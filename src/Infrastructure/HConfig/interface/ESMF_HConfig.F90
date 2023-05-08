@@ -276,6 +276,66 @@ module ESMF_HConfigMod
     module procedure ESMF_HConfigAddMapValStringSeq
   end interface
 
+  interface ESMF_HConfigAsI4
+    module procedure ESMF_HConfigAsI4
+    module procedure ESMF_HConfigIterAsI4
+  end interface
+
+  interface ESMF_HConfigAsI8
+    module procedure ESMF_HConfigAsI8
+    module procedure ESMF_HConfigIterAsI8
+  end interface
+
+  interface ESMF_HConfigAsLogical
+    module procedure ESMF_HConfigAsLogical
+    module procedure ESMF_HConfigIterAsLogical
+  end interface
+
+  interface ESMF_HConfigAsR4
+    module procedure ESMF_HConfigAsR4
+    module procedure ESMF_HConfigIterAsR4
+  end interface
+
+  interface ESMF_HConfigAsR8
+    module procedure ESMF_HConfigAsR8
+    module procedure ESMF_HConfigIterAsR8
+  end interface
+
+  interface ESMF_HConfigAsString
+    module procedure ESMF_HConfigAsString
+    module procedure ESMF_HConfigIterAsString
+  end interface
+
+  interface ESMF_HConfigAsI4Seq
+    module procedure ESMF_HConfigAsI4Seq
+    module procedure ESMF_HConfigIterAsI4Seq
+  end interface
+
+  interface ESMF_HConfigAsI8Seq
+    module procedure ESMF_HConfigAsI8Seq
+    module procedure ESMF_HConfigIterAsI8Seq
+  end interface
+
+  interface ESMF_HConfigAsLogicalSeq
+    module procedure ESMF_HConfigAsLogicalSeq
+    module procedure ESMF_HConfigIterAsLogicalSeq
+  end interface
+
+  interface ESMF_HConfigAsR4Seq
+    module procedure ESMF_HConfigAsR4Seq
+    module procedure ESMF_HConfigIterAsR4Seq
+  end interface
+
+  interface ESMF_HConfigAsR8Seq
+    module procedure ESMF_HConfigAsR8Seq
+    module procedure ESMF_HConfigIterAsR8Seq
+  end interface
+
+  interface ESMF_HConfigAsStringSeq
+    module procedure ESMF_HConfigAsStringSeq
+    module procedure ESMF_HConfigIterAsStringSeq
+  end interface
+
   interface ESMF_HConfigCreate
     module procedure ESMF_HConfigCreateDefault
     module procedure ESMF_HConfigCreateHConfig
@@ -4089,35 +4149,43 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsI4()"
 !BOP
-! !IROUTINE: ESMF_HConfigAsI4 - Return value as I4
+! !IROUTINE: ESMF_HConfigAs<Type> - Return value as <Type>
 
 ! !INTERFACE:
-  function ESMF_HConfigAsI4(hconfig, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
+!  function ESMF_HConfigAs<Type>(hconfig, keywordEnforcer, index, keyString, &
+!    doc, asOkay, rc)
 ! !RETURN VALUE:
-    integer(ESMF_KIND_I4) :: ESMF_HConfigAsI4
+!    <Type> :: ESMF_HConfigAs<Type>
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
+!    type(ESMF_HConfig[Iter]) , intent(in)     :: hconfig
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    integer,            intent(in),  optional :: index
+!    character(*),       intent(in),  optional :: keyString
+!    integer,            intent(in),  optional :: doc
+!    logical,            intent(out), optional :: asOkay
+!    integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!   Return the value of item {\tt hconfig} interpreted as I4.
+!   Return the value of item {\tt hconfig} interpreted as <Type>.
 !   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
 !   provided, {\tt asOkay == .true.}.
+!
+!   The supported <Type> options are:
+!   \begin{itemize}
+!   \item I4
+!   \item I8
+!   \item Logical
+!   \item R4
+!   \item R8
+!   \item String
+!   \end{itemize}
 !
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfig} or {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -4137,6 +4205,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsI4()"
+  function ESMF_HConfigAsI4(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    integer(ESMF_KIND_I4) :: ESMF_HConfigAsI4
+
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
     type(ESMF_Logical)    :: flag
@@ -4187,17 +4273,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsI4MapKey()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsI4MapKey - Return map key as I4
-
-! !INTERFACE:
-  function ESMF_HConfigAsI4MapKey(hconfig, keywordEnforcer, index, keyString, &
+#define ESMF_METHOD "ESMF_HConfigIterAsI4()"
+  function ESMF_HConfigIterAsI4(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
-! !RETURN VALUE:
-    integer(ESMF_KIND_I4) :: ESMF_HConfigAsI4MapKey
-!
-! !ARGUMENTS:
+
+    integer(ESMF_KIND_I4) :: ESMF_HConfigIterAsI4
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -4206,520 +4287,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
-! !DESCRIPTION:
-!   Return the map key of item {\tt hconfig} interpreted as I4.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
-    type(ESMF_Logical)    :: flag
 
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    if (present(index).or.present(keyString).or.present(doc)) then
-      hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Call into the C++ interface to get the I4
-      call c_ESMC_HConfigAsI4(hconfigTemp, ESMF_HConfigAsI4MapKey, &
-        flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! clean up
-      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      ! Call into the C++ interface to get the I4
-      call c_ESMC_HConfigAsI4MapKey(hconfig, ESMF_HConfigAsI4MapKey, &
-        flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! handle asOkay
-    if (present(asOkay)) then
-      asOkay = flag
-    else if (flag == ESMF_FALSE) then
-      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-        msg="Conversion to the requested typekind is not supported", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
-    endif
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsI4MapVal()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsI4MapVal - Return map value as I4
-
-! !INTERFACE:
-  function ESMF_HConfigAsI4MapVal(hconfig, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
-! !RETURN VALUE:
-    integer(ESMF_KIND_I4) :: ESMF_HConfigAsI4MapVal
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return the map value of item {\tt hconfig} interpreted as I4.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    type(ESMF_HConfig)    :: hconfigTemp
-    type(ESMF_Logical)    :: flag
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    if (present(index).or.present(keyString).or.present(doc)) then
-      hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Call into the C++ interface to get the I4
-      call c_ESMC_HConfigAsI4(hconfigTemp, ESMF_HConfigAsI4MapVal, &
-        flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! clean up
-      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      ! Call into the C++ interface to get the I4
-      call c_ESMC_HConfigAsI4MapVal(hconfig, ESMF_HConfigAsI4MapVal, &
-        flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! handle asOkay
-    if (present(asOkay)) then
-      asOkay = flag
-    else if (flag == ESMF_FALSE) then
-      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-        msg="Conversion to the requested typekind is not supported", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
-    endif
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsI4Seq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsI4Seq - Return Seq array of value as I4
-
-! !INTERFACE:
-  function ESMF_HConfigAsI4Seq(hconfig, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
-! !RETURN VALUE:
-    integer(ESMF_KIND_I4), allocatable :: ESMF_HConfigAsI4Seq(:)
-!
-! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return the value of item {\tt hconfig} interpreted as I4.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    logical               :: isScalar, isSequence
-    type(ESMF_HConfig)    :: hconfigTemp
-    integer               :: i, size
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
-
-    isScalar = ESMF_HConfigIsScalar(hconfig, index=index, keyString=keyString, &
-      doc=doc, rc=localrc)
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if (isScalar) then
-      allocate(ESMF_HConfigAsI4Seq(1))
-      ESMF_HConfigAsI4Seq(1) = ESMF_HConfigAsI4(hconfig, index=index, &
-        keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
-    else
-      isSequence = ESMF_HConfigIsSequence(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if (isSequence) then
-        ! access the sequence
-        hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
-          keyString=keyString, doc=doc, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        ! loop through the sequence
-        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        allocate(ESMF_HConfigAsI4Seq(size))
-        do i=1, size
-          ESMF_HConfigAsI4Seq(i) = ESMF_HConfigAsI4(hconfigTemp, &
-            index=i, asOkay=asOkay, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          if (present(asOkay)) then
-            if (.not.asOkay) exit
-          endif
-        enddo
-        ! clean up
-        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      else
-        ! this is an error condition... neither scalar and nor sequence
-        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          msg="Must either be scalar or sequence to use Seq interface", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-    endif
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsI4SeqMapKey()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsI4SeqMapKey - Return Seq array of map key as I4
-
-! !INTERFACE:
-  function ESMF_HConfigAsI4SeqMapKey(hconfig, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
-! !RETURN VALUE:
-    integer(ESMF_KIND_I4), allocatable :: ESMF_HConfigAsI4SeqMapKey(:)
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return the map key of item {\tt hconfig} interpreted as I4.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    logical               :: isScalar, isSequence
-    type(ESMF_HConfig)    :: hconfigTemp
-    integer               :: i, size
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    isScalar = ESMF_HConfigIsScalarMapKey(hconfig, index=index, &
-      keyString=keyString, doc=doc, rc=localrc)
+    ESMF_HConfigIterAsI4 = ESMF_HConfigAsI4(hconfigTemp, &
+      index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (isScalar) then
-      allocate(ESMF_HConfigAsI4SeqMapKey(1))
-      ESMF_HConfigAsI4SeqMapKey(1) = ESMF_HConfigAsI4MapKey(hconfig, &
-        index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
-    else
-      isSequence = ESMF_HConfigIsSequenceMapKey(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if (isSequence) then
-        ! access the sequence
-        hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-          keyString=keyString, doc=doc, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        ! loop through the sequence
-        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        allocate(ESMF_HConfigAsI4SeqMapKey(size))
-        do i=1, size
-          ESMF_HConfigAsI4SeqMapKey(i) = ESMF_HConfigAsI4(hconfigTemp, &
-            index=i, asOkay=asOkay, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          if (present(asOkay)) then
-            if (.not.asOkay) exit
-          endif
-        enddo
-        ! clean up
-        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      else
-        ! this is an error condition... neither scalar and nor sequence
-        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          msg="Must either be scalar or sequence to use Seq interface", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-    endif
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsI4SeqMapVal()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsI4SeqMapVal - Return Seq arraay of map value as I4
-
-! !INTERFACE:
-  function ESMF_HConfigAsI4SeqMapVal(hconfig, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
-! !RETURN VALUE:
-    integer(ESMF_KIND_I4), allocatable :: ESMF_HConfigAsI4SeqMapVal(:)
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return the map value of item {\tt hconfig} interpreted as I4.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    logical               :: isScalar, isSequence
-    type(ESMF_HConfig)    :: hconfigTemp
-    integer               :: i, size
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    isScalar = ESMF_HConfigIsScalarMapVal(hconfig, index=index, &
-      keyString=keyString, doc=doc, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (isScalar) then
-      allocate(ESMF_HConfigAsI4SeqMapVal(1))
-      ESMF_HConfigAsI4SeqMapVal(1) = ESMF_HConfigAsI4MapVal(hconfig, &
-        index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
-    else
-      isSequence = ESMF_HConfigIsSequenceMapVal(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if (isSequence) then
-        ! access the sequence
-        hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-          keyString=keyString, doc=doc, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        ! loop through the sequence
-        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        allocate(ESMF_HConfigAsI4SeqMapVal(size))
-        do i=1, size
-          ESMF_HConfigAsI4SeqMapVal(i) = ESMF_HConfigAsI4(hconfigTemp, &
-            index=i, asOkay=asOkay, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          if (present(asOkay)) then
-            if (.not.asOkay) exit
-          endif
-        enddo
-        ! clean up
-        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      else
-        ! this is an error condition... neither scalar and nor sequence
-        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          msg="Must either be scalar or sequence to use Seq interface", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -4731,16 +4309,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAsI8()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsI8 - Return value as I8
 
-! !INTERFACE:
   function ESMF_HConfigAsI8(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
-! !RETURN VALUE:
+
     integer(ESMF_KIND_I8) :: ESMF_HConfigAsI8
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfig), intent(in)            :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -4749,34 +4323,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
-! !DESCRIPTION:
-!   Return the value of item {\tt hconfig} interpreted as I8.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
     type(ESMF_Logical)    :: flag
@@ -4827,17 +4373,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsI8MapKey()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsI8MapKey - Return map key as I8
-
-! !INTERFACE:
-  function ESMF_HConfigAsI8MapKey(hconfig, keywordEnforcer, index, keyString, &
+#define ESMF_METHOD "ESMF_HConfigIterAsI8()"
+  function ESMF_HConfigIterAsI8(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
-! !RETURN VALUE:
-    integer(ESMF_KIND_I8) :: ESMF_HConfigAsI8MapKey
-!
-! !ARGUMENTS:
+
+    integer(ESMF_KIND_I8) :: ESMF_HConfigIterAsI8
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -4846,520 +4387,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
-! !DESCRIPTION:
-!   Return the map key of item {\tt hconfig} interpreted as I8.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
-    type(ESMF_Logical)    :: flag
 
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    if (present(index).or.present(keyString).or.present(doc)) then
-      hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Call into the C++ interface to get the I8
-      call c_ESMC_HConfigAsI8(hconfigTemp, ESMF_HConfigAsI8MapKey, &
-        flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! clean up
-      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      ! Call into the C++ interface to get the I8
-      call c_ESMC_HConfigAsI8MapKey(hconfig, ESMF_HConfigAsI8MapKey, &
-        flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! handle asOkay
-    if (present(asOkay)) then
-      asOkay = flag
-    else if (flag == ESMF_FALSE) then
-      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-        msg="Conversion to the requested typekind is not supported", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
-    endif
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsI8MapVal()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsI8MapVal - Return map value as I8
-
-! !INTERFACE:
-  function ESMF_HConfigAsI8MapVal(hconfig, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
-! !RETURN VALUE:
-    integer(ESMF_KIND_I8) :: ESMF_HConfigAsI8MapVal
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return the map value of item {\tt hconfig} interpreted as I8.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    type(ESMF_HConfig)    :: hconfigTemp
-    type(ESMF_Logical)    :: flag
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    if (present(index).or.present(keyString).or.present(doc)) then
-      hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Call into the C++ interface to get the I8
-      call c_ESMC_HConfigAsI8(hconfigTemp, ESMF_HConfigAsI8MapVal, &
-        flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! clean up
-      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      ! Call into the C++ interface to get the I8
-      call c_ESMC_HConfigAsI8MapVal(hconfig, ESMF_HConfigAsI8MapVal, &
-        flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! handle asOkay
-    if (present(asOkay)) then
-      asOkay = flag
-    else if (flag == ESMF_FALSE) then
-      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-        msg="Conversion to the requested typekind is not supported", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
-    endif
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsI8Seq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsI8Seq - Return Seq array of value as I8
-
-! !INTERFACE:
-  function ESMF_HConfigAsI8Seq(hconfig, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
-! !RETURN VALUE:
-    integer(ESMF_KIND_I8), allocatable :: ESMF_HConfigAsI8Seq(:)
-!
-! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return the value of item {\tt hconfig} interpreted as I8.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    logical               :: isScalar, isSequence
-    type(ESMF_HConfig)    :: hconfigTemp
-    integer               :: i, size
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
-
-    isScalar = ESMF_HConfigIsScalar(hconfig, index=index, keyString=keyString, &
-      doc=doc, rc=localrc)
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if (isScalar) then
-      allocate(ESMF_HConfigAsI8Seq(1))
-      ESMF_HConfigAsI8Seq(1) = ESMF_HConfigAsI8(hconfig, index=index, &
-        keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
-    else
-      isSequence = ESMF_HConfigIsSequence(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if (isSequence) then
-        ! access the sequence
-        hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
-          keyString=keyString, doc=doc, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        ! loop through the sequence
-        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        allocate(ESMF_HConfigAsI8Seq(size))
-        do i=1, size
-          ESMF_HConfigAsI8Seq(i) = ESMF_HConfigAsI8(hconfigTemp, &
-            index=i, asOkay=asOkay, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          if (present(asOkay)) then
-            if (.not.asOkay) exit
-          endif
-        enddo
-        ! clean up
-        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      else
-        ! this is an error condition... neither scalar and nor sequence
-        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          msg="Must either be scalar or sequence to use Seq interface", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-    endif
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsI8SeqMapKey()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsI8SeqMapKey - Return Seq array of map key as I8
-
-! !INTERFACE:
-  function ESMF_HConfigAsI8SeqMapKey(hconfig, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
-! !RETURN VALUE:
-    integer(ESMF_KIND_I8), allocatable :: ESMF_HConfigAsI8SeqMapKey(:)
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return the map key of item {\tt hconfig} interpreted as I8.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    logical               :: isScalar, isSequence
-    type(ESMF_HConfig)    :: hconfigTemp
-    integer               :: i, size
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    isScalar = ESMF_HConfigIsScalarMapKey(hconfig, index=index, &
-      keyString=keyString, doc=doc, rc=localrc)
+    ESMF_HConfigIterAsI8 = ESMF_HConfigAsI8(hconfigTemp, &
+      index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (isScalar) then
-      allocate(ESMF_HConfigAsI8SeqMapKey(1))
-      ESMF_HConfigAsI8SeqMapKey(1) = ESMF_HConfigAsI8MapKey(hconfig, &
-        index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
-    else
-      isSequence = ESMF_HConfigIsSequenceMapKey(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if (isSequence) then
-        ! access the sequence
-        hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-          keyString=keyString, doc=doc, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        ! loop through the sequence
-        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        allocate(ESMF_HConfigAsI8SeqMapKey(size))
-        do i=1, size
-          ESMF_HConfigAsI8SeqMapKey(i) = ESMF_HConfigAsI8(hconfigTemp, &
-            index=i, asOkay=asOkay, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          if (present(asOkay)) then
-            if (.not.asOkay) exit
-          endif
-        enddo
-        ! clean up
-        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      else
-        ! this is an error condition... neither scalar and nor sequence
-        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          msg="Must either be scalar or sequence to use Seq interface", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-    endif
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsI8SeqMapVal()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsI8SeqMapVal - Return Seq arraay of map value as I8
-
-! !INTERFACE:
-  function ESMF_HConfigAsI8SeqMapVal(hconfig, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
-! !RETURN VALUE:
-    integer(ESMF_KIND_I8), allocatable :: ESMF_HConfigAsI8SeqMapVal(:)
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return the map value of item {\tt hconfig} interpreted as I8.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    logical               :: isScalar, isSequence
-    type(ESMF_HConfig)    :: hconfigTemp
-    integer               :: i, size
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    isScalar = ESMF_HConfigIsScalarMapVal(hconfig, index=index, &
-      keyString=keyString, doc=doc, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (isScalar) then
-      allocate(ESMF_HConfigAsI8SeqMapVal(1))
-      ESMF_HConfigAsI8SeqMapVal(1) = ESMF_HConfigAsI8MapVal(hconfig, &
-        index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
-    else
-      isSequence = ESMF_HConfigIsSequenceMapVal(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if (isSequence) then
-        ! access the sequence
-        hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-          keyString=keyString, doc=doc, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        ! loop through the sequence
-        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        allocate(ESMF_HConfigAsI8SeqMapVal(size))
-        do i=1, size
-          ESMF_HConfigAsI8SeqMapVal(i) = ESMF_HConfigAsI8(hconfigTemp, &
-            index=i, asOkay=asOkay, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          if (present(asOkay)) then
-            if (.not.asOkay) exit
-          endif
-        enddo
-        ! clean up
-        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      else
-        ! this is an error condition... neither scalar and nor sequence
-        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          msg="Must either be scalar or sequence to use Seq interface", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -5371,16 +4409,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAsLogical()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsLogical - Return value as Logical
 
-! !INTERFACE:
   function ESMF_HConfigAsLogical(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
-! !RETURN VALUE:
+
     logical :: ESMF_HConfigAsLogical
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfig), intent(in)            :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -5389,34 +4423,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
-! !DESCRIPTION:
-!   Return the value of item {\tt hconfig} interpreted as Logical.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
     type(ESMF_Logical)    :: value
@@ -5471,17 +4477,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsLogicalMapKey()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsLogicalMapKey - Return map key as Logical
-
-! !INTERFACE:
-  function ESMF_HConfigAsLogicalMapKey(hconfig, keywordEnforcer, index, keyString, &
+#define ESMF_METHOD "ESMF_HConfigIterAsLogical()"
+  function ESMF_HConfigIterAsLogical(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
-! !RETURN VALUE:
-    logical :: ESMF_HConfigAsLogicalMapKey
-!
-! !ARGUMENTS:
+
+    logical :: ESMF_HConfigIterAsLogical
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -5490,524 +4491,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
-! !DESCRIPTION:
-!   Return the map key of item {\tt hconfig} interpreted as Logical.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
-    type(ESMF_Logical)    :: value
-    type(ESMF_Logical)    :: flag
 
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    if (present(index).or.present(keyString).or.present(doc)) then
-      hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Call into the C++ interface to get the Logical
-      call c_ESMC_HConfigAsLogical(hconfigTemp, value, flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! clean up
-      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      ! Call into the C++ interface to get the Logical
-      call c_ESMC_HConfigAsLogicalMapKey(hconfig, value, flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! handle asOkay
-    if (present(asOkay)) then
-      asOkay = flag
-    else if (flag == ESMF_FALSE) then
-      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-        msg="Conversion to the requested typekind is not supported", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
-    endif
-
-    ! convert ESMF_Logical -> logical
-    ESMF_HConfigAsLogicalMapKey = value
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsLogicalMapVal()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsLogicalMapVal - Return map value as Logical
-
-! !INTERFACE:
-  function ESMF_HConfigAsLogicalMapVal(hconfig, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
-! !RETURN VALUE:
-    logical :: ESMF_HConfigAsLogicalMapVal
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return the map value of item {\tt hconfig} interpreted as Logical.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    type(ESMF_HConfig)    :: hconfigTemp
-    type(ESMF_Logical)    :: value
-    type(ESMF_Logical)    :: flag
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    if (present(index).or.present(keyString).or.present(doc)) then
-      hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Call into the C++ interface to get the Logical
-      call c_ESMC_HConfigAsLogical(hconfigTemp, value, flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! clean up
-      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      ! Call into the C++ interface to get the Logical
-      call c_ESMC_HConfigAsLogicalMapVal(hconfig, value, flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! handle asOkay
-    if (present(asOkay)) then
-      asOkay = flag
-    else if (flag == ESMF_FALSE) then
-      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-        msg="Conversion to the requested typekind is not supported", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
-    endif
-
-    ! convert ESMF_Logical -> logical
-    ESMF_HConfigAsLogicalMapVal = value
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsLogicalSeq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsLogicalSeq - Return Seq array of Logical values
-
-! !INTERFACE:
-  function ESMF_HConfigAsLogicalSeq(hconfig, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
-! !RETURN VALUE:
-    logical, allocatable :: ESMF_HConfigAsLogicalSeq(:)
-!
-! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return the value of item {\tt hconfig} interpreted as Logical.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    logical               :: isScalar, isSequence
-    type(ESMF_HConfig)    :: hconfigTemp
-    integer               :: i, size
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
-
-    isScalar = ESMF_HConfigIsScalar(hconfig, index=index, keyString=keyString, &
-      doc=doc, rc=localrc)
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if (isScalar) then
-      allocate(ESMF_HConfigAsLogicalSeq(1))
-      ESMF_HConfigAsLogicalSeq(1) = ESMF_HConfigAsLogical(hconfig, index=index, &
-        keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
-    else
-      isSequence = ESMF_HConfigIsSequence(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if (isSequence) then
-        ! access the sequence
-        hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
-          keyString=keyString, doc=doc, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        ! loop through the sequence
-        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        allocate(ESMF_HConfigAsLogicalSeq(size))
-        do i=1, size
-          ESMF_HConfigAsLogicalSeq(i) = ESMF_HConfigAsLogical(hconfigTemp, &
-            index=i, asOkay=asOkay, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          if (present(asOkay)) then
-            if (.not.asOkay) exit
-          endif
-        enddo
-        ! clean up
-        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      else
-        ! this is an error condition... neither scalar and nor sequence
-        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          msg="Must either be scalar or sequence to use Seq interface", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-    endif
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsLogicalSeqMapKey()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsLogicalSeqMapKey - Return Seq array map key as Logical
-
-! !INTERFACE:
-  function ESMF_HConfigAsLogicalSeqMapKey(hconfig, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
-! !RETURN VALUE:
-    logical, allocatable :: ESMF_HConfigAsLogicalSeqMapKey(:)
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return the map key of item {\tt hconfig} interpreted as Logical.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    logical               :: isScalar, isSequence
-    type(ESMF_HConfig)    :: hconfigTemp
-    integer               :: i, size
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    isScalar = ESMF_HConfigIsScalarMapKey(hconfig, index=index, &
-      keyString=keyString, doc=doc, rc=localrc)
+    ESMF_HConfigIterAsLogical = ESMF_HConfigAsLogical(hconfigTemp, &
+      index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (isScalar) then
-      allocate(ESMF_HConfigAsLogicalSeqMapKey(1))
-      ESMF_HConfigAsLogicalSeqMapKey(1) = ESMF_HConfigAsLogicalMapKey(hconfig, &
-        index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
-    else
-      isSequence = ESMF_HConfigIsSequenceMapKey(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if (isSequence) then
-        ! access the sequence
-        hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-          keyString=keyString, doc=doc, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        ! loop through the sequence
-        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        allocate(ESMF_HConfigAsLogicalSeqMapKey(size))
-        do i=1, size
-          ESMF_HConfigAsLogicalSeqMapKey(i) = ESMF_HConfigAsLogical(hconfigTemp, &
-            index=i, asOkay=asOkay, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          if (present(asOkay)) then
-            if (.not.asOkay) exit
-          endif
-        enddo
-        ! clean up
-        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      else
-        ! this is an error condition... neither scalar and nor sequence
-        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          msg="Must either be scalar or sequence to use Seq interface", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-    endif
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsLogicalSeqMapVal()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsLogicalSeqMapVal - Return Seq array map value as Logical
-
-! !INTERFACE:
-  function ESMF_HConfigAsLogicalSeqMapVal(hconfig, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
-! !RETURN VALUE:
-    logical, allocatable :: ESMF_HConfigAsLogicalSeqMapVal(:)
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return the map value of item {\tt hconfig} interpreted as Logical.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    logical               :: isScalar, isSequence
-    type(ESMF_HConfig)    :: hconfigTemp
-    integer               :: i, size
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    isScalar = ESMF_HConfigIsScalarMapVal(hconfig, index=index, &
-      keyString=keyString, doc=doc, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (isScalar) then
-      allocate(ESMF_HConfigAsLogicalSeqMapVal(1))
-      ESMF_HConfigAsLogicalSeqMapVal(1) = ESMF_HConfigAsLogicalMapVal(hconfig, &
-        index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
-    else
-      isSequence = ESMF_HConfigIsSequenceMapVal(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if (isSequence) then
-        ! access the sequence
-        hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-          keyString=keyString, doc=doc, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        ! loop through the sequence
-        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        allocate(ESMF_HConfigAsLogicalSeqMapVal(size))
-        do i=1, size
-          ESMF_HConfigAsLogicalSeqMapVal(i) = ESMF_HConfigAsLogical(hconfigTemp, &
-            index=i, asOkay=asOkay, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          if (present(asOkay)) then
-            if (.not.asOkay) exit
-          endif
-        enddo
-        ! clean up
-        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      else
-        ! this is an error condition... neither scalar and nor sequence
-        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          msg="Must either be scalar or sequence to use Seq interface", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -6019,16 +4513,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAsR4()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsR4 - Return value as R4
 
-! !INTERFACE:
   function ESMF_HConfigAsR4(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
-! !RETURN VALUE:
+
     real(ESMF_KIND_R4) :: ESMF_HConfigAsR4
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfig), intent(in)            :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -6037,34 +4527,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
-! !DESCRIPTION:
-!   Return the value of item {\tt hconfig} interpreted as R4.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
     type(ESMF_Logical)    :: flag
@@ -6115,17 +4577,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsR4MapKey()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsR4MapKey - Return map key as R4
-
-! !INTERFACE:
-  function ESMF_HConfigAsR4MapKey(hconfig, keywordEnforcer, index, keyString, &
+#define ESMF_METHOD "ESMF_HConfigIterAsR4()"
+  function ESMF_HConfigIterAsR4(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
-! !RETURN VALUE:
-    real(ESMF_KIND_R4) :: ESMF_HConfigAsR4MapKey
-!
-! !ARGUMENTS:
+
+    real(ESMF_KIND_R4) :: ESMF_HConfigIterAsR4
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -6134,520 +4591,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
-! !DESCRIPTION:
-!   Return the map key of item {\tt hconfig} interpreted as R4.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
-    type(ESMF_Logical)    :: flag
 
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    if (present(index).or.present(keyString).or.present(doc)) then
-      hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Call into the C++ interface to get the R4
-      call c_ESMC_HConfigAsR4(hconfigTemp, ESMF_HConfigAsR4MapKey, &
-        flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! clean up
-      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      ! Call into the C++ interface to get the R4
-      call c_ESMC_HConfigAsR4MapKey(hconfig, ESMF_HConfigAsR4MapKey, &
-        flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! handle asOkay
-    if (present(asOkay)) then
-      asOkay = flag
-    else if (flag == ESMF_FALSE) then
-      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-        msg="Conversion to the requested typekind is not supported", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
-    endif
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsR4MapVal()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsR4MapVal - Return map value as R4
-
-! !INTERFACE:
-  function ESMF_HConfigAsR4MapVal(hconfig, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
-! !RETURN VALUE:
-    real(ESMF_KIND_R4) :: ESMF_HConfigAsR4MapVal
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return the map value of item {\tt hconfig} interpreted as R4.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    type(ESMF_HConfig)    :: hconfigTemp
-    type(ESMF_Logical)    :: flag
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    if (present(index).or.present(keyString).or.present(doc)) then
-      hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Call into the C++ interface to get the R4
-      call c_ESMC_HConfigAsR4(hconfigTemp, ESMF_HConfigAsR4MapVal, &
-        flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! clean up
-      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      ! Call into the C++ interface to get the R4
-      call c_ESMC_HConfigAsR4MapVal(hconfig, ESMF_HConfigAsR4MapVal, &
-        flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! handle asOkay
-    if (present(asOkay)) then
-      asOkay = flag
-    else if (flag == ESMF_FALSE) then
-      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-        msg="Conversion to the requested typekind is not supported", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
-    endif
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsR4Seq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsR4Seq - Return Seq array of value as R4
-
-! !INTERFACE:
-  function ESMF_HConfigAsR4Seq(hconfig, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
-! !RETURN VALUE:
-    real(ESMF_KIND_R4), allocatable :: ESMF_HConfigAsR4Seq(:)
-!
-! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return the value of item {\tt hconfig} interpreted as R4.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    logical               :: isScalar, isSequence
-    type(ESMF_HConfig)    :: hconfigTemp
-    integer               :: i, size
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
-
-    isScalar = ESMF_HConfigIsScalar(hconfig, index=index, keyString=keyString, &
-      doc=doc, rc=localrc)
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if (isScalar) then
-      allocate(ESMF_HConfigAsR4Seq(1))
-      ESMF_HConfigAsR4Seq(1) = ESMF_HConfigAsR4(hconfig, index=index, &
-        keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
-    else
-      isSequence = ESMF_HConfigIsSequence(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if (isSequence) then
-        ! access the sequence
-        hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
-          keyString=keyString, doc=doc, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        ! loop through the sequence
-        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        allocate(ESMF_HConfigAsR4Seq(size))
-        do i=1, size
-          ESMF_HConfigAsR4Seq(i) = ESMF_HConfigAsR4(hconfigTemp, &
-            index=i, asOkay=asOkay, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          if (present(asOkay)) then
-            if (.not.asOkay) exit
-          endif
-        enddo
-        ! clean up
-        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      else
-        ! this is an error condition... neither scalar and nor sequence
-        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          msg="Must either be scalar or sequence to use Seq interface", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-    endif
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsR4SeqMapKey()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsR4SeqMapKey - Return Seq array of map key as R4
-
-! !INTERFACE:
-  function ESMF_HConfigAsR4SeqMapKey(hconfig, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
-! !RETURN VALUE:
-    real(ESMF_KIND_R4), allocatable :: ESMF_HConfigAsR4SeqMapKey(:)
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return the map key of item {\tt hconfig} interpreted as R4.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    logical               :: isScalar, isSequence
-    type(ESMF_HConfig)    :: hconfigTemp
-    integer               :: i, size
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    isScalar = ESMF_HConfigIsScalarMapKey(hconfig, index=index, &
-      keyString=keyString, doc=doc, rc=localrc)
+    ESMF_HConfigIterAsR4 = ESMF_HConfigAsR4(hconfigTemp, &
+      index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (isScalar) then
-      allocate(ESMF_HConfigAsR4SeqMapKey(1))
-      ESMF_HConfigAsR4SeqMapKey(1) = ESMF_HConfigAsR4MapKey(hconfig, &
-        index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
-    else
-      isSequence = ESMF_HConfigIsSequenceMapKey(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if (isSequence) then
-        ! access the sequence
-        hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-          keyString=keyString, doc=doc, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        ! loop through the sequence
-        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        allocate(ESMF_HConfigAsR4SeqMapKey(size))
-        do i=1, size
-          ESMF_HConfigAsR4SeqMapKey(i) = ESMF_HConfigAsR4(hconfigTemp, &
-            index=i, asOkay=asOkay, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          if (present(asOkay)) then
-            if (.not.asOkay) exit
-          endif
-        enddo
-        ! clean up
-        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      else
-        ! this is an error condition... neither scalar and nor sequence
-        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          msg="Must either be scalar or sequence to use Seq interface", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-    endif
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsR4SeqMapVal()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsR4SeqMapVal - Return Seq arraay of map value as R4
-
-! !INTERFACE:
-  function ESMF_HConfigAsR4SeqMapVal(hconfig, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
-! !RETURN VALUE:
-    real(ESMF_KIND_R4), allocatable :: ESMF_HConfigAsR4SeqMapVal(:)
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return the map value of item {\tt hconfig} interpreted as R4.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    logical               :: isScalar, isSequence
-    type(ESMF_HConfig)    :: hconfigTemp
-    integer               :: i, size
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    isScalar = ESMF_HConfigIsScalarMapVal(hconfig, index=index, &
-      keyString=keyString, doc=doc, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (isScalar) then
-      allocate(ESMF_HConfigAsR4SeqMapVal(1))
-      ESMF_HConfigAsR4SeqMapVal(1) = ESMF_HConfigAsR4MapVal(hconfig, &
-        index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
-    else
-      isSequence = ESMF_HConfigIsSequenceMapVal(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if (isSequence) then
-        ! access the sequence
-        hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-          keyString=keyString, doc=doc, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        ! loop through the sequence
-        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        allocate(ESMF_HConfigAsR4SeqMapVal(size))
-        do i=1, size
-          ESMF_HConfigAsR4SeqMapVal(i) = ESMF_HConfigAsR4(hconfigTemp, &
-            index=i, asOkay=asOkay, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          if (present(asOkay)) then
-            if (.not.asOkay) exit
-          endif
-        enddo
-        ! clean up
-        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      else
-        ! this is an error condition... neither scalar and nor sequence
-        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          msg="Must either be scalar or sequence to use Seq interface", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -6659,16 +4613,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAsR8()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsR8 - Return value as R8
 
-! !INTERFACE:
   function ESMF_HConfigAsR8(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
-! !RETURN VALUE:
+
     real(ESMF_KIND_R8) :: ESMF_HConfigAsR8
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfig), intent(in)            :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -6677,34 +4627,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
-! !DESCRIPTION:
-!   Return the value of item {\tt hconfig} interpreted as R8.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
     type(ESMF_Logical)    :: flag
@@ -6755,17 +4677,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsR8MapKey()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsR8MapKey - Return map key as R8
-
-! !INTERFACE:
-  function ESMF_HConfigAsR8MapKey(hconfig, keywordEnforcer, index, keyString, &
+#define ESMF_METHOD "ESMF_HConfigIterAsR8()"
+  function ESMF_HConfigIterAsR8(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
-! !RETURN VALUE:
-    real(ESMF_KIND_R8) :: ESMF_HConfigAsR8MapKey
-!
-! !ARGUMENTS:
+
+    real(ESMF_KIND_R8) :: ESMF_HConfigIterAsR8
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -6774,520 +4691,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
-! !DESCRIPTION:
-!   Return the map key of item {\tt hconfig} interpreted as R8.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
-    type(ESMF_Logical)    :: flag
 
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    if (present(index).or.present(keyString).or.present(doc)) then
-      hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Call into the C++ interface to get the R8
-      call c_ESMC_HConfigAsR8(hconfigTemp, ESMF_HConfigAsR8MapKey, &
-        flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! clean up
-      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      ! Call into the C++ interface to get the R8
-      call c_ESMC_HConfigAsR8MapKey(hconfig, ESMF_HConfigAsR8MapKey, &
-        flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! handle asOkay
-    if (present(asOkay)) then
-      asOkay = flag
-    else if (flag == ESMF_FALSE) then
-      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-        msg="Conversion to the requested typekind is not supported", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
-    endif
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsR8MapVal()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsR8MapVal - Return map value as R8
-
-! !INTERFACE:
-  function ESMF_HConfigAsR8MapVal(hconfig, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
-! !RETURN VALUE:
-    real(ESMF_KIND_R8) :: ESMF_HConfigAsR8MapVal
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return the map value of item {\tt hconfig} interpreted as R8.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    type(ESMF_HConfig)    :: hconfigTemp
-    type(ESMF_Logical)    :: flag
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    if (present(index).or.present(keyString).or.present(doc)) then
-      hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Call into the C++ interface to get the R8
-      call c_ESMC_HConfigAsR8(hconfigTemp, ESMF_HConfigAsR8MapVal, &
-        flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! clean up
-      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      ! Call into the C++ interface to get the R8
-      call c_ESMC_HConfigAsR8MapVal(hconfig, ESMF_HConfigAsR8MapVal, &
-        flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! handle asOkay
-    if (present(asOkay)) then
-      asOkay = flag
-    else if (flag == ESMF_FALSE) then
-      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-        msg="Conversion to the requested typekind is not supported", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
-    endif
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsR8Seq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsR8Seq - Return Seq array of value as R8
-
-! !INTERFACE:
-  function ESMF_HConfigAsR8Seq(hconfig, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
-! !RETURN VALUE:
-    real(ESMF_KIND_R8), allocatable :: ESMF_HConfigAsR8Seq(:)
-!
-! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return the value of item {\tt hconfig} interpreted as R8.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    logical               :: isScalar, isSequence
-    type(ESMF_HConfig)    :: hconfigTemp
-    integer               :: i, size
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
-
-    isScalar = ESMF_HConfigIsScalar(hconfig, index=index, keyString=keyString, &
-      doc=doc, rc=localrc)
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if (isScalar) then
-      allocate(ESMF_HConfigAsR8Seq(1))
-      ESMF_HConfigAsR8Seq(1) = ESMF_HConfigAsR8(hconfig, index=index, &
-        keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
-    else
-      isSequence = ESMF_HConfigIsSequence(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if (isSequence) then
-        ! access the sequence
-        hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
-          keyString=keyString, doc=doc, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        ! loop through the sequence
-        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        allocate(ESMF_HConfigAsR8Seq(size))
-        do i=1, size
-          ESMF_HConfigAsR8Seq(i) = ESMF_HConfigAsR8(hconfigTemp, &
-            index=i, asOkay=asOkay, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          if (present(asOkay)) then
-            if (.not.asOkay) exit
-          endif
-        enddo
-        ! clean up
-        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      else
-        ! this is an error condition... neither scalar and nor sequence
-        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          msg="Must either be scalar or sequence to use Seq interface", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-    endif
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsR8SeqMapKey()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsR8SeqMapKey - Return Seq array of map key as R8
-
-! !INTERFACE:
-  function ESMF_HConfigAsR8SeqMapKey(hconfig, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
-! !RETURN VALUE:
-    real(ESMF_KIND_R8), allocatable :: ESMF_HConfigAsR8SeqMapKey(:)
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return the map key of item {\tt hconfig} interpreted as R8.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    logical               :: isScalar, isSequence
-    type(ESMF_HConfig)    :: hconfigTemp
-    integer               :: i, size
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    isScalar = ESMF_HConfigIsScalarMapKey(hconfig, index=index, &
-      keyString=keyString, doc=doc, rc=localrc)
+    ESMF_HConfigIterAsR8 = ESMF_HConfigAsR8(hconfigTemp, &
+      index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (isScalar) then
-      allocate(ESMF_HConfigAsR8SeqMapKey(1))
-      ESMF_HConfigAsR8SeqMapKey(1) = ESMF_HConfigAsR8MapKey(hconfig, &
-        index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
-    else
-      isSequence = ESMF_HConfigIsSequenceMapKey(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if (isSequence) then
-        ! access the sequence
-        hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-          keyString=keyString, doc=doc, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        ! loop through the sequence
-        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        allocate(ESMF_HConfigAsR8SeqMapKey(size))
-        do i=1, size
-          ESMF_HConfigAsR8SeqMapKey(i) = ESMF_HConfigAsR8(hconfigTemp, &
-            index=i, asOkay=asOkay, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          if (present(asOkay)) then
-            if (.not.asOkay) exit
-          endif
-        enddo
-        ! clean up
-        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      else
-        ! this is an error condition... neither scalar and nor sequence
-        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          msg="Must either be scalar or sequence to use Seq interface", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-    endif
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsR8SeqMapVal()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsR8SeqMapVal - Return Seq arraay of map value as R8
-
-! !INTERFACE:
-  function ESMF_HConfigAsR8SeqMapVal(hconfig, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
-! !RETURN VALUE:
-    real(ESMF_KIND_R8), allocatable :: ESMF_HConfigAsR8SeqMapVal(:)
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return the map value of item {\tt hconfig} interpreted as R8.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    logical               :: isScalar, isSequence
-    type(ESMF_HConfig)    :: hconfigTemp
-    integer               :: i, size
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    isScalar = ESMF_HConfigIsScalarMapVal(hconfig, index=index, &
-      keyString=keyString, doc=doc, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (isScalar) then
-      allocate(ESMF_HConfigAsR8SeqMapVal(1))
-      ESMF_HConfigAsR8SeqMapVal(1) = ESMF_HConfigAsR8MapVal(hconfig, &
-        index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
-    else
-      isSequence = ESMF_HConfigIsSequenceMapVal(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if (isSequence) then
-        ! access the sequence
-        hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-          keyString=keyString, doc=doc, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        ! loop through the sequence
-        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        allocate(ESMF_HConfigAsR8SeqMapVal(size))
-        do i=1, size
-          ESMF_HConfigAsR8SeqMapVal(i) = ESMF_HConfigAsR8(hconfigTemp, &
-            index=i, asOkay=asOkay, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          if (present(asOkay)) then
-            if (.not.asOkay) exit
-          endif
-        enddo
-        ! clean up
-        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      else
-        ! this is an error condition... neither scalar and nor sequence
-        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          msg="Must either be scalar or sequence to use Seq interface", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -7299,16 +4713,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAsString()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsString - Return value as string
 
-! !INTERFACE:
   function ESMF_HConfigAsString(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
-! !RETURN VALUE:
+
     character(len=:), allocatable :: ESMF_HConfigAsString
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfig), intent(in)            :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -7317,34 +4727,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
-! !DESCRIPTION:
-!   Return the value of item {\tt hconfig} interpreted as string.
-!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
-!   provided, {\tt asOkay == .true.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[asOkay]}]
-!     Set to {\tt .true.} for successful convertion to the requested typekind.
-!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
-!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
-!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
-!     and the validity of the returned converted value is determined by
-!     {\tt asOkay}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
     integer               :: len
     type(ESMF_HConfig)    :: hconfigTemp
@@ -7416,17 +4798,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsStringMapKey()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsStringMapKey - Return map key as string
-
-! !INTERFACE:
-  function ESMF_HConfigAsStringMapKey(hconfig, keywordEnforcer, index, keyString, &
+#define ESMF_METHOD "ESMF_HConfigIterAsString()"
+  function ESMF_HConfigIterAsString(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
-! !RETURN VALUE:
-    character(len=:), allocatable :: ESMF_HConfigAsStringMapKey
-!
-! !ARGUMENTS:
+
+    character(len=:), allocatable :: ESMF_HConfigIterAsString
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -7435,10 +4812,58 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_HConfigIterAsString = ESMF_HConfigAsString(hconfigTemp, &
+      index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_HConfigAs<Type>MapKey - Return map key as <Type>
+
+! !INTERFACE:
+!  function ESMF_HConfigAs<Type>MapKey(hconfig, keywordEnforcer, index, keyString, &
+!    doc, asOkay, rc)
+! !RETURN VALUE:
+!    <Type> :: ESMF_HConfigAs<Type>MapKey
+!
+! !ARGUMENTS:
+!    type(ESMF_HConfigIter), intent(in)        :: hconfig
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    integer,            intent(in),  optional :: index
+!    character(*),       intent(in),  optional :: keyString
+!    integer,            intent(in),  optional :: doc
+!    logical,            intent(out), optional :: asOkay
+!    integer,            intent(out), optional :: rc
+
 ! !DESCRIPTION:
-!   Return the map key of item {\tt hconfig} interpreted as string.
+!   Return the map key of item {\tt hconfig} interpreted as <Type>.
 !   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
 !   provided, {\tt asOkay == .true.}.
+!
+!   The supported <Type> options are:
+!   \begin{itemize}
+!   \item I4
+!   \item I8
+!   \item Logical
+!   \item R4
+!   \item R8
+!   \item String
+!   \end{itemize}
 !
 ! The arguments are:
 !   \begin{description}
@@ -7463,6 +4888,362 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsI4MapKey()"
+
+  function ESMF_HConfigAsI4MapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    integer(ESMF_KIND_I4) :: ESMF_HConfigAsI4MapKey
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+    type(ESMF_Logical)    :: flag
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    if (present(index).or.present(keyString).or.present(doc)) then
+      hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Call into the C++ interface to get the I4
+      call c_ESMC_HConfigAsI4(hconfigTemp, ESMF_HConfigAsI4MapKey, &
+        flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! clean up
+      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface to get the I4
+      call c_ESMC_HConfigAsI4MapKey(hconfig, ESMF_HConfigAsI4MapKey, &
+        flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! handle asOkay
+    if (present(asOkay)) then
+      asOkay = flag
+    else if (flag == ESMF_FALSE) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="Conversion to the requested typekind is not supported", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsI8MapKey()"
+
+  function ESMF_HConfigAsI8MapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    integer(ESMF_KIND_I8) :: ESMF_HConfigAsI8MapKey
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+    type(ESMF_Logical)    :: flag
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    if (present(index).or.present(keyString).or.present(doc)) then
+      hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Call into the C++ interface to get the I8
+      call c_ESMC_HConfigAsI8(hconfigTemp, ESMF_HConfigAsI8MapKey, &
+        flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! clean up
+      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface to get the I8
+      call c_ESMC_HConfigAsI8MapKey(hconfig, ESMF_HConfigAsI8MapKey, &
+        flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! handle asOkay
+    if (present(asOkay)) then
+      asOkay = flag
+    else if (flag == ESMF_FALSE) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="Conversion to the requested typekind is not supported", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsLogicalMapKey()"
+
+  function ESMF_HConfigAsLogicalMapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    logical :: ESMF_HConfigAsLogicalMapKey
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+    type(ESMF_Logical)    :: value
+    type(ESMF_Logical)    :: flag
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    if (present(index).or.present(keyString).or.present(doc)) then
+      hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Call into the C++ interface to get the Logical
+      call c_ESMC_HConfigAsLogical(hconfigTemp, value, flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! clean up
+      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface to get the Logical
+      call c_ESMC_HConfigAsLogicalMapKey(hconfig, value, flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! handle asOkay
+    if (present(asOkay)) then
+      asOkay = flag
+    else if (flag == ESMF_FALSE) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="Conversion to the requested typekind is not supported", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    ! convert ESMF_Logical -> logical
+    ESMF_HConfigAsLogicalMapKey = value
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsR4MapKey()"
+
+  function ESMF_HConfigAsR4MapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    real(ESMF_KIND_R4) :: ESMF_HConfigAsR4MapKey
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+    type(ESMF_Logical)    :: flag
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    if (present(index).or.present(keyString).or.present(doc)) then
+      hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Call into the C++ interface to get the R4
+      call c_ESMC_HConfigAsR4(hconfigTemp, ESMF_HConfigAsR4MapKey, &
+        flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! clean up
+      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface to get the R4
+      call c_ESMC_HConfigAsR4MapKey(hconfig, ESMF_HConfigAsR4MapKey, &
+        flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! handle asOkay
+    if (present(asOkay)) then
+      asOkay = flag
+    else if (flag == ESMF_FALSE) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="Conversion to the requested typekind is not supported", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsR8MapKey()"
+
+  function ESMF_HConfigAsR8MapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    real(ESMF_KIND_R8) :: ESMF_HConfigAsR8MapKey
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+    type(ESMF_Logical)    :: flag
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    if (present(index).or.present(keyString).or.present(doc)) then
+      hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Call into the C++ interface to get the R8
+      call c_ESMC_HConfigAsR8(hconfigTemp, ESMF_HConfigAsR8MapKey, &
+        flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! clean up
+      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface to get the R8
+      call c_ESMC_HConfigAsR8MapKey(hconfig, ESMF_HConfigAsR8MapKey, &
+        flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! handle asOkay
+    if (present(asOkay)) then
+      asOkay = flag
+    else if (flag == ESMF_FALSE) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="Conversion to the requested typekind is not supported", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsStringMapKey()"
+
+  function ESMF_HConfigAsStringMapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    character(len=:), allocatable :: ESMF_HConfigAsStringMapKey
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
     integer               :: localrc                ! local return code
     integer               :: len
     type(ESMF_HConfig)    :: hconfigTemp
@@ -7533,30 +5314,38 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsStringMapVal()"
 !BOP
-! !IROUTINE: ESMF_HConfigAsStringMapVal - Return map value as string
+! !IROUTINE: ESMF_HConfigAs<Type>MapVal - Return map value as <Type>
 
 ! !INTERFACE:
-  function ESMF_HConfigAsStringMapVal(hconfig, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
+!  function ESMF_HConfigAs<Type>MapVal(hconfig, keywordEnforcer, index, keyString, &
+!    doc, asOkay, rc)
 ! !RETURN VALUE:
-    character(len=:), allocatable :: ESMF_HConfigAsStringMapVal
+!    <Type> :: ESMF_HConfigAs<Type>MapVal
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
+!    type(ESMF_HConfigIter), intent(in)        :: hconfig
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    integer,            intent(in),  optional :: index
+!    character(*),       intent(in),  optional :: keyString
+!    integer,            intent(in),  optional :: doc
+!    logical,            intent(out), optional :: asOkay
+!    integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!   Return the map value of item {\tt hconfig} interpreted as string.
+!   Return the map value of item {\tt hconfig} interpreted as <Type>.
 !   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
 !   provided, {\tt asOkay == .true.}.
+!
+!   The supported <Type> options are:
+!   \begin{itemize}
+!   \item I4
+!   \item I8
+!   \item Logical
+!   \item R4
+!   \item R8
+!   \item String
+!   \end{itemize}
 !
 ! The arguments are:
 !   \begin{description}
@@ -7581,6 +5370,362 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsI4MapVal()"
+
+  function ESMF_HConfigAsI4MapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    integer(ESMF_KIND_I4) :: ESMF_HConfigAsI4MapVal
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+    type(ESMF_Logical)    :: flag
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    if (present(index).or.present(keyString).or.present(doc)) then
+      hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Call into the C++ interface to get the I4
+      call c_ESMC_HConfigAsI4(hconfigTemp, ESMF_HConfigAsI4MapVal, &
+        flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! clean up
+      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface to get the I4
+      call c_ESMC_HConfigAsI4MapVal(hconfig, ESMF_HConfigAsI4MapVal, &
+        flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! handle asOkay
+    if (present(asOkay)) then
+      asOkay = flag
+    else if (flag == ESMF_FALSE) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="Conversion to the requested typekind is not supported", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsI8MapVal()"
+
+  function ESMF_HConfigAsI8MapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    integer(ESMF_KIND_I8) :: ESMF_HConfigAsI8MapVal
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+    type(ESMF_Logical)    :: flag
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    if (present(index).or.present(keyString).or.present(doc)) then
+      hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Call into the C++ interface to get the I8
+      call c_ESMC_HConfigAsI8(hconfigTemp, ESMF_HConfigAsI8MapVal, &
+        flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! clean up
+      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface to get the I8
+      call c_ESMC_HConfigAsI8MapVal(hconfig, ESMF_HConfigAsI8MapVal, &
+        flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! handle asOkay
+    if (present(asOkay)) then
+      asOkay = flag
+    else if (flag == ESMF_FALSE) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="Conversion to the requested typekind is not supported", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsLogicalMapVal()"
+
+  function ESMF_HConfigAsLogicalMapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    logical :: ESMF_HConfigAsLogicalMapVal
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+    type(ESMF_Logical)    :: value
+    type(ESMF_Logical)    :: flag
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    if (present(index).or.present(keyString).or.present(doc)) then
+      hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Call into the C++ interface to get the Logical
+      call c_ESMC_HConfigAsLogical(hconfigTemp, value, flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! clean up
+      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface to get the Logical
+      call c_ESMC_HConfigAsLogicalMapVal(hconfig, value, flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! handle asOkay
+    if (present(asOkay)) then
+      asOkay = flag
+    else if (flag == ESMF_FALSE) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="Conversion to the requested typekind is not supported", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    ! convert ESMF_Logical -> logical
+    ESMF_HConfigAsLogicalMapVal = value
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsR4MapVal()"
+
+  function ESMF_HConfigAsR4MapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    real(ESMF_KIND_R4) :: ESMF_HConfigAsR4MapVal
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+    type(ESMF_Logical)    :: flag
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    if (present(index).or.present(keyString).or.present(doc)) then
+      hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Call into the C++ interface to get the R4
+      call c_ESMC_HConfigAsR4(hconfigTemp, ESMF_HConfigAsR4MapVal, &
+        flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! clean up
+      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface to get the R4
+      call c_ESMC_HConfigAsR4MapVal(hconfig, ESMF_HConfigAsR4MapVal, &
+        flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! handle asOkay
+    if (present(asOkay)) then
+      asOkay = flag
+    else if (flag == ESMF_FALSE) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="Conversion to the requested typekind is not supported", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsR8MapVal()"
+
+  function ESMF_HConfigAsR8MapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    real(ESMF_KIND_R8) :: ESMF_HConfigAsR8MapVal
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+    type(ESMF_Logical)    :: flag
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    if (present(index).or.present(keyString).or.present(doc)) then
+      hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Call into the C++ interface to get the R8
+      call c_ESMC_HConfigAsR8(hconfigTemp, ESMF_HConfigAsR8MapVal, &
+        flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! clean up
+      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface to get the R8
+      call c_ESMC_HConfigAsR8MapVal(hconfig, ESMF_HConfigAsR8MapVal, &
+        flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! handle asOkay
+    if (present(asOkay)) then
+      asOkay = flag
+    else if (flag == ESMF_FALSE) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="Conversion to the requested typekind is not supported", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsStringMapVal()"
+
+  function ESMF_HConfigAsStringMapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    character(len=:), allocatable :: ESMF_HConfigAsStringMapVal
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
     integer               :: localrc                ! local return code
     integer               :: len
     type(ESMF_HConfig)    :: hconfigTemp
@@ -7651,39 +5796,48 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsStringSeq()"
 !BOP
-! !IROUTINE: ESMF_HConfigAsStringSeq - Return Seq array of String values
+! !IROUTINE: ESMF_HConfigAs<Type>Seq - Return value as sequence array of <Type>
 
 ! !INTERFACE:
-  function ESMF_HConfigAsStringSeq(hconfig, stringLen, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
+!  function ESMF_HConfigAs<Type>Seq(hconfig, keywordEnforcer, index, keyString, &
+!    doc, asOkay, rc)
 ! !RETURN VALUE:
-    character(len=:), allocatable :: ESMF_HConfigAsStringSeq(:)
+!    <Type>, allocatable :: ESMF_HConfigAs<Type>Seq(:)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
-    integer,            intent(in)            :: stringLen
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
+!    type(ESMF_HConfig[Iter]), intent(in)      :: hconfig
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    integer,            intent(in),  optional :: index
+!    character(*),       intent(in),  optional :: keyString
+!    integer,            intent(in),  optional :: doc
+!    logical,            intent(out), optional :: asOkay
+!    integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!   Return the value of item {\tt hconfig} interpreted as String.
+!   Return the value of item {\tt hconfig} interpreted as sequence of <Type>.
 !   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
 !   provided, {\tt asOkay == .true.}.
+!
+!   The supported <Type> options are:
+!   \begin{itemize}
+!   \item I4
+!   \item I8
+!   \item Logical
+!   \item R4
+!   \item R8
+!   \item String
+!   \end{itemize}
+!
+!   An extra non-optional argument {\tt stringLen} must be provided for the
+!   {\bf String} option. It specifies the number of characters in each of the
+!   output strings. Longer actual string values are tuncated, while shorter
+!   actual string values are padded with white space.
 !
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[stringLen]
-!     Number of characters in each of the output strings. Longer actual strings
-!     are tuncated, while shorter actual strings are padded with white space.
+!     {\tt ESMF\_HConfig} or {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -7703,6 +5857,616 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsI4Seq()"
+
+  function ESMF_HConfigAsI4Seq(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    integer(ESMF_KIND_I4), allocatable :: ESMF_HConfigAsI4Seq(:)
+
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    logical               :: isScalar, isSequence
+    type(ESMF_HConfig)    :: hconfigTemp
+    integer               :: i, size
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    isScalar = ESMF_HConfigIsScalar(hconfig, index=index, keyString=keyString, &
+      doc=doc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (isScalar) then
+      allocate(ESMF_HConfigAsI4Seq(1))
+      ESMF_HConfigAsI4Seq(1) = ESMF_HConfigAsI4(hconfig, index=index, &
+        keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+    else
+      isSequence = ESMF_HConfigIsSequence(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (isSequence) then
+        ! access the sequence
+        hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
+          keyString=keyString, doc=doc, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! loop through the sequence
+        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        allocate(ESMF_HConfigAsI4Seq(size))
+        do i=1, size
+          ESMF_HConfigAsI4Seq(i) = ESMF_HConfigAsI4(hconfigTemp, &
+            index=i, asOkay=asOkay, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (present(asOkay)) then
+            if (.not.asOkay) exit
+          endif
+        enddo
+        ! clean up
+        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        ! this is an error condition... neither scalar and nor sequence
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+          msg="Must either be scalar or sequence to use Seq interface", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterAsI4Seq()"
+  function ESMF_HConfigIterAsI4Seq(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    integer(ESMF_KIND_I4), allocatable :: ESMF_HConfigIterAsI4Seq(:)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_HConfigIterAsI4Seq = ESMF_HConfigAsI4Seq(hconfigTemp, &
+      index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsI8Seq()"
+
+  function ESMF_HConfigAsI8Seq(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    integer(ESMF_KIND_I8), allocatable :: ESMF_HConfigAsI8Seq(:)
+
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    logical               :: isScalar, isSequence
+    type(ESMF_HConfig)    :: hconfigTemp
+    integer               :: i, size
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    isScalar = ESMF_HConfigIsScalar(hconfig, index=index, keyString=keyString, &
+      doc=doc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (isScalar) then
+      allocate(ESMF_HConfigAsI8Seq(1))
+      ESMF_HConfigAsI8Seq(1) = ESMF_HConfigAsI8(hconfig, index=index, &
+        keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+    else
+      isSequence = ESMF_HConfigIsSequence(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (isSequence) then
+        ! access the sequence
+        hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
+          keyString=keyString, doc=doc, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! loop through the sequence
+        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        allocate(ESMF_HConfigAsI8Seq(size))
+        do i=1, size
+          ESMF_HConfigAsI8Seq(i) = ESMF_HConfigAsI8(hconfigTemp, &
+            index=i, asOkay=asOkay, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (present(asOkay)) then
+            if (.not.asOkay) exit
+          endif
+        enddo
+        ! clean up
+        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        ! this is an error condition... neither scalar and nor sequence
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+          msg="Must either be scalar or sequence to use Seq interface", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterAsI8Seq()"
+  function ESMF_HConfigIterAsI8Seq(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    integer(ESMF_KIND_I8), allocatable :: ESMF_HConfigIterAsI8Seq(:)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_HConfigIterAsI8Seq = ESMF_HConfigAsI8Seq(hconfigTemp, &
+      index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsLogicalSeq()"
+
+  function ESMF_HConfigAsLogicalSeq(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    logical, allocatable :: ESMF_HConfigAsLogicalSeq(:)
+
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    logical               :: isScalar, isSequence
+    type(ESMF_HConfig)    :: hconfigTemp
+    integer               :: i, size
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    isScalar = ESMF_HConfigIsScalar(hconfig, index=index, keyString=keyString, &
+      doc=doc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (isScalar) then
+      allocate(ESMF_HConfigAsLogicalSeq(1))
+      ESMF_HConfigAsLogicalSeq(1) = ESMF_HConfigAsLogical(hconfig, index=index, &
+        keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+    else
+      isSequence = ESMF_HConfigIsSequence(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (isSequence) then
+        ! access the sequence
+        hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
+          keyString=keyString, doc=doc, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! loop through the sequence
+        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        allocate(ESMF_HConfigAsLogicalSeq(size))
+        do i=1, size
+          ESMF_HConfigAsLogicalSeq(i) = ESMF_HConfigAsLogical(hconfigTemp, &
+            index=i, asOkay=asOkay, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (present(asOkay)) then
+            if (.not.asOkay) exit
+          endif
+        enddo
+        ! clean up
+        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        ! this is an error condition... neither scalar and nor sequence
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+          msg="Must either be scalar or sequence to use Seq interface", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterAsLogicalSeq()"
+  function ESMF_HConfigIterAsLogicalSeq(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    logical, allocatable :: ESMF_HConfigIterAsLogicalSeq(:)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_HConfigIterAsLogicalSeq = ESMF_HConfigAsLogicalSeq(hconfigTemp, &
+      index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsR4Seq()"
+
+  function ESMF_HConfigAsR4Seq(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    real(ESMF_KIND_R4), allocatable :: ESMF_HConfigAsR4Seq(:)
+
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    logical               :: isScalar, isSequence
+    type(ESMF_HConfig)    :: hconfigTemp
+    integer               :: i, size
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    isScalar = ESMF_HConfigIsScalar(hconfig, index=index, keyString=keyString, &
+      doc=doc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (isScalar) then
+      allocate(ESMF_HConfigAsR4Seq(1))
+      ESMF_HConfigAsR4Seq(1) = ESMF_HConfigAsR4(hconfig, index=index, &
+        keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+    else
+      isSequence = ESMF_HConfigIsSequence(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (isSequence) then
+        ! access the sequence
+        hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
+          keyString=keyString, doc=doc, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! loop through the sequence
+        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        allocate(ESMF_HConfigAsR4Seq(size))
+        do i=1, size
+          ESMF_HConfigAsR4Seq(i) = ESMF_HConfigAsR4(hconfigTemp, &
+            index=i, asOkay=asOkay, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (present(asOkay)) then
+            if (.not.asOkay) exit
+          endif
+        enddo
+        ! clean up
+        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        ! this is an error condition... neither scalar and nor sequence
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+          msg="Must either be scalar or sequence to use Seq interface", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterAsR4Seq()"
+  function ESMF_HConfigIterAsR4Seq(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    real(ESMF_KIND_R4), allocatable :: ESMF_HConfigIterAsR4Seq(:)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_HConfigIterAsR4Seq = ESMF_HConfigAsR4Seq(hconfigTemp, &
+      index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsR8Seq()"
+
+  function ESMF_HConfigAsR8Seq(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    real(ESMF_KIND_R8), allocatable :: ESMF_HConfigAsR8Seq(:)
+
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    logical               :: isScalar, isSequence
+    type(ESMF_HConfig)    :: hconfigTemp
+    integer               :: i, size
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    isScalar = ESMF_HConfigIsScalar(hconfig, index=index, keyString=keyString, &
+      doc=doc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (isScalar) then
+      allocate(ESMF_HConfigAsR8Seq(1))
+      ESMF_HConfigAsR8Seq(1) = ESMF_HConfigAsR8(hconfig, index=index, &
+        keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+    else
+      isSequence = ESMF_HConfigIsSequence(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (isSequence) then
+        ! access the sequence
+        hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
+          keyString=keyString, doc=doc, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! loop through the sequence
+        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        allocate(ESMF_HConfigAsR8Seq(size))
+        do i=1, size
+          ESMF_HConfigAsR8Seq(i) = ESMF_HConfigAsR8(hconfigTemp, &
+            index=i, asOkay=asOkay, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (present(asOkay)) then
+            if (.not.asOkay) exit
+          endif
+        enddo
+        ! clean up
+        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        ! this is an error condition... neither scalar and nor sequence
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+          msg="Must either be scalar or sequence to use Seq interface", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterAsR8Seq()"
+  function ESMF_HConfigIterAsR8Seq(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    real(ESMF_KIND_R8), allocatable :: ESMF_HConfigIterAsR8Seq(:)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_HConfigIterAsR8Seq = ESMF_HConfigAsR8Seq(hconfigTemp, &
+      index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsStringSeq()"
+
+  function ESMF_HConfigAsStringSeq(hconfig, stringLen, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    character(len=:), allocatable :: ESMF_HConfigAsStringSeq(:)
+
+    type(ESMF_HConfig), intent(in)            :: hconfig
+    integer,            intent(in)            :: stringLen
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
     integer               :: localrc                ! local return code
     logical               :: isScalar, isSequence
     type(ESMF_HConfig)    :: hconfigTemp
@@ -7771,17 +6535,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsStringSeqMapKey()"
-!BOP
-! !IROUTINE: ESMF_HConfigAsStringSeqMapKey - Return Seq array map key as String
-
-! !INTERFACE:
-  function ESMF_HConfigAsStringSeqMapKey(hconfig, stringLen, keywordEnforcer, index, keyString, &
+#define ESMF_METHOD "ESMF_HConfigIterAsStringSeq()"
+  function ESMF_HConfigIterAsStringSeq(hconfig, stringLen, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
-! !RETURN VALUE:
-    character(len=:), allocatable :: ESMF_HConfigAsStringSeqMapKey(:)
-!
-! !ARGUMENTS:
+
+    character(len=:), allocatable :: ESMF_HConfigIterAsStringSeq(:)
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
     integer,            intent(in)            :: stringLen
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -7791,18 +6550,69 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_HConfigIterAsStringSeq = ESMF_HConfigAsStringSeq(hconfigTemp, &
+      stringLen=stringLen, &
+      index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_HConfigAs<Type>SeqMapKey - Return map key value as sequence array of <Type>
+
+! !INTERFACE:
+!  function ESMF_HConfigAs<Type>SeqMapKey(hconfig, keywordEnforcer, index, keyString, &
+!    doc, asOkay, rc)
+! !RETURN VALUE:
+!    <Type>, allocatable :: ESMF_HConfigAs<Type>SeqMapKey(:)
+!
+! !ARGUMENTS:
+!    type(ESMF_HConfigIter), intent(in)        :: hconfig
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    integer,            intent(in),  optional :: index
+!    character(*),       intent(in),  optional :: keyString
+!    integer,            intent(in),  optional :: doc
+!    logical,            intent(out), optional :: asOkay
+!    integer,            intent(out), optional :: rc
+
 ! !DESCRIPTION:
-!   Return the map key of item {\tt hconfig} interpreted as String.
+!   Return the map key of item {\tt hconfig} interpreted as sequence of <Type>.
 !   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
 !   provided, {\tt asOkay == .true.}.
+!
+!   The supported <Type> options are:
+!   \begin{itemize}
+!   \item I4
+!   \item I8
+!   \item Logical
+!   \item R4
+!   \item R8
+!   \item String
+!   \end{itemize}
+!
+!   An extra non-optional argument {\tt stringLen} must be provided for the
+!   {\bf String} option. It specifies the number of characters in each of the
+!   output strings. Longer actual string values are tuncated, while shorter
+!   actual string values are padded with white space.
 !
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[stringLen]
-!     Number of characters in each of the output strings. Longer actual strings
-!     are tuncated, while shorter actual strings are padded with white space.
+!     {\tt ESMF\_HConfig} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -7822,6 +6632,440 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsI4SeqMapKey()"
+
+  function ESMF_HConfigAsI4SeqMapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    integer(ESMF_KIND_I4), allocatable :: ESMF_HConfigAsI4SeqMapKey(:)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    logical               :: isScalar, isSequence
+    type(ESMF_HConfig)    :: hconfigTemp
+    integer               :: i, size
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    isScalar = ESMF_HConfigIsScalarMapKey(hconfig, index=index, &
+      keyString=keyString, doc=doc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (isScalar) then
+      allocate(ESMF_HConfigAsI4SeqMapKey(1))
+      ESMF_HConfigAsI4SeqMapKey(1) = ESMF_HConfigAsI4MapKey(hconfig, &
+        index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+    else
+      isSequence = ESMF_HConfigIsSequenceMapKey(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (isSequence) then
+        ! access the sequence
+        hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
+          keyString=keyString, doc=doc, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! loop through the sequence
+        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        allocate(ESMF_HConfigAsI4SeqMapKey(size))
+        do i=1, size
+          ESMF_HConfigAsI4SeqMapKey(i) = ESMF_HConfigAsI4(hconfigTemp, &
+            index=i, asOkay=asOkay, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (present(asOkay)) then
+            if (.not.asOkay) exit
+          endif
+        enddo
+        ! clean up
+        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        ! this is an error condition... neither scalar and nor sequence
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+          msg="Must either be scalar or sequence to use Seq interface", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsI8SeqMapKey()"
+
+  function ESMF_HConfigAsI8SeqMapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    integer(ESMF_KIND_I8), allocatable :: ESMF_HConfigAsI8SeqMapKey(:)
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    logical               :: isScalar, isSequence
+    type(ESMF_HConfig)    :: hconfigTemp
+    integer               :: i, size
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    isScalar = ESMF_HConfigIsScalarMapKey(hconfig, index=index, &
+      keyString=keyString, doc=doc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (isScalar) then
+      allocate(ESMF_HConfigAsI8SeqMapKey(1))
+      ESMF_HConfigAsI8SeqMapKey(1) = ESMF_HConfigAsI8MapKey(hconfig, &
+        index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+    else
+      isSequence = ESMF_HConfigIsSequenceMapKey(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (isSequence) then
+        ! access the sequence
+        hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
+          keyString=keyString, doc=doc, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! loop through the sequence
+        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        allocate(ESMF_HConfigAsI8SeqMapKey(size))
+        do i=1, size
+          ESMF_HConfigAsI8SeqMapKey(i) = ESMF_HConfigAsI8(hconfigTemp, &
+            index=i, asOkay=asOkay, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (present(asOkay)) then
+            if (.not.asOkay) exit
+          endif
+        enddo
+        ! clean up
+        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        ! this is an error condition... neither scalar and nor sequence
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+          msg="Must either be scalar or sequence to use Seq interface", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsLogicalSeqMapKey()"
+
+  function ESMF_HConfigAsLogicalSeqMapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    logical, allocatable :: ESMF_HConfigAsLogicalSeqMapKey(:)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    logical               :: isScalar, isSequence
+    type(ESMF_HConfig)    :: hconfigTemp
+    integer               :: i, size
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    isScalar = ESMF_HConfigIsScalarMapKey(hconfig, index=index, &
+      keyString=keyString, doc=doc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (isScalar) then
+      allocate(ESMF_HConfigAsLogicalSeqMapKey(1))
+      ESMF_HConfigAsLogicalSeqMapKey(1) = ESMF_HConfigAsLogicalMapKey(hconfig, &
+        index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+    else
+      isSequence = ESMF_HConfigIsSequenceMapKey(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (isSequence) then
+        ! access the sequence
+        hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
+          keyString=keyString, doc=doc, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! loop through the sequence
+        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        allocate(ESMF_HConfigAsLogicalSeqMapKey(size))
+        do i=1, size
+          ESMF_HConfigAsLogicalSeqMapKey(i) = ESMF_HConfigAsLogical(hconfigTemp, &
+            index=i, asOkay=asOkay, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (present(asOkay)) then
+            if (.not.asOkay) exit
+          endif
+        enddo
+        ! clean up
+        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        ! this is an error condition... neither scalar and nor sequence
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+          msg="Must either be scalar or sequence to use Seq interface", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsR4SeqMapKey()"
+
+  function ESMF_HConfigAsR4SeqMapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    real(ESMF_KIND_R4), allocatable :: ESMF_HConfigAsR4SeqMapKey(:)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    logical               :: isScalar, isSequence
+    type(ESMF_HConfig)    :: hconfigTemp
+    integer               :: i, size
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    isScalar = ESMF_HConfigIsScalarMapKey(hconfig, index=index, &
+      keyString=keyString, doc=doc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (isScalar) then
+      allocate(ESMF_HConfigAsR4SeqMapKey(1))
+      ESMF_HConfigAsR4SeqMapKey(1) = ESMF_HConfigAsR4MapKey(hconfig, &
+        index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+    else
+      isSequence = ESMF_HConfigIsSequenceMapKey(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (isSequence) then
+        ! access the sequence
+        hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
+          keyString=keyString, doc=doc, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! loop through the sequence
+        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        allocate(ESMF_HConfigAsR4SeqMapKey(size))
+        do i=1, size
+          ESMF_HConfigAsR4SeqMapKey(i) = ESMF_HConfigAsR4(hconfigTemp, &
+            index=i, asOkay=asOkay, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (present(asOkay)) then
+            if (.not.asOkay) exit
+          endif
+        enddo
+        ! clean up
+        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        ! this is an error condition... neither scalar and nor sequence
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+          msg="Must either be scalar or sequence to use Seq interface", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsR8SeqMapKey()"
+
+  function ESMF_HConfigAsR8SeqMapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    real(ESMF_KIND_R8), allocatable :: ESMF_HConfigAsR8SeqMapKey(:)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    logical               :: isScalar, isSequence
+    type(ESMF_HConfig)    :: hconfigTemp
+    integer               :: i, size
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    isScalar = ESMF_HConfigIsScalarMapKey(hconfig, index=index, &
+      keyString=keyString, doc=doc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (isScalar) then
+      allocate(ESMF_HConfigAsR8SeqMapKey(1))
+      ESMF_HConfigAsR8SeqMapKey(1) = ESMF_HConfigAsR8MapKey(hconfig, &
+        index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+    else
+      isSequence = ESMF_HConfigIsSequenceMapKey(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (isSequence) then
+        ! access the sequence
+        hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
+          keyString=keyString, doc=doc, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! loop through the sequence
+        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        allocate(ESMF_HConfigAsR8SeqMapKey(size))
+        do i=1, size
+          ESMF_HConfigAsR8SeqMapKey(i) = ESMF_HConfigAsR8(hconfigTemp, &
+            index=i, asOkay=asOkay, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (present(asOkay)) then
+            if (.not.asOkay) exit
+          endif
+        enddo
+        ! clean up
+        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        ! this is an error condition... neither scalar and nor sequence
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+          msg="Must either be scalar or sequence to use Seq interface", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsStringSeqMapKey()"
+
+  function ESMF_HConfigAsStringSeqMapKey(hconfig, stringLen, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    character(len=:), allocatable :: ESMF_HConfigAsStringSeqMapKey(:)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    integer,            intent(in)            :: stringLen
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
     integer               :: localrc                ! local return code
     logical               :: isScalar, isSequence
     type(ESMF_HConfig)    :: hconfigTemp
@@ -7889,39 +7133,38 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsStringSeqMapVal()"
 !BOP
-! !IROUTINE: ESMF_HConfigAsStringSeqMapVal - Return Seq array map value as String
+! !IROUTINE: ESMF_HConfigAs<Type>SeqMapVal - Return map value as sequence array of <Type>
 
 ! !INTERFACE:
-  function ESMF_HConfigAsStringSeqMapVal(hconfig, stringLen, keywordEnforcer, index, keyString, &
-    doc, asOkay, rc)
+!  function ESMF_HConfigAs<Type>SeqMapVal(hconfig, keywordEnforcer, index, keyString, &
+!    doc, asOkay, rc)
 ! !RETURN VALUE:
-    character(len=:), allocatable :: ESMF_HConfigAsStringSeqMapVal(:)
+!    <Type>, allocatable :: ESMF_HConfigAs<Type>SeqMapVal(:)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-    integer,            intent(in)            :: stringLen
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    logical,            intent(out), optional :: asOkay
-    integer,            intent(out), optional :: rc
+!    type(ESMF_HConfigIter), intent(in)        :: hconfig
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    integer,            intent(in),  optional :: index
+!    character(*),       intent(in),  optional :: keyString
+!    integer,            intent(in),  optional :: doc
+!    logical,            intent(out), optional :: asOkay
+!    integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!   Return the map value of item {\tt hconfig} interpreted as String.
+!   Return the map value of item {\tt hconfig} interpreted as sequence of <Type>.
 !   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
 !   provided, {\tt asOkay == .true.}.
+!
+!   An extra non-optional argument {\tt stringLen} must be provided for the
+!   {\bf String} option. It specifies the number of characters in each of the
+!   output strings. Longer actual string values are tuncated, while shorter
+!   actual string values are padded with white space.
 !
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
 !     {\tt ESMF\_HConfigIter} object.
-!   \item[stringLen]
-!     Number of characters in each of the output strings. Longer actual strings
-!     are tuncated, while shorter actual strings are padded with white space.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -7941,6 +7184,441 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsI4SeqMapVal()"
+
+  function ESMF_HConfigAsI4SeqMapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    integer(ESMF_KIND_I4), allocatable :: ESMF_HConfigAsI4SeqMapVal(:)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    logical               :: isScalar, isSequence
+    type(ESMF_HConfig)    :: hconfigTemp
+    integer               :: i, size
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    isScalar = ESMF_HConfigIsScalarMapVal(hconfig, index=index, &
+      keyString=keyString, doc=doc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (isScalar) then
+      allocate(ESMF_HConfigAsI4SeqMapVal(1))
+      ESMF_HConfigAsI4SeqMapVal(1) = ESMF_HConfigAsI4MapVal(hconfig, &
+        index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+    else
+      isSequence = ESMF_HConfigIsSequenceMapVal(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (isSequence) then
+        ! access the sequence
+        hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
+          keyString=keyString, doc=doc, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! loop through the sequence
+        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        allocate(ESMF_HConfigAsI4SeqMapVal(size))
+        do i=1, size
+          ESMF_HConfigAsI4SeqMapVal(i) = ESMF_HConfigAsI4(hconfigTemp, &
+            index=i, asOkay=asOkay, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (present(asOkay)) then
+            if (.not.asOkay) exit
+          endif
+        enddo
+        ! clean up
+        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        ! this is an error condition... neither scalar and nor sequence
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+          msg="Must either be scalar or sequence to use Seq interface", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsI8SeqMapVal()"
+
+  function ESMF_HConfigAsI8SeqMapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    integer(ESMF_KIND_I8), allocatable :: ESMF_HConfigAsI8SeqMapVal(:)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    logical               :: isScalar, isSequence
+    type(ESMF_HConfig)    :: hconfigTemp
+    integer               :: i, size
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    isScalar = ESMF_HConfigIsScalarMapVal(hconfig, index=index, &
+      keyString=keyString, doc=doc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (isScalar) then
+      allocate(ESMF_HConfigAsI8SeqMapVal(1))
+      ESMF_HConfigAsI8SeqMapVal(1) = ESMF_HConfigAsI8MapVal(hconfig, &
+        index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+    else
+      isSequence = ESMF_HConfigIsSequenceMapVal(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (isSequence) then
+        ! access the sequence
+        hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
+          keyString=keyString, doc=doc, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! loop through the sequence
+        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        allocate(ESMF_HConfigAsI8SeqMapVal(size))
+        do i=1, size
+          ESMF_HConfigAsI8SeqMapVal(i) = ESMF_HConfigAsI8(hconfigTemp, &
+            index=i, asOkay=asOkay, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (present(asOkay)) then
+            if (.not.asOkay) exit
+          endif
+        enddo
+        ! clean up
+        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        ! this is an error condition... neither scalar and nor sequence
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+          msg="Must either be scalar or sequence to use Seq interface", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsLogicalSeqMapVal()"
+
+  function ESMF_HConfigAsLogicalSeqMapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    logical, allocatable :: ESMF_HConfigAsLogicalSeqMapVal(:)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    logical               :: isScalar, isSequence
+    type(ESMF_HConfig)    :: hconfigTemp
+    integer               :: i, size
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    isScalar = ESMF_HConfigIsScalarMapVal(hconfig, index=index, &
+      keyString=keyString, doc=doc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (isScalar) then
+      allocate(ESMF_HConfigAsLogicalSeqMapVal(1))
+      ESMF_HConfigAsLogicalSeqMapVal(1) = ESMF_HConfigAsLogicalMapVal(hconfig, &
+        index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+    else
+      isSequence = ESMF_HConfigIsSequenceMapVal(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (isSequence) then
+        ! access the sequence
+        hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
+          keyString=keyString, doc=doc, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! loop through the sequence
+        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        allocate(ESMF_HConfigAsLogicalSeqMapVal(size))
+        do i=1, size
+          ESMF_HConfigAsLogicalSeqMapVal(i) = ESMF_HConfigAsLogical(hconfigTemp, &
+            index=i, asOkay=asOkay, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (present(asOkay)) then
+            if (.not.asOkay) exit
+          endif
+        enddo
+        ! clean up
+        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        ! this is an error condition... neither scalar and nor sequence
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+          msg="Must either be scalar or sequence to use Seq interface", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsR4SeqMapVal()"
+
+  function ESMF_HConfigAsR4SeqMapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    real(ESMF_KIND_R4), allocatable :: ESMF_HConfigAsR4SeqMapVal(:)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    logical               :: isScalar, isSequence
+    type(ESMF_HConfig)    :: hconfigTemp
+    integer               :: i, size
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    isScalar = ESMF_HConfigIsScalarMapVal(hconfig, index=index, &
+      keyString=keyString, doc=doc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (isScalar) then
+      allocate(ESMF_HConfigAsR4SeqMapVal(1))
+      ESMF_HConfigAsR4SeqMapVal(1) = ESMF_HConfigAsR4MapVal(hconfig, &
+        index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+    else
+      isSequence = ESMF_HConfigIsSequenceMapVal(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (isSequence) then
+        ! access the sequence
+        hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
+          keyString=keyString, doc=doc, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! loop through the sequence
+        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        allocate(ESMF_HConfigAsR4SeqMapVal(size))
+        do i=1, size
+          ESMF_HConfigAsR4SeqMapVal(i) = ESMF_HConfigAsR4(hconfigTemp, &
+            index=i, asOkay=asOkay, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (present(asOkay)) then
+            if (.not.asOkay) exit
+          endif
+        enddo
+        ! clean up
+        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        ! this is an error condition... neither scalar and nor sequence
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+          msg="Must either be scalar or sequence to use Seq interface", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsR8SeqMapVal()"
+
+  function ESMF_HConfigAsR8SeqMapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    real(ESMF_KIND_R8), allocatable :: ESMF_HConfigAsR8SeqMapVal(:)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    logical               :: isScalar, isSequence
+    type(ESMF_HConfig)    :: hconfigTemp
+    integer               :: i, size
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    isScalar = ESMF_HConfigIsScalarMapVal(hconfig, index=index, &
+      keyString=keyString, doc=doc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (isScalar) then
+      allocate(ESMF_HConfigAsR8SeqMapVal(1))
+      ESMF_HConfigAsR8SeqMapVal(1) = ESMF_HConfigAsR8MapVal(hconfig, &
+        index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+    else
+      isSequence = ESMF_HConfigIsSequenceMapVal(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (isSequence) then
+        ! access the sequence
+        hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
+          keyString=keyString, doc=doc, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! loop through the sequence
+        size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        allocate(ESMF_HConfigAsR8SeqMapVal(size))
+        do i=1, size
+          ESMF_HConfigAsR8SeqMapVal(i) = ESMF_HConfigAsR8(hconfigTemp, &
+            index=i, asOkay=asOkay, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (present(asOkay)) then
+            if (.not.asOkay) exit
+          endif
+        enddo
+        ! clean up
+        call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        ! this is an error condition... neither scalar and nor sequence
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+          msg="Must either be scalar or sequence to use Seq interface", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsStringSeqMapVal()"
+
+  function ESMF_HConfigAsStringSeqMapVal(hconfig, stringLen, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
+
+    character(len=:), allocatable :: ESMF_HConfigAsStringSeqMapVal(:)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    integer,            intent(in)            :: stringLen
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: asOkay
+    integer,            intent(out), optional :: rc
+
     integer               :: localrc                ! local return code
     logical               :: isScalar, isSequence
     type(ESMF_HConfig)    :: hconfigTemp

@@ -198,7 +198,7 @@ program ESMF_HConfigEx
 
       ! Any scalar can be accessed as a string.
       ! character(len=:), allocatable :: string
-      string = ESMF_HConfigAsString(ESMF_HConfigIterAsHConfig(hconfigIter), rc=rc)
+      string = ESMF_HConfigAsString(hconfigIter, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_LogWrite("AsString: "//string, ESMF_LOGMSG_INFO, rc=rc)
@@ -214,7 +214,7 @@ program ESMF_HConfigEx
       ! logical :: asOkay
 
       ! integer(ESMF_KIND_I4) :: valueI4
-      valueI4 = ESMF_HConfigAsI4(ESMF_HConfigIterAsHConfig(hconfigIter), asOkay=asOkay, rc=rc)
+      valueI4 = ESMF_HConfigAsI4(hconfigIter, asOkay=asOkay, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       write (msgString, '("asOkay: ", l2, " valueI4: ", i10)') asOkay, valueI4
@@ -222,7 +222,7 @@ program ESMF_HConfigEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
       ! integer(ESMF_KIND_I8) :: valueI8
-      valueI8 = ESMF_HConfigAsI8(ESMF_HConfigIterAsHConfig(hconfigIter), asOkay=asOkay, rc=rc)
+      valueI8 = ESMF_HConfigAsI8(hconfigIter, asOkay=asOkay, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       write (msgString, '("asOkay: ", l2, " valueI8: ", i10)') asOkay, valueI8
@@ -230,7 +230,7 @@ program ESMF_HConfigEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
       ! real(ESMF_KIND_R4) :: valueR4
-      valueR4 = ESMF_HConfigAsR4(ESMF_HConfigIterAsHConfig(hconfigIter), asOkay=asOkay, rc=rc)
+      valueR4 = ESMF_HConfigAsR4(hconfigIter, asOkay=asOkay, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       write (msgString, '("asOkay: ", l2, " valueR4: ", f10.6)') asOkay, valueR4
@@ -238,7 +238,7 @@ program ESMF_HConfigEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
       ! real(ESMF_KIND_R8) :: valueR8
-      valueR8 = ESMF_HConfigAsR8(ESMF_HConfigIterAsHConfig(hconfigIter), asOkay=asOkay, rc=rc)
+      valueR8 = ESMF_HConfigAsR8(hconfigIter, asOkay=asOkay, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       write (msgString, '("asOkay: ", l2, " valueR8: ", f10.6)') asOkay, valueR8
@@ -246,7 +246,7 @@ program ESMF_HConfigEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
       ! logical :: valueL
-      valueL = ESMF_HConfigAsLogical(ESMF_HConfigIterAsHConfig(hconfigIter), asOkay=asOkay, rc=rc)
+      valueL = ESMF_HConfigAsLogical(hconfigIter, asOkay=asOkay, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       write (msgString, '("asOkay: ", l2, " valueL:  ", l10)') asOkay, valueL

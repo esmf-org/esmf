@@ -529,7 +529,7 @@ program ESMF_HConfigUTest
         if (rc /= ESMF_SUCCESS) return
         if (flag) then
           ! as string
-          string = ESMF_HConfigAsString(ESMF_HConfigIterAsHConfig(hconfigIter), rc=rc)
+          string = ESMF_HConfigAsString(hconfigIter, rc=rc)
           if (rc /= ESMF_SUCCESS) return
           call ESMF_LogWrite("String: "//string, ESMF_LOGMSG_INFO, rc=rc)
           if (rc /= ESMF_SUCCESS) return
@@ -543,25 +543,25 @@ program ESMF_HConfigUTest
           call ESMF_HConfigDestroy(hconfig3, rc=rc)
           if (rc /= ESMF_SUCCESS) return
           ! as I4
-          valueI4 = ESMF_HConfigAsI4(ESMF_HConfigIterAsHConfig(hconfigIter), rc=rc)
+          valueI4 = ESMF_HConfigAsI4(hconfigIter, rc=rc)
           if (rc /= ESMF_SUCCESS) return
           write(msgString, *) "I4: ", valueI4
           call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
           if (rc /= ESMF_SUCCESS) return
           ! as I8
-          valueI8 = ESMF_HConfigAsI8(ESMF_HConfigIterAsHConfig(hconfigIter), rc=rc)
+          valueI8 = ESMF_HConfigAsI8(hconfigIter, rc=rc)
           if (rc /= ESMF_SUCCESS) return
           write(msgString, *) "I8: ", valueI8
           call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
           if (rc /= ESMF_SUCCESS) return
           ! as R4
-          valueR4 = ESMF_HConfigAsR4(ESMF_HConfigIterAsHConfig(hconfigIter), rc=rc)
+          valueR4 = ESMF_HConfigAsR4(hconfigIter, rc=rc)
           if (rc /= ESMF_SUCCESS) return
           write(msgString, *) "R4: ", valueR4
           call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
           if (rc /= ESMF_SUCCESS) return
           ! as R8
-          valueR8 = ESMF_HConfigAsR8(ESMF_HConfigIterAsHConfig(hconfigIter), rc=rc)
+          valueR8 = ESMF_HConfigAsR8(hconfigIter, rc=rc)
           if (rc /= ESMF_SUCCESS) return
           write(msgString, *) "R8: ", valueR8
           call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
@@ -613,7 +613,7 @@ program ESMF_HConfigUTest
             flag = ESMF_HConfigIsScalar(ESMF_HConfigIterAsHConfig(hconfigIter2), rc=rc)
             if (rc /= ESMF_SUCCESS) return
             if (flag) then
-              string = ESMF_HConfigAsString(ESMF_HConfigIterAsHConfig(hconfigIter2), rc=rc)
+              string = ESMF_HConfigAsString(hconfigIter2, rc=rc)
               if (rc /= ESMF_SUCCESS) return
               tag = ESMF_HConfigGetTag(ESMF_HConfigIterAsHConfig(hconfigIter2), rc=rc)
               if (rc /= ESMF_SUCCESS) return
@@ -631,7 +631,7 @@ program ESMF_HConfigUTest
                 flag = ESMF_HConfigIsScalar(ESMF_HConfigIterAsHConfig(hconfigIter3), rc=rc)
                 if (rc /= ESMF_SUCCESS) return
                 if (flag) then
-                  string = ESMF_HConfigAsString(ESMF_HConfigIterAsHConfig(hconfigIter3), rc=rc)
+                  string = ESMF_HConfigAsString(hconfigIter3, rc=rc)
                   if (rc /= ESMF_SUCCESS) return
                   tag = ESMF_HConfigGetTag(ESMF_HConfigIterAsHConfig(hconfigIter3), rc=rc)
                   if (rc /= ESMF_SUCCESS) return
