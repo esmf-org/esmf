@@ -534,7 +534,7 @@ program ESMF_HConfigUTest
           call ESMF_LogWrite("String: "//string, ESMF_LOGMSG_INFO, rc=rc)
           if (rc /= ESMF_SUCCESS) return
           ! as string through CreateAt()
-          hconfig3 = ESMF_HConfigCreateAt(ESMF_HConfigIterAsHConfig(hconfigIter), rc=rc)
+          hconfig3 = ESMF_HConfigCreateAt(hconfigIter, rc=rc)
           if (rc /= ESMF_SUCCESS) return
           string = ESMF_HConfigAsString(hconfig3, rc=rc)
           if (rc /= ESMF_SUCCESS) return

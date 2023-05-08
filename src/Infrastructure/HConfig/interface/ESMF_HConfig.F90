@@ -365,6 +365,11 @@ module ESMF_HConfigMod
     module procedure ESMF_HConfigCreateStringSeq
   end interface
 
+  interface ESMF_HConfigCreateAt
+    module procedure ESMF_HConfigCreateAt
+    module procedure ESMF_HConfigIterCreateAt
+  end interface
+
   interface ESMF_HConfigSet
     module procedure ESMF_HConfigSetHConfig
     module procedure ESMF_HConfigSetI4
@@ -7121,7 +7126,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
 !    <Type>,  intent(in)            :: content[(:)]
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    integer,                intent(out), optional :: rc
+!    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Create a new HConfig object from content of type <Type>. All <Type> options
@@ -7607,26 +7612,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigCreateAt()"
 !BOP
 ! !IROUTINE: ESMF_HConfigCreateAt - Return HConfig object at location
 
 ! !INTERFACE:
-  function ESMF_HConfigCreateAt(hconfig, keywordEnforcer, index, key, &
-    keyString, doc, rc)
+!  function ESMF_HConfigCreateAt(hconfig, keywordEnforcer, index, key, &
+!    keyString, doc, rc)
 !
 ! !RETURN VALUE:
-    type(ESMF_HConfig) :: ESMF_HConfigCreateAt
+!    type(ESMF_HConfig) :: ESMF_HConfigCreateAt
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    type(ESMF_HConfig), intent(in),  optional :: key
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    integer,            intent(out), optional :: rc
+!    type(ESMF_HConfig[Iter]), intent(in)      :: hconfig
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    integer,            intent(in),  optional :: index
+!    type(ESMF_HConfig), intent(in),  optional :: key
+!    character(*),       intent(in),  optional :: keyString
+!    integer,            intent(in),  optional :: doc
+!    integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Create a new HConfig object at the current iteration, or
@@ -7636,7 +7639,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfig} or {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with
 !     {\tt key} and {\tt keyString}.
@@ -7654,6 +7657,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigCreateAt()"
+
+  function ESMF_HConfigCreateAt(hconfig, keywordEnforcer, index, key, &
+    keyString, doc, rc)
+
+    type(ESMF_HConfig) :: ESMF_HConfigCreateAt
+
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    type(ESMF_HConfig), intent(in),  optional :: key
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hKey
 
@@ -7705,6 +7727,46 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_HConfigCreateAt)
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterCreateAt()"
+
+  function ESMF_HConfigIterCreateAt(hconfig, keywordEnforcer, index, key, &
+    keyString, doc, rc)
+
+    type(ESMF_HConfig) :: ESMF_HConfigIterCreateAt
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    type(ESMF_HConfig), intent(in),  optional :: key
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_HConfigIterCreateAt = ESMF_HConfigCreateAt(hconfigTemp, &
+      index=index, key=key, keyString=keyString, doc=doc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
