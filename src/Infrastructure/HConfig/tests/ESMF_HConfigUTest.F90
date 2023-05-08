@@ -519,7 +519,7 @@ program ESMF_HConfigUTest
 
       if (flag) then
         ! sequence iteration
-        size = ESMF_HConfigGetSize(ESMF_HConfigIterAsHConfig(hconfigIter), rc=rc)
+        size = ESMF_HConfigGetSize(hconfigIter, rc=rc)
         if (rc /= ESMF_SUCCESS) return
         write(msgString, *) "Size: ", size
         call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)

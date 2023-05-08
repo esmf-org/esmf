@@ -370,6 +370,11 @@ module ESMF_HConfigMod
     module procedure ESMF_HConfigIterCreateAt
   end interface
 
+  interface ESMF_HConfigGetSize
+    module procedure ESMF_HConfigGetSize
+    module procedure ESMF_HConfigIterGetSize
+  end interface
+
   interface ESMF_HConfigSet
     module procedure ESMF_HConfigSetHConfig
     module procedure ESMF_HConfigSetI4
@@ -8101,31 +8106,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigGetSize()"
 !BOP
 ! !IROUTINE: ESMF_HConfigGetSize - Get size of HConfig node
 
 ! !INTERFACE:
-  function ESMF_HConfigGetSize(hconfig, keywordEnforcer, index, keyString, doc, rc)
+!  function ESMF_HConfigGetSize(hconfig, keywordEnforcer, index, keyString, doc, rc)
 ! !RETURN VALUE:
-    integer :: ESMF_HConfigGetSize
+!    integer :: ESMF_HConfigGetSize
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    integer,            intent(out), optional :: rc
+!    type(ESMF_HConfig[Iter]), intent(in)      :: hconfig
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    integer,            intent(in),  optional :: index
+!    character(*),       intent(in),  optional :: keyString
+!    integer,            intent(in),  optional :: doc
+!    integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!   Return size of the {\tt hconfig} node.
+!   Return the number of elements in collection {\tt hconfig}.
 !
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfig} or {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -8138,6 +8141,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigGetSize()"
+
+  function ESMF_HConfigGetSize(hconfig, keywordEnforcer, index, keyString, doc, rc)
+
+    integer :: ESMF_HConfigGetSize
+
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
     integer               :: localrc                ! local return code
     integer               :: size
     type(ESMF_HConfig)    :: hconfigTemp
@@ -8172,6 +8192,44 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterGetSize()"
+
+  function ESMF_HConfigIterGetSize(hconfig, keywordEnforcer, index, keyString, doc, rc)
+
+    integer :: ESMF_HConfigIterGetSize
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_HConfigIterGetSize = ESMF_HConfigGetSize(hconfigTemp, &
+      index=index, keyString=keyString, doc=doc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
