@@ -10,25 +10,25 @@
 !
 !==============================================================================
 !
-#define ESMF_FILENAME "ESMF_GeomBase.F90"
+#define ESMF_FILENAME "ESMF_Geom.F90"
 !
-!     ESMF GeomBase Module
-      module ESMF_GeomBaseMod
+!     ESMF Geom Module
+      module ESMF_GeomMod
 !
 !==============================================================================
 !
-! This file contains the GeomBase class definition.
+! This file contains the Geom class definition.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
 #include "ESMF.h"
 !==============================================================================
 !BOPI
-! !MODULE: ESMF_GeomBaseMod - GeomBase class
+! !MODULE: ESMF_GeomMod - Geom class
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements the {\tt ESMF\_GeomBase} class.
+! The code in this file implements the {\tt ESMF\_Geom} class.
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -76,12 +76,12 @@
                       ESMF_GEOMTYPE_XGRID=ESMF_GeomType_Flag(4)
 
 !------------------------------------------------------------------------------
-! ! ESMF_GeomBaseClass
+! ! ESMF_GeomClass
 !
 !------------------------------------------------------------------------------
 
   ! F90 class type to hold pointer to object
-  type ESMF_GeomBaseClass
+  type ESMF_GeomClass
 #ifndef ESMF_NO_SEQUENCE
   sequence
 #endif
@@ -99,17 +99,17 @@
 
 
 !------------------------------------------------------------------------------
-! ! ESMF_GeomBase
+! ! ESMF_Geom
 !
 !------------------------------------------------------------------------------
 
   ! F90 class type to hold pointer to C++ object
-  type ESMF_GeomBase
+  type ESMF_Geom
 #ifndef ESMF_NO_SEQUENCE
   sequence
 #endif
 
-    type(ESMF_GeomBaseClass),pointer :: gbcp
+    type(ESMF_GeomClass),pointer :: gbcp
 
     ESMF_INIT_DECLARE
   end type
@@ -118,8 +118,8 @@
 !
 ! !PUBLIC TYPES:
 !
-public ESMF_GeomBase
-public ESMF_GeomBaseClass ! for internal use only
+public ESMF_Geom
+public ESMF_GeomClass ! for internal use only
 public ESMF_GeomType_Flag,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
                        ESMF_GEOMTYPE_GRID,  ESMF_GEOMTYPE_MESH, &
                        ESMF_GEOMTYPE_LOCSTREAM, ESMF_GEOMTYPE_XGRID
@@ -134,24 +134,24 @@ public ESMF_GeomType_Flag,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
   public operator(==)
   public operator(/=)
 
-  public ESMF_GeomBaseCreate
-  public ESMF_GeomBaseDestroy
+  public ESMF_GeomCreate
+  public ESMF_GeomDestroy
 
-  public ESMF_GeomBaseGet
-  public ESMF_GeomBaseGetPlocalDE
+  public ESMF_GeomGet
+  public ESMF_GeomGetPlocalDE
 
-  public ESMF_GeomBaseSerialize
-  public ESMF_GeomBaseDeserialize
+  public ESMF_GeomSerialize
+  public ESMF_GeomDeserialize
 
-  public ESMF_GeomBaseValidate
+  public ESMF_GeomValidate
 
-  public ESMF_GeomBaseGetArrayInfo
+  public ESMF_GeomGetArrayInfo
 
 
-!  public ESMF_GeomBaseGetMesh
+!  public ESMF_GeomGetMesh
 
 ! - ESMF-internal methods:
-  public ESMF_GeomBaseGetInit
+  public ESMF_GeomGetInit
 
 !EOPI
 
@@ -170,21 +170,21 @@ public ESMF_GeomType_Flag,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
-! !IROUTINE: ESMF_GeomBaseCreate -- Generic interface
+! !IROUTINE: ESMF_GeomCreate -- Generic interface
 
 ! !INTERFACE:
-interface ESMF_GeomBaseCreate
+interface ESMF_GeomCreate
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      module procedure ESMF_GeomBaseCreateGrid
-      module procedure ESMF_GeomBaseCreateMesh
-      module procedure ESMF_GeomBaseCreateLocStream
-      module procedure ESMF_GeomBaseCreateXGrid
+      module procedure ESMF_GeomCreateGrid
+      module procedure ESMF_GeomCreateMesh
+      module procedure ESMF_GeomCreateLocStream
+      module procedure ESMF_GeomCreateXGrid
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
-!  types of {\tt ESMF\_GeomBaseCreate} functions.
+!  types of {\tt ESMF\_GeomCreate} functions.
 !EOPI
 end interface
 
@@ -232,19 +232,19 @@ end interface
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GeomBaseGetArrayInfo"
+#define ESMF_METHOD "ESMF_GeomGetArrayInfo"
 
 !BOPI
-! !IROUTINE: ESMF_GeomBaseGetArrayInfo" - get information to make an Array from a GeomBase
+! !IROUTINE: ESMF_GeomGetArrayInfo" - get information to make an Array from a Geom
 
 ! !INTERFACE:
-      subroutine ESMF_GeomBaseGetArrayInfo(geombase, &
+      subroutine ESMF_GeomGetArrayInfo(geom, &
                            gridToFieldMap, ungriddedLBound, ungriddedUBound, &
                            distgrid, distgridToArrayMap, undistLBound, undistUBound,   &
                            rc)
 !
 ! !ARGUMENTS:
-       type(ESMF_GeomBase),   intent(in)            :: geombase
+       type(ESMF_Geom),   intent(in)            :: geom
        integer,               intent(in),  optional :: gridToFieldMap(:)
        integer,               intent(in),  optional :: ungriddedLBound(:)
        integer,               intent(in),  optional :: ungriddedUBound(:)
@@ -257,28 +257,28 @@ end interface
 !
 ! !DESCRIPTION:
 !
-! This subroutine gets information from a GeomBase which is useful in creating an
+! This subroutine gets information from a Geom which is useful in creating an
 ! Array. This subroutine takes as input {\tt gridToFieldMap} which gives for each
-! geombase object dimension which dimension in the eventual Array it should be
+! geom object dimension which dimension in the eventual Array it should be
 ! mapped to. It also takes {\tt ungriddedLBound} and {\tt ungriddedUBound} which
-! describes the dimensions of the Array not associated with the geombase object.
+! describes the dimensions of the Array not associated with the geom object.
 ! From these it produces a mapping from the distgrid to the Array, the undistributed
 ! bounds of the Array in the correct order. (For everything besides {\tt Grid}  the
 ! gridToFieldMap and distgridToArrayMap will be single element
-! arrays describing which dimension in the Array the geombase object (e.g. Mesh)
+! arrays describing which dimension in the Array the geom object (e.g. Mesh)
 ! is mapped to.
 !
 ! The arguments are:
 ! \begin{description}
-!\item[{geombase}]
-!     The geombase to get the information from to create the Array.
+!\item[{geom}]
+!     The geom to get the information from to create the Array.
 !\item[{[distgrid]}]
 !     The distgrid to create the Array on
 !\item[{[gridToFieldMap]}]
 !     Indicates where each grid dimension goes in the newly created Array.
-!     {\tt The array gridToFieldMap} should be at least of size equal to the geombase object's
+!     {\tt The array gridToFieldMap} should be at least of size equal to the geom object's
 !     Array dimension (e.g. Mesh = 1)
-!     If not set defaults to (1,2,3,....,geombase objects dim).
+!     If not set defaults to (1,2,3,....,geom objects dim).
 !\item[{[ungriddedLBound]}]
 !     The lower bounds of the non-grid Array dimensions.
 !\item[{[ungriddedUBound]}]
@@ -296,17 +296,17 @@ end interface
 !
 !EOPI
     integer :: localrc
-    type(ESMF_GeomBaseClass),pointer :: gbcp
+    type(ESMF_GeomClass),pointer :: gbcp
     integer :: i
 
     ! Initialize return code; assume failure until success is certain
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit, geombase, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomGetInit, geom, rc)
 
-    ! Get GeomBaseClass
-    gbcp=>geombase%gbcp
+    ! Get GeomClass
+    gbcp=>geom%gbcp
 
     ! Get info depending on type
     select case(gbcp%type%type)
@@ -416,112 +416,125 @@ end interface
     ! Set return value
     if (present(rc)) rc = ESMF_SUCCESS
 
-    end  subroutine ESMF_GeomBaseGetArrayInfo
+    end  subroutine ESMF_GeomGetArrayInfo
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GeomBaseCreate"
-!BOPI
-! !IROUTINE: ESMF_GeomBaseCreate - Create a GeomBase from a Grid
+#define ESMF_METHOD "ESMF_GeomCreate"
+!BOP
+! !IROUTINE: ESMF_GeomCreate - Create a Geom from a Grid
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_GeomBaseCreate()
-      function ESMF_GeomBaseCreateGrid(grid,staggerloc, rc)
+  ! Private name; call using ESMF_GeomCreate()
+      function ESMF_GeomCreateGrid(grid,staggerloc, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_GeomBase) :: ESMF_GeomBaseCreateGrid
+      type(ESMF_Geom) :: ESMF_GeomCreateGrid
 !
 ! !ARGUMENTS:
-       type(ESMF_Grid),       intent(in)              :: grid
-       type(ESMF_StaggerLoc), intent(in)              :: staggerloc
-       integer,               intent(out),  optional  :: rc
+       type(ESMF_Grid),       intent(in)             :: grid
+       type(ESMF_StaggerLoc), intent(in), optional   :: staggerloc
+       integer,               intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
-! Create an {\tt ESMF\_GeomBase} object from an {\tt ESMF\_Grid} object.
-! This will be overloaded for each type of object a GeomBase can represent.
+! Create an {\tt ESMF\_Geom} object from an {\tt ESMF\_Grid} object.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[grid]
-!      {\tt ESMF\_Grid} object to create the Grid Base from.
-! \item[staggerloc]
-!       StaggerLoc on the Grid to create the Grid Base object on.
+!      {\tt ESMF\_Grid} object from which to create the Geom.
+! \item [{[staggerloc]}]
+!       Stagger location of data in grid cells.  For valid
+!       predefined values see section \ref{const:staggerloc}.
+!       If not specified, defaults to {\tt ESMF\_STAGGERLOC\_CENTER}.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-  !
-!EOPI
-    type(ESMF_GeomBaseClass),pointer :: gbcp
+!
+!EOP
+    type(ESMF_GeomClass),pointer :: gbcp
+    type(ESMF_StaggerLoc)  :: localStaggerLoc
     integer :: localrc ! local error status
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
+       
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
 
+    ! Set default staggerloc
+    if (present(staggerloc)) then   
+       localStaggerloc=staggerloc
+    else
+       localStaggerLoc = ESMF_STAGGERLOC_CENTER
+    endif
+
+
     ! initialize pointers
     nullify(gbcp)
-    nullify( ESMF_GeomBaseCreateGrid%gbcp)
+    nullify(ESMF_GeomCreateGrid%gbcp)
 
-    ! allocate GeomBase type
+    ! allocate Geom type
     allocate(gbcp, stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, msg="Allocating GeomBase type object", &
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating Geom type object", &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Set values in GeomBase
+    ! Set values in Geom
     gbcp%type = ESMF_GEOMTYPE_GRID
     gbcp%grid = grid
-    gbcp%staggerloc = staggerloc
+    gbcp%staggerloc = localStaggerloc
 
-    ! Set GeomBase Type into GeomBase
-     ESMF_GeomBaseCreateGrid%gbcp=>gbcp
+    ! Set Geom Type into Geom
+     ESMF_GeomCreateGrid%gbcp=>gbcp
 
     ! Set init status
-    ESMF_INIT_SET_CREATED(ESMF_GeomBaseCreateGrid)
+    ESMF_INIT_SET_CREATED(ESMF_GeomCreateGrid)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-    end function ESMF_GeomBaseCreateGrid
+    end function ESMF_GeomCreateGrid
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GeomBaseCreate"
-!BOPI
-! !IROUTINE: ESMF_GeomBaseCreate - Create a GeomBase from a Mesh
+#define ESMF_METHOD "ESMF_GeomCreate"
+!BOP
+! !IROUTINE: ESMF_GeomCreate - Create a Geom from a Mesh
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_GeomBaseCreate()
-      function ESMF_GeomBaseCreateMesh(mesh, indexflag, loc, rc)
+  ! Private name; call using ESMF_GeomCreate()
+      function ESMF_GeomCreateMesh(mesh, meshLoc, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_GeomBase) :: ESMF_GeomBaseCreateMesh
+      type(ESMF_Geom) :: ESMF_GeomCreateMesh
 !
 ! !ARGUMENTS:
        type(ESMF_Mesh),       intent(in)              :: mesh
-       type(ESMF_Index_Flag), intent(in),  optional   :: indexflag
-       type(ESMF_MeshLoc),    intent(in),  optional   :: loc
+       type(ESMF_MeshLoc),    intent(in),  optional   :: meshLoc
        integer,               intent(out), optional   :: rc
 !
 ! !DESCRIPTION:
-! Create an {\tt ESMF\_GeomBase} object from an {\tt ESMF\_Mesh} object.
-! This will be overloaded for each type of object a GeomBase can represent.
+! Create an {\tt ESMF\_Geom} object from an {\tt ESMF\_Mesh} object.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[mesh]
-!      {\tt ESMF\_Mesh} object to create the Mesh Base from.
+!      {\tt ESMF\_Mesh} object from which to create the Geom.
+! \item [{[meshloc]}]
+!       \begin{sloppypar}
+!       The part of the Mesh on which to build the Field. For valid
+!       predefined values see Section~\ref{const:meshloc}.
+!       If not set, defaults to {\tt ESMF\_MESHLOC\_NODE}.
+!       \end{sloppypar}
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOPI
-    type(ESMF_GeomBaseClass),pointer :: gbcp
+!EOP
+    type(ESMF_GeomClass),pointer :: gbcp
     integer                          :: localrc ! local error status
-    type(ESMF_MeshLoc)               :: localLoc
-    type(ESMF_Index_Flag)            :: loc_indexflag
+    type(ESMF_MeshLoc)               :: localMeshLoc
     type(ESMF_DistGrid)              :: distgrid
     logical                          :: isPresent
     type(ESMF_Pointer)               :: dgThis
@@ -535,133 +548,69 @@ end interface
 
     ! initialize pointers
     nullify(gbcp)
-    nullify( ESMF_GeomBaseCreateMesh%gbcp)
+    nullify( ESMF_GeomCreateMesh%gbcp)
 
-    ! allocate GeomBase type
+    ! allocate Geom type
     allocate(gbcp, stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, msg="Allocating GeomBase type object", &
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating Geom type object", &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set default
-    if (present(loc)) then
-       localLoc=loc
+    if (present(meshLoc)) then
+       localMeshLoc=meshLoc
     else
-       localLoc=ESMF_MESHLOC_NODE
+       localMeshLoc=ESMF_MESHLOC_NODE
     endif
 
-!TODO: The following block for checking the indexflag is commented out for two
-!TODO: reasons:
-!TODO: (1) During the NUOPC Mesh transfer protocol, the acceptor side is allowed
-!TODO:     to use MeshEmptyCreate() for the new (redistributed) Mesh on either
-!TODO:     the nodal, element, or both DistGrids. Eventually the 
-!TODO:     MeshEmptyComplete() will autogenerate "the other" DistGrid as needed,
-!TODO:     but it won't be available for the immediate FieldEmptySet() that is
-!TODO:     used for the tranfer protocol.
-!TODO: (2) Fundamentally, passing the indexflag from the field down into the
-!TODO:     GeomBaseCreate() seems problematic. It is not required that the 
-!TODO:     GeomBase have the same indexflag as the Field. Just that it can
-!TODO:     support the Field indexflag. E.g. a GeomObject with ESMF_INDEX_GLOBAL
-!TODO:     supports Fields with any indexflag.
-#if 0
-    if(localLoc == ESMF_MESHLOC_NODE) then
-      call ESMF_MeshGet(mesh, nodalDistgridIsPresent=isPresent, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if(.not. isPresent) then
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
-          msg="- mesh does not have a distgrid for user supplied nodal meshloc", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-      call ESMF_MeshGet(mesh, nodalDistgrid=distgrid, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else if(localLoc == ESMF_MESHLOC_ELEMENT) then
-      call ESMF_MeshGet(mesh, elementDistgridIsPresent=isPresent, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if(.not. isPresent) then
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
-          msg="- mesh does not have a distgrid for user supplied element meshloc", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-      call ESMF_MeshGet(mesh, elementDistgrid=distgrid, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! See if there is a valid DistGrid object on this PET - might not be during
-    ! transfer.
-    call ESMF_DistGridGetThis(distgrid, dgThis, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (dgThis/=ESMF_NULL_POINTER) then
-      ! for valid DistGrid object ensure that indexflag matches
-      call ESMF_DistGridGet(distgrid, indexflag=loc_indexflag, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if(present(indexflag)) then
-        if(indexflag /= loc_indexflag) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
-            msg="- user supplied indexflag does not match indexflag in Mesh/Distgrid ", &
-            ESMF_CONTEXT, rcToReturn=rc)
-          return
-        endif
-      endif
-    endif
-#endif
 
     ! TODO: properly handle the indexflag information for Mesh
-    ! Set values in GeomBase
+    ! Set values in Geom
     gbcp%type = ESMF_GEOMTYPE_MESH
     gbcp%mesh = mesh
-    gbcp%meshloc = localLoc
+    gbcp%meshloc = localMeshLoc
 
-    ! Set GeomBase Type into GeomBase
-     ESMF_GeomBaseCreateMesh%gbcp=>gbcp
+    ! Set Geom Type into Geom
+     ESMF_GeomCreateMesh%gbcp=>gbcp
 
     ! Set init status
-    ESMF_INIT_SET_CREATED(ESMF_GeomBaseCreateMesh)
+    ESMF_INIT_SET_CREATED(ESMF_GeomCreateMesh)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-    end function ESMF_GeomBaseCreateMesh
+    end function ESMF_GeomCreateMesh
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GeomBaseCreate"
-!BOPI
-! !IROUTINE: ESMF_GeomBaseCreate - Create a GeomBase from a LocStream
+#define ESMF_METHOD "ESMF_GeomCreate"
+!BOP
+! !IROUTINE: ESMF_GeomCreate - Create a Geom from a LocStream
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_GeomBaseCreate()
-      function ESMF_GeomBaseCreateLocStream(locstream, rc)
+  ! Private name; call using ESMF_GeomCreate()
+      function ESMF_GeomCreateLocStream(locstream, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_GeomBase) :: ESMF_GeomBaseCreateLocStream
+      type(ESMF_Geom) :: ESMF_GeomCreateLocStream
 !
 ! !ARGUMENTS:
        type(ESMF_LocStream),  intent(in)              :: locstream
        integer,               intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-! Create an {\tt ESMF\_GeomBase} object from an {\tt ESMF\_LocStream} object.
-! This will be overloaded for each type of object a GeomBase can represent.
+! Create an {\tt ESMF\_Geom} object from an {\tt ESMF\_LocStream} object.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[locstream]
-!      {\tt ESMF\_LocStream} object to create the GeomBase from.
+!      {\tt ESMF\_LocStream} object from which to create the Geom.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOPI
-    type(ESMF_GeomBaseClass),pointer :: gbcp
+!EOP
+    type(ESMF_GeomClass),pointer :: gbcp
     integer :: localrc ! local error status
 
     ! Initialize return code; assume failure until success is certain
@@ -673,67 +622,70 @@ end interface
 
     ! initialize pointers
     nullify(gbcp)
-    nullify( ESMF_GeomBaseCreateLocStream%gbcp)
+    nullify( ESMF_GeomCreateLocStream%gbcp)
 
-    ! allocate GeomBase type
+    ! allocate Geom type
     allocate(gbcp, stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, msg="Allocating GeomBase type object", &
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating Geom type object", &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Set values in GeomBase
+    ! Set values in Geom
     gbcp%type = ESMF_GEOMTYPE_LOCSTREAM
     gbcp%locstream = locstream
 
-    ! Set GeomBase Type into GeomBase
-     ESMF_GeomBaseCreateLocStream%gbcp=>gbcp
+    ! Set Geom Type into Geom
+     ESMF_GeomCreateLocStream%gbcp=>gbcp
 
     ! Set init status
-    ESMF_INIT_SET_CREATED(ESMF_GeomBaseCreateLocStream)
+    ESMF_INIT_SET_CREATED(ESMF_GeomCreateLocStream)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-    end function ESMF_GeomBaseCreateLocStream
+    end function ESMF_GeomCreateLocStream
 
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GeomBaseCreate"
-!BOPI
-! !IROUTINE: ESMF_GeomBaseCreate - Create a GeomBase from an XGrid
+#define ESMF_METHOD "ESMF_GeomCreate"
+!BOP
+! !IROUTINE: ESMF_GeomCreate - Create a Geom from an XGrid
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_GeomBaseCreate()
-      function ESMF_GeomBaseCreateXGrid(xgrid, xgridside, gridIndex, rc)
+  ! Private name; call using ESMF_GeomCreate()
+      function ESMF_GeomCreateXGrid(xgrid, xgridside, gridIndex, rc)
 !
  ! !RETURN VALUE:
-      type(ESMF_GeomBase) :: ESMF_GeomBaseCreateXGrid
+      type(ESMF_Geom) :: ESMF_GeomCreateXGrid
 !
 ! !ARGUMENTS:
-       type(ESMF_XGrid),     intent(in)            :: xgrid
-       type(ESMF_XGridSide_Flag), intent(in), optional  :: XGridSide
-       integer,              intent(in), optional  :: gridIndex
-       integer,              intent(out),optional  :: rc
+       type(ESMF_XGrid),     intent(in)                :: xgrid
+       type(ESMF_XGridSide_Flag), intent(in), optional :: xgridSide
+       integer,              intent(in), optional      :: gridIndex
+       integer,              intent(out),optional      :: rc
 !
 ! !DESCRIPTION:
-! Create an {\tt ESMF\_GeomBase} object from an {\tt ESMF\_XGrid} object.
-! This will be overloaded for each type of object a GeomBase can represent.
+! Create an {\tt ESMF\_Geom} object from an {\tt ESMF\_XGrid} object.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[xgrid]
-!      {\tt ESMF\_XGrid} object to create the GeomBase from.
-! \item[{[XGridSide]}]
-!      Which side to create the Field on.
-! \item[{[gridIndex]}]
-!      Index to specify which distgrid when on side A or side B
+!      {\tt ESMF\_XGrid} object from which to create the Geom.
+! \item[{[xgridSide]}]
+!       Which side of the XGrid to create the Field on (either ESMF\_XGRIDSIDE\_A,
+!       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED). If not specified, then
+!       defaults to ESMF\_XGRIDSIDE\_BALANCED.
+! \item [{[gridindex]}]
+!       If xgridSide is  ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then
+!       this index tells which Grid or Mesh on that side is being
+!       referred to. If not provided, defaults to 1.      
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOPI
-    type(ESMF_GeomBaseClass),pointer :: gbcp
+!EOP
+    type(ESMF_GeomClass),pointer :: gbcp
     integer :: localrc ! local error status
     integer :: localGridIndex
     type(ESMF_XGridSide_Flag) :: localXGridSide
@@ -760,56 +712,57 @@ end interface
 
     ! initialize pointers
     nullify(gbcp)
-    nullify( ESMF_GeomBaseCreateXGrid%gbcp)
+    nullify( ESMF_GeomCreateXGrid%gbcp)
 
-    ! allocate GeomBase type
+    ! allocate Geom type
      allocate(gbcp, stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, msg="Allocating GeomBase type object", &
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating Geom type object", &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Set values in GeomBase
+    ! Set values in Geom
     gbcp%type = ESMF_GEOMTYPE_XGRID
     gbcp%xgrid = xgrid
     gbcp%xgridside = localXGridSide
     gbcp%xgridIndex = localGridIndex
 
-    ! Set GeomBase Type into GeomBase
-    ESMF_GeomBaseCreateXGrid%gbcp=>gbcp
+    ! Set Geom Type into Geom
+    ESMF_GeomCreateXGrid%gbcp=>gbcp
 
     ! Set init status
-    ESMF_INIT_SET_CREATED(ESMF_GeomBaseCreateXGrid)
+    ESMF_INIT_SET_CREATED(ESMF_GeomCreateXGrid)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-    end function ESMF_GeomBaseCreateXGrid
+    end function ESMF_GeomCreateXGrid
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GeomBaseDestroy"
-!BOPI
-! !IROUTINE: ESMF_GeomBaseDestroy - Release resources associated with a GeomBase
+#define ESMF_METHOD "ESMF_GeomDestroy"
+!BOP
+! !IROUTINE: ESMF_GeomDestroy - Release resources associated with a Geom
 
 ! !INTERFACE:
-      subroutine ESMF_GeomBaseDestroy(geombase, rc)
+      subroutine ESMF_GeomDestroy(geom, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GeomBase)            :: geombase
+      type(ESMF_Geom)            :: geom
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Destroys an {\tt ESMF\_GeomBase} object. This call does not destroy wrapped
-!   Grid, LocStream, or other Grid objects.
+!   Destroys an {\tt ESMF\_Geom} object. This call does not destroy wrapped
+!   Grid, LocStream, or other objects.
 !
 !     The arguments are:
-!     \begin{description}
-!     \item[geombase]
-!          {\tt ESMF\_GeomBase} to be destroyed.
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+! \begin{description}
+! \item[geom]
+!   {\tt ESMF\_Geom} to be destroyed.
+! \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
 !
-!EOPI
+!EOP
 
     ! Initialize return code; assume failure until success is certain
     integer                 :: localrc ! local error status
@@ -817,39 +770,40 @@ end interface
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_GeomBaseGetInit, geombase, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GeomGetInit, geom, rc)
 
-    ! deallocate GeomBase type
-    deallocate(geombase%gbcp, stat=localrc)
+    ! deallocate Geom type
+    deallocate(geom%gbcp, stat=localrc)
     if (ESMF_LogFoundDeallocError(localrc, &
-      msg="Deallocating GeomBase type object", &
+      msg="Deallocating Geom type object", &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set init code
-    ESMF_INIT_SET_DELETED(geombase)
+    ESMF_INIT_SET_DELETED(geom)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
- end subroutine ESMF_GeomBaseDestroy
+ end subroutine ESMF_GeomDestroy
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GeomBaseGet"
-!BOPI
-! !IROUTINE: ESMF_GeomBaseGet - Get information about a Grid
+#define ESMF_METHOD "ESMF_GeomGet"
+!BOP
+! !IROUTINE: ESMF_GeomGet - Get information about a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GeomBaseGet(geombase, &
-           dimCount, localDECount, distgrid, &
+      subroutine ESMF_GeomGet(geom, &
+          dimCount, rank, localDECount, distgrid, &
           distgridToGridMap, indexFlag, geomtype, &
           grid, staggerloc, mesh, meshloc, locstream, &
           xgrid, xgridside, gridIndex,rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GeomBase),   intent(in)            :: geombase
+      type(ESMF_Geom),   intent(in)            :: geom
       integer,               intent(out), optional :: dimCount
+      integer,               intent(out), optional :: rank
       integer,               intent(out), optional :: localDECount
       type(ESMF_DistGrid),   intent(out), optional :: distgrid
       integer,               intent(out), optional :: distgridToGridMap(:)
@@ -867,48 +821,53 @@ end interface
 
 !
 ! !DESCRIPTION:
-!    Gets various types of information about a grid.
+!    Get various types of information about a Geom.
 !
 !The arguments are:
 !\begin{description}
-!\item[{geombase}]
-!   GeomBase to get the information from.
+!\item[{geom}]
+!   Geom to get the information from.
 !\item[{[dimCount]}]
-!   DimCount of the GeomBase object (e.g. the number of dimensions in the Array
-!   it will be mapped to (e.g. Mesh=1)).
+!   The full number of dimensions of the Distgrid object underneath the Geom object.
+! \item[{[rank]}]
+!   The count of the memory dimensions in this Geom object.
+!   Typically it's the same as dimCount.
+!   However, in some cases (e.g. arbitrarily distributed grids) it can be different.
 !\item[{[localDECount]}]
-!   The number of DEs in this grid on this PET.
+!   The number of DEs in this Geom object on this PET.
 !\item[{[distgrid]}]
-!   The structure describing the distribution of the grid.
+!   The structure describing the distribution of the Geom object.
 !\item[{[distgridToGridMap]}]
 !   List that has as many elements as the distgrid dimCount. This array describes
-!   mapping between the grids dimensions and the distgrid.
+!   mapping between the Geom object's dimensions and its Distgrid.
 ! \item[{[indexflag]}]
 !    Flag that indicates how the DE-local indices are to be defined.
-! \item[{[geomtype]}]
-!    Flag that indicates what type of object this geombase holds.
-!    Can be {\tt ESMF_GEOMTYPE_GRID}, {\tt ESMF_GEOMTYPE_MESH},...
+! \item [{[geomtype]}]
+!    The type of geometry on which the Field is built. See
+!    section~\ref{const:geomtype} for the range of values.
 ! \item[{[grid]}]
-!    The Grid object that this geombase object holds.
+!    If the Geom object holds a Grid, then this will pass out that Grid object.
 ! \item[{[staggerloc]}]
-!    The Grid stagger location.
+!    If the Geom object holds a Grid, then this will pass out the staggerloc.
 ! \item[{[mesh]}]
-!    The Mesh object that this geombase object holds.
+!    If the Geom object holds a Mesh, then this will pass out that Mesh object.
 ! \item[{[meshloc]}]
-!    The part of the mesh that the field is on
+!    If the Geom object holds a Mesh, then this will pass out the meshloc.
 ! \item[{[locstream]}]
-!    The LocStream object that this geombase object holds.
- ! \item[{[XGridSide]}]
-!      The xgrid side that the Fiels was created on.
- ! \item[{[gridIndex]}]
-!      The Xgrid index to specify which distgrid the Field was created on when on side A or side B.
+!    If the Geom object holds a LocStream, then this will pass out that LocStream object.
+! \item[{[xgrid]}]
+!    If the Geom object holds an XGrid, then this will pass out that XGrid object.
+! \item[{[xgridSide]}]
+!    If the Geom object holds an XGrid, then this will pass out the XGrid side.
+! \item[{[gridIndex]}]
+!    If the Geom object holds an XGrid, then this will pass out the gridIndex. 
 !\item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
 !
-!EOPI
-    type(ESMF_GeomBaseClass),pointer :: gbcp
-    type(ESMF_XGridGeomBase)         :: xgrid_geombase
+!EOP
+    type(ESMF_GeomClass),pointer :: gbcp
+    type(ESMF_XGridGeomBase)         :: xgrid_geom
     type(ESMF_Distgrid)              :: localDistgrid
     type(ESMF_DELayout)              :: localDelayout
     integer                          :: localrc
@@ -920,10 +879,10 @@ end interface
 
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit, geombase, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomGetInit, geom, rc)
 
-    ! Get GeomBaseClass
-    gbcp=>geombase%gbcp
+    ! Get GeomClass
+    gbcp=>geom%gbcp
 
     ! get type
     if (present(geomtype)) then
@@ -998,8 +957,9 @@ end interface
        endif
     endif
 
-    if (present(dimCount).or.present(localDECount).or.present(distgrid).or. &
-      present(distgridToGridMap).or.present(indexflag)) then
+    if (present(dimCount).or. present(rank).or. &
+         present(localDECount).or.present(distgrid).or. &
+         present(distgridToGridMap).or.present(indexflag)) then
 
       ! Get info depending on type
       select case(gbcp%type%type)
@@ -1007,7 +967,7 @@ end interface
               call ESMF_GridGet(grid=gbcp%grid,  &
                         dimCount=dimCount,  localDECount=localDECount, &
                         distgridToGridMap=distgridToGridMap, &
-                        indexflag=indexFlag, rc=localrc)
+                        indexflag=indexFlag, rank=rank, rc=localrc)
               if (ESMF_LogFoundError(localrc, &
                                    ESMF_ERR_PASSTHRU, &
                                    ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1047,6 +1007,16 @@ end interface
                     ESMF_CONTEXT, rcToReturn=rc)) return
             endif
 
+
+            if (present(rank)) then
+               call ESMF_DistGridGet(localDistgrid, &
+                    dimCount=rank, rc=localrc)
+               if (ESMF_LogFoundError(localrc, &
+                    ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
+
+            
             if (present(localDECount)) then
                call ESMF_DistGridGet(localDistgrid, &
                     delayout=localDeLayout, rc=localrc)
@@ -1092,7 +1062,9 @@ end interface
 
 
          case (ESMF_GEOMTYPE_LOCSTREAM%type) ! LocStream
-              if (present(dimCount)) dimCount = 1
+            if (present(dimCount)) dimCount = 1
+            if (present(rank)) rank = 1
+            
               if (present(distgridToGridMap)) distgridToGridMap = 1
               call ESMF_LocStreamGet(gbcp%locstream, distgrid=distgrid, &
                      localDECount=localDECount, indexflag=indexflag, rc=localrc)
@@ -1103,9 +1075,10 @@ end interface
          case (ESMF_GEOMTYPE_XGRID%type) ! XGrid
 
            if(gbcp%xgridside == ESMF_XGRIDSIDE_BALANCED) then
-             if (present(dimCount)) dimCount = 1
-             if (present(distgridToGridMap)) distgridToGridMap = 1
-             if (present(localDECount)) then
+              if (present(dimCount)) dimCount = 1
+              if (present(rank)) rank = 1
+              if (present(distgridToGridMap)) distgridToGridMap = 1
+              if (present(localDECount)) then
                  call ESMF_DistGridGet(gbcp%xgrid%xgtypep%distgridM, delayout=localdelayout, rc=localrc)
                  if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1116,12 +1089,12 @@ end interface
                                   ESMF_CONTEXT, rcToReturn=rc)) return
              endif
            else
-             call ESMF_XGridGet(gbcp%xgrid, xgrid_geombase, xgridSide=gbcp%xgridSide, &
+             call ESMF_XGridGet(gbcp%xgrid, xgrid_geom, xgridSide=gbcp%xgridSide, &
                                 gridindex=gbcp%xgridindex, rc=localrc)
              if (ESMF_LogFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
-             call ESMF_XGridGeomBaseGet(xgrid_geombase, &
+             call ESMF_XGridGeomBaseGet(xgrid_geom, &
                 dimCount=dimCount, localDeCount=localDECount, distgrid=distgrid, &
                 distgridToGridMap=distgridToGridMap, indexFlag=indexFlag, &
                 grid=grid, staggerloc=staggerloc, mesh=mesh, meshloc=meshloc, &
@@ -1129,6 +1102,15 @@ end interface
              if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+             ! For XGrid rank=dimCount, but we need to call in separately because
+             ! dimCount keyword is used above
+             if (present(rank)) then
+                call ESMF_XGridGeomBaseGet(xgrid_geom, dimCount=rank, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                     ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+             endif             
            endif
 
            ! Get distgrid
@@ -1155,21 +1137,21 @@ end interface
     ! Set return value
     if (present(rc)) rc = ESMF_SUCCESS
 
-end subroutine ESMF_GeomBaseGet
+end subroutine ESMF_GeomGet
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GeomBaseGetPLocalDe"
+#define ESMF_METHOD "ESMF_GeomGetPLocalDe"
 !BOPI
-! !IROUTINE: ESMF_GeomBaseGetPLocalDE - Get information about a particular DE
+! !IROUTINE: ESMF_GeomGetPLocalDE - Get information about a particular DE
 
 ! !INTERFACE:
-      subroutine ESMF_GeomBaseGetPLocalDe(geombase, localDe, &
+      subroutine ESMF_GeomGetPLocalDe(geom, localDe, &
           exclusiveLBound, exclusiveUBound, exclusiveCount,  rc)
 
 !
 ! !ARGUMENTS:
-      type(ESMF_GeomBase),        intent(in)            :: geombase
+      type(ESMF_Geom),        intent(in)            :: geom
       integer,                intent(in)            :: localDe
        integer,                intent(out), optional :: exclusiveLBound(:)
       integer,                intent(out), optional :: exclusiveUBound(:)
@@ -1182,7 +1164,7 @@ end subroutine ESMF_GeomBaseGet
 !
 !The arguments are:
 !\begin{description}
-!\item[{geombase}]
+!\item[{geom}]
 !    Grid Base to get the information from.
 !\item[{[localDe]}]
 !     The local DE from which to get the information.
@@ -1208,17 +1190,17 @@ end subroutine ESMF_GeomBaseGet
 !
 !EOPI
     integer :: localrc
-    type(ESMF_GeomBaseClass),pointer :: gbcp
+    type(ESMF_GeomClass),pointer :: gbcp
     integer :: cl,cu,cc,el,eu,ec
 
     ! Initialize return code; assume failure until success is certain
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit, geombase, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomGetInit, geom, rc)
 
-    ! Get GeomBaseClass
-    gbcp=>geombase%gbcp
+    ! Get GeomClass
+    gbcp=>geom%gbcp
 
     ! Get info depending on type
     select case(gbcp%type%type)
@@ -1315,7 +1297,7 @@ end subroutine ESMF_GeomBaseGet
     ! Set return value
     if (present(rc)) rc = ESMF_SUCCESS
 
- end subroutine ESMF_GeomBaseGetPLocalDe
+ end subroutine ESMF_GeomGetPLocalDe
 
 ! -----------------------------------------------------------------------------
 !
@@ -1325,18 +1307,18 @@ end subroutine ESMF_GeomBaseGet
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GeomBaseSerialize"
+#define ESMF_METHOD "ESMF_GeomSerialize"
 
 !BOPI
-! !IROUTINE: ESMF_GeomBaseSerialize - Serialize geombase info into a byte stream
+! !IROUTINE: ESMF_GeomSerialize - Serialize geom info into a byte stream
 !
 ! !INTERFACE:
-      subroutine ESMF_GeomBaseSerialize(geombase, buffer, length, offset, &
+      subroutine ESMF_GeomSerialize(geom, buffer, length, offset, &
                                         attreconflag, inquireflag, skipGeomObj, &
                                         rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GeomBase), intent(inout) :: geombase
+      type(ESMF_Geom), intent(inout) :: geom
       character, pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
@@ -1346,14 +1328,14 @@ end subroutine ESMF_GeomBaseGet
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Takes an {\tt ESMF\_GeomBase} object and adds all the information needed
+!      Takes an {\tt ESMF\_Geom} object and adds all the information needed
 !      to  recreate the object based on this information.
 !      Expected to be used by {\tt ESMF\_StateReconcile()}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [geombase]
-!           {\tt ESMF\_GeomBase} object to be serialized.
+!     \item [geom]
+!           {\tt ESMF\_Geom} object to be serialized.
 !     \item [buffer]
 !           Data buffer which will hold the serialized information.
 !     \item [length]
@@ -1377,7 +1359,7 @@ end subroutine ESMF_GeomBaseGet
 !     \end{description}
 !
 !EOPI
-    type(ESMF_GeomBaseClass),pointer :: gbcp
+    type(ESMF_GeomClass),pointer :: gbcp
     integer :: localrc
     type(ESMF_AttReconcileFlag) :: lattreconflag
     type(ESMF_InquireFlag) :: linquireflag
@@ -1392,7 +1374,7 @@ end subroutine ESMF_GeomBaseGet
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit, geombase, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomGetInit, geom, rc)
 
     ! deal with optional attreconflag and inquireflag
     if (present(attreconflag)) then
@@ -1415,12 +1397,12 @@ end subroutine ESMF_GeomBaseGet
 
     ! ----------
 
-    ! Get GeomBaseClass
-    gbcp=>geombase%gbcp
+    ! Get GeomClass
+    gbcp=>geom%gbcp
 
-    ! serialize GeomBase info
+    ! serialize Geom info
 
-    call c_ESMC_GeomBaseSerialize(gbcp%type%type, &
+    call c_ESMC_GeomSerialize(gbcp%type%type, &
                                   gbcp%staggerloc%staggerloc, &
                                   gbcp%meshloc%meshloc, &
                                   gbcp%xgridside, &
@@ -1438,7 +1420,7 @@ end subroutine ESMF_GeomBaseGet
     offset = offset + 4
     ! print *, ESMF_METHOD, ': offset at start of Geom object =', offset
 
-    ! Do nothing with the GeomBase's attached geometry object if we are skipping
+    ! Do nothing with the Geom's attached geometry object if we are skipping
     if (.not. local_skipGeomObj) then
       ! Get info depending on type
       select case(gbcp%type%type)
@@ -1495,21 +1477,21 @@ end subroutine ESMF_GeomBaseGet
     ! Set return value
     if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_GeomBaseSerialize
+      end subroutine ESMF_GeomSerialize
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GeomBaseDeserialize"
+#define ESMF_METHOD "ESMF_GeomDeserialize"
 
 !BOPI
-! !IROUTINE: ESMF_GeomBaseDeserialize - Deserialize a byte stream into a GeomBase
+! !IROUTINE: ESMF_GeomDeserialize - Deserialize a byte stream into a Geom
 !
 ! !INTERFACE:
-      function ESMF_GeomBaseDeserialize(buffer, offset, attreconflag, skipGeomObj, &
+      function ESMF_GeomDeserialize(buffer, offset, attreconflag, skipGeomObj, &
                                         rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_GeomBase) :: ESMF_GeomBaseDeserialize
+      type(ESMF_Geom) :: ESMF_GeomDeserialize
 !
 ! !ARGUMENTS:
       character, pointer, dimension(:) :: buffer
@@ -1542,7 +1524,7 @@ end subroutine ESMF_GeomBaseGet
 !     \end{description}
 !
 !EOPI
-    type(ESMF_GeomBaseClass),pointer :: gbcp
+    type(ESMF_GeomClass),pointer :: gbcp
     integer :: localrc
     type(ESMF_AttReconcileFlag) :: lattreconflag
     integer :: geomobj_len
@@ -1570,13 +1552,13 @@ end subroutine ESMF_GeomBaseGet
 
     ! ----------
 
-    ! allocate GeomBase type
+    ! allocate Geom type
     allocate(gbcp, stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, msg="Allocating GeomBase type object", &
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating Geom type object", &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! deserialize GeomBase info
-    call c_ESMC_GeomBaseDeserialize(gbcp%type%type,     &
+    ! deserialize Geom info
+    call c_ESMC_GeomDeserialize(gbcp%type%type,     &
                                     gbcp%staggerloc%staggerloc, &
                                     gbcp%meshloc%meshloc, &
                                     gbcp%xgridside, &
@@ -1592,7 +1574,7 @@ end subroutine ESMF_GeomBaseGet
             ESMF_UtilStringInt2String (geomobj_len), ESMF_CONTEXT)
     offset = offset + 4
 
-    ! Do nothing with the GeomBase's attached geometry object if we are skipping
+    ! Do nothing with the Geom's attached geometry object if we are skipping
     if (.not. local_skipGeomObj) then
       ! Get info depending on type
       select case(gbcp%type%type)
@@ -1636,39 +1618,39 @@ end subroutine ESMF_GeomBaseGet
 
 
     ! Set pointer
-    ESMF_GeomBaseDeserialize%gbcp=>gbcp
+    ESMF_GeomDeserialize%gbcp=>gbcp
 
     ! Set init status
-    ESMF_INIT_SET_CREATED(ESMF_GeomBaseDeserialize)
+    ESMF_INIT_SET_CREATED(ESMF_GeomDeserialize)
 
     if  (present(rc)) rc = ESMF_SUCCESS
 
-    end function ESMF_GeomBaseDeserialize
+    end function ESMF_GeomDeserialize
 
 
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GeomBaseValidate()"
+#define ESMF_METHOD "ESMF_GeomValidate()"
 !BOPI
-! !IROUTINE: ESMF_GeomBaseValidate - Validate GeomBase internals
+! !IROUTINE: ESMF_GeomValidate - Validate Geom internals
 
 ! !INTERFACE:
-  subroutine ESMF_GeomBaseValidate(geombase, rc)
+  subroutine ESMF_GeomValidate(geom, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GeomBase), intent(in)              :: geombase
+    type(ESMF_Geom), intent(in)              :: geom
     integer,             intent(out),  optional  :: rc
 !
 !
 ! !DESCRIPTION:
-!      Validates that the {\tt GeomBase} is internally consistent.
+!      Validates that the {\tt Geom} is internally consistent.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[geombase]
-!          Specified {\tt ESMF\_GeomBase} object.
+!     \item[geom]
+!          Specified {\tt ESMF\_Geom} object.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1676,16 +1658,16 @@ end subroutine ESMF_GeomBaseGet
 !EOPI
 !------------------------------------------------------------------------------
     integer :: localrc
-    type(ESMF_GeomBaseClass),pointer :: gbcp
+    type(ESMF_GeomClass),pointer :: gbcp
 
     ! Initialize return code; assume failure until success is certain
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit, geombase, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomGetInit, geom, rc)
 
-    ! Get GeomBaseClass
-    gbcp=>geombase%gbcp
+    ! Get GeomClass
+    gbcp=>geom%gbcp
 
     ! Get info depending on type
     select case(gbcp%type%type)
@@ -1724,42 +1706,42 @@ end subroutine ESMF_GeomBaseGet
     ! Set return value
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_GeomBaseValidate
+  end subroutine ESMF_GeomValidate
 !------------------------------------------------------------------------------
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef ESMF_METHOD
-#define ESMF_METHOD "ESMF_GeomBaseGetInit"
+#define ESMF_METHOD "ESMF_GeomGetInit"
 !BOPI
-! !IROUTINE: ESMF_GeomBaseGetInit - Internal access routine for init code
+! !IROUTINE: ESMF_GeomGetInit - Internal access routine for init code
 !
 ! !INTERFACE:
-      function ESMF_GeomBaseGetInit(geombase)
+      function ESMF_GeomGetInit(geom)
 !
 ! !RETURN VALUE:
-      ESMF_INIT_TYPE :: ESMF_GeomBaseGetInit
+      ESMF_INIT_TYPE :: ESMF_GeomGetInit
 !
 ! !ARGUMENTS:
-      type(ESMF_GeomBase), intent(in), optional :: geombase
+      type(ESMF_Geom), intent(in), optional :: geom
 !
 ! !DESCRIPTION:
 ! Access deep object init code.
 !
 ! The arguments are:
 ! \begin{description}
-! \item [geombase]
+! \item [geom]
 ! Grid Base object.
 ! \end{description}
 !
 !EOPI
 
-    if (present(geombase)) then
-      ESMF_GeomBaseGetInit = ESMF_INIT_GET(geombase)
+    if (present(geom)) then
+      ESMF_GeomGetInit = ESMF_INIT_GET(geom)
     else
-      ESMF_GeomBaseGetInit = ESMF_INIT_CREATED
+      ESMF_GeomGetInit = ESMF_INIT_CREATED
     endif
 
-    end function ESMF_GeomBaseGetInit
+    end function ESMF_GeomGetInit
 
 !------------------------------------------------------------------------------
 
@@ -1836,4 +1818,4 @@ end subroutine ESMF_GeomBaseGet
 
 #undef  ESMF_METHOD
 
-end module ESMF_GeomBaseMod
+end module ESMF_GeomMod

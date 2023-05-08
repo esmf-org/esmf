@@ -37,7 +37,7 @@ module ESMF_FieldPrMod
   use ESMF_StaggerLocMod
   use ESMF_DistGridMod
   use ESMF_GridMod
-  use ESMF_GeomBaseMod
+  use ESMF_GeomMod
   use ESMF_ArrayMod
   use ESMF_ArrayCreateMod
   use ESMF_ArrayGetMod
@@ -175,11 +175,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     write(ESMF_UtilIOStdout,*)  "Field status = ", fp%status
     if (fp%status .eq. ESMF_FIELDSTATUS_GRIDSET .or. &
          fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
-!      call ESMF_GeomBasePrint(fp%geombase, "", localrc)
+!      call ESMF_GeomPrint(fp%geom, "", localrc)
 !      if (ESMF_LogFoundError(localrc, &
 !          ESMF_ERR_PASSTHRU, &
 !          ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_GeomBaseGet(fp%geombase, dimCount=gridrank, rc=localrc)
+      call ESMF_GeomGet(fp%geom, dimCount=gridrank, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return

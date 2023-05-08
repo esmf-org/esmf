@@ -51,7 +51,7 @@ module ESMF_FieldMod
   use ESMF_StaggerLocMod
   use ESMF_DistGridMod
   use ESMF_GridMod
-  use ESMF_GeomBaseMod
+  use ESMF_GeomMod
   use ESMF_ArrayMod
   use ESMF_ArrayCreateMod
   use ESMF_ArrayGetMod
@@ -94,12 +94,12 @@ module ESMF_FieldMod
     !private
     type (ESMF_Base)              :: base             ! base class object
     type (ESMF_Array)             :: array
-    type (ESMF_GeomBase)          :: geombase
+    type (ESMF_Geom)              :: geom
     type (ESMF_FieldStatus_Flag)  :: status
     type (ESMF_Status)            :: iostatus         ! if unset, inherit from gcomp
     logical                       :: array_internal   ! .true. if field%array is
                                                       ! internally allocated
-    logical                       :: geomb_internal   ! .true. if field%geombase is
+    logical                       :: geomb_internal   ! .true. if field%geom is
                                                       ! internally allocated
     logical                       :: is_proxy         ! .true. for a proxy field
     integer                       :: dimCount         ! field dimension count
@@ -318,20 +318,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! make sure there is a grid before asking it questions.
       if (ftypep%status .eq. ESMF_FIELDSTATUS_GRIDSET .or. &
           ftypep%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
-          call ESMF_GeomBaseValidate(ftypep%geombase, rc=localrc)
+          call ESMF_GeomValidate(ftypep%geom, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
-      ! get the grid decomp type if geombase is grid
+      ! get the grid decomp type if geom is grid
       decompType = ESMF_GRID_NONARBITRARY
-          call ESMF_GeomBaseGet(ftypep%geombase, geomtype=geomtype, rc=localrc)
+          call ESMF_GeomGet(ftypep%geom, geomtype=geomtype, rc=localrc)
           if (ESMF_LogFoundError(localrc, &  
             ESMF_ERR_PASSTHRU, &  
             ESMF_CONTEXT, rcToReturn=rc)) return  
           
           if (geomtype .eq. ESMF_GEOMTYPE_GRID) then
-             call ESMF_GeomBaseGet(ftypep%geombase, grid=grid, rc=localrc)
+             call ESMF_GeomGet(ftypep%geom, grid=grid, rc=localrc)
              if (ESMF_LogFoundError(localrc, &  
                     ESMF_ERR_PASSTHRU, &  
                     ESMF_CONTEXT, rcToReturn=rc)) return  
@@ -341,7 +341,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     ESMF_CONTEXT, rcToReturn=rc)) return  
           endif   
           ! get grid dim and extents for the local piece
-          call ESMF_GeomBaseGet(ftypep%geombase, dimCount=gridrank, &
+          call ESMF_GeomGet(ftypep%geom, dimCount=gridrank, &
                             distgrid=gridDistGrid, localDECount=localDECount, rc=localrc)
           if (localrc .ne. ESMF_SUCCESS) then
              call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
@@ -351,7 +351,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif 
           ! Bounds only valid if there are local DE's
           do lDE=0, localDECount-1
-             call ESMF_GeomBaseGetPLocalDe(ftypep%geombase, localDE=lDE,  &
+             call ESMF_GeomGetPLocalDe(ftypep%geom, localDE=lDE,  &
                                exclusiveLBound=exclLBounds, &
                                exclusiveUBound=exclUBounds, &
                                rc=localrc)
@@ -547,7 +547,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           skipGeomObj = .true.
         end if
 
-        call ESMF_GeomBaseSerialize(fp%geombase, buffer, length, offset, &
+        call ESMF_GeomSerialize(fp%geom, buffer, length, offset, &
                                     lattreconflag, linquireflag, skipGeomObj, &
                                     localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -673,7 +673,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           skipGeomObj = .true.
         end if
 
-        fp%geombase=ESMF_GeomBaseDeserialize(buffer, offset, &
+        fp%geom=ESMF_GeomDeserialize(buffer, offset, &
                                             lattreconflag, skipGeomObj, &
                                             localrc)
         if (ESMF_LogFoundError(localrc, &

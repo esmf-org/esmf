@@ -41,7 +41,7 @@ module ESMF_FieldGetMod
   use ESMF_XGridMod
   use ESMF_MeshMod
   use ESMF_LocStreamMod
-  use ESMF_GeomBaseMod
+  use ESMF_GeomMod
   use ESMF_StaggerLocMod
   use ESMF_InitMacrosMod
 
@@ -407,7 +407,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Get the geometry type
     if (present(geomtype)) then
-        call ESMF_GeomBaseGet(ftype%geombase, geomtype=localGeomType, rc=localrc)
+        call ESMF_GeomGet(ftype%geom, geomtype=localGeomType, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -421,7 +421,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No Grid or invalid Grid attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   grid=grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -435,7 +435,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No Grid or invalid Grid attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   staggerloc=staggerloc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -449,7 +449,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No Mesh or invalid Mesh attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   meshloc=meshloc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -463,7 +463,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No Mesh or invalid Mesh attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   mesh=mesh, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -477,7 +477,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No LocStream or invalid LocStream attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   locstream=locstream, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -491,7 +491,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No XGrid or invalid XGrid attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   xgrid=xgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -505,7 +505,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No XGrid or invalid XGrid attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   xgridside=xgridside, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -519,7 +519,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No XGrid or invalid XGrid attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   gridIndex=gridIndex, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -703,13 +703,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
       endif
 
-      call ESMF_GeomBaseGet(ftype%geombase, geomtype=localGeomType, rc=localrc)
+      call ESMF_GeomGet(ftype%geom, geomtype=localGeomType, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       if(localGeomType == ESMF_GEOMTYPE_GRID) then
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   grid=l_grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -808,7 +808,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         deallocate(dg2fmap, minIndexPTile, maxIndexPTile, minIndexPDe, maxIndexPDe) 
         deallocate(ldeToDeMap, isDist)
       else if(localGeomType == ESMF_GEOMTYPE_MESH) then
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   mesh=l_mesh, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -1264,7 +1264,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! check variables
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-    call ESMF_GeomBaseGet(field%ftypep%geombase, dimCount=gridrank, rc=localrc)
+    call ESMF_GeomGet(field%ftypep%geom, dimCount=gridrank, rc=localrc)
     if (localrc .ne. ESMF_SUCCESS) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
           msg="Cannot retrieve gridrank from ftypep%grid", &

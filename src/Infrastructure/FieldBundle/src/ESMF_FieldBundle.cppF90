@@ -49,7 +49,7 @@ module ESMF_FieldBundleMod
   use ESMF_XGridMod
   use ESMF_MeshMod
   use ESMF_LocStreamMod
-  use ESMF_GeomBaseMod
+  use ESMF_GeomMod
   use ESMF_FieldMod
   use ESMF_FieldCreateMod
   use ESMF_FieldGetMod
@@ -95,7 +95,7 @@ module ESMF_FieldBundleMod
   sequence
 ^endif
     type(ESMF_Base)              :: base      ! base class object
-    type(ESMF_GeomBase)          :: geombase  ! base class object
+    type(ESMF_Geom)          :: geom  ! base class object
     type(ESMF_Container)         :: container ! internal storage implementation
     type(ESMF_FieldBundleStatus) :: status    ! status of this FieldBundle
     logical                      :: is_proxy  ! true if this is a proxy FB
@@ -748,20 +748,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
       ! No garbage, all fieldList should be linked
       !
-      ! Obviously the attribute linking of the geombase object is a bit tricky,
-      ! right now, we do not restrict the geombase to be matched among the fields in the
+      ! Obviously the attribute linking of the geom object is a bit tricky,
+      ! right now, we do not restrict the geom to be matched among the fields in the
       ! fieldBundle. But for attribute hierarchy, we actually assume that all fields in
-      ! the fieldBundle should be built on the same geombase object.
+      ! the fieldBundle should be built on the same geom object.
       !
       ! 3/7/13
-      ! New behavior for geombase:
-      ! 1. FieldBundleSet() can always change the geombase object in a FieldBundle
-      ! 2. Add/AddReplace/Replace can  change the geombase object in a FieldBundle if it is not set
-      ! 3. Add/AddReplace/Replace can NOT change  geombase object in a FieldBundle after its set
+      ! New behavior for geom:
+      ! 1. FieldBundleSet() can always change the geom object in a FieldBundle
+      ! 2. Add/AddReplace/Replace can  change the geom object in a FieldBundle if it is not set
+      ! 3. Add/AddReplace/Replace can NOT change  geom object in a FieldBundle after its set
       !
       ! Attribute link
       if(size(fieldList) .ge. 1 .and. (fieldbundle%this%status /= ESMF_FBSTATUS_GRIDSET) ) then
-        ! setgeom links grid geombase automatically
+        ! setgeom links grid geom automatically
         call ESMF_FieldBundleSetGeom(fieldbundle, fieldList(1), rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc))  return
@@ -931,7 +931,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Attribute link
     if(size(fieldList) .ge. 1 .and. (fieldbundle%this%status /= ESMF_FBSTATUS_GRIDSET) ) then
-      ! setgeom links grid geombase automatically
+      ! setgeom links grid geom automatically
       call ESMF_FieldBundleSetGeom(fieldbundle, fieldList(1), rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc))  return
@@ -1646,9 +1646,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (basestatus .eq. ESMF_STATUS_READY) then
       
-      ! Destroy internal geombase and mark this fieldBundle UNINIT
+      ! Destroy internal geom and mark this fieldBundle UNINIT
       if(this%status == ESMF_FBSTATUS_GRIDSET) then
-        call ESMF_GeomBaseDestroy(this%geombase, rc=localrc)
+        call ESMF_GeomDestroy(this%geom, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1802,16 +1802,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     this => fieldbundle%this
 
-    ! geomBase
+    ! geom
     if(present(geomtype)) then
       if(this%status /= ESMF_FBSTATUS_GRIDSET) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-          msg = " - fieldbundle does not have a geombase object stored", &
+          msg = " - fieldbundle does not have a geom object stored", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
   
-      call ESMF_GeomBaseGet(this%geombase, geomtype=geomtype, rc=localrc)
+      call ESMF_GeomGet(this%geom, geomtype=geomtype, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -1819,12 +1819,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if(present(grid)) then
       if(this%status /= ESMF_FBSTATUS_GRIDSET) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-          msg = " - fieldbundle does not have a geombase object stored", &
+          msg = " - fieldbundle does not have a geom object stored", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
   
-      call ESMF_GeomBaseGet(this%geombase, grid=grid, rc=localrc)
+      call ESMF_GeomGet(this%geom, grid=grid, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -1832,12 +1832,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if(present(xgrid)) then
       if(this%status /= ESMF_FBSTATUS_GRIDSET) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-          msg = " - fieldbundle does not have a geombase object stored", &
+          msg = " - fieldbundle does not have a geom object stored", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
   
-      call ESMF_GeomBaseGet(this%geombase, xgrid=xgrid, rc=localrc)
+      call ESMF_GeomGet(this%geom, xgrid=xgrid, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -1845,12 +1845,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if(present(mesh)) then
       if(this%status /= ESMF_FBSTATUS_GRIDSET) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-          msg = " - fieldbundle does not have a geombase object stored", &
+          msg = " - fieldbundle does not have a geom object stored", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
   
-      call ESMF_GeomBaseGet(this%geombase, mesh=mesh, rc=localrc)
+      call ESMF_GeomGet(this%geom, mesh=mesh, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -1858,12 +1858,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if(present(locstream)) then
       if(this%status /= ESMF_FBSTATUS_GRIDSET) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-          msg = " - fieldbundle does not have a geombase object stored", &
+          msg = " - fieldbundle does not have a geom object stored", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
   
-      call ESMF_GeomBaseGet(this%geombase, locstream=locstream, rc=localrc)
+      call ESMF_GeomGet(this%geom, locstream=locstream, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -5385,7 +5385,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Attribute link
     fieldCount = size(fieldList)
     if(fieldCount .ge. 1 .and. (fieldbundle%this%status /= ESMF_FBSTATUS_GRIDSET) ) then
-      ! setgeom links grid geombase automatically
+      ! setgeom links grid geom automatically
       call ESMF_FieldBundleSetGeom(fieldbundle, fieldList(1), rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc))  return
@@ -5453,13 +5453,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! if there is not one already associated with it.  
       if (btype%status == ESMF_FBSTATUS_GRIDSET) then
         if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-          msg="FieldBundle is already associated with a Geombase", &
+          msg="FieldBundle is already associated with a Geom", &
           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
-      ! Create the geombase around the grid, use the center stagger as a generic stagger here, 
+      ! Create the geom around the grid, use the center stagger as a generic stagger here, 
       ! because the stagger wont really matter in this case
-      btype%geombase=ESMF_GeomBaseCreate(grid,ESMF_STAGGERLOC_CENTER,rc=status)
+      btype%geom=ESMF_GeomCreate(grid,ESMF_STAGGERLOC_CENTER,rc=status)
       if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -5525,17 +5525,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! if there is not one already associated with it.  
       if (btype%status == ESMF_FBSTATUS_GRIDSET) then
         if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-          msg="FieldBundle is already associated with a Geombase", &
+          msg="FieldBundle is already associated with a Geom", &
           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
-      ! Create the geombase around the grid, use the center stagger as a generic stagger here, 
+      ! Create the geom around the grid, use the center stagger as a generic stagger here, 
       ! because the stagger wont really matter in this case
-      btype%geombase=ESMF_GeomBaseCreate(mesh,rc=status)
+      btype%geom=ESMF_GeomCreate(mesh,rc=status)
       if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc))  return
 
-      ! Set Status to containing a Geombase
+      ! Set Status to containing a Geom
       btype%status = ESMF_FBSTATUS_GRIDSET
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -5598,16 +5598,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! if there is not one already associated with it.  
       if (btype%status == ESMF_FBSTATUS_GRIDSET) then
         if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-          msg="FieldBundle is already associated with a Geombase", &
+          msg="FieldBundle is already associated with a Geom", &
           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
-       ! Create the geombase around the locstream
-       btype%geombase=ESMF_GeomBaseCreate(locstream, rc=status)
+       ! Create the geom around the locstream
+       btype%geom=ESMF_GeomCreate(locstream, rc=status)
        if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
-      ! Set Status to containing a Geombase
+      ! Set Status to containing a Geom
       btype%status = ESMF_FBSTATUS_GRIDSET
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -5669,16 +5669,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! if there is not one already associated with it.  
       if (btype%status == ESMF_FBSTATUS_GRIDSET) then
         if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-          msg="FieldBundle is already associated with a Geombase", &
+          msg="FieldBundle is already associated with a Geom", &
           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
-       ! Create the geombase around the locstream
-       btype%geombase=ESMF_GeomBaseCreate(xgrid, rc=status)
+       ! Create the geom around the locstream
+       btype%geom=ESMF_GeomCreate(xgrid, rc=status)
        if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
-      ! Set Status to containing a Geombase
+      ! Set Status to containing a Geom
       btype%status = ESMF_FBSTATUS_GRIDSET
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -7227,9 +7227,9 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_DEBUG, rc=rc)
 
       if(bp%status == ESMF_FBSTATUS_GRIDSET) then
         ! NOTE: A small optimization for StateReconcile is possible by removing
-        !  this extra GeomBase serialization/deserialization. According to Fei,
+        !  this extra Geom serialization/deserialization. According to Fei,
         !  this just references the first Field.
-        call ESMF_GeomBaseSerialize(bp%geombase, buffer, length, offset, &
+        call ESMF_GeomSerialize(bp%geom, buffer, length, offset, &
                                  lattreconflag, linquireflag, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -7396,7 +7396,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_DEBUG, rc=rc)
       if(packedVal == 1) bp%is_packed = .true.
 
       if(bp%status == ESMF_FBSTATUS_GRIDSET) then
-        bp%geombase = ESMF_GeomBaseDeserialize(buffer, offset, &
+        bp%geom = ESMF_GeomDeserialize(buffer, offset, &
           attreconflag=attreconflag, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -7465,7 +7465,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_DEBUG, rc=rc)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldBundleSetGeom()"
 !BOPI
-! !IROUTINE: ESMF_FieldBundleSetGeom - Set a GeomBase in FieldBundle
+! !IROUTINE: ESMF_FieldBundleSetGeom - Set a Geom in FieldBundle
 !
 ! !INTERFACE:
   subroutine ESMF_FieldBundleSetGeom(fieldbundle, field, rc)
@@ -7476,7 +7476,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_DEBUG, rc=rc)
     integer, intent(out), optional                    :: rc 
 !
 ! !DESCRIPTION:
-!      Set a geombase in FieldBundle, if the geombase is a Grid, attribute
+!      Set a geom in FieldBundle, if the geom is a Grid, attribute
 !     linking is done inside FieldBundleSetGrid.
 !
 !     The arguments are:
@@ -7506,9 +7506,9 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_DEBUG, rc=rc)
     ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field, rc)
 
-    ! Donot do anything if fieldbundle already has a geombase
-    ! TODO: we will check matchness here in the future between field%geombase
-    ! and fieldbundle%geombase
+    ! Donot do anything if fieldbundle already has a geom
+    ! TODO: we will check matchness here in the future between field%geom
+    ! and fieldbundle%geom
     if(fieldbundle%this%status == ESMF_FBSTATUS_GRIDSET) then
       if(present(rc)) rc = ESMF_SUCCESS
       return
@@ -7567,7 +7567,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_DEBUG, rc=rc)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldBundleRemoveGeom()"
 !BOPI
-! !IROUTINE: ESMF_FieldBundleRemoveGeom - Remove the GeomBase in FieldBundle
+! !IROUTINE: ESMF_FieldBundleRemoveGeom - Remove the Geom in FieldBundle
 !
 ! !INTERFACE:
   subroutine ESMF_FieldBundleRemoveGeom(fieldbundle, rc)
@@ -7577,7 +7577,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_DEBUG, rc=rc)
     integer, intent(out), optional                    :: rc 
 !
 ! !DESCRIPTION:
-!      Remove the geombase in FieldBundle, if the geombase is a Grid, attribute
+!      Remove the geom in FieldBundle, if the geom is a Grid, attribute
 !     linking is removed as well. Called when the fieldbundle is emptied.
 !
 !     The arguments are:
@@ -7608,11 +7608,11 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_DEBUG, rc=rc)
       return
     endif
 
-    call ESMF_GeomBaseGet(fieldbundle%this%geombase, geomtype=geomtype, rc=localrc)
+    call ESMF_GeomGet(fieldbundle%this%geom, geomtype=geomtype, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc))  return
 
-    call ESMF_GeomBaseDestroy(fieldbundle%this%geombase, rc=localrc)
+    call ESMF_GeomDestroy(fieldbundle%this%geom, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -7832,7 +7832,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_DEBUG, rc=rc)
   subroutine ESMF_FieldBundleTypeDeepCopy(in, out)
     type(ESMF_FieldBundleType)        :: in, out
     out%base       = in%base
-    out%geombase   = in%geombase
+    out%geom   = in%geom
     out%container  = in%container
     out%status     = in%status
     out%is_proxy   = in%is_proxy

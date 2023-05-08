@@ -42,7 +42,7 @@ module ESMF_FieldGatherMod
     use ESMF_MeshMod
     use ESMF_XGridMod
     use ESMF_XGridGetMod
-    use ESMF_GeomBaseMod
+    use ESMF_GeomMod
     use ESMF_FieldMod
     use ESMF_FieldGetMod
     use ESMF_ArrayMod
