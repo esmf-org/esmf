@@ -6971,7 +6971,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigCreateDefault()"
 !BOP
-! !IROUTINE: ESMF_HConfigCreateDefault - Create HConfig object
+! !IROUTINE: ESMF_HConfigCreate - Create HConfig object from YAML string or file
 
 ! !INTERFACE:
   ! Private name; call using ESMF_HConfigCreate()
@@ -7055,11 +7055,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 
+
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigCreateHConfig()"
 !BOP
-! !IROUTINE: ESMF_HConfigCreateHConfig - Create HConfig object from HConfig
+! !IROUTINE: ESMF_HConfigCreate - Create HConfig object from HConfig object
 
 ! !INTERFACE:
   ! Private name; call using ESMF_HConfigCreate()
@@ -7108,36 +7109,58 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigCreateI4()"
 !BOP
-! !IROUTINE: ESMF_HConfigCreateI4 - Create HConfig object from I4
+! !IROUTINE: ESMF_HConfigCreate - Create HConfig object from content
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_HConfigCreate()
-  function ESMF_HConfigCreateI4(content, keywordEnforcer, rc)
+!  function ESMF_HConfigCreate(content, keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
-    type(ESMF_HConfig) :: ESMF_HConfigCreateI4
+!    type(ESMF_HConfig) :: ESMF_HConfigCreate
 !
 ! !ARGUMENTS:
-    integer(ESMF_KIND_I4),  intent(in)            :: content
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(out), optional :: rc
+!    <Type>,  intent(in)            :: content[(:)]
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Create a new HConfig object.
+!   Create a new HConfig object from content of type <Type>. All <Type> options
+!   support the sequence array variant {\tt (:)} in addition to the scalar
+!   variant.
+!
+!   The supported <Type> options are:
+!   \begin{itemize}
+!   \item I4
+!   \item I8
+!   \item Logical
+!   \item R4
+!   \item R8
+!   \end{itemize}
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[content]
-!     I4 content.
+!     Content of type <Type>.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigCreateI4()"
+
+  function ESMF_HConfigCreateI4(content, keywordEnforcer, rc)
+
+    type(ESMF_HConfig) :: ESMF_HConfigCreateI4
+
+    integer(ESMF_KIND_I4),  intent(in)            :: content
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                intent(out), optional :: rc
+
     integer               :: localrc        ! local return code
 
     ! initialize return code; assume routine not implemented
@@ -7165,34 +7188,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigCreateI4Seq()"
-!BOP
-! !IROUTINE: ESMF_HConfigCreateI4Seq - Create HConfig object from I4 Seq
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigCreate()
   function ESMF_HConfigCreateI4Seq(content, keywordEnforcer, rc)
-!
-! !RETURN VALUE:
+
     type(ESMF_HConfig) :: ESMF_HConfigCreateI4Seq
-!
-! !ARGUMENTS:
+
     integer(ESMF_KIND_I4),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Create a new HConfig object.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[content]
-!     Array of I4 content.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc        ! local return code
     integer               :: count
 
@@ -7229,34 +7233,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigCreateI8()"
-!BOP
-! !IROUTINE: ESMF_HConfigCreateI8 - Create HConfig object from I8
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigCreate()
   function ESMF_HConfigCreateI8(content, keywordEnforcer, rc)
-!
-! !RETURN VALUE:
+
     type(ESMF_HConfig) :: ESMF_HConfigCreateI8
-!
-! !ARGUMENTS:
+
     integer(ESMF_KIND_I8),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Create a new HConfig object.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[content]
-!     I8 content.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc        ! local return code
 
     ! initialize return code; assume routine not implemented
@@ -7284,34 +7269,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigCreateI8Seq()"
-!BOP
-! !IROUTINE: ESMF_HConfigCreateI8Seq - Create HConfig object from I8 Seq
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigCreate()
   function ESMF_HConfigCreateI8Seq(content, keywordEnforcer, rc)
-!
-! !RETURN VALUE:
+
     type(ESMF_HConfig) :: ESMF_HConfigCreateI8Seq
-!
-! !ARGUMENTS:
+
     integer(ESMF_KIND_I8),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Create a new HConfig object.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[content]
-!     Array of I8 content.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc        ! local return code
     integer               :: count
 
@@ -7348,34 +7314,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigCreateLogical()"
-!BOP
-! !IROUTINE: ESMF_HConfigCreateLogical - Create HConfig object from logical
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigCreate()
   function ESMF_HConfigCreateLogical(content, keywordEnforcer, rc)
-!
-! !RETURN VALUE:
+
     type(ESMF_HConfig) :: ESMF_HConfigCreateLogical
-!
-! !ARGUMENTS:
+
     logical,            intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Create a new HConfig object.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[content]
-!     Logical content.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer                       :: localrc        ! local return code
     character(len=:), allocatable :: sContent
 
@@ -7400,34 +7347,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigCreateLogicalSeq()"
-!BOP
-! !IROUTINE: ESMF_HConfigCreateLogicalSeq - Create HConfig object from logical Seq
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigCreate()
   function ESMF_HConfigCreateLogicalSeq(content, keywordEnforcer, rc)
-!
-! !RETURN VALUE:
+
     type(ESMF_HConfig) :: ESMF_HConfigCreateLogicalSeq
-!
-! !ARGUMENTS:
+
     logical,            intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Create a new HConfig object.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[content]
-!     Logical content.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer                       :: localrc        ! local return code
     character(len=:), allocatable :: sContent
     integer                       :: count, i
@@ -7461,34 +7389,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigCreateR4()"
-!BOP
-! !IROUTINE: ESMF_HConfigCreateR4 - Create HConfig object from R4
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigCreate()
   function ESMF_HConfigCreateR4(content, keywordEnforcer, rc)
-!
-! !RETURN VALUE:
+
     type(ESMF_HConfig) :: ESMF_HConfigCreateR4
-!
-! !ARGUMENTS:
+
     real(ESMF_KIND_R4),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Create a new HConfig object.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[content]
-!     R4 content.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc        ! local return code
 
     ! initialize return code; assume routine not implemented
@@ -7516,34 +7425,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigCreateR4Seq()"
-!BOP
-! !IROUTINE: ESMF_HConfigCreateR4Seq - Create HConfig object from R4 Seq
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigCreate()
   function ESMF_HConfigCreateR4Seq(content, keywordEnforcer, rc)
-!
-! !RETURN VALUE:
+
     type(ESMF_HConfig) :: ESMF_HConfigCreateR4Seq
-!
-! !ARGUMENTS:
+
     real(ESMF_KIND_R4),     intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Create a new HConfig object.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[content]
-!     Array of R4 content.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc        ! local return code
     integer               :: count
 
@@ -7580,34 +7470,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigCreateR8()"
-!BOP
-! !IROUTINE: ESMF_HConfigCreateR8 - Create HConfig object from R8
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigCreate()
   function ESMF_HConfigCreateR8(content, keywordEnforcer, rc)
-!
-! !RETURN VALUE:
+
     type(ESMF_HConfig) :: ESMF_HConfigCreateR8
-!
-! !ARGUMENTS:
+
     real(ESMF_KIND_R8),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Create a new HConfig object.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[content]
-!     R8 content.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc        ! local return code
 
     ! initialize return code; assume routine not implemented
@@ -7635,34 +7506,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigCreateR8Seq()"
-!BOP
-! !IROUTINE: ESMF_HConfigCreateR8Seq - Create HConfig object from R8 Seq
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigCreate()
   function ESMF_HConfigCreateR8Seq(content, keywordEnforcer, rc)
-!
-! !RETURN VALUE:
+
     type(ESMF_HConfig) :: ESMF_HConfigCreateR8Seq
-!
-! !ARGUMENTS:
+
     real(ESMF_KIND_R8),     intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Create a new HConfig object.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[content]
-!     Array of R8 content.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc        ! local return code
     integer               :: count
 
@@ -7700,7 +7552,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigCreateStringSeq()"
 !BOP
-! !IROUTINE: ESMF_HConfigCreateStringSeq - Create HConfig object from String Seq
+! !IROUTINE: ESMF_HConfigCreate - Create HConfig object from String sequence array
 
 ! !INTERFACE:
   ! Private name; call using ESMF_HConfigCreate()
