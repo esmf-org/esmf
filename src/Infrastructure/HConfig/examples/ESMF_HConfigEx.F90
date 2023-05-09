@@ -130,7 +130,7 @@ program ESMF_HConfigEx
 ! loop variable.
 !EOE
 !BOC
-  ! type(ESMF_HConfig) :: hconfigIter
+  ! type(ESMF_HConfigIter) :: hconfigIter
   hconfigIter = hconfigIterBegin
   do while (hconfigIter /= hconfigIterEnd)
 
@@ -182,7 +182,7 @@ program ESMF_HConfigEx
 ! function.
 !EOE
 !BOC
-  ! type(ESMF_HConfig) :: hconfigIter
+  ! type(ESMF_HConfigIter) :: hconfigIter
   hconfigIter = hconfigIterBegin
   do while (ESMF_HConfigIterLoop(hconfigIter, hconfigIterBegin, hconfigIterEnd, rc=rc))
 !EOC
@@ -412,7 +412,7 @@ program ESMF_HConfigEx
 ! and end iterator variables are defined.
 !EOE
 !BOC
-  ! type(ESMF_HConfig) :: hconfigIterBegin, hconfigIterEnd
+  ! type(ESMF_HConfigIter) :: hconfigIterBegin, hconfigIterEnd
   hconfigIterBegin = ESMF_HConfigIterBegin(hconfig, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -812,7 +812,7 @@ program ESMF_HConfigEx
 ! map iterator can be set to the beginning using the following call.
 !EOE
 !BOC
-  ! type(ESMF_HConfig) :: hconfigIter
+  ! type(ESMF_HConfigIter) :: hconfigIter
   hconfigIter = ESMF_HConfigIterBegin(hconfig, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -1043,7 +1043,7 @@ program ESMF_HConfigEx
 ! an iterator is used to access the map nodes individually.
 !EOE
 !BOC
-  ! type(ESMF_HConfig) :: hconfigIter
+  ! type(ESMF_HConfigIter) :: hconfigIter
   hconfigIter = ESMF_HConfigIterBegin(hconfig, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)

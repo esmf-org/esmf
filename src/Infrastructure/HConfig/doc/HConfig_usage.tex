@@ -1,26 +1,39 @@
 % $Id$
 
 The following examples demonstrate how a user typically interacts with the
-HConfig API. HConfig objects can be created explicitly by the user, or they
-can be accessed from an existing Config object, e.g. queried from a Component.
+HConfig API. The HConfig class introduces two derived types:
+\begin{itemize}
+\item {\tt ESMF\_HConfig}
+\item {\tt ESMF\_HConfigIter}
+\end{itemize}
 
-The {\tt ESMF\_HConfig} object plays a number of roles when interacting with
+{\tt ESMF\_HConfig} objects can be created explicitly by the user, or they
+can be accessed from an existing {\tt ESMF\_Config} object, e.g. queried from
+a Component. They can play a number of roles when interacting with
 a HConfig hierarchy:
+
 \begin{enumerate}
-\item It can be the root node of the entire hierarchy. In YAML terminology, this
+\item The root node of the entire hierarchy. In YAML terminology, this
 refers to a {\em document}.
-\item It can be any node within the hierarchy.
-\item It can be an iterator, {\em referencing} a specific node within the
-hierarchy. The iterator approach allows convenient sequential access to all
-the child nodes of a particular location in the hierarchy. There are two flavors
-of iterators in HConfig: {\em sequence} and {\em map} iterators.
-\item It can be a collection of hierarchies, i.e. a set of YAML {\em documents}.
+\item {\em Any} node within the hierarchy.
+\item Collection of hierarchies, i.e. a set of YAML {\em documents}.
 \end{enumerate}
 
-There are some redundancies built into the HConfig API, where different ways
-are available to achieve the same goal. This is mostly done for convenience,
-allowing the user to pick the approach most suitable to their needs.
+{\tt ESMF\_HConfigIter} objects are iterators, {\em referencing} a specific
+node within the hierarchy. They are created from {\tt ESMF\_HConfig} objects.
+The iterator approach allows convenient sequential traversal of a particular
+location in the HConfig hierarchy. There are {\em two} flavors of iterators in
+HConfig: {\em sequence} and {\em map} iterators.
+Both are represented by the same {\tt ESMF\_HConfigIter} derived type, and the
+distinction is made at run-time.
+
+Notice that there are redundancies built into the HConfig API, where different
+ways are available to achieve the same goal. This is mostly done for
+convenience, allowing the user to pick the approach most suitable to their
+needs.
 
 For instance, while it can be convenient to use iterators in some cases, in
-others, it might be easier to access each element directly by {\em index}
-(for sequences) or {\em key} (for maps).
+others, it might be more appropriate to access elements directly by {\em index}
+(for sequences) or {\em key} (for maps). Both options are available.
+
+
