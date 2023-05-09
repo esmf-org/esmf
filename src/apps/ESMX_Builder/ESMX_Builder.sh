@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 
 # usage instructions
 usage () {
@@ -100,7 +100,7 @@ fi
 # process arguments
 POSITIONAL_ARGS=()
 while [[ $# -gt 0 ]]; do
-  case $1 in
+  case "$1" in
     --help|-h) usage; exit 0 ;;
     --esmx-dir=?*) ESMF_ESMXDIR=${1#*=} ;;
     --esmx-dir)  usage_error "$1" "requires an argument" ;;
@@ -254,9 +254,31 @@ fi
 INSTALL_SETTINGS=("")
 
 # build and install
+set +e
 cmake -S${ESMF_ESMXDIR} -B${BUILD_DIR} ${CMAKE_SETTINGS[@]}
+if [ "$?" !=  "0" ]; then
+  echo "ESMX_Builder Failed: (cmake)"
+  exit -1
+fi
 cmake --build ${BUILD_DIR} ${BUILD_SETTINGS[@]}
+if [ "$?" !=  "0" ]; then
+  echo "ESMX_Builder Failed: (cmake --build)"
+  exit -2
+fi
 cmake --install ${BUILD_DIR} ${INSTALL_SETTINGS[@]}
+if [ "$?" !=  "0" ]; then
+  echo "ESMX_Builder Failed: (cmake --install)"
+  exit -3
+fi
 if [ "${TEST}" = true ]; then
   (cd ${BUILD_DIR}/Driver; ctest ${TEST_SETTINGS[@]})
+  if [ "$?" !=  "0" ]; then
+    echo "ESMX_Builder Failed: (ctest)"
+    LASTTEST="${BUILD_DIR}/Driver/Testing/Temporary/LastTest.log"
+    if [ -f "${LASTTEST}" ]; then
+      exit $(grep -c '^Test Failed\.$' ${LASTTEST})
+    else
+      exit -4
+    fi
+  fi
 fi
