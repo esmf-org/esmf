@@ -420,6 +420,11 @@ module ESMF_HConfigMod
     module procedure ESMF_HConfigItrIterEnd
   end interface
 
+  interface ESMF_HConfigRemove
+    module procedure ESMF_HConfigRemove
+    module procedure ESMF_HConfigIterRemove
+  end interface
+
   interface ESMF_HConfigSet
     module procedure ESMF_HConfigSetHConfig
     module procedure ESMF_HConfigSetI4
@@ -10935,20 +10940,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigRemove()"
 !BOP
 ! !IROUTINE: ESMF_HConfigRemove - Remove element from HConfig object
-
+!
 ! !INTERFACE:
-  subroutine ESMF_HConfigRemove(hconfig, keywordEnforcer, index, keyString, rc)
+!  subroutine ESMF_HConfigRemove(hconfig, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(out), optional :: rc
+!    type(ESMF_HConfig[Iter]), intent(in)      :: hconfigIter
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    integer,            intent(in),  optional :: index
+!    character(*),       intent(in),  optional :: keyString
+!    integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Remove an element from a squence or map HConfig object. Either {\tt index}
@@ -10971,6 +10974,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigRemove()"
+
+  subroutine ESMF_HConfigRemove(hconfig, keywordEnforcer, index, keyString, rc)
+
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(out), optional :: rc
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
 
@@ -11005,6 +11022,41 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterRemove()"
+
+  subroutine ESMF_HConfigIterRemove(hconfig, keywordEnforcer, index, keyString, rc)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_HConfigRemove(hconfigTemp, &
+      index=index, keyString=keyString, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
