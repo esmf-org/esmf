@@ -725,7 +725,7 @@ program ESMF_HConfigEx
 ! \subsubsection{Load HConfig from YAML file}
 !
 ! One option to load a YAML file is to first create an empty HConfig object,
-! followed by calling {\tt ESMF\_HConfigLoadFile()}.
+! followed by calling {\tt ESMF\_HConfigFileLoad()}.
 !EOE
 !BOC
   ! type(ESMF_HConfig) :: hconfig
@@ -733,7 +733,7 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-  call ESMF_HConfigLoadFile(hconfig, filename="example.yaml", rc=rc)
+  call ESMF_HConfigFileLoad(hconfig, filename="example.yaml", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -762,7 +762,7 @@ program ESMF_HConfigEx
 ! \subsubsection{Save HConfig to YAML file}
 !
 ! A HConfig object can be saved to a YAML file by calling the
-! {\tt ESMF\_HConfigSaveFile()} method. To demonstrate this, a YAML file
+! {\tt ESMF\_HConfigFileSave()} method. To demonstrate this, a YAML file
 ! containing:
 ! \begin{verbatim}
 ! # An example of YAML configuration file
@@ -782,10 +782,10 @@ program ESMF_HConfigEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Now the {\tt hconfig} object can be saved to file using the
-! {\tt ESMF\_HConfigSaveFile()} method.
+! {\tt ESMF\_HConfigFileSave()} method.
 !EOE
 !BOC
-  call ESMF_HConfigSaveFile(hconfig, filename="saveMe.yml", rc=rc)
+  call ESMF_HConfigFileSave(hconfig, filename="saveMe.yml", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
@@ -799,7 +799,7 @@ program ESMF_HConfigEx
 !   plane: [TRUE, FALSE]
 ! \end{verbatim}
 !
-! The object specified in {\tt ESMF\_HConfigSaveFile()} can be a regular node
+! The object specified in {\tt ESMF\_HConfigFileSave()} can be a regular node
 ! (of any type) or a {\em sequence} iterator. In either case the file written
 ! represents the YAML hierarchy with the specified object as the root node.
 !
@@ -830,7 +830,7 @@ program ESMF_HConfigEx
 ! Then save it.
 !EOE
 !BOC
-  call ESMF_HConfigSaveFile(hconfigTemp, filename="mapKeyBegin.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfigTemp, filename="mapKeyBegin.yaml", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
@@ -853,7 +853,7 @@ program ESMF_HConfigEx
 ! Then save it.
 !EOE
 !BOC
-  call ESMF_HConfigSaveFile(hconfigTemp, filename="mapValBegin.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfigTemp, filename="mapValBegin.yaml", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
@@ -884,7 +884,7 @@ program ESMF_HConfigEx
 ! It can be saved to file as usual.
 !EOE
 !BOC
-  call ESMF_HConfigSaveFile(hconfigTemp, filename="mapValAtKey.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfigTemp, filename="mapValAtKey.yaml", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
@@ -907,7 +907,7 @@ program ESMF_HConfigEx
 ! {\tt [bmx, mountain, street]}. It, too, can be saved to file.
 !EOE
 !BOC
-  call ESMF_HConfigSaveFile(hconfigTemp2, filename="mapValRecursive.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfigTemp2, filename="mapValRecursive.yaml", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
@@ -962,7 +962,7 @@ program ESMF_HConfigEx
 !
 ! Next, file {\tt exampleWithTags.yaml} is loaded.
 !BOC
-  call ESMF_HConfigLoadFile(hconfig, filename="exampleWithTags.yaml", rc=rc)
+  call ESMF_HConfigFileLoad(hconfig, filename="exampleWithTags.yaml", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
@@ -1196,7 +1196,7 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_00.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfig, filename="build_and_edit_00.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Now the {\tt ESMF\_HConfigAdd()} method can be used to add new elements to
@@ -1218,7 +1218,7 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_01.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfig, filename="build_and_edit_01.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Additional elements can be added at the end of {\tt hconfig}.
@@ -1228,7 +1228,7 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_02.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfig, filename="build_and_edit_02.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! At this point, the content of {\tt hconfig} is a sequence with two elements.
@@ -1246,7 +1246,7 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_03.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfig, filename="build_and_edit_03.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! This results in the following content, where the third element of the sequence
@@ -1274,7 +1274,7 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_04.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfig, filename="build_and_edit_04.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The result is the following content for {\tt hconfig}.
@@ -1299,7 +1299,7 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigSaveFile(hconfigTemp, filename="build_and_edit_05.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfigTemp, filename="build_and_edit_05.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! This creates a temporary HConfig object that {\em references} the 3rd element
@@ -1330,7 +1330,7 @@ program ESMF_HConfigEx
   call ESMF_HConfigDestroy(hconfigTemp, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_06.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfig, filename="build_and_edit_06.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! After these operations, the content of {\tt hconfig} has changed to
@@ -1369,7 +1369,7 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_07.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfig, filename="build_and_edit_07.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The content of {\tt hconfig} has been updated as below.
@@ -1390,7 +1390,7 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_08.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfig, filename="build_and_edit_08.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! sets the 4th element of {\tt hconfig} directly, without the need of a
@@ -1412,7 +1412,7 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_09.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfig, filename="build_and_edit_09.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The result is a sequence with only three remaining elements.
@@ -1440,7 +1440,7 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_10.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfig, filename="build_and_edit_10.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The resulting {\tt hconfig} content is as expected.
@@ -1458,7 +1458,7 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_11.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfig, filename="build_and_edit_11.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! If saved to file, the contents of {\tt hconfig} shows up as a simple tilde
@@ -1476,7 +1476,7 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_12.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfig, filename="build_and_edit_12.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The contents of {\tt hconfig} now is a map with a single entry:
@@ -1507,7 +1507,7 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_13.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfig, filename="build_and_edit_13.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Resulting in the final contents of {\tt hconfig}:
@@ -1572,11 +1572,11 @@ program ESMF_HConfigEx
 ! When saving {\tt hconfig}, a multi-document YAML file will be written.
 !EOE
 !BOC
-  call ESMF_HConfigSaveFile(hconfig, filename="multi_00.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfig, filename="multi_00.yaml", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! The {\tt ESMF\_HConfigSaveFile()} method implements strict usage of both
+! The {\tt ESMF\_HConfigFileSave()} method implements strict usage of both
 ! document markers when saving a multi-document HConfig object.
 ! \begin{verbatim}
 ! ---
@@ -1601,7 +1601,7 @@ program ESMF_HConfigEx
 ! is written to file.
 !EOE
 !BOC
-  call ESMF_HConfigSaveFile(hconfig, filename="multi_01.yaml", doc=2, rc=rc)
+  call ESMF_HConfigFileSave(hconfig, filename="multi_01.yaml", doc=2, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
@@ -1610,19 +1610,19 @@ program ESMF_HConfigEx
 ! - And
 ! - a second document.
 ! \end{verbatim}
-! The {\tt ESMF\_HConfigLoadFile()} method also accepts the optional {\tt doc}
+! The {\tt ESMF\_HConfigFileLoad()} method also accepts the optional {\tt doc}
 ! argument. When specified, the result is a single-document {\tt hconfig}
 ! object, holding the content of the indicated document within the loaded file.
 !EOE
 !BOC
-  call ESMF_HConfigLoadFile(hconfig, filename="multiDoc.yaml", doc=3, rc=rc)
+  call ESMF_HConfigFileLoad(hconfig, filename="multiDoc.yaml", doc=3, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Saving {\tt hconfig} to file shows the expected situation.
 !EOE
 !BOC
-  call ESMF_HConfigSaveFile(hconfig, filename="multi_02.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfig, filename="multi_02.yaml", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
@@ -1637,7 +1637,7 @@ program ESMF_HConfigEx
 ! the method applies to the specified document. The default for when the
 ! {\tt doc} argument is not present, for most methods is to use the first
 ! document in the object. The exceptions to this rule are the
-! {\tt ESMF\_HConfigSaveFile()} and {\tt ESMF\_HConfigLoadFile()} methods.
+! {\tt ESMF\_HConfigFileSave()} and {\tt ESMF\_HConfigFileLoad()} methods.
 ! Here the default is to apply the operation to {\em all} documents.
 !
 ! When done, clean up {\tt hconfig} as usual.
@@ -1666,7 +1666,7 @@ program ESMF_HConfigEx
   hconfig = ESMF_HConfigCreate([1,2,3], rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call ESMF_HConfigSaveFile(hconfig, filename="shortcut_00.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfig, filename="shortcut_00.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The content of {\tt hconfig} can be accessed in the usual manner, via
@@ -1739,7 +1739,7 @@ program ESMF_HConfigEx
   call ESMF_HConfigAdd(hconfig, ["aaa","bbb","ccc"], addKeyString="k1", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call ESMF_HConfigSaveFile(hconfig, filename="shortcut_01.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfig, filename="shortcut_01.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Next a sequence of R4 values is added to the map held by {\tt hconfig},
@@ -1749,7 +1749,7 @@ program ESMF_HConfigEx
   call ESMF_HConfigAdd(hconfig, [1.0,1.25,1.5], addKeyString="k2", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call ESMF_HConfigSaveFile(hconfig, filename="shortcut_02.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfig, filename="shortcut_02.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! At this point {\tt hconfig} contains the following information:
@@ -1773,7 +1773,7 @@ program ESMF_HConfigEx
   call ESMF_HConfigSet(hconfig, [.true.,.false.], keyString="k1", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call ESMF_HConfigSaveFile(hconfig, filename="shortcut_03.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfig, filename="shortcut_03.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! This changes the content of {\tt hconfig} as expected.

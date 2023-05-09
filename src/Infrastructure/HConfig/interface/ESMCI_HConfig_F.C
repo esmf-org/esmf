@@ -201,7 +201,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigloadfile)(ESMCI::HConfig *ptr,
+  void FTN_X(c_esmc_hconfigfileload)(ESMCI::HConfig *ptr,
     const char *filename, int *doc, int *rc,
     ESMCI_FortranStrLenArg strLen){
 #undef  ESMC_METHOD
@@ -219,7 +219,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigsavefile)(ESMCI::HConfig *ptr,
+  void FTN_X(c_esmc_hconfigfilesave)(ESMCI::HConfig *ptr,
     const char *filename, int *doc, int *rc, ESMCI_FortranStrLenArg strLen){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_hconfigsave()"

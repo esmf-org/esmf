@@ -110,14 +110,14 @@ program ESMF_HConfigUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "HConfigLoadFile()"
+  write(name, *) "HConfigFileLoad()"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_HConfigLoadFile(hconfig, fileName="sample.yaml", rc=rc)
+  call ESMF_HConfigFileLoad(hconfig, fileName="sample.yaml", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "HConfig Iterator test after HConfigLoadFile()"
+  write(name, *) "HConfig Iterator test after HConfigFileLoad()"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call HConfigIterationTest(hconfig, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -148,7 +148,7 @@ program ESMF_HConfigUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "HConfigCreate() with LoadFile fileName"
+  write(name, *) "HConfigCreate() with FileLoad fileName"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   hconfig = ESMF_HConfigCreate(fileName="sample.yaml", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -179,7 +179,7 @@ program ESMF_HConfigUTest
   !NEX_UTest
   write(name, *) "ConfigLog() from sample.rc"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ConfigLog(config1, prefix="RC LoadFile:", raw=raw, rc=rc)
+  call ESMF_ConfigLog(config1, prefix="RC FileLoad:", raw=raw, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
@@ -200,7 +200,7 @@ program ESMF_HConfigUTest
   !NEX_UTest
   write(name, *) "ConfigLog() from sample.yaml"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ConfigLog(config2, prefix="YAML LoadFile:", raw=raw, rc=rc)
+  call ESMF_ConfigLog(config2, prefix="YAML FileLoad:", raw=raw, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------

@@ -165,6 +165,9 @@ module ESMF_HConfigMod
 
   public ESMF_HConfigDestroy
 
+  public ESMF_HConfigFileLoad
+  public ESMF_HConfigFileSave
+
   public ESMF_HConfigGetDocCount
 
   public ESMF_HConfigGetSize
@@ -212,8 +215,6 @@ module ESMF_HConfigMod
   public ESMF_HConfigIterNext
 
   public ESMF_HConfigLoad
-  public ESMF_HConfigLoadFile
-  public ESMF_HConfigSaveFile
 
   public ESMF_HConfigRemove
 
@@ -7096,7 +7097,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else if (present(filename)) then
       ! load filename
-      call ESMF_HConfigLoadFile(ESMF_HConfigCreateDefault, filename=filename, &
+      call ESMF_HConfigFileLoad(ESMF_HConfigCreateDefault, filename=filename, &
         rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -8094,6 +8095,117 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_HConfigDestroy
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigFileLoad()"
+!BOP
+! !IROUTINE: ESMF_HConfigFileLoad - Load file into HConfig
+
+! !INTERFACE:
+  subroutine ESMF_HConfigFileLoad(hconfig, filename, keywordEnforcer, doc, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+    character(len=*),   intent(in)            :: filename
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Load YAML file into {\tt hconfig}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[hconfig]
+!     {\tt ESMF\_HConfig} object.
+!   \item[filename]
+!     Name of the YAML file to be loaded.
+!   \item[{[doc]}]
+!     The doc index inside the file. If specified, only this single document
+!     is loaded from file, resulting in a single document {\tt hconfig} object.
+!     Defaults to {\em all} docs.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_HConfigFileLoad(hconfig, filename, doc, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_HConfigFileLoad
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigFileSave()"
+!BOP
+! !IROUTINE: ESMF_HConfigFileSave - Save HConfig to file
+
+! !INTERFACE:
+  subroutine ESMF_HConfigFileSave(hconfig, filename, keywordEnforcer, doc, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+    character(len=*),   intent(in)            :: filename
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Save HConfig into YAML file. Only {\tt localPet == 0} does the writing.
+!   The {\tt hconfig} must {\em not} be a map iterator.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[hconfig]
+!     {\tt ESMF\_HConfig} object.
+!   \item[filename]
+!     Name of the YAML file into which to save.
+!   \item[{[doc]}]
+!     The doc index inside {\tt hconfig}. Defaults to {\em all} docs.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_HConfigFileSave(hconfig, filename, doc, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_HConfigFileSave
 !------------------------------------------------------------------------------
 
 
@@ -10045,7 +10157,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-internal method -------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsHConfig()"
 !BOPI
@@ -10771,7 +10883,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-public method -------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigLoad()"
 !BOPI
@@ -10819,117 +10931,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_HConfigLoad
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigLoadFile()"
-!BOP
-! !IROUTINE: ESMF_HConfigLoadFile - Load file into HConfig
-
-! !INTERFACE:
-  subroutine ESMF_HConfigLoadFile(hconfig, filename, keywordEnforcer, doc, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
-    character(len=*),   intent(in)            :: filename
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: doc
-    integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Load YAML file into {\tt hconfig}.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[filename]
-!     Name of the YAML file to be loaded.
-!   \item[{[doc]}]
-!     The doc index. If specified, only this single document is loaded from file.
-!     The result is a single document {\tt hconfig} object.
-!     Defaults to {\em all} docs.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_HConfigLoadFile(hconfig, filename, doc, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_HConfigLoadFile
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigSaveFile()"
-!BOP
-! !IROUTINE: ESMF_HConfigSaveFile - Save HConfig to file
-
-! !INTERFACE:
-  subroutine ESMF_HConfigSaveFile(hconfig, filename, keywordEnforcer, doc, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
-    character(len=*),   intent(in)            :: filename
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: doc
-    integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Save HConfig into YAML file. Only {\tt localPet == 0} does the writing.
-!   The {\tt hconfig} must {\em not} be a map iterator.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[filename]
-!     Name of the YAML file into which to save.
-!   \item[{[doc]}]
-!     The doc index. Defaults to {\em all} docs.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_HConfigSaveFile(hconfig, filename, doc, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_HConfigSaveFile
 !------------------------------------------------------------------------------
 
 
