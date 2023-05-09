@@ -622,9 +622,9 @@ program ESMF_HConfigUTest
               if (rc /= ESMF_SUCCESS) return
             else
 
-              hconfigIter3 = ESMF_HConfigIterBegin(ESMF_HConfigIterAsHConfig(hconfigIter2), rc=rc)
+              hconfigIter3 = ESMF_HConfigIterBegin(hconfigIter2, rc=rc)
               if (rc /= ESMF_SUCCESS) return
-              hconfigIter3End = ESMF_HConfigIterEnd(ESMF_HConfigIterAsHConfig(hconfigIter2), rc=rc)
+              hconfigIter3End = ESMF_HConfigIterEnd(hconfigIter2, rc=rc)
               if (rc /= ESMF_SUCCESS) return
 
               do while(hconfigIter3 /= hconfigIter3End)

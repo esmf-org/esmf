@@ -196,14 +196,18 @@ module ESMF_HConfigMod
   public ESMF_HConfigIsSequenceMapVal
 
   public ESMF_HConfigIterAsHConfig
+
   public ESMF_HConfigIterBegin
   public ESMF_HConfigIterBeginMapKey
   public ESMF_HConfigIterBeginMapVal
+
   public ESMF_HConfigIterEnd
   public ESMF_HConfigIterEndMapKey
   public ESMF_HConfigIterEndMapVal
+
   public ESMF_HConfigIterIsMap
   public ESMF_HConfigIterIsSequence
+
   public ESMF_HConfigIterLoop
   public ESMF_HConfigIterNext
 
@@ -403,6 +407,16 @@ module ESMF_HConfigMod
   interface ESMF_HConfigIsSequence
     module procedure ESMF_HConfigIsSequence
     module procedure ESMF_HConfigItrIsSequence
+  end interface
+
+  interface ESMF_HConfigIterBegin
+    module procedure ESMF_HConfigIterBegin
+    module procedure ESMF_HConfigItrIterBegin
+  end interface
+
+  interface ESMF_HConfigIterEnd
+    module procedure ESMF_HConfigIterEnd
+    module procedure ESMF_HConfigItrIterEnd
   end interface
 
   interface ESMF_HConfigSet
@@ -10031,10 +10045,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-public method -------------------------------
+! -------------------------- ESMF-internal method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsHConfig()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_HConfigIterAsHConfig - Interpret an iterator as hconfig
 
 ! !INTERFACE:
@@ -10058,7 +10072,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
 
@@ -10084,34 +10098,46 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIterBegin()"
 !BOP
 ! !IROUTINE: ESMF_HConfigIterBegin - Iterator at the beginning
-
+!
 ! !INTERFACE:
-  function ESMF_HConfigIterBegin(hconfig, keywordEnforcer, rc)
+!  function ESMF_HConfigIterBegin(hconfig, keywordEnforcer, rc)
 ! !RETURN VALUE:
-    type(ESMF_HConfigIter) :: ESMF_HConfigIterBegin
+!    type(ESMF_HConfigIter) :: ESMF_HConfigIterBegin
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(out), optional :: rc
-
+!    type(ESMF_HConfig[Iter]), intent(in)      :: hconfig
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    integer,            intent(out), optional :: rc
+!
 ! !DESCRIPTION:
 !   Return an iterator that points to the first item in {\tt hconfig}.
 !
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfig} or {\tt ESMF\_HConfigIter} object.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterBegin()"
+
+  function ESMF_HConfigIterBegin(hconfig, keywordEnforcer, rc)
+
+    type(ESMF_HConfigIter) :: ESMF_HConfigIterBegin
+
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
     integer               :: localrc                ! local return code
 
     ! initialize return code; assume routine not implemented
@@ -10131,6 +10157,40 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_HConfigIterBegin)
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigItrIterBegin()"
+
+  function ESMF_HConfigItrIterBegin(hconfig, keywordEnforcer, rc)
+
+    type(ESMF_HConfigIter) :: ESMF_HConfigItrIterBegin
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_HConfigItrIterBegin = ESMF_HConfigIterBegin(hconfigTemp, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -10254,34 +10314,46 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIterEnd()"
 !BOP
 ! !IROUTINE: ESMF_HConfigIterEnd - Iterator at the end
-
+!
 ! !INTERFACE:
-  function ESMF_HConfigIterEnd(hconfig, keywordEnforcer, rc)
+!  function ESMF_HConfigIterEnd(hconfig, keywordEnforcer, rc)
 ! !RETURN VALUE:
-    type(ESMF_HConfigIter) :: ESMF_HConfigIterEnd
+!    type(ESMF_HConfigIter) :: ESMF_HConfigIterEnd
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(out), optional :: rc
-
+!    type(ESMF_HConfig[Iter]), intent(in)      :: hconfig
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    integer,            intent(out), optional :: rc
+!
 ! !DESCRIPTION:
 !   Return an iterator that points to one past the last item in {\tt hconfig}.
 !
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfig} or {\tt ESMF\_HConfigIter} object.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterEnd()"
+
+  function ESMF_HConfigIterEnd(hconfig, keywordEnforcer, rc)
+
+    type(ESMF_HConfigIter) :: ESMF_HConfigIterEnd
+
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
     integer               :: localrc                ! local return code
 
     ! initialize return code; assume routine not implemented
@@ -10301,6 +10373,40 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_HConfigIterEnd)
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigItrIterEnd()"
+
+  function ESMF_HConfigItrIterEnd(hconfig, keywordEnforcer, rc)
+
+    type(ESMF_HConfigIter) :: ESMF_HConfigItrIterEnd
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_HConfigItrIterEnd = ESMF_HConfigIterEnd(hconfigTemp, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
