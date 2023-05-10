@@ -51,6 +51,18 @@ module ESMF_HConfigMod
 !
 !------------------------------------------------------------------------------
 
+  !TODO: Currently both ESMF_HConfig and ESMF_HConfigIter are identical
+  !TODO: types. The implementation simply mimics a difference on the user API
+  !TODO: level. The current way matches the deep C++ implementation of HConfig,
+  !TODO: however, in the long run it would be nice to clean this up.
+  !TODO: What really should happen is that there is a separate deep C++
+  !TODO: implementation for ESMF_HConfig and ESMF_HConfigIter, for nodes and
+  !TODO: iterators, respectively. At that point the Fortran derived types would
+  !TODO: also change to reflect this.
+  !TODO: As a consquence the inernal ESMF_HConfigIterAsHConfig() would go away,
+  !TODO: and the HConfig vs. HConfigIter implementations of overloaded
+  !TODO: interfaces would look different, depending on which type it is.
+
   ! Fortran type to hold pointer to C++ object
   type ESMF_HConfig
 #ifndef ESMF_NO_SEQUENCE
@@ -732,7 +744,7 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_HConfigAdd - Add content to HConfig object
+! !IROUTINE: ESMF_HConfigAdd - Add <Type> content to HConfig object
 
 ! !INTERFACE:
 !  subroutine ESMF_HConfigAdd(hconfig, content, keywordEnforcer, &
@@ -2006,7 +2018,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_HConfigAddMapKey - Add content to HConfig MapKey object
+! !IROUTINE: ESMF_HConfigAddMapKey - Add <Type> content to HConfig MapKey object
 
 ! !INTERFACE:
 !  subroutine ESMF_HConfigAdd(hconfig, content, keywordEnforcer, &
@@ -2735,7 +2747,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_HConfigAddMapVal - Add content to HConfig MapVal object
+! !IROUTINE: ESMF_HConfigAddMapVal - Add <Type> content to HConfig MapVal object
 
 ! !INTERFACE:
 !  subroutine ESMF_HConfigAdd(hconfig, content, keywordEnforcer, &
@@ -3464,13 +3476,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_HConfigAs<Type> - Return value as <Type>
+! !IROUTINE: ESMF_HConfigAs<TypeSpec> - Return value as <Type>
 
 ! !INTERFACE:
-!  function ESMF_HConfigAs<Type>(hconfig, keywordEnforcer, index, keyString, &
+!  function ESMF_HConfigAs<TypeSpec>(hconfig, keywordEnforcer, index, keyString, &
 !    doc, asOkay, rc)
 ! !RETURN VALUE:
-!    <Type> :: ESMF_HConfigAs<Type>
+!    <Type> :: ESMF_HConfigAs<TypeSpec>
 !
 ! !ARGUMENTS:
 !    type(ESMF_HConfig[Iter]) , intent(in)     :: hconfig
@@ -3486,14 +3498,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
 !   provided, {\tt asOkay == .true.}.
 !
-!   The supported <Type> options are:
+!   The supported <Type> / <TypeSpec> options are:
 !   \begin{itemize}
-!   \item {\tt integer(ESMF\_KIND\_I4)}
-!   \item {\tt integer(ESMF\_KIND\_I8)}
-!   \item {\tt logical}
-!   \item {\tt real(ESMF\_KIND\_R4)}
-!   \item {\tt real(ESMF\_KIND\_R8)}
-!   \item {\tt character(len=:), allocatable}
+!   \item {\tt integer(ESMF\_KIND\_I4)} / {\tt I4}
+!   \item {\tt integer(ESMF\_KIND\_I8)} / {\tt I8}
+!   \item {\tt logical}                 / {\tt Logical}
+!   \item {\tt real(ESMF\_KIND\_R4)}    / {\tt R4}
+!   \item {\tt real(ESMF\_KIND\_R8)}    / {\tt R8}
+!   \item {\tt character(len=:), allocatable} / {\tt String}
 !   \end{itemize}
 !
 ! The arguments are:
@@ -4171,13 +4183,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_HConfigAs<Type>MapKey - Return map key as <Type>
+! !IROUTINE: ESMF_HConfigAs<TypeSpec>MapKey - Return map key as <Type>
 
 ! !INTERFACE:
-!  function ESMF_HConfigAs<Type>MapKey(hconfig, keywordEnforcer, index, keyString, &
+!  function ESMF_HConfigAs<TypeSpec>MapKey(hconfig, keywordEnforcer, index, keyString, &
 !    doc, asOkay, rc)
 ! !RETURN VALUE:
-!    <Type> :: ESMF_HConfigAs<Type>MapKey
+!    <Type> :: ESMF_HConfigAs<TypeSpec>MapKey
 !
 ! !ARGUMENTS:
 !    type(ESMF_HConfigIter), intent(in)        :: hconfig
@@ -4193,14 +4205,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
 !   provided, {\tt asOkay == .true.}.
 !
-!   The supported <Type> options are:
+!   The supported <Type> / <TypeSpec> options are:
 !   \begin{itemize}
-!   \item {\tt integer(ESMF\_KIND\_I4)}
-!   \item {\tt integer(ESMF\_KIND\_I8)}
-!   \item {\tt logical}
-!   \item {\tt real(ESMF\_KIND\_R4)}
-!   \item {\tt real(ESMF\_KIND\_R8)}
-!   \item {\tt character(len=:), allocatable}
+!   \item {\tt integer(ESMF\_KIND\_I4)} / {\tt I4}
+!   \item {\tt integer(ESMF\_KIND\_I8)} / {\tt I8}
+!   \item {\tt logical}                 / {\tt Logical}
+!   \item {\tt real(ESMF\_KIND\_R4)}    / {\tt R4}
+!   \item {\tt real(ESMF\_KIND\_R8)}    / {\tt R8}
+!   \item {\tt character(len=:), allocatable} / {\tt String}
 !   \end{itemize}
 !
 ! The arguments are:
@@ -4653,13 +4665,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_HConfigAs<Type>MapVal - Return map value as <Type>
+! !IROUTINE: ESMF_HConfigAs<TypeSpec>MapVal - Return map value as <Type>
 
 ! !INTERFACE:
-!  function ESMF_HConfigAs<Type>MapVal(hconfig, keywordEnforcer, index, keyString, &
+!  function ESMF_HConfigAs<TypeSpec>MapVal(hconfig, keywordEnforcer, index, keyString, &
 !    doc, asOkay, rc)
 ! !RETURN VALUE:
-!    <Type> :: ESMF_HConfigAs<Type>MapVal
+!    <Type> :: ESMF_HConfigAs<TypeSpec>MapVal
 !
 ! !ARGUMENTS:
 !    type(ESMF_HConfigIter), intent(in)        :: hconfig
@@ -4675,14 +4687,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
 !   provided, {\tt asOkay == .true.}.
 !
-!   The supported <Type> options are:
+!   The supported <Type> / <TypeSpec> options are:
 !   \begin{itemize}
-!   \item {\tt integer(ESMF\_KIND\_I4)}
-!   \item {\tt integer(ESMF\_KIND\_I8)}
-!   \item {\tt logical}
-!   \item {\tt real(ESMF\_KIND\_R4)}
-!   \item {\tt real(ESMF\_KIND\_R8)}
-!   \item {\tt character(len=:), allocatable}
+!   \item {\tt integer(ESMF\_KIND\_I4)} / {\tt I4}
+!   \item {\tt integer(ESMF\_KIND\_I8)} / {\tt I8}
+!   \item {\tt logical}                 / {\tt Logical}
+!   \item {\tt real(ESMF\_KIND\_R4)}    / {\tt R4}
+!   \item {\tt real(ESMF\_KIND\_R8)}    / {\tt R8}
+!   \item {\tt character(len=:), allocatable} / {\tt String}
 !   \end{itemize}
 !
 ! The arguments are:
@@ -5135,13 +5147,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_HConfigAs<Type>Seq - Return value as sequence array of <Type>
+! !IROUTINE: ESMF_HConfigAs<TypeSpec>Seq - Return value as sequence array of <Type>
 
 ! !INTERFACE:
-!  function ESMF_HConfigAs<Type>Seq(hconfig, keywordEnforcer, index, keyString, &
+!  function ESMF_HConfigAs<TypeSpec>Seq(hconfig, keywordEnforcer, index, keyString, &
 !    doc, asOkay, rc)
 ! !RETURN VALUE:
-!    <Type>, allocatable :: ESMF_HConfigAs<Type>Seq(:)
+!    <Type>, allocatable :: ESMF_HConfigAs<TypeSpec>Seq(:)
 !
 ! !ARGUMENTS:
 !    type(ESMF_HConfig[Iter]), intent(in)      :: hconfig
@@ -5157,18 +5169,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
 !   provided, {\tt asOkay == .true.}.
 !
-!   The supported <Type> options are:
+!   The supported <Type> / <TypeSpec> options are:
 !   \begin{itemize}
-!   \item {\tt integer(ESMF\_KIND\_I4)}
-!   \item {\tt integer(ESMF\_KIND\_I8)}
-!   \item {\tt logical}
-!   \item {\tt real(ESMF\_KIND\_R4)}
-!   \item {\tt real(ESMF\_KIND\_R8)}
-!   \item {\tt character(len=:)} See note about {\tt stringLen} argument below!
+!   \item {\tt integer(ESMF\_KIND\_I4)} / {\tt I4}
+!   \item {\tt integer(ESMF\_KIND\_I8)} / {\tt I8}
+!   \item {\tt logical}                 / {\tt Logical}
+!   \item {\tt real(ESMF\_KIND\_R4)}    / {\tt R4}
+!   \item {\tt real(ESMF\_KIND\_R8)}    / {\tt R8}
+!   \item {\tt character(len=:), allocatable} / {\tt String} (See note about {\tt stringLen} argument below!)
 !   \end{itemize}
 !
 !   An extra non-optional argument {\tt stringLen} must be provided for the
-!   {\bf string} option. This argument specifies the number of characters in
+!   {\bf String} option. This argument specifies the number of characters in
 !   each of the output strings. Longer actual string values are tuncated, while
 !   shorter actual string values are padded with white space.
 !
@@ -5934,13 +5946,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_HConfigAs<Type>SeqMapKey - Return map key value as sequence array of <Type>
+! !IROUTINE: ESMF_HConfigAs<TypeSpec>SeqMapKey - Return map key value as sequence array of <Type>
 
 ! !INTERFACE:
-!  function ESMF_HConfigAs<Type>SeqMapKey(hconfig, keywordEnforcer, index, keyString, &
+!  function ESMF_HConfigAs<TypeSpec>SeqMapKey(hconfig, keywordEnforcer, index, keyString, &
 !    doc, asOkay, rc)
 ! !RETURN VALUE:
-!    <Type>, allocatable :: ESMF_HConfigAs<Type>SeqMapKey(:)
+!    <Type>, allocatable :: ESMF_HConfigAs<TypeSpec>SeqMapKey(:)
 !
 ! !ARGUMENTS:
 !    type(ESMF_HConfigIter), intent(in)        :: hconfig
@@ -5956,18 +5968,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
 !   provided, {\tt asOkay == .true.}.
 !
-!   The supported <Type> options are:
+!   The supported <Type> / <TypeSpec> options are:
 !   \begin{itemize}
-!   \item {\tt integer(ESMF\_KIND\_I4)}
-!   \item {\tt integer(ESMF\_KIND\_I8)}
-!   \item {\tt logical}
-!   \item {\tt real(ESMF\_KIND\_R4)}
-!   \item {\tt real(ESMF\_KIND\_R8)}
-!   \item {\tt character(len=:)} See note about {\tt stringLen} argument below!
+!   \item {\tt integer(ESMF\_KIND\_I4)} / {\tt I4}
+!   \item {\tt integer(ESMF\_KIND\_I8)} / {\tt I8}
+!   \item {\tt logical}                 / {\tt Logical}
+!   \item {\tt real(ESMF\_KIND\_R4)}    / {\tt R4}
+!   \item {\tt real(ESMF\_KIND\_R8)}    / {\tt R8}
+!   \item {\tt character(len=:), allocatable} / {\tt String} (See note about {\tt stringLen} argument below!)
 !   \end{itemize}
 !
 !   An extra non-optional argument {\tt stringLen} must be provided for the
-!   {\bf string} option. This argument specifies the number of characters in
+!   {\bf String} option. This argument specifies the number of characters in
 !   each of the output strings. Longer actual string values are tuncated, while
 !   shorter actual string values are padded with white space.
 !
@@ -6496,13 +6508,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_HConfigAs<Type>SeqMapVal - Return map value as sequence array of <Type>
+! !IROUTINE: ESMF_HConfigAs<TypeSpec>SeqMapVal - Return map value as sequence array of <Type>
 
 ! !INTERFACE:
-!  function ESMF_HConfigAs<Type>SeqMapVal(hconfig, keywordEnforcer, index, keyString, &
+!  function ESMF_HConfigAs<TypeSpec>SeqMapVal(hconfig, keywordEnforcer, index, keyString, &
 !    doc, asOkay, rc)
 ! !RETURN VALUE:
-!    <Type>, allocatable :: ESMF_HConfigAs<Type>SeqMapVal(:)
+!    <Type>, allocatable :: ESMF_HConfigAs<TypeSpec>SeqMapVal(:)
 !
 ! !ARGUMENTS:
 !    type(ESMF_HConfigIter), intent(in)        :: hconfig
@@ -6518,18 +6530,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
 !   provided, {\tt asOkay == .true.}.
 !
-!   The supported <Type> options are:
+!   The supported <Type> / <TypeSpec> options are:
 !   \begin{itemize}
-!   \item {\tt integer(ESMF\_KIND\_I4)}
-!   \item {\tt integer(ESMF\_KIND\_I8)}
-!   \item {\tt logical}
-!   \item {\tt real(ESMF\_KIND\_R4)}
-!   \item {\tt real(ESMF\_KIND\_R8)}
-!   \item {\tt character(len=:)} See note about {\tt stringLen} argument below!
+!   \item {\tt integer(ESMF\_KIND\_I4)} / {\tt I4}
+!   \item {\tt integer(ESMF\_KIND\_I8)} / {\tt I8}
+!   \item {\tt logical}                 / {\tt Logical}
+!   \item {\tt real(ESMF\_KIND\_R4)}    / {\tt R4}
+!   \item {\tt real(ESMF\_KIND\_R8)}    / {\tt R8}
+!   \item {\tt character(len=:), allocatable} / {\tt String} (See note about {\tt stringLen} argument below!)
 !   \end{itemize}
 !
 !   An extra non-optional argument {\tt stringLen} must be provided for the
-!   {\bf string} option. This argument specifies the number of characters in
+!   {\bf String} option. This argument specifies the number of characters in
 !   each of the output strings. Longer actual string values are tuncated, while
 !   shorter actual string values are padded with white space.
 !
@@ -7200,7 +7212,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_HConfigCreate - Create HConfig object from content
+! !IROUTINE: ESMF_HConfigCreate - Create HConfig object from <Type> content
 
 ! !INTERFACE:
 !  function ESMF_HConfigCreate(content, keywordEnforcer, rc)
@@ -11097,7 +11109,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_HConfigSet - Set content of HConfig object
+! !IROUTINE: ESMF_HConfigSet - Set <Type> content in HConfig object
 
 ! !INTERFACE:
 !  subroutine ESMF_HConfigSet(hconfig, content, keywordEnforcer, &
@@ -12250,7 +12262,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_HConfigSetMapKey - Set content of HConfig MapKey object
+! !IROUTINE: ESMF_HConfigSetMapKey - Set <Type> content in HConfig MapKey object
 
 ! !INTERFACE:
 !  subroutine ESMF_HConfigSet(hconfig, content, keywordEnforcer, &
@@ -12909,7 +12921,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_HConfigSetMapVal - Set content of HConfig MapVal object
+! !IROUTINE: ESMF_HConfigSetMapVal - Set <Type> content in HConfig MapVal object
 
 ! !INTERFACE:
 !  subroutine ESMF_HConfigSet(hconfig, content, keywordEnforcer, &
