@@ -2935,7 +2935,7 @@ void ESMCI_MeshGetNodeCreateInfo(Mesh *mesh,
 
 
 
-void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid **ngrid, int *rc) {
+void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid **node_distgrid, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshcreatenodedistgrid()"
 
@@ -2991,11 +2991,10 @@ void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid **ngrid, int *rc) {
 
     int *indices = (nsize==0)?NULL:&ngids[0];
     
-     FTN_X(f_esmf_getmeshdistgrid)(ngrid, &nsize, indices, &rc1);
-
+    FTN_X(f_esmf_getmeshdistgrid)(node_distgrid, &nsize, indices, &rc1);
     if (ESMC_LogDefault.MsgFoundError(rc1,
-      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc))) return;
+                                      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      ESMC_NOT_PRESENT_FILTER(rc))) return;
   }
 
   // Set return code
@@ -3004,7 +3003,7 @@ void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid **ngrid, int *rc) {
 }
 
 
-void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, DistGrid **egrid, int *rc) {
+void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, DistGrid **elem_distgrid, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshcreateelemdistgrid()"
 
@@ -3058,7 +3057,7 @@ void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, DistGrid **egrid, int *rc) {
     int *indices = (esize==0)?NULL:&egids[0];
 
 
-    FTN_X(f_esmf_getmeshdistgrid)(egrid, &esize, indices, &rc1);
+    FTN_X(f_esmf_getmeshdistgrid)(elem_distgrid, &esize, indices, &rc1);
 
     if(ESMC_LogDefault.MsgFoundError(rc1,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
