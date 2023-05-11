@@ -71,7 +71,7 @@ echo "::endgroup::"
 # increase stack size
 echo "::group::Increase Stack Size"
 ulimit -s unlimited
-ulimit
+ulimit -a
 echo "::endgroup::"
 
 # run app prototypes 
