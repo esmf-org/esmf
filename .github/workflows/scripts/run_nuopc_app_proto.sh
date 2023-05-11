@@ -68,6 +68,12 @@ $MPI_FC -o test_mpi.x test_mpi.F90
 mpirun -np 2 ./test_mpi.x
 echo "::endgroup::"
 
+# increase stack size
+echo "::group::Increase Stack Size"
+ulimit -s unlimited
+ulimit
+echo "::endgroup::"
+
 # run app prototypes 
 echo "::group::Build and Run NUOPC Application Prototypes"
 chmod 755 testProtos.sh
