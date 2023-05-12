@@ -80,7 +80,7 @@ chmod 755 testProtos.sh
 #./testProtos.sh 2>&1 | tee testProtos.log
 #cat testProtos.log
 
-./testProtos.sh >&testProtos.log&
+#./testProtos.sh >&testProtos.log&
 sleep 120
 
 # attach gdb to processes
@@ -105,6 +105,7 @@ echo "  gdb --batch -x \"$CONFFILE\" 2>/dev/null" >> trace_cmd.sh
 echo "done" >> trace_cmd.sh
 
 chmod 755 trace_cmd.sh
+cat trace_cmd.sh
 
 nohup ./trace_cmd.sh `pwd` sleep "gh_runner" > /dev/null 2>&1 &
 
