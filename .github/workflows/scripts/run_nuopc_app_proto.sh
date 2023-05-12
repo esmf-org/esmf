@@ -46,7 +46,7 @@ if [[ "$comp" == *"oneapi"* ]]; then
 else
   export PATH=$spack_install_dir/view/bin:$PATH
   # set it for OpenMPI to fix not enough slots issue
-  export TOOLRUN="--oversubscribe --mca orte_base_help_aggregate 0"
+  export TOOLRUN="--oversubscribe --mca coll dynamic_gen2"
   MPI_FC=mpif90
 fi
 which mpirun
