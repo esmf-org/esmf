@@ -37,7 +37,7 @@ jobs:
       run: |
         sudo apt-get -qq update
         sudo apt-get -qq install tar unzip file gringo
-        sudo apt-get -qq install build-essential binutils-dev gfortran
+        sudo apt-get -qq install build-essential binutils-dev gfortran gdb
         sudo apt-get -qq install python3-dev
 
     # restore Intel oneAPI compiler installation from cache
@@ -58,20 +58,20 @@ jobs:
         scripts/install_oneapi.sh -c ${{ matrix.compiler }}
 
     # concretize test environment 
-    - name: Concretize Spack Environment Using YAML Specification
-      run: |
-        ${{ github.workspace }}/.github/workflows/scripts/spack_concretize.sh \
-          -a x86_64 \
-          -c ${{ matrix.compiler }} \
-          -d ${{ matrix.esmf }} \
-          -i ~/.spack-ci \
-          -r ${{ github.workspace }} 
+    #- name: Concretize Spack Environment Using YAML Specification
+    #  run: |
+    #    ${{ github.workspace }}/.github/workflows/scripts/spack_concretize.sh \
+    #      -a x86_64 \
+    #      -c ${{ matrix.compiler }} \
+    #      -d ${{ matrix.esmf }} \
+    #      -i ~/.spack-ci \
+    #      -r ${{ github.workspace }} 
 
     # install test environment
-    - name: Install ESMF with Spack 
-      run: |
-        ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
-          -r ${{ github.workspace }}
+    #- name: Install ESMF with Spack 
+    #  run: |
+    #    ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
+    #      -r ${{ github.workspace }}
 
     # checkout NUOPC app prototypes
     - name: Checkout NUOPC app prototypes
