@@ -85,6 +85,8 @@ chmod 755 testProtos.sh
 
 ./testProtos.sh >&testProtos.log&
 sleep 120
+ps
+cat testProtos.log
 
 # create backtrace script
 echo "#!/bin/bash" > trace_cmd.sh
@@ -111,12 +113,17 @@ cat trace_cmd.sh
 chmod 755 trace_cmd.sh
 
 # attach gdb to processes in the background
-nohup ./trace_cmd.sh `pwd` asyncIOApp "gh_runner" > /dev/null 2>&1 &
+nohup ./trace_cmd.sh `pwd` App "gh_runner" > /dev/null 2>&1 &
 
 sleep 120
 
 # show content of the collected backtraces
+ls -al
 cat bt-*
+
+cd AsyncIOBlockingProto
+ls -al
+cat PET*
 
 exit
 
