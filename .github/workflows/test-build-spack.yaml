@@ -25,7 +25,7 @@ jobs:
         #esmf: [esmf@8.4.2+parallelio~xerces~pnetcdf^parallelio@2.5.10+pnetcdf, esmf@8.4.2~xerces~pnetcdf]
         #esmf: [esmf@8.4.2+pio~parallelio~xerces~pnetcdf]
         #esmf: [esmf@8.4.2]
-        esmf: [esmf@develop~external-parallelio]
+        esmf: [esmf@develop+external-parallelio+mpi~xerces^netcdf-c+dap+mpi^parallel-netcdf@1.12.3^parallelio@2.5.10+pnetcdf]
 
     steps:
     # check out base repo
