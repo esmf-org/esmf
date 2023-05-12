@@ -22,7 +22,8 @@ jobs:
         #compiler: [oneapi@2023.0.0]
         compiler: [gcc@11.3.0]
         #esmf: [esmf@8.4.2, esmf@8.4.2~external-parallelio]
-        esmf: [esmf@8.4.2+parallelio~xerces~pnetcdf^parallelio@2.5.10+pnetcdf, esmf@8.4.2~xerces~pnetcdf]
+        #esmf: [esmf@8.4.2+parallelio~xerces~pnetcdf^parallelio@2.5.10+pnetcdf, esmf@8.4.2~xerces~pnetcdf]
+        esmf: [esmf@8.4.2+pio~xerces~pnetcdf]
 
     steps:
     # check out base repo
@@ -74,8 +75,8 @@ jobs:
     - name: Checkout NUOPC app prototypes
       uses: actions/checkout@v3
       with:
-        #repository: esmf-org/nuopc-app-prototypes
-        repository: uturuncoglu/nuopc-app-prototypes
+        repository: esmf-org/nuopc-app-prototypes
+        #repository: uturuncoglu/nuopc-app-prototypes
         path: ${{ github.workspace }}/nuopc-app-prototypes
         ref: develop
 
