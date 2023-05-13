@@ -1339,6 +1339,7 @@ interface assignment (=)
   module procedure ESMF_ptas2
   module procedure ESMF_ioas
   module procedure ESMF_ifas_string
+  module procedure ESMF_FileFormatAsString
   module procedure ESMF_FileStatusAs
 end interface  
 
@@ -1930,6 +1931,36 @@ end function ESMF_FileFormatEq
                                  FileFormat2%fileformat)
 
 end function ESMF_FileFormatNe
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FileFormatAsString"
+subroutine ESMF_FileFormatAsString(String, FileFormat)
+  character(len=*), intent(out) :: String
+  type(ESMF_FileFormat_Flag), intent(in) :: FileFormat
+
+  if (FileFormat == ESMF_FILEFORMAT_UNKNOWN) then
+     String = 'ESMF_FILEFORMAT_UNKNOWN'
+  else if (FileFormat == ESMF_FILEFORMAT_VTK) then
+     String = 'ESMF_FILEFORMAT_VTK'
+  else if (FileFormat == ESMF_FILEFORMAT_SCRIP) then
+     String = 'ESMF_FILEFORMAT_SCRIP'
+  else if (FileFormat == ESMF_FILEFORMAT_ESMFMESH) then
+     String = 'ESMF_FILEFORMAT_ESMFMESH'
+  else if (FileFormat == ESMF_FILEFORMAT_ESMFGRID) then
+     String = 'ESMF_FILEFORMAT_ESMFGRID'
+  else if (FileFormat == ESMF_FILEFORMAT_UGRID) then
+     String = 'ESMF_FILEFORMAT_UGRID'
+  else if (FileFormat == ESMF_FILEFORMAT_CFGRID) then
+     ! Note that ESMF_FILEFORMAT_CFGRID is the same as ESMF_FILEFORMAT_GRIDSPEC
+     String = 'ESMF_FILEFORMAT_CFGRID/ESMF_FILEFORMAT_GRIDSPEC'
+  else if (FileFormat == ESMF_FILEFORMAT_MOSAIC) then
+     String = 'ESMF_FILEFORMAT_MOSAIC'
+  else if (FileFormat == ESMF_FILEFORMAT_TILE) then
+     String = 'ESMF_FILEFORMAT_TILE'
+  else
+     String = '(Unexpected ESMF_FILEFORMAT value)'
+  end if
+end subroutine ESMF_FileFormatAsString
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

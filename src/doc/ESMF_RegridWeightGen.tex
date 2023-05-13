@@ -307,6 +307,9 @@ ESMF_RegridWeightGen
         [--extrap_num_levels <L>]
         [--ignore_unmapped|-i]
         [--ignore_degenerate]
+        [--src_type SCRIP|ESMFMESH|UGRID|GRIDSPEC|MOSAIC|TILE]
+        [--dst_type SCRIP|ESMFMESH|UGRID|GRIDSPEC|MOSAIC|TILE]
+        [-t SCRIP|ESMFMESH|UGRID|GRIDSPEC|MOSAIC|TILE]
         [-r]
         [--src_regional]
         [--dst_regional]
@@ -473,6 +476,23 @@ where:
     --ignore_degenerate - ignore degenerate cells in the input grids. If not specified
                         the default is to stop with an error if an degenerate
                         cell is found.
+
+    --src_type        - an optional argument specifying the source grid file type.
+                        The value can be one of SCRIP, ESMFMESH, UGRID, GRIDSPEC, MOSAIC or TILE.
+                        If neither --src_type nor -t is given, the source grid file type will be
+                        determined automatically. (Usually it is unnecessary to provide --src_type,
+                        but it can be specified when the automatic file type determination fails.)
+
+    --dst_type        - an optional argument specifying the destination grid file type.
+                        The value can be one of SCRIP, ESMFMESH, UGRID, GRIDSPEC, MOSAIC or TILE.
+                        If neither --dst_type nor -t is given, the destination grid file type will be
+                        determined automatically. (Usually it is unnecessary to provide --dst_type,
+                        but it can be specified when the automatic file type determination fails.)
+
+    -t                - an optional argument specifying the file types for both the source
+                        and the destination grid files.
+                        The value can be one of SCRIP, ESMFMESH, UGRID, GRIDSPEC, MOSAIC or TILE.
+                        If -t is given, then neither --src_type nor --dst_type can be given.
 
     -r                - an optional argument specifying that the source and
                         destination grids are regional grids.  If the argument
