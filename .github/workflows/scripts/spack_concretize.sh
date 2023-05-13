@@ -163,4 +163,8 @@ echo "::endgroup::"
 # concretize spack environment
 echo "::group::Concretize Spack Environment Using YAML Specification"
 spack --color always -e $run_dir/. concretize -f
+if [ $? -ne 0 ]; then
+  echo "Error in concretize step! exiting ..."
+  exit $?
+fi
 echo "::endgroup::"
