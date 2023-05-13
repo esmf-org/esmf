@@ -78,55 +78,8 @@ echo "::endgroup::"
 echo "::group::Build and Run NUOPC Application Prototypes"
 # make proto script executable
 chmod 755 testProtos.sh
-
 # run app prototypes in the background
-#./testProtos.sh 2>&1 | tee testProtos.log
-#cat testProtos.log
-
-./testProtos.sh >&testProtos.log&
-sleep 60
-
-# create backtrace script
-echo "#!/bin/bash" > trace_cmd.sh
-echo "pid_lst=\`ps -ef | grep \$2 | awk '{print \$2}'\`" >> trace_cmd.sh
-echo "echo \$pid_lst" >> trace_cmd.sh
-echo "for i in \$pid_lst" >> trace_cmd.sh
-echo "do" >> trace_cmd.sh
-echo "  prefix=\"\${3}_\${i}\"" >> trace_cmd.sh
-echo "  CONFFILE=\"\$1/bt-\${prefix}.conf\"" >> trace_cmd.sh
-echo "  echo \"set pagination off\" >\"\$CONFFILE\"" >> trace_cmd.sh
-echo "  echo \"set logging file \$1/bt-\${prefix}.txt\" >> \"\$CONFFILE\"" >> trace_cmd.sh
-echo "  echo \"set logging overwrite on\" >> \"\$CONFFILE\"" >> trace_cmd.sh
-echo "  echo \"set logging redirect on\" >> \"\$CONFFILE\"" >> trace_cmd.sh
-echo "  echo \"set logging on\" >> \"\$CONFFILE\"" >> trace_cmd.sh
-echo "  echo \"attach \$i\" >> \"\$CONFFILE\"" >> trace_cmd.sh
-echo "  echo \"bt\" >> \"\$CONFFILE\"" >> trace_cmd.sh
-echo "  echo \"detach\" >> \"\$CONFFILE\"" >> trace_cmd.sh
-echo "  echo \"set logging off\" >> \"\$CONFFILE\"" >> trace_cmd.sh
-echo "  echo \"quit\" >> \"\$CONFFILE\"" >> trace_cmd.sh
-echo "  gdb --batch -x \"\$CONFFILE\" 2>/dev/null" >> trace_cmd.sh
-echo "done" >> trace_cmd.sh
-cat trace_cmd.sh
-
-# make it executable
-chmod 755 trace_cmd.sh
-
-# attach gdb to processes in the background
-nohup ./trace_cmd.sh `pwd` App "gh_runner" > /dev/null 2>&1 &
-
-sleep 60
-
-# show content of the collected backtraces
-ls -al
-cat bt-*
-
-cd AsyncIOBlockingProto
-ls -al
-cat PET*
-cat *.std*
-
-exit
-
+./testProtos.sh 2>&1 | tee testProtos.log
 echo "::endgroup::"
 
 # process output
