@@ -1353,9 +1353,9 @@ contains
     print *, "                      [--extrap_num_levels <L>]"
     print *, "                      [--ignore_unmapped|-i]"
     print *, "                      [--ignore_degenerate]"
-    print *, "                      [--src_type SCRIP|ESMFMESH|UGRID|GRIDSPEC|MOSAIC|TILE]"
-    print *, "                      [--dst_type SCRIP|ESMFMESH|UGRID|GRIDSPEC|MOSAIC|TILE]"
-    print *, "                      [-t SCRIP|ESMFMESH|UGRID|GRIDSPEC|MOSAIC|TILE]"
+    print *, "                      [--src_type SCRIP|ESMFMESH|UGRID|CFGRID|GRIDSPEC|MOSAIC|TILE]"
+    print *, "                      [--dst_type SCRIP|ESMFMESH|UGRID|CFGRID|GRIDSPEC|MOSAIC|TILE]"
+    print *, "                      [-t SCRIP|ESMFMESH|UGRID|CFGRID|GRIDSPEC|MOSAIC|TILE]"
     print *, "                      [-r]"
     print *, "                      [--src_regional]"
     print *, "                      [--dst_regional]"
@@ -1410,18 +1410,18 @@ contains
     print *, "--ignore_degenerate - ignore degenerate cells in the input grids. If not specified,"
     print *, "                          the default is to stop with an error."
     print *, "--src_type - an optional argument specifying the source grid file type."
-    print *, "             The value can be one of SCRIP, ESMFMESH, UGRID, GRIDSPEC, MOSAIC or TILE."
+    print *, "             The value can be one of SCRIP, ESMFMESH, UGRID, CFGRID, GRIDSPEC, MOSAIC or TILE."
     print *, "             If neither --src_type nor -t is given, the source grid file type will be"
     print *, "             determined automatically. (Usually it is unnecessary to provide --src_type,"
     print *, "             but it can be specified when the automatic file type determination fails.)"
     print *, "--dst_type - an optional argument specifying the destination grid file type."
-    print *, "             The value can be one of SCRIP, ESMFMESH, UGRID, GRIDSPEC, MOSAIC or TILE."
+    print *, "             The value can be one of SCRIP, ESMFMESH, UGRID, CFGRID, GRIDSPEC, MOSAIC or TILE."
     print *, "             If neither --dst_type nor -t is given, the destination grid file type will be"
     print *, "             determined automatically. (Usually it is unnecessary to provide --dst_type,"
     print *, "             but it can be specified when the automatic file type determination fails.)"
     print *, "-t         - an optional argument specifying the file types for both the source"
     print *, "             and the destination grid files."
-    print *, "             The value can be one of SCRIP, ESMFMESH, UGRID, GRIDSPEC, MOSAIC or TILE."
+    print *, "             The value can be one of SCRIP, ESMFMESH, UGRID, CFGRID, GRIDSPEC, MOSAIC or TILE."
     print *, "             If -t is given, then neither --src_type nor --dst_type can be given."
     print *, "-r         - an optional argument specifying the source and destination grids"
     print *, "             are regional grids.  Without this argument, the grids are assumed"
@@ -1502,6 +1502,8 @@ contains
        fileType = ESMF_FILEFORMAT_ESMFMESH
     case ('UGRID')
        fileType = ESMF_FILEFORMAT_UGRID
+    case ('CFGRID')
+       fileType = ESMF_FILEFORMAT_CFGRID
     case ('GRIDSPEC')
        fileType = ESMF_FILEFORMAT_GRIDSPEC
     case ('MOSAIC')
@@ -1511,7 +1513,7 @@ contains
     case default
        write(*,*)
        print *, "ERROR: Unknown ", trim(argName), ": must be one of:"
-       print *, "SCRIP, ESMFMESH, UGRID, GRIDSPEC, MOSAIC or TILE."
+       print *, "SCRIP, ESMFMESH, UGRID, CFGRID, GRIDSPEC, MOSAIC or TILE."
        print *, "Use the --help argument to see an explanation of usage."
        call ESMF_Finalize(endflag=ESMF_END_ABORT)
     end select
