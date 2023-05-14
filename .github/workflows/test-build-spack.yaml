@@ -38,7 +38,7 @@ jobs:
     - name: Install Core Development Tools
       run: |
         sudo apt-get -qq update
-        sudo apt-get -qq install tar unzip file gringo
+        sudo apt-get -qq install tar unzip file curl gringo
         sudo apt-get -qq install build-essential binutils-dev gfortran gdb
         sudo apt-get -qq install python3-dev
 
