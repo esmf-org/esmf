@@ -42,6 +42,7 @@ export ESMFMKFILE=$spack_install_dir/view/lib/esmf.mk
 if [[ "$comp" == *"oneapi"* ]]; then
   # this is not correct, need to be changed later
   . /opt/intel/oneapi/setvars.sh
+  export TOOLRUN=""
   MPI_FC=mpiifort
 else
   export PATH=$spack_install_dir/view/bin:$PATH
@@ -65,13 +66,7 @@ echo "  print*, 'Hello from ', id, ' of ', p" >> test_mpi.F90
 echo "  call MPI_Finalize(err)" >> test_mpi.F90
 echo "end program test_mpi" >> test_mpi.F90
 $MPI_FC -o test_mpi.x test_mpi.F90
-mpirun -np 2 ./test_mpi.x
-echo "::endgroup::"
-
-# increase stack size
-echo "::group::Increase Stack Size"
-ulimit -s unlimited
-ulimit -a
+mpirun -np 2 ${TOOLRUN} ./test_mpi.x
 echo "::endgroup::"
 
 # run app prototypes 
