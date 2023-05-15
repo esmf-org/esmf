@@ -145,7 +145,8 @@ echo "  specs:" >> spack.yaml
 IFS=', ' read -r -a array <<< "$deps"
 for d in "${array[@]}"
 do
-  echo "  - $d esmf_pio=OFF %$comp target=$arch" >> spack.yaml
+  #echo "  - $d esmf_pio=OFF %$comp target=$arch" >> spack.yaml
+  echo "  - $d %$comp target=$arch" >> spack.yaml
 done
 echo "  packages:" >> spack.yaml
 echo "    all:" >> spack.yaml
