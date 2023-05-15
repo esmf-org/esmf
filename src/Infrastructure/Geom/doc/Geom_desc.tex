@@ -8,9 +8,13 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-The ESMF Geom class is used as a generic holder for other ESMF geometry objects (e.g. an ESMF_Grid). This allows a generic
-representation of a geometry to be passed through a couple system. Some operations (e.g. creating a Field) are supported on
-a Geom object and more will be added over time as needed. However, if an unsupported operation is needed the specific object
-can always be pulled out and operated on that way.
+The ESMF Geom class is used as a holder for other ESMF geometry objects (e.g. an ESMF Grid). This allows a generic
+representation of a geometry to be passed around (e.g. through a coupled system) without it's specific type being known.
+Some operations (e.g. creating a Field) are supported on a Geom object and more will be added over time as needed. However, if
+an unsupported operation is needed, then the specific geometry object can always be pulled out and operated on that way.
 
-%% Add something about staggerloc, meshloc, etc
+In addition to the geometry object a Geom can also contain information describing a location on a geometry, for example, in the case of
+Grid a geometry object can contain a stagger location. Having this information allows the creation of Fields and other capabilities to
+be performed in the most generic way on just a Geom object. The user doesn't need to specify this location information during the
+creation of a Geom object. If they don't, then default values for this information are provided which match those which would
+be used when when creating a Field with the specific geometry (e.g. stagger location ESMF\_STAGGERLOC\_CENTER for a Grid).
