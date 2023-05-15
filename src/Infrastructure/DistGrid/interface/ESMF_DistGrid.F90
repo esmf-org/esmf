@@ -155,6 +155,7 @@ module ESMF_DistGridMod
   public ESMF_DistGridSetInitCreated
   public ESMF_DistGridSeqIndex
   public ESMF_DistGridGetThis
+  public ESMF_DistGridSetThis
   
 !EOPI
 !------------------------------------------------------------------------------
@@ -4526,6 +4527,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_DistGridGetThis
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridSetThis()"
+!BOPI
+! !IROUTINE: ESMF_DistGridSetThis - Set C++ pointer in DistGrid
+
+! !INTERFACE:
+  subroutine ESMF_DistGridSetThis(distgrid, this, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DistGrid),intent(inout)           :: distgrid
+    type(ESMF_Pointer), intent(in)              :: this
+    integer,            intent(out),  optional  :: rc
+!
+!
+! !DESCRIPTION:
+!     Set C++ pointer in DistGrid.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid]
+!          Specified {\tt ESMF\_DistGrid} object.
+!     \item[this]
+!          C++ pointer.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Copy C++ pointer
+    distgrid%this = this
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_DistGridSetThis
 !------------------------------------------------------------------------------
 
 

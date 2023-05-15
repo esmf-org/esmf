@@ -141,6 +141,14 @@ void MBMesh_addnodes(MBMesh **mbmpp, int *_num_nodes, int *nodeId,
     int petCount = VM::getCurrent(&localrc)->getPetCount();
     ESMC_CHECK_PASSTHRU_THROW(localrc);
 
+    // Error check nodeIds
+    for (int n = 0; n < num_nodes; n++) {
+      if (nodeId[n] < 1) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                         " node ids must be >= 1 ", ESMC_CONTEXT,&localrc)) throw localrc;
+      }
+    }
+    
      // Get nodeOwner array and error check
     int *nodeOwner=NULL;
     if (present(nodeOwnerII)) { // if masks exist
@@ -312,6 +320,15 @@ void MBMesh_addelements(MBMesh **mbmpp,
       ThrowRequire(elemType != NULL);
       if (areaPresent) ThrowRequire(elemArea != NULL);
       if (elemCoordsPresent) ThrowRequire(elemCoords != NULL);
+    }
+
+
+    // Error check elemIds
+    for (int e = 0; e < num_elems; e++) {
+      if (elemId[e] < 1) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                         " element ids must be >= 1 ", ESMC_CONTEXT,&localrc)) throw localrc;
+      }
     }
 
     // Check element type

@@ -1,14 +1,7 @@
 \label{ConnectorCompMeta}
-The Connector Component metadata is implemented as an ESMF Attribute Package:
-
-\begin{itemize}
-    \item Convention: NUOPC
-    \item Purpose: General
-    \item Includes:
-    \begin{itemize}
-        \item ESG General (see for example the \htmladdnormallink{Component Attribute packages}{http://www.earthsystemmodeling.org/esmf\_releases/public/ESMF\_5\_2\_0rp2/ESMF\_refdoc/node6.html\#SECTION06022100000000000000} section in the ESMF v5.2.0rp2 documentation)
-    \end{itemize} 
-\end{itemize}
+The Connector Component metadata is implemented through ESMF\_Info. It can be accessed
+using the JSON Pointer "/NUOPC/Instance/" prefix followed by the "Attribute name"
+as per the table below. E.g. "Verbosity" is accessed using {\tt key="/NUOPC/Instance/Verbosity"}.
 
 \begin{longtable}{|p{.22\textwidth}|p{.6\textwidth}|p{.2\textwidth}|}
      \hline\hline

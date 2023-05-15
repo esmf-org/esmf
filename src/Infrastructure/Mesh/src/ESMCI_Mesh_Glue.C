@@ -182,6 +182,14 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *_num_nodes, int *nodeId,
      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
        throw localrc;  // bail out with exception
 
+     // Error check nodeIds
+     for (int n = 0; n < num_nodes; n++) {
+       if (nodeId[n] < 1) {
+         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                          " node ids must be >= 1 ", ESMC_CONTEXT,&localrc)) throw localrc;
+       }
+     }
+     
      // Get nodeOwner
      int *nodeOwner=NULL;
      bool nodeOwner_allocated=false;
@@ -222,6 +230,9 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *_num_nodes, int *nodeId,
       }
     }
 
+
+
+    
     // Create new nodes
     for (int n = 0; n < num_nodes; ++n) {
 
@@ -770,7 +781,17 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     // Get parametric dimension
     int parametric_dim=mesh.parametric_dim();
 
-    // Error check input
+    
+    //// Error check input
+
+     // Error check elemIds
+     for (int e = 0; e < num_elems; e++) {
+       if (elemId[e] < 1) {
+         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                          " element ids must be >= 1 ", ESMC_CONTEXT,&localrc)) throw localrc;
+       }
+     }
+    
     //// Check element type
     ////(DON'T NEED TO CHECK PDIM==2, BECAUSE WE NOW SUPPORT
     //// ANY NUMBER OF CORNERS WITH PDIM=2)
@@ -2914,7 +2935,7 @@ void ESMCI_MeshGetNodeCreateInfo(Mesh *mesh,
 
 
 
-void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid **ngrid, int *rc) {
+void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid **node_distgrid, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshcreatenodedistgrid()"
 
@@ -2970,11 +2991,10 @@ void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid **ngrid, int *rc) {
 
     int *indices = (nsize==0)?NULL:&ngids[0];
     
-     FTN_X(f_esmf_getmeshdistgrid)(ngrid, &nsize, indices, &rc1);
-
+    FTN_X(f_esmf_getmeshdistgrid)(node_distgrid, &nsize, indices, &rc1);
     if (ESMC_LogDefault.MsgFoundError(rc1,
-      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc))) return;
+                                      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      ESMC_NOT_PRESENT_FILTER(rc))) return;
   }
 
   // Set return code
@@ -2983,7 +3003,7 @@ void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid **ngrid, int *rc) {
 }
 
 
-void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, DistGrid **egrid, int *rc) {
+void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, DistGrid **elem_distgrid, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshcreateelemdistgrid()"
 
@@ -3037,7 +3057,7 @@ void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, DistGrid **egrid, int *rc) {
     int *indices = (esize==0)?NULL:&egids[0];
 
 
-    FTN_X(f_esmf_getmeshdistgrid)(egrid, &esize, indices, &rc1);
+    FTN_X(f_esmf_getmeshdistgrid)(elem_distgrid, &esize, indices, &rc1);
 
     if(ESMC_LogDefault.MsgFoundError(rc1,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,

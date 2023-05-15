@@ -3,7 +3,7 @@
 ALL: build_here 
 
 SOURCEC	  = 
-SOURCEF	  = ESMF_GeomBase.F90
+SOURCEF	  = ESMF_Geom.F90
 SOURCEH	  = 
 
 # List all .h files which should be copied to common include dir
@@ -13,7 +13,7 @@ OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
 LIBBASE	  = libesmf
-LOCDIR	  = src/Infrastructure/GeomBase/src
+LOCDIR	  = src/Infrastructure/Geom/src
 
 CLEANDIRS   =
 CLEANFILES  =

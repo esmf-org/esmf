@@ -7,7 +7,7 @@
 # Default compiler setting.
 #
 ESMF_F90DEFAULT         = ftn -h ssp -dy
-ESMF_F90LINKERDEFAULT   = CC -h new_for_init -h ssp
+ESMF_F90LINKERDEFAULT   = $(ESMF_CXXLINKER)
 ESMF_CXXDEFAULT         = CC -h new_for_init -h ssp
 ESMF_CDEFAULT           = cc -h new_for_init -h ssp
 

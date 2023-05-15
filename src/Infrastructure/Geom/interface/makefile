@@ -2,7 +2,7 @@
 
 ALL: build_here 
 
-SOURCEC	  = ESMCI_GeomBase_F.C
+SOURCEC	  = ESMCI_Geom_F.C
 SOURCEF	  = 
 SOURCEH	  = 
 
@@ -13,7 +13,7 @@ OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
 LIBBASE	  = libesmf
-LOCDIR	  = src/Infrastructure/GeomBase/interface
+LOCDIR	  = src/Infrastructure/Geom/interface
 
 CLEANDIRS   =
 CLEANFILES  =

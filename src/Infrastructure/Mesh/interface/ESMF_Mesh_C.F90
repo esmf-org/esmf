@@ -200,7 +200,7 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_getmeshdistgrid"
-    subroutine f_esmf_getmeshdistgrid(dgrid, count, indices, rc)
+    subroutine f_esmf_getmeshdistgrid(distgridPtr, count, indices, rc)
       use ESMF_UtilTypesMod
       use ESMF_LogErrMod
       use ESMF_BaseMod
@@ -208,13 +208,14 @@
 
       implicit none
 
-      type(ESMF_DistGrid)    :: dgrid
+      type(ESMF_Pointer)     :: distgridPtr
       integer, intent(in)    :: count
       integer, intent(inout) :: indices(count)
       integer, intent(out)   :: rc
 
       integer :: localrc
       integer, allocatable :: indicesLocal(:)
+      type(ESMF_DistGrid)    :: distgrid
 
       ! initialize return code; assume routine not implemented
       rc = ESMF_RC_NOT_IMPL
@@ -224,14 +225,24 @@
       if (count > 0) then
         indicesLocal(1:count) = indices(1:count)
       endif
- 
-      dgrid = ESMF_DistGridCreate(indicesLocal, rc=localrc)
+
+      ! Create the DistGrid
+      distgrid = ESMF_DistGridCreate(indicesLocal, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) then
-          deallocate(indicesLocal)
-          return
+        ESMF_CONTEXT, rcToReturn=rc)) then
+        deallocate(indicesLocal)  ! prevent memory leak when bailing
+        return
       endif
 
+      ! Get the pointer to the actual internal DistGrid object (vs. the F90 wrapper object)
+      call ESMF_DistGridGetThis(distgrid, distgridPtr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) then
+        deallocate(indicesLocal)  ! prevent memory leak when bailing
+        return
+      endif
+
+      ! clean up
       deallocate(indicesLocal)
 
       ! Return success

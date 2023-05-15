@@ -8,7 +8,7 @@ include $(ESMF_DIR)/makefile
 
 DIRS        = stubs Util LogErr VM Trace Base TimeMgr DELayout HConfig \
               Config ArraySpec LocalArray Route DistGrid Array ArrayBundle IO \
-              Grid Mesh XGridGeomBase GridUtil LocStream XGrid GeomBase \
+              Grid Mesh XGridGeomBase GridUtil LocStream XGrid Geom \
               PointList Regrid Field Container FieldBundle
 
 CLEANDIRS   =
