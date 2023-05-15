@@ -34,6 +34,9 @@ jobs:
     - name: Checkout Base Repository
       uses: actions/checkout@v3
 
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+
     # prepare core environment
     - name: Install Core Development Tools
       run: |
