@@ -73,7 +73,6 @@ jobs:
       if: ${{ success() }}
       with:
         repository: esmf-org/nuopc-app-prototypes
-        #repository: uturuncoglu/nuopc-app-prototypes
         path: ${{ github.workspace }}/nuopc-app-prototypes
         ref: develop
 
