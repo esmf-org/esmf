@@ -37,7 +37,7 @@ module ESMF_FieldPrMod
   use ESMF_StaggerLocMod
   use ESMF_DistGridMod
   use ESMF_GridMod
-  use ESMF_GeomBaseMod
+  use ESMF_GeomMod
   use ESMF_ArrayMod
   use ESMF_ArrayCreateMod
   use ESMF_ArrayGetMod
@@ -175,11 +175,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     write(ESMF_UtilIOStdout,*)  "Field status = ", fp%status
     if (fp%status .eq. ESMF_FIELDSTATUS_GRIDSET .or. &
          fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
-!      call ESMF_GeomBasePrint(fp%geombase, "", localrc)
+!      call ESMF_GeomPrint(fp%geom, "", localrc)
 !      if (ESMF_LogFoundError(localrc, &
 !          ESMF_ERR_PASSTHRU, &
 !          ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_GeomBaseGet(fp%geombase, dimCount=gridrank, rc=localrc)
+      call ESMF_GeomGet(fp%geom, dimCount=gridrank, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -251,9 +251,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[fileName]
 !     The name of the file from which Field data is read.
 !     If the Field is a multi-tile Array, then fileName must contain
-!     exactly one instance of "\#"; this is a placeholder that will be replaced
+!     exactly one instance of "*"; this is a placeholder that will be replaced
 !     by the tile number, with each tile being read from a separate file. (For
-!     example, for a fileName of "myfile\#.nc", tile 1 will be read from
+!     example, for a fileName of "myfile*.nc", tile 1 will be read from
 !     "myfile1.nc", tile 2 from "myfile2.nc", etc.)
 !     (This handling of the fileName for multi-tile I/O is subject to change.)
 !   \item[{[variableName]}]

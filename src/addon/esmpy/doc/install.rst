@@ -71,7 +71,7 @@ The path of this file is:
     <ESMF_INSTALL_DIR>/lib/lib<g<or>O>/<platform>/esmf.mk
 
 An installation of ESMPy in the default location for Python packages can be done
-with the following command issued from the top level ESMPy directory:
+with the following command issued from the top level ESMPy directory (``src/addon/esmpy``):
 
 .. code::
 
@@ -104,7 +104,8 @@ Validation
 ----------
 
 The ESMPy testing is done with the pytest package, both in serial and
-parallel. Basic unit tests can be run with the following command:
+parallel. Basic unit tests can be run with the following command, from
+the top level ESMPy directory (``src/addon/esmpy``):
 
 .. code::
 

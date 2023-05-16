@@ -192,6 +192,8 @@
 
 #include "../Infrastructure/XGrid/doc/XGrid_refdoc.ctex"
 
+#include "../Infrastructure/Geom/doc/Geom_refdoc.ctex"
+
 #include "../Infrastructure/DistGrid/doc/DistGrid_refdoc.ctex"
 
 #include "../Infrastructure/Route/doc/RHandle_refdoc.ctex"

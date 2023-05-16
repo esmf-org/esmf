@@ -39,7 +39,7 @@ module ESMFIOMod
   use ESMF_UtilTypesMod
   use ESMF_VMMod
   use ESMF_ArrayMod
-  use ESMF_GeomBaseMod
+  use ESMF_GeomMod
   use ESMF_StaggerLocTypeMod
   use ESMF_StateMod
   use ESMF_ClockMod
