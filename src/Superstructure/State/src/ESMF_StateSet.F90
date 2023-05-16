@@ -87,7 +87,7 @@ module ESMF_StateSetMod
     type(ESMF_State),            intent(inout)         :: state
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_StateIntent_Flag), intent(in),  optional :: stateIntent
-     character(len = *),         intent(in),  optional :: name
+    character(len = *),          intent(in),  optional :: name
     integer,                     intent(out), optional :: rc
 
 !
@@ -98,7 +98,7 @@ module ESMF_StateSetMod
 !    \begin{description}
 !    \item[state]
 !      The {\tt ESMF\_State} to set.
-!    \item[stateIntent]
+!    \item[{[stateIntent]}]
 !       The intent, e.g. Import, Export, or Internal, of this {\tt ESMF\_State}.
 !       Possible values are listed in Section~\ref{const:stateintent}.
 !    \item [{[name]}]
