@@ -840,7 +840,7 @@ StateAddRepListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%s
 ! !IROUTINE: ESMF_StateCreate - Create a new State
 
 ! !INTERFACE:
-      function ESMF_StateCreate(keywordEnforcer, stateintent, &
+      function ESMF_StateCreate(keywordEnforcer, stateIntent, &
                    arrayList, arraybundleList,  &
                    fieldList, fieldbundleList,  &
                    nestedStateList,             &
@@ -851,7 +851,7 @@ StateAddRepListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%s
 !
 ! !ARGUMENTS:
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_StateIntent_Flag),   intent(in),  optional :: stateintent
+      type(ESMF_StateIntent_Flag),   intent(in),  optional :: stateIntent
       type(ESMF_Array),       intent(in),  optional :: arrayList(:)
       type(ESMF_ArrayBundle), intent(in),  optional :: arraybundleList(:)
       type(ESMF_Field),       intent(in),  optional :: fieldList(:)
@@ -878,12 +878,10 @@ StateAddRepListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%s
 !
 !  The arguments are:
 !  \begin{description}
-!   \item[{[stateintent]}]
-!    Import or Export {\tt ESMF\_State}.  Valid values are
-!    {\tt ESMF\_STATEINTENT\_IMPORT}, {\tt ESMF\_STATEINTENT\_EXPORT},
-!    {\tt ESMF\_STATEINTENT\_INTERNAL},
-!    or {\tt ESMF\_STATEINTENT\_UNSPECIFIED}. The default
-!    is {\tt ESMF\_STATEINTENT\_UNSPECIFIED}.
+!   \item[{[stateIntent]}]
+!    The intent, e.g. Import, Export, or Internal, of this {\tt ESMF\_State}.
+!    Possible values are listed in Section~\ref{const:stateintent}.
+!    The default is {\tt ESMF\_STATEINTENT\_UNSPECIFIED}.
 !   \item[{[arrayList]}]
 !    A list (Fortran array) of {\tt ESMF\_Array}s.
 !   \item[{[arraybundleList]}]
@@ -1123,7 +1121,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
       ! Private name; call using ESMF_StateGet()
       subroutine ESMF_StateGetInfo(state,  &
             keywordEnforcer, itemSearch, itemorderflag, nestedFlag,  &
-            stateintent, itemCount, itemNameList, itemTypeList, name, rc)
+            stateIntent, itemCount, itemNameList, itemTypeList, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),          intent(in)            :: state
@@ -1131,7 +1129,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
       character (len=*),         intent(in),  optional :: itemSearch
       type(ESMF_ItemOrder_Flag), intent(in),  optional :: itemorderflag
       logical,                   intent(in),  optional :: nestedFlag
-      type(ESMF_StateIntent_Flag), intent(out), optional :: stateintent
+      type(ESMF_StateIntent_Flag), intent(out), optional :: stateIntent
       integer,                   intent(out), optional :: itemCount
       character (len=*),         intent(out), optional :: itemNameList(:)
       type(ESMF_StateItem_Flag), intent(out), optional :: itemTypeList(:)
@@ -1180,8 +1178,8 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !       State level only (default)
 !       When set to {\tt .true.}, additionally returns information from
 !       nested States
-!     \item[{[stateintent]}]
-!       Returns the type, e.g., Import, Export, or Internal, of this {\tt ESMF\_State}.
+!     \item[{[stateIntent]}]
+!       The intent, e.g. Import, Export, or Internal, of this {\tt ESMF\_State}.
 !       Possible values are listed in Section~\ref{const:stateintent}.
 !     \item[{[itemCount]}]
 !       Count of items in this {\tt ESMF\_State}.

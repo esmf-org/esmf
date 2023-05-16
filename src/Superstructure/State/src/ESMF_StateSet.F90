@@ -92,20 +92,20 @@ module ESMF_StateSetMod
 
 !
 ! !DESCRIPTION:
-!      Set the info in the {\tt state} object.
+!    Set the info in the {\tt state} object.
 !
-!     The arguments are:
-!      \begin{description}     
-!      \item[state]
-!        The {\tt ESMF\_State} to set.
-!      \item[stateIntent]
-!        Intent, e.g. Import or Export, of this {\tt ESMF\_State}.
-!        Possible values are listed in Section~\ref{const:stateintent}.
-!      \item [{[name]}]
-!        The State name.
-!      \item[{[rc]}]
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!      \end{description}
+!    he arguments are:
+!    \begin{description}
+!    \item[state]
+!      The {\tt ESMF\_State} to set.
+!    \item[stateIntent]
+!       The intent, e.g. Import, Export, or Internal, of this {\tt ESMF\_State}.
+!       Possible values are listed in Section~\ref{const:stateintent}.
+!    \item [{[name]}]
+!      The State name.
+!    \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!    \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
