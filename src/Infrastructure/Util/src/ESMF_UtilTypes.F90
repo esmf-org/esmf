@@ -1310,9 +1310,9 @@ interface operator (/=)
   module procedure ESMF_bfne
   module procedure ESMF_ctfne
   module procedure ESMF_tnfne
-  module procedure ESMF_ifneq
   module procedure ESMF_pinne
   module procedure ESMF_frne
+  module procedure ESMF_ifneq
   module procedure ESMF_unmappedactionne
   module procedure ESMF_RegridPoleNe
   module procedure ESMF_FileFormatNe
