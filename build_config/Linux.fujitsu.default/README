@@ -1,5 +1,0 @@
-Settings for Linux, using the Fujitsu compilers: FCC, fcc, frt
-
-Requires the following environment settings:
-
-ESMF_COMPILER fujitsu

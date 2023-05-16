@@ -1,6 +1,0 @@
-Settings for Darwin (Mac OS X), using the commercial IBM xlf Fortran compiler
-and GNU C++ compiler (g++).
-
-Requires the following environment settings:
-
-ESMF_COMPILER xlfgcc
