@@ -13,8 +13,8 @@ representation of a geometry to be passed around (e.g. through a coupled system)
 Some operations (e.g. creating a Field) are supported on a Geom object and more will be added over time as needed. However, if
 an unsupported operation is needed, then the specific geometry object can always be pulled out and operated on that way.
 
-In addition to the geometry object a Geom can also contain information describing a location on a geometry, for example, in the case of
-Grid a geometry object can contain a stagger location. Having this information allows the creation of Fields and other capabilities to
+In addition to the geometry object a Geom can also contain information describing a location on a geometry. For example, in the case of
+a Grid, a geometry object can contain a stagger location. Having this information allows the creation of Fields and other capabilities to
 be performed in the most generic way on just a Geom object. The user doesn't need to specify this location information during the
 creation of a Geom object. If they don't, then default values for this information are provided which match those which would
 be used when when creating a Field with the specific geometry (e.g. stagger location ESMF\_STAGGERLOC\_CENTER for a Grid).
