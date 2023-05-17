@@ -5841,6 +5841,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical               :: isScalar, isSequence
     type(ESMF_HConfig)    :: hconfigTemp
     integer               :: i, size
+    character(len=:), allocatable :: tempString(:)
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -5855,9 +5856,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (isScalar) then
-      allocate(character(len=stringLen)::ESMF_HConfigAsStringSeq(1))
-      ESMF_HConfigAsStringSeq(1) = ESMF_HConfigAsString(hconfig, index=index, &
+      allocate(character(len=stringLen)::tempString(1))
+      tempString(1) = ESMF_HConfigAsString(hconfig, index=index, &
         keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+      call move_alloc(tempString, ESMF_HConfigAsStringSeq)
     else
       isSequence = ESMF_HConfigIsSequence(hconfig, index=index, &
         keyString=keyString, doc=doc, rc=localrc)
@@ -5873,9 +5875,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        allocate(character(len=stringLen)::ESMF_HConfigAsStringSeq(size))
+        allocate(character(len=stringLen)::tempString(size))
         do i=1, size
-          ESMF_HConfigAsStringSeq(i) = ESMF_HConfigAsString(hconfigTemp, &
+          tempString(i) = ESMF_HConfigAsString(hconfigTemp, &
             index=i, asOkay=asOkay, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -5883,6 +5885,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (.not.asOkay) exit
           endif
         enddo
+        call move_alloc(tempString, ESMF_HConfigAsStringSeq)
         ! clean up
         call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6444,6 +6447,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical               :: isScalar, isSequence
     type(ESMF_HConfig)    :: hconfigTemp
     integer               :: i, size
+    character(len=:), allocatable :: tempString(:)
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -6458,9 +6462,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (isScalar) then
-      allocate(character(len=stringLen)::ESMF_HConfigAsStringSeqMapKey(1))
-      ESMF_HConfigAsStringSeqMapKey(1) = ESMF_HConfigAsStringMapKey(hconfig, &
+      allocate(character(len=stringLen)::tempString(1))
+      tempString(1) = ESMF_HConfigAsStringMapKey(hconfig, &
         index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+      call move_alloc(tempString, ESMF_HConfigAsStringSeqMapKey)
     else
       isSequence = ESMF_HConfigIsSequenceMapKey(hconfig, index=index, &
         keyString=keyString, doc=doc, rc=localrc)
@@ -6476,9 +6481,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        allocate(character(len=stringLen)::ESMF_HConfigAsStringSeqMapKey(size))
+        allocate(character(len=stringLen)::tempString(size))
         do i=1, size
-          ESMF_HConfigAsStringSeqMapKey(i) = ESMF_HConfigAsString(hconfigTemp, &
+          tempString(i) = ESMF_HConfigAsString(hconfigTemp, &
             index=i, asOkay=asOkay, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6486,6 +6491,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (.not.asOkay) exit
           endif
         enddo
+        call move_alloc(tempString, ESMF_HConfigAsStringSeqMapKey)
         ! clean up
         call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -7007,6 +7013,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical               :: isScalar, isSequence
     type(ESMF_HConfig)    :: hconfigTemp
     integer               :: i, size
+    character(len=:), allocatable :: tempString(:)
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -7021,9 +7028,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (isScalar) then
-      allocate(character(len=stringLen)::ESMF_HConfigAsStringSeqMapVal(1))
-      ESMF_HConfigAsStringSeqMapVal(1) = ESMF_HConfigAsStringMapVal(hconfig, &
+      allocate(character(len=stringLen)::tempString(1))
+      tempString(1) = ESMF_HConfigAsStringMapVal(hconfig, &
         index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
+      call move_alloc(tempString, ESMF_HConfigAsStringSeqMapVal)
     else
       isSequence = ESMF_HConfigIsSequenceMapVal(hconfig, index=index, &
         keyString=keyString, doc=doc, rc=localrc)
@@ -7039,9 +7047,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         size = ESMF_HConfigGetSize(hconfigTemp, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        allocate(character(len=stringLen)::ESMF_HConfigAsStringSeqMapVal(size))
+        allocate(character(len=stringLen)::tempString(size))
         do i=1, size
-          ESMF_HConfigAsStringSeqMapVal(i) = ESMF_HConfigAsString(hconfigTemp, &
+          tempString(i) = ESMF_HConfigAsString(hconfigTemp, &
             index=i, asOkay=asOkay, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7049,6 +7057,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (.not.asOkay) exit
           endif
         enddo
+        call move_alloc(tempString, ESMF_HConfigAsStringSeqMapVal)
         ! clean up
         call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
