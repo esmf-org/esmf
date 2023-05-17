@@ -49,7 +49,10 @@ program ESMF_HConfigUTest
   !LOCAL VARIABLES:
   type(ESMF_VM)     :: vm
   integer           :: i, j, petCount, localPet
-  type(ESMF_HConfig):: hconfig
+  type(ESMF_HConfig):: hconfig, hconfig2, hconfig3
+  type(ESMF_HConfigIter):: hconfigIter, hconfigIterEnd
+  type(ESMF_HConfigIter):: hconfigIter2, hconfigIter2End
+  type(ESMF_HConfigIter):: hconfigIter3, hconfigIter3End
   type(ESMF_Config) :: config1, config2
   logical           :: compareOK
   integer           :: intVar1, intVar2, count1, count2
@@ -85,23 +88,69 @@ program ESMF_HConfigUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "HConfigCreate()"
+  write(name, *) "HConfigCreate() Empty"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   hconfig = ESMF_HConfigCreate(rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "HConfigLoad()"
+  write(name, *) "HConfigSet()"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_HConfigLoad(hconfig, content="[1, 2, 3]", rc=rc)
+  call ESMF_HConfigSet(hconfig, content="[1, 2, 3]", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "HConfigLoadFile()"
+  write(name, *) "HConfig Iterator test after HConfigSet()"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_HConfigLoadFile(hconfig, fileName="sample.yaml", rc=rc)
+  call HConfigIterationTest(hconfig, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigFileLoad()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_HConfigFileLoad(hconfig, fileName="sample.yaml", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfig Iterator test after HConfigFileLoad()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call HConfigIterationTest(hconfig, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroy test HConfig"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_HConfigDestroy(hconfig, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigCreate() with Load content"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  hconfig = ESMF_HConfigCreate(content="[abc, TRUE, 123]", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroy test HConfig"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_HConfigDestroy(hconfig, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigCreate() with FileLoad fileName"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  hconfig = ESMF_HConfigCreate(fileName="sample.yaml", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
@@ -130,7 +179,7 @@ program ESMF_HConfigUTest
   !NEX_UTest
   write(name, *) "ConfigLog() from sample.rc"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ConfigLog(config1, prefix="RC LoadFile:", raw=raw, rc=rc)
+  call ESMF_ConfigLog(config1, prefix="RC FileLoad:", raw=raw, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
@@ -151,7 +200,7 @@ program ESMF_HConfigUTest
   !NEX_UTest
   write(name, *) "ConfigLog() from sample.yaml"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ConfigLog(config2, prefix="YAML LoadFile:", raw=raw, rc=rc)
+  call ESMF_ConfigLog(config2, prefix="YAML FileLoad:", raw=raw, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
@@ -324,5 +373,286 @@ program ESMF_HConfigUTest
   !------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
   !------------------------------------------------------------------------
+
+ contains
+ 
+  subroutine HConfigIterationTest(hconfig, rc)
+    type(ESMF_HConfig)    :: hconfig
+    integer, intent(out)  :: rc
+
+    logical                       :: flag, valueL
+    logical                       :: asOkayL, asOkayS, asOkayI4, asOkayI8
+    logical                       :: asOkayR4, asOkayR8
+    character(len=:), allocatable :: string, tag
+    character(160)                :: msgString
+    integer(ESMF_KIND_I4)         :: valueI4
+    integer(ESMF_KIND_I8)         :: valueI8
+    real(ESMF_KIND_R4)            :: valueR4
+    real(ESMF_KIND_R8)            :: valueR8
+    integer                       :: i, size
+
+    rc = ESMF_SUCCESS
+
+    size = ESMF_HConfigGetSize(hconfig, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    write(msgString, *) "Size: ", size
+    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    flag = ESMF_HConfigIsSequence(hconfig, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    if (flag) then
+      do i=1, size
+        ! sequence element as I4
+        valueI4 = ESMF_HConfigAsI4(hconfig, index=i, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+        write(msgString, *) "I4: ", valueI4
+        call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+        ! sequence element as I4 through CreateAt()
+        hconfig2 = ESMF_HConfigCreateAt(hconfig, index=i, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+        valueI4 = ESMF_HConfigAsI4(hconfig2, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+        write(msgString, *) "I4 through CreateAt(): ", valueI4
+        call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+        call ESMF_HConfigDestroy(hconfig2, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+      enddo
+    else
+      ! direct access via key, here through CreateAt()
+      hconfig2 = ESMF_HConfigCreateAt(hconfig, keyString="radius_of_the_earth", &
+        rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      valueR4 = ESMF_HConfigAsR4(hconfig2, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      write(msgString, *) "R4 'radius_of_the_earth' through CreateAt(): ", &
+        valueR4
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      call ESMF_HConfigDestroy(hconfig2, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      ! direct access via key, here directly through AsR8(keyString=...)
+      valueR8 = ESMF_HConfigAsR8(hconfig, keyString="radius_of_the_earth", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      write(msgString, *) "R8 'radius_of_the_earth' through AsR8(keyString=...): ", &
+        valueR8
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      ! direct access via key, through AsString(keyString=...)
+      ! value_one
+      string = ESMF_HConfigAsString(hconfig, keyString="value_one", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      tag = ESMF_HConfigGetTag(hconfig, keyString="value_one", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      valueL = ESMF_HConfigAsLogical(hconfig, keyString="value_one", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      write(msgString, *) "String 'value_one' through AsString(keyString=...): ", &
+        string, "  [", tag, "] through AsLogical(keyString=...):", valueL
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      string = ESMF_HConfigAsString(hconfig, keyString="value_one", asOkay=asOkayS, &
+        rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      valueL = ESMF_HConfigAsLogical(hconfig, keyString="value_one", asOkay=asOkayL, &
+        rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      valueI4 = ESMF_HConfigAsI4(hconfig, keyString="value_one", asOkay=asOkayI4, &
+        rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      valueI8 = ESMF_HConfigAsI8(hconfig, keyString="value_one", asOkay=asOkayI8, &
+        rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      valueR4 = ESMF_HConfigAsR4(hconfig, keyString="value_one", asOkay=asOkayR4, &
+        rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      valueR8 = ESMF_HConfigAsR8(hconfig, keyString="value_one", asOkay=asOkayR8, &
+        rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      write(msgString, *) "'value_one'", &
+        " asOkayS: ", asOkayS, " asOkayL: ", asOkayL, &
+        " asOkayI4: ", asOkayI4, " asOkayI8: ", asOkayI8, &
+        " asOkayR4: ", asOkayR4, " asOkayR8: ", asOkayR8
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      ! value_two
+      string = ESMF_HConfigAsString(hconfig, keyString="value_two", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      tag = ESMF_HConfigGetTag(hconfig, keyString="value_two", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      valueL = ESMF_HConfigAsLogical(hconfig, keyString="value_two", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      write(msgString, *) "String 'value_two' through AsString(keyString=...): ", &
+        string, "  [", tag, "] through AsLogical(keyString=...):", valueL
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      ! value_three
+      string = ESMF_HConfigAsString(hconfig, keyString="value_three", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      tag = ESMF_HConfigGetTag(hconfig, keyString="value_three", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      write(msgString, *) "String 'value_three' through AsString(keyString=...): ", &
+        string, "  [", tag, "]"
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      ! value_four
+      string = ESMF_HConfigAsString(hconfig, keyString="value_four", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      tag = ESMF_HConfigGetTag(hconfig, keyString="value_four", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      write(msgString, *) "String 'value_four' through AsString(keyString=...): ", &
+        string, "  [", tag, "]"
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+    endif
+
+    hconfigIter = ESMF_HConfigIterBegin(hconfig, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    hconfigIterEnd = ESMF_HConfigIterEnd(hconfig, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    do while(hconfigIter /= hconfigIterEnd)
+
+      flag = ESMF_HConfigIterIsSequence(hconfigIter, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+
+      if (flag) then
+        ! sequence iteration
+        size = ESMF_HConfigGetSize(hconfigIter, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+        write(msgString, *) "Size: ", size
+        call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+
+        flag = ESMF_HConfigIsScalar(hconfigIter, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+        if (flag) then
+          ! as string
+          string = ESMF_HConfigAsString(hconfigIter, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          call ESMF_LogWrite("String: "//string, ESMF_LOGMSG_INFO, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          ! as string through CreateAt()
+          hconfig3 = ESMF_HConfigCreateAt(hconfigIter, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          string = ESMF_HConfigAsString(hconfig3, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          call ESMF_LogWrite("String through CreateAt(): "//string, ESMF_LOGMSG_INFO, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          call ESMF_HConfigDestroy(hconfig3, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          ! as I4
+          valueI4 = ESMF_HConfigAsI4(hconfigIter, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          write(msgString, *) "I4: ", valueI4
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          ! as I8
+          valueI8 = ESMF_HConfigAsI8(hconfigIter, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          write(msgString, *) "I8: ", valueI8
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          ! as R4
+          valueR4 = ESMF_HConfigAsR4(hconfigIter, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          write(msgString, *) "R4: ", valueR4
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          ! as R8
+          valueR8 = ESMF_HConfigAsR8(hconfigIter, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          write(msgString, *) "R8: ", valueR8
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+        endif
+      else
+        ! map iteration
+        size = ESMF_HConfigGetSizeMapKey(hconfigIter, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+        write(msgString, *) "Size: ", size
+        call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+
+        flag = ESMF_HConfigIsScalarMapKey(hconfigIter, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+        if (flag) then
+          string = ESMF_HConfigAsStringMapKey(hconfigIter, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          tag = ESMF_HConfigGetTagMapKey(hconfigIter, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          write(msgString, *) "MapKey string: ", string, "  [", tag, "]"
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+        endif
+
+        size = ESMF_HConfigGetSizeMapVal(hconfigIter, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+        write(msgString, *) "Size: ", size
+        call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+
+        flag = ESMF_HConfigIsScalarMapVal(hconfigIter, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+        if (flag) then
+          string = ESMF_HConfigAsStringMapVal(hconfigIter, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          tag = ESMF_HConfigGetTagMapVal(hconfigIter, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          write(msgString, *) "MapVal string: ", string, "  [", tag, "]"
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+        else
+          hconfigIter2 = ESMF_HConfigIterBeginMapVal(hconfigIter, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          hconfigIter2End = ESMF_HConfigIterEndMapVal(hconfigIter, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+
+          do while(hconfigIter2 /= hconfigIter2End)
+            flag = ESMF_HConfigIsScalar(hconfigIter2, rc=rc)
+            if (rc /= ESMF_SUCCESS) return
+            if (flag) then
+              string = ESMF_HConfigAsString(hconfigIter2, rc=rc)
+              if (rc /= ESMF_SUCCESS) return
+              tag = ESMF_HConfigGetTag(hconfigIter2, rc=rc)
+              if (rc /= ESMF_SUCCESS) return
+              write(msgString, *) "String: ", string, "  [", tag, "]"
+              call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+              if (rc /= ESMF_SUCCESS) return
+            else
+
+              hconfigIter3 = ESMF_HConfigIterBegin(hconfigIter2, rc=rc)
+              if (rc /= ESMF_SUCCESS) return
+              hconfigIter3End = ESMF_HConfigIterEnd(hconfigIter2, rc=rc)
+              if (rc /= ESMF_SUCCESS) return
+
+              do while(hconfigIter3 /= hconfigIter3End)
+                flag = ESMF_HConfigIsScalar(hconfigIter3, rc=rc)
+                if (rc /= ESMF_SUCCESS) return
+                if (flag) then
+                  string = ESMF_HConfigAsString(hconfigIter3, rc=rc)
+                  if (rc /= ESMF_SUCCESS) return
+                  tag = ESMF_HConfigGetTag(hconfigIter3, rc=rc)
+                  if (rc /= ESMF_SUCCESS) return
+                  write(msgString, *) "String: ", string, "  [", tag, "]"
+                  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+                  if (rc /= ESMF_SUCCESS) return
+                endif
+                call ESMF_HConfigIterNext(hconfigIter3, rc=rc)
+                if (rc /= ESMF_SUCCESS) return
+              enddo
+            endif
+            call ESMF_HConfigIterNext(hconfigIter2, rc=rc)
+            if (rc /= ESMF_SUCCESS) return
+          enddo
+        endif
+      endif
+
+      call ESMF_HConfigIterNext(hconfigIter, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+    enddo
+
+  end subroutine
 
 end program ESMF_HConfigUTest

@@ -1112,6 +1112,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       hconfig = config%cptr%hconfig
     endif
 
+    if ( present (rc )) rc = ESMF_SUCCESS
+
   end subroutine ESMF_ConfigGet
 !------------------------------------------------------------------------------
 
@@ -2880,7 +2882,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         then
         ! This is a YAML file
 
-        call ESMF_HConfigLoadFile(config%cptr%hconfig, trim(filename), &
+        call ESMF_HConfigFileLoad(config%cptr%hconfig, trim(filename), &
           rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
