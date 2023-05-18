@@ -4077,6 +4077,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer               :: len
     type(ESMF_HConfig)    :: hconfigTemp
     type(ESMF_Logical)    :: flag
+    character(len=:), allocatable :: tempString
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -4097,10 +4098,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! correctly size the character allocation
-      allocate(character(len=len)::ESMF_HConfigAsString)
+      allocate(character(len=len)::tempString)
 
       ! Call into the C++ interface to get the string
-      call c_ESMC_HConfigAsString(hconfigTemp, ESMF_HConfigAsString, &
+      call c_ESMC_HConfigAsString(hconfigTemp, tempString, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4116,14 +4117,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! correctly size the character allocation
-      allocate(character(len=len)::ESMF_HConfigAsString)
+      allocate(character(len=len)::tempString)
 
       ! Call into the C++ interface to get the string
-      call c_ESMC_HConfigAsString(hconfig, ESMF_HConfigAsString, &
+      call c_ESMC_HConfigAsString(hconfig, tempString, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+
+    ! transfer ownership of allocation
+    call move_alloc(tempString, ESMF_HConfigAsString)
 
     ! handle asOkay
     if (present(asOkay)) then
@@ -4160,6 +4164,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
+    character(len=:), allocatable :: tempString
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -4169,10 +4174,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ESMF_HConfigIterAsString = ESMF_HConfigAsString(hconfigTemp, &
+    tempString = ESMF_HConfigAsString(hconfigTemp, &
       index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! transfer ownership of allocation
+    call move_alloc(tempString, ESMF_HConfigIterAsString)
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -4598,6 +4606,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer               :: len
     type(ESMF_HConfig)    :: hconfigTemp
     type(ESMF_Logical)    :: flag
+    character(len=:), allocatable :: tempString
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -4618,10 +4627,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! correctly size the character allocation
-      allocate(character(len=len)::ESMF_HConfigAsStringMapKey)
+      allocate(character(len=len)::tempString)
 
       ! Call into the C++ interface to get the string
-      call c_ESMC_HConfigAsString(hconfigTemp, ESMF_HConfigAsStringMapKey, &
+      call c_ESMC_HConfigAsString(hconfigTemp, tempString, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4637,14 +4646,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! correctly size the character allocation
-      allocate(character(len=len)::ESMF_HConfigAsStringMapKey)
+      allocate(character(len=len)::tempString)
 
       ! Call into the C++ interface to get the string
-      call c_ESMC_HConfigAsStringMapKey(hconfig, ESMF_HConfigAsStringMapKey, &
+      call c_ESMC_HConfigAsStringMapKey(hconfig, tempString, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+
+    ! transfer ownership of allocation
+    call move_alloc(tempString, ESMF_HConfigAsStringMapKey)
 
     ! handle asOkay
     if (present(asOkay)) then
@@ -5080,6 +5092,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer               :: len
     type(ESMF_HConfig)    :: hconfigTemp
     type(ESMF_Logical)    :: flag
+    character(len=:), allocatable :: tempString
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -5100,10 +5113,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! correctly size the character allocation
-      allocate(character(len=len)::ESMF_HConfigAsStringMapVal)
+      allocate(character(len=len)::tempString)
 
       ! Call into the C++ interface to get the string
-      call c_ESMC_HConfigAsString(hconfigTemp, ESMF_HConfigAsStringMapVal, &
+      call c_ESMC_HConfigAsString(hconfigTemp, tempString, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -5119,14 +5132,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! correctly size the character allocation
-      allocate(character(len=len)::ESMF_HConfigAsStringMapVal)
+      allocate(character(len=len)::tempString)
 
       ! Call into the C++ interface to get the string
-      call c_ESMC_HConfigAsStringMapVal(hconfig, ESMF_HConfigAsStringMapVal, &
+      call c_ESMC_HConfigAsStringMapVal(hconfig, tempString, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+
+    ! transfer ownership of allocation
+    call move_alloc(tempString, ESMF_HConfigAsStringMapVal)
 
     ! handle asOkay
     if (present(asOkay)) then
@@ -5925,6 +5941,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
+    character(len=:), allocatable :: tempString(:)
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -5934,11 +5951,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ESMF_HConfigIterAsStringSeq = ESMF_HConfigAsStringSeq(hconfigTemp, &
+    tempString = ESMF_HConfigAsStringSeq(hconfigTemp, &
       stringLen=stringLen, &
       index=index, keyString=keyString, doc=doc, asOkay=asOkay, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! transfer ownership of allocation
+    call move_alloc(tempString, ESMF_HConfigIterAsStringSeq)
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -8672,6 +8692,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer               :: localrc                ! local return code
     integer               :: len
     type(ESMF_HConfig)    :: hconfigTemp
+    character(len=:), allocatable :: tempString
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -8692,10 +8713,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! correctly size the character allocation
-      allocate(character(len=len)::ESMF_HConfigGetTag)
+      allocate(character(len=len)::tempString)
 
       ! Call into the C++ interface to get the string
-      call c_ESMC_HConfigGetTag(hconfigTemp, ESMF_HConfigGetTag, localrc)
+      call c_ESMC_HConfigGetTag(hconfigTemp, tempString, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -8710,13 +8731,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! correctly size the character allocation
-      allocate(character(len=len)::ESMF_HConfigGetTag)
+      allocate(character(len=len)::tempString)
 
       ! Call into the C++ interface to get the string
-      call c_ESMC_HConfigGetTag(hconfig, ESMF_HConfigGetTag, localrc)
+      call c_ESMC_HConfigGetTag(hconfig, tempString, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+
+    ! transfer ownership of allocation
+    call move_alloc(tempString, ESMF_HConfigGetTag)
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -8742,6 +8766,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
+    character(len=:), allocatable :: tempString
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -8751,10 +8776,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ESMF_HConfigIterGetTag = ESMF_HConfigGetTag(hconfigTemp, &
+    tempString = ESMF_HConfigGetTag(hconfigTemp, &
       index=index, keyString=keyString, doc=doc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! transfer ownership of allocation
+    call move_alloc(tempString, ESMF_HConfigIterGetTag)
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -8805,6 +8833,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer               :: localrc                ! local return code
     integer               :: len
     type(ESMF_HConfig)    :: hconfigTemp
+    character(len=:), allocatable :: tempString
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -8825,10 +8854,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! correctly size the character allocation
-      allocate(character(len=len)::ESMF_HConfigGetTagMapKey)
+      allocate(character(len=len)::tempString)
 
       ! Call into the C++ interface to get the string
-      call c_ESMC_HConfigGetTag(hconfigTemp, ESMF_HConfigGetTagMapKey, &
+      call c_ESMC_HConfigGetTag(hconfigTemp, tempString, &
         localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -8844,14 +8873,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! correctly size the character allocation
-      allocate(character(len=len)::ESMF_HConfigGetTagMapKey)
+      allocate(character(len=len)::tempString)
 
       ! Call into the C++ interface to get the string
-      call c_ESMC_HConfigGetTagMapKey(hconfig, ESMF_HConfigGetTagMapKey, &
+      call c_ESMC_HConfigGetTagMapKey(hconfig, tempString, &
         localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+
+    ! transfer ownership of allocation
+    call move_alloc(tempString, ESMF_HConfigGetTagMapKey)
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -8902,6 +8934,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer               :: localrc                ! local return code
     integer               :: len
     type(ESMF_HConfig)    :: hconfigTemp
+    character(len=:), allocatable :: tempString
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -8922,10 +8955,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! correctly size the character allocation
-      allocate(character(len=len)::ESMF_HConfigGetTagMapVal)
+      allocate(character(len=len)::tempString)
 
       ! Call into the C++ interface to get the string
-      call c_ESMC_HConfigGetTag(hconfigTemp, ESMF_HConfigGetTagMapVal, &
+      call c_ESMC_HConfigGetTag(hconfigTemp, tempString, &
         localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -8941,14 +8974,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! correctly size the character allocation
-      allocate(character(len=len)::ESMF_HConfigGetTagMapVal)
+      allocate(character(len=len)::tempString)
 
       ! Call into the C++ interface to get the string
-      call c_ESMC_HConfigGetTagMapVal(hconfig, ESMF_HConfigGetTagMapVal, &
+      call c_ESMC_HConfigGetTagMapVal(hconfig, tempString, &
         localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+
+    ! transfer ownership of allocation
+    call move_alloc(tempString, ESMF_HConfigGetTagMapVal)
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
