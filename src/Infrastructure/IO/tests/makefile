@@ -85,9 +85,11 @@ RUN_ESMF_IO_MultitileUTest:
 	rm -f $(ESMF_TESTDIR)/ESMF_IO_MultitileUTest*.nc
 	$(MAKE) TNAME=IO_Multitile NP=8 ftest
 
+# Note that we run this with NP=1 because there is little value in running these tests
+# with multiple processors
 RUN_ESMF_IO_FileTypeCheckUTest:
 	cp -f filetypecheck_data/*.nc $(ESMF_TESTDIR)
-	$(MAKE) TNAME=IO_FileTypeCheck NP=4 ftest
+	$(MAKE) TNAME=IO_FileTypeCheck NP=1 ftest
 
 RUN_ESMF_IO_FileTypeCheckUTestUNI:
 	cp -f filetypecheck_data/*.nc $(ESMF_TESTDIR)
