@@ -184,6 +184,28 @@ program ESMF_IO_FileTypeCheckUTest
 #endif
   !------------------------------------------------------------------------
 
+  !------------------------------------------------------------------------
+  !EX_UTest
+  call ESMF_FileTypeCheck("test_sph_3x3_scrip_units_look_like_gridspec.nc", fileType, rc=rc)
+  write(name, *) "Detection of SCRIP grid file (with units like GRIDSPEC) succeeds"
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc == ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+  !EX_UTest
+  write(name, *) "Detection of SCRIP grid file (with units like GRIDSPEC) returns correct value"
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  write(failMsg, *) "Returned wrong file type"
+  call ESMF_Test(fileType == ESMF_FILEFORMAT_SCRIP, name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *), "Comparison did not fail as expected"
+  call ESMF_Test(fileType /= ESMF_FILEFORMAT_SCRIP, name, failMsg, result, ESMF_SRCLINE)
+#endif
+  !------------------------------------------------------------------------
+
 #endif  ! ESMF_TESTEXHAUSTIVE
 
   !------------------------------------------------------------------------
