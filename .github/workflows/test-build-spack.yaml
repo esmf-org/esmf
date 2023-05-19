@@ -10,10 +10,8 @@ on:
 jobs:
   latest-stable:
     runs-on: ${{ matrix.os }}
-    continue-on-error: false
 
     strategy:
-      fail-fast: false
       matrix:
         os: [ubuntu-latest]
         compiler: [gcc@11.3.0]
@@ -51,7 +49,6 @@ jobs:
 
     # concretize test environment 
     - name: Concretize Spack Environment Using YAML Specification
-      if: ${{ success() }}
       run: |
         ${{ github.workspace }}/.github/workflows/scripts/spack_concretize.sh \
           -a x86_64 \
@@ -62,7 +59,6 @@ jobs:
 
     # install test environment
     - name: Install ESMF with Spack 
-      if: ${{ success() }}
       run: |
         ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
           -r ${{ github.workspace }}
@@ -70,7 +66,6 @@ jobs:
     # checkout NUOPC app prototypes
     - name: Checkout NUOPC app prototypes
       uses: actions/checkout@v3
-      if: ${{ success() }}
       with:
         repository: esmf-org/nuopc-app-prototypes
         path: ${{ github.workspace }}/nuopc-app-prototypes
@@ -78,7 +73,6 @@ jobs:
 
     # test installation using NUOPC app prototypes
     - name: Run NUOPC app prototypes
-      if: ${{ success() }}
       run: |
         ${{ github.workspace }}/.github/workflows/scripts/run_nuopc_app_proto.sh \
           -c ${{ matrix.compiler }} \
