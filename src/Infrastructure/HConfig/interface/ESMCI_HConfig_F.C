@@ -549,6 +549,9 @@ extern "C" {
     std::string value = ptr->getTag(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
+#if (__GNUC__ == 9)
+    string_l = value.size();
+#endif
     strncpy(string, value.c_str(), string_l);
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -584,6 +587,9 @@ extern "C" {
     std::string value = ptr->getTagMapKey(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
+#if (__GNUC__ == 9)
+    string_l = value.size();
+#endif
     strncpy(string, value.c_str(), string_l);
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -619,6 +625,9 @@ extern "C" {
     std::string value = ptr->getTagMapVal(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
+#if (__GNUC__ == 9)
+    string_l = value.size();
+#endif
     strncpy(string, value.c_str(), string_l);
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1145,6 +1154,9 @@ extern "C" {
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (asOkay) *flag = ESMF_TRUE;
+#if (__GNUC__ == 9)
+    string_l = value.size();
+#endif
     strncpy(string, value.c_str(), string_l);
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1187,6 +1199,9 @@ extern "C" {
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (asOkay) *flag = ESMF_TRUE;
+#if (__GNUC__ == 9)
+    string_l = value.size();
+#endif
     strncpy(string, value.c_str(), string_l);
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1229,6 +1244,9 @@ extern "C" {
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (asOkay) *flag = ESMF_TRUE;
+#if (__GNUC__ == 9)
+    string_l = value.size();
+#endif
     strncpy(string, value.c_str(), string_l);
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
