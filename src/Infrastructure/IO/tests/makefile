@@ -13,20 +13,23 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IO_NetCDFUTest  \
 		$(ESMF_TESTDIR)/ESMC_IO_InqUTest \
 		$(ESMF_TESTDIR)/ESMF_IO_YAMLUTest \
 		$(ESMF_TESTDIR)/ESMF_IOUTest \
-		$(ESMF_TESTDIR)/ESMF_IO_MultitileUTest
+		$(ESMF_TESTDIR)/ESMF_IO_MultitileUTest \
+		$(ESMF_TESTDIR)/ESMF_IO_FileTypeCheckUTest
 
 TESTS_RUN     = RUN_ESMCI_IO_NetCDFUTest \
 		RUN_ESMCI_IO_PIOUTest \
 		RUN_ESMC_IO_InqUTest \
 		RUN_ESMF_IO_YAMLUTest \
 		RUN_ESMF_IOUTest \
-		RUN_ESMF_IO_MultitileUTest
+		RUN_ESMF_IO_MultitileUTest \
+		RUN_ESMF_IO_FileTypeCheckUTest
 
 TESTS_RUN_UNI = RUN_ESMCI_IO_NetCDFUTestUNI \
 		RUN_ESMCI_IO_PIOUTestUNI \
 		RUN_ESMC_IO_InqUTestUNI \
 		RUN_ESMF_IO_YAMLUTestUNI \
-		RUN_ESMF_IOUTestUNI
+		RUN_ESMF_IOUTestUNI \
+		RUN_ESMF_IO_FileTypeCheckUTestUNI
 
 include ${ESMF_DIR}/makefile
 
@@ -81,3 +84,11 @@ RUN_ESMF_IO_YAMLUTestUNI:
 RUN_ESMF_IO_MultitileUTest:
 	rm -f $(ESMF_TESTDIR)/ESMF_IO_MultitileUTest*.nc
 	$(MAKE) TNAME=IO_Multitile NP=8 ftest
+
+RUN_ESMF_IO_FileTypeCheckUTest:
+	cp -f filetypecheck_data/*.nc $(ESMF_TESTDIR)
+	$(MAKE) TNAME=IO_FileTypeCheck NP=4 ftest
+
+RUN_ESMF_IO_FileTypeCheckUTestUNI:
+	cp -f filetypecheck_data/*.nc $(ESMF_TESTDIR)
+	$(MAKE) TNAME=IO_FileTypeCheck NP=1 ftest
