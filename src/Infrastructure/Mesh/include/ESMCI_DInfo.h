@@ -60,6 +60,7 @@ public:
 
     DInfoEntry(IDTYPE _id, INFOTYPE _info): id(_id), info(_info) {}
 
+    // Less 
     bool operator<(const DInfoEntry &rhs) const {
       if (id != rhs.id) {
         return id < rhs.id;
@@ -76,22 +77,19 @@ public:
     
   };
   
-  std::vector<DInfoEntry> staging;
-  std::vector<DInfoEntry> searchable;
-  
-  IDTYPE gmin,gmax; // global min and max of id
-  bool allow_id_repeats;
-  bool is_committed; // has this DInfo object been committed, so it's searchable
-  
+  std::vector<DInfoEntry> staging; // A place to accumulate ids and info before setting
+                                   // up for searching
+  std::vector<DInfoEntry> searchable; // After committing this will contain a sorted list
+                                      // for searching
 
+  bool is_committed; // has this DInfo object been committed, so it's searchable
+  IDTYPE gmin,gmax; // global min and max of id in staging (only valid when committed)
+
+  
 public:
   
   // Full constructor
-  DInfo(bool _allow_id_repeats): allow_id_repeats(_allow_id_repeats), is_committed(false) {}
-
-  // Default constructor
-  DInfo():DInfo(false) {}
-
+  DInfo(): is_committed(false) {}
 
   // Reserve space in staging area
   void reserve(int _num) {
@@ -105,12 +103,23 @@ public:
   void add(IDTYPE _id, INFOTYPE _info) {
     staging.push_back(DInfoEntry(_id,_info));
   }
+
+
+  // Reset back to empty (pre-commit) state, but like a vector hold onto any memory that happens to be there
+  void clear() {
+    staging.clear();
+    searchable.clear();
+    is_committed=false;
+  }
   
   
   // Search info in directory
   // (Because the search involves communication it's more efficient to do it in a chunk))
-  void search(int num_search, IDTYPE *search_ids, INFOTYPE *search_info);
-
+  void search(int num_search,
+              IDTYPE *search_ids,
+              bool  error_on_not_found, 
+              INFOTYPE not_found_info_val,
+              INFOTYPE *out_search_info);
   
   // Output searchable list (probably mostly for debugging)
   void print_searchable();
