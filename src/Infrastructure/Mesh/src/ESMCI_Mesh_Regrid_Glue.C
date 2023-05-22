@@ -284,17 +284,18 @@ void ESMCI_regrid_create(
 
     // Get vectorRegrid dims
     // TODO: Move to a better place
+    int num_vec_dims;
+    int src_vec_dims_undist_seqind[ESMF_MAXDIM];
+    int dst_vec_dims_undist_seqind[ESMF_MAXDIM];
     if (vectorRegrid) {
 
       // Get src info
       int src_num_vec_dims;
-      int src_vec_dims_undist_seqind[ESMF_MAXDIM];
       _get_vec_dims_for_vectorRegrid(srcarray, src_num_vec_dims, src_vec_dims_undist_seqind);
       printf("src_num_vec_dims=%d\n",src_num_vec_dims);      
 
       // Get dst info
       int dst_num_vec_dims;
-      int dst_vec_dims_undist_seqind[ESMF_MAXDIM];
       _get_vec_dims_for_vectorRegrid(dstarray, dst_num_vec_dims, dst_vec_dims_undist_seqind);
       printf("dst_num_vec_dims=%d\n",dst_num_vec_dims);      
 
@@ -304,7 +305,10 @@ void ESMCI_regrid_create(
                   "The srcField and the dstField must have the same size ungridded dimension to use vector regridding.",
                                          ESMC_CONTEXT, &localrc)) throw localrc;
       }
-      
+
+      // Set num vector dims
+      // (Setting to src, but dst should be the same as checked above)
+      num_vec_dims=src_num_vec_dims;
     }
 
 
@@ -452,15 +456,10 @@ void ESMCI_regrid_create(
     
     /////// We have the weights, now set up the sparsemm object /////
 
-    // Firstly, the index list
+    // Get the size of the sparse matrix and allocate space for it
     std::pair<UInt,UInt> iisize = wts->count_matrix_entries();
     int num_entries = iisize.first;
     int *iientries = new int[2*iisize.first];
-    int larg[2] = {2, static_cast<int>(iisize.first)};
-    // Gather the list
-    ESMCI::InterArray<int> ii(iientries, 2, larg);
-    ESMCI::InterArray<int> *iiptr = &ii;
-
     double *factors = new double[iisize.first];
 
 
@@ -541,6 +540,24 @@ void ESMCI_regrid_create(
       if (*norm_type==ESMC_NORM_TYPE_FRACAREA) change_wts_to_be_fracarea(dstmesh, num_entries, iientries, factors);
     }
 
+
+#if 0    
+    ///// If requested, then change weights to be vector weights
+    if (vectorRegrid) {
+
+      // Size of a vector matrix compared to non-vector
+      in vec_factor=num_vec_dims*num_vec_dims;
+      
+      // Allocate new vector matrix
+      int num_entries_vec=vec_factor*num_entries;
+      int *iientries_vec = new int[2*iisize.first]; 
+
+    }
+
+#endif
+
+
+    
     // Copy status info from WMat to Array
     if (has_statusArray) {
       if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
@@ -568,6 +585,8 @@ void ESMCI_regrid_create(
     VM::logMemInfo(std::string("RegridCreate5.1"));
 #endif
 
+
+   
 #ifdef C_SIDE_REGRID_FREED_MESH
     // enabling this freature currently breaks several tests
     delete srcmesh;
@@ -581,10 +600,19 @@ void ESMCI_regrid_create(
 
     ESMCI_REGRID_TRACE_ENTER("NativeMesh ArraySMMStore");
 
-    // Build the ArraySMM
+    // Build the RouteHandle using ArraySMMStore() 
     if (*has_rh != 0) {
+      
+      // Set some flags
       enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
       ESMC_Logical ignoreUnmatched = ESMF_FALSE;
+
+      // Wrap factorIndexList in InterArray
+      int larg[2] = {2, num_entries};
+      ESMCI::InterArray<int> ii(iientries, 2, larg);
+      ESMCI::InterArray<int> *iiptr = &ii;
+      
+      // Call into Array sparse matrix multiply store to create RouteHandle
       FTN_X(c_esmc_arraysmmstoreind4)(arraysrcpp, arraydstpp, rh, &tk, factors,
             &num_entries, iiptr, &ignoreUnmatched, srcTermProcessing,
             pipelineDepth, &localrc);
