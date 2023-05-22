@@ -192,7 +192,7 @@
           endif
         endif
 
-        ! Check the variable names to determin if it is SCRIP or ESMFMESH
+        ! Check the variable names to determine if it is SCRIP or ESMFMESH
         ncStatus = nf90_inquire_variable(gridid, i, name=attvalue)
         errmsg = 'nf90_inquire_variable failed '//trim(filename)
         if (CDFCheckError (ncStatus, &
@@ -211,10 +211,10 @@
         endif
      enddo
 
-     if (foundlon .and. foundlat) then
-         filetype = ESMF_FILEFORMAT_GRIDSPEC
-         rc=ESMF_SUCCESS
-         goto 1000
+     if (foundesmfcoord .and. foundesmfconn) then
+        filetype = ESMF_FILEFORMAT_ESMFMESH
+        rc=ESMF_SUCCESS
+        goto 1000
      endif
 
      if (foundscriplon .and. foundscriplat) then
@@ -223,10 +223,10 @@
          goto 1000
      endif
 
-     if (foundesmfcoord .and. foundesmfconn) then
-         filetype = ESMF_FILEFORMAT_ESMFMESH
-         rc=ESMF_SUCCESS
-         goto 1000
+     if (foundlon .and. foundlat) then
+        filetype = ESMF_FILEFORMAT_GRIDSPEC
+        rc=ESMF_SUCCESS
+        goto 1000
      endif
 
 1000 continue
