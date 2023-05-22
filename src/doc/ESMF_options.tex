@@ -543,12 +543,12 @@ The valid values are:
 \item [ESMF\_LINETYPE\_CART]
    Cartesian line. When this option is specified distances are calculated in a straight line through the 3D Cartesian space
    in which the sphere is embedded. Cells are approximated by 3D planes bounded by 3D Cartesian lines between their corner vertices. 
-   When calculating regrid weights, this line type is currently the default for the following regrid methods: ESMF\_REGRIDMETHOD\_BILINEAR, 
-   ESMF\_REGRIDMETHOD\_PATCH, ESMF\_REGRIDMETHOD\_NEAREST\_STOD, and  ESMF\_REGRIDMETHOD\_NEAREST\_DTOS.
+   When calculating regrid weights, this line type is currently the default for non-conservative regrid methods (e.g. ESMF\_REGRIDMETHOD\_BILINEAR, 
+   ESMF\_REGRIDMETHOD\_PATCH, ESMF\_REGRIDMETHOD\_NEAREST\_STOD, etc.).
 \item [ESMF\_LINETYPE\_GREAT\_CIRCLE]
    Great circle line. When this option is specified distances are calculated along a great circle path (the shortest distance
    between two points on a sphere surface). Cells are bounded by great circle paths between their corner vertices. When calculating regrid 
-   weights, this line type is currently the default for the following regrid method: ESMF\_REGRIDMETHOD\_CONSERVE. 
+   weights, this line type is currently the default for conservative regrid methods (e.g. ESMF\_REGRIDMETHOD\_CONSERVE, etc.).
 \end{description}
 
 
