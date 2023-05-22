@@ -67,12 +67,13 @@
 %\input{../Infrastructure/Grid/doc/Grid_options}
 %#endif
 
-\subsection{Use and Examples}
-#ifdef STANDALONE
-\input{Geom_usage}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Geom/doc/Geom_usage}
-#endif
+%%%  Take this out for now, but if we end up having time then add an example
+%\subsection{Use and Examples}
+%#ifdef STANDALONE
+%\input{Geom_usage}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Geom/doc/Geom_usage}
+%#endif
 
 \subsection{Class API: Geom Methods}
 #ifdef STANDALONE
