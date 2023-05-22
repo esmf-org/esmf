@@ -104,6 +104,12 @@ static void _get_vec_dims_for_vectorRegrid(ESMCI::Array &array, int &num_vec_dim
   }
 }
 
+static void _create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *iientries, double *factors,
+                                                          int num_vec_dims, int *src_vec_dims_undist_seqind, int *dst_vec_dims_undist_seqind,
+                                                          Mesh *src_mesh, PointList *src_pl,
+                                                          Mesh *dst_mesh, PointList *dst_pl,
+                                                          int &num_entries_vec, int *&iientries_vec, double *&factors_vec);
+
 
 
 void ESMCI_regrid_create(
@@ -541,20 +547,30 @@ void ESMCI_regrid_create(
     }
 
 
-#if 0    
     ///// If requested, then change weights to be vector weights
     if (vectorRegrid) {
 
-      // Size of a vector matrix compared to non-vector
-      in vec_factor=num_vec_dims*num_vec_dims;
+      // Declare vector Matrix
+      int num_entries_vec;
+      int *iientries_vec;
+      double *factors_vec;
+
+      // Create vector weights from regular weights
+      _create_vector_sparse_mat_from_reg_sparse_mat(num_entries, iientries, factors,
+                                                    num_vec_dims, src_vec_dims_undist_seqind, dst_vec_dims_undist_seqind,
+                                                    srcmesh, srcpointlist,
+                                                    dstmesh, dstpointlist,
+                                                    num_entries_vec, iientries_vec, factors_vec);      
+      // Get rid of old matrix
+      delete [] factors;
+      delete [] iientries;
+      num_entries = 0;      
       
-      // Allocate new vector matrix
-      int num_entries_vec=vec_factor*num_entries;
-      int *iientries_vec = new int[2*iisize.first]; 
-
+      // Swap matrix to vector version
+      num_entries=num_entries_vec;
+      iientries=iientries_vec;
+      factors=factors_vec;    
     }
-
-#endif
 
 
     
@@ -2476,5 +2492,27 @@ void copy_cnsv_rs_from_WMat_to_Array(WMat *wmat, ESMCI::Array *array) {
 #undef ZERO_TOL
 #undef cWtoA_MAXDIM
 }
+
+
+static void _create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *iientries, double *factors,
+                                                          int num_vec_dims, int *src_vec_dims_undist_seqind, int *dst_vec_dims_undist_seqind,
+                                                          Mesh *src_mesh, PointList *src_pl,
+                                                          Mesh *dst_mesh, PointList *dst_pl,
+                                                          int &num_entries_vec, int *&iientries_vec, double *&factors_vec) {
+
+  
+#if 0
+      // Size of a vector matrix compared to non-vector
+      int vec_factor=num_vec_dims*num_vec_dims;
+      
+      // Allocate new vector matrix
+      int num_entries_vec=vec_factor*num_entries;
+      int *iientries_vec = new int[2*iisize.first]; 
+#endif  
+
+
+}
+
+
 
 #undef  ESMC_METHOD
