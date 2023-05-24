@@ -67,7 +67,7 @@
 !   The rule to check the file format is as follows:
 !   ESMF_FILEFORMAT_UGRID: a variable with attribute "cf_role" or "standard_name" set to "mesh_topology"
 !   ESMF_FILEFORMAT_MOSAIC: a variable with attribute "standard_name" set to "grid_mosaic_spec"
-!   ESMF_FILEFORMAT_TILE:  a varilable with attribute "standard_name" set to "grid_tile_spec"
+!   ESMF_FILEFORMAT_TILE:  a variable with attribute "standard_name" set to "grid_tile_spec"
 !   ESMF_FILEFORMAT_ESMFMESH: variables nodeCoords and elementConn exists
 !   ESMF_FILEFORMAT_SCRIP:  variables grid_corner_lon and grid_corner_lat exists
 !   ESMF_FILEFORMAT_CFGRID: variables with attributes "degree_north" and "degree_east" exists, and other formats aren't matched
