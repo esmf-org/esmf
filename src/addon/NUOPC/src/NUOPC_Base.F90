@@ -5241,9 +5241,9 @@ module NUOPC_Base
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    integer               :: i, j, count
+    integer               :: i, j, count, countAlloc
     integer, allocatable  :: chopPos(:)
-    
+
     ! check the incoming pointer
     if (associated(chopStringList)) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
@@ -5253,13 +5253,13 @@ module NUOPC_Base
         rcToReturn=rc)
       return  ! bail out
     endif
-    
+
     ! determine how many times chopChar is found in string
     count=0 ! reset
     do i=1, len(trim(string))
       if (string(i:i)==chopChar) count=count+1
     enddo
-    
+
     ! record positions where chopChar is found in string
     allocate(chopPos(count))
     j=1 ! reset
@@ -5269,17 +5269,28 @@ module NUOPC_Base
         j=j+1
       endif
     enddo
-    
+
+    ! prepare chopStringList
+    countAlloc = count
+    if (count>0) then
+      if (chopPos(count)<len(trim(string))) countAlloc = count + 1
+    else
+      countAlloc = 1
+    endif
+    allocate(chopStringList(countAlloc))
+
     ! chop up the string
-    allocate(chopStringList(count+1))
     j=1 ! reset
     do i=1, count
       chopStringList(i) = string(j:chopPos(i)-1)
       j=chopPos(i)+1
     enddo
-    chopStringList(count+1) = trim(string(j:len(string)))
+    if (countAlloc>count) then
+      ! there is some part of string left after the last chopChar
+      chopStringList(count+1) = string(j:len(trim(string)))
+    endif
     deallocate(chopPos)
-    
+
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
