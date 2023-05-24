@@ -772,7 +772,7 @@ and {\tt grid\_corner\_lon} values).
 
 Both the SCRIP grid file format and the SCRIP weight file format work with the SCRIP 1.4 tools.
 
-\subsubsection{ESMF Unstructured Grid File Format}\label{sec:fileformat:esmf}
+\subsubsection{ESMF Unstructured Grid File Format (ESMFMESH)}\label{sec:fileformat:esmf}
 
 ESMF supports a custom unstructured grid file format for describing meshes. This format is more compatible than the SCRIP format with the methods used to create an ESMF Mesh object, so less conversion needs to be done to create a Mesh. The ESMF format is thus more efficient than SCRIP when used with ESMF codes (e.g. the ESMF\_RegridWeightGen application). When using the ESMF API, the file format flag {\tt ESMF\_FILEFORMAT\_ESMFMESH} can be used to indicate a file in this format.
 
@@ -933,10 +933,10 @@ data:
 
 \end{verbatim}
 
-\subsubsection{CF Convention Single Tile File Format}\label{sec:fileformat:gridspec}
+\subsubsection{CF Convention Single Tile File Format (CFGRID/GRIDSPEC)}\label{sec:fileformat:gridspec}
 
 ESMF\_RegridWeightGen supports single tile logically rectangular lat/lon grid files that follow the NETCDF CF convention based on
-\htmladdnormallink{CF Metadata Conventions V1.6} {http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html}. When using the ESMF API, the file format flag {\tt ESMF\_FILEFORMAT\_CFGRID} (or its equivalent {\tt ESMF\_FILEFORMAT\_GRIDSPEC}) can be used to indicate a file in this format.  
+\htmladdnormallink{CF Metadata Conventions V1.6} {http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html}. When using the ESMF API, the file format flag {\tt ESMF\_FILEFORMAT\_CFGRID} (or its equivalent deprecated name, {\tt ESMF\_FILEFORMAT\_GRIDSPEC}) can be used to indicate a file in this format.  
 
  An example grid file is shown below.
 The cell center coordinate variables are determined by the value of its attribute {\tt units}.  The longitude
