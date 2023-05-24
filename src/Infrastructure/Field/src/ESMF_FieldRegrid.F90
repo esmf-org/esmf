@@ -528,9 +528,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           up a cell. Both of these quantities can influence how interpolation weights are calculated.
 !           As would be expected, this argument is only applicable when {\tt srcField} and {\tt dstField} are
 !           built on grids which lie on the surface of a sphere. Section~\ref{opt:lineType} shows a 
-!           list of valid options for this argument. If not specified, the default depends on the 
-!           regrid method. Section~\ref{opt:lineType} has the defaults by line type. Figure~\ref{line_type_support} shows
-!           which line types are supported for each regrid method as well as showing the default line type by regrid method.  
+!           list of valid options for this argument. Figure~\ref{line_type_support} shows
+!           which line types are supported for each regrid method as well as showing the default line type by regrid method.
+!           If not specified, defaults to {\tt ESMF\_LINETYPE\_CART} for non-conservative regrid methods, 
+!           and {\tt ESMF\_LINETYPE\_GREAT\_CIRCLE} for conservative methods.
+!
 !     \item [{[normType]}] 
 !           This argument controls the type of normalization used when generating conservative weights. This option
 !           only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE} or  {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE\_2ND}
