@@ -69,6 +69,7 @@
 #include <cfloat>
 #include <cmath>
 #include <vector>
+#include <set>
 #ifdef __sun
 #include <signal.h>
 #else
@@ -2614,6 +2615,49 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
 }
 
 
+int VMK::checkPetList(int *petList, int count){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::checkPetList()"
+  int rc;
+  if (!petList){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "petList must not be NULL.",
+      ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  std::vector<int> petListVec(petList, petList + count);
+  std::set<int> petListSet(petListVec.begin(), petListVec.end());
+  if (petListSet.size() != petListVec.size()){
+    // there must be at least one duplicate element in petList
+    auto it=petListVec.begin();
+    for (int i=0; i<count/10; i++){
+      std::stringstream msg;
+      msg << "{ ";
+      for (int j=0; j<9; j++){
+        msg << *it << ", ";
+        ++it;
+      }
+      msg << *it << "}";
+      ++it;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_ERROR);
+    }
+    std::stringstream msg;
+    msg << "{ ";
+    for (int j=0; j<count%10-1; j++){
+      msg << *it << ", ";
+      ++it;
+    }
+    msg << *it << "}";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_ERROR);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_DUP,
+      "There appear to be duplicate PETs in the petList.",
+      ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  return ESMF_SUCCESS;
+}
+
+
 void VMK::print()const{
   // print info about the VMK object
   printf("--- VMK::print() start ---\n");
@@ -3020,8 +3064,7 @@ void VMKPlan::vmkplan_maxthreads(VMK &vm, int max,
 }
 
 
-void VMKPlan::vmkplan_maxthreads(VMK &vm, int max, int *plist, 
-  int nplist){
+void VMKPlan::vmkplan_maxthreads(VMK &vm, int max, int *plist, int nplist){
   // set up a VMKPlan that will max. the number of thread-pets up to max
   // but only allow PETs listed in plist to participate
   // first do garbage collection on current object
@@ -3130,8 +3173,8 @@ void VMKPlan::vmkplan_maxthreads(VMK &vm, int max, int *plist,
 }
 
 
-int VMKPlan::vmkplan_maxthreads(VMK &vm, int max, int *plist, 
-  int nplist, int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi,
+int VMKPlan::vmkplan_maxthreads(VMK &vm, int max, int *plist, int nplist,
+  int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi,
   bool forceEachChildPetOwnPthread){
   // set the communication preferences
   if (pref_intra_process >= 0)
@@ -3162,8 +3205,7 @@ void VMKPlan::vmkplan_minthreads(VMK &vm, int max){
 }
 
 
-void VMKPlan::vmkplan_minthreads(VMK &vm, int max, int *plist, 
-  int nplist){
+void VMKPlan::vmkplan_minthreads(VMK &vm, int max, int *plist, int nplist){
   // set up a VMKPlan that will only have single threaded pet
   // instantiations and claim all cores of pets that don't make it through, up
   // to max cores/pet but only allow PETs listed in plist to participate
@@ -3247,8 +3289,8 @@ void VMKPlan::vmkplan_minthreads(VMK &vm, int max, int *plist,
 }
 
 
-int VMKPlan::vmkplan_minthreads(VMK &vm, int max, int *plist,
-  int nplist, int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi,
+int VMKPlan::vmkplan_minthreads(VMK &vm, int max, int *plist, int nplist,
+  int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi,
   bool forceEachChildPetOwnPthread){
   // set the communication preferences
   if (pref_intra_process >= 0)
@@ -3278,8 +3320,7 @@ void VMKPlan::vmkplan_maxcores(VMK &vm, int max){
 }
 
 
-void VMKPlan::vmkplan_maxcores(VMK &vm, int max, int *plist,
-  int nplist){
+void VMKPlan::vmkplan_maxcores(VMK &vm, int max, int *plist, int nplist){
   // set up a VMKPlan that will have pets with the maximum number of cores
   // available, but not more than max and only use PETs listed in plist
   // first do garbage collection on current object
@@ -3369,8 +3410,8 @@ void VMKPlan::vmkplan_maxcores(VMK &vm, int max, int *plist,
 }
 
 
-int VMKPlan::vmkplan_maxcores(VMK &vm, int max, int *plist, 
-  int nplist, int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi,
+int VMKPlan::vmkplan_maxcores(VMK &vm, int max, int *plist, int nplist,
+  int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi,
   bool forceEachChildPetOwnPthread){
   // set the communication preferences
   if (pref_intra_process >= 0)

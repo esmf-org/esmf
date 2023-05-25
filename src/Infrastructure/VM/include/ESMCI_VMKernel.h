@@ -423,6 +423,9 @@ class VMK{
     void shutdown(class VMKPlan *vmp, void *arg);
       // exit a vm derived from current vm according to the VMKPlan
 
+    static int checkPetList(int *petList, int count);
+      // ensure there are no duplicate PETs listed
+
     void print() const;
     void log(std::string prefix,
       ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO)const;

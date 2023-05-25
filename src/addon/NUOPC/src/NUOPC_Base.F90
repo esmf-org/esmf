@@ -95,6 +95,11 @@ module NUOPC_Base
     module procedure NUOPC_InitAttributesState
   end interface
 
+  interface NUOPC_IngestPetList
+    module procedure NUOPC_IngestPetListFF
+    module procedure NUOPC_IngestPetListHC
+  end interface
+
   interface NUOPC_IsAtTime
     module procedure NUOPC_IsAtTimeField
     module procedure NUOPC_IsAtTimeState
@@ -2330,13 +2335,14 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_IngestPetList - Ingest a petList from FreeFormat
 ! !INTERFACE:
-  subroutine NUOPC_IngestPetList(petList, freeFormat, rc)
+  ! Private name; call using NUOPC_IngestPetList()
+  subroutine NUOPC_IngestPetListFF(petList, freeFormat, rc)
 ! !ARGUMENTS:
     integer, allocatable,   intent(out)           :: petList(:)
     type(NUOPC_FreeFormat), intent(in),  target   :: freeFormat
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Construct a petList from a {\tt FreeFormat} object.
+!   Construct a petList from a FreeFormat object.
 !
 !   The arguments are:
 !   \begin{description}
@@ -2373,11 +2379,14 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     integer                 :: localrc
-    integer                 :: i, j, k
+    integer                 :: i, j, k, temp
     integer                 :: lineCount, tokenCount, blockCount, petCount
     integer, allocatable    :: lb(:), ub(:)
+    logical, allocatable    :: reverse(:)
     character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
     character(len=ESMF_MAXSTR), pointer :: chopStringList(:)
+
+    if (present(rc)) rc = ESMF_SUCCESS
 
     call NUOPC_FreeFormatGet(freeFormat, lineCount=lineCount, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2390,7 +2399,7 @@ module NUOPC_Base
       blockCount = blockCount + tokenCount
     enddo
 
-    allocate(lb(blockCount),ub(blockCount))
+    allocate(lb(blockCount),ub(blockCount),reverse(blockCount))
     petCount = 0
     k = 1
 
@@ -2427,12 +2436,13 @@ module NUOPC_Base
           read(chopStringList(1),*) lb(k)
           read(chopStringList(2),*) ub(k)
           deallocate(chopStringList)
+          reverse(k) = .false.
           if (ub(k)<lb(k)) then
-            call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-              msg="Upper bound must not be less than lower bound in "//& 
-              "petList block element.", line=__LINE__, file=FILENAME, &
-              rcToReturn=rc)
-            return  ! bail out
+            ! reverse range
+            reverse(k) = .true.
+            temp = ub(k)
+            ub(k) = lb(k)
+            lb(k) = temp
           endif
         else
           ! this is a single PET
@@ -2453,13 +2463,152 @@ module NUOPC_Base
     i = 1
 
     do k=1, blockCount
-      do j=lb(k), ub(k)
-        petList(i) = j
-        i = i+1
-      enddo
+      if (reverse(k)) then
+        do j=ub(k), lb(k), -1
+          petList(i) = j
+          i = i+1
+        enddo
+      else
+        do j=lb(k), ub(k)
+          petList(i) = j
+          i = i+1
+        enddo
+      endif
     enddo
 
-    deallocate(lb, ub)
+    deallocate(lb, ub, reverse)
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_IngestPetList - Ingest a petList from HConfig
+! !INTERFACE:
+  ! Private name; call using NUOPC_IngestPetList()
+  subroutine NUOPC_IngestPetListHC(petList, hconfig, rc)
+! !ARGUMENTS:
+    integer, allocatable,   intent(out)           :: petList(:)
+    type(ESMF_HConfig),     intent(in)            :: hconfig
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   Construct a petList from a HConfig object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[petList]
+!     The constructed petList. The size and content is set by this method.
+!   \item[hconfig]
+!     The incoming petList information as HConfig. The provided {\tt hconfig}
+!     must be a scalar, or a list of lists and scalars. The input is recursively
+!     processed, and each scalar fed into the FreeFormat version of the
+!     {\tt NUOPC\_IngestPetList()} interface as a single string. The resulting
+!     {\tt petList} is the union of all PETs determined by all of the elements
+!     contained in {\tt hconfig}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                 :: localrc
+    type(NUOPC_FreeFormat)  :: ff
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! create empty free format object
+    ff = NUOPC_FreeFormatCreate(rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    ! recursively process hconfig and add to free format object
+    call ProcessRecusive(ff, hconfig, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    ! ingest petList from free format object
+    call NUOPC_IngestPetList(petList, ff, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    ! clean-up
+    call NUOPC_FreeFormatDestroy(ff, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  recursive subroutine ProcessRecusive(freeFormat, hconfig, rc)
+    type(NUOPC_FreeFormat)                        :: freeFormat
+    type(ESMF_HConfig),     intent(in)            :: hconfig
+    integer,                intent(out), optional :: rc
+    ! local variables
+    integer                   :: localrc
+    logical                   :: isFlag
+    character(:), allocatable :: valueString
+    type(ESMF_HConfigIter)    :: hconfigIter, hconfigIterBegin, hconfigIterEnd
+    type(ESMF_HConfig)        :: hconfigNode
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    isFlag = ESMF_HConfigIsScalar(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    if (isFlag) then
+      ! scalar  -> terminal node
+      isFlag = ESMF_HConfigIsNull(hconfig, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      if (.not.isFlag) then
+        ! valid scalar
+        valueString = ESMF_HConfigAsString(hconfig, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        call NUOPC_FreeFormatAdd(freeFormat, [valueString], rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      endif
+    else
+      ! not scalar -> check for sequence
+      isFlag = ESMF_HConfigIsSequence(hconfig, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      if (.not.isFlag) then
+        ! error condition
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+          msg="Must be scalar or sequence.", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)
+        return  ! bail out
+      endif
+      ! iterate over the sequence elements
+      hconfigIterBegin = ESMF_HConfigIterBegin(hconfig, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      hconfigIterEnd = ESMF_HConfigIterEnd(hconfig, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      hconfigIter = hconfigIterBegin
+      do while ( &
+        ESMF_HConfigIterLoop(hconfigIter, hconfigIterBegin, hconfigIterEnd, &
+        rc=localrc))
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        ! recursive processing
+        hconfigNode = ESMF_HConfigCreateAt(hconfigIter, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        call ProcessRecusive(freeFormat, hconfigNode, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        call ESMF_HConfigDestroy(hconfigNode, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      enddo
+    endif
 
   end subroutine
   !-----------------------------------------------------------------------------
@@ -5241,9 +5390,9 @@ module NUOPC_Base
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    integer               :: i, j, count
+    integer               :: i, j, count, countAlloc
     integer, allocatable  :: chopPos(:)
-    
+
     ! check the incoming pointer
     if (associated(chopStringList)) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
@@ -5253,13 +5402,13 @@ module NUOPC_Base
         rcToReturn=rc)
       return  ! bail out
     endif
-    
+
     ! determine how many times chopChar is found in string
     count=0 ! reset
     do i=1, len(trim(string))
       if (string(i:i)==chopChar) count=count+1
     enddo
-    
+
     ! record positions where chopChar is found in string
     allocate(chopPos(count))
     j=1 ! reset
@@ -5269,17 +5418,28 @@ module NUOPC_Base
         j=j+1
       endif
     enddo
-    
+
+    ! prepare chopStringList
+    countAlloc = count
+    if (count>0) then
+      if (chopPos(count)<len(trim(string))) countAlloc = count + 1
+    else
+      countAlloc = 1
+    endif
+    allocate(chopStringList(countAlloc))
+
     ! chop up the string
-    allocate(chopStringList(count+1))
     j=1 ! reset
     do i=1, count
       chopStringList(i) = string(j:chopPos(i)-1)
       j=chopPos(i)+1
     enddo
-    chopStringList(count+1) = trim(string(j:len(string)))
+    if (countAlloc>count) then
+      ! there is some part of string left after the last chopChar
+      chopStringList(count+1) = string(j:len(trim(string)))
+    endif
     deallocate(chopPos)
-    
+
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 

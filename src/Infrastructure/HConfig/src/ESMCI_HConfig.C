@@ -386,8 +386,9 @@ int HConfig::loadFile(
       return rc;
     }
   }catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception loading content from file", ESMC_CONTEXT, &rc);
+    std::stringstream msg;
+    msg << "Caught exception loading content from file: " << filename;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg, ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -460,8 +461,9 @@ int HConfig::saveFile(
           fout << (YAML::Node)(*iter);
     }
   }catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception loading content from file", ESMC_CONTEXT, &rc);
+    std::stringstream msg;
+    msg << "Caught exception saving content to file: " << filename;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg, ESMC_CONTEXT, &rc);
     return rc;
   }
 
