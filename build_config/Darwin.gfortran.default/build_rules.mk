@@ -230,7 +230,7 @@ ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
 # Determine where gfortran's libraries are located
 #
 ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.dylib)
-ifeq ($(ESMF_LIBSTDCXX),libgfortran.dylib)
+ifeq ($(ESMF_LIBGFORTRAN),libgfortran.dylib)
 ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.a)
 endif
 ESMF_CXXLINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
