@@ -205,6 +205,8 @@ ESMF_F90COMPILEOPTS += -ffree-line-length-huge
 ############################################################
 # Determine where gcc's libraries are located
 #
+# Note that the result of -print-file-name will be the full path to the file if it is found
+# within the compiler installation, and simply the file name verbatim if it is NOT found.
 ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.dylib)
 ifeq ($(ESMF_LIBSTDCXX),libstdc++.dylib)
 ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
