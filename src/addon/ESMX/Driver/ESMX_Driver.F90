@@ -65,11 +65,12 @@ module ESMX_Driver
     integer, allocatable            :: petList(:)
     type(ESMF_GridComp)             :: comp
     type(ESMF_Config)               :: config
-    type(ESMF_HConfig)              :: hconfig, hconfigNode, hconfigAttr
+    type(ESMF_HConfig)              :: hconfig, hconfigNode, hconfigNode2
     character(:), allocatable       :: configKey(:)
     character(:), allocatable       :: componentList(:)
     character(:), allocatable       :: compLabel
     character(:), allocatable       :: model
+    character(:), allocatable       :: string1, string2
     type(ESMF_Info)                 :: info
     type(type_CompDef), allocatable :: CompDef(:)
     logical                         :: inCompDef, isPresent
@@ -106,18 +107,18 @@ module ESMX_Driver
       call ESMF_ConfigGet(config, hconfig=hconfig, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
-      ! Find hconfigAttr that holds driver level attributes, conditionally ingest
+      ! Find hconfig node that holds driver level attributes, conditionally ingest
       configKey = ["ESMX      ", "Driver    ", "attributes"]
-      hconfigAttr = HConfigCreateFoundNode(hconfig, configKey=configKey, &
+      hconfigNode2 = HConfigCreateFoundNode(hconfig, configKey=configKey, &
         foundFlag=isPresent, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
       if (isPresent) then
-        call NUOPC_CompAttributeIngest(driver, hconfigAttr, rc=rc)
+        call NUOPC_CompAttributeIngest(driver, hconfigNode2, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME)) return  ! bail out
       endif
-      call ESMF_HConfigDestroy(hconfigAttr, rc=rc)
+      call ESMF_HConfigDestroy(hconfigNode2, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
     endif
@@ -156,7 +157,7 @@ module ESMX_Driver
       ! compLabel
       compLabel=trim(componentList(i))
 
-      ! Find hconfigNode that hold component level settings
+      ! Find hconfigNode that holds component level settings
       hconfigNode = HConfigCreateFoundNode(hconfig, configKey=[compLabel], &
         foundFlag=isPresent, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -182,16 +183,24 @@ module ESMX_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
 
-#if 0
       ! set up petList
-      ff = NUOPC_FreeFormatCreate(config, label=trim(compLabel)//"_petlist:", &
-        relaxedFlag=.true., rc=rc)
+      isPresent = ESMF_HConfigIsDefined(hconfigNode, keyString="petList", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
-      call NUOPC_IngestPetList(petList, ff, rc=rc)
-#else
-      allocate(petList(0))
-#endif
+      if (isPresent) then
+        hconfigNode2 = ESMF_HConfigCreateAt(hconfigNode, keyString="petList", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+        call NUOPC_IngestPetList(petList, hconfigNode2, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+        call ESMF_HConfigDestroy(hconfigNode2, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+      else
+        allocate(petList(0))
+      endif
 
       ! Set NUOPC hint for OpenMP
       info = ESMF_InfoCreate(rc=rc)
@@ -216,7 +225,14 @@ module ESMX_Driver
       inCompDef = .false.
       do j=1, componentCount
         if (trim(CompDef(j)%name)=="__uninitialized__") exit
-        if (trim(CompDef(j)%name)==trim(model)) then
+        ! case insensitive string comparison
+        string1 = ESMF_UtilStringLowerCase(trim(CompDef(j)%name), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+        string2 = ESMF_UtilStringLowerCase(trim(model), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+        if (string1==string2) then
           inCompDef = .true.
           exit
         endif
@@ -242,20 +258,20 @@ module ESMX_Driver
           line=__LINE__, file=FILENAME)) return  ! bail out
       endif
 
-      ! Find hconfigAttr that holds model level attributes, conditionally ingest
+      ! Find hconfig node that holds model level attributes, conditionally ingest
       isPresent = ESMF_HConfigIsDefined(hconfigNode, keyString="attributes", &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
       if (isPresent) then
-        hconfigAttr = ESMF_HConfigCreateAt(hconfigNode, &
+        hconfigNode2 = ESMF_HConfigCreateAt(hconfigNode, &
           keyString="attributes", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME)) return  ! bail out
-        call NUOPC_CompAttributeIngest(comp, hconfigAttr, rc=rc)
+        call NUOPC_CompAttributeIngest(comp, hconfigNode2, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME)) return  ! bail out
-        call ESMF_HConfigDestroy(hconfigAttr, rc=rc)
+        call ESMF_HConfigDestroy(hconfigNode2, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME)) return  ! bail out
       endif
