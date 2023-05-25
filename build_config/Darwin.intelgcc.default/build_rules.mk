@@ -203,6 +203,8 @@ ESMF_CRPATHPREFIX           = -Wl,-rpath,
 # Determine where gcc's stdc++ or clang's c++ libraries are located, depending
 # on which underlying compiler is in use.
 #
+# Note that the result of -print-file-name will be the full path to the file if it is found
+# within the compiler installation, and simply the file name verbatim if it is NOT found.
 ifeq ($(ESMF_CLANGSTR), clang)
 ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.dylib)
 ifeq ($(ESMF_LIBSTDCXX),libc++.dylib)
