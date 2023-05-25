@@ -1254,6 +1254,11 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     ESMCI_NULL_CHECK_PRC(vm, rc)
     ESMCI_NULL_CHECK_PRC(*vm, rc)
+    if (*npetlist > 0){
+      int localrc = ESMCI::VMK::checkPetList(petlist, *npetlist);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+    }
     (*ptr) = new ESMCI::VMPlan;
     if (*contextflag==ESMF_CHILD_IN_PARENT_VM)
       (*ptr)->vmkplan_useparentvm(**vm);
@@ -1367,6 +1372,11 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     ESMCI_NULL_CHECK_PRC(vm, rc)
     ESMCI_NULL_CHECK_PRC(*vm, rc)
+    if (*npetlist > 0){
+      int localrc = ESMCI::VMK::checkPetList(petlist, *npetlist);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+    }
     // Sort out the non-present F90 optional arguments. 
     max = ESMC_NOT_PRESENT_FILTER(max);
     pref_intra_process = ESMC_NOT_PRESENT_FILTER(pref_intra_process);
@@ -1433,6 +1443,11 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     ESMCI_NULL_CHECK_PRC(vm, rc)
     ESMCI_NULL_CHECK_PRC(*vm, rc)
+    if (*npetlist > 0){
+      int localrc = ESMCI::VMK::checkPetList(petlist, *npetlist);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+    }
     // Sort out the non-present F90 optional arguments. 
     max = ESMC_NOT_PRESENT_FILTER(max);
     pref_intra_process = ESMC_NOT_PRESENT_FILTER(pref_intra_process);
@@ -1499,6 +1514,11 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     ESMCI_NULL_CHECK_PRC(vm, rc)
     ESMCI_NULL_CHECK_PRC(*vm, rc)
+    if (*npetlist > 0){
+      int localrc = ESMCI::VMK::checkPetList(petlist, *npetlist);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+    }
     // Sort out the non-present F90 optional arguments. 
     max = ESMC_NOT_PRESENT_FILTER(max);
     pref_intra_process = ESMC_NOT_PRESENT_FILTER(pref_intra_process);
