@@ -70,7 +70,7 @@
       type(ESMF_Array)       :: alist10(1), alist11(1)
       type(ESMF_Field)       :: field10, field11
       type(ESMF_Field)       :: field1x
-      type(ESMF_Field)       :: fieldrnd(30)
+      type(ESMF_Field)       :: fieldrnd(5)
       type(ESMF_FieldBundle) :: fbundle12
       type(ESMF_FieldBundle) :: fbundle1x
       type(ESMF_RouteHandle) :: routehandle11, routehandle12
@@ -79,13 +79,9 @@
       type(ESMF_State)       :: state20, state30
       type(ESMF_State)       :: staternd
 
-      character(4)           :: rndchars
-      character(20)          :: rndfieldnames(size (fieldrnd))
-      character(20)          :: namelist(size (fieldrnd))
-      character(20)          :: sortedfieldnames (size (fieldrnd))
-      real                   :: rndnums(size (fieldrnd) * len (rndchars))
-      real                   :: rndnums2d(len (rndchars), size (fieldrnd))
-      equivalence              (rndnums, rndnums2d)
+      character(7)           :: rndfieldnames(size (fieldrnd))
+      character(7)           :: namelist(size (fieldrnd))
+      character(7)           :: sortedfieldnames (size (fieldrnd))
       integer :: i
       integer :: linkcount
 
@@ -1643,39 +1639,37 @@
 ! call ESMF_StatePrint (state30, options='debug', nestedFlag=.true.)
 
       !------------------------------------------------------------------------
-      ! Test adding Fields with random names, and obtaining lists
+      ! Test adding Fields with pseudo-random names, and obtaining lists, to test sorting
+      ! of field names
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Create a few Fields with random names
-      call random_number (rndnums)
-      rndnums = rndnums*26 + 65  ! Convert to ASCII A-Z
+      ! Create a few Fields with pseudo-random names
+      rndfieldnames = ['field M', 'field D', 'field A', 'field Z', 'field Q']
       do, i=1, size (fieldrnd)
-        write (rndfieldnames(i),'(a,4a)')  &
-            'random field ', achar (int (rndnums2d(:,i)))
         fieldrnd(i) = ESMF_FieldCreate (name=rndfieldnames(i),  &
             locstream=lstream, arrayspec=aspec, rc=rc)
         if (rc /= ESMF_SUCCESS) exit
       end do
 
-      write (failmsg, *) "Creating Fields for random Field test"
-      write (name, *) "Create Field array for random Field test"
+      write (failmsg, *) "Creating Fields for pseudo-random Field test"
+      write (name, *) "Create Field array for pseudo-random Field test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
         result, ESMF_SRCLINE)
 
       !EX_UTest
-      ! Create a State for random Fields
-      staternd = ESMF_StateCreate (name='random Field State', rc=rc)
-      write (failmsg, *) "Creating Fields for random Field test"
-      write (name, *) "Create Field array for random Field test"
+      ! Create a State for pseudo-random Fields
+      staternd = ESMF_StateCreate (name='pseudo-random Field State', rc=rc)
+      write (failmsg, *) "Creating Fields for pseudo-random Field test"
+      write (name, *) "Create Field array for pseudo-random Field test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
         result, ESMF_SRCLINE)
 
       !EX_UTest
-      ! Add random Fields to the State
+      ! Add pseudo-random Fields to the State
       call ESMF_StateAdd (staternd, FieldList=fieldrnd, rc=rc)
-      write (failmsg, *) "Adding random Fields to State test"
-      write (name, *) "Adding random Fields to State test"
+      write (failmsg, *) "Adding pseudo-random Fields to State test"
+      write (name, *) "Adding pseudo-random Fields to State test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
         result, ESMF_SRCLINE)
 
@@ -1684,8 +1678,8 @@
       sortedfieldnames = rndfieldnames
       call ESMF_UtilSort (sortedfieldnames,  &
           direction=ESMF_SORTFLAG_ASCENDING, rc=rc)
-      write (failmsg, *) "Adding random Fields to State test"
-      write (name, *) "Adding random Fields to State test"
+      write (failmsg, *) "Adding pseudo-random Fields to State test"
+      write (name, *) "Adding pseudo-random Fields to State test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
         result, ESMF_SRCLINE)
 !      print '(a, (a))', 'sorted Field name:', ' ',  &
