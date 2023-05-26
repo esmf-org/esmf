@@ -3014,6 +3014,10 @@ module NUOPC_Comp
     if (present(profiling)) then
       ! initialize the output value
       profiling = 0
+      ! set specific verbosity levels
+      max   = 65535  ! all 16 lower bits set
+      high  =   511  ! all 9 lower bits set
+      low   =    73  ! bits 0, 3, 6
       ! query the component for Profiling
       call NUOPC_CompAttributeGet(comp, name="Profiling", value=valueString, &
         rc=localrc)

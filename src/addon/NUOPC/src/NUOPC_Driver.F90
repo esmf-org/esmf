@@ -1306,6 +1306,9 @@ module NUOPC_Driver
     allocate(mustAttributeUpdate(0:is%wrap%modelCount))
     mustAttributeUpdate = .false.
 
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("Init-Sweep-1")
+    endif
     ! modelComps
     call loopModelCompsS(driver, phaseString="IPDv00p1", &
       mustAttributeUpdate=mustAttributeUpdate, rc=rc)
@@ -1357,7 +1360,13 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("Init-Sweep-1")
+    endif
 
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("Init-Sweep-2")
+    endif
     ! modelComps (new for IPDv05)
     call loopModelCompsS(driver, phaseString="IPDv05p2", &
       mustAttributeUpdate=mustAttributeUpdate, rc=rc)
@@ -1418,8 +1427,14 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("Init-Sweep-2")
+    endif
 
     ! modelComps
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("Init-Sweep-3")
+    endif
     call loopModelCompsS(driver, phaseString="IPDv01p2", &
       mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1485,6 +1500,9 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("Init-Sweep-3")
+    endif
 
     ! Before returning the driver must clean up its own importState, which
     ! may have Fields advertised that do not have a ConsumerConnection set.
@@ -1494,6 +1512,9 @@ module NUOPC_Driver
     ! they should not remain in the parent importState. Leaving them in the
     ! parent State, while not connected with a child anylonger, would lead to
     ! issues during GeomTransfer.
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("rmFieldsWoConsumerConnection")
+    endif
     stateIsCreated = ESMF_StateIsCreated(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -1503,6 +1524,9 @@ module NUOPC_Driver
       call rmFieldsWoConsumerConnection(importState, name=name, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("rmFieldsWoConsumerConnection")
     endif
 
     ! SPECIALIZE by calling into optional attached method
@@ -1944,6 +1968,9 @@ module NUOPC_Driver
     mustAttributeUpdate = .false.
 
     ! modelComps
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("Init-Sweep-4")
+    endif
     call loopModelCompsS(driver, phaseString="IPDv00p2", &
       mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2002,8 +2029,14 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("Init-Sweep-4")
+    endif
 
     ! modelComps
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("Init-Sweep-5")
+    endif
     call loopModelCompsS(driver, phaseString="IPDv03p4", &
       mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2047,7 +2080,13 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("Init-Sweep-5")
+    endif
 
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("Init-Sweep-6")
+    endif
     ! modelComps
     call loopModelCompsS(driver, phaseString="IPDv03p5", &
       mustAttributeUpdate=mustAttributeUpdate, rc=rc)
@@ -2124,7 +2163,13 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("Init-Sweep-6")
+    endif
 
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("Init-Sweep-7")
+    endif
     ! modelComps
     call loopModelCompsS(driver, phaseString="IPDv00p3", &
       mustAttributeUpdate=mustAttributeUpdate, rc=rc)
@@ -2163,6 +2208,9 @@ module NUOPC_Driver
       return  ! bail out
     ! connectorComps
     ! nothing to do
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("Init-Sweep-7")
+    endif
 
     ! SPECIALIZE by calling into optional attached method
     ! after children realize
@@ -2617,6 +2665,9 @@ module NUOPC_Driver
     allocate(mustAttributeUpdate(0:is%wrap%modelCount))
     mustAttributeUpdate = .false.
 
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionEnter("Init-Sweep-8")
+    endif
     ! modelComps
     if (is%wrap%firstTimeDataInit) then
       ! IPDv < 02 data initialize phase only called once
@@ -2670,6 +2721,10 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
+
+    if (btest(profiling,2)) then
+      call ESMF_TraceRegionExit("Init-Sweep-8")
+    endif
 
     ! determine whether to enter initialize data resolution loop
     call NUOPC_CompAttributeGet(driver, name="InitializeDataResolution", &
