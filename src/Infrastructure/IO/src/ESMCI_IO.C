@@ -1203,6 +1203,7 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int pet
 
   int ndims = dg_orig->getDimCount();
   int rank = src_array_p->getRank();
+  int tileCount = dg_orig->getTileCount();
 
   int replicatedDims=0;
   for (int i=0; i<ndims; i++)
@@ -1212,6 +1213,14 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int pet
   std::vector<int> maxIndexPDimPTileVec;
   std::vector<int> distgridToArrayMapVec;
   if (replicatedDims>0){
+    // FIXME(wjs, 2023-05-26) Still need to fix this loop to work with the multi-tile
+    // case; then remove the following error check
+    if (tileCount > 1) {
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_NOT_IMPL,
+        "Multi-tile with > 1 DE per PET and replicated dims not yet implemented", ESMC_CONTEXT, rc);
+      return;
+    }
+
     // eliminate replicated dimensions from the destination
     for (int i=0; i<ndims; i++){
       if (distgridToArrayMap[i]!=0){
@@ -1232,26 +1241,42 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int pet
     distgridToArrayMap = &(distgridToArrayMapVec[0]);
   }
 
-  if ((maxIndexPDimPTile[0]-minIndexPDimPTile[0]+1)<petCount){
-    ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD,
-      "Index space too small to be distributed across all PETs", ESMC_CONTEXT, rc);
-    return; // bail out
+  if (tileCount == 1) {
+    // FIXME(wjs, 2023-05-26) Generalize this error-check to work with the multi-tile case
+    if ((maxIndexPDimPTile[0]-minIndexPDimPTile[0]+1)<petCount){
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD,
+        "Index space too small to be distributed across all PETs", ESMC_CONTEXT, rc);
+      return; // bail out
+    }
   }
 
-  ESMCI::InterArray<int> minIndexInterface((int*)minIndexPDimPTile, ndims-replicatedDims);
-  ESMCI::InterArray<int> maxIndexInterface((int*)maxIndexPDimPTile, ndims-replicatedDims);
+  DistGrid *distgrid;
+  if (tileCount == 1) {
+    ESMCI::InterArray<int> minIndexInterface((int*)minIndexPDimPTile, ndims-replicatedDims);
+    ESMCI::InterArray<int> maxIndexInterface((int*)maxIndexPDimPTile, ndims-replicatedDims);
 #if 0
-  std::cout << ESMC_METHOD << "[" << me << "]: setting maxindex to: (";
-  for (int i=0; i<ndims; i++)
-    std::cout << " " << maxIndexPDimPTile[i];
-  std::cout << " )" << std::endl;
+    std::cout << ESMC_METHOD << "[" << me << "]: setting maxindex to: (";
+    for (int i=0; i<ndims; i++)
+      std::cout << " " << maxIndexPDimPTile[i];
+    std::cout << " )" << std::endl;
 #endif
-  // create default DistGrid, which means 1DE per PET
-  DistGrid *distgrid = DistGrid::create(&minIndexInterface, &maxIndexInterface, NULL,
-      NULL, 0, NULL, NULL, NULL, NULL, NULL, (ESMCI::DELayout*)NULL, NULL,
-      &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
-    return;
+    // create default DistGrid, which means 1DE per PET
+    distgrid = DistGrid::create(&minIndexInterface, &maxIndexInterface, NULL,
+        NULL, 0, NULL, NULL, NULL, NULL, NULL, (ESMCI::DELayout*)NULL, NULL,
+        &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+      return;
+  } else {
+    int dummyLen[] = {ndims-replicatedDims, tileCount};
+    ESMCI::InterArray<int> minIndexInterface((int*)minIndexPDimPTile, 2, dummyLen);
+    ESMCI::InterArray<int> maxIndexInterface((int*)maxIndexPDimPTile, 2, dummyLen);
+    // create default DistGrid, which means 1DE per PET
+    distgrid = DistGrid::create(&minIndexInterface, &maxIndexInterface, NULL,
+        NULL, 0, 0, NULL, NULL, NULL, NULL, NULL, (ESMCI::DELayout*)NULL, NULL,
+        &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+      return;
+  }
 
   // std::cout << ESMC_METHOD << ": creating temp Array for redistribution" << std::endl;
   ESMCI::ArraySpec arrayspec;
