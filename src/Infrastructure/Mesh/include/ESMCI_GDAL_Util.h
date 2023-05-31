@@ -37,7 +37,9 @@
 #ifdef ESMF_SHAPEFILE
 
 // TODO: Change when we know name of shapefile include file
-//#include <pio.h>
+#include <ogr_api.h>
+#include <gdal.h>
+#include <ogr_srs_api.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
@@ -48,8 +50,19 @@
 
 using namespace ESMCI;
 
-void get_example_from_SHAPEFILE_file(int &example);
-
+void open_();
+void get_mesh_topo_id_from_SHP_file();
+void get_dim_from_SHP_file();
+void get_elementConn_id_from_SHP_file();
+void get_elementCount_from_SHP_file();
+void get_elementConn_info_from_SHP_file();
+void get_nodeCoord_ids_from_SHP_file();
+void get_nodeCount_from_SHP_file();
+void get_coords_from_SHP_file();
+void get_coordsys_from_SHP_file();
+void get_elemCoord_ids_from_SHP_file();
+void get_mask_from_SHP_file();
+void ESMCI_mesh_create_from_SHP_file();
 
 #endif // ifdef ESMF_SHAPEFILE
 

@@ -64,6 +64,9 @@
 #include "IO/include/ESMCI_PIO_Handler.h"
 #endif
 
+#ifdef ESMF_SHAPEFILE
+#include <ogr_api.h>
+#endif
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
@@ -1306,25 +1309,30 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
   // Try-catch block around main part of method
   try {
 
+    // Get VM 
+    ESMCI::VM *vm=VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &localrc)) throw localrc;
+    
+    // Get VM info
+    int local_pet = vm->getLocalPet();  
+    int pet_count = vm->getPetCount();
+
+    // Bound all of this by local_pet == 0 for now (MSL)
+    if (local_pet == 0) {
     // DEBUG OUTPUT filename
     printf("In shapefile method filename=%s\n",filename);
 
-    
-    // Example just to make sure everything is compiling correctly
-    int example;
-    get_example_from_SHAPEFILE_file(example);
-    if (example == 3) {
-      printf("Example subroutine is working (example=%d)!\n",example);      
-    }
-    
     //// Fill in code getting things from shapefile and creating parts of the Mesh here 
     
+    // Open file
 
+    }
     // Return an error, because this isn't implemented yet
     // TODO: GET RID OF THE FOLLOWING LINE WHEN THIS SUBROUTINE IS CREATING A VALID MESH
-    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-                                      "Creating a Mesh from a shapefile format file not finished yet.",
-                                      ESMC_CONTEXT, &localrc)) throw localrc; 
+    //if (ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+    //                                  "Creating a Mesh from a shapefile format file not finished yet.",
+    //                                  ESMC_CONTEXT, &localrc)) throw localrc; 
         
 
   } catch(std::exception &x) {

@@ -49,7 +49,9 @@
 #ifdef ESMF_SHAPEFILE
 
 // TODO: SWITCH THIS TO SHAPELIB, WHEN WE KNOW WHAT IT'S CALLED
-//#include <pio.h>
+#include <ogr_api.h>
+#include <gdal.h>
+#include <ogr_srs_api.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
@@ -59,16 +61,98 @@
 using namespace ESMCI;
 
 
-void get_example_from_SHAPEFILE_file(int &example) {
+// Get the id of mesh topology dummy variable
+// TODO: allow the user to specify the name of the mesh topo variable
+void get_mesh_topo_id_from_SHP_file(){
 #undef ESMC_METHOD
-#define ESMC_METHOD "get_coordDim_from_ESMFMesh_file()"
+#define ESMC_METHOD "get_mesh_topo_id_from_SHP_file()"
 
-
-  // Set example
-  example=3;
-  
 }
 
+
+// Get the dimension of the mesh in the SHP file
+// (This dimension is both the pdim and orig_sdim of the mesh)
+void get_dim_from_SHP_file(){
+#undef ESMC_METHOD
+#define ESMC_METHOD "get_dim_from_SHP_file()"
+
+}
+
+
+// Get the id of the elementConn array
+void get_elementConn_id_from_SHP_file(){
+#undef ESMC_METHOD
+#define ESMC_METHOD "get_elementConn_id_from_SHP_file()"
+
+}
+
+
+void get_elementCount_from_SHP_file(){
+#undef ESMC_METHOD
+#define ESMC_METHOD "get_elementCount_from_SHP_file()"
+
+}
+
+
+// Get elementConn info out from a SHP file. 
+// Note that the output is a 1D array 
+// (The elem conn info is collapsed to get rid of unnecessary values)
+void get_elementConn_info_from_SHP_file(){
+#undef ESMC_METHOD
+#define ESMC_METHOD "get_elementConn_info_from_SHP_file()"
+
+}
+
+
+// Get the ids of the node coordinate variables
+// nodeCoord_ids - must at least be of size dim
+void get_nodeCoord_ids_from_SHP_file(){
+#undef ESMC_METHOD
+#define ESMC_METHOD "get_nodeCoord_ids_from_SHP_file()"
+
+}
+
+
+void get_nodeCount_from_SHP_file(){
+#undef ESMC_METHOD
+#define ESMC_METHOD "get_nodeCount_from_SHP_file()"
+
+}
+
+
+// Get coords from SHP format file
+void get_coords_from_SHP_file(){
+#undef ESMC_METHOD
+#define ESMC_METHOD "get_coords_from_SHP_file()"
+
+}
+
+
+
+/* XMRKX */
+void get_coordsys_from_SHP_file(){
+#undef ESMC_METHOD
+#define ESMC_METHOD "_get_coordsys_from_SHP_file()"
+
+}
+
+
+void get_elemCoord_ids_from_SHP_file(){
+#undef ESMC_METHOD
+#define ESMC_METHOD "get_elemCoord_ids_from_SHP_file()"
+
+}
+
+
+// Get mask from a variable in a SHP format file
+// This was set up to work for either element or node masks. The variable just has
+// to have the correct size, and the global count and ids have to be for 
+// the correct entity (either elems or nodes).
+void get_mask_from_SHP_file() {
+#undef ESMC_METHOD
+#define ESMC_METHOD "get_mask_from_SHP_file()"
+
+}
 
 #endif // ifdef ESMF_SHAPEFILE
 
