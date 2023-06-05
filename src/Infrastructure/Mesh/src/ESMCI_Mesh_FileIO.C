@@ -47,7 +47,7 @@
 #include "Mesh/include/ESMCI_FileIO_Util.h"
 #include "Mesh/include/ESMCI_ESMFMesh_Util.h"
 #include "Mesh/include/ESMCI_UGRID_Util.h"
-#include "Mesh/include/ESMCI_SHAPEFILE_Util.h"
+#include "Mesh/include/ESMCI_GDAL_Util.h"
 
 
 #ifdef ESMF_PNETCDF
@@ -64,7 +64,7 @@
 #include "IO/include/ESMCI_PIO_Handler.h"
 #endif
 
-#ifdef ESMF_SHAPEFILE
+#ifdef ESMF_GDAL
 #include <ogr_api.h>
 #endif
 //-----------------------------------------------------------------------------
@@ -1299,12 +1299,11 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
   *out_mesh=NULL;
 
  // Will only work if SHAPEFILE is available
-#ifdef ESMF_SHAPEFILE
+#ifdef ESMF_GDAL
   
   // Declare some handy variables
   int localrc;
   int rc;
-
 
   // Try-catch block around main part of method
   try {
@@ -1320,14 +1319,49 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
 
     // Bound all of this by local_pet == 0 for now (MSL)
     if (local_pet == 0) {
-    // DEBUG OUTPUT filename
-    printf("In shapefile method filename=%s\n",filename);
+      // DEBUG OUTPUT filename
+      printf("In shapefile method filename=%s\n",filename);
 
-    //// Fill in code getting things from shapefile and creating parts of the Mesh here 
+      //// Fill in code getting things from shapefile and creating parts of the Mesh here 
     
-    // Open file
+      // Open file
+      OGRDataSourceH hDS;
+      if (access(filename, F_OK) == 0) {
+	OGRRegisterAll(); // register all the drivers
+	hDS = OGROpen( filename, FALSE, NULL );
+	if( hDS == NULL )
+	  {
+	    printf( "Open failed: %s, %d\n", CPLGetLastErrorMsg(), CPLGetLastErrorNo() );
+	    Throw();
+	  }
+      } else {
+	printf("Cannot access shapefile\n");
+	Throw();
+      }
 
+      // Get DIM var
+      int dim;
+      get_dim_from_SHP_file(hDS, filename, dim);
+
+      // Get shapefile params
+      process_shapefile(hDS);
+
+      // Convert mesh dim from file into pdim and orig_sdim to use in mesh create
+      int pdim, orig_sdim;
+      if (dim == 2) {
+	pdim=orig_sdim=2;
+      } else if (dim == 3) {
+	pdim=orig_sdim=3;
+      } else {
+	Throw() << "Meshes can only be created with dim=2 or 3.";
+      }
+      
+      OGR_DS_Destroy( hDS );
     }
+    
+    localrc = 0;
+    printf("rc: %d  localrc: %d\n", rc, localrc);
+
     // Return an error, because this isn't implemented yet
     // TODO: GET RID OF THE FOLLOWING LINE WHEN THIS SUBROUTINE IS CREATING A VALID MESH
     //if (ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
@@ -1358,12 +1392,12 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     throw rc; // To be caught one level up so we know where the error came from
   }
 
-#else // ifdef ESMF_SHAPEFILE
+#else // ifdef ESMF_GDAL
   int localrc;
   if (ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
                                 "This functionality requires ESMF to be built with a shapefile library." ,
                                     ESMC_CONTEXT, &localrc)) throw localrc;
-#endif // ifdef ESMF_SHAPEFILE
+#endif // ifdef ESMF_GDAL
 
   
 }

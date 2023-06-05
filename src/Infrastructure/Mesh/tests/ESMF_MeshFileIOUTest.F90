@@ -342,7 +342,7 @@ program ESMF_MeshFileIOUTest
   call test_create_mesh_from_SH_file(correct, rc)
 
 ! TODO: CHANGE ESMF_PIO TO THE SHAPEFILE EQUIVALENT  
-#ifdef ESMF_SHAPEFILE
+#ifdef ESMF_GDAL
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMC_RC_LIB_NOT_PRESENT"

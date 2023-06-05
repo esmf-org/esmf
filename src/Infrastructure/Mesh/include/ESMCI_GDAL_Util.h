@@ -18,8 +18,8 @@
 // INCLUDES
 //------------------------------------------------------------------------------
 
-#ifndef ESMCI_SHAPEFILE_UTIL_H
-#define ESMCI_SHAPEFILE_UTIL_H
+#ifndef ESMCI_GDAL_UTIL_H
+#define ESMCI_GDAL_UTIL_H
 
 #include <string>
 #include <ostream>
@@ -33,10 +33,8 @@
 #include "ESMCI_Array.h"
 #include "ESMCI_DistGrid.h"
 
-// These internal functions can only be used if SHAPEFILE is available
-#ifdef ESMF_SHAPEFILE
-
-// TODO: Change when we know name of shapefile include file
+// These internal functions can only be used if GDAL is available
+#ifdef ESMF_GDAL
 #include <ogr_api.h>
 #include <gdal.h>
 #include <ogr_srs_api.h>
@@ -50,20 +48,14 @@
 
 using namespace ESMCI;
 
+// general routines
 void open_();
-void get_mesh_topo_id_from_SHP_file();
-void get_dim_from_SHP_file();
-void get_elementConn_id_from_SHP_file();
-void get_elementCount_from_SHP_file();
-void get_elementConn_info_from_SHP_file();
-void get_nodeCoord_ids_from_SHP_file();
-void get_nodeCount_from_SHP_file();
-void get_coords_from_SHP_file();
-void get_coordsys_from_SHP_file();
-void get_elemCoord_ids_from_SHP_file();
-void get_mask_from_SHP_file();
+
+// shapefile routines
+void get_dim_from_SHP_file(OGRDataSourceH hDS, char *filename, int &dim);
+void process_shapefile(OGRDataSourceH hDS);
 void ESMCI_mesh_create_from_SHP_file();
 
-#endif // ifdef ESMF_SHAPEFILE
+#endif // ifdef ESMF_GDAL
 
-#endif // ESMCI_SHAPEFILE_UTIL_H
+#endif // ESMCI_GDAL_UTIL_H
