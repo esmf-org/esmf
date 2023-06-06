@@ -2501,16 +2501,41 @@ static void _create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *
                                                           int &num_entries_vec, int *&iientries_vec, double *&factors_vec) {
 
   
-#if 0
-      // Size of a vector matrix compared to non-vector
-      int vec_factor=num_vec_dims*num_vec_dims;
-      
-      // Allocate new vector matrix
-      int num_entries_vec=vec_factor*num_entries;
-      int *iientries_vec = new int[2*iisize.first]; 
-#endif  
+  // Size of a vector matrix compared to non-vector
+  int vec_factor=num_vec_dims*num_vec_dims;
+  
+  // Allocate new vector matrix
+  int num_entries_vec=vec_factor*num_entries;
+  int *iientries_vec = new int[2*num_entries_vec]; 
+  double *factors_vec= new double[num_entries_vec];
 
 
+  // Loop calculating vector entries from regular ones
+  int pos=0;
+  int pos_vec=0;
+  for (auto i=0; i<num_entries; i++) {
+
+    // Get src id
+    int src_id=iientries[pos];
+
+    // Get dst id
+    int dst_id=iientries[pos+1];
+
+    // Get src coords
+
+    // Get dst coords
+
+    
+    
+    
+    // Advance position in regular matrix
+    pos += 2;
+    
+    // Advance position in vector matrix
+    pos_vec += vec_factor;
+  }
+
+  
 }
 
 
