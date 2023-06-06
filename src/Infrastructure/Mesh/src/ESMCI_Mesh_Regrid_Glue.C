@@ -2509,7 +2509,7 @@ static void _create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *
   int *iientries_vec = new int[2*num_entries_vec]; 
   double *factors_vec= new double[num_entries_vec];
 
-
+  
   // Loop calculating vector entries from regular ones
   int pos=0;
   int pos_vec=0;
@@ -2525,7 +2525,9 @@ static void _create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *
 
     // Get dst coords
 
-    
+    // Use coords to calculate new matrix entries
+
+    // Fill in new matrix
     
     
     // Advance position in regular matrix
