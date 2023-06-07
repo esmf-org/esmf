@@ -15,7 +15,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         compiler: [gcc@11.3.0]
-        esmf: [esmf@8.4.2+external-parallelio, esmf@8.4.2~external-parallelio]
+        esmf: [esmf@8.4.2+external-parallelio, esmf@8.4.2~external-parallelio, esmf@=8.5.0b23+external-parallelio]
 
     steps:
     # check out base repo
