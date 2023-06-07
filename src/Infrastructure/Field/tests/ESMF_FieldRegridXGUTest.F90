@@ -706,6 +706,8 @@ contains
     !----------------------------------------------------
     !call ESMF_LogWrite(tag, ESMF_LOGMSG_INFO)
     ! Test passing in srcTermProcessing and pipeLineDepth
+    srcTermProcessing=-1 ! Set to -1 to use autotuning
+    pipeLineDepth=-1     ! Set to -1 to use autotuning
     call ESMF_FieldRegridStore(xgrid, f_atm, f_xgrid, &
          srcTermProcessing=srcTermProcessing, &
          pipeLineDepth=pipeLineDepth, &
