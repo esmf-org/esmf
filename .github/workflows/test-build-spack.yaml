@@ -8,6 +8,11 @@ on:
         required: false
         type: string
         default: 'develop'
+      nuopc_app_version:
+        description: 'NUOPC Application Prototypes version or tag'
+        required: false
+        type: string
+        default: 'develop'
   schedule:
     - cron: '0 18 * * *'
 
@@ -73,7 +78,7 @@ jobs:
       with:
         repository: esmf-org/nuopc-app-prototypes
         path: ${{ github.workspace }}/nuopc-app-prototypes
-        ref: develop
+        ref: ${{ inputs.nuopc_app_version }}
 
     # test installation using NUOPC app prototypes
     - name: Run NUOPC app prototypes
