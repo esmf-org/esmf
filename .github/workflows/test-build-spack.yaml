@@ -12,14 +12,14 @@ on:
     - cron: '0 18 * * *'
 
 jobs:
-  spack-test:
+  build:
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
         os: [ubuntu-latest]
         compiler: [gcc@11.3.0]
-        esmf: [${{ github.event.inputs.esmf_version }}+external-parallelio, ${{ github.event.inputs.esmf_version }}~external-parallelio]
+        esmf: ["${{ inputs.esmf_version }}+external-parallelio", "${{ inputs.esmf_version }}~external-parallelio"]
 
     steps:
     # check out base repo
