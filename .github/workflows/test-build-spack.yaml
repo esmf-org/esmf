@@ -10,7 +10,7 @@ on:
     - cron: '0 18 * * *'
 
 jobs:
-  latest-stable:
+  spack-test:
     runs-on: ${{ matrix.os }}
 
     strategy:
