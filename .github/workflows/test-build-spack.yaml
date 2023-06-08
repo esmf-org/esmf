@@ -3,9 +3,10 @@ name: Build ESMF Using Spack
 on:
   workflow_dispatch:
     inputs:
-      esmf_version: ESMF version
-      required: false
-      default: develop
+      esmf_version: 
+        description: ESMF version or tag
+        required: false
+        default: develop
   schedule:
     - cron: '0 18 * * *'
 
