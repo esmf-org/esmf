@@ -2,10 +2,12 @@ name: Build ESMF Using Spack
 
 on:
   workflow_dispatch:
-  push:
+    inputs:
+      esmf_version: ESMF version
+      required: false
+      default: develop
   schedule:
-    - cron: '0 0 * * MON'
-    - cron: '0 0 * * FRI'
+    - cron: '0 18 * * *'
 
 jobs:
   latest-stable:
@@ -15,7 +17,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         compiler: [gcc@11.3.0]
-        esmf: [esmf@=8.5.0b23+external-parallelio, esmf@=8.5.0b23~external-parallelio]
+        esmf: [${{ github.event.inputs.esmf_version }}+external-parallelio, ${{ github.event.inputs.esmf_version }}~external-parallelio]
 
     steps:
     # check out base repo
