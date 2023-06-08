@@ -4,9 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       esmf_version: 
-        description: ESMF version or tag
+        description: 'ESMF version or tag'
         required: false
-        default: develop
+        type: string
+        default: 'develop'
   schedule:
     - cron: '0 18 * * *'
 
