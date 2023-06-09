@@ -40,7 +40,7 @@ jobs:
         # create matrix in JSON format
         echo "{" > matrix.txt
         echo "    \"compiler\": [gcc@11.3.0]" >> matrix.txt
-        if [ ${{ github.event_name == 'workflow_dispatch' }} ] then
+        if [ ${{ github.event_name == 'workflow_dispatch' }} ]; then
           echo "Event is workflow_dispatch. Creating matrix from inputs."
           echo "    \"esmf\": [\"${{ inputs.esmf_version }}+external-parallelio\", \"${{ inputs.esmf_version }}~external-parallelio\"]" >> matrix.txt
         else
