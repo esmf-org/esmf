@@ -1,5 +1,9 @@
 name: Build ESMF Using Spack
 
+env:
+  esmf_version: 'esmf@develop'
+  nuopc_app_version: 'develop'
+
 on:
   workflow_dispatch:
     inputs:
@@ -15,7 +19,7 @@ on:
         default: 'develop'
   schedule:
     - cron: '0 6 * * *'
-    - cron: '0 17 * * *'
+    - cron: '0 18 * * *'
 
 jobs:
   build:
@@ -25,7 +29,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         compiler: [gcc@11.3.0]
-        esmf: ["${{ inputs.esmf_version }}+external-parallelio", "${{ inputs.esmf_version }}~external-parallelio"]
+        esmf: ["${{ inputs.esmf_version || env.esmf_version }}+external-parallelio", "${{ inputs.esmf_version || env.esmf_version }}~external-parallelio"]
 
     steps:
     # check out base repo
