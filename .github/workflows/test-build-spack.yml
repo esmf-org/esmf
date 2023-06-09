@@ -19,7 +19,7 @@ on:
         default: 'develop'
   schedule:
     - cron: '0 6 * * *'
-    - cron: '10 21 * * *'
+    - cron: '25 21 * * *'
 
 jobs:
   set-matrix:
@@ -39,7 +39,6 @@ jobs:
 
         # create matrix in JSON format
         echo "{" > matrix.txt
-        echo "    \"os\": [ubuntu-latest]" >> matrix.txt
         echo "    \"compiler\": [gcc@11.3.0]" >> matrix.txt
         if [ -z "${{ inputs.esmf_version != '' }}" ]; then
           echo "    \"esmf\": [\"${{ inputs.esmf_version }}+external-parallelio\", \"${{ inputs.esmf_version }}~external-parallelio\"]" >> matrix.txt
@@ -47,77 +46,75 @@ jobs:
           echo "    \"esmf\": [\"${{ env.esmf_version }}+external-parallelio\", \"${{ env.esmf_version }}~external-parallelio\"]" >> matrix.txt
         fi
         echo "}" >> matrix.txt
-
-        # output content of the matrix.txt for debugging
         cat matrix.txt
 
-  #build:
-  #  runs-on: ${{ matrix.os }}
+        # send matrix content to output
+        echo "matrix=$(cat matrix.txt)" >> $GITHUB_OUTPUT
 
-  #  strategy:
-  #    matrix:
-  #      os: [ubuntu-latest]
-  #      compiler: [gcc@11.3.0]
-  #      esmf:["${{ inputs.esmf_version }}+external-parallelio", "${{ inputs.esmf_version }}~external-parallelio"]
+  build:
+    runs-on: ubuntu-latest
 
-  #  steps:
-  #  # check out base repo
-  #  - name: Checkout Base Repository
-  #    uses: actions/checkout@v3
+    strategy:
+      matrix: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
 
-  #  # prepare core environment
-  #  - name: Install Core Development Tools
-  #    run: |
-  #      sudo apt-get -qq update
-  #      sudo apt-get -qq install tar unzip file curl gringo
-  #      sudo apt-get -qq install build-essential binutils-dev gfortran gdb
-  #      sudo apt-get -qq install python3-dev
+    steps:
+    # check out base repo
+    - name: Checkout Base Repository
+      uses: actions/checkout@v3
 
-  #  # restore Intel oneAPI compiler installation from cache
-  #  - name: Restore Intel oneAPI Compiler Installation
-  #    uses: actions/cache@v3
-  #    if: ${{ startsWith(matrix.compiler, 'oneapi') }}
-  #    with:
-  #      path: /opt/intel/oneapi
-  #      key: intel-${{ runner.os }}-${{ matrix.compiler }}
-  #      restore-keys: |
-  #        intel-${{ runner.os }}-${{ matrix.compiler }}
+    # prepare core environment
+    - name: Install Core Development Tools
+      run: |
+        sudo apt-get -qq update
+        sudo apt-get -qq install tar unzip file curl gringo
+        sudo apt-get -qq install build-essential binutils-dev gfortran gdb
+        sudo apt-get -qq install python3-dev
 
-  #  # install compiler
-  #  - name: Install Intel oneAPI Compiler
-  #    if: ${{ startsWith(matrix.compiler, 'oneapi') }}
-  #    run: |
-  #      cd ${{ github.workspace }}/.github/workflows
-  #      scripts/install_oneapi.sh -c ${{ matrix.compiler }}
+    # restore Intel oneAPI compiler installation from cache
+    - name: Restore Intel oneAPI Compiler Installation
+      uses: actions/cache@v3
+      if: ${{ startsWith(matrix.compiler, 'oneapi') }}
+      with:
+        path: /opt/intel/oneapi
+        key: intel-${{ runner.os }}-${{ matrix.compiler }}
+        restore-keys: |
+          intel-${{ runner.os }}-${{ matrix.compiler }}
 
-  #  # concretize test environment 
-  #  - name: Concretize Spack Environment Using YAML Specification
-  #    run: |
-  #      ${{ github.workspace }}/.github/workflows/scripts/spack_concretize.sh \
-  #        -a x86_64 \
-  #        -c ${{ matrix.compiler }} \
-  #        -d ${{ matrix.esmf }} \
-  #        -i ~/.spack-ci \
-  #        -r ${{ github.workspace }} 
+    # install compiler
+    - name: Install Intel oneAPI Compiler
+      if: ${{ startsWith(matrix.compiler, 'oneapi') }}
+      run: |
+        cd ${{ github.workspace }}/.github/workflows
+        scripts/install_oneapi.sh -c ${{ matrix.compiler }}
 
-  #  # install test environment
-  #  - name: Install ESMF with Spack 
-  #    run: |
-  #      ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
-  #        -r ${{ github.workspace }}
+    # concretize test environment 
+    - name: Concretize Spack Environment Using YAML Specification
+      run: |
+        ${{ github.workspace }}/.github/workflows/scripts/spack_concretize.sh \
+          -a x86_64 \
+          -c ${{ matrix.compiler }} \
+          -d ${{ matrix.esmf }} \
+          -i ~/.spack-ci \
+          -r ${{ github.workspace }} 
 
-  #  # checkout NUOPC app prototypes
-  #  - name: Checkout NUOPC app prototypes
-  #    uses: actions/checkout@v3
-  #    with:
-  #      repository: esmf-org/nuopc-app-prototypes
-  #      path: ${{ github.workspace }}/nuopc-app-prototypes
-  #      ref: ${{ inputs.nuopc_app_version }}
+    # install test environment
+    - name: Install ESMF with Spack 
+      run: |
+        ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
+          -r ${{ github.workspace }}
 
-  #  # test installation using NUOPC app prototypes
-  #  - name: Run NUOPC app prototypes
-  #    run: |
-  #      ${{ github.workspace }}/.github/workflows/scripts/run_nuopc_app_proto.sh \
-  #        -c ${{ matrix.compiler }} \
-  #        -r ${{ github.workspace }}/nuopc-app-prototypes \
-  #        -s ~/.spack-ci
+    # checkout NUOPC app prototypes
+    - name: Checkout NUOPC app prototypes
+      uses: actions/checkout@v3
+      with:
+        repository: esmf-org/nuopc-app-prototypes
+        path: ${{ github.workspace }}/nuopc-app-prototypes
+        ref: ${{ inputs.nuopc_app_version }}
+
+    # test installation using NUOPC app prototypes
+    - name: Run NUOPC app prototypes
+      run: |
+        ${{ github.workspace }}/.github/workflows/scripts/run_nuopc_app_proto.sh \
+          -c ${{ matrix.compiler }} \
+          -r ${{ github.workspace }}/nuopc-app-prototypes \
+          -s ~/.spack-ci
