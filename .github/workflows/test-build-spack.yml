@@ -50,7 +50,8 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         compiler: [gcc@11.3.0]
-        esmf: ["${{ inputs.esmf_version || env.esmf_version }}+external-parallelio", "${{ inputs.esmf_version || env.esmf_version }}~external-parallelio"]
+        #esmf: ["${{ inputs.esmf_version || env.esmf_version }}+external-parallelio", "${{ inputs.esmf_version || env.esmf_version }}~external-parallelio"]
+        esmf:["${{ inputs.esmf_version }}+external-parallelio", "${{ inputs.esmf_version }}~external-parallelio"]
 
     steps:
     # check out base repo
