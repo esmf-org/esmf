@@ -33,15 +33,23 @@ jobs:
     - name: Generate Matrix
       id: set-matrix
       run: |
+        # output variables for debugging
         echo "INPUT: >${{ inputs.esmf_version }}< >${{ inputs.nuopc_app_version }}<"
         echo "ENV  : >${{ env.esmf_version }}< >${{ env.nuopc_app_version }}<"
-        if [ -z "${{ inputs.esmf_version != '' }}" ]; then
-           echo "empty"
-        else
-           #echo "esmf_version=${{ inputs.esmf_version }}" >> $GITHUB_ENV
-           echo "not empty"
-        fi
 
+        # create matrix in JSON format
+        echo "{" > matrix.txt
+        echo "    \"os\": [ubuntu-latest]" >> matrix.txt
+        echo "    \"compiler\": [gcc@11.3.0]" >> matrix.txt
+        if [ -z "${{ inputs.esmf_version != '' }}" ]; then
+          echo "    \"esmf\": [\"${{ inputs.esmf_version }}+external-parallelio\", \"${{ inputs.esmf_version }}~external-parallelio\"]" >> matrix.txt
+        else
+          echo "    \"esmf\": [\"${{ env.esmf_version }}+external-parallelio\", \"${{ env.esmf_version }}~external-parallelio\"]" >> matrix.txt
+        fi
+        echo "}" >> matrix.txt
+
+        # output content of the matrix.txt for debugging
+        cat matrix.txt
 
   #build:
   #  runs-on: ${{ matrix.os }}
