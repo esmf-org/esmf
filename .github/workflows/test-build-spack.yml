@@ -40,15 +40,17 @@ jobs:
         # create matrix in JSON format
         echo "{" > matrix.txt
         echo "    \"compiler\": [gcc@11.3.0]" >> matrix.txt
-        if [ -z "${{ inputs.esmf_version != '' }}" ]; then
+        if [ ${{ github.event_name == 'workflow_dispatch' }} ] then
+          echo "Event is workflow_dispatch. Creating matrix from inputs."
           echo "    \"esmf\": [\"${{ inputs.esmf_version }}+external-parallelio\", \"${{ inputs.esmf_version }}~external-parallelio\"]" >> matrix.txt
         else
+          echo "Event is cron. Creating matrix from environment variables."
           echo "    \"esmf\": [\"${{ env.esmf_version }}+external-parallelio\", \"${{ env.esmf_version }}~external-parallelio\"]" >> matrix.txt
         fi
         echo "}" >> matrix.txt
         cat matrix.txt
 
-        # send matrix content to output
+        # send matrix.txt content to output
         echo "matrix=$(cat matrix.txt)" >> $GITHUB_OUTPUT
 
   build:
