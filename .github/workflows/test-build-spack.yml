@@ -1,6 +1,7 @@
 name: Build ESMF Using Spack
 
 env:
+  compiler: gcc@11.3.0
   esmf_version: 'esmf@develop'
   nuopc_app_version: 'develop'
 
@@ -39,19 +40,20 @@ jobs:
 
         # create matrix in JSON format
         echo "{" > matrix.txt
-        echo "    \"compiler\": [gcc@11.3.0]" >> matrix.txt
+        echo "    \"compiler\": \[${{ env.compiler }}\]" >> matrix.txt
         if [ ${{ github.event_name == 'workflow_dispatch' }} ]; then
           echo "Event is workflow_dispatch. Creating matrix from inputs."
-          echo "    \"esmf\": [\"${{ inputs.esmf_version }}+external-parallelio\", \"${{ inputs.esmf_version }}~external-parallelio\"]" >> matrix.txt
+          echo "    \"esmf\": \[\"${{ inputs.esmf_version }}+external-parallelio\", \"${{ inputs.esmf_version }}~external-parallelio\"\]" >> matrix.txt
         else
           echo "Event is cron. Creating matrix from environment variables."
-          echo "    \"esmf\": [\"${{ env.esmf_version }}+external-parallelio\", \"${{ env.esmf_version }}~external-parallelio\"]" >> matrix.txt
+          echo "    \"esmf\": \[\"${{ env.esmf_version }}+external-parallelio\", \"${{ env.esmf_version }}~external-parallelio\"\]" >> matrix.txt
         fi
         echo "}" >> matrix.txt
         cat matrix.txt
 
         # send matrix.txt content to output
-        echo "matrix=$(cat matrix.txt)" >> $GITHUB_OUTPUT
+        matrix=$(cat matrix.txt)
+        echo "matrix=$matrix" >> $GITHUB_OUTPUT
 
   build:
     runs-on: ubuntu-latest
