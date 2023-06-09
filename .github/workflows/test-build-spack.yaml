@@ -7,7 +7,7 @@ on:
         description: 'ESMF version or tag'
         required: false
         type: string
-        default: 'develop'
+        default: 'esmf@develop'
       nuopc_app_version:
         description: 'NUOPC Application Prototypes version or tag'
         required: false
