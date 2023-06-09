@@ -4,12 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       esmf_version: 
-        description: 'ESMF version or tag'
+        description: 'ESMF version or tag like esmf@develop or esmf@=8.5.0b23'
         required: false
         type: string
         default: 'esmf@develop'
       nuopc_app_version:
-        description: 'NUOPC Application Prototypes version or tag'
+        description: 'NUOPC Application Prototypes version or tag like develop or v8.5.0b23'
         required: false
         type: string
         default: 'develop'
