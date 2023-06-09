@@ -22,6 +22,27 @@ on:
     - cron: '0 18 * * *'
 
 jobs:
+  set-matrix:
+    runs-on: ubuntu-latest
+
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+    steps:
+    # generete matrix
+    - name: Generate Matrix
+      id: set-matrix
+      run: |
+        echo "INPUT: >${{ inputs.esmf_version }}< >${{ inputs.nuopc_app_version }}<"
+        echo "ENV  : >${{ env.esmf_version }}< >${{ env.nuopc_app_version }}<"
+        if [ -z "${{ inputs.esmf_version != '' }}" ]; then
+           echo "empty"
+        else
+           #echo "esmf_version=${{ inputs.esmf_version }}" >> $GITHUB_ENV
+           echo "not empty"
+        fi
+
+
   build:
     runs-on: ${{ matrix.os }}
 
