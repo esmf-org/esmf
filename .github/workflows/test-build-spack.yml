@@ -54,9 +54,6 @@ jobs:
         # send matrix.txt content to output
         echo "matrix=\"$matrix\"" >> $GITHUB_OUTPUT
 
-
- echo "matrix={\"include\":[{\"project\":\"foo\",\"config\":\"Debug\"},{\"project\":\"bar\",\"config\":\"Release\"}]}" >> $GITHUB_OUTPUT
-
   build:
     runs-on: ubuntu-latest
 
