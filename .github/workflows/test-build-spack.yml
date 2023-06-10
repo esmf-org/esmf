@@ -20,7 +20,7 @@ on:
         default: 'develop'
   schedule:
     - cron: '0 6 * * *'
-    - cron: '25 21 * * *'
+    - cron: '18 6 * * *'
 
 jobs:
   set-matrix:
@@ -39,27 +39,17 @@ jobs:
         echo "ENV  : >${{ env.esmf_version }}< >${{ env.nuopc_app_version }}<"
 
         # create matrix JSON file
-        #echo "{" > matrix.txt
-        #echo "    \"compiler\": [\"${{ env.compiler }}\"]," >> matrix.txt
-        #if [ ${{ github.event_name == 'workflow_dispatch' }} ]; then
-        #  echo "Event is workflow_dispatch. Creating matrix from inputs."
-        #  echo "    \"esmf\": [\"${{ inputs.esmf_version }}+external-parallelio\", \"${{ inputs.esmf_version }}~external-parallelio\"]" >> matrix.txt
-        #else
-        #  echo "Event is cron. Creating matrix from environment variables."
-        #  echo "    \"esmf\": [\"${{ env.esmf_version }}+external-parallelio\", \"${{ env.esmf_version }}~external-parallelio\"]" >> matrix.txt
-        #fi
-        #echo "}" >> matrix.txt
-        #cat matrix.txt
-        # send matrix.txt content to output
-        #echo "matrix=$(cat matrix.txt)" >> $GITHUB_OUTPUT
-
         str1="{\"compiler\": [\"${{ env.compiler }}\"],"
         if [ ${{ github.event_name == 'workflow_dispatch' }} ]; then
           str2="\"esmf\": [\"${{ inputs.esmf_version }}+external-parallelio\", \"${{ inputs.esmf_version }}~external-parallelio\"]}"
         else
           str2="\"esmf\": [\"${{ env.esmf_version }}+external-parallelio\", \"${{ env.esmf_version }}~external-parallelio\"]}"
         fi
+
+        # output contect for debugging
         echo "matrix=${str1}${str2}"
+
+        # output for next step
         echo "matrix=${str1}${str2}" >> $GITHUB_OUTPUT
 
   build:
