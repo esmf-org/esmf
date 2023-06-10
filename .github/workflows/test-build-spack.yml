@@ -27,12 +27,12 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix: ${{ steps.list_comp_pkgs.outputs.matrix }}
 
     steps:
     # generete matrix
-    - name: Generate Matrix
-      id: set-matrix
+    - name: Generate Matrix by Listing Compiler and ESMF Packages
+      id: list_comp_pkgs
       run: |
         # output variables for debugging
         echo "INPUT: >${{ inputs.esmf_version }}< >${{ inputs.nuopc_app_version }}<"
