@@ -38,7 +38,7 @@ jobs:
         echo "INPUT: >${{ inputs.esmf_version }}< >${{ inputs.nuopc_app_version }}<"
         echo "ENV  : >${{ env.esmf_version }}< >${{ env.nuopc_app_version }}<"
 
-        # create matrix in JSON format
+        # create matrix
         echo "{" > matrix.txt
         echo "    \"compiler\": [${{ env.compiler }}]" >> matrix.txt
         if [ ${{ github.event_name == 'workflow_dispatch' }} ]; then
@@ -52,8 +52,7 @@ jobs:
         cat matrix.txt
 
         # send matrix.txt content to output
-        matrix=$(cat matrix.txt)
-        echo "matrix=$matrix" #>> $GITHUB_OUTPUT
+        echo "matrix=\"$matrix\"" >> $GITHUB_OUTPUT
 
   build:
     runs-on: ubuntu-latest
