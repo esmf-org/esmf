@@ -63,6 +63,8 @@ jobs:
         echo "matrix=${str1}${str2}" >> $GITHUB_OUTPUT
 
   build:
+    needs: set-matrix
+
     runs-on: ubuntu-latest
 
     strategy:
