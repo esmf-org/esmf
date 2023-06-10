@@ -40,7 +40,7 @@ jobs:
 
         # create matrix
         echo "{" > matrix.txt
-        echo "    \"compiler\": [${{ env.compiler }}]" >> matrix.txt
+        echo "    \"compiler\": [\"${{ env.compiler }}\"]," >> matrix.txt
         if [ ${{ github.event_name == 'workflow_dispatch' }} ]; then
           echo "Event is workflow_dispatch. Creating matrix from inputs."
           echo "    \"esmf\": [\"${{ inputs.esmf_version }}+external-parallelio\", \"${{ inputs.esmf_version }}~external-parallelio\"]" >> matrix.txt
@@ -53,6 +53,9 @@ jobs:
 
         # send matrix.txt content to output
         echo "matrix=\"$matrix\"" >> $GITHUB_OUTPUT
+
+
+ echo "matrix={\"include\":[{\"project\":\"foo\",\"config\":\"Debug\"},{\"project\":\"bar\",\"config\":\"Release\"}]}" >> $GITHUB_OUTPUT
 
   build:
     runs-on: ubuntu-latest
