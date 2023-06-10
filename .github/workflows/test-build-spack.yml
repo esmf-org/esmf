@@ -52,22 +52,24 @@ jobs:
         cat matrix.txt
 
         # send matrix.txt content to output
-        echo "matrix=\"$matrix\"" >> $GITHUB_OUTPUT
+        echo "matrix=$matrix" >> $GITHUB_OUTPUT
 
   build:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
+    #strategy:
+    #  matrix: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
 
     steps:
     # check out base repo
-    - name: Checkout Base Repository
-      uses: actions/checkout@v3
+    #- name: Checkout Base Repository
+    #  uses: actions/checkout@v3
 
     # prepare core environment
     - name: Install Core Development Tools
       run: |
+        echo ">${{ needs.set-matrix.outputs.matrix }}<"
+        exit 1
         sudo apt-get -qq update
         sudo apt-get -qq install tar unzip file curl gringo
         sudo apt-get -qq install build-essential binutils-dev gfortran gdb
