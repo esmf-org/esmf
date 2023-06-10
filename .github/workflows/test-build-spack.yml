@@ -57,7 +57,7 @@ jobs:
         if [ ${{ github.event_name == 'workflow_dispatch' }} ]; then
           str2="\"esmf\": [\"${{ inputs.esmf_version }}+external-parallelio\", \"${{ inputs.esmf_version }}~external-parallelio\"]}"
         else
-          str2=\"esmf\": [\"${{ env.esmf_version }}+external-parallelio\", \"${{ env.esmf_version }}~external-parallelio\"]}"
+          str2="\"esmf\": [\"${{ env.esmf_version }}+external-parallelio\", \"${{ env.esmf_version }}~external-parallelio\"]}"
         fi
         echo "matrix=${str1}${str2}"
         echo "matrix=${str1}${str2}" >> $GITHUB_OUTPUT
