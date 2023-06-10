@@ -52,7 +52,7 @@ jobs:
         cat matrix.txt
 
         # send matrix.txt content to output
-        echo "matrix=$matrix" >> $GITHUB_OUTPUT
+        echo "matrix=$(cat matrix)" >> $GITHUB_OUTPUT
 
   build:
     runs-on: ubuntu-latest
