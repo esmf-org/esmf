@@ -20,7 +20,6 @@ on:
         default: 'develop'
   schedule:
     - cron: '0 6 * * *'
-    - cron: '35 5 * * *'
 
 jobs:
   set-matrix:
