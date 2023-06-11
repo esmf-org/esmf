@@ -40,10 +40,12 @@ jobs:
 
         # create matrix JSON file
         str1="{\"compiler\": [\"${{ env.compiler }}\"],"
-        if [ ${{ github.event_name == 'workflow_dispatch' }} ]; then
-          str2="\"esmf\": [\"${{ inputs.esmf_version }}+external-parallelio\", \"${{ inputs.esmf_version }}~external-parallelio\"]}"
-        else
+        if [ -z "${{ inputs.esmf_version }}" ]; then
           str2="\"esmf\": [\"${{ env.esmf_version }}+external-parallelio\", \"${{ env.esmf_version }}~external-parallelio\"]}"
+          echo "nuopc_app_version=${{ env.nuopc_app_version }}" >> $GITHUB_OUTPUT
+        else
+          str2="\"esmf\": [\"${{ inputs.esmf_version }}+external-parallelio\", \"${{ inputs.esmf_version }}~external-parallelio\"]}"
+          echo "nuopc_app_version=${{ inputs.nuopc_app_version }}" >> $GITHUB_OUTPUT
         fi
 
         # output contect for debugging
@@ -68,8 +70,6 @@ jobs:
     # prepare core environment
     - name: Install Core Development Tools
       run: |
-        #echo ">${{ needs.set-matrix.outputs.matrix }}<"
-        #exit 1
         sudo apt-get -qq update
         sudo apt-get -qq install tar unzip file curl gringo
         sudo apt-get -qq install build-essential binutils-dev gfortran gdb
@@ -114,7 +114,7 @@ jobs:
       with:
         repository: esmf-org/nuopc-app-prototypes
         path: ${{ github.workspace }}/nuopc-app-prototypes
-        ref: ${{ inputs.nuopc_app_version }}
+        ref: ${{ needs.set-matrix.outputs.nuopc_app_version }}
 
     # test installation using NUOPC app prototypes
     - name: Run NUOPC app prototypes
