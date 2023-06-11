@@ -27,6 +27,7 @@ jobs:
 
     outputs:
       matrix: ${{ steps.list_comp_pkgs.outputs.matrix }}
+      nuopc_app_version: ${{ steps.list_comp_pkgs.outputs.nuopc_app_version }}
 
     steps:
     # generete matrix
@@ -65,14 +66,6 @@ jobs:
     # check out base repo
     - name: Checkout Base Repository
       uses: actions/checkout@v3
-
-    # checkout NUOPC app prototypes
-    - name: Checkout NUOPC app prototypes
-      uses: actions/checkout@v3
-      with:
-        repository: esmf-org/nuopc-app-prototypes
-        path: ${{ github.workspace }}/nuopc-app-prototypes
-        ref: ${{ set-matrix.outputs.nuopc_app_version }}
 
     # prepare core environment
     - name: Install Core Development Tools
@@ -121,7 +114,7 @@ jobs:
       with:
         repository: esmf-org/nuopc-app-prototypes
         path: ${{ github.workspace }}/nuopc-app-prototypes
-        ref: ${{ set-matrix.outputs.nuopc_app_version }}
+        ref: ${{ needs.set-matrix.outputs.nuopc_app_version }}
 
     # test installation using NUOPC app prototypes
     - name: Run NUOPC app prototypes
