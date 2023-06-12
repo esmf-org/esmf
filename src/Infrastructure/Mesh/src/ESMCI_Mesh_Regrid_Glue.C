@@ -104,6 +104,11 @@ static void _get_vec_dims_for_vectorRegrid(ESMCI::Array &array, int &num_vec_dim
   }
 }
 
+
+
+
+
+
 static void _create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *iientries, double *factors,
                                                           int num_vec_dims, int *src_vec_dims_undist_seqind, int *dst_vec_dims_undist_seqind,
                                                           Mesh *src_mesh, PointList *src_pl,
@@ -2494,6 +2499,197 @@ void copy_cnsv_rs_from_WMat_to_Array(WMat *wmat, ESMCI::Array *array) {
 }
 
 
+class Coord {
+
+
+  // Data
+  double c[3];
+
+public:
+
+  Coord() {
+    c[0]=0.0;
+    c[1]=0.0;
+    c[2]=0.0;
+  }
+  
+  
+  Coord(double x, double y, double z) {
+    c[0]=x;
+    c[1]=y;
+    c[2]=z;
+  }
+  
+  // Less 
+  bool operator<(const Coord &rhs) const {
+    if (c[0] != rhs.c[0]) {
+      return c[0] < rhs.c[0];
+    } else if (c[1] != rhs.c[1]) {
+      return c[1] < rhs.c[1];
+    }
+    return c[2] < rhs.c[2];
+  }
+
+  // Do we need this? 
+  bool operator==(const Coord &rhs) const {
+    return (c[0] == rhs.c[0] && c[1] == rhs.c[1] && c[2] == rhs.c[2]);
+  }
+ 
+};
+
+
+
+// Class that lets you search for coords by Id
+class CoordFromId {
+
+  class CoordFromIdEntry{
+  public:
+    int id;
+    Coord coord;
+
+    CoordFromIdEntry(int _id, double x, double y, double z): id(_id), coord(x,y,z) {}
+
+    // Less 
+    bool operator<(const CoordFromIdEntry &rhs) const {
+      if (id != rhs.id) {
+        return id < rhs.id;
+      }
+      return coord < rhs.coord;
+    }
+
+    // Do we need this? 
+    bool operator==(const CoordFromIdEntry &rhs) const {
+      return (id == rhs.id && coord == rhs.coord);
+    }
+    
+  };
+  
+  
+  // Data
+  bool is_committed;
+  std::vector<CoordFromIdEntry> searchable; // After committing this will contain a sorted list for searching
+
+ 
+public:
+  
+  // Create empty
+  CoordFromId(): is_committed(false) {
+    
+  }
+
+  // Add
+  void add(Mesh *mesh, MeshObj::id_type obj_type);
+  
+};
+
+  // zzzzz
+
+  // Mesh *src_mesh, PointList *src_pl,
+
+void CoordFromId::add(Mesh *mesh, MeshObj::id_type obj_type) {
+
+  // Get spatial dimension
+  int sdim=mesh->spatial_dim();
+  
+  // Add based on obj_type
+  if (obj_type == MeshObj::NODE) {
+
+    // Get coordinate data
+    MEField<> *node_coords=mesh->GetField("coordinates");
+    ThrowRequire(node_coords != NULL);
+    
+    // Add
+    if (sdim == 2) { 
+      Mesh::iterator ni = mesh->node_begin(), ne = mesh->node_end();
+      for (; ni != ne; ++ni) {
+        MeshObj &node = *ni;
+        
+        // Skip if not local
+        if (!GetAttr(node).is_locally_owned()) continue;
+        
+        // Get id
+        int id=node.get_id();
+        
+        // Get pointer to coords
+        double *c = node_coords->data(node);
+        
+        // Add to list
+        searchable.push_back(CoordFromIdEntry(id,c[0],c[1],0.0));      
+      }
+    } else if (sdim == 3) { 
+      Mesh::iterator ni = mesh->node_begin(), ne = mesh->node_end();
+      for (; ni != ne; ++ni) {
+        MeshObj &node = *ni;
+        
+        // Skip if not local
+        if (!GetAttr(node).is_locally_owned()) continue;
+        
+        // Get id
+        int id=node.get_id();
+        
+        // Get pointer to coords
+        double *c = node_coords->data(node);
+        
+        // Add to list
+        searchable.push_back(CoordFromIdEntry(id,c[0],c[1],c[2]));      
+      }
+    } else {
+      Throw() << "Meshes of spatial dim= "<<sdim<<" not supported in vector regridding.";
+    }
+
+  } else if (obj_type == MeshObj::ELEMENT) {
+
+    // Get element coordinate data
+    MEField<> *elem_coords=mesh->GetField("elem_coordinates");
+    if (elem_coords == NULL) Throw() << "Vector regridding not supported on Mesh elements when the elements don't have center coordinates.";
+    
+    // Add 
+    if (sdim == 2) { 
+      Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
+      for (; ei != ee; ++ei) {
+        MeshObj &elem = *ei;
+        
+        // Skip if not local
+        if (!GetAttr(elem).is_locally_owned()) continue;
+        
+        // Get id
+        int id=elem.get_id();
+        
+        // Get pointer to coords
+        double *c = elem_coords->data(elem);
+        
+        // Add to list
+        searchable.push_back(CoordFromIdEntry(id,c[0],c[1],0.0));      
+      }
+    } else if (sdim == 3) { 
+      Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
+      for (; ei != ee; ++ei) {
+        MeshObj &elem = *ei;
+        
+        // Skip if not local
+        if (!GetAttr(elem).is_locally_owned()) continue;
+        
+        // Get id
+        int id=elem.get_id();
+        
+        // Get pointer to coords
+        double *c = elem_coords->data(elem);
+        
+        // Add to list
+        searchable.push_back(CoordFromIdEntry(id,c[0],c[1],c[2]));      
+      }
+    } else {
+      Throw() << "Meshes of spatial dim= "<<sdim<<" not supported in vector regridding.";
+    } 
+  } else {
+    Throw() << "Unrecognized Mesh object type.";
+  }
+
+}
+
+
+
+
 static void _create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *iientries, double *factors,
                                                           int num_vec_dims, int *src_vec_dims_undist_seqind, int *dst_vec_dims_undist_seqind,
                                                           Mesh *src_mesh, PointList *src_pl,
@@ -2505,9 +2701,9 @@ static void _create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *
   int vec_factor=num_vec_dims*num_vec_dims;
   
   // Allocate new vector matrix
-  int num_entries_vec=vec_factor*num_entries;
-  int *iientries_vec = new int[2*num_entries_vec]; 
-  double *factors_vec= new double[num_entries_vec];
+  num_entries_vec=vec_factor*num_entries;
+  iientries_vec = new int[2*num_entries_vec]; 
+  factors_vec= new double[num_entries_vec];
 
   
   // Loop calculating vector entries from regular ones
