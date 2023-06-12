@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -270,7 +270,7 @@ void ESMC_InfoIsEqual(ESMCI::Info *lhs, ESMCI::Info *rhs, int &res, int &esmc_rc
   esmc_rc = ESMF_FAILURE;
   try {
 
-#if defined (__INTEL_COMPILER)
+#if defined (__INTEL_COMPILER) || defined (__INTEL_LLVM_COMPILER)
     // TODO: This is not efficient but required for a peculiar situation with
     //  Intel and Intel MPI. I think it has something to do with unsigned integer
     //  and integer comparison following deserialization.

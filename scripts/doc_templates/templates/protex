@@ -740,7 +740,7 @@ KEY:       foreach $key ( @keys ) {
 #          Beginning of source code section
 #          --------------------------------
            if ($Fld[1] eq $boc_string) {
-              print ' ';
+#              print ' ';
               print '%/////////////////////////////////////////////////////////////';
               $first = 0;
               $prologue = 0;
@@ -1163,7 +1163,7 @@ sub do_beg {
 }# end sub do_beg
 
 sub do_eoc {
-        print ' ';
+#        print ' ';
         if ($verb) {
             print "\\end{verbatim}";
             $verb = 0;

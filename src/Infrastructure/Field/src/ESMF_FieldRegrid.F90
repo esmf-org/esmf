@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -36,7 +36,7 @@ module ESMF_FieldRegridMod
   use ESMF_StaggerLocMod
   use ESMF_MeshMod
   use ESMF_RHandleMod
-  use ESMF_GeomBaseMod
+  use ESMF_GeomMod
   use ESMF_XGridGeomBaseMod
   use ESMF_RegridMod
   use ESMF_FieldMod
@@ -528,9 +528,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           up a cell. Both of these quantities can influence how interpolation weights are calculated.
 !           As would be expected, this argument is only applicable when {\tt srcField} and {\tt dstField} are
 !           built on grids which lie on the surface of a sphere. Section~\ref{opt:lineType} shows a 
-!           list of valid options for this argument. If not specified, the default depends on the 
-!           regrid method. Section~\ref{opt:lineType} has the defaults by line type. Figure~\ref{line_type_support} shows
-!           which line types are supported for each regrid method as well as showing the default line type by regrid method.  
+!           list of valid options for this argument. Figure~\ref{line_type_support} shows
+!           which line types are supported for each regrid method as well as showing the default line type by regrid method.
+!           If not specified, defaults to {\tt ESMF\_LINETYPE\_CART} for non-conservative regrid methods, 
+!           and {\tt ESMF\_LINETYPE\_GREAT\_CIRCLE} for conservative methods.
+!
 !     \item [{[normType]}] 
 !           This argument controls the type of normalization used when generating conservative weights. This option
 !           only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE} or  {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE\_2ND}
@@ -1201,9 +1203,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-
-
-
+       
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         !!!! If conservative regridding was used, copy fraction information into output Fields !!!!
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1290,8 +1290,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
-
-
+        
         !!!!!!!!!!!!!!!!!!
         ! Return success !
         !!!!!!!!!!!!!!!!!!
@@ -3252,23 +3251,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegridStore()
-      subroutine ESMF_FieldRegridStoreX(xgrid, srcField, dstField, &
-                    keywordEnforcer, regridmethod, routehandle, &
+    subroutine ESMF_FieldRegridStoreX(xgrid, srcField, dstField, keywordEnforcer, &
+                    regridmethod, &
+                    srcTermProcessing, pipeLineDepth, &
+                    routehandle, &
                     srcFracField, dstFracField, &
                     srcMergeFracField, dstMergeFracField, rc)
 !      
 ! !ARGUMENTS:
-      type(ESMF_XGrid),       intent(in)              :: xgrid
-      type(ESMF_Field),       intent(in)              :: srcField
-      type(ESMF_Field),       intent(inout)           :: dstField
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      type(ESMF_XGrid),       intent(in)                      :: xgrid
+      type(ESMF_Field),       intent(in)                      :: srcField
+      type(ESMF_Field),       intent(inout)                   :: dstField
+      type(ESMF_KeywordEnforcer), optional                    :: keywordEnforcer ! must use keywords below
       type(ESMF_RegridMethod_Flag),   intent(in),    optional :: regridmethod
-      type(ESMF_RouteHandle), intent(inout), optional :: routehandle
-      type(ESMF_Field),       intent(inout), optional :: srcFracField
-      type(ESMF_Field),       intent(inout), optional :: dstFracField
-      type(ESMF_Field),       intent(inout), optional :: srcMergeFracField
-      type(ESMF_Field),       intent(inout), optional :: dstMergeFracField
-      integer,                intent(out),   optional :: rc 
+      integer,                        intent(inout), optional :: srcTermProcessing
+      integer,                        intent(inout), optional :: pipeLineDepth
+      type(ESMF_RouteHandle), intent(inout), optional         :: routehandle
+      type(ESMF_Field),       intent(inout), optional         :: srcFracField
+      type(ESMF_Field),       intent(inout), optional         :: dstFracField
+      type(ESMF_Field),       intent(inout), optional         :: srcMergeFracField
+      type(ESMF_Field),       intent(inout), optional         :: dstMergeFracField
+      integer,                intent(out),   optional         :: rc 
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -3320,6 +3323,61 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The type of interpolation. For this method only 
 !           {\tt ESMF\_REGRIDMETHOD\_CONSERVE} and {\tt ESMF\_REGRIDMETHOD\_CONSERVE\_2ND} are
 !           supported. If not specified, defaults to {\tt ESMF\_REGRIDMETHOD\_CONSERVE}.
+!     \item [{[srcTermProcessing]}]
+!           The {\tt srcTermProcessing} parameter controls how many source terms,
+!           located on the same PET and summing into the same destination element,
+!           are summed into partial sums on the source PET before being transferred
+!           to the destination PET. A value of 0 indicates that the entire arithmetic
+!           is done on the destination PET; source elements are neither multiplied 
+!           by their factors nor added into partial sums before being sent off by the
+!           source PET. A value of 1 indicates that source elements are multiplied
+!           by their factors on the source side before being sent to the destination
+!           PET. Larger values of {\tt srcTermProcessing} indicate the maximum number
+!           of terms in the partial sums on the source side.
+!
+!     Note that partial sums may lead to bit-for-bit differences in the results.
+!     See section \ref{RH:bfb} for an in-depth discussion of {\em all}
+!     bit-for-bit reproducibility aspects related to route-based communication
+!     methods.
+!
+!     \begin{sloppypar}
+!     The {\tt ESMF\_FieldRegridStore()} method implements an auto-tuning scheme
+!     for the {\tt srcTermProcessing} parameter. The intent on the 
+!     {\tt srcTermProcessing} argument is "{\tt inout}" in order to 
+!     support both overriding and accessing the auto-tuning parameter.
+!     If an argument $>= 0$ is specified, it is used for the 
+!     {\tt srcTermProcessing} parameter, and the auto-tuning phase is skipped.
+!     In this case the {\tt srcTermProcessing} argument is not modified on
+!     return. If the provided argument is $< 0$, the {\tt srcTermProcessing}
+!     parameter is determined internally using the auto-tuning scheme. In this
+!     case the {\tt srcTermProcessing} argument is re-set to the internally
+!     determined value on return. Auto-tuning is also used if the optional 
+!     {\tt srcTermProcessing} argument is omitted.
+!     \end{sloppypar}
+!     
+!   \item [{[pipelineDepth]}]
+!     The {\tt pipelineDepth} parameter controls how many messages a PET
+!     may have outstanding during a sparse matrix exchange. Larger values
+!     of {\tt pipelineDepth} typically lead to better performance. However,
+!     on some systems too large a value may lead to performance degradation,
+!     or runtime errors.
+!
+!     Note that the pipeline depth has no effect on the bit-for-bit
+!     reproducibility of the results. However, it may affect the performance
+!     reproducibility of the exchange.
+!
+!     The {\tt ESMF\_FieldRegridStore()} method implements an auto-tuning scheme
+!     for the {\tt pipelineDepth} parameter. The intent on the 
+!     {\tt pipelineDepth} argument is "{\tt inout}" in order to 
+!     support both overriding and accessing the auto-tuning parameter.
+!     If an argument $>= 0$ is specified, it is used for the 
+!     {\tt pipelineDepth} parameter, and the auto-tuning phase is skipped.
+!     In this case the {\tt pipelineDepth} argument is not modified on
+!     return. If the provided argument is $< 0$, the {\tt pipelineDepth}
+!     parameter is determined internally using the auto-tuning scheme. In this
+!     case the {\tt pipelineDepth} argument is re-set to the internally
+!     determined value on return. Auto-tuning is also used if the optional 
+!     {\tt pipelineDepth} argument is omitted.
 !     \item [{[routehandle]}]
 !           The handle that implements the regrid and that can be used in later 
 !           {\tt ESMF\_FieldRegrid}.
@@ -3362,7 +3420,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_Array)     :: dstFracArray
         type(ESMF_STAGGERLOC):: interpFieldStaggerloc, fracFieldStaggerloc
         type(ESMF_MESHLOC)   :: interpFieldMeshloc, fracFieldMeshloc
-        integer              :: srcTermProcessingVal
         type(ESMF_RegridMethod_Flag) :: lregridmethod
         type(ESMF_Mesh)      :: superMesh
         type(ESMF_Field)     :: tmpSrcField, tmpDstField
@@ -3852,10 +3909,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ESMF_CONTEXT, rcToReturn=rc)) return
            
            ! call FieldSMMStore
-           srcTermProcessingVal = 0
            call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
                 sparseMat%factorList, sparseMat%factorIndexList, &
-                srcTermProcessing=srcTermProcessingVal, &
+                srcTermProcessing=srcTermProcessing, &
+                pipeLineDepth=pipeLineDepth, &
                 rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3912,13 +3969,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            endif
 
            ! Generate routehandle other that 1st order conserve
-           srcTermProcessingVal = 1 ! multiply on src, but all adding on dst
            call ESMF_FieldRegridStoreNX(&
                 srcField=tmpSrcField, &
                 dstField=tmpDstField, &
 ! ??            srcMaskValues, dstMaskValues, &
                 regridmethod=lregridmethod, &
-                srcTermProcessing=srcTermProcessingVal, &
+                srcTermProcessing=srcTermProcessing, &
+                pipeLineDepth=pipeLineDepth, &
                 routehandle=routehandle, &
                 srcFracField=srcFracField, &
                 dstFracField=dstFracField, &

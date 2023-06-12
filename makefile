@@ -320,8 +320,12 @@ endif
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo " * Other relevant environment variables *"
-	-@echo "PATH:    $(PATH)"
+	-@echo "PATH:     $(PATH)"
 	-@echo "LD_LIBRARY_PATH: $(LD_LIBRARY_PATH)"
+	-@echo "LDFLAGS:  $(LDFLAGS)"
+	-@echo "CXXFLAGS: $(CXXFLAGS)"
+	-@echo "FCFLAGS:  $(FCFLAGS)"
+	-@echo "CFLAGS:   $(CFLAGS)"
 	-@echo " "
 
 #
@@ -407,7 +411,8 @@ endif
 	-@echo " "
 #
 #
-MKINFO = $(ESMF_LIBDIR)/esmf.mk
+MKINFO  = $(ESMF_LIBDIR)/esmf.mk
+TMPINFO = $(ESMF_DIR)/tmp.info
 info_mk: chkdir_lib
 	-@$(ESMF_RM) $(MKINFO)
 	-@echo "# ESMF application makefile fragment" > $(MKINFO)
@@ -674,6 +679,30 @@ endif
 	    echo "# ESMF_PROJ4_LIBPATH:       $(ESMF_PROJ4_LIBPATH)" >> $(MKINFO) ; \
 	  fi; \
 	 fi
+	-@echo "#" >> $(MKINFO)
+	-@echo "# * Compilers, Linkers, Flags, and Libraries *" >> $(MKINFO)
+	-@echo "# Location of the preprocessor:     " `which $(word 1, $(ESMF_CPP))` >> $(MKINFO)
+	-@echo "# Location of the Fortran compiler: " `which $(word 1, $(ESMF_F90COMPILER))` >> $(MKINFO)
+	-@echo "# Location of the Fortran linker:   " `which $(word 1, $(ESMF_F90LINKER))` >> $(MKINFO)
+	-@echo "# Location of the C++ compiler:     " `which $(word 1, $(ESMF_CXXCOMPILER))` >> $(MKINFO)
+	-@echo "# Location of the C++ linker:       " `which $(word 1, $(ESMF_CXXLINKER))` >> $(MKINFO)
+	-@echo "# Location of the C compiler:       " `which $(word 1, $(ESMF_CCOMPILER))` >> $(MKINFO)
+	-@echo "# Location of the C linker:         " `which $(word 1, $(ESMF_CLINKER))` >> $(MKINFO)
+	-@echo "#" >> $(MKINFO)
+	-@if [ -f $(TMPINFO) ] ; then \
+	  echo "# !!! ----- User set ESMF_ environment variables ----- !!!" >> $(MKINFO) ; \
+	  echo "#" >> $(MKINFO) ; \
+	  awk '{ print "# ", $$0 }' $(TMPINFO) >> $(MKINFO) ; \
+	  $(ESMF_RM) $(TMPINFO) ; \
+	fi
+
+envdump:
+	-@echo "--------------------------------------------------------------" > $(TMPINFO)
+	-@echo " * User set ESMF environment variables *" >> $(TMPINFO)
+	$(shell $(ESMF_DIR)/scripts/envecho)
+	-@cat envecho.out >> $(TMPINFO) ; rm -f envecho.out
+	-@echo >> $(TMPINFO)
+	-@echo "--------------------------------------------------------------" >> $(TMPINFO)
 
 # Rewrite esmf.mk during installation to ensure correct installation paths are encoded
 install_info_mk:
@@ -706,7 +735,7 @@ SCRIPTS    =
 
 # ------------------------------------------------------------------
 # INSTALL target
-install:
+install: envdump
 	-@echo " "
 	-@echo "Installing ESMF:"
 	-@echo " "

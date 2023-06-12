@@ -20,9 +20,9 @@ else()
 endif()
 
 # Create ESMX executable
-add_executable(esmx esmx.F90)
-target_include_directories(esmx PUBLIC ${PROJECT_BINARY_DIR})
-target_link_libraries(esmx PUBLIC esmx_driver)
+add_executable(esmx_app ESMX_App.F90)
+target_include_directories(esmx_app PUBLIC ${PROJECT_BINARY_DIR})
+target_link_libraries(esmx_app PUBLIC esmx_driver)
 
 # Install executable
 install(

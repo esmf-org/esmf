@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1310,9 +1310,9 @@ interface operator (/=)
   module procedure ESMF_bfne
   module procedure ESMF_ctfne
   module procedure ESMF_tnfne
-  module procedure ESMF_ifneq
   module procedure ESMF_pinne
   module procedure ESMF_frne
+  module procedure ESMF_ifneq
   module procedure ESMF_unmappedactionne
   module procedure ESMF_RegridPoleNe
   module procedure ESMF_FileFormatNe
@@ -1339,6 +1339,7 @@ interface assignment (=)
   module procedure ESMF_ptas2
   module procedure ESMF_ioas
   module procedure ESMF_ifas_string
+  module procedure ESMF_FileFormatAsString
   module procedure ESMF_FileStatusAs
 end interface  
 
@@ -1930,6 +1931,36 @@ end function ESMF_FileFormatEq
                                  FileFormat2%fileformat)
 
 end function ESMF_FileFormatNe
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FileFormatAsString"
+subroutine ESMF_FileFormatAsString(String, FileFormat)
+  character(len=*), intent(out) :: String
+  type(ESMF_FileFormat_Flag), intent(in) :: FileFormat
+
+  if (FileFormat == ESMF_FILEFORMAT_UNKNOWN) then
+     String = 'ESMF_FILEFORMAT_UNKNOWN'
+  else if (FileFormat == ESMF_FILEFORMAT_VTK) then
+     String = 'ESMF_FILEFORMAT_VTK'
+  else if (FileFormat == ESMF_FILEFORMAT_SCRIP) then
+     String = 'ESMF_FILEFORMAT_SCRIP'
+  else if (FileFormat == ESMF_FILEFORMAT_ESMFMESH) then
+     String = 'ESMF_FILEFORMAT_ESMFMESH'
+  else if (FileFormat == ESMF_FILEFORMAT_ESMFGRID) then
+     String = 'ESMF_FILEFORMAT_ESMFGRID'
+  else if (FileFormat == ESMF_FILEFORMAT_UGRID) then
+     String = 'ESMF_FILEFORMAT_UGRID'
+  else if (FileFormat == ESMF_FILEFORMAT_CFGRID) then
+     ! Note that ESMF_FILEFORMAT_CFGRID is the same as ESMF_FILEFORMAT_GRIDSPEC
+     String = 'ESMF_FILEFORMAT_CFGRID/ESMF_FILEFORMAT_GRIDSPEC'
+  else if (FileFormat == ESMF_FILEFORMAT_MOSAIC) then
+     String = 'ESMF_FILEFORMAT_MOSAIC'
+  else if (FileFormat == ESMF_FILEFORMAT_TILE) then
+     String = 'ESMF_FILEFORMAT_TILE'
+  else
+     String = '(Unexpected ESMF_FILEFORMAT value)'
+  end if
+end subroutine ESMF_FileFormatAsString
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2396,7 +2427,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         print *, ""
         print *, "Earth System Modeling Framework"
         print *, ""
-        print *, "Copyright (c) 2002-2022 University Corporation for Atmospheric Research,"
+        print *, "Copyright (c) 2002-2023 University Corporation for Atmospheric Research,"
         print *, "Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory,"
         print *, "University of Michigan, National Centers for Environmental Prediction,"
         print *, "Los Alamos National Laboratory, Argonne National Laboratory,"

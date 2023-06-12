@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -2161,6 +2161,7 @@ VM *VM::getCurrent(
 #endif
   int i = matchTableIndex;
   if (matchTable_tid[i] != mytid){
+    // simple linear search for maching thread id
     for (i=0; i<matchTableBound; i++)
       if (matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
@@ -2174,6 +2175,55 @@ VM *VM::getCurrent(
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return matchTable_vm[i];
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::isThreadKnown()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::isThreadKnown - Is executing thread known by any VM
+//
+// !INTERFACE:
+bool VM::isThreadKnown(
+//
+// !RETURN VALUE:
+//    Bool
+//
+// !ARGUMENTS:
+//
+  int *rc){   // return code
+//
+// !DESCRIPTION:
+//   Indicate whether current thread is known by any VM in the local VAS.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  bool found = true;
+  esmf_pthread_t mytid;
+#ifndef ESMF_NO_PTHREADS
+  mytid = pthread_self();
+#else
+  mytid = 0;
+#endif
+  int i = matchTableIndex;
+  if (matchTable_tid[i] != mytid){
+    // simple linear search for maching thread id
+    for (i=0; i<matchTableBound; i++)
+      if (matchTable_tid[i] == mytid) break;
+    if (i == matchTableBound){
+      // executing thread is NOT known as PET by any VM under this VAS.
+      found = false;
+    }
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return found;
 }
 //-----------------------------------------------------------------------------
 

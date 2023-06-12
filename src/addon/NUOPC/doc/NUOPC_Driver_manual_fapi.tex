@@ -117,7 +117,12 @@ Component that drives and coordinates initialization of its child components: Mo
   \begin{itemize}
     \item {\bf label\_SetRunClock}
       \begin{itemize}
-        \item Optional. By default driver clock is not modified each time its Run is entered.
+        \item Optional. By default driver clock is left unchanged if the parent component has no valid clock.
+          If there is a valid parent clock, the current time is checked between it and the driver clock. An
+          error is returned if the current time does not agree. Otherwise (current time does agree between
+          both clocks), the driver clock stop time is adjusted to a single time step of the parent clock in
+          the future. This ensures that the driver returns at the appropriate parent time step, even if that
+          might change dynamically during the run.
         \item Modify the driver clock before executing RunSequence. This is very rarely needed.
       \end{itemize}
     \item {\bf label\_ExecuteRunSequence}

@@ -14,8 +14,10 @@ The following packages are *required* to work with ESMPy:
 
 The following packages are *optional*:
 
-* ESMF installation with NetCDF - required to create :class:`Grids <esmpy.api.grid.Grid>` and :class:`Meshes <esmpy.api.mesh.Mesh>` from file
+* ESMF installation with NetCDF - required to create :class:`Grids <esmpy.api.grid.Grid>`, :class:`Meshes <esmpy.api.mesh.Mesh>` and :class:`Fields <esmpy.api.field.Field>` from file, and to write regridding weights to file
     - NetCDF must be built as a shared library for ESMPy installation to succeed
+* ESMF installation with PIO (the Parallel IO library) - required to create :class:`Meshes <esmpy.api.mesh.Mesh>` and :class:`Fields <esmpy.api.field.Field>` from file, and to write regridding weights to file
+    - Note that building ESMF with PIO requires building with a real MPI library (not mpiuni)
 * `mpi4py <http://mpi4py.scipy.org/>`_- python bindings to MPI, needed to run some of the parallel regridding examples
 * `pytest <https://docs.pytest.org/en/7.1.x/>`_ - for testing
 
@@ -69,7 +71,7 @@ The path of this file is:
     <ESMF_INSTALL_DIR>/lib/lib<g<or>O>/<platform>/esmf.mk
 
 An installation of ESMPy in the default location for Python packages can be done
-with the following command issued from the top level ESMPy directory:
+with the following command issued from the top level ESMPy directory (``src/addon/esmpy``):
 
 .. code::
 
@@ -91,14 +93,19 @@ To use ESMPy in an external program, import it with:
 
     import esmpy
 
-The environment variable ``ESMFMKFILE`` must be set when to use ESMPy.
+The environment variable ``ESMFMKFILE`` must be set when using ESMPy.
+
+.. Note::
+
+   The Python module name for ESMPy was changed in v8.4.0 from "ESMF" to "esmpy". If you are using a version older than v8.4.0, the import command is ``import ESMF``. See the `ESMF Release Notes <http://earthsystemmodeling.org/static/releases.html>`_ for more details and links to previous versions of the ESMPy documentation.
 
 ----------
 Validation
 ----------
 
 The ESMPy testing is done with the pytest package, both in serial and
-parallel. Basic unit tests can be run with the following command:
+parallel. Basic unit tests can be run with the following command, from
+the top level ESMPy directory (``src/addon/esmpy``):
 
 .. code::
 

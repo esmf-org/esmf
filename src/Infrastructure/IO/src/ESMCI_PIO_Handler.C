@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1657,6 +1657,7 @@ void PIO_Handler::closeOneTileFile(
     ESMCI_IOREGION_ENTER("PIOc_closefile");
     int piorc = PIOc_closefile(pioFileDesc[tile-1]);
     ESMCI_IOREGION_EXIT("PIOc_closefile");
+    pioFileDesc[tile-1] = 0;
     new_file[tile-1] = false;
     if (rc != NULL) *rc = piorc;
   }

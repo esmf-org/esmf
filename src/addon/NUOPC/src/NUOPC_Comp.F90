@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -81,6 +81,8 @@ module NUOPC_Comp
   interface NUOPC_CompAttributeIngest
     module procedure NUOPC_GridCompAttributeIng
     module procedure NUOPC_CplCompAttributeIng
+    module procedure NUOPC_GridCompAttributeIngHC
+    module procedure NUOPC_CplCompAttributeIngHC
   end interface
   !---------------------------------------------
   interface NUOPC_CompAttributeInit
@@ -1620,7 +1622,7 @@ module NUOPC_Comp
     
   end subroutine
   !-----------------------------------------------------------------------------
-  
+
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_CompAttributeIngest - Ingest free format NUOPC CplComp Attributes
@@ -1770,7 +1772,173 @@ module NUOPC_Comp
     
   end subroutine
   !-----------------------------------------------------------------------------
-  
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompAttributeIngest - Ingest NUOPC GridComp Attributes from HConfig
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompAttributeIngest() 
+  subroutine NUOPC_GridCompAttributeIngHC(comp, hconfig, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp),    intent(in)            :: comp
+    type(ESMF_HConfig),     intent(in)            :: hconfig
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   \label{NUOPC_GridCompAttributeIngHC}
+!   Ingest component attributes from a HConfig object onto the highest level
+!   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
+!   purpose="Instance").
+!
+!   Important: The {\em value} of standard NUOPC attributes, such as
+!   {\em Verbosity}, {\em Profiling}, or {\em Diagnostic} must be set as
+!   {\bf strings}, potentially requiring explicit quotation marks! 
+!   This rule applies even to values that are ultimately interpreted
+!   as integers, or bit patterns. Other attributes, e.g. used specifically
+!   by the component itself, have no such restriction.
+!
+!   The provided {\tt hconfig} is expected to be a {\em map}. An error is
+!   returned if this condition is not met. Each key-value pair held by
+!   {\tt hconfig} is added as an attribute to {\tt comp}.
+!   A copy of the source contents is made.
+!
+!   Transfers of {\em scalar}, {\em sequence}, and {\em map} values
+!   from {\tt hconfig} are supported.  Maps are treated recursively.
+!   Sequences are restricted to scalar elements of the same typekind.
+!
+!   The keys of any map provided by the {\tt hconfig} object must
+!   be of scalar type. Keys are interpreted as strings when transferred as an
+!   attribute.
+!
+!   Existing attributes with the same key are overridden by this operation.
+!   When attributes are overridden, the typekind of the associated value
+!   element is allowed to change.
+!
+! \begin{verbatim}
+! # A simple YAML definition of standard NUOPC attributes, followed by
+! # component specific attributes.
+!
+! Verbosity:  "4609"              # must explicitly quote this integer
+! Profiling:  low                 # this is naturally a string
+! Diagnostic: "0"                 # again explicitly quote the zero
+! CustomSeq1: [1, 2, 3, 4]        # sequence of integers
+! CustomSeq2: [1., 2., 3., 4.]    # sequence of floats
+! CustomSeq3: [true, false]       # sequence of bools
+! CustomType: {k1: [a, aa, aaa], k2: b, k3: c}  # complex structure
+! \end{verbatim}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    character(ESMF_MAXSTR)  :: name
+    type(ESMF_Info)         :: info
+    integer                 :: localrc
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(comp, name=name, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! access the Info object
+    call ESMF_InfoGetFromHost(comp, info=info, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! set contents of Info according to HConfig
+    call ESMF_InfoSet(info, value=hconfig, keyPrefix="/NUOPC/Instance", &
+      rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompAttributeIngest - Ingest NUOPC CplComp Attributes from HConfig
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompAttributeIngest() 
+  subroutine NUOPC_CplCompAttributeIngHC(comp, hconfig, rc)
+! !ARGUMENTS:
+    type(ESMF_CplComp),     intent(in)            :: comp
+    type(ESMF_HConfig),     intent(in)            :: hconfig
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   \label{NUOPC_GridCompAttributeIngHC}
+!   Ingest component attributes from a HConfig object onto the highest level
+!   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
+!   purpose="Instance").
+!
+!   Important: The {\em value} of standard NUOPC attributes, such as
+!   {\em Verbosity}, {\em Profiling}, or {\em Diagnostic} must be set as
+!   {\bf strings}, potentially requiring explicit quotation marks! 
+!   This rule applies even to values that are ultimately interpreted
+!   as integers, or bit patterns. Other attributes, e.g. used specifically
+!   by the component itself, have no such restriction.
+!
+!   The provided {\tt hconfig} is expected to be a {\em map}. An error is
+!   returned if this condition is not met. Each key-value pair held by
+!   {\tt hconfig} is added as an attribute to {\tt comp}.
+!   A copy of the source contents is made.
+!
+!   Transfers of {\em scalar}, {\em sequence}, and {\em map} values
+!   from {\tt hconfig} are supported.  Maps are treated recursively.
+!   Sequences are restricted to scalar elements of the same typekind.
+!
+!   The keys of any map provided by the {\tt hconfig} object must
+!   be of scalar type. Keys are interpreted as strings when transferred as an
+!   attribute.
+!
+!   Existing attributes with the same key are overridden by this operation.
+!   When attributes are overridden, the typekind of the associated value
+!   element is allowed to change.
+!
+! \begin{verbatim}
+! # A simple YAML definition of standard NUOPC attributes, followed by
+! # component specific attributes.
+!
+! Verbosity:  "4609"              # must explicitly quote this integer
+! Profiling:  low                 # this is naturally a string
+! Diagnostic: "0"                 # again explicitly quote the zero
+! CustomSeq1: [1, 2, 3, 4]        # sequence of integers
+! CustomSeq2: [1., 2., 3., 4.]    # sequence of floats
+! CustomSeq3: [true, false]       # sequence of bools
+! CustomType: {k1: [a, aa, aaa], k2: b, k3: c}  # complex structure
+! \end{verbatim}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    character(ESMF_MAXSTR)  :: name
+    type(ESMF_Info)         :: info
+    integer                 :: localrc
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(comp, name=name, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! access the Info object
+    call ESMF_InfoGetFromHost(comp, info=info, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! set contents of Info according to HConfig
+    call ESMF_InfoSet(info, value=hconfig, keyPrefix="/NUOPC/Instance", &
+      rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
   !-----------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: NUOPC_CompAttributeInit - Initialize the NUOPC GridComp Attributes
@@ -2846,6 +3014,10 @@ module NUOPC_Comp
     if (present(profiling)) then
       ! initialize the output value
       profiling = 0
+      ! set specific verbosity levels
+      max   = 65535  ! all 16 lower bits set
+      high  =   511  ! all 9 lower bits set
+      low   =    73  ! bits 0, 3, 6
       ! query the component for Profiling
       call NUOPC_CompAttributeGet(comp, name="Profiling", value=valueString, &
         rc=localrc)

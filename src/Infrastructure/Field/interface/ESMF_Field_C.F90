@@ -1,7 +1,7 @@
 !  $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1183,7 +1183,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     use ESMF_FieldCreateMod
     use ESMF_FieldGetMod
     use ESMF_IOScripMod
-    use ESMF_GeomBaseMod
+    use ESMF_GeomMod
     use ESMF_GridMod
     use ESMF_MeshMod
     use ESMF_LocStreamMod

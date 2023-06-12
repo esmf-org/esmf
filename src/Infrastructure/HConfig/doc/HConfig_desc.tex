@@ -1,0 +1,26 @@
+% $Id$
+%
+% Earth System Modeling Framework
+% Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+\label{sec:HConfig}
+
+The ESMF HConfig class implements a hierarchical configuration facility that is
+compatible with YAML Ain't Markup Language (YAML\texttrademark). ESMF HConfig
+can be understood as a Fortran interface to YAML. However, no claim is made that
+{\em all} YAML language features are supported in their entirety.
+
+The purpose of the HConfig class under ESMF is to provide a migration path
+toward more standard configuration management for ESMF applications. To this end
+ESMF\_HConfig integrates with the traditional ESMF\_Config class. Through this
+integration the traditional Config class API offers basic access to YAML
+configuration files, in addition to providing backward compatible support of the
+traditional config file format. This is discussed in more detail in the Config
+class section. For more complete YAML support, applications are encouraged to
+migrate to the HConfig API discussed in this section.
+

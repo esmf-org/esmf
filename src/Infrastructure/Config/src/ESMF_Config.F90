@@ -2,7 +2,7 @@
 !==============================================================================
 ! Earth System Modeling Framework
 !
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1111,6 +1111,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(hconfig)) then
       hconfig = config%cptr%hconfig
     endif
+
+    if ( present (rc )) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ConfigGet
 !------------------------------------------------------------------------------
@@ -2880,7 +2882,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         then
         ! This is a YAML file
 
-        call ESMF_HConfigLoadFile(config%cptr%hconfig, trim(filename), &
+        call ESMF_HConfigFileLoad(config%cptr%hconfig, trim(filename), &
           rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3285,7 +3287,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     rawArg = .false.  ! default
     if (present(raw)) rawArg = raw
 
-    write(msgString, "(a,i8,a,l,a)") prefix//" nbuf=", config%cptr%nbuf, &
+    write(msgString, "(a,i8,a,l2,a)") prefix//" nbuf=", config%cptr%nbuf, &
       " buffer(raw=", rawArg, "):"
     call ESMF_LogWrite(msgString, logMsg, log=log, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

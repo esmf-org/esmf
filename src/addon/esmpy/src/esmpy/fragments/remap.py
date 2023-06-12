@@ -76,13 +76,13 @@
 #                     http://www.earthsystemmodeling.org
 #     
 # Software documentation for the last public release is at:
-#                     http://www.earthsystemmodeling.org -> Users -> Documentation
+#                     http://www.earthsystemmodeling.org -> Docs
 #     
 # Software documentation for all releases is at:
-#                     http://www.earthsystemmodeling.org -> Download -> View All Releases
+#                     http://www.earthsystemmodeling.org -> Download
 #     
 # The ESMF library source code is also available for download at:
-#                     http://sourceforge.net/projects/esmf
+#                     https://github.com/esmf-org/esmf
 #     
 # Please contact esmf_support@ucar.edu with any questions or problems.
 #     

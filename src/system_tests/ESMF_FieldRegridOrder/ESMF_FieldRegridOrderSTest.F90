@@ -1,7 +1,6 @@
 ! $Id$
 !
 ! System test code FieldRegridOrder
-!  Description on Sourceforge under System Test #xxxxxx
 
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_removeTEST        String used by test script to count system tests.

@@ -294,9 +294,9 @@ CMake version 2.8.12 or newer be available in the path.
 
 \item[{\tt "external"}] PIO-dependent features will be enabled and will use an
 external PIO library.  The additional parameters {\tt ESMF\_PIO\_INCLUDE} 
-(path to PIO include files) and {\tt ESMF\_PIO\_LIBPATH} (path to PIO library files)
-should also be set when using this option. The minimum version of PIO for
-this option is 2.5.7. 
+(path to PIO include files) and {\tt ESMF\_PIO\_LIBPATH} (path to PIO library
+files) should also be set when using this option. The minimum version of PIO for
+this option is 2.5.10.
 
 \item[{\tt "OFF"}] Disables PIO-dependent code.
 
@@ -980,14 +980,6 @@ Build configure file site name or the value default. If not set, then the value
 of default is assumed. When including platform-specific files, this value is
 used as the third part of the directory name (parts 1 and 2 are the
 ESMF\_OS value and ESMF\_COMPILER value, respectively.)
-
-The Sourceforge {\tt esmfcontrib} repository contains makefiles which have
-already been customized for certain machines.  If one exists for your site
-and you wish to use it, download the corresponding files into the
-{\tt build\_contrib} directory and set {\tt ESMF\_SITE} to your location
-(which corresponds to the last part of the directory name).  See the
-Sourceforge site
-\htmladdnormallink{http://sourceforge.net/projects/esmfcontrib}{http://sourceforge.net/projects/esmfcontrib} for more information.
 
 \item[ESMF\_TESTESMFMKFILE]
 Possible value: {\tt ON}, {\tt OFF} (default)

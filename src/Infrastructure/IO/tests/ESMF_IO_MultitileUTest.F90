@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -96,9 +96,9 @@ program ESMF_IO_MultitileUTest
 
   logical :: allEqual
 
-  character(len=*), parameter :: fileNameFields = "ESMF_IO_MultitileUTestFields#.nc"
-  character(len=*), parameter :: fileNameArrays = "ESMF_IO_MultitileUTestArrays#.nc"
-  character(len=*), parameter :: fileNameFail = "ESMF_IO_MultitileUTestFail#.nc"
+  character(len=*), parameter :: fileNameFields = "ESMF_IO_MultitileUTestFields*.nc"
+  character(len=*), parameter :: fileNameArrays = "ESMF_IO_MultitileUTestArrays*.nc"
+  character(len=*), parameter :: fileNameFail = "ESMF_IO_MultitileUTestFail*.nc"
 
   !------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally

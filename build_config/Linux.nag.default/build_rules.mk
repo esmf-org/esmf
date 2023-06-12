@@ -108,6 +108,17 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version
 ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} --version
 
 ############################################################
+# Special debug flags
+#
+# Activate to turn on UBSan:
+#ESMF_LINKOPTFLAG_G      += -fsanitize=undefined
+# Also set environment variable UBSAN_OPTIONS="print_stacktrace=1"
+# for stacktrace at runtime.
+#
+ESMF_F90OPTFLAG_G       += -C=array
+ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused $(ESMF_LINKOPTFLAG_G)
+
+############################################################
 # Set NAG unix modules when certain non-Standard system calls
 # (e.g., ABORT) are made.
 ESMF_F90COMPILEOPTS += -DESMF_NAG_UNIX_MODULE
@@ -168,6 +179,8 @@ ESMF_CRPATHPREFIX           = -Wl,-rpath,
 ############################################################
 # Determine where gcc's libraries are located
 #
+# Note that the result of -print-file-name will be the full path to the file if it is found
+# within the compiler installation, and simply the file name verbatim if it is NOT found.
 ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS) -print-file-name=libstdc++.so)
 ifeq ($(ESMF_LIBSTDCXX),libstdc++.so)
 ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS) -print-file-name=libstdc++.a)

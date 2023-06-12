@@ -50,6 +50,8 @@ call ESMF_InfoGetFromHost(array, info, rc=rc)
 call ESMF_InfoSet(info, "aKey", 15, rc=rc)
 \end{verbatim}
 
+Notice that the legacy {\tt ESMF\_Attribute} API expects the usage of what was called an "Attribute Package". This essentially corresponds to a namespace similar to what {\tt ESMF\_Info} provides for keys via the JSON Pointer syntax (see \ref{info_key_format}). In the above {\tt ESMF\_AttributeSet()} call, without specification of {\tt convention} and {\tt purpose} arguments, the resulting JSON pointer of the key is "/ESMF/General/aKey". This is important to account for when mixing deprecated {\tt ESMF\_Attribute} calls with the {\tt ESMF\_Info} API.
+
 \subsubsection{Getting an Attribute}
 With \texttt{ESMF\_Attribute}:
 \begin{verbatim}
@@ -60,6 +62,8 @@ With \texttt{ESMF\_Info}:
 call ESMF_InfoGetFromHost(array, info, rc=rc)
 call ESMF_InfoGet(info, "aKey", aKeyValue, rc=rc)
 \end{verbatim}
+
+Notice again that the {\tt ESMF\_Attribute} API automatically prepends "/ESMF/General/" to the JSON pointer used for key in the absence of {\tt convention} and {\tt purpose} arguments.
 
 \subsection{Key Format Overview}
 \label{info_key_format}

@@ -192,6 +192,8 @@
 
 #include "../Infrastructure/XGrid/doc/XGrid_refdoc.ctex"
 
+#include "../Infrastructure/Geom/doc/Geom_refdoc.ctex"
+
 #include "../Infrastructure/DistGrid/doc/DistGrid_refdoc.ctex"
 
 #include "../Infrastructure/Route/doc/RHandle_refdoc.ctex"
@@ -222,6 +224,8 @@
 #include "../Infrastructure/TimeMgr/doc/TimeMgr_refdoc.ctex"
 
 #include "../Infrastructure/Config/doc/Config_refdoc.ctex"
+
+#include "../Infrastructure/HConfig/doc/HConfig_refdoc.ctex"
 
 #include "../Infrastructure/LogErr/doc/LogErr_refdoc.ctex"
 
