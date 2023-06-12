@@ -2577,8 +2577,12 @@ public:
     
   }
 
-  // Add
+  
+  // Add points to query structure from Mesh
   void add(Mesh *mesh, MeshObj::id_type obj_type);
+
+  // Add points to query structure from PointList
+  void add(PointList *pl);
   
 };
 
@@ -2643,7 +2647,7 @@ void CoordFromId::add(Mesh *mesh, MeshObj::id_type obj_type) {
     MEField<> *elem_coords=mesh->GetField("elem_coordinates");
     if (elem_coords == NULL) Throw() << "Vector regridding not supported on Mesh elements when the elements don't have center coordinates.";
     
-    // Add 
+    // Add based on spatial dim
     if (sdim == 2) { 
       Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
       for (; ei != ee; ++ei) {
@@ -2687,6 +2691,44 @@ void CoordFromId::add(Mesh *mesh, MeshObj::id_type obj_type) {
 
 }
 
+void CoordFromId::add(PointList *pl) {
+
+  // Get spatial (coordinate) dim
+  int sdim=pl->get_coord_dim();
+
+  // Add points based on spatial dim
+  if (sdim == 2) { 
+    // Loop adding ids and points
+    int num_pts = pl->get_curr_num_pts();
+    for (int i=0; i<num_pts; i++) {
+      
+      // Get point id
+      int id = pl->get_id(i);
+      
+      // Get point coords
+      const double *c = pl->get_coord_ptr(i);   
+      
+      // Add to list
+      searchable.push_back(CoordFromIdEntry(id,c[0],c[1],0.0));          
+    }
+  } else if (sdim == 3) { 
+    // Loop adding ids and points
+    int num_pts = pl->get_curr_num_pts();
+    for (int i=0; i<num_pts; i++) {
+      
+      // Get point id
+      int id = pl->get_id(i);
+      
+      // Get point coords
+      const double *c = pl->get_coord_ptr(i);   
+      
+      // Add to list
+      searchable.push_back(CoordFromIdEntry(id,c[0],c[1],c[2]));          
+    }    
+  } else {
+    Throw() << "Geometries of spatial dim= "<<sdim<<" not supported in vector regridding.";
+  } 
+}
 
 
 
