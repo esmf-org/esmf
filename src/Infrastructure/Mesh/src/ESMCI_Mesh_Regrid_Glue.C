@@ -2566,14 +2566,14 @@ class CoordFromId {
   
   
   // Data
-  bool is_committed;
+  bool is_searchable;
   std::vector<CoordFromIdEntry> searchable; // After committing this will contain a sorted list for searching
 
  
 public:
   
   // Create empty
-  CoordFromId(): is_committed(false) {
+  CoordFromId(): is_searchable(false) {
     
   }
 
@@ -2583,21 +2583,29 @@ public:
 
   // Add points to query structure from PointList
   void add(PointList *pl);
+
+  // Make searchable
+  void make_searchable();
   
 };
 
-  // zzzzz
-
-  // Mesh *src_mesh, PointList *src_pl,
 
 void CoordFromId::add(Mesh *mesh, MeshObj::id_type obj_type) {
 
+  // If already searchable, don't allow more to be added
+  if (is_searchable) {
+    Throw() << "CoordFromId object has already been made searchable, more points can't be added.";
+  }
+  
   // Get spatial dimension
   int sdim=mesh->spatial_dim();
   
   // Add based on obj_type
   if (obj_type == MeshObj::NODE) {
 
+    // Reserve to the correct size
+    searchable.reserve(mesh->num_nodes());
+    
     // Get coordinate data
     MEField<> *node_coords=mesh->GetField("coordinates");
     ThrowRequire(node_coords != NULL);
@@ -2643,6 +2651,9 @@ void CoordFromId::add(Mesh *mesh, MeshObj::id_type obj_type) {
 
   } else if (obj_type == MeshObj::ELEMENT) {
 
+    // Reserve to the correct size
+    searchable.reserve(mesh->num_elems());
+    
     // Get element coordinate data
     MEField<> *elem_coords=mesh->GetField("elem_coordinates");
     if (elem_coords == NULL) Throw() << "Vector regridding not supported on Mesh elements when the elements don't have center coordinates.";
@@ -2693,9 +2704,18 @@ void CoordFromId::add(Mesh *mesh, MeshObj::id_type obj_type) {
 
 void CoordFromId::add(PointList *pl) {
 
+  // If already searchable, don't allow more to be added
+  if (is_searchable) {
+    Throw() << "CoordFromId object has already been made searchable, more points can't be added.";
+  }
+
+  
   // Get spatial (coordinate) dim
   int sdim=pl->get_coord_dim();
 
+  // Reserve to the correct size
+  searchable.reserve(pl->get_curr_num_pts());
+  
   // Add points based on spatial dim
   if (sdim == 2) { 
     // Loop adding ids and points
@@ -2727,8 +2747,24 @@ void CoordFromId::add(PointList *pl) {
     }    
   } else {
     Throw() << "Geometries of spatial dim= "<<sdim<<" not supported in vector regridding.";
-  } 
+  }
+
 }
+
+void CoordFromId::make_searchable() {
+
+  // If already done, then leave
+  if (is_searchable) return;
+  
+  // Sort to make quickly searchable
+  std::sort(searchable.begin(),searchable.end());
+  
+  // Mark as searchable
+  is_searchable=true;
+}
+
+
+
 
 
 
