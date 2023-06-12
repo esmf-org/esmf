@@ -2534,7 +2534,14 @@ public:
   bool operator==(const Coord &rhs) const {
     return (c[0] == rhs.c[0] && c[1] == rhs.c[1] && c[2] == rhs.c[2]);
   }
- 
+
+  // Fill _coords with coordinate values.  _coords must be at least size 3.
+  void get_coords(double *_coords) {
+    _coords[0]=c[0];
+    _coords[1]=c[1];
+    _coords[2]=c[2];
+  }
+  
 };
 
 
@@ -2548,6 +2555,7 @@ class CoordFromId {
     Coord coord;
 
     CoordFromIdEntry(int _id, double x, double y, double z): id(_id), coord(x,y,z) {}
+
 
     // Less 
     bool operator<(const CoordFromIdEntry &rhs) const {
@@ -2563,12 +2571,25 @@ class CoordFromId {
     }
     
   };
+
+  // A less function object for CoordFromIdEntry that only cares about id.
+  // Used below in lower_bound search by just id.
+  class CoordFromIdEntry_just_id_less : public std::binary_function<CoordFromIdEntry, CoordFromIdEntry, bool> {
+  public:
+    CoordFromIdEntry_just_id_less() {}
+    bool operator()(const CoordFromIdEntry  &l, const CoordFromIdEntry &r) {
+      return l.id < r.id;
+    }
+  };
+  
   
   
   // Data
   bool is_searchable;
   std::vector<CoordFromIdEntry> searchable; // After committing this will contain a sorted list for searching
 
+
+  
  
 public:
   
@@ -2586,8 +2607,41 @@ public:
 
   // Make searchable
   void make_searchable();
+
+  // Search
+  // Returns true if id has been found. In that case fills coords_out with coords of
+  // point for that id, coords_out must be of size >=3.
+  bool search(int search_id, double *coords_out) {
+
+    // Find id in searchable list
+   std::vector<CoordFromIdEntry>::iterator ei = std::lower_bound(searchable.begin(),
+                                                                 searchable.end(),
+                                                                 CoordFromIdEntry(search_id, 0.0, 0.0, 0.0),
+                                                                 CoordFromIdEntry_just_id_less());
+
+
+   // If within list
+   if (ei != searchable.end()) {
+       CoordFromIdEntry &lb_cfie = *ei;
+
+       // If the ids match, then we've found an answer
+       if (lb_cfie.id == search_id) {
+
+         // Get coords from entry
+         lb_cfie.coord.get_coords(coords_out);
+         
+         // Report success
+         return true;
+       } 
+   }   
+   
+   // Didn't find id, so report that
+   return false;
+  }
   
 };
+
+
 
 
 void CoordFromId::add(Mesh *mesh, MeshObj::id_type obj_type) {
