@@ -565,7 +565,10 @@ void ESMCI_regrid_create(
                                                     num_vec_dims, src_vec_dims_undist_seqind, dst_vec_dims_undist_seqind,
                                                     srcmesh, srcpointlist,
                                                     dstmesh, dstpointlist,
-                                                    num_entries_vec, iientries_vec, factors_vec);      
+                                                    num_entries_vec, iientries_vec, factors_vec);
+
+      // DON'T DO THIS YET
+#if 0      
       // Get rid of old matrix
       delete [] factors;
       delete [] iientries;
@@ -574,7 +577,8 @@ void ESMCI_regrid_create(
       // Swap matrix to vector version
       num_entries=num_entries_vec;
       iientries=iientries_vec;
-      factors=factors_vec;    
+      factors=factors_vec;
+#endif      
     }
 
 
@@ -2614,29 +2618,30 @@ public:
   bool search(int search_id, double *coords_out) {
 
     // Find id in searchable list
-   std::vector<CoordFromIdEntry>::iterator ei = std::lower_bound(searchable.begin(),
-                                                                 searchable.end(),
-                                                                 CoordFromIdEntry(search_id, 0.0, 0.0, 0.0),
-                                                                 CoordFromIdEntry_just_id_less());
+    std::vector<CoordFromIdEntry>::iterator ei; // break into two lines, so easier to read
+    ei = std::lower_bound(searchable.begin(),
+                          searchable.end(),
+                          CoordFromIdEntry(search_id, 0.0, 0.0, 0.0),
+                          CoordFromIdEntry_just_id_less()); 
+    
 
-
-   // If within list
-   if (ei != searchable.end()) {
-       CoordFromIdEntry &lb_cfie = *ei;
-
-       // If the ids match, then we've found an answer
-       if (lb_cfie.id == search_id) {
-
-         // Get coords from entry
-         lb_cfie.coord.get_coords(coords_out);
-         
-         // Report success
-         return true;
-       } 
-   }   
-   
-   // Didn't find id, so report that
-   return false;
+    // If within list
+    if (ei != searchable.end()) {
+      CoordFromIdEntry &lb_cfie = *ei;
+      
+      // If the ids match, then we've found an answer
+      if (lb_cfie.id == search_id) {
+        
+        // Get coords from entry
+        lb_cfie.coord.get_coords(coords_out);
+        
+        // Report success
+        return true;
+      } 
+    }   
+    
+    // Didn't find id, so report that
+    return false;
   }
   
 };
@@ -2828,6 +2833,19 @@ static void _create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *
                                                           Mesh *dst_mesh, PointList *dst_pl,
                                                           int &num_entries_vec, int *&iientries_vec, double *&factors_vec) {
 
+  // Set up coordinate query for destination
+  CoordFromId dstCoordFromId;
+  if (dst_pl != NULL) {
+    dstCoordFromId.add(dst_pl);
+  } else if (dst_mesh != NULL) {
+    dstCoordFromId.add(dst_mesh, MeshObj::NODE); // TODO: Make this ELEMENT for conservative
+  } else {
+    Throw() <<"No available geometry object to get coords from.";
+  }
+
+  // Make searchable
+  dstCoordFromId.make_searchable(); 
+  
   
   // Size of a vector matrix compared to non-vector
   int vec_factor=num_vec_dims*num_vec_dims;
@@ -2837,7 +2855,6 @@ static void _create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *
   iientries_vec = new int[2*num_entries_vec]; 
   factors_vec= new double[num_entries_vec];
 
-  
   // Loop calculating vector entries from regular ones
   int pos=0;
   int pos_vec=0;
@@ -2851,8 +2868,13 @@ static void _create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *
 
     // Get src coords
 
-    // Get dst coords
+    // Get dst coords, complain if not there
+    double dst_coords[3];
+    if (!dstCoordFromId.search(dst_id, dst_coords)) {
+      Throw()<<"dst id="<<dst_id<<" not found in coordinate search.";
+    }
 
+  
     // Use coords to calculate new matrix entries
 
     // Fill in new matrix

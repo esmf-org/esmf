@@ -356,9 +356,9 @@ void DInfo<IDTYPE, INFOTYPE> :: search(int num_search,
 
     // Search for the request in this PETs searchable list
     typename std::vector<DInfoEntry>::iterator ei = std::lower_bound(searchable.begin(),
-                                                            searchable.end(),
-                                                            req,
-                                                            DInfoEntry_just_id_less<IDTYPE,INFOTYPE>());
+                                                                     searchable.end(),
+                                                                     req,
+                                                                     DInfoEntry_just_id_less<IDTYPE,INFOTYPE>());
     // If within list
     if (ei != searchable.end()) {
        DInfoEntry &lb_req = *ei;
@@ -379,8 +379,6 @@ void DInfo<IDTYPE, INFOTYPE> :: search(int num_search,
       }
     } 
   }
-
-
 
   
   // Build the reply.  Important: the ordering (per proc) of requests is the same
