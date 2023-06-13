@@ -2933,7 +2933,64 @@ void CoordFromId::make_searchable(int num_entries, int *iientries, int sord) {
 }
 
 
+// Compute n_vec,e_vec unit basis vectors from 3D Cart.
+// All vector args should at least be of size 3
+void _calc_basis_vec(double *cart_coords, double *n_vec, double *e_vec) {
+  
+  // Convert 3D Cart to lon, lat, etc.in radians
+  double lon, lat, rad;
+  convert_cart_to_sph_rad(cart_coords[0], cart_coords[1], cart_coords[2],
+                          &lon, &lat, &rad);
 
+  // Calculate north vec
+  n_vec[0]=-sin(lat)*sin(lon);
+  n_vec[1]=sin(lat)*cos(lon);
+  n_vec[2]=cos(lat);
+
+  // Normalize
+  double n_vec_len=MU_LEN_VEC3D(n_vec);
+  if (n_vec_len != 0.0) {
+    double div_len=1.0/n_vec_len;
+    MU_MULT_BY_SCALAR_VEC3D(n_vec,n_vec,div_len);
+  }
+
+
+  // Calculate east vec
+  e_vec[0]=cos(lon);
+  e_vec[1]=sin(lon);
+  e_vec[2]=0.0;
+
+  // Normalize
+  double e_vec_len=MU_LEN_VEC3D(e_vec);
+  if (e_vec_len != 0.0) {
+    double div_len=1.0/e_vec_len;
+    MU_MULT_BY_SCALAR_VEC3D(e_vec,e_vec,div_len);
+  }
+}
+
+
+// src_coords, dst_coords must be at least of size 3
+// vec_wgts must be at least of size 4
+// This assumes that the first vector component (1) is east and the second (2) is north
+void _calc_2D_vec_weights(double *src_coords, double *dst_coords, double *vec_wgts) {
+
+  // Get src basis vectors
+  double src_n_vec[3];
+  double src_e_vec[3];
+  _calc_basis_vec(src_coords, src_n_vec, src_e_vec);
+
+
+  // Get dst basis vectors
+  double dst_n_vec[3];
+  double dst_e_vec[3];
+  _calc_basis_vec(dst_coords, dst_n_vec, dst_e_vec);
+  
+  // Calc. vector weights
+  vec_wgts[0] = src_e_vec[0]*dst_e_vec[0]+src_e_vec[1]*dst_e_vec[1]+src_e_vec[2]*dst_e_vec[2]; // src 1 to  dst 1
+  vec_wgts[1] = src_n_vec[0]*dst_e_vec[0]+src_n_vec[1]*dst_e_vec[1]+src_n_vec[2]*dst_e_vec[2]; // src 2 to  dst 1
+  vec_wgts[2] = src_e_vec[0]*dst_n_vec[0]+src_e_vec[1]*dst_n_vec[1]+src_e_vec[2]*dst_n_vec[2]; // src 1 to  dst 2
+  vec_wgts[2] = src_n_vec[0]*dst_n_vec[0]+src_n_vec[1]*dst_n_vec[1]+src_n_vec[2]*dst_n_vec[2]; // src 2 to  dst 2
+}
 
 
 
@@ -2984,6 +3041,9 @@ static void _create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *
   int pos_vec=0;
   for (auto i=0; i<num_entries; i++) {
 
+    // Get factor
+    double factor = factors[i];
+    
     // Get src id
     int src_id=iientries[pos];
 
@@ -3005,10 +3065,22 @@ static void _create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *
       Throw()<<"dst id="<<dst_id<<" not found in coordinate search.";
     }
     
-  
-    // Use coords to calculate new matrix entries
 
-    // Fill in new matrix
+    // Add new vector weights
+    if (vec_dim == 2) {
+
+      // Use coords to calculate new matrix entries based on vec_dim
+      double vec_weights[4];
+      _calc_2D_vec_weights(double *src_coords, double *dst_coords, double *vec_wgts);
+      
+      // Fill in new matrix entries
+
+      
+      
+    } else {
+      Throw() << "Fields with a vector dim of "<<vec_dim<<" are currently not supported in vector regridding.";      
+    }
+       
     
     
     // Advance position in regular matrix
