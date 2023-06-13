@@ -65,14 +65,12 @@ int i;
 int ftr       = 0;
 int totpoints = 0;
 
-int numNodes, numElems;
-int *nodeIDs;
-int *elemConn,*numElemConn;
+//int numNodes, numElems;
 //double *nodeXCoords,*nodeYCoords;
 
 // Routines
-int processPolygon(OGRGeometryH fGeom, int runtyp, double *nodeXCoords, double *nodeYCoords);
-int processMultiPolygon(OGRGeometryH hGeom, int runtyp, double *nodeXCoords, double *nodeYCoords);
+int processPolygon(OGRGeometryH fGeom, int runtyp, double *nodeXCoords, double *nodeYCoords, int *nodeIDs, int *elemIDs, int *numElemConn, int *elemConn);
+int processMultiPolygon(OGRGeometryH hGeom, int runtyp, double *nodeXCoords, double *nodeYCoords, int *nodeIDs, int *elemIDs, int *numElemConn, int *elemConn);
 
 // Get the dimension of the mesh in the SHP file
 // (This dimension is both the pdim and orig_sdim of the mesh)
@@ -88,8 +86,12 @@ void get_dim_from_SHP_file(OGRDataSourceH hDS, char *filename, int &dim) {
   return;
 }
 
-void process_shapefile(OGRDataSourceH hDS) {
+void process_shapefile(OGRDataSourceH hDS, double *&nodeCoords, 
+		       int *&nodeIDs, int *&elemIDs, int *&elemConn,
+		       int *&numElemConn, int *totNumElemConn, int *numNodes, int *numElems) {
   int nElements;
+//  int *nodeIDs;
+//  int *elemConn;//,*numElemConn;
   double *nodeXCoords,*nodeYCoords;
 
 //  OGRRegisterAll(); // register all the drivers
@@ -128,11 +130,11 @@ void process_shapefile(OGRDataSourceH hDS) {
     
     // ADD POLYGON
     if (wkbFlatten(OGR_G_GetGeometryType(hGeom)) == wkbPolygon) {
-      processPolygon(fGeom,0, NULL, NULL);
+      processPolygon(fGeom,0, NULL, NULL, NULL, NULL, NULL, NULL);
     }
     // BREAK DOWN MULTIPOLYGON AND ADD SUB-POLYGONS
     else if (wkbFlatten(OGR_G_GetGeometryType(hGeom)) == wkbMultiPolygon){
-      processMultiPolygon(hGeom,0, NULL, NULL);
+      processMultiPolygon(hGeom,0, NULL, NULL, NULL, NULL, NULL, NULL);
     }
 
     // Cleanup
@@ -142,18 +144,22 @@ void process_shapefile(OGRDataSourceH hDS) {
   // Step 3:
   // Allocate vars
   // -- numNodes - there are as many connections as nodes
-  numNodes   = totpoints; // At this point, un-trimmed. Points will repeat
+  *numNodes   = totpoints; // At this point, un-trimmed. Points will repeat
+  *totNumElemConn = totpoints;
   // -- numElems
-  numElems   = ftr; // This is an assumption!
+  *numElems   = ftr; // This is an assumption!
   // -- nodeIDs
-  nodeIDs    = (int *)malloc(numNodes*sizeof(int));
+  nodeIDs = new int[totpoints];
+//  nodeIDs    = (int *)malloc(totpoints*sizeof(int));
   // -- node[X,Y]Coords
-  nodeXCoords = (double *)malloc(numNodes*sizeof(double));
-  nodeYCoords = (double *)malloc(numNodes*sizeof(double));
+  nodeXCoords = (double *)malloc(*numNodes*sizeof(double));
+  nodeYCoords = (double *)malloc(*numNodes*sizeof(double));
   // -- elemConn
-//  elemConn    = (int *)malloc(numNodes*sizeof(int)); <- nodeIDs is already this, right?
+  elemConn    = (int *)malloc(*numNodes*sizeof(int)); //<- nodeIDs is already this, right?
+  // -- elemIDs
+  elemIDs   = (int *)malloc(*numElems*sizeof(int));
   // -- numElemConn
-  numElemConn   = (int *)malloc(numElems*sizeof(int));
+  numElemConn   = (int *)malloc(*numElems*sizeof(int));
 
   // Reset counters
   ftr       = 0; // Zero features
@@ -172,11 +178,11 @@ void process_shapefile(OGRDataSourceH hDS) {
     
     // ADD POLYGON
     if (wkbFlatten(OGR_G_GetGeometryType(hGeom)) == wkbPolygon) {
-      processPolygon(fGeom,1, nodeXCoords, nodeYCoords);
+      processPolygon(fGeom,1, nodeXCoords, nodeYCoords, nodeIDs, elemIDs, numElemConn, elemConn);
     }
     // BREAK DOWN MULTIPOLYGON AND ADD SUB-POLYGONS
     else if (wkbFlatten(OGR_G_GetGeometryType(hGeom)) == wkbMultiPolygon){
-      processMultiPolygon(hGeom,1, nodeXCoords, nodeYCoords);
+      processMultiPolygon(hGeom,1, nodeXCoords, nodeYCoords, nodeIDs, elemIDs, numElemConn, elemConn);
     }
 
     // Cleanup
@@ -186,26 +192,35 @@ void process_shapefile(OGRDataSourceH hDS) {
   printf("\n");
   printf("N Features: %d\n",ftr);
   printf("N Points:   %d\n",totpoints);
+  printf("numNodes:   %d\n",numNodes);
 
-  // Dump vals
+  nodeCoords= new double[2*totpoints];
+
+  // Pass OGR Values to Mesh arrays
   printf("Coords: \n");
+  int j = 0;
   for (i=0;i<totpoints;i++) {
     printf("%d: %.2f, %.2f\n",nodeIDs[i],nodeXCoords[i],nodeYCoords[i]);
+    nodeCoords[j]   = nodeXCoords[i];
+    nodeCoords[j+1] = nodeYCoords[i];
+    j+=2;
   }
 
+  printf("--\n");
+  printf("elemID: numElemConn\n");
+
+  for (i=0;i<ftr;i++) {
+    printf("%d: %d\n", elemIDs[i],numElemConn[i]);
+  }
+  printf("--\n");
+
   free(nodeXCoords);
-  printf("nodeXCoords freed\n");
   free(nodeYCoords);
-  printf("nodeYCoords freed\n");
-  free(nodeIDs);
-  printf("nodeIDs freed\n");
-//  free(elemConn);
-  free(numElemConn);
-  printf("numElemConn freed\n");
 
   return ;
 }
-int processPolygon(OGRGeometryH fGeom, int runtyp, double *nodeXCoords, double *nodeYCoords) {
+int processPolygon(OGRGeometryH fGeom, int runtyp, double *nodeXCoords, double *nodeYCoords,
+		   int *nodeIDs, int *elemIDs, int *numElemConn, int *elemConn) {
   // runtyp: if 0, just counting things. 
   //         if 1, populating arrays
   int points;
@@ -226,13 +241,23 @@ int processPolygon(OGRGeometryH fGeom, int runtyp, double *nodeXCoords, double *
   // If populating, (i.e. if runtyp = 1), then populate
   if ( runtyp == 1 ) {
     // Set nodeIDs & nodeCoords
-    for (i = 0; i < points-1; i++) {
-      nodeXCoords[totpoints+i] = OGR_G_GetX(fGeom, i);
-      nodeYCoords[totpoints+i] = OGR_G_GetY(fGeom, i);
-      nodeIDs[totpoints+i]     = totpoints+i;
-//      elemConn[totpoints+i]    = totpoints+i;
+//    for (i = 0; i < points-1; i++) {
+//      nodeXCoords[totpoints+i] = OGR_G_GetX(fGeom, i);
+//      nodeYCoords[totpoints+i] = OGR_G_GetY(fGeom, i);
+//      nodeIDs[totpoints+i]     = totpoints+i+1; // increment from 1, not 0
+//      elemConn[totpoints+i]    = totpoints+i+1;
+//    }    
+    // assumes OGR reads a clockwise ring. This loop reverses it.
+    int ii=0;
+    for (i = points-2; i >=0; i--) {
+      nodeXCoords[totpoints+ii] = OGR_G_GetX(fGeom, i);
+      nodeYCoords[totpoints+ii] = OGR_G_GetY(fGeom, i);
+      nodeIDs[totpoints+ii]     = totpoints+ii+1; // increment from 1, not 0
+      elemConn[totpoints+ii]    = totpoints+ii+1;
+      ii++;
     }    
-    numElemConn[ftr]         = points;
+    numElemConn[ftr]         = points-1;
+    elemIDs[ftr]             = ftr+1;
   }
   
   // Successful query
@@ -242,7 +267,8 @@ int processPolygon(OGRGeometryH fGeom, int runtyp, double *nodeXCoords, double *
   return 0;
 }
 
-int processMultiPolygon(OGRGeometryH hGeom, int runtyp, double *nodeXCoords, double *nodeYCoords) {
+int processMultiPolygon(OGRGeometryH hGeom, int runtyp, double *nodeXCoords, double *nodeYCoords, 
+			int *nodeIDs, int *elemIDs, int *numElemConn, int *elemConn) {
   // runtyp: if 0, just counting things. 
   //         if 1, populating arrays
   int j;
@@ -260,10 +286,10 @@ int processMultiPolygon(OGRGeometryH hGeom, int runtyp, double *nodeXCoords, dou
     
     // ADD POLYGON
     if (wkbFlatten(OGR_G_GetGeometryType(fGeom)) == wkbPolygon) {
-      processPolygon(mGeom,runtyp, nodeXCoords, nodeYCoords);
+      processPolygon(mGeom,runtyp, nodeXCoords, nodeYCoords, nodeIDs, elemIDs, numElemConn, elemConn);
     } // Or RECURSE INTO SUB MULTIPOLYGON
     else if(wkbFlatten(OGR_G_GetGeometryType(fGeom)) == wkbMultiPolygon) {
-      processMultiPolygon(fGeom,runtyp, nodeXCoords, nodeYCoords);
+      processMultiPolygon(fGeom,runtyp, nodeXCoords, nodeYCoords, nodeIDs, elemIDs, numElemConn, elemConn);
     }
   }
 //  printf("\n");

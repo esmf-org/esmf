@@ -1339,12 +1339,39 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
 	Throw();
       }
 
-      // Get DIM var
+      // Get DIM var - currently forced to 2D
       int dim;
       get_dim_from_SHP_file(hDS, filename, dim);
 
       // Get shapefile params
-      process_shapefile(hDS);
+      int num_nodes;
+      int num_elems=0, totNumElemConn=0;
+      int *numElemConn=NULL, *elemConn=NULL;
+      double *nodeCoords=NULL;
+      int *node_IDs=NULL;
+      int *elem_IDs=NULL;
+
+      // Processes polygons in hDS. Polygons are flattened to 2D
+      process_shapefile(hDS,nodeCoords,node_IDs,elem_IDs,elemConn,numElemConn,
+			&totNumElemConn, &num_nodes, &num_elems);
+
+      // TBD: Coord system conversion
+
+      /* At this point, we've read the shapfile and defined
+	 - num_nodes
+	 - num_elems
+	 - nodeCoords
+	 - numElemConn
+	 - node_IDs
+       */
+
+//\\      printf("totnumelemconn: %d\n", totNumElemConn);
+//\\      printf("num_nodes: %d\n", num_nodes);
+//\\      printf("num_elems: %d\n", num_elems);
+//\\      int i;
+//\\      for (i=0;i<2*num_nodes;i+=2) {
+//\\	printf("nodeCoords %.2f, %.2f\n",nodeCoords[i],nodeCoords[i+1]);
+//\\      }
 
       // Convert mesh dim from file into pdim and orig_sdim to use in mesh create
       int pdim, orig_sdim;
@@ -1356,11 +1383,56 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
 	Throw() << "Meshes can only be created with dim=2 or 3.";
       }
       
+      // Get coordsys from file
+      ESMC_CoordSys_Flag coord_sys_mesh=ESMC_COORDSYS_SPH_DEG; // Assume "degrees" for now.
+// NOTE DEFINED YET      get_coordsys_from_SHP_file(pioFileDesc, filename, dim, nodeCoord_ids, coord_sys_file);
+
+      // Create Mesh
+      ESMCI_meshcreate(out_mesh, &pdim, &orig_sdim, &coord_sys_mesh, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+					&localrc)) throw localrc;
+
+      // printf("Finished creating mesh: %d\n", localrc);
+
+      // Add nodes
+      ESMCI_meshaddnodes(out_mesh, &num_nodes, node_IDs,
+			 nodeCoords, NULL, NULL,
+			 &coord_sys_mesh, &orig_sdim,
+			 &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+					&localrc)) throw localrc;
+      
+      // printf("Finished adding nodes: %d\n", localrc);
+
+      // Add elements
+      // !!! None of the elements have shared edges.
+      int areaPresent = 0;
+      int centerCoordsPresent=0;
+      ESMCI_meshaddelements(out_mesh,
+			    &num_elems, elem_IDs, numElemConn, //elementType, <- using numElemConn in place of elementType assumes 2D!!
+			    NULL, // No mask
+			    &areaPresent, NULL, // No areas
+			    &centerCoordsPresent, NULL, // No center coords
+			    &totNumElemConn, elemConn, 
+			    &coord_sys_mesh, &orig_sdim, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+					&localrc)) throw localrc;
+
+      // printf("Finished adding elements: %d\n", localrc);
+
+      // Cleanup
       OGR_DS_Destroy( hDS );
-    }
-    
-    localrc = 0;
-    printf("rc: %d  localrc: %d\n", rc, localrc);
+
+      delete [] elem_IDs;
+      delete [] elemConn;
+      delete [] node_IDs;
+      delete [] numElemConn;
+      delete [] nodeCoords;
+
+    } else {
+      // Set return code
+//      if (rc!=NULL) *rc = ESMF_SUCCESS;
+    } 
 
     // Return an error, because this isn't implemented yet
     // TODO: GET RID OF THE FOLLOWING LINE WHEN THIS SUBROUTINE IS CREATING A VALID MESH

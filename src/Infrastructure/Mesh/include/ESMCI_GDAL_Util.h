@@ -53,7 +53,9 @@ void open_();
 
 // shapefile routines
 void get_dim_from_SHP_file(OGRDataSourceH hDS, char *filename, int &dim);
-void process_shapefile(OGRDataSourceH hDS);
+void process_shapefile(OGRDataSourceH hDS, double *&nodeCoords, int *&nodeIDs, int *&elemIDs, 
+		       int *&elemConn, int *&numElemConn,
+		       int *totNumElemConn, int *numNodes, int *numElems);
 void ESMCI_mesh_create_from_SHP_file();
 
 #endif // ifdef ESMF_GDAL

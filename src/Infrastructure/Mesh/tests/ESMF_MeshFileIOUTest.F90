@@ -4583,8 +4583,8 @@ subroutine  check_mesh_from_sph_3x3_UG_file(correct, rc)
    if (rc /= ESMF_SUCCESS) return
 
    ! DEBUG OUTPUT
-   !call ESMF_MeshWrite(mesh,"mesh_3x3_ugrid",rc=rc)
-   !if (rc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+   call ESMF_MeshWrite(mesh,"mesh_3x3_ugrid",rc=rc)
+   if (rc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
    ! Init correct to true before looking for problems
    correct=.true.
@@ -6913,19 +6913,18 @@ subroutine   test_create_mesh_from_SH_file(correct, rc)
   if (rc /= ESMF_SUCCESS) return
 
   ! Create Mesh from shape file
-  mesh=ESMF_MeshCreate("data/test_shape.shp", &
+  mesh=ESMF_MeshCreate("data/cb_2018_us_county_500k.shp", &
        fileformat=ESMF_FILEFORMAT_SHAPEFILE, &
        rc=rc)
   if (rc /= ESMF_SUCCESS) return
 
 
   !! Write mesh for debugging
-  ! call ESMF_MeshWrite(mesh,"test_mesh",rc=rc)
-  ! if (rc /= ESMF_SUCCESS) return
+   call ESMF_MeshWrite(mesh,"cb_2018_us_county_500k",rc=rc)
+   if (rc /= ESMF_SUCCESS) return
 
   ! Get rid of Mesh
-  ! TODO: Uncomment when above is working 
-  !call ESMF_MeshDestroy(mesh, rc=rc)
+  call ESMF_MeshDestroy(mesh, rc=rc)
   if (rc /= ESMF_SUCCESS) return
 
    ! Return success
