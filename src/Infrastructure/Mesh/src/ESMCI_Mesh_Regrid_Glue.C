@@ -2954,7 +2954,7 @@ static void _create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *
   }
 
   // Make searchable
-  srcCoordFromId.make_searchable();
+  srcCoordFromId.make_searchable(num_entries, iientries, 0);
   
   
   // Set up coordinate query for destination
@@ -2991,14 +2991,19 @@ static void _create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *
     int dst_id=iientries[pos+1];
 
     // Get src coords
+    double src_coords[3];
+    if (!srcCoordFromId.search(src_id, src_coords)) {
+      Throw()<<"src id="<<src_id<<" not found in coordinate search.";
+    }
 
+    printf("id=%d src_coords=%f %f %f\n",src_id,src_coords[0],src_coords[1],src_coords[2]);
+
+    
     // Get dst coords, complain if not there
     double dst_coords[3];
     if (!dstCoordFromId.search(dst_id, dst_coords)) {
       Throw()<<"dst id="<<dst_id<<" not found in coordinate search.";
     }
-
-    printf("id=%d dst_coords=%f %f %f\n",dst_id,dst_coords[0],dst_coords[1],dst_coords[2]);
     
   
     // Use coords to calculate new matrix entries
