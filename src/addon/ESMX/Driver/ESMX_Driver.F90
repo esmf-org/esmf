@@ -25,6 +25,8 @@ module ESMX_Driver
     character(ESMF_MAXSTR)                  :: name = "__uninitialized__"
   end type
 
+  include "compCnt.inc"
+
   !-----------------------------------------------------------------------------
   contains
   !-----------------------------------------------------------------------------
@@ -149,7 +151,7 @@ module ESMX_Driver
     componentCount = size(componentList)
 
     ! Setup CompDef structure
-    allocate(CompDef(componentCount))
+    allocate(CompDef(componentDefCount))
     include "compDef.inc"
 
     ! Determine information for each component and add to the driver
@@ -223,7 +225,7 @@ module ESMX_Driver
 
       ! Search for an entry for this component model inside CompDef
       inCompDef = .false.
-      do j=1, componentCount
+      do j=1, componentDefCount
         if (trim(CompDef(j)%name)=="__uninitialized__") exit
         ! case insensitive string comparison
         string1 = ESMF_UtilStringLowerCase(trim(CompDef(j)%name), rc=rc)
