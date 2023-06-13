@@ -135,6 +135,12 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version -c
 ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} --version -c
 
 ############################################################
+# Special debug flags
+#
+ESMF_F90OPTFLAG_G       += -Ktrap=fp
+ESMF_CXXOPTFLAG_G       += -Ktrap=fp
+
+############################################################
 # Currently no support the Fortran2018 assumed type feature
 #
 ESMF_F90COMPILECPPFLAGS += -DESMF_NO_F2018ASSUMEDTYPE

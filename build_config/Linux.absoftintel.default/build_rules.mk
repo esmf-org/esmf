@@ -110,7 +110,7 @@ ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -V -v
 ############################################################
 # Special debug flags
 #
-ESMF_CXXOPTFLAG_G       += -traceback
+ESMF_CXXOPTFLAG_G       += -traceback -fp-trap=common
 
 ############################################################
 # How to specify module directories
