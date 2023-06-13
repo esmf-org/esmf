@@ -35,6 +35,10 @@
 #include "moab/FileOptions.hpp"
 #include "AffineXform.hpp"
 
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
+
 static inline int streq( const char* a, const char* b )
 {
     return strcmp( a, b ) == 0;

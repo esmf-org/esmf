@@ -48,6 +48,7 @@ LIBBASE   = libesmf
 LOCDIR    = src/Infrastructure/Mesh/src/Moab
 
 ESMF_CXXCOMPILECPPFLAGS += \
+			   -std=gnu++11 \
                            -I$(ESMF_DIR)/$(LOCDIR)/DiscreteGeometry \
                            -I$(ESMF_DIR)/$(LOCDIR)/IntxMesh \
                            -I$(ESMF_DIR)/$(LOCDIR)/io \

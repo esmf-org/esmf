@@ -32,7 +32,7 @@
 #include <sstream>
 using namespace std;
 
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
 #include <unistd.h>
 #include <limits.h>
 #else

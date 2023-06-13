@@ -213,3 +213,43 @@ ESMF_SL_LIBLIBS       += $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS) -lgfortran
 # Turn off trace lib building. It is currently not supported on Cygwin
 #
 ESMF_TRACE_LIB_BUILD = OFF
+
+############################################################
+# Windows does not have support for POSIX IPC (memory mapped files)
+#
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
+
+############################################################
+# Windows does not have support for POSIX dynamic linking
+#
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_DLFCN
+
+############################################################
+# Windows does not have support for "gethostid()"
+#
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_GETHOSTID
+
+############################################################
+# Windows does not have support for signals
+#
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SIGNALS
+
+############################################################
+# Windows does not have support for system(3c) call
+#
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SYSTEMCALL
+
+############################################################
+# Windows does not have support for the times system call
+#
+ESMF_CXXCOMPILECPPFLAGS += -DNO_TIMES
+
+############################################################
+# Windows does not have support for Pthreads
+#
+ESMF_PTHREADS := OFF
+
+############################################################
+# Windows does not have support for sockets
+#
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SOCKETS

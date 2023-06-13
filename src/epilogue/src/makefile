@@ -22,3 +22,4 @@ include ${ESMF_DIR}/makefile
 
 DIRS	  = 
 
+ESMF_CXXCOMPILECPPFLAGS += -std=gnu++11

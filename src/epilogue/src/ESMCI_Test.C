@@ -24,7 +24,7 @@
 //
 // insert any higher level, 3rd party or system includes here
 #include <stdio.h>
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
 #include <sys/time.h>
 #else
 #include <windows.h>
@@ -171,7 +171,7 @@ int TestEnd(
   }
 
   // Calculate & print test elapsed time.
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
   gettimeofday(&end_time, NULL);
   elapsed_time = (end_time.tv_sec - start_time.tv_sec) ;
   elapsed_time += (end_time.tv_usec - start_time.tv_usec) / 1000.0;   // us to ms
@@ -472,7 +472,7 @@ int TestStart(
   ESMC_LogSet(1);
 
   // Get test start time
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
   gettimeofday(&start_time, NULL);
 #endif
 

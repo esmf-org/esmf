@@ -37,7 +37,7 @@
 #include <iostream>
 #include <string>
 
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
 #include <unistd.h>
 #else
 #include <Winsock.h>
@@ -135,7 +135,7 @@ string  ESMCI_WebServForkClient::submitJob(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
 printf("ESMCI_WebServForkClient::submitJob()\n");
 printf("Client ID: %d\n", clientId);
 printf("RegistrarHost: %s\n", registrarHost.c_str());
@@ -206,7 +206,7 @@ int  ESMCI_WebServForkClient::cancelJob(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
         int     pid = extractPid(jobId);
         int     rc = 0;
 
