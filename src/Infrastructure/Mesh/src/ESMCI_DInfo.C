@@ -38,6 +38,9 @@
 #include "Mesh/include/Legacy/ESMCI_ParEnv.h"
 #include <Mesh/include/Legacy/ESMCI_Exception.h>
 
+
+#if 0
+
 #include <Mesh/include/ESMCI_DInfo.h>
 
 //-----------------------------------------------------------------------------
@@ -49,6 +52,8 @@
 
 using namespace ESMCI;
 using namespace std;
+
+
 
 // Set of templated calls to support different id types in allreduce
 template<class IDTYPE>
@@ -477,5 +482,5 @@ void DInfo<IDTYPE, INFOTYPE> :: print_searchable() {
 // Explicitly Instantiate some versions of this class for testing, etc.
 template class DInfo<int, double>;
 
-
+#endif
 

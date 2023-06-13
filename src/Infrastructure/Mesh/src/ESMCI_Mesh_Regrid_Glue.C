@@ -40,6 +40,8 @@
 #include "Mesh/include/ESMCI_Mesh_Regrid_Glue.h"
 #include "Mesh/include/Legacy/ESMCI_MeshMerge.h"
 #include "Mesh/include/ESMCI_Mesh_GToM_Glue.h"
+#include "Mesh/include/ESMCI_DInfo.h"
+
 
 #include <iostream>
 #include <vector>
@@ -2558,8 +2560,10 @@ class CoordFromId {
     int id;
     Coord coord;
 
+    // Constructors
     CoordFromIdEntry(int _id, double x, double y, double z): id(_id), coord(x,y,z) {}
-
+    CoordFromIdEntry(int _id, Coord _coord): id(_id), coord(_coord) {}
+    
 
     // Less 
     bool operator<(const CoordFromIdEntry &rhs) const {
@@ -2612,6 +2616,13 @@ public:
   // Make searchable
   void make_searchable();
 
+  // This method makes the structure searchable for a particular set
+  // of possibly non-local ids. In this case, for convenience, the ids
+  // are passed in in the form of the weight matrix index list. sord
+  // give whether the ids from the source (sord=0) or destination (sord=1) should
+  // be used.
+  void make_searchable(int num_entries, int *iientries, int sord);
+  
   // Search
   // Returns true if id has been found. In that case fills coords_out with coords of
   // point for that id, coords_out must be of size >=3.
@@ -2810,10 +2821,109 @@ void CoordFromId::add(PointList *pl) {
 
 }
 
-void CoordFromId::make_searchable() {
+ void CoordFromId::make_searchable() {
 
   // If already done, then leave
   if (is_searchable) return;
+  
+  // Sort to make quickly searchable
+  std::sort(searchable.begin(),searchable.end());
+  
+  // Mark as searchable
+  is_searchable=true;
+}
+
+
+// This method makes the structure searchable for a particular set
+// of possibly non-local ids. In this case, for convenience, the ids
+// are passed in in the form of the weight matrix index list. sord
+// give whether the ids from the source (sord=0) or destination (sord=1) should
+// be used.
+void CoordFromId::make_searchable(int num_entries, int *iientries, int sord) {
+
+  // If already done, then leave
+  if (is_searchable) return;
+
+  // Error check sord
+  if ((sord < 0) || (sord > 1)) {
+    Throw() << "Value= "<<sord<<" is an unsupported value in source or destination indicator.";
+  }
+
+  
+  //// Get unique set of ids that will be searched for on this PET}
+
+  // Declare id storage
+  std::vector<int> search_ids;
+
+  // Reserve a reasonable size
+  search_ids.reserve(num_entries);
+  
+  // Get list of ids on this PET
+  int pos=sord;
+  for (int i=0; i< num_entries; i++) {
+    search_ids.push_back(iientries[pos]);
+    pos += 2; // Advance to next pair of entries
+  }
+
+  // Sort to allow unique to work
+  std::sort(search_ids.begin(),search_ids.end());
+
+  // Unique ids to make search and comm more efficient
+  search_ids.erase(std::unique(search_ids.begin(), search_ids.end()), search_ids.end());
+
+
+  //// Set up class for distributed search
+
+  // Allocate array where the results will go
+  Coord *results = new Coord[search_ids.size()];    
+    
+  // Declare distributed search structure
+  {
+    DInfo<int,Coord> di_search;
+    
+    // Reserve space
+    di_search.reserve(searchable.size());
+    
+    // Add search items
+    for (CoordFromIdEntry cfie : searchable) {
+      di_search.add(cfie.id,cfie.coord);
+    }
+    
+    // Commit to make searchable
+    di_search.commit();
+    
+
+    //// Do distributed search on local set of ids
+    
+    // Declare not found info value
+    Coord bad_value(0.0,0.0,0.0);
+    
+    // Do search
+    // (Because of true will return error if id not found)
+    if (search_ids.empty()) {
+      di_search.search(0, NULL, true, bad_value, results);
+    } else {
+      di_search.search(search_ids.size(), search_ids.data(), true, bad_value, results);
+    }
+    
+  } // End of block to get rid of search struct
+  
+  
+  //// Use distributed results to reconstruct search vector
+
+  // Empty current search vector
+  searchable.clear();
+  
+  // Add new distributed objects to search vector
+  for (auto i=0; i<search_ids.size(); i++) {
+    searchable.push_back(CoordFromIdEntry(search_ids[i],results[i]));
+  }
+
+  // Now that we don't need them anymore, get rid of results
+  delete [] results;
+
+  
+  //// Make new searchable vector searchable
   
   // Sort to make quickly searchable
   std::sort(searchable.begin(),searchable.end());
@@ -2833,6 +2943,20 @@ static void _create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *
                                                           Mesh *dst_mesh, PointList *dst_pl,
                                                           int &num_entries_vec, int *&iientries_vec, double *&factors_vec) {
 
+  // Set up coordinate query for source
+  CoordFromId srcCoordFromId;
+  if (src_pl != NULL) {
+    srcCoordFromId.add(src_pl);
+  } else if (src_mesh != NULL) {
+    srcCoordFromId.add(src_mesh, MeshObj::NODE); // TODO: Make this ELEMENT for conservative
+  } else {
+    Throw() <<"No available geometry object to get coords from.";
+  }
+
+  // Make searchable
+  srcCoordFromId.make_searchable();
+  
+  
   // Set up coordinate query for destination
   CoordFromId dstCoordFromId;
   if (dst_pl != NULL) {
@@ -2874,6 +2998,8 @@ static void _create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *
       Throw()<<"dst id="<<dst_id<<" not found in coordinate search.";
     }
 
+    printf("id=%d dst_coords=%f %f %f\n",dst_id,dst_coords[0],dst_coords[1],dst_coords[2]);
+    
   
     // Use coords to calculate new matrix entries
 
