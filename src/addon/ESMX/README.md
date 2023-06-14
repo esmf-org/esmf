@@ -19,7 +19,7 @@ ESMX unifies, provides, and maintains those parts of NUOPC-based modeling system
 
 One of the main pieces provided by ESMX is the *unified driver executable*. A good starting point to explore this feature is the [ESMX_AtmOcnProto](https://github.com/esmf-org/nuopc-app-prototypes/tree/develop/ESMX_AtmOcnProto) example under the NUOPC prototype repository.
 
-The name of the unified driver executable created by ESMX is all lower case `esmx`. This name will be used for the remainder of this section to refer to the unfied driver executable.
+The name of the unified driver executable created by ESMX is all lower case `esmx_app`. This name will be used for the remainder of this section to refer to the unfied driver executable.
 
 ### ESMX\_Builder
 
@@ -80,7 +80,7 @@ where:
   --verbose or -v          build with verbose output
 ```
 
-This script installs `esmx` into INSTALL\_PREFIX/bin.
+This script installs `esmx_app` into INSTALL\_PREFIX/bin.
 
 ### ESMX\_BUILD\_FILE (e.g. esmxBuild.yaml)
 
@@ -106,9 +106,9 @@ The ESMX build system depends on a build file, for example `esmxBuild.yaml`. Thi
       TestTawasLumo:
         dir: path/to/test/data
 
-In this example two components are built into `esmx` explicitly. (Read about dynamic loading of components from shared objects at run-time later.)
+In this example two components are built into `esmx_app` explicitly. (Read about dynamic loading of components from shared objects at run-time later.)
 
-Each component is given a name, here `TaWaS` and `Lumo`, respectively. Components will be referenced by this *component-name* in the run-time configuration (esmxRun.config) discussed below. Component names are case-sensitive.
+Each component is given a name, here `TaWaS` and `Lumo`, respectively. Components will be referenced by this *component-name* in the run-time configuration (esmxRun.yaml) discussed below. Component names are case-sensitive.
 
 Build options for ESMX are defined using [YAML](https://yaml.org/) syntax.
 
@@ -186,58 +186,79 @@ The ESMX build system searches for a build\_script in the source\_dir and builds
 **None**<br>
 The ESMX build system will not build the component. The ESMX build system searches for the CMake configuration file, fortran module, and libraries in the install\_prefix directory.
 
-### esmxRun.config
+### esmxRun.yaml
 
-The `esmx` executable is launched the same way any other ESMF or NUOPC application is launched. Typically this means starting it through the system specific MPI launch facility (mpirun, mpiexec, srun, ...).
+The `esmx_app` executable is launched the same way any other ESMF or NUOPC application is launched. Typically this means starting it through the system specific MPI launch facility (mpirun, mpiexec, srun, ...).
 
-At startup, the `esmx` executable expects to find a file named `esmxRun.config` in the run directory from which it is launched. This run-time configuration file specifies a few global ESMF and ESMX level settings, the list of components accessed during this run, details about the components, and finally the run sequence.
+At startup, the `esmx_app` executable expects to find a file named `esmxRun.yaml` in the run directory from which it is launched. This is the ESMX run-time configuration file in [YAML](https://yaml.org/) format. It specifies a few global ESMF and ESMX level settings, the list of components accessed during the run, details about the components, and finally the run sequence.
 
-    logKindFlag:            ESMF_LOGKIND_MULTI
-    globalResourceControl:  .true.
+    ESMX:
 
-    ESMX_log_flush:        .true.
-    ESMX_field_dictionary: ./fd.yaml
+      App:
+        globalResourceControl:  true
+        logKindFlag:            ESMF_LOGKIND_Multi
+        logAppendFlag:          false
+        logFlush:               true
+        startTime:              2012-10-24T18:00:00
+        stopTime:               2012-10-24T19:00:00
 
-    ESMX_component_list:   ATM OCN
-    ESMX_attributes::
-      Verbosity = high
-    ::
+      Driver:
+        componentList:          [ATM, OCN]
+        attributes:
+          Verbosity: low
 
-    ATM_model:            tawas
-    ATM_omp_num_threads:  4
-    ATM_attributes::
-      Verbosity = high
-    ::
+        runSequence: |
+          @900
+            ATM -> OCN
+            OCN -> ATM
+            ATM
+            OCN
+          @
 
-    OCN_model:            lumo
-    OCN_petlist:          1 3
-    OCN_attributes::
-      Verbosity = high
-    ::
+    ATM:
+      model:            Tawas     # model value is case insensitive to match Fortran
+      ompNumThreads:    4
+      attributes:
+        Verbosity:  low
+      petList:          [3, [2-0]]  # petList is list of scalars and lists.
+                                    # each list again can be of scalars and lists
+                                    # recursively.
 
-    startTime:  2012-10-24T18:00:00
-    stopTime:   2012-10-24T19:00:00
+    OCN:
+      model:            lumo
+      petList:          [0-1, 3]
+      attributes:
+        Verbosity:  low
 
-    runSeq::
-      @900
-        ATM -> OCN
-        OCN -> ATM
-        ATM
-        OCN
-      @
-    ::
+The highest level of `esmxRun.yaml` is expected to define the `ESMX` key, as well as a key for every component that is listed in the `componentList` defined under the `Driver` level. The `ESMX` key is associated with a map containing the `App` and `Driver` keys. The `App` key must be present if `esmfRun.yaml` is read by the `esmx_app` executable, but is optional, and will be ignored in case `esmfRun.yaml` is read by the `esmx_driver`.
 
-The first two fields, `logKindFlag` and `globalResourceControl`, are examples of ESMF level configuration options. They are ingested by the [ESMF_Initialize()](https://earthsystemmodeling.org/docs/nightly/develop/ESMF_refdoc/node4.html#SECTION04024100000000000000) method (called by `esmx`) as documented in the [ESMF Reference Manual](https://earthsystemmodeling.org/docs/nightly/develop/ESMF_refdoc/ESMF_refdoc.html).
+The map under `ESMX` / `App` must contain the following **non-optional** keys:
+* `startTime`: a string setting the application start time.
+* `stopTime`: a string setting the application stop time.
 
-Fields starting with `ESMX_` are defined by the ESMX unified driver executable. Most important on this level is `ESMX_component_list`. This field defines the generic components participating in the execution. There is no restriction what labels can be used for the generic components, however, `ATM` and `OCN` are typical labels for "atmosphere" and "ocean", respectively. Note that the run sequence under `runSeq`, toward the end of the file, is defined in terms of the generic component labels introduced by `ESMX_component_list`.
+The map under `ESMX` / `App` may contain the following **optional** keys:
+* `globalResourceControl`: a boolean to enable/disable global resource control used by ESMF managed threading. See the ESMF reference manual for a discussion under the ESMF_Initialize() call.
+* `logKindFlag`: a string constant setting the ESMF logging kind. Possible values are `ESMF_LOGKIND_None`, `ESMF_LOGKIND_Multi`, and `ESMF_LOGKIND_Multi_On_Error`. See the ESMF reference manual for a discussion under the ESMF_Initialize() call.
+* `logAppendFlag`: a boolean to enable/disable the append behavior when writing ESMF log files. See the ESMF reference manual for a discussion under the ESMF_Initialize() call.
+* `logFlush`: a boolean to enable/disable flushing for each ESMF log write operation.
 
-Each generic component label must be associated with an actual component model through the `XXX_model` field, where `XXX` is replaced by the actual generic component label, e.g. `ATM`, `OCN`, etc. The association is made by specifying the *component-name* used in the `esmxBuild.yaml` file discussed earlier. The options in the example are `tawas` and `lumo`.
+The map under `ESMX` / `Driver` must contain the following **non-optional** key:
+* `componentList`: a list of component labels. Each label must be associated with a top level key in the `esmxRun.yaml` file.
 
-Finally the `startTime` and `stopTime` fields set the start and stop time of the run, respectively. The `runSeq` field defines the run sequence. The *default* time step of the outer run sequence loop, i.e. if using the `@*` syntax, is set to `stopTime - startTime`.
+The map under `ESMX` / `Driver` may contain the following **optional** keys:
+* `attributes`: a map of key value pairs, each defining a driver attribute.
+* `runSequence`: a block literal string defining the run sequence.
+
+The map under each component label must contain the following **non-optional** key:
+* `model`: a string that associates the component label with the *component-name* used in the `esmxBuild.yaml` file discussed earlier.
+
+The map under each component lable may contain the following **optional** keys:
+* `petList`: list of PETs on which the component executes.
+* `attributes`: a map of key value pairs, each defining a component attribute.
 
 ### Dynamically loading components from shared objects at run-time
 
-There are two options recognized when specifying the value of the `XXX_model` field for a component in the `esmxRun.config` file:
+There are two options recognized when specifying the value of the `model` field for a component in the `esmxRun.yaml` file:
 - First, if the value specified is recognized as a *component-name* provided by any of the components built into `esmx` during build-time, as specified by `esmxBuild.yaml`, the respective component is accessed via its Fortran module.
 - Second, if the value does not match a build-time dependency, it is assumed to correspond to a shared object. In that case the attempt is made to load the specified shared object at run-time, and to associate with the generic component label.
 
@@ -269,14 +290,14 @@ The applcation can then be built as typically via cmake commands, only requiring
 	    cmake -S. -Bbuild -DESMF_ESMXDIR=$(ESMF_ESMXDIR)
 	    cmake --build ./build
 
-### esmxBuild.yaml and esmxRun.config
+### esmxBuild.yaml and esmxRun.yaml
 
 The `esmx_driver` target defined by the `add_subdirectory(${ESMF_ESMXDIR}/Driver ./ESMX_Driver)` has a build-time dependency on the `esmxBuild.yaml` file already discussed under the [unfied driver executable section](#esmxbuildyaml). The identical file can be used when working on the `ESMX_Driver` level.
 
-The run-time configuration needed by `ESMX_Driver` can either be supplied by the user application, or alternatively default to `esmxRun.config`. The following rules apply:
-- `ESMX_Driver`, at the beginning of its `SetModelServices()` method checks whether the parent level has provided an `ESMF_Config` object by setting the `config` member on the `ESMX_Driver` component. If so, the provided `config` object is used. Otherwise `ESMX_Driver` itself creates `config` from file `esmxRun.config`.
+The run-time configuration needed by `ESMX_Driver` can either be supplied by the user application, or alternatively default to `esmxRun.yaml`. The following rules apply:
+- `ESMX_Driver`, at the beginning of its `SetModelServices()` method checks whether the parent level has provided an `ESMF_Config` object by setting the `config` member on the `ESMX_Driver` component. If so, the provided `config` object is used. Otherwise `ESMX_Driver` itself creates `config` from file `esmxRun.yaml`.
 - For the case where the `config` object was provided by the parent layer, `ESMX_Driver` does not ingest attributes from `config`. Instead the assumption is made that the parent layer sets the desired attributes on `ESMX_Driver`.
-- For the case where the `config` object was loaded from `esmxRun.config` by `ESMX_Driver`, the driver ingests attributes from `config`, potentially overriding parent level settings.
+- For the case where the `config` object was loaded from `esmxRun.yaml` by `ESMX_Driver`, the driver ingests attributes from `config`, potentially overriding parent level settings.
 - The `ESMX_component_list`, child component, and run sequence information is ingested from `config` as described under the [unfied driver executable section](#esmxrunconfig).
 - If the parent level passes an `ESMF_Clock` object to `ESMX_Driver` during initialize, the driver uses it instead of looking for `startTime` and `stopTime` in `config`.
 - For the case where a clock is provided by the parent layer, its `timeStep` is used as the *default* time step of the outer run sequence loop when using the `@*` syntax. If a specific time step is set in the run sequence with `@DT`, then `DT` must be a divisor of the `timeStep` provided by the parent clock.
