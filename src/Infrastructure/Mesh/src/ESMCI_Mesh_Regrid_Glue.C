@@ -472,9 +472,11 @@ void ESMCI_regrid_create(
     // Get the size of the sparse matrix and allocate space for it
     std::pair<UInt,UInt> iisize = wts->count_matrix_entries();
     int num_entries = iisize.first;
+    int iientries_size=2;
     int *iientries = new int[2*iisize.first];
     double *factors = new double[iisize.first];
 
+    
 
     // Translate weights to sparse matrix representation
     if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) {
@@ -569,8 +571,6 @@ void ESMCI_regrid_create(
                                                     dstmesh, dstpointlist,
                                                     num_entries_vec, iientries_vec, factors_vec);
 
-      // DON'T DO THIS YET
-#if 0      
       // Get rid of old matrix
       delete [] factors;
       delete [] iientries;
@@ -580,7 +580,7 @@ void ESMCI_regrid_create(
       num_entries=num_entries_vec;
       iientries=iientries_vec;
       factors=factors_vec;
-#endif      
+      iientries_size=4;
     }
 
 
@@ -635,7 +635,7 @@ void ESMCI_regrid_create(
       ESMC_Logical ignoreUnmatched = ESMF_FALSE;
 
       // Wrap factorIndexList in InterArray
-      int larg[2] = {2, num_entries};
+      int larg[2] = {iientries_size, num_entries};
       ESMCI::InterArray<int> ii(iientries, 2, larg);
       ESMCI::InterArray<int> *iiptr = &ii;
       
@@ -3033,22 +3033,24 @@ static void _create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *
   
   // Allocate new vector matrix
   num_entries_vec=vec_factor*num_entries;
-  iientries_vec = new int[2*num_entries_vec]; 
+  iientries_vec = new int[4*num_entries_vec]; 
   factors_vec= new double[num_entries_vec];
 
   // Loop calculating vector entries from regular ones
-  int pos=0;
-  int pos_vec=0;
+  int factor_pos=0;
+  int iientries_pos=0;
+  int factor_vec_pos=0;
+  int iientries_vec_pos=0;
   for (auto i=0; i<num_entries; i++) {
 
     // Get factor
-    double factor = factors[i];
+    double factor = factors[factor_pos];
     
     // Get src id
-    int src_id=iientries[pos];
+    int src_id=iientries[iientries_pos];
 
     // Get dst id
-    int dst_id=iientries[pos+1];
+    int dst_id=iientries[iientries_pos+1];
 
     // Get src coords
     double src_coords[3];
@@ -3067,27 +3069,48 @@ static void _create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *
     
 
     // Add new vector weights
-    if (vec_dim == 2) {
+    if (num_vec_dims == 2) {
 
       // Use coords to calculate new matrix entries based on vec_dim
-      double vec_weights[4];
-      _calc_2D_vec_weights(double *src_coords, double *dst_coords, double *vec_wgts);
+      double vec_wgts[4];
+      _calc_2D_vec_weights(src_coords, dst_coords, vec_wgts);
       
       // Fill in new matrix entries
+      iientries_vec[iientries_vec_pos] = src_id;
+      iientries_vec[iientries_vec_pos+1] = 1;
+      iientries_vec[iientries_vec_pos+2] = dst_id;
+      iientries_vec[iientries_vec_pos+3] = 1;
+      factors_vec[factor_vec_pos]=factor*vec_wgts[0];
 
-      
+      iientries_vec[iientries_vec_pos+4] = src_id;
+      iientries_vec[iientries_vec_pos+5] = 2;
+      iientries_vec[iientries_vec_pos+6] = dst_id;
+      iientries_vec[iientries_vec_pos+7] = 1;
+      factors_vec[factor_vec_pos+1]=factor*vec_wgts[1];
+
+      iientries_vec[iientries_vec_pos+8] = src_id;
+      iientries_vec[iientries_vec_pos+9] = 1;
+      iientries_vec[iientries_vec_pos+10] = dst_id;
+      iientries_vec[iientries_vec_pos+11] = 2;
+      factors_vec[factor_vec_pos+2]=factor*vec_wgts[2];
+
+      iientries_vec[iientries_vec_pos+12] = src_id;
+      iientries_vec[iientries_vec_pos+13] = 2;
+      iientries_vec[iientries_vec_pos+14] = dst_id;
+      iientries_vec[iientries_vec_pos+15] = 2;
+      factors_vec[factor_vec_pos+3]=factor*vec_wgts[3];      
       
     } else {
-      Throw() << "Fields with a vector dim of "<<vec_dim<<" are currently not supported in vector regridding.";      
+      Throw() << "Fields with a vector dim of "<<num_vec_dims<<" are currently not supported in vector regridding.";      
     }
        
-    
-    
-    // Advance position in regular matrix
-    pos += 2;
-    
-    // Advance position in vector matrix
-    pos_vec += vec_factor;
+    // Advance position in regular matrix    
+    factor_pos += 1;
+    iientries_pos += 2;
+
+    // Advance position in new vector matrix    
+    factor_vec_pos += vec_factor;
+    iientries_vec_pos += 4*vec_factor;
   }
 
   
