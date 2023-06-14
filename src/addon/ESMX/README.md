@@ -4,7 +4,7 @@ ESMX is the **E**arth **S**ystem **M**odel e**X**ecutable layer.
 
 The ESMX layer is built on top of the ESMF and NUOPC APIs.
 
-The idea behind ESMX is to make it as simple as possible for a user to build, run, and test NUOPC based systems. The approach implemented is the same whether applied to a single component, or a fully coupled system of NUOPC-compliant components. ESMX user interfaces are implemented through configuration files.
+The idea behind ESMX is to make it as simple as possible for a user to build, run, and test NUOPC based systems. The approach implemented is the same whether applied to a single component, or a fully coupled system of NUOPC-compliant components. ESMX user interfaces are implemented through [YAML](https://yaml.org/) based configuration files.
 
 Major objectives of ESMX are:
  - **Simplification** of standing up new NUOPC-based systems.
@@ -21,14 +21,14 @@ One of the main pieces provided by ESMX is the *unified driver executable*. A go
 
 The name of the unified driver executable created by ESMX is all lower case `esmx_app`. This name will be used for the remainder of this section to refer to the unfied driver executable.
 
-### ESMX\_Builder
+### ESMX_Builder
 
-The ESMX\_Builder is a shell script included with ESMF installations that facilitates building ESMX. The script is installed into the ESMF binary directory within an ESMF installation. For more information on installing ESMF see the [ESMF User's Guide](https://earthsystemmodeling.org/doc/).
+The ESMX_Builder is a shell script included with ESMF installations that facilitates building ESMX. The script is installed into the ESMF binary directory within an ESMF installation. For more information on installing ESMF see the [ESMF User's Guide](https://earthsystemmodeling.org/doc/).
 
-If the ESMF binary directory is included in the PATH environment variable then ESMX\_Builder can be called from any directory as follows:
+If the ESMF binary directory is included in the PATH environment variable then ESMX_Builder can be called from any directory as follows:
 
 ```
-ESMX_Builder [OPTIONS]... BUILD_FILE
+ESMX_Builder [OPTIONS]... ESMX_BUILD_FILE
 
 options:
   [--esmx-dir=ESMF_ESMXDIR]
@@ -46,7 +46,7 @@ options:
   [--verbose] or [-v]
 
 where:
-  BUILD_FILE               ESMX build configuration file
+  ESMX_BUILD_FILE          ESMX build configuration file
                            (default: esmxBuild.yaml)
 
   --esmx-dir=ESMF_ESMXDIR  ESMX source directory
@@ -80,187 +80,208 @@ where:
   --verbose or -v          build with verbose output
 ```
 
-This script installs `esmx_app` into INSTALL\_PREFIX/bin.
+This script installs `esmx_app` into INSTALL_PREFIX/bin.
 
-### ESMX\_BUILD\_FILE (e.g. esmxBuild.yaml)
+### ESMX_BUILD_FILE (default: esmxBuild.yaml)
 
 The ESMX build system depends on a build file, for example `esmxBuild.yaml`. This is a [YAML](https://yaml.org/) file with a very simple format. An example is given here:
 
-    application:
+```
+application:
 
-      disable_comps: ESMX_Data
-      cmake_build_args: -DOPTION=VALUE
-      test: on
+  disable_comps: ESMX_Data
+  cmake_build_args: -DOPTION=VALUE
+  test: on
 
-    components:
+components:
 
-      TaWaS:
-        cmake_config: TaWaS/tawas.cmake
-        fort_module:  tawas.mod
+  TaWaS:
+    cmake_config: TaWaS/tawas.cmake
+    fort_module:  tawas.mod
 
-      Lumo:
-        cmake_config: Lumo/lumo.cmake
+  Lumo:
+    cmake_config: Lumo/lumo.cmake
 
-    tests:
+tests:
 
-      TestTawasLumo:
-        dir: path/to/test/data
+  TestTawasLumo:
+    dir: path/to/test/data
+```
 
-In this example two components are built into `esmx_app` explicitly. (Read about dynamic loading of components from shared objects at run-time later.)
+In this example two components are built into `esmx_app` explicitly. (Read about [dynamically loading of components from shared objects at run-time](#dynamically-loading-components-from-shared-objects-at-run-time) later.) The `ESMX_Data` component is built into `esmx_app` by default. This example disables this behavior.
 
-Each component is given a name, here `TaWaS` and `Lumo`, respectively. Components will be referenced by this *component-name* in the run-time configuration (esmxRun.yaml) discussed below. Component names are case-sensitive.
+Each component is given a name, here `TaWaS` and `Lumo`, respectively. Components will be referenced by this *component-name* in the run-time configuration (esmxRun.yaml) discussed below. Component names are case-sensitive!
 
-Build options for ESMX are defined using [YAML](https://yaml.org/) syntax.
+There are *three* top level sections recognized in the ESMX build file. Each is introduced by a specific key using the [YAML](https://yaml.org/) map syntax: `application:`, `components:`, and `tests:`. The value associated with each key is a map of key/value pairs. The available option keys under each top level section are discussed below.
 
-**Application Options**<br>
-Build options for application are defined as follows:
-| Option                | Description                                 | Default                  |
-| --------------------- | ------------------------------------------- | ------------------------ |
-| disable\_comps        | components to disable                       | *None*                   |
-| link\_module\_paths   | search paths for CMake modules              | *None*                   |
-| link\_packages        | cmake packages, linked to esmx              | *None*                   |
-| link\_paths           | search path for external libraries          | *None*                   |
-| link\_libraries       | external libraries, linked to esmx          | *None*                   |
-| build\_args           | arguments passed to all build\_types        | *None*                   |
-| build\_jobs           | job number used for all build\_types        | *None*                   |
-| build\_verbose        | verbosity setting used for all build\_types | *None*                   |
-| cmake\_build\_args    | argumens passed to all cmake builds         | *None*                   |
-| cmake\_build\_jobs    | job number used for all cmake builds        | *None*                   |
-| cmake\_build\_verbose | verbosity setting used for all cmake builds | *None*                   |
-| make\_build\_args     | argumens passed to all make builds          | *None*                   |
-| make\_build\_jobs     | job number used for all make builds         | *None*                   |
-| script\_build\_args   | argumens passed to all script builds        | *None*                   |
-| test                  | add test cases [on, off]                    | off                      |
-| test\_exe             | executable used to run test cases           | ESMF\_INTERNAL\_MPIRUN   |
-| test\_dir             | output directory for test cases             | CMAKE\_BINARY\_DIR-tests |
-| test\_tasks           | number of tasks used to run test cases      | 4                        |
+#### Application Options (`application` key)
 
-**Component Options**<br>
-Build options for each component are defined as follows:
-| Option          | Description                                   | Default                |
-| --------------- | --------------------------------------------- | ---------------------- |
-| build\_type     | auto, cmake, make, script, none               | auto                   |
-| build\_script   | build script                                  | compile                |
-| build\_args     | build arguments passed to ExternalProject     | *None*                 |
-| source\_dir     | source directory for build                    | *component-name*       |
-| cmake\_config   | CMake configuration file                      | *component-name*.cmake |
-| libraries       | component libraries, linked to esmx           | *component-name*       |
-| fort\_module    | fortran module filename for NUOPC SetServices | *component-name*.mod   |
-| install\_prefix | root directory for installation               | install                |
-| config\_dir     | subdirectory for cmake configuration file     | cmake                  |
-| library\_dir    | subdirectory for library file                 | lib                    |
-| include\_dir    | subdirectory for fortran module file          | include                |
-| link\_paths     | search path for external libraries            | *None*                 |
-| link\_libraries | external libraries, linked to esmx            | *None*                 |
-| git\_repository | URL for downloading git repository            | *None*                 |
-| git\_tag        | tag for downloading git repository            | *None*                 |
-| git\_dir        | download directory for git repository         | *None*                 |
-| test\_dir       | directory used for test case data             | *None*                 |
-| test\_exe       | executable used to run test case              | ESMX\_TEST\_EXE        |
-| test\_tasks     | number of tasks used to run test case         | ESMX\_TEST\_TASKS      |
+These options affect the ESMX application layer.
 
-**Test Options**<br>
-Build options for each test are defined as follows:
-| Option | Description                                   | Default           |
-| ------ | --------------------------------------------- | ----------------- |
-| dir    | directory used for test case data             | *None*            |
-| exe    | executable used to run test case              | ESMX\_TEST\_EXE   |
-| tasks  | number of tasks used to run test case         | ESMX\_TEST\_TASKS |
+| Option key            | Description / Value options                           | Default                |
+| --------------------- | ----------------------------------------------------- | ---------------------- |
+| `disable_comps`       | scalar or list of components to disable               | *None*                 |
+| `link_module_paths`   | scalar or list of search paths for CMake modules      | *None*                 |
+| `link_packages`       | scalar or list of cmake packages, linked to esmx      | *None*                 |
+| `link_paths`          | scalar or list of search path for external libraries  | *None*                 |
+| `link_libraries`      | scalar or list of external libraries, linked to esmx  | *None*                 |
+| `build_args`          | scalar or list of arguments passed to all build_types | *None*                 |
+| `build_jobs`          | job number used for all build_types                   | *None*                 |
+| `build_verbose`       | verbosity setting used for all build_types            | *None*                 |
+| `cmake_build_args`    | scalar or list of argumens passed to all cmake builds | *None*                 |
+| `cmake_build_jobs`    | job number used for all cmake builds                  | *None*                 |
+| `cmake_build_verbose` | verbosity setting used for all cmake builds           | *None*                 |
+| `make_build_args`     | scalar or list of argumens passed to all make builds  | *None*                 |
+| `make_build_jobs`     | job number used for all make builds                   | *None*                 |
+| `script_build_args`   | scalar or list of argumens passed to all script builds| *None*                 |
+| `test`                | add test cases: `on` or `off`                         | `off`                  |
+| `test_exe`            | executable used to launch test cases                  | ESMF_INTERNAL_MPIRUN   |
+| `test_dir`            | output directory for test cases                       | CMAKE_BINARY_DIR-tests |
+| `test_tasks`          | number of tasks used to run test cases                | `4`                    |
 
-Downloading component using git\_repository will result in a detached head. Developers making changing to component code must create or checkout a branch before making code changes. Downloading component using git\_repository fails if the source\_dir already exists.
+#### Component Options (`components` key)
 
-### Build Types
+This section contains a key for for each *component-name*, specifying component specific options.
 
-**Auto**<br>
-The ESMX build system searches for CMakeLists.txt, Makefile, and a build\_script in order in the source\_dir and uses the first build option it finds. If no build files are found then the ESMX build system searches for the CMake configuration file, fortran module, and libraries in the install\_prefix directory but does not build the model. If no build option, CMake configuration, or libraries are found then the build fails.
+| Option key       | Description / Value options                   | Default                |
+| ---------------- | --------------------------------------------- | ---------------------- |
+| `build_type`     | [build type:](#build-types) `auto`, `cmake`, `make`, `script`, `none`     | `auto`                 |
+| `build_script`   | build script                                  | `compile`              |
+| `build_args`     | build arguments passed to ExternalProject     | *None*                 |
+| `source_dir`     | source directory for build                    | *component-name*       |
+| `cmake_config`   | CMake configuration file                      | *component-name*.cmake |
+| `libraries`      | component libraries, linked to esmx           | *component-name*       |
+| `fort_module`    | fortran module filename for NUOPC SetServices | *component-name*.mod   |
+| `install_prefix` | root directory for installation               | `install`              |
+| `config_dir`     | subdirectory for cmake configuration file     | `cmake`                |
+| `library_dir`    | subdirectory for library file                 | `lib`                  |
+| `include_dir`    | subdirectory for fortran module file          | `include`              |
+| `link_paths`     | search path for external libraries            | *None*                 |
+| `link_libraries` | external libraries, linked to esmx            | *None*                 |
+| `git_repository` | URL for downloading git repository            | *None*                 |
+| `git_tag`        | tag for downloading git repository            | *None*                 |
+| `git_dir`        | download directory for git repository         | *None*                 |
+| `test_dir`       | directory used for test case data             | *None*                 |
+| `test_exe`       | executable used to run test case              | ESMX_TEST_EXE          |
+| `test_tasks`     | number of tasks used to run test case         | ESMX_TEST_TASKS        |
 
-**CMake**<br>
-The ESMX build system searches for CMakeLists.txt in the source\_dir and builds using CMake. Once built, the ESMX build system searches for the CMake configuration file and libraries in the install\_prefix directory.
+**Caution:** Downloading components using the `git_repository` option will result in a detached head. Developers making changing to component code must create or checkout a branch before making code changes. Downloading component using git_repository fails if the source_dir already exists.
 
-**Make**<br>
-The ESMX build system searches for Makefile in the source\_dir and builds using Make. Once built, the ESMX build system searches for libraries and fortran modules in the install\_prefix directory.
+##### Build Types:
 
-**Script**<br>
-The ESMX build system searches for a build\_script in the source\_dir and builds using this script. Once built, the ESMX build system searches for libraries and fortran modules in the install\_prefix directory.
+**`auto`** -
+The ESMX build system searches for `CMakeLists.txt`, `Makefile`, and a build_script in order in the `source_dir` and uses the first build option it finds. If no build files are found then the ESMX build system searches for the CMake configuration file, fortran module, and libraries in the `install_prefix` directory but does not build the model. If no build option, CMake configuration, or libraries are found then the build fails.
 
-**None**<br>
-The ESMX build system will not build the component. The ESMX build system searches for the CMake configuration file, fortran module, and libraries in the install\_prefix directory.
+**`cmake`** -
+The ESMX build system searches for `CMakeLists.txt` in the `source_dir` and builds using CMake. Once built, the ESMX build system searches for the CMake configuration file and libraries in the `install_prefix` directory.
+
+**`make`** -
+The ESMX build system searches for `Makefile` in the `source_dir` and builds using Make. Once built, the ESMX build system searches for libraries and fortran modules in the `install_prefix` directory.
+
+**`script`** -
+The ESMX build system searches for a `build_script` in the `source_dir` and builds using this script. Once built, the ESMX build system searches for libraries and fortran modules in the `install_prefix` directory.
+
+**`none`** -
+The ESMX build system will not build the component. The ESMX build system searches for the CMake configuration file, fortran module, and libraries in the install_prefix directory.
+
+
+#### Test Options (`tests` key)
+
+This section contains a key for for each *test-name*, specifying test specific options.
+
+| Option key       | Description / Value options                   | Default         |
+| ---------------- | --------------------------------------------- | --------------- |
+| `dir`            | directory used for test case data             | *None*          |
+| `exe`            | executable used to run test case              | ESMX_TEST_EXE   |
+| `tasks`          | number of tasks used to run test case         | ESMX_TEST_TASKS |
 
 ### esmxRun.yaml
 
-The `esmx_app` executable is launched the same way any other ESMF or NUOPC application is launched. Typically this means starting it through the system specific MPI launch facility (mpirun, mpiexec, srun, ...).
+At startup, the `esmx_app` executable expects to find a file named `esmxRun.yaml` in the run directory from which it is launched. This is the ESMX run-time configuration file in [YAML](https://yaml.org/) format, providing settings such as the list of components active at run-time, component attributes, the run sequence, as well as application level options.
 
-At startup, the `esmx_app` executable expects to find a file named `esmxRun.yaml` in the run directory from which it is launched. This is the ESMX run-time configuration file in [YAML](https://yaml.org/) format. It specifies a few global ESMF and ESMX level settings, the list of components accessed during the run, details about the components, and finally the run sequence.
+An example `esmxRun.yaml` file is given here:
 
-    ESMX:
 
-      App:
-        globalResourceControl:  true
-        logKindFlag:            ESMF_LOGKIND_Multi
-        logAppendFlag:          false
-        logFlush:               true
-        startTime:              2012-10-24T18:00:00
-        stopTime:               2012-10-24T19:00:00
+```
+ESMX:
 
-      Driver:
-        componentList:          [ATM, OCN]
-        attributes:
-          Verbosity: low
+  App:
+    globalResourceControl:  true
+    logKindFlag:            ESMF_LOGKIND_Multi
+    logAppendFlag:          false
+    logFlush:               true
+    startTime:              2012-10-24T18:00:00
+    stopTime:               2012-10-24T19:00:00
 
-        runSequence: |
-          @900
-            ATM -> OCN
-            OCN -> ATM
-            ATM
-            OCN
-          @
+  Driver:
+    componentList:          [ATM, OCN]
+    attributes:
+      Verbosity: low
 
-    ATM:
-      model:            Tawas     # model value is case insensitive to match Fortran
-      ompNumThreads:    4
-      attributes:
-        Verbosity:  low
-      petList:          [3, [2-0]]  # petList is list of scalars and lists.
-                                    # each list again can be of scalars and lists
-                                    # recursively.
+    runSequence: |
+      @900
+        ATM -> OCN
+        OCN -> ATM
+        ATM
+        OCN
+      @
 
-    OCN:
-      model:            lumo
-      petList:          [0-1, 3]
-      attributes:
-        Verbosity:  low
+ATM:
+  model:            Tawas     # model value is case insensitive to match Fortran
+  ompNumThreads:    4
+  attributes:
+    Verbosity:  low
+  petList:          [3, [2-0]]  # petList is list of scalars and lists.
+                                # each list again can be of scalars and lists
+                                # recursively.
 
-The highest level of `esmxRun.yaml` is expected to define the `ESMX` key, as well as a key for every component that is listed in the `componentList` defined under the `Driver` level. The `ESMX` key is associated with a map containing the `App` and `Driver` keys. The `App` key must be present if `esmfRun.yaml` is read by the `esmx_app` executable, but is optional, and will be ignored in case `esmfRun.yaml` is read by the `esmx_driver`.
+OCN:
+  model:            lumo
+  petList:          [0-1, 3]
+  attributes:
+    Verbosity:  low
+```
 
-The map under `ESMX` / `App` must contain the following **non-optional** keys:
-* `startTime`: a string setting the application start time.
-* `stopTime`: a string setting the application stop time.
+On the highest level, `esmxRun.yaml` is expected to define the `ESMX` key, as well as a key for every component that is listed in the `componentList` found under the `Driver` level. The `ESMX` key is associated with a map containing the `App` and `Driver` keys. The `App` key must be present if `esmfRun.yaml` is read by the `esmx_app` executable, but is optional (and will be ignored) in case `esmfRun.yaml` is read by the `esmx_driver`.
 
-The map under `ESMX` / `App` may contain the following **optional** keys:
-* `globalResourceControl`: a boolean to enable/disable global resource control used by ESMF managed threading. See the ESMF reference manual for a discussion under the ESMF_Initialize() call.
-* `logKindFlag`: a string constant setting the ESMF logging kind. Possible values are `ESMF_LOGKIND_None`, `ESMF_LOGKIND_Multi`, and `ESMF_LOGKIND_Multi_On_Error`. See the ESMF reference manual for a discussion under the ESMF_Initialize() call.
-* `logAppendFlag`: a boolean to enable/disable the append behavior when writing ESMF log files. See the ESMF reference manual for a discussion under the ESMF_Initialize() call.
-* `logFlush`: a boolean to enable/disable flushing for each ESMF log write operation.
+#### ESMX/App Options
 
-The map under `ESMX` / `Driver` must contain the following **non-optional** key:
-* `componentList`: a list of component labels. Each label must be associated with a top level key in the `esmxRun.yaml` file.
+This section affects the application level.
 
-The map under `ESMX` / `Driver` may contain the following **optional** keys:
-* `attributes`: a map of key value pairs, each defining a driver attribute.
-* `runSequence`: a block literal string defining the run sequence.
+| Option key                | Description / Value options                               | Default         |
+| ------------------------- | --------------------------------------------------------- | --------------- |
+| `startTime`               | string setting the application start time                 | *non-optional*  |
+| `stopTime`                | string setting the application stop time                  | *non-optional*  |
+| `globalResourceControl`   | enable/disable global resource control: `true` or `false` | `false`         |
+| `logKindFlag`             | string constant setting ESMF logging kind, see ESMF RefDoc| `ESMF_LOGKIND_Multi_On_Error`|
+| `logAppendFlag`           | enable/disable log append: `true` or `false`              | `true`          |
+| `logFlush`                | enable/disable log flush for each write: `true` or `false`| `false`         |
 
-The map under each component label must contain the following **non-optional** key:
-* `model`: a string that associates the component label with the *component-name* used in the `esmxBuild.yaml` file discussed earlier.
+#### ESMX/Driver Options
 
-The map under each component lable may contain the following **optional** keys:
-* `petList`: list of PETs on which the component executes.
-* `attributes`: a map of key value pairs, each defining a component attribute.
+This section affects the driver level.
+
+| Option key      | Description / Value options                                          | Default         |
+| --------------- | -------------------------------------------------------------------- | --------------- |
+| `componentList` | list of component labels, each matching a top level key in this file | *non-optional*  |
+| `attributes`    | map of key value pairs, each defining a driver attribute             | *None*          |
+| `runSequence`   | block literal string defining the run sequence                       | *NUOPC default* |
+
+#### Component Label Options
+
+This section affects the specific component instance.
+
+| Option key    | Description / Value options                                          | Default         |
+| ------------- | -------------------------------------------------------------------- | --------------- |
+| `model`       | string associating the instance with a *component-name* defined in `esmxBuild.yaml` | *non-optional*  |
+| `petList`     | list of PETs on which the component executes                         | *None*          |
+| `attributes`  | map of key value pairs, each defining a component attribute          | *None*          |
 
 ### Dynamically loading components from shared objects at run-time
 
 There are two options recognized when specifying the value of the `model` field for a component in the `esmxRun.yaml` file:
 - First, if the value specified is recognized as a *component-name* provided by any of the components built into `esmx` during build-time, as specified by `esmxBuild.yaml`, the respective component is accessed via its Fortran module.
-- Second, if the value does not match a build-time dependency, it is assumed to correspond to a shared object. In that case the attempt is made to load the specified shared object at run-time, and to associate with the generic component label.
+- Second, if the value does not match a build-time dependency, it is assumed to correspond to a shared object instead. In that case the attempt is made to load the specified shared object at run-time, and to associate with the generic component label.
 
 ## The Unfied ESMX_Driver
 
@@ -271,24 +292,28 @@ A good starting point to explore this feature is the [ESMX_ExternalDriverAPIProt
 
 The typical situation where `ESMX_Driver` comes into play is where a user application needs to access a NUOPC based system that uses the unified ESMX driver. Assuming the user application uses CMake, integration of ESMX is straight forward. All that is required is `add_subdirectory()` in the application's `CMakeLists.txt` file to add the `${ESMF_ESMXDIR}/Driver` directory, and make the application dependent on target `esmx_driver`. An example for a very simple application is shown:
 
-    cmake_minimum_required(VERSION 3.5.2)
-    enable_language(Fortran)
+```
+cmake_minimum_required(VERSION 3.5.2)
+enable_language(Fortran)
 
-    add_subdirectory(${ESMF_ESMXDIR}/Driver ./ESMX_Driver)
+add_subdirectory(${ESMF_ESMXDIR}/Driver ./ESMX_Driver)
 
-    # Specific project settings
-    project(ExternalDriverAPIProto VERSION 0.1.0)
-    add_executable(externalApp externalApp.F90)
-    target_include_directories(externalApp PUBLIC ${PROJECT_BINARY_DIR})
-    target_link_libraries(externalApp PUBLIC esmx_driver)
+# Specific project settings
+project(ExternalDriverAPIProto VERSION 0.1.0)
+add_executable(externalApp externalApp.F90)
+target_include_directories(externalApp PUBLIC ${PROJECT_BINARY_DIR})
+target_link_libraries(externalApp PUBLIC esmx_driver)
+```
 
 The applcation can then be built as typically via cmake commands, only requiring that the `ESMF_ESMXDIR` variable is passed in. It can be convenient to wrap the cmake commands into a GNU Makefile, accessing the `ESMF_ESMXDIR` variable through the `ESMFMKFILE` mechanism.
 
-    include $(ESMFMKFILE)
+```
+include $(ESMFMKFILE)
 
-    build/externalApp: externalApp.F90 esmxBuild.yaml
-	    cmake -S. -Bbuild -DESMF_ESMXDIR=$(ESMF_ESMXDIR)
-	    cmake --build ./build
+build/externalApp: externalApp.F90 esmxBuild.yaml
+        cmake -S. -Bbuild -DESMF_ESMXDIR=$(ESMF_ESMXDIR)
+        cmake --build ./build
+```
 
 ### esmxBuild.yaml and esmxRun.yaml
 
@@ -313,8 +338,10 @@ The ESMX layer has the following dependencies:
 
 There are many ways to provide a suitable Python environment. One portable way based on [venv](https://docs.python.org/3/library/venv.html) is shown below.
 
-    python3 -m venv ESMXenv
-    source ESMXenv/bin/activate (for Bash)  or   source ESMXenv/bin/activate.csh (for Csh)
-    pip install pyyaml
-    ... Environment ready for ESMX ...
-    deactivate
+```
+python3 -m venv ESMXenv
+source ESMXenv/bin/activate (for Bash)  or   source ESMXenv/bin/activate.csh (for Csh)
+pip install pyyaml
+... Environment ready for ESMX ...
+deactivate
+```
