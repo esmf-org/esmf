@@ -224,7 +224,7 @@
      endif
 
      if (foundlon .and. foundlat) then
-        filetype = ESMF_FILEFORMAT_GRIDSPEC
+        filetype = ESMF_FILEFORMAT_CFGRID
         rc=ESMF_SUCCESS
         goto 1000
      endif
