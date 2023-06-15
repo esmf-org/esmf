@@ -369,7 +369,7 @@ contains
 ! !IROUTINE:  ESMF_ArrayBundleEQ - Compare two ArrayBundles for equality
 !
 ! !INTERFACE:
-  function ESMF_ArrayBundleEQ(arraybundle1, arraybundle2)
+  impure elemental function ESMF_ArrayBundleEQ(arraybundle1, arraybundle2)
 ! 
 ! !RETURN VALUE:
     logical :: ESMF_ArrayBundleEQ
@@ -420,7 +420,7 @@ contains
 ! !IROUTINE:  ESMF_ArrayBundleNE - Compare two ArrayBundles for non-equality
 !
 ! !INTERFACE:
-  function ESMF_ArrayBundleNE(arraybundle1, arraybundle2)
+    impure elemental function ESMF_ArrayBundleNE(arraybundle1, arraybundle2)
 ! 
 ! !RETURN VALUE:
     logical :: ESMF_ArrayBundleNE

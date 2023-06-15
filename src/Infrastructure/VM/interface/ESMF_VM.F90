@@ -1023,7 +1023,7 @@ contains
 ! !IROUTINE:  ESMF_VMEQ - Compare two VMs for equality
 !
 ! !INTERFACE:
-  function ESMF_VMEQ(vm1, vm2)
+  impure elemental function ESMF_VMEQ(vm1, vm2)
 ! 
 ! !RETURN VALUE:
     logical :: ESMF_VMEQ
@@ -1074,7 +1074,7 @@ contains
 ! !IROUTINE:  ESMF_VMNE - Compare two VMs for non-equality
 !
 ! !INTERFACE:
-  function ESMF_VMNE(vm1, vm2)
+  impure elemental function ESMF_VMNE(vm1, vm2)
 ! 
 ! !RETURN VALUE:
     logical :: ESMF_VMNE

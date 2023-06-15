@@ -253,7 +253,7 @@ contains  !====================================================================
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoEqual()"
-function ESMF_InfoEqual(lhs, rhs) result(is_equal)
+impure elemental function ESMF_InfoEqual(lhs, rhs) result(is_equal)
   type(ESMF_Info), intent(in) :: lhs
   type(ESMF_Info), intent(in) :: rhs
   logical :: is_equal
@@ -271,7 +271,7 @@ end function ESMF_InfoEqual
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoNotEqual()"
-function ESMF_InfoNotEqual(lhs, rhs) result(is_equal)
+impure elemental function ESMF_InfoNotEqual(lhs, rhs) result(is_equal)
   type(ESMF_Info), intent(in) :: lhs
   type(ESMF_Info), intent(in) :: rhs
   logical :: is_equal

@@ -209,7 +209,7 @@ contains
 ! !IROUTINE:  ESMF_SciCompEQ - Compare two SciComps for equality
 !
 ! !INTERFACE:
-  function ESMF_SciCompEQ(scicomp1, scicomp2)
+  impure elemental function ESMF_SciCompEQ(scicomp1, scicomp2)
 ! 
 ! !RETURN VALUE:
     logical :: ESMF_SciCompEQ
@@ -261,7 +261,7 @@ contains
 ! !IROUTINE:  ESMF_SciCompNE - Compare two SciComps for non-equality
 !
 ! !INTERFACE:
-  function ESMF_SciCompNE(scicomp1, scicomp2)
+  impure elemental function ESMF_SciCompNE(scicomp1, scicomp2)
 ! 
 ! !RETURN VALUE:
     logical :: ESMF_SciCompNE

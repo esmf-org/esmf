@@ -595,7 +595,7 @@ contains
 ! !IROUTINE:  ESMF_HConfigEQ - Compare two HConfigs for equality
 !
 ! !INTERFACE:
-  function ESMF_HConfigEQ(HConfig1, HConfig2)
+  impure elemental function ESMF_HConfigEQ(HConfig1, HConfig2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_HConfigEQ
@@ -643,7 +643,7 @@ contains
 ! !IROUTINE:  ESMF_HConfigIterEQ - Compare two HConfigIters for equality
 !
 ! !INTERFACE:
-  function ESMF_HConfigIterEQ(HConfig1, HConfig2)
+  impure elemental function ESMF_HConfigIterEQ(HConfig1, HConfig2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_HConfigIterEQ
@@ -691,7 +691,7 @@ contains
 ! !IROUTINE:  ESMF_HConfigNE - Compare two HConfigs for non-equality
 !
 ! !INTERFACE:
-  function ESMF_HConfigNE(HConfig1, HConfig2)
+  impure elemental function ESMF_HConfigNE(HConfig1, HConfig2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_HConfigNE
@@ -720,7 +720,7 @@ contains
 ! !IROUTINE:  ESMF_HConfigIterNE - Compare two HConfigIters for non-equality
 !
 ! !INTERFACE:
-  function ESMF_HConfigIterNE(HConfig1, HConfig2)
+  impure elemental function ESMF_HConfigIterNE(HConfig1, HConfig2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_HConfigIterNE

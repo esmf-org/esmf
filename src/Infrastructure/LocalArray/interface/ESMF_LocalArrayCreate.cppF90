@@ -420,7 +420,7 @@ contains
 ! !IROUTINE:  ESMF_LocalArrayEQ - Compare two LocalArrays for equality
 !
 ! !INTERFACE:
-  function ESMF_LocalArrayEQ(localarray1, localarray2)
+  impure elemental function ESMF_LocalArrayEQ(localarray1, localarray2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_LocalArrayEQ
@@ -470,7 +470,7 @@ contains
 ! !IROUTINE:  ESMF_LocalArrayNE - Compare two LocalArrays for non-equality
 !
 ! !INTERFACE:
-  function ESMF_LocalArrayNE(localarray1, localarray2)
+  impure elemental function ESMF_LocalArrayNE(localarray1, localarray2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_LocalArrayNE
@@ -502,14 +502,14 @@ contains
 
 ! functions to compare two ESMF_DataCopy_Flags to see if they are the same or not
 
-function ESMF_cfeq(cf1, cf2)
+impure elemental function ESMF_cfeq(cf1, cf2)
  logical ESMF_cfeq
  type(ESMF_DataCopy_Flag), intent(in) :: cf1, cf2
 
  ESMF_cfeq = (cf1%datacopyflag .eq. cf2%datacopyflag)
 end function
 
-function ESMF_cfne(cf1, cf2)
+impure elemental function ESMF_cfne(cf1, cf2)
  logical ESMF_cfne
  type(ESMF_DataCopy_Flag), intent(in) :: cf1, cf2
 

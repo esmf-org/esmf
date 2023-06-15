@@ -271,7 +271,7 @@ contains
 ! !IROUTINE:  ESMF_XGridEQ - Compare two XGrids for equality
 !
 ! !INTERFACE:
-  function ESMF_XGridEQ(xgrid1, xgrid2)
+  impure elemental function ESMF_XGridEQ(xgrid1, xgrid2)
 ! 
 ! !RETURN VALUE:
     logical :: ESMF_XGridEQ
@@ -322,7 +322,7 @@ contains
 ! !IROUTINE:  ESMF_XGridNE - Compare two XGrids for non-equality
 !
 ! !INTERFACE:
-  function ESMF_XGridNE(xgrid1, xgrid2)
+  impure elemental function ESMF_XGridNE(xgrid1, xgrid2)
 ! 
 ! !RETURN VALUE:
     logical :: ESMF_XGridNE
@@ -1416,7 +1416,7 @@ contains
 ! !IROUTINE: ESMF_XGridSideEqual - Equality of XGridSides
 !
 ! !INTERFACE:
-      function ESMF_XGridSideEqual(XGridSide1, XGridSide2)
+      impure elemental function ESMF_XGridSideEqual(XGridSide1, XGridSide2)
 
 ! !RETURN VALUE:
       logical :: ESMF_XGridSideEqual
@@ -1450,7 +1450,7 @@ contains
 ! !IROUTINE: ESMF_XGridSideNotEqual - Non-equality of XGridSides
 !
 ! !INTERFACE:
-      function ESMF_XGridSideNotEqual(XGridSide1, XGridSide2)
+      impure elemental function ESMF_XGridSideNotEqual(XGridSide1, XGridSide2)
 
 ! !RETURN VALUE:
       logical :: ESMF_XGridSideNotEqual

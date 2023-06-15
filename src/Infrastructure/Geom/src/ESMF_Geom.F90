@@ -1753,7 +1753,7 @@ end subroutine ESMF_GeomGet
 ! !IROUTINE: ESMF_GeomTypeEqual - Equality of GeomTypes
 !
 ! !INTERFACE:
-      function ESMF_GeomTypeEqual(GeomType1, GeomType2)
+      impure elemental function ESMF_GeomTypeEqual(GeomType1, GeomType2)
 
 ! !RETURN VALUE:
       logical :: ESMF_GeomTypeEqual
@@ -1787,7 +1787,7 @@ end subroutine ESMF_GeomGet
 ! !IROUTINE: ESMF_GeomTypeNotEqual - Non-equality of GeomTypes
 !
 ! !INTERFACE:
-      function ESMF_GeomTypeNotEqual(GeomType1, GeomType2)
+      impure elemental function ESMF_GeomTypeNotEqual(GeomType1, GeomType2)
 
 ! !RETURN VALUE:
       logical :: ESMF_GeomTypeNotEqual
