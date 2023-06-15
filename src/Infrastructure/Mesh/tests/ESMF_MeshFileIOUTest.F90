@@ -4564,7 +4564,7 @@ subroutine  check_mesh_from_sph_3x3_UG_file(correct, rc)
       elemMask=(/1,0,1/)
 
      endif
-   endif
+  endif
 
 
    ! Create distgrid to ensure that elements are created on the
@@ -6913,15 +6913,15 @@ subroutine   test_create_mesh_from_SH_file(correct, rc)
   if (rc /= ESMF_SUCCESS) return
 
   ! Create Mesh from shape file
-  mesh=ESMF_MeshCreate("data/cb_2018_us_county_500k.shp", &
+  mesh=ESMF_MeshCreate("data/complex_3.shp", &
        fileformat=ESMF_FILEFORMAT_SHAPEFILE, &
        rc=rc)
   if (rc /= ESMF_SUCCESS) return
 
 
   !! Write mesh for debugging
-   call ESMF_MeshWrite(mesh,"cb_2018_us_county_500k",rc=rc)
-   if (rc /= ESMF_SUCCESS) return
+!   call ESMF_MeshWrite(mesh,"complex_3",rc=rc)
+!   if (rc /= ESMF_SUCCESS) return
 
   ! Get rid of Mesh
   call ESMF_MeshDestroy(mesh, rc=rc)

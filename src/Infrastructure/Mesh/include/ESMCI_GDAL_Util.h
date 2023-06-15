@@ -52,11 +52,22 @@ using namespace ESMCI;
 void open_();
 
 // shapefile routines
-void get_dim_from_SHP_file(OGRDataSourceH hDS, char *filename, int &dim);
-void process_shapefile(OGRDataSourceH hDS, double *&nodeCoords, int *&nodeIDs, int *&elemIDs, 
-		       int *&elemConn, int *&numElemConn,
-		       int *totNumElemConn, int *numNodes, int *numElems);
+void ESMCI_GDAL_SHP_get_dim_from_file(OGRDataSourceH hDS, char *filename, int &dim);
+void ESMCI_GDAL_process_shapefile_serial(OGRDataSourceH hDS, double *&nodeCoords, 
+			      int *&nodeIDs, int *&elemIDs, 
+			      int *&elemConn, int *&numElemConn,
+			      int *totNumElemConn, int *numNodes, 
+			      int *numElems);
+void ESMCI_GDAL_process_shapefile_distributed(OGRDataSourceH hDS,
+			      int *nFeatures, int *&featureIDs, int *&globFeatureIDs,
+			      double *&nodeCoords, 
+			      int *&nodeIDs, int *&elemIDs, 
+			      int *&elemConn, int *&numElemConn,
+			      int *totNumElemConn, int *numNodes, 
+			      int *numElems);
 void ESMCI_mesh_create_from_SHP_file();
+
+void ESMCI_GDAL_SHP_get_feature_info(OGRDataSourceH hDS, int *nFeatures, int *&FeatureIDs);
 
 #endif // ifdef ESMF_GDAL
 

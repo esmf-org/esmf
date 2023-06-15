@@ -1318,128 +1318,132 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     int pet_count = vm->getPetCount();
 
     // Bound all of this by local_pet == 0 for now (MSL)
-    if (local_pet == 0) {
-      // DEBUG OUTPUT filename
-      printf("In shapefile method filename=%s\n",filename);
+    // if (local_pet == 0) {
+    //   // DEBUG OUTPUT filename
+    //   printf("In shapefile method filename=%s\n",filename);
+    // }
 
-      //// Fill in code getting things from shapefile and creating parts of the Mesh here 
-    
-      // Open file
-      OGRDataSourceH hDS;
-      if (access(filename, F_OK) == 0) {
-	OGRRegisterAll(); // register all the drivers
-	hDS = OGROpen( filename, FALSE, NULL );
-	if( hDS == NULL )
-	  {
-	    printf( "Open failed: %s, %d\n", CPLGetLastErrorMsg(), CPLGetLastErrorNo() );
-	    Throw();
-	  }
-      } else {
-	printf("Cannot access shapefile\n");
-	Throw();
-      }
+  // Open file and create datasource (DS)
+    OGRDataSourceH hDS;
+    if (access(filename, F_OK) == 0) {
+      OGRRegisterAll(); // register all the drivers
+      hDS = OGROpen( filename, FALSE, NULL );
+      if( hDS == NULL )
+	{
+	  printf( "Open failed on pet %d: %s, %d\n", local_pet, CPLGetLastErrorMsg(), CPLGetLastErrorNo() );
+	  Throw();
+	}
+    } else if (local_pet == 0) {
+      printf("Cannot access shapefile\n");
+      Throw();
+    }
 
-      // Get DIM var - currently forced to 2D
-      int dim;
-      get_dim_from_SHP_file(hDS, filename, dim);
+    // Get DIM var - currently forced to 2D
+    int dim;
+    ESMCI_GDAL_SHP_get_dim_from_file(hDS, filename, dim);
 
-      // Get shapefile params
-      int num_nodes;
-      int num_elems=0, totNumElemConn=0;
-      int *numElemConn=NULL, *elemConn=NULL;
-      double *nodeCoords=NULL;
-      int *node_IDs=NULL;
-      int *elem_IDs=NULL;
+    // Get shapefile params
+    int num_nodes;
+    int num_elems=0;
+    int totNumElemConn=0;
+    int *numElemConn=NULL;
+    int *elemConn=NULL;
+    double *nodeCoords=NULL;
+    int *node_IDs=NULL;
+    int *elem_IDs=NULL;
 
-      // Processes polygons in hDS. Polygons are flattened to 2D
-      process_shapefile(hDS,nodeCoords,node_IDs,elem_IDs,elemConn,numElemConn,
-			&totNumElemConn, &num_nodes, &num_elems);
+    // Processes polygons in hDS. Polygons are flattened to 2D
+//    process_shapefile_serial(hDS,nodeCoords,node_IDs,elem_IDs,elemConn,numElemConn,
+//			     &totNumElemConn, &num_nodes, &num_elems);
 
-      // TBD: Coord system conversion
+    // 1) Get DS global params: number of features & feature IDs
 
-      /* At this point, we've read the shapfile and defined
-	 - num_nodes
-	 - num_elems
-	 - nodeCoords
-	 - numElemConn
-	 - node_IDs
-       */
+    int nFeatures;
+    int *globalFeature_IDs=NULL;
+    ESMCI_GDAL_SHP_get_feature_info(hDS, &nFeatures, globalFeature_IDs);
 
-//\\      printf("totnumelemconn: %d\n", totNumElemConn);
-//\\      printf("num_nodes: %d\n", num_nodes);
-//\\      printf("num_elems: %d\n", num_elems);
-//\\      int i;
-//\\      for (i=0;i<2*num_nodes;i+=2) {
-//\\	printf("nodeCoords %.2f, %.2f\n",nodeCoords[i],nodeCoords[i+1]);
-//\\      }
+    // Get positions at which to read element information
+    std::vector<int> feature_ids_vec;
+    get_ids_divided_evenly_across_pets(nFeatures, local_pet, pet_count, feature_ids_vec);
 
-      // Convert mesh dim from file into pdim and orig_sdim to use in mesh create
-      int pdim, orig_sdim;
-      if (dim == 2) {
-	pdim=orig_sdim=2;
-      } else if (dim == 3) {
-	pdim=orig_sdim=3;
-      } else {
-	Throw() << "Meshes can only be created with dim=2 or 3.";
-      }
-      
-      // Get coordsys from file
-      ESMC_CoordSys_Flag coord_sys_mesh=ESMC_COORDSYS_SPH_DEG; // Assume "degrees" for now.
-// NOTE DEFINED YET      get_coordsys_from_SHP_file(pioFileDesc, filename, dim, nodeCoord_ids, coord_sys_file);
-
-      // Create Mesh
-      ESMCI_meshcreate(out_mesh, &pdim, &orig_sdim, &coord_sys_mesh, &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-					&localrc)) throw localrc;
-
-      // printf("Finished creating mesh: %d\n", localrc);
-
-      // Add nodes
-      ESMCI_meshaddnodes(out_mesh, &num_nodes, node_IDs,
-			 nodeCoords, NULL, NULL,
-			 &coord_sys_mesh, &orig_sdim,
-			 &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-					&localrc)) throw localrc;
-      
-      // printf("Finished adding nodes: %d\n", localrc);
-
-      // Add elements
-      // !!! None of the elements have shared edges.
-      int areaPresent = 0;
-      int centerCoordsPresent=0;
-      ESMCI_meshaddelements(out_mesh,
-			    &num_elems, elem_IDs, numElemConn, //elementType, <- using numElemConn in place of elementType assumes 2D!!
-			    NULL, // No mask
-			    &areaPresent, NULL, // No areas
-			    &centerCoordsPresent, NULL, // No center coords
-			    &totNumElemConn, elemConn, 
-			    &coord_sys_mesh, &orig_sdim, &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-					&localrc)) throw localrc;
-
-      // printf("Finished adding elements: %d\n", localrc);
-
-      // Cleanup
-      OGR_DS_Destroy( hDS );
-
-      delete [] elem_IDs;
-      delete [] elemConn;
-      delete [] node_IDs;
-      delete [] numElemConn;
-      delete [] nodeCoords;
-
-    } else {
-      // Set return code
-//      if (rc!=NULL) *rc = ESMF_SUCCESS;
+    // Assign vector info to pointer, because PIO and mesh calls don't accept vectors
+    int num_features=0; // local PET
+    int *feature_IDs=NULL; // local PET
+    if (!feature_ids_vec.empty()) {
+      num_features=feature_ids_vec.size(); // local to this pet
+      feature_IDs=&feature_ids_vec[0];
     } 
 
-    // Return an error, because this isn't implemented yet
-    // TODO: GET RID OF THE FOLLOWING LINE WHEN THIS SUBROUTINE IS CREATING A VALID MESH
-    //if (ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-    //                                  "Creating a Mesh from a shapefile format file not finished yet.",
-    //                                  ESMC_CONTEXT, &localrc)) throw localrc; 
-        
+    // Processes polygons in hDS. Polygons are flattened to 2D
+    ESMCI_GDAL_process_shapefile_distributed(hDS,&num_features,feature_IDs,globalFeature_IDs,
+					     nodeCoords,node_IDs,elem_IDs,
+					     elemConn,numElemConn,
+					     &totNumElemConn, &num_nodes, &num_elems);
+    // TBD: Coord system conversion
+
+    /* At this point, we've read the shapfile and defined
+       - num_nodes
+       - num_elems
+       - nodeCoords
+       - numElemConn
+       - node_IDs
+    */
+
+    // Convert mesh dim from file into pdim and orig_sdim to use in mesh create
+    int pdim, orig_sdim;
+    if (dim == 2) {
+      pdim=orig_sdim=2;
+    } else if (dim == 3) {
+      pdim=orig_sdim=3;
+    } else {
+      Throw() << "Meshes can only be created with dim=2 or 3.";
+    }
+      
+    // Get coordsys from file
+    ESMC_CoordSys_Flag coord_sys_mesh=ESMC_COORDSYS_SPH_DEG; // Assume "degrees" for now.
+    // NOTE DEFINED YET      get_coordsys_from_SHP_file(pioFileDesc, filename, dim, nodeCoord_ids, coord_sys_file);
+
+    // Create Mesh
+    ESMCI_meshcreate(out_mesh, &pdim, &orig_sdim, &coord_sys_mesh, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+				      &localrc)) throw localrc;
+
+    // printf("Finished creating mesh: %d\n", localrc);
+
+    // Add nodes
+    ESMCI_meshaddnodes(out_mesh, &num_nodes, node_IDs,
+		       nodeCoords, NULL, NULL,
+		       &coord_sys_mesh, &orig_sdim,
+		       &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+				      &localrc)) throw localrc;
+      
+    // printf("Finished adding nodes: %d\n", localrc);
+
+    // Add elements
+    // !!! None of the elements have shared edges.
+    int areaPresent = 0;
+    int centerCoordsPresent=0;
+    ESMCI_meshaddelements(out_mesh,
+			  &num_elems, elem_IDs, numElemConn, //elementType, <- using numElemConn in place of elementType assumes 2D!!
+			  NULL, // No mask
+			  &areaPresent, NULL, // No areas
+			  &centerCoordsPresent, NULL, // No center coords
+			  &totNumElemConn, elemConn, 
+			  &coord_sys_mesh, &orig_sdim, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+				      &localrc)) throw localrc;
+
+    // printf("Finished adding elements: %d\n", localrc);
+
+    // Cleanup
+    OGR_DS_Destroy( hDS );
+
+    delete [] elem_IDs;
+    delete [] elemConn;
+    delete [] node_IDs;
+    delete [] numElemConn;
+    delete [] nodeCoords;
 
   } catch(std::exception &x) {
 

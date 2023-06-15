@@ -62,12 +62,15 @@ I know that’s a lot of information, so feel free to ask lots of questions. I t
 moving it shouldn’t be hard to bring this capability in, but there might be some back and forth at 
 the beginning just to get both of us on the same page. 
 
-* Structure & Flow
-  get_elementconn_from...
-  get_nodecount_from...
-  get_coords_from...
-  
-
+* Parallelization
+** Notes:
+features and elements need to be defined separately, since a feature may be decomposed into several elements.
+** Issues/Questions
+*** geographic location of features not ordered.
+*** Do we want to sync with a regular lat/lon grid so data are more likely to be on the PET where they're needed?
+** get_DS_params <global>
+** divvy up feature/element IDs to PETS
+** get features for ID bounds
 * Questions:
 ** What about CRS and projection to/from GEOS? 
 Will area (spatial extent) be conserved? e.g. if the GIS CRS is curvilinear, is the mapping in ESMF able to handle that?
