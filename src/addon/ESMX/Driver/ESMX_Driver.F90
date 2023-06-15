@@ -152,7 +152,6 @@ module ESMX_Driver
 
     ! Setup CompDef structure
     allocate(CompDef(componentDefCount))
-
     include "compDef.inc"
 
     ! Determine information for each component and add to the driver
