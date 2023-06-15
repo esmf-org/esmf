@@ -237,6 +237,18 @@ void ESMCI_regrid_create(
       }
     }
 
+    /// vectorRegrid not supported with Cartesian meshes
+    if (vectorRegrid) {
+      if (srcmesh != NULL) {
+        if (srcmesh->coordsys == ESMC_COORDSYS_CART) {
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                           "Vector regridding currently not supported for Cartesian geometries.",
+                                           ESMC_CONTEXT, &localrc)) throw localrc;
+        }
+      } 
+    }
+
+    
     /// vectorRegrid currently only supported with 1 ungridded dim
     if (vectorRegrid) {
 
@@ -305,12 +317,10 @@ void ESMCI_regrid_create(
       // Get src info
       int src_num_vec_dims;
       _get_vec_dims_for_vectorRegrid(srcarray, src_num_vec_dims, src_vec_dims_undist_seqind);
-      printf("src_num_vec_dims=%d\n",src_num_vec_dims);      
 
       // Get dst info
       int dst_num_vec_dims;
       _get_vec_dims_for_vectorRegrid(dstarray, dst_num_vec_dims, dst_vec_dims_undist_seqind);
-      printf("dst_num_vec_dims=%d\n",dst_num_vec_dims);      
 
       // The size of the dimensions must match
       if (src_num_vec_dims != dst_num_vec_dims) {
@@ -472,7 +482,7 @@ void ESMCI_regrid_create(
     // Get the size of the sparse matrix and allocate space for it
     std::pair<UInt,UInt> iisize = wts->count_matrix_entries();
     int num_entries = iisize.first;
-    int iientries_size=2;
+    int iientries_entry_size=2;
     int *iientries = new int[2*iisize.first];
     double *factors = new double[iisize.first];
 
@@ -580,7 +590,7 @@ void ESMCI_regrid_create(
       num_entries=num_entries_vec;
       iientries=iientries_vec;
       factors=factors_vec;
-      iientries_size=4;
+      iientries_entry_size=4;  // Because we have the ungridded dims entries the matrix is now of size 4
     }
 
 
@@ -635,7 +645,7 @@ void ESMCI_regrid_create(
       ESMC_Logical ignoreUnmatched = ESMF_FALSE;
 
       // Wrap factorIndexList in InterArray
-      int larg[2] = {iientries_size, num_entries};
+      int larg[2] = {iientries_entry_size, num_entries};
       ESMCI::InterArray<int> ii(iientries, 2, larg);
       ESMCI::InterArray<int> *iiptr = &ii;
       
@@ -2989,7 +2999,7 @@ void _calc_2D_vec_weights(double *src_coords, double *dst_coords, double *vec_wg
   vec_wgts[0] = src_e_vec[0]*dst_e_vec[0]+src_e_vec[1]*dst_e_vec[1]+src_e_vec[2]*dst_e_vec[2]; // src 1 to  dst 1
   vec_wgts[1] = src_n_vec[0]*dst_e_vec[0]+src_n_vec[1]*dst_e_vec[1]+src_n_vec[2]*dst_e_vec[2]; // src 2 to  dst 1
   vec_wgts[2] = src_e_vec[0]*dst_n_vec[0]+src_e_vec[1]*dst_n_vec[1]+src_e_vec[2]*dst_n_vec[2]; // src 1 to  dst 2
-  vec_wgts[2] = src_n_vec[0]*dst_n_vec[0]+src_n_vec[1]*dst_n_vec[1]+src_n_vec[2]*dst_n_vec[2]; // src 2 to  dst 2
+  vec_wgts[3] = src_n_vec[0]*dst_n_vec[0]+src_n_vec[1]*dst_n_vec[1]+src_n_vec[2]*dst_n_vec[2]; // src 2 to  dst 2
 }
 
 
@@ -3058,7 +3068,7 @@ static void _create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *
       Throw()<<"src id="<<src_id<<" not found in coordinate search.";
     }
 
-    printf("id=%d src_coords=%f %f %f\n",src_id,src_coords[0],src_coords[1],src_coords[2]);
+    // printf("id=%d src_coords=%f %f %f\n",src_id,src_coords[0],src_coords[1],src_coords[2]);
 
     
     // Get dst coords, complain if not there
