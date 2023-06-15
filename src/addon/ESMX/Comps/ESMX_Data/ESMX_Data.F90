@@ -60,7 +60,6 @@ module esmx_data
     type(ESMF_CoordSys_Flag) :: coordSys = ESMF_COORDSYS_SPH_DEG
     type(ESMF_Grid)          :: grid
     ! field information
-    character(len=ESMF_MAXSTR) :: field_file    = "esmxRun.config"
     type(xdata_field), pointer :: imp_flds_head => null()
     type(xdata_field), pointer :: exp_flds_head => null()
     type(xdata_field), pointer :: imp_flds_tail => null()
@@ -98,7 +97,9 @@ module esmx_data
     allocate(is%ptr, stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg='XDATA: Memory allocation failed.', &
-      line=__LINE__, file=__FILE__, rcToReturn=rc)) return
+      line=__LINE__, &
+      file=__FILE__, &
+      rcToReturn=rc)) return
     call ESMF_GridCompSetInternalState(xdata, is, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
@@ -178,7 +179,7 @@ module esmx_data
     endif
 
     ! get configuration information
-    call x_comp_get_attributes(xdata, xstate, rc=rc)
+    call x_comp_get_config(xdata, xstate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
 
@@ -633,7 +634,9 @@ module esmx_data
       deallocate(xfield, stat=stat)
       if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
         msg=trim(xstate%cname)//': Memory deallocation failed.', &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
+        line=__LINE__, &
+        file=__FILE__, &
+        rcToReturn=rc)) return
       nullify(xfield)
     enddo
     xstate%imp_flds_tail => null()
@@ -648,7 +651,9 @@ module esmx_data
       deallocate(xfield, stat=stat)
       if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
         msg=trim(xstate%cname)//': Memory deallocation failed.', &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
+        line=__LINE__, &
+        file=__FILE__, &
+        rcToReturn=rc)) return
       nullify(xfield)
     enddo
     xstate%exp_flds_tail => null()
@@ -661,21 +666,27 @@ module esmx_data
     deallocate(is%ptr, stat=stat)
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
       msg='XDATA: Memory deallocation failed.', &
-      line=__LINE__, file=__FILE__, rcToReturn=rc)) return
+      line=__LINE__, &
+      file=__FILE__, &
+      rcToReturn=rc)) return
   endsubroutine ModelFinalize
 
   !-----------------------------------------------------------------------------
   ! X Comp Internal Subroutines
   !-----------------------------------------------------------------------------
 
-  subroutine x_comp_get_attributes(xdata, xstate, rc)
+  subroutine x_comp_get_config(xdata, xstate, rc)
     ! arguments
     type(ESMF_GridComp)                       :: xdata
     type(xdata_state), pointer, intent(inout) :: xstate
     integer, intent(out)                      :: rc
     ! local variables
-    character(len=64) :: attval
-    real              :: tmpReal
+    logical            :: isPresent
+    integer            :: stat
+    logical            :: check
+    type(ESMF_Config)  :: config
+    type(ESMF_HConfig) :: hconfig
+    type(ESMF_HConfig) :: xdatacfg
 
     rc = ESMF_SUCCESS
 
@@ -686,126 +697,56 @@ module esmx_data
       return
     endif
 
-    ! diagnostics
-    call ESMF_AttributeGet(xdata, name="write_final", value=attval, &
-      defaultValue="true", convention="NUOPC", purpose="Instance", rc=rc)
+    call ESMF_GridCompGet(xdata, configIsPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
-    attval = ESMF_UtilStringLowerCase(attval, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    xstate%write_final = (attval .eq. "true")
+    if (isPresent) then
+      ! get config from component
+      call ESMF_GridCompGet(xdata, config=config, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      ! access hconfig
+      call ESMF_ConfigGet(config, hconfig=hconfig, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      isPresent = ESMF_HConfigIsMap(hconfig, &
+        keyString=xstate%cname, rc=rc)
+      if (isPresent) then
+        ! access xdatacfg
+        xdatacfg = ESMF_HConfigCreateAt(hconfig, &
+          keyString=xstate%cname, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        call x_comp_read_output(xdatacfg, xstate, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        call x_comp_read_geom(xdatacfg, xstate, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        call x_comp_read_fields(xdatacfg, xstate, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        call ESMF_HConfigDestroy(xdatacfg, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+      endif ! xdatacfg
+    endif ! config
 
-    ! dimensions
-    call ESMF_AttributeGet(xdata, name="nx", value=attval, &
-      defaultValue="64", convention="NUOPC", purpose="Instance", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    xstate%nx = ESMF_UtilString2Int(attval, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    call ESMF_AttributeGet(xdata, name="ny", value=attval, &
-      defaultValue="32", convention="NUOPC", purpose="Instance", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    xstate%ny = ESMF_UtilString2Int(attval, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    call ESMF_AttributeGet(xdata, name="nz", value=attval, &
-      defaultValue="4", convention="NUOPC", purpose="Instance", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    xstate%nz = ESMF_UtilString2Int(attval, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-
-    ! coordinate system
-    call ESMF_AttributeGet(xdata, name="coordSys", value=attval, &
-      defaultValue="ESMF_COORDSYS_SPH_DEG", &
-      convention="NUOPC", purpose="Instance", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    attval = ESMF_UtilStringUpperCase(attval, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    select case (attval)
-      case ("ESMF_COORDSYS_CART")
-        xstate%coordSys = ESMF_COORDSYS_CART
-      case ("ESMF_COORDSYS_SPH_DEG")
-        xstate%coordSys = ESMF_COORDSYS_SPH_DEG
-      case ("ESMF_COORDSYS_SPH_RAD")
-        xstate%coordSys = ESMF_COORDSYS_SPH_RAD
-      case default
-        call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-          msg=trim(xstate%cname)//': invalid value - coordSys', &
-          line=__LINE__, file=__FILE__, rcToReturn=rc)
-        return
-    endselect
-
-    ! coordinates
-    call ESMF_AttributeGet(xdata, name="minx", value=attval, &
-      defaultValue="-126.0", convention="NUOPC", purpose="Instance", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    tmpReal = ESMF_UtilString2Real(attval, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    xstate%minx = real(tmpReal, ESMF_KIND_R8)
-    call ESMF_AttributeGet(xdata, name="maxx", value=attval, &
-      defaultValue="-64.0", convention="NUOPC", purpose="Instance", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    tmpReal = ESMF_UtilString2Real(attval, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    xstate%maxx = real(tmpReal, ESMF_KIND_R8)
-    call ESMF_AttributeGet(xdata, name="miny", value=attval, &
-      defaultValue="22", convention="NUOPC", purpose="Instance", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    tmpReal = ESMF_UtilString2Real(attval, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    xstate%miny = real(tmpReal, ESMF_KIND_R8)
-    call ESMF_AttributeGet(xdata, name="maxy", value=attval, &
-      defaultValue="50", convention="NUOPC", purpose="Instance", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    tmpReal = ESMF_UtilString2Real(attval, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    xstate%maxy = real(tmpReal, ESMF_KIND_R8)
-
-    ! field information filename
-    call ESMF_AttributeGet(xdata, name="field_file", value=attval, &
-      defaultValue="esmxRun.config", &
-      convention="NUOPC", purpose="Instance", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    xstate%field_file = attval
-
-    call x_comp_read_fields(xstate, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-
-  endsubroutine x_comp_get_attributes
+  endsubroutine x_comp_get_config
 
   !-----------------------------------------------------------------------------
 
-  subroutine x_comp_read_fields(xstate, rc)
+  subroutine x_comp_read_output(xdatacfg, xstate, rc)
     ! arguments
+    type(ESMF_HConfig)                        :: xdatacfg
     type(xdata_state), pointer, intent(inout) :: xstate
     integer, intent(out)                      :: rc
     ! local variables
-    integer                                     :: stat
-    integer                                     :: i
-    type(ESMF_Config)                           :: fieldsConfig
-    type(NUOPC_FreeFormat)                      :: attrFF
-    integer                                     :: lineCount
-    integer                                     :: tokenCount
-    character(NUOPC_FreeFormatLen), allocatable :: tokenList(:)
-    type(xdata_field), pointer                  :: xfield
-    real                                        :: tmpReal
+    logical            :: isPresent
+    integer            :: stat
+    logical            :: check
+    type(ESMF_HConfig) :: outcfg
+    character(len=64)  :: cfgval
 
     rc = ESMF_SUCCESS
 
@@ -816,157 +757,334 @@ module esmx_data
       return
     endif
 
-    ! load field_file into fieldsConfig
-    fieldsConfig = ESMF_ConfigCreate(rc=rc)
+    ! read output configuration
+    isPresent = ESMF_HConfigIsMap(xdatacfg, &
+      keyString="output", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
-    call ESMF_ConfigLoadFile(fieldsConfig, xstate%field_file, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-
-    ! read import fields from config
-    attrFF = NUOPC_FreeFormatCreate(fieldsConfig, &
-      label=trim(xstate%cname)//"_import_fields::", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    call NUOPC_FreeFormatGet(attrFF, lineCount=lineCount, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    do i=1, lineCount
-      nullify(xfield)
-      call NUOPC_FreeFormatGetLine(attrFF, line=i, &
-        tokenCount=tokenCount, rc=rc)
+    if (isPresent) then
+      ! access output
+      outcfg = ESMF_HConfigCreateAt(xdatacfg, &
+        keyString="output", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
-      if (tokenCount.ne.4) then
+      check = x_comp_hconfig_check(outcfg, &
+        (/"write_final"/), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      if (.not. check) then
         call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-          msg=trim(xstate%cname)//": Malformed import field "// &
-            " 'STANDARD_NAME' 'DIMENSIONS' 'MIN_RANGE' 'MAX_RANGE'"// &
-            " in file: "//trim(xstate%field_file), &
-          line=__LINE__,file=__FILE__, rcToReturn=rc)
+          msg=trim(xstate%cname)//": valid options for output " //&
+          "(write_final)", &
+        line=__LINE__,file=__FILE__, rcToReturn=rc)
         return
       endif
-      allocate(tokenList(tokenCount), stat=stat)
-      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-        msg=trim(xstate%cname)//': Memory allocation failed.', &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-      call NUOPC_FreeFormatGetLine(attrFF, line=i, tokenList=tokenList, rc=rc)
+      ! options
+      xstate%write_final = x_comp_hconfig_logical(outcfg, "write_final", &
+        defaultValue=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
-      allocate(xfield, stat=stat)
-      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-        msg=trim(xstate%cname)//': Memory allocation failed.', &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-      xfield%stdn = tokenList(1)
-      xfield%fdim = ESMF_UtilString2Int(tokenList(2), rc=rc)
+      call ESMF_HConfigDestroy(outcfg, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
-      xfield%okay = .false.
-      xfield%lsum = (/filv, 0.0_ESMF_KIND_R8/)
-      xfield%lmin = filv
-      xfield%lmax = filv
-      xfield%gsum = (/filv, 0.0_ESMF_KIND_R8/)
-      xfield%gmin = filv
-      xfield%gmax = filv
-      xfield%gavg = filv
-      tmpReal = ESMF_UtilString2Real(tokenList(3), rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return
-      xfield%minv = real(tmpReal, ESMF_KIND_R8)
-      tmpReal = ESMF_UtilString2Real(tokenList(4), rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return
-      xfield%maxv = real(tmpReal, ESMF_KIND_R8)
-      xfield%dflt = filv
-      xfield%nfld => null()
-      deallocate(tokenList)
-      if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
-        msg=trim(xstate%cname)//': Memory deallocation failed.', &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-      if (.not. associated(xstate%imp_flds_head)) then
-        xstate%imp_flds_head => xfield
-        xstate%imp_flds_tail => xfield
-      else
-        xstate%imp_flds_tail%nfld => xfield
-        xstate%imp_flds_tail => xfield
-      endif
-    enddo
-    call NUOPC_FreeFormatDestroy(attrFF, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return
+    endif ! outcfg
 
-    ! read export fields from config
-    attrFF = NUOPC_FreeFormatCreate(fieldsConfig, &
-      label=trim(xstate%cname)//"_export_fields::", rc=rc)
+  endsubroutine x_comp_read_output
+
+  !-----------------------------------------------------------------------------
+
+  subroutine x_comp_read_geom(xdatacfg, xstate, rc)
+    ! arguments
+    type(ESMF_HConfig)                        :: xdatacfg
+    type(xdata_state), pointer, intent(inout) :: xstate
+    integer, intent(out)                      :: rc
+    ! local variables
+    logical            :: isPresent
+    integer            :: stat
+    logical            :: check
+    type(ESMF_HConfig) :: geomcfg
+    character(len=64)  :: cfgval
+
+    rc = ESMF_SUCCESS
+
+    if (.not. associated(xstate)) then
+      call ESMF_LogSetError(ESMF_RC_PTR_NOTALLOC, &
+        msg='XDATA: xstate has not been associated', &
+        line=__LINE__, file=__FILE__, rcToReturn=rc)
+      return
+    endif
+
+    ! read geom configuration
+    isPresent = ESMF_HConfigIsMap(xdatacfg, &
+      keyString="geom", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
-    call NUOPC_FreeFormatGet(attrFF, lineCount=lineCount, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    do i=1, lineCount
-      nullify(xfield)
-      call NUOPC_FreeFormatGetLine(attrFF, line=i, &
-        tokenCount=tokenCount, rc=rc)
+    if (isPresent) then
+      ! access geom
+      geomcfg = ESMF_HConfigCreateAt(xdatacfg, &
+        keyString="geom", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
-      if (tokenCount.ne.3) then
+      check = x_comp_hconfig_check(geomcfg, &
+        (/"nx      ", &
+          "ny      ", &
+          "nz      ", &
+          "coordSys", &
+          "minx    ", &
+          "maxx    ", &
+          "miny    ", &
+          "maxy    "/), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      if (.not. check) then
         call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-          msg=trim(xstate%cname)//": Malformed export field "// &
-            " 'STANDARD_NAME' 'DIMENSIONS' 'FILL_VALUE'"// &
-            " in file: "//trim(xstate%field_file), &
-          line=__LINE__,file=__FILE__, rcToReturn=rc)
+          msg=trim(xstate%cname)//": valid options for geom " //&
+          "(nx, ny, nz, coordSys, minx, maxx, miny, maxy)", &
+        line=__LINE__,file=__FILE__, rcToReturn=rc)
         return
       endif
-      allocate(tokenList(tokenCount), stat=stat)
-      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-        msg=trim(xstate%cname)//': Memory allocation failed.', &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-      call NUOPC_FreeFormatGetLine(attrFF, line=i, tokenList=tokenList, rc=rc)
+      ! dimensions
+      xstate%nx = x_comp_hconfig_i4(geomcfg, "nx", &
+        defaultValue=64, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
-      allocate(xfield, stat=stat)
-      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-        msg=trim(xstate%cname)//': Memory allocation failed.', &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-      xfield%stdn = tokenList(1)
-      xfield%fdim = ESMF_UtilString2Int(tokenList(2), rc=rc)
+      xstate%ny = x_comp_hconfig_i4(geomcfg, "ny", &
+        defaultValue=32, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
-      xfield%okay = .false.
-      xfield%lsum = (/filv, 0.0_ESMF_KIND_R8/)
-      xfield%lmin = filv
-      xfield%lmax = filv
-      xfield%gsum = (/filv, 0.0_ESMF_KIND_R8/)
-      xfield%gmin = filv
-      xfield%gmax = filv
-      xfield%gavg = filv
-      xfield%minv = 0.0_ESMF_KIND_R8
-      xfield%maxv = 0.0_ESMF_KIND_R8
-      tmpReal = ESMF_UtilString2Real(tokenList(3), rc=rc)
+      xstate%nz = x_comp_hconfig_i4(geomcfg, "nz", &
+        defaultValue=4, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
-      xfield%dflt = real(tmpReal, ESMF_KIND_R8)
-      xfield%nfld => null()
-      deallocate(tokenList)
-      if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
-        msg=trim(xstate%cname)//': Memory deallocation failed.', &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-      if (.not. associated(xstate%exp_flds_head)) then
-        xstate%exp_flds_head => xfield
-        xstate%exp_flds_tail => xfield
-      else
-        xstate%exp_flds_tail%nfld => xfield
-        xstate%exp_flds_tail => xfield
-      endif
-    enddo
-    call NUOPC_FreeFormatDestroy(attrFF, rc=rc)
+      ! coordinate system
+      cfgval = x_comp_hconfig_str(geomcfg, "coordSys", &
+        defaultValue="ESMF_COORDSYS_SPH_DEG", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
+      cfgval = ESMF_UtilStringUpperCase(cfgval, rc=rc)
+      select case (cfgval)
+        case ("ESMF_COORDSYS_CART")
+          xstate%coordSys = ESMF_COORDSYS_CART
+        case ("ESMF_COORDSYS_SPH_DEG")
+          xstate%coordSys = ESMF_COORDSYS_SPH_DEG
+        case ("ESMF_COORDSYS_SPH_RAD")
+          xstate%coordSys = ESMF_COORDSYS_SPH_RAD
+        case default
+          call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+            msg=trim(xstate%cname)//': invalid value - coordSys', &
+            line=__LINE__, file=__FILE__, rcToReturn=rc)
+          return
+      endselect
+      ! coordinates
+      xstate%minx = x_comp_hconfig_r8(geomcfg, "minx", &
+        defaultValue=-126.0_ESMF_KIND_R8, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      xstate%maxx = x_comp_hconfig_r8(geomcfg, "maxx", &
+        defaultValue=-64.0_ESMF_KIND_R8, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      xstate%miny = x_comp_hconfig_r8(geomcfg, "miny", &
+        defaultValue=22.0_ESMF_KIND_R8, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      xstate%maxy = x_comp_hconfig_r8(geomcfg, "maxy", &
+        defaultValue=50.0_ESMF_KIND_R8, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      call ESMF_HConfigDestroy(geomcfg, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+    endif ! geomcfg
 
-    ! clean up
-    call ESMF_ConfigDestroy(fieldsConfig, rc=rc)
+  endsubroutine x_comp_read_geom
+
+  !-----------------------------------------------------------------------------
+
+  subroutine x_comp_read_fields(xdatacfg, xstate, rc)
+    ! arguments
+    type(ESMF_HConfig)                        :: xdatacfg
+    type(xdata_state), pointer, intent(inout) :: xstate
+    integer, intent(out)                      :: rc
+    ! local variables
+    logical                    :: isPresent
+    integer                    :: stat
+    logical                    :: check
+    type(ESMF_HConfig)         :: flistcfg
+    type(ESMF_HConfig)         :: fieldcfg
+    type(ESMF_HConfigIter)     :: flistcur
+    type(ESMF_HConfigIter)     :: flistbeg
+    type(ESMF_HConfigIter)     :: flistend
+    character(ESMF_MAXSTR)     :: fname
+    type(xdata_field), pointer :: xfield
+
+    rc = ESMF_SUCCESS
+
+    if (.not. associated(xstate)) then
+      call ESMF_LogSetError(ESMF_RC_PTR_NOTALLOC, &
+        msg='XDATA: xstate has not been associated', &
+        line=__LINE__, file=__FILE__, rcToReturn=rc)
+      return
+    endif
+
+    ! read import field configuration
+    isPresent = ESMF_HConfigIsMap(xdatacfg, &
+      keyString="importFields", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
+    if (isPresent) then
+      ! access flistcfg(import)
+      flistcfg = ESMF_HConfigCreateAt(xdatacfg, &
+        keyString="importFields", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
+      flistbeg = ESMF_HConfigIterBegin(flistcfg, rc=rc)
+      flistend = ESMF_HConfigIterEnd(flistcfg, rc=rc)
+      flistcur = flistbeg
+      do while (ESMF_HConfigIterLoop(flistcur, flistbeg, flistend, rc=rc))
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        fname = ESMF_HConfigAsStringMapKey(flistcur, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        ! access fieldcfg
+        fieldcfg = ESMF_HConfigCreateAt(flistcfg, keyString=fname, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        check = x_comp_hconfig_check(fieldcfg, &
+          (/"dim", "min", "max"/), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        if (.not. check) then
+          call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+            msg=trim(xstate%cname)//": ("//trim(fname)//")" //&
+            " valid options for importFields (dim, min, max)", &
+          line=__LINE__,file=__FILE__, rcToReturn=rc)
+          return
+        endif
+        nullify(xfield)
+        allocate(xfield, stat=stat)
+        if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+          msg=trim(xstate%cname)//': Memory allocation failed.', &
+          line=__LINE__, &
+          file=__FILE__, &
+          rcToReturn=rc)) return
+        xfield%stdn = fname
+        xfield%fdim = x_comp_hconfig_i4(fieldcfg, "dim", &
+          defaultValue=2, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        xfield%okay = .false.
+        xfield%lsum = (/filv, 0.0_ESMF_KIND_R8/)
+        xfield%lmin = filv
+        xfield%lmax = filv
+        xfield%gsum = (/filv, 0.0_ESMF_KIND_R8/)
+        xfield%gmin = filv
+        xfield%gmax = filv
+        xfield%gavg = filv
+        xfield%minv = x_comp_hconfig_r8(fieldcfg, "min", &
+          defaultValue=0.0_ESMF_KIND_R8, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        xfield%maxv = x_comp_hconfig_r8(fieldcfg, "max", &
+          defaultValue=0.0_ESMF_KIND_R8, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        xfield%dflt = filv
+        xfield%nfld => null()
+        if (.not. associated(xstate%imp_flds_head)) then
+          xstate%imp_flds_head => xfield
+          xstate%imp_flds_tail => xfield
+        else
+          xstate%imp_flds_tail%nfld => xfield
+          xstate%imp_flds_tail => xfield
+        endif
+        call ESMF_HConfigDestroy(fieldcfg, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+      enddo ! fieldcfg
+      call ESMF_HConfigDestroy(flistcfg, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+    endif ! flistcfg
+
+    ! read export field configuration
+    isPresent = ESMF_HConfigIsMap(xdatacfg, &
+      keyString="exportFields", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
+    if (isPresent) then
+      ! access flistcfg(export)
+      flistcfg = ESMF_HConfigCreateAt(xdatacfg, &
+        keyString="exportFields", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      flistbeg = ESMF_HConfigIterBegin(flistcfg, rc=rc)
+      flistend = ESMF_HConfigIterEnd(flistcfg, rc=rc)
+      flistcur = flistbeg
+      do while (ESMF_HConfigIterLoop(flistcur, flistbeg, flistend, rc=rc))
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        fname = ESMF_HConfigAsStringMapKey(flistcur, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        ! access fieldcfg
+        fieldcfg = ESMF_HConfigCreateAt(flistcfg, keyString=fname, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        check = x_comp_hconfig_check(fieldcfg, &
+          (/"dim", "val"/), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        if (.not. check) then
+          call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+            msg=trim(xstate%cname)//": ("//trim(fname)//")" //&
+            " valid options for exportFields (dim, val)", &
+          line=__LINE__,file=__FILE__, rcToReturn=rc)
+          return
+        endif
+        nullify(xfield)
+        allocate(xfield, stat=stat)
+        if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+          msg=trim(xstate%cname)//': Memory allocation failed.', &
+          line=__LINE__, &
+          file=__FILE__, &
+          rcToReturn=rc)) return
+        xfield%stdn = fname
+        xfield%fdim = x_comp_hconfig_i4(fieldcfg, "dim", &
+          defaultValue=2, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        xfield%okay = .false.
+        xfield%lsum = (/filv, 0.0_ESMF_KIND_R8/)
+        xfield%lmin = filv
+        xfield%lmax = filv
+        xfield%gsum = (/filv, 0.0_ESMF_KIND_R8/)
+        xfield%gmin = filv
+        xfield%gmax = filv
+        xfield%gavg = filv
+        xfield%minv = 0.0_ESMF_KIND_R8
+        xfield%maxv = 0.0_ESMF_KIND_R8
+        xfield%dflt = x_comp_hconfig_r8(fieldcfg, "val", &
+          defaultValue=0.0_ESMF_KIND_R8, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        xfield%nfld => null()
+        if (.not. associated(xstate%exp_flds_head)) then
+          xstate%exp_flds_head => xfield
+          xstate%exp_flds_tail => xfield
+        else
+          xstate%exp_flds_tail%nfld => xfield
+          xstate%exp_flds_tail => xfield
+        endif
+        call ESMF_HConfigDestroy(fieldcfg, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+      enddo ! fieldcfg
+      call ESMF_HConfigDestroy(flistcfg, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+    endif ! flistcfg
 
   endsubroutine x_comp_read_fields
 
@@ -1146,6 +1264,7 @@ module esmx_data
     type(ESMF_State), intent(inout)  :: state
     integer, intent(out)             :: rc
     ! local variables
+    integer :: stat
 
     rc = ESMF_SUCCESS
 
@@ -1159,17 +1278,26 @@ module esmx_data
     if (.not. associated(xfield)) then
       call ESMF_LogSetError(ESMF_RC_MEM_ALLOCATE, &
         msg=trim(xstate%cname)//": xfield error", &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)
+        line=__LINE__, &
+        file=__FILE__, &
+        rcToReturn=rc)
       return
     endif
 
     if (associated(xfield%efld)) then
       call ESMF_LogSetError(ESMF_RC_MEM_ALLOCATE, &
         msg=trim(xstate%cname)//": ESMF_Field error - "//trim(xfield%stdn), &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)
+        line=__LINE__, &
+        file=__FILE__, &
+        rcToReturn=rc)
       return
     endif
-    allocate(xfield%efld)
+    allocate(xfield%efld, stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg=trim(xstate%cname)//': Memory allocation failed.', &
+      line=__LINE__, &
+      file=__FILE__, &
+      rcToReturn=rc)) return
 
     if (xfield%fdim .eq. 3) then
       xfield%efld = ESMF_FieldCreate(name=trim(xfield%stdn), grid=xstate%grid, &
@@ -1280,5 +1408,261 @@ module esmx_data
   endsubroutine x_comp_check_field
 
   !-----------------------------------------------------------------------------
+
+  function x_comp_hconfig_check(hconfig, options, caseinsensitive, rc)
+    ! return value
+    logical :: x_comp_hconfig_check
+    ! arguments
+    type(ESMF_HConfig), intent(in) :: hconfig
+    character(*), intent(in)       :: options(:)
+    logical, intent(in), optional  :: caseinsensitive
+    integer, intent(out)           :: rc
+    ! local variables
+    integer                             :: i
+    integer                             :: stat
+    logical                             :: local_ci
+    type(ESMF_HConfigIter)              :: listcur, listbeg, listend
+    character(ESMF_MAXSTR)              :: key
+    character(ESMF_MAXSTR), allocatable :: options_ci(:)
+
+    rc = ESMF_SUCCESS
+
+    x_comp_hconfig_check = ESMF_HConfigIsMap(hconfig, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
+    if (.not. x_comp_hconfig_check) then
+      call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+        msg="XDATA: HConfig is not Map", &
+        line=__LINE__, file=__FILE__, rcToReturn=rc)
+      return
+    endif
+
+    if (present(caseinsensitive)) then
+      local_ci = caseinsensitive
+    else
+      local_ci = .false.
+    endif
+
+    listbeg = ESMF_HConfigIterBegin(hconfig, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
+    listend = ESMF_HConfigIterEnd(hconfig, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
+    listcur = listbeg
+    if (local_ci) then
+      allocate(options_ci(size(options)), stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg='XDATA: Memory allocation failed.', &
+        line=__LINE__, &
+        file=__FILE__, &
+        rcToReturn=rc)) return
+      do i=1, size(options)
+        options_ci(i) = ESMF_UtilStringLowerCase(options(i), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+      enddo
+      do while (ESMF_HConfigIterLoop(listcur, listbeg, listend, rc=rc))
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        key = ESMF_HConfigAsStringMapKey(listcur, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        key = ESMF_UtilStringLowerCase(key, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        if (.not. any(key .eq. options_ci)) then
+          x_comp_hconfig_check = .false.
+          return
+        endif
+      enddo
+      deallocate(options_ci)
+    else
+      do while (ESMF_HConfigIterLoop(listcur, listbeg, listend, rc=rc))
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        key = ESMF_HConfigAsStringMapKey(listcur, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        if (.not. any(key .eq. options)) then
+          x_comp_hconfig_check = .false.
+          return
+        endif
+      enddo
+      x_comp_hconfig_check = .true.
+    endif
+
+  endfunction x_comp_hconfig_check
+
+  !-----------------------------------------------------------------------------
+
+  function x_comp_hconfig_i4(hconfig, key, defaultValue, rc)
+    ! return value
+    integer(ESMF_KIND_I4) :: x_comp_hconfig_i4
+    ! arguments
+    type(ESMF_HConfig), intent(in)              :: hconfig
+    character(*), intent(in)                    :: key
+    integer(ESMF_KIND_I4), intent(in), optional :: defaultValue
+    integer, intent(out)                        :: rc
+    ! local variables
+    logical :: isPresent
+    logical :: check
+
+    rc = ESMF_SUCCESS
+    x_comp_hconfig_i4 = 0
+
+    isPresent = ESMF_HConfigIsMap(hconfig, keyString=key, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
+
+    if (isPresent) then
+      x_comp_hconfig_i4 = ESMF_HConfigAsI4(hconfig, keyString=key, &
+        asOkay=check, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      if (.not.check) then
+        call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+          msg="XDATA: Value cannot be converted to I4 - "//trim(key), &
+          line=__LINE__, file=__FILE__, rcToReturn=rc)
+        return
+      endif
+    elseif (present(defaultValue)) then
+      x_comp_hconfig_i4 = defaultValue
+    else
+      call ESMF_LogSetError(ESMF_RC_NOT_FOUND, &
+        msg="XDATA: Key not found - "//trim(key), &
+        line=__LINE__, file=__FILE__, rcToReturn=rc)
+      return
+    endif
+  endfunction x_comp_hconfig_i4
+
+  !-----------------------------------------------------------------------------
+
+  function x_comp_hconfig_r8(hconfig, key, defaultValue, rc)
+    ! return value
+    real(ESMF_KIND_R8) :: x_comp_hconfig_r8
+    ! arguments
+    type(ESMF_HConfig), intent(in)           :: hconfig
+    character(*), intent(in)                 :: key
+    real(ESMF_KIND_R8), intent(in), optional :: defaultValue
+    integer, intent(out)                     :: rc
+    ! local variables
+    logical :: isPresent
+    logical :: check
+
+    rc = ESMF_SUCCESS
+    x_comp_hconfig_r8 = 0.0_ESMF_KIND_R8
+
+    isPresent = ESMF_HConfigIsDefined(hconfig, keyString=key, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
+
+    if (isPresent) then
+      x_comp_hconfig_r8 = ESMF_HConfigAsR8(hconfig, keyString=key, &
+        asOkay=check, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      if (.not.check) then
+        call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+          msg="XDATA: Value cannot be converted to R8 - "//trim(key), &
+          line=__LINE__, file=__FILE__, rcToReturn=rc)
+        return
+      endif
+    elseif (present(defaultValue)) then
+      x_comp_hconfig_r8 = defaultValue
+    else
+      call ESMF_LogSetError(ESMF_RC_NOT_FOUND, &
+        msg="XDATA: Key not found - "//trim(key), &
+        line=__LINE__, file=__FILE__, rcToReturn=rc)
+      return
+    endif
+  endfunction x_comp_hconfig_r8
+
+  !-----------------------------------------------------------------------------
+
+  function x_comp_hconfig_str(hconfig, key, defaultValue, rc)
+    ! return value
+    character(ESMF_MAXSTR) :: x_comp_hconfig_str
+    ! arguments
+    type(ESMF_HConfig), intent(in)     :: hconfig
+    character(*), intent(in)           :: key
+    character(*), intent(in), optional :: defaultValue
+    integer, intent(out)               :: rc
+    ! local variables
+    logical :: isPresent
+    logical :: check
+
+    rc = ESMF_SUCCESS
+    x_comp_hconfig_str = ' '
+
+    isPresent = ESMF_HConfigIsDefined(hconfig, keyString=key, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
+
+    if (isPresent) then
+      x_comp_hconfig_str = ESMF_HConfigAsString(hconfig, keyString=key, &
+        asOkay=check, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      if (.not.check) then
+        call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+          msg="XDATA: Value cannot be converted to String - "//trim(key), &
+          line=__LINE__, file=__FILE__, rcToReturn=rc)
+        return
+      endif
+    elseif (present(defaultValue)) then
+      x_comp_hconfig_str = defaultValue
+    else
+      call ESMF_LogSetError(ESMF_RC_NOT_FOUND, &
+        msg="XDATA: Key not found - "//trim(key), &
+        line=__LINE__, file=__FILE__, rcToReturn=rc)
+      return
+    endif
+  endfunction x_comp_hconfig_str
+
+  !-----------------------------------------------------------------------------
+
+  function x_comp_hconfig_logical(hconfig, key, defaultValue, rc)
+    ! return value
+    logical :: x_comp_hconfig_logical
+    ! arguments
+    type(ESMF_HConfig), intent(in) :: hconfig
+    character(*), intent(in)       :: key
+    logical, intent(in), optional  :: defaultValue
+    integer, intent(out)           :: rc
+    ! local variables
+    logical :: isPresent
+    logical :: check
+
+    rc = ESMF_SUCCESS
+    x_comp_hconfig_logical = .false.
+
+    isPresent = ESMF_HConfigIsDefined(hconfig, keyString=key, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
+
+    if (isPresent) then
+      x_comp_hconfig_logical = ESMF_HConfigAsLogical(hconfig, keyString=key, &
+        asOkay=check, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      if (.not.check) then
+        call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+          msg="XDATA: Value cannot be converted to Logical - "//trim(key), &
+          line=__LINE__, file=__FILE__, rcToReturn=rc)
+        return
+      endif
+    elseif (present(defaultValue)) then
+      x_comp_hconfig_logical = defaultValue
+    else
+      call ESMF_LogSetError(ESMF_RC_NOT_FOUND, &
+        msg="XDATA: Key not found - "//trim(key), &
+        line=__LINE__, file=__FILE__, rcToReturn=rc)
+      return
+    endif
+  endfunction x_comp_hconfig_logical
+
+  !-----------------------------------------------------------------------------
+
 
 endmodule esmx_data

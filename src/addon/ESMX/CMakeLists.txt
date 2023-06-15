@@ -26,7 +26,7 @@ target_link_libraries(esmx_app PUBLIC esmx_driver)
 
 # Install executable
 install(
-  TARGETS esmx
+  TARGETS esmx_app
   EXPORT esmx
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib

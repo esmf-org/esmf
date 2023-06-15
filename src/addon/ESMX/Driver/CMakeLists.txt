@@ -449,37 +449,38 @@ foreach(CMP IN ITEMS ${COMPS})
       message(WARNING "No test directory provided for ${CMP}")
     elseif(NOT EXISTS ${CMP_TEST_DIR})
       message(FATAL_ERROR "Cannot find test directory ${CMP_TEST_DIR}")
-    endif()
-    if(CMP_TEST_EXE STREQUAL "")
-      set(CMP_TEST_EXE ${ESMX_TEST_EXE})
-    endif()
-    if(CMP_TEST_TASKS STREQUAL "")
-      set(CMP_TEST_TASKS ${ESMX_TEST_TASKS})
     else()
-      set(CMP_TEST_TASKS -np ${CMP_TEST_TASKS})
+      if(CMP_TEST_EXE STREQUAL "")
+        set(CMP_TEST_EXE ${ESMX_TEST_EXE})
+      endif()
+      if(CMP_TEST_TASKS STREQUAL "")
+        set(CMP_TEST_TASKS ${ESMX_TEST_TASKS})
+      else()
+        set(CMP_TEST_TASKS -np ${CMP_TEST_TASKS})
+      endif()
+
+      # copy test files
+      file(COPY ${CMP_TEST_DIR}/ DESTINATION ${ESMX_TEST_DIR}/cmp/${CMP})
+      file(CREATE_LINK ${CMAKE_BINARY_DIR}/esmx_app
+        ${ESMX_TEST_DIR}/cmp/${CMP}/esmx_app
+        SYMBOLIC
+      )
+
+      # find test application
+      find_program(FND_TEST_EXE
+        NAMES ${CMP_TEST_EXE}
+        NO_CACHE
+      )
+      if(NOT FND_TEST_EXE)
+        message(FATAL_ERROR "Cannot find test executable: ${CMP_TEST_EXE}")
+      endif()
+
+      # add test
+      add_test(NAME esmx-cmp-${CMP}
+        COMMAND ${FND_TEST_EXE} ${CMP_TEST_TASKS} ./esmx_app
+        WORKING_DIRECTORY ${ESMX_TEST_DIR}/cmp/${CMP})
+      unset(FND_TEST_EXE)
     endif()
-
-    # copy test files
-    file(COPY ${CMP_TEST_DIR}/ DESTINATION ${ESMX_TEST_DIR}/cmp/${CMP})
-    file(CREATE_LINK ${CMAKE_BINARY_DIR}/esmx
-      ${ESMX_TEST_DIR}/cmp/${CMP}/esmx
-      SYMBOLIC
-    )
-
-    # find test application
-    find_program(FND_TEST_EXE
-      NAMES ${CMP_TEST_EXE}
-      NO_CACHE
-    )
-    if(NOT FND_TEST_EXE)
-      message(FATAL_ERROR "Cannot find test executable: ${CMP_TEST_EXE}")
-    endif()
-
-    # add test
-    add_test(NAME esmx-cmp-${CMP}
-      COMMAND ${FND_TEST_EXE} ${CMP_TEST_TASKS} ./esmx
-      WORKING_DIRECTORY ${ESMX_TEST_DIR}/cmp/${CMP})
-    unset(FND_TEST_EXE)
   endif()
 
   # unset variables used for component
@@ -517,8 +518,8 @@ if(ESMX_TEST)
 
     # copy test files
     file(COPY ${TST_DIR}/ DESTINATION ${ESMX_TEST_DIR}/sys/${TST})
-    file(CREATE_LINK ${CMAKE_BINARY_DIR}/esmx
-      ${ESMX_TEST_DIR}/sys/${TST}/esmx
+    file(CREATE_LINK ${CMAKE_BINARY_DIR}/esmx_app
+      ${ESMX_TEST_DIR}/sys/${TST}/esmx_app
       SYMBOLIC
     )
 
@@ -533,7 +534,7 @@ if(ESMX_TEST)
 
     # add test
     add_test(NAME esmx-sys-${TST}
-      COMMAND ${FND_TST_EXE} ${TST_TASKS} ./esmx
+      COMMAND ${FND_TST_EXE} ${TST_TASKS} ./esmx_app
       WORKING_DIRECTORY ${ESMX_TEST_DIR}/sys/${TST})
     unset(FND_TST_EXE)
 
