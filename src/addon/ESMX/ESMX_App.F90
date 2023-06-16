@@ -30,7 +30,8 @@ program ESMX_App
 
   ! Initialize ESMF
   configKey = ["ESMX", "App "]
-  call ESMF_Initialize(configFileName="esmxRun.yaml", configKey=configKey, &
+  call ESMF_Initialize(configFilenameFromArgNum=1, & ! arg 1 to spec alt. config
+    configFileName="esmxRun.yaml", configKey=configKey, &
     config=config, defaultCalkind=ESMF_CALKIND_GREGORIAN, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &
