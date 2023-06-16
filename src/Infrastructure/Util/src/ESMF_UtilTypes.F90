@@ -1508,7 +1508,7 @@ end interface
 ! function to compare two ESMF_AttReconcileFlag types
 
 impure elemental function ESMF_atreceq(atrec1, atrec2)
-  impure elemental logical ESMF_atreceq
+  logical ESMF_atreceq
   type(ESMF_AttReconcileFlag), intent(in) :: atrec1, atrec2
 
   ESMF_atreceq = (atrec1%value == atrec2%value)
@@ -1517,15 +1517,15 @@ end function ESMF_atreceq
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_Status flags to see if they're the same or not
 
-impure elemental recursive function ESMF_sfeq(sf1, sf2) result (sfeq)
- impure elemental logical sfeq
+recursive function ESMF_sfeq(sf1, sf2) result (sfeq)
+ logical sfeq
  type(ESMF_Status), intent(in) :: sf1, sf2
 
  sfeq = (sf1%status == sf2%status)
 end function
 
-impure elemental recursive function ESMF_sfne(sf1, sf2) result (sfne)
- logical sfne
+recursive function ESMF_sfne(sf1, sf2) result (sfne)
+ logical :: sfne
  type(ESMF_Status), intent(in) :: sf1, sf2
 
  sfne = (sf1%status /= sf2%status)
