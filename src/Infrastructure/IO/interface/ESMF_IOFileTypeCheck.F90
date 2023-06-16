@@ -65,12 +65,12 @@
 !   ESMF_FILEFORMAT_MOSAIC (GRIDSPEC Mosaic file) and ESMF_FILEFORMAT_TILE (GRIDSPEC Tile file)
 !
 !   The rule to check the file format is as follows:
-!   ESMF_FILEFORMAT_SCRIP:  variables grid_corner_lon and grid_corner_lat exists
 !   ESMF_FILEFORMAT_UGRID: a variable with attribute "cf_role" or "standard_name" set to "mesh_topology"
-!   ESMF_FILEFORMAT_ESMFMESH: variables nodeCoords and elementConn exists
-!   ESMF_FILEFORMAT_CFGRID: variables with attributes "degree_north" and "degree_east" exists
 !   ESMF_FILEFORMAT_MOSAIC: a variable with attribute "standard_name" set to "grid_mosaic_spec"
-!   ESMF_FILEFORMAT_TILE:  a varilable with attribute "standard_name" set to "grid_tile_spec"
+!   ESMF_FILEFORMAT_TILE:  a variable with attribute "standard_name" set to "grid_tile_spec"
+!   ESMF_FILEFORMAT_ESMFMESH: variables nodeCoords and elementConn exist
+!   ESMF_FILEFORMAT_SCRIP:  variables grid_corner_lon and grid_corner_lat exist
+!   ESMF_FILEFORMAT_CFGRID: variables with attributes "degree_north" and "degree_east" (or similar) exist, and other formats aren't matched
 ! -----------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FileTypeCheck"
@@ -192,7 +192,7 @@
           endif
         endif
 
-        ! Check the variable names to determin if it is SCRIP or ESMFMESH
+        ! Check the variable names to determine if it is SCRIP or ESMFMESH
         ncStatus = nf90_inquire_variable(gridid, i, name=attvalue)
         errmsg = 'nf90_inquire_variable failed '//trim(filename)
         if (CDFCheckError (ncStatus, &
@@ -211,10 +211,10 @@
         endif
      enddo
 
-     if (foundlon .and. foundlat) then
-         filetype = ESMF_FILEFORMAT_GRIDSPEC
-         rc=ESMF_SUCCESS
-         goto 1000
+     if (foundesmfcoord .and. foundesmfconn) then
+        filetype = ESMF_FILEFORMAT_ESMFMESH
+        rc=ESMF_SUCCESS
+        goto 1000
      endif
 
      if (foundscriplon .and. foundscriplat) then
@@ -223,10 +223,10 @@
          goto 1000
      endif
 
-     if (foundesmfcoord .and. foundesmfconn) then
-         filetype = ESMF_FILEFORMAT_ESMFMESH
-         rc=ESMF_SUCCESS
-         goto 1000
+     if (foundlon .and. foundlat) then
+        filetype = ESMF_FILEFORMAT_CFGRID
+        rc=ESMF_SUCCESS
+        goto 1000
      endif
 
 1000 continue
