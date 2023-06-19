@@ -56,7 +56,7 @@ program ESMF_IO_FileTypeCheckUTest
   !EX_UTest
   call ESMF_FileTypeCheck("test_sph_3x3_scrip.nc", fileType, rc=rc)
   write(name, *) "Detection of SCRIP grid file succeeds"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+#if (defined ESMF_NETCDF || defined ESMF_PNETCDF)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -65,7 +65,7 @@ program ESMF_IO_FileTypeCheckUTest
 #endif
   !EX_UTest
   write(name, *) "Detection of SCRIP grid file returns correct value"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+#if (defined ESMF_NETCDF || defined ESMF_PNETCDF)
   write(failMsg, *) "Returned wrong file type"
   call ESMF_Test(fileType == ESMF_FILEFORMAT_SCRIP, name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -78,7 +78,7 @@ program ESMF_IO_FileTypeCheckUTest
   !EX_UTest
   call ESMF_FileTypeCheck("test_sph_3x3_ugrid.nc", fileType, rc=rc)
   write(name, *) "Detection of UGRID grid file succeeds"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+#if (defined ESMF_NETCDF || defined ESMF_PNETCDF)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -87,7 +87,7 @@ program ESMF_IO_FileTypeCheckUTest
 #endif
   !EX_UTest
   write(name, *) "Detection of UGRID grid file returns correct value"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+#if (defined ESMF_NETCDF || defined ESMF_PNETCDF)
   write(failMsg, *) "Returned wrong file type"
   call ESMF_Test(fileType == ESMF_FILEFORMAT_UGRID, name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -100,7 +100,7 @@ program ESMF_IO_FileTypeCheckUTest
   !EX_UTest
   call ESMF_FileTypeCheck("test_sph_3x3_esmf.nc", fileType, rc=rc)
   write(name, *) "Detection of ESMFMESH grid file succeeds"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+#if (defined ESMF_NETCDF || defined ESMF_PNETCDF)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -109,7 +109,7 @@ program ESMF_IO_FileTypeCheckUTest
 #endif
   !EX_UTest
   write(name, *) "Detection of ESMFMESH grid file returns correct value"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+#if (defined ESMF_NETCDF || defined ESMF_PNETCDF)
   write(failMsg, *) "Returned wrong file type"
   call ESMF_Test(fileType == ESMF_FILEFORMAT_ESMFMESH, name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -122,7 +122,7 @@ program ESMF_IO_FileTypeCheckUTest
   !EX_UTest
   call ESMF_FileTypeCheck("GRIDSPEC_1x1_subset.nc", fileType, rc=rc)
   write(name, *) "Detection of GRIDSPEC grid file succeeds"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+#if (defined ESMF_NETCDF || defined ESMF_PNETCDF)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -131,7 +131,7 @@ program ESMF_IO_FileTypeCheckUTest
 #endif
   !EX_UTest
   write(name, *) "Detection of GRIDSPEC grid file returns correct value"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+#if (defined ESMF_NETCDF || defined ESMF_PNETCDF)
   write(failMsg, *) "Returned wrong file type"
   call ESMF_Test(fileType == ESMF_FILEFORMAT_GRIDSPEC, name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -144,7 +144,7 @@ program ESMF_IO_FileTypeCheckUTest
   !EX_UTest
   call ESMF_FileTypeCheck("C48_mosaic.nc", fileType, rc=rc)
   write(name, *) "Detection of MOSAIC grid file succeeds"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+#if (defined ESMF_NETCDF || defined ESMF_PNETCDF)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -153,7 +153,7 @@ program ESMF_IO_FileTypeCheckUTest
 #endif
   !EX_UTest
   write(name, *) "Detection of MOSAIC grid file returns correct value"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+#if (defined ESMF_NETCDF || defined ESMF_PNETCDF)
   write(failMsg, *) "Returned wrong file type"
   call ESMF_Test(fileType == ESMF_FILEFORMAT_MOSAIC, name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -166,7 +166,7 @@ program ESMF_IO_FileTypeCheckUTest
   !EX_UTest
   call ESMF_FileTypeCheck("horizontal_grid.tile6_subset.nc", fileType, rc=rc)
   write(name, *) "Detection of TILE grid file succeeds"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+#if (defined ESMF_NETCDF || defined ESMF_PNETCDF)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -175,7 +175,7 @@ program ESMF_IO_FileTypeCheckUTest
 #endif
   !EX_UTest
   write(name, *) "Detection of TILE grid file returns correct value"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+#if (defined ESMF_NETCDF || defined ESMF_PNETCDF)
   write(failMsg, *) "Returned wrong file type"
   call ESMF_Test(fileType == ESMF_FILEFORMAT_TILE, name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -188,7 +188,7 @@ program ESMF_IO_FileTypeCheckUTest
   !EX_UTest
   call ESMF_FileTypeCheck("test_sph_3x3_scrip_units_look_like_gridspec.nc", fileType, rc=rc)
   write(name, *) "Detection of SCRIP grid file (with units like GRIDSPEC) succeeds"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+#if (defined ESMF_NETCDF || defined ESMF_PNETCDF)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -197,7 +197,7 @@ program ESMF_IO_FileTypeCheckUTest
 #endif
   !EX_UTest
   write(name, *) "Detection of SCRIP grid file (with units like GRIDSPEC) returns correct value"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+#if (defined ESMF_NETCDF || defined ESMF_PNETCDF)
   write(failMsg, *) "Returned wrong file type"
   call ESMF_Test(fileType == ESMF_FILEFORMAT_SCRIP, name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -206,7 +206,8 @@ program ESMF_IO_FileTypeCheckUTest
 #endif
   !------------------------------------------------------------------------
 
-#endif  ! ESMF_TESTEXHAUSTIVE
+! ESMF_TESTEXHAUSTIVE
+#endif
 
   !------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
