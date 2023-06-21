@@ -71,7 +71,10 @@ class ESMXCmpCfg(dict):
                 files = [file_path]
             return ESMXCmpCfg(file_path).get_config(comp, files)
         else:
-            return self[comp]
+            if self[comp] is not None:
+                return self[comp]
+            else:
+                return {None: None}
 
 class ESMXTstCfg(dict):
     def __init__(self, args):
