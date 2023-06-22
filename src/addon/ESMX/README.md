@@ -28,7 +28,7 @@ The ESMX_Builder is a shell script included with ESMF installations that facilit
 If the ESMF binary directory is included in the PATH environment variable then ESMX_Builder can be called from any directory as follows:
 
 ```
-ESMX_Builder [OPTIONS]... ESMX_BUILD_FILE
+ESMX_Builder [OPTIONS ...] [ESMX_BUILD_FILE]
 
 options:
   [--esmx-dir=ESMF_ESMXDIR]
@@ -82,9 +82,9 @@ where:
 
 This script installs `esmx_app` into INSTALL_PREFIX/bin.
 
-### ESMX_BUILD_FILE (default: esmxBuild.yaml)
+### ESMX Build Configuration
 
-The ESMX build system depends on a build file, for example `esmxBuild.yaml`. This is a [YAML](https://yaml.org/) file with a very simple format. An example is given here:
+The ESMX build system depends on a build file defined by the ESMX_BUILD_FILE variable. When unspecified the ESMX_BUILD_FILE defaults `esmxBuild.yaml`. This is a [YAML](https://yaml.org/) file with a very simple format. An example is given here:
 
 ```
 application:
@@ -116,7 +116,7 @@ There are *three* top level sections recognized in the ESMX build file. Each is 
 
 #### Application Options (`application` key)
 
-These options affect the ESMX application layer.
+These options affect the ESMX application layer. If no key/value pair is provided then the default will be used.
 
 | Option key            | Description / Value options                           | Default                |
 | --------------------- | ----------------------------------------------------- | ---------------------- |
@@ -141,13 +141,13 @@ These options affect the ESMX application layer.
 
 #### Component Options (`components` key)
 
-This section contains a key for for each *component-name*, specifying component specific options.
+This section contains a key for for each *component-name*, specifying component specific options. If no key/value pair is provided then the default will be used.
 
 | Option key       | Description / Value options                   | Default                |
 | ---------------- | --------------------------------------------- | ---------------------- |
 | `build_type`     | [build type:](#build-types) `auto`, `cmake`, `make`, `script`, `none`     | `auto`                 |
 | `build_script`   | build script                                  | `compile`              |
-| `build_args`     | build arguments passed to ExternalProject     | *None*                 |
+| `build_args`     | scalar or list of arguments for building component                        | *None*                 |
 | `source_dir`     | source directory for build                    | *component-name*       |
 | `cmake_config`   | CMake configuration file                      | *component-name*.cmake |
 | `libraries`      | component libraries, linked to esmx           | *component-name*       |
@@ -176,7 +176,7 @@ The ESMX build system searches for `CMakeLists.txt`, `Makefile`, and a build_scr
 The ESMX build system searches for `CMakeLists.txt` in the `source_dir` and builds using CMake. Once built, the ESMX build system searches for the CMake configuration file and libraries in the `install_prefix` directory.
 
 **`make`** -
-The ESMX build system searches for `Makefile` in the `source_dir` and builds using Make. Once built, the ESMX build system searches for libraries and fortran modules in the `install_prefix` directory.
+The ESMX build system searches for `Makefile` in the `source_dir` and builds using Make without a target. If a specific target is desired then it can be configured using `build_args`. Once built, the ESMX build system searches for libraries and fortran modules in the `install_prefix` directory.
 
 **`script`** -
 The ESMX build system searches for a `build_script` in the `source_dir` and builds using this script. Once built, the ESMX build system searches for libraries and fortran modules in the `install_prefix` directory.
@@ -195,11 +195,11 @@ This section contains a key for for each *test-name*, specifying test specific o
 | `exe`            | executable used to run test case              | ESMX_TEST_EXE   |
 | `tasks`          | number of tasks used to run test case         | ESMX_TEST_TASKS |
 
-### esmxRun.yaml
+### ESMX Run Configuration
 
-At startup, the `esmx_app` executable expects to find a file named `esmxRun.yaml` in the run directory from which it is launched. This is the ESMX run-time configuration file in [YAML](https://yaml.org/) format, providing settings such as the list of components active at run-time, component attributes, the run sequence, as well as application level options.
+At startup, the `esmx_app` executable checks the first command line argument for a filename. If no argument is provided then the filename defaults to `esmxRun.yaml`. This is the ESMX run-time configuration file in [YAML](https://yaml.org/) format, providing settings such as the list of components active at run-time, component attributes, the run sequence, as well as application level options.
 
-An example `esmxRun.yaml` file is given here:
+An example `ESMX Run Configuration` file is given here:
 
 
 ```
@@ -242,7 +242,7 @@ OCN:
     Verbosity:  low
 ```
 
-On the highest level, `esmxRun.yaml` is expected to define the `ESMX` key, as well as a key for every component that is listed in the `componentList` found under the `Driver` level. The `ESMX` key is associated with a map containing the `App` and `Driver` keys. The `App` key must be present if `esmfRun.yaml` is read by the `esmx_app` executable, but is optional (and will be ignored) in case `esmfRun.yaml` is read by the `esmx_driver`.
+On the highest level, `ESMX Run Configuration` is expected to define the `ESMX` key, as well as a key for every component that is listed in the `componentList` found under the `Driver` level. The `ESMX` key is associated with a map containing the `App` and `Driver` keys. The `App` key must be present if `ESMX Run Configuration` is read by the `esmx_app` executable, but is optional (and will be ignored) in case `esmfRun.yaml` is read by the `esmx_driver`.
 
 #### ESMX/App Options
 
@@ -307,31 +307,37 @@ target_link_libraries(externalApp PUBLIC esmx_driver)
 
 The applcation can then be built as typically via cmake commands, only requiring that the `ESMF_ESMXDIR` variable is passed in. It can be convenient to wrap the cmake commands into a GNU Makefile, accessing the `ESMF_ESMXDIR` variable through the `ESMFMKFILE` mechanism.
 
+When executing cmake, the [ESMX_BUILD_FILE](#esmx-build-configuration) can be specified using `-DESMX_BUILD_FILE=<value>`. If ESMX_BUILD_FILE is not defined in the command line arguments then it will default to `esmxBuild.yaml`.
+
 ```
 include $(ESMFMKFILE)
 
 build/externalApp: externalApp.F90 esmxBuild.yaml
-        cmake -S. -Bbuild -DESMF_ESMXDIR=$(ESMF_ESMXDIR)
+        cmake -S. -Bbuild -DESMF_ESMXDIR=$(ESMF_ESMXDIR) -DESMX_BUILD_FILE="<value>"
         cmake --build ./build
 ```
 
 ### esmxBuild.yaml and esmxRun.yaml
 
-The `esmx_driver` target defined by the `add_subdirectory(${ESMF_ESMXDIR}/Driver ./ESMX_Driver)` has a build-time dependency on the `esmxBuild.yaml` file already discussed under the [unfied driver executable section](#esmxbuildyaml). The identical file can be used when working on the `ESMX_Driver` level.
+The `esmx_driver` target defined by the `add_subdirectory(${ESMF_ESMXDIR}/Driver ./ESMX_Driver)` has a build-time dependency on the ESMX_BUILD_FILE already discussed under the [ESMX Build Configuration section](#esmx-build-configuration). The identical file can be used when working on the `ESMX_Driver` level.
 
 The run-time configuration needed by `ESMX_Driver` can either be supplied by the user application, or alternatively default to `esmxRun.yaml`. The following rules apply:
 - `ESMX_Driver`, at the beginning of its `SetModelServices()` method checks whether the parent level has provided an `ESMF_Config` object by setting the `config` member on the `ESMX_Driver` component. If so, the provided `config` object is used. Otherwise `ESMX_Driver` itself creates `config` from file `esmxRun.yaml`.
 - For the case where the `config` object was provided by the parent layer, `ESMX_Driver` does not ingest attributes from `config`. Instead the assumption is made that the parent layer sets the desired attributes on `ESMX_Driver`.
 - For the case where the `config` object was loaded from `esmxRun.yaml` by `ESMX_Driver`, the driver ingests attributes from `config`, potentially overriding parent level settings.
-- The `ESMX_component_list`, child component, and run sequence information is ingested from `config` as described under the [unfied driver executable section](#esmxrunconfig).
+- The `ESMX_component_list`, child component, and run sequence information is ingested from `config` as described under the [ESMX Run Configuration section](#esmx-run-configuration).
 - If the parent level passes an `ESMF_Clock` object to `ESMX_Driver` during initialize, the driver uses it instead of looking for `startTime` and `stopTime` in `config`.
 - For the case where a clock is provided by the parent layer, its `timeStep` is used as the *default* time step of the outer run sequence loop when using the `@*` syntax. If a specific time step is set in the run sequence with `@DT`, then `DT` must be a divisor of the `timeStep` provided by the parent clock.
+
+## ESMX Components
+
+ESMX includes a data component, which can be used for testing NUOPC caps. See documentation [here](Comps/ESMX_Data/README.md).
 
 ## ESMX Software Dependencies
 
 The ESMX layer has the following dependencies:
 - **ESMF Library**: The ESMX layer is part of the ESMF repository. In order to use ESMX as described above, the ESMF library first needs to be built following the instructions for [Building ESMF](https://github.com/esmf-org/esmf#building-esmf).
-- **CMake**: v3.5.2 or greater.
+- **CMake**: v3.21 or greater.
 - **Python**: v3.5 or greater.
   - `python3` must be in `$PATH`.
   - `PyYaml` must be installed in the Python environment.

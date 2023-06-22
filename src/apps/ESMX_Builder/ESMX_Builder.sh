@@ -3,12 +3,11 @@
 # usage instructions
 usage () {
   printf "\n"
-  printf "Usage: $0 [OPTIONS]... BUILD_FILE\n"
+  printf "Usage: $0 [OPTIONS ...] [ESMX_BUILD_FILE]\n"
   printf "\n"
-  printf "ARGUMENTS\n"
-  printf "  BUILD_FILE\n"
-  printf "      ESMX build configuration file\n"
-  printf "      (default: esmxBuild.yaml)\n"
+  printf "ESMX_BUILD_FILE\n"
+  printf "  ESMX build configuration file\n"
+  printf "  (default: esmxBuild.yaml)\n"
   printf "\n"
   printf "OPTIONS\n"
   printf "  --esmx-dir=ESMF_ESMXDIR\n"
@@ -57,7 +56,7 @@ usage_error () {
 settings () {
   printf "Settings:\n"
   printf "\n"
-  printf "  BUILD_FILE=${BUILD_FILE}\n"
+  printf "  ESMX_BUILD_FILE=${BUILD_FILE}\n"
   printf "  ESMF_ESMXDIR=${ESMF_ESMXDIR}\n"
   printf "  ESMFMKFILE=${ESMFMKFILE}\n"
   printf "  BUILD_DIR=${BUILD_DIR}\n"
@@ -199,7 +198,7 @@ fi
 
 # check BUILD_FILE
 if [ ! -f "${BUILD_FILE}" ]; then
-  echo "ERROR: BUILD_FILE is missing: ${BUILD_FILE}"
+  echo "ERROR: ESMX_BUILD_FILE is missing: ${BUILD_FILE}"
   usage; exit 1
 fi
 
