@@ -552,6 +552,7 @@ module esmx_data
     integer                    :: fc
     type(ESMF_Field), pointer  :: fl(:)
     type(ESMF_FieldBundle)     :: fb
+    character(ESMF_MAXSTR)     :: fieldName
 
     rc = ESMF_SUCCESS
 
@@ -574,12 +575,14 @@ module esmx_data
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
 
+    ! access import- and exportState
+    call NUOPC_ModelGet(xdata, importState=importState, &
+      exportState=exportState, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
+
     ! write final import and export states
     if (xstate%write_final) then
-      call NUOPC_ModelGet(xdata, importState=importState, &
-        exportState=exportState, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return
       call NUOPC_GetStateMemberCount(importState, fieldCount=fc, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
@@ -624,10 +627,16 @@ module esmx_data
       endif
     endif
 
-    ! destroy import fields
+    ! remove import fields from importState and destroy
     do while (associated(xstate%imp_flds_head))
       xfield => xstate%imp_flds_head
       xstate%imp_flds_head => xfield%nfld
+      call ESMF_FieldGet(xfield%efld, name=fieldName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      call ESMF_StateRemove(importState, (/fieldName/), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
       call ESMF_FieldDestroy(xfield%efld, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
@@ -641,10 +650,16 @@ module esmx_data
     enddo
     xstate%imp_flds_tail => null()
 
-    ! destroy export fields
+    ! remove export fields from exportState and destroy
     do while (associated(xstate%exp_flds_head))
       xfield => xstate%exp_flds_head
       xstate%exp_flds_head => xfield%nfld
+      call ESMF_FieldGet(xfield%efld, name=fieldName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      call ESMF_StateRemove(exportState, (/fieldName/), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
       call ESMF_FieldDestroy(xfield%efld, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
@@ -1511,7 +1526,7 @@ module esmx_data
     rc = ESMF_SUCCESS
     x_comp_hconfig_i4 = 0
 
-    isPresent = ESMF_HConfigIsMap(hconfig, keyString=key, rc=rc)
+    isPresent = ESMF_HConfigIsScalar(hconfig, keyString=key, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
 
@@ -1553,7 +1568,7 @@ module esmx_data
     rc = ESMF_SUCCESS
     x_comp_hconfig_r8 = 0.0_ESMF_KIND_R8
 
-    isPresent = ESMF_HConfigIsDefined(hconfig, keyString=key, rc=rc)
+    isPresent = ESMF_HConfigIsScalar(hconfig, keyString=key, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
 
@@ -1595,7 +1610,7 @@ module esmx_data
     rc = ESMF_SUCCESS
     x_comp_hconfig_str = ' '
 
-    isPresent = ESMF_HConfigIsDefined(hconfig, keyString=key, rc=rc)
+    isPresent = ESMF_HConfigIsScalar(hconfig, keyString=key, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
 
@@ -1637,7 +1652,7 @@ module esmx_data
     rc = ESMF_SUCCESS
     x_comp_hconfig_logical = .false.
 
-    isPresent = ESMF_HConfigIsDefined(hconfig, keyString=key, rc=rc)
+    isPresent = ESMF_HConfigIsScalar(hconfig, keyString=key, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
 
