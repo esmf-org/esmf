@@ -108,9 +108,11 @@ tests:
     dir: path/to/test/data
 ```
 
-In this example two components are built into `esmx_app` explicitly. (Read about [dynamically loading of components from shared objects at run-time](#dynamically-loading-components-from-shared-objects-at-run-time) later.) The `ESMX_Data` component is built into `esmx_app` by default. This example disables this behavior.
+In this example two components are built into `esmx_app` explicitly. (Read about [dynamically loading of components from shared objects at run-time](#dynamically-loading-components-from-shared-objects-at-run-time) later.) Each component is given a name, here `TaWaS` and `Lumo`, respectively. Components will be referenced by this *component-name* in the run-time configuration (`esmxRun.yaml`) discussed below.
 
-Each component is given a name, here `TaWaS` and `Lumo`, respectively. Components will be referenced by this *component-name* in the run-time configuration (esmxRun.yaml) discussed below. Component names are case-sensitive!
+**CAUTION:** Component names are case-sensitive when used e.g. by default to construct library names, etc. However, they are treated case-insensitive when referenced from within the `esmxRun.yaml` file due to the case-insensitive nature of Fortran when referencing modules via the USE statement.
+
+ESMX comes with a default data component called `ESMX_Data`. It is built into `esmx_app` by default. This example disables this behavior by setting `disable_comps: ESMX_Data`.
 
 There are *three* top level sections recognized in the ESMX build file. Each is introduced by a specific key using the [YAML](https://yaml.org/) map syntax: `application:`, `components:`, and `tests:`. The value associated with each key is a map of key/value pairs. The available option keys under each top level section are discussed below.
 
@@ -165,7 +167,7 @@ This section contains a key for for each *component-name*, specifying component 
 | `test_exe`       | executable used to run test case              | ESMX_TEST_EXE          |
 | `test_tasks`     | number of tasks used to run test case         | ESMX_TEST_TASKS        |
 
-**Caution:** Downloading components using the `git_repository` option will result in a detached head. Developers making changing to component code must create or checkout a branch before making code changes. Downloading component using git_repository fails if the source_dir already exists.
+**CAUTION:** Downloading components using the `git_repository` option will result in a detached head. Developers making changing to component code must create or checkout a branch before making code changes. Downloading component using git_repository fails if the source_dir already exists.
 
 ##### Build Types:
 
@@ -331,7 +333,7 @@ The run-time configuration needed by `ESMX_Driver` can either be supplied by the
 
 ## ESMX Components
 
-ESMX includes a data component, which can be used for testing NUOPC caps. See documentation [here](Comps/ESMX_Data/README.md).
+ESMX includes a data component, which can be used for testing NUOPC caps. This component is known as [`ESMX_Data`](Comps/ESMX_Data).
 
 ## ESMX Software Dependencies
 
