@@ -257,7 +257,9 @@ This section affects the application level.
 | `globalResourceControl`   | enable/disable global resource control: `true` or `false` | `false`         |
 | `logKindFlag`             | string constant setting ESMF logging kind, see ESMF RefDoc| `ESMF_LOGKIND_Multi_On_Error`|
 | `logAppendFlag`           | enable/disable log append: `true` or `false`              | `true`          |
+| `defaultLogFilename`      | name of the default ESMF log file (suffix if multi PET)   | `ESMF_LogFile`  |
 | `logFlush`                | enable/disable log flush for each write: `true` or `false`| `false`         |
+| `fieldDictionary`         | name of the NUOPC field dictionary file to be loaded      | *None*          |
 
 #### ESMX/Driver Options
 
@@ -266,18 +268,20 @@ This section affects the driver level.
 | Option key      | Description / Value options                                          | Default         |
 | --------------- | -------------------------------------------------------------------- | --------------- |
 | `componentList` | list of component labels, each matching a top level key in this file | *non-optional*  |
-| `attributes`    | map of key value pairs, each defining a driver attribute             | *None*          |
 | `runSequence`   | block literal string defining the run sequence                       | *NUOPC default* |
+| `attributes`    | map of key value pairs, each defining a driver attribute             | *None*          |
 
 #### Component Label Options
 
 This section affects the specific component instance.
 
-| Option key    | Description / Value options                                          | Default         |
-| ------------- | -------------------------------------------------------------------- | --------------- |
-| `model`       | string associating the instance with a *component-name* defined in `esmxBuild.yaml` | *non-optional*  |
-| `petList`     | list of PETs on which the component executes                         | *None*          |
-| `attributes`  | map of key value pairs, each defining a component attribute          | *None*          |
+| Option key            | Description / Value options                                           | Default         |
+| --------------------- | --------------------------------------------------------------------- | --------------- |
+| `model`               | string associating the instance with a *component-name* defined in `esmxBuild.yaml` | *non-optional*  |
+| `petList`             | list of PETs on which the component executes                          | *None*          |
+| `ompNumThreads`       | setting of /NUOPC/Hint/PePerPet/MaxCount (see NUOPC ref doc)          | *None*          |
+| `attributes`          | map of key value pairs, each defining a component attribute           | *None*          |
+| *model specific yaml* | each model can define its own YAML section, e.g. with key value pairs, etc. | *None*          |
 
 ### Dynamically loading components from shared objects at run-time
 

@@ -85,6 +85,11 @@ module esmx_data
     type(xstate_wrap)          :: is
     type(xdata_state), pointer :: xstate
     character(len=64)          :: value
+    type(ESMF_Config)          :: config
+    type(ESMF_HConfig)         :: hconfig, hconfigNode
+    character(80)              :: compLabel
+    character(:), allocatable  :: badKey
+    logical                    :: isFlag
 
     rc = ESMF_SUCCESS
 
@@ -148,6 +153,45 @@ module esmx_data
       localPet=xstate%myid, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
+
+    ! validate config
+    call ESMF_GridCompGet(xdata, name=compLabel, configIsPresent=isFlag, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return  ! bail out
+    if (isFlag) then
+      ! Config present, assert it is in the ESMX YAML format
+      call ESMF_GridCompGet(xdata, config=config, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__,    file=__FILE__)) return  ! bail out
+      call ESMF_ConfigGet(config, hconfig=hconfig, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return  ! bail out
+      hconfigNode = ESMF_HConfigCreateAt(hconfig, keyString=compLabel, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return  ! bail out
+      ! component responsibility to validate ESMX handled options here, and
+      ! potentially locally handled options
+      isFlag = ESMF_HConfigValidateMapKeys(hconfigNode, &
+        vocabulary=["model        ", &  ! ESMX_Driver handled option
+                    "petList      ", &  ! ESMX_Driver handled option
+                    "ompNumThreads", &  ! ESMX_Driver handled option
+                    "attributes   ", &  ! ESMX_Driver handled option
+                    "output       ", &  ! ESMX_Data handled option
+                    "geom         ", &  ! ESMX_Data handled option
+                    "importFields ", &  ! ESMX_Data handled option
+                    "exportFields "  &  ! ESMX_Data handled option
+                   ], badKey=badKey, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return  ! bail out
+      if (.not.isFlag) then
+        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+          msg="An invalid key was found in config under "//trim(compLabel)// &
+            " (maybe a typo?): "//badKey, &
+          line=__LINE__, file=__FILE__, rcToReturn=rc)
+        return
+      endif
+    endif
+
   endsubroutine SetServices
 
   !-----------------------------------------------------------------------------
@@ -724,7 +768,7 @@ module esmx_data
       call ESMF_ConfigGet(config, hconfig=hconfig, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
-      isPresent = ESMF_HConfigIsMap(hconfig, &
+      isPresent = ESMF_HConfigIsDefined(hconfig, &
         keyString=xstate%cname, rc=rc)
       if (isPresent) then
         ! access xdatacfg
@@ -773,7 +817,7 @@ module esmx_data
     endif
 
     ! read output configuration
-    isPresent = ESMF_HConfigIsMap(xdatacfg, &
+    isPresent = ESMF_HConfigIsDefined(xdatacfg, &
       keyString="output", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
@@ -830,7 +874,7 @@ module esmx_data
     endif
 
     ! read geom configuration
-    isPresent = ESMF_HConfigIsMap(xdatacfg, &
+    isPresent = ESMF_HConfigIsDefined(xdatacfg, &
       keyString="geom", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
@@ -943,7 +987,7 @@ module esmx_data
     endif
 
     ! read import field configuration
-    isPresent = ESMF_HConfigIsMap(xdatacfg, &
+    isPresent = ESMF_HConfigIsDefined(xdatacfg, &
       keyString="importFields", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
@@ -1024,7 +1068,7 @@ module esmx_data
     endif ! flistcfg
 
     ! read export field configuration
-    isPresent = ESMF_HConfigIsMap(xdatacfg, &
+    isPresent = ESMF_HConfigIsDefined(xdatacfg, &
       keyString="exportFields", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
@@ -1442,7 +1486,7 @@ module esmx_data
 
     rc = ESMF_SUCCESS
 
-    x_comp_hconfig_check = ESMF_HConfigIsMap(hconfig, rc=rc)
+    x_comp_hconfig_check = ESMF_HConfigIsDefined(hconfig, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
     if (.not. x_comp_hconfig_check) then
@@ -1526,7 +1570,7 @@ module esmx_data
     rc = ESMF_SUCCESS
     x_comp_hconfig_i4 = 0
 
-    isPresent = ESMF_HConfigIsScalar(hconfig, keyString=key, rc=rc)
+    isPresent = ESMF_HConfigIsDefined(hconfig, keyString=key, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
 
@@ -1568,7 +1612,7 @@ module esmx_data
     rc = ESMF_SUCCESS
     x_comp_hconfig_r8 = 0.0_ESMF_KIND_R8
 
-    isPresent = ESMF_HConfigIsScalar(hconfig, keyString=key, rc=rc)
+    isPresent = ESMF_HConfigIsDefined(hconfig, keyString=key, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
 
@@ -1610,7 +1654,7 @@ module esmx_data
     rc = ESMF_SUCCESS
     x_comp_hconfig_str = ' '
 
-    isPresent = ESMF_HConfigIsScalar(hconfig, keyString=key, rc=rc)
+    isPresent = ESMF_HConfigIsDefined(hconfig, keyString=key, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
 
@@ -1652,7 +1696,7 @@ module esmx_data
     rc = ESMF_SUCCESS
     x_comp_hconfig_logical = .false.
 
-    isPresent = ESMF_HConfigIsScalar(hconfig, keyString=key, rc=rc)
+    isPresent = ESMF_HConfigIsDefined(hconfig, keyString=key, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
 
