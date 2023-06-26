@@ -62,6 +62,7 @@ program ESMF_HConfigUTest
   real              :: realList1(5), realList2(5)
   character(80)     :: strList1(3), strList2(3)
   real              :: realTable1(7,3), realTable2(7,3)
+  character(:), allocatable :: badKey
 
   logical :: raw = .false. ! switch ConfigLog() into "raw" mode or not
 
@@ -121,6 +122,35 @@ program ESMF_HConfigUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call HConfigIterationTest(hconfig, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Validate HConfig against vocabulary"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  compareOK = ESMF_HConfigValidateMapKeys(hconfig, &
+    vocabulary=["my_file_names      ", &
+                "constants          ", &
+                "my_favorite_colors ", &
+                "radius_of_the_earth", &
+                "parameter_1        ", &
+                "parameter_2        ", &
+                "input_file_name    ", &
+                "value_one          ", &
+                "value_two          ", &
+                "value_three        ", &
+                "value_four         ", &
+                "my_table_name      "  &
+               ], badKey=badKey, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Validation result of HConfig against vocabulary"
+  write(failMsg, *) "Not as expected"
+  if (allocated(badKey)) write(failMsg, *) "Not as expected, badKey: "//badKey
+  call ESMF_Test((compareOK), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
