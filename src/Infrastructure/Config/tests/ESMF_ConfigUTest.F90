@@ -2051,6 +2051,14 @@ end module config_subrs
 
       !------------------------------------------------------------------------
       !NEX_UTest
+      ! Test Config Print
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Print Test"
+      call ESMF_ConfigPrint(cf, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
       ! Test Config Destroy
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Destroy Test"
