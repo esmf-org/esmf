@@ -805,7 +805,8 @@ module esmx_data
     integer            :: stat
     logical            :: check
     type(ESMF_HConfig) :: outcfg
-    character(:), allocatable  :: cfgval
+    character(:), allocatable :: cfgval
+    character(:), allocatable :: badKey
 
     rc = ESMF_SUCCESS
 
@@ -827,14 +828,13 @@ module esmx_data
         keyString="output", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
-      check = x_comp_hconfig_check(outcfg, &
-        (/"write_final"/), rc=rc)
+      check = ESMF_HConfigValidateMapKeys(outcfg, &
+        vocabulary=["write_final"], badKey=badKey, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
       if (.not. check) then
         call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-          msg=trim(xstate%cname)//": valid options for output " //&
-          "(write_final)", &
+          msg=trim(xstate%cname)//": unknown output option key - "//badKey, &
         line=__LINE__,file=__FILE__, rcToReturn=rc)
         return
       endif
@@ -863,6 +863,7 @@ module esmx_data
     logical            :: check
     type(ESMF_HConfig) :: geomcfg
     character(len=64)  :: cfgval
+    character(:), allocatable :: badKey
 
     rc = ESMF_SUCCESS
 
@@ -884,21 +885,21 @@ module esmx_data
         keyString="geom", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
-      check = x_comp_hconfig_check(geomcfg, &
-        (/"nx      ", &
-          "ny      ", &
-          "nz      ", &
-          "coordSys", &
-          "minx    ", &
-          "maxx    ", &
-          "miny    ", &
-          "maxy    "/), rc=rc)
+      check = ESMF_HConfigValidateMapKeys(geomcfg, &
+        vocabulary=["nx      ", &
+                    "ny      ", &
+                    "nz      ", &
+                    "coordSys", &
+                    "minx    ", &
+                    "maxx    ", &
+                    "miny    ", &
+                    "maxy    "  &
+                   ], badKey=badKey, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
       if (.not. check) then
         call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-          msg=trim(xstate%cname)//": valid options for geom " //&
-          "(nx, ny, nz, coordSys, minx, maxx, miny, maxy)", &
+          msg=trim(xstate%cname)//": unknown geom option key - "//badKey, &
         line=__LINE__,file=__FILE__, rcToReturn=rc)
         return
       endif
@@ -976,6 +977,7 @@ module esmx_data
     type(ESMF_HConfigIter)     :: flistend
     character(:), allocatable  :: fname
     type(xdata_field), pointer :: xfield
+    character(:), allocatable  :: badKey
 
     rc = ESMF_SUCCESS
 
@@ -1010,14 +1012,17 @@ module esmx_data
         fieldcfg = ESMF_HConfigCreateAt(flistcfg, keyString=fname, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return
-        check = x_comp_hconfig_check(fieldcfg, &
-          (/"dim", "min", "max"/), rc=rc)
+        check = ESMF_HConfigValidateMapKeys(fieldcfg, &
+          vocabulary=["dim", &
+                      "min", &
+                      "max"  &
+                     ], badKey=badKey, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return
         if (.not. check) then
           call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-            msg=trim(xstate%cname)//": ("//fname//")" //&
-            " valid options for importFields (dim, min, max)", &
+            msg=trim(xstate%cname)//": ("//fname//")"// &
+                " unknown importFields option key - "//badKey, &
           line=__LINE__,file=__FILE__, rcToReturn=rc)
           return
         endif
@@ -1091,14 +1096,16 @@ module esmx_data
         fieldcfg = ESMF_HConfigCreateAt(flistcfg, keyString=fname, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return
-        check = x_comp_hconfig_check(fieldcfg, &
-          (/"dim", "val"/), rc=rc)
+        check = ESMF_HConfigValidateMapKeys(fieldcfg, &
+          vocabulary=["dim", &
+                      "val"  &
+                     ], badKey=badKey, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return
         if (.not. check) then
           call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-            msg=trim(xstate%cname)//": ("//fname//")" //&
-            " valid options for exportFields (dim, val)", &
+            msg=trim(xstate%cname)//": ("//fname//")"// &
+                " unknown exportFields option key - "//badKey, &
           line=__LINE__,file=__FILE__, rcToReturn=rc)
           return
         endif
@@ -1465,93 +1472,6 @@ module esmx_data
       xfield%okay = .false.
     endif
   endsubroutine x_comp_check_field
-
-  !-----------------------------------------------------------------------------
-
-  function x_comp_hconfig_check(hconfig, options, caseinsensitive, rc)
-    ! return value
-    logical :: x_comp_hconfig_check
-    ! arguments
-    type(ESMF_HConfig), intent(in) :: hconfig
-    character(*), intent(in)       :: options(:)
-    logical, intent(in), optional  :: caseinsensitive
-    integer, intent(out)           :: rc
-    ! local variables
-    integer                             :: i
-    integer                             :: stat
-    logical                             :: local_ci
-    type(ESMF_HConfigIter)              :: listcur, listbeg, listend
-    character(ESMF_MAXSTR)              :: key
-    character(ESMF_MAXSTR), allocatable :: options_ci(:)
-
-    rc = ESMF_SUCCESS
-
-    x_comp_hconfig_check = ESMF_HConfigIsDefined(hconfig, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    if (.not. x_comp_hconfig_check) then
-      call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-        msg="XDATA: HConfig is not Map", &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)
-      return
-    endif
-
-    if (present(caseinsensitive)) then
-      local_ci = caseinsensitive
-    else
-      local_ci = .false.
-    endif
-
-    listbeg = ESMF_HConfigIterBegin(hconfig, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    listend = ESMF_HConfigIterEnd(hconfig, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    listcur = listbeg
-    if (local_ci) then
-      allocate(options_ci(size(options)), stat=stat)
-      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-        msg='XDATA: Memory allocation failed.', &
-        line=__LINE__, &
-        file=__FILE__, &
-        rcToReturn=rc)) return
-      do i=1, size(options)
-        options_ci(i) = ESMF_UtilStringLowerCase(options(i), rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=__FILE__)) return
-      enddo
-      do while (ESMF_HConfigIterLoop(listcur, listbeg, listend, rc=rc))
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=__FILE__)) return
-        key = ESMF_HConfigAsStringMapKey(listcur, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=__FILE__)) return
-        key = ESMF_UtilStringLowerCase(key, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=__FILE__)) return
-        if (.not. any(key .eq. options_ci)) then
-          x_comp_hconfig_check = .false.
-          return
-        endif
-      enddo
-      deallocate(options_ci)
-    else
-      do while (ESMF_HConfigIterLoop(listcur, listbeg, listend, rc=rc))
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=__FILE__)) return
-        key = ESMF_HConfigAsStringMapKey(listcur, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=__FILE__)) return
-        if (.not. any(key .eq. options)) then
-          x_comp_hconfig_check = .false.
-          return
-        endif
-      enddo
-      x_comp_hconfig_check = .true.
-    endif
-
-  endfunction x_comp_hconfig_check
 
   !-----------------------------------------------------------------------------
 

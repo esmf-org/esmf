@@ -167,7 +167,6 @@ This section contains a key for for each *component-name*, specifying component 
 | `test_exe`       | executable used to run test case              | ESMX_TEST_EXE          |
 | `test_tasks`     | number of tasks used to run test case         | ESMX_TEST_TASKS        |
 
-**CAUTION:** Downloading components using the `git_repository` option will result in a detached head. Developers making changing to component code must create or checkout a branch before making code changes. Downloading component using git_repository fails if the source_dir already exists.
 
 ##### Build Types:
 
