@@ -1,6 +1,6 @@
 # ESMX Data Component
 
-The ESMX Data component is a lightweight testing component. Each ESMX Data component provides a custom list of export fields with prescribed values and a custom list of import fields with value ranges for testing validity. Multiple ESMX Data components can be used in the same application for testing complex sets of connected components.
+The ESMX Data component is a lightweight testing component that derives from `NUOPC_Model`. Each ESMX Data component provides a custom list of export fields with prescribed values and a custom list of import fields with value ranges for testing validity. Multiple ESMX Data components can be used in the same application for testing complex sets of connected components.
 
 ## ESMX Data Build Configuration
 
