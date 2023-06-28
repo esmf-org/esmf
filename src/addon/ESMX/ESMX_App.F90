@@ -23,14 +23,15 @@ program ESMX_App
   type(ESMF_HConfig)        :: hconfig, hconfigNode
   character(:), allocatable :: configKey(:)
   character(:), allocatable :: valueString
-  logical                   :: isPresent, logFlush
+  logical                   :: isFlag, logFlush
   type(ESMF_Time)           :: startTime, stopTime
   type(ESMF_TimeInterval)   :: timeStep
   type(ESMF_Clock)          :: clock
 
   ! Initialize ESMF
   configKey = ["ESMX", "App "]
-  call ESMF_Initialize(configFileName="esmxRun.yaml", configKey=configKey, &
+  call ESMF_Initialize(configFilenameFromArgNum=1, & ! arg 1 to spec alt. config
+    configFileName="esmxRun.yaml", configKey=configKey, &
     config=config, defaultCalkind=ESMF_CALKIND_GREGORIAN, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &
@@ -44,23 +45,44 @@ program ESMX_App
 
   ! Find hconfigNode that holds app level settings according to configKey
   hconfigNode = HConfigCreateFoundNode(hconfig, configKey=configKey, &
-    foundFlag=isPresent, rc=rc)
+    foundFlag=isFlag, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  if (.not.isPresent) then
+  if (.not.isFlag) then
     call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
       msg="Must provide settings for: "//configKey(1)//":"//configKey(2), &
       line=__LINE__, file=FILENAME, rcToReturn=rc)
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
 
-  ! Set logFlush
-  isPresent = ESMF_HConfigIsDefined(hconfigNode, keyString="logFlush", rc=rc)
+  ! Validate hconfigNode against ESMX/App controlled key vocabulary
+  isFlag = ESMF_HConfigValidateMapKeys(hconfigNode, &
+    vocabulary=["defaultLogFilename   ", & ! ESMF_Initialize option
+                "logAppendFlag        ", & ! ESMF_Initialize option
+                "logKindFlag          ", & ! ESMF_Initialize option
+                "globalResourceControl", & ! ESMF_Initialize option
+                "startTime            ", & ! ESMX_App option
+                "stopTime             ", & ! ESMX_App option
+                "logFlush             ", & ! ESMX_App option
+                "fieldDictionary      "  & ! ESMX_App option
+                ], badKey=valueString, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  if (isPresent) then
+  if (.not.isFlag) then
+    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+      msg="An invalid key was found in config under ESMX/App (maybe a typo?): "//valueString, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  endif
+
+  ! Set logFlush
+  isFlag = ESMF_HConfigIsDefined(hconfigNode, keyString="logFlush", rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  if (isFlag) then
     logFlush = ESMF_HConfigAsLogical(hconfigNode, keyString="logFlush", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) &
@@ -89,12 +111,12 @@ program ESMX_App
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! Set field dictionary
-  isPresent = ESMF_HConfigIsDefined(hconfigNode, keyString="fieldDictionary", &
+  isFlag = ESMF_HConfigIsDefined(hconfigNode, keyString="fieldDictionary", &
     rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  if (isPresent) then
+  if (isFlag) then
     valueString = ESMF_HConfigAsString(hconfigNode, &
       keyString="fieldDictionary", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -158,11 +180,11 @@ program ESMX_App
   ! Find hconfigNode that holds driver level attributes, conditionally ingest
   configKey = ["ESMX      ", "Driver    ", "attributes"]
   hconfigNode = HConfigCreateFoundNode(hconfig, configKey=configKey, &
-    foundFlag=isPresent, rc=rc)
+    foundFlag=isFlag, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  if (isPresent) then
+  if (isFlag) then
     call NUOPC_CompAttributeIngest(driver, hconfigNode, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) &

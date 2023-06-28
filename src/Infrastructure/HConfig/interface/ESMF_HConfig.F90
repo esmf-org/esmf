@@ -234,6 +234,8 @@ module ESMF_HConfigMod
   public ESMF_HConfigSetMapKey
   public ESMF_HConfigSetMapVal
 
+  public ESMF_HConfigValidateMapKeys
+
 ! - ESMF-internal methods:
   public ESMF_HConfigGetInit
 !EOPI
@@ -7179,7 +7181,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 
-
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigCreateHConfig()"
@@ -9623,7 +9624,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   end function
 !------------------------------------------------------------------------------
-
 
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -13600,6 +13600,102 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigValidateMapKeys()"
+!BOP
+! !IROUTINE: ESMF_HConfigValidateMapKeys - Validate map keys against list of vocabulary
+
+! !INTERFACE:
+  function ESMF_HConfigValidateMapKeys(hconfig, vocabulary, keywordEnforcer, &
+    badKey, rc)
+!
+! !RETURN VALUE:
+    logical :: ESMF_HConfigValidateMapKeys
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig),        intent(in)            :: hconfig
+    character(len=*),          intent(in)            :: vocabulary(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(:), allocatable, intent(out), optional :: badKey
+    integer,                   intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Validate that the {\em map} held in {\tt hconfig} only uses {\em keys} that
+!   are listed in {\tt vocabulary}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[hconfig]
+!     A map HConfig object.
+!   \item[vocabulary]
+!     List of {\em keys} to validate against.
+!   \item[{[badKey]}]
+!     If returning {\tt .false.} with {\tt ESMF\_SUCCESS}, then {\tt badKey} is
+!     set to the first {\em key} in {\tt hconfig} that was {\em not} found in
+!     {\tt vocabulary}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                   :: localrc        ! local return code
+    type(ESMF_HConfigIter)    :: hconfigIter, hconfigIterBegin, hconfigIterEnd
+    logical                   :: isFlag
+    character(:), allocatable :: key
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! initialize return value
+    ESMF_HConfigValidateMapKeys = .false.
+
+    ! ensure hconfig is map
+    isFlag = ESMF_HConfigIsMap(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (.not.isFlag) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="HConfig must be a map.", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    ! prepare iterators
+    hconfigIterBegin = ESMF_HConfigIterBegin(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    hconfigIterEnd = ESMF_HConfigIterEnd(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! iterate over hconfig validating each key
+    ESMF_HConfigValidateMapKeys = .true.
+    hconfigIter = hconfigIterBegin
+    do while (ESMF_HConfigIterLoop(hconfigIter, hconfigIterBegin, &
+      hconfigIterEnd, rc=localrc))
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      key = ESMF_HConfigAsStringMapKey(hconfigIter, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (.not. any(key==vocabulary)) then
+        ESMF_HConfigValidateMapKeys = .false.
+        if (present(rc)) rc = ESMF_SUCCESS
+        if (present(badKey)) badKey = key
+        return
+      endif
+    enddo
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_HConfigValidateMapKeys
 !------------------------------------------------------------------------------
 
 
