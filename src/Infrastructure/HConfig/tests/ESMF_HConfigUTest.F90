@@ -374,6 +374,40 @@ program ESMF_HConfigUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "HConfigCreate() as a simple scalar using YAML string"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  hconfig = ESMF_HConfigCreate(content="12345", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_HConfigAs<TypeSpec>()
+  write(name, *) "HConfigAsString() test"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  dummy = ESMF_HConfigAsString(hconfig, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_HConfigAs<TypeSpec>Seq()
+  write(name, *) "HConfigAsI4Seq() test"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  dummySeq = ESMF_HConfigAsI4Seq(hconfig, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroy test HConfig"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_HConfigDestroy(hconfig, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "HConfigCreate() as a map from YAML string"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   hconfig = ESMF_HConfigCreate(content="{a: first, b: second}", rc=rc)
@@ -387,15 +421,6 @@ program ESMF_HConfigUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   isFlag = ESMF_HConfigIsDefined(hconfig, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  ! Testing ESMF_HConfigAs<TypeSpec>()
-  write(name, *) "HConfigAsString() test"
-  write(failMsg, *) "Did return ESMF_SUCCESS"
-  dummy = ESMF_HConfigAsString(hconfig, rc=rc)
-  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -562,7 +587,7 @@ program ESMF_HConfigUTest
   !NEX_UTest
   write(name, *) "HConfigFileSave() test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_HConfigFileSave(hconfig, filename="debug.yaml", rc=rc)
+  call ESMF_HConfigFileSave(hconfig, filename="utest-out.yaml", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
