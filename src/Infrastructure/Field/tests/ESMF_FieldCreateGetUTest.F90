@@ -8603,7 +8603,7 @@ contains
         integer, dimension(2)             :: gelb, geub, gclb, gcub
         type(ESMF_StaggerLoc)                       :: sloc
 
-        integer                                     :: totalCount(1:2)
+        integer                                     :: totalCount(1:2), dimCount
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
@@ -8639,7 +8639,13 @@ contains
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        
+
+        ! call into GeomGet() for test coverage
+        call ESMF_GeomGet(geom, dimCount=dimCount, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
         field = ESMF_FieldCreate(geom, farray, &
              indexflag=ESMF_INDEX_DELOCAL, &
              datacopyflag=ESMF_DATACOPY_VALUE, &

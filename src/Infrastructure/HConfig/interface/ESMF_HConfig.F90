@@ -753,7 +753,7 @@ contains
 !    addKey, addKeyString, index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_HConfig[Iter}), intent(in)      :: hconfig
+!    type(ESMF_HConfig[Iter]), intent(in)      :: hconfig
 !    <Type>,             intent(in)            :: content[(:)]
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_HConfig), intent(in),  optional :: addKey
@@ -2023,7 +2023,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAddMapKey - Add <Type> content to HConfig MapKey object
 
 ! !INTERFACE:
-!  subroutine ESMF_HConfigAdd(hconfig, content, keywordEnforcer, &
+!  subroutine ESMF_HConfigAddMapKey(hconfig, content, keywordEnforcer, &
 !    addKey, addKeyString, index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
@@ -2752,7 +2752,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAddMapVal - Add <Type> content to HConfig MapVal object
 
 ! !INTERFACE:
-!  subroutine ESMF_HConfigAdd(hconfig, content, keywordEnforcer, &
+!  subroutine ESMF_HConfigAddMapVal(hconfig, content, keywordEnforcer, &
 !    addKey, addKeyString, index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
@@ -3538,6 +3538,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAsI4()"
+
   function ESMF_HConfigAsI4(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -3602,6 +3603,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsI4()"
+
   function ESMF_HConfigIterAsI4(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -3706,6 +3708,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsI8()"
+
   function ESMF_HConfigIterAsI8(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -3814,6 +3817,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsLogical()"
+
   function ESMF_HConfigIterAsLogical(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -3918,6 +3922,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsR4()"
+
   function ESMF_HConfigIterAsR4(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -4022,6 +4027,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsR8()"
+
   function ESMF_HConfigIterAsR8(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -4147,6 +4153,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsString()"
+
   function ESMF_HConfigIterAsString(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -5297,6 +5304,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsI4Seq()"
+
   function ESMF_HConfigIterAsI4Seq(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -5419,6 +5427,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsI8Seq()"
+
   function ESMF_HConfigIterAsI8Seq(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -5541,6 +5550,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsLogicalSeq()"
+
   function ESMF_HConfigIterAsLogicalSeq(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -5663,6 +5673,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsR4Seq()"
+
   function ESMF_HConfigIterAsR4Seq(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -5785,6 +5796,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsR8Seq()"
+
   function ESMF_HConfigIterAsR8Seq(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -5911,6 +5923,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsStringSeq()"
+
   function ESMF_HConfigIterAsStringSeq(hconfig, stringLen, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -12609,6 +12622,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigSetMapKeyLogicalSeq()"
+
   subroutine ESMF_HConfigSetMapKeyLogicalSeq(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
