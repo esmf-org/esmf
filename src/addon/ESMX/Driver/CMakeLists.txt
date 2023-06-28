@@ -41,6 +41,13 @@ if(DEFINED ESMX_DISABLE_COMPS)
   set(ESMX_DISABLE_COMPS --disable_comps ${ESMX_DISABLE_COMPS})
 endif()
 
+# define ESMX_EXE_NAME
+if(NOT DEFINED ESMX_EXE_NAME)
+  set(ESMX_EXE_NAME "esmx_app" PARENT_SCOPE)
+else()
+  set(ESMX_EXE_NAME ${ESMX_EXE_NAME} PARENT_SCOPE)
+endif()
+
 # test options
 if(ESMX_TEST)
   enable_testing()
@@ -461,8 +468,8 @@ foreach(CMP IN ITEMS ${COMPS})
 
       # copy test files
       file(COPY ${CMP_TEST_DIR}/ DESTINATION ${ESMX_TEST_DIR}/cmp/${CMP})
-      file(CREATE_LINK ${CMAKE_BINARY_DIR}/esmx_app
-        ${ESMX_TEST_DIR}/cmp/${CMP}/esmx_app
+      file(CREATE_LINK ${CMAKE_BINARY_DIR}/${ESMX_EXE_NAME}
+        ${ESMX_TEST_DIR}/cmp/${CMP}/${ESMX_EXE_NAME}
         SYMBOLIC
       )
 
@@ -477,7 +484,7 @@ foreach(CMP IN ITEMS ${COMPS})
 
       # add test
       add_test(NAME esmx-cmp-${CMP}
-        COMMAND ${FND_TEST_EXE} ${CMP_TEST_TASKS} ./esmx_app
+        COMMAND ${FND_TEST_EXE} ${CMP_TEST_TASKS} ./${ESMX_EXE_NAME}
         WORKING_DIRECTORY ${ESMX_TEST_DIR}/cmp/${CMP})
       unset(FND_TEST_EXE)
     endif()
@@ -518,8 +525,8 @@ if(ESMX_TEST)
 
     # copy test files
     file(COPY ${TST_DIR}/ DESTINATION ${ESMX_TEST_DIR}/sys/${TST})
-    file(CREATE_LINK ${CMAKE_BINARY_DIR}/esmx_app
-      ${ESMX_TEST_DIR}/sys/${TST}/esmx_app
+    file(CREATE_LINK ${CMAKE_BINARY_DIR}/${ESMX_EXE_NAME}
+      ${ESMX_TEST_DIR}/sys/${TST}/${ESMX_EXE_NAME}
       SYMBOLIC
     )
 
@@ -534,7 +541,7 @@ if(ESMX_TEST)
 
     # add test
     add_test(NAME esmx-sys-${TST}
-      COMMAND ${FND_TST_EXE} ${TST_TASKS} ./esmx_app
+      COMMAND ${FND_TST_EXE} ${TST_TASKS} ./${ESMX_EXE_NAME}
       WORKING_DIRECTORY ${ESMX_TEST_DIR}/sys/${TST})
     unset(FND_TST_EXE)
 

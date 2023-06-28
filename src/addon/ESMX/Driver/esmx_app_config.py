@@ -4,7 +4,8 @@ import argparse
 from esmx_tools import *
 
 def create_appConf(appCfg: ESMXAppCfg, odir):
-    options = [ESMXOpt('disable_comps', None, str),
+    options = [ESMXOpt('exe_name', None, str),
+               ESMXOpt('disable_comps', None, str),
                ESMXOpt('link_module_paths', None, dir),
                ESMXOpt('link_paths', None, dir),
                ESMXOpt('link_libraries', None, str),

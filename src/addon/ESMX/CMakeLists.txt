@@ -19,15 +19,20 @@ else()
   message(WARNING "${CMAKE_Fortran_COMPILER_ID} Fortran compiler will be used with default options")
 endif()
 
+# define ESMX_EXE_NAME
+if(NOT DEFINED ESMX_EXE_NAME)
+  set(ESMX_EXE_NAME "esmx_app")
+endif()
+
 # Create ESMX executable
-add_executable(esmx_app ESMX_App.F90)
-target_include_directories(esmx_app PUBLIC ${PROJECT_BINARY_DIR})
-target_link_libraries(esmx_app PUBLIC esmx_driver)
+add_executable(${ESMX_EXE_NAME} ESMX_App.F90)
+target_include_directories(${ESMX_EXE_NAME} PUBLIC ${PROJECT_BINARY_DIR})
+target_link_libraries(${ESMX_EXE_NAME} PUBLIC esmx_driver)
 
 # Install executable
 install(
-  TARGETS esmx_app
-  EXPORT esmx_app
+  TARGETS ${ESMX_EXE_NAME}
+  EXPORT esmx
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib)

@@ -39,7 +39,7 @@ usage () {
   printf "  --load-bashenv=BASHENV\n"
   printf "      load bash environment file before building\n"
   printf "  --test[=TEST_ARGS], -t[=TEST_ARGS]\n"
-  printf "      enable testing, add TEST_ARGS as needed.\n"
+  printf "      (beta) enable testing, add TEST_ARGS as needed.\n"
   printf "  --verbose, -v\n"
   printf "      build with verbose output\n"
   printf "\n"
