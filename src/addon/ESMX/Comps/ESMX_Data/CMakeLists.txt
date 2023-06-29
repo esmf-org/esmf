@@ -15,6 +15,7 @@ project(ESMX_Data
         LANGUAGES Fortran)
 
 if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
+  set(CMAKE_Fortran_FLAGS -ffree-line-length-none)
   set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
   set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -fbacktrace -02")
   set(CMAKE_Fortran_FLAGS_DEBUG "-g -fbacktrace -O0 -fcheck=all -ffpe-trap=invalid,zero,overflow,underflow")
