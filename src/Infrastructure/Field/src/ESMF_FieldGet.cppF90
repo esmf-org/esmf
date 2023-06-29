@@ -634,7 +634,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       present(elementCount)) then
 
       call ESMF_ArrayGet(ftype%array, rank=fieldrank, &
-          localDeCount=localDeCount, &
           rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) then
          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
@@ -688,7 +687,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_DistGridGet(distgrid, localdecount=ldecount, &
+        call ESMF_DistGridGet(distgrid, &
           decount=decount, dimcount=dg_dimcount, tilecount=tilecount, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -708,23 +707,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           dg2fmap(i) = ftype%gridToFieldMap(i)
           isDist(dg2fmap(i)) = .true.
         enddo
-        allocate(ldeToDeMap(1))
         allocate(minIndexPTile(dg_dimcount, tilecount), maxIndexPTile(dg_dimcount, tileCount))
         allocate(minIndexPDe(dg_dimcount, decount), maxIndexPDe(dg_dimcount, deCount))
 
-        call ESMF_DistGridGet(distgrid, localdeToDeMap=lDeToDeMap, &
+        call ESMF_DistGridGet(distgrid, &
           minIndexPTile=minIndexPTile, maxIndexPTile = maxIndexPTile, &
           minIndexPDe=minIndexPDe, maxIndexPDe=maxIndexPDe, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-
-        if(ldecount /= 1) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-             msg="Only implemented for field with 1 localDe.", &
-              ESMF_CONTEXT, rcToReturn=rc)
-          return
-        endif
 
         if(tilecount /= 1) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
@@ -759,7 +750,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         write(*, *) 'dimcount = ', dg_dimcount
         write(*, *) 'fieldrank = ', fieldrank
         write(*, *) 'decount = ', decount
-        write(*, *) 'localdecount = ', ldecount
         write(*, *) 'tileCount = ', tilecount
         write(*, *) 'minIndexPTile = ', minIndexPTile
         write(*, *) 'maxIndexPTile = ', maxIndexPTile
@@ -768,7 +758,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         write(*, *) 'dg2fmap = ', dg2fmap
 #endif
         deallocate(dg2fmap, minIndexPTile, maxIndexPTile, minIndexPDe, maxIndexPDe) 
-        deallocate(ldeToDeMap, isDist)
+        deallocate(isDist)
       else if(localGeomType == ESMF_GEOMTYPE_MESH) then
         call ESMF_GeomGet(ftype%geom, &
                   mesh=l_mesh, rc=localrc)
@@ -780,7 +770,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_DistGridGet(distgrid, localdecount=ldecount, &
+        call ESMF_DistGridGet(distgrid, &
           decount=decount, dimcount=dg_dimcount, tilecount=tilecount, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -794,21 +784,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           isDist(dg2fmap(i)) = .true.
         enddo
 
-        allocate(ldeToDeMap(1))
         allocate(minIndexPTile(dg_dimcount, tilecount), maxIndexPTile(dg_dimcount, tileCount))
         allocate(minIndexPDe(dg_dimcount, decount), maxIndexPDe(dg_dimcount, deCount))
-        call ESMF_DistGridGet(distgrid, localdeToDeMap=lDeToDeMap, &
+        call ESMF_DistGridGet(distgrid, &
           minIndexPTile=minIndexPTile, maxIndexPTile = maxIndexPTile, &
           minIndexPDe=minIndexPDe, maxIndexPDe=maxIndexPDe, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        if(ldecount /= 1) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-             msg="Only implemented for field with 1 localDe.", &
-              ESMF_CONTEXT, rcToReturn=rc)
-          return
-        endif
         if(tilecount /= 1) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
              msg="Cannot retrieve global information for more than 1 tile yet.", &
@@ -842,7 +825,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         write(*, *) 'dimcount = ', dg_dimcount
         write(*, *) 'fieldrank = ', fieldrank
         write(*, *) 'decount = ', decount
-        write(*, *) 'localdecount = ', ldecount
         write(*, *) 'tileCount = ', tilecount
         write(*, *) 'minIndexPTile = ', minIndexPTile
         write(*, *) 'maxIndexPTile = ', maxIndexPTile
@@ -850,7 +832,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         write(*, *) 'dg2fmap = ', dg2fmap
 #endif
         deallocate(dg2fmap, minIndexPTile, maxIndexPTile, minIndexPDe, maxIndexPDe) 
-        deallocate(ldeToDeMap, isDist)
+        deallocate(isDist)
       else
         call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
            msg="Only implemented for Grid and Mesh.", &
