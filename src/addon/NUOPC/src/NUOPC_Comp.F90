@@ -536,7 +536,7 @@ module NUOPC_Comp
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC GridComp Attribute
+! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC GridComp Attribute - string
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompAttributeGet() 
   subroutine NUOPC_GridCompAttributeGet(comp, name, value, isPresent, isSet, rc)
@@ -551,12 +551,13 @@ module NUOPC_Comp
 !   Access the attribute {\tt name} inside of {\tt comp} using the
 !   convention {\tt NUOPC} and purpose {\tt Instance}.
 !
+!   This call assumes to find a scalar value. An error is returned otherwise.
+!
+!   This call concverts to a string value, regardless of the actual attribute
+!   storage.
+!
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
 !   the attribute is not present or not set, respectively.
-!
-!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
-!   stored and returned as type character string.
-!   See \ref{NUOPC_GridCompAttributeIng} for details.
 !
 !   The arguments are:
 !   \begin{description}
@@ -581,6 +582,12 @@ module NUOPC_Comp
     ! local variables
     integer                 :: localrc
     type(ESMF_Info)         :: info
+    type(ESMF_TypeKind_Flag):: tk
+    integer(ESMF_KIND_I4)   :: valueI4
+    integer(ESMF_KIND_I8)   :: valueI8
+    real(ESMF_KIND_R4)      :: valueR4
+    real(ESMF_KIND_R8)      :: valueR8
+    logical                 :: valueL
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -616,20 +623,79 @@ module NUOPC_Comp
       if (.not.isSet) return ! early successful return
     endif
 
-    call ESMF_InfoGet(info, key="/NUOPC/Instance/"//name, value=value, &
-      rc=localrc)
+    tk = ESMF_InfoGetTK(info, key="/NUOPC/Instance/"//name, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
 
+    if (tk==ESMF_TYPEKIND_CHARACTER) then
+      call ESMF_InfoGet(info, key="/NUOPC/Instance/"//name, value=value, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+    else if (tk==ESMF_TYPEKIND_LOGICAL) then
+      call ESMF_InfoGet(info, key="/NUOPC/Instance/"//name, value=valueL, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+      write(value,*) valueL
+    else if (tk==ESMF_TYPEKIND_I4) then
+      call ESMF_InfoGet(info, key="/NUOPC/Instance/"//name, value=valueI4, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+      write(value,*) valueI4
+    else if (tk==ESMF_TYPEKIND_I8) then
+      call ESMF_InfoGet(info, key="/NUOPC/Instance/"//name, value=valueI8, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+      write(value,*) valueI8
+    else if (tk==ESMF_TYPEKIND_R4) then
+      call ESMF_InfoGet(info, key="/NUOPC/Instance/"//name, value=valueR4, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+      write(value,*) valueR4
+    else if (tk==ESMF_TYPEKIND_R8) then
+      call ESMF_InfoGet(info, key="/NUOPC/Instance/"//name, value=valueR8, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+      write(value,*) valueR8
+    else
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+        msg="Unsupported typekind", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)
+      return
+    endif
+
   end subroutine
   !-----------------------------------------------------------------------------
-  
+
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC CplComp Attribute
+! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC CplComp Attribute - string
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompAttributeGet() 
   subroutine NUOPC_CplCompAttributeGet(comp, name, value, isPresent, isSet, rc)
@@ -644,12 +710,13 @@ module NUOPC_Comp
 !   Access the attribute {\tt name} inside of {\tt comp} using the
 !   convention {\tt NUOPC} and purpose {\tt Instance}.
 !
+!   This call assumes to find a scalar value. An error is returned otherwise.
+!
+!   This call concverts to a string value, regardless of the actual attribute
+!   storage.
+!
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
 !   the attribute is not present or not set, respectively.
-!
-!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
-!   stored and returned as type character string.
-!   See \ref{NUOPC_CplCompAttributeIng} for details.
 !
 !   The arguments are:
 !   \begin{description}
@@ -674,6 +741,12 @@ module NUOPC_Comp
     ! local variables
     integer                 :: localrc
     type(ESMF_Info)         :: info
+    type(ESMF_TypeKind_Flag):: tk
+    integer(ESMF_KIND_I4)   :: valueI4
+    integer(ESMF_KIND_I8)   :: valueI8
+    real(ESMF_KIND_R4)      :: valueR4
+    real(ESMF_KIND_R8)      :: valueR8
+    logical                 :: valueL
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -709,20 +782,79 @@ module NUOPC_Comp
       if (.not.isSet) return ! early successful return
     endif
 
-    call ESMF_InfoGet(info, key="/NUOPC/Instance/"//name, value=value, &
-      rc=localrc)
+    tk = ESMF_InfoGetTK(info, key="/NUOPC/Instance/"//name, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
 
+    if (tk==ESMF_TYPEKIND_CHARACTER) then
+      call ESMF_InfoGet(info, key="/NUOPC/Instance/"//name, value=value, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+    else if (tk==ESMF_TYPEKIND_LOGICAL) then
+      call ESMF_InfoGet(info, key="/NUOPC/Instance/"//name, value=valueL, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+      write(value,*) valueL
+    else if (tk==ESMF_TYPEKIND_I4) then
+      call ESMF_InfoGet(info, key="/NUOPC/Instance/"//name, value=valueI4, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+      write(value,*) valueI4
+    else if (tk==ESMF_TYPEKIND_I8) then
+      call ESMF_InfoGet(info, key="/NUOPC/Instance/"//name, value=valueI8, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+      write(value,*) valueI8
+    else if (tk==ESMF_TYPEKIND_R4) then
+      call ESMF_InfoGet(info, key="/NUOPC/Instance/"//name, value=valueR4, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+      write(value,*) valueR4
+    else if (tk==ESMF_TYPEKIND_R8) then
+      call ESMF_InfoGet(info, key="/NUOPC/Instance/"//name, value=valueR8, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+      write(value,*) valueR8
+    else
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+        msg="Unsupported typekind", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)
+      return
+    endif
+
   end subroutine
   !-----------------------------------------------------------------------------
-  
+
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC GridComp Attribute
+! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC GridComp Attribute - integer
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompAttributeGet() 
   subroutine NUOPC_GridCompAttributeGetI(comp, name, value, isPresent, isSet, rc)
@@ -740,10 +872,6 @@ module NUOPC_Comp
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
 !   the attribute is not present or not set, respectively.
 !
-!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
-!   stored and returned as type character string.
-!   See \ref{NUOPC_GridCompAttributeIng} for details.
-!
 !   The arguments are:
 !   \begin{description}
 !   \item[comp]
@@ -811,10 +939,10 @@ module NUOPC_Comp
 
   end subroutine
   !-----------------------------------------------------------------------------
-  
+
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC CplComp Attribute
+! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC CplComp Attribute - integer
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompAttributeGet() 
   subroutine NUOPC_CplCompAttributeGetI(comp, name, value, isPresent, isSet, rc)
@@ -831,10 +959,6 @@ module NUOPC_Comp
 !
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
 !   the attribute is not present or not set, respectively.
-!
-!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
-!   stored and returned as type character string.
-!   See \ref{NUOPC_CplCompAttributeIng} for details.
 !
 !   The arguments are:
 !   \begin{description}
@@ -903,10 +1027,10 @@ module NUOPC_Comp
 
   end subroutine
   !-----------------------------------------------------------------------------
-  
+
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC GridComp Attribute
+! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC GridComp Attribute - string list
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompAttributeGet() 
   subroutine NUOPC_GridCompAttributeGetSL(comp, name, valueList, isPresent, &
@@ -928,10 +1052,6 @@ module NUOPC_Comp
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
 !   the attribute is not present or not set, respectively.
 !
-!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
-!   stored and returned as type character string.
-!   See \ref{NUOPC_GridCompAttributeIng} for details.
-!
 !   The arguments are:
 !   \begin{description}
 !   \item[comp]
@@ -1046,10 +1166,10 @@ module NUOPC_Comp
 
   end subroutine
   !-----------------------------------------------------------------------------
-  
+
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC CplComp Attribute
+! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC CplComp Attribute - string list
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompAttributeGet() 
   subroutine NUOPC_CplCompAttributeGetSL(comp, name, valueList, isPresent, &
@@ -1070,10 +1190,6 @@ module NUOPC_Comp
 !
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
 !   the attribute is not present or not set, respectively.
-!
-!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
-!   stored and returned as type character string.
-!   See \ref{NUOPC_CplCompAttributeIng} for details.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1189,10 +1305,10 @@ module NUOPC_Comp
 
   end subroutine
   !-----------------------------------------------------------------------------
-  
+
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC GridComp Attribute
+! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC GridComp Attribute - integer list
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompAttributeGet() 
   subroutine NUOPC_GridCompAttributeGetIL(comp, name, valueList, isPresent, &
@@ -1213,10 +1329,6 @@ module NUOPC_Comp
 !
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
 !   the attribute is not present or not set, respectively.
-!
-!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
-!   stored and returned as type character string.
-!   See \ref{NUOPC_GridCompAttributeIng} for details.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1330,10 +1442,10 @@ module NUOPC_Comp
 
   end subroutine
   !-----------------------------------------------------------------------------
-  
+
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC CplComp Attribute
+! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC CplComp Attribute - integer list
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompAttributeGet() 
   subroutine NUOPC_CplCompAttributeGetIL(comp, name, valueList, isPresent, &
@@ -1354,10 +1466,6 @@ module NUOPC_Comp
 !
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
 !   the attribute is not present or not set, respectively.
-!
-!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
-!   stored and returned as type character string.
-!   See \ref{NUOPC_CplCompAttributeIng} for details.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1789,13 +1897,6 @@ module NUOPC_Comp
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
 !
-!   Important: The {\em value} of standard NUOPC attributes, such as
-!   {\em Verbosity}, {\em Profiling}, or {\em Diagnostic} must be set as
-!   {\bf strings}, potentially requiring explicit quotation marks! 
-!   This rule applies even to values that are ultimately interpreted
-!   as integers, or bit patterns. Other attributes, e.g. used specifically
-!   by the component itself, have no such restriction.
-!
 !   The provided {\tt hconfig} is expected to be a {\em map}. An error is
 !   returned if this condition is not met. Each key-value pair held by
 !   {\tt hconfig} is added as an attribute to {\tt comp}.
@@ -1817,12 +1918,12 @@ module NUOPC_Comp
 ! # A simple YAML definition of standard NUOPC attributes, followed by
 ! # component specific attributes.
 !
-! Verbosity:  "4609"              # must explicitly quote this integer
-! Profiling:  low                 # this is naturally a string
-! Diagnostic: "0"                 # again explicitly quote the zero
-! CustomSeq1: [1, 2, 3, 4]        # sequence of integers
-! CustomSeq2: [1., 2., 3., 4.]    # sequence of floats
-! CustomSeq3: [true, false]       # sequence of bools
+! Verbosity:  4609             # decimal representation of explicit bit pattern
+! Profiling:  low              # pre-defined NUOPC setting
+! Diagnostic: 0                # explicit 0 turns OFF feature
+! CustomSeq1: [1, 2, 3, 4]     # sequence of integers
+! CustomSeq2: [1., 2., 3., 4.] # sequence of floats
+! CustomSeq3: [true, false]    # sequence of bools
 ! CustomType: {k1: [a, aa, aaa], k2: b, k3: c}  # complex structure
 ! \end{verbatim}
 !
@@ -1867,17 +1968,10 @@ module NUOPC_Comp
     type(ESMF_HConfig),     intent(in)            :: hconfig
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
-!   \label{NUOPC_GridCompAttributeIngHC}
+!   \label{NUOPC_CplCompAttributeIngHC}
 !   Ingest component attributes from a HConfig object onto the highest level
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
-!
-!   Important: The {\em value} of standard NUOPC attributes, such as
-!   {\em Verbosity}, {\em Profiling}, or {\em Diagnostic} must be set as
-!   {\bf strings}, potentially requiring explicit quotation marks! 
-!   This rule applies even to values that are ultimately interpreted
-!   as integers, or bit patterns. Other attributes, e.g. used specifically
-!   by the component itself, have no such restriction.
 !
 !   The provided {\tt hconfig} is expected to be a {\em map}. An error is
 !   returned if this condition is not met. Each key-value pair held by
@@ -1900,12 +1994,12 @@ module NUOPC_Comp
 ! # A simple YAML definition of standard NUOPC attributes, followed by
 ! # component specific attributes.
 !
-! Verbosity:  "4609"              # must explicitly quote this integer
-! Profiling:  low                 # this is naturally a string
-! Diagnostic: "0"                 # again explicitly quote the zero
-! CustomSeq1: [1, 2, 3, 4]        # sequence of integers
-! CustomSeq2: [1., 2., 3., 4.]    # sequence of floats
-! CustomSeq3: [true, false]       # sequence of bools
+! Verbosity:  4609             # decimal representation of explicit bit pattern
+! Profiling:  low              # pre-defined NUOPC setting
+! Diagnostic: 0                # explicit 0 turns OFF feature
+! CustomSeq1: [1, 2, 3, 4]     # sequence of integers
+! CustomSeq2: [1., 2., 3., 4.] # sequence of floats
+! CustomSeq3: [true, false]    # sequence of bools
 ! CustomType: {k1: [a, aa, aaa], k2: b, k3: c}  # complex structure
 ! \end{verbatim}
 !
