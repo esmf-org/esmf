@@ -49,12 +49,12 @@ program ESMF_HConfigUTest
   !LOCAL VARIABLES:
   type(ESMF_VM)     :: vm
   integer           :: i, j, petCount, localPet
-  type(ESMF_HConfig):: hconfig, hconfig2, hconfig3
+  type(ESMF_HConfig):: hconfig, hconfig2, hconfig3, hconfigAlias
   type(ESMF_HConfigIter):: hconfigIter, hconfigIterEnd
   type(ESMF_HConfigIter):: hconfigIter2, hconfigIter2End
   type(ESMF_HConfigIter):: hconfigIter3, hconfigIter3End
   type(ESMF_Config) :: config1, config2
-  logical           :: compareOK
+  logical           :: compareOK, isFlag
   integer           :: intVar1, intVar2, count1, count2
   real(ESMF_KIND_R4):: r4Var1, r4Var2
   real(ESMF_KIND_R8):: r8Var1, r8Var2
@@ -62,6 +62,9 @@ program ESMF_HConfigUTest
   real              :: realList1(5), realList2(5)
   character(80)     :: strList1(3), strList2(3)
   real              :: realTable1(7,3), realTable2(7,3)
+  character(len=:), allocatable       :: dummy
+  integer(ESMF_KIND_I4), allocatable  :: dummySeq(:)
+  character(:), allocatable           :: badKey
 
   logical :: raw = .false. ! switch ConfigLog() into "raw" mode or not
 
@@ -121,6 +124,35 @@ program ESMF_HConfigUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call HConfigIterationTest(hconfig, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Validate HConfig against vocabulary"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  compareOK = ESMF_HConfigValidateMapKeys(hconfig, &
+    vocabulary=["my_file_names      ", &
+                "constants          ", &
+                "my_favorite_colors ", &
+                "radius_of_the_earth", &
+                "parameter_1        ", &
+                "parameter_2        ", &
+                "input_file_name    ", &
+                "value_one          ", &
+                "value_two          ", &
+                "value_three        ", &
+                "value_four         ", &
+                "my_table_name      "  &
+               ], badKey=badKey, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Validation result of HConfig against vocabulary"
+  write(failMsg, *) "Not as expected"
+  if (allocated(badKey)) write(failMsg, *) "Not as expected, badKey: "//badKey
+  call ESMF_Test((compareOK), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -367,6 +399,253 @@ program ESMF_HConfigUTest
   write(name, *) "Destroy test Config from sample.yaml"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ConfigDestroy(config2, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigCreate() as a simple scalar using YAML string"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  hconfig = ESMF_HConfigCreate(content="12345", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_HConfigAs<TypeSpec>()
+  write(name, *) "HConfigAsString() test"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  dummy = ESMF_HConfigAsString(hconfig, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_HConfigAs<TypeSpec>Seq()
+  write(name, *) "HConfigAsI4Seq() test"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  dummySeq = ESMF_HConfigAsI4Seq(hconfig, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroy test HConfig"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_HConfigDestroy(hconfig, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigCreate() as a map from YAML string"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  hconfig = ESMF_HConfigCreate(content="{a: first, b: second}", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_HConfigIs<NodeType>()
+  write(name, *) "HConfigIsDefined() test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isFlag = ESMF_HConfigIsDefined(hconfig, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigAdd() another map element, with both key and value a list"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_HConfigAdd(hconfig, "[third1, third2]", &
+    addKeyString="[c1, c2, c3]", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Obtain iterator to first element of HConfig"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  hconfigIter = ESMF_HConfigIterBegin(hconfig, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigIterNext to step forward twice"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_HConfigIterNext(hconfigIter, rc=rc)
+  call ESMF_HConfigIterNext(hconfigIter, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_HConfigIs<NodeType>MapKey()
+  write(name, *) "HConfigIsDefinedMapKey() test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isFlag = ESMF_HConfigIsDefinedMapKey(hconfigIter, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_HConfigIs<NodeType>MapVal()
+  write(name, *) "HConfigIsDefinedMapVal() test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isFlag = ESMF_HConfigIsDefinedMapVal(hconfigIter, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigAddMapKey() another element to the map key list"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_HConfigAddMapKey(hconfigIter, "c4", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigAddMapVal() another element to the map value list"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_HConfigAddMapVal(hconfigIter, "third3", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigIterBeginMapKey() test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  hconfigIter2 = ESMF_HConfigIterBeginMapKey(hconfigIter, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigIterEndMapKey() test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  hconfigIter2 = ESMF_HConfigIterEndMapKey(hconfigIter, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigIterBeginMapVal() test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  hconfigIter2 = ESMF_HConfigIterBeginMapVal(hconfigIter, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigIterEndMapVal() test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  hconfigIter2 = ESMF_HConfigIterEndMapVal(hconfigIter, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigIterIsMap() test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isFlag = ESMF_HConfigIterIsMap(hconfigIter, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigIterIsSequence() test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isFlag = ESMF_HConfigIterIsSequence(hconfigIter, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigSetMapKey() test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_HConfigSetMapKey(hconfigIter, "123", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_HConfigAs<TypeSpec>MapKey()
+  write(name, *) "HConfigAsStringMapKey() test"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  dummy = ESMF_HConfigAsStringMapKey(hconfigIter, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_HConfigAs<TypeSpec>SeqMapKey()
+  write(name, *) "HConfigAsI4SeqMapKey() test"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  dummySeq = ESMF_HConfigAsI4SeqMapKey(hconfigIter, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigSetMapVal() test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_HConfigSetMapVal(hconfigIter, "456", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_HConfigAs<TypeSpec>MapVal()
+  write(name, *) "HConfigAsStringMapVal() test"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  dummy = ESMF_HConfigAsStringMapVal(hconfigIter, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_HConfigAs<TypeSpec>SeqMapVal()
+  write(name, *) "HConfigAsI4SeqMapVal() test"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  dummySeq = ESMF_HConfigAsI4SeqMapVal(hconfigIter, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigFileSave() test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_HConfigFileSave(hconfig, filename="utest-out.yaml", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  hconfigAlias = hconfig  ! assignment
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_HConfigOperator(==)()
+  write(name, *) "HConfig equality operator test"
+  write(failMsg, *) "Did not compare as expected"
+  isFlag = (hconfigAlias==hconfig)
+  call ESMF_Test(isFlag, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_HConfigOperator(/=)()
+  write(name, *) "HConfig non-equality operator test"
+  write(failMsg, *) "Did not compare as expected"
+  isFlag = (hconfigAlias/=hconfig)
+  call ESMF_Test(.not.isFlag, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroy test HConfig"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_HConfigDestroy(hconfig, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 

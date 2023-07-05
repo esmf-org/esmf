@@ -3350,7 +3350,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[config]
 !       The input {\tt ESMF\_Config} object.
 !     \item[{[unit]}]
-!       Output unit.
+!       Output unit. Defaults to {\tt stdout}.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}

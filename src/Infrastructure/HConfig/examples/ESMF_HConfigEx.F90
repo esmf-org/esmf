@@ -94,7 +94,7 @@ program ESMF_HConfigEx
 !
 ! One way to parse the elements contained in {\tt hconfig} is to use the
 ! iterator pattern known from laguages such as C++ or Python. HConfig
-! iterators are implemented as regular {\tt type(ESMF\_HConfig)} objects that
+! iterators are implemented as {\tt type(ESMF\_HConfigIter)} objects that
 ! are initialized using one of the {\tt HConfigIter*()} methods. An iterator
 ! can then be used to traverse the elements in a {\em sequence} or {\em map}
 ! by calling the {\tt ESMF\_HConfigIterNext()} method, taking one step forward
@@ -430,6 +430,7 @@ program ESMF_HConfigEx
 ! the {\em map key} or {\em map value}, respectively.
 !EOE
 !BOC
+  ! type(ESMF_HConfigIter) :: hconfigIter
   hconfigIter = hconfigIterBegin
   do while (ESMF_HConfigIterLoop(hconfigIter, hconfigIterBegin, hconfigIterEnd, rc=rc))
 !EOC
