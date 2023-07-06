@@ -8,7 +8,7 @@ files, use the unittest CLI: https://docs.python.org/3/library/unittest.html#com
 For example, to generate the `ESMF_Attribute.F90` code:
 ```sh
 cd ${ESMF_DIR}/src/scripts/jinja2_templating
-python -m unittest generate_templates.Runner.test_ESMF_Attribute
+python3 -m unittest generate_templates.Runner.test_ESMF_Attribute
 ```
 
 The `test` prefix is left on method names to hook the template generation into the
