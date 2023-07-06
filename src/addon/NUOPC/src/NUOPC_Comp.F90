@@ -683,6 +683,11 @@ module NUOPC_Comp
         rcToReturn=rc)) &
         return  ! bail out
       write(value,*) valueR8
+    else if (tk==ESMF_NOKIND) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+        msg="Unable to retrieve value. Either invalid name or value not set.", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)
+      return
     else
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
         msg="Unsupported typekind", &
@@ -842,6 +847,11 @@ module NUOPC_Comp
         rcToReturn=rc)) &
         return  ! bail out
       write(value,*) valueR8
+    else if (tk==ESMF_NOKIND) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+        msg="Unable to retrieve value. Either invalid name or value not set.", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)
+      return
     else
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
         msg="Unsupported typekind", &
