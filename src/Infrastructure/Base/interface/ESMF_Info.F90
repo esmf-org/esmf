@@ -1932,7 +1932,9 @@ end subroutine ESMF_InfoGetArrayLGAlloc
 !       An integer index to use. This will index into an object type providing
 !       the primary mechanism for iteration.
 !     \item [{[typekind]}]
-!       Get the ESMF typekind for the target. The minimum typekind required to hold the value is returned.
+!       Get the ESMF typekind for the target. The minimum typekind required to
+!       hold the value is returned.
+!       See section \ref{const:typekind} for valid values.
 !     \item [{[ikey]}]
 !       If present, this will be set to the key's name for the current inquire.
 !       Useful when iterating using an index. This does \textit{not} return the full key
@@ -2253,7 +2255,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_TypeKind_Flag) :: typekind
 !
 ! !DESCRIPTION:
-!     Return a value's ESMF TypeKind using a \textit{key}.
+!     Return the ESMF TypeKind of the value associated with \textit{key}.
+!     See section \ref{const:typekind} for valid return values.
 !
 !     The arguments are:
 !     \begin{description}
