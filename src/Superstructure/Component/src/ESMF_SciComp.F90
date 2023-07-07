@@ -325,40 +325,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    type(ESMF_CompClass), pointer :: compclass       ! generic comp
-    type(ESMF_SciComp)            :: scomp
     integer                       :: localrc         ! local error status
 
     ! Initialize the pointer to null.
     nullify(ESMF_SciCompCreate%compp)
-    nullify(compclass)
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
     ! Allocate a new comp class
-    allocate(compclass, stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, msg="compclass", &
+    allocate(ESMF_SciCompCreate%compp, stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, msg="ESMF_SciCompCreate%compp", &
       ESMF_CONTEXT, rcTOReturn=rc)) return
-      
+
     ! call Comp method
-    call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_SCI, name, rc=localrc)
+    call ESMF_CompConstruct(ESMF_SciCompCreate%compp, ESMF_COMPTYPE_SCI, &
+      name, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcTOReturn=rc)) then
-      deallocate(compclass)
+      deallocate(ESMF_SciCompCreate%compp)
       return
     endif
 
-    scomp%compp => compclass
-    ! Add reference to this object into ESMF garbage collection table
-    call c_ESMC_VMAddFObject(scomp, ESMF_ID_COMPONENT%objectID)
-      
-    ! Set return values
-    ESMF_SciCompCreate%compp => compclass
-    
     ESMF_INIT_SET_CREATED(ESMF_SciCompCreate)
+
+    ! Add reference to this object into ESMF garbage collection table
+    call c_ESMC_VMAddFObject(ESMF_SciCompCreate, ESMF_ID_COMPONENT%objectID)
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS

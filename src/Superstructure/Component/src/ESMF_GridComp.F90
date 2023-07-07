@@ -538,8 +538,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    type(ESMF_CompClass), pointer :: compclass       ! generic comp
-    type(ESMF_GridComp)           :: gcomp
     integer :: localrc                               ! local error status
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
@@ -548,36 +546,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Initialize the pointer to null.
     nullify(ESMF_GridCompCreate%compp)
-    nullify(compclass)
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
     ! Allocate a new comp class
-    allocate(compclass, stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, msg="compclass", &
+    allocate(ESMF_GridCompCreate%compp, stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, msg="ESMF_GridCompCreate%compp", &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! call Comp method
-    call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
-      configFile=configFile, config=config, clock=clock, petList=petList, &
-      contextflag=contextflag, rc=localrc)
+    call ESMF_CompConstruct(ESMF_GridCompCreate%compp, ESMF_COMPTYPE_GRID, &
+      name, configFile=configFile, config=config, clock=clock, &
+      petList=petList, contextflag=contextflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) then
-      deallocate(compclass)
+      deallocate(ESMF_GridCompCreate%compp)
       return
     endif
 
-    gcomp%compp => compclass
-    ! Add reference to this object into ESMF garbage collection table
-    call c_ESMC_VMAddFObject(gcomp, ESMF_ID_COMPONENT%objectID)
-
-    ! Set return values
-    ESMF_GridCompCreate%compp => compclass
-
     ESMF_INIT_SET_CREATED(ESMF_GridCompCreate)
+
+    ! Add reference to this object into ESMF garbage collection table
+    call c_ESMC_VMAddFObject(ESMF_GridCompCreate, ESMF_ID_COMPONENT%objectID)
 
     ! deal with geom object arguments
     call ESMF_GridCompSet(ESMF_GridCompCreate, grid=grid, gridList=gridList, &

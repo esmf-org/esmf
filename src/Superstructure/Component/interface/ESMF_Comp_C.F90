@@ -511,7 +511,7 @@ recursive subroutine f_esmf_compcollectgarbage2(comp, rc)
     ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) return
 
-  ! deallocate actual CompClass allocation      
+  ! deallocate actual CompClass allocation
   if (associated(comp%compp)) then
     deallocate(comp%compp, stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Deallocating Comp", &
