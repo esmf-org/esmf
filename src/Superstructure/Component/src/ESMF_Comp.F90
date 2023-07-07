@@ -953,6 +953,7 @@ contains
         deallocate(compp%petlist, stat=localrc)
         if (ESMF_LogFoundDeallocError(localrc, msg="local petlist", &
           ESMF_CONTEXT, rcToReturn=rc)) return 
+        nullify(compp%petlist)
 
         ! call C++ to release function and data pointer tables.
         call c_ESMC_FTableDestroy(compp%ftable, localrc)
