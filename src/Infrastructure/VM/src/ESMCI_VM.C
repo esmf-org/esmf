@@ -1022,8 +1022,8 @@ void VM::shutdown(
 #ifdef GARBAGE_COLLECTION_LOG_on
             char msg[800];
             void *basePtr = **(void ***)(&matchTable_FObjects[i][k].fobject);
-            sprintf(msg, "ESMF Automatic Garbage Collection: fortran obj delete: "
-              "%20s %p - %p",
+            sprintf(msg, "ESMF Automatic Garbage Collection line %d, "
+              "context %d: fortran obj delete: %20s %p - %p", __LINE__, i,
               ESMC_ObjectID_Name(matchTable_FObjects[i][k].objectID),
               *(void **)(&matchTable_FObjects[i][k].fobject), basePtr);
             ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
@@ -1111,8 +1111,9 @@ void VM::shutdown(
             proxyString="actual";
             if (matchTable_Objects[i][k]->ESMC_BaseGetProxyFlag()==ESMF_PROXYYES)
               proxyString="proxy";
-            sprintf(msg, "ESMF Automatic Garbage Collection: c++base obj delete: "
-              "%20s %p - %6s - %7s - %7s : %04d : VM=%p : %10s",
+            sprintf(msg, "ESMF Automatic Garbage Collection line %d, "
+              "context %d: c++base obj delete: "
+              "%20s %p - %6s - %7s - %7s : %04d : VM=%p : %10s", __LINE__, i,
               matchTable_Objects[i][k]->ESMC_BaseGetClassName(),
               matchTable_Objects[i][k], proxyString,
               ESMC_StatusString(matchTable_Objects[i][k]->ESMC_BaseGetStatus()),
@@ -3413,8 +3414,8 @@ void VM::finalize(
 #ifdef GARBAGE_COLLECTION_LOG_on
       char msg[800];
       void *basePtr = **(void ***)(&matchTable_FObjects[0][k].fobject);
-      sprintf(msg, "ESMF Automatic Garbage Collection: fortran obj delete: "
-        "%20s %p - %p",
+      sprintf(msg, "ESMF Automatic Garbage Collection line %d, "
+        "context %d: fortran obj delete: %20s %p - %p", __LINE__, 0,
         ESMC_ObjectID_Name(matchTable_FObjects[0][k].objectID),
         *(void **)(&matchTable_FObjects[0][k].fobject), basePtr);
       ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
@@ -3501,8 +3502,9 @@ void VM::finalize(
       proxyString="actual";
       if (matchTable_Objects[0][k]->ESMC_BaseGetProxyFlag()==ESMF_PROXYYES)
         proxyString="proxy";
-      sprintf(msg, "ESMF Automatic Garbage Collection: c++base obj delete: "
-        "%20s %p - %6s - %7s - %7s : %04d : VM=%p : %10s",
+      sprintf(msg, "ESMF Automatic Garbage Collection line %d, "
+        "context %d: c++base obj delete: "
+        "%20s %p - %6s - %7s - %7s : %04d : VM=%p : %10s", __LINE__, 0,
         matchTable_Objects[0][k]->ESMC_BaseGetClassName(),
         matchTable_Objects[0][k], proxyString,
         ESMC_StatusString(matchTable_Objects[0][k]->ESMC_BaseGetStatus()),
