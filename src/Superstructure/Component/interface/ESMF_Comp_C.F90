@@ -513,7 +513,7 @@ recursive subroutine f_esmf_compcollectgarbage2(comp, rc)
 
   ! deallocate actual CompClass allocation
   if (associated(comp%compp)) then
-    deallocate(comp%compp, stat=localrc)
+!    deallocate(comp%compp, stat=localrc) !gjt: issues with Intel oneAPI
     if (ESMF_LogFoundAllocError(localrc, msg="Deallocating Comp", &
       ESMF_CONTEXT, rcToReturn=rc)) return
   endif
