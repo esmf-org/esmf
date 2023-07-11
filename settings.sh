@@ -11,3 +11,5 @@ export ESMF_GDAL_INCLUDE=/usr/include/gdal
 export ESMF_GDAL_LIBPATH=/usr/lib64
 #export ESMF_SHAPEFILE_LIBS=-lshp
 export ESMF_GDAL_LIBS=-lgdal
+export ESMF_BOPT=g
+export ESMF_CXXCOMPILEOPTS="-DESMFIO_DEBUG"

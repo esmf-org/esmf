@@ -50,6 +50,18 @@
 namespace ESMCI
 {
 
+/**
+ * These are the supported output data rearrangement methods.
+ */
+enum GDAL_REARRANGERS
+{
+    /** Box rearranger. */
+    GDAL_REARR_BOX = 1,
+
+    /** Subset rearranger. */
+    GDAL_REARR_SUBSET = 2
+};
+
 // !PUBLIC TYPES:
  class IO_GDAL;
 
@@ -105,17 +117,7 @@ namespace ESMCI
  // < declare private interface methods here >
 
 #ifdef ESMF_GDAL
-//    int ncerrToEsmcRc (int ncerr);
     ESMC_TypeKind_Flag  gdalToEsmcType(OGRFieldType gdalTypeVal);
-//    nc_type         esmcToNcType(ESMC_TypeKind_Flag  esmcTypeVal);
-
-//    Array*  readArray(NcFile  netCdfFile,
-//                       int    varIndex,
-//                       int    *rc);
-//    int     writeArray(NcFile netCdfFile,
-//                       Array* thisArray,
-//                       int    numDims,
-//                       int*   dimensions);
 #endif
 
 //
@@ -142,6 +144,12 @@ namespace ESMCI
     // friend to restore state  TODO ?
     //Clock *ESMCI_IO_GDALReadRestart(const std::string& name=0,
                                    //int*         rc=0);
+
+    int GDALc_finalize(int instance);
+    int GDALc_inq(int ncid, int *ndimsp, int *nvarsp, int *ngattsp, int *unlimdimidp);
+
+    int GDALc_inq_varid(int ncid, const char *name, int *varidp);
+    int GDALc_inq_vardimid(int ncid, int varid, int *dimidsp);
 
 }   // namespace ESMCI
 

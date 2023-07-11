@@ -35,6 +35,9 @@
 #ifdef ESMF_PIO
 #include "ESMCI_PIO_Handler.h"
 #endif
+#ifdef ESMF_GDAL
+#include "ESMCI_GDAL_Handler.h"
+#endif
 
 #define ROOT_PET (0)
 

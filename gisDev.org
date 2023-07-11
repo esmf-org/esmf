@@ -71,6 +71,15 @@ features and elements need to be defined separately, since a feature may be deco
 ** get_DS_params <global>
 ** divvy up feature/element IDs to PETS
 ** get features for ID bounds
+* Field Read
+ESMF_FieldRead() <ESMF_FieldPr.F90>
+-- ESMF_IORead() <ESMF_IO.F90>
+-- -- c_ESMC_IORead() <ESMCI_IO_F.C>
+-- -- -- (*ptr)->read() <ESMCI_IO.C>
+-- -- -- -- IO::read() <ESMCI_IO.C>
+-- -- -- -- -- IO_Handler::arrayRead() <ESMCI_IO_Handler.C>
+-- -- -- -- -- -- PIO_Handler::arrayReadOneTileFile() <ESMCI_PIO_Handler.C>
+-- -- -- -- -- -- -- PIOc_Read_Array() <pio_darray.c>
 * Questions:
 ** What about CRS and projection to/from GEOS? 
 Will area (spatial extent) be conserved? e.g. if the GIS CRS is curvilinear, is the mapping in ESMF able to handle that?

@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMC_FILENAME "ESMCI_PIO_Handler.C"
+#define ESMC_FILENAME "ESMCI_GDAL_Handler.C"
 //==============================================================================
 //
 // ESMC IO method code (body) file
@@ -18,14 +18,16 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ {\tt ESMC\_PIO_Handler} methods
-// declared in the companion file {\tt ESMCI\_PIO_Handler.h}
+// The code in this file implements the C++ {\tt ESMC\_GDAL_Handler} methods
+// declared in the companion file {\tt ESMCI\_GDAL_Handler.h}
 //
 //-------------------------------------------------------------------------
-#define PIO_DEBUG_LEVEL 4
-#define ESMFIO_DEBUG 1
+#define GDAL_DEBUG_LEVEL 0
 // include associated header file
-#include "ESMCI_PIO_Handler.h"
+#include "ESMCI_GDAL_Handler.h"
+
+// include generic services header file
+#include "ESMCI_IO_GDAL.h"
 
 // higher level, 3rd party or system includes here
 #include <vector>
@@ -44,16 +46,6 @@
 #include "json.hpp"
 #include "ESMCI_TraceMacros.h"
 
-// Define PIO NetCDF and Parallel NetCDF flags
-#ifdef ESMF_PNETCDF
-# define _PNETCDF
-#include <pnetcdf.h>
-# elif ESMF_NETCDF
-# define _NETCDF
-# include <netcdf.h>
-#endif
-#include <pio.h>
-
 #include "esmf_io_debug.h"
 
 using json = nlohmann::json;  // Convenience rename for JSON namespace.
@@ -70,24 +62,24 @@ namespace ESMCI
 //
 //-------------------------------------------------------------------------
 //
-// private helper class for managing PIO I/O Descriptors
+// private helper class for managing GDAL I/O Descriptors
 //
 //-------------------------------------------------------------------------
 //
-  class PIO_IODescHandler {
+  class GDAL_IODescHandler {
   private:
-    static std::vector<PIO_IODescHandler *> activePioIoDescriptors;
-    int ios;                  // PIO IO system instance for this descriptor
-    int io_descriptor;        // PIO IO descriptor
+    static std::vector<GDAL_IODescHandler *> activeGdalIoDescriptors;
+    int ios;                  // GDAL IO system instance for this descriptor
+    int io_descriptor;        // GDAL IO descriptor
     int nDims;                // The number of dimensions for Array IO
     int *dims;                // The shape of the Array IO
-    int basepiotype;          // PIO version of Array data type
+    int basegdaltype;         // GDAL version of Array data type
     Array *array_p;           // The array matched to this descriptor
     int tile;                 // The tile number in the array for this descriptor (1-based indexing)
     int arrayRank;            // The rank of array_p
     int *arrayShape;          // The shape of array_p
   public:
-    PIO_IODescHandler(int iosArg, Array *arrayArg) {
+    GDAL_IODescHandler(int iosArg, Array *arrayArg) {
       ios = iosArg;
       io_descriptor = (int)NULL;
       array_p = arrayArg;
@@ -99,11 +91,11 @@ namespace ESMCI
     }
     // These definitions are at the end of the file
   public:
-    ~PIO_IODescHandler();
+    ~GDAL_IODescHandler();
     static void finalize(void);
-    static int constructPioDecomp(int iosys, Array *arr_p, int tile,
+    static int constructGdalDecomp(int iosys, Array *arr_p, int tile,
                                   int *newDecomp_p);
-    static int freePioDecomp(int *decomp_p);
+    static int freeGdalDecomp(int *decomp_p);
     static int getDims(const int &iodesc,
                        int * nioDims = (int *)NULL,
                        int ** ioDims = (int **)NULL,
@@ -122,8 +114,8 @@ namespace ESMCI
 //-------------------------------------------------------------------------
 //
 
-  std::vector<int> PIO_Handler::activePioInstances;
-  std::vector<PIO_IODescHandler *> PIO_IODescHandler::activePioIoDescriptors;
+  std::vector<int> GDAL_Handler::activeGdalInstances;
+  std::vector<GDAL_IODescHandler *> GDAL_IODescHandler::activeGdalIoDescriptors;
 
 //
 //-------------------------------------------------------------------------
@@ -136,12 +128,12 @@ namespace ESMCI
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_Handler::initialize()"
+#define ESMC_METHOD "ESMCI::GDAL_Handler::initialize()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_Handler::initialize
+// !IROUTINE:  ESMCI::GDAL_Handler::initialize
 //
 // !INTERFACE:
-void PIO_Handler::initialize (
+void GDAL_Handler::initialize (
 //
 // !RETURN VALUE:
 //
@@ -158,9 +150,9 @@ void PIO_Handler::initialize (
   ) {
 //
 // !DESCRIPTION:
-//    Create an active, initialized PIO instance.
-//    PIO is initialized based on the input arguments. However, if a
-//    compatible PIO iosystem is already initialized, then nothing is done.
+//    Create an active, initialized GDAL instance.
+//    GDAL is initialized based on the input arguments. However, if a
+//    compatible GDAL iosystem is already initialized, then nothing is done.
 //    This is a collective call. Input parameters are read on comp_rank=0,
 //    values on other tasks are ignored. ALL PEs which will be participating
 //    in future I/O calls with this instance must participate in the call.
@@ -170,7 +162,7 @@ void PIO_Handler::initialize (
   // initialize return code; assume routine not implemented
   int localrc = ESMF_RC_NOT_IMPL;      // local return code
   int base;
-  bool instanceFound = false;          // try to find a PIO sys to reuse
+  bool instanceFound = false;          // try to find a GDAL sys to reuse
   int instance = 0;
   if (rc != NULL) {
     *rc = ESMF_RC_NOT_IMPL;            // final return code
@@ -184,37 +176,33 @@ void PIO_Handler::initialize (
 
   try {
 
-#ifdef ESMFIO_DEBUG
-    PIOc_set_log_level(PIO_DEBUG_LEVEL);
-#endif // ESMFIO_DEBUG
     if (!instanceFound) {
-      PRINTMSG("Before PIOc_Init_Intracomm, num_iotasks = " << num_iotasks);
-      PIOc_Init_Intracomm(comp_comm, num_iotasks,
-                          stride, base, rearr, &instance);
-      PRINTMSG("After PIOc_Init_Intracomm, instance = " << instance);
+      PRINTMSG("Before GDALc_Init_Intracomm, num_iotasks = " << num_iotasks);
+//      GDALc_Init_Intracomm(comp_comm, num_iotasks,
+//                          stride, base, rearr, &instance);
+      PRINTMSG("After GDALc_Init_Intracomm, instance = " << instance);
       // If we get here, hopefully everything is OK.
       if (instance != 0) {
 #ifdef ESMFIO_FILESYSTEM_LUSTRE
-          PIOc_set_hint(instance, "romio_ds_read", "disable");
-          PIOc_set_hint(instance, "romio_ds_write", "disable");
+          GDALc_set_hint(instance, "romio_ds_read", "disable");
+          GDALc_set_hint(instance, "romio_ds_write", "disable");
 #endif
 #ifdef ESMFIO_FILESYSTEM_GPFS
-          PIOc_set_hint(instance, "ibm_largeblock_io", "true");
+          GDALc_set_hint(instance, "ibm_largeblock_io", "true");
 #endif
-//          localrc = PIOc_set_rearr_opts(instance, PIO_REARR_COMM_P2P, PIO_REARR_COMM_FC_2D_ENABLE, 0, 0, 0, 0, 0, 4);
 
-        // Set the error handling to return PIO errors
+        // Set the error handling to return GDAL errors
         // Just return error (error code may be different on different PEs).
         // Broadcast the error to all PEs (consistant error handling)
-        PIOc_Set_IOSystem_Error_Handling(instance, PIO_BCAST_ERROR);
-        PRINTMSG("After PIOc_Set_IOSystem_Error_Handling");
+//        GDALc_Set_IOSystem_Error_Handling(instance, GDAL_BCAST_ERROR);
+        PRINTMSG("After GDALc_Set_IOSystem_Error_Handling");
         // Add the instance to the global list
-        PIO_Handler::activePioInstances.push_back(instance);
+        GDAL_Handler::activeGdalInstances.push_back(instance);
         PRINTMSG("push_back");
         localrc = ESMF_SUCCESS;
       } else {
         // Something went wrong (this really shouldn't happen)
-        ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, "Unknown error in PIOc_Init_Intracomm",
+        ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, "Unknown error in GDALc_Init_Intracomm",
             ESMC_CONTEXT, rc);
         return;
       }
@@ -236,18 +224,18 @@ void PIO_Handler::initialize (
   if (rc != NULL) {
     *rc = localrc;
   }
-} // PIO_Handler::initialize()
+} // GDAL_Handler::initialize()
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_Handler::initializeVM()"
+#define ESMC_METHOD "ESMCI::GDAL_Handler::initializeVM()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_Handler::initializeVM
+// !IROUTINE:  ESMCI::GDAL_Handler::initializeVM
 //
 // !INTERFACE:
-int PIO_Handler::initializeVM (void
+int GDAL_Handler::initializeVM (void
 //
 // !RETURN VALUE:
 //
@@ -258,9 +246,9 @@ int PIO_Handler::initializeVM (void
   ) {
 //
 // !DESCRIPTION:
-//    Create an active, initialized PIO instance.
-//    PIO is initialized based on defaults gleaned from the VM. However, if a
-//    compatible PIO iosystem is already initialized, then nothing is done.
+//    Create an active, initialized GDAL instance.
+//    GDAL is initialized based on defaults gleaned from the VM. However, if a
+//    compatible GDAL iosystem is already initialized, then nothing is done.
 //    This is a collective call. Input parameters are read on comp_rank=0,
 //    values on other tasks are ignored. ALL PEs which will be participating
 //    in future I/O calls with this instance must participate in the call.
@@ -269,7 +257,7 @@ int PIO_Handler::initializeVM (void
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int rc = ESMF_RC_NOT_IMPL;              // return code
-  bool instanceFound = false;             // try to find a PIO sys to reuse
+  bool instanceFound = false;             // try to find a GDAL sys to reuse
 
   try {
     if (!instanceFound) {
@@ -286,27 +274,22 @@ int PIO_Handler::initializeVM (void
       base = 0; // IO tasks start with base and are every stride tasks until num_iotasks.
       if (numtasks > stride){
           num_iotasks = int(numtasks/stride);
-#ifdef ESMF_PNETCDF
-          rearr = PIO_REARR_SUBSET;
-#else
-          rearr = PIO_REARR_BOX;
-#endif
+          rearr = GDAL_REARR_BOX;
       }else{
           num_iotasks = numtasks > 32 ? 32:numtasks;
           stride = numtasks/num_iotasks;
-          rearr = PIO_REARR_BOX;
+          rearr = GDAL_REARR_BOX;
       }
 
       // Call the static function
-      PIO_Handler::initialize(my_rank, communicator, num_iotasks,
+      GDAL_Handler::initialize(my_rank, communicator, num_iotasks,
                               stride, rearr, &base, &rc);
       PRINTMSG("After initialize, rc = " << rc);
       if (ESMF_SUCCESS == rc) {
-        PRINTMSG("Looking for active instance, size = " << activePioInstances.size());
-        pioSystemDesc = PIO_Handler::activePioInstances.back();
-        PRINTMSG("Fetched PIO system descriptor, " << (void *)pioSystemDesc);
+        PRINTMSG("Looking for active instance, size = " << activeGdalInstances.size());
+        gdalSystemDesc = GDAL_Handler::activeGdalInstances.back();
+        PRINTMSG("Fetched GDAL system descriptor, " << (void *)gdalSystemDesc);
       }
-//      PIOc_set_blocksize(444444);
     }
   } catch (int catchrc) {
     // catch standard ESMF return code
@@ -322,18 +305,18 @@ int PIO_Handler::initializeVM (void
   }
 
   return rc;
-} // PIO_Handler::initializeVM()
+} // GDAL_Handler::initializeVM()
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_Handler::finalize()"
+#define ESMC_METHOD "ESMCI::GDAL_Handler::finalize()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_Handler::finalize
+// !IROUTINE:  ESMCI::GDAL_Handler::finalize
 //
 // !INTERFACE:
-void PIO_Handler::finalize (
+void GDAL_Handler::finalize (
 //
 // !RETURN VALUE:
 //
@@ -344,11 +327,11 @@ void PIO_Handler::finalize (
   ) {
 //
 // !DESCRIPTION:
-//    Tear down all active, initialized PIO instances.
+//    Tear down all active, initialized GDAL instances.
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  int piorc;
+  int gdalrc;
   int localrc = ESMF_SUCCESS;             // local return code
   if (rc != NULL) {
     *rc = ESMF_RC_NOT_IMPL;               // final return code
@@ -357,7 +340,7 @@ void PIO_Handler::finalize (
   PRINTMSG("");
   try {
     // Close any open IO descriptors before turning off the instances
-    PIO_IODescHandler::finalize();
+    GDAL_IODescHandler::finalize();
   } catch(int lrc) {
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(lrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
@@ -368,34 +351,16 @@ void PIO_Handler::finalize (
     return;
   }
   try {
-    // Now, close any open PIO instances
-    while(!PIO_Handler::activePioInstances.empty()) {
-      int instance = PIO_Handler::activePioInstances.back();
-      piorc = PIOc_finalize(instance);
+    // Now, close any open GDAL instances
+    while(!GDAL_Handler::activeGdalInstances.empty()) {
+      int instance = GDAL_Handler::activeGdalInstances.back();
+      gdalrc = GDALc_finalize(instance);
       // Even if we have an error but log and keep going to try and shut
-      // down other PIO instances
-      CHECKPIOWARN(piorc, "Error shutting down PIO instance",
+      // down other GDAL instances
+      CHECKGDALWARN(gdalrc, "Error shutting down GDAL instance",
           ESMF_RC_FILE_UNEXPECTED, localrc);
-      /*
-#ifdef ESMFIO_DEBUG
-      static int ionum = 1;
-      if (piorc != PIO_NOERR) {
-        int lrc;
-        ESMC_VM currentVM;
-        int localPet;
-        int petCount;
-        int peCount;
-        MPI_Comm foo;
-        currentVM = ESMC_VMGetCurrent(&lrc);
-        lrc = ESMC_VMGet(currentVM, &localPet, &petCount, &peCount,
-                         &foo, (int *)NULL, (int *)NULL);
-        PRINTMSG(" (" << localPet << "): ionum = " << ionum << ", localrc = " << localrc);
-      }
-      ionum++;
-#endif // ESMFIO_DEBUG
-      */
 
-      PIO_Handler::activePioInstances.pop_back();
+      GDAL_Handler::activeGdalInstances.pop_back();
     }
   } catch(int lrc) {
     // catch standard ESMF return code
@@ -411,40 +376,40 @@ void PIO_Handler::finalize (
   if (rc != NULL) {
     *rc = localrc;
   }
-} // PIO_Handler::finalize()
+} // GDAL_Handler::finalize()
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_Handler::isPioInitialized()"
+#define ESMC_METHOD "ESMCI::GDAL_Handler::isGdalInitialized()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_Handler::isPioInitialized
+// !IROUTINE:  ESMCI::GDAL_Handler::isGdalInitialized
 //
 // !INTERFACE:
-ESMC_Logical PIO_Handler::isPioInitialized (void
+ESMC_Logical GDAL_Handler::isGdalInitialized (void
 //
 // !RETURN VALUE:
 //
-//  ESMC_Logical ESMF_TRUE if PIO is initialized, ESMF_FALSE otherwise
+//  ESMC_Logical ESMF_TRUE if GDAL is initialized, ESMF_FALSE otherwise
 //
 // !ARGUMENTS:
 //
   ) {
 //
 // !DESCRIPTION:
-//    Indicate whether or not PIO has been initialized.
+//    Indicate whether or not GDAL has been initialized.
 //    NB: This does not guarantee that the initialization is appropriate
 //        for the desired I/O operations.
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  if(activePioInstances.empty()) {
+  if(activeGdalInstances.empty()) {
     return ESMF_FALSE;
   } else {
     return ESMF_TRUE;
   }
-} // PIO_Handler::isPioInitialized()
+} // GDAL_Handler::isGdalInitialized()
 //-----------------------------------------------------------------------------
 
 //
@@ -457,28 +422,28 @@ ESMC_Logical PIO_Handler::isPioInitialized (void
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_Handler::PIO_Handler()"
+#define ESMC_METHOD "ESMCI::GDAL_Handler::GDAL_Handler()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_Handler::PIO_Handler    - constructor
+// !IROUTINE:  ESMCI::GDAL_Handler::GDAL_Handler    - constructor
 //
 // !INTERFACE:
-PIO_Handler::PIO_Handler(
+GDAL_Handler::GDAL_Handler(
 //
 // !RETURN VALUE:
 //
 //
 // !ARGUMENTS:
 //
-  ESMC_IOFmt_Flag fmtArg,                 // (in)  - File format for PIO to use
+  ESMC_IOFmt_Flag fmtArg,                 // (in)  - File format for GDAL to use
   int ntilesArg,                          // (in)  - Number of tiles in arrays handled by this object
   int *rc                                 // (out) - Error return code
   ) : IO_Handler(fmtArg, ntilesArg) {
 //
 // !DESCRIPTION:
-//    Construct the internal information structure of an ESMCI::PIO_Handler
+//    Construct the internal information structure of an ESMCI::GDAL_Handler
 //    object.
 //    No error checking wrt consistency of input arguments is needed because
-//    the PIO_Handler constructor is only to be called by IO_Handler::create()
+//    the GDAL_Handler constructor is only to be called by IO_Handler::create()
 //    interfaces which are responsible for providing consistent arguments
 //    to this layer.
 //
@@ -492,11 +457,11 @@ PIO_Handler::PIO_Handler(
 
   try {
 
-    // fill in the PIO_Handler object
-    pioSystemDesc =  0;
-    pioFileDesc = new int[ntilesArg];
+    // fill in the GDAL_Handler object
+    gdalSystemDesc =  0;
+    gdalFileDesc = new int[ntilesArg];
     for (int i = 0; i < ntilesArg; ++i) {
-      pioFileDesc[i] = 0;
+      gdalFileDesc[i] = 0;
     }
     localrc = ESMF_SUCCESS;
     new_file = new bool[ntilesArg];
@@ -520,18 +485,18 @@ PIO_Handler::PIO_Handler(
   if (rc != NULL) {
     *rc = localrc;
   }
-} // PIO_Handler::PIO_Handler()
+} // GDAL_Handler::GDAL_Handler()
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_Handler::destruct()"
+#define ESMC_METHOD "ESMCI::GDAL_Handler::destruct()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_Handler::destruct    - tear down PIO handler
+// !IROUTINE:  ESMCI::GDAL_Handler::destruct    - tear down GDAL handler
 //
 // !INTERFACE:
-void PIO_Handler::destruct (void
+void GDAL_Handler::destruct (void
 //
 // !RETURN VALUE:
 //
@@ -550,24 +515,24 @@ void PIO_Handler::destruct (void
   // Make sure the file is closed (note that it's okay to call this even if the file is already closed)
   PRINTMSG(" (" << my_rank << "): closing file");
   close((int *)NULL);     // Don't care about an error, continue with cleanup
-  // kill the pointer to the PIO_Handler object
-  // NB: This does not shutdown the PIO instance, it may be reused.
-  pioSystemDesc = 0;
+  // kill the pointer to the GDAL_Handler object
+  // NB: This does not shutdown the GDAL instance, it may be reused.
+  gdalSystemDesc = 0;
   // Deallocate some memory
-  delete[] pioFileDesc;
+  delete[] gdalFileDesc;
   delete[] new_file;
-} // PIO_Handler::destruct()
+} // GDAL_Handler::destruct()
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_Handler::arrayReadOneTileFile()"
+#define ESMC_METHOD "ESMCI::GDAL_Handler::arrayReadOneTileFile()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_Handler::arrayReadOneTileFile    - Read an array from a file, for the given tile
+// !IROUTINE:  ESMCI::GDAL_Handler::arrayReadOneTileFile    - Read an array from a file, for the given tile
 //
 // !INTERFACE:
-void PIO_Handler::arrayReadOneTileFile(
+void GDAL_Handler::arrayReadOneTileFile(
 //
 // !RETURN VALUE:
 //
@@ -590,15 +555,15 @@ void PIO_Handler::arrayReadOneTileFile(
 //EOPI
 //-----------------------------------------------------------------------------
   int localrc = ESMF_RC_NOT_IMPL;         // local return code
-  int piorc;                              // PIO error value
+  int gdalrc;                              // GDAL error value
   int * ioDims;                           // Array IO shape
   int nioDims;                            // Array IO rank
   int * arrDims;                          // Array shape
   int narrDims;                           // Array rank
-  int iodesc;                             // PIO IO descriptor
-  int filedesc;                           // PIO file descriptor
-  int vardesc;                            // PIO variable descriptor
-  int basepiotype;                        // PIO version of Array data type
+  int iodesc;                             // GDAL IO descriptor
+  int filedesc;                           // GDAL file descriptor
+  int vardesc;                            // GDAL variable descriptor
+  int basegdaltype;                        // GDAL version of Array data type
   void *baseAddress;                      // The address of the Array IO data
   int localDE;                            // DE to use for IO
   int nVar;                               // Number of variables in file
@@ -622,7 +587,7 @@ void PIO_Handler::arrayReadOneTileFile(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
     return;
 
-  filedesc = pioFileDesc[tile-1]; // note that tile indices are 1-based
+  filedesc = gdalFileDesc[tile-1]; // note that tile indices are 1-based
 
   // Get a pointer to the array data
   // Still have the one DE restriction so use localDE = 0
@@ -631,7 +596,7 @@ void PIO_Handler::arrayReadOneTileFile(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
     return;
   // arrlen will be the size owned locally (0 if this DE doesn't own the current tile)
-  // (though note that this value isn't actually used by PIO)
+  // (though note that this value isn't actually used by GDAL)
   int arrlen;
   if (tileOfThisDe == tile) {
     baseAddress = arr_p->getLocalarrayList()[localDE]->getBaseAddr();
@@ -644,15 +609,15 @@ void PIO_Handler::arrayReadOneTileFile(
     int nDims;
 
     // If frame >= 0 then we need to not use the unlimited dim in the iodesc.
-    iodesc = getIODesc(pioSystemDesc, arr_p, tile, &ioDims, &nioDims,
-		       &arrDims, &narrDims, &basepiotype, &localrc);
+    iodesc = getIODesc(gdalSystemDesc, arr_p, tile, &ioDims, &nioDims,
+		       &arrDims, &narrDims, &basegdaltype, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
 				      ESMC_CONTEXT, rc)) return;
 
     // This should work if it is a NetCDF file.
-    piorc = PIOc_inq(filedesc, &nDims,
+    gdalrc = GDALc_inq(filedesc, &nDims,
 		     &nVar, &nAtt, &unlim);
-    if (!CHECKPIOERROR(piorc, "File is not in NetCDF format", ESMF_RC_FILE_READ, (*rc))) {
+    if (!CHECKGDALERROR(gdalrc, "File is not in NetCDF format", ESMF_RC_FILE_READ, (*rc))) {
       return;
     }
 
@@ -662,10 +627,10 @@ void PIO_Handler::arrayReadOneTileFile(
       varname = arr_p->getName();
     }
 
-    piorc = PIOc_inq_varid(filedesc, varname.c_str(), &vardesc);
+    gdalrc = GDALc_inq_varid(filedesc, varname.c_str(), &vardesc);
     // An error here means the variable is not in the file
     const std::string errmsg = "variable " + varname + " not found in file";
-    if (!CHECKPIOERROR(piorc, errmsg, ESMF_RC_FILE_READ, (*rc))) {
+    if (!CHECKGDALERROR(gdalrc, errmsg, ESMF_RC_FILE_READ, (*rc))) {
       return;
     }
 
@@ -675,10 +640,10 @@ void PIO_Handler::arrayReadOneTileFile(
       // Do not use the unlimited dim in iodesc calculation
       //
       int dimids[narrDims];
-      piorc = PIOc_inq_vardimid(filedesc, vardesc, dimids);
+      gdalrc = GDALc_inq_vardimid(filedesc, vardesc, dimids);
       // This should never happen
       const std::string errmsg = "variable " + varname + " inq_dimid failed";
-      if (!CHECKPIOERROR(piorc, errmsg, ESMF_RC_FILE_READ, (*rc))) {
+      if (!CHECKGDALERROR(gdalrc, errmsg, ESMF_RC_FILE_READ, (*rc))) {
 	return;
       }
 
@@ -692,8 +657,8 @@ void PIO_Handler::arrayReadOneTileFile(
 
       int dimid_time;
       MPI_Offset time_len;
-      piorc = PIOc_inq_dimid(filedesc, "time", &dimid_time);
-      if (!CHECKPIOERROR(piorc, "No time dimension found in file", ESMF_RC_FILE_READ, (*rc))) {
+      gdalrc = GDALc_inq_dimid(filedesc, "time", &dimid_time);
+      if (!CHECKGDALERROR(gdalrc, "No time dimension found in file", ESMF_RC_FILE_READ, (*rc))) {
         return;
       }
       // Check to see if time is the unlimited dimension
@@ -707,9 +672,9 @@ void PIO_Handler::arrayReadOneTileFile(
         }
       }
       // Check to make sure the requested record is in the file
-      piorc = PIOc_inq_dimlen(filedesc,
+      gdalrc = GDALc_inq_dimlen(filedesc,
           dimid_time, &time_len);
-      if (!CHECKPIOERROR(piorc, "Error finding time length", ESMF_RC_FILE_READ, (*rc))) {
+      if (!CHECKGDALERROR(gdalrc, "Error finding time length", ESMF_RC_FILE_READ, (*rc))) {
         return;
       }
       if (*timeslice > time_len) {
@@ -734,20 +699,17 @@ void PIO_Handler::arrayReadOneTileFile(
     }
     if (unlim >= 0 && frame > 0) {
         PRINTMSG("calling setframe for read_darray, frame = " << frame);
-        PIOc_setframe(filedesc, vardesc, frame-1);
+        GDALc_setframe(filedesc, vardesc, frame-1);
     }
 
 #endif // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
-#ifdef ESMFIO_DEBUG
-  PIOc_set_log_level(4);
-#endif // ESMFIO_DEBUG
 
-  PRINTMSG("calling read_darray, pio type = " << basepiotype << ", address = " << baseAddress);
+  PRINTMSG("calling read_darray, gdal type = " << basegdaltype << ", address = " << baseAddress);
   // Read in the array
-  piorc = PIOc_read_darray(filedesc, vardesc, iodesc,
+  gdalrc = GDALc_read_darray(filedesc, vardesc, iodesc,
                            arrlen, (void *)baseAddress);
 
-  if (!CHECKPIOERROR(piorc, "Error reading array data", ESMF_RC_FILE_READ, (*rc))) {
+  if (!CHECKGDALERROR(gdalrc, "Error reading array data", ESMF_RC_FILE_READ, (*rc))) {
     return;
   }
 
@@ -755,17 +717,17 @@ void PIO_Handler::arrayReadOneTileFile(
   if (rc != NULL) {
     *rc = localrc;
   }
-} // PIO_Handler::arrayReadOneTileFile()
+} // GDAL_Handler::arrayReadOneTileFile()
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_Handler::arrayWriteOneTileFile()"
+#define ESMC_METHOD "ESMCI::GDAL_Handler::arrayWriteOneTileFile()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_Handler::arrayWriteOneTileFile    - Write an Array to a file, for the given tile
+// !IROUTINE:  ESMCI::GDAL_Handler::arrayWriteOneTileFile    - Write an Array to a file, for the given tile
 //
 // !INTERFACE:
-void PIO_Handler::arrayWriteOneTileFile(
+void GDAL_Handler::arrayWriteOneTileFile(
 //
 // !RETURN VALUE:
 //
@@ -785,24 +747,24 @@ void PIO_Handler::arrayWriteOneTileFile(
 // !DESCRIPTION:
 //    Write data to field <name> to the open file, for the given tile.
 //    For typical single-tile arrays, this will just be called once per arrayWrite, with tile=1.
-//    Calls the appropriate PIO write_darray_<rank>_<typekind> function.
+//    Calls the appropriate GDAL write_darray_<rank>_<typekind> function.
 //    It is an error if this handler object does not have an open
-//    PIO file descriptor and a valid PIO IO descriptor (these items should
-//    all be in place after a successful call to PIO_Handler::open).
+//    GDAL file descriptor and a valid GDAL IO descriptor (these items should
+//    all be in place after a successful call to GDAL_Handler::open).
 //
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMF_RC_NOT_IMPL;         // local return code
-  int piorc;                              // PIO error value
+  int gdalrc;                              // GDAL error value
   int * ioDims;                           // Array IO shape
   int nioDims;                            // Array IO rank
   int * arrDims;                          // Array shape
   int narrDims;                           // Array rank
-  int iodesc;                             // PIO IO descriptor
-  int filedesc;                           // PIO file descriptor
-  int vardesc = 0;                        // PIO variable descriptor
-  int basepiotype;                        // PIO version of Array data type
+  int iodesc;                             // GDAL IO descriptor
+  int filedesc;                           // GDAL file descriptor
+  int vardesc = 0;                        // GDAL variable descriptor
+  int basegdaltype;                        // GDAL version of Array data type
   void *baseAddress;                      // The address of the Array IO data
   int localDE;                            // DE to use for IO
   int ncDims[8];                          // To hold NetCDF dimensions
@@ -830,9 +792,9 @@ void PIO_Handler::arrayWriteOneTileFile(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
     return;
 
-  filedesc = pioFileDesc[tile-1]; // note that tile indices are 1-based
-  iodesc = getIODesc(pioSystemDesc, arr_p, tile, &ioDims, &nioDims,
-      &arrDims, &narrDims, &basepiotype, &localrc);
+  filedesc = gdalFileDesc[tile-1]; // note that tile indices are 1-based
+  iodesc = getIODesc(gdalSystemDesc, arr_p, tile, &ioDims, &nioDims,
+      &arrDims, &narrDims, &basegdaltype, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)) return;
   for (int i=0; i<narrDims; i++) {
@@ -886,11 +848,11 @@ void PIO_Handler::arrayWriteOneTileFile(
       int nAtt;                           // Number of attributes in file
       int nfDims;                         // Number of dimensions in file
       PRINTMSG("Entering NetCDF define mode (redef)");
-      piorc = PIOc_redef(filedesc);
+      gdalrc = GDALc_redef(filedesc);
       // Not all NetCDF errors are really errors here so we need to check
-      if ((PIO_NOERR != piorc) && (NC_EINDEFINE != piorc)) {
-        if (!CHECKPIOERROR(piorc,
-            ((NC_EPERM == piorc) ?
+      if ((GDAL_NOERR != gdalrc) && (NC_EINDEFINE != gdalrc)) {
+        if (!CHECKGDALERROR(gdalrc,
+            ((NC_EPERM == gdalrc) ?
             "File is read only" :
             "File is not in NetCDF format"),
             ESMF_RC_FILE_WRITE, (*rc))) {
@@ -899,43 +861,43 @@ void PIO_Handler::arrayWriteOneTileFile(
       }
 
       // This should work if it is a NetCDF file.
-      PRINTMSG("Calling PIOc_inq");
-      piorc = PIOc_inq(filedesc, &nfDims,
+      PRINTMSG("Calling GDALc_inq");
+      gdalrc = GDALc_inq(filedesc, &nfDims,
                                 &nVar, &nAtt, &unlim);
-      if (!CHECKPIOERROR(piorc, "File is not in NetCDF format",
+      if (!CHECKGDALERROR(gdalrc, "File is not in NetCDF format",
           ESMF_RC_FILE_WRITE, (*rc))) {
         return;
       }
 
       // We have a NetCDF file, see if the variable is in there
       PRINTMSG("Looking for variable in file");
-      piorc = PIOc_inq_varid(filedesc, varname.c_str(), &vardesc);
+      gdalrc = GDALc_inq_varid(filedesc, varname.c_str(), &vardesc);
       // This should succeed if the variable exists
-      varExists = (PIO_NOERR == piorc);
+      varExists = (GDAL_NOERR == gdalrc);
     }
 
   // Check consistency of time dimension with timeslice
   bool hasTimeDim;
 
     int dimidTime;
-    PIO_Offset timeLen;
+    GDAL_Offset timeLen;
     PRINTMSG("Checking time dimension");
-    //piorc = PIOc_inq_dimid(filedesc, "time", &dimidTime);
-    piorc = PIOc_inq_unlimdim(filedesc, &dimidTime);
+    //gdalrc = GDALc_inq_dimid(filedesc, "time", &dimidTime);
+    gdalrc = GDALc_inq_unlimdim(filedesc, &dimidTime);
     // NetCDF does not specify which error code goes with with
     // condition so we will guess that there is no time dimension
     // on any error condition (This may be an error depending on context).
-    hasTimeDim = (PIO_NOERR == piorc && dimidTime != -1);
-    PRINTMSG("inq_dimid  = " << piorc);
+    hasTimeDim = (GDAL_NOERR == gdalrc && dimidTime != -1);
+    PRINTMSG("inq_dimid  = " << gdalrc);
     PRINTMSG("hasTimeDim = " << hasTimeDim);
     PRINTMSG("unlim = " << unlim);
     if (hasTimeDim) {
       // Retrieve the max time field
-      piorc = PIOc_inq_dimlen(filedesc, dimidTime, &timeLen);
-      PRINTMSG("inq_dimlen = " << piorc);
+      gdalrc = GDALc_inq_dimlen(filedesc, dimidTime, &timeLen);
+      PRINTMSG("inq_dimlen = " << gdalrc);
       PRINTMSG("dimidTime = " << dimidTime);
       PRINTMSG("timeLen = " << timeLen);
-      if (!CHECKPIOERROR(piorc, "Error retrieving information about time",
+      if (!CHECKGDALERROR(gdalrc, "Error retrieving information about time",
           ESMF_RC_FILE_WRITE, (*rc))) {
         return;
       }
@@ -975,8 +937,8 @@ void PIO_Handler::arrayWriteOneTileFile(
     int nArrdims = nioDims + ((timeFrame > 0) ? 1 : 0);
 
     // Check compatibility between array to write and existing variable.
-    piorc = PIOc_inq_varndims(filedesc, vardesc, &nDims);
-    if (!CHECKPIOERROR(piorc, "Error retrieving information about variable",
+    gdalrc = GDALc_inq_varndims(filedesc, vardesc, &nDims);
+    if (!CHECKGDALERROR(gdalrc, "Error retrieving information about variable",
         ESMF_RC_FILE_WRITE, (*rc))) {
       return;
     }
@@ -991,10 +953,10 @@ void PIO_Handler::arrayWriteOneTileFile(
       }
     }
 
-    PRINTMSG("Calling pio_cpp_inq_vardimid_vdesc");
+    PRINTMSG("Calling gdal_cpp_inq_vardimid_vdesc");
     std::vector<int> dimIds(nDims);
-    piorc = PIOc_inq_vardimid(filedesc, vardesc, &dimIds.front());
-    if (!CHECKPIOERROR(piorc, "Error retrieving information about variable",
+    gdalrc = GDALc_inq_vardimid(filedesc, vardesc, &dimIds.front());
+    if (!CHECKGDALERROR(gdalrc, "Error retrieving information about variable",
         ESMF_RC_FILE_WRITE, (*rc))) {
       return;
     }
@@ -1002,12 +964,12 @@ void PIO_Handler::arrayWriteOneTileFile(
     MPI_Offset dimLen;
     int ioDimNum = 0;
     for (int i = 0; i < nDims; i++) {
-      piorc = PIOc_inq_dimlen(filedesc, dimIds[i], &dimLen);
-      if (!CHECKPIOERROR(piorc, "Error retrieving dimension information",
+      gdalrc = GDALc_inq_dimlen(filedesc, dimIds[i], &dimLen);
+      if (!CHECKGDALERROR(gdalrc, "Error retrieving dimension information",
           ESMF_RC_FILE_WRITE, (*rc))) {
         return;
       }
-      PRINTMSG("PIOc_inq_dimlen for dim = " << i << " dimLen="<<dimLen);
+      PRINTMSG("GDALc_inq_dimlen for dim = " << i << " dimLen="<<dimLen);
 
       if (dimIds[i] == unlim) {
         if (timeFrame <= 0) {
@@ -1050,11 +1012,11 @@ void PIO_Handler::arrayWriteOneTileFile(
   if (!varExists) {
     // Ensure we are in define mode
     PRINTMSG("Going into NetCDF define mode (redef)");
-    piorc = PIOc_redef(filedesc);
+    gdalrc = GDALc_redef(filedesc);
     // Not all NetCDF errors are really errors here so we need to check
-    if ((PIO_NOERR != piorc) && (NC_EINDEFINE != piorc)) {
-      if (!CHECKPIOERROR(piorc,
-          ((NC_EPERM == piorc) ?
+    if ((GDAL_NOERR != gdalrc) && (NC_EINDEFINE != gdalrc)) {
+      if (!CHECKGDALERROR(gdalrc,
+          ((NC_EPERM == gdalrc) ?
           "File is read only" :
           "File is not in NetCDF format"),
           ESMF_RC_FILE_WRITE, (*rc))) {
@@ -1077,11 +1039,11 @@ void PIO_Handler::arrayWriteOneTileFile(
 
       // if dimension already exists, use it.
       int dimid_existing;
-      piorc = PIOc_inq_dimid(filedesc, axis.c_str(), &dimid_existing);
-      if (PIO_NOERR == piorc) {
+      gdalrc = GDALc_inq_dimid(filedesc, axis.c_str(), &dimid_existing);
+      if (GDAL_NOERR == gdalrc) {
         MPI_Offset dim_len;
-        piorc = PIOc_inq_dimlen(filedesc, dimid_existing, &dim_len);
-        if (!CHECKPIOERROR(piorc, "Error finding existing dimension length", ESMF_RC_FILE_WRITE, (*rc))) {
+        gdalrc = GDALc_inq_dimlen(filedesc, dimid_existing, &dim_len);
+        if (!CHECKGDALERROR(gdalrc, "Error finding existing dimension length", ESMF_RC_FILE_WRITE, (*rc))) {
           return;
         }
         if (ioDims[i] != dim_len) {
@@ -1095,9 +1057,9 @@ void PIO_Handler::arrayWriteOneTileFile(
         ncDims[nioDims - i - 1] = dimid_existing;
       } else {
         PRINTMSG("Defining dimension " << i);
-        piorc = PIOc_def_dim(filedesc, axis.c_str(),
+        gdalrc = GDALc_def_dim(filedesc, axis.c_str(),
                                 ioDims[i], &ncDims[nioDims - i - 1]);
-        if (!CHECKPIOERROR(piorc, std::string("Defining dimension: ") + axis,
+        if (!CHECKGDALERROR(gdalrc, std::string("Defining dimension: ") + axis,
             ESMF_RC_FILE_WRITE, (*rc))) {
           return;
         }
@@ -1110,16 +1072,16 @@ void PIO_Handler::arrayWriteOneTileFile(
         for(int i=nioDims;i>0;i--)
             ncDims[i] = ncDims[i-1];
       if (hasTimeDim) {
-        piorc = PIOc_inq_dimid (filedesc, "time", &ncDims[0]);
-        if (!CHECKPIOERROR(piorc, "Attempting to obtain 'time' dimension ID",
+        gdalrc = GDALc_inq_dimid (filedesc, "time", &ncDims[0]);
+        if (!CHECKGDALERROR(gdalrc, "Attempting to obtain 'time' dimension ID",
             ESMF_RC_FILE_WRITE, (*rc))) {
           return;
         }
       } else {
         PRINTMSG("Defining time dimension");
-        piorc = PIOc_def_dim(filedesc, "time",
-                                PIO_UNLIMITED, &ncDims[0]);
-        if (!CHECKPIOERROR(piorc, "Attempting to define 'time' dimension",
+        gdalrc = GDALc_def_dim(filedesc, "time",
+                                GDAL_UNLIMITED, &ncDims[0]);
+        if (!CHECKGDALERROR(gdalrc, "Attempting to define 'time' dimension",
             ESMF_RC_FILE_WRITE, (*rc))) {
           return;
         }
@@ -1129,11 +1091,11 @@ void PIO_Handler::arrayWriteOneTileFile(
   PRINTMSG("varExists = " << varExists);
   if (!varExists) {
     PRINTMSG("niodims = " << nioDims);
-    PRINTMSG("basepiotype = " << basepiotype);
+    PRINTMSG("basegdaltype = " << basegdaltype);
 
-    piorc = PIOc_def_var(filedesc, varname.c_str(), basepiotype,
+    gdalrc = GDALc_def_var(filedesc, varname.c_str(), basegdaltype,
                          nioDims, ncDims, &vardesc);
-    if (!CHECKPIOERROR(piorc, "Attempting to define PIO vardesc for: " + varname,
+    if (!CHECKGDALERROR(gdalrc, "Attempting to define GDAL vardesc for: " + varname,
         ESMF_RC_FILE_WRITE, (*rc))) {
       return;
     }
@@ -1141,11 +1103,11 @@ void PIO_Handler::arrayWriteOneTileFile(
   if (timeFrame >= 0) {
 #ifdef ESMFIO_DEBUG
     int nvdims;
-    PIOc_inq_varndims(filedesc, vardesc, &nvdims);
+    GDALc_inq_varndims(filedesc, vardesc, &nvdims);
     PRINTMSG("calling setframe, timeFrame = " << timeFrame);
 #endif // ESMFIO_DEBUG
-    piorc = PIOc_setframe(filedesc, vardesc, timeFrame-1);
-    if (!CHECKPIOERROR(piorc, "Attempting to setframe for: " + varname,
+    gdalrc = GDALc_setframe(filedesc, vardesc, timeFrame-1);
+    if (!CHECKGDALERROR(gdalrc, "Attempting to setframe for: " + varname,
         ESMF_RC_FILE_WRITE, (*rc))) {
       return;
     }
@@ -1157,7 +1119,7 @@ void PIO_Handler::arrayWriteOneTileFile(
     if (varExists) {
       int varid;
       int lrc;
-      lrc = PIOc_inq_varid(filedesc, varname.c_str(), &varid);
+      lrc = GDALc_inq_varid(filedesc, varname.c_str(), &varid);
       PRINTMSG("varid = " << varid);
     }
 #endif // ESMFIO_DEBUG
@@ -1181,27 +1143,24 @@ void PIO_Handler::arrayWriteOneTileFile(
 
   PRINTMSG("calling enddef, status = " << rc);
 
-    piorc = PIOc_enddef(filedesc);
-    if (!CHECKPIOERROR(piorc,  "Attempting to end definition of variable: " + varname,
+    gdalrc = GDALc_enddef(filedesc);
+    if (!CHECKGDALERROR(gdalrc,  "Attempting to end definition of variable: " + varname,
         ESMF_RC_FILE_WRITE, (*rc))) {
       return;
     }
 
 #endif // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
-  PRINTMSG("calling write_darray, pio type = " << basepiotype << ", address = " << baseAddress);
-#ifdef ESMFIO_DEBUG
-  PIOc_set_log_level(4);
-#endif // ESMFIO_DEBUG
+  PRINTMSG("calling write_darray, gdal type = " << basegdaltype << ", address = " << baseAddress);
   // Write the array
-  ESMCI_IOREGION_ENTER("PIOc_write_darray");
-  piorc =  PIOc_write_darray(filedesc, vardesc, iodesc, arrlen,
+  ESMCI_IOREGION_ENTER("GDALc_write_darray");
+  gdalrc =  GDALc_write_darray(filedesc, vardesc, iodesc, arrlen,
                              (void *)baseAddress, NULL);
-  if (!CHECKPIOERROR(piorc, "Attempting to write file",
+  if (!CHECKGDALERROR(gdalrc, "Attempting to write file",
             ESMF_RC_FILE_WRITE, (*rc))) {
       return;
   }
   new_file[tile-1] = false;
-  ESMCI_IOREGION_EXIT("PIOc_write_darray");
+  ESMCI_IOREGION_EXIT("GDALc_write_darray");
 
 
   // Cleanup & return
@@ -1209,17 +1168,17 @@ void PIO_Handler::arrayWriteOneTileFile(
   if (rc != NULL) {
     *rc = ESMF_SUCCESS;
   }
-} // PIO_Handler::arrayWriteOneTileFile()
+} // GDAL_Handler::arrayWriteOneTileFile()
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_Handler::openOneTileFile()"
+#define ESMC_METHOD "ESMCI::GDAL_Handler::openOneTileFile()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_Handler::openOneTileFile    - open a stream with stored filename, for the given tile
+// !IROUTINE:  ESMCI::GDAL_Handler::openOneTileFile    - open a stream with stored filename, for the given tile
 //
 // !INTERFACE:
-void PIO_Handler::openOneTileFile(
+void GDAL_Handler::openOneTileFile(
 //
 // !RETURN VALUE:
 //
@@ -1234,16 +1193,16 @@ void PIO_Handler::openOneTileFile(
 // !DESCRIPTION:
 //    Open a file for reading and/or writing for the given tile.
 //    For typical single-tile arrays, this will just be called once per open, with tile=1.
-//    PIO must be initialized for this routine to succeed (ESMF_RC_INTNRL_BAD)
+//    GDAL must be initialized for this routine to succeed (ESMF_RC_INTNRL_BAD)
 //    It is an error if a file is already open (ESMF_RC_FILE_OPEN)
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  int iotype;                             // PIO I/O type
-  int mode;                               // PIO file open mode
+  int iotype;                             // GDAL I/O type
+  int mode;                               // GDAL file open mode
   // initialize return code; assume routine not implemented
   int localrc = ESMF_RC_NOT_IMPL;         // local return code
-  int piorc;                              // PIO error value
+  int gdalrc;                              // GDAL error value
   VM *vm = VM::getCurrent(&localrc);
   int numtasks =  vm->getPetCount();
   int petspernode = vm->getSsiMaxPetCount();
@@ -1251,22 +1210,22 @@ void PIO_Handler::openOneTileFile(
 
   struct iofmt_map_t {
     int esmf_iofmt;
-    int pio_fmt;
+    int gdal_fmt;
   } iofmt_map[] = {
 #if defined (ESMF_PNETCDF)
-    { ESMF_IOFMT_NETCDF,   PIO_IOTYPE_PNETCDF }
-    ,{ ESMF_IOFMT_NETCDF_64BIT_OFFSET, PIO_IOTYPE_PNETCDF }
-    ,{ ESMF_IOFMT_NETCDF_64BIT_DATA, PIO_IOTYPE_PNETCDF }
-    ,{ ESMF_IOFMT_NETCDF4,  PIO_IOTYPE_NETCDF }
-    ,{ ESMF_IOFMT_NETCDF4C, PIO_IOTYPE_NETCDF4C }
-    ,{ ESMF_IOFMT_NETCDF4P, PIO_IOTYPE_NETCDF4P }
+    { ESMF_IOFMT_NETCDF,   GDAL_IOTYPE_PNETCDF }
+    ,{ ESMF_IOFMT_NETCDF_64BIT_OFFSET, GDAL_IOTYPE_PNETCDF }
+    ,{ ESMF_IOFMT_NETCDF_64BIT_DATA, GDAL_IOTYPE_PNETCDF }
+    ,{ ESMF_IOFMT_NETCDF4,  GDAL_IOTYPE_NETCDF }
+    ,{ ESMF_IOFMT_NETCDF4C, GDAL_IOTYPE_NETCDF4C }
+    ,{ ESMF_IOFMT_NETCDF4P, GDAL_IOTYPE_NETCDF4P }
 #elif defined (ESMF_NETCDF)
-    { ESMF_IOFMT_NETCDF,   PIO_IOTYPE_NETCDF }
-    ,{ ESMF_IOFMT_NETCDF_64BIT_OFFSET, PIO_IOTYPE_NETCDF }
-    ,{ ESMF_IOFMT_NETCDF_64BIT_DATA, PIO_IOTYPE_NETCDF }
-    ,{ ESMF_IOFMT_NETCDF4,  PIO_IOTYPE_NETCDF }
-    ,{ ESMF_IOFMT_NETCDF4C, PIO_IOTYPE_NETCDF4C }
-    ,{ ESMF_IOFMT_NETCDF4P, PIO_IOTYPE_NETCDF4P }
+    { ESMF_IOFMT_NETCDF,   GDAL_IOTYPE_NETCDF }
+    ,{ ESMF_IOFMT_NETCDF_64BIT_OFFSET, GDAL_IOTYPE_NETCDF }
+    ,{ ESMF_IOFMT_NETCDF_64BIT_DATA, GDAL_IOTYPE_NETCDF }
+    ,{ ESMF_IOFMT_NETCDF4,  GDAL_IOTYPE_NETCDF }
+    ,{ ESMF_IOFMT_NETCDF4C, GDAL_IOTYPE_NETCDF4C }
+    ,{ ESMF_IOFMT_NETCDF4P, GDAL_IOTYPE_NETCDF4P }
 #endif
   };
 
@@ -1277,20 +1236,20 @@ void PIO_Handler::openOneTileFile(
   }
 
   PRINTPOS;
-  if (isPioInitialized() != ESMF_TRUE) {
+  if (isGdalInitialized() != ESMF_TRUE) {
     if (ESMC_LogDefault.MsgFoundError (ESMF_RC_INTNRL_BAD,
-        "PIO not initialized",
+        "GDAL not initialized",
         ESMC_CONTEXT, rc)) return;
   } else if (isOpen(tile) == ESMF_TRUE) {
     if (ESMC_LogDefault.MsgFoundError (ESMF_RC_FILE_OPEN,
         "File is already open",
         ESMC_CONTEXT, rc)) return;
-  } else if (pioSystemDesc <= 0 ) {
-    // Just grab last created PIO instance for now (TBD: need way to choose)
-    pioSystemDesc = PIO_Handler::activePioInstances.back();
+  } else if (gdalSystemDesc <= 0 ) {
+    // Just grab last created GDAL instance for now (TBD: need way to choose)
+    gdalSystemDesc = GDAL_Handler::activeGdalInstances.back();
   }
 
-  // Translate the I/O format from ESMF to PIO
+  // Translate the I/O format from ESMF to GDAL
 #if !defined(ESMF_NETCDF) && !defined (ESMF_PNETCDF)
   if (ESMC_LogDefault.MsgFoundError(ESMF_RC_LIB_NOT_PRESENT,
       "Library for requested I/O format is not present", ESMC_CONTEXT, rc))
@@ -1300,7 +1259,7 @@ void PIO_Handler::openOneTileFile(
   int i_loop;
   for (i_loop=0; i_loop<iofmt_map_size; i_loop++) {
     if (getFormat() == iofmt_map[i_loop].esmf_iofmt) {
-      iotype = iofmt_map[i_loop].pio_fmt;
+      iotype = iofmt_map[i_loop].gdal_fmt;
       break;
     }
   }
@@ -1312,11 +1271,11 @@ void PIO_Handler::openOneTileFile(
 
   // Check to see if we are able to open file properly
   bool okToCreate = false;
-  int clobberMode = PIO_NOCLOBBER;
+  int clobberMode = GDAL_NOCLOBBER;
   if (readonly) {
-    mode = PIO_NOWRITE;
+    mode = GDAL_NOWRITE;
   }  else {
-    mode = PIO_WRITE;
+    mode = GDAL_WRITE;
   }
   // Figure out if we need to call createfile or openfile
   new_file[tile-1] = false;
@@ -1332,7 +1291,7 @@ void PIO_Handler::openOneTileFile(
     } else {
       // Treat like NEW
       okToCreate = true;
-      clobberMode = PIO_NOCLOBBER;
+      clobberMode = GDAL_NOCLOBBER;
     }
     break;
   case ESMC_FILESTATUS_OLD:
@@ -1340,11 +1299,11 @@ void PIO_Handler::openOneTileFile(
     break;
   case ESMC_FILESTATUS_NEW:
     okToCreate = true;
-    clobberMode = PIO_NOCLOBBER;
+    clobberMode = GDAL_NOCLOBBER;
     break;
   case ESMC_FILESTATUS_REPLACE:
     okToCreate = true;
-    clobberMode = PIO_CLOBBER;
+    clobberMode = GDAL_CLOBBER;
     break;
   default:
     localrc = ESMF_RC_ARG_BAD;
@@ -1354,8 +1313,7 @@ void PIO_Handler::openOneTileFile(
 
   if (okToCreate) {
 #ifdef ESMFIO_DEBUG
-    std::string errmsg = "Calling PIOc_createfile";
-    PIOc_set_log_level(PIO_DEBUG_LEVEL);
+    std::string errmsg = "Calling GDALc_createfile";
     ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
 #endif // ESMFIO_DEBUG
     // Looks like we are ready to try and create the file
@@ -1363,45 +1321,42 @@ void PIO_Handler::openOneTileFile(
     switch (getFormat()){
     case ESMF_IOFMT_NETCDF_64BIT_OFFSET:
     {
-        mode |= PIO_64BIT_OFFSET;
+        mode |= GDAL_64BIT_OFFSET;
         break;
     }
     case ESMF_IOFMT_NETCDF_64BIT_DATA:
     {
-        mode |= PIO_64BIT_DATA;
+        mode |= GDAL_64BIT_DATA;
         break;
     }
     }
-    ESMCI_IOREGION_ENTER("PIOc_createfile");
+    ESMCI_IOREGION_ENTER("GDALc_createfile");
 
-    piorc = PIOc_createfile(pioSystemDesc, &(pioFileDesc[tile-1]),
+    gdalrc = GDALc_createfile(gdalSystemDesc, &(gdalFileDesc[tile-1]),
                             &iotype, thisFilename.c_str(), mode);
-    ESMCI_IOREGION_EXIT("PIOc_createfile");
-    if (!CHECKPIOWARN(piorc, std::string("Unable to create file: ") + thisFilename,
+    ESMCI_IOREGION_EXIT("GDALc_createfile");
+    if (!CHECKGDALWARN(gdalrc, std::string("Unable to create file: ") + thisFilename,
       ESMF_RC_FILE_OPEN, (*rc))) {
       return;
     } else {
       new_file[tile-1] = true;
-      PRINTMSG("call to PIOc_createfile: success for " << thisFilename << " iotype= "<< iotype << " Mode "<< mode << " ESMF FMT "<<getFormat() );
+      PRINTMSG("call to GDALc_createfile: success for " << thisFilename << " iotype= "<< iotype << " Mode "<< mode << " ESMF FMT "<<getFormat() );
     }
-#ifdef ESMFIO_DEBUG
-    PIOc_set_log_level(4);
-#endif // ESMFIO_DEBUG
-    piorc = PIOc_set_fill(pioFileDesc[tile-1], PIO_NOFILL, NULL);
-    if (!CHECKPIOWARN(piorc, std::string("Unable to set fill on file: ") + thisFilename,
+    gdalrc = GDALc_set_fill(gdalFileDesc[tile-1], GDAL_NOFILL, NULL);
+    if (!CHECKGDALWARN(gdalrc, std::string("Unable to set fill on file: ") + thisFilename,
                       ESMF_RC_FILE_OPEN, (*rc))) {
         return;
     }
   } else {
-    PRINTMSG(" calling PIOc_openfile with mode = " << mode <<
+    PRINTMSG(" calling GDALc_openfile with mode = " << mode <<
              ", file = \"" << thisFilename << "\"");
     // Looks like we are ready to go
-    ESMCI_IOREGION_ENTER("PIOc_openfile");
-    piorc = PIOc_openfile(pioSystemDesc, &(pioFileDesc[tile-1]),
+    ESMCI_IOREGION_ENTER("GDALc_openfile");
+    gdalrc = GDALc_openfile(gdalSystemDesc, &(gdalFileDesc[tile-1]),
                           &iotype, thisFilename.c_str(), mode);
-    ESMCI_IOREGION_EXIT("PIOc_openfile");
-    PRINTMSG(", called PIOc_openfile on " << thisFilename);
-    if (!CHECKPIOWARN(piorc, std::string("Unable to open existing file: ") + thisFilename,
+    ESMCI_IOREGION_EXIT("GDALc_openfile");
+    PRINTMSG(", called GDALc_openfile on " << thisFilename);
+    if (!CHECKGDALWARN(gdalrc, std::string("Unable to open existing file: ") + thisFilename,
         ESMF_RC_FILE_OPEN, (*rc))) {
       return;
     }
@@ -1411,17 +1366,17 @@ void PIO_Handler::openOneTileFile(
   if (rc != NULL) {
     *rc = ESMF_SUCCESS;
   }
-} // PIO_Handler::openOneTileFile()
+} // GDAL_Handler::openOneTileFile()
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_Handler::attPackPut()"
+#define ESMC_METHOD "ESMCI::GDAL_Handler::attPackPut()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_Handler::attPackPut
+// !IROUTINE:  ESMCI::GDAL_Handler::attPackPut
 //
 // !INTERFACE:
-void PIO_Handler::attPackPut (
+void GDAL_Handler::attPackPut (
 //
 // !RETURN VALUE:
 //
@@ -1440,8 +1395,8 @@ void PIO_Handler::attPackPut (
 //EOPI
 //-----------------------------------------------------------------------------
   int localrc;
-  int piorc;
-  int filedesc = pioFileDesc[tile-1]; // note that tile indices are 1-based
+  int gdalrc;
+  int filedesc = gdalFileDesc[tile-1]; // note that tile indices are 1-based
 
   const json &j = attPack->getStorageRef();
   for (json::const_iterator it=j.cbegin(); it!=j.cend(); it++) {
@@ -1478,41 +1433,41 @@ void PIO_Handler::attPackPut (
             return;
         }
         const std::string value = jcurr[0];
-        piorc = PIOc_put_att_text (filedesc, vardesc,
+        gdalrc = GDALc_put_att_text (filedesc, vardesc,
                                    it.key().c_str(), strlen(value.c_str()), value.c_str());
-        if (!CHECKPIOERROR(piorc, "Attempting to set string Attribute: " + it.key(),
+        if (!CHECKGDALERROR(gdalrc, "Attempting to set string Attribute: " + it.key(),
                            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
       }
       case ESMC_TYPEKIND_I8: {
         const std::vector<long> value = jcurr.get<std::vector<long>>();
-        piorc = PIOc_put_att_long (filedesc, vardesc,
+        gdalrc = GDALc_put_att_long (filedesc, vardesc,
                                    it.key().c_str(), att_type, size, value.data());
-        if (!CHECKPIOERROR(piorc, "Attempting to set I8 Attribute: " + it.key(),
+        if (!CHECKGDALERROR(gdalrc, "Attempting to set I8 Attribute: " + it.key(),
                            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
       }
       case ESMC_TYPEKIND_R8: {
         const std::vector<double> value = jcurr.get<std::vector<double>>();
-        piorc = PIOc_put_att_double (filedesc, vardesc,
+        gdalrc = GDALc_put_att_double (filedesc, vardesc,
                                      it.key().c_str(), att_type, size, value.data());
-        if (!CHECKPIOERROR(piorc, "Attempting to set R8 Attribute: " + it.key(),
+        if (!CHECKGDALERROR(gdalrc, "Attempting to set R8 Attribute: " + it.key(),
                            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
       }
       case ESMC_TYPEKIND_I4: {
         const std::vector<int> value = jcurr.get<std::vector<int>>();
-        piorc = PIOc_put_att_int (filedesc, vardesc,
+        gdalrc = GDALc_put_att_int (filedesc, vardesc,
                                   it.key().c_str(), att_type, size, value.data());
-        if (!CHECKPIOERROR(piorc, "Attempting to set I4 Attribute: " + it.key(),
+        if (!CHECKGDALERROR(gdalrc, "Attempting to set I4 Attribute: " + it.key(),
                            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
       }
       case ESMC_TYPEKIND_R4: {
         const std::vector<float> value = jcurr.get<std::vector<float>>();
-        piorc = PIOc_put_att_float (filedesc, vardesc,
+        gdalrc = GDALc_put_att_float (filedesc, vardesc,
                                     it.key().c_str(), att_type, size, value.data());
-        if (!CHECKPIOERROR(piorc, "Attempting to set R4 Attribute: " + it.key(),
+        if (!CHECKGDALERROR(gdalrc, "Attempting to set R4 Attribute: " + it.key(),
                            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
       }
@@ -1525,17 +1480,17 @@ void PIO_Handler::attPackPut (
 
   if (rc) {*rc = ESMF_SUCCESS;}
 
-} // PIO_Handler::attPackPut()
+} // GDAL_Handler::attPackPut()
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_Handler::isOpen()"
+#define ESMC_METHOD "ESMCI::GDAL_Handler::isOpen()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_Handler::isOpen    - Determine is a file is open
+// !IROUTINE:  ESMCI::GDAL_Handler::isOpen    - Determine is a file is open
 //
 // !INTERFACE:
-ESMC_Logical PIO_Handler::isOpen(
+ESMC_Logical GDAL_Handler::isOpen(
 //
 // !RETURN VALUE:
 //
@@ -1554,32 +1509,32 @@ ESMC_Logical PIO_Handler::isOpen(
 //EOPI
 //-----------------------------------------------------------------------------
   PRINTPOS;
-  int filedesc = pioFileDesc[tile-1]; // note that tile indices are 1-based
+  int filedesc = gdalFileDesc[tile-1]; // note that tile indices are 1-based
   if (filedesc == 0) {
-    PRINTMSG("pioFileDesc is NULL");
+    PRINTMSG("gdalFileDesc is NULL");
     return ESMF_FALSE;
-  } else if (PIOc_File_is_Open(filedesc) != 0) {
+  } else if (GDALc_File_is_Open(filedesc) != 0) {
     PRINTMSG("File is open");
     return ESMF_TRUE;
   } else {
     // This really should not happen, warn and clean up just in case
     std::string errmsg;
     const std::string thisFilename = getFilename(tile);
-    errmsg = std::string ("File, ") + thisFilename + ", closed by PIO";
+    errmsg = std::string ("File, ") + thisFilename + ", closed by GDAL";
     ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     return ESMF_FALSE;
   }
-} // PIO_Handler::isOpen()
+} // GDAL_Handler::isOpen()
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_Handler::flushOneTileFile()"
+#define ESMC_METHOD "ESMCI::GDAL_Handler::flushOneTileFile()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_Handler::flushOneTileFile    - Flush any pending I/O operations for this tile's file
+// !IROUTINE:  ESMCI::GDAL_Handler::flushOneTileFile    - Flush any pending I/O operations for this tile's file
 //
 // !INTERFACE:
-void PIO_Handler::flushOneTileFile(
+void GDAL_Handler::flushOneTileFile(
 //
 // !RETURN VALUE:
 //
@@ -1608,26 +1563,26 @@ void PIO_Handler::flushOneTileFile(
   // Not open? No problem, just skip
   if (isOpen(tile) == ESMF_TRUE) {
     PRINTMSG("calling sync");
-    ESMCI_IOREGION_ENTER("PIOc_sync");
-    PIOc_sync(pioFileDesc[tile-1]);
-    ESMCI_IOREGION_EXIT("PIOc_sync");
+    ESMCI_IOREGION_ENTER("GDALc_sync");
+    GDALc_sync(gdalFileDesc[tile-1]);
+    ESMCI_IOREGION_EXIT("GDALc_sync");
   }
   // return successfully
   if (rc != NULL) {
     *rc = ESMF_SUCCESS;
   }
-} // PIO_Handler::flushOneTileFile()
+} // GDAL_Handler::flushOneTileFile()
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_Handler::closeOneTileFile()"
+#define ESMC_METHOD "ESMCI::GDAL_Handler::closeOneTileFile()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_Handler::closeOneTileFile    - Close this tile's possibly-open file
+// !IROUTINE:  ESMCI::GDAL_Handler::closeOneTileFile    - Close this tile's possibly-open file
 //
 // !INTERFACE:
-void PIO_Handler::closeOneTileFile(
+void GDAL_Handler::closeOneTileFile(
 //
 // !RETURN VALUE:
 //
@@ -1655,50 +1610,50 @@ void PIO_Handler::closeOneTileFile(
   PRINTPOS;
   // Not open? No problem, just skip
   if (isOpen(tile) == ESMF_TRUE) {
-    ESMCI_IOREGION_ENTER("PIOc_closefile");
-    int piorc = PIOc_closefile(pioFileDesc[tile-1]);
-    ESMCI_IOREGION_EXIT("PIOc_closefile");
-    pioFileDesc[tile-1] = 0;
+    ESMCI_IOREGION_ENTER("GDALc_closefile");
+    int gdalrc = GDALc_closefile(gdalFileDesc[tile-1]);
+    ESMCI_IOREGION_EXIT("GDALc_closefile");
+    gdalFileDesc[tile-1] = 0;
     new_file[tile-1] = false;
-    if (rc != NULL) *rc = piorc;
+    if (rc != NULL) *rc = gdalrc;
   }
 
   // return successfully
   if (rc != NULL) {
     *rc = ESMF_SUCCESS;
   }
-} // PIO_Handler::closeOneTileFile()
+} // GDAL_Handler::closeOneTileFile()
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_Handler::getIODesc()"
+#define ESMC_METHOD "ESMCI::GDAL_Handler::getIODesc()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_Handler::getIODesc - Find or create an IO descriptor
+// !IROUTINE:  ESMCI::GDAL_Handler::getIODesc - Find or create an IO descriptor
 //
 // !INTERFACE:
-  int PIO_Handler::getIODesc(
+  int GDAL_Handler::getIODesc(
 //
 // !RETURN VALUE:
 //
-//    int PIO IO descriptor
+//    int GDAL IO descriptor
 //
 // !ARGUMENTS:
 //
-  int iosys,          // (in)  - PIO system handle to use
+  int iosys,          // (in)  - GDAL system handle to use
   Array *arr_p,                       // (in)  - Array for IO decompomposition
   int tile,                           // (in)  - Tile number in array (1-based indexing)
   int ** ioDims,                      // (out) - Array shape for IO
   int *nioDims,                       // (out) - Rank of Array IO
   int ** arrDims,                     // (out) - Array shape for IO
   int *narrDims,                      // (out) - Rank of Array IO
-  int *basepiotype,                   // (out) - Data type for IO
+  int *basegdaltype,                   // (out) - Data type for IO
   int *rc                             // (out) - Error return code
   ) {
 //
 // !DESCRIPTION:
-//    Find or create an appropriate PIO I/O Descriptor and return it.
+//    Find or create an appropriate GDAL I/O Descriptor and return it.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -1711,12 +1666,12 @@ void PIO_Handler::closeOneTileFile(
   }
 
   PRINTPOS;
-  new_io_desc = PIO_IODescHandler::getIODesc(iosys, arr_p, tile, &localrc);
+  new_io_desc = GDAL_IODescHandler::getIODesc(iosys, arr_p, tile, &localrc);
   if ((int)NULL == new_io_desc) {
-    PRINTMSG("calling constructPioDecomp");
-    localrc = PIO_IODescHandler::constructPioDecomp(iosys,
+    PRINTMSG("calling constructGdalDecomp");
+    localrc = GDAL_IODescHandler::constructGdalDecomp(iosys,
                                                     arr_p, tile, &new_io_desc);
-    PRINTMSG("constructPioDecomp call complete" << ", localrc = " << localrc);
+    PRINTMSG("constructGdalDecomp call complete" << ", localrc = " << localrc);
   }
   if ((ioDims != (int **)NULL) || (nioDims != (int *)NULL) ||
       (arrDims != (int **)NULL) || (narrDims != (int *)NULL)) {
@@ -1725,7 +1680,7 @@ void PIO_Handler::closeOneTileFile(
     int narrdimArg;
     int *arrdimsArg;
 
-    localrc = PIO_IODescHandler::getDims(new_io_desc, &niodimArg, &iodimsArg,
+    localrc = GDAL_IODescHandler::getDims(new_io_desc, &niodimArg, &iodimsArg,
                                          &narrdimArg, &arrdimsArg);
     if (!ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)) {
@@ -1744,8 +1699,8 @@ void PIO_Handler::closeOneTileFile(
     }
   }
   PRINTMSG("getDims complete, calling getIOType");
-  if (basepiotype != (int *)NULL) {
-    *basepiotype = PIO_IODescHandler::getIOType(new_io_desc, &localrc);
+  if (basegdaltype != (int *)NULL) {
+    *basegdaltype = GDAL_IODescHandler::getIOType(new_io_desc, &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc);
   }
@@ -1753,18 +1708,18 @@ void PIO_Handler::closeOneTileFile(
     *rc = localrc;
   }
   return new_io_desc;
-} // PIO_Handler::getIODesc()
+} // GDAL_Handler::getIODesc()
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_Handler::CheckPIOError()"
+#define ESMC_METHOD "ESMCI::GDAL_Handler::CheckGDALError()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_Handler::CheckPIOError
+// !IROUTINE:  ESMCI::GDAL_Handler::CheckGDALError
 //
 // !INTERFACE:
-bool PIO_Handler::CheckPIOError(
+bool GDAL_Handler::CheckGDALError(
 //
 // !RETURN VALUE:
 //
@@ -1772,7 +1727,7 @@ bool PIO_Handler::CheckPIOError(
 //
 // !ARGUMENTS:
 //
-  int pioRetCode,                        // (in)  - Return code to check
+  int gdalRetCode,                        // (in)  - Return code to check
   int line,                              // (in)  - Line containing error
   const char * const file,               // (in)  - File containing error
   const char * const method,             // (in)  - ESMC_METHOD
@@ -1783,7 +1738,7 @@ bool PIO_Handler::CheckPIOError(
   ) {
 //
 // !DESCRIPTION:
-//    Log an error (if an error condition is indicated by pioRetCode)
+//    Log an error (if an error condition is indicated by gdalRetCode)
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -1793,30 +1748,30 @@ bool PIO_Handler::CheckPIOError(
   }
 
   std::stringstream errmsg;
-  if (pioRetCode != PIO_NOERR) {
+  if (gdalRetCode != GDAL_NOERR) {
 #if defined(ESMF_PNETCDF)
-    // Log the error, assuming the error code was passed through PIO from PNetCDF
+    // Log the error, assuming the error code was passed through GDAL from PNetCDF
     if (!fmtStr.empty()) {
-      errmsg << " " << fmtStr << ", (PIO/PNetCDF error = " <<  ncmpi_strerror (pioRetCode) << ")";
+      errmsg << " " << fmtStr << ", (GDAL/PNetCDF error = " <<  ncmpi_strerror (gdalRetCode) << ")";
     } else {
-      errmsg << " (PIO/PNetCDF error = " <<  ncmpi_strerror (pioRetCode) << ")";
+      errmsg << " (GDAL/PNetCDF error = " <<  ncmpi_strerror (gdalRetCode) << ")";
     }
 #elif defined(ESMF_NETCDF)
-    // Log the error, assuming the error code was passed through PIO from NetCDF
+    // Log the error, assuming the error code was passed through GDAL from NetCDF
     if (!fmtStr.empty()) {
-      errmsg << " " << fmtStr << ", (PIO/NetCDF error = " <<  nc_strerror (pioRetCode) << ")";
+      errmsg << " " << fmtStr << ", (GDAL/NetCDF error = " <<  nc_strerror (gdalRetCode) << ")";
     } else {
-      errmsg << " (PIO/NetCDF error = " <<  nc_strerror (pioRetCode) << ")";
+      errmsg << " (GDAL/NetCDF error = " <<  nc_strerror (gdalRetCode) << ")";
     }
 #else
     if (!fmtStr.empty()) {
-      errmsg << " " << fmtStr << ", (PIO error = " << pioRetCode << ")";
+      errmsg << " " << fmtStr << ", (GDAL error = " << gdalRetCode << ")";
     } else {
-      errmsg << " (PIO error = " << pioRetCode << ")";
+      errmsg << " (GDAL error = " << gdalRetCode << ")";
     }
 #endif
     // Attempt to find a corresponding ESMC error code
-    switch(pioRetCode) {
+    switch(gdalRetCode) {
 #if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
     case NC_EEXIST:
       localrc = ESMF_RC_FILE_CREATE;
@@ -1850,19 +1805,19 @@ bool PIO_Handler::CheckPIOError(
         line, file, method, rc);
   }
 
-  return (pioRetCode == PIO_NOERR);
-} // PIO_Handler::CheckPIOError()
+  return (gdalRetCode == GDAL_NOERR);
+} // GDAL_Handler::CheckGDALError()
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_IODescHandler::~PIO_IODescHandler()"
+#define ESMC_METHOD "ESMCI::GDAL_IODescHandler::~GDAL_IODescHandler()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_IODescHandler::~PIO_IODescHandler
+// !IROUTINE:  ESMCI::GDAL_IODescHandler::~GDAL_IODescHandler
 //
 // !INTERFACE:
-PIO_IODescHandler::~PIO_IODescHandler (
+GDAL_IODescHandler::~GDAL_IODescHandler (
 //
 // !RETURN VALUE:
 //
@@ -1872,15 +1827,15 @@ PIO_IODescHandler::~PIO_IODescHandler (
   ) {
 //
 // !DESCRIPTION:
-//    Tear down active, initialized PIO IO Descriptor and free memory
+//    Tear down active, initialized GDAL IO Descriptor and free memory
 //
 //EOPI
 //-----------------------------------------------------------------------------
     int localrc;
-    PRINTMSG("calling PIOc_freedecomp");
-    ESMCI_IOREGION_ENTER("PIOc_freedecomp");
-    PIOc_freedecomp(ios, io_descriptor);
-    ESMCI_IOREGION_EXIT("PIOc_freedecomp");
+    PRINTMSG("calling GDALc_freedecomp");
+    ESMCI_IOREGION_ENTER("GDALc_freedecomp");
+    GDALc_freedecomp(ios, io_descriptor);
+    ESMCI_IOREGION_EXIT("GDALc_freedecomp");
     if (dims != (int *)NULL) {
         delete[] dims;
         dims = (int *)NULL;
@@ -1890,18 +1845,18 @@ PIO_IODescHandler::~PIO_IODescHandler (
         arrayShape = (int *)NULL;
     }
     array_p = (Array *)NULL;
-} // PIO_IODescHandler::~PIO_IODescHandler()
+} // GDAL_IODescHandler::~GDAL_IODescHandler()
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_IODescHandler::finalize()"
+#define ESMC_METHOD "ESMCI::GDAL_IODescHandler::finalize()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_IODescHandler::finalize
+// !IROUTINE:  ESMCI::GDAL_IODescHandler::finalize
 //
 // !INTERFACE:
-void PIO_IODescHandler::finalize (
+void GDAL_IODescHandler::finalize (
 //
 // !RETURN VALUE:
 //
@@ -1911,30 +1866,30 @@ void PIO_IODescHandler::finalize (
   ) {
 //
 // !DESCRIPTION:
-//    Tear down all active, initialized PIO IO Descriptors.
+//    Tear down all active, initialized GDAL IO Descriptors.
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  PIO_IODescHandler *handle;
+  GDAL_IODescHandler *handle;
 
-  while(!PIO_IODescHandler::activePioIoDescriptors.empty()) {
-    handle = PIO_IODescHandler::activePioIoDescriptors.back();
+  while(!GDAL_IODescHandler::activeGdalIoDescriptors.empty()) {
+    handle = GDAL_IODescHandler::activeGdalIoDescriptors.back();
     delete handle; // Shuts down descriptor
-    handle = (PIO_IODescHandler *)NULL;
-    PIO_IODescHandler::activePioIoDescriptors.pop_back();
+    handle = (GDAL_IODescHandler *)NULL;
+    GDAL_IODescHandler::activeGdalIoDescriptors.pop_back();
   }
-} // PIO_IODescHandler::finalize()
+} // GDAL_IODescHandler::finalize()
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_IODescHandler::constructPioDecomp()"
+#define ESMC_METHOD "ESMCI::GDAL_IODescHandler::constructGdalDecomp()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_IODescHandler::constructPioDecomp - New Decomposition
+// !IROUTINE:  ESMCI::GDAL_IODescHandler::constructGdalDecomp - New Decomposition
 //
 // !INTERFACE:
-int PIO_IODescHandler::constructPioDecomp(
+int GDAL_IODescHandler::constructGdalDecomp(
 //
 // !RETURN VALUE:
 //
@@ -1942,16 +1897,16 @@ int PIO_IODescHandler::constructPioDecomp(
 //
 // !ARGUMENTS:
 //
-  int iosys,                // (in)  - PIO system handle to use
+  int iosys,                // (in)  - GDAL system handle to use
   Array *arr_p,             // (in)  - Array for IO decompomposition
   int tile,                 // (in)  - Tile number in array (1-based indexing)
   int *newDecomp_p          // (out) - New decomposition descriptor
   ) {
 //
 // !DESCRIPTION:
-//    Gather the necessary information the input array and call PIO_initdecomp.
+//    Gather the necessary information the input array and call GDAL_initdecomp.
 //    The result is a new decomposition descriptor which is used in the
-//     PIO read/write calls.
+//     GDAL read/write calls.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -1961,10 +1916,10 @@ int PIO_IODescHandler::constructPioDecomp(
   int rc;
   int localDe;                      // The DE being processed
   int localDeCount;                 // The number of DEs on this PET
-  int pioDofCount;                  // Number
-  MPI_Offset *pioDofList;              // Local to global array map
+  int gdalDofCount;                  // Number
+  MPI_Offset *gdalDofList;              // Local to global array map
   DistGrid *distGrid;               // The Array's associated DistGrid
-  PIO_IODescHandler *handle;        // New handler object for this IO desc.
+  GDAL_IODescHandler *handle;        // New handler object for this IO desc.
 
   PRINTPOS;
   // check the inputs
@@ -1984,8 +1939,8 @@ int PIO_IODescHandler::constructPioDecomp(
     return ESMF_RC_ARG_BAD;
   }
 
-  handle = new PIO_IODescHandler(iosys, arr_p);
-  pioDofList = (MPI_Offset *)NULL;
+  handle = new GDAL_IODescHandler(iosys, arr_p);
+  gdalDofList = (MPI_Offset *)NULL;
 
   localDeCount = arr_p->getDELayout()->getLocalDeCount();
   PRINTMSG("localDeCount = " << localDeCount);
@@ -2000,7 +1955,7 @@ int PIO_IODescHandler::constructPioDecomp(
   bool thisDeIsThisTile = false;
 
   // We need the total number of elements
-  pioDofCount = 0;
+  gdalDofCount = 0;
   int const *localDeToDeMap = arr_p->getDistGrid()->getDELayout()->getLocalDeToDeMap();
   // NB: This loop is redundant for now, I wish I could lift the restriction.
   for (localDe = 0; localDe < localDeCount; ++localDe) {
@@ -2014,59 +1969,59 @@ int PIO_IODescHandler::constructPioDecomp(
       thisDeIsThisTile = true;
     }
     if (thisDeIsThisTile && arr_p->getDistGrid()->getElementCountPDe()[localDeToDeMap[localDe]]>0)
-      pioDofCount += arr_p->getTotalElementCountPLocalDe()[localDe];
+      gdalDofCount += arr_p->getTotalElementCountPLocalDe()[localDe];
   }
 
-  PRINTMSG("pioDofCount = " << pioDofCount);
+  PRINTMSG("gdalDofCount = " << gdalDofCount);
   try {
     // Allocate space for the DOF list
-    pioDofList = new MPI_Offset[pioDofCount];
+    gdalDofList = new MPI_Offset[gdalDofCount];
 
   } catch(...) {
-    if ((MPI_Offset *)NULL != pioDofList) {
+    if ((MPI_Offset *)NULL != gdalDofList) {
       // Free the DofList!
-      delete[] pioDofList;
-      pioDofList = (MPI_Offset *)NULL;
+      delete[] gdalDofList;
+      gdalDofList = (MPI_Offset *)NULL;
     }
     ESMC_LogDefault.AllocError(ESMC_CONTEXT, &localrc);
     return localrc;
   }
-  // Fill in the PIO DOF list (local to global map)
+  // Fill in the GDAL DOF list (local to global map)
   // TODO: This is where we would need to make some magic to include multiple DEs.
   // TODO: (Particular care may be needed in the multi-tile case, where some DEs on the
   // TODO: current PE may be part of the current tile, while others are not.
-  // TODO: For now, with one DE, we can assume that, if pioDofCount>0, then this DE
+  // TODO: For now, with one DE, we can assume that, if gdalDofCount>0, then this DE
   // TODO: corresponds to the current tile.)
   localDe = 0;
-  if (pioDofCount>0){
+  if (gdalDofCount>0){
     // construct the mapping of the local elements
-    localrc = arr_p->constructFileMap((int64_t *) pioDofList, pioDofCount, localDe);
+    localrc = arr_p->constructFileMap((int64_t *) gdalDofList, gdalDofCount, localDe);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &localrc)) {
-      delete[] pioDofList;
-      pioDofList = (MPI_Offset *)NULL;
+      delete[] gdalDofList;
+      gdalDofList = (MPI_Offset *)NULL;
       return localrc;
     }
   }
 
 #if 0
-    std::cout << " pioDofList = [";
-    for (int i = 0; i < pioDofCount; i++) {
-      std::cout << " " << pioDofList[i]
-                << ((i == (pioDofCount - 1)) ? ' ' : ',');
+    std::cout << " gdalDofList = [";
+    for (int i = 0; i < gdalDofCount; i++) {
+      std::cout << " " << gdalDofList[i]
+                << ((i == (gdalDofCount - 1)) ? ' ' : ',');
     }
     std::cout << "]" << std::endl;
 #endif // 0
   // Get TKR info
   switch(arr_p->getTypekind()) {
   case ESMC_TYPEKIND_I4:
-    handle->basepiotype = PIO_INT;
+    handle->basegdaltype = GDAL_INT;
     break;
    case ESMC_TYPEKIND_R4:
-    handle->basepiotype = PIO_REAL;
+    handle->basegdaltype = GDAL_REAL;
     break;
    case ESMC_TYPEKIND_R8:
-    handle->basepiotype = PIO_DOUBLE;
+    handle->basegdaltype = GDAL_DOUBLE;
     break;
   case ESMC_TYPEKIND_I1:
   case ESMC_TYPEKIND_I2:
@@ -2078,8 +2033,8 @@ int PIO_IODescHandler::constructPioDecomp(
   default:
     if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, "Unsupported typekind", ESMC_CONTEXT,
         &localrc)) {
-      delete[] pioDofList;
-      pioDofList = (MPI_Offset *)NULL;
+      delete[] gdalDofList;
+      gdalDofList = (MPI_Offset *)NULL;
       return localrc;
     }
   }
@@ -2136,7 +2091,7 @@ int PIO_IODescHandler::constructPioDecomp(
       sprintf((shapestr + (5 * i)), " %03d%c", handle->arrayShape[i],
               (((handle->arrayRank - 1) == i) ? ' ' : ','));
     }
-    PRINTMSG(", IODesc shape = [" << shapestr << "], calling pio_initdecomp");
+    PRINTMSG(", IODesc shape = [" << shapestr << "], calling gdal_initdecomp");
 
     char dimstr[64];
     for (int i = 0; i < handle->nDims; i++) {
@@ -2145,46 +2100,42 @@ int PIO_IODescHandler::constructPioDecomp(
     }
     PRINTMSG(", IODesc dims = [" << dimstr << "]");
   }
-  PIOc_set_log_level(PIO_DEBUG_LEVEL);
 #endif // ESMFIO_DEBUG
   int ddims[handle->nDims];
   for(int i=0; i<handle->nDims; i++)
       ddims[i] = handle->dims[handle->nDims - i - 1];
   // Create the decomposition
-  ESMCI_IOREGION_ENTER("PIOc_InitDecomp");
-  PIOc_InitDecomp(iosys, handle->basepiotype, handle->nDims,
-                  ddims, pioDofCount, pioDofList,
+  ESMCI_IOREGION_ENTER("GDALc_InitDecomp");
+  GDALc_InitDecomp(iosys, handle->basegdaltype, handle->nDims,
+                  ddims, gdalDofCount, gdalDofList,
                   &(handle->io_descriptor), NULL, NULL, NULL);
-  ESMCI_IOREGION_EXIT("PIOc_InitDecomp");
+  ESMCI_IOREGION_EXIT("GDALc_InitDecomp");
 
-  PRINTMSG("after call to PIOc_initdecomp_dof");
-#ifdef ESMFIO_DEBUG
-  PIOc_set_log_level(4);
-#endif // ESMFIO_DEBUG
+  PRINTMSG("after call to GDALc_initdecomp_dof");
 
   // Add the handle into the master list
-  PIO_IODescHandler::activePioIoDescriptors.push_back(handle);
+  GDAL_IODescHandler::activeGdalIoDescriptors.push_back(handle);
   // Finally, set the output handle
   *newDecomp_p = handle->io_descriptor;
 
   // Free the DofList!
-  delete[] pioDofList;
-  pioDofList = (MPI_Offset *)NULL;
+  delete[] gdalDofList;
+  gdalDofList = (MPI_Offset *)NULL;
 
   // return successfully
   return ESMF_SUCCESS;
-} // PIO_IODescHandler::constructPioDecomp()
+} // GDAL_IODescHandler::constructGdalDecomp()
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_IODescHandler::freePioDecomp()"
+#define ESMC_METHOD "ESMCI::GDAL_IODescHandler::freeGdalDecomp()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_IODescHandler::freePioDecomp - Delete Decomposition
+// !IROUTINE:  ESMCI::GDAL_IODescHandler::freeGdalDecomp - Delete Decomposition
 //
 // !INTERFACE:
-int PIO_IODescHandler::freePioDecomp(
+int GDAL_IODescHandler::freeGdalDecomp(
 //
 // !RETURN VALUE:
 //
@@ -2192,11 +2143,11 @@ int PIO_IODescHandler::freePioDecomp(
 //
 // !ARGUMENTS:
 //
-  int *decomp_p             // (inout) - PIO decomp desc to free
+  int *decomp_p             // (inout) - GDAL decomp desc to free
   ) {
 //
 // !DESCRIPTION:
-//    Free a PIO I/O decomposition structure and remove it from the
+//    Free a GDAL I/O decomposition structure and remove it from the
 //    active instances.
 //
 //EOPI
@@ -2204,8 +2155,8 @@ int PIO_IODescHandler::freePioDecomp(
 
   // initialize return code; assume routine not implemented
   int localrc = ESMF_RC_NOT_IMPL;   // local return code
-  PIO_IODescHandler *handle;        // Temp handler for finding descriptor
-  std::vector<PIO_IODescHandler *>::iterator it;
+  GDAL_IODescHandler *handle;        // Temp handler for finding descriptor
+  std::vector<GDAL_IODescHandler *>::iterator it;
   bool foundHandle = false;
 
   // check the inputs
@@ -2216,13 +2167,13 @@ int PIO_IODescHandler::freePioDecomp(
   }
 
   // Look for newDecomp_p in the active handle instances
-  for (it = PIO_IODescHandler::activePioIoDescriptors.begin();
-       it < PIO_IODescHandler::activePioIoDescriptors.end(); ++it) {
+  for (it = GDAL_IODescHandler::activeGdalIoDescriptors.begin();
+       it < GDAL_IODescHandler::activeGdalIoDescriptors.end(); ++it) {
     handle = *it;
     if (*decomp_p == handle->io_descriptor) {
       foundHandle = true;
       delete handle;
-      handle = (PIO_IODescHandler *)NULL;
+      handle = (GDAL_IODescHandler *)NULL;
       *decomp_p = (int)NULL;
       break;
     }
@@ -2232,24 +2183,24 @@ int PIO_IODescHandler::freePioDecomp(
   if (foundHandle) {
     localrc = ESMF_SUCCESS;
   } else {
-    ESMC_LogDefault.Write("PIO IO descriptor not found or freed",
+    ESMC_LogDefault.Write("GDAL IO descriptor not found or freed",
                           ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     localrc = ESMF_RC_MEM_DEALLOCATE;
   }
 
   return localrc;
-} // PIO_IODescHandler::freePioDecomp()
+} // GDAL_IODescHandler::freeGdalDecomp()
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_IODescHandler::getDims()"
+#define ESMC_METHOD "ESMCI::GDAL_IODescHandler::getDims()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_IODescHandler::getDims
+// !IROUTINE:  ESMCI::GDAL_IODescHandler::getDims
 //
 // !INTERFACE:
-int PIO_IODescHandler::getDims(
+int GDAL_IODescHandler::getDims(
 //
 // !RETURN VALUE:
 //
@@ -2271,10 +2222,10 @@ int PIO_IODescHandler::getDims(
 //-----------------------------------------------------------------------------
   int localrc = ESMF_RC_NOT_FOUND;        // local return code
 
-  std::vector<PIO_IODescHandler *>::iterator it;
+  std::vector<GDAL_IODescHandler *>::iterator it;
   PRINTPOS;
-  for (it = PIO_IODescHandler::activePioIoDescriptors.begin();
-       it < PIO_IODescHandler::activePioIoDescriptors.end();
+  for (it = GDAL_IODescHandler::activeGdalIoDescriptors.begin();
+       it < GDAL_IODescHandler::activeGdalIoDescriptors.end();
        it++) {
     if (iodesc == (*it)->io_descriptor) {
       PRINTMSG("getDims: found handler, nioDims = " << (*it)->nDims <<
@@ -2300,22 +2251,22 @@ int PIO_IODescHandler::getDims(
   // return success or not found
   return localrc;
 
-} // PIO_IODescHandler::getDims()
+} // GDAL_IODescHandler::getDims()
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_IODescHandler::getIOType()"
+#define ESMC_METHOD "ESMCI::GDAL_IODescHandler::getIOType()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_IODescHandler::getIOType
+// !IROUTINE:  ESMCI::GDAL_IODescHandler::getIOType
 //
 // !INTERFACE:
-int PIO_IODescHandler::getIOType(
+int GDAL_IODescHandler::getIOType(
 //
 // !RETURN VALUE:
 //
-//    int IO type (e.g., PIO_int)
+//    int IO type (e.g., GDAL_int)
 //
 // !ARGUMENTS:
 //
@@ -2324,7 +2275,7 @@ int PIO_IODescHandler::getIOType(
   ) {
 //
 // !DESCRIPTION:
-//    Return the IO type descriptor (e.g., PIO_int)
+//    Return the IO type descriptor (e.g., GDAL_int)
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -2333,13 +2284,13 @@ int PIO_IODescHandler::getIOType(
   if (rc != NULL) {
     *rc = ESMF_RC_NOT_IMPL;               // final return code
   }
-  std::vector<PIO_IODescHandler *>::iterator it;
+  std::vector<GDAL_IODescHandler *>::iterator it;
   PRINTPOS;
-  for (it = PIO_IODescHandler::activePioIoDescriptors.begin();
-       it < PIO_IODescHandler::activePioIoDescriptors.end();
+  for (it = GDAL_IODescHandler::activeGdalIoDescriptors.begin();
+       it < GDAL_IODescHandler::activeGdalIoDescriptors.end();
        it++) {
     if (iodesc == (*it)->io_descriptor) {
-      iotype = (*it)->basepiotype;
+      iotype = (*it)->basegdaltype;
       localrc = ESMF_SUCCESS;
     }
   }
@@ -2350,18 +2301,18 @@ int PIO_IODescHandler::getIOType(
   }
 
   return iotype;
-} // PIO_IODescHandler::getIOType()
+} // GDAL_IODescHandler::getIOType()
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_IODescHandler::getIODesc()"
+#define ESMC_METHOD "ESMCI::GDAL_IODescHandler::getIODesc()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_IODescHandler::getIODesc
+// !IROUTINE:  ESMCI::GDAL_IODescHandler::getIODesc
 //
 // !INTERFACE:
-int PIO_IODescHandler::getIODesc(
+int GDAL_IODescHandler::getIODesc(
 //
 // !RETURN VALUE:
 //
@@ -2370,14 +2321,14 @@ int PIO_IODescHandler::getIODesc(
 //
 // !ARGUMENTS:
 //
-  int iosys,              // (in)  - The PIO IO system
+  int iosys,              // (in)  - The GDAL IO system
   Array *arrayArg,        // (in)  - The IO descriptor
   int tileArg,            // (in)  - Tile number in array (1-based indexing)
   int *rc                 // (out) - Error return code
   ) {
 //
 // !DESCRIPTION:
-//    Return a pointer to an appropriate PIO IO descriptor
+//    Return a pointer to an appropriate GDAL IO descriptor
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -2387,9 +2338,9 @@ int PIO_IODescHandler::getIODesc(
     *rc = ESMF_RC_NOT_IMPL;               // final return code
   }
 
-  std::vector<PIO_IODescHandler *>::iterator it;
-  for (it = PIO_IODescHandler::activePioIoDescriptors.begin();
-       it < PIO_IODescHandler::activePioIoDescriptors.end();
+  std::vector<GDAL_IODescHandler *>::iterator it;
+  for (it = GDAL_IODescHandler::activeGdalIoDescriptors.begin();
+       it < GDAL_IODescHandler::activeGdalIoDescriptors.end();
        ++it) {
     if ((iosys == (*it)->ios) && (arrayArg == (*it)->array_p) && (tileArg == (*it)->tile)) {
       iodesc = (*it)->io_descriptor;
@@ -2403,7 +2354,7 @@ int PIO_IODescHandler::getIODesc(
   }
 
   return iodesc;
-} // PIO_IODescHandler::getIODesc()
+} // GDAL_IODescHandler::getIODesc()
 //-----------------------------------------------------------------------------
 
 }  // end namespace ESMCI

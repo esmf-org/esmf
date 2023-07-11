@@ -11,6 +11,11 @@ ifdef ESMF_PIO
   STOREH   += ESMCI_PIO_Handler.h
 endif
 
+ifdef ESMF_GDAL
+  SOURCEC  += ESMCI_GDAL_Handler.C
+  STOREH   += ESMCI_GDAL_Handler.h ESMCI_IO_GDAL.h
+endif
+
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
