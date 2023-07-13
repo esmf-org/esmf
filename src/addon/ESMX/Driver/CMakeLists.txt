@@ -211,25 +211,25 @@ foreach(CMP IN ITEMS ${COMPS})
         WORKING_DIRECTORY ${CMP_GIT_DIR}
         RESULT_VARIABLE ret
       )
-      esmx_check_err(${ret} "git set-url failed for ${CMP}")
+      esmx_check_ret(${ret} "git set-url failed for ${CMP}")
       execute_process(
         COMMAND git fetch origin
         WORKING_DIRECTORY ${CMP_GIT_DIR}
         RESULT_VARIABLE ret
       )
-      esmx_check_err(${ret} "git fetch failed for ${CMP}")
+      esmx_check_ret(${ret} "git fetch failed for ${CMP}")
       execute_process(
         COMMAND git checkout ${CMP_GIT_TAG}
         WORKING_DIRECTORY ${CMP_GIT_DIR}
         RESULT_VARIABLE ret
       )
-      esmx_check_err(${ret} "git checkout failed for ${CMP}")
+      esmx_check_ret(${ret} "git checkout failed for ${CMP}")
       execute_process(
         COMMAND git pull origin ${CMP_GIT_TAG}
         WORKING_DIRECTORY ${CMP_GIT_DIR}
         RESULT_VARIABLE ret
       )
-      esmx_check_err(${ret} "git pull failed for ${CMP}")
+      esmx_check_ret(${ret} "git pull failed for ${CMP}")
     endif()
   endif()
 
