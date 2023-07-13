@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.22)
 
 # load packages and modules
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 find_package(Python 3.5 REQUIRED COMPONENTS Interpreter)
-find_package(ESMF 8.4.0 MODULE REQUIRED)
+find_package(ESMF 8.5.0 MODULE REQUIRED)
 include(FetchContent)
 
 # esmx functions
@@ -88,10 +88,6 @@ elseif(DEFINED ESMX_BUILD_JOBS)
 endif()
 
 # compiler options
-find_program(CMAKE_CXX_COMPILER ${ESMF_CXXCOMPILER})
-find_program(CMAKE_Fortran_COMPILER ${ESMF_F90COMPILER})
-set(CMAKE_CXX_COMPILER ${ESMF_CXXCOMPILER} PARENT_SCOPE)
-set(CMAKE_Fortran_COMPILER ${ESMF_F90COMPILER} PARENT_SCOPE)
 if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
   set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
   set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -fbacktrace -02")

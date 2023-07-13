@@ -294,19 +294,43 @@ A good starting point to explore this feature is the [ESMX_ExternalDriverAPIProt
 
 ### Project integration
 
-The typical situation where `ESMX_Driver` comes into play is where a user application needs to access a NUOPC based system that uses the unified ESMX driver. Assuming the user application uses CMake, integration of ESMX is straight forward. All that is required is `add_subdirectory()` in the application's `CMakeLists.txt` file to add the `${ESMF_ESMXDIR}/Driver` directory, and make the application dependent on target `esmx_driver`. An example for a very simple application is shown:
+The typical situation where `ESMX_Driver` comes into play is where a user application needs to access a NUOPC based system that uses the unified ESMX driver. Assuming the user application uses CMake, integration of ESMX is straight forward. The critical piece required is to add `add_subdirectory()` in the application's `CMakeLists.txt` file to bring in the `${ESMF_ESMXDIR}/Driver` directory, and make the application dependent on target `esmx_driver`. An example for a very simple application is shown:
 
 ```
-cmake_minimum_required(VERSION 3.5.2)
-enable_language(Fortran)
+cmake_minimum_required(VERSION 3.22)
 
+# Where to look for the local Find<Package>.cmake files
+list(APPEND CMAKE_MODULE_PATH "${ESMF_ESMXDIR}/Driver/cmake")
+
+# Find ESMF
+find_package(ESMF 8.5.0 MODULE REQUIRED)
+
+# Set compilers consistent with ESMF
+set(CMAKE_Fortran_COMPILER        "${ESMF_F90COMPILER}")
+set(CMAKE_CXX_COMPILER            "${ESMF_CXXCOMPILER}")
+set(CMAKE_C_COMPILER              "${ESMF_CCOMPILER}")
+
+# Project
+project(ExternalDriverAPIProto
+        VERSION 1.0.0
+        LANGUAGES Fortran CXX C
+        )
+
+# Add ESMX driver
 add_subdirectory(${ESMF_ESMXDIR}/Driver ./ESMX_Driver)
 
-# Specific project settings
-project(ExternalDriverAPIProto VERSION 0.1.0)
+# Create executable
 add_executable(externalApp externalApp.F90)
 target_include_directories(externalApp PUBLIC ${PROJECT_BINARY_DIR})
 target_link_libraries(externalApp PUBLIC esmx_driver)
+
+# Install executable
+install(
+  TARGETS externalApp
+  EXPORT externalApp
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib)
 ```
 
 The applcation can then be built as typically via cmake commands, only requiring that the `ESMF_ESMXDIR` variable is passed in. It can be convenient to wrap the cmake commands into a GNU Makefile, accessing the `ESMF_ESMXDIR` variable through the `ESMFMKFILE` mechanism.
@@ -345,7 +369,7 @@ ESMX includes a data component, which can be used for testing NUOPC caps. This c
 
 The ESMX layer has the following dependencies:
 - **ESMF Library**: The ESMX layer is part of the ESMF repository. In order to use ESMX as described above, the ESMF library first needs to be built following the instructions for [Building ESMF](https://github.com/esmf-org/esmf#building-esmf).
-- **CMake**: v3.21 or greater.
+- **CMake**: v3.22 or greater.
 - **Python**: v3.5 or greater.
   - `python3` must be in `$PATH`.
   - `PyYaml` must be installed in the Python environment.
