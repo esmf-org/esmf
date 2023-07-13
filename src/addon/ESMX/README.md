@@ -294,7 +294,7 @@ A good starting point to explore this feature is the [ESMX_ExternalDriverAPIProt
 
 ### Project integration
 
-The typical situation where `ESMX_Driver` comes into play is where a user application needs to access a NUOPC based system that uses the unified ESMX driver. Assuming the user application uses CMake, integration of ESMX is straight forward. The cricial piece required is to add `add_subdirectory()` in the application's `CMakeLists.txt` file to bring in the `${ESMF_ESMXDIR}/Driver` directory, and make the application dependent on target `esmx_driver`. An example for a very simple application is shown:
+The typical situation where `ESMX_Driver` comes into play is where a user application needs to access a NUOPC based system that uses the unified ESMX driver. Assuming the user application uses CMake, integration of ESMX is straight forward. The critical piece required is to add `add_subdirectory()` in the application's `CMakeLists.txt` file to bring in the `${ESMF_ESMXDIR}/Driver` directory, and make the application dependent on target `esmx_driver`. An example for a very simple application is shown:
 
 ```
 cmake_minimum_required(VERSION 3.22)
