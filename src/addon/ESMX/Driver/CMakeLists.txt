@@ -43,6 +43,7 @@ endif()
 
 # define ESMX_EXE_NAME
 if(NOT DEFINED ESMX_EXE_NAME)
+  set(ESMX_EXE_NAME "esmx_app")
   set(ESMX_EXE_NAME "esmx_app" PARENT_SCOPE)
 else()
   set(ESMX_EXE_NAME ${ESMX_EXE_NAME} PARENT_SCOPE)
