@@ -369,7 +369,7 @@ ESMX includes a data component, which can be used for testing NUOPC caps. This c
 
 The ESMX layer has the following dependencies:
 - **ESMF Library**: The ESMX layer is part of the ESMF repository. In order to use ESMX as described above, the ESMF library first needs to be built following the instructions for [Building ESMF](https://github.com/esmf-org/esmf#building-esmf).
-- **CMake**: v3.21 or greater.
+- **CMake**: v3.22 or greater.
 - **Python**: v3.5 or greater.
   - `python3` must be in `$PATH`.
   - `PyYaml` must be installed in the Python environment.
