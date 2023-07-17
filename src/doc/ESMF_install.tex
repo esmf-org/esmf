@@ -633,7 +633,7 @@ specific compiler executables by specifying the full path. This can be used to
 pick specific compiler executables without having to modify the {\tt PATH}
 environment variable.
 
-Use 'gmake info' to see which compiler executables the ESMF build system will
+Use 'make info' to see which compiler executables the ESMF build system will
 be using according to your environment variable settings.
 
 To see possible values for {\tt ESMF\_COMPILER}, cd to
@@ -721,7 +721,7 @@ This variable can be used to override the deferring of the build of the
 ESMF library.  By default, the library is built after all of the source
 files have been compiled.  This speeds up the build process. It also
 allows parallel compilation of source code when the -j flag is used with
-gmake.  Setting this environment variable to {\tt OFF} forces the library to
+make.  Setting this environment variable to {\tt OFF} forces the library to
 be updated after each individual compilation, thus disabling the ability
 to use parallel compilation.
 
@@ -1081,7 +1081,7 @@ See \ref{sec:yaml-cpp}
 
 \end{description}
 
-Environment variables must be set in the user's shell or when calling gmake. It
+Environment variables must be set in the user's shell or when calling make. It
 is {\em not} necessary to edit ESMF makefiles or other build system files to set
 these variables. Here is an example of setting an environment variable in the
 csh/tcsh shell:
@@ -1096,10 +1096,10 @@ In bash/ksh shell environment variables are set this way:
   export ESMF_ABI=32
 \end{verbatim}
 
-Environment variables can also be set from the gmake command line:
+Environment variables can also be set from the make command line:
 
 \begin{verbatim}
-  gmake ESMF_ABI=32
+  make ESMF_ABI=32
 \end{verbatim}
 
 \subsection{Supported Platforms}
@@ -1119,24 +1119,24 @@ separate for different architectures or options.
 
 Build the library with the command:
 \begin{verbatim}
-  gmake
+  make
 \end{verbatim}
 
 %Build options that enable you to copy the library and *.mod files to
 %specified directories are explained in Section~\ref{BuildOptions}.
 
 Makefiles throughout the framework are configured to allow users to
-compile files only in the directory where {\tt gmake} is entered. Shared
+compile files only in the directory where {\tt make} is entered. Shared
 libraries are rebuilt only if necessary. In addition the entire ESMF
-framework may be built from any directory by entering {\tt gmake all},
+framework may be built from any directory by entering {\tt make all},
 assuming that all the environmental variables are set correctly as
 described in Section~\ref{EnvironmentVariables}.
 
 The makefiles are also configured to allow multiple make targets to be
-compiled in parallel, via the gmake -j flag.  For example, to use eight
+compiled in parallel, via the make -j flag.  For example, to use eight
 parallel processes to build the library, use -j8:
 \begin{verbatim}
-  gmake -j8 lib
+  make -j8 lib
 \end{verbatim}
 
 The parallel compilation feature depends on {\tt ESMF\_DEFER\_LIB\_BUILD=ON}
@@ -1149,10 +1149,10 @@ than 1.
 
 Users may also run examples or execute unit tests of specific classes
 by changing directories to the desired class {\tt examples} or {\tt tests}
-directories and entering {\tt gmake run\_examples} or
-{\tt gmake run\_unit\_tests}, respectively.  For non-multiprocessor machines,
-uni-processor targets are available as {\tt gmake run\_examples\_uni} or
-{\tt gmake run\_unit\_tests\_uni}.
+directories and entering {\tt make run\_examples} or
+{\tt make run\_unit\_tests}, respectively.  For non-multiprocessor machines,
+uni-processor targets are available as {\tt make run\_examples\_uni} or
+{\tt make run\_unit\_tests\_uni}.
 
 \subsection{Building the ESMF Documentation}
 \label{BuildDocumentation}
@@ -1175,7 +1175,7 @@ Ubuntu Linux using:
 
 \noindent To build documentation:
 \begin{verbatim}
-  gmake doc              ! Builds the manuals, including pdf and html.
+  make doc              ! Builds the manuals, including pdf and html.
 \end{verbatim}
 
 \noindent The resulting documentation files will be
@@ -1205,12 +1205,12 @@ environment variables does and how to set them.
 
 Install ESMF with the command:
 \begin{verbatim}
-  gmake install
+  make install
 \end{verbatim}
 
 Check the ESMF installation with the command:
 \begin{verbatim}
-  gmake installcheck
+  make installcheck
 \end{verbatim}
 
 {\em Advice to installers.} To complete the installation of ESMF, a single ESMF specific environment variable should be set. The variable is named {\tt ESMFMKFILE}, and it must point to the {\tt esmf.mk} file that was generated during the installation process. Systems that support multiple ESMF installations via management software (e.g. {\em modules, softenv, ...}) should set/reset the {\tt ESMFMKFILE} environment variable as part of the configuration.
