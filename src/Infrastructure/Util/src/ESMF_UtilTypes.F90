@@ -566,7 +566,8 @@
                            ESMF_IOFMT_NETCDF4P            = ESMF_IOFmt_Flag(5), &
                            ESMF_IOFMT_NETCDF4C            = ESMF_IOFmt_Flag(6), &
                            ESMF_IOFMT_CONFIG              = ESMF_IOFmt_Flag(7), &
-                           ESMF_IOFMT_YAML                = ESMF_IOFmt_Flag(8)
+                           ESMF_IOFMT_YAML                = ESMF_IOFmt_Flag(8), &
+                           ESMF_IOFMT_SHP                 = ESMF_IOFmt_Flag(9) ! GDAL/Shapefile format (MSL)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_Index_Flag
@@ -1069,7 +1070,8 @@
              ESMF_IOFMT_NETCDF4P, &
              ESMF_IOFMT_NETCDF4C, &
              ESMF_IOFMT_CONFIG, &
-             ESMF_IOFMT_YAML
+             ESMF_IOFMT_YAML, &
+             ESMF_IOFMT_SHP
 
       public ESMF_Index_Flag, &
              ESMF_INDEX_DELOCAL, &

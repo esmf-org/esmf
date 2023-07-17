@@ -109,7 +109,8 @@ typedef enum ESMC_IOFmt_Flag { //ESMF_IOFMT_BIN=0,
                        ESMF_IOFMT_NETCDF4P,
                        ESMF_IOFMT_NETCDF4C,
                        ESMF_IOFMT_CONFIG,
-                       ESMF_IOFMT_YAML} ESMC_IOFmt_Flag;
+                       ESMF_IOFMT_YAML,
+                       ESMF_IOFMT_SHP} ESMC_IOFmt_Flag;
 
 enum ESMC_LineType_Flag { ESMC_LINETYPE_CART=0,
                           ESMC_LINETYPE_GREAT_CIRCLE};
