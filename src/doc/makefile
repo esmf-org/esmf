@@ -50,13 +50,13 @@ CLOBBERDIRS =
 #-------------------------------------------------------------------------------
 dvi:  tex $(DVIFILES)
 
-ESMF_usrdoc.dvi: ESMF_usrdoc.ctex $(USRDOC_DEP_FILES)
+ESMF_usrdoc.dvi: ESMF_usrdoc.ctex $(USRDOC_DEP_FILES) verstitle_alldoc.tex
 	${DO_LATEX} ESMF usr
 
-ESMF_refdoc.dvi: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
+ESMF_refdoc.dvi: ESMF_refdoc.ctex $(REFDOC_DEP_FILES) verstitle_alldoc.tex
 	${DO_LATEX} ESMF ref
 
-ESMC_crefdoc.dvi: ESMC_crefdoc.ctex $(REFDOC_DEP_FILES)
+ESMC_crefdoc.dvi: ESMC_crefdoc.ctex $(REFDOC_DEP_FILES) verstitle_alldoc.tex
 	${DO_LATEX} ESMC cref
 
 
