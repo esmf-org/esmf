@@ -53,7 +53,7 @@ namespace ESMCI {
   // classes and structs
 
   class GDAL_Handler;       // The main class for implementing GDAL functionality
-
+  class GDAL_SystemHandler;
   // class definitions
   
   //===========================================================================
@@ -123,7 +123,7 @@ namespace ESMCI {
     }
 
     // open() and close()
-    void GDAL_openOneTileFile(int tile, bool readonly_arg, int *rc = NULL);
+    void openOneTileFile(int tile, bool readonly_arg, int *rc = NULL);
     ESMC_Logical isOpen(int tile);
     ESMC_Logical isNewFile(int tile) {  // note 1-based indexing for tile
       return (new_file[tile-1] ? ESMF_TRUE : ESMF_FALSE);

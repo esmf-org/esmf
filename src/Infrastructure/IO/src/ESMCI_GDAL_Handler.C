@@ -1174,7 +1174,7 @@ void GDAL_Handler::arrayWriteOneTileFile(
 // !IROUTINE:  ESMCI::GDAL_Handler::openOneTileFile    - open a stream with stored filename, for the given tile
 //
 // !INTERFACE:
-void GDAL_Handler::GDAL_openOneTileFile(
+void GDAL_Handler::openOneTileFile(
 //
 // !RETURN VALUE:
 //
