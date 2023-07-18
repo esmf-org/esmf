@@ -553,11 +553,11 @@ the application.
 \label{EnvironmentVariables}
 
 The following is a full alphabetical list of all environment variables which
-are used by the ESMF build system. In many cases only {\tt ESMF\_DIR} must be
-set. On Linux and Darwin systems {\tt ESMF\_COMPILER} and {\tt ESMF\_COMM} must
-also be set to select the appropriate Fortran and C++ compilers and MPI
-implementation. The other variables have default values which work for
-most systems.
+are used by the ESMF build system. The {\tt ESMF\_DIR} must be set in all
+circumstances, while most other environment variables have defaults. However,
+it is recommended to explicitly set the compiler and MPI flavor using
+{\tt ESMF\_COMPILER} and {\tt ESMF\_COMM}, respectively, to ensure the expected
+behavior.
 
 \begin{description}
 
@@ -615,8 +615,8 @@ Possible value: {\em system-dependent}
 
 The ESMF library build requires a working Fortran90 and C++ compiler. On
 platforms that don't come with a single vendor supplied compiler suite
-(e.g. Linux or Darwin) {\tt ESMF\_COMPILER} must be set to select which Fortran
-and C++ compilers are being used to build the ESMF library. Notice that setting
+(e.g. Linux or Darwin) it is recommended to explicitly set {\tt ESMF\_COMPILER}
+to the desired compiler flavor. Notice that setting
 the {\tt ESMF\_COMPILER} variable does {\em not} affect how the compiler
 executables are located on the system. {\tt ESMF\_COMPILER} (together with
 {\tt ESMF\_COMM}) affect the name that is expected for the compiler executables.
