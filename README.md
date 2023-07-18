@@ -11,6 +11,7 @@ Hello and welcome to ESMF.
  * The [ESMF User's Guide](http://earthsystemmodeling.org/docs/nightly/develop/ESMF_usrdoc/) contains information on building and installing ESMF.
  * The [ESMF Reference Manual](http://earthsystemmodeling.org/docs/nightly/develop/ESMF_refdoc/) contains information on the architecture of ESMF,
    example code, and details of the API (Application Programming Interface).
+ * Visit the [ESMF Web Site](http://earthsystemmodeling.org) for a general overview of the project.
  * Please contact <esmf_support@ucar.edu> with any questions or problems.
 
 ## Downloading ESMF
