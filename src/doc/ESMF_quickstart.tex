@@ -47,9 +47,9 @@ a useful area to examine if porting ESMF to a new platform.
 After downloading and unpacking the ESMF tar file, the build procedure is:
 \begin{enumerate}
 \item Set the required environment variables. 
-\item Type {\tt gmake info} to view and verify your settings
-\item Type {\tt gmake } to build the library.
-\item Type {\tt gmake check } to run self-tests to verify
+\item Type {\tt make info} to view and verify your settings
+\item Type {\tt make } to build the library.
+\item Type {\tt make check } to run self-tests to verify
 the build was successful.
 \end{enumerate}
 See the following sections for more information on each of these steps.
@@ -124,7 +124,7 @@ specific compiler executables by specifying the full path. This can be used to
 pick specific compiler executables without having to modify the {\tt PATH}
 environment variable.
 
-Use 'gmake info' to see which compiler executables the ESMF build system will
+Use 'make info' to see which compiler executables the ESMF build system will
 be using according to your environment variable settings.
 
 To see possible values for {\tt ESMF\_COMPILER}, cd to 
@@ -173,20 +173,15 @@ provided as absolute path or relative to {\tt ESMF\_DIR}.
 
 
 \subsubsection{GNU make}
-The ESMF build system uses the GNU make program; it is normally named 
-{\tt gmake} but may also be simply {\tt make} or {\tt gnumake} on some 
-platforms (we will use {\tt gmake} in this document). ESMF does not use
-configure or autoconf;  the selection of various options is done by
-setting environment variables before building the framework. 
+\input{../../build/doc/user_make}
 
-
-\subsubsection{gmake info}
-{\tt gmake info} is a command that assists the user in verifying that the ESMF 
+\subsubsection{make info}
+{\tt make info} is a command that assists the user in verifying that the ESMF 
 variables have been set appropriately. It also tells the user the paths to 
 various libraries e.g. MPI that are set on the system. The user to review 
 this information to verify their settings. In the case of a build failure, 
 this information is invaluable and will be the first thing asked for by the
-ESMF support team. Below is an {\bf example output} from {\tt gmake info}: 
+ESMF support team. Below is an {\bf example output} from {\tt make info}: 
  
 \begin{verbatim}
 
@@ -375,7 +370,7 @@ on the requirements).
 
 To build and run the unit and system tests, type:
 \begin{verbatim}
-gmake check
+make check
 \end{verbatim}
 A summary report of success and failures will be printed out at the end.
 
@@ -403,10 +398,10 @@ specific type of test:
 \item[examples] examples contain code illustrating a single type of function
 %\item[demos] demos are example applications showing the use of the system
 \end{description}
-For example, {\tt gmake build\_examples} recompiles the example programs but 
-does not execute them. {\tt gmake dust\_unit\_tests} removes all
+For example, {\tt make build\_examples} recompiles the example programs but 
+does not execute them. {\tt make dust\_unit\_tests} removes all
 output files generated when executing the unit tests, but leaves the
-executables. {\tt gmake clean\_system\_tests} removes all executables and files
+executables. {\tt make clean\_system\_tests} removes all executables and files
 associated with the system tests.
 
 For the unit tests only, there is an additional environment variable
@@ -432,7 +427,7 @@ provided in section \ref{sec:CLTs}.
 
 To build the bundled ESMF command line tools, type:
 \begin{verbatim}
-gmake build_apps
+make build_apps
 \end{verbatim}
 This will build the command line tools and place the executables under the 
 {\tt \$ESMF\_DIR/apps} directory inside the ESMF source tree. The 
