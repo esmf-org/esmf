@@ -665,17 +665,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           return
        endif
 
+       call ESMF_ArrayGet(ftype%array, rank=fieldrank, &
+            rc=localrc)
+       if (localrc .ne. ESMF_SUCCESS) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
+               msg="Cannot retrieve fieldrank from ftypep%array", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
+
        if(present(minIndex) .or. present(maxIndex) .or. &
             present(elementCount)) then
-
-          call ESMF_ArrayGet(ftype%array, rank=fieldrank, &
-               rc=localrc)
-          if (localrc .ne. ESMF_SUCCESS) then
-             call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-                  msg="Cannot retrieve fieldrank from ftypep%array", &
-                  ESMF_CONTEXT, rcToReturn=rc)
-             return
-          endif
 
           allocate(l_min(fieldrank), l_max(fieldrank), l_elecount(fieldrank))
           l_min = -1
@@ -780,15 +780,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
        if(present(localminIndex) .or. present(localmaxIndex) .or. &
             present(localelementCount) ) then
-
-          call ESMF_ArrayGet(ftype%array, rank=fieldrank, &
-               rc=localrc)
-          if (localrc .ne. ESMF_SUCCESS) then
-             call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-                  msg="Cannot retrieve fieldrank from ftypep%array", &
-                  ESMF_CONTEXT, rcToReturn=rc)
-             return
-          endif
 
           allocate(ll_min(fieldrank), ll_max(fieldrank), ll_elecount(fieldrank))
           ll_min = -1
