@@ -3262,7 +3262,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_XGrid),       intent(in)                      :: xgrid
       type(ESMF_Field),       intent(in)                      :: srcField
       type(ESMF_Field),       intent(inout)                   :: dstField
-      type(ESMF_KeywordEnforcer), optional                    :: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_RegridMethod_Flag),   intent(in),    optional :: regridmethod
       integer,                        intent(inout), optional :: srcTermProcessing
       integer,                        intent(inout), optional :: pipeLineDepth
