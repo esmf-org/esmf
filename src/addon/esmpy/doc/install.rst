@@ -62,15 +62,7 @@ Installing ESMPy from Source
 ----------------------------
 
 When installing from source, ESMPy uses `pip <https://pypi.org/project/pip//>`_ 
-to build and install the package. This requires setting an environment variable 
-pointing to a file named esmf.mk that is generated during an ESMF installation.  
-The path of this file is:
-
-.. code::
-
-    <ESMF_INSTALL_DIR>/lib/lib<g<or>O>/<platform>/esmf.mk
-
-An installation of ESMPy in the default location for Python packages can be done
+to build and install the package. An installation of ESMPy in the default location for Python packages can be done
 with the following command issued from the top level ESMPy directory (``src/addon/esmpy``):
 
 .. code::
@@ -93,7 +85,8 @@ To use ESMPy in an external program, import it with:
 
     import esmpy
 
-The environment variable ``ESMFMKFILE`` must be set when using ESMPy.
+The environment variable ``ESMFMKFILE`` should be set when using ESMPy. If it is not found, the package will
+try to guess a few very common locations, but we recommend correctly setting the variable nonetheless.
 
 .. Note::
 
