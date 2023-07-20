@@ -3282,6 +3282,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! These fraction Fields allow a user to calculate correct flux regridded through {\tt ESMF\_XGrid}.
 ! \item[7.1.0r] Added argument {\tt regridmethod}. This new argument allows the user to choose the regrid method
 !               to apply when computing the routehandle. 
+! \item[8.5.0] Added arguments {\tt srcTermProcessing} and {\tt pipelineDepth} to
+!              provide access to the tuning parameters affecting the sparse matrix
+!              execution. See the text for details on the impact
+!              {\tt srcTermProcessing} can have on bit-for-bit reproducibility.
 ! \end{description}
 ! \end{itemize}
 !
