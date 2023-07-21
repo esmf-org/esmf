@@ -1303,6 +1303,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_FieldRegridStoreNX
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "getMeshWithNodesOnFieldLoc"
     ! Get or create a mesh that has nodes on the location which the Field is built
     subroutine getMeshWithNodesOnFieldLoc(field, maskValues, &
          createdTmpMesh, mesh, turnedOnMeshNodeMask, rc)
@@ -1429,6 +1431,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine getMeshWithNodesOnFieldLoc
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "getMeshOnCornersWFieldOnCenter"
     ! Get or create a mesh that has nodes on corners surrounding the centers that the Field is built on
     ! For a Grid this is Nodes on Corners Field on Centers
     ! For a Mesh this is Nodes surrounding a Field built on Elements
@@ -1539,6 +1543,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine getMeshOnCornersWFieldOnCenter
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "getPointListOnFieldLoc"
     ! Get or create a pointlist with points on the Field location
     subroutine getPointListOnFieldLoc(field, maskValues, &
          createdTmpPointList, pointlist, rc)
@@ -1658,6 +1664,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine getPointListOnFieldLoc
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "copyFracsIntoOutputField"
     ! Copy frac data into output Field
     subroutine copyFracsIntoOutputField(regridField, regridMesh, outFracField, rc)
 
@@ -3056,7 +3064,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_FieldRegridStoreNX
 #endif
 
-   ! Small subroutine to hide some of the complexity of grid2mesh for conservative regrid
+#undef  ESMF_METHOD
+#define ESMF_METHOD "conserve_GridToMesh"
+    ! Small subroutine to hide some of the complexity of grid2mesh for conservative regrid
     function conserve_GridToMesh(grid, maskValues, turnedOnMeshElemMask, rc)
       type (ESMF_Grid), intent(in)  :: grid
       integer(ESMF_KIND_I4), intent(in),  optional :: maskValues(:)
@@ -3154,7 +3164,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end function conserve_GridToMesh
 
 
-   ! Small subroutine to hide some of the complexity of grid2mesh for bilinear/patch
+#undef  ESMF_METHOD
+#define ESMF_METHOD "b_or_p_GridToMesh"
+    ! Small subroutine to hide some of the complexity of grid2mesh for bilinear/patch
     function b_or_p_GridToMesh(grid,staggerloc,maskValues, turnedOnMeshNodeMask, rc)
       type (ESMF_Grid), intent(in)  :: grid
       type (ESMF_StaggerLoc), intent(in) :: staggerloc
@@ -4337,6 +4349,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "checkGrid"
     ! Small subroutine to make sure that Grid doesn't
     ! contain some of the properties that aren't currently
     ! allowed in regridding
@@ -4394,7 +4408,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 
-    ! Same as checkGrid, but less restrictive due to anticipated conversion to a pointlist
+#undef  ESMF_METHOD
+#define ESMF_METHOD "checkGridLite"
+   ! Same as checkGrid, but less restrictive due to anticipated conversion to a pointlist
     subroutine checkGridLite(grid,staggerloc,rc)
         type (ESMF_Grid) :: grid
         type(ESMF_StaggerLoc) :: staggerloc
