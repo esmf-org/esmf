@@ -237,6 +237,7 @@ RUN_ESMF_VMBarrierUTestUNI:
 #
 # VM Epoch and Large Messages
 #
+RUN_ESMF_VMEpochLargeMsgUTest: ESMF_MPILAUNCHOPTIONS := $(shell echo $(ESMF_MPILAUNCHOPTIONS) | sed 's/\-\-exact//')
 RUN_ESMF_VMEpochLargeMsgUTest:
 	$(MAKE) TNAME=VMEpochLargeMsg NP=2 ftest
 #
