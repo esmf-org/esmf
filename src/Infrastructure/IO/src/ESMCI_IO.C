@@ -336,6 +336,26 @@ int IO::read(
       localrc = ESMF_STATUS_UNALLOCATED;
       break;
     case IO_ARRAY:
+      // Check for redistribution (when DE/PET != 1)
+      need_redist = redist_check(temp_array_p, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                        &rc)) {
+        // Close the file but return original error even if close fails.
+        localrc = close();
+        return rc;
+      }
+      if (need_redist) {
+        // Create a compatible temp Array with 1 DE per PET
+        // std::cout << ESMC_METHOD << ": calling redist_arraycreate1de" << std::endl;
+        redist_arraycreate1de((*it)->getArray(), &temp_array_p, petCount, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                          &rc)) {
+          // Close the file but return original error even if close fails.
+          localrc = close();
+          return rc;
+        }
+      }
+
       // Check for undistributed dimensions
       has_undist = undist_check (temp_array_p, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
@@ -353,26 +373,6 @@ int IO::read(
         }
       }
 
-      // Check for redistribution (when DE/PET != 1)
-      need_redist = redist_check(temp_array_p, &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-          &rc)) {
-      // Close the file but return original error even if close fails.
-        localrc = close();
-        return rc;
-      }
-      if (need_redist) {
-        // Create a compatible temp Array with 1 DE per PET
-        // std::cout << ESMC_METHOD << ": calling redist_arraycreate1de" << std::endl;
-        redist_arraycreate1de((*it)->getArray(), &temp_array_p, petCount, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-            &rc)) {
-        // Close the file but return original error even if close fails.
-          localrc = close();
-          return rc;
-        }
-      }
-
       // Read data into the Array
       // std::cout << ESMC_METHOD << ": calling arrayRead" << std::endl;
       ioHandler->arrayRead(temp_array_p,
@@ -383,6 +383,17 @@ int IO::read(
       if (need_redist) {
         // Redistribute into the caller supplied Array
         // std::cout << ESMC_METHOD << ": DE count > 1 - redistStore" << std::endl;
+
+        if (has_undist) {
+          // We need to redistribute from the view prior to the aliasing that treated all
+          // dimensions as distributed.
+          //
+          // Note that, even though the arrayRead read into temp_array_p, this also filled
+          // the data in temp_array_undist_p, since those two are aliases of each other
+          // (i.e., with DATACOPY_REFERENCE).
+          temp_array_p = temp_array_undist_p;
+        }
+
         localrc = ESMCI::Array::redistStore(temp_array_p, (*it)->getArray(), &rh, NULL);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
