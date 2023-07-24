@@ -553,11 +553,11 @@ the application.
 \label{EnvironmentVariables}
 
 The following is a full alphabetical list of all environment variables which
-are used by the ESMF build system. In many cases only {\tt ESMF\_DIR} must be
-set. On Linux and Darwin systems {\tt ESMF\_COMPILER} and {\tt ESMF\_COMM} must
-also be set to select the appropriate Fortran and C++ compilers and MPI
-implementation. The other variables have default values which work for
-most systems.
+are used by the ESMF build system. The {\tt ESMF\_DIR} must be set in all
+circumstances, while most other environment variables have defaults. However,
+it is recommended to explicitly set the compiler and MPI flavor using
+{\tt ESMF\_COMPILER} and {\tt ESMF\_COMM}, respectively, to ensure the expected
+behavior.
 
 \begin{description}
 
@@ -615,8 +615,8 @@ Possible value: {\em system-dependent}
 
 The ESMF library build requires a working Fortran90 and C++ compiler. On
 platforms that don't come with a single vendor supplied compiler suite
-(e.g. Linux or Darwin) {\tt ESMF\_COMPILER} must be set to select which Fortran
-and C++ compilers are being used to build the ESMF library. Notice that setting
+(e.g. Linux or Darwin) it is recommended to explicitly set {\tt ESMF\_COMPILER}
+to the desired compiler flavor. Notice that setting
 the {\tt ESMF\_COMPILER} variable does {\em not} affect how the compiler
 executables are located on the system. {\tt ESMF\_COMPILER} (together with
 {\tt ESMF\_COMM}) affect the name that is expected for the compiler executables.
@@ -633,7 +633,7 @@ specific compiler executables by specifying the full path. This can be used to
 pick specific compiler executables without having to modify the {\tt PATH}
 environment variable.
 
-Use 'gmake info' to see which compiler executables the ESMF build system will
+Use 'make info' to see which compiler executables the ESMF build system will
 be using according to your environment variable settings.
 
 To see possible values for {\tt ESMF\_COMPILER}, cd to
@@ -721,7 +721,7 @@ This variable can be used to override the deferring of the build of the
 ESMF library.  By default, the library is built after all of the source
 files have been compiled.  This speeds up the build process. It also
 allows parallel compilation of source code when the -j flag is used with
-gmake.  Setting this environment variable to {\tt OFF} forces the library to
+make.  Setting this environment variable to {\tt OFF} forces the library to
 be updated after each individual compilation, thus disabling the ability
 to use parallel compilation.
 
@@ -1081,7 +1081,7 @@ See \ref{sec:yaml-cpp}
 
 \end{description}
 
-Environment variables must be set in the user's shell or when calling gmake. It
+Environment variables must be set in the user's shell or when calling make. It
 is {\em not} necessary to edit ESMF makefiles or other build system files to set
 these variables. Here is an example of setting an environment variable in the
 csh/tcsh shell:
@@ -1096,10 +1096,10 @@ In bash/ksh shell environment variables are set this way:
   export ESMF_ABI=32
 \end{verbatim}
 
-Environment variables can also be set from the gmake command line:
+Environment variables can also be set from the make command line:
 
 \begin{verbatim}
-  gmake ESMF_ABI=32
+  make ESMF_ABI=32
 \end{verbatim}
 
 \subsection{Supported Platforms}
@@ -1111,6 +1111,37 @@ to one platform/architecture at a time.  The output from the test cases
 will be stored in a separate directories so the results will be kept
 separate for different architectures or options.
 
+\subsubsection{Intel Compiler Support (Classic and oneAPI)}
+
+ESMF supports the Intel compiler suite via {\tt ESMF\_COMPILER=intel}. Starting in 2020, Intel began promoting their
+new LLVM-based C/C++ and Fortran compiler line under the oneAPI brand. As of 2023, the older compilers are still
+part of the Intel compiler suite and referred to as Intel Compiler Classic. ESMF supports both the classic and oneAPI
+compiler lines. The following paragraphs provide important details that allow users to fine-tune the interaction
+with the Intel compilers.
+
+Under {\tt ESMF\_OS=Linux}, with {\tt ESMF\_COMPILER=intel} and {\tt ESMF\_COMM=mpiuni} set, the C, C++, and
+Fortran compiler front-ends default to the classic options {\tt icc}, {\tt icpc}, and {\tt ifort}, respectively. Any
+of these defaults can be overridden by explicitly setting the {\tt ESMF\_C}, {\tt ESMF\_CXX}, or {\tt ESMF\_F90}
+environment variables to the oneAPI options {\tt icx}, {\tt icpx}, and {\tt ifx}, respectively.
+
+Under {\tt ESMF\_OS=Linux}, with {\tt ESMF\_COMPILER=intel} and {\tt ESMF\_COMM=intelmpi} set, the C, C++, and
+Fortran compiler front-ends default to the MPI compiler wrappers {\tt mpiicc}, {\tt mpicpc}, and {\tt mpiifort},
+respectively. It depends on the IntelMPI installation details whether classic, oneAPI, or a mixture of compilers
+are used underneath the MPI wrappers. The IntelMPI defaults can be overridden by explicitly setting the
+{\tt I\_MPI\_CC}, {\tt I\_MPI\_CXX}, or {\tt I\_MPI\_F90} environment variables. This is an IntelMPI feature.
+
+The recommendation for Cray systems that use the Cray compiler wrappers {\tt cc}, {\tt CC}, and {\tt ftn},
+respectively, is to use {\tt ESMF\_OS=Unicos}. In most cases this setting is detected automatically by the ESMF
+build system, and should {\em not} be overridden.
+
+Under {\tt ESMF\_OS=Unicos}, with {\tt ESMF\_COMPILER=intel}, the C, C++, and Fortran compiler front-ends default to
+{\tt cc}, {\tt CC}, and {\tt ftn}, respectively, regardless of the  {\tt ESMF\_COMM} setting. The appropriate
+classic, oneAPI, or mixed compiler combination is typically determined by the Intel environment module loaded.
+Common module names on Cray systems are {\tt intel-classic}, {\tt intel-oneAPI}, and {\tt intel}, respectively.
+
+{\bf Tip: } Use the ESMF "{\tt make info}" target to query compiler version information. This can be used to determine the
+appropriate settings, and to diagnose issues before kicking off the complete ESMF build procedure.
+
 \subsection{Building the ESMF Library}
 \label{BuildESMF}
 
@@ -1119,24 +1150,24 @@ separate for different architectures or options.
 
 Build the library with the command:
 \begin{verbatim}
-  gmake
+  make
 \end{verbatim}
 
 %Build options that enable you to copy the library and *.mod files to
 %specified directories are explained in Section~\ref{BuildOptions}.
 
 Makefiles throughout the framework are configured to allow users to
-compile files only in the directory where {\tt gmake} is entered. Shared
+compile files only in the directory where {\tt make} is entered. Shared
 libraries are rebuilt only if necessary. In addition the entire ESMF
-framework may be built from any directory by entering {\tt gmake all},
+framework may be built from any directory by entering {\tt make all},
 assuming that all the environmental variables are set correctly as
 described in Section~\ref{EnvironmentVariables}.
 
 The makefiles are also configured to allow multiple make targets to be
-compiled in parallel, via the gmake -j flag.  For example, to use eight
+compiled in parallel, via the make -j flag.  For example, to use eight
 parallel processes to build the library, use -j8:
 \begin{verbatim}
-  gmake -j8 lib
+  make -j8 lib
 \end{verbatim}
 
 The parallel compilation feature depends on {\tt ESMF\_DEFER\_LIB\_BUILD=ON}
@@ -1149,21 +1180,16 @@ than 1.
 
 Users may also run examples or execute unit tests of specific classes
 by changing directories to the desired class {\tt examples} or {\tt tests}
-directories and entering {\tt gmake run\_examples} or
-{\tt gmake run\_unit\_tests}, respectively.  For non-multiprocessor machines,
-uni-processor targets are available as {\tt gmake run\_examples\_uni} or
-{\tt gmake run\_unit\_tests\_uni}.
+directories and entering {\tt make run\_examples} or
+{\tt make run\_unit\_tests}, respectively.  For non-multiprocessor machines,
+uni-processor targets are available as {\tt make run\_examples\_uni} or
+{\tt make run\_unit\_tests\_uni}.
 
 \subsection{Building the ESMF Documentation}
 \label{BuildDocumentation}
 
 The ESMF source documentation consists of an {\it ESMF User's Guide}
 and an {\it ESMF Reference Manual for Fortran}.
-
-The tarballs on the ESMF website for ESMF versions 3.0.1 and later do
-not contain the ESMF documentation files.  The documentation is
-available on the ESMF website in html or pdf form and most users should
-not need to build it from the source.
 
 If a user does want to build the documentation, they will need to download the
 ESMF code repository (see section \ref{sec:download}). Latex, latex2html, perl
@@ -1175,7 +1201,7 @@ Ubuntu Linux using:
 
 \noindent To build documentation:
 \begin{verbatim}
-  gmake doc              ! Builds the manuals, including pdf and html.
+  make doc              ! Builds the manuals, including pdf and html.
 \end{verbatim}
 
 \noindent The resulting documentation files will be
@@ -1205,12 +1231,12 @@ environment variables does and how to set them.
 
 Install ESMF with the command:
 \begin{verbatim}
-  gmake install
+  make install
 \end{verbatim}
 
 Check the ESMF installation with the command:
 \begin{verbatim}
-  gmake installcheck
+  make installcheck
 \end{verbatim}
 
 {\em Advice to installers.} To complete the installation of ESMF, a single ESMF specific environment variable should be set. The variable is named {\tt ESMFMKFILE}, and it must point to the {\tt esmf.mk} file that was generated during the installation process. Systems that support multiple ESMF installations via management software (e.g. {\em modules, softenv, ...}) should set/reset the {\tt ESMFMKFILE} environment variable as part of the configuration.

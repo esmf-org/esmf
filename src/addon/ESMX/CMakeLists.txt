@@ -1,11 +1,24 @@
-cmake_minimum_required(VERSION 3.5.2)
-enable_language(Fortran)
+cmake_minimum_required(VERSION 3.22)
+
+# Where to look for the local Find<Package>.cmake files
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Driver/cmake")
+
+# Find ESMF
+find_package(ESMF 8.5.0 MODULE REQUIRED)
+
+# Set compilers consistent with ESMF
+set(CMAKE_Fortran_COMPILER        "${ESMF_F90COMPILER}")
+set(CMAKE_CXX_COMPILER            "${ESMF_CXXCOMPILER}")
+set(CMAKE_C_COMPILER              "${ESMF_CCOMPILER}")
+
+# Project
+project(ESMX
+        VERSION 1.0.0
+        LANGUAGES Fortran CXX C
+        )
 
 # Add ESMX driver
 add_subdirectory(Driver)
-
-# Specific project settings
-project(ESMX VERSION 0.1.0)
 
 if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
   set(CMAKE_Fortran_FLAGS_RELEASE "-O2")

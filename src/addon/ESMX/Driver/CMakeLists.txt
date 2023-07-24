@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.22)
 
 # load packages and modules
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 find_package(Python 3.5 REQUIRED COMPONENTS Interpreter)
-find_package(ESMF 8.4.0 MODULE REQUIRED)
+find_package(ESMF 8.5.0 MODULE REQUIRED)
 include(FetchContent)
 
 # esmx functions
@@ -43,6 +43,7 @@ endif()
 
 # define ESMX_EXE_NAME
 if(NOT DEFINED ESMX_EXE_NAME)
+  set(ESMX_EXE_NAME "esmx_app")
   set(ESMX_EXE_NAME "esmx_app" PARENT_SCOPE)
 else()
   set(ESMX_EXE_NAME ${ESMX_EXE_NAME} PARENT_SCOPE)
@@ -87,10 +88,6 @@ elseif(DEFINED ESMX_BUILD_JOBS)
 endif()
 
 # compiler options
-find_program(CMAKE_CXX_COMPILER ${ESMF_CXXCOMPILER})
-find_program(CMAKE_Fortran_COMPILER ${ESMF_F90COMPILER})
-set(CMAKE_CXX_COMPILER ${ESMF_CXXCOMPILER} PARENT_SCOPE)
-set(CMAKE_Fortran_COMPILER ${ESMF_F90COMPILER} PARENT_SCOPE)
 if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
   set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
   set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -fbacktrace -02")
@@ -211,25 +208,25 @@ foreach(CMP IN ITEMS ${COMPS})
         WORKING_DIRECTORY ${CMP_GIT_DIR}
         RESULT_VARIABLE ret
       )
-      esmx_check_err(${ret} "git set-url failed for ${CMP}")
+      esmx_check_ret(${ret} "git set-url failed for ${CMP}")
       execute_process(
         COMMAND git fetch origin
         WORKING_DIRECTORY ${CMP_GIT_DIR}
         RESULT_VARIABLE ret
       )
-      esmx_check_err(${ret} "git fetch failed for ${CMP}")
+      esmx_check_ret(${ret} "git fetch failed for ${CMP}")
       execute_process(
         COMMAND git checkout ${CMP_GIT_TAG}
         WORKING_DIRECTORY ${CMP_GIT_DIR}
         RESULT_VARIABLE ret
       )
-      esmx_check_err(${ret} "git checkout failed for ${CMP}")
+      esmx_check_ret(${ret} "git checkout failed for ${CMP}")
       execute_process(
         COMMAND git pull origin ${CMP_GIT_TAG}
         WORKING_DIRECTORY ${CMP_GIT_DIR}
         RESULT_VARIABLE ret
       )
-      esmx_check_err(${ret} "git pull failed for ${CMP}")
+      esmx_check_ret(${ret} "git pull failed for ${CMP}")
     endif()
   endif()
 

@@ -441,16 +441,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character (len=*),       intent(in),  optional :: name
     integer,                 intent(out), optional :: rc
 !
-! !STATUS:
-! \begin{itemize}
-! \item\apiStatusCompatibleVersion{5.2.0r}
-! \item\apiStatusModifiedSinceVersion{5.2.0r}
-! \begin{description}
-! \item[8.1.0] Added argument {\tt pinflag} to provide access to DE sharing
-!              between PETs.
-! \end{description}
-! \end{itemize}
-!
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Field} and allocate space internally for an
 ! {\tt ESMF\_Array}.  Return a new {\tt ESMF\_Field}. For an example and
@@ -1426,7 +1416,7 @@ end function ESMF_FieldCreateGBTKR
 #define FieldCreateGBDataDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldCreate - Create a Field from Fortran array @\
+! !IROUTINE: ESMF_FieldCreate - Create a Field from Geom and Fortran array @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldCreate() @\
@@ -1601,7 +1591,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 #define FieldCreateGBDataPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldCreate - Create a Field from Fortran array pointer @\
+! !IROUTINE: ESMF_FieldCreate - Create a Field from Geom and Fortran array pointer @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldCreate() @\

@@ -3026,6 +3026,110 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigLog"
+!BOP
+!
+! !IROUTINE: ESMF_ConfigLog - Write content of Config object to log
+!
+! !INTERFACE:
+  subroutine ESMF_ConfigLog(config, keywordEnforcer, raw, prefix, logMsgFlag, &
+    log, rc)
+
+! !ARGUMENTS:
+    type(ESMF_Config),      intent(in)              :: config
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                intent(in),    optional :: raw
+    character (len=*),      intent(in),    optional :: prefix
+    type(ESMF_LogMsg_Flag), intent(in),    optional :: logMsgFlag
+    type(ESMF_Log),         intent(inout), optional :: log
+    integer,                intent(out),   optional :: rc
+!
+!
+! !DESCRIPTION:
+!   Write content of {\tt ESMF\_Config} object to ESMF log.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[config]
+!     The {\tt ESMF\_Config} object to be logged.
+!   \item [{[raw]}]
+!     For {\tt .true.} output the internal buffer as is, for {\tt .false.}
+!     output in the interpreted format. The default is {\tt .false.}.
+!   \item [{[prefix]}]
+!     String to prefix the memory info message. Default is no prefix.
+!   \item [{[logMsgFlag]}]
+!     Type of log message generated. See section \ref{const:logmsgflag} for
+!     a list of valid message types. Default is {\tt ESMF\_LOGMSG\_INFO}.
+!   \item [{[log]}]
+!     {\tt ESMF\_Log} object that can be used instead of the default Log.
+!     Default is to use the default log.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP -------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_LogMsg_Flag)  :: logMsg
+    integer                 :: lbeg, lend
+    character(240)          :: msgString
+    logical                 :: rawArg
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! deal with optionl logMsgFlag
+    logMsg = ESMF_LOGMSG_INFO ! default
+    if (present(logMsgFlag)) logMsg = logMsgFlag
+
+    write(msgString, "(a)") prefix//&
+      "--- ESMF_ConfigLog() start -------------------------------------"
+    call ESMF_LogWrite(msgString, logMsg, log=log, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    rawArg = .false.  ! default
+    if (present(raw)) rawArg = raw
+
+    write(msgString, "(a,i8,a,l2,a)") prefix//" nbuf=", config%cptr%nbuf, &
+      " buffer(raw=", rawArg, "):"
+    call ESMF_LogWrite(msgString, logMsg, log=log, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (rawArg) then
+      call ESMF_LogWrite(config%cptr%buffer(1:config%cptr%nbuf), logMsg, &
+        log=log, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      lbeg = 2
+      lend = index_( config % cptr % buffer(lbeg:config % cptr % nbuf), EOL )
+      do while (lend >= lbeg .and. lend < config % cptr % nbuf)
+        write(msgString, "(a)") prefix//trim(config % cptr % buffer(lbeg:lend))
+        call ESMF_LogWrite(msgString, logMsg, log=log, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        lbeg = lend + 2
+        lend = lend + &
+          index_( config % cptr % buffer(lbeg:config % cptr % nbuf), EOL )
+      end do
+    endif
+
+    write(msgString, "(a)") prefix//&
+      "--- ESMF_ConfigLog() end ---------------------------------------"
+    call ESMF_LogWrite(msgString, logMsg, log=log, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ConfigLog
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigNextLine"
 !BOP
 !
@@ -3219,110 +3323,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
 
     end subroutine ESMF_ConfigParseAttributes
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ConfigLog"
-!BOP
-!
-! !IROUTINE: ESMF_ConfigLog - Write content of Config object to log
-!
-! !INTERFACE:
-  subroutine ESMF_ConfigLog(config, keywordEnforcer, raw, prefix, logMsgFlag, &
-    log, rc)
-
-! !ARGUMENTS:
-    type(ESMF_Config),      intent(in)              :: config
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    logical,                intent(in),    optional :: raw
-    character (len=*),      intent(in),    optional :: prefix
-    type(ESMF_LogMsg_Flag), intent(in),    optional :: logMsgFlag
-    type(ESMF_Log),         intent(inout), optional :: log
-    integer,                intent(out),   optional :: rc
-!
-!
-! !DESCRIPTION:
-!   Write content of {\tt ESMF\_Config} object to ESMF log.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[config]
-!     The {\tt ESMF\_Config} object to be logged.
-!   \item [{[raw]}]
-!     For {\tt .true.} output the internal buffer as is, for {\tt .false.}
-!     output in the interpreted format. The default is {\tt .false.}.
-!   \item [{[prefix]}]
-!     String to prefix the memory info message. Default is no prefix.
-!   \item [{[logMsgFlag]}]
-!     Type of log message generated. See section \ref{const:logmsgflag} for
-!     a list of valid message types. Default is {\tt ESMF\_LOGMSG\_INFO}.
-!   \item [{[log]}]
-!     {\tt ESMF\_Log} object that can be used instead of the default Log.
-!     Default is to use the default log.
-!   \item[{[rc]}] 
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP -------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_LogMsg_Flag)  :: logMsg
-    integer                 :: lbeg, lend
-    character(240)          :: msgString
-    logical                 :: rawArg
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! deal with optionl logMsgFlag
-    logMsg = ESMF_LOGMSG_INFO ! default
-    if (present(logMsgFlag)) logMsg = logMsgFlag
-
-    write(msgString, "(a)") prefix//&
-      "--- ESMF_ConfigLog() start -------------------------------------"
-    call ESMF_LogWrite(msgString, logMsg, log=log, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    rawArg = .false.  ! default
-    if (present(raw)) rawArg = raw
-
-    write(msgString, "(a,i8,a,l2,a)") prefix//" nbuf=", config%cptr%nbuf, &
-      " buffer(raw=", rawArg, "):"
-    call ESMF_LogWrite(msgString, logMsg, log=log, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (rawArg) then
-      call ESMF_LogWrite(config%cptr%buffer(1:config%cptr%nbuf), logMsg, &
-        log=log, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      lbeg = 2
-      lend = index_( config % cptr % buffer(lbeg:config % cptr % nbuf), EOL )
-      do while (lend >= lbeg .and. lend < config % cptr % nbuf)
-        write(msgString, "(a)") prefix//trim(config % cptr % buffer(lbeg:lend))
-        call ESMF_LogWrite(msgString, logMsg, log=log, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        lbeg = lend + 2
-        lend = lend + &
-          index_( config % cptr % buffer(lbeg:config % cptr % nbuf), EOL )
-      end do
-    endif
-
-    write(msgString, "(a)") prefix//&
-      "--- ESMF_ConfigLog() end ---------------------------------------"
-    call ESMF_LogWrite(msgString, logMsg, log=log, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_ConfigLog
-!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
