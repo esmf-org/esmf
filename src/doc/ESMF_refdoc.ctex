@@ -15,7 +15,7 @@
 \newcommand{\sreq}[1]{\subsection{\hspace{.2in}#1}}
 \newcommand{\ssreq}[1]{\subsubsection{\hspace{.2in}#1}}
 \newcommand{\mytitle}{\longname \docmttype ~~}
-\newcommand{\myversion}{Version 8.4.0}
+\newcommand{\myversion}{Version 8.5.0}
 
 \input{common_commands}
 
@@ -192,6 +192,8 @@
 
 #include "../Infrastructure/XGrid/doc/XGrid_refdoc.ctex"
 
+#include "../Infrastructure/Geom/doc/Geom_refdoc.ctex"
+
 #include "../Infrastructure/DistGrid/doc/DistGrid_refdoc.ctex"
 
 #include "../Infrastructure/Route/doc/RHandle_refdoc.ctex"
@@ -222,6 +224,8 @@
 #include "../Infrastructure/TimeMgr/doc/TimeMgr_refdoc.ctex"
 
 #include "../Infrastructure/Config/doc/Config_refdoc.ctex"
+
+#include "../Infrastructure/HConfig/doc/HConfig_refdoc.ctex"
 
 #include "../Infrastructure/LogErr/doc/LogErr_refdoc.ctex"
 

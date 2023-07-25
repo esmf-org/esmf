@@ -1,7 +1,6 @@
 ! $Id$
 !
 ! System test FieldBundleRedistBlk2Blk
-!  Description on Sourceforge under System Test #XXXXX
 
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.

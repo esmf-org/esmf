@@ -1,7 +1,6 @@
 ! $Id$
 !
 ! System test CompCreate
-!  Description on Sourceforge under System Test #63029
 
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.

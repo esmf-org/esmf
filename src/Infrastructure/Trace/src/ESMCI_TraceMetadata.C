@@ -5,7 +5,7 @@
  * Standard trace metadata used by all ESMF traces.
  *
  * Earth System Modeling Framework
- * Copyright 2002-2022, University Corporation for Atmospheric Research, 
+ * Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
  * Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
  * Laboratory, University of Michigan, National Centers for Environmental 
  * Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 

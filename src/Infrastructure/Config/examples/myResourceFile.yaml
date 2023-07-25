@@ -1,0 +1,25 @@
+# YAML representation of the myResourceFile.rc RF
+
+# mapping to sequences
+
+my_file_names:      [jan87.dat, jan88.dat, jan89.dat]  # all strings
+constants:          [3.1415, 25]                       # float and integer
+my_favorite_colors: [green, blue, 022]
+
+# mapping to scalars
+
+radius_of_the_earth:   6.37E6
+parameter_1:           89
+parameter_2:           78.2
+input_file_name:       dummy_input.nc
+
+# represent table as mapping to sequence of sequences
+
+my_table_name:
+- [1000,    3000,    263.0]
+- [ 925,    3000,    263.0]
+- [ 850,    3000,    263.0]
+- [ 700,    3000,    269.0]
+- [ 500,    3000,    287.0]
+- [ 400,    3000,    295.8]
+- [ 300,    3000,    295.8]

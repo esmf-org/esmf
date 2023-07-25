@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -44,9 +44,10 @@ program ESMF_InfoDescribeUTest
     eidesc_create_background, eidesc_double_init, eidesc_mesh
   logical :: isPresent
   type(ESMF_Mesh) :: mesh
-  type(ESMF_Info) :: infoh, infoh2
-  character(:), allocatable :: actual
-
+  type(ESMF_Info) :: infoh, infoh2, infoFromGeom
+  character(:), allocatable :: actual, actualFromGeom
+  type(ESMF_Geom) :: geom
+  
   !----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -145,11 +146,40 @@ program ESMF_InfoDescribeUTest
   call ESMF_Test((eidesc_mesh%curr_base_is_valid .and. actual=="mesh attribute"), &
     name, failMsg, result, ESMF_SRCLINE)
 
+
+! Don't destroy here because used in next test
+!  call eidesc_mesh%Destroy(rc=rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!------------------------------------------------------------------------------
+
+  !----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test getting info from ESMF_Geom"
+  write(failMsg, *) "Did not succeed"
+  rc = ESMF_FAILURE
+
+  ! Create ESMF_Geom
+  geom=ESMF_GeomCreate(mesh, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! Get info from geom
+  call ESMF_InfoGetFromHost(geom, infoFromGeom, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! Get string from info to make sure it's the same as mesh above
+  call ESMF_InfoGetCharAlloc(infoFromGeom, "special", actualFromGeom, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! Test that it looks like the above which was retrieved directly through the mesh
+  call ESMF_Test((actualFromGeom=="mesh attribute"), name, failMsg, result, ESMF_SRCLINE)
+
+  ! Now destroy
   call eidesc_mesh%Destroy(rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !------------------------------------------------------------------------------
-
+  
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
 
 end program ESMF_InfoDescribeUTest

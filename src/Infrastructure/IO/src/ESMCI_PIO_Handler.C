@@ -1,12 +1,16 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
+//
+//==============================================================================
+#define ESMC_FILENAME "ESMCI_PIO_Handler.C"
+//==============================================================================
 //
 // ESMC IO method code (body) file
 //
@@ -18,7 +22,6 @@
 // declared in the companion file {\tt ESMCI\_PIO_Handler.h}
 //
 //-------------------------------------------------------------------------
-#define ESMC_FILENAME "ESMCI_PIO_Handler.C"
 #define PIO_DEBUG_LEVEL 0
 // include associated header file
 #include "ESMCI_PIO_Handler.h"
@@ -35,9 +38,7 @@
 
 // other ESMF include files here.
 #include "ESMCI_Macros.h"
-#include "ESMCI_Container.h"
 #include "ESMCI_LogErr.h"
-#include "ESMCI_ArrayBundle.h"
 #include "ESMCI_Info.h"
 #include "json.hpp"
 #include "ESMCI_TraceMacros.h"
@@ -1656,6 +1657,7 @@ void PIO_Handler::closeOneTileFile(
     ESMCI_IOREGION_ENTER("PIOc_closefile");
     int piorc = PIOc_closefile(pioFileDesc[tile-1]);
     ESMCI_IOREGION_EXIT("PIOc_closefile");
+    pioFileDesc[tile-1] = 0;
     new_file[tile-1] = false;
     if (rc != NULL) *rc = piorc;
   }

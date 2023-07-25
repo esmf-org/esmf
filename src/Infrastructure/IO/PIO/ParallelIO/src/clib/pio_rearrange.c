@@ -108,7 +108,7 @@ expand_region(int dim, const int *gdimlen, int maplen, const PIO_Offset *map,
 
             /* If we have exhausted the map, or the map no longer matches,
                we are done, break out of both loops. */
-            PLOG((3,"dim=%d maplen = %d map[%d]=%d map[%d]=%d i=%d region_stride=%d",dim, maplen, test_idx, map[test_idx], j, map[j],i,region_stride));
+            //PLOG((3,"dim=%d maplen = %d map[%d]=%d map[%d]=%d i=%d region_stride=%d",dim, maplen, test_idx, map[test_idx], j, map[j],i,region_stride));
             if (test_idx >= maplen || map[test_idx] != map[j] + i * region_stride)
             {
                 expansion_done = 1;

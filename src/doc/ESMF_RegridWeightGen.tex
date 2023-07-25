@@ -31,16 +31,15 @@ different formats:  the SCRIP format~\ref{sec:fileformat:scrip} as is used as an
 \htmladdnormallink{CF metadata conventions}{http://cfconventions.org}, the GRIDSPEC Mosaic file~\ref{sec:fileformat:mosaic} following the proposed \htmladdnormallink{GRIDSPEC standard}{http://extranet.gfdl.noaa.gov/~vb/gridstd/gridstd.html},  
 the ESMF unstructured grid format~\ref{sec:fileformat:esmf} or the proposed CF unstructured grid data model (UGRID) ~\ref{sec:fileformat:ugrid}.  GRIDSPEC is a proposed CF extension for the annotation of complex Earth system grids.  In the latest ESMF library, we added support for multi-tile GRIDSPEC Mosaic file with non-overlapping tiles. For UGRID, we support the 2D flexible mesh topology with mixed triangles and quadrilaterals and fully 3D unstructured mesh topology with hexahedrons and tetrahedrons.  
 
-In the latest ESMF implementation, the {\tt ESMF\_RegridWeightGen} command line toll can detect the type of the input grid files automatically.  The user
-doesn't need to provide the source and destination grid file type arguments anymore.  The following arguments {\tt -t}, {\tt --src\_type}, {\tt --dst\_type}, {\tt --src\_meshname}, and {\tt --dst\_meshname} are no longer needed.  If provided, the application will simply ingore them. The rule to determine the file format is the following:
+The {\tt ESMF\_RegridWeightGen} command line tool can detect the type of the input grid files automatically, so the specification of source and destination grid file type arguments is optional. However, these arguments ({\tt -t}, {\tt \verb+--+src\_type} or {\tt \verb+--+dst\_type}) can be provided to override the auto-detection. If not explicitly specified, the rule to determine the file format is the following:
 
 \begin{itemize}
-  \item ESMF\_FILEFORMAT\_SCRIP:  variables grid\_corner\_lon and grid\_corner\_lat exists
   \item ESMF\_FILEFORMAT\_UGRID: a variable with attribute "cf\_role" or "standard\_name" set to "mesh\_topology"
-  \item ESMF\_FILEFORMAT\_ESMFMESH: variables nodeCoords and elementConn exists
-  \item ESMF\_FILEFORMAT\_CFGRID: variables with attributes "degree\_north" and "degree\_east" exists
   \item ESMF\_FILEFORMAT\_MOSAIC: a variable with attribute "standard\_name" set to "grid\_mosaic\_spec"
   \item ESMF\_FILEFORMAT\_TILE:  a varilable with attribute "standard\_name" set to "grid\_tile\_spec"
+  \item ESMF\_FILEFORMAT\_ESMFMESH: variables nodeCoords and elementConn exist
+  \item ESMF\_FILEFORMAT\_SCRIP:  variables grid\_corner\_lon and grid\_corner\_lat exist
+  \item ESMF\_FILEFORMAT\_CFGRID: variables with attributes "degree\_north" and "degree\_east" (or similar) exist, and other formats aren't matched
 \end{itemize}
 
 
@@ -307,6 +306,9 @@ ESMF_RegridWeightGen
         [--extrap_num_levels <L>]
         [--ignore_unmapped|-i]
         [--ignore_degenerate]
+        [--src_type SCRIP|ESMFMESH|UGRID|CFGRID|GRIDSPEC|MOSAIC|TILE]
+        [--dst_type SCRIP|ESMFMESH|UGRID|CFGRID|GRIDSPEC|MOSAIC|TILE]
+        [-t SCRIP|ESMFMESH|UGRID|CFGRID|GRIDSPEC|MOSAIC|TILE]
         [-r]
         [--src_regional]
         [--dst_regional]
@@ -473,6 +475,23 @@ where:
     --ignore_degenerate - ignore degenerate cells in the input grids. If not specified
                         the default is to stop with an error if an degenerate
                         cell is found.
+
+    --src_type        - an optional argument specifying the source grid file type.
+                        The value can be one of SCRIP, ESMFMESH, UGRID, CFGRID, GRIDSPEC, MOSAIC or TILE.
+                        If neither --src_type nor -t is given, the source grid file type will be
+                        determined automatically. (Usually it is unnecessary to provide --src_type,
+                        but it can be specified when the automatic file type determination fails.)
+
+    --dst_type        - an optional argument specifying the destination grid file type.
+                        The value can be one of SCRIP, ESMFMESH, UGRID, CFGRID, GRIDSPEC, MOSAIC or TILE.
+                        If neither --dst_type nor -t is given, the destination grid file type will be
+                        determined automatically. (Usually it is unnecessary to provide --dst_type,
+                        but it can be specified when the automatic file type determination fails.)
+
+    -t                - an optional argument specifying the file types for both the source
+                        and the destination grid files.
+                        The value can be one of SCRIP, ESMFMESH, UGRID, CFGRID, GRIDSPEC, MOSAIC or TILE.
+                        If -t is given, then neither --src_type nor --dst_type can be given.
 
     -r                - an optional argument specifying that the source and
                         destination grids are regional grids.  If the argument
@@ -646,7 +665,7 @@ features supported by each of the grid file formats.
 \begin{center}
 \begin{tabular}{|l|c|c|c|c|c|}
 \hline
-Feature & SCRIP  & ESMF Unstruct. & CF TILE & UGRID & GRIDSPEC Mosaic\\
+Feature & SCRIP  & ESMF Unstruct. & CF Grid & UGRID & GRIDSPEC Mosaic\\
 \hline
 Create an unstructured Mesh            & YES & YES & NO  & YES & NO\\
 Create a logically-rectangular Grid   & YES & NO  & YES & NO & YES\\
@@ -752,7 +771,7 @@ and {\tt grid\_corner\_lon} values).
 
 Both the SCRIP grid file format and the SCRIP weight file format work with the SCRIP 1.4 tools.
 
-\subsubsection{ESMF Unstructured Grid File Format}\label{sec:fileformat:esmf}
+\subsubsection{ESMF Unstructured Grid File Format (ESMFMESH)}\label{sec:fileformat:esmf}
 
 ESMF supports a custom unstructured grid file format for describing meshes. This format is more compatible than the SCRIP format with the methods used to create an ESMF Mesh object, so less conversion needs to be done to create a Mesh. The ESMF format is thus more efficient than SCRIP when used with ESMF codes (e.g. the ESMF\_RegridWeightGen application). When using the ESMF API, the file format flag {\tt ESMF\_FILEFORMAT\_ESMFMESH} can be used to indicate a file in this format.
 
@@ -913,10 +932,10 @@ data:
 
 \end{verbatim}
 
-\subsubsection{CF Convention Single Tile File Format}\label{sec:fileformat:gridspec}
+\subsubsection{CF Convention Single Tile File Format (CFGRID/GRIDSPEC)}\label{sec:fileformat:gridspec}
 
 ESMF\_RegridWeightGen supports single tile logically rectangular lat/lon grid files that follow the NETCDF CF convention based on
-\htmladdnormallink{CF Metadata Conventions V1.6} {http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html}. When using the ESMF API, the file format flag {\tt ESMF\_FILEFORMAT\_CFGRID} (or its equivalent {\tt ESMF\_FILEFORMAT\_GRIDSPEC}) can be used to indicate a file in this format.  
+\htmladdnormallink{CF Metadata Conventions V1.6} {http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html}. When using the ESMF API, the file format flag {\tt ESMF\_FILEFORMAT\_CFGRID} (or its equivalent deprecated name, {\tt ESMF\_FILEFORMAT\_GRIDSPEC}) can be used to indicate a file in this format.  
 
  An example grid file is shown below.
 The cell center coordinate variables are determined by the value of its attribute {\tt units}.  The longitude

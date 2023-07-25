@@ -24,8 +24,18 @@ except:
 esmfmk = None
 try:
     esmfmk = os.environ["ESMFMKFILE"]
-except:
-    raise ImportError('The ESMFMKFILE environment variable is not available.')
+except KeyError:
+    # Try to guess with very common paths in normal installs (especially conda)
+    guesses = [
+        os.path.join(sys.prefix, 'lib', 'esmf.mk'),  # conda build of esmf
+        os.path.join(sys.prefix, 'Library', 'lib', 'esmf.mk')
+    ]
+    for path in guesses:
+        if os.path.isfile(path):
+            esmfmk = path
+            break
+    else:
+        raise ImportError('The esmf.mk file cannot be found. Pass its path in the ESMFMKFILE environment variable.')
 
 #### INVESTIGATE esmf.mk ######################################################
 

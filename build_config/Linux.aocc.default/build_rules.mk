@@ -25,9 +25,7 @@ endif
 #
 ifeq ($(ESMF_COMM),mpiuni)
 # MPI stub library -----------------------------------------
-ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_CPPFLAGS          += -DESMF_MPIUNI -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpi)
@@ -148,17 +146,17 @@ ESMF_F90OPTFLAG_G       += -Wall -Wextra -Wconversion -Wno-unused
 ifeq ($(ESMF_FORTRANSYMBOLS),default)
 ESMF_F90COMPILEOPTS       +=
 ESMF_F90LINKOPTS          +=
-ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
+ESMF_CPPFLAGS             += -DESMF_LOWERCASE_SINGLEUNDERSCORE
 else
 ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_singleunderscore)
 ESMF_F90COMPILEOPTS       += -fno-second-underscore
 ESMF_F90LINKOPTS          += -fno-second-underscore
-ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
+ESMF_CPPFLAGS             += -DESMF_LOWERCASE_SINGLEUNDERSCORE
 else
 ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_doubleunderscore)
 ESMF_F90COMPILEOPTS       += -fsecond-underscore
 ESMF_F90LINKOPTS          += -fsecond-underscore
-ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_DOUBLEUNDERSCORE
+ESMF_CPPFLAGS             += -DESMF_LOWERCASE_DOUBLEUNDERSCORE
 else
 $(error "ESMF_FORTRANSYMBOLS = $(ESMF_FORTRANSYMBOLS)" not supported by ESMF and/or this platform)
 endif
@@ -190,18 +188,24 @@ endif
 ifeq ($(ESMF_ABISTRING),x86_64_32)
 ESMF_CXXCOMPILEOPTS       += -m32
 ESMF_CXXLINKOPTS          += -m32
+ESMF_CCOMPILEOPTS         += -m32
+ESMF_CLINKOPTS            += -m32
 ESMF_F90COMPILEOPTS       += -m32
 ESMF_F90LINKOPTS          += -m32
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_small)
 ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=small
 ESMF_CXXLINKOPTS          += -m64 -mcmodel=small
+ESMF_CCOMPILEOPTS         += -m64 -mcmodel=small
+ESMF_CLINKOPTS            += -m64 -mcmodel=small
 ESMF_F90COMPILEOPTS       += -m64 -mcmodel=small
 ESMF_F90LINKOPTS          += -m64 -mcmodel=small
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_medium)
 ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=medium
 ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
+ESMF_CCOMPILEOPTS         += -m64 -mcmodel=medium
+ESMF_CLINKOPTS            += -m64 -mcmodel=medium
 ESMF_F90COMPILEOPTS       += -m64 -mcmodel=medium
 ESMF_F90LINKOPTS          += -m64 -mcmodel=medium
 endif
@@ -212,8 +216,10 @@ endif
 ifeq ($(ESMF_PTHREADS),ON)
 ESMF_F90COMPILEOPTS += -pthread
 ESMF_CXXCOMPILEOPTS += -pthread
+ESMF_CCOMPILEOPTS   += -pthread
 ESMF_F90LINKOPTS    += -pthread
 ESMF_CXXLINKOPTS    += -pthread
+ESMF_CLINKOPTS      += -pthread
 endif
 
 ############################################################

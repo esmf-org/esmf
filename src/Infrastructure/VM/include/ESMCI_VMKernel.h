@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -422,6 +422,9 @@ class VMK{
     void exit(class VMKPlan *vmp, void *arg);
     void shutdown(class VMKPlan *vmp, void *arg);
       // exit a vm derived from current vm according to the VMKPlan
+
+    static int checkPetList(int *petList, int count);
+      // ensure there are no duplicate PETs listed
 
     void print() const;
     void log(std::string prefix,

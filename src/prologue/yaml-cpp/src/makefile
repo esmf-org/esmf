@@ -4,6 +4,7 @@ ALL: build_here
 
 SOURCEC	  = binary.cpp emitterutils.cpp nodeevents.cpp scanscalar.cpp \
             convert.cpp exceptions.cpp null.cpp scantag.cpp directives.cpp \
+            depthguard.cpp \
             exp.cpp ostream_wrapper.cpp scantoken.cpp emit.cpp memory.cpp \
             parse.cpp simplekey.cpp emitfromevents.cpp nodebuilder.cpp \
             parser.cpp singledocparser.cpp emitter.cpp node.cpp regex_yaml.cpp \

@@ -64,13 +64,13 @@ class LocStream(dict):
     
     The valid values are:
 
-    ============================================  ===========  ===========  ===========
-    Coordinate System                             dimension 1  dimension 2  dimension 3
-    ============================================  ===========  ===========  ===========
+    =============================================  ===========  ===========  ===========
+    Coordinate System                              dimension 1  dimension 2  dimension 3
+    =============================================  ===========  ===========  ===========
     :attr:`~esmpy.api.constants.CoordSys.SPH_DEG`  ESMF:Lon     ESMF:Lat     ESMF:Radius
     :attr:`~esmpy.api.constants.CoordSys.SPH_RAD`  ESMF:Lon     ESMF:Lat     ESMF:Radius
     :attr:`~esmpy.api.constants.CoordSys.CART`     ESMF:X       ESMF:Y       ESMF:Z
-    ============================================  ===========  ===========  ===========
+    =============================================  ===========  ===========  ===========
 
     :param int location_count: The number of points in this stream.
     :param CoordSys coord_sys: Coordinate system for the location stream.

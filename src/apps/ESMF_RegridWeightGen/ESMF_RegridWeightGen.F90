@@ -2,7 +2,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -46,7 +46,8 @@ program ESMF_RegridWeightGenApp
   type(ESMF_LineType_Flag) :: lineType
   type(ESMF_PoleMethod_Flag) :: pole
    integer            :: poleptrs
-  type(ESMF_FileFormat_Flag) :: srcFileType, dstFileType
+  type(ESMF_FileFormat_Flag) :: srcFileType, dstFileType, srcFileTypeInferred, dstFileTypeInferred
+  character(len=MAXNAMELEN) :: fileTypeStr, fileTypeInferredStr
   type(ESMF_RegridMethod_Flag) :: methodflag
   type(ESMF_ExtrapMethod_Flag) :: extrapMethodFlag
   character(len=ESMF_MAXPATHLEN) :: commandbuf1(5)
@@ -59,7 +60,7 @@ program ESMF_RegridWeightGenApp
   logical              :: ignoreUnmapped, userAreaFlag, ignoreDegenerate
   type(ESMF_UnmappedAction_Flag) :: unmappedaction
   logical            :: srcMissingValue, dstMissingValue
-  logical            :: srcIsRegional, dstIsRegional, typeSetFlag
+  logical            :: srcIsRegional, dstIsRegional, typeFlagSet
   logical            :: useSrcCoordVar, useDstCoordVar
   character(len=MAXNAMELEN) :: srcvarname, dstvarname
   character(len=MAXNAMELEN) :: srcCoordNames(2), dstCoordNames(2)
@@ -360,44 +361,91 @@ program ESMF_RegridWeightGenApp
       endif
     endif
 
-    typeSetFlag = .false.  
+    typeFlagSet = .false.
     srcFileType = ESMF_FILEFORMAT_UNKNOWN
     dstFileType = ESMF_FILEFORMAT_UNKNOWN
     srcIsRegional = .false.
     dstIsRegional = .false.
-    ! deprecated
     call ESMF_UtilGetArgIndex('-t', argindex=ind, rc=rc)
     if (ind /= -1) then
-     write(*,*)
-     print *, "WARNING: deprecated switch -t will be ignored.  The file type will be detected automatically"
-    endif
+       typeFlagSet = .true.
+       call ESMF_UtilGetArg(ind+1, argvalue=flag)
+       call ParseFileTypeArg('-t', flag, srcFileType)
+       dstFileType = srcFileType
+    end if
 
     call ESMF_UtilGetArgIndex('--src_type', argindex=ind, rc=rc)
     if (ind /= -1) then
-     write(*,*)
-     print *, "WARNING: deprecated switch -src_type will be ignored.  The file type will be detected automatically"
+       if (typeFlagSet) then
+          write(*,*)
+          print *, 'ERROR: Cannot specify both -t and --src_type'
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+       end if
+       call ESMF_UtilGetArg(ind+1, argvalue=flag)
+       call ParseFileTypeArg('--src_type', flag, srcFileType)
     endif
 
     call ESMF_UtilGetArgIndex('--dst_type', argindex=ind, rc=rc)
     if (ind /= -1) then
-     write(*,*)
-     print *, "WARNING: deprecated switch -dst_type will be ignored.  The file type will be detected automatically"
-    endif
+       if (typeFlagSet) then
+          write(*,*)
+          print *, 'ERROR: Cannot specify both -t and --dst_type'
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+       end if
+       call ESMF_UtilGetArg(ind+1, argvalue=flag)
+       call ParseFileTypeArg('--dst_type', flag, dstFileType)
+    end if
 
     ! Check the srcfile type and dstfile type
-    call ESMF_FileTypeCheck(srcfile, srcFileType, varname=srcMeshName, rc=rc)
-    if (rc/=ESMF_SUCCESS .or. srcFileType==ESMF_FILEFORMAT_UNKNOWN) then
-        write(*,*)
-        print *, 'ERROR: Unable to detect the source grid file type.'
-        call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    endif
-    ! Check the dstfile type and dstfile type
-    call ESMF_FileTypeCheck(dstfile, dstFileType, varname=dstMeshName, rc=rc)
-    if (rc/=ESMF_SUCCESS .or. dstFileType==ESMF_FILEFORMAT_UNKNOWN) then
-        write(*,*)
-        print *, 'ERROR: Unable to detect the destination grid file type.'
-        call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    endif
+    !
+    ! Note that we call ESMF_FileTypeCheck even if the file types were explicitly
+    ! specified. This is partly to get the mesh names and partly to be able to print a
+    ! warning if the inferred file type differs from the specified file type.
+    call ESMF_FileTypeCheck(srcfile, srcFileTypeInferred, varname=srcMeshName, rc=rc)
+    if (srcFileType == ESMF_FILEFORMAT_UNKNOWN) then
+       ! src file type wasn't explicitly specified, so get it from the inferred type
+       if (rc/=ESMF_SUCCESS .or. srcFileTypeInferred==ESMF_FILEFORMAT_UNKNOWN) then
+          write(*,*)
+          print *, 'ERROR: Unable to detect the source grid file type.'
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+       endif
+       srcFileType = srcFileTypeInferred
+    else
+       ! src file type was explicitly specified; print a warning if the inferred file
+       ! type differs from the explicitly specified type
+       if (srcFileTypeInferred /= ESMF_FILEFORMAT_UNKNOWN .and. &
+            srcFileTypeInferred /= srcFileType) then
+          fileTypeInferredStr = srcFileTypeInferred
+          fileTypeStr = srcFileType
+          write(*,*)
+          print *, 'WARNING: inferred src file type (', trim(fileTypeInferredStr), ') ', &
+               'differs from specified src file type (', trim(fileTypeStr), '); ', &
+               'using specified src file type (', trim(fileTypeStr), ').'
+       end if
+    end if
+    call ESMF_FileTypeCheck(dstfile, dstFileTypeInferred, varname=dstMeshName, rc=rc)
+    if (dstFileType == ESMF_FILEFORMAT_UNKNOWN) then
+       ! dst file type wasn't explicitly specified, so get it from the inferred type
+       if (rc/=ESMF_SUCCESS .or. dstFileTypeInferred==ESMF_FILEFORMAT_UNKNOWN) then
+          write(*,*)
+          print *, 'ERROR: Unable to detect the destination grid file type.'
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+       endif
+       dstFileType = dstFileTypeInferred
+    else
+       ! dst file type was explicitly specified; print a warning if the inferred file
+       ! type differs from the explicitly specified type
+       if (dstFileTypeInferred /= ESMF_FILEFORMAT_UNKNOWN .and. &
+            dstFileTypeInferred /= dstFileType) then
+          fileTypeInferredStr = dstFileTypeInferred
+          fileTypeStr = dstFileType
+          write(*,*)
+          print *, 'WARNING: inferred dst file type (', trim(fileTypeInferredStr), ') ', &
+               'differs from specified dst file type (', trim(fileTypeStr), '); ', &
+               'using specified dst file type (', trim(fileTypeStr), ').'
+       end if
+    end if
+
 
     ! If the src grid type is GRIDSPEC or UGRID, check if --src_missingvalue argument is given
     call ESMF_UtilGetArgIndex('--src_missingvalue', argindex=ind, rc=rc)
@@ -1305,6 +1353,9 @@ contains
     print *, "                      [--extrap_num_levels <L>]"
     print *, "                      [--ignore_unmapped|-i]"
     print *, "                      [--ignore_degenerate]"
+    print *, "                      [--src_type SCRIP|ESMFMESH|UGRID|CFGRID|GRIDSPEC|MOSAIC|TILE]"
+    print *, "                      [--dst_type SCRIP|ESMFMESH|UGRID|CFGRID|GRIDSPEC|MOSAIC|TILE]"
+    print *, "                      [-t SCRIP|ESMFMESH|UGRID|CFGRID|GRIDSPEC|MOSAIC|TILE]"
     print *, "                      [-r]"
     print *, "                      [--src_regional]"
     print *, "                      [--dst_regional]"
@@ -1358,6 +1409,20 @@ contains
     print *, "                          the default is to stop with an error."
     print *, "--ignore_degenerate - ignore degenerate cells in the input grids. If not specified,"
     print *, "                          the default is to stop with an error."
+    print *, "--src_type - an optional argument specifying the source grid file type."
+    print *, "             The value can be one of SCRIP, ESMFMESH, UGRID, CFGRID, GRIDSPEC, MOSAIC or TILE."
+    print *, "             If neither --src_type nor -t is given, the source grid file type will be"
+    print *, "             determined automatically. (Usually it is unnecessary to provide --src_type,"
+    print *, "             but it can be specified when the automatic file type determination fails.)"
+    print *, "--dst_type - an optional argument specifying the destination grid file type."
+    print *, "             The value can be one of SCRIP, ESMFMESH, UGRID, CFGRID, GRIDSPEC, MOSAIC or TILE."
+    print *, "             If neither --dst_type nor -t is given, the destination grid file type will be"
+    print *, "             determined automatically. (Usually it is unnecessary to provide --dst_type,"
+    print *, "             but it can be specified when the automatic file type determination fails.)"
+    print *, "-t         - an optional argument specifying the file types for both the source"
+    print *, "             and the destination grid files."
+    print *, "             The value can be one of SCRIP, ESMFMESH, UGRID, CFGRID, GRIDSPEC, MOSAIC or TILE."
+    print *, "             If -t is given, then neither --src_type nor --dst_type can be given."
     print *, "-r         - an optional argument specifying the source and destination grids"
     print *, "             are regional grids.  Without this argument, the grids are assumed"
     print *, "             to be global"
@@ -1423,5 +1488,35 @@ contains
     print *, "Earth System Modeling Framework."
     print *, ""
   end subroutine PrintUsage
+
+  subroutine ParseFileTypeArg(argName, fileTypeArg, fileType)
+    ! Parse a given file type argument, returning the appropriate file type constant
+    character(len=*), intent(in) :: argName             ! name of the argument, just used for error messages
+    character(len=*), intent(in) :: fileTypeArg         ! value of the file type argument
+    type(ESMF_FileFormat_Flag), intent(out) :: fileType ! determined file type constant
+
+    select case (fileTypeArg)
+    case ('SCRIP')
+       fileType = ESMF_FILEFORMAT_SCRIP
+    case ('ESMFMESH')
+       fileType = ESMF_FILEFORMAT_ESMFMESH
+    case ('UGRID')
+       fileType = ESMF_FILEFORMAT_UGRID
+    case ('CFGRID')
+       fileType = ESMF_FILEFORMAT_CFGRID
+    case ('GRIDSPEC')
+       fileType = ESMF_FILEFORMAT_GRIDSPEC
+    case ('MOSAIC')
+       fileType = ESMF_FILEFORMAT_MOSAIC
+    case ('TILE')
+       fileType = ESMF_FILEFORMAT_TILE
+    case default
+       write(*,*)
+       print *, "ERROR: Unknown ", trim(argName), ": must be one of:"
+       print *, "SCRIP, ESMFMESH, UGRID, CFGRID, GRIDSPEC, MOSAIC or TILE."
+       print *, "Use the --help argument to see an explanation of usage."
+       call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    end select
+  end subroutine ParseFileTypeArg
 
 end program ESMF_RegridWeightGenApp

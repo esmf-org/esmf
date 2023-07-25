@@ -1,7 +1,7 @@
 % $Id$
 %
 % Earth System Modeling Framework
-% Copyright 2002-2022, University Corporation for Atmospheric Research,
+% Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 % Laboratory, University of Michigan, National Centers for Environmental
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -53,7 +53,13 @@
 \section{Appendix D:  Attribute Class Legacy API}
 \label{appendix_attribute_legacy_api}
 
-Documentation for the legacy \texttt{ESMF\_Attribute} Class. It is recommended that users migrate to the \texttt{ESMF\_Info} class (see section \ref{esmf_info_class}).
+Documentation for the legacy \texttt{ESMF\_Attribute} Class. It is recommended that users migrate to the \texttt{ESMF\_Info} class (see section \ref{esmf_info_class}).\newline
+
+Notice that a few aspects of the legacy Attribute API have been modified compared to its original implementation. These changes were necessary as a consequence of the changed backend to {\tt ESMF\_Info}:
+\begin{itemize}
+\item The {\tt ESMF\_AttributeSet()} method now supports setting attributes that were not previously added via {\tt ESMF\_AttributeAdd()}. In other words, the {\tt ESMF\_AttributeAdd()} method has become optional.
+\item There are overloads of the {\tt ESMF\_AttributeSet()} and {\tt ESMF\_AttributeGet()} with optional {\tt convention} and {\tt purpose} arguments. Both arguments must either be present or absent. Any other combination is handled as an error condition. For the case that both {\tt convention} and {\tt purpose} arguments are absent, and no Attribute Package is specified, the default JSON key prefix is "/ESMF/General".
+\end{itemize}
 
 \subsection{Constants}
 #ifdef STANDALONE

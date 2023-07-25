@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -273,7 +273,7 @@ contains
     type(ESMF_Mesh)                 :: mesh_atm, mesh_ocn, mesh_xgrid
     real(ESMF_KIND_R8)              :: srcsum(3), allsrcsum(3), dstFlux_reg, dstFlux, error
     integer                         :: eleCount, totCount(1)
-    
+    integer :: srcTermProcessing, pipeLineDepth    
     type(ESMF_VM)   :: vm
 
     localrc = ESMF_SUCCESS
@@ -705,7 +705,16 @@ contains
     ! compute regrid routehandle
     !----------------------------------------------------
     !call ESMF_LogWrite(tag, ESMF_LOGMSG_INFO)
-    call ESMF_FieldRegridStore(xgrid, f_atm, f_xgrid, routehandle=rh_a2x, rc=localrc)
+    ! Test passing in srcTermProcessing and pipeLineDepth
+    srcTermProcessing=-1 ! Set to -1 to use autotuning
+    pipeLineDepth=-1     ! Set to -1 to use autotuning
+    call ESMF_FieldRegridStore(xgrid, f_atm, f_xgrid, &
+         srcTermProcessing=srcTermProcessing, &
+         pipeLineDepth=pipeLineDepth, &
+         routehandle=rh_a2x, rc=localrc)
+    ! Debug output
+    !write(*,*) "srcTermProcessing=",srcTermProcessing
+    !write(*,*) "pipeLineDepth=",pipeLineDepth
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return

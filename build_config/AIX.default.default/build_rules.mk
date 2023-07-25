@@ -25,6 +25,7 @@ ifeq ($(ESMF_COMM),mpiuni)
 ESMF_F90COMPILECPPFLAGS+= -WF,-DESMF_MPIUNI
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
 ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_CCOMPILEPATHS     += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpi)

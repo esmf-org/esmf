@@ -1,7 +1,7 @@
 !  $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -360,6 +360,29 @@
 
    end subroutine f_esmf_configvalidatenooptions
 !------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+   subroutine f_esmf_configsetstring(config, value, label, rc)
+     use ESMF_UtilTypesMod    ! ESMF base class
+     use ESMF_BaseMod    ! ESMF base class
+     use ESMF_ConfigMod
+
+     implicit none
+
+     type(ESMF_Config), intent(inout)       :: config
+     character(len=*), intent(in)           :: value
+     character(len=*), intent(in)           :: label
+     integer, intent(out)                   :: rc
+
+     ! Initialize return code; assume routine not implemented
+     rc = ESMF_RC_NOT_IMPL
+
+     ESMF_INIT_SET_CREATED(config)
+     call ESMF_ConfigSetAttribute(config, value, label=label, rc=rc)
+
+   end subroutine f_esmf_configsetstring
+!------------------------------------------------------------------------------
+
 
 !======================================================================
 !  Subroutines with (more than 1) optional arguments are commented out.

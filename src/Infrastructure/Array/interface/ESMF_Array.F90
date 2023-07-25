@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -3868,9 +3868,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[fileName]
 !    The name of the output file to which Array data is written.
 !    If this is a multi-tile Array, then fileName must contain
-!    exactly one instance of "\#"; this is a placeholder that will be replaced
+!    exactly one instance of "*"; this is a placeholder that will be replaced
 !    by the tile number, with each tile being written to a separate file. (For
-!    example, for a fileName of "myfile\#.nc", tile 1 will be written to
+!    example, for a fileName of "myfile*.nc", tile 1 will be written to
 !    "myfile1.nc", tile 2 to "myfile2.nc", etc.)
 !    (This handling of the fileName for multi-tile I/O is subject to change.)
 !   \item[{[variableName]}]

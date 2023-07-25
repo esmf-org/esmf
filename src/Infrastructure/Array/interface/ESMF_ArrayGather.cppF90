@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -220,7 +220,8 @@ contains
     integer                       :: localrc        ! local return code @\
     integer                       :: counts(mrank)  ! counts vector @\
     integer                       :: lb(mrank)      ! lb vector @\
-    integer                       :: i, localPet, count @\
+    integer                       :: i, localPet @\
+    integer(ESMF_KIND_I8)         :: count @\
     type(ESMF_VM)                 :: vm_opt @\
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: fptr @\
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),allocatable :: farray_dummy @\

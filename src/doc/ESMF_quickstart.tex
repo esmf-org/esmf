@@ -19,41 +19,13 @@ the bundled command line tools as described in sections \ref{sec:Use} and
 \ref{sec:CLTs}, respectively.
 
 \subsection{Downloading ESMF}
-\subsubsection{From the ESMF web site}
 \label{sec:download}
-ESMF is distributed as a source code tar file.  The tar file for the latest
-public release, release notes, 
-known bugs, supported platforms, documentation, and other related information 
-can be found on the ESMF website, under the {\bf Download} tab:
+ESMF is distributed via releases on GitHub. Each release page contains release notes,
+known issues, and links to supported platforms, documentation, and other related information
+Releases on GitHub can be found from the ESMF web page via:
 \begin{verbatim}
     http://www.earthsystemmodeling.org -> Download
 \end{verbatim}
-The source code for all other releases including the HEAD of the CVS trunk and the
-last stable version can be found by following the {\bf View All Releases} link on the left hand navigation bar under {\bf Download}:
-\begin{verbatim}
-    http://www.earthsystemmodeling.org -> Download -> View All Releases
-\end{verbatim}
-
-\subsubsection{From the SourceForge website}
-ESMF can also be downloaded from the SourceForge website
-from the {\bf Files} link on that website.
-\begin{verbatim}
-    http://sourceforge.net/projects/esmf -> Files
-\end{verbatim}
-Follow the directions on that web page to download a tar file.  
-
-\subsection{Unpacking the download}
-The source code comes as a zipped tar file. First unzip the file:
-\begin{verbatim}
-gunzip esmf*.tar.gz
-\end{verbatim}
-
-Then untar the file:
-\begin{verbatim}
-tar -xf esmf*.tar
-\end{verbatim}
-
-This will create a directory called {\tt esmf}.
 
 \subsection{Directory Structure}
 The current list of directories includes the following:
@@ -75,9 +47,9 @@ a useful area to examine if porting ESMF to a new platform.
 After downloading and unpacking the ESMF tar file, the build procedure is:
 \begin{enumerate}
 \item Set the required environment variables. 
-\item Type {\tt gmake info} to view and verify your settings
-\item Type {\tt gmake } to build the library.
-\item Type {\tt gmake check } to run self-tests to verify
+\item Type {\tt make info} to view and verify your settings
+\item Type {\tt make } to build the library.
+\item Type {\tt make check } to run self-tests to verify
 the build was successful.
 \end{enumerate}
 See the following sections for more information on each of these steps.
@@ -152,7 +124,7 @@ specific compiler executables by specifying the full path. This can be used to
 pick specific compiler executables without having to modify the {\tt PATH}
 environment variable.
 
-Use 'gmake info' to see which compiler executables the ESMF build system will
+Use 'make info' to see which compiler executables the ESMF build system will
 be using according to your environment variable settings.
 
 To see possible values for {\tt ESMF\_COMPILER}, cd to 
@@ -176,13 +148,10 @@ x86\_64 architectures three additional, more specific ABI settings are available
 {\tt x86\_64\_32}, {\tt x86\_64\_small} and {\tt x86\_64\_medium}.
 
 \item[ESMF\_SITE]
-The SourceForge {\tt esmfcontrib} repository contains makefiles which have 
-already been customized for certain machines.  If one exists for your site 
-and you wish to use it, download the corresponding files into the 
-{\tt build\_contrib} directory and set {\tt ESMF\_SITE} to your location
-(which corresponds to the last part of the directory name).  See the 
-SourceForge site {\tt http://sourceforge.net/projects/esmfcontrib} for more 
-information.
+Build configure file site name or the value default. If not set, then the value
+of default is assumed. When including platform-specific files, this value is
+used as the third part of the directory name (parts 1 and 2 are the
+ESMF\_OS value and ESMF\_COMPILER value, respectively.)
 
 \item[ESMF\_ETCDIR]
 If a user wants to add Attribute package specification files for their own 
@@ -204,20 +173,15 @@ provided as absolute path or relative to {\tt ESMF\_DIR}.
 
 
 \subsubsection{GNU make}
-The ESMF build system uses the GNU make program; it is normally named 
-{\tt gmake} but may also be simply {\tt make} or {\tt gnumake} on some 
-platforms (we will use {\tt gmake} in this document). ESMF does not use
-configure or autoconf;  the selection of various options is done by
-setting environment variables before building the framework. 
+\input{../../build/doc/user_make}
 
-
-\subsubsection{gmake info}
-{\tt gmake info} is a command that assists the user in verifying that the ESMF 
+\subsubsection{make info}
+{\tt make info} is a command that assists the user in verifying that the ESMF 
 variables have been set appropriately. It also tells the user the paths to 
 various libraries e.g. MPI that are set on the system. The user to review 
 this information to verify their settings. In the case of a build failure, 
 this information is invaluable and will be the first thing asked for by the
-ESMF support team. Below is an {\bf example output} from {\tt gmake info}: 
+ESMF support team. Below is an {\bf example output} from {\tt make info}: 
  
 \begin{verbatim}
 
@@ -406,7 +370,7 @@ on the requirements).
 
 To build and run the unit and system tests, type:
 \begin{verbatim}
-gmake check
+make check
 \end{verbatim}
 A summary report of success and failures will be printed out at the end.
 
@@ -434,10 +398,10 @@ specific type of test:
 \item[examples] examples contain code illustrating a single type of function
 %\item[demos] demos are example applications showing the use of the system
 \end{description}
-For example, {\tt gmake build\_examples} recompiles the example programs but 
-does not execute them. {\tt gmake dust\_unit\_tests} removes all
+For example, {\tt make build\_examples} recompiles the example programs but 
+does not execute them. {\tt make dust\_unit\_tests} removes all
 output files generated when executing the unit tests, but leaves the
-executables. {\tt gmake clean\_system\_tests} removes all executables and files
+executables. {\tt make clean\_system\_tests} removes all executables and files
 associated with the system tests.
 
 For the unit tests only, there is an additional environment variable
@@ -463,7 +427,7 @@ provided in section \ref{sec:CLTs}.
 
 To build the bundled ESMF command line tools, type:
 \begin{verbatim}
-gmake build_apps
+make build_apps
 \end{verbatim}
 This will build the command line tools and place the executables under the 
 {\tt \$ESMF\_DIR/apps} directory inside the ESMF source tree. The 

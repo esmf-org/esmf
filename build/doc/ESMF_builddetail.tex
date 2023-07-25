@@ -146,14 +146,8 @@ interfaces (ABIs), this variable can be set to select which ABI to use. Valid
 values are {\tt 32} or {\tt 64}. By default the most common ABI is chosen.
 
 \item[ESMF\_SITE]
-The Sourceforge {\tt esmfcontrib} repository contains makefiles which have 
-already been customized for certain machines.  If one exists for your site 
-and you wish to use it, download the corresponding files into the 
-{\tt build\_contrib} directory and set {\tt ESMF\_SITE} to your location
-(which corresponds to the last part of the directory name).  See the 
-Sourceforge site {\tt http://sourceforge.net/projects/esmfcontrib} for more 
-information.
-
+Support site specific configurations. The value of {\tt ESMF\_SITE} replaces
+the last part of the configuration name, {\tt default} by default.
 
 \end{description}
 

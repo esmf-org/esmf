@@ -1,15 +1,7 @@
 \label{StateMeta}
-The State metadata is implemented as an ESMF Attribute Package:
-
-\begin{itemize}
-    \item Convention: NUOPC
-    \item Purpose: Instance
-    \item Includes:
-    \begin{itemize}
-        \item {\em no other packages at the moment}
-    \end{itemize} 
-    \item Description: Namespace implementation for import and export. 
-\end{itemize}
+The State metadata is implemented through ESMF\_Info. It can be accessed
+using the JSON Pointer "/NUOPC/Instance/" prefix followed by the "Attribute name"
+as per the table below. E.g. "Namespace" is accessed using {\tt key="/NUOPC/Instance/Namespace"}.
 
 \begin{longtable}{|p{.22\textwidth}|p{.6\textwidth}|p{.2\textwidth}|}
      \hline\hline

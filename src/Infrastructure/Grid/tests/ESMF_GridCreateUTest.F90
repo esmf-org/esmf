@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -2881,7 +2881,7 @@ program ESMF_GridCreateUTest
   rc=ESMF_SUCCESS
 
   transformArgs%stretch_factor = 3.0;
-  transformArgs%target_lat = 0.0; ! in radians
+  transformArgs%target_lon = 0.0; ! in radians
   transformArgs%target_lat = 1.3; ! in radians
   grid=ESMF_GridCreateCubedSphere(15, &
                                   staggerLocList = (/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &

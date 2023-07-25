@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -9162,7 +9162,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     do i=1, 10
       call ESMF_VMWtime(t_1)
       t_2 = t_1
-      do while (t_2 == t_1)
+      do while (t_2 <= t_1)
         call ESMF_VMWtime(t_2)
       end do
       if (t_2 - t_1 > temp_prec) temp_prec = t_2 - t_1
