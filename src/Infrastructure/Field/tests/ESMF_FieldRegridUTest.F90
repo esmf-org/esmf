@@ -45004,6 +45004,7 @@ end subroutine test_regridSMMArbGrid
   type(ESMF_Grid) :: srcGrid
   type(ESMF_Grid) :: dstGrid
   type(ESMF_Field) :: srcField
+  type(ESMF_Field) :: dstVecField
   type(ESMF_Field) :: dstField
   type(ESMF_Field) :: tmp1Field
   type(ESMF_Field) :: tmp2Field
@@ -45011,6 +45012,7 @@ end subroutine test_regridSMMArbGrid
   type(ESMF_Field) :: xdstField
   type(ESMF_Array) :: dstArray
   type(ESMF_Array) :: srcArray
+  type(ESMF_Array) :: dstVecArray
   type(ESMF_Array) :: tmp1Array
   type(ESMF_Array) :: tmp2Array
   type(ESMF_Array) :: tmp3Array
@@ -45051,6 +45053,8 @@ end subroutine test_regridSMMArbGrid
   
   integer :: localPet, petCount
 
+
+  
   ! result code
   integer :: finalrc
 
@@ -45287,6 +45291,16 @@ end subroutine test_regridSMMArbGrid
     return
   endif
 
+
+  dstVecField = ESMF_FieldCreate(dstGrid,  typekind=ESMF_TYPEKIND_R8, &
+       ungriddedLBound=(/1/), ungriddedUBound=(/3/), & ! 3D vector
+       staggerloc=ESMF_STAGGERLOC_CENTER, name="dstVec", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  
   xdstField = ESMF_FieldCreate(dstGrid,  typekind=ESMF_TYPEKIND_R8, &
        ungriddedLBound=(/1/), ungriddedUBound=(/2/), & ! 2D vector
        staggerloc=ESMF_STAGGERLOC_CENTER, name="xdest", rc=localrc)
@@ -45348,6 +45362,13 @@ end subroutine test_regridSMMArbGrid
     return
   endif
 
+  call ESMF_FieldGet(dstVecField, array=dstVecArray, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+ 
   
   ! Get number of local DEs
   call ESMF_GridGet(dstGrid, localDECount=dstlocalDECount, rc=localrc)
@@ -45586,6 +45607,7 @@ end subroutine test_regridSMMArbGrid
        array1=tmp1Array, &
        array2=tmp2Array, &
        array3=tmp3Array, &
+       array4=dstVecArray, &
        rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE

@@ -436,10 +436,28 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
    // Create whatever fields the user wants
    std::vector<IOField<NodalField>*> nfields;
    for (UInt i = 0; i < arrays.size(); ++i) {
+     
+     // Get array undist. dim
+     int undistDimCount=arrays[i]->getTensorCount();
+
+     // Get array info based on if looks like a vector Array
+     // For now a Vector Array is a field with 1 undist dim of size 2 or 3
+     int meshFieldDim=1; // Not a vector by default
+     if (undistDimCount == 1) {
+       const int *undistLBound=arrays[i]->getUndistLBound();
+       const int *undistUBound=arrays[i]->getUndistUBound();
+       int tmp_meshFieldDim=undistUBound[0]-undistLBound[0]+1;
+       if ((tmp_meshFieldDim == 2) || (tmp_meshFieldDim == 3)) {
+         meshFieldDim=tmp_meshFieldDim;
+       }
+       printf("%d Array undist dim size=%d\n",i,meshFieldDim);
+     }
+ 
+     // Register Field
      char buf[512];
-     std::sprintf(buf, "array_%03d", i);
+     std::sprintf(buf, "array_%03d", i+1);
      nfields.push_back(
-             mesh.RegisterNodalField(mesh, buf, 1)
+             mesh.RegisterNodalField(mesh, buf, meshFieldDim)
                       );
      nfields.back()->set_output_status(true);
    }
