@@ -8630,7 +8630,7 @@ void GridIter::getArrayVecData(
     arrayInd[undistDim]=d;
     
     // Get data
-    localArray->getDataInternal(curInd, data+pos);
+    localArray->getDataInternal(arrayInd, data+pos);
 
     // Advance to next entry in data
     pos++;

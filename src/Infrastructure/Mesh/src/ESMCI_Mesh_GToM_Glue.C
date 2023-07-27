@@ -116,26 +116,6 @@ void ESMCI_GridToMesh(const Grid &grid_, int staggerLoc,
             "- Grid being used in Regrid call does not contain coordinates at appropriate staggerloc ", ESMC_CONTEXT, &localrc);
    throw localrc;
  }
-
-
-   for (UInt i = 0; i < arrays.size(); ++i) {
-
-     int rank=arrays[i]->getRank();
-
-    
-     // Get array undist. dim
-     int undistDimCount=arrays[i]->getTensorCount();
-
-     const int *arrayToDistGridMap=arrays[i]->getArrayToDistGridMap();
-     
-     printf("%d rank=%d tensorCount=%d arrayToDistGridMap=",i,rank,undistDimCount);
-     for (int r=0; r<rank; r++) {
-       printf("%d ",arrayToDistGridMap[r]);
-
-     }
-     printf("\n");
-   }
-
  
  
  // Create Mesh
@@ -471,7 +451,8 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
        if ((tmp_meshFieldDim == 2) || (tmp_meshFieldDim == 3)) {
          meshFieldDim=tmp_meshFieldDim;
        }
-       printf("%d Array undist dim size=%d\n",i,meshFieldDim);
+       // DEBUG OUTPUT
+       //  printf("%d Array undist dim size=%d\n",i,meshFieldDim);
      }
  
      // Register Field
@@ -515,10 +496,34 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
 
     // Other arrays
     for (UInt i = 0; i < arrays.size(); ++i) {
-      gni->getArrayData(arrays[i], &fdata);
+
+      // Get array undist. dim
+      int undistDimCount=arrays[i]->getTensorCount();
+      
+      // Get array info based on if looks like a vector Array
+      // For now a Vector Array is a field with 1 undist dim of size 2 or 3
+      int meshFieldDim=1; // Not a vector by default
+      if (undistDimCount == 1) {
+        const int *undistLBound=arrays[i]->getUndistLBound();
+        const int *undistUBound=arrays[i]->getUndistUBound();
+        int tmp_meshFieldDim=undistUBound[0]-undistLBound[0]+1;
+        if ((tmp_meshFieldDim == 2) || (tmp_meshFieldDim == 3)) {
+          meshFieldDim=tmp_meshFieldDim;
+        }
+     }
+
+      // Get data pointer from mesh
       double *data = nfields[i]->data(*ni);
       ThrowRequire(data);
-      data[0] = fdata;
+      
+      // Get data based on the mesh field dim
+      if (meshFieldDim == 1) {
+        gni->getArrayData(arrays[i], &fdata);
+        data[0] = fdata;
+      } else {
+        gni->getArrayVecData(arrays[i], data);
+        // DEBUG OUTPUT  printf("%s data=%f %f %f\n", arrays[i]->getName(),data[0],data[1],data[2]);
+      }      
     }
 
 #ifdef G2M_DBG

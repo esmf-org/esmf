@@ -45028,6 +45028,7 @@ end subroutine test_regridSMMArbGrid
   real(ESMF_KIND_R8), pointer :: tmp1farrayPtr(:,:)
   real(ESMF_KIND_R8), pointer :: tmp2farrayPtr(:,:)
   real(ESMF_KIND_R8), pointer :: tmp3farrayPtr(:,:)
+  real(ESMF_KIND_R8), pointer :: dstVecfarrayPtr(:,:,:)
   integer :: clbnd(2),cubnd(2)
   integer :: fclbnd(3),fcubnd(3)
   integer :: i1,i2,i3, index(2)
@@ -45411,6 +45412,13 @@ end subroutine test_regridSMMArbGrid
         return
      endif
 
+     call ESMF_FieldGet(dstVecField, lDE, dstVecfarrayPtr,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
 
      !! Set Field value
      do i1=fclbnd(1),fcubnd(1)
@@ -45441,7 +45449,14 @@ end subroutine test_regridSMMArbGrid
         xfarrayPtr(i1,i2,2) = x*n_vec(1)+y*n_vec(2)+z*n_vec(3)
         
         ! initialize destination field
-        farrayPtr(i1,i2,i3)=0.0
+        farrayPtr(i1,i2,1)=0.0
+        farrayPtr(i1,i2,2)=0.0
+
+        ! initialize dest vec field
+        dstVecfarrayPtr(i1,i2,1)=1.0
+        dstVecfarrayPtr(i1,i2,2)=2.0
+        dstVecfarrayPtr(i1,i2,3)=3.0
+        
      enddo
      enddo
 
