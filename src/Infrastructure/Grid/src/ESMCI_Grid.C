@@ -8552,12 +8552,105 @@ template void GridIter::getArrayData(Array *array, ESMC_R4 *data);
 template void GridIter::getArrayData(Array *array, ESMC_I4 *data);
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMCI::GridIter::getArrayVecData()"
+//BOPI
+// !IROUTINE:  getArrayVecData
+//
+// !INTERFACE:
+template <class TYPE>
+void GridIter::getArrayVecData(
+ //
+// !RETURN VALUE:
+//  void
+//
+// !ARGUMENTS:
+//   Data output
+// 
+                             Array *array,
+                             TYPE *data // (out) input array needs to be at
+                                        // least of the size of the undistributed dim of the Array
+ ){
+//
+// !DESCRIPTION:
+// Get a vector of data from a passed in Array
+// 
+// NOTE: THIS CURRENTLY ONLY WORKS WITH Arrays WITH 1 UNDISTRIBUTED DIM!!!   
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int localrc;
+  LocalArray *localArray;
+  
+  // if done then leave
+  if (done) return;
+
+  // Check typekind
+  if (array->getTypekind() != get_TypeKind_from_Type<TYPE>()) {
+    int rc;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+               "- requested type does not match type of data in Array ", ESMC_CONTEXT, &rc);
+    throw rc;
+  }
+
+  // Check that Array has only 1 undistributed dim
+  if (array->getTensorCount() != 1) {
+    int rc;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+     " This code only works for Arrays with exactly 1 undistributed/ungridded dimension.", ESMC_CONTEXT, &rc);
+    throw rc;
+  }
+
+  
+  //// Get LocalArray cooresponding to staggerloc, coord and localDE
+  localArray=array->getLocalarrayList()[curDE];
+
+  // Get array info
+  int rank=array->getRank();
+  const int *arrayToDistGridMap=array->getArrayToDistGridMap();
+
+  // Copy Grid index to Array one
+  int arrayInd[ESMF_MAXDIM];
+  int undistDim=0;
+  for (int r=0; r<rank; r++) {
+    arrayInd[r]=0; // Init to 0
+    if (arrayToDistGridMap[r] != 0) arrayInd[r]=curInd[arrayToDistGridMap[r]-1];
+    else undistDim=r;
+  }
+
+  // Interate through undist. dim.
+  const int *undistLBoundArray=array->getUndistLBound();
+  const int *undistUBoundArray=array->getUndistUBound();
+  int undistLBound=undistLBoundArray[0]; // Only 1 undist dim supported
+  int undistUBound=undistUBoundArray[0]; // Only 1 undist dim supported
+  int pos=0;
+  for (int d=undistLBound; d <= undistUBound; d++) {
+    // Set undistbound
+    arrayInd[undistDim]=d;
+    
+    // Get data
+    localArray->getDataInternal(curInd, data+pos);
+
+    // Advance to next entry in data
+    pos++;
+  }
+}
+
+// Add more types here if necessary
+template void GridIter::getArrayVecData(Array *array, ESMC_R8 *data);
+template void GridIter::getArrayVecData(Array *array, ESMC_R4 *data);
+template void GridIter::getArrayVecData(Array *array, ESMC_I4 *data);
+//-----------------------------------------------------------------------------
+
+
+  
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMCI::GridIter::getArrayData()"
+ #define ESMC_METHOD "ESMCI::GridIter::setArrayData()"
 //BOPI
-// !IROUTINE:  getArrayData
+// !IROUTINE:  setArrayData
 //
 // !INTERFACE:
 template <class TYPE>

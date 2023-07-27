@@ -820,6 +820,7 @@ int getComputationalUBound(
   template <class TYPE> void getCartCoord(TYPE *coord);
   template <class TYPE> void getItem(int item, TYPE *value);
   template <class TYPE> void getArrayData(Array *array, TYPE *data);
+  template <class TYPE> void getArrayVecData(Array *array, TYPE *data);
   template <class TYPE> void setArrayData(Array *array, TYPE data);
   }; 
 

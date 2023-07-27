@@ -118,6 +118,26 @@ void ESMCI_GridToMesh(const Grid &grid_, int staggerLoc,
  }
 
 
+   for (UInt i = 0; i < arrays.size(); ++i) {
+
+     int rank=arrays[i]->getRank();
+
+    
+     // Get array undist. dim
+     int undistDimCount=arrays[i]->getTensorCount();
+
+     const int *arrayToDistGridMap=arrays[i]->getArrayToDistGridMap();
+     
+     printf("%d rank=%d tensorCount=%d arrayToDistGridMap=",i,rank,undistDimCount);
+     for (int r=0; r<rank; r++) {
+       printf("%d ",arrayToDistGridMap[r]);
+
+     }
+     printf("\n");
+   }
+
+ 
+ 
  // Create Mesh
  Mesh *meshp = new Mesh();
 
@@ -126,6 +146,7 @@ void ESMCI_GridToMesh(const Grid &grid_, int staggerLoc,
 
  // Make reference
  Mesh &mesh = *meshp;
+
 
  // *** Set some meta-data ***
  // We set the topological dimension of the mesh (quad = 2, hex = 3, etc...)
