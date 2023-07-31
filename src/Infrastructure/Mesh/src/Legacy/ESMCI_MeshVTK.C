@@ -302,6 +302,7 @@ static void write_data_from_Array(iter ni, iter ne, std::map<MeshObj::id_type, i
   }
 }
 
+
 // Write mesh data to stream, taking into account the correct typeid
 template<typename T, typename iter, typename FIELD>
 void append_data(iter ni, iter ne, const FIELD &llf, UInt d, std::ofstream &out) {
@@ -354,6 +355,107 @@ static void write_data(iter ni, iter ne, const FIELD &llf, const std::string &vn
   }
 }
 
+
+  // Vector version of output
+  // TODO: Think about if you just want to output a vector based on the dim of the field, 
+  //       or if you want to base it on something else (e.g. the name of the Array??)
+  
+// Write mesh data to stream, taking into account the correct typeid
+template<typename T, typename iter, typename FIELD>
+void append_vec_data(iter ni, iter ne, const FIELD &llf, UInt vec_dim_size, std::ofstream &out) {
+
+  // Output based on number of dims
+  if (vec_dim_size == 2) {
+    for (; ni != ne; ++ni) {
+      if (llf.OnObj(*ni)) {
+        // Output first 2 components
+        for (int d=0; d<2; d++) {
+            out << ((T *)llf.data(*ni))[d] << " ";
+        }
+        out << "0 "; // Output 3rd component
+      }
+    }
+  } else if (vec_dim_size == 3) {
+    for (; ni != ne; ++ni) {
+      if (llf.OnObj(*ni)) {
+        // Output 3 components
+        for (int d=0; d<3; d++) {
+            out << ((T *)llf.data(*ni))[d] << " ";
+        }
+      }
+    }
+  } else {
+   Throw() << " A field with a vector dimension of size "<<vec_dim_size<<" isn't supported in VTK vector output.";
+  }
+
+}
+  
+template<>
+void append_vec_data<double>(Mesh::const_iterator ni, Mesh::const_iterator ne, const _field &llf, UInt vec_dim_size, std::ofstream &out) {
+
+  // Output based on number of dims
+  if (vec_dim_size == 2) {
+    for (; ni != ne; ++ni) {
+      if (llf.OnObj(*ni)) {
+        // Output first 2 components
+        for (int d=0; d<2; d++) {
+          // It seems to irritate visit if a value is <1.0E-300, so round down if that's the case
+          if (std::abs(((double *)llf.data(*ni))[d]) > 1.0E-300) {
+            out << ((double *)llf.data(*ni))[d] << " ";
+          } else {
+            out << "0 ";
+          }
+        }
+        out << "0 "; // Output 3rd component
+      }
+    }
+  } else if (vec_dim_size == 3) {
+    for (; ni != ne; ++ni) {
+      if (llf.OnObj(*ni)) {
+        // Output 3 components
+        for (int d=0; d<3; d++) {
+          // It seems to irritate visit if a value is <1.0E-300, so round down if that's the case
+          if (std::abs(((double *)llf.data(*ni))[d]) > 1.0E-300) {
+            out << ((double *)llf.data(*ni))[d] << " ";
+          } else {
+            out << "0 ";
+          }
+        }
+      }
+    }
+  } else {
+   Throw() << " A field with a vector dimension of size "<<vec_dim_size<<" isn't supported in VTK vector output.";
+  }
+}
+
+
+
+template<typename iter, typename FIELD>
+static void write_vec_data(iter ni, iter ne, const FIELD &llf, const std::string &vname, UInt vec_dim_size, std::ofstream &out) {
+
+  if (llf.tinfo() == typeid(double)) {
+    out << "VECTORS " << vname << " double" << std::endl;
+    append_vec_data<double>(ni, ne, llf, vec_dim_size, out);
+  } else if (llf.tinfo() == typeid(int)) {
+    out << "VECTORS " << vname << " int" << std::endl;
+    append_vec_data<int>(ni, ne, llf, vec_dim_size, out);
+  } else if (llf.tinfo() == typeid(float)) {
+    out << "VECTORS " << vname << " float" << std::endl;
+    append_vec_data<float>(ni, ne, llf, vec_dim_size, out);
+  } else if (llf.tinfo() == typeid(long)) {
+    out << "VECTORS " << vname << " long" << std::endl;
+    append_vec_data<long>(ni, ne, llf, vec_dim_size, out);
+  } else if (llf.tinfo() == typeid(char)) {
+    out << "VECTORS " << vname << " char" << std::endl;
+    append_vec_data<char>(ni, ne, llf, vec_dim_size, out);
+  } else if (llf.tinfo() == typeid(UChar)) {
+    out << "VECTORS " << vname << " unsigned char" << std::endl;
+    append_vec_data<UChar>(ni, ne, llf, vec_dim_size, out);
+  } else {
+    std::cout << "Unknown data type, skipping ";
+  }
+}
+  
   void WriteVTKMesh(const Mesh &mesh, const std::string &filename,
                     int num_nodeArrays, ESMCI::Array **nodeArrays, 
                     int num_elemArrays, ESMCI::Array **elemArrays) {
@@ -550,18 +652,31 @@ static void write_data(iter ni, iter ne, const FIELD &llf, const std::string &vn
      for (; nv != ne; ++nv) {
        const MEField<> &mf = *nv;
        if (mf.Output() && mf.is_nodal()) {
-
-         for (UInt d = 0; d < mf.dim(); d++) {
-           char buf[512];
-           std::sprintf(buf, "_%d", d);
-           std::string vname = mf.name() + (mf.dim() == 1? "" : std::string(buf));
-
-           const _field &llf = mf();
-           write_data(mesh.node_begin(), mesh.node_end(), llf, vname, d, out);
-
+         const _field &llf = mf();
+         std::string vname = mf.name();
+           
+         // Output based on number of dims
+         if (mf.dim() == 1) {
+       
+           write_data(mesh.node_begin(), mesh.node_end(), llf, vname, 0, out);
            out << std::endl;
+           
+         } else if ((mf.dim() == 2) || (mf.dim() == 3)) {
 
-         } //for d
+           write_vec_data(mesh.node_begin(), mesh.node_end(), llf, vname, mf.dim(), out);
+           out << std::endl;           
+           
+         } else {
+           
+           for (UInt d = 0; d < mf.dim(); d++) {      
+             char buf[512];
+             std::sprintf(buf, "_%d", d);
+             std::string comp_vname = vname + (mf.dim() == 1? "" : std::string(buf));
+             write_data(mesh.node_begin(), mesh.node_end(), llf, comp_vname, d, out);             
+             out << std::endl;
+           } //for d
+           
+         }
 
        } // is nodal/output
 
