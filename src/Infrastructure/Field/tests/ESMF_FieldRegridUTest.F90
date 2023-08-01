@@ -44960,9 +44960,16 @@ end subroutine test_regridSMMArbGrid
    real(ESMF_KIND_R8) :: n_vec(3)
    real(ESMF_KIND_R8) :: e_len, n_len
 
+
    ! East vector
-   e_vec(1)=cos(lon_rad)
-   e_vec(2)=sin(lon_rad)
+   ! OLD
+   !e_vec(1)=cos(lon_rad)
+   !e_vec(2)=sin(lon_rad)
+   !e_vec(3)=0
+
+   ! Try this one instead: [-sin(lng), cos(lng), 0]
+   e_vec(1)=-sin(lon_rad)
+   e_vec(2)=cos(lon_rad)
    e_vec(3)=0
 
    ! Make unit vec
@@ -44976,11 +44983,19 @@ end subroutine test_regridSMMArbGrid
       e_vec(3)=e_vec(3)/e_len
    endif
 
+   ! TODO: Try this one instead: [-sin(lat) * cos(lng), -sin(lat) * sin(lng), cos(lat)]
+   
    ! North vector
-   n_vec(1)=-sin(lat_rad)*sin(lon_rad)
-   n_vec(2)=sin(lat_rad)*cos(lon_rad) 
+   ! OLD
+   !n_vec(1)=-sin(lat_rad)*sin(lon_rad)
+   !n_vec(2)=sin(lat_rad)*cos(lon_rad) 
+   !n_vec(3)=cos(lat_rad)
+
+   n_vec(1)=-sin(lat_rad)*cos(lon_rad)
+   n_vec(2)=-sin(lat_rad)*sin(lon_rad) 
    n_vec(3)=cos(lat_rad)
 
+   
    ! Make unit vec
    n_len=sqrt(n_vec(1)*n_vec(1) + &
               n_vec(2)*n_vec(2) + &
