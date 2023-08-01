@@ -45004,15 +45004,17 @@ end subroutine test_regridSMMArbGrid
   type(ESMF_Grid) :: srcGrid
   type(ESMF_Grid) :: dstGrid
   type(ESMF_Field) :: srcField
-  type(ESMF_Field) :: dstVecField
+  type(ESMF_Field) :: src3DVecField
+  type(ESMF_Field) :: dst3DVecField
   type(ESMF_Field) :: dstField
   type(ESMF_Field) :: tmp1Field
   type(ESMF_Field) :: tmp2Field
   type(ESMF_Field) :: tmp3Field
   type(ESMF_Field) :: xdstField
   type(ESMF_Array) :: dstArray
+  type(ESMF_Array) :: dst3DVecArray
   type(ESMF_Array) :: srcArray
-  type(ESMF_Array) :: dstVecArray
+  type(ESMF_Array) :: src3DVecArray
   type(ESMF_Array) :: tmp1Array
   type(ESMF_Array) :: tmp2Array
   type(ESMF_Array) :: tmp3Array
@@ -45028,7 +45030,8 @@ end subroutine test_regridSMMArbGrid
   real(ESMF_KIND_R8), pointer :: tmp1farrayPtr(:,:)
   real(ESMF_KIND_R8), pointer :: tmp2farrayPtr(:,:)
   real(ESMF_KIND_R8), pointer :: tmp3farrayPtr(:,:)
-  real(ESMF_KIND_R8), pointer :: dstVecfarrayPtr(:,:,:)
+  real(ESMF_KIND_R8), pointer :: dst3DVecfarrayPtr(:,:,:)
+  real(ESMF_KIND_R8), pointer :: src3DVecfarrayPtr(:,:,:)
   integer :: clbnd(2),cubnd(2)
   integer :: fclbnd(3),fcubnd(3)
   integer :: i1,i2,i3, index(2)
@@ -45118,9 +45121,26 @@ end subroutine test_regridSMMArbGrid
      return
   endif
 
+  ! Src 3D Vec Field for dumping to VTK for debugging
+  src3DVecField = ESMF_FieldCreate(srcGrid, typekind=ESMF_TYPEKIND_R8, &
+       ungriddedLBound=(/1/), ungriddedUBound=(/3/), & ! 2D vector
+       staggerloc=ESMF_STAGGERLOC_CENTER, name="src3Dvec", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+  endif
+
+  
   
   ! Get srcArray from Field
   call ESMF_FieldGet(srcField, array=srcArray, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+   endif
+
+   ! Get srcArray from Field
+  call ESMF_FieldGet(src3DVecField, array=src3DVecArray, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
@@ -45168,6 +45188,15 @@ end subroutine test_regridSMMArbGrid
         return
      endif
 
+     ! get src pointer
+     call ESMF_FieldGet(src3DVecField, lDE, src3DVecfarrayPtr, &
+          rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     
      
      ! Set src data
      do i1=fclbnd(1),fcubnd(1)
@@ -45194,8 +45223,14 @@ end subroutine test_regridSMMArbGrid
         ! TODO: NEED A BETTER TEST CASE THAT'S TANGENT TO SPHERE, BUT IS CONSISTENT OVER POLE
         
         ! Dot with 3D vector (x,y,z) to get components 
-        farrayPtr(i1,i2,1) = x*e_vec(1)+y*e_vec(2)+z*e_vec(3)
-        farrayPtr(i1,i2,2) = x*n_vec(1)+y*n_vec(2)+z*n_vec(3)
+        farrayPtr(i1,i2,1) = 0.0
+        farrayPtr(i1,i2,2) = 1.0
+
+        ! Calculate debug output from src field and basis vectors
+        src3DVecfarrayPtr(i1,i2,1) = farrayPtr(i1,i2,1)*e_vec(1)+farrayPtr(i1,i2,2)*n_vec(1)
+        src3DVecfarrayPtr(i1,i2,2) = farrayPtr(i1,i2,1)*e_vec(2)+farrayPtr(i1,i2,2)*n_vec(2)
+        src3DVecfarrayPtr(i1,i2,3) = farrayPtr(i1,i2,1)*e_vec(3)+farrayPtr(i1,i2,2)*n_vec(3)
+        
      enddo
      enddo
 #else
@@ -45293,9 +45328,9 @@ end subroutine test_regridSMMArbGrid
   endif
 
 
-  dstVecField = ESMF_FieldCreate(dstGrid,  typekind=ESMF_TYPEKIND_R8, &
+  dst3DVecField = ESMF_FieldCreate(dstGrid,  typekind=ESMF_TYPEKIND_R8, &
        ungriddedLBound=(/1/), ungriddedUBound=(/3/), & ! 3D vector
-       staggerloc=ESMF_STAGGERLOC_CENTER, name="dstVec", rc=localrc)
+       staggerloc=ESMF_STAGGERLOC_CENTER, name="dst3DVec", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
@@ -45363,7 +45398,7 @@ end subroutine test_regridSMMArbGrid
     return
   endif
 
-  call ESMF_FieldGet(dstVecField, array=dstVecArray, rc=localrc)
+  call ESMF_FieldGet(dst3DVecField, array=dst3DVecArray, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
@@ -45412,7 +45447,7 @@ end subroutine test_regridSMMArbGrid
         return
      endif
 
-     call ESMF_FieldGet(dstVecField, lDE, dstVecfarrayPtr,  rc=localrc)
+     call ESMF_FieldGet(dst3DVecField, lDE, dst3DVecfarrayPtr,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -45453,9 +45488,9 @@ end subroutine test_regridSMMArbGrid
         farrayPtr(i1,i2,2)=0.0
 
         ! initialize dest vec field
-        dstVecfarrayPtr(i1,i2,1)=1.0
-        dstVecfarrayPtr(i1,i2,2)=2.0
-        dstVecfarrayPtr(i1,i2,3)=3.0
+        dst3DVecfarrayPtr(i1,i2,1)=1.0
+        dst3DVecfarrayPtr(i1,i2,2)=2.0
+        dst3DVecfarrayPtr(i1,i2,3)=3.0
         
      enddo
      enddo
@@ -45601,6 +45636,11 @@ end subroutine test_regridSMMArbGrid
         tmp2FarrayPtr(i1,i2) = farrayPtr(i1,i2,2)
         tmp3FarrayPtr(i1,i2) = xfarrayPtr(i1,i2,2)
 
+        ! Calculate debug output from src field and basis vectors
+        dst3DVecfarrayPtr(i1,i2,1) = farrayPtr(i1,i2,1)*e_vec(1)+farrayPtr(i1,i2,2)*n_vec(1)
+        dst3DVecfarrayPtr(i1,i2,2) = farrayPtr(i1,i2,1)*e_vec(2)+farrayPtr(i1,i2,2)*n_vec(2)
+        dst3DVecfarrayPtr(i1,i2,3) = farrayPtr(i1,i2,1)*e_vec(3)+farrayPtr(i1,i2,2)*n_vec(3)
+        
      enddo
      enddo
 
@@ -45609,7 +45649,7 @@ end subroutine test_regridSMMArbGrid
 
 #if 1
   call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
-       filename="srcGrid", array1=srcArray, &
+       filename="srcGrid", array1=src3DVecArray, &
        rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
@@ -45618,11 +45658,10 @@ end subroutine test_regridSMMArbGrid
 
   call ESMF_GridWriteVTK(dstGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
        filename="dstGrid", &
-!       array1=dstArray, &
-       array1=tmp1Array, &
-       array2=tmp2Array, &
-       array3=tmp3Array, &
-       array4=dstVecArray, &
+       array1=dst3DVecArray, &
+       array2=tmp1Array, &
+       array3=tmp2Array, &
+       array4=tmp3Array, &
        rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
