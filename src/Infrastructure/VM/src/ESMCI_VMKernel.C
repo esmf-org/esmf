@@ -119,6 +119,10 @@ typedef DWORD pid_t;
 #define VM_MPI_THREAD_LEVEL MPI_THREAD_MULTIPLE
 #endif
 
+// Utility macros to get a macro value into a string
+#define XSTR(X) STR(X)
+#define STR(X) #X
+
 namespace ESMCI {
 
 // Definition of class static data members
@@ -682,8 +686,14 @@ void VMK::finalize(int finalizeMpi){
     delete [] cid[i];
   delete [] cid;
   delete [] ssiLocalPetList;
-  // finalize the MPI tool interface
-  MPI_T_finalize();
+  // Special MPI Tool Interface handling for OpenMPI
+  std::string esmf_comm(XSTR(ESMF_COMM));
+  bool mpi_t_done = false;
+  if (esmf_comm == "openmpi"){
+    // OpenMPI must call MPI_T_finalize() before MPI_Finalize()
+    mpi_t_done = true;
+    MPI_T_finalize();
+  }
   // conditionally finalize MPI
   int finalized;
   MPI_Finalized(&finalized);
@@ -694,6 +704,12 @@ void VMK::finalize(int finalizeMpi){
 #endif
     if (finalizeMpi)
       MPI_Finalize();
+  }
+  MPI_Finalized(&finalized);
+  if (finalized && !mpi_t_done){
+    // finalize the MPI tool interface
+    // do this _after_ MPI_Finalize() or else Darshan dies with SEGV (not clear why)
+    MPI_T_finalize();
   }
 }
 
