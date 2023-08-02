@@ -2003,6 +2003,9 @@ endif
 ifeq ($(ESMF_COMM),mpt)
 ESMF_PRELOAD_SH = $(ESMF_PRELOADSCRIPT)
 endif
+ifneq (,$(findstring srun,$(ESMF_MPIRUN)))
+ESMF_PRELOAD_SH = $(ESMF_PRELOADSCRIPT)
+endif
 
 endif
 

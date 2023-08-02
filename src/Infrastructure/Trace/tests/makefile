@@ -14,8 +14,8 @@ TESTS_BUILD = \
 		$(ESMF_TESTDIR)/ESMF_TraceUTest \
 		$(ESMF_TESTDIR)/ESMF_TraceIOUTest \
 		$(ESMF_TESTDIR)/ESMF_TraceMPIUTest \
-                $(ESMF_TESTDIR)/ESMCI_TraceRegionUTest \
-		$(ESMF_TESTDIR)/ESMF_ProfileUTest 
+		$(ESMF_TESTDIR)/ESMCI_TraceRegionUTest \
+		$(ESMF_TESTDIR)/ESMF_ProfileUTest
 
 
 TESTS_RUN = \
@@ -24,7 +24,7 @@ TESTS_RUN = \
 		RUN_ESMF_TraceClkMonoSyncUTest \
 		RUN_ESMF_TraceIOUTest \
 		RUN_ESMF_TraceMPIUTest \
-                RUN_ESMCI_TraceRegionUTest \
+		RUN_ESMCI_TraceRegionUTest \
 		RUN_ESMF_ProfileUTest	
 
 TESTS_RUN_UNI = \
@@ -87,15 +87,15 @@ RUN_ESMF_TraceClkMonoSyncUTestUNI:
 # --- TraceIOUTest
 
 RUN_ESMF_TraceIOUTest:
-	$(MAKE) TNAME=TraceIO NP=4 $(ESMF_TESTTRACE_TARGET) 
+	$(MAKE) TNAME=TraceIO NP=4 $(ESMF_TESTTRACE_TARGET)
 
 RUN_ESMF_TraceIOUTestUNI:
-	$(MAKE) TNAME=TraceIO NP=1 $(ESMF_TESTTRACE_TARGET) 
+	$(MAKE) TNAME=TraceIO NP=1 $(ESMF_TESTTRACE_TARGET)
 
 # --- TraceMPIUTest
 
 RUN_ESMF_TraceMPIUTest:
-	env ESMF_RUNTIME_PROFILE=ON $(MAKE) TNAME=TraceMPI NP=4 $(ESMF_TESTTRACE_TARGET) 
+	$(MAKE) TNAME=TraceMPI NP=4 $(ESMF_TESTTRACE_TARGET)
 
 RUN_ESMF_TraceMPIUTestUNI:
 	$(MAKE) TNAME=TraceMPI NP=1 $(ESMF_TESTTRACE_TARGET)
