@@ -34,8 +34,6 @@ If a bug fix for this is released, the next #define can
 be removed.
 #endif
 
-#define ESMF_HAS_ACHAR_BUG 1
-
 #if 0
 NAG before v6.2, use sizeof work-around code instead of F2008 C_SIZEOF
 #endif
