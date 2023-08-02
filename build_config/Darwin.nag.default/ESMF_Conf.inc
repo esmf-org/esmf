@@ -27,16 +27,6 @@ be one of the following:
 #endif
 
 #if 0
-In the ESMF_Config.F90 source file, if EOL is defined
-as achar(10) (which is the newline character), 
-the file cannot be compiled (it will not parse). 
-If a bug fix for this is released, the next #define can
-be removed.
-#endif
-
-#define ESMF_HAS_ACHAR_BUG 1
-
-#if 0
 NAG before v6.2, use sizeof work-around code instead of F2008 C_SIZEOF
 #endif
 #ifndef __NAG_COMPILER_RELEASE
