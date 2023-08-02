@@ -44962,12 +44962,7 @@ end subroutine test_regridSMMArbGrid
 
 
    ! East vector
-   ! OLD
-   !e_vec(1)=cos(lon_rad)
-   !e_vec(2)=sin(lon_rad)
-   !e_vec(3)=0
-
-   ! Try this one instead: [-sin(lng), cos(lng), 0]
+   ! [-sin(lng), cos(lng), 0]
    e_vec(1)=-sin(lon_rad)
    e_vec(2)=cos(lon_rad)
    e_vec(3)=0
@@ -44983,14 +44978,9 @@ end subroutine test_regridSMMArbGrid
       e_vec(3)=e_vec(3)/e_len
    endif
 
-   ! TODO: Try this one instead: [-sin(lat) * cos(lng), -sin(lat) * sin(lng), cos(lat)]
-   
-   ! North vector
-   ! OLD
-   !n_vec(1)=-sin(lat_rad)*sin(lon_rad)
-   !n_vec(2)=sin(lat_rad)*cos(lon_rad) 
-   !n_vec(3)=cos(lat_rad)
 
+   ! North vector
+   ! [-sin(lat) * cos(lng), -sin(lat) * sin(lng), cos(lat)]
    n_vec(1)=-sin(lat_rad)*cos(lon_rad)
    n_vec(2)=-sin(lat_rad)*sin(lon_rad) 
    n_vec(3)=cos(lat_rad)

@@ -2953,9 +2953,9 @@ void _calc_basis_vec(double *cart_coords, double *n_vec, double *e_vec) {
                           &lon, &lat, &rad);
 
   // Calculate north vec
-  n_vec[0]=-sin(lat)*sin(lon);
-  n_vec[1]=sin(lat)*cos(lon);
-  n_vec[2]=cos(lat);
+  n_vec[0]=-sin(lat)*cos(lon);
+  n_vec[1]=-sin(lat)*sin(lon);
+  n_vec[2]= cos(lat);
 
   // Normalize
   double n_vec_len=MU_LEN_VEC3D(n_vec);
@@ -2966,9 +2966,9 @@ void _calc_basis_vec(double *cart_coords, double *n_vec, double *e_vec) {
 
 
   // Calculate east vec
-  e_vec[0]=cos(lon);
-  e_vec[1]=sin(lon);
-  e_vec[2]=0.0;
+  e_vec[0]=-sin(lon);
+  e_vec[1]= cos(lon);
+  e_vec[2]= 0.0;
 
   // Normalize
   double e_vec_len=MU_LEN_VEC3D(e_vec);
