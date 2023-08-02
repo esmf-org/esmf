@@ -45000,7 +45000,28 @@ end subroutine test_regridSMMArbGrid
  end subroutine calc_unit_basis_vecs
 
 
- 
+  subroutine calc_test_field(lon_rad, lat_rad, e, n)
+   real(ESMF_KIND_R8) :: lon_rad,lat_rad, e, n
+   real(ESMF_KIND_R8) :: e_vec(3)
+   real(ESMF_KIND_R8) :: n_vec(3)
+   real(ESMF_KIND_R8) :: len
+
+   ! Get basis vectors
+   call calc_unit_basis_vecs(lon_rad, lat_rad, e_vec, n_vec)
+   
+   ! Dot with a vector going along x-axis (essentially just use x component)
+   e=e_vec(1)
+   n=n_vec(1)
+
+   ! Make unit vec
+   len=sqrt(e*e + n*n)
+   if (len .ne. 0.0) then
+      e=e/len
+      n=n/len
+   endif
+
+ end subroutine calc_test_field
+
   
  subroutine test_sph_vec_blnr_csG_to_llG(rc)
   integer, intent(out)  :: rc
@@ -45224,13 +45245,10 @@ end subroutine test_regridSMMArbGrid
         
         ! Get basis vactors at that point
         call calc_unit_basis_vecs(lon_rad, lat_rad, e_vec, n_vec)
-
-        ! TODO: NEED A BETTER TEST CASE THAT'S TANGENT TO SPHERE, BUT IS CONSISTENT OVER POLE
         
-        ! Dot with 3D vector (x,y,z) to get components 
-        farrayPtr(i1,i2,1) = 0.0
-        farrayPtr(i1,i2,2) = 1.0
-
+        ! Set test field
+        call calc_test_field(lon_rad, lat_rad, farrayPtr(i1,i2,1), farrayPtr(i1,i2,2))
+        
         ! Calculate debug output from src field and basis vectors
         src3DVecfarrayPtr(i1,i2,1) = farrayPtr(i1,i2,1)*e_vec(1)+farrayPtr(i1,i2,2)*n_vec(1)
         src3DVecfarrayPtr(i1,i2,2) = farrayPtr(i1,i2,1)*e_vec(2)+farrayPtr(i1,i2,2)*n_vec(2)
@@ -45485,8 +45503,7 @@ end subroutine test_regridSMMArbGrid
         ! TODO: NEED A BETTER TEST CASE THAT'S TANGENT TO SPHERE, BUT IS CONSISTENT OVER POLE
         
         ! Dot with 3D vector (x,y,z) to get components to give a consistent direction to test case
-        xfarrayPtr(i1,i2,1) = x*e_vec(1)+y*e_vec(2)+z*e_vec(3)
-        xfarrayPtr(i1,i2,2) = x*n_vec(1)+y*n_vec(2)+z*n_vec(3)
+        call calc_test_field(lon_rad, lat_rad, xfarrayPtr(i1,i2,1), xfarrayPtr(i1,i2,2))
         
         ! initialize destination field
         farrayPtr(i1,i2,1)=0.0
