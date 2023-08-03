@@ -45033,17 +45033,17 @@ end subroutine test_regridSMMArbGrid
   type(ESMF_Field) :: src3DVecField
   type(ESMF_Field) :: dst3DVecField
   type(ESMF_Field) :: dstField
-  type(ESMF_Field) :: tmp1Field
-  type(ESMF_Field) :: tmp2Field
-  type(ESMF_Field) :: tmp3Field
+  type(ESMF_Field) :: angleField
+  type(ESMF_Field) :: magDiffField
+  type(ESMF_Field) :: tmpField
   type(ESMF_Field) :: xdstField
   type(ESMF_Array) :: dstArray
   type(ESMF_Array) :: dst3DVecArray
   type(ESMF_Array) :: srcArray
   type(ESMF_Array) :: src3DVecArray
-  type(ESMF_Array) :: tmp1Array
-  type(ESMF_Array) :: tmp2Array
-  type(ESMF_Array) :: tmp3Array
+  type(ESMF_Array) :: angleArray
+  type(ESMF_Array) :: magDiffArray
+  type(ESMF_Array) :: tmpArray
   type(ESMF_RouteHandle) :: routeHandle
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_VM) :: vm
@@ -45053,9 +45053,9 @@ end subroutine test_regridSMMArbGrid
   real(ESMF_KIND_R8), pointer :: farrayPtr1DYC(:)
   real(ESMF_KIND_R8), pointer :: farrayPtr(:,:,:), farrayPtr2(:,:)
   real(ESMF_KIND_R8), pointer :: xfarrayPtr(:,:,:)
-  real(ESMF_KIND_R8), pointer :: tmp1farrayPtr(:,:)
-  real(ESMF_KIND_R8), pointer :: tmp2farrayPtr(:,:)
-  real(ESMF_KIND_R8), pointer :: tmp3farrayPtr(:,:)
+  real(ESMF_KIND_R8), pointer :: anglefarrayPtr(:,:)
+  real(ESMF_KIND_R8), pointer :: magDifffarrayPtr(:,:)
+  real(ESMF_KIND_R8), pointer :: tmpfarrayPtr(:,:)
   real(ESMF_KIND_R8), pointer :: dst3DVecfarrayPtr(:,:,:)
   real(ESMF_KIND_R8), pointer :: src3DVecfarrayPtr(:,:,:)
   integer :: clbnd(2),cubnd(2)
@@ -45077,7 +45077,7 @@ end subroutine test_regridSMMArbGrid
 
   real(ESMF_KIND_R8) :: regrid_vec(3), exact_vec(3)
 
-  real(ESMF_KIND_R8) :: dot,len_vec,angle
+  real(ESMF_KIND_R8) :: dot,regrid_len,exact_len,angle
 
   real(ESMF_KIND_R8) :: x,y,z, lat_180
   
@@ -45108,7 +45108,7 @@ end subroutine test_regridSMMArbGrid
 #if 1        
 
   ! Src Grid - a cubed sphere grid      
-  srcGrid=ESMF_GridCreateCubedSphere(tileSize=12, &
+  srcGrid=ESMF_GridCreateCubedSphere(tileSize=10, &
        staggerLocList = (/ESMF_STAGGERLOC_CENTER/), &
        indexflag = ESMF_INDEX_GLOBAL, &
        rc=localrc)
@@ -45369,21 +45369,21 @@ end subroutine test_regridSMMArbGrid
   endif
 
 
-  tmp1Field = ESMF_FieldCreate(dstGrid,  typekind=ESMF_TYPEKIND_R8, &
+  angleField = ESMF_FieldCreate(dstGrid,  typekind=ESMF_TYPEKIND_R8, &
        staggerloc=ESMF_STAGGERLOC_CENTER, name="tmp", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
      return
   endif
   
-  tmp2Field = ESMF_FieldCreate(dstGrid,  typekind=ESMF_TYPEKIND_R8, &
+  magDiffField = ESMF_FieldCreate(dstGrid,  typekind=ESMF_TYPEKIND_R8, &
        staggerloc=ESMF_STAGGERLOC_CENTER, name="tmp", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
      return
   endif
 
-  tmp3Field = ESMF_FieldCreate(dstGrid,  typekind=ESMF_TYPEKIND_R8, &
+  tmpField = ESMF_FieldCreate(dstGrid,  typekind=ESMF_TYPEKIND_R8, &
        staggerloc=ESMF_STAGGERLOC_CENTER, name="tmp", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
@@ -45394,19 +45394,19 @@ end subroutine test_regridSMMArbGrid
 
   
   ! Get tmpArray from Field
-  call ESMF_FieldGet(tmp1Field, array=tmp1Array, rc=localrc)
+  call ESMF_FieldGet(angleField, array=angleArray, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
  endif
 
- call ESMF_FieldGet(tmp2Field, array=tmp2Array, rc=localrc)
+ call ESMF_FieldGet(magDiffField, array=magDiffArray, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
      return
   endif
   
-  call ESMF_FieldGet(tmp3Field, array=tmp3Array, rc=localrc)
+  call ESMF_FieldGet(tmpField, array=tmpArray, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
@@ -45575,21 +45575,21 @@ end subroutine test_regridSMMArbGrid
      endif
 
      
-     call ESMF_FieldGet(tmp1Field, lDE, tmp1farrayPtr, &
+     call ESMF_FieldGet(angleField, lDE, anglefarrayPtr, &
           rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
      endif
 
-     call ESMF_FieldGet(tmp2Field, lDE, tmp2farrayPtr, &
+     call ESMF_FieldGet(magDiffField, lDE, magDifffarrayPtr, &
           rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
      endif
 
-     call ESMF_FieldGet(tmp3Field, lDE, tmp3farrayPtr, &
+     call ESMF_FieldGet(tmpField, lDE, tmpfarrayPtr, &
           rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
@@ -45640,23 +45640,23 @@ end subroutine test_regridSMMArbGrid
 
         ! Figure out angle
         dot=regrid_vec(1)*exact_vec(1)+regrid_vec(2)*exact_vec(2)+regrid_vec(3)*exact_vec(3)
-        len_vec=sqrt(regrid_vec(1)*regrid_vec(1)+regrid_vec(2)*regrid_vec(2)+regrid_vec(3)*regrid_vec(3))
-        if (len_vec .ne. 0.0) then
-           dot=dot/len_vec
+        regrid_len=sqrt(regrid_vec(1)*regrid_vec(1)+regrid_vec(2)*regrid_vec(2)+regrid_vec(3)*regrid_vec(3))
+        if (regrid_len .ne. 0.0) then
+           dot=dot/regrid_len
         endif
 
-        len_vec=sqrt(exact_vec(1)*exact_vec(1)+exact_vec(2)*exact_vec(2)+exact_vec(3)*exact_vec(3))
-        if (len_vec .ne. 0.0) then
-           dot=dot/len_vec
+        exact_len=sqrt(exact_vec(1)*exact_vec(1)+exact_vec(2)*exact_vec(2)+exact_vec(3)*exact_vec(3))
+        if (exact_len .ne. 0.0) then
+           dot=dot/exact_len
         endif
         
         angle=acos(dot) 
 
 
         ! For debugging   
-        tmp1FarrayPtr(i1,i2) = angle
-        tmp2FarrayPtr(i1,i2) = farrayPtr(i1,i2,2)
-        tmp3FarrayPtr(i1,i2) = xfarrayPtr(i1,i2,2)
+        angleFarrayPtr(i1,i2) = angle
+        magDiffFarrayPtr(i1,i2) = exact_len-regrid_len
+        tmpFarrayPtr(i1,i2) = xfarrayPtr(i1,i2,2)
 
         ! Calculate debug output from src field and basis vectors
         dst3DVecfarrayPtr(i1,i2,1) = farrayPtr(i1,i2,1)*e_vec(1)+farrayPtr(i1,i2,2)*n_vec(1)
@@ -45681,9 +45681,9 @@ end subroutine test_regridSMMArbGrid
   call ESMF_GridWriteVTK(dstGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
        filename="dstGrid", &
        array1=dst3DVecArray, &
-       array2=tmp1Array, &
-       array3=tmp2Array, &
-       array4=tmp3Array, &
+       array2=angleArray, &
+       array3=magDiffArray, &
+       array4=tmpArray, &
        rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
@@ -45699,12 +45699,43 @@ end subroutine test_regridSMMArbGrid
      return
    endif
 
+  ! Destroy the Fields
+   call ESMF_FieldDestroy(src3DVecField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
    call ESMF_FieldDestroy(dstField, rc=localrc)
    if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
      return
    endif
 
+   call ESMF_FieldDestroy(dst3DVecField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+
+   call ESMF_FieldDestroy(angleField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+   call ESMF_FieldDestroy(magDiffField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+   call ESMF_FieldDestroy(tmpField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif   
 
   ! Free the grids
   call ESMF_GridDestroy(srcGrid, rc=localrc)
