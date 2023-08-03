@@ -1168,6 +1168,20 @@
 
       !------------------------------------------------------------------------
       !NEX_UTest
+      write(name, *) "VMLog w/ prefix"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_VMLog(vm, prefix="TestVMLog: ", rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "VMLogSystem w/ prefix"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_VMLogSystem(prefix="TestVMLogSystem: ", rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM validate Test"
       call ESMF_VMValidate(vm, rc=rc)
@@ -1469,10 +1483,10 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       call ESMF_VMLogMemInfo(prefix="TestPrefix", log=log, rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      
+
       call ESMF_LogClose(log, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      
+
 #endif
       call ESMF_TestEnd(ESMF_SRCLINE)
 
