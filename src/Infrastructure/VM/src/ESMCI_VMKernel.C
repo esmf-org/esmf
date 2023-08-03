@@ -119,10 +119,6 @@ typedef DWORD pid_t;
 #define VM_MPI_THREAD_LEVEL MPI_THREAD_MULTIPLE
 #endif
 
-// Utility macros to get a macro value into a string
-#define XSTR(X) STR(X)
-#define STR(X) #X
-
 namespace ESMCI {
 
 // Definition of class static data members
@@ -417,9 +413,6 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
     // query the MPI thread support level as set by external MPI initialization
     MPI_Query_thread(&mpi_thread_level);
   }
-  // initialize the MPI tool interface
-  int provided_thread_level;
-  MPI_T_init_thread(VM_MPI_THREAD_LEVEL, &provided_thread_level);
 #else
   // MPIUNI simply set the thread level
   mpi_thread_level = MPI_THREAD_SERIALIZED;
@@ -686,14 +679,6 @@ void VMK::finalize(int finalizeMpi){
     delete [] cid[i];
   delete [] cid;
   delete [] ssiLocalPetList;
-  // Special MPI Tool Interface handling for OpenMPI
-  std::string esmf_comm(XSTR(ESMF_COMM));
-  bool mpi_t_done = false;
-  if (esmf_comm == "openmpi"){
-    // OpenMPI must call MPI_T_finalize() before MPI_Finalize()
-    mpi_t_done = true;
-    MPI_T_finalize();
-  }
   // conditionally finalize MPI
   int finalized;
   MPI_Finalized(&finalized);
@@ -704,12 +689,6 @@ void VMK::finalize(int finalizeMpi){
 #endif
     if (finalizeMpi)
       MPI_Finalize();
-  }
-  MPI_Finalized(&finalized);
-  if (finalized && !mpi_t_done){
-    // finalize the MPI tool interface
-    // do this _after_ MPI_Finalize() or else Darshan dies with SEGV (not clear why)
-    MPI_T_finalize();
   }
 }
 
@@ -765,8 +744,6 @@ struct SpawnArg{
 
     
 void VMK::abort(){
-  // finalize the MPI tool interface
-  MPI_T_finalize();
   // abort default (all MPI) virtual machine
   int finalized;
   MPI_Finalized(&finalized);
@@ -2802,6 +2779,9 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
   }
   msg.str("");  // clear
 #ifndef ESMF_MPIUNI
+  // initialize the MPI tool interface
+  int provided_thread_level;
+  MPI_T_init_thread(VM_MPI_THREAD_LEVEL, &provided_thread_level);
   msg << prefix << "--- VMK::logSystem() MPI Control Variables ---------------";
   ESMC_LogDefault.Write(msg.str(), msgType);
   int num_cvar;
@@ -2837,6 +2817,7 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
   msg << prefix << "new MPIR_CVAR_NEMESIS_SHM_EAGER_MAX_SZ=" << eagersize;
   ESMC_LogDefault.Write(msg.str(), msgType);
 #endif
+  MPI_T_finalize();
 #endif
   msg.str("");  // clear
   msg << prefix << "--- VMK::logSystem() end ---------------------------------";
