@@ -211,6 +211,8 @@
 
 #include "../Infrastructure/VM/doc/VM_crefdoc.ctex"
 
+#include "../Infrastructure/Trace/doc/Trace_crefdoc.ctex"
+
 %#include "../Infrastructure/Util/doc/IOUtil_crefdoc.ctex"
 
 \newpage
