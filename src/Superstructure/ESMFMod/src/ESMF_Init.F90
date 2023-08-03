@@ -94,7 +94,8 @@ module ESMF_InitMod
 ! !INTERFACE:
       subroutine ESMF_Initialize(keywordEnforcer, configFilenameFromArgNum, &
         configFilename, configKey, &
-        defaultCalKind, defaultDefaultLogFilename, defaultLogFilename, &
+        defaultDefaultCalKind, defaultCalKind, &
+        defaultDefaultLogFilename, defaultLogFilename, &
         defaultLogAppendFlag, logAppendFlag, defaultLogKindFlag, logKindFlag, &
         mpiCommunicator,  ioUnitLBound, ioUnitUBound, &
         defaultGlobalResourceControl, globalResourceControl, config, vm, rc)
@@ -104,6 +105,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                 intent(in),  optional :: configFilenameFromArgNum
       character(len=*),        intent(in),  optional :: configFilename
       character(len=*),        intent(in),  optional :: configKey(:)
+      type(ESMF_CalKind_Flag), intent(in),  optional :: defaultDefaultCalKind
       type(ESMF_CalKind_Flag), intent(in),  optional :: defaultCalKind
       character(len=*),        intent(in),  optional :: defaultDefaultLogFilename
       character(len=*),        intent(in),  optional :: defaultLogFilename
@@ -149,6 +151,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              configurations.\newline
 !              Added argument {\tt configFilenameFromArgNum} to support config
 !              file specification via the command line.
+! \item[8.6.0] Added {\tt defaultDefaultCalKind} argument to allow specifiation of
+!              a default for {\tt defaultCalKind}.
 ! \end{description}
 ! \end{itemize}
 !
@@ -271,6 +275,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           and ESMF is not initialized.
 !           The supported config labels are:
 !           \begin{itemize}
+!              \item {\tt defaultCalKind}
 !              \item {\tt defaultLogFilename}
 !              \item {\tt logAppendFlag}
 !              \item {\tt logKindFlag}
@@ -284,10 +289,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The {\tt configKey} option is only supported for YAML configurations.
 !           An error is returned if {\tt configKey} is specified for the
 !           traditional {\tt ESMF\_Config} case.
+!     \item [{[defaultDefaultCalKind]}]
+!           Default value for argument {\tt defaultCalKind}, the calendar
+!           used by ESMF Time Manger by default.
+!           If not specified, defaults to {\tt ESMF\_CALKIND\_NOCALENDAR}.
 !     \item [{[defaultCalKind]}]
 !           Sets the default calendar to be used by ESMF Time Manager.
 !           See section \ref{const:calkindflag} for a list of valid options.
-!           If not specified, defaults to {\tt ESMF\_CALKIND\_NOCALENDAR}.
+!           If not specified,
+!           defaults according to {\tt defaultDefaultCalKind}.
 !     \item [{[defaultDefaultLogFilename]}]
 !           Default value for argument {\tt defaultLogFilename}, the name of
 !           the default log file for warning and error messages.
@@ -373,6 +383,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_FrameworkInternalInit(lang=ESMF_MAIN_F90, &
         configFilenameFromArgNum=configFilenameFromArgNum, &
         configFilename=configFilename, configKey=configKey, &
+        defaultDefaultCalKind=defaultDefaultCalKind, &
         defaultCalKind=defaultCalKind, &
         defaultDefaultLogFilename=defaultDefaultLogFilename, &
         defaultLogFilename=defaultLogFilename, &
@@ -482,7 +493,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
       subroutine ESMF_FrameworkInternalInit(lang, configFilenameFromArgNum, &
         configFilename, configKey, &
-        defaultCalKind, defaultDefaultLogFilename, defaultLogFilename, &
+        defaultDefaultCalKind, defaultCalKind, &
+        defaultDefaultLogFilename, defaultLogFilename, &
         defaultLogAppendFlag, logAppendFlag, defaultLogKindFlag, logKindFlag, &
         mpiCommunicator, ioUnitLBound, ioUnitUBound, &
         defaultGlobalResourceControl, globalResourceControl, config, rc)
@@ -492,6 +504,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                 intent(in),  optional :: configFilenameFromArgNum
       character(len=*),        intent(in),  optional :: configFilename
       character(len=*),        intent(in),  optional :: configKey(:)
+      type(ESMF_CalKind_Flag), intent(in),  optional :: defaultDefaultCalKind
       type(ESMF_CalKind_Flag), intent(in),  optional :: defaultCalKind
       character(len=*),        intent(in),  optional :: defaultDefaultLogFilename
       character(len=*),        intent(in),  optional :: defaultLogFilename
@@ -525,6 +538,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           Name of the config file for the entire application.
 !     \item [{[configKey]}]
 !           Key associated with the the default label map for YAML configs.
+!     \item [{[defaultDefaultCalKind]}]
+!           Default value for argument {\tt defaultCalKind}.
 !     \item [{[defaultCalKind]}]
 !           Sets the default calendar to be used by ESMF Time Manager.
 !           If not specified, defaults to {\tt ESMF\_CALKIND\_NOCALENDAR}.
@@ -590,9 +605,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       logical                 :: globalResourceControlSet, logAppendFlagSet
       character(160)          :: defaultLogFilenameSet, defaultLogFilenameS
-      character(80)           :: logKindFlagS, logKindFlagSU
-      character(:), allocatable :: logKindFlagSA
+      character(:), allocatable :: stringAlloc
+      character(80)           :: stringS, stringSU
       type(ESMF_LogKind_Flag) :: logKindFlagSet
+      type(ESMF_CalKind_Flag) :: defaultCalKindSet
 
       character(ESMF_MAXSTR)  :: configFilenameInternal
       logical                 :: isFlag, validHConfigNode, haveConfig
@@ -635,6 +651,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         logKindFlagSet = defaultLogKindFlag
       if (present(logKindFlag)) &
         logKindFlagSet = logKindFlag
+      !
+      defaultCalKindSet = ESMF_CALKIND_NOCALENDAR
+      if (present(defaultDefaultCalKind)) &
+        defaultCalKindSet = defaultDefaultCalKind
+      if (present(defaultCalKind)) &
+        defaultCalKindSet = defaultCalKind
 
       ! If non-default Fortran unit numbers are to be used, set them
       ! prior to log files being created.
@@ -882,30 +904,92 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             return  ! bail out
           endif
           if (validHConfigNode) then
-            logKindFlagSA = ESMF_HConfigAsString(hconfigNode, &
+            stringAlloc = ESMF_HConfigAsString(hconfigNode, &
               keyString="logKindFlag", rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-            logKindFlagSU = ESMF_UtilStringUpperCase(logKindFlagSA, rc=localrc)
+            stringSU = ESMF_UtilStringUpperCase(stringAlloc, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           else
-            call ESMF_ConfigGetAttribute(configInternal, logKindFlagS, &
+            call ESMF_ConfigGetAttribute(configInternal, stringS, &
               label="logKindFlag:", default="---invalid---", rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-            logKindFlagSU = ESMF_UtilStringUpperCase(logKindFlagS, rc=localrc)
+            stringSU = ESMF_UtilStringUpperCase(stringS, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           endif
-          if (trim(logKindFlagSU)=="ESMF_LOGKIND_NONE") then
+          if (trim(stringSU)=="ESMF_LOGKIND_NONE") then
             logKindFlagSet = ESMF_LOGKIND_NONE
-          else if (trim(logKindFlagSU)=="ESMF_LOGKIND_SINGLE") then
+          else if (trim(stringSU)=="ESMF_LOGKIND_SINGLE") then
             logKindFlagSet = ESMF_LOGKIND_SINGLE
-          else if (trim(logKindFlagSU)=="ESMF_LOGKIND_MULTI") then
+          else if (trim(stringSU)=="ESMF_LOGKIND_MULTI") then
             logKindFlagSet = ESMF_LOGKIND_MULTI
-          else if (trim(logKindFlagSU)=="ESMF_LOGKIND_MULTI_ON_ERROR") then
+          else if (trim(stringSU)=="ESMF_LOGKIND_MULTI_ON_ERROR") then
             logKindFlagSet = ESMF_LOGKIND_MULTI_ON_ERROR
+          endif
+        endif
+
+        ! defaultCalKind
+        if (validHConfigNode) then
+          isPresent = ESMF_HConfigIsDefined(hconfigNode, &
+            keyString="defaultCalKind", rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (isPresent) then
+            isPresent = .not.ESMF_HConfigIsNull(hconfigNode, &
+              keyString="defaultCalKind", rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+        else
+          call ESMF_ConfigFindLabel(configInternal, &
+            label="defaultCalKind:", isPresent=isPresent, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+        if (isPresent) then
+          if (present(defaultCalKind)) then
+            ! both API and Config want to set -> error
+            call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+              msg="Cannot set 'defaultCalKind' from Config and API "//&
+              "at the same time.", ESMF_CONTEXT, rcToReturn=rc)
+            return  ! bail out
+          endif
+          if (validHConfigNode) then
+            stringAlloc = ESMF_HConfigAsString(hconfigNode, &
+              keyString="defaultCalKind", rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            stringSU = ESMF_UtilStringUpperCase(stringAlloc, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          else
+            call ESMF_ConfigGetAttribute(configInternal, stringS, &
+              label="defaultCalKind:", default="---invalid---", rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            stringSU = ESMF_UtilStringUpperCase(stringS, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+          if (trim(stringSU)=="ESMF_CALKIND_NOCALENDAR") then
+            defaultCalKindSet = ESMF_CALKIND_NOCALENDAR
+          else if (trim(stringSU)=="ESMF_CALKIND_360DAY") then
+            defaultCalKindSet = ESMF_CALKIND_360DAY
+          else if (trim(stringSU)=="ESMF_CALKIND_CUSTOM") then
+            defaultCalKindSet = ESMF_CALKIND_CUSTOM
+          else if (trim(stringSU)=="ESMF_CALKIND_GREGORIAN") then
+            defaultCalKindSet = ESMF_CALKIND_GREGORIAN
+          else if (trim(stringSU)=="ESMF_CALKIND_JULIAN") then
+            defaultCalKindSet = ESMF_CALKIND_JULIAN
+          else if (trim(stringSU)=="ESMF_CALKIND_JULIANDAY") then
+            defaultCalKindSet = ESMF_CALKIND_JULIANDAY
+          else if (trim(stringSU)=="ESMF_CALKIND_MODJULIANDAY") then
+            defaultCalKindSet = ESMF_CALKIND_MODJULIANDAY
+          else if (trim(stringSU)=="ESMF_CALKIND_NOLEAP") then
+            defaultCalKindSet = ESMF_CALKIND_NOLEAP
           endif
         endif
 
@@ -936,11 +1020,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             return  ! bail out
           endif
           if (validHConfigNode) then
-            logKindFlagSA = ESMF_HConfigAsString(hconfigNode, &
+            stringAlloc = ESMF_HConfigAsString(hconfigNode, &
               keyString="defaultLogFilename", rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-            defaultLogFilenameSet = trim(logKindFlagSA)
+            defaultLogFilenameSet = trim(stringAlloc)
           else
             call ESMF_ConfigGetAttribute(configInternal, defaultLogFilenameS, &
               label="defaultLogFilename:", default="---invalid---", rc=localrc)
@@ -1249,7 +1333,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       ! Initialize the default time manager calendar
-      call ESMF_CalendarInitialize(calkindflag=defaultCalKind, rc=localrc)
+      call ESMF_CalendarInitialize(calkindflag=defaultCalKindSet, rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
          write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
              ": Error initializing the default time manager calendar"

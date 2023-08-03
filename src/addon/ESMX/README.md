@@ -253,9 +253,10 @@ This section affects the application level.
 | `startTime`               | string setting the application start time                 | *non-optional*  |
 | `stopTime`                | string setting the application stop time                  | *non-optional*  |
 | `globalResourceControl`   | enable/disable global resource control: `true` or `false` | `false`         |
-| `logKindFlag`             | string constant setting ESMF logging kind, see ESMF RefDoc| `ESMF_LOGKIND_Multi_On_Error`|
+| `logKindFlag`             | ESMF logging kind, see ESMF RefDoc for options            | `ESMF_LOGKIND_Multi_On_Error`|
 | `logAppendFlag`           | enable/disable log append: `true` or `false`              | `true`          |
 | `defaultLogFilename`      | name of the default ESMF log file (suffix if multi PET)   | `ESMF_LogFile`  |
+| `defaultCalKind`          | ESMF calendar kind used by default, see ESMF RefDoc for options | `ESMF_CALKIND_GREGORIAN` |
 | `logFlush`                | enable/disable log flush for each write: `true` or `false`| `false`         |
 | `fieldDictionary`         | name of the NUOPC field dictionary file to be loaded      | *None*          |
 

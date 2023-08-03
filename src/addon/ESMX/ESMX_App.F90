@@ -32,7 +32,7 @@ program ESMX_App
   configKey = ["ESMX", "App "]
   call ESMF_Initialize(configFilenameFromArgNum=1, & ! arg 1 to spec alt. config
     configFileName="esmxRun.yaml", configKey=configKey, &
-    config=config, defaultCalkind=ESMF_CALKIND_GREGORIAN, rc=rc)
+    config=config, defaultDefaultCalKind=ESMF_CALKIND_GREGORIAN, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -61,6 +61,7 @@ program ESMX_App
     vocabulary=["defaultLogFilename   ", & ! ESMF_Initialize option
                 "logAppendFlag        ", & ! ESMF_Initialize option
                 "logKindFlag          ", & ! ESMF_Initialize option
+                "defaultCalKind       ", & ! ESMF_Initialize option
                 "globalResourceControl", & ! ESMF_Initialize option
                 "startTime            ", & ! ESMX_App option
                 "stopTime             ", & ! ESMX_App option
