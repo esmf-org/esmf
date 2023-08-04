@@ -1170,6 +1170,33 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
+  void FTN_X(c_esmc_vmsetenv)(char *name, char *value, int *rc,
+    ESMCI_FortranStrLenArg name_l, ESMCI_FortranStrLenArg value_l){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmsetenv()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    try{
+      std::string nameStr(name, name_l);
+      std::string valueStr(value, value_l);
+      ESMCI::VM::setenv(nameStr.c_str(), valueStr.c_str());
+    }catch(int localrc){
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc))
+        return; // bail out
+    }catch(std::exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return; // bail out
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception", 
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
   void FTN_X(c_esmc_vmfinalize)(ESMC_Logical *keepMpiFlag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmfinalize()"

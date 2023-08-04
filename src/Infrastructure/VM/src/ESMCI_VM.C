@@ -3108,7 +3108,7 @@ char const *VM::getenv(
   char const *name){
 //
 // !DESCRIPTION:
-//    Access environment variables in the global VM object
+//    Access environment variable cached within the global VM object
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -3121,6 +3121,43 @@ char const *VM::getenv(
 
   // match found
   return esmfRuntimeEnvValue[i].c_str();
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::setenv()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::setenv - set environment variable
+// !INTERFACE:
+ void VM::setenv(
+//
+// !RETURN VALUE:
+//    pointer to value or NULL
+//
+// !ARGUMENTS:
+//
+  char const *name,
+  char const *value){
+//
+// !DESCRIPTION:
+//    Set environment variable cached within the global VM object
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int count = esmfRuntimeEnv.size();
+  int i;
+  for (i=0; i<count; i++)
+    if (!esmfRuntimeEnv[i].compare(name)) break;
+  if (i == count){
+    // no match found -> add new variable
+    esmfRuntimeEnv.push_back(name);
+    esmfRuntimeEnvValue.push_back(value);
+  }else{
+    // match found -> update the value
+    esmfRuntimeEnvValue[i] = std::string(value);
+  }
 }
 //-----------------------------------------------------------------------------
 
