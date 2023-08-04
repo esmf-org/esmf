@@ -281,6 +281,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              \item {\tt logKindFlag}
 !              \item {\tt globalResourceControl}
 !           \end{itemize}
+!
+!           ESMF allows the user to affect certain details about the execution
+!           of an application through a number of run-time environment variables.
+!           The following list of variables are checked within the specified
+!           configuration file. If a matching label is found, the respective
+!           value is set, potentially overriding the value defined within the
+!           user environment for the same variable.
+!           \begin{itemize}
+!              \item {\tt ESMF\_RUNTIME\_PROFILE}
+!              \item {\tt ESMF\_RUNTIME\_PROFILE\_OUTPUT}
+!              \item {\tt ESMF\_RUNTIME\_PROFILE\_PETLIST}
+!              \item {\tt ESMF\_RUNTIME\_TRACE}
+!              \item {\tt ESMF\_RUNTIME\_TRACE\_CLOCK}
+!              \item {\tt ESMF\_RUNTIME\_TRACE\_PETLIST}
+!              \item {\tt ESMF\_RUNTIME\_TRACE\_COMPONENT}
+!              \item {\tt ESMF\_RUNTIME\_TRACE\_FLUSH}
+!              \item {\tt ESMF\_RUNTIME\_COMPLIANCECHECK}
+!           \end{itemize}
 !     \item [{[configKey]}]
 !           If present, use {\tt configKey} to find the map of predefined
 !           initialization options that are used during ESMF initialization.
@@ -606,7 +624,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical                 :: globalResourceControlSet, logAppendFlagSet
       character(160)          :: defaultLogFilenameSet, defaultLogFilenameS
       character(:), allocatable :: stringAlloc
-      character(80)           :: stringS, stringSU
+      character(80)           :: stringS, stringSU, stringSet
       type(ESMF_LogKind_Flag) :: logKindFlagSet
       type(ESMF_CalKind_Flag) :: defaultCalKindSet
 
@@ -1076,22 +1094,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
         endif
 
-        ! optionally destroy the HConfigNode
-        if (validHConfigNode) then
-          call ESMF_HConfigDestroy(hconfigNode, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        endif
-
-        ! optionally destroy the Config
-        if (.not.present(config)) then
-          call ESMF_ConfigDestroy(configInternal, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        else
-          config = configInternal ! return back to user
-        endif
-
       endif ! have a default Config
 
       if (present(configFilenameFromArgNum).or.present(configFilename)) &
@@ -1298,7 +1300,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Ensure that at least the version number makes it into the log
       call ESMF_LogFlush(rc=localrc)
-      
+
+      if (haveConfig) then
+        ! Ingest ESMF_RUNTIME_* settings from config -> possibly override environment
+        call ingest_environment_variable("ESMF_RUNTIME_PROFILE")
+        call ingest_environment_variable("ESMF_RUNTIME_PROFILE_OUTPUT")
+        call ingest_environment_variable("ESMF_RUNTIME_PROFILE_PETLIST")
+        call ingest_environment_variable("ESMF_RUNTIME_TRACE")
+        call ingest_environment_variable("ESMF_RUNTIME_TRACE_CLOCK")
+        call ingest_environment_variable("ESMF_RUNTIME_TRACE_PETLIST")
+        call ingest_environment_variable("ESMF_RUNTIME_TRACE_COMPONENT")
+        call ingest_environment_variable("ESMF_RUNTIME_TRACE_FLUSH")
+        call ingest_environment_variable("ESMF_RUNTIME_COMPLIANCECHECK")
+        ! optionally destroy the HConfigNode
+        if (validHConfigNode) then
+          call ESMF_HConfigDestroy(hconfigNode, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+        ! optionally destroy the Config
+        if (.not.present(config)) then
+          call ESMF_ConfigDestroy(configInternal, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else
+          config = configInternal ! return back to user
+        endif
+      endif
+
       ! if compliance checker is on, we want logs to have high precision timestamps
       call c_esmc_getComplianceCheckJSON(complianceCheckIsOn, localrc)
       if (localrc /= ESMF_SUCCESS) then
@@ -1361,6 +1390,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       if (rcpresent) rc = ESMF_SUCCESS
+
+      contains
+
+        subroutine ingest_environment_variable(env_var_name)
+          character(*), intent(in) :: env_var_name
+          if (validHConfigNode) then
+            isPresent = ESMF_HConfigIsDefined(hconfigNode, &
+              keyString=env_var_name, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            if (isPresent) then
+              isPresent = .not.ESMF_HConfigIsNull(hconfigNode, &
+                keyString=env_var_name, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
+          else
+            call ESMF_ConfigFindLabel(configInternal, &
+              label="ESMF_RUNTIME_PROFILE:", isPresent=isPresent, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+          if (isPresent) then
+            if (validHConfigNode) then
+              stringAlloc = ESMF_HConfigAsString(hconfigNode, &
+                keyString=env_var_name, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+              stringSet = trim(stringAlloc)
+            else
+              call ESMF_ConfigGetAttribute(configInternal, stringS, &
+                label="defaultLogFilename:", default="---invalid---", rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+              if (trim(stringS)/="---invalid---") then
+                stringSet = trim(stringS)
+              endif
+            endif
+            call ESMF_VMSetEnv(env_var_name, stringSet, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+        end subroutine
+
 
       end subroutine ESMF_FrameworkInternalInit
 !------------------------------------------------------------------------------
