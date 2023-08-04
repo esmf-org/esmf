@@ -1299,7 +1299,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Ensure that at least the version number makes it into the log
       call ESMF_LogFlush(rc=localrc)
       
-      ! if compliance checker is on, we want logs to have high prescision timestamps
+      ! if compliance checker is on, we want logs to have high precision timestamps
       call c_esmc_getComplianceCheckJSON(complianceCheckIsOn, localrc)
       if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error checking ESMF_RUNTIME_COMPLIANCECHECK env variable"
@@ -1316,7 +1316,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check if tracing is on
       call c_esmc_getComplianceCheckTrace(traceIsOn, profileIsOn, localrc)
       if (localrc /= ESMF_SUCCESS) then
-          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error checking ESMF_RUNTIME_COMPLIANCECHECK env variable"
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error checking ESMF_RUNTIME_* env variables"
           return
       endif
       if (traceIsOn == 1 .or. profileIsOn == 1) then
@@ -1536,7 +1536,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       call c_esmc_getComplianceCheckTrace(traceIsOn, profileIsOn, localrc)
       if (localrc /= ESMF_SUCCESS) then
-          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error checking ESMF_RUNTIME_COMPLIANCECHECK env variable"
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error checking ESMF_RUNTIME_* env variables"
           return
       endif
       if (traceIsOn == 1 .or. profileIsOn == 1) then
