@@ -20,7 +20,7 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{ESMF Tracing Fortran Reference}
+\newcommand{\mytitle}{ESMF Tracing C Reference}
 \newcommand{\myauthors}{Rocky Dunlap}
 % set a standard paragraph style
 \setlength{\parskip}{0pt}
@@ -60,15 +60,15 @@
 \input{../Infrastructure/Trace/doc/Trace_desc}
 #endif
 
-\subsection{Use and Examples}
+#\subsection{Use and Examples}
 #ifdef STANDALONE
-\input{Trace_usage}
-\input{ESMF_TraceEx_fapi}
-\input{ESMF_TraceUserEx_fapi}
+#\input{Trace_usage}
+#\input{ESMF_TraceEx_fapi}
+#\input{ESMF_TraceUserEx_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Trace/doc/Trace_usage}
-\input{../Infrastructure/Trace/doc/ESMF_TraceEx_fapi}
-\input{../Infrastructure/Trace/doc/ESMF_TraceUserEx_fapi}
+#\input{../Infrastructure/Trace/doc/Trace_usage}
+#\input{../Infrastructure/Trace/doc/ESMF_TraceEx_fapi}
+#\input{../Infrastructure/Trace/doc/ESMF_TraceUserEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
@@ -80,9 +80,9 @@
 
 \subsection{Class API}
 #ifdef STANDALONE
-\input{ESMF_Trace_fapi}
+\input{ESMC_Trace_chapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Trace/doc/ESMF_Trace_fapi}
+\input{../Infrastructure/Trace/doc/ESMC_Trace_chapi}
 #endif
 
 %#ifdef STANDALONE
