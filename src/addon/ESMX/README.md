@@ -248,6 +248,8 @@ On the highest level, `ESMX Run Configuration` is expected to define the `ESMX` 
 
 This section affects the application level.
 
+**CAUTION:** Specifying any of the  `ESMF_RUNTIME_*` keys overrides the corresponding environment variables set in the user's environment.
+
 | Option key                | Description / Value options                               | Default         |
 | ------------------------- | --------------------------------------------------------- | --------------- |
 | `startTime`               | string setting the application start time                 | *non-optional*  |
@@ -259,6 +261,15 @@ This section affects the application level.
 | `defaultCalKind`          | ESMF calendar kind used by default, see ESMF RefDoc for options | `ESMF_CALKIND_GREGORIAN` |
 | `logFlush`                | enable/disable log flush for each write: `true` or `false`| `false`         |
 | `fieldDictionary`         | name of the NUOPC field dictionary file to be loaded      | *None*          |
+| `ESMF_RUNTIME_PROFILE`    | enable/disable all profiling functions: `ON` or `OFF`     | `OFF`           |
+| `ESMF_RUNTIME_PROFILE_OUTPUT` | output format; multiple can be selected: `TEXT` `SUMMARY` `BINARY` | `TEXT`      |
+| `ESMF_RUNTIME_PROFILE_PETLIST`| limit profiling to an explicit list of PETs           | *all PETs*      |
+| `ESMF_RUNTIME_TRACE`      | enable/disable all tracing functions: `ON` or `OFF`       | `OFF`           |
+| `ESMF_RUNTIME_TRACE_CLOCK`| type of clock for events: `REALTIME` or `MONOTONIC` or `MONOTONIC_SYNC`  | `REALTIME`|
+| `ESMF_RUNTIME_TRACE_PETLIST`| limit tracing to an explicit list of PETs               | *all PETs*      |
+| `ESMF_RUNTIME_TRACE_COMPONENT`| enable/disable tracing of component events: `ON` or `OFF` | `ON`        |
+| `ESMF_RUNTIME_TRACE_FLUSH`| frequency of event stream flushing to file: `DEFAULT` or `EAGER` | `DEFAULT`|
+| `ESMF_RUNTIME_COMPLIANCECHECK`| enable/disable NUOPC compliance checking: `ON` or `OFF` with `DEPTH` | `OFF`|
 
 #### ESMX/Driver Options
 
