@@ -98,6 +98,111 @@ program ESMF_HConfigUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "HConfigIsDefined() test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isFlag = ESMF_HConfigIsDefined(hconfig, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigIsDefined() value test"
+  write(failMsg, *) "Value not as expected"
+  call ESMF_Test(isFlag, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigIsNULL() test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isFlag = ESMF_HConfigIsNULL(hconfig, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigIsNULL() value test"
+  write(failMsg, *) "Value not as expected"
+  call ESMF_Test(isFlag, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigIsScalar() test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isFlag = ESMF_HConfigIsScalar(hconfig, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigIsScalar() value test"
+  write(failMsg, *) "Value not as expected"
+  call ESMF_Test(.not.isFlag, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigIsMap() test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isFlag = ESMF_HConfigIsMap(hconfig, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigIsMap() value test"
+  write(failMsg, *) "Value not as expected"
+  call ESMF_Test(.not.isFlag, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigIsSequence() test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isFlag = ESMF_HConfigIsSequence(hconfig, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigIsSequence() value test"
+  write(failMsg, *) "Value not as expected"
+  call ESMF_Test(.not.isFlag, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigIsDefined() for index test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isFlag = ESMF_HConfigIsDefined(hconfig, index=1, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigIsDefined() for index value test"
+  write(failMsg, *) "Value not as expected"
+  call ESMF_Test(.not.isFlag, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigIsDefined() for keyString test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isFlag = ESMF_HConfigIsDefined(hconfig, keyString="does not exist", rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigIsDefined() for keyString value test"
+  write(failMsg, *) "Value not as expected"
+  call ESMF_Test(.not.isFlag, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "HConfigSet()"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_HConfigSet(hconfig, content="[1, 2, 3]", rc=rc)
@@ -455,6 +560,13 @@ program ESMF_HConfigUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "HConfigIsDefined() value test"
+  write(failMsg, *) "Value not as expected"
+  call ESMF_Test(isFlag, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "HConfigAdd() another map element, with both key and value a list"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_HConfigAdd(hconfig, "[third1, third2]", &
@@ -490,11 +602,25 @@ program ESMF_HConfigUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "HConfigIsDefinedMapKey() value test"
+  write(failMsg, *) "Value not as expected"
+  call ESMF_Test(isFlag, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   ! Testing ESMF_HConfigIs<NodeType>MapVal()
   write(name, *) "HConfigIsDefinedMapVal() test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   isFlag = ESMF_HConfigIsDefinedMapVal(hconfigIter, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigIsDefinedMapVal() value test"
+  write(failMsg, *) "Value not as expected"
+  call ESMF_Test(isFlag, name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -555,10 +681,24 @@ program ESMF_HConfigUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "HConfigIterIsMap() value test"
+  write(failMsg, *) "Value not as expected"
+  call ESMF_Test(isFlag, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "HConfigIterIsSequence() test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   isFlag = ESMF_HConfigIterIsSequence(hconfigIter, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfigIterIsSequence() value test"
+  write(failMsg, *) "Value not as expected"
+  call ESMF_Test(.not.isFlag, name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
