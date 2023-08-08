@@ -45080,7 +45080,11 @@ end subroutine test_regridSMMArbGrid
   real(ESMF_KIND_R8) :: dot,regrid_len,exact_len,angle
 
   real(ESMF_KIND_R8) :: x,y,z, lat_180
-  
+
+  real(ESMF_KIND_R8) :: totLocal(3),totGlobal(3)
+  real(ESMF_KIND_R8) :: maxLocal(2),maxGlobal(2)
+
+ 
   integer :: localPet, petCount
 
 
@@ -45555,9 +45559,10 @@ end subroutine test_regridSMMArbGrid
       return
    endif
 
-
-  ! Check results
-  do lDE=0,dstlocalDECount-1
+   ! Check results
+   totLocal(:)=0
+   maxLocal(:)=-1.0 
+   do lDE=0,dstlocalDECount-1
 
      call ESMF_FieldGet(dstField, lDE, farrayPtr, &
           computationalLBound=fclbnd, computationalUBound=fcubnd, &
@@ -45611,9 +45616,7 @@ end subroutine test_regridSMMArbGrid
         return
      endif
 
-     
-
-     !! make sure we're not using any bad points
+     !! Loop looking at error
      do i1=fclbnd(1),fcubnd(1)
      do i2=fclbnd(2),fcubnd(2)
 
@@ -45662,6 +45665,14 @@ end subroutine test_regridSMMArbGrid
         dst3DVecfarrayPtr(i1,i2,1) = farrayPtr(i1,i2,1)*e_vec(1)+farrayPtr(i1,i2,2)*n_vec(1)
         dst3DVecfarrayPtr(i1,i2,2) = farrayPtr(i1,i2,1)*e_vec(2)+farrayPtr(i1,i2,2)*n_vec(2)
         dst3DVecfarrayPtr(i1,i2,3) = farrayPtr(i1,i2,1)*e_vec(3)+farrayPtr(i1,i2,2)*n_vec(3)
+
+        ! Gather error measures
+        totLocal(1)=totLocal(1)+angle
+        totLocal(2)=totLocal(2)+abs(exact_len-regrid_len)
+        totLocal(3)=totLocal(3) + 1.0
+
+        if (angle > maxLocal(1)) maxLocal(1)=angle
+        if (abs(exact_len-regrid_len) > maxLocal(2)) maxLocal(2)=abs(exact_len-regrid_len)
         
      enddo
      enddo
@@ -45669,6 +45680,32 @@ end subroutine test_regridSMMArbGrid
   enddo    ! lDE
 
 
+  ! Reduce to get global sum and max
+  call ESMF_VMAllReduce(vm, totLocal, totGlobal, 3, ESMF_REDUCE_SUM, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  call ESMF_VMAllReduce(vm, maxLocal, maxGlobal, 2, ESMF_REDUCE_MAX, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! If PET 0, report output
+  if (localPet == 0) then
+     write(*,*) "Max angle difference=",maxGlobal(1)
+     write(*,*) "Avg angle difference=",totGlobal(1)/totGlobal(3)
+     write(*,*)
+     write(*,*) "Max magnitude difference=",maxGlobal(2)
+     write(*,*) "Avg magnitude difference=",totGlobal(2)/totGlobal(3)
+  endif
+
+  
+
+
+  
 #if 1
   call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
        filename="srcGrid", array1=src3DVecArray, &
