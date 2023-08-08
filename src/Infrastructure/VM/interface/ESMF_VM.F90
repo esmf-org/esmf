@@ -458,6 +458,7 @@ module ESMF_VMMod
   public ESMF_VMInitializePreMPI
   public ESMF_VMInitialize
   public ESMF_VMSet
+  public ESMF_VMSetEnv
   public ESMF_VMFinalize
   public ESMF_VMAbort
   public ESMF_VMShutdown
@@ -9345,6 +9346,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMSet
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMSetEnv()"
+!BOPI
+! !IROUTINE: ESMF_VMSetEnv - Set environment variable cached in the Global VM
+
+! !INTERFACE:
+  subroutine ESMF_VMSetEnv(name, value, rc)
+!
+! !ARGUMENTS:
+    character(*), intent(in)            :: name
+    character(*), intent(in)            :: value
+    integer,      intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Set environment variable cached in the Global VM. Potentially override what
+!   came from the shell environment.
+!
+!   The arguments are:
+!   \begin{description}
+!     \item [name]
+!        The name of the environment variable.
+!     \item [value]
+!        The value of the environment variable.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMSetEnv(name, value, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMSetEnv
 !------------------------------------------------------------------------------
 
 

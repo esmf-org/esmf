@@ -32,7 +32,7 @@ program ESMX_App
   configKey = ["ESMX", "App "]
   call ESMF_Initialize(configFilenameFromArgNum=1, & ! arg 1 to spec alt. config
     configFileName="esmxRun.yaml", configKey=configKey, &
-    config=config, defaultCalkind=ESMF_CALKIND_GREGORIAN, rc=rc)
+    config=config, defaultDefaultCalKind=ESMF_CALKIND_GREGORIAN, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -58,14 +58,24 @@ program ESMX_App
 
   ! Validate hconfigNode against ESMX/App controlled key vocabulary
   isFlag = ESMF_HConfigValidateMapKeys(hconfigNode, &
-    vocabulary=["defaultLogFilename   ", & ! ESMF_Initialize option
-                "logAppendFlag        ", & ! ESMF_Initialize option
-                "logKindFlag          ", & ! ESMF_Initialize option
-                "globalResourceControl", & ! ESMF_Initialize option
-                "startTime            ", & ! ESMX_App option
-                "stopTime             ", & ! ESMX_App option
-                "logFlush             ", & ! ESMX_App option
-                "fieldDictionary      "  & ! ESMX_App option
+    vocabulary=["defaultLogFilename          ", & ! ESMF_Initialize option
+                "logAppendFlag               ", & ! ESMF_Initialize option
+                "logKindFlag                 ", & ! ESMF_Initialize option
+                "defaultCalKind              ", & ! ESMF_Initialize option
+                "globalResourceControl       ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_PROFILE        ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_PROFILE_OUTPUT ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_PROFILE_PETLIST", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_TRACE          ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_TRACE_CLOCK    ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_TRACE_PETLIST  ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_TRACE_COMPONENT", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_TRACE_FLUSH    ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_COMPLIANCECHECK", & ! ESMF_Initialize option
+                "startTime                   ", & ! ESMX_App option
+                "stopTime                    ", & ! ESMX_App option
+                "logFlush                    ", & ! ESMX_App option
+                "fieldDictionary             "  & ! ESMX_App option
                 ], badKey=valueString, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &

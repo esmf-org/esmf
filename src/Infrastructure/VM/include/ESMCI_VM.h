@@ -148,6 +148,7 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     static void rmFObject(void **fobject);
     static bool validObject(ESMC_Base *);
     static char const *getenv(char const *name);
+    static void setenv(char const *name, char const *value);
     // misc.
     int print() const;
     int validate() const;
