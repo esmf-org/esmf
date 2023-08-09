@@ -47,12 +47,12 @@
 
 using namespace ESMCI;
 
-// TODO: move below
+// Get information about vector dimensions for vector regrid capability
 void get_vec_dims_for_vectorRegrid(ESMCI::Array &array, int &num_vec_dims, int *vec_dims_undist_seqind);
 
 
-
-
+// This interface transforms a standard weight matrix into one that works on vectors.
+// (For more info. see the associated .C file)
 void create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *iientries, double *factors,
                                                           int num_vec_dims, int *src_vec_dims_undist_seqind, int *dst_vec_dims_undist_seqind,
                                                           Mesh *src_mesh, PointList *src_pl,

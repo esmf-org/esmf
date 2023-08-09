@@ -28,17 +28,10 @@
 #include "ESMCI_TraceMacros.h"  // for profiling
 
 #include "Mesh/include/ESMCI_Mesh.h"
-#include "Mesh/include/Legacy/ESMCI_MeshRead.h"
 #include "Mesh/include/Regridding/ESMCI_MeshRegrid.h"
 #include "Mesh/include/Legacy/ESMCI_Exception.h"
-#include "Mesh/include/Regridding/ESMCI_Integrate.h"
 #include "Mesh/include/Regridding/ESMCI_Interp.h"
-#include "Mesh/include/Regridding/ESMCI_ExtrapolationPoleLGC.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
-#include "Mesh/include/ESMCI_MathUtil.h"
-#include "Mesh/include/Legacy/ESMCI_Phedra.h"
-#include "Mesh/include/ESMCI_Mesh_Regrid_Glue.h"
-#include "Mesh/include/Legacy/ESMCI_MeshMerge.h"
 #include "Mesh/include/ESMCI_Mesh_GToM_Glue.h"
 #include "Mesh/include/ESMCI_DInfo.h"
 
@@ -58,9 +51,16 @@
 
 using namespace ESMCI;
 
+///////////////////////////// Outward facing interface //////////////////////////////////////////
 
-
-// Get information about vector dimensions for vectorRegrid capability
+// Get information about vector dimensions for the vector regrid capability
+// INPUTS:
+// + array - the ESMF Array from the Field which contains the vector data
+// OUTPUTS:
+// + num_vec_dims - the number of components in the vector dimensions
+// + vec_dims_undist_seqind - the tensor seqinds of the vector components. HOWEVER, since we only
+//                            support one ungridded dim right now, currently this is just the first few tensor dims.
+//                            Needs to be of size at least num_vec_dims.
 void get_vec_dims_for_vectorRegrid(ESMCI::Array &array, int &num_vec_dims, int *vec_dims_undist_seqind) {
 
   // Get undisributed dimension sizes
@@ -82,10 +82,12 @@ void get_vec_dims_for_vectorRegrid(ESMCI::Array &array, int &num_vec_dims, int *
 }
 
 
-// Temporary class for holding coordinates
+
+
+//////////// File local classes and subroutines used by create_vector_sparse_mat_from_reg_sparse_mat() ///////////
+
+// Class for holding coordinates to make other classes below cleaner
 class Coord {
-
-
   // Data
   double c[3];
 
@@ -96,8 +98,7 @@ public:
     c[1]=0.0;
     c[2]=0.0;
   }
-  
-  
+    
   Coord(double x, double y, double z) {
     c[0]=x;
     c[1]=y;
@@ -129,8 +130,7 @@ public:
 };
 
 
-
-// Class that lets you search for coords by Id
+// Class that lets you search for coords by Id. It used DInfo<> to allow the search to be parallel
 class CoordFromId {
 
   class CoordFromIdEntry{
@@ -169,14 +169,10 @@ class CoordFromId {
   };
   
   
-  
   // Data
   bool is_searchable;
   std::vector<CoordFromIdEntry> searchable; // After committing this will contain a sorted list for searching
 
-
-  
- 
 public:
   
   // Create empty
@@ -184,7 +180,6 @@ public:
     
   }
 
-  
   // Add points to query structure from Mesh
   void add(Mesh *mesh, MeshObj::id_type obj_type);
 
@@ -234,8 +229,6 @@ public:
   }
   
 };
-
-
 
 
 void CoordFromId::add(Mesh *mesh, MeshObj::id_type obj_type) {
@@ -511,9 +504,11 @@ void CoordFromId::make_searchable(int num_entries, int *iientries, int sord) {
 }
 
 
+
+
 // Compute n_vec,e_vec unit basis vectors from 3D Cart.
 // All vector args should at least be of size 3
-void _calc_basis_vec(double *cart_coords, double *n_vec, double *e_vec) {
+static void _calc_basis_vec(double *cart_coords, double *n_vec, double *e_vec) {
   
   // Convert 3D Cart to lon, lat, etc.in radians
   double lon, lat, rad;
@@ -550,7 +545,7 @@ void _calc_basis_vec(double *cart_coords, double *n_vec, double *e_vec) {
 // src_coords, dst_coords must be at least of size 3
 // vec_wgts must be at least of size 4
 // This assumes that the first vector component (1) is east and the second (2) is north
-void _calc_2D_vec_weights(double *src_coords, double *dst_coords, double *vec_wgts) {
+static void _calc_2D_vec_weights(double *src_coords, double *dst_coords, double *vec_wgts) {
 
   // Get src basis vectors
   double src_n_vec[3];
@@ -572,15 +567,34 @@ void _calc_2D_vec_weights(double *src_coords, double *dst_coords, double *vec_wg
 
 
 
-///////////////////////////////////////////////////////////
+///////////////////////////// Outward facing interface //////////////////////////////////////////
 
-// Create a vector sparse matrix from a regular one
+// This interface transforms a standard weight matrix into one that works on vectors. The
+// vectors are mapped into 3D Cartesian space, regridded using the matrix, and then mapped
+// back to vectors on the sphere. Currently the basis vectors used to map to and from 3D Cart.
+// are standard north and east calculated by ESMF. TODO: Add the ability for a user to set their own basis vectors
+//
+// INPUTS:
+// + num_entries - the size of the input sparse matrix
+// + iientries   - the indices of the input sparse matrix of size 2*num_entries
+// + factors     - the weights of hte input sparse matrix of size num_entries
+// + num_vec_dims - the number of vector components
+// + src_vec_dims_undist_seqind - unused (when more than 1 ungridded dim will be used to pass the src vector one)
+// + dst_vec_dims_undist_seqind,- unused (when more than 1 ungridded dim will be used to pass the dst vector one)
+// + src_mesh - if not NULL and src_pl is NULL, then describes the src geometry
+// + src_pl  -  if not NULL, then describes the src geometry
+// + dst_mesh - if not NULL and src_pl is NULL, then describes the dst geometry
+// + dst_pl  -  if not NULL, then describes the dst geometry
+// OUTPUTS:
+// + num_entries_vec - the size of the new vector sparse matrix
+// + iientries_vec   - the indices of the new vector sparse matrix allocated internally, but of size 4*num_entries_vec
+// + factors_vec     - the weigths of the new vector sparse matrix allocated internally, but of size num_entries_vec
 
 void create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *iientries, double *factors,
-                                                          int num_vec_dims, int *src_vec_dims_undist_seqind, int *dst_vec_dims_undist_seqind,
-                                                          Mesh *src_mesh, PointList *src_pl,
-                                                          Mesh *dst_mesh, PointList *dst_pl,
-                                                          int &num_entries_vec, int *&iientries_vec, double *&factors_vec) {
+                                                  int num_vec_dims, int *src_vec_dims_undist_seqind, int *dst_vec_dims_undist_seqind,
+                                                  Mesh *src_mesh, PointList *src_pl,
+                                                  Mesh *dst_mesh, PointList *dst_pl,
+                                                  int &num_entries_vec, int *&iientries_vec, double *&factors_vec) {
 
   // Set up coordinate query for source
   CoordFromId srcCoordFromId;
@@ -608,7 +622,7 @@ void create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *iientrie
 
   // Make searchable
   dstCoordFromId.make_searchable(); 
-  
+
   
   // Size of a vector matrix compared to non-vector
   int vec_factor=num_vec_dims*num_vec_dims;
