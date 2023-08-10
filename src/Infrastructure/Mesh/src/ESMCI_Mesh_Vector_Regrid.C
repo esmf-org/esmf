@@ -579,8 +579,8 @@ static void _calc_2D_vec_weights(double *src_coords, double *dst_coords, double 
 // + iientries   - the indices of the input sparse matrix of size 2*num_entries
 // + factors     - the weights of hte input sparse matrix of size num_entries
 // + num_vec_dims - the number of vector components
-// + src_vec_dims_undist_seqind - unused (when more than 1 ungridded dim will be used to pass the src vector one)
-// + dst_vec_dims_undist_seqind,- unused (when more than 1 ungridded dim will be used to pass the dst vector one)
+// + src_vec_dims_undist_seqind - src vector component tensor dims (of size num_vec_dims)
+// + dst_vec_dims_undist_seqind,- dst vector component tensor dims (of size num_vec_dims)
 // + src_mesh - if not NULL and src_pl is NULL, then describes the src geometry
 // + src_pl  -  if not NULL, then describes the src geometry
 // + dst_mesh - if not NULL and src_pl is NULL, then describes the dst geometry
@@ -673,27 +673,27 @@ void create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *iientrie
       
       // Fill in new matrix entries
       iientries_vec[iientries_vec_pos] = src_id;
-      iientries_vec[iientries_vec_pos+1] = 1;
+      iientries_vec[iientries_vec_pos+1] = src_vec_dims_undist_seqind[0]; 
       iientries_vec[iientries_vec_pos+2] = dst_id;
-      iientries_vec[iientries_vec_pos+3] = 1;
+      iientries_vec[iientries_vec_pos+3] = dst_vec_dims_undist_seqind[0]; 
       factors_vec[factor_vec_pos]=factor*vec_wgts[0];
 
       iientries_vec[iientries_vec_pos+4] = src_id;
-      iientries_vec[iientries_vec_pos+5] = 2;
+      iientries_vec[iientries_vec_pos+5] = src_vec_dims_undist_seqind[1];
       iientries_vec[iientries_vec_pos+6] = dst_id;
-      iientries_vec[iientries_vec_pos+7] = 1;
+      iientries_vec[iientries_vec_pos+7] = dst_vec_dims_undist_seqind[0];
       factors_vec[factor_vec_pos+1]=factor*vec_wgts[1];
 
       iientries_vec[iientries_vec_pos+8] = src_id;
-      iientries_vec[iientries_vec_pos+9] = 1;
+      iientries_vec[iientries_vec_pos+9] = src_vec_dims_undist_seqind[0]; 
       iientries_vec[iientries_vec_pos+10] = dst_id;
-      iientries_vec[iientries_vec_pos+11] = 2;
+      iientries_vec[iientries_vec_pos+11] = dst_vec_dims_undist_seqind[1];
       factors_vec[factor_vec_pos+2]=factor*vec_wgts[2];
 
       iientries_vec[iientries_vec_pos+12] = src_id;
-      iientries_vec[iientries_vec_pos+13] = 2;
+      iientries_vec[iientries_vec_pos+13] = src_vec_dims_undist_seqind[1];
       iientries_vec[iientries_vec_pos+14] = dst_id;
-      iientries_vec[iientries_vec_pos+15] = 2;
+      iientries_vec[iientries_vec_pos+15] = dst_vec_dims_undist_seqind[1];
       factors_vec[factor_vec_pos+3]=factor*vec_wgts[3];      
       
     } else {
