@@ -45702,7 +45702,9 @@ end subroutine test_regridSMMArbGrid
      write(*,*) "Avg magnitude difference=",totGlobal(2)/totGlobal(3)
   endif
 
-  
+
+  ! Fail if average angle error bigger than produced by vector regrid
+  if (totGlobal(1)/totGlobal(3) > 2.0E-3) correct=.false.
 
 
   
