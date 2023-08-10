@@ -361,8 +361,10 @@ int IO::read(
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
         return rc;
 
+      // Save a version of the temporary array that possibly has undistributed dimensions
+      temp_array_undist_p = temp_array_p;
+
       if (has_undist) {
-        temp_array_undist_p = temp_array_p;
         // Create an aliased Array which treats all dimensions as distributed.
         // std::cout << ESMC_METHOD << ": calling undist_arraycreate_alldist" << std::endl;
         undist_arraycreate_alldist (temp_array_undist_p, &temp_array_p, &localrc);
@@ -384,34 +386,30 @@ int IO::read(
         // Redistribute into the caller supplied Array
         // std::cout << ESMC_METHOD << ": DE count > 1 - redistStore" << std::endl;
 
-        if (has_undist) {
-          // We need to redistribute from the view prior to the aliasing that treated all
-          // dimensions as distributed.
-          //
-          // Note that, even though the arrayRead read into temp_array_p, this also filled
-          // the data in temp_array_undist_p, since those two are aliases of each other
-          // (i.e., with DATACOPY_REFERENCE).
-          temp_array_p = temp_array_undist_p;
-        }
-
-        localrc = ESMCI::Array::redistStore(temp_array_p, (*it)->getArray(), &rh, NULL);
+        // Note that, if has_undist is true, then we need to redistribute from the view
+        // prior to the aliasing that treated all dimensions as distributed - i.e.,
+        // temp_array_undist_p. Further note that, even though the arrayRead read into
+        // temp_array_p, this also filled the data in temp_array_undist_p, since those two
+        // are aliases of each other (i.e., with DATACOPY_REFERENCE). If has_undist is
+        // false, then temp_array_undist_p is identical to temp_array_p.
+        localrc = ESMCI::Array::redistStore(temp_array_undist_p, (*it)->getArray(), &rh, NULL);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
 
         // std::cout << ESMC_METHOD << ": DE count > 1 - redistribute data" << std::endl;
-        localrc = ESMCI::Array::redist(temp_array_p, (*it)->getArray(), &rh,
+        localrc = ESMCI::Array::redist(temp_array_undist_p, (*it)->getArray(), &rh,
           ESMF_COMM_BLOCKING, NULL, NULL, ESMC_REGION_TOTAL);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
 
-        localrc = temp_array_p->redistRelease(rh);
+        localrc = temp_array_undist_p->redistRelease(rh);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
         // std::cout << ESMC_METHOD << ": DE count > 1 - redistribute complete!" << std::endl;
 
         // Cleanups
         // std::cout << ESMC_METHOD << ": cleaning up" << std::endl;
-        localrc = ESMCI::Array::destroy(&temp_array_p);
+        localrc = ESMCI::Array::destroy(&temp_array_undist_p);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
       }
