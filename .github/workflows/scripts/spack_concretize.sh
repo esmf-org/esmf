@@ -146,8 +146,8 @@ if [[ "$comp" == *"gcc"* ]]; then
      echo "The gcc@latest is set. Trying to find latest available gcc compiler ..."
      use_latest=1
   elif [ -z "$(cat ~/.spack/linux/compilers.yaml | grep $comp_str)" ]; then
-     echo "Given compiler ($comp) is not found! Trying to find latest available gcc compiler ..."
-     use_latest=1
+     echo "Given compiler ($comp) is not found! Exiting ..."
+     exit 1
   fi
 
   if [[ $use_latest == 1 ]]; then
