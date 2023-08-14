@@ -136,16 +136,25 @@ fi
 
 # check given gcc compiler is found or not? If not, use newer version
 if [[ "$comp" == *"gcc"* ]]; then
+  echo "::group::Check gcc compiler"
   comp_str=${comp/@/@=}
-  if [ -z "$(cat ~/.spack/linux/compilers.yaml | grep $comp_str)" ]; then
-    echo "Given compiler ($comp) not found! Try to find another ..."
-    str=`echo $comp_str | awk -F\@ '{print $1}'`
-    comp_ver=`grep -ir "${str}@=" ~/.spack/linux/compilers.yaml | tr -d "spec: ${str}@=" | sort -n | tail -n 1`
-    comp="${str}@$comp_ver"
-    echo "New compiler is found! Using $comp ..."
-  else
-    echo "Given compiler is found. Using $comp ..."
+  str=`echo $comp_str | awk -F\@ '{print $1}'`
+  comp_ver=`grep -ir "${str}@=" ~/.spack/linux/compilers.yaml | tr -d "spec: ${str}@=" | sort -n | tail -n 1`
+
+  use_latest=0
+  if [[ "$comp" == *"gcc@latest"* ]]; then
+     echo "The gcc@latest is set. Trying to find latest available gcc compiler ..."
+     use_latest=1
+  elif [ -z "$(cat ~/.spack/linux/compilers.yaml | grep $comp_str)" ]; then
+     echo "Given compiler ($comp) is not found! Trying to find latest available gcc compiler ..."
+     use_latest=1
   fi
+
+  if [[ $use_latest == 1 ]]; then
+     comp="${str}@$comp_ver"
+  fi
+  echo "Using $comp gnu compiler."
+  echo "::endgroup::"
 fi
 
 # create spack.yaml
