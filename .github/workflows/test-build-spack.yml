@@ -1,7 +1,7 @@
 name: Build ESMF Using Spack
 
 env:
-  compiler: gcc@11.3.0
+  compiler: gcc@12.3.0
   esmf_version: 'esmf@develop'
   nuopc_app_version: 'develop'
 

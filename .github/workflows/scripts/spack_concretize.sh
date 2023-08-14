@@ -134,6 +134,20 @@ if [[ "$comp" == *"oneapi"* ]]; then
   echo "::endgroup::"
 fi
 
+# check given gcc compiler is found or not? If not, use newer version
+if [[ "$comp" == *"gcc"* ]]; then
+  comp_str=${comp/@/@=}
+  if [ -z "$(cat ~/.spack/linux/compilers.yaml | grep $comp_str)" ]; then
+    echo "Given compiler ($comp) not found! Try to find another ..."
+    str=`echo $comp_str | awk -F\@ '{print $1}'`
+    comp_ver=`grep -ir "${str}@=" ~/.spack/linux/compilers.yaml | tr -d "spec: ${str}@=" | sort -n | tail -n 1`
+    comp="${str}@$comp_ver"
+    echo "New compiler is found! Using $comp ..."
+  else
+    echo "Given compiler is found. Using $comp ..."
+  fi
+fi
+
 # create spack.yaml
 echo "::group::Create spack.yaml"
 echo "spack:" > spack.yaml
