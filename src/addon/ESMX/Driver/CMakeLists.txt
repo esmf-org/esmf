@@ -125,7 +125,6 @@ endforeach()
 # link packages
 foreach(ESMX_LINK_PACKAGE IN ITEMS ${ESMX_LINK_PACKAGES})
   find_package(${ESMX_LINK_PACKAGE} REQUIRED)
-  target_link_libraries(esmx_driver ${ESMX_LINK_PACKAGE})
 endforeach()
 
 # link external libraries
