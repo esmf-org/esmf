@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.22)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Driver/cmake")
 
 # Find ESMF
-find_package(ESMF 8.5.0 MODULE REQUIRED)
+find_package(ESMF 8.6.0 MODULE REQUIRED)
 
 # Set compilers consistent with ESMF
 set(CMAKE_Fortran_COMPILER        "${ESMF_F90COMPILER}")
