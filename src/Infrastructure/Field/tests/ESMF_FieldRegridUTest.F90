@@ -45109,7 +45109,6 @@ end subroutine test_regridSMMArbGrid
             ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-#if 1        
 
   ! Src Grid - a cubed sphere grid      
   srcGrid=ESMF_GridCreateCubedSphere(tileSize=10, &
@@ -45121,25 +45120,7 @@ end subroutine test_regridSMMArbGrid
     return
   endif
 
-        
-#else
-
-  ! Just to test, do this first
-  srcGrid=ESMF_GridCreate1PeriDimUfrm(maxIndex=(/100,50/),& 
-       minCornerCoord=(/0.0_ESMF_KIND_R8,-90.0_ESMF_KIND_R8/), &
-       maxCornerCoord=(/360.0_ESMF_KIND_R8,90.0_ESMF_KIND_R8/), &
-       regDecomp=(/1,petCount/), &
-       staggerLocList=(/ESMF_STAGGERLOC_CENTER/), &
-       rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
-        
-#endif
-
-  
-
+       
 
   
   ! Src Field
@@ -45189,9 +45170,6 @@ end subroutine test_regridSMMArbGrid
   ! (Get memory and set coords for src)
   do lDE=0,srclocalDECount-1
 
-
-
-#if 1
 
      !! get coord 1
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
@@ -45260,69 +45238,6 @@ end subroutine test_regridSMMArbGrid
         
      enddo
      enddo
-#else
-
-
-     !! get coord 1
-     call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
-          farrayPtr=farrayPtr1DXC, rc=localrc)
-     if (localrc /=ESMF_SUCCESS) then
-        rc=ESMF_FAILURE
-        return
-     endif
-
-     call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
-          farrayPtr=farrayPtr1DYC, rc=localrc)
-     if (localrc /=ESMF_SUCCESS) then
-        rc=ESMF_FAILURE
-        return
-     endif
-
-
-     ! get src pointer
-     call ESMF_FieldGet(srcField, lDE, farrayPtr, &
-          computationalLBound=fclbnd, computationalUBound=fcubnd, &
-          rc=localrc)
-     if (localrc /=ESMF_SUCCESS) then
-        rc=ESMF_FAILURE
-        return
-     endif
-
-     
-     !! Set Field value
-     do i1=fclbnd(1),fcubnd(1)
-
-        ! Get X coord from Grid
-        lon = farrayPtr1DXC(i1)
-        lon_rad = DEG2RAD*(lon)
-
-     do i2=fclbnd(2),fcubnd(2)
-
-        ! Get Y coord from Grid
-        lat = farrayPtr1DYC(i2)
-        lat_rad = DEG2RAD*(lat)
-
-       ! Calc x,y,z coordinate
-        lat_180 = DEG2RAD*(90.-lat)
-        x = cos(lon_rad)*sin(lat_180)
-        y = sin(lon_rad)*sin(lat_180)
-        z = cos(lat_180)
-
-        
-        ! Get basis vactors at that point
-        call calc_unit_basis_vecs(lon_rad, lat_rad, e_vec, n_vec)
-
-        ! TODO: NEED A BETTER TEST CASE THAT'S TANGENT TO SPHERE, BUT IS CONSISTENT OVER POLE
-        
-        ! Dot with 3D vector (x,y,z) to get components 
-        farrayPtr(i1,i2,1) = x*e_vec(1)+y*e_vec(2)+z*e_vec(3)
-        farrayPtr(i1,i2,2) = x*n_vec(1)+y*n_vec(2)+z*n_vec(3)
-        
-     enddo
-     enddo     
-
-#endif     
-
      
   enddo    ! lDE
 
