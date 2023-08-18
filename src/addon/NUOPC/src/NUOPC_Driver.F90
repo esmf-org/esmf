@@ -116,6 +116,9 @@ module NUOPC_Driver
 
   ! Generic methods
   public NUOPC_DriverAddComp
+#ifdef __INTEL_LLVM_COMPILER
+  public NUOPC_DriverAddGridCompPtr !TODO: remove once IFX works correctly
+#endif
   public NUOPC_DriverAddRunElement
   public NUOPC_DriverEgestRunSequence
   public NUOPC_DriverGet
@@ -4518,6 +4521,66 @@ module NUOPC_Driver
 
   !-----------------------------------------------------------------------------
   !-----------------------------------------------------------------------------
+
+#ifdef __INTEL_LLVM_COMPILER
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_DriverAddComp - Add a GridComp child to a Driver using procedure pointers
+!
+! !INTERFACE:
+  ! Private name; call using NUOPC_DriverAddComp()
+  recursive subroutine NUOPC_DriverAddGridCompPtr(driver, compLabel, &
+    compSetServicesRoutine, compSetVMRoutine, petList, info, config, comp, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                               :: driver
+    character(len=*),    intent(in)                   :: compLabel
+    abstract interface
+      recursive subroutine SetServicesRoutine(gridcomp, rc)
+        use ESMF
+        implicit none
+        type(ESMF_GridComp)        :: gridcomp ! must not be optional
+        integer, intent(out)       :: rc       ! must not be optional
+      end subroutine
+      recursive subroutine SetVMRoutine(gridcomp, rc)
+        use ESMF
+        implicit none
+        type(ESMF_GridComp)        :: gridcomp ! must not be optional
+        integer, intent(out)       :: rc       ! must not be optional
+      end subroutine
+    end interface
+    procedure(SetServicesRoutine),  pointer           :: compSetServicesRoutine
+    procedure(SetVMRoutine),        pointer, optional :: compSetVMRoutine
+    integer,             intent(in),         optional :: petList(:)
+    type(ESMF_Info),     intent(in),         optional :: info
+    type(ESMF_Config),   intent(in),         optional :: config
+    type(ESMF_GridComp), intent(out),        optional :: comp
+    integer,             intent(out),        optional :: rc
+!
+! !DESCRIPTION:
+! Same as {\tt NUOPC\_DriverAddGridComp()}, but with dummy procedure arguments
+! have pointer attributes. This is a work-around of IFX compiler needed by ESMX.
+!TODO: Remove this interface once IFX no longer needs it as a work-around.
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                         :: localrc
+    character(ESMF_MAXSTR)          :: name
+
+    call NUOPC_CompGet(driver, name=name, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    call NUOPC_DriverAddGridComp(driver, compLabel, &
+      compSetServicesRoutine, compSetVMRoutine, petList, info, config, comp, &
+      rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+#endif
 
   !-----------------------------------------------------------------------------
 !BOP
