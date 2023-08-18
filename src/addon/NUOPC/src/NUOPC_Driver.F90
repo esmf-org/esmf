@@ -4528,30 +4528,29 @@ module NUOPC_Driver
   recursive subroutine NUOPC_DriverAddGridComp(driver, compLabel, &
     compSetServicesRoutine, compSetVMRoutine, petList, info, config, comp, rc)
 ! !ARGUMENTS:
-    type(ESMF_GridComp)                        :: driver
-    character(len=*),    intent(in)            :: compLabel
-    interface
-      recursive subroutine compSetServicesRoutine(gridcomp, rc)
+    type(ESMF_GridComp)                               :: driver
+    character(len=*),    intent(in)                   :: compLabel
+    abstract interface
+      recursive subroutine SetServicesRoutine(gridcomp, rc)
+        use ESMF
+        implicit none
+        type(ESMF_GridComp)        :: gridcomp ! must not be optional
+        integer, intent(out)       :: rc       ! must not be optional
+      end subroutine
+      recursive subroutine SetVMRoutine(gridcomp, rc)
         use ESMF
         implicit none
         type(ESMF_GridComp)        :: gridcomp ! must not be optional
         integer, intent(out)       :: rc       ! must not be optional
       end subroutine
     end interface
-    interface
-      recursive subroutine compSetVMRoutine(gridcomp, rc)
-        use ESMF
-        implicit none
-        type(ESMF_GridComp)        :: gridcomp ! must not be optional
-        integer, intent(out)       :: rc       ! must not be optional
-      end subroutine
-    end interface
-    optional                                   :: compSetVMRoutine
-    integer,             intent(in),  optional :: petList(:)
-    type(ESMF_Info),     intent(in),  optional :: info
-    type(ESMF_Config),   intent(in),  optional :: config
-    type(ESMF_GridComp), intent(out), optional :: comp
-    integer,             intent(out), optional :: rc
+    procedure(SetServicesRoutine)                     :: compSetServicesRoutine
+    procedure(SetVMRoutine),                 optional :: compSetVMRoutine
+    integer,             intent(in),         optional :: petList(:)
+    type(ESMF_Info),     intent(in),         optional :: info
+    type(ESMF_Config),   intent(in),         optional :: config
+    type(ESMF_GridComp), intent(out),        optional :: comp
+    integer,             intent(out),        optional :: rc
 !
 ! !DESCRIPTION:
 ! Create and add a GridComp (i.e. Model, Mediator, or Driver) as a child
@@ -4896,31 +4895,30 @@ module NUOPC_Driver
     dstCompLabel, compSetServicesRoutine, compSetVMRoutine, petList, info, &
     config, comp, rc)
 ! !ARGUMENTS:
-    type(ESMF_GridComp)                        :: driver
-    character(len=*),    intent(in)            :: srcCompLabel
-    character(len=*),    intent(in)            :: dstCompLabel
-    interface
-      recursive subroutine compSetServicesRoutine(cplcomp, rc)
+    type(ESMF_GridComp)                               :: driver
+    character(len=*),    intent(in)                   :: srcCompLabel
+    character(len=*),    intent(in)                   :: dstCompLabel
+    abstract interface
+      recursive subroutine SetServicesRoutine(cplcomp, rc)
+        use ESMF
+        implicit none
+        type(ESMF_CplComp)         :: cplcomp  ! must not be optional
+        integer, intent(out)       :: rc       ! must not be optional
+      end subroutine
+      recursive subroutine SetVMRoutine(cplcomp, rc)
         use ESMF
         implicit none
         type(ESMF_CplComp)         :: cplcomp  ! must not be optional
         integer, intent(out)       :: rc       ! must not be optional
       end subroutine
     end interface
-    interface
-      recursive subroutine compSetVMRoutine(cplcomp, rc)
-        use ESMF
-        implicit none
-        type(ESMF_CplComp)         :: cplcomp  ! must not be optional
-        integer, intent(out)       :: rc       ! must not be optional
-      end subroutine
-    end interface
-    optional                                   :: compSetVMRoutine
-    integer, target,     intent(in),  optional :: petList(:)
-    type(ESMF_Info),     intent(in),  optional :: info
-    type(ESMF_Config),   intent(in),  optional :: config
-    type(ESMF_CplComp),  intent(out), optional :: comp
-    integer,             intent(out), optional :: rc
+    procedure(SetServicesRoutine)                     :: compSetServicesRoutine
+    procedure(SetVMRoutine),                 optional :: compSetVMRoutine
+    integer, target,     intent(in),         optional :: petList(:)
+    type(ESMF_Info),     intent(in),         optional :: info
+    type(ESMF_Config),   intent(in),         optional :: config
+    type(ESMF_CplComp),  intent(out),        optional :: comp
+    integer,             intent(out),        optional :: rc
 !
 ! !DESCRIPTION:
 ! Create and add a CplComp (i.e. Connector) as a child component to a Driver.
