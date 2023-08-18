@@ -261,6 +261,16 @@ module ESMX_Driver
 
       if (inCompDef) then
         ! add child component with SetVM and SetServices in CompDef
+#ifdef __INTEL_LLVM_COMPILER
+!TODO: remove once IFX works correctly and does not require this work-around
+        call NUOPC_DriverAddGridCompPtr(driver, trim(compLabel), config=config, &
+          compSetServicesRoutine=CompDef(j)%ssPtr, compSetVMRoutine=CompDef(j)%svPtr, &
+          info=info, petList=petList, comp=comp, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, &
+          msg="Unable to add component '"//trim(compLabel)// &
+            "' to driver via Fortran module.", &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+#else
         call NUOPC_DriverAddComp(driver, trim(compLabel), config=config, &
           compSetServicesRoutine=CompDef(j)%ssPtr, compSetVMRoutine=CompDef(j)%svPtr, &
           info=info, petList=petList, comp=comp, rc=rc)
@@ -268,6 +278,7 @@ module ESMX_Driver
           msg="Unable to add component '"//trim(compLabel)// &
             "' to driver via Fortran module.", &
           line=__LINE__, file=FILENAME)) return  ! bail out
+#endif
       else
         ! add child component with SetVM and SetServices in shared object
         call NUOPC_DriverAddComp(driver, trim(compLabel), config=config, &
