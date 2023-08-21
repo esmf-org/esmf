@@ -4593,7 +4593,7 @@ module NUOPC_Driver
 ! !ARGUMENTS:
     type(ESMF_GridComp)                               :: driver
     character(len=*),    intent(in)                   :: compLabel
-#if defined (__NVCOMPILER) || defined (__PGI)
+#if defined (__NVCOMPILER) || defined (__PGI) || defined (ESMF_COMPILER_AOCC)
     interface
       recursive subroutine compSetServicesRoutine(gridcomp, rc)
         use ESMF
@@ -4981,7 +4981,7 @@ module NUOPC_Driver
     type(ESMF_GridComp)                               :: driver
     character(len=*),    intent(in)                   :: srcCompLabel
     character(len=*),    intent(in)                   :: dstCompLabel
-#if defined (__NVCOMPILER) || defined (__PGI)
+#if defined (__NVCOMPILER) || defined (__PGI) || defined (ESMF_COMPILER_AOCC)
     interface
       recursive subroutine compSetServicesRoutine(cplcomp, rc)
         use ESMF
