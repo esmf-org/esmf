@@ -4593,6 +4593,25 @@ module NUOPC_Driver
 ! !ARGUMENTS:
     type(ESMF_GridComp)                               :: driver
     character(len=*),    intent(in)                   :: compLabel
+#if defined (__NVCOMPILER) || defined (__PGI)
+    interface
+      recursive subroutine compSetServicesRoutine(gridcomp, rc)
+        use ESMF
+        implicit none
+        type(ESMF_GridComp)        :: gridcomp ! must not be optional
+        integer, intent(out)       :: rc       ! must not be optional
+      end subroutine
+    end interface
+    interface
+      recursive subroutine compSetVMRoutine(gridcomp, rc)
+        use ESMF
+        implicit none
+        type(ESMF_GridComp)        :: gridcomp ! must not be optional
+        integer, intent(out)       :: rc       ! must not be optional
+      end subroutine
+    end interface
+    optional                                          :: compSetVMRoutine
+#else
     abstract interface
       recursive subroutine SetServicesRoutine(gridcomp, rc)
         use ESMF
@@ -4609,6 +4628,7 @@ module NUOPC_Driver
     end interface
     procedure(SetServicesRoutine)                     :: compSetServicesRoutine
     procedure(SetVMRoutine),                 optional :: compSetVMRoutine
+#endif
     integer,             intent(in),         optional :: petList(:)
     type(ESMF_Info),     intent(in),         optional :: info
     type(ESMF_Config),   intent(in),         optional :: config
@@ -4961,6 +4981,25 @@ module NUOPC_Driver
     type(ESMF_GridComp)                               :: driver
     character(len=*),    intent(in)                   :: srcCompLabel
     character(len=*),    intent(in)                   :: dstCompLabel
+#if defined (__NVCOMPILER) || defined (__PGI)
+    interface
+      recursive subroutine compSetServicesRoutine(cplcomp, rc)
+        use ESMF
+        implicit none
+        type(ESMF_CplComp)         :: cplcomp  ! must not be optional
+        integer, intent(out)       :: rc       ! must not be optional
+      end subroutine
+    end interface
+    interface
+      recursive subroutine compSetVMRoutine(cplcomp, rc)
+        use ESMF
+        implicit none
+        type(ESMF_CplComp)         :: cplcomp  ! must not be optional
+        integer, intent(out)       :: rc       ! must not be optional
+      end subroutine
+    end interface
+    optional                                          :: compSetVMRoutine
+#else
     abstract interface
       recursive subroutine SetServicesRoutine(cplcomp, rc)
         use ESMF
@@ -4977,6 +5016,7 @@ module NUOPC_Driver
     end interface
     procedure(SetServicesRoutine)                     :: compSetServicesRoutine
     procedure(SetVMRoutine),                 optional :: compSetVMRoutine
+#endif
     integer, target,     intent(in),         optional :: petList(:)
     type(ESMF_Info),     intent(in),         optional :: info
     type(ESMF_Config),   intent(in),         optional :: config
