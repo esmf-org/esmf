@@ -406,9 +406,30 @@ int IO::read(
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
         // std::cout << ESMC_METHOD << ": DE count > 1 - redistribute complete!" << std::endl;
+      }
 
-        // Cleanups
-        // std::cout << ESMC_METHOD << ": cleaning up" << std::endl;
+      // Cleanups
+      // std::cout << ESMC_METHOD << ": cleaning up" << std::endl;
+      //
+      // We need to clean up temporary arrays under the following conditions:
+      //
+      // - need_redist true, has_undist false: temp_array_p and temp_array_undist_p
+      //   reference the same temporary Array (created by redist_arraycreate1de); we need
+      //   to destroy one of them (it doesn't matter which one)
+      //
+      // - need_redist false, has_undist true: temp_array_p is a temporary Array (created
+      //   by undist_arraycreate_alldist), temp_array_undist_p points to the real Array;
+      //   we need to destroy temp_array_p
+      //
+      // - need_redist true, has_undist true: temp_array_p is a temporary Array (created
+      //   by undist_arraycreate_alldist), temp_array_undist_p is a different temporary
+      //   Array (created by redist_arraycreate1de); we need to destroy both of them
+      if (need_redist || has_undist) {
+        localrc = ESMCI::Array::destroy(&temp_array_p);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+          return rc;
+      }
+      if (need_redist && has_undist) {
         localrc = ESMCI::Array::destroy(&temp_array_undist_p);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
@@ -734,9 +755,28 @@ ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef arrayWrite()", ESMC_LOGMS
 #if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft arrayWrite()", ESMC_LOGMSG_INFO);
 #endif
-      // Clean ups //
-      if (need_redist) {
+      // Clean ups
+      //
+      // We need to clean up temporary arrays under the following conditions:
+
+      // - need_redist true, has_undist false: temp_array_p is a temporary Array (created
+      //   by redist_arraycreate1de), temp_array_undist_p is never created; we need to
+      //   destroy temp_array_p
+      //
+      // - need_redist false, has_undist true: temp_array_p is a temporary Array (created
+      //   by undist_arraycreate_alldist), temp_array_undist_p points to the real Array;
+      //   we need to destroy temp_array_p
+      //
+      // - need_redist true, has_undist true: temp_array_p is a temporary Array (created
+      //   by undist_arraycreate_alldist), temp_array_undist_p is a different temporary
+      //   Array (created by redist_arraycreate1de); we need to destroy both of them
+      if (need_redist || has_undist) {
         localrc = ESMCI::Array::destroy(&temp_array_p);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+          return rc;
+      }
+      if (need_redist && has_undist) {
+        localrc = ESMCI::Array::destroy(&temp_array_undist_p);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
       }
