@@ -68,6 +68,7 @@ jobs:
     - name: Commit and publish docs
       run: |
         cd ${{ github.workspace }}/esmpy_doc
+        git add .
         git diff-index --quiet HEAD || git commit --message "Publish ESMPy Docs"
         git push origin
         rm ~/.ssh/id_rsa
