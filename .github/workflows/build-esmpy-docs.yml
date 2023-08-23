@@ -45,11 +45,11 @@ jobs:
     - name: Setup deployment
       run: | 
         mkdir -p ~/.ssh
-        if [ -z "${{secrets.ESMF_WEB_DEPLOY_KEY}}" ]; then
-          echo "ERROR: Missing ESMF_WEB_DEPLOY_KEY!"
+        if [ -z "${{secrets.ESMPY_WEB_DEPLOY_KEY}}" ]; then
+          echo "ERROR: Missing ESMPY_WEB_DEPLOY_KEY!"
           exit 1
         fi
-        echo "${{secrets.ESMF_WEB_DEPLOY_KEY}}" > ~/.ssh/id_rsa
+        echo "${{secrets.ESMPY_WEB_DEPLOY_KEY}}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         git config --global user.name "ESMF-Bot"
         git config --global user.email "esmf_support@ucar.edu"
