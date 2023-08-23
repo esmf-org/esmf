@@ -41,13 +41,19 @@ jobs:
       with:
         name: esmpy-docs
         path: ${{ github.workspace }}/artifacts
-        
-    - name: Checkout esmpy_doc
-      uses: actions/checkout@v3
-      with:
-          repository: esmf-org/esmpy_doc
-          path: esmpy_doc
-          token: ${{ secrets.ESMF_WEB_TOKEN }}
+    
+    - name: Setup deployment
+      run: | 
+        mkdir -p ~/.ssh
+        if [ -z "${{secrets.ESMF_WEB_DEPLOY_KEY}}" ]; then
+          echo "ERROR: Missing ESMF_WEB_DEPLOY_KEY!"
+          exit 1
+        fi
+        echo "${{secrets.ESMF_WEB_DEPLOY_KEY}}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        git config --global user.name "ESMF-Bot"
+        git config --global user.email "esmf_support@ucar.edu"
+        git clone --depth=1 git@github.com:esmf-org/esmpy_doc.git ${{ github.workspace }}/esmpy_doc
     
     - name: Copy docs
       run: | 
@@ -60,10 +66,8 @@ jobs:
         cp -rf latex/ESMPy.pdf ${{ github.workspace }}/esmpy_doc/docs/nightly/${{ github.ref_name }}/
 
     - name: Commit and publish docs
-      uses: actions-js/push@master
-      with:
-        repository: esmf-org/esmpy_doc
-        directory: ${{ github.workspace }}/esmpy_doc
-        branch: master
-        github_token: ${{ secrets.ESMF_WEB_TOKEN }}
-        message: 'Publish ESMPy Docs'
+      run: |
+        cd ${{ github.workspace }}/esmpy_doc
+        git diff-index --quiet HEAD || git commit --message "Publish ESMPy Docs"
+        git push origin
+        rm ~/.ssh/id_rsa
