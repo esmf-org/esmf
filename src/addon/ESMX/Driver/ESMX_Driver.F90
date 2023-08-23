@@ -19,11 +19,37 @@ module ESMX_Driver
 
   public SetServices, SetVM, HConfigCreateFoundNode
 
+#if defined (__NVCOMPILER) || defined (__PGI)
+!TODO: remove once NVHPC and PGI compilers work correctly w/o work-around
+
+  abstract interface
+    recursive subroutine SetServicesRoutine(gridcomp, rc)
+      use ESMF
+      implicit none
+      type(ESMF_GridComp)        :: gridcomp ! must not be optional
+      integer, intent(out)       :: rc       ! must not be optional
+    end subroutine
+    recursive subroutine SetVMRoutine(gridcomp, rc)
+      use ESMF
+      implicit none
+      type(ESMF_GridComp)        :: gridcomp ! must not be optional
+      integer, intent(out)       :: rc       ! must not be optional
+    end subroutine
+  end interface
+
+  type type_CompDef
+    procedure(SetServicesRoutine), pointer, nopass :: ssPtr => null()
+    procedure(SetVMRoutine),       pointer, nopass :: svPtr => null()
+    character(ESMF_MAXSTR)                  :: name = "__uninitialized__"
+  end type
+
+#else
   type type_CompDef
     procedure(SetServices), pointer, nopass :: ssPtr => null()
     procedure(SetVM),       pointer, nopass :: svPtr => null()
     character(ESMF_MAXSTR)                  :: name = "__uninitialized__"
   end type
+#endif
 
   include "compCnt.inc"
 
@@ -261,8 +287,8 @@ module ESMX_Driver
 
       if (inCompDef) then
         ! add child component with SetVM and SetServices in CompDef
-#ifdef __INTEL_LLVM_COMPILER
-!TODO: remove once IFX works correctly and does not require this work-around
+#if defined (__INTEL_LLVM_COMPILER) || (__NVCOMPILER) || defined (__PGI)
+!TODO: remove once IFX, NVHPC, and PGI compilers work correctly w/o work-around
         call NUOPC_DriverAddGridCompPtr(driver, trim(compLabel), config=config, &
           compSetServicesRoutine=CompDef(j)%ssPtr, compSetVMRoutine=CompDef(j)%svPtr, &
           info=info, petList=petList, comp=comp, rc=rc)
