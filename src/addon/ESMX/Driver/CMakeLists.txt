@@ -293,7 +293,7 @@ foreach(CMP IN ITEMS ${COMPS})
 
   # build component with cmake
   if(${CMP_BUILD_TYPE} STREQUAL "cmake")
-    message(STATUS "Building (CMAKE) - ${CMP} - ${CMP_SOURCE_DIR}")
+    message(STATUS "ESMX building (CMAKE) - ${CMP} - ${CMP_SOURCE_DIR}")
     find_file(FND_CMAKE_LISTS
       NAMES CMakeLists.txt cmakelists.txt CMAKELISTS.txt
       PATHS ${CMP_SOURCE_DIR}
@@ -335,7 +335,7 @@ foreach(CMP IN ITEMS ${COMPS})
 
   # build component with make
   elseif(${CMP_BUILD_TYPE} STREQUAL "make")
-    message(STATUS "Building (MAKE) - ${CMP} - ${CMP_SOURCE_DIR}")
+    message(STATUS "ESMX building (MAKE) - ${CMP} - ${CMP_SOURCE_DIR}")
     find_file(FND_MAKE_FILE
       NAMES Makefile makefile MAKEFILE
       PATHS ${CMP_SOURCE_DIR}
@@ -361,7 +361,7 @@ foreach(CMP IN ITEMS ${COMPS})
 
   # build component with script
   elseif(${CMP_BUILD_TYPE} STREQUAL "script")
-    message(STATUS "Building (SCRIPT) - ${CMP} - ${CMP_SOURCE_DIR}")
+    message(STATUS "ESMX building (SCRIPT) - ${CMP} - ${CMP_SOURCE_DIR}")
     find_file(FND_BUILD_SCRIPT
       NAMES ${CMP_BUILD_SCRIPT}
       PATHS ${CMP_SOURCE_DIR}
