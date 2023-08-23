@@ -42,12 +42,18 @@ jobs:
         name: esmf-docs
         path: ${{ github.workspace }}/artifacts
        
-    - name: Checkout esmf-org.github.io
-      uses: actions/checkout@v3
-      with:
-          repository: esmf-org/esmf-org.github.io
-          path: esmf-org.github.io
-          token: ${{ secrets.ESMF_WEB_TOKEN }}
+    - name: Setup deployment
+      run: | 
+        mkdir -p ~/.ssh
+        if [ -z "${{secrets.ESMF_WEB_DEPLOY_KEY}}" ]; then
+          echo "ERROR: Missing ESMF_WEB_DEPLOY_KEY!"
+          exit 1
+        fi
+        echo "${{secrets.ESMF_WEB_DEPLOY_KEY}}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git clone --depth=1 git@github.com:esmf-org/esmf-org.github.io.git ${{ github.workspace }}/esmf-org.github.io
 
     - name: Copy docs
       run: | 
@@ -66,10 +72,9 @@ jobs:
         cp -rf ./dev_guide/dev_guide/* ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/dev_guide/
         
     - name: Commit and publish docs
-      uses: actions-js/push@master
-      with:
-        repository: esmf-org/esmf-org.github.io
-        directory: ${{ github.workspace }}/esmf-org.github.io
-        branch: master
-        github_token: ${{ secrets.ESMF_WEB_TOKEN }}
-        message: 'Publish ESMF Docs'
+      run: | 
+        cd ${{ github.workspace }}/esmf-org.github.io
+        git add .
+        git diff-index --quiet HEAD || git commit --message "Publish ESMF Docs"
+        git push origin
+        rm ~/.ssh/id_rsa

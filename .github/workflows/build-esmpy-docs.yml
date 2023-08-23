@@ -51,8 +51,8 @@ jobs:
         fi
         echo "${{secrets.ESMPY_WEB_DEPLOY_KEY}}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
-        git config --global user.name "ESMF-Bot"
-        git config --global user.email "esmf_support@ucar.edu"
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git clone --depth=1 git@github.com:esmf-org/esmpy_doc.git ${{ github.workspace }}/esmpy_doc
     
     - name: Copy docs
