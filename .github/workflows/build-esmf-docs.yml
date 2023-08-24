@@ -49,8 +49,8 @@ jobs:
           echo "ERROR: Missing ESMF_WEB_DEPLOY_KEY!"
           exit 1
         fi
-        echo "${{secrets.ESMF_WEB_DEPLOY_KEY}}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
+        eval `ssh-agent -s`
+        ssh-add - <<< '${{secrets.ESMF_WEB_DEPLOY_KEY}}'
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git clone --depth=1 git@github.com:esmf-org/esmf-org.github.io.git ${{ github.workspace }}/esmf-org.github.io
@@ -77,4 +77,4 @@ jobs:
         git add .
         git diff-index --quiet HEAD || git commit --message "Publish ESMF Docs"
         git push origin
-        rm ~/.ssh/id_rsa
+        ssh-add -D
