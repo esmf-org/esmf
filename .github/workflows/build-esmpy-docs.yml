@@ -51,6 +51,7 @@ jobs:
           echo "ERROR: Missing ESMPY_WEB_DEPLOY_KEY!"
           exit 1
         fi
+        set +o history
         ssh-agent -a $SSH_AUTH_SOCK > /dev/null
         ssh-add - <<< "${{secrets.ESMPY_WEB_DEPLOY_KEY}}"
         git config --global user.name "github-actions[bot]"
