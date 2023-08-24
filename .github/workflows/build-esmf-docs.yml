@@ -42,21 +42,12 @@ jobs:
         name: esmf-docs
         path: ${{ github.workspace }}/artifacts
        
-    - name: Setup deployment
-      env:
-        SSH_AUTH_SOCK: ${{runner.temp}}/ssh_agent.sock
-      run: | 
-        mkdir -p ~/.ssh
-        if [ -z "${{secrets.ESMF_WEB_DEPLOY_KEY}}" ]; then
-          echo "ERROR: Missing ESMF_WEB_DEPLOY_KEY!"
-          exit 1
-        fi
-        set +o history
-        ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-        echo "${{secrets.ESMF_WEB_DEPLOY_KEY}}" | ssh-add -
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git clone --depth=1 git@github.com:esmf-org/esmf-org.github.io.git ${{ github.workspace }}/esmf-org.github.io
+    - name: Checkout esmf-org.github.io
+      uses: actions/checkout@v3
+      with:
+          repository: esmf-org/esmf-org.github.io
+          path: ${{github.workspace}}/esmf-org.github.io
+          ssh-key: ${{secrets.ESMF_WEB_DEPLOY_KEY}}
 
     - name: Copy docs
       run: | 
@@ -75,11 +66,10 @@ jobs:
         cp -rf ./dev_guide/dev_guide/* ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/dev_guide/
         
     - name: Commit and publish docs
-      env:
-        SSH_AUTH_SOCK: ${{runner.temp}}/ssh_agent.sock
       run: | 
         cd ${{ github.workspace }}/esmf-org.github.io
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
         git add .
         git diff-index --quiet HEAD || git commit --message "Publish ESMF Docs"
         git push origin
-        ssh-add -D
