@@ -116,7 +116,7 @@ module NUOPC_Driver
 
   ! Generic methods
   public NUOPC_DriverAddComp
-#if defined (__INTEL_LLVM_COMPILER) || (__NVCOMPILER) || defined (__PGI)
+#if defined (__INTEL_LLVM_COMPILER) || (__NVCOMPILER)
   public NUOPC_DriverAddGridCompPtr !TODO: remove once IFX works correctly
 #endif
   public NUOPC_DriverAddRunElement
@@ -4522,7 +4522,7 @@ module NUOPC_Driver
   !-----------------------------------------------------------------------------
   !-----------------------------------------------------------------------------
 
-#if defined (__INTEL_LLVM_COMPILER) || defined (__NVCOMPILER) || defined (__PGI)
+#if defined (__INTEL_LLVM_COMPILER) || defined (__NVCOMPILER)
   !-----------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: NUOPC_DriverAddComp - Add a GridComp child to a Driver using procedure pointers

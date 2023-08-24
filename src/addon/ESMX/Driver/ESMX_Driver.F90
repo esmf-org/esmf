@@ -19,7 +19,7 @@ module ESMX_Driver
 
   public SetServices, SetVM, HConfigCreateFoundNode
 
-#if defined (__NVCOMPILER) || defined (__PGI)
+#if defined (__NVCOMPILER)
 !TODO: remove once NVHPC and PGI compilers work correctly w/o work-around
 
   abstract interface
@@ -287,7 +287,7 @@ module ESMX_Driver
 
       if (inCompDef) then
         ! add child component with SetVM and SetServices in CompDef
-#if defined (__INTEL_LLVM_COMPILER) || (__NVCOMPILER) || defined (__PGI)
+#if defined (__INTEL_LLVM_COMPILER) || (__NVCOMPILER)
 !TODO: remove once IFX, NVHPC, and PGI compilers work correctly w/o work-around
         call NUOPC_DriverAddGridCompPtr(driver, trim(compLabel), config=config, &
           compSetServicesRoutine=CompDef(j)%ssPtr, compSetVMRoutine=CompDef(j)%svPtr, &
