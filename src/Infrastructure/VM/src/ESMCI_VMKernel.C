@@ -89,6 +89,10 @@ using namespace std;
 #include "ESMCI_AccInfo.h"
 #include "ESMCI_LogErr.h"
 
+#ifndef ESMF_NO_OPENACC
+#include <openacc.h>
+#endif
+
 // macros used within this source file
 #define VERBOSITY             (1)       // 0: off, 10: max
 #define VM_TID_MPI_TAG        (10)      // mpi tag used to send/recv TID
@@ -376,6 +380,9 @@ void VMK::set(bool globalResourceControl){
 #endif
 #ifndef ESMF_NO_OPENMP
     omp_set_num_threads(1);
+#endif
+#ifndef ESMF_NO_OPENACC
+    acc_set_num_cores(1);
 #endif
   }
 #endif
@@ -781,6 +788,9 @@ VMK::Affinities VMK::setAffinities(void *ssarg){
     if (sarg->openmpnumthreads>=0)
       numthreads = sarg->openmpnumthreads;
     omp_set_num_threads(numthreads);
+#ifndef ESMF_NO_OPENACC
+    acc_set_num_cores(numthreads);
+#endif
 #if !defined(ESMF_OS_Darwin) && !defined(ESMF_OS_Cygwin)
     if (sarg->openmphandling>1){
 #pragma omp parallel
