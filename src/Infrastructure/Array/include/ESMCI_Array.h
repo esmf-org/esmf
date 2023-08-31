@@ -63,7 +63,7 @@ namespace ESMCI {
   template<typename SIT, typename DIT> class SparseMatrix;
 
   // class definitions
-  
+
 //TODO: Figure out how to have code use correct SeqIndex structure automatic.
 //TODO: For now just hard-code the use of one or the other via CPP definition.
 #define SeqIndexTensor SeqIndex
@@ -173,7 +173,7 @@ namespace ESMCI {
     // larrayList and larrayBaseAddrList hold the PET-local DEs in the first
     // localDe many entries. Then, up to vasLocalDeCount are the DEs that
     // are in the same VAS, and up to ssiLocalDeCount are the DEs that are
-    // in the same SSI. 
+    // in the same SSI.
     // Without VAS DE sharing, vasLocalDeCount==localDeCount.
     // Without SSI DE sharing, ssiLocalDeCount==vasLocalDeCount.
     LocalArray **larrayList;          // [ssiLocalDeCount] localDeCount first
@@ -324,12 +324,12 @@ namespace ESMCI {
    private:
     Array(ESMC_TypeKind_Flag typekind, int rank, LocalArray **larrayList,
       VM::memhandle *mh, int vasLocalDeCount, int ssiLocalDeCount,
-      int *localDeToDeMap, DistGrid *distgrid, bool distgridCreator, 
+      int *localDeToDeMap, DistGrid *distgrid, bool distgridCreator,
       int *exclusiveLBound, int *exclusiveUBound, int *computationalLBound,
       int *computationalUBound, int *totalLBound, int *totalUBound,
       int tensorCount, int tensorElementCount, int *undistLBoundArray,
       int *undistUBoundArray, int *distgridToArrayMapArray,
-      int *arrayToDistGridMapArray, int *distgridToPackedArrayMapArray, 
+      int *arrayToDistGridMapArray, int *distgridToPackedArrayMapArray,
       ESMC_IndexFlag indexflagArg, int *rc,
       VM *vm=NULL); // allow specific VM instead default
    public:
