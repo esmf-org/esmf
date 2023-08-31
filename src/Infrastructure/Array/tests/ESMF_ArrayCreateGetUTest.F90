@@ -13,7 +13,7 @@
 program ESMF_ArrayCreateGetUTest
 
 !------------------------------------------------------------------------------
- 
+
 #include "ESMF_Macros.inc"
 #include "ESMF.h"
 
@@ -87,18 +87,18 @@ program ESMF_ArrayCreateGetUTest
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
-! always run. When the environment variable, EXHAUSTIVE, is set to ON then 
+! always run. When the environment variable, EXHAUSTIVE, is set to ON then
 ! the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
 ! to OFF, then only the sanity unit tests.
 ! Special strings (Non-exhaustive and exhaustive) have been
 ! added to allow a script to count the number and types of unit tests.
-!------------------------------------------------------------------------------- 
+!-------------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !------------------------------------------------------------------------
-  
+
   !------------------------------------------------------------------------
   ! preparations
   call ESMF_VMGetGlobal(vm, rc=rc)
@@ -106,7 +106,7 @@ program ESMF_ArrayCreateGetUTest
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, &
     ssiSharedMemoryEnabledFlag=ssiSharedMemoryEnabled, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
+
   !------------------------------------------------------------------------
   ! this unit test requires to be run on exactly 4 PETs
   if (petCount /= 4) goto 10
@@ -134,7 +134,7 @@ program ESMF_ArrayCreateGetUTest
     regDecomp=regDecomp, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   deallocate(regDecomp)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Create test Array for IsCreated"
@@ -185,7 +185,7 @@ program ESMF_ArrayCreateGetUTest
   array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
     indexflag=ESMF_INDEX_GLOBAL, name="MyArray", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Array equality before assignment Test"
@@ -201,7 +201,7 @@ program ESMF_ArrayCreateGetUTest
   arrayAlias = array
   arrayBool = (arrayAlias.eq.array)
   call ESMF_Test(arrayBool, name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayDestroy Test"
@@ -240,7 +240,7 @@ program ESMF_ArrayCreateGetUTest
     indexflag=ESMF_INDEX_GLOBAL, undistLBound=(/0/), undistUBound=(/2,2/), &
     name="MyArray", rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate Allocate 2D ESMF_TYPEKIND_R8 Test"
@@ -248,7 +248,7 @@ program ESMF_ArrayCreateGetUTest
   array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
     indexflag=ESMF_INDEX_GLOBAL, name="MyArray", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArraySet Test"
@@ -284,7 +284,7 @@ program ESMF_ArrayCreateGetUTest
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     indexflag=ESMF_INDEX_GLOBAL, name="MyArray with ArraySpec", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayPrint 2D ESMF_TYPEKIND_R8 Test"
@@ -299,26 +299,26 @@ program ESMF_ArrayCreateGetUTest
   call ESMF_ArrayGet(array, arrayspec=arrayspec2, name=arrayName, rc=rc)
   print *, "Array name: ", arrayname
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Verify ArraySpec returned from Array"
   write(failMsg, *) "Incorrect ArraySpec"
   call ESMF_Test((arrayspec2==arrayspec), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Verify name returned from Array"
   write(failMsg, *) "Incorrect name"
   call ESMF_Test((trim(arrayName)=="MyArray with ArraySpec"), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet Fortran array pointer, 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr2D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Getting Attribute count from an Array"
@@ -331,14 +331,14 @@ program ESMF_ArrayCreateGetUTest
   write(name, *) "Verify Attribute count from an Array"
   write(failMsg, *) "Incorrect count"
   call ESMF_Test((count.eq.0), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate from Copy, uninitialized Array Test"
   write(failMsg, *) "Incorrectly returned ESMF_SUCCESS"
   arrayCpy = ESMF_ArrayCreate(arrayUnInit, rc=rc)
   call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate from Copy (ALLOC), 2D ESMF_TYPEKIND_R8 Test"
@@ -346,7 +346,7 @@ program ESMF_ArrayCreateGetUTest
   farrayPtr2D     = real(localPet+10, ESMF_KIND_R8)  ! fill with data to check
   arrayCpy = ESMF_ArrayCreate(array, datacopyflag=ESMF_DATACOPY_ALLOC, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet arrayspec from Array Copy (ALLOC) Test"
@@ -354,20 +354,20 @@ program ESMF_ArrayCreateGetUTest
   call ESMF_ArrayGet(arrayCpy, arrayspec=arrayspec2, name=arrayName, rc=rc)
   print *, "Array name: ", arrayname
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Verify ArraySpec returned from Array (ALLOC) Copy"
   write(failMsg, *) "Incorrect ArraySpec"
   call ESMF_Test((arrayspec2==arrayspec), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet Fortran array pointer, from Array Copy (ALLOC) Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(arrayCpy, farrayPtr=farrayPtr2DCpy, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Verify Array vs Array Copy (ALLOC) no data copy"
@@ -408,14 +408,14 @@ program ESMF_ArrayCreateGetUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayPrint from Copy (ALLOC) after original destroy, 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayPrint(arrayCpy, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayDestroy of Copy (ALLOC) Test"
@@ -430,14 +430,14 @@ program ESMF_ArrayCreateGetUTest
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     indexflag=ESMF_INDEX_GLOBAL, name="MyArray with ArraySpec", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet Fortran array pointer, 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr2D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate from Copy (VALUE), 2D ESMF_TYPEKIND_R8 Test"
@@ -453,7 +453,7 @@ program ESMF_ArrayCreateGetUTest
   call ESMF_ArrayGet(arrayCpy, isESMFAllocated=isESMFAllocated, rc=rc)
   print *, "Array is allocated internally: ", isESMFAllocated
   call ESMF_Test(isESMFAllocated, name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet arrayspec from Array Copy (VALUE) Test"
@@ -461,20 +461,20 @@ program ESMF_ArrayCreateGetUTest
   call ESMF_ArrayGet(arrayCpy, arrayspec=arrayspec2, name=arrayName, rc=rc)
   print *, "Array name: ", arrayname
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Verify ArraySpec returned from Array (VALUE) Copy"
   write(failMsg, *) "Incorrect ArraySpec"
   call ESMF_Test((arrayspec2==arrayspec), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet Fortran array pointer, from Array Copy (VALUE) Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(arrayCpy, farrayPtr=farrayPtr2DCpy, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Verify Array vs Array Copy (VALUE) data copy"
@@ -515,7 +515,7 @@ program ESMF_ArrayCreateGetUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayDestroy of Copy (VALUE) Test"
@@ -631,7 +631,7 @@ program ESMF_ArrayCreateGetUTest
   array = ESMF_ArrayCreate(farrayPtr=farrayPtr3D, distgrid=distgrid, &
     name="MyArray", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayPrint for ArrayCreate from Ptr Test"
@@ -645,7 +645,7 @@ program ESMF_ArrayCreateGetUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr3Dx, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Deallocate returned pointer Test"
@@ -668,7 +668,7 @@ program ESMF_ArrayCreateGetUTest
   array = ESMF_ArrayCreate(farray=farrayPtr3D, distgrid=distgrid, &
     indexflag=ESMF_INDEX_GLOBAL, name="MyArray", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayDestroy Test"
@@ -686,7 +686,7 @@ program ESMF_ArrayCreateGetUTest
   array = ESMF_ArrayCreate(farray=farrayPtr3D, distgrid=distgrid, &
     indexflag=ESMF_INDEX_GLOBAL, name="MyArray", datacopyflag=ESMF_DATACOPY_VALUE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayDestroy Test"
@@ -704,7 +704,7 @@ program ESMF_ArrayCreateGetUTest
   array = ESMF_ArrayCreate(farrayPtr=farrayPtr3D, distgrid=distgrid, &
     name="MyArray", datacopyflag=ESMF_DATACOPY_VALUE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayDestroy Test"
@@ -723,7 +723,7 @@ program ESMF_ArrayCreateGetUTest
     distgridToArrayMap=(/2,1/), computationalLWidth=(/0,5/), &
     indexflag=ESMF_INDEX_GLOBAL, name="MyArray", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayDestroy Test"
@@ -740,7 +740,7 @@ program ESMF_ArrayCreateGetUTest
     indexflag=ESMF_INDEX_GLOBAL, computationalLWidth=(/-1,-1/), &
     computationalUWidth=(/-2,-3/), name="MyArray Negative", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayPrint 2D ESMF_TYPEKIND_R8 w/ computational widths Test"
@@ -754,7 +754,7 @@ program ESMF_ArrayCreateGetUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate Allocate 2D ESMF_TYPEKIND_R8 w/ computationalEdge widths Test"
@@ -763,7 +763,7 @@ program ESMF_ArrayCreateGetUTest
     indexflag=ESMF_INDEX_GLOBAL, computationalEdgeLWidth=(/0,-1/), &
     computationalEdgeUWidth=(/-2,+1/), name="MyArray Negative Edge", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayPrint 2D ESMF_TYPEKIND_R8 w/ computationalEdge widths Test"
@@ -802,7 +802,7 @@ program ESMF_ArrayCreateGetUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate Allocate 2D ESMF_TYPEKIND_R8 w/ computationalEdge and total widths Test"
@@ -812,7 +812,7 @@ program ESMF_ArrayCreateGetUTest
     computationalEdgeUWidth=(/-2,+1/), totalLWidth=(/1,2/), totalUWidth=(/3,4/),&
     name="MyArray Negative Edge", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayPrint 2D ESMF_TYPEKIND_R8 w/ computationalEdge and total widths Test"
@@ -861,7 +861,7 @@ program ESMF_ArrayCreateGetUTest
     call ESMF_Test((totalLBound(1,1)==8.and.totalLBound(2,1)==11.and.&
     totalUBound(1,1)==18.and.totalUBound(2,1)==27), &
       name, failMsg, result, ESMF_SRCLINE)
-  endif  
+  endif
   deallocate(totalLBound, totalUBound)
 
   !------------------------------------------------------------------------
@@ -870,7 +870,7 @@ program ESMF_ArrayCreateGetUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Create test Array with ESMF_PIN_DE_TO_PET"
@@ -886,7 +886,7 @@ program ESMF_ArrayCreateGetUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr2D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   write (msg,*) "Local Array lbounds=", lbound(farrayPtr2D)
   call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -950,7 +950,7 @@ program ESMF_ArrayCreateGetUTest
   endif
   allocate(localDeToDeMap(ssiLocalDeCount))
   allocate(localArrayList(ssiLocalDeCount))
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet localDeToDeMap ESMF_PIN_DE_TO_SSI Test"
@@ -966,14 +966,14 @@ program ESMF_ArrayCreateGetUTest
     write(failMsg, *) "Did not return the correct RC"
     call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
   endif
-  
+
   !------------------------------------------------------------------------
   ! initialize the data on this PETs first localDE
   if (ssiSharedMemoryEnabled) then
     farrayPtr2D(:,:) = localDeToDeMap(1)
   endif
   !------------------------------------------------------------------------
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArraySync() for ESMF_PIN_DE_TO_SSI Test"
@@ -985,7 +985,7 @@ program ESMF_ArrayCreateGetUTest
     write(failMsg, *) "Did not return the correct RC"
     call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
   endif
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "LocalArrayGet Fortran array pointer for last ssiLocalDe for ESMF_PIN_DE_TO_SSI Test"
@@ -1027,7 +1027,7 @@ program ESMF_ArrayCreateGetUTest
 
   call ESMF_ArraySync(array, rc=rc) ! prevent race condition with below
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
+
   deallocate(localDeToDeMap)
   deallocate(localArrayList)
 
@@ -1078,7 +1078,7 @@ program ESMF_ArrayCreateGetUTest
   endif
   allocate(localDeToDeMap(ssiLocalDeCount))
   allocate(localArrayList(ssiLocalDeCount))
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet localDeToDeMap ESMF_PIN_DE_TO_SSI arrayCpy Test"
@@ -1094,14 +1094,14 @@ program ESMF_ArrayCreateGetUTest
     write(failMsg, *) "Did not return the correct RC"
     call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
   endif
-  
+
   !------------------------------------------------------------------------
   ! initialize the data on this PETs first localDE
   if (ssiSharedMemoryEnabled) then
     farrayPtr2D(:,:) = localDeToDeMap(1) * 10
   endif
   !------------------------------------------------------------------------
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArraySync() for ESMF_PIN_DE_TO_SSI arrayCpy Test"
@@ -1113,7 +1113,7 @@ program ESMF_ArrayCreateGetUTest
     write(failMsg, *) "Did not return the correct RC"
     call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
   endif
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "LocalArrayGet Fortran array pointer for last ssiLocalDe for ESMF_PIN_DE_TO_SSI arrayCpy Test"
@@ -1155,7 +1155,7 @@ program ESMF_ArrayCreateGetUTest
 
   call ESMF_ArraySync(arrayCpy, rc=rc) ! prevent race condition with below
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
+
   deallocate(localDeToDeMap)
   deallocate(localArrayList)
 
@@ -1210,7 +1210,7 @@ program ESMF_ArrayCreateGetUTest
   endif
   allocate(localDeToDeMap(ssiLocalDeCount))
   allocate(localArrayList(ssiLocalDeCount))
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet localDeToDeMap ESMF_PIN_DE_TO_SSI arrayCpy Test"
@@ -1226,7 +1226,7 @@ program ESMF_ArrayCreateGetUTest
     write(failMsg, *) "Did not return the correct RC"
     call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
   endif
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Test data in LocalArray for last ssiLocalDe for ESMF_PIN_DE_TO_SSI arrayCpy Test"
@@ -1254,7 +1254,7 @@ program ESMF_ArrayCreateGetUTest
 
   call ESMF_ArraySync(arrayCpy, rc=rc) ! prevent race condition with below
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
+
   deallocate(localDeToDeMap)
   deallocate(localArrayList)
 
@@ -1269,7 +1269,7 @@ program ESMF_ArrayCreateGetUTest
     write(failMsg, *) "Did not return the correct RC"
     call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
   endif
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayDestroy Test for arrayCpy with ESMF_PIN_DE_TO_SSI w/ DELayout"
@@ -1295,15 +1295,15 @@ program ESMF_ArrayCreateGetUTest
   endif
 
   !------------------------------------------------------------------------
-  ! cleanup  
+  ! cleanup
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
+
   !------------------------------------------------------------------------
   ! preparations
   distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/40/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate AssmdShape 1D ESMF_TYPEKIND_R8 Test"
@@ -1311,21 +1311,21 @@ program ESMF_ArrayCreateGetUTest
   array = ESMF_ArrayCreate(farray=farray1D, distgrid=distgrid, &
     indexflag=ESMF_INDEX_DELOCAL, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet Fortran array pointer, 1D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr1D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet w/ incompatible Fortran array pointer, 1D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did return ESMF_SUCCESS"
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr2D, rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayPrint AssmdShape 1D ESMF_TYPEKIND_R8 Test"
@@ -1339,7 +1339,7 @@ program ESMF_ArrayCreateGetUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate AssmdShape 1D ESMF_TYPEKIND_R8 w/ negative computationalEdge widths Test"
@@ -1348,7 +1348,7 @@ program ESMF_ArrayCreateGetUTest
     indexflag=ESMF_INDEX_DELOCAL, computationalEdgeLWidth=(/-1/), &
     computationalEdgeUWidth=(/-1/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayPrint AssmdShape 1D ESMF_TYPEKIND_R8 w/ negative computationalEdge widths Test"
@@ -1362,18 +1362,18 @@ program ESMF_ArrayCreateGetUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
-  ! cleanup  
+  ! cleanup
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
+
   !------------------------------------------------------------------------
   ! preparations
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/40,10/), &
     regDecomp=(/petCount,1/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate AssmdShape 2D ESMF_TYPEKIND_R8 Test"
@@ -1381,87 +1381,21 @@ program ESMF_ArrayCreateGetUTest
   array = ESMF_ArrayCreate(farray=farray2D, distgrid=distgrid, &
     indexflag=ESMF_INDEX_DELOCAL, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet Fortran array pointer, 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr2D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet w/ incompatible Fortran array pointer, 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did return ESMF_SUCCESS"
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr3D, rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
-  !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayDestroy Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayDestroy(array, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
-  !------------------------------------------------------------------------
-  ! cleanup  
-  call ESMF_DistGridDestroy(distgrid, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
-  !------------------------------------------------------------------------
-  ! preparations
-  distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1/), maxIndex=(/40,10,10/), &
-    regDecomp=(/petCount,1,1/), rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
-  !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayCreate AssmdShape 3D ESMF_TYPEKIND_R4 Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  array = ESMF_ArrayCreate(farray=farray3D, distgrid=distgrid, &
-    indexflag=ESMF_INDEX_DELOCAL, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
-  !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayGet Fortran array pointer, 3D ESMF_TYPEKIND_R4 Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, farrayPtr=farrayPtr3D, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
-  !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayDestroy Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayDestroy(array, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
-  !------------------------------------------------------------------------
-  ! cleanup  
-  call ESMF_DistGridDestroy(distgrid, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
-  !------------------------------------------------------------------------
-  ! preparations
-  distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1,1/), &
-    maxIndex=(/40,10,10,10/), regDecomp=(/petCount,1,1,1/), rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
-  !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayCreate AssmdShape 4D ESMF_TYPEKIND_I4 Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  array = ESMF_ArrayCreate(farray=farray4D, distgrid=distgrid, &
-    indexflag=ESMF_INDEX_DELOCAL, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
-  !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayGet Fortran array pointer, 4D ESMF_TYPEKIND_I4 Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, farrayPtr=farrayPtr4D, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-    
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayDestroy Test"
@@ -1470,10 +1404,76 @@ program ESMF_ArrayCreateGetUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
-  ! cleanup  
+  ! cleanup
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
+
+  !------------------------------------------------------------------------
+  ! preparations
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1/), maxIndex=(/40,10,10/), &
+    regDecomp=(/petCount,1,1/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayCreate AssmdShape 3D ESMF_TYPEKIND_R4 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  array = ESMF_ArrayCreate(farray=farray3D, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_DELOCAL, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet Fortran array pointer, 3D ESMF_TYPEKIND_R4 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr3D, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayDestroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  ! cleanup
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  !------------------------------------------------------------------------
+  ! preparations
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1,1/), &
+    maxIndex=(/40,10,10,10/), regDecomp=(/petCount,1,1,1/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayCreate AssmdShape 4D ESMF_TYPEKIND_I4 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  array = ESMF_ArrayCreate(farray=farray4D, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_DELOCAL, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet Fortran array pointer, 4D ESMF_TYPEKIND_I4 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr4D, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayDestroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  ! cleanup
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   !------------------------------------------------------------------------
   ! prepare a 2D DistGrid
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/15,23/), &
@@ -1488,7 +1488,7 @@ program ESMF_ArrayCreateGetUTest
   call ESMF_DistGridGet(distgrid, minIndexPDe=minIndexPDe, &
     maxIndexPDe=maxIndexPDe, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
+
   do de=0, deCount-1
     write (msg,*) "DistGrid DE=",de," minIndexPDe=", minIndexPDe(:,de), &
       " maxIndexPDe=", maxIndexPDe(:,de)
@@ -1497,7 +1497,7 @@ program ESMF_ArrayCreateGetUTest
   enddo
 
   deallocate(minIndexPDe, maxIndexPDe)
-  
+
   !------------------------------------------------------------------------
   ! prepare a 2D DistGrid with with extra edge elements
   distgrid = ESMF_DistGridCreate(distgrid, &
@@ -1512,7 +1512,7 @@ program ESMF_ArrayCreateGetUTest
   call ESMF_DistGridGet(distgrid, minIndexPDe=minIndexPDe, &
     maxIndexPDe=maxIndexPDe, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
+
   do de=0, deCount-1
     write (msg,*) "DistGrid2 DE=",de," minIndexPDe=", minIndexPDe(:,de), &
       " maxIndexPDe=", maxIndexPDe(:,de)
@@ -1540,7 +1540,7 @@ program ESMF_ArrayCreateGetUTest
   call ESMF_ArrayGet(array, exclusiveLBound=exclusiveLBound, &
     exclusiveUBound=exclusiveUBound, localDeToDeMap=localDeToDeMap, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
+
   do lde=0, localDeCount-1
     de = localDeToDeMap(lde)
     write (msg,*) "Array DE=",de," exclusiveLBound=", exclusiveLBound(:,lde), &
@@ -1560,7 +1560,7 @@ program ESMF_ArrayCreateGetUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
-  ! cleanup  
+  ! cleanup
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -1591,7 +1591,7 @@ program ESMF_ArrayCreateGetUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   ! prepare Fortran allocations on each PET to match DistGrid
   if (localPet==0) then
@@ -1616,7 +1616,7 @@ program ESMF_ArrayCreateGetUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
-  ! cleanup  
+  ! cleanup
   deallocate(farrayPtr1D)
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -1634,7 +1634,7 @@ program ESMF_ArrayCreateGetUTest
   else
     allocate(farrayPtr1D(0))
   endif
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Create Array on 4 DE DistGrid with only DE 0 elements, with Fortran allocation"
@@ -1651,11 +1651,11 @@ program ESMF_ArrayCreateGetUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
-  ! cleanup  
+  ! cleanup
   deallocate(farrayPtr1D)
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
+
 10 continue
   !------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
