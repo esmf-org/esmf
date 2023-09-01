@@ -139,7 +139,7 @@ module ESMF_ArrayCreateMod
     module procedure ESMF_ArrayCreateAllocateAS
     module procedure ESMF_ArrayCreateAllocateASArb
     module procedure ESMF_ArrayCreateAllocateASArbI8
-    module procedure ESMF_ArrayCreateCopy
+    module procedure ESMF_ArrayCreateFromArray
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
@@ -3862,16 +3862,16 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 
 ! -------------------------- ESMF-public method -------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayCreateCopy()"
+^define ESMF_METHOD "ESMF_ArrayCreateFromArray()"
 !BOP
-! !IROUTINE: ESMF_ArrayCreate - Create Array object as copy of existing Array object
+! !IROUTINE: ESMF_ArrayCreate - Create Array object from an existing Array object
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateCopy(array, keywordEnforcer, datacopyflag, delayout, rc)
+  function ESMF_ArrayCreateFromArray(array, keywordEnforcer, datacopyflag, delayout, rc)
 !
 ! !RETURN VALUE:
-    type(ESMF_Array) :: ESMF_ArrayCreateCopy
+    type(ESMF_Array) :: ESMF_ArrayCreateFromArray
 !
 ! !ARGUMENTS:
        type(ESMF_Array),           intent(in)            :: array
@@ -3886,14 +3886,14 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
 ! \item[8.1.0] Added argument {\tt datacopyflag} to select between different
-!   copy options.\newline
+!   data copy options.\newline
 !   Added argument {\tt delayout} to create Array with different localDe -> DE
 !   mapping. This is identical to a change in DE -> PET mapping.
 ! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Create an {\tt ESMF\_Array} object as the copy of an existing Array.
+! Create an {\tt ESMF\_Array} object from an existing Array.
 !
 ! The return value is the newly created {\tt ESMF\_Array} object.
 !
@@ -3925,11 +3925,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 
     ! Mark this Array object as invalid
     arrayOut%this = ESMF_NULL_POINTER
-    ESMF_ArrayCreateCopy = arrayOut
+    ESMF_ArrayCreateFromArray = arrayOut
 
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayGetInit, array, rc)
 
-    ! Set copy/ref behavior
+    ! Set data copy/ref behavior
     datacopyflag_opt = ESMF_DATACOPY_VALUE  ! default
     if (present(datacopyflag)) datacopyflag_opt = datacopyflag
 
@@ -3940,15 +3940,15 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set return value
-    ESMF_ArrayCreateCopy = arrayOut
+    ESMF_ArrayCreateFromArray = arrayOut
 
     ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_ArrayCreateCopy)
+    ESMF_INIT_SET_CREATED(ESMF_ArrayCreateFromArray)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end function ESMF_ArrayCreateCopy
+  end function ESMF_ArrayCreateFromArray
 !------------------------------------------------------------------------------
 
 
