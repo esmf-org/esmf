@@ -1,10 +1,11 @@
-name: cmake
+name: cmake ubuntu openmpi latest
+#with AddressSanitizer
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   build:
@@ -14,50 +15,36 @@ jobs:
     env:
       CC: mpicc
       FC: mpifort
-      CPPFLAGS: "-I/usr/include -I/usr/local/include -I/home/runner/pnetcdf/include"
-      LDFLAGS: "-L/home/runner/pnetcdf/lib"
-      LD_LIBRARY_PATH: "/home/runner/pnetcdf/lib"
-      PNETCDF_VERSION: 1.12.3
+      FCFLAGS: "-fallow-argument-mismatch"
+#      LDFLAGS: "-static-libasan"
+#      ASAN_OPTIONS: "detect_odr_violation=0"
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Installs
       run: |
         set -x
-        sudo gem install apt-spy2
-        sudo apt-spy2 check
-        sudo apt-spy2 fix --commit
-        # after selecting a specific mirror, we need to run 'apt-get update'
         sudo apt-get update
-        sudo apt-get install netcdf-bin libnetcdf-dev doxygen graphviz wget gfortran libjpeg-dev libz-dev openmpi-bin libopenmpi-dev cmake
-
-    - name: cache-pnetcdf
-      id: cache-pnetcdf
-      uses: actions/cache@v2
-      with:
-        path: ~/pnetcdf
-        key: pnetcdf-${{ runner.os }}-${{ env.PNETCDF_VERSION }}
-
-    - name: build-pnetcdf
-      if: steps.cache-pnetcdf.outputs.cache-hit != 'true'
-      run: |
-        set -x
-        wget https://parallel-netcdf.github.io/Release/pnetcdf-${{ env.PNETCDF_VERSION }}.tar.gz &> /dev/null
-        tar -xzvf pnetcdf-${{ env.PNETCDF_VERSION }}.tar.gz
-        pushd pnetcdf-${{ env.PNETCDF_VERSION }}
-        ./configure --prefix=/home/runner/pnetcdf --enable-shared --disable-cxx
-        make
-        sudo make install
-        popd
+        sudo apt-get install netcdf-bin libnetcdf-dev doxygen graphviz wget gfortran \
+        libjpeg-dev libz-dev openmpi-bin libopenmpi-dev cmake pnetcdf-bin libpnetcdf-dev libnetcdff-dev
+        nc-config --all
 
     - name: cmake build
+      uses: ./.github/actions/parallelio_cmake
+      with:
+        parallelio_version: ${{ env.GITHUB_SHA }}
+        enable_fortran: True
+        enable_logging: True
+        install_prefix: ${GITHUB_WORKSPACE}/parallelio
+        mpiexec_flags: --oversubscribe
+#        extra_cflags: "-g -O0 -fsanitize=address -fno-omit-frame-pointer -static-libasan"
+#        extra_fflags: "-g -O0 -fsanitize=address -fno-omit-frame-pointer -static-libasan"
+    - name: parallelio tests
       run: |
-        set -x
-        mkdir build
-        cd build
-        cmake -Wno-dev -DNetCDF_C_LIBRARY=/usr/lib/x86_64-linux-gnu/libnetcdf.so \
-        -DNetCDF_C_INCLUDE_DIR=/usr/include -DPnetCDF_PATH='/home/runner/pnetcdf' \
-        -DPIO_ENABLE_FORTRAN=Off \
-        -DPIO_ENABLE_LOGGING=On -DPIO_ENABLE_TIMING=Off  -DMPIEXEC_PREFLAGS="--oversubscribe" ..
-        make VERBOSE=1
+        pushd $GITHUB_WORKSPACE/build
         make tests VERBOSE=1
         ctest -VV
+        popd
+
+#    - name: Setup tmate session
+#      if: ${{ failure() }}
+#      uses: mxschmitt/action-tmate@v3

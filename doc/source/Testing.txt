@@ -112,17 +112,17 @@ the PIO build directory).
 The contents of the namelist file should look like:
 
      &pioperf
-     
+
      decompfile = "/u/home/user/piodecomp30tasks01dims06.dat"
-     
+
      pio_typenames = 'pnetcdf'
-     
+
      niotasks = 30
-     
+
      rearrangers = 1
-     
+
      nvars = 2
-     
+
      /
 
 Here, the second line ("decompfile") points to the path for your

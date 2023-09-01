@@ -22,10 +22,11 @@
 #define PIO_VERSION_MINOR @PIO_VERSION_MINOR@ /*!< pio-c minor version. */
 #define PIO_VERSION_PATCH @PIO_VERSION_PATCH@ /*!< pio-c patch version. */
 #define PIO_VERSION       "@PACKAGE_VERSION@"
-
+#ifndef PIO_HAS_PAR_FILTERS
+#define PIO_HAS_PAR_FILTERS @PIO_HAS_PAR_FILTERS@ /*!< NetCDF supports parallel I/O with filters. */
+#endif
 #define PIO_HAS_SZIP_WRITE  @PIO_HAS_SZIP_WRITE@  /*!< szip write support */
 #define PIO_HAS_PNETCDF     @PIO_HAS_PNETCDF@     /*!< PnetCDF support. */
-#define PIO_HAS_PAR_FILTERS @PIO_HAS_PAR_FILTERS@ /*!< NetCDF supports parallel I/O with filters. */
 #define PIO_HAS_NETCDF4     @PIO_HAS_NETCDF4@     /*!< NetCDF-4 supported. */
 #define PIO_HAS_NETCDF4_PAR @PIO_HAS_NETCDF4_PAR@ /*!< NetCDF-4 parallel I/O supported. */
 #define PIO_HAS_NETCDF_INTEGRATION @PIO_HAS_NETCDF_INTEGRATION@ /*!< NetCDF integration supported. */

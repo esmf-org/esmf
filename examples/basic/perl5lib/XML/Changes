@@ -24,4 +24,3 @@ Revision history for Perl extension XML::Lite.
 0.01  Sat Aug 25 13:31:48 2001
 	- original version; created by h2xs 1.20 with options
 		-XA -n XML::Lite
-

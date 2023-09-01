@@ -338,6 +338,7 @@ int main(int argc, char **argv)
                 sprintf(filename[fmt], "test_intercomm2_%d.nc", flavor[fmt]);
 
                 /* Create a netCDF file with one dimension and one variable. */
+                
                 if ((ret = PIOc_createfile(iosysid[my_comp_idx], &ncid, &flavor[fmt], filename[fmt],
                                            NC_CLOBBER)))
                     ERR(ret);
@@ -492,8 +493,8 @@ int main(int argc, char **argv)
                     ERR(ret);
 
                 /* Write some data. For the PIOc_put/get functions, all
-                 * data must be on compmaster before the function is
-                 * called. Only compmaster's arguments are passed to the
+                 * data must be on compmain before the function is
+                 * called. Only compmain's arguments are passed to the
                  * async msg handler. All other computation tasks are
                  * ignored. */
                 for (int i = 0; i < DIM_LEN; i++)

@@ -99,8 +99,8 @@ The typical configuration with CMake can be done as follows:
 CC=mpicc FC=mpif90 cmake [-DOPTION1=value1 -DOPTION2=value2 ...] /path/to/pio/source
 ```
 
-Full instructions for the cmake build can be found in the installation
-documentation.
+Full instructions for the cmake build can be found in the [installation
+documentation](https://ncar.github.io/ParallelIO/install.html).
 
 # References
 
