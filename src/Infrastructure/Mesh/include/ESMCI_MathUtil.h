@@ -120,6 +120,13 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
                                double *tmp,
                                int *num_out, double *out);
 
+  void intersect_segs_sph2D3D(double *p1, double *p2, double *q1, double *q2,
+                              double *p_t, double *q_t);
+  
+  void intersect_segs_cart2D(double *p1, double *p2, double *q1, double *q2,
+                             double *p_t, double *q_t);
+
+  
 //// Handy macros ////
 
 // Do it this way because some compilers don't support isfinite (e.g. pgi)
@@ -273,6 +280,10 @@ struct GEOM_CART2D {
     return area_of_flat_2D_polygon(num, coords);
   }   
 
+  static void intersect_segs(double *p1, double *p2, double *q1, double *q2, double *p_t, double *q_t) {
+    intersect_segs_cart2D(p1, p2, q1, q2, p_t, q_t);
+  }
+  
 };
 
 
@@ -314,6 +325,11 @@ struct GEOM_SPH2D3D {
     return great_circle_area(num, coords);
   }
 
+
+  static void intersect_segs(double *p1, double *p2, double *q1, double *q2, double *p_t, double *q_t) {
+    intersect_segs_sph2D3D(p1, p2, q1, q2, p_t, q_t);
+  }
+  
 };
 
 

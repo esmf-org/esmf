@@ -3974,5 +3974,62 @@ bool is_pnt_in_polygon(int num_p, double *p, double *pnt, double tol, int *tri_i
   }
 
 
+  // Do a very careful intersection of segments on a sphere
+  // p1,p2 - endpoints of first segment of size 3
+  // q1,q2 - endpoints of second segment of size 3
+  // p_t   - output position of intersection point in segment p
+  // q_t   - output position of intersection point in segment q
+  void intersect_segs_sph2D3D(double *p1, double *p2, double *q1, double *q2,
+                              double *p_t, double *q_t) {
+
+    
+
+  }
+
+  // Do a very careful intersection of segments on a 2D plane
+  // p1,p2 - endpoints of first segment of size 3
+  // q1,q2 - endpoints of second segment of size 3
+  // p_t   - output position of intersection point in segment p
+  // q_t   - output position of intersection point in segment q
+  void intersect_segs_cart2D(double *p1, double *p2, double *q1, double *q2,
+                             double *p_t, double *q_t) {
+
+    // Calculate thing to divide both line equations by
+    double ttdb=
+      p1[0]*(q2[1] - q1[1]) +
+      p2[0]*(q1[1] - q2[1]) +
+      q1[0]*(p1[1] - p2[1]) +
+      q2[0]*(p2[1] - p1[1]);
+
+
+#if 0
+    // if ttdb is 0.0 then the lines are parallel, this
+    // shouldn't happen, but if it does it makes the
+    // most sense to add the out point
+    if (ttdb == 0.0) {
+      p[0]=q2[0];
+      p[1]=q2[1];
+      return true;
+    }
+#endif
+
+
+    // Calculate p_t
+    *p_t=
+      -(q1[0]*(p1[1]-q2[1]) +
+        q2[0]*(q1[1]-p1[1]) +
+        p1[0]*(q2[1]-q1[1]))/ttdb;
+
+    
+    // Calculate q_t
+    *q_t=
+      -(p1[0]*(q1[1]-p2[1]) +
+        p2[0]*(p1[1]-q1[1]) +
+        q1[0]*(p2[1]-p1[1]))/ttdb;
+   
+  }
+
+  
+  
 
 } // namespace

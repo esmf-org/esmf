@@ -44,26 +44,81 @@
 using namespace ESMCI;
 
 template <class GEOM>
+class Vert {
+
+  double pnt[GEOM::pnt_size];
+
+  Vert *next, *prev;
+
+  Vert(double x, double y): next(NULL), prev(NULL) {
+    pnt[0]=x;
+    pnt[1]=y;
+  }
+
+  Vert(double x, double y, double z): next(NULL), prev(NULL) {
+    if (GEOM::pnt_size == 2) Throw() << "This instance of Pgon only supports 2D points.";
+    pnt[0]=x;
+    pnt[1]=y;
+    pnt[2]=z;
+  }
+
+  Vert(double *_pnt): next(NULL), prev(NULL) {
+
+    // Add point 0 & 1
+    pnt[0]=_pnt[0];
+    pnt[1]=_pnt[1];
+
+    // Maybe add 3
+    if (GEOM::pnt_size > 2) pnt[2]=_pnt[2];
+
+    // Only support 3 coords right now, this is error checked in Pgon creation
+  }
+  
+  void add_next(Vert *v) {
+    
+    // Point new vert appropriately 
+    v->next=next;
+    v->prev=this;
+    
+    // If there's something after, point it's prev to this
+    if (next != NULL) {
+      next->prev=v;
+    }
+
+    // Make the next node the new one
+    next=v;
+  }
+
+ void make_first() {
+    
+   // Point new node appropriately 
+   next=this;
+   prev=this;
+  }
+ 
+  
+};
+
+
+template <class GEOM2>
 class Pgon {
 
-  // Coords
+  // Buffer for holding Coords when they need to be passed someplace
   std::vector<double> pnt_coords;
 
-  // is this a hole? 
-  bool is_hole;
+  Vert<GEOM2> *beg,*end; // List of vertices
 
+  int num_pnts; // Size of polygon
+  
 public:
 
   
   // Full constructor
-  Pgon(bool _is_hole): is_hole(_is_hole) {
+  Pgon(): beg(NULL), end(NULL), num_pnts(0) {
 
     // Error check number of coords
-    if ((GEOM::pnt_size != 2) && (GEOM::pnt_size != 3)) Throw() << "Pgon only supports 2D or 3D points.";
+    if ((GEOM2::pnt_size != 2) && (GEOM2::pnt_size != 3)) Throw() << "Pgon only supports 2D or 3D points.";
   }
-
-  // Default constructor
-  Pgon():Pgon(false) { }
 
   // Clear points
   void clear() {
@@ -72,39 +127,51 @@ public:
   
   // Reserve to add future points
   void reserve(int num_pnts) {
-    pnt_coords.reserve(num_pnts*GEOM::pnt_size);
+    pnt_coords.reserve(num_pnts*GEOM2::pnt_size);
   }
 
- 
+  void push_back_Vert(Vert<GEOM2> *vert) {
+    // If empty, then just make the only one
+    if (beg == NULL) {
+      vert->make_first();
+      beg=end=vert;      
+    } else { // Add at end
+      end->add_next(vert);
+      end=vert;
+    }
+
+    // Increase the number of points
+    num_pnts++;
+  }
+  
   // Add a point
   void push_back_pnt(double *pnt) {
 
-    // Add point 0 & 1
-    pnt_coords.push_back(pnt[0]);
-    pnt_coords.push_back(pnt[1]);
+    // create vert
+    Vert<GEOM2> *vert=new Vert<GEOM2>(pnt);
 
-    // Maybe add 3
-    if (GEOM::pnt_size > 2) pnt_coords.push_back(pnt[2]);
-
-    // Only support 3 coords right now, this is error checked in creation
+    // Add
+    push_back_Vert(vert);
   }
 
   // Add a point 2D case
   void push_back_pnt(double x, double y) {
 
-    // Add point 0 & 1
-    pnt_coords.push_back(x);
-    pnt_coords.push_back(y);
+    // create vert
+    Vert<GEOM2> *vert=new Vert<GEOM2>(x,y);
 
+    // Add
+    push_back_Vert(vert);
   }
 
   // Add a point 3D case
   void push_back_pnt(double x, double y, double z) {
 
-    // Add point 0 & 1 & 2
-    pnt_coords.push_back(x);
-    pnt_coords.push_back(y);
-    pnt_coords.push_back(z);
+    // create vert
+    Vert<GEOM2> *vert=new Vert<GEOM2>(x,y,z);
+
+    // Add
+    push_back_Vert(vert);
   }
 
   
@@ -114,7 +181,7 @@ public:
 
     // if not empty, return area
     if (!pnt_coords.empty()) {
-      GEOM::calc_area_polygon(pnt_coords.size(), pnt_coords.data()); 
+      GEOM2::calc_area_polygon(pnt_coords.size(), pnt_coords.data()); 
     } else { // else return 0
       return 0.0;
     }
@@ -122,9 +189,10 @@ public:
 
 
   // Get methods
-  bool get_is_hole() {return is_hole;}
-  int get_num_pnts() {return pnt_coords.size()/GEOM::pnt_size;}  
-  int get_pnt_size() {return GEOM::pnt_size;}
+  int get_num_pnts() {return pnt_coords.size()/GEOM2::pnt_size;}  
+  int get_pnt_size() {return GEOM2::pnt_size;}
+
+  double *get_pnt_coord(int i) {return GEOM2::pnt_size*i+pnt_coords.data();}
 
   // Returns a direct pointer to the coordinate memory
   // (coordinates for a given point are stored next to each other in memory) 
@@ -133,9 +201,26 @@ public:
   // Write to vtk file for debuggin
   void write_to_vtk(const char *filename);
 
+  // Compute intersection of Pgons
+  static void intersection(Pgon<GEOM2> &subject, Pgon<GEOM2> &clipper, Pgon<GEOM2> &result);
+
   // Compute difference of Pgons
-  static void difference(Pgon<GEOM> subject, Pgon<GEOM> clipper,
-                         std::vector< Pgon<GEOM> > reults);
+  static void difference(Pgon<GEOM2> &subject, Pgon<GEOM2> &clipper, Pgon<GEOM2> &result);
+
+
+  // Eventually add these, where the result ends up in the Pgon object.
+  // This would be more efficient because in repeated use you wouldn't
+  // have to keep recreating the subject polygon
+#if 0
+
+  // Compute intersection of Pgons
+  void intersection(Pgon<GEOM2> &other);
+
+  // Compute difference of Pgons
+  void difference(Pgon<GEOM2> &clipper);
+
+ 
+#endif
 
 };
 
