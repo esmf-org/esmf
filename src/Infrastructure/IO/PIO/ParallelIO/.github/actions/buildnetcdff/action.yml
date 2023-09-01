@@ -1,0 +1,35 @@
+description: 'Build the netcdf fortran library'
+inputs:
+  netcdf_fortran_version:
+    description: 'Tag in the netcdf fortran repository to use'
+    default: v5.6.0
+    required: False
+    type: string
+  netcdf_c_path:
+    description: 'Path to the installed netcdf c code root'
+    default: /usr
+    required: False
+    type: string
+  install_prefix:
+    description: 'Install path of netcdf-fortran'
+    default: $HOME/netcdf-fortran
+    required: False
+    type: string
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        repository: Unidata/netcdf-fortran
+        path: netcdf-fortran-src
+        ref: ${{ inputs.NETCDF_FORTRAN_VERSION }}
+    - id: netcdf-fortran-build
+      shell: bash
+      run: |
+        pushd netcdf-fortran-src
+        export CPPFLAGS="$CPPFLAGS -I${{ inputs.netcdf_c_path }}/include"
+        export LDFLAGS="$LDFLAGS -L${{ inputs.netcdf_c_path }}/lib -lnetcdf"
+        ./configure --prefix=${{ inputs.install_prefix }}
+        make
+        make install

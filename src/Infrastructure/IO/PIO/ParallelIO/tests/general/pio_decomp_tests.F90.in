@@ -62,7 +62,7 @@ PIO_TF_AUTO_TEST_SUB_BEGIN nc_write_1d_darray
   filename = "test_pio_decomp_simple_tests.testfile"
   do i=1,num_iotypes
     PIO_TF_LOG(0,*) "Testing : PIO_TF_DATA_TYPE : ", iotype_descs(i)
-    ierr = PIO_createfile(pio_tf_iosystem_, pio_file, iotypes(i), filename, PIO_CLOBBER) 
+    ierr = PIO_createfile(pio_tf_iosystem_, pio_file, iotypes(i), filename, PIO_CLOBBER)
     PIO_TF_CHECK_ERR(ierr, "Could not create file " // trim(filename))
 
     ierr = PIO_def_dim(pio_file, 'PIO_TF_test_dim', dims(1), pio_dim)
@@ -163,7 +163,7 @@ PIO_TF_AUTO_TEST_SUB_BEGIN nc_wr_1d_const_buf_sz
   filename = "test_pio_decomp_simple_tests.testfile"
   do i=1,num_iotypes
     PIO_TF_LOG(0,*) "Testing : PIO_TF_DATA_TYPE : ", iotype_descs(i)
-    ierr = PIO_createfile(pio_tf_iosystem_, pio_file, iotypes(i), filename, PIO_CLOBBER) 
+    ierr = PIO_createfile(pio_tf_iosystem_, pio_file, iotypes(i), filename, PIO_CLOBBER)
     PIO_TF_CHECK_ERR(ierr, "Could not create file " // trim(filename))
 
     ierr = PIO_def_dim(pio_file, 'PIO_TF_test_dim', dims(1), pio_dim)
@@ -230,11 +230,11 @@ PIO_TF_AUTO_TEST_SUB_BEGIN nc_write_1d_reuse_decomp
   do i=1,num_iotypes
     PIO_TF_LOG(0,*) "Testing : PIO_TF_DATA_TYPE : ", iotype_descs(i)
     ierr = PIO_createfile(pio_tf_iosystem_, pio_file1, iotypes(i),&
-                            filename1, PIO_CLOBBER) 
+                            filename1, PIO_CLOBBER)
     PIO_TF_CHECK_ERR(ierr, "Could not create file " // trim(filename1))
 
     ierr = PIO_createfile(pio_tf_iosystem_, pio_file2, iotypes(i),&
-                            filename2, PIO_CLOBBER) 
+                            filename2, PIO_CLOBBER)
     PIO_TF_CHECK_ERR(ierr, "Could not create file " // trim(filename1))
 
     ierr = PIO_def_dim(pio_file1, 'PIO_TF_test_dim', dims(1), pio_dim_file1)

@@ -1,7 +1,7 @@
 #include "config.h"
 ! Get a 3D column decomposition
 ! If force_rearrange is FALSE, the decomposition is such that
-! # All even procs have VEC_HGT_SZ blocks of 
+! # All even procs have VEC_HGT_SZ blocks of
 ! (VEC_COL_SZ rows x VEC_ROW_SZ columns) elements
 ! # All odd procs have  VEC_HGT_SZ blocks of
 ! (VEC_COL_SZ rows x VEC_ROW_SZ + 1 columns) elements

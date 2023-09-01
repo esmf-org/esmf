@@ -9,7 +9,7 @@ include (LibMPI)
 include_directories("${CMAKE_SOURCE_DIR}/tests/ncint")
 include_directories("${CMAKE_BINARY_DIR}")
 
-set (my_tests tst_async_multi tst_ncint_async_perf
+set (my_tests tst_async_multi tst_ncint_async_perf tst_ncint_open
   tst_ncint_perf tst_pio_async tst_pio_udf tst_var_compress)
 
 # Test Timeout in seconds.
@@ -28,4 +28,3 @@ FOREACH(tst ${my_tests})
     NUMPROCS 4
     TIMEOUT ${DEFAULT_TEST_TIMEOUT})
 ENDFOREACH()
-

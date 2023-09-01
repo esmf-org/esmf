@@ -123,7 +123,10 @@ PIO_TF_AUTO_TEST_SUB_BEGIN test_data_conversion
   dims(1) = VEC_LOCAL_SZ * pio_tf_world_sz_
   compdof = VEC_LOCAL_SZ * pio_tf_world_rank_ + compdof_rel_disps
   wbuf = pio_tf_world_rank_;
-  exp_val = pio_tf_world_rank_;
+
+! Type conversions here to avoid gfortran warnings
+
+  exp_val = pio_tf_world_rank_
 
   ! Set the decomposition for writing data as PIO_int
   call PIO_initdecomp(pio_tf_iosystem_, PIO_int, dims, compdof, wiodesc)
