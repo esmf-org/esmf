@@ -3891,8 +3891,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !   data copy options.\newline
 !   Added argument {\tt delayout} to create Array with different localDe -> DE
 !   mapping. This is identical to a change in DE -> PET mapping.
-! \item[8.6.0] Added argument {\tt trailingUndistSlice} to all arrays created
-!   by reference to slice along traling undistributed dimensions.
+! \item[8.6.0] Added argument {\tt trailingUndistSlice} to allow slicing of
+!   arrays created by reference.
 ! \end{description}
 ! \end{itemize}
 !
@@ -3914,9 +3914,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      If present, override the DELayout of the incoming {\tt distgrid}.
 !      By default use the DELayout defined in {\tt distgrid}.
 ! \item[{[trailingUndistSlice]}]
-!      If present, the returned Array references the data of the slice of the
-!      {\tt array} argument, at the specified trailing undistributed dimension
-!      tuple.
+!      If present, the returned Array references the data of the array slice
+!      as defined by the specified tuple, applied to the right most
+!      trailing undistributed dimensions.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
