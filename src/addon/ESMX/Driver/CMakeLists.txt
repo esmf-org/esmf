@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.22)
 # load packages and modules
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 find_package(Python 3.5 REQUIRED COMPONENTS Interpreter)
-find_package(ESMF 8.5.0 MODULE REQUIRED)
+find_package(ESMF 8.6.0 MODULE REQUIRED)
 include(FetchContent)
 
 # esmx functions
@@ -90,12 +90,16 @@ endif()
 # compiler options
 if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
   set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
-  set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -fbacktrace -02")
+  set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -fbacktrace -O2")
   set(CMAKE_Fortran_FLAGS_DEBUG "-g -fbacktrace -O0 -fcheck=all -ffpe-trap=invalid,zero,overflow,underflow")
 elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
   set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
   set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -traceback -O2")
   set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0 -check all -fpe0 -ftrapuv -init=snan,arrays")
+elseif(CMAKE_Fortran_COMPILER_ID MATCHES "NVHPC")
+  set(CMAKE_Fortran_FLAGS_RELEASE "-O2 -fast")
+  set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -traceback -O2 -fast")
+  set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0")
 else()
   message(WARNING "${CMAKE_Fortran_COMPILER_ID} Fortran compiler will be used with default options")
 endif()
@@ -125,7 +129,6 @@ endforeach()
 # link packages
 foreach(ESMX_LINK_PACKAGE IN ITEMS ${ESMX_LINK_PACKAGES})
   find_package(${ESMX_LINK_PACKAGE} REQUIRED)
-  target_link_libraries(esmx_driver ${ESMX_LINK_PACKAGE})
 endforeach()
 
 # link external libraries
@@ -290,7 +293,7 @@ foreach(CMP IN ITEMS ${COMPS})
 
   # build component with cmake
   if(${CMP_BUILD_TYPE} STREQUAL "cmake")
-    message(STATUS "Building (CMAKE) - ${CMP} - ${CMP_SOURCE_DIR}")
+    message(STATUS "ESMX building (CMAKE) - ${CMP} - ${CMP_SOURCE_DIR}")
     find_file(FND_CMAKE_LISTS
       NAMES CMakeLists.txt cmakelists.txt CMAKELISTS.txt
       PATHS ${CMP_SOURCE_DIR}
@@ -332,7 +335,7 @@ foreach(CMP IN ITEMS ${COMPS})
 
   # build component with make
   elseif(${CMP_BUILD_TYPE} STREQUAL "make")
-    message(STATUS "Building (MAKE) - ${CMP} - ${CMP_SOURCE_DIR}")
+    message(STATUS "ESMX building (MAKE) - ${CMP} - ${CMP_SOURCE_DIR}")
     find_file(FND_MAKE_FILE
       NAMES Makefile makefile MAKEFILE
       PATHS ${CMP_SOURCE_DIR}
@@ -358,7 +361,7 @@ foreach(CMP IN ITEMS ${COMPS})
 
   # build component with script
   elseif(${CMP_BUILD_TYPE} STREQUAL "script")
-    message(STATUS "Building (SCRIPT) - ${CMP} - ${CMP_SOURCE_DIR}")
+    message(STATUS "ESMX building (SCRIPT) - ${CMP} - ${CMP_SOURCE_DIR}")
     find_file(FND_BUILD_SCRIPT
       NAMES ${CMP_BUILD_SCRIPT}
       PATHS ${CMP_SOURCE_DIR}
