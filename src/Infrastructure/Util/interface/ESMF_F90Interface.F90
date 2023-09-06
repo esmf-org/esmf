@@ -532,7 +532,7 @@ contains
     farray1DI8, farray2DI8, farray3DI8, farray1DR8, farray2DR8, farray3DR8, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_InterArray), intent(inout)           :: array
+    type(ESMF_InterArray), intent(in)              :: array
     integer,                 pointer,     optional :: farray1D(:)
     integer,                 pointer,     optional :: farray2D(:,:)
     integer,                 pointer,     optional :: farray3D(:,:,:)
