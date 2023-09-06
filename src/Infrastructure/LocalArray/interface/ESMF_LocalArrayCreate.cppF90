@@ -52,6 +52,7 @@ module ESMF_LocalArrayCreateMod
   use ESMF_BaseMod          ! ESMF base class
   use ESMF_LogErrMod        ! ESMF error handling
   use ESMF_IOUtilMod
+  use ESMF_F90InterfaceMod
 
   use ESMF_ArraySpecMod
   use ESMF_LocalArrayWrapperTypeMod ! contains the LAWrapper derived type
@@ -137,6 +138,7 @@ module ESMF_LocalArrayCreateMod
 
   public ESMF_LocalArrayCopyF90Ptr
   public ESMF_LocalArrayAdjust
+  public ESMF_LocalArraySlice
 
   public ESMF_LocalArrayValidate
   public ESMF_LocalArrayPrint
@@ -3601,6 +3603,163 @@ TypeKindRankDeclarationMacro(LocalArrayAdjust)
 !---------------------------------------------------------------------------- @\
 
 TypeKindRankDeclarationMacro(LocalArrayAdjustShape)
+
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_LocalArraySlice"
+!BOPI
+! !IROUTINE: ESMF_LocalArraySlice - Slice array on trailing dims
+!
+! !INTERFACE:
+  subroutine ESMF_LocalArraySlice(array, trailingTensorSlice, rankIn, rankOut, rc)
+!
+! !ARGUMENTS:
+   type(ESMF_LocalArray), intent(inout)         :: array
+   type(ESMF_InterArray), intent(in)            :: trailingTensorSlice
+   integer,               intent(in)            :: rankIn, rankOut
+   integer,               intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!   Slice the {\tt ESMF\_LocalArray} object.
+!
+!EOPI
+!------------------------------------------------------------------------------
+    ! Local vars
+    integer :: localrc                   ! local return code
+    integer                     :: localtk, count
+    type(ESMF_TypeKind_Flag)    :: typekind
+    integer, pointer            :: slice(:)
+
+    localrc = ESMF_RC_NOT_IMPL
+
+    ! Access information from array
+    call c_ESMC_LocalArrayGetTypeKind(array, typekind, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Access information from trailingTensorSlice
+    call ESMF_InterArrayGet(trailingTensorSlice, farray1D=slice, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    count = size(slice)
+print *, "count: ", count
+print *, "slice: ", slice
+
+    ! Call a T/K/R specific interface in order to create the proper
+    !  type of F90 pointer, then slice the F90 pointer.
+
+    localtk = typekind%dkind
+
+    !! calling routines generated from macros by the preprocessor
+
+    select case (localtk)
+      case (ESMF_TYPEKIND_R8%dkind)
+        select case(rankIn)
+          case (1)
+          case (2)
+          case (3)
+            select case(rankOut)
+              case (1)
+              case (2)
+                call ESMF_LocalArraySlice3D2DR8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+          case (4)
+^ifndef ESMF_NO_GREATER_THAN_4D
+          case (5)
+          case (6)
+          case (7)
+^endif
+          case default
+            if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+              msg="Unsupported rankIn", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        end select
+      case default
+        if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+          msg="Unsupported typekind", &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    end select
+
+    ! Set init code
+    ESMF_INIT_SET_CREATED(array)
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_LocalArraySlice
+!------------------------------------------------------------------------------
+
+
+  subroutine ESMF_LocalArraySlice3D2DR8(array, slice, rc)
+    type(ESMF_LocalArray),  intent(inout)           :: array
+    integer,                pointer                 :: slice(:)
+    integer,                intent(out),  optional  :: rc
+
+    integer :: localrc, rankOut
+    type (ESMF_LAWrap3Dr8) :: wrapIn
+    type (ESMF_LAWrap2Dr8) :: wrapOut
+    real (ESMF_KIND_r8), dimension(:,:,:), pointer :: farrayPtrIn
+    real (ESMF_KIND_r8), dimension(:,:), pointer :: farrayPtrOut
+
+    call ESMF_LogWrite("Hi There from ESMF_LocalArraySlice3D2DR8", &
+      ESMF_LOGMSG_DEBUG, rc=rc)
+
+    call c_ESMC_LocalArrayGetFPtr(array, wrapIn, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+print *, "lbound(wrapIn%ptr3Dr8):", lbound(wrapIn%ptr3Dr8)
+print *, "ubound(wrapIn%ptr3Dr8):", ubound(wrapIn%ptr3Dr8)
+
+#if 0
+
+    ! slicing!!!
+    wrapOut%ptr2Dr8 => wrapIn%ptr3Dr8(:,:,slice(1))
+!    wrapOut%ptr2Dr8 => wrapIn%ptr3Dr8(:,:,1)
+
+!print *, "wrapOut%ptr2Dr8(1,1)=", wrapOut%ptr2Dr8(1,1)
+
+    rankOut = 2 ! must set now so SetFPtr works correctly
+    call c_ESMC_LocalArraySetRank(array, rankOut, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_ESMC_LocalArraySetFPtr(array, wrapOut, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+#else
+
+    farrayPtrOut(lbound(wrapIn%ptr3Dr8,1):,lbound(wrapIn%ptr3Dr8,2):) => wrapIn%ptr3Dr8(:,:,slice(1))
+!    farrayPtrOut => wrapIn%ptr3Dr8(:,:,slice(1))
+
+print *, "lbound(farrayPtrOut):", lbound(farrayPtrOut)
+print *, "ubound(farrayPtrOut):", ubound(farrayPtrOut)
+
+    array = ESMF_LocalArrayCreate(farrayPtrOut, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+#endif
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_LocalArraySlice3D2DR8
 
 
 !------------------------------------------------------------------------------

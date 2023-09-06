@@ -363,7 +363,8 @@ namespace ESMCI {
       InterArray<int> *undistLBoundArg, InterArray<int> *undistUBoundArg,
       int *rc, VM *vm=NULL);
     static Array *create(Array *array, DataCopyFlag copyflag,
-      DELayout *delayout=NULL, int rmLeadingTensors=0, int *rc=NULL);
+      DELayout *delayout=NULL, InterArray<int> *trailingTensorSlice=NULL,
+      int rmLeadingTensors=0, int *rc=NULL);
     static Array *create(Array *array, bool rmTensorFlag, int *rc=NULL);
     static int destroy(Array **array, bool noGarbage=false);
     // data copy()
