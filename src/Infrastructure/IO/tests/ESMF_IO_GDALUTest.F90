@@ -46,18 +46,7 @@ program ESMF_IO_GDALUTest
 
   type(ESMF_VM) :: vm
   integer :: localPet
-  type(ESMF_Grid) :: grid6tile
-  type(ESMF_DistGrid) :: distgrid3tile
-
-  ! Fields used for writing:
-  !
-  ! The following fields make up the field bundle:
-  type(ESMF_Field) :: field1, field2, field1Copy, field4d
-  real(ESMF_KIND_R8), pointer :: field1Data(:,:), field2Data(:,:), field1CopyData(:,:), field4dData(:,:,:,:)
-  type(ESMF_FieldBundle) :: fieldBundle
-  ! This field is not in the field bundle:
-  type(ESMF_Field) :: field3
-  real(ESMF_KIND_R8), pointer :: field3Data(:,:)
+  type(ESMF_Mesh) :: mesh
 
   ! Fields used for reading:
   !
@@ -66,37 +55,13 @@ program ESMF_IO_GDALUTest
   real(ESMF_KIND_R8), pointer :: field1ReadData(:,:), field2ReadData(:,:), field1CopyReadData(:,:), field4dReadData(:,:,:,:)
   type(ESMF_FieldBundle) :: fieldBundleRead
   ! This field is not in the field bundle:
-  type(ESMF_Field) :: field3Read
-  real(ESMF_KIND_R8), pointer :: field3ReadData(:,:)
+  type(ESMF_Field) :: field
+  real(ESMF_KIND_R8), pointer :: fieldReadData(:)
 
-  ! This is used for error testing:
-  type(ESMF_Grid) :: gridSingleTile
-  type(ESMF_Field) :: fieldSingleTile
-  type(ESMF_FieldBundle) :: fieldBundleMixedTileCounts
+  type(ESMF_ArraySpec) :: arraySpec
 
-  ! Arrays used for writing:
-  !
-  ! The following arrays make up the array bundle:
-  type(ESMF_Array) :: array1, array2
-  real(ESMF_KIND_R8), pointer :: array1Data(:,:), array2Data(:,:)
-  type(ESMF_ArrayBundle) :: arrayBundle
-  ! This array is not in the array bundle:
-  type(ESMF_Array) :: array3
-  real(ESMF_KIND_R8), pointer :: array3Data(:,:)
-
-  ! Arrays used for reading:
-  !
-  ! The following arrays make up the array bundle:
-  type(ESMF_Array) :: array1Read, array2Read
-  real(ESMF_KIND_R8), pointer :: array1ReadData(:,:), array2ReadData(:,:)
-  type(ESMF_ArrayBundle) :: arrayBundleRead
-  ! This array is not in the array bundle:
-  type(ESMF_Array) :: array3Read
-  real(ESMF_KIND_R8), pointer :: array3ReadData(:,:)
-
-  logical :: allEqual
-
-  character(len=*), parameter :: fileNameFields = "ESMF_IO_GDALUTestFields#.shp"
+  character(len=*), parameter :: fileNameFields = "data/complex_3.shp"
+!  character(len=*), parameter :: fileNameFields = "cb_2018_us_county_20m.shp"
 
   !------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
@@ -107,33 +72,44 @@ program ESMF_IO_GDALUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !------------------------------------------------------------------------
 
-  ! --- 
-  !------------------------------------------------------------------------
+  ! Create Mesh from shape file
+  write(name, *) "Creating a Mesh to use in Field Tests"
+  mesh=ESMF_MeshCreate(fileNameFields, &
+       fileformat=ESMF_FILEFORMAT_SHAPEFILE, &
+       rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
-  !EX_UTest_Multi_Proc_Only
-  write(name, *) "Read a multi-tile Field"
+
+  write(name, *) "Get a multi-tile Field"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_FieldRead(field3Read, fileName=fileNameFields, iofmt=ESMF_IOFMT_SHP, rc=rc)
+  call ESMF_ArraySpecSet(arraySpec, 1, typekind=ESMF_TYPEKIND_R8, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  field = ESMF_FieldCreate(mesh, arraySpec, name="DistFld", rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+!  call ESMF_FieldPrint(field, rc=rc)
+!  if (rc /= ESMF_SUCCESS) return
+  call ESMF_FieldGet(field, farrayPtr=fieldReadData, rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_GDAL))
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc == ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
-  !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
-!>>  write(name, *) "Confirm that Field-read field matches original"
-!>>  write(failMsg, *) "Read-in field differs from original"
-!>>  allEqual = all(field3ReadData == field3Data)
-!>>#if (defined ESMF_PIO && (defined ESMF_GDAL))
-!>>  call ESMF_Test(allEqual, name, failMsg, result, ESMF_SRCLINE)
-!>>#else
-!>>  write(failMsg, *) "Comparison did not fail as expected"
-!>>  call ESMF_Test(.not. allEqual, name, failMsg, result, ESMF_SRCLINE)
-!>>#endif
+  write(name, *) "Read a multi-tile Field"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_FieldRead(field, fileName=fileNameFields, iofmt=ESMF_IOFMT_SHP, rc=rc)
+#if (defined ESMF_PIO && (defined ESMF_GDAL))
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc == ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------

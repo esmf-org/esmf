@@ -68,7 +68,7 @@ namespace ESMCI {
     // global information
     static std::vector<int> activeGdalInstances;
     int gdalSystemDesc; // Descriptor for initialized GDAL inst.
-    int *gdalFileDesc;  // Descriptor(s) for open GDAL file (typically just one, but multiple for I/O of multi-tile arrays)
+    OGRDataSourceH *gdalFileDesc;  // Descriptor(s) for open GDAL file (typically just one, but multiple for I/O of multi-tile arrays)
     MPI_Comm communicator;
     int my_rank;
     int num_iotasks;

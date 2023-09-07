@@ -132,24 +132,38 @@ enum GDAL_REARRANGERS
     // These also establish defaults to match F90 optional args.  TODO ?
 
     // friend function to allocate and initialize io from heap
-    IO_GDAL *ESMCI_IO_GDALCreate(const std::string& name=0,
-                       ESMC_Base* base=0, int* rc=0);
+  IO_GDAL *ESMCI_IO_GDALCreate(const std::string& name=0,
+			       ESMC_Base* base=0, int* rc=0);
 
-    // friend function to copy an io_netcdf  TODO ?
-    //IO_GDAL *ESMCI_IO_GDALCreate(IO_GDAL *io_netcdf, int *rc=0);
+  // friend function to copy an io_netcdf  TODO ?
+  //IO_GDAL *ESMCI_IO_GDALCreate(IO_GDAL *io_netcdf, int *rc=0);
 
-    // friend function to de-allocate clock
-    int ESMCI_IO_GDALDestroy(IO_GDAL **io_netcdf);
+  // friend function to de-allocate clock
+  int ESMCI_IO_GDALDestroy(IO_GDAL **io_netcdf);
 
-    // friend to restore state  TODO ?
-    //Clock *ESMCI_IO_GDALReadRestart(const std::string& name=0,
-                                   //int*         rc=0);
+  // friend to restore state  TODO ?
+  //Clock *ESMCI_IO_GDALReadRestart(const std::string& name=0,
+  //int*         rc=0);
 
-    int GDALc_finalize(int instance);
-    int GDALc_inq(int ncid, int *ndimsp, int *nvarsp, int *ngattsp, int *unlimdimidp);
+  int GDALc_finalize(int instance);
+  int GDALc_inq(int ncid, int *ndimsp, int *nvarsp, int *ngattsp, int *unlimdimidp);
 
-    int GDALc_inq_varid(int ncid, const char *name, int *varidp);
-    int GDALc_inq_vardimid(int ncid, int varid, int *dimidsp);
+  int GDALc_inq_fieldid(OGRDataSourceH hDS, const char *name, int *varidp);
+  int GDALc_inq_field(int ncid, int varid, char *name, int *xtypep, int *ndimsp, int *dimidsp,
+		      int *nattsp);
+  int GDALc_inq_vardimid(int ncid, int varid, int *dimidsp);
+
+  int GDALc_deletefile(int iosysid, const char *filename);
+  int GDALc_createfile(int iosysid, OGRDataSourceH *ncidp,  int *iotype, const char *fname, bool mode);
+  int GDALc_create(int iosysid, const char *path, int cmode, int *ncidp);
+  int GDALc_openfile(int iosysid, OGRDataSourceH *hDSp, int *iotype, const char *fname, bool mode);
+  int GDALc_open(int iosysid, const char *path, int mode, int *ncidp);
+  int GDALc_closefile(int ncid);
+
+  int GDALc_inq_timeid(OGRDataSourceH hDS, int *timeid); // Is there a field of type OFTDate, OFTTime, or OFTDateTime?
+
+  // Read distributed array.
+  int GDALc_read_darray(OGRDataSourceH hDS, int fieldid, int ioid, MPI_Offset arraylen, void *array);
 
 }   // namespace ESMCI
 
