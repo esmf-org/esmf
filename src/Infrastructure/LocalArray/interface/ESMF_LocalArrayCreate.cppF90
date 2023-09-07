@@ -3646,8 +3646,6 @@ TypeKindRankDeclarationMacro(LocalArrayAdjustShape)
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     count = size(slice)
-print *, "count: ", count
-print *, "slice: ", slice
 
     ! Call a T/K/R specific interface in order to create the proper
     !  type of F90 pointer, then slice the F90 pointer.
@@ -3657,13 +3655,811 @@ print *, "slice: ", slice
     !! calling routines generated from macros by the preprocessor
 
     select case (localtk)
-      case (ESMF_TYPEKIND_R8%dkind)
+^ifndef ESMF_NO_INTEGER_1_BYTE
+      case (ESMF_TYPEKIND_I1%dkind)
         select case(rankIn)
-          case (1)
           case (2)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice2D1DI1(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
           case (3)
             select case(rankOut)
               case (1)
+                call ESMF_LocalArraySlice3D1DI1(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice3D2DI1(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+          case (4)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice4D1DI1(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice4D2DI1(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice4D3DI1(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+^ifndef ESMF_NO_GREATER_THAN_4D
+          case (5)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice5D1DI1(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice5D2DI1(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice5D3DI1(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (4)
+                call ESMF_LocalArraySlice5D4DI1(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+          case (6)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice6D1DI1(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice6D2DI1(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice6D3DI1(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (4)
+                call ESMF_LocalArraySlice6D4DI1(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (5)
+                call ESMF_LocalArraySlice6D5DI1(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+          case (7)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice7D1DI1(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice7D2DI1(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice7D3DI1(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (4)
+                call ESMF_LocalArraySlice7D4DI1(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (5)
+                call ESMF_LocalArraySlice7D5DI1(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (6)
+                call ESMF_LocalArraySlice7D6DI1(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+^endif
+          case default
+            if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+              msg="Unsupported rankIn", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        end select
+^endif
+^ifndef ESMF_NO_INTEGER_2_BYTE
+      case (ESMF_TYPEKIND_I2%dkind)
+        select case(rankIn)
+          case (2)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice2D1DI2(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+          case (3)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice3D1DI2(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice3D2DI2(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+          case (4)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice4D1DI2(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice4D2DI2(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice4D3DI2(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+^ifndef ESMF_NO_GREATER_THAN_4D
+          case (5)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice5D1DI2(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice5D2DI2(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice5D3DI2(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (4)
+                call ESMF_LocalArraySlice5D4DI2(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+          case (6)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice6D1DI2(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice6D2DI2(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice6D3DI2(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (4)
+                call ESMF_LocalArraySlice6D4DI2(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (5)
+                call ESMF_LocalArraySlice6D5DI2(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+          case (7)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice7D1DI2(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice7D2DI2(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice7D3DI2(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (4)
+                call ESMF_LocalArraySlice7D4DI2(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (5)
+                call ESMF_LocalArraySlice7D5DI2(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (6)
+                call ESMF_LocalArraySlice7D6DI2(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+^endif
+          case default
+            if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+              msg="Unsupported rankIn", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        end select
+^endif
+      case (ESMF_TYPEKIND_I4%dkind)
+        select case(rankIn)
+          case (2)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice2D1DI4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+          case (3)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice3D1DI4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice3D2DI4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+          case (4)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice4D1DI4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice4D2DI4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice4D3DI4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+^ifndef ESMF_NO_GREATER_THAN_4D
+          case (5)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice5D1DI4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice5D2DI4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice5D3DI4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (4)
+                call ESMF_LocalArraySlice5D4DI4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+          case (6)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice6D1DI4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice6D2DI4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice6D3DI4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (4)
+                call ESMF_LocalArraySlice6D4DI4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (5)
+                call ESMF_LocalArraySlice6D5DI4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+          case (7)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice7D1DI4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice7D2DI4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice7D3DI4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (4)
+                call ESMF_LocalArraySlice7D4DI4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (5)
+                call ESMF_LocalArraySlice7D5DI4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (6)
+                call ESMF_LocalArraySlice7D6DI4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+^endif
+          case default
+            if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+              msg="Unsupported rankIn", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        end select
+      case (ESMF_TYPEKIND_I8%dkind)
+        select case(rankIn)
+          case (2)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice2D1DI8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+          case (3)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice3D1DI8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice3D2DI8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+          case (4)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice4D1DI8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice4D2DI8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice4D3DI8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+^ifndef ESMF_NO_GREATER_THAN_4D
+          case (5)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice5D1DI8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice5D2DI8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice5D3DI8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (4)
+                call ESMF_LocalArraySlice5D4DI8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+          case (6)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice6D1DI8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice6D2DI8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice6D3DI8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (4)
+                call ESMF_LocalArraySlice6D4DI8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (5)
+                call ESMF_LocalArraySlice6D5DI8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+          case (7)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice7D1DI8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice7D2DI8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice7D3DI8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (4)
+                call ESMF_LocalArraySlice7D4DI8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (5)
+                call ESMF_LocalArraySlice7D5DI8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (6)
+                call ESMF_LocalArraySlice7D6DI8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+^endif
+          case default
+            if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+              msg="Unsupported rankIn", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        end select
+      case (ESMF_TYPEKIND_R4%dkind)
+        select case(rankIn)
+          case (2)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice2D1DR4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+          case (3)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice3D1DR4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice3D2DR4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+          case (4)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice4D1DR4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice4D2DR4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice4D3DR4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+^ifndef ESMF_NO_GREATER_THAN_4D
+          case (5)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice5D1DR4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice5D2DR4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice5D3DR4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (4)
+                call ESMF_LocalArraySlice5D4DR4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+          case (6)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice6D1DR4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice6D2DR4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice6D3DR4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (4)
+                call ESMF_LocalArraySlice6D4DR4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (5)
+                call ESMF_LocalArraySlice6D5DR4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+          case (7)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice7D1DR4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice7D2DR4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice7D3DR4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (4)
+                call ESMF_LocalArraySlice7D4DR4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (5)
+                call ESMF_LocalArraySlice7D5DR4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (6)
+                call ESMF_LocalArraySlice7D6DR4(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+^endif
+          case default
+            if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+              msg="Unsupported rankIn", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        end select
+      case (ESMF_TYPEKIND_R8%dkind)
+        select case(rankIn)
+          case (2)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice2D1DR8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
+          case (3)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice3D1DR8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
               case (2)
                 call ESMF_LocalArraySlice3D2DR8(array, slice, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
@@ -3675,10 +4471,124 @@ print *, "slice: ", slice
                   ESMF_CONTEXT, rcToReturn=rc)) return
             end select
           case (4)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice4D1DR8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice4D2DR8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice4D3DR8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
 ^ifndef ESMF_NO_GREATER_THAN_4D
           case (5)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice5D1DR8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice5D2DR8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice5D3DR8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (4)
+                call ESMF_LocalArraySlice5D4DR8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
           case (6)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice6D1DR8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice6D2DR8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice6D3DR8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (4)
+                call ESMF_LocalArraySlice6D4DR8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (5)
+                call ESMF_LocalArraySlice6D5DR8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
           case (7)
+            select case(rankOut)
+              case (1)
+                call ESMF_LocalArraySlice7D1DR8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (2)
+                call ESMF_LocalArraySlice7D2DR8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (3)
+                call ESMF_LocalArraySlice7D3DR8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (4)
+                call ESMF_LocalArraySlice7D4DR8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (5)
+                call ESMF_LocalArraySlice7D5DR8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case (6)
+                call ESMF_LocalArraySlice7D6DR8(array, slice, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              case default
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rankIn/rankOut combination", &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            end select
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -3701,65 +4611,74 @@ print *, "slice: ", slice
 !------------------------------------------------------------------------------
 
 
-  subroutine ESMF_LocalArraySlice3D2DR8(array, slice, rc)
-    type(ESMF_LocalArray),  intent(inout)           :: array
-    integer,                pointer                 :: slice(:)
-    integer,                intent(out),  optional  :: rc
+#define LocalArraySliceDoc() \
+!---------------------------------------------------------------------------- @\
+!BOPI @\
+! !IROUTINE: ESMF_LocalArraySlice<rank><type><kind> - Array Slicing @\
+! @\
+! !INTERFACE: @\
+!      recursive subroutine ESMF_LocalArraySlice<rank><type><kind>(array,&@\
+!  slice, rc) @\
+! @\
+! !ARGUMENTS: @\
+!      type(ESMF_LocalArray), intent(inout) :: array @\
+!      integer, pointer                     :: slice(:) @\
+!      integer, intent(out), optional       :: rc   @\
+! @\
+! !DESCRIPTION: @\
+! Array Slicing. @\
+!EOPI @\
+!---------------------------------------------------------------------------- @\
+ @\
 
-    integer :: localrc, rankOut
-    type (ESMF_LAWrap3Dr8) :: wrapIn
-    type (ESMF_LAWrap2Dr8) :: wrapOut
-    real (ESMF_KIND_r8), dimension(:,:,:), pointer :: farrayPtrIn
-    real (ESMF_KIND_r8), dimension(:,:), pointer :: farrayPtrOut
+#define LocalArraySliceMacro(mtypename, mtypekind, mranka, mdima, mlena, mrnga, mlbca, mrankb, mdimb, mlenb, mrngb, mlbcb, mslc) \
+!---------------------------------------------------------------------------- @\
+^undef  ESMF_METHOD @\
+!define ESMF_METHOD "ESMF_LocalArraySlice##mrank##D##mtypekind" @\
+^define ESMF_METHOD "ESMF_LocalArraySlice" @\
+ @\
+  recursive subroutine ESMF_LocalArraySlice##mranka##D##mrankb##D##mtypekind(array, &@\
+    slice, rc) @\
+ @\
+    type(ESMF_LocalArray), intent(inout) :: array @\
+    integer, pointer                     :: slice(:) @\
+    integer, intent(out), optional       :: rc   @\
+ @\
+    ! Local variables @\
+    integer :: localrc                ! local return code @\
+    integer :: lb(mranka), ub(mranka) ! bounds of the incoming array  @\
+ @\
+    type (ESMF_LAWrap##mranka##D##mtypekind) :: wrapIn  @\
+    mtypename (ESMF_KIND_##mtypekind), dimension(mdimb), pointer :: farrayPtrOut  @\
+ @\
+    ! Initialize return code; assume routine not implemented @\
+    localrc = ESMF_RC_NOT_IMPL @\
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+    call c_ESMC_LocalArrayGetFPtr(array, wrapIn, localrc) @\
+    if (ESMF_LogFoundError(localrc, & @\
+      ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+    lb = lbound(wrapIn%ptr##mranka##D##mtypekind) @\
+    ub = ubound(wrapIn%ptr##mranka##D##mtypekind) @\
+ @\
+    farrayPtrOut(mlbcb) & @\
+      => wrapIn%ptr##mranka##D##mtypekind(mdimb,mslc) @\
+ @\
+    array = ESMF_LocalArrayCreate(farrayPtrOut, rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, & @\
+      ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+    ! return successfully @\
+    if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+  end subroutine ESMF_LocalArraySlice##mranka##D##mrankb##D##mtypekind  @\
+ @\
+!---------------------------------------------------------------------------- @\
 
-    call ESMF_LogWrite("Hi There from ESMF_LocalArraySlice3D2DR8", &
-      ESMF_LOGMSG_DEBUG, rc=rc)
-
-    call c_ESMC_LocalArrayGetFPtr(array, wrapIn, localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-print *, "lbound(wrapIn%ptr3Dr8):", lbound(wrapIn%ptr3Dr8)
-print *, "ubound(wrapIn%ptr3Dr8):", ubound(wrapIn%ptr3Dr8)
-
-#if 0
-
-    ! slicing!!!
-    wrapOut%ptr2Dr8 => wrapIn%ptr3Dr8(:,:,slice(1))
-!    wrapOut%ptr2Dr8 => wrapIn%ptr3Dr8(:,:,1)
-
-!print *, "wrapOut%ptr2Dr8(1,1)=", wrapOut%ptr2Dr8(1,1)
-
-    rankOut = 2 ! must set now so SetFPtr works correctly
-    call c_ESMC_LocalArraySetRank(array, rankOut, localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    call c_ESMC_LocalArraySetFPtr(array, wrapOut, localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-#else
-
-    farrayPtrOut(lbound(wrapIn%ptr3Dr8,1):,lbound(wrapIn%ptr3Dr8,2):) => wrapIn%ptr3Dr8(:,:,slice(1))
-!    farrayPtrOut => wrapIn%ptr3Dr8(:,:,slice(1))
-
-print *, "lbound(farrayPtrOut):", lbound(farrayPtrOut)
-print *, "ubound(farrayPtrOut):", ubound(farrayPtrOut)
-
-    array = ESMF_LocalArrayCreate(farrayPtrOut, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-#endif
-
-    ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_LocalArraySlice3D2DR8
+TypeKindRankCrossRankTridiagDeclarationMacro(LocalArraySlice)
 
 
 !------------------------------------------------------------------------------
