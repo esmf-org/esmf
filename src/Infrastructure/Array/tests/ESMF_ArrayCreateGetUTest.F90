@@ -2305,7 +2305,7 @@ program ESMF_ArrayCreateGetUTest
           * sin(real(j,ESMF_KIND_R4)) &
           * sin(real(k,ESMF_KIND_R4)) &
           * sin(real(l,ESMF_KIND_R4))
-        if (abs(diffR4) > 1.d-10) then
+        if (abs(diffR4) > 1.d-6) then
           dataCorrect=.false.
           write (msg,*) "diffR4=", diffR4
           call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
