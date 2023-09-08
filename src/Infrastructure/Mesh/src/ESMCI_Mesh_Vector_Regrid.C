@@ -89,42 +89,37 @@ void get_vec_dims_for_vectorRegrid(ESMCI::Array &array, int &num_vec_dims, int *
 // Class for holding coordinates to make other classes below cleaner
 class Coord {
   // Data
-  double c[3];
+  double c[2];  // Holds lon, lat
 
 public:
 
   Coord() {
     c[0]=0.0;
     c[1]=0.0;
-    c[2]=0.0;
   }
     
-  Coord(double x, double y, double z) {
-    c[0]=x;
-    c[1]=y;
-    c[2]=z;
+  Coord(double lon, double lat) {
+    c[0]=lon;
+    c[1]=lat;
   }
   
   // Less 
   bool operator<(const Coord &rhs) const {
     if (c[0] != rhs.c[0]) {
       return c[0] < rhs.c[0];
-    } else if (c[1] != rhs.c[1]) {
-      return c[1] < rhs.c[1];
     }
-    return c[2] < rhs.c[2];
+    return c[1] < rhs.c[1];
   }
 
   // Do we need this? 
   bool operator==(const Coord &rhs) const {
-    return (c[0] == rhs.c[0] && c[1] == rhs.c[1] && c[2] == rhs.c[2]);
+    return (c[0] == rhs.c[0] && c[1] == rhs.c[1]);
   }
 
   // Fill _coords with coordinate values.  _coords must be at least size 3.
   void get_coords(double *_coords) {
     _coords[0]=c[0];
     _coords[1]=c[1];
-    _coords[2]=c[2];
   }
   
 };
@@ -139,7 +134,7 @@ class CoordFromId {
     Coord coord;
 
     // Constructors
-    CoordFromIdEntry(int _id, double x, double y, double z): id(_id), coord(x,y,z) {}
+    CoordFromIdEntry(int _id, double lon, double lat): id(_id), coord(lon,lat) {}
     CoordFromIdEntry(int _id, Coord _coord): id(_id), coord(_coord) {}
     
 
@@ -205,7 +200,7 @@ public:
     std::vector<CoordFromIdEntry>::iterator ei; // break into two lines, so easier to read
     ei = std::lower_bound(searchable.begin(),
                           searchable.end(),
-                          CoordFromIdEntry(search_id, 0.0, 0.0, 0.0),
+                          CoordFromIdEntry(search_id, 0.0, 0.0),
                           CoordFromIdEntry_just_id_less()); 
     
 
@@ -239,7 +234,9 @@ void CoordFromId::add(Mesh *mesh, MeshObj::id_type obj_type) {
   }
   
   // Get spatial dimension
-  int sdim=mesh->spatial_dim();
+  int orig_sdim=mesh->spatial_dim();
+  if (orig_sdim < 2) Throw() << "Vector regridding only supported with meshes with >=2 coordinate dims.";
+
   
   // Add based on obj_type
   if (obj_type == MeshObj::NODE) {
@@ -248,46 +245,25 @@ void CoordFromId::add(Mesh *mesh, MeshObj::id_type obj_type) {
     searchable.reserve(mesh->num_nodes());
     
     // Get coordinate data
-    MEField<> *node_coords=mesh->GetField("coordinates");
-    ThrowRequire(node_coords != NULL);
+    MEField<> *node_coords=mesh->GetField("orig_coordinates");
+    if (!node_coords) Throw() << "Vector regridding not supported without original coords.";
     
-    // Add
-    if (sdim == 2) { 
-      Mesh::iterator ni = mesh->node_begin(), ne = mesh->node_end();
-      for (; ni != ne; ++ni) {
-        MeshObj &node = *ni;
-        
-        // Skip if not local
-        if (!GetAttr(node).is_locally_owned()) continue;
-        
-        // Get id
-        int id=node.get_id();
-        
-        // Get pointer to coords
-        double *c = node_coords->data(node);
-        
-        // Add to list
-        searchable.push_back(CoordFromIdEntry(id,c[0],c[1],0.0));      
-      }
-    } else if (sdim == 3) { 
-      Mesh::iterator ni = mesh->node_begin(), ne = mesh->node_end();
-      for (; ni != ne; ++ni) {
-        MeshObj &node = *ni;
-        
-        // Skip if not local
-        if (!GetAttr(node).is_locally_owned()) continue;
-        
-        // Get id
-        int id=node.get_id();
-        
-        // Get pointer to coords
-        double *c = node_coords->data(node);
-        
-        // Add to list
-        searchable.push_back(CoordFromIdEntry(id,c[0],c[1],c[2]));      
-      }
-    } else {
-      Throw() << "Meshes of spatial dim= "<<sdim<<" not supported in vector regridding.";
+    // Add coordinates, but only the first two (just need lon,lat)
+    Mesh::iterator ni = mesh->node_begin(), ne = mesh->node_end();
+    for (; ni != ne; ++ni) {
+      MeshObj &node = *ni;
+      
+      // Skip if not local
+      if (!GetAttr(node).is_locally_owned()) continue;
+      
+      // Get id
+      int id=node.get_id();
+      
+      // Get pointer to coords
+      double *c = node_coords->data(node);
+      
+      // Add to list
+      searchable.push_back(CoordFromIdEntry(id,c[0],c[1]));      
     }
 
   } else if (obj_type == MeshObj::ELEMENT) {
@@ -296,47 +272,26 @@ void CoordFromId::add(Mesh *mesh, MeshObj::id_type obj_type) {
     searchable.reserve(mesh->num_elems());
     
     // Get element coordinate data
-    MEField<> *elem_coords=mesh->GetField("elem_coordinates");
-    if (elem_coords == NULL) Throw() << "Vector regridding not supported on Mesh elements when the elements don't have center coordinates.";
+    MEField<> *elem_coords=mesh->GetField("elem_orig_coordinates");
+    if (elem_coords == NULL) Throw() << "Vector regridding not supported on Mesh elements when the elements don't have original center coordinates.";
     
-    // Add based on spatial dim
-    if (sdim == 2) { 
-      Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
-      for (; ei != ee; ++ei) {
-        MeshObj &elem = *ei;
+    // Add coordinates, but only the first two (just need lon,lat)
+    Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem = *ei;
         
-        // Skip if not local
-        if (!GetAttr(elem).is_locally_owned()) continue;
-        
-        // Get id
-        int id=elem.get_id();
-        
-        // Get pointer to coords
-        double *c = elem_coords->data(elem);
-        
-        // Add to list
-        searchable.push_back(CoordFromIdEntry(id,c[0],c[1],0.0));      
-      }
-    } else if (sdim == 3) { 
-      Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
-      for (; ei != ee; ++ei) {
-        MeshObj &elem = *ei;
-        
-        // Skip if not local
-        if (!GetAttr(elem).is_locally_owned()) continue;
-        
-        // Get id
-        int id=elem.get_id();
-        
-        // Get pointer to coords
-        double *c = elem_coords->data(elem);
-        
-        // Add to list
-        searchable.push_back(CoordFromIdEntry(id,c[0],c[1],c[2]));      
-      }
-    } else {
-      Throw() << "Meshes of spatial dim= "<<sdim<<" not supported in vector regridding.";
-    } 
+      // Skip if not local
+      if (!GetAttr(elem).is_locally_owned()) continue;
+      
+      // Get id
+      int id=elem.get_id();
+      
+      // Get pointer to coords
+      double *c = elem_coords->data(elem);
+      
+      // Add to list
+      searchable.push_back(CoordFromIdEntry(id,c[0],c[1]));      
+    }
   } else {
     Throw() << "Unrecognized Mesh object type.";
   }
@@ -370,7 +325,7 @@ void CoordFromId::add(PointList *pl) {
       const double *c = pl->get_coord_ptr(i);   
       
       // Add to list
-      searchable.push_back(CoordFromIdEntry(id,c[0],c[1],0.0));          
+      searchable.push_back(CoordFromIdEntry(id,c[0],c[1]));          
     }
   } else if (sdim == 3) { 
     // Loop adding ids and points
@@ -382,9 +337,14 @@ void CoordFromId::add(PointList *pl) {
       
       // Get point coords
       const double *c = pl->get_coord_ptr(i);   
-      
+
+      // Convert 3D Cart to lon, lat, etc.in radians
+      double lon, lat, rad;
+      convert_cart_to_sph_rad(c[0], c[1], c[2],
+                              &lon, &lat, &rad);
+
       // Add to list
-      searchable.push_back(CoordFromIdEntry(id,c[0],c[1],c[2]));          
+      searchable.push_back(CoordFromIdEntry(id,lon,lat));          
     }    
   } else {
     Throw() << "Geometries of spatial dim= "<<sdim<<" not supported in vector regridding.";
@@ -467,7 +427,7 @@ void CoordFromId::make_searchable(int num_entries, int *iientries, int sord) {
     //// Do distributed search on local set of ids
     
     // Declare not found info value
-    Coord bad_value(0.0,0.0,0.0);
+    Coord bad_value(0.0,0.0);
     
     // Do search
     // (Because of true will return error if id not found)
@@ -507,14 +467,15 @@ void CoordFromId::make_searchable(int num_entries, int *iientries, int sord) {
 
 
 // Compute n_vec,e_vec unit basis vectors from 3D Cart.
-// All vector args should at least be of size 3
-static void _calc_basis_vec(double *cart_coords, double *n_vec, double *e_vec) {
-  
-  // Convert 3D Cart to lon, lat, etc.in radians
-  double lon, lat, rad;
-  convert_cart_to_sph_rad(cart_coords[0], cart_coords[1], cart_coords[2],
-                          &lon, &lat, &rad);
+// sph_coords - is of size 2 containing lon and lat
+// n_vec - north vec is of size 3
+// e_vec - east vec is of size 3
+static void _calc_basis_vec(double *sph_coords, double *n_vec, double *e_vec) {
 
+  // Copy to single variables for clarity
+  double lon=sph_coords[0];
+  double lat=sph_coords[1];
+  
   // Calculate north vec
   n_vec[0]=-sin(lat)*cos(lon);
   n_vec[1]=-sin(lat)*sin(lon);
@@ -542,7 +503,7 @@ static void _calc_basis_vec(double *cart_coords, double *n_vec, double *e_vec) {
 }
 
 
-// src_coords, dst_coords must be at least of size 3
+// src_coords, dst_coords must be at least of size 2
 // vec_wgts must be at least of size 4
 // This assumes that the first vector component (1) is east and the second (2) is north
 static void _calc_2D_vec_weights(double *src_coords, double *dst_coords, double *vec_wgts) {
@@ -649,7 +610,7 @@ void create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *iientrie
     int dst_id=iientries[iientries_pos+1];
 
     // Get src coords
-    double src_coords[3];
+    double src_coords[2];
     if (!srcCoordFromId.search(src_id, src_coords)) {
       Throw()<<"src id="<<src_id<<" not found in coordinate search.";
     }
@@ -658,7 +619,7 @@ void create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *iientrie
 
     
     // Get dst coords, complain if not there
-    double dst_coords[3];
+    double dst_coords[2];
     if (!dstCoordFromId.search(dst_id, dst_coords)) {
       Throw()<<"dst id="<<dst_id<<" not found in coordinate search.";
     }
@@ -666,7 +627,7 @@ void create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *iientrie
 
     // Add new vector weights
     if (num_vec_dims == 2) {
-
+      
       // Use coords to calculate new matrix entries based on vec_dim
       double vec_wgts[4];
       _calc_2D_vec_weights(src_coords, dst_coords, vec_wgts);
