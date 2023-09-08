@@ -275,6 +275,10 @@ bool intersect_tri_with_line(const double *tri, const double *l1, const double *
   // coords is of size 2*num
   double area_of_flat_2D_polygon(int num, double *coords) {
 
+    // The area of a degenerate triangle is 0.0
+    if (num < 3) return 0.0;
+
+    // Calculate area
     double area=0;
     for(int i=0; i<num; i++) {
       int ip1=(i+1)%num; // i plus 1 mod the size to wrap at end

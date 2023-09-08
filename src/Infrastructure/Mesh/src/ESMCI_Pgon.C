@@ -40,10 +40,12 @@ using namespace ESMCI;
 
  // Dump to vtk file for debugging
 template<> void Pgon<GEOM_CART2D>::write_to_vtk(const char *filename) {
-  write_2D_poly_woid_to_vtk(filename, get_num_pnts(), pnt_coords.data());
+  pack_coords_into_buff();
+  write_2D_poly_woid_to_vtk(filename, get_num_pnts(), coord_buff.data());
 }
 
 // Dump to vtk file for debugging
 template<> void Pgon<GEOM_SPH2D3D>::write_to_vtk(const char *filename) {
-  write_3D_poly_woid_to_vtk(filename, get_num_pnts(), pnt_coords.data());
+  pack_coords_into_buff();
+  write_3D_poly_woid_to_vtk(filename, get_num_pnts(), coord_buff.data());
 }

@@ -45,7 +45,9 @@ using namespace ESMCI;
 
 template <class GEOM>
 class Vert {
-
+  
+public: 
+  
   double pnt[GEOM::pnt_size];
 
   Vert *next, *prev;
@@ -89,8 +91,7 @@ class Vert {
     next=v;
   }
 
- void make_first() {
-    
+ void make_first() {    
    // Point new node appropriately 
    next=this;
    prev=this;
@@ -104,31 +105,16 @@ template <class GEOM2>
 class Pgon {
 
   // Buffer for holding Coords when they need to be passed someplace
-  std::vector<double> pnt_coords;
+  std::vector<double> coord_buff;
 
   Vert<GEOM2> *beg,*end; // List of vertices
 
   int num_pnts; // Size of polygon
-  
-public:
 
-  
-  // Full constructor
-  Pgon(): beg(NULL), end(NULL), num_pnts(0) {
 
-    // Error check number of coords
-    if ((GEOM2::pnt_size != 2) && (GEOM2::pnt_size != 3)) Throw() << "Pgon only supports 2D or 3D points.";
-  }
 
-  // Clear points
-  void clear() {
-    pnt_coords.clear();
-  }
-  
-  // Reserve to add future points
-  void reserve(int num_pnts) {
-    pnt_coords.reserve(num_pnts*GEOM2::pnt_size);
-  }
+  // private methods 
+private: 
 
   void push_back_Vert(Vert<GEOM2> *vert) {
     // If empty, then just make the only one
@@ -143,6 +129,73 @@ public:
     // Increase the number of points
     num_pnts++;
   }
+
+  ////////////////////////
+  /// TODO: Look into having specific template overriding for particular GEOMS for some methods to avoid ifs
+  ////////////////////////
+
+  void pack_coords_into_buff() {
+
+    // Leave if no points
+    if (num_pnts == 0) return;
+    
+    // Clear vector
+    coord_buff.clear();
+
+    // Reserve the correct amount of mem
+    coord_buff.reserve(num_pnts*GEOM2::pnt_size);
+
+    // Loop adding points
+    Vert<GEOM2> *v=beg;
+    ThrowRequire(v != NULL);
+    while (v != end) {
+      
+      // Pack coords
+      coord_buff.push_back(v->pnt[0]);
+      coord_buff.push_back(v->pnt[1]);
+      if (GEOM2::pnt_size >2) coord_buff.push_back(v->pnt[2]);
+
+      // Go to next
+      v=v->next;
+    }
+
+    // Do End
+    coord_buff.push_back(v->pnt[0]);
+    coord_buff.push_back(v->pnt[1]);
+    if (GEOM2::pnt_size >2) coord_buff.push_back(v->pnt[2]);
+  }
+
+
+  
+public:
+
+  
+  // Full constructor
+  Pgon(): beg(NULL), end(NULL), num_pnts(0) {
+
+    // Error check number of coords
+    if ((GEOM2::pnt_size != 2) && (GEOM2::pnt_size != 3)) Throw() << "Pgon only supports 2D or 3D points.";
+  }
+
+
+
+
+
+
+
+  
+  // Clear points
+  // TODO: This should keep Verts, but take out of beg, end and drop num_pnts to 0
+  void clear() {
+    coord_buff.clear();
+  }
+  
+  // Reserve to add future points
+  // TODO: This should preallocate Verts
+  void reserve(int num_pnts) {
+    coord_buff.reserve(num_pnts*GEOM2::pnt_size);
+  }
+
   
   // Add a point
   void push_back_pnt(double *pnt) {
@@ -174,29 +227,27 @@ public:
     push_back_Vert(vert);
   }
 
-  
-  
+   
   // Calc area of the polygon
   double area() {
 
-    // if not empty, return area
-    if (!pnt_coords.empty()) {
-      GEOM2::calc_area_polygon(pnt_coords.size(), pnt_coords.data()); 
-    } else { // else return 0
-      return 0.0;
-    }
+    // Put coords into buffer
+    pack_coords_into_buff();
+    
+    // Return area
+    return GEOM2::calc_area_polygon(num_pnts, coord_buff.data()); 
   }
-
+  
 
   // Get methods
-  int get_num_pnts() {return pnt_coords.size()/GEOM2::pnt_size;}  
+  int get_num_pnts() {return num_pnts;}
   int get_pnt_size() {return GEOM2::pnt_size;}
 
-  double *get_pnt_coord(int i) {return GEOM2::pnt_size*i+pnt_coords.data();}
+  double *get_pnt_coord(int i) {return GEOM2::pnt_size*i+coord_buff.data();}
 
   // Returns a direct pointer to the coordinate memory
   // (coordinates for a given point are stored next to each other in memory) 
-  double *get_coord_mem() {return pnt_coords.data();}
+  double *get_coord_buff() {return coord_buff.data();}
 
   // Write to vtk file for debuggin
   void write_to_vtk(const char *filename);
