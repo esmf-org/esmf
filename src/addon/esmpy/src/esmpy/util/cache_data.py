@@ -1,16 +1,28 @@
 import os
-import esmpy
 import site
-# import inspect
 
+def _data_dir():
+    if 'ESMPY_DATA_DIR' in os.environ:
+        return os.environ['ESMPY_DATA_DIR']
+    elif 'ESMPY_DATA_NEW_DIR' in os.environ:
+        return os.environ['ESMPY_DATA_NEW_DIR']
+    else:
+        return os.path.join(site.getsitepackages()[0], "esmpy/data")
 
-# inspect returns local module directory by default (not installed directory)
-# DATA_DIR = os.environ.get('ESMPY_DATA_DIR', os.path.join(os.path.dirname(inspect.getfile(esmpy)),'data'))
-DATA_DIR = os.environ.get('ESMPY_DATA_DIR', os.path.join(site.getsitepackages()[0], "esmpy/data"))
+DATA_DIR = _data_dir()
 DATA_URL = 'http://data.earthsystemmodeling.org/download/data/'
 # DATA_URL = 'https://raw.github.com/esmf-org/esmf-test-data/main/grids/'
 
+def do_download():
+    """
+    Returns a bool saying whether we should download data.
 
+    (Under some conditions, we use a pre-existing data directory rather than downloading.)
+    """
+    if 'ESMPY_DATA_DIR' in os.environ:
+        return False
+    else:
+        return True
 
 # If fname doesn't exist, retrieve it from the remote server via http.
 def cache_data_file(fname):
@@ -50,10 +62,8 @@ def download_example_data():
                     "T42_grid.nc",
                     ]
 
-    wget = True
-    if 'ESMPY_DATA_DIR' in os.environ:
-        wget = False
-    else:
+    wget = do_download()
+    if wget:
         print ('Data directory: {}'.format(DATA_DIR))
 
     # Create data subdirectory if it doesn't exist.
@@ -78,10 +88,8 @@ def download_unittest_data():
                     "gridspec1Dcoords.nc",
                     ]
 
-    wget = True
-    if 'ESMPY_DATA_DIR' in os.environ:
-        wget = False
-    else:
+    wget = do_download()
+    if wget:
         print ('Data directory: {}'.format(DATA_DIR))
 
     # Create data subdirectory if it doesn't exist.
