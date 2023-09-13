@@ -317,7 +317,7 @@ END SUBROUTINE shr_mpi_bcastl0
 
 !================== Routines from csm_share/shr/shr_file_mod.F90 ===============
 !===============================================================================
-!BOP ===========================================================================
+!BOPI ===========================================================================
 !
 ! !IROUTINE: shr_file_getUnit -- Get a free FORTRAN unit number
 !
@@ -333,7 +333,7 @@ INTEGER FUNCTION shr_file_getUnit ()
 
    implicit none
 
-!EOP
+!EOPI
 
    !----- local parameters -----
    integer(SHR_KIND_IN),parameter :: shr_file_minUnit = 10      ! Min unit number to give
@@ -367,7 +367,7 @@ END FUNCTION shr_file_getUnit
 !===============================================================================
 
 !===============================================================================
-!BOP ===========================================================================
+!BOPI ===========================================================================
 !
 ! !IROUTINE: shr_file_freeUnit -- Free up a FORTRAN unit number
 !
@@ -387,7 +387,7 @@ SUBROUTINE shr_file_freeUnit ( unit)
 
    integer(SHR_KIND_IN),intent(in) :: unit  ! unit number to be freed
 
-!EOP
+!EOPI
 
    !----- local parameters -----
    integer(SHR_KIND_IN),parameter :: shr_file_minUnit = 10      ! Min unit number to give
