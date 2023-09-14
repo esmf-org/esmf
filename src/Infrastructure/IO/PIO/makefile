@@ -34,6 +34,10 @@ else
   PIO_CONF_OPTS += --disable-pnetcdf
 endif
 
+ifdef ESMF_GDAL_LIBPATH
+  GDAL_Found=true
+  PIO_CMAKE_OPTS += -DGDAL_INCLUDE_DIR=$(ESMF_GDAL_INCLUDE) -DGDAL_LIBRARY=$(ESMF_GDAL_LIBPATH)/libgdal.so
+endif
 
 ifndef PIO_AUTOTOOLS_BUILD
 # Use the PIO native cmake build system to build and install

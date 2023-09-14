@@ -148,7 +148,7 @@ enum GDAL_REARRANGERS
   int GDALc_finalize(int instance);
   int GDALc_inq(int ncid, int *ndimsp, int *nvarsp, int *ngattsp, int *unlimdimidp);
 
-  int GDALc_inq_fieldid(OGRDataSourceH hDS, const char *name, int *varidp);
+//<<>>  int GDALc_inq_fieldid(OGRDataSourceH hDS, const char *name, int *varidp);
   int GDALc_inq_field(int ncid, int varid, char *name, int *xtypep, int *ndimsp, int *dimidsp,
 		      int *nattsp);
   int GDALc_inq_vardimid(int ncid, int varid, int *dimidsp);
@@ -156,7 +156,7 @@ enum GDAL_REARRANGERS
   int GDALc_deletefile(int iosysid, const char *filename);
   int GDALc_createfile(int iosysid, OGRDataSourceH *ncidp,  int *iotype, const char *fname, bool mode);
   int GDALc_create(int iosysid, const char *path, int cmode, int *ncidp);
-  int GDALc_openfile(int iosysid, OGRDataSourceH *hDSp, int *iotype, const char *fname, bool mode);
+//  int GDALc_openfile(int iosysid, OGRDataSourceH *hDSp, int *iotype, const char *fname, bool mode);
   int GDALc_open(int iosysid, const char *path, int mode, int *ncidp);
   int GDALc_closefile(int ncid);
 

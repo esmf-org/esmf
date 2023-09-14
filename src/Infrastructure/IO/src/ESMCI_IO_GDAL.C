@@ -294,75 +294,75 @@ int GDALc_createfile(int iosysid, OGRDataSourceH *ncidp, int *iotype, const char
     return ret;
 }
 
-int GDALc_openfile(int iosysid, OGRDataSourceH *hDSp, int *iotype, const char *filename,
-                  bool mode)
-{
-//>>    PLOG((1, "PIOc_openfile iosysid %d *iotype %d filename %s mode %d", iosysid,
-//>>          iotype ? *iotype: 0, filename, mode));
-  OGRRegisterAll();
-  OGRDataSourceH hDx = OGROpen( filename, FALSE, NULL );
-  PRINTMSG("NLayers -3: " << OGR_DS_GetLayerCount(hDx) << " file: " << filename );
-  PRINTMSG("NLayers -2: " << GDALDatasetGetLayerCount(hDx));
-  OGR_DS_Destroy(hDx);
-  *hDSp = OGROpen( filename, FALSE, NULL );
-  PRINTMSG("NLayers -1: " << OGR_DS_GetLayerCount(*hDSp));
-  if( hDSp == NULL )
-    {
-      if (ESMC_LogDefault.MsgFoundError(ESMF_RC_NOT_FOUND, "Open GDAL file failed", ESMC_CONTEXT, 0))
-      return ESMF_RC_NOT_FOUND;
-    }
-return 0;
-}
+//<<>>int GDALc_openfile(int iosysid, OGRDataSourceH *hDSp, int *iotype, const char *filename,
+//<<>>                  bool mode)
+//<<>>{
+//<<>>//>>    PLOG((1, "PIOc_openfile iosysid %d *iotype %d filename %s mode %d", iosysid,
+//<<>>//>>          iotype ? *iotype: 0, filename, mode));
+//<<>>  OGRRegisterAll();
+//<<>>  OGRDataSourceH hDx = OGROpen( filename, FALSE, NULL );
+//<<>>  PRINTMSG("NLayers -3: " << OGR_DS_GetLayerCount(hDx) << " file: " << filename );
+//<<>>  PRINTMSG("NLayers -2: " << GDALDatasetGetLayerCount(hDx));
+//<<>>  OGR_DS_Destroy(hDx);
+//<<>>  *hDSp = OGROpen( filename, FALSE, NULL );
+//<<>>  PRINTMSG("NLayers -1: " << OGR_DS_GetLayerCount(*hDSp));
+//<<>>  if( hDSp == NULL )
+//<<>>    {
+//<<>>      if (ESMC_LogDefault.MsgFoundError(ESMF_RC_NOT_FOUND, "Open GDAL file failed", ESMC_CONTEXT, 0))
+//<<>>      return ESMF_RC_NOT_FOUND;
+//<<>>    }
+//<<>>return 0;
+//<<>>}
 
-int GDALc_inq_fieldid(OGRDataSourceH hDS, const char *name, int *varidp)
-{
-    iosystem_desc_t *ios;  /* Pointer to io system information. */
-    file_desc_t *file;     /* Pointer to file information. */
-    int ierr;              /* Return code from function calls. */
-    int mpierr = MPI_SUCCESS, mpierr2;  /* Return code from MPI function codes. */
-
-//>>    PLOG((1, "PIOc_inq_varid ncid = %d name = %s", ncid, name));
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "IO_GDAL::GDALc_inq_fieldid"
-
-    if (hDS == NULL) {
-      PRINTMSG("DataSource is NULL");
-      return -1;
-    } else {
-      PRINTMSG("DataSource is GOOD");
-      printf("hDS %p\n",(void *)hDS);
-    }
-
-    PRINTPOS;
-    PRINTMSG("NLayers: " << OGR_DS_GetLayerCount(hDS));
-    OGRLayerH hLayer = OGR_DS_GetLayer( hDS, 0 );
-    PRINTPOS;
-    OGR_L_ResetReading(hLayer);
-    PRINTPOS;
-    if (hLayer == NULL) {
-      PRINTMSG("Layer is NULL");
-      return -1;
-    }
-    *varidp = OGR_L_FindFieldIndex(hLayer,name,1);
-
-    PRINTMSG("INQ_FIELDID FIELD " << name << " INDEX: " << *varidp);
-
-    return *varidp;
-
-//>>    /* Broadcast and check the return code. */
-//>>    if ((mpierr = MPI_Bcast(&ierr, 1, MPI_INT, ios->ioroot, ios->my_comm)))
-//>>        return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
-//>>    if (ierr)
-//>>        return check_netcdf(file, ierr, __FILE__, __LINE__);
-//>>
-//>>    /* Broadcast results to all tasks. Ignore NULL parameters. */
-//>>    if (varidp)
-//>>        if ((mpierr = MPI_Bcast(varidp, 1, MPI_INT, ios->ioroot, ios->my_comm)))
-//>>            check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
-
-    return PIO_NOERR;
-}
+//<<>>int GDALc_inq_fieldid(OGRDataSourceH hDS, const char *name, int *varidp)
+//<<>>{
+//<<>>    iosystem_desc_t *ios;  /* Pointer to io system information. */
+//<<>>    file_desc_t *file;     /* Pointer to file information. */
+//<<>>    int ierr;              /* Return code from function calls. */
+//<<>>    int mpierr = MPI_SUCCESS, mpierr2;  /* Return code from MPI function codes. */
+//<<>>
+//<<>>//>>    PLOG((1, "PIOc_inq_varid ncid = %d name = %s", ncid, name));
+//<<>>
+//<<>>#undef  ESMC_METHOD
+//<<>>#define ESMC_METHOD "IO_GDAL::GDALc_inq_fieldid"
+//<<>>
+//<<>>    if (hDS == NULL) {
+//<<>>      PRINTMSG("DataSource is NULL");
+//<<>>      return -1;
+//<<>>    } else {
+//<<>>      PRINTMSG("DataSource is GOOD");
+//<<>>      printf("hDS %p\n",(void *)hDS);
+//<<>>    }
+//<<>>
+//<<>>    PRINTPOS;
+//<<>>    PRINTMSG("NLayers: " << OGR_DS_GetLayerCount(hDS));
+//<<>>    OGRLayerH hLayer = OGR_DS_GetLayer( hDS, 0 );
+//<<>>    PRINTPOS;
+//<<>>    OGR_L_ResetReading(hLayer);
+//<<>>    PRINTPOS;
+//<<>>    if (hLayer == NULL) {
+//<<>>      PRINTMSG("Layer is NULL");
+//<<>>      return -1;
+//<<>>    }
+//<<>>    *varidp = OGR_L_FindFieldIndex(hLayer,name,1);
+//<<>>
+//<<>>    PRINTMSG("INQ_FIELDID FIELD " << name << " INDEX: " << *varidp);
+//<<>>
+//<<>>    return *varidp;
+//<<>>
+//<<>>//>>    /* Broadcast and check the return code. */
+//<<>>//>>    if ((mpierr = MPI_Bcast(&ierr, 1, MPI_INT, ios->ioroot, ios->my_comm)))
+//<<>>//>>        return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
+//<<>>//>>    if (ierr)
+//<<>>//>>        return check_netcdf(file, ierr, __FILE__, __LINE__);
+//<<>>//>>
+//<<>>//>>    /* Broadcast results to all tasks. Ignore NULL parameters. */
+//<<>>//>>    if (varidp)
+//<<>>//>>        if ((mpierr = MPI_Bcast(varidp, 1, MPI_INT, ios->ioroot, ios->my_comm)))
+//<<>>//>>            check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
+//<<>>
+//<<>>    return PIO_NOERR;
+//<<>>}
 
   int GDALc_inq_timeid(OGRDataSourceH hDS, int *timeid) { // Is there a field of type OFTDate, OFTTime, or OFTDateTime?
     

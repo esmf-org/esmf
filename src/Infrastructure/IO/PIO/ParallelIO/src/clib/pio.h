@@ -18,6 +18,8 @@
 
 #include <netcdf.h>
 
+#include <ogr_api.h>
+
 /** PIO_OFFSET is an integer type of size sufficient to represent the
  * size (in bytes) of the largest file supported by MPI. This is not
  * actually used by the code. */
@@ -614,7 +616,10 @@ enum PIO_IOTYPE
     PIO_IOTYPE_NETCDF4C = 3,
 
     /** NetCDF4 (HDF5) parallel */
-    PIO_IOTYPE_NETCDF4P = 4
+    PIO_IOTYPE_NETCDF4P = 4,
+
+    /** GDAL (serial only) */
+    PIO_IOTYPE_GDAL = 5
 };
 
 /**
@@ -1321,6 +1326,10 @@ extern "C" {
                              const long long *op);
     int nc_put_vard_ulonglong(int ncid, int varid, int decompid, const size_t recnum,
                               const unsigned long long *op);
+
+    /* These functions are for the GDAL integration layer. MSL - 9/7/2023 */
+    int GDALc_inq_fieldid(int ncid, const char *name, int *varidp);
+    int GDALc_openfile(int iosysid, OGRDataSourceH *hDSp, int *iotype, const char *fname, bool mode);
 
 #if defined(__cplusplus)
 }

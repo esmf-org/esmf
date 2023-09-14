@@ -28,6 +28,9 @@ set (src topology.c pio_file.c pioc_support.c pio_lists.c
 if (NETCDF_INTEGRATION)
   set (src ${src} ../ncint/nc_get_vard.c ../ncint/ncintdispatch.c ../ncint/ncint_pio.c ../ncint/nc_put_vard.c)
 endif ()
+#<<THIS IS NOT YET IMPLEMENTED - MSL>> if (GDAL_INTEGRATION)
+set (src ${src} pio_gdal.c)
+#endif ()
 
 add_library (pioc ${src})
 
@@ -172,6 +175,14 @@ if (PIO_USE_MPISERIAL)
     set (MPI_C_INCLUDE_PATH ${MPISERIAL_C_INCLUDE_DIRS})
   endif ()
 endif ()
+
+#===== GDAL ===== <M.Long>
+#if (GDAL_Found)
+  target_include_directories (pioc
+    PUBLIC ${GDAL_INCLUDE_DIR})
+  target_link_libraries (pioc
+    PUBLIC ${GDAL_LIBRARY})
+#endif ()
 
 include(CheckTypeSize)
 check_type_size("size_t" SIZEOF_SIZE_T)

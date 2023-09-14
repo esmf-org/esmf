@@ -630,7 +630,7 @@ void GDAL_Handler::arrayReadOneTileFile(
 
     PRINTMSG("Field " << fieldname.c_str());
     PRINTMSG("NLayers 1: " << OGR_DS_GetLayerCount(filedesc));
-    gdalrc = GDALc_inq_fieldid(filedesc, fieldname.c_str(), &fielddesc);
+//<<>>    gdalrc = GDALc_inq_fieldid(filedesc, fieldname.c_str(), &fielddesc);
     // An error here means the variable is not in the file
     if (gdalrc == -1) {
       PRINTMSG("Field " << fieldname.c_str() << " not found in file");
