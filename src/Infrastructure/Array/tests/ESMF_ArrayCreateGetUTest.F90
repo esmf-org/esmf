@@ -31,6 +31,7 @@ program ESMF_ArrayCreateGetUTest
 ! !USES:
   use ESMF_TestMod     ! test methods
   use ESMF
+  use, intrinsic :: ieee_arithmetic
 
   implicit none
 
@@ -375,6 +376,9 @@ program ESMF_ArrayCreateGetUTest
   dataCorrect = .true.
   do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
   do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
+    if (ieee_is_nan(farrayPtr2DCpy(i,j))) then
+      farrayPtr2DCpy(i,j) = 0
+    endif
     write (msg,*) "farrayPtr2D(",i,",",j,")=", farrayPtr2D(i,j), &
       "  farrayPtr2DCpy(",i,",",j,")=", farrayPtr2DCpy(i,j)
     call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
@@ -628,6 +632,7 @@ program ESMF_ArrayCreateGetUTest
   write(name, *) "ArrayCreate from Ptr with 3D farray on 2D DistGrid Test as Ptr"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   allocate(farrayPtr3D(-2:6,12,3:10))
+  farrayPtr3D = 0
   array = ESMF_ArrayCreate(farrayPtr=farrayPtr3D, distgrid=distgrid, &
     name="MyArray", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

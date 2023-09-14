@@ -2943,11 +2943,11 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   ! 5     0         5     220, 213, 212, 211, 210, 201, 200
 !------------------------------------------------------------------------
   
-  write(msgString,*) "dstArray7(j=1): ", farrayPtr2D(1,:)
+  write(msgString,*) "dstArray7(j=1): ", (farrayPtr2D(1,i), i=lbound(farrayPtr2D, 2), ubound(farrayPtr2D, 2))
   call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-  write(msgString,*) "dstArray7(j=2): ", farrayPtr2D(2,:)
+  write(msgString,*) "dstArray7(j=2): ", (farrayPtr2D(2,i), i=lbound(farrayPtr2D, 2), ubound(farrayPtr2D, 2))
   call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-  write(msgString,*) "dstArray7(j=3): ", farrayPtr2D(3,:)
+  write(msgString,*) "dstArray7(j=3): ", (farrayPtr2D(3,i), i=lbound(farrayPtr2D, 2), ubound(farrayPtr2D, 2))
   call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
 
 !------------------------------------------------------------------------
