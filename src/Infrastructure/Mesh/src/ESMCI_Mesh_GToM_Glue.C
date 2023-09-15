@@ -140,8 +140,15 @@ void ESMCI_GridToMesh(const Grid &grid_, int staggerLoc,
 
  // original spatial dim is the same as grid dimension
  mesh.orig_spatial_dim=pdim;
+ int orig_sdim=mesh.orig_spatial_dim; // for convenience also put in a local var.
+
+ // Get coordinate system
  mesh.coordsys=grid.getCoordSys();
 
+ // See if we should add original coords
+ bool add_orig_coords=false;
+ if (mesh.coordsys != ESMC_COORDSYS_CART) add_orig_coords=true;
+ 
  // See if this is for conservative regridding
  bool isConserve=false;
  if (*regridConserve == ESMC_REGRID_CONSERVE_ON) isConserve=true;
@@ -423,6 +430,13 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
    // Now set up the nodal coordinates
    IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", sdim);
 
+   // If required, add orig_coords
+   IOField<NodalField> *node_orig_coord = NULL;
+   if (add_orig_coords) {
+     node_orig_coord = mesh.RegisterNodalField(mesh, "orig_coordinates", orig_sdim);     
+   }
+
+   
 #if 0
   if (*regridConserve == ESMC_REGRID_CONSERVE_ON) {
     // Register the iwts field
@@ -473,8 +487,16 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
    MeshDB::iterator ni = mesh.node_begin(), ne = mesh.node_end();
 
    for (; ni != ne; ++ni) {
+     // Get Cart. coords
      double *c = node_coord->data(*ni);
 
+     // Get orig coords
+     double *orig_c;
+     if (add_orig_coords) {
+       orig_c=node_orig_coord->data(*ni);
+     }
+
+     // field data
      double fdata;
 
      UInt lid = ngid2lid[ni->get_id()]; // we set this above when creating the node
@@ -494,6 +516,20 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
       }
     }
 
+    
+    // If requested and local fill in orig coords
+    if (add_orig_coords) {
+      if (gni->isLocal()) {
+        gni->getCoord(orig_c);
+      } else { // set to Null value to be ghosted later
+        for (int i=0; i<orig_sdim; i++) {
+          orig_c[i]=-10;
+        }
+      }
+    }
+
+    /// STOPPED HERE, BUT CHECK ABOVE
+    
     // Other arrays
     for (UInt i = 0; i < arrays.size(); ++i) {
 
