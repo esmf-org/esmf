@@ -558,7 +558,7 @@
        realptr(i,j) = i + ((j-1)*ni) + 0.1
      enddo
     enddo
-    print *, "partial print of realptr data = ", realptr(3:6,7:9)
+    print *, "partial print of realptr data = ", ((realptr(i,j),j=7,9),i=3,6)
 
     !--------------------------------------------------------------------------
     !EX_UTest
@@ -578,14 +578,14 @@
        realptr(i,j) = (i*2) + ((j-1)*ni) 
      enddo
     enddo
-    print *, "realptr data changed after nocopy set, now = ", realptr(3:6,7:9)
+    print *, "realptr data changed after nocopy set, now = ", ((realptr(i,j),j=7,9),i=3,6)
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting Local Array 2D Real Data Test"
     call ESMF_LocalArrayGet(array2, realptr2, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
     print *, "array 2a get returned"
     print *, "bounds: ", lbound(realptr2), ubound(realptr2)
-    print *, "partial print of realptr2 data = ", realptr2(3:7,7:9)
+    print *, "partial print of realptr2 data = ", ((realptr2(i,j),j=7,9),i=3,7)
 
     !--------------------------------------------------------------------------
     !EX_UTest
@@ -633,7 +633,7 @@
     write(name, *) "Getting Local Array 2D Real Data Test"
     call ESMF_LocalArrayGet(array2, realptr2, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
     print *, "array 2b get returned"
-    print *, "partial print of realptr2 data = ", realptr2(1:3,1:3)
+    print *, "partial print of realptr2 data = ", ((realptr2(i,j),j=1,3),i=1,3)
 
     !--------------------------------------------------------------------------
     !EX_UTest
@@ -689,11 +689,11 @@
        realptr(i,j) = (i*2) + ((j-1)*ni) 
      enddo
     enddo
-    print *, "realptr data changed after datacopyflag set, now = ", realptr(1:3,1:3)
+    print *, "realptr data changed after datacopyflag set, now = ", ((realptr(i,j),j=1,3),i=1,3)
 
     call ESMF_LocalArrayGet(array2, realptr2, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
     print *, "array 2c get returned"
-    print *, "realptr2 data = ", realptr2(1:3,1:3)
+    print *, "realptr2 data = ", ((realptr2(i,j),j=1,3),i=1,3)
 
     !--------------------------------------------------------------------------
     !EX_UTest
@@ -710,7 +710,7 @@
     call ESMF_LocalArrayGet(array2, realptr2, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 2c get returned"
-    print *, "realptr2 data = ", realptr2(1:3,1:3)
+    print *, "realptr2 data = ", ((realptr2(i,j),j=1,3),i=1,3)
 
     !--------------------------------------------------------------------------
    !EX_UTest
