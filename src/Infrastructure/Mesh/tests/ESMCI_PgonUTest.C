@@ -14,6 +14,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <cmath>
+#include <iostream>
+
 
 // ESMF header
 #include "ESMC.h"
@@ -87,6 +89,9 @@ int main(void){
 
     // DEBUG OUTPUT: write to file
     tri.write_to_vtk("tri2DCart");
+
+    // Try debug output
+    std::cout << tri;
     
   } catch(...) {
     // Change to error if we detect an error
