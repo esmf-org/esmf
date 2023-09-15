@@ -487,10 +487,10 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
    MeshDB::iterator ni = mesh.node_begin(), ne = mesh.node_end();
 
    for (; ni != ne; ++ni) {
-     // Get Cart. coords
+     // Get Cart. coords pointer
      double *c = node_coord->data(*ni);
 
-     // Get orig coords
+     // Get orig coords pointer
      double *orig_c;
      if (add_orig_coords) {
        orig_c=node_orig_coord->data(*ni);
@@ -527,8 +527,6 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
         }
       }
     }
-
-    /// STOPPED HERE, BUT CHECK ABOVE
     
     // Other arrays
     for (UInt i = 0; i < arrays.size(); ++i) {

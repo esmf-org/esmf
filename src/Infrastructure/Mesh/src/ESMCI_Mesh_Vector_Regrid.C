@@ -89,7 +89,7 @@ void get_vec_dims_for_vectorRegrid(ESMCI::Array &array, int &num_vec_dims, int *
 // Class for holding coordinates to make other classes below cleaner
 class Coord {
   // Data
-  double c[2];  // Holds lon, lat
+  double c[2];  // Holds lon, lat in radians
 
 public:
 
@@ -261,6 +261,12 @@ void CoordFromId::add(Mesh *mesh, MeshObj::id_type obj_type) {
       
       // Get pointer to coords
       double *c = node_coords->data(node);
+
+      // If degrees, convert
+      if (mesh->coordsys == ESMC_COORDSYS_SPH_DEG) {
+        c[0] *= ESMC_CoordSys_Deg2Rad;
+        c[1] *= ESMC_CoordSys_Deg2Rad;
+      }
       
       // Add to list
       searchable.push_back(CoordFromIdEntry(id,c[0],c[1]));      
@@ -288,6 +294,12 @@ void CoordFromId::add(Mesh *mesh, MeshObj::id_type obj_type) {
       
       // Get pointer to coords
       double *c = elem_coords->data(elem);
+
+      // If degrees, convert
+      if (mesh->coordsys == ESMC_COORDSYS_SPH_DEG) {
+        c[0] *= ESMC_CoordSys_Deg2Rad;
+        c[1] *= ESMC_CoordSys_Deg2Rad;
+      }
       
       // Add to list
       searchable.push_back(CoordFromIdEntry(id,c[0],c[1]));      
