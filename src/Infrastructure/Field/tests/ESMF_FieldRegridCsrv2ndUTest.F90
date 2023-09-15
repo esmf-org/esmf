@@ -6284,6 +6284,11 @@ end subroutine createTestMesh3x3_2
     rc=ESMF_FAILURE
     return
   endif
+  call ESMF_FieldFill(srcField, dataFillScheme="one", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
 
 
    ! deallocate node data

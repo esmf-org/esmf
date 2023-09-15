@@ -6338,6 +6338,11 @@ contains
     rc=ESMF_FAILURE
     return
   endif
+  call ESMF_FieldFill(srcField, dataFillScheme="one", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
 
   
    ! deallocate node data
@@ -15259,6 +15264,11 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
     rc=ESMF_FAILURE
     return
   endif
+  call ESMF_FieldFill(srcField, dataFillScheme="one", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
 
 
    ! deallocate node data
@@ -18554,6 +18564,11 @@ end subroutine createTestMesh3x3
     rc=ESMF_FAILURE
     return
   endif
+  call ESMF_FieldFill(srcField, dataFillScheme="one", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
 
   ! Create source frac field
   srcFracField = ESMF_FieldCreate(srcMesh, arrayspec, meshloc=ESMF_MESHLOC_ELEMENT, &
@@ -19385,6 +19400,11 @@ end subroutine createTestMesh3x3
    srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
                         meshLoc=ESMF_MESHLOC_ELEMENT, &
                         name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+  call ESMF_FieldFill(srcField, dataFillScheme="one", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
