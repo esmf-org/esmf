@@ -113,6 +113,71 @@ template <class GEOMVO>
 }
 
 
+template <class GEOMVI>
+class VertIter {
+
+private:
+  class iterator {
+  public: 
+    iterator(Vert<GEOMVI> *_beg): beg(_beg), curr(NULL) {
+      if (beg == NULL) return;
+      
+      if (next_Vert() == NULL) {
+        beg=NULL;
+        curr=NULL;        
+      }
+    }
+
+    const iterator& operator++() {
+      next_Vert();
+      return *this;
+    }
+
+    Vert<GEOMVI> *operator*() {
+      return curr;
+    }
+
+    bool operator !=(const iterator& rhs) const {
+      return (beg != rhs.beg || curr != rhs.beg);
+    } 
+
+  private:
+    Vert<GEOMVI> *beg;
+    Vert<GEOMVI> *curr;
+    
+    // Go to next Vert in the list
+   Vert<GEOMVI> *next_Vert() {
+
+     // If we haven't started yet, set to beginning
+     if (curr == NULL) {
+       curr=beg;  
+     } 
+
+     // Go to next
+     curr=curr->next;
+
+     // If we're back at the beginning, then mark as end
+     if (curr == beg) {
+       curr=NULL;
+       beg=NULL;
+     }
+
+     // return current vertex
+     return curr;
+   }
+  };
+
+public:
+  VertIter() : beg(NULL) {};
+
+  iterator begin() { return iterator(beg); }
+  iterator end() { return iterator(NULL); }
+
+  Vert<GEOMVI> *beg;  
+};
+
+
+
 
 template <class GEOM2>
 class Pgon {
@@ -125,7 +190,9 @@ class Pgon {
 
   int num_pnts; // Size of polygon
 
-
+protected:
+  VertIter<GEOM2> vertIter;
+  
 
   // private methods 
 private: 
@@ -192,6 +259,20 @@ public:
   }
 
 
+  // Loop over vertices
+  VertIter<GEOM2> &get_VertIter(Vert<GEOM2> *first=NULL) {
+
+    // Set beginning
+    if (first == NULL) {
+      vertIter.beg=beg;
+    } else {
+      vertIter.beg=first;
+    }
+
+    return vertIter;
+  }
+
+  
   
   // Clear points
   // TODO: This should keep Verts, but take out of beg, end and drop num_pnts to 0
@@ -286,6 +367,42 @@ public:
 
   // Debug output
 template <class GEOM3>
+  std::ostream &operator<<(std::ostream &os, Pgon<GEOM3> &pg) {
+
+  // Output Pgon Type
+  os<<"Type: ";
+  if (GEOM3::pnt_size==2) os<<"CART_2D";
+  else os<<"SPH_2D3D";
+  os<<" ";
+
+  // Output Pgon size
+  os<<"num_pnts= "<<pg.num_pnts;
+
+  // Next line
+  os<<"\n";
+
+  // Vertices
+  os << "Vertices:\n";
+  if (pg.beg == NULL) return (os); // Leave if empty
+
+  // Loop outputting vertices
+  for (Vert<GEOM3> *v : pg.get_VertIter()) {
+
+    // Output Vert
+    os<<"  ["<<*v<<"] ";
+    
+    // Next line
+    os<<"\n";
+  }
+    
+  return(os);
+}
+
+
+// OLD WAY
+#if 0 
+  // Debug output
+template <class GEOM3>
   std::ostream &operator<<(std::ostream &os, const Pgon<GEOM3> &pg) {
 
   // Output Pgon Type
@@ -325,7 +442,7 @@ template <class GEOM3>
   return(os);
 }
 
-
+#endif
 
 
 
