@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -23,7 +23,7 @@ extern "C" {
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // ESMC_InterArray interfaces
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  
+
   void FTN_X(c_esmc_interarraysetinvalid)(ESMCI::InterArray<int> *array,
     int *rc){
 #undef  ESMC_METHOD
@@ -32,7 +32,7 @@ extern "C" {
     *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_interarraycreate1d)(ESMCI::InterArray<int> *array, 
+  void FTN_X(c_esmc_interarraycreate1d)(ESMCI::InterArray<int> *array,
     int *farray, int *len, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_interarraycreate1d()"
@@ -40,7 +40,7 @@ extern "C" {
     *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_interarraycreate2d)(ESMCI::InterArray<int> *array, 
+  void FTN_X(c_esmc_interarraycreate2d)(ESMCI::InterArray<int> *array,
     int *farray, int *len, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_interarraycreate2d()"
@@ -48,7 +48,7 @@ extern "C" {
     *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_interarraycreate3d)(ESMCI::InterArray<int> *array, 
+  void FTN_X(c_esmc_interarraycreate3d)(ESMCI::InterArray<int> *array,
     int *farray, int *len, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_interarraycreate3d()"
@@ -64,7 +64,7 @@ extern "C" {
     *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_interarraycreate1di8)(ESMCI::InterArray<ESMC_I8> *array, 
+  void FTN_X(c_esmc_interarraycreate1di8)(ESMCI::InterArray<ESMC_I8> *array,
     ESMC_I8 *farray, int *len, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_interarraycreate1di8()"
@@ -72,7 +72,7 @@ extern "C" {
     *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_interarraycreate2di8)(ESMCI::InterArray<ESMC_I8> *array, 
+  void FTN_X(c_esmc_interarraycreate2di8)(ESMCI::InterArray<ESMC_I8> *array,
     ESMC_I8 *farray, int *len, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_interarraycreate2di8()"
@@ -80,7 +80,7 @@ extern "C" {
     *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_interarraycreate3di8)(ESMCI::InterArray<ESMC_I8> *array, 
+  void FTN_X(c_esmc_interarraycreate3di8)(ESMCI::InterArray<ESMC_I8> *array,
     ESMC_I8 *farray, int *len, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_interarraycreate3di8()"
@@ -89,7 +89,7 @@ extern "C" {
   }
 
 
-  void FTN_X(c_esmc_interarraycreate1dr8)(ESMCI::InterArray<ESMC_R8> *array, 
+  void FTN_X(c_esmc_interarraycreate1dr8)(ESMCI::InterArray<ESMC_R8> *array,
     ESMC_R8 *farray, int *len, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_interarraycreate1dr8()"
@@ -97,7 +97,7 @@ extern "C" {
     *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_interarraycreate2dr8)(ESMCI::InterArray<ESMC_R8> *array, 
+  void FTN_X(c_esmc_interarraycreate2dr8)(ESMCI::InterArray<ESMC_R8> *array,
     ESMC_R8 *farray, int *len, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_interarraycreate2dr8()"
@@ -105,7 +105,7 @@ extern "C" {
     *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_interarraycreate3dr8)(ESMCI::InterArray<ESMC_R8> *array, 
+  void FTN_X(c_esmc_interarraycreate3dr8)(ESMCI::InterArray<ESMC_R8> *array,
     ESMC_R8 *farray, int *len, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_interarraycreate3dr8()"
