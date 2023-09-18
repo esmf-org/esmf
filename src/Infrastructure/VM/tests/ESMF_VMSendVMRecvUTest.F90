@@ -387,7 +387,7 @@ program ESMF_VMSendVMRecvUTest
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       if (localPet==0) then
         write(name, *) "Sending local data Character String Test"
-        write (char_data, "(i2.2,i3)") localPet, 1
+        write (char_data, "(i2.2,i5)") localPet, 1
         call ESMF_VMSend(vm, sendData=char_data, count=len(char_data), &
           dstPet=dst, rc=rc)
       else
@@ -395,7 +395,7 @@ program ESMF_VMSendVMRecvUTest
         call ESMF_VMRecv(vm, recvData=char_data, count=len(char_data), &
           srcPet=src, rc=rc)
         CHSum=0
-        write (char_soln, "(i2.2,i3)") src, 1
+        write (char_soln, "(i2.2,i5)") src, 1
         if (char_data /= char_soln) CHSum = CHSum + 1
       endif
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -409,11 +409,11 @@ program ESMF_VMSendVMRecvUTest
         call ESMF_VMRecv(vm, recvData=char_data, count=len(char_data), &
           srcPet=src, rc=rc)
         CHSum=0
-        write (char_soln, "(i2.2,i3)") src, 1
+        write (char_soln, "(i2.2,i5)") src, 1
         if (char_data /= char_soln) CHSum = CHSum + 1
       else
         write(name, *) "Sending local data Character String Test"
-        write (char_data, "(i2.2,i3)") localPet, 1
+        write (char_data, "(i2.2,i5)") localPet, 1
         call ESMF_VMSend(vm, sendData=char_data, count=len(char_data), &
           dstPet=dst, rc=rc)
       endif
@@ -439,7 +439,7 @@ program ESMF_VMSendVMRecvUTest
       if (localPet==0) then
         write(name, *) "Sending local data Character String array Test"
         do i=1, count
-          write (ch_data(i), "(i2.2,i3)") localPet, i
+          write (ch_data(i), "(i2.2,i5)") localPet, i
         enddo
         call ESMF_VMSend(vm, sendData=ch_data, count=count*len(ch_data), &
           dstPet=dst, rc=rc)
@@ -449,7 +449,7 @@ program ESMF_VMSendVMRecvUTest
           srcPet=src, rc=rc)
         CHSum=0
         do i=1, count
-          write (char_soln, "(i2.2,i3)") src, i
+          write (char_soln, "(i2.2,i5)") src, i
           if (ch_data(i) /= char_soln) CHSum = CHSum + 1
         enddo
       endif
@@ -465,13 +465,13 @@ program ESMF_VMSendVMRecvUTest
           srcPet=src, rc=rc)
         CHSum=0
         do i=1, count
-          write (char_soln, "(i2.2,i3)") src, i
+          write (char_soln, "(i2.2,i5)") src, i
           if (ch_data(i) /= char_soln) CHSum = CHSum + 1
         enddo
       else
         write(name, *) "Sending local data Character String array Test"
         do i=1, count
-          write (ch_data(i), "(i2.2,i3)") localPet, i
+          write (ch_data(i), "(i2.2,i5)") localPet, i
         enddo
         call ESMF_VMSend(vm, sendData=ch_data, count=count*len(ch_data), &
           dstPet=dst, rc=rc)

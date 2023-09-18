@@ -357,7 +357,7 @@ program ESMF_VMSendNbVMRecvNbUTest
       !NEX_UTest
       write(name, *) "Sending local data Character String Test"
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write (char_data, "(i2.2,i3)") localPet, 1
+      write (char_data, "(i2.2,i5)") localPet, 1
       call ESMF_VMSend(vm, sendData=char_data, count=len(char_data), &
         dstPet=dst, syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -387,7 +387,7 @@ program ESMF_VMSendNbVMRecvNbUTest
       write(name, *) "Verify local data after receive Character String Test"
       write(failMsg, *) "Wrong Local Data"
       CHSum=0
-      write (char_soln, "(i2.2,i3)") src, 1
+      write (char_soln, "(i2.2,i5)") src, 1
       if (char_test /= char_soln) CHSum = CHSum + 1
       call ESMF_Test( (CHSum == 0), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -402,7 +402,7 @@ program ESMF_VMSendNbVMRecvNbUTest
       write(name, *) "Sending local data Character String array Test"
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       do i=1, count
-        write (ch_data(i), "(i2.2,i3)") localPet, i
+        write (ch_data(i), "(i2.2,i5)") localPet, i
       enddo
       call ESMF_VMSend(vm, sendData=ch_data, count=count*len(ch_data), &
         dstPet=dst, syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
@@ -434,7 +434,7 @@ program ESMF_VMSendNbVMRecvNbUTest
       write(failMsg, *) "Wrong Local Data"
       CHSum=0
       do i=1, count
-        write (char_soln, "(i2.2,i3)") src, i
+        write (char_soln, "(i2.2,i5)") src, i
         if (ch_test(i) /= char_soln) CHSum = CHSum + 1
       enddo
       call ESMF_Test( (CHSum == 0), name, failMsg, result, ESMF_SRCLINE)
@@ -696,7 +696,7 @@ program ESMF_VMSendNbVMRecvNbUTest
       !NEX_UTest
       write(name, *) "Sending local data Character String Test"
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write (char_data, "(i2.2,i3)") localPet, 1
+      write (char_data, "(i2.2,i5)") localPet, 1
       call ESMF_VMSend(vm, sendData=char_data, count=len(char_data), &
         dstPet=dst, syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -725,7 +725,7 @@ program ESMF_VMSendNbVMRecvNbUTest
       write(name, *) "Verify local data after receive Character String Test"
       write(failMsg, *) "Wrong Local Data"
       CHSum=0
-      write (char_soln, "(i2.2,i3)") src, 1
+      write (char_soln, "(i2.2,i5)") src, 1
       if (char_test /= char_soln) CHSum = CHSum + 1
       call ESMF_Test( (CHSum == 0), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -740,7 +740,7 @@ program ESMF_VMSendNbVMRecvNbUTest
       write(name, *) "Sending local data Character String array Test"
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       do i=1, count
-        write (ch_data(i), "(i2.2,i3)") localPet, i
+        write (ch_data(i), "(i2.2,i5)") localPet, i
       enddo
       call ESMF_VMSend(vm, sendData=ch_data, count=count*len(ch_data), &
         dstPet=dst, syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
@@ -771,7 +771,7 @@ program ESMF_VMSendNbVMRecvNbUTest
       write(failMsg, *) "Wrong Local Data"
       CHSum=0
       do i=1, count
-        write (char_soln, "(i2.2,i3)") src, i
+        write (char_soln, "(i2.2,i5)") src, i
         if (ch_test(i) /= char_soln) CHSum = CHSum + 1
       enddo
       call ESMF_Test( (CHSum == 0), name, failMsg, result, ESMF_SRCLINE)
