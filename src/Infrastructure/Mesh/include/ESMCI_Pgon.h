@@ -75,7 +75,8 @@ public:
 
     // Only support 3 coords right now, this is error checked in Pgon creation
   }
-  
+
+  // TODO: review this again
   void add_next(Vert *v) {
     
     // Point new vert appropriately 
@@ -218,25 +219,14 @@ private:
     coord_buff.reserve(num_pnts*GEOM2::pnt_size);
 
     // Loop adding points
-    Vert<GEOM2> *v=beg;
-    ThrowRequire(v != NULL);
-    while (v != end) {
-      
+    for (Vert<GEOM2> *v : get_VertIter()) {
+
       // Pack coords
       coord_buff.push_back(v->pnt[0]);
       coord_buff.push_back(v->pnt[1]);
       if (GEOM2::pnt_size >2) coord_buff.push_back(v->pnt[2]);
-
-      // Go to next
-      v=v->next;
     }
-
-    // Do End
-    coord_buff.push_back(v->pnt[0]);
-    coord_buff.push_back(v->pnt[1]);
-    if (GEOM2::pnt_size >2) coord_buff.push_back(v->pnt[2]);
   }
-
 
   
 public:
