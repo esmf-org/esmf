@@ -83,6 +83,11 @@ int main(void){
   
     // Create new Pgon triangle object
     Pgon<GEOM_CART2D> tri;
+
+    // Test debug output empty
+    std::cout << tri;
+    
+    // Add points
     tri.push_back_pnt(0.0,0.0);
     tri.push_back_pnt(1.0,0.0);
     tri.push_back_pnt(0.0,1.0);

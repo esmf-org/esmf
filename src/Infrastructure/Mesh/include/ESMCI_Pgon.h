@@ -119,14 +119,7 @@ class VertIter {
 private:
   class iterator {
   public: 
-    iterator(Vert<GEOMVI> *_beg): beg(_beg), curr(NULL) {
-      if (beg == NULL) return;
-      
-      if (next_Vert() == NULL) {
-        beg=NULL;
-        curr=NULL;        
-      }
-    }
+    iterator(Vert<GEOMVI> *_beg): beg(_beg), curr(_beg) {}
 
     const iterator& operator++() {
       next_Vert();
@@ -148,10 +141,8 @@ private:
     // Go to next Vert in the list
    Vert<GEOMVI> *next_Vert() {
 
-     // If we haven't started yet, set to beginning
-     if (curr == NULL) {
-       curr=beg;  
-     } 
+     // If we're at end, just leave
+     if (curr == NULL) return NULL;
 
      // Go to next
      curr=curr->next;
@@ -260,8 +251,9 @@ public:
 
 
   // Loop over vertices
+  // TODO: Make this so it makes an independant iterator object? So you can have more than one per polygon
   VertIter<GEOM2> &get_VertIter(Vert<GEOM2> *first=NULL) {
-
+    
     // Set beginning
     if (first == NULL) {
       vertIter.beg=beg;
