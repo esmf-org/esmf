@@ -93,7 +93,7 @@ int main(void){
     tri.push_back_pnt(0.0,1.0);
 
     // DEBUG OUTPUT: write to file
-    tri.write_to_vtk("tri2DCart");
+    // tri.write_to_vtk("tri2DCart");
 
     // Try debug output
     std::cout << tri;
@@ -106,7 +106,7 @@ int main(void){
   // Output test info
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-
+  
   ////// Create a 2D Sph Pgon ///////
 
   //NEX_UTest
@@ -137,6 +137,56 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+
+  ////// Simple test of intersection of 2D Cart Pgons ///////
+
+  //NEX_UTest
+  strcpy(name, "Simple test of 2D Cartesian Pgon intersection");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+
+  // Init to sucess
+  rc=ESMF_SUCCESS;
+
+  // Try catch to catch errors
+  try { 
+  
+    // Create Pgon triangle object
+    Pgon<GEOM_CART2D> tri;
+    tri.push_back_pnt(0.0,0.0);
+    tri.push_back_pnt(1.0,0.0);
+    tri.push_back_pnt(0.0,1.0);
+
+    // Debug output
+    tri.write_to_vtk("tri_2DCart");
+
+   
+    // Create Pgon square object
+    Pgon<GEOM_CART2D> square;
+    square.push_back_pnt(0.5,0.5);
+    square.push_back_pnt(1.5,0.5);
+    square.push_back_pnt(1.5,1.5);
+    square.push_back_pnt(0.5,1.5);
+
+    // Debug output
+    square.write_to_vtk("square_2DCart");
+
+    // Intersection
+    Pgon<GEOM_CART2D> result;
+    Pgon<GEOM_CART2D>::intersection(tri, square, result);
+    
+    
+  } catch(...) {
+    // Change to error if we detect an error
+    rc=ESMF_FAILURE;
+  }
+  
+  // Output test info
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+
+
+  
   
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);

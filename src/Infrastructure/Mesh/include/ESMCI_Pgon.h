@@ -381,51 +381,5 @@ template <class GEOM3>
 }
 
 
-// OLD WAY
-#if 0 
-  // Debug output
-template <class GEOM3>
-  std::ostream &operator<<(std::ostream &os, const Pgon<GEOM3> &pg) {
-
-  // Output Pgon Type
-  os<<"Type: ";
-  if (GEOM3::pnt_size==2) os<<"CART_2D";
-  else os<<"SPH_2D3D";
-  os<<" ";
-
-  // Output Pgon size
-  os<<"num_pnts= "<<pg.num_pnts;
-
-  // Next line
-  os<<"\n";
-  
-    // Loop outputting vertices
-  os << "Vertices:\n";
-  Vert<GEOM3> *v=pg.beg;
-  ThrowRequire(v != NULL);
-  while (v != pg.end) {
-    
-    // Output Vert
-    os<<"  ["<<*v<<"] ";
-    
-    // Next line
-    os<<"\n";
-    
-    // Go to next
-    v=v->next;
-  }
-  
-  // Do End
-  os<<"  ["<<*v<<"] ";
-  
-  // Next line
-  os<<"\n";
-  
-  return(os);
-}
-
-#endif
-
-
 
 #endif // ESMCI_PGON_H
