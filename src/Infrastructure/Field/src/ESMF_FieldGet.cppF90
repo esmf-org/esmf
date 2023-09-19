@@ -109,8 +109,8 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
-  subroutine ESMF_FieldGetDefault(field, keywordEnforcer, arrayspec, &
-    status, geomtype, grid, mesh, locstream, xgrid, array, localarrayList, &
+  subroutine ESMF_FieldGetDefault(field, keywordEnforcer, arrayspec, status, &
+    geomtype, geom, grid, mesh, locstream, xgrid, array, localarrayList, &
     typekind, dimCount, rank, staggerloc, meshloc, xgridside, &
     gridindex, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     totalLWidth, totalUWidth, localDeCount, ssiLocalDeCount, &
@@ -124,6 +124,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_ArraySpec),       intent(out), optional :: arrayspec
     type(ESMF_FieldStatus_Flag),intent(out), optional :: status
     type(ESMF_GeomType_Flag),   intent(out), optional :: geomtype
+    type(ESMF_Geom),            intent(out), optional :: geom
     type(ESMF_Grid),            intent(out), optional :: grid
     type(ESMF_Mesh),            intent(out), optional :: mesh
     type(ESMF_LocStream),       intent(out), optional :: locstream
@@ -183,6 +184,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[8.5.0] Added argument {\tt isESMFAllocated} to support user query of
 !              whether ESMF or user is responsible for the data allocation
 !              referenced by this object.
+! \item[8.6.0] Added argument {\tt geom} to support user query of Geom object.
 ! \end{description}
 ! \end{itemize}
 !
@@ -208,6 +210,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[geomtype]}]
 !       The type of geometry on which the Field is built. See
 !       section~\ref{const:geomtype} for the range of values.
+! \item [{[geom]}]
+!       {\tt ESMF\_Geom}.
 ! \item [{[grid]}]
 !       {\tt ESMF\_Grid}.
 ! \item [{[mesh]}]
@@ -401,6 +405,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         geomtype = localGeomType
+    endif
+
+    if (present(geom)) then
+      geom = ftype%geom
     endif
 
     if (present(grid)) then
