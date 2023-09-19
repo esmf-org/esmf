@@ -319,15 +319,18 @@ namespace ESMCI {
       }
 
       //weighted average
-      _mean = ((old_count * old_mean) + (other.getMean() * other.getCount())) / _count;
+      if (_count > 0) _mean = ((old_count * old_mean) + (other.getMean() * other.getCount())) / _count;
+      else _mean = 0.;
 
       double old_mean_sq = old_mean * old_mean;
       double other_mean_sq = other.getMean() * other.getMean();
       double merge_mean_sq = _mean * _mean;
-      double old_var = _variance / (old_count - 1.0);
-      double other_var = other._variance / (other.getCount() - 1.0);
-      _variance = ((old_var + old_mean_sq - merge_mean_sq) * (old_count - 1.0) +
-		   (other_var + other_mean_sq - merge_mean_sq) * (other.getCount() - 1.0));     
+      double old_var = 0.;
+      if (old_count > 0) old_var = _variance / old_count;
+      double other_var = 0.;
+      if (other.getCount() > 0) other_var = other._variance / other.getCount();
+      _variance = ((old_var + old_mean_sq - merge_mean_sq) * old_count +
+		   (other_var + other_mean_sq - merge_mean_sq) * other.getCount());
 
       //recursively merge child nodes
       mergeChildren(other);

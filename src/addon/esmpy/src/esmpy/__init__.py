@@ -102,10 +102,6 @@ __email__ = msg["Maintainer-email"]
 __description__ = msg["Summary"]
 __requires__ = msg["Requires-Dist"]
 __requires_python__ = msg["Requires-Python"]
-# these don't seem to work with setuptools pyproject.toml
-__author__ = msg["Author"]
-__homepage__ = msg["Home-page"]
-__obsoletes__ = msg["obsoletes"]
 
 #### IMPORT LIBRARIES #########################################################
 

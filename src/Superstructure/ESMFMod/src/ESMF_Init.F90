@@ -92,16 +92,20 @@ module ESMF_InitMod
 ! !IROUTINE:  ESMF_Initialize - Initialize ESMF
 !
 ! !INTERFACE:
-      subroutine ESMF_Initialize(keywordEnforcer, configFilename, configKey, &
-        defaultCalKind, defaultDefaultLogFilename, defaultLogFilename, &
+      subroutine ESMF_Initialize(keywordEnforcer, configFilenameFromArgNum, &
+        configFilename, configKey, &
+        defaultDefaultCalKind, defaultCalKind, &
+        defaultDefaultLogFilename, defaultLogFilename, &
         defaultLogAppendFlag, logAppendFlag, defaultLogKindFlag, logKindFlag, &
         mpiCommunicator,  ioUnitLBound, ioUnitUBound, &
         defaultGlobalResourceControl, globalResourceControl, config, vm, rc)
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                 intent(in),  optional :: configFilenameFromArgNum
       character(len=*),        intent(in),  optional :: configFilename
       character(len=*),        intent(in),  optional :: configKey(:)
+      type(ESMF_CalKind_Flag), intent(in),  optional :: defaultDefaultCalKind
       type(ESMF_CalKind_Flag), intent(in),  optional :: defaultCalKind
       character(len=*),        intent(in),  optional :: defaultDefaultLogFilename
       character(len=*),        intent(in),  optional :: defaultLogFilename
@@ -143,7 +147,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              the extra {\tt default} prefix, either specified in the call, or
 !              within the specified Config file.
 ! \item[8.5.0] Added argument {\tt configKey} to support custom location of the
-!              map of predefined initialization options for YAML configurations.
+!              map of predefined initialization options for YAML
+!              configurations.\newline
+!              Added argument {\tt configFilenameFromArgNum} to support config
+!              file specification via the command line.
+! \item[8.6.0] Added {\tt defaultDefaultCalKind} argument to allow specifiation of
+!              a default for {\tt defaultCalKind}.
 ! \end{description}
 ! \end{itemize}
 !
@@ -220,6 +229,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     The arguments are:
 !     \begin{description}
+!     \item [{[configFilenameFromArgNum]}]
+!           Index of the command line argument specifying the config file
+!           name. If the specified command line argument does not exist, or
+!           {\tt configFilenameFromArgNum} was not specified, the
+!           {\tt configFilename} argument, if provided, is used by default.
 !     \item [{[configFilename]}]
 !           Name of the configuration file for the entire application.
 !           If this argument is specified, the configuration file must exist.
@@ -261,10 +275,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           and ESMF is not initialized.
 !           The supported config labels are:
 !           \begin{itemize}
+!              \item {\tt defaultCalKind}
 !              \item {\tt defaultLogFilename}
 !              \item {\tt logAppendFlag}
 !              \item {\tt logKindFlag}
 !              \item {\tt globalResourceControl}
+!           \end{itemize}
+!
+!           ESMF allows the user to affect certain details about the execution
+!           of an application through a number of run-time environment variables.
+!           The following list of variables are checked within the specified
+!           configuration file. If a matching label is found, the respective
+!           value is set, potentially overriding the value defined within the
+!           user environment for the same variable.
+!           \begin{itemize}
+!              \item {\tt ESMF\_RUNTIME\_PROFILE}
+!              \item {\tt ESMF\_RUNTIME\_PROFILE\_OUTPUT}
+!              \item {\tt ESMF\_RUNTIME\_PROFILE\_PETLIST}
+!              \item {\tt ESMF\_RUNTIME\_TRACE}
+!              \item {\tt ESMF\_RUNTIME\_TRACE\_CLOCK}
+!              \item {\tt ESMF\_RUNTIME\_TRACE\_PETLIST}
+!              \item {\tt ESMF\_RUNTIME\_TRACE\_COMPONENT}
+!              \item {\tt ESMF\_RUNTIME\_TRACE\_FLUSH}
+!              \item {\tt ESMF\_RUNTIME\_COMPLIANCECHECK}
 !           \end{itemize}
 !     \item [{[configKey]}]
 !           If present, use {\tt configKey} to find the map of predefined
@@ -274,10 +307,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The {\tt configKey} option is only supported for YAML configurations.
 !           An error is returned if {\tt configKey} is specified for the
 !           traditional {\tt ESMF\_Config} case.
+!     \item [{[defaultDefaultCalKind]}]
+!           Default value for argument {\tt defaultCalKind}, the calendar
+!           used by ESMF Time Manger by default.
+!           If not specified, defaults to {\tt ESMF\_CALKIND\_NOCALENDAR}.
 !     \item [{[defaultCalKind]}]
 !           Sets the default calendar to be used by ESMF Time Manager.
 !           See section \ref{const:calkindflag} for a list of valid options.
-!           If not specified, defaults to {\tt ESMF\_CALKIND\_NOCALENDAR}.
+!           If not specified,
+!           defaults according to {\tt defaultDefaultCalKind}.
 !     \item [{[defaultDefaultLogFilename]}]
 !           Default value for argument {\tt defaultLogFilename}, the name of
 !           the default log file for warning and error messages.
@@ -361,7 +399,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! initialize the framework
       call ESMF_FrameworkInternalInit(lang=ESMF_MAIN_F90, &
+        configFilenameFromArgNum=configFilenameFromArgNum, &
         configFilename=configFilename, configKey=configKey, &
+        defaultDefaultCalKind=defaultDefaultCalKind, &
         defaultCalKind=defaultCalKind, &
         defaultDefaultLogFilename=defaultDefaultLogFilename, &
         defaultLogFilename=defaultLogFilename, &
@@ -469,16 +509,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE:  ESMF_FrameworkInternalInit - internal routine called by both F90 and C++
 !
 ! !INTERFACE:
-      subroutine ESMF_FrameworkInternalInit(lang, configFilename, configKey, &
-        defaultCalKind, defaultDefaultLogFilename, defaultLogFilename, &
+      subroutine ESMF_FrameworkInternalInit(lang, configFilenameFromArgNum, &
+        configFilename, configKey, &
+        defaultDefaultCalKind, defaultCalKind, &
+        defaultDefaultLogFilename, defaultLogFilename, &
         defaultLogAppendFlag, logAppendFlag, defaultLogKindFlag, logKindFlag, &
         mpiCommunicator, ioUnitLBound, ioUnitUBound, &
         defaultGlobalResourceControl, globalResourceControl, config, rc)
 !
 ! !ARGUMENTS:
       integer,                 intent(in)            :: lang
+      integer,                 intent(in),  optional :: configFilenameFromArgNum
       character(len=*),        intent(in),  optional :: configFilename
       character(len=*),        intent(in),  optional :: configKey(:)
+      type(ESMF_CalKind_Flag), intent(in),  optional :: defaultDefaultCalKind
       type(ESMF_CalKind_Flag), intent(in),  optional :: defaultCalKind
       character(len=*),        intent(in),  optional :: defaultDefaultLogFilename
       character(len=*),        intent(in),  optional :: defaultLogFilename
@@ -503,10 +547,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [lang]
 !           Flag to say whether main program is F90 or C++.  Affects things
 !           related to initialization, such as starting MPI.
+!     \item [{[configFilenameFromArgNum]}]
+!           Index of the command line argument specifying the config file
+!           name. If the specified command line argument does not exist, or
+!           {\tt configFilenameFromArgNum} was not specified, the
+!           {\tt configFilename} argument, if provided, is used by default.
 !     \item [{[configFilename]}]
 !           Name of the config file for the entire application.
 !     \item [{[configKey]}]
 !           Key associated with the the default label map for YAML configs.
+!     \item [{[defaultDefaultCalKind]}]
+!           Default value for argument {\tt defaultCalKind}.
 !     \item [{[defaultCalKind]}]
 !           Sets the default calendar to be used by ESMF Time Manager.
 !           If not specified, defaults to {\tt ESMF\_CALKIND\_NOCALENDAR}.
@@ -572,12 +623,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       logical                 :: globalResourceControlSet, logAppendFlagSet
       character(160)          :: defaultLogFilenameSet, defaultLogFilenameS
-      character(80)           :: logKindFlagS, logKindFlagSU
-      character(:), allocatable :: logKindFlagSA
+      character(:), allocatable :: stringAlloc
+      character(80)           :: stringS, stringSU, stringSet
       type(ESMF_LogKind_Flag) :: logKindFlagSet
+      type(ESMF_CalKind_Flag) :: defaultCalKindSet
 
-      logical                 :: isFlag, validHConfigNode
-      integer                 :: i
+      character(ESMF_MAXSTR)  :: configFilenameInternal
+      logical                 :: isFlag, validHConfigNode, haveConfig
+      integer                 :: i, argCount, configFilenameLength(1)
 
       ! Initialize return code
       rcpresent = .FALSE.
@@ -616,6 +669,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         logKindFlagSet = defaultLogKindFlag
       if (present(logKindFlag)) &
         logKindFlagSet = logKindFlag
+      !
+      defaultCalKindSet = ESMF_CALKIND_NOCALENDAR
+      if (present(defaultDefaultCalKind)) &
+        defaultCalKindSet = defaultDefaultCalKind
+      if (present(defaultCalKind)) &
+        defaultCalKindSet = defaultCalKind
 
       ! If non-default Fortran unit numbers are to be used, set them
       ! prior to log files being created.
@@ -657,9 +716,76 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       ! deal with Config
-      if (present(configFilename)) then
-        ! have a default Config
+      haveConfig = .false.
 
+      if (present(configFilenameFromArgNum).or.present(configFilename)) &
+        then
+        ! must initialize a temporary ESMF default log
+        call ESMF_LogInitialize("ESMF_LogFile",  &
+          logKindFlag=ESMF_LOGKIND_MULTI_ON_ERROR, &
+          rc=localrc)
+        if (localrc /= ESMF_SUCCESS) then
+          call ESMF_LogRc2Msg (localrc, errmsg, errmsg_l)
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+              ": Error LogInitialize() log file: ", errmsg(:errmsg_l)
+          return
+        endif
+        ! get localPet
+        call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_VMGet(vm, localPet=localPet, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+
+      if (present(configFilenameFromArgNum)) then
+        ! see if a configuration file was indeed specified through the argument
+        if (localPet==0) then
+          ! arg access is only guaranteed on root pet
+          call ESMF_UtilGetArgC(count=argCount, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (configFilenameFromArgNum > argCount) then
+            ! argument does not exist -> check into default
+            if (present(configFilename)) then
+              haveConfig = .true.
+              configFilenameInternal = trim(configFilename)
+            endif
+          else
+            ! argument does exist -> use it
+            haveConfig = .true.
+            call ESMF_UtilGetArg(configFilenameFromArgNum, &
+              argvalue=configFilenameInternal, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+          configFilenameLength(1) = 0
+          if (haveConfig) then
+            configFilenameLength(1) = len_trim(configFilenameInternal)
+          endif
+        endif
+        call ESMF_VMBroadcast(vm, bcstData=configFilenameLength, count=1, &
+          rootPet=0, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        haveConfig = .true.
+        if (configFilenameLength(1) == 0) haveConfig = .false.
+        if (haveConfig) then
+          call ESMF_VMBroadcast(vm, bcstData=configFilenameInternal, &
+            count=ESMF_MAXSTR, rootPet=0, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+      endif
+
+      if (.not.haveConfig.and.present(configFilename)) then
+        haveConfig = .true.
+        configFilenameInternal = trim(configFilename)
+      endif
+
+      if (haveConfig) then
+        ! have a default Config -> load and use it
         ! first must initialize a temporary ESMF default log
         call ESMF_LogInitialize("ESMF_LogFile",  &
           logKindFlag=ESMF_LOGKIND_MULTI_ON_ERROR, &
@@ -677,7 +803,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! load config file
-        call ESMF_ConfigLoadFile(configInternal, configFilename, rc=localrc)
+        call ESMF_ConfigLoadFile(configInternal, trim(configFilenameInternal), &
+          rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -795,30 +922,92 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             return  ! bail out
           endif
           if (validHConfigNode) then
-            logKindFlagSA = ESMF_HConfigAsString(hconfigNode, &
+            stringAlloc = ESMF_HConfigAsString(hconfigNode, &
               keyString="logKindFlag", rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-            logKindFlagSU = ESMF_UtilStringUpperCase(logKindFlagSA, rc=localrc)
+            stringSU = ESMF_UtilStringUpperCase(stringAlloc, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           else
-            call ESMF_ConfigGetAttribute(configInternal, logKindFlagS, &
+            call ESMF_ConfigGetAttribute(configInternal, stringS, &
               label="logKindFlag:", default="---invalid---", rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-            logKindFlagSU = ESMF_UtilStringUpperCase(logKindFlagS, rc=localrc)
+            stringSU = ESMF_UtilStringUpperCase(stringS, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           endif
-          if (trim(logKindFlagSU)=="ESMF_LOGKIND_NONE") then
+          if (trim(stringSU)=="ESMF_LOGKIND_NONE") then
             logKindFlagSet = ESMF_LOGKIND_NONE
-          else if (trim(logKindFlagSU)=="ESMF_LOGKIND_SINGLE") then
+          else if (trim(stringSU)=="ESMF_LOGKIND_SINGLE") then
             logKindFlagSet = ESMF_LOGKIND_SINGLE
-          else if (trim(logKindFlagSU)=="ESMF_LOGKIND_MULTI") then
+          else if (trim(stringSU)=="ESMF_LOGKIND_MULTI") then
             logKindFlagSet = ESMF_LOGKIND_MULTI
-          else if (trim(logKindFlagSU)=="ESMF_LOGKIND_MULTI_ON_ERROR") then
+          else if (trim(stringSU)=="ESMF_LOGKIND_MULTI_ON_ERROR") then
             logKindFlagSet = ESMF_LOGKIND_MULTI_ON_ERROR
+          endif
+        endif
+
+        ! defaultCalKind
+        if (validHConfigNode) then
+          isPresent = ESMF_HConfigIsDefined(hconfigNode, &
+            keyString="defaultCalKind", rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (isPresent) then
+            isPresent = .not.ESMF_HConfigIsNull(hconfigNode, &
+              keyString="defaultCalKind", rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+        else
+          call ESMF_ConfigFindLabel(configInternal, &
+            label="defaultCalKind:", isPresent=isPresent, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+        if (isPresent) then
+          if (present(defaultCalKind)) then
+            ! both API and Config want to set -> error
+            call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+              msg="Cannot set 'defaultCalKind' from Config and API "//&
+              "at the same time.", ESMF_CONTEXT, rcToReturn=rc)
+            return  ! bail out
+          endif
+          if (validHConfigNode) then
+            stringAlloc = ESMF_HConfigAsString(hconfigNode, &
+              keyString="defaultCalKind", rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            stringSU = ESMF_UtilStringUpperCase(stringAlloc, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          else
+            call ESMF_ConfigGetAttribute(configInternal, stringS, &
+              label="defaultCalKind:", default="---invalid---", rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            stringSU = ESMF_UtilStringUpperCase(stringS, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+          if (trim(stringSU)=="ESMF_CALKIND_NOCALENDAR") then
+            defaultCalKindSet = ESMF_CALKIND_NOCALENDAR
+          else if (trim(stringSU)=="ESMF_CALKIND_360DAY") then
+            defaultCalKindSet = ESMF_CALKIND_360DAY
+          else if (trim(stringSU)=="ESMF_CALKIND_CUSTOM") then
+            defaultCalKindSet = ESMF_CALKIND_CUSTOM
+          else if (trim(stringSU)=="ESMF_CALKIND_GREGORIAN") then
+            defaultCalKindSet = ESMF_CALKIND_GREGORIAN
+          else if (trim(stringSU)=="ESMF_CALKIND_JULIAN") then
+            defaultCalKindSet = ESMF_CALKIND_JULIAN
+          else if (trim(stringSU)=="ESMF_CALKIND_JULIANDAY") then
+            defaultCalKindSet = ESMF_CALKIND_JULIANDAY
+          else if (trim(stringSU)=="ESMF_CALKIND_MODJULIANDAY") then
+            defaultCalKindSet = ESMF_CALKIND_MODJULIANDAY
+          else if (trim(stringSU)=="ESMF_CALKIND_NOLEAP") then
+            defaultCalKindSet = ESMF_CALKIND_NOLEAP
           endif
         endif
 
@@ -849,11 +1038,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             return  ! bail out
           endif
           if (validHConfigNode) then
-            logKindFlagSA = ESMF_HConfigAsString(hconfigNode, &
+            stringAlloc = ESMF_HConfigAsString(hconfigNode, &
               keyString="defaultLogFilename", rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-            defaultLogFilenameSet = trim(logKindFlagSA)
+            defaultLogFilenameSet = trim(stringAlloc)
           else
             call ESMF_ConfigGetAttribute(configInternal, defaultLogFilenameS, &
               label="defaultLogFilename:", default="---invalid---", rc=localrc)
@@ -905,23 +1094,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
         endif
 
-        ! optionally destroy the HConfigNode
-        if (validHConfigNode) then
-          call ESMF_HConfigDestroy(hconfigNode, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        endif
+      endif ! have a default Config
 
-        ! optionally destroy the Config
-        if (.not.present(config)) then
-          call ESMF_ConfigDestroy(configInternal, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        else
-          config = configInternal ! return back to user
-        endif
-
-        ! shut down temporary Log
+      if (present(configFilenameFromArgNum).or.present(configFilename)) &
+        then
+        ! must shut down temporary Log
         call ESMF_LogFinalize(rc=localrc)
         if (localrc /= ESMF_SUCCESS) then
           call ESMF_LogRc2Msg (localrc, errmsg, errmsg_l)
@@ -929,7 +1106,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ": Error finalizing log file: ", errmsg(:errmsg_l)
           return
         endif
-      endif ! have a default Config
+      endif
 
       ! set global VM resource control
       call ESMF_VMSet(globalResourceControl=globalResourceControlSet, &
@@ -1123,8 +1300,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Ensure that at least the version number makes it into the log
       call ESMF_LogFlush(rc=localrc)
-      
-      ! if compliance checker is on, we want logs to have high prescision timestamps
+
+      if (haveConfig) then
+        ! Ingest ESMF_RUNTIME_* settings from config -> possibly override environment
+        call ingest_environment_variable("ESMF_RUNTIME_PROFILE")
+        call ingest_environment_variable("ESMF_RUNTIME_PROFILE_OUTPUT")
+        call ingest_environment_variable("ESMF_RUNTIME_PROFILE_PETLIST")
+        call ingest_environment_variable("ESMF_RUNTIME_TRACE")
+        call ingest_environment_variable("ESMF_RUNTIME_TRACE_CLOCK")
+        call ingest_environment_variable("ESMF_RUNTIME_TRACE_PETLIST")
+        call ingest_environment_variable("ESMF_RUNTIME_TRACE_COMPONENT")
+        call ingest_environment_variable("ESMF_RUNTIME_TRACE_FLUSH")
+        call ingest_environment_variable("ESMF_RUNTIME_COMPLIANCECHECK")
+        ! optionally destroy the HConfigNode
+        if (validHConfigNode) then
+          call ESMF_HConfigDestroy(hconfigNode, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+        ! optionally destroy the Config
+        if (.not.present(config)) then
+          call ESMF_ConfigDestroy(configInternal, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else
+          config = configInternal ! return back to user
+        endif
+      endif
+
+      ! if compliance checker is on, we want logs to have high precision timestamps
       call c_esmc_getComplianceCheckJSON(complianceCheckIsOn, localrc)
       if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error checking ESMF_RUNTIME_COMPLIANCECHECK env variable"
@@ -1141,7 +1345,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check if tracing is on
       call c_esmc_getComplianceCheckTrace(traceIsOn, profileIsOn, localrc)
       if (localrc /= ESMF_SUCCESS) then
-          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error checking ESMF_RUNTIME_COMPLIANCECHECK env variable"
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error checking ESMF_RUNTIME_* env variables"
           return
       endif
       if (traceIsOn == 1 .or. profileIsOn == 1) then
@@ -1158,7 +1362,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       ! Initialize the default time manager calendar
-      call ESMF_CalendarInitialize(calkindflag=defaultCalKind, rc=localrc)
+      call ESMF_CalendarInitialize(calkindflag=defaultCalKindSet, rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
          write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
              ": Error initializing the default time manager calendar"
@@ -1177,15 +1381,59 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       already_init = .true.
 
-      if (.not.present(configFilename).and.present(config)) then
+      if (.not.haveConfig.and.present(config)) then
         call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          msg="Cannot request 'config' without supplying "// &
-            "'configFilename'", &
+          msg="Cannot request 'config' without identifying "// &
+            "a valid config file", &
             ESMF_CONTEXT, rcToReturn=rc)
         return  ! bail out
       endif
 
       if (rcpresent) rc = ESMF_SUCCESS
+
+      contains
+
+        subroutine ingest_environment_variable(env_var_name)
+          character(*), intent(in) :: env_var_name
+          if (validHConfigNode) then
+            isPresent = ESMF_HConfigIsDefined(hconfigNode, &
+              keyString=env_var_name, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            if (isPresent) then
+              isPresent = .not.ESMF_HConfigIsNull(hconfigNode, &
+                keyString=env_var_name, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
+          else
+            call ESMF_ConfigFindLabel(configInternal, &
+              label="ESMF_RUNTIME_PROFILE:", isPresent=isPresent, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+          if (isPresent) then
+            if (validHConfigNode) then
+              stringAlloc = ESMF_HConfigAsString(hconfigNode, &
+                keyString=env_var_name, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+              stringSet = trim(stringAlloc)
+            else
+              call ESMF_ConfigGetAttribute(configInternal, stringS, &
+                label="defaultLogFilename:", default="---invalid---", rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+              if (trim(stringS)/="---invalid---") then
+                stringSet = trim(stringS)
+              endif
+            endif
+            call ESMF_VMSetEnv(env_var_name, stringSet, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+        end subroutine
+
 
       end subroutine ESMF_FrameworkInternalInit
 !------------------------------------------------------------------------------
@@ -1361,7 +1609,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       call c_esmc_getComplianceCheckTrace(traceIsOn, profileIsOn, localrc)
       if (localrc /= ESMF_SUCCESS) then
-          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error checking ESMF_RUNTIME_COMPLIANCECHECK env variable"
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error checking ESMF_RUNTIME_* env variables"
           return
       endif
       if (traceIsOn == 1 .or. profileIsOn == 1) then

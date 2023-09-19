@@ -109,6 +109,30 @@ end subroutine f_esmf_localarrayadjust
 
 
 #undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_localarrayslice"
+subroutine f_esmf_localarrayslice(array, trailingTensorSlice, rankIn, rankOut, rc)
+  use ESMF_UtilTypesMod     ! ESMF base class
+  use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LogErrMod        ! ESMF error logging
+  use ESMF_LocalArrayMod
+  use ESMF_F90InterfaceMod
+
+  implicit none
+
+  type(ESMF_LocalArray) :: array
+  type(ESMF_InterArray) :: trailingTensorSlice
+  integer :: rankIn, rankOut
+  integer :: rc
+
+  call ESMF_LocalArraySlice(array, trailingTensorSlice, rankIn, rankOut, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, &
+    ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT)) return
+
+end subroutine f_esmf_localarrayslice
+
+
+#undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_localarraycopyf90ptr"
 subroutine f_esmf_localarraycopyf90ptr(arrayInArg, arrayOutArg, datacopyflag, rc)
   use ESMF_UtilTypesMod     ! ESMF base class

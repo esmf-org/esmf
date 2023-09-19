@@ -62,15 +62,7 @@ Installing ESMPy from Source
 ----------------------------
 
 When installing from source, ESMPy uses `pip <https://pypi.org/project/pip//>`_ 
-to build and install the package. This requires setting an environment variable 
-pointing to a file named esmf.mk that is generated during an ESMF installation.  
-The path of this file is:
-
-.. code::
-
-    <ESMF_INSTALL_DIR>/lib/lib<g<or>O>/<platform>/esmf.mk
-
-An installation of ESMPy in the default location for Python packages can be done
+to build and install the package. An installation of ESMPy in the default location for Python packages can be done
 with the following command issued from the top level ESMPy directory (``src/addon/esmpy``):
 
 .. code::
@@ -93,7 +85,8 @@ To use ESMPy in an external program, import it with:
 
     import esmpy
 
-The environment variable ``ESMFMKFILE`` must be set when using ESMPy.
+The environment variable ``ESMFMKFILE`` should be set when using ESMPy. If it is not found, the package will
+try to guess a few very common locations, but we recommend correctly setting the variable nonetheless.
 
 .. Note::
 
@@ -133,6 +126,14 @@ greater test coverage is desired:
     commands will simply download the test files without actually running them 
     (allowing the stress on the machine to be applied to bandwidth first, and 
     then memory).
+
+.. Note::
+
+   By default, test data will be downloaded to a ``data`` subdirectory of the ESMPy installation directory. This location can be changed by setting one of the following environment variables:
+
+   - If ``ESMPY_DATA_DIR`` is set, this should point to a directory that has already been populated with the necessary data; the pre-existing data will be read from this directory and no automatic downloads will be attempted.
+
+   - Otherwise, if ``ESMPY_DATA_NEW_DIR`` is set, data will be downloaded to the path set by this variable instead of using the ``data`` subdirectory of the ESMPy installation directory.
 
 -----------
 Limitations

@@ -16,9 +16,9 @@ During software development it is advantageous to recompile a portion of
 ESMF and not build the entire framework when testing localized software
 modifications.  The makefiles are configured to compile only files in the
 current directory and rebuild the shared libraries only when necessary.
-Therefore when "gmake" is entered in any directory, only files in that
+Therefore when "make" is entered in any directory, only files in that
 directory are compiled.  However, the entire ESMF framework may be built
-from any directory by entering "gmake lib".
+from any directory by entering "make lib".
 
 The unit tests, the system tests, the examples, and the demos all share
 a common set of targets.  The following target list illustrates the
@@ -59,10 +59,10 @@ Document file dependencies are set with:
 
 The makefiles targets work from both local directory and from ESMF\_DIR:
 \begin{description} 
-\item [gmake alldoc] 
-\item [gmake pdf] 
-\item [gmake dvi] 
-\item [gmake html] 
+\item [make alldoc] 
+\item [make pdf] 
+\item [make dvi] 
+\item [make html] 
 \end{description}
 
 

@@ -1416,7 +1416,7 @@ endif
 !follows:
 !\begin{verbatim}
 !   type ESMF_CubedSphereTransform_Args
-!      real(ESMF_KIND_R4) :: stretch_factor, target_lat, target_lon
+!      real(ESMF_KIND_R8) :: stretch_factor, target_lat, target_lon
 !   end type
 !\end{verbatim}
 !
@@ -1425,7 +1425,7 @@ endif
  
 !BOC
      transformArgs%stretch_factor = 0.5;
-     transformArgs%target_lat = 0.0; ! in radians
+     transformArgs%target_lon = 0.0; ! in radians
      transformArgs%target_lat = 1.3; ! in radians
      grid2D = ESMF_GridCreateCubedSphere(tileSize=45, regDecompPTile=decomptile, &
                  staggerLocList = (/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &

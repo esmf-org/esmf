@@ -13,6 +13,8 @@ ESMF_CPPDEFAULT		= clang -E -P -x c
 
 ESMF_CXXCOMPILECPPFLAGS += -x c++
 
+ESMF_CPPFLAGS          += -DESMF_COMPILER_AOCC
+
 ############################################################
 # Default MPI setting.
 #

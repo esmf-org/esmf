@@ -1,10 +1,10 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
-! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-! Laboratory, University of Michigan, National Centers for Environmental 
-! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !
@@ -233,6 +233,8 @@ module ESMF_HConfigMod
   public ESMF_HConfigSet
   public ESMF_HConfigSetMapKey
   public ESMF_HConfigSetMapVal
+
+  public ESMF_HConfigValidateMapKeys
 
 ! - ESMF-internal methods:
   public ESMF_HConfigGetInit
@@ -516,9 +518,9 @@ module ESMF_HConfigMod
 !
 ! !DESCRIPTION:
 !   Test whether hconfig1 and hconfig2 are valid aliases to the same ESMF
-!   HConfig object in memory. For a more general comparison of two 
-!   ESMF HConfigs, going beyond the simple alias test, the 
-!   {\tt ESMF\_HConfigMatch()} function (not yet fully implemented) must 
+!   HConfig object in memory. For a more general comparison of two
+!   ESMF HConfigs, going beyond the simple alias test, the
+!   {\tt ESMF\_HConfigMatch()} function (not yet fully implemented) must
 !   be used.
 !
 !   The arguments are:
@@ -558,7 +560,7 @@ module ESMF_HConfigMod
 !   Test whether hconfig1 and hconfig2 are {\it not} valid aliases to the
 !   same ESMF HConfig object in memory. For a more general comparison of two
 !   ESMF HConfigs, going beyond the simple alias test, the
-!   {\tt ESMF\_HConfigMatch()} function (not yet fully implemented) must 
+!   {\tt ESMF\_HConfigMatch()} function (not yet fully implemented) must
 !   be used.
 !
 !   The arguments are:
@@ -615,7 +617,7 @@ contains
     integer :: localrc1, localrc2
     logical :: lval1, lval2
 
-    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain
     ! init checks on both args, and in the case where both are uninitialized,
     ! to distinguish equality based on uninitialized type (uncreated,
     ! deleted).
@@ -663,7 +665,7 @@ contains
     integer :: localrc1, localrc2
     logical :: lval1, lval2
 
-    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain
     ! init checks on both args, and in the case where both are uninitialized,
     ! to distinguish equality based on uninitialized type (uncreated,
     ! deleted).
@@ -751,7 +753,7 @@ contains
 !    addKey, addKeyString, index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_HConfig[Iter}), intent(in)      :: hconfig
+!    type(ESMF_HConfig[Iter]), intent(in)      :: hconfig
 !    <Type>,             intent(in)            :: content[(:)]
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_HConfig), intent(in),  optional :: addKey
@@ -792,16 +794,18 @@ contains
 !     The content to be added.
 !   \item[{[addKey]}]
 !     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
+!     Muturally exclusive with {\tt addKeyString}.
 !   \item[{[addKeyString]}]
 !     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
+!     Muturally exclusive with {\tt addKey}.
 !   \item[{[index]}]
 !     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
@@ -2021,7 +2025,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAddMapKey - Add <Type> content to HConfig MapKey object
 
 ! !INTERFACE:
-!  subroutine ESMF_HConfigAdd(hconfig, content, keywordEnforcer, &
+!  subroutine ESMF_HConfigAddMapKey(hconfig, content, keywordEnforcer, &
 !    addKey, addKeyString, index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
@@ -2066,16 +2070,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The content to be added.
 !   \item[{[addKey]}]
 !     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
+!     Muturally exclusive with {\tt addKeyString}.
 !   \item[{[addKeyString]}]
 !     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
+!     Muturally exclusive with {\tt addKey}.
 !   \item[{[index]}]
 !     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
@@ -2750,7 +2756,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAddMapVal - Add <Type> content to HConfig MapVal object
 
 ! !INTERFACE:
-!  subroutine ESMF_HConfigAdd(hconfig, content, keywordEnforcer, &
+!  subroutine ESMF_HConfigAddMapVal(hconfig, content, keywordEnforcer, &
 !    addKey, addKeyString, index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
@@ -2795,16 +2801,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The content to be added.
 !   \item[{[addKey]}]
 !     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
+!     Muturally exclusive with {\tt addKeyString}.
 !   \item[{[addKeyString]}]
 !     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
+!     Muturally exclusive with {\tt addKey}.
 !   \item[{[index]}]
 !     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
@@ -3513,9 +3521,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[hconfig]
 !     {\tt ESMF\_HConfig} or {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
+!     Attempt to access by index if specified.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!     Attempt to access by key string if specified.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
@@ -3536,6 +3548,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAsI4()"
+
   function ESMF_HConfigAsI4(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -3600,6 +3613,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsI4()"
+
   function ESMF_HConfigIterAsI4(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -3704,6 +3718,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsI8()"
+
   function ESMF_HConfigIterAsI8(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -3812,6 +3827,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsLogical()"
+
   function ESMF_HConfigIterAsLogical(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -3916,6 +3932,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsR4()"
+
   function ESMF_HConfigIterAsR4(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -4020,6 +4037,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsR8()"
+
   function ESMF_HConfigIterAsR8(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -4145,6 +4163,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsString()"
+
   function ESMF_HConfigIterAsString(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -4220,9 +4239,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[hconfig]
 !     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
+!     Attempt to access by index if specified.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!     Attempt to access by key string if specified.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
@@ -4702,9 +4725,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[hconfig]
 !     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
+!     Attempt to access by index if specified.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!     Attempt to access by key string if specified.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
@@ -5189,9 +5216,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[hconfig]
 !     {\tt ESMF\_HConfig} or {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
+!     Attempt to access by index if specified.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!     Attempt to access by key string if specified.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
@@ -5295,6 +5326,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsI4Seq()"
+
   function ESMF_HConfigIterAsI4Seq(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -5417,6 +5449,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsI8Seq()"
+
   function ESMF_HConfigIterAsI8Seq(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -5539,6 +5572,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsLogicalSeq()"
+
   function ESMF_HConfigIterAsLogicalSeq(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -5661,6 +5695,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsR4Seq()"
+
   function ESMF_HConfigIterAsR4Seq(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -5783,6 +5818,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsR8Seq()"
+
   function ESMF_HConfigIterAsR8Seq(hconfig, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -5909,6 +5945,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterAsStringSeq()"
+
   function ESMF_HConfigIterAsStringSeq(hconfig, stringLen, keywordEnforcer, index, keyString, &
     doc, asOkay, rc)
 
@@ -5991,9 +6028,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[hconfig]
 !     {\tt ESMF\_HConfig} object.
 !   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
+!     Attempt to access by index if specified.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!     Attempt to access by key string if specified.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
@@ -6556,9 +6597,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[hconfig]
 !     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
+!     Attempt to access by index if specified.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!     Attempt to access by key string if specified.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
@@ -7166,7 +7211,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 
-
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigCreateHConfig()"
@@ -7747,14 +7791,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[hconfig]
 !     {\tt ESMF\_HConfig} or {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with
-!     {\tt key} and {\tt keyString}.
+!     Attempt to access by index if specified.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt key} and {\tt keyString}.
 !   \item[{[key]}]
-!     Attempt to access by key if specified. Mutural exclusive with
+!     Attempt to access by key if specified. Muturally exclusive with
 !     {\tt index} and {\tt keyString},
 !   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with
-!     {\tt index} and {\tt key}.
+!     Attempt to access by key string if specified.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index} and {\tt key}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
@@ -7913,14 +7959,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[hconfig]
 !     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with
-!     {\tt key} and {\tt keyString}.
+!     Attempt to access by index if specified.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt key} and {\tt keyString}.
 !   \item[{[key]}]
-!     Attempt to access by key if specified. Mutural exclusive with
+!     Attempt to access by key if specified. Muturally exclusive with
 !     {\tt index} and {\tt keyString},
 !   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with
-!     {\tt index} and {\tt key}.
+!     Attempt to access by key string if specified.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index} and {\tt key}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
@@ -8020,14 +8068,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[hconfig]
 !     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with
-!     {\tt key} and {\tt keyString}.
+!     Attempt to access by index if specified.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt key} and {\tt keyString}.
 !   \item[{[key]}]
-!     Attempt to access by key if specified. Mutural exclusive with
+!     Attempt to access by key if specified. Muturally exclusive with
 !     {\tt index} and {\tt keyString},
 !   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with
-!     {\tt index} and {\tt key}.
+!     Attempt to access by key string if specified.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index} and {\tt key}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
@@ -8099,7 +8149,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigDestroy()"
 !BOP
-! !IROUTINE: ESMF_HConfigDestroy - Release resources associated with a HConfig 
+! !IROUTINE: ESMF_HConfigDestroy - Release resources associated with a HConfig
 
 ! !INTERFACE:
   subroutine ESMF_HConfigDestroy(hconfig, keywordEnforcer, rc)
@@ -8113,7 +8163,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Destroys an {\tt ESMF\_HConfig}, releasing the resources associated
 !   with the object.
 !
-!   By default a small remnant of the object is kept in memory in order to 
+!   By default a small remnant of the object is kept in memory in order to
 !   prevent problems with dangling aliases. The default garbage collection
 !   mechanism can be overridden with the {\tt noGarbage} argument.
 !
@@ -8140,16 +8190,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call c_ESMC_HConfigDestroy(hconfig, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
- 
+
     ! Mark this HConfig as invalid
     hconfig%shallowMemory = 0
 
     ! Set init code
     ESMF_INIT_SET_DELETED(hconfig)
- 
+
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end subroutine ESMF_HConfigDestroy
 !------------------------------------------------------------------------------
 
@@ -8342,9 +8392,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[hconfig]
 !     {\tt ESMF\_HConfig} or {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
+!     Attempt to access by index if specified.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!     Attempt to access by key string if specified.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
@@ -8478,9 +8532,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[hconfig]
 !     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
+!     Attempt to access by index if specified.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!     Attempt to access by key string if specified.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
@@ -8561,9 +8619,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[hconfig]
 !     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
+!     Attempt to access by index if specified.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!     Attempt to access by key string if specified.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
@@ -8641,9 +8703,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[hconfig]
 !     {\tt ESMF\_HConfig} or {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
+!     Attempt to access by index if specified.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!     Attempt to access by key string if specified.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
@@ -8791,9 +8857,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[hconfig]
 !     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
+!     Attempt to access by index if specified.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!     Attempt to access by key string if specified.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
@@ -8888,9 +8958,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[hconfig]
 !     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
+!     Attempt to access by index if specified.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!     Attempt to access by key string if specified.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
@@ -8995,9 +9069,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[hconfig]
 !     {\tt ESMF\_HConfig} or {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
+!     Attempt to access by index if specified.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!     Attempt to access by key string if specified.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
@@ -9538,9 +9616,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[hconfig]
 !     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
+!     Attempt to access by index if specified.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!     Attempt to access by key string if specified.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
@@ -9610,7 +9692,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   end function
 !------------------------------------------------------------------------------
-
 
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -9895,9 +9976,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[hconfig]
 !     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
+!     Attempt to access by index if specified.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!     Attempt to access by key string if specified.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
@@ -11015,10 +11100,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_HConfig} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -11158,9 +11245,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
+!     Attempt to access by index if specified.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!     Attempt to access by key string if specified.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
@@ -12311,9 +12402,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
+!     Attempt to access by index if specified.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!     Attempt to access by key string if specified.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
@@ -12609,6 +12704,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigSetMapKeyLogicalSeq()"
+
   subroutine ESMF_HConfigSetMapKeyLogicalSeq(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
@@ -12970,9 +13066,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
+!     Attempt to access by index if specified.
+!     Requires {\tt hconfig} of NodeType Sequence.
+!     Muturally exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!     Attempt to access by key string if specified.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
@@ -13586,6 +13686,102 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigValidateMapKeys()"
+!BOP
+! !IROUTINE: ESMF_HConfigValidateMapKeys - Validate map keys against list of vocabulary
+
+! !INTERFACE:
+  function ESMF_HConfigValidateMapKeys(hconfig, vocabulary, keywordEnforcer, &
+    badKey, rc)
+!
+! !RETURN VALUE:
+    logical :: ESMF_HConfigValidateMapKeys
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig),        intent(in)            :: hconfig
+    character(len=*),          intent(in)            :: vocabulary(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(:), allocatable, intent(out), optional :: badKey
+    integer,                   intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Validate that the {\em map} held in {\tt hconfig} only uses {\em keys} that
+!   are listed in {\tt vocabulary}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[hconfig]
+!     A map HConfig object.
+!   \item[vocabulary]
+!     List of {\em keys} to validate against.
+!   \item[{[badKey]}]
+!     If returning {\tt .false.} with {\tt ESMF\_SUCCESS}, then {\tt badKey} is
+!     set to the first {\em key} in {\tt hconfig} that was {\em not} found in
+!     {\tt vocabulary}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                   :: localrc        ! local return code
+    type(ESMF_HConfigIter)    :: hconfigIter, hconfigIterBegin, hconfigIterEnd
+    logical                   :: isFlag
+    character(:), allocatable :: key
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! initialize return value
+    ESMF_HConfigValidateMapKeys = .false.
+
+    ! ensure hconfig is map
+    isFlag = ESMF_HConfigIsMap(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (.not.isFlag) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="HConfig must be a map.", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    ! prepare iterators
+    hconfigIterBegin = ESMF_HConfigIterBegin(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    hconfigIterEnd = ESMF_HConfigIterEnd(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! iterate over hconfig validating each key
+    ESMF_HConfigValidateMapKeys = .true.
+    hconfigIter = hconfigIterBegin
+    do while (ESMF_HConfigIterLoop(hconfigIter, hconfigIterBegin, &
+      hconfigIterEnd, rc=localrc))
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      key = ESMF_HConfigAsStringMapKey(hconfigIter, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (.not. any(key==vocabulary)) then
+        ESMF_HConfigValidateMapKeys = .false.
+        if (present(rc)) rc = ESMF_SUCCESS
+        if (present(badKey)) badKey = key
+        return
+      endif
+    enddo
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_HConfigValidateMapKeys
 !------------------------------------------------------------------------------
 
 

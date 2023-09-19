@@ -729,7 +729,6 @@
       print *, "Ending the no-op loop"
 
       ! Generate a random string using clock as seed and write it to log file
-      call random_seed()
       call random_seed(size=k)
       print *, "size of random seed = ", k
       allocate(rndseed(k))
