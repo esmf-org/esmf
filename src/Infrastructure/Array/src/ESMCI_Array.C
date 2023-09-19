@@ -2240,19 +2240,19 @@ Array *Array::create(
             return ESMC_NULL_POINTER;
           }
           if (copyflag != DATACOPY_REFERENCE){
-            // create tha appropriate copy
-            ESMCI::LocalArray *larray = arrayOut->larrayList[i];
+            // create the appropriate copy
+            ESMCI::LocalArray *larray = arrayOut->larrayList[i]; // temp
             arrayOut->larrayList[i] = LocalArray::create(larray,
               copyflag, NULL, NULL, &localrc);
             if (ESMC_LogDefault.MsgFoundError(localrc,
               ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)){
-              arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+              arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID); // mark invalid
               return ESMC_NULL_POINTER;
             }
-            localrc = ESMCI::LocalArray::destroy(larray);
+            localrc = ESMCI::LocalArray::destroy(larray);        // destroy temp
             if (ESMC_LogDefault.MsgFoundError(localrc,
               ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)){
-              arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+              arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID); // mark invalid
               return ESMC_NULL_POINTER;
             }
           }
