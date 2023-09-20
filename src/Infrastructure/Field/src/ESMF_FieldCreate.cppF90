@@ -5068,7 +5068,7 @@ TypeKindRankDeclarationMacro(FieldCreateXGDataPtr)
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateFromField(field, keywordEnforcer, datacopyflag, &
-    trailingUndistSlice, name, rc)
+    trailingUngridSlice, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateFromField
@@ -5077,7 +5077,7 @@ TypeKindRankDeclarationMacro(FieldCreateXGDataPtr)
        type(ESMF_Field),           intent(in)            :: field
        type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag
-       integer,                    intent(in),  optional :: trailingUndistSlice(:)
+       integer,                    intent(in),  optional :: trailingUngridSlice(:)
        character (len=*),          intent(in),  optional :: name
        integer,                    intent(out), optional :: rc
 !
@@ -5096,10 +5096,10 @@ TypeKindRankDeclarationMacro(FieldCreateXGDataPtr)
 !      allocation provided by {\tt field} directly or copies the data from
 !      {\tt field} into a new memory allocation. For valid values see
 !      \ref{const:datacopyflag}. The default is {\tt ESMF\_DATACOPY\_VALUE}.
-! \item[{[trailingUndistSlice]}]
+! \item[{[trailingUngridSlice]}]
 !      If present, the returned Field refers to the array slice of {\tt field}
 !      as defined by the specified tuple, applied to the right most
-!      trailing undistributed dimensions.
+!      trailing ungridded dimensions.
 ! \item[{[name]}]
 !      Name of the Field object.
 ! \item[{[rc]}]
@@ -5136,7 +5136,7 @@ TypeKindRankDeclarationMacro(FieldCreateXGDataPtr)
 
     ! created array slice
     arrayOut = ESMF_ArrayCreate(array, datacopyflag=datacopyflag, &
-      trailingUndistSlice=trailingUndistSlice, rc=localrc)
+      trailingUndistSlice=trailingUngridSlice, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

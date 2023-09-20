@@ -2674,7 +2674,7 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         field2 = ESMF_FieldCreate(field1, name="Field#2", &
-          trailingUndistSlice=[1,1], rc=localrc)
+          trailingUngridSlice=[1,1], rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
