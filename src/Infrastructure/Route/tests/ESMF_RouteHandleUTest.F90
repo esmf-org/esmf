@@ -91,6 +91,11 @@ program ESMF_RouteHandleUTest
     line=__LINE__, &
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_FieldFill(fieldA, dataFillScheme="one", rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   gridB = ESMF_GridCreate1PeriDimUfrm(maxIndex=(/360, 160/), &
     minCornerCoord=(/0._ESMF_KIND_R8, -80._ESMF_KIND_R8/), &

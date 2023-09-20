@@ -1160,6 +1160,10 @@ contains
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_FieldFill(f_atm, dataFillScheme="one", rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     f_error = ESMF_FieldCreate(grid_atm, typekind=ESMF_TYPEKIND_R8, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1167,6 +1171,10 @@ contains
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     f_ocn = ESMF_FieldCreate(grid_ocn, typekind=ESMF_TYPEKIND_R8, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_FieldFill(f_ocn, dataFillScheme="one", rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return

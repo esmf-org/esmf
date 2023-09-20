@@ -114,7 +114,7 @@ ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -v --version
 ############################################################
 # Special debug flags
 #
-ESMF_F90OPTFLAG_G       += -traceback -check bounds
+ESMF_F90OPTFLAG_G       += -traceback -check bounds -fpe0
 
 ############################################################
 # Enable TR15581/F2003 Allocatable array resizing

@@ -115,7 +115,7 @@ ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} --version
 # Also set environment variable UBSAN_OPTIONS="print_stacktrace=1"
 # for stacktrace at runtime.
 #
-ESMF_F90OPTFLAG_G       += -C=array
+ESMF_F90OPTFLAG_G       += -C=array -ieee=stop
 ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused $(ESMF_LINKOPTFLAG_G)
 
 ############################################################

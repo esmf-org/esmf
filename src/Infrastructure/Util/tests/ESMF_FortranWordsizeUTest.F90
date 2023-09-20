@@ -58,9 +58,9 @@
       integer(ESMF_KIND_I4) :: vint4
       integer(ESMF_KIND_I8) :: vint8
 
-      real                :: vreal
-      real (ESMF_KIND_R4) :: vreal4
-      real (ESMF_KIND_R8) :: vreal8
+      real                :: vreal = 0.0
+      real (ESMF_KIND_R4) :: vreal4 = 0.0_ESMF_KIND_R4
+      real (ESMF_KIND_R8) :: vreal8 = 0.0_ESMF_KIND_R8
       
       integer :: datasize
 

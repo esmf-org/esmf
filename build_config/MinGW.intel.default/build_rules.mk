@@ -154,8 +154,8 @@ ESMF_F90COMPILEFIXCPP    = -fpp
 ###########################################################
 # Special debugging flags
 #
-ESMF_F90OPTFLAG_G           = -Od -debug -traceback
-ESMF_CXXOPTFLAG_G           = -Od -debug -traceback
+ESMF_F90OPTFLAG_G           = -Od -debug -traceback -fpe0
+ESMF_CXXOPTFLAG_G           = -Od -debug -traceback -fp-trap=common
 
 ###########################################################
 # Default optlevel

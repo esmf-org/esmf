@@ -122,8 +122,8 @@ ESMF_CXXMAJORVERSION      = $(shell $(ESMF_DIR)/scripts/version.intel 1 ${ESMF_C
 ############################################################
 # Special debug flags
 #
-ESMF_CXXOPTFLAG_G       += -Wcheck
-ESMF_F90OPTFLAG_G       += -traceback -check bounds
+ESMF_F90OPTFLAG_G       += -traceback -check bounds -fpe0
+ESMF_CXXOPTFLAG_G       += -Wcheck -fp-trap=common
 
 ############################################################
 # Enable TR15581/F2003 Allocatable array resizing

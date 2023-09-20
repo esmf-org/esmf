@@ -16206,21 +16206,19 @@ write(*,*) "LOCALRC=",localrc
   type(ESMF_Field) :: srcXtraField
   type(ESMF_Field) :: dstXtraField
   type(ESMF_Field) :: xdstXtraField
-  type(ESMF_Array) :: arrayB
-  type(ESMF_Array) :: srcArrayA
   type(ESMF_RouteHandle) :: routeHandle
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_VM) :: vm
   integer(ESMF_KIND_I4), pointer :: maskB(:,:), maskA(:,:)
   real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:)
   real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:)
+  real(ESMF_KIND_R8), pointer :: srcPtr(:,:),dstPtr(:,:)
   real(ESMF_KIND_R8), pointer :: srcXtraPtr(:,:,:),dstXtraPtr(:,:,:)
   real(ESMF_KIND_R8), pointer :: xdstXtraPtr(:,:,:)
   integer :: clbnd(2),cubnd(2)
   integer :: fclbnd(3),fcubnd(3)
   integer :: i1,i2,i3, index(2)
   integer :: lDE, localDECount
-  real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   integer src_nx, src_ny, dst_nx, dst_ny
   integer :: num_extra
@@ -16298,6 +16296,11 @@ write(*,*) "LOCALRC=",localrc
     rc=ESMF_FAILURE
     return
   endif
+  call ESMF_FieldFill(srcField, dataFillScheme="one", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
 
 
    dstField = ESMF_FieldCreate(dstGrid, arrayspec, &
@@ -16366,17 +16369,17 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
-  ! Get arrays
+  ! Get pointer dstField
   ! arrayB
-  call ESMF_FieldGet(dstField, array=arrayB, rc=localrc)
+  call ESMF_FieldGet(dstField, localDe=0, farrayPtr=dstPtr, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
 
-  ! srcArrayA
-  call ESMF_FieldGet(srcField, array=srcArrayA, rc=localrc)
+  ! get pointer srcField
+  call ESMF_FieldGet(srcField, localDe=0, farrayPtr=srcPtr, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
@@ -21699,6 +21702,9 @@ write(*,*) "LOCALRC=",localrc
     ! Create the srcField.
     srcField =  ESMF_FieldCreate(srcGrid, typekind=ESMF_TYPEKIND_R8, &
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return ! bail out
+    call ESMF_FieldFill(srcField, dataFillScheme="one", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return ! bail out
 
@@ -35148,6 +35154,11 @@ write(*,*) "LOCALRC=",localrc
       rc=ESMF_FAILURE
       return
   endif
+  call ESMF_FieldFill(srcField, dataFillScheme="one", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+  endif
   dstField = ESMF_FieldCreate(dstGrid, arrayspec, &
       staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -35194,12 +35205,12 @@ write(*,*) "LOCALRC=",localrc
 
   ! Test Regrid for Quiet NaN
   ! Fill src and dst fields
-  call ESMF_FieldFill(srcField, dataFillScheme="nan", rc=rc)
+  call ESMF_FieldFill(srcField, dataFillScheme="nan", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
   endif
-  call ESMF_FieldFill(dstField, dataFillScheme="one", rc=rc)
+  call ESMF_FieldFill(dstField, dataFillScheme="one", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -35399,12 +35410,12 @@ write(*,*) "LOCALRC=",localrc
 
   ! Test Regrid for Signaling NaN
   ! Fill src and dst fields
-  call ESMF_FieldFill(srcField, dataFillScheme="snan", rc=rc)
+  call ESMF_FieldFill(srcField, dataFillScheme="snan", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
   endif
-  call ESMF_FieldFill(dstField, dataFillScheme="one", rc=rc)
+  call ESMF_FieldFill(dstField, dataFillScheme="one", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -36304,6 +36315,11 @@ write(*,*) "LOCALRC=",localrc
     rc=ESMF_FAILURE
     return
   endif
+  call ESMF_FieldFill(srcField, dataFillScheme="one", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
 
 
    ! deallocate node data
@@ -37096,6 +37112,11 @@ write(*,*) "LOCALRC=",localrc
 
    srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
                         name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+  call ESMF_FieldFill(srcField, dataFillScheme="one", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
@@ -39297,6 +39318,11 @@ end subroutine test_regridSMMArbGrid
 
    srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
                         name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+  call ESMF_FieldFill(srcField, dataFillScheme="one", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
@@ -42239,6 +42265,11 @@ end subroutine test_regridSMMArbGrid
 
    srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
                         name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+  call ESMF_FieldFill(srcField, dataFillScheme="one", rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return

@@ -102,7 +102,8 @@ ESMF_CXXMAJORVERSION        = $(shell $(ESMF_DIR)/scripts/version.intel 1 ${ESMF
 ############################################################
 # Special debug flags
 #
-ESMF_CXXOPTFLAG_G       += -traceback
+ESMF_F90OPTFLAG_G       += -C=array -ieee=stop
+ESMF_CXXOPTFLAG_G       += -traceback -fp-trap=common
 
 ############################################################
 # Set NAG unix modules when certain non-Standard system calls

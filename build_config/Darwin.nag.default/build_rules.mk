@@ -109,6 +109,11 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -v --version
 
 ############################################################
+# Special debug flags
+#
+ESMF_F90OPTFLAG_G += -C=array -ieee=stop
+
+############################################################
 # See if g++ is really clang
 #
 ESMF_CLANGSTR := $(findstring clang, $(shell $(ESMF_CXXCOMPILER) --version))

@@ -50,7 +50,7 @@ ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} --version
 ############################################################
 # Special debug flags
 #
-ESMF_F90OPTFLAG_G       += -Wall -Wextra -Wconversion -Wno-unused -Wno-unused-dummy-argument -fbacktrace -fimplicit-none -fcheck=all,no-pointer
+ESMF_F90OPTFLAG_G       += -Wall -Wextra -Wconversion -Wno-unused -Wno-unused-dummy-argument -fbacktrace -fimplicit-none -fcheck=all,no-pointer -ffpe-trap=zero,overflow
 ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused
 
 ############################################################
