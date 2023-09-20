@@ -52,42 +52,40 @@ using namespace ESMCI;
 #define PGON_INTERTYPE_T_P2 3
 #define PGON_INTERTYPE_V 4
 
-#if 0
 // Generate and classify intersection
 // TODO: Eventually add general method here that does whatever for intersecting and adding new verts, so
 // that it can be called from both loops and OTree code. Maybe take in verts defining points, so they can
 // be added to.
 template<class GEOM>
-static void Pgon<GEOM>::_intersect_and_classify_edge(Pgon<GEOM> &pg1, Pgon<GEOM> &pg2,
-                                                     double *p1_pg1, double *p2_pg1,
-                                                     double *p1_pg2, double *p2_pg2, int &intertype){
+void _intersect_and_classify_edge(Pgon<GEOM> &pg1, Pgon<GEOM> &pg2,
+                                  Vert<GEOM> *v1_pg1, Vert<GEOM> *v2_pg1,
+                                  Vert<GEOM> *v1_pg2, Vert<GEOM> *v2_pg2) {
 
      // Intersect edges
       double pg1_t,pg2_t;
-      GEOM::intersect_segs(p1_pg1,p2_pg1,pg1_pg2,p2_pg2,&pg1_t,&pg2_t); 
+      GEOM::intersect_segs(v1_pg1->pnt,v2_pg1->pnt,v1_pg2->pnt,v2_pg2->pnt,&pg1_t,&pg2_t); 
 
       // Classify intersection
       // TODO: think about changing to table driven
-      intertype=PGON_INTERTYPE_UNDEF;        
+      int intertype=PGON_INTERTYPE_UNDEF;        
       if (pg1_t < 0.0) {
         intertype=PGON_INTERTYPE_NONE;        
-      } else if (pg1_t == 0.0) 
+      } else if (pg1_t == 0.0) {
         intertype=PGON_INTERTYPE_T_P1;
       } else if (pg1_t < 1.0) {
         if (pg2_t == 0.0) {
           intertype=PGON_INTERTYPE_T_P2;        
         } else {
-          intertype=X_INTERSECTION;
+          intertype=PGON_INTERTYPE_X;
         }
       } else if (pg1_t == 1.0) {
         
       } else { // pg1_t > 1.0
         intertype=PGON_INTERTYPE_NONE;        
       }
-      
-}
 
-#endif
+      printf("t1=%f t2=%f intertype=%d\n",pg1_t,pg2_t,intertype);
+}
 
 
 // Compute the intersecting points of two polygons (pg1 and pg2). Insert the intersection points into
@@ -112,9 +110,11 @@ void _intersect_pgons(Pgon<GEOM> &pg1, Pgon<GEOM> &pg2) {
       Vert<GEOM> *v2_pg2 = v1_pg2->next;
       
       // Debug output
-      std::cout << "["<<*v1_pg2<<"]->["<<*v2_pg2<<"] \n";
-      
-    
+      std::cout << "["<<*v1_pg1<<"]->["<<*v2_pg1<<"] with ["<<*v1_pg2<<"]->["<<*v2_pg2<<"] \n";
+      _intersect_and_classify_edge(pg1, pg2,
+                                   v1_pg1, v2_pg1,
+                                   v1_pg2, v2_pg2);
+                
     }
     
   }
