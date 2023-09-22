@@ -30,7 +30,6 @@ extern int diosysid;
 #endif /* NETCDF_INTEGRATION */
 
 extern int default_error_handler; /* defined in pioc.c */
-
 /**
  * @defgroup PIO_init_async Initialize an ASYNC IO System
  * Initialize the IOSystem, including specifying number of IO and
@@ -198,9 +197,9 @@ PIOc_init_async(MPI_Comm world, int num_io_procs, int *io_proc_list,
     /* Rank of current process in IO communicator. */
     int io_rank = -1;
 
-    /* Set to MPI_ROOT on master process, MPI_PROC_NULL on other
+    /* Set to MPI_ROOT on main process, MPI_PROC_NULL on other
      * processes. */
-    int iomaster;
+    int iomain;
 
     /* Create a group for the IO component. */
     if ((ret = MPI_Group_incl(world_group, num_io_procs, my_io_proc_list, &io_group)))
@@ -228,9 +227,9 @@ PIOc_init_async(MPI_Comm world, int num_io_procs, int *io_proc_list,
         PLOG((3, "about to get io rank"));
         if ((ret = MPI_Comm_rank(io_comm, &io_rank)))
             return check_mpi(NULL, NULL, ret, __FILE__, __LINE__);
-        iomaster = !io_rank ? MPI_ROOT : MPI_PROC_NULL;
+        iomain = !io_rank ? MPI_ROOT : MPI_PROC_NULL;
         PLOG((3, "intracomm created for io_comm = %d io_rank = %d IO %s",
-              io_comm, io_rank, iomaster == MPI_ROOT ? "MASTER" : "SERVANT"));
+              io_comm, io_rank, iomain == MPI_ROOT ? "main" : "SERVANT"));
     }
 
     /* We will create a group for each computational component. */
@@ -379,14 +378,14 @@ PIOc_init_async(MPI_Comm world, int num_io_procs, int *io_proc_list,
             if ((ret = MPI_Comm_rank(my_iosys->comp_comm, &my_iosys->comp_rank)))
                 return check_mpi(NULL, NULL, ret, __FILE__, __LINE__);
 
-            /* Set comp_rank 0 to be the compmaster. It will have a
+            /* Set comp_rank 0 to be the compmain. It will have a
              * setting of MPI_ROOT, all other tasks will have a
              * setting of MPI_PROC_NULL. */
-            my_iosys->compmaster = my_iosys->comp_rank ? MPI_PROC_NULL : MPI_ROOT;
+            my_iosys->compmain = my_iosys->comp_rank ? MPI_PROC_NULL : MPI_ROOT;
 
             PLOG((3, "intracomm created for cmp = %d comp_comm = %d comp_rank = %d comp %s",
                   cmp, my_iosys->comp_comm, my_iosys->comp_rank,
-                  my_iosys->compmaster == MPI_ROOT ? "MASTER" : "SERVANT"));
+                  my_iosys->compmain == MPI_ROOT ? "main" : "SERVANT"));
         }
 
         /* If this is the IO component, make a copy of the IO comm for
@@ -397,7 +396,7 @@ PIOc_init_async(MPI_Comm world, int num_io_procs, int *io_proc_list,
             if ((ret = MPI_Comm_dup(io_comm, &my_iosys->io_comm)))
                 return check_mpi(NULL, NULL, ret, __FILE__, __LINE__);
             PLOG((3, "dup of io_comm = %d io_rank = %d", my_iosys->io_comm, io_rank));
-            my_iosys->iomaster = iomaster;
+            my_iosys->iomain = iomain;
             my_iosys->io_rank = io_rank;
             my_iosys->ioroot = 0;
             my_iosys->comp_idx = cmp;

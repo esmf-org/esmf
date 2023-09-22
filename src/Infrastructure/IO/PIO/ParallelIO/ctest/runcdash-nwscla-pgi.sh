@@ -31,7 +31,7 @@ if [ ! -d src ]; then
   git clone  https://github.com/PARALLELIO/ParallelIO src
 fi
 cd src
-git checkout master
-git pull origin master
+git checkout main
+git pull origin main
 
 ctest -S CTestScript.cmake,${model} -VV

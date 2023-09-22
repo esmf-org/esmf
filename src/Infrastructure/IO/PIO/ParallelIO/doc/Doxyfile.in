@@ -291,7 +291,7 @@ OPTIMIZE_OUTPUT_VHDL   = NO
 # Note that for custom extensions you also need to set FILE_PATTERNS otherwise
 # the files are not read by doxygen.
 
-EXTENSION_MAPPING      = f90=Fortran 
+EXTENSION_MAPPING      = f90=Fortran
 
 # If the MARKDOWN_SUPPORT tag is enabled then doxygen pre-processes all comments
 # according to the Markdown format, which allows for more readable
@@ -772,7 +772,7 @@ INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/../doc/source \
                          @CMAKE_CURRENT_SOURCE_DIR@/../examples/c \
                          @CMAKE_CURRENT_SOURCE_DIR@/../examples/f03 \
 			 @FORTRAN_SRC_FILES@ \
-			 @C_SRC_FILES@ 
+			 @C_SRC_FILES@
 
 
 # This tag can be used to specify the character encoding of the source files
