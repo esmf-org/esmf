@@ -71,7 +71,9 @@ namespace ESMCI {
   //
   // !ARGUMENTS:
                    int _max_num_pts,
-                   int _coord_dim
+                   int _coord_dim,
+                   int _orig_coord_dim // If 0, no original coords allocated
+                                       // Defaults to 0.
                    ){
     //
     // !DESCRIPTION:
@@ -80,21 +82,25 @@ namespace ESMCI {
     //-----------------------------------------------------------------------------
     // Set values
     coord_dim=_coord_dim;
+    orig_coord_dim=_orig_coord_dim;
     max_num_pts=_max_num_pts;
     curr_num_pts=0;
 
-    // allocate memory
+    // Allocate point memory
     points = NULL;
-
     if (max_num_pts>=0) {
       points=new point [max_num_pts];
     }
 
-    // return successfully
+    // Allocate orig coords memory, if it's asked for
+    orig_points = NULL;
+    if ( (_orig_coord_dim > 0) && (max_num_pts >= 0)) {
+      orig_points=new point [max_num_pts];
+    }
   }
 
 
-
+  // STOPPED HERE ///
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::~PointList()"
@@ -121,10 +127,15 @@ namespace ESMCI {
     max_num_pts=0;
     curr_num_pts=0;
     coord_dim=0;
-
+    orig_coord_dim=0;
+    
     // Deallocate memory
     if (points!=NULL) delete [] points;
     points=NULL;
+
+    if (orig_points!=NULL) delete [] orig_points;
+    orig_points=NULL;
+    
   }
 
 
@@ -145,7 +156,7 @@ namespace ESMCI {
     //
                     int _id,
                     const double *_coord
-                    ) {
+                     ) {
     //
     // !DESCRIPTION:
     // Add a point to the PointList.
@@ -177,6 +188,7 @@ namespace ESMCI {
       points[curr_num_pts].coords[i] = _coord[i];
     }
 
+    
     // Advance to next position
     curr_num_pts++;
 
@@ -187,6 +199,87 @@ namespace ESMCI {
 
   }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::PointList::add()"
+  //BOPI
+  // !IROUTINE:  add
+  //
+  // !INTERFACE:
+  int PointList::add(
+
+    //
+    // !RETURN VALUE:
+    //  none
+    //
+    // !ARGUMENTS:
+    //
+                    int _id,
+                    const double *_coord,
+                    const double *_orig_coord
+                    ) {
+    //
+    // !DESCRIPTION:
+    // Add a point to the PointList.
+    //
+    //EOPI
+    //-----------------------------------------------------------------------------
+
+    // initialize return code; assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;         // local return code
+    int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+    // Error checks
+    if (curr_num_pts >= max_num_pts) {
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
+                                    " attempting to add to a full PointList ",
+                                    ESMC_CONTEXT, &localrc);
+      throw localrc;
+    }
+
+    if (!hasOrigCoords()) {
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
+                                    " attempting to add original coords to a PointList that wasn't created to hold them.",
+                                    ESMC_CONTEXT, &localrc);
+      throw localrc;
+    }
+
+
+
+    
+    // IF START EXTENDING POINT LIST WHEN OVER SIZE, THEN SWITCH TO VECTORS
+
+    // Add point id
+    points[curr_num_pts].id = _id;
+
+    // Add point coords
+    for (int i=0; i<coord_dim; i++) {
+      points[curr_num_pts].coords[i] = _coord[i];
+    }
+
+    // Add id for original points
+    orig_points[curr_num_pts].id=_id; // for sorting
+
+    // Add point original coords
+    for (int i=0; i<orig_coord_dim; i++) {
+      orig_points[curr_num_pts].coords[i] = _orig_coord[i];
+    }
+    
+    
+    // Advance to next position
+    curr_num_pts++;
+
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+
+
+  }
+
+
+
+  
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::PointList::sort_by_id()"
   //BOPI
@@ -225,6 +318,11 @@ namespace ESMCI {
     //    printf("sort time= %.4f\n",tend-tbeg);
     //    fflush(stdout);
 
+    // If present, also sort original coords
+    if (hasOrigCoords()) {
+      std::sort(orig_points,orig_points+curr_num_pts);
+    }
+    
     // return successfully
     rc = ESMF_SUCCESS;
     return rc;
@@ -492,6 +590,61 @@ namespace ESMCI {
     return;
   }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::PointList::get_orig_coord()"
+  //BOPI
+  // !IROUTINE:  get_orig_coord
+  //
+  // !INTERFACE:
+  void PointList::get_orig_coord(
+
+    //
+    // !RETURN VALUE:
+    //  none
+    //
+    // !ARGUMENTS:
+    //
+                            int loc, double *_orig_coord) const {
+    //
+    // !DESCRIPTION:
+    // copy original coordinates corresponding to given location into a given array.
+    //
+    //EOPI
+    //-----------------------------------------------------------------------------
+
+    // Error checks
+    if (loc<0 || loc>=curr_num_pts) {
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
+                                    " invalid location in PointList ",
+                                    ESMC_CONTEXT, &localrc);
+      throw localrc;
+    }
+
+    if (!hasOrigCoords()) {
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
+                                    " attempting to get original coord. from a PointList that doesn't have them.",
+                                    ESMC_CONTEXT, &localrc);
+      throw localrc;
+    }
+
+    if (_orig_coord == NULL) {
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
+                                    " provided array pointer is NULL ",
+                                    ESMC_CONTEXT, &localrc);
+      throw localrc;
+    }
+
+    // Copy coordinates
+    for (int i=0; i<orig_coord_dim; i++) {
+      _orig_coord[i]=orig_points[loc].coords[i];
+    }
+
+    return;
+  }
+
 
   #undef  ESMC_METHOD
   #define ESMC_METHOD "ESMCI::PointList::get_id()"
@@ -597,4 +750,49 @@ namespace ESMCI {
     return points[loc].coords;
   }
 
+
+  #undef  ESMC_METHOD
+  #define ESMC_METHOD "ESMCI::PointList::get_orig_coord_ptr()"
+  //BOPI
+  // !IROUTINE:  get_coord_ptr
+  //
+  // !INTERFACE:
+  const double *PointList::get_orig_coord_ptr(
+
+    //
+    // !RETURN VALUE:
+    //  double *
+    //
+    // !ARGUMENTS:
+    //
+                                      int loc) const {
+    //
+    // !DESCRIPTION:
+    // return pointer to original coordinates corresponding to given location.
+    //
+    //EOPI
+    //-----------------------------------------------------------------------------
+
+    // Error check
+    if (loc<0 || loc>=curr_num_pts) {
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
+                                    "- invalid location in PointList ",
+                                    ESMC_CONTEXT, &localrc);
+      throw localrc;
+    }
+
+    if (!hasOrigCoords()) {
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
+                                    " attempting to get original coord. from a PointList that doesn't have them.",
+                                    ESMC_CONTEXT, &localrc);
+      throw localrc;
+    }
+
+    // Pass back pointer 
+    return orig_points[loc].coords;
+  }
+
+  
 } // namespace ESMCI

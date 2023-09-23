@@ -68,15 +68,27 @@ namespace ESMCI {
 
     point *points;
 
+    int orig_coord_dim;
+    point *orig_points;  // Contains original coord points. Id is repeated from above to allow sorting. In separate list to
+                         // keep typical implementation as standard as possible. i
+
+
   public:
-    // Construct
-    PointList(int max_size, int coord_dim);
+
+    // Construct 
+    PointList(int max_size, int coord_dim, int orig_coord_dim=0);
 
     // Destruct
     ~PointList();
 
+    // Detect original coords
+    bool hasOrigCoords() const {return (orig_points != NULL);}
+    
     // Add Point to List
     int add(int _id, const double *_coord);
+
+    // Add Point to List including original coords
+    int add(int _id, const double *_coord, const double *_orig_coord);
 
     // diagnostic print to file
     int WriteVTK(const char *filename);
@@ -87,10 +99,15 @@ namespace ESMCI {
     // Get a pointer to the coordinates for a particular location
     const double *get_coord_ptr(int loc) const;
 
+    // Get a pointer to the original coordinates for a particular location
+    const double *get_orig_coord_ptr(int loc) const;
+
     // Get a pointer to the id for a particular location
     const int *get_id_ptr(int loc) const;
 
     void get_coord(int loc, double *_coord) const;
+
+    void get_orig_coord(int loc, double *_orig_coord) const;
 
     // Get id for a particular location
     int get_id(int loc) const;
