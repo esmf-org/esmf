@@ -1006,12 +1006,19 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 #define ESMC_METHOD "GridToPointList()"
     Trace __trace("GridToPointList()");
 
+    bool add_orig_coords=true;
+    
     int localrc;
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,rc))
       throw localrc;  // bail out with exception
+
+
+    // If needed get orig coord dim
+    int orig_coord_dim=0; // 0 indicates not to add orig coords
+    if (add_orig_coords) orig_coord_dim=grid.getDimCount();
 
     // Loop nodes of the grid.  Here we loop all nodes, both owned and not.
     ESMCI::GridIter *gni=new ESMCI::GridIter(&grid,staggerLoc,true);
@@ -1051,9 +1058,10 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
         
       }
 
+
       // Create PointList
       // (Put Cartesian coordinates in list)
-      ESMCI::PointList *pl=new PointList(num_local_pts, grid.getCartCoordDimCount());
+      ESMCI::PointList *pl=new PointList(num_local_pts, grid.getCartCoordDimCount(), orig_coord_dim);
 
       // loop through all nodes in the Grid
       for(gni->toBeg(); !gni->isDone(); gni->adv()) {
@@ -1079,8 +1087,14 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
           double cart_coord[ESMF_MAXDIM];
           gni->getCartCoord(cart_coord);
 
-          // Add Point
-          pl->add(gid,cart_coord);
+          // Add Point. If requested get and add original coords too, otherwise, just Cart. coords.
+          if (add_orig_coords) {
+            double orig_coord[ESMF_MAXDIM];
+            gni->getCoord(orig_coord);            
+            pl->add(gid,cart_coord,orig_coord);
+          } else {
+            pl->add(gid,cart_coord);
+          }
         }
       }
 
@@ -1098,7 +1112,7 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 
       // Create PointList
       // (Put Cartesian coordinates in list)
-      ESMCI::PointList *pl=new PointList(num_local_pts, grid.getCartCoordDimCount());
+      ESMCI::PointList *pl=new PointList(num_local_pts, grid.getCartCoordDimCount(), orig_coord_dim);
 
       // loop through all nodes in the Grid
       for(gni->toBeg(); !gni->isDone(); gni->adv()) {
@@ -1111,8 +1125,15 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
         double cart_coord[ESMF_MAXDIM];
         gni->getCartCoord(cart_coord);
 
-        // Add Point
-        pl->add(gid,cart_coord);
+        // Add Point. If requested get and add original coords too, otherwise, just Cart. coords.
+        if (add_orig_coords) {
+          double orig_coord[ESMF_MAXDIM];
+          gni->getCoord(orig_coord);            
+          pl->add(gid,cart_coord,orig_coord);
+        } else {
+          pl->add(gid,cart_coord);
+        }
+        
       }
       // Output point list
       *_pl=pl;

@@ -323,6 +323,9 @@ void CoordFromId::add(PointList *pl) {
 
   // Reserve to the correct size
   searchable.reserve(pl->get_curr_num_pts());
+
+  printf("Pl->hasOrigCoords=%d\n",pl->hasOrigCoords());
+
   
   // Add points based on spatial dim
   if (sdim == 2) { 
@@ -355,8 +358,19 @@ void CoordFromId::add(PointList *pl) {
       convert_cart_to_sph_rad(c[0], c[1], c[2],
                               &lon, &lat, &rad);
 
+      
       // Add to list
-      searchable.push_back(CoordFromIdEntry(id,lon,lat));          
+      //searchable.push_back(CoordFromIdEntry(id,lon,lat));
+      double oc[3];
+      pl->get_orig_coord(i,oc);   
+
+      oc[0] *= ESMC_CoordSys_Deg2Rad;
+      oc[1] *= ESMC_CoordSys_Deg2Rad;
+      
+      //      printf("id=%d converted coords=%f %f  orig coords=%f %f\n",id,lon,lat,oc[0],oc[1]);
+
+      searchable.push_back(CoordFromIdEntry(id,oc[0],oc[1]));
+      
     }    
   } else {
     Throw() << "Geometries of spatial dim= "<<sdim<<" not supported in vector regridding.";
