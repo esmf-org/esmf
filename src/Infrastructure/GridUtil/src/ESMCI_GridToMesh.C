@@ -1020,6 +1020,10 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
     int orig_coord_dim=0; // 0 indicates not to add orig coords
     if (add_orig_coords) orig_coord_dim=grid.getDimCount();
 
+    // If needed get coordsys
+    ESMC_CoordSys_Flag coordSys=ESMC_COORDSYS_UNINIT;
+    if (add_orig_coords) coordSys==grid.getCoordSys();
+    
     // Loop nodes of the grid.  Here we loop all nodes, both owned and not.
     ESMCI::GridIter *gni=new ESMCI::GridIter(&grid,staggerLoc,true);
 
@@ -1061,7 +1065,7 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 
       // Create PointList
       // (Put Cartesian coordinates in list)
-      ESMCI::PointList *pl=new PointList(num_local_pts, grid.getCartCoordDimCount(), orig_coord_dim);
+      ESMCI::PointList *pl=new PointList(num_local_pts, grid.getCartCoordDimCount(), orig_coord_dim, coordSys);
 
       // loop through all nodes in the Grid
       for(gni->toBeg(); !gni->isDone(); gni->adv()) {
@@ -1112,7 +1116,7 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 
       // Create PointList
       // (Put Cartesian coordinates in list)
-      ESMCI::PointList *pl=new PointList(num_local_pts, grid.getCartCoordDimCount(), orig_coord_dim);
+      ESMCI::PointList *pl=new PointList(num_local_pts, grid.getCartCoordDimCount(), orig_coord_dim, coordSys);
 
       // loop through all nodes in the Grid
       for(gni->toBeg(); !gni->isDone(); gni->adv()) {

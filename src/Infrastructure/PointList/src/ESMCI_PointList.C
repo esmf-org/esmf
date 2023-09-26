@@ -72,8 +72,10 @@ namespace ESMCI {
   // !ARGUMENTS:
                    int _max_num_pts,
                    int _coord_dim,
-                   int _orig_coord_dim // If 0, no original coords allocated
-                                       // Defaults to 0.
+                   int _orig_coord_dim, // If 0, no original coords allocated
+                                        // Defaults to 0.
+                   ESMC_CoordSys_Flag _orig_coord_sys // coordinate system of original
+                                                     // coords, defaults to uninit
                    ){
     //
     // !DESCRIPTION:
@@ -85,7 +87,8 @@ namespace ESMCI {
     orig_coord_dim=_orig_coord_dim;
     max_num_pts=_max_num_pts;
     curr_num_pts=0;
-
+    orig_coord_sys=_orig_coord_sys;
+    
     // Allocate point memory
     points = NULL;
     if (max_num_pts>=0) {
@@ -98,9 +101,6 @@ namespace ESMCI {
       orig_points=new point [max_num_pts];
     }
   }
-
-
-  // STOPPED HERE ///
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::~PointList()"

@@ -37,6 +37,8 @@
 //EOPI
 //-------------------------------------------------------------------------
 
+#include "ESMCI_CoordSys.h"
+
 
 namespace ESMCI {
 
@@ -68,6 +70,7 @@ namespace ESMCI {
 
     point *points;
 
+    ESMC_CoordSys_Flag orig_coord_sys;
     int orig_coord_dim;
     point *orig_points;  // Contains original coord points. Id is repeated from above to allow sorting. In separate list to
                          // keep typical implementation as standard as possible. i
@@ -76,13 +79,16 @@ namespace ESMCI {
   public:
 
     // Construct 
-    PointList(int max_size, int coord_dim, int orig_coord_dim=0);
+    PointList(int max_size, int coord_dim, int orig_coord_dim=0,ESMC_CoordSys_Flag orig_coord_sys=ESMC_COORDSYS_UNINIT);
 
     // Destruct
     ~PointList();
 
     // Detect original coords
     bool hasOrigCoords() const {return (orig_points != NULL);}
+
+    // Get coordinate system of original points
+    ESMC_CoordSys_Flag get_orig_coord_sys() const {return orig_coord_sys;}
     
     // Add Point to List
     int add(int _id, const double *_coord);
