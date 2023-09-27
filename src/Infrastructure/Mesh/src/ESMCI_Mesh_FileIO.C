@@ -1379,6 +1379,8 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
 					     nodeCoords,node_IDs,elem_IDs,
 					     elemConn,numElemConn,
 					     &totNumElemConn, &num_nodes, &num_elems);
+    printf(">>>>> nElems, %d, nFeatures, %d\n", num_elems, num_features);
+
     // TBD: Coord system conversion
 
     /* At this point, we've read the shapfile and defined

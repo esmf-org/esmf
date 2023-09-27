@@ -69,6 +69,7 @@ namespace ESMCI {
     static std::vector<int> activeGdalInstances;
     int gdalSystemDesc; // Descriptor for initialized GDAL inst.
     OGRDataSourceH *gdalFileDesc;  // Descriptor(s) for open GDAL file (typically just one, but multiple for I/O of multi-tile arrays)
+    int *gdalFileID;
     MPI_Comm communicator;
     int my_rank;
     int num_iotasks;
@@ -123,7 +124,7 @@ namespace ESMCI {
     }
 
     // open() and close()
-    void GDAL_openOneTileFile(int tile, bool readonly_arg, int *rc = NULL);
+    void openOneTileFile(int tile, bool readonly_arg, int *rc = NULL);
     ESMC_Logical isOpen(int tile);
     ESMC_Logical isNewFile(int tile) {  // note 1-based indexing for tile
       return (new_file[tile-1] ? ESMF_TRUE : ESMF_FALSE);
@@ -137,7 +138,8 @@ namespace ESMCI {
                             int *nioDims = (int *)NULL,
                             int ** arrdims = (int **)NULL,
                             int *narrDims = (int *)NULL,
-                            int *basegdaltype = (int *)NULL,
+//                            int *basegdaltype = (int *)NULL,
+                            int *basepiotype = (int *)NULL,
                             int *rc = (int *)NULL);
     void attPackPut (int vardesc, const ESMCI::Info *attPack, int tile, int *rc);
 

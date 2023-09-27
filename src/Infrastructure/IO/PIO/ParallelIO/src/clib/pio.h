@@ -18,7 +18,8 @@
 
 #include <netcdf.h>
 
-#include <ogr_api.h>
+#include <gdal.h>
+//#include <ogr_api.h>
 
 /** PIO_OFFSET is an integer type of size sufficient to represent the
  * size (in bytes) of the largest file supported by MPI. This is not
@@ -598,6 +599,13 @@ typedef struct file_desc_t
      * feature. One consequence is that PIO_IOTYPE_NETCDF4C files will
      * not have deflate automatically turned on for each var. */
     int ncint_file;
+
+    /** GDAL specific vars - M.Long */
+    GDALDatasetH *hDS;
+    int dateVarID;     // Index of field with type OFTDate
+    int timeVarID;     // Index of field with type OFTTime
+    int datetimeVarID; // Index of field with type OFTDatetime
+
 } file_desc_t;
 
 /**
@@ -1328,8 +1336,13 @@ extern "C" {
                               const unsigned long long *op);
 
     /* These functions are for the GDAL integration layer. MSL - 9/7/2023 */
-    int GDALc_inq_fieldid(int ncid, const char *name, int *varidp);
-    int GDALc_openfile(int iosysid, OGRDataSourceH *hDSp, int *iotype, const char *fname, bool mode);
+    int GDALc_inq_fieldid(int fileid, const char *name, int *varidp);
+    int GDALc_inq_timeid(int fileid, int *timeid); // Is there a field of type OFTDate, OFTTime, or OFTDateTime?
+//    int GDALc_openfile(int iosysid, GDALDatasetH *hDSp, int *iotype, const char *fname, bool mode);
+    int GDALc_openfile(int iosysid, int *fileIDp, GDALDatasetH *hDSp, int *iotype, const char *fname, bool mode);
+    int GDALc_sync(int fileid);
+    int GDALc_shp_get_int_field(int fileid);
+    int GDALc_shp_get_double_field(int fileid);
 
 #if defined(__cplusplus)
 }

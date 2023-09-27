@@ -364,28 +364,6 @@ int GDALc_createfile(int iosysid, OGRDataSourceH *ncidp, int *iotype, const char
 //<<>>    return PIO_NOERR;
 //<<>>}
 
-  int GDALc_inq_timeid(OGRDataSourceH hDS, int *timeid) { // Is there a field of type OFTDate, OFTTime, or OFTDateTime?
-    
-    OGRLayerH hLayer = OGR_DS_GetLayer( hDS, 0 );
-    OGR_L_ResetReading(hLayer);
-
-    OGRFeatureDefnH hFD = OGR_L_GetLayerDefn(hLayer);
-    int nFld = OGR_FD_GetFieldCount(hFD);
-
-//    PRINTPOS;
-//    PRINTMSG("NFields: " << nFld);
-
-    for (int i=0;i<nFld;i++) {
-      OGRFieldType Fld = OGR_Fld_GetType(OGR_FD_GetFieldDefn(hFD,i));
-      const char* FldTyp = OGR_GetFieldTypeName(Fld);
-//      PRINTMSG("Field type: " << FldTyp);
-    }
-
-    OGR_FD_Destroy(hFD);
-
-    return 0;
-  }
-
   int GDALc_read_darray(OGRDataSourceH hDS, int fieldid, int ioid, MPI_Offset arraylen, void *array) 
   {
     iosystem_desc_t *ios;  /* Pointer to io system information. */

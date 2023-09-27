@@ -101,6 +101,7 @@ void ESMCI_GDAL_SHP_get_feature_info(OGRDataSourceH hDS, int *nFeatures, int *&F
   for (int i=0;i<*nFeatures;i++) {
     hFeature = OGR_L_GetNextFeature(hLayer);
     FeatureIDs[i] = OGR_F_GetFID(hFeature);
+    printf("FEATURE ID %d\n", FeatureIDs[i]);
     OGR_F_Destroy( hFeature );
   }
 

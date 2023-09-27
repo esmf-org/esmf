@@ -85,3 +85,15 @@ ESMF_FieldRead() <ESMF_FieldPr.F90>
 Will area (spatial extent) be conserved? e.g. if the GIS CRS is curvilinear, is the mapping in ESMF able to handle that?
 i.e. is ESMF mapping only planar?
 *** Solution: add a transformation routine from->to. e.g. from ESMF planar to GIS curvilear, or vice versa
+* Sept 21, 2023
+** MeshCreate:
+*** Need to create an index that identifies which multipolygon feature ID
+    is associated with a given subdivided polygon. The point is to allow 
+    for a data read/write to know what data to use when reading a field.
+    e.g. if a multipolyon with index 20 has a field value of 10, an the
+    multipolygon is broken into several polygons, each sub-polygon would
+    have a reference index to multipolygon 20 so it could be given a field
+    value of 10 (or otherwise scaled proportionally).
+
+    - the index needs to be a handle of type OGRFeatureH <- NOPE. Get Feature Index of type GBigInt
+    - It needs to happen in the meshgrid processing step

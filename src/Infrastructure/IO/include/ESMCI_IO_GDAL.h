@@ -160,7 +160,6 @@ enum GDAL_REARRANGERS
   int GDALc_open(int iosysid, const char *path, int mode, int *ncidp);
   int GDALc_closefile(int ncid);
 
-  int GDALc_inq_timeid(OGRDataSourceH hDS, int *timeid); // Is there a field of type OFTDate, OFTTime, or OFTDateTime?
 
   // Read distributed array.
   int GDALc_read_darray(OGRDataSourceH hDS, int fieldid, int ioid, MPI_Offset arraylen, void *array);

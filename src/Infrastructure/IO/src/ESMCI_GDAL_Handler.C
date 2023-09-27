@@ -22,7 +22,7 @@
 // declared in the companion file {\tt ESMCI\_GDAL_Handler.h}
 //
 //-------------------------------------------------------------------------
-#define GDAL_DEBUG_LEVEL 0
+#define GDAL_DEBUG_LEVEL 4
 // include associated header file
 #include "ESMCI_GDAL_Handler.h"
 
@@ -76,6 +76,7 @@ namespace ESMCI
     int nDims;                // The number of dimensions for Array IO
     int *dims;                // The shape of the Array IO
     int basegdaltype;         // GDAL version of Array data type
+    int basepiotype;          // PIO version of Array data type
     Array *array_p;           // The array matched to this descriptor
     int tile;                 // The tile number in the array for this descriptor (1-based indexing)
     int arrayRank;            // The rank of array_p
@@ -178,6 +179,9 @@ void GDAL_Handler::initialize (
 
   try {
 
+#ifdef ESMFIO_DEBUG
+    PIOc_set_log_level(GDAL_DEBUG_LEVEL);
+#endif // ESMFIO_DEBUG
     if (!instanceFound) {
       PRINTMSG("Before GDALc_Init_Intracomm, num_iotasks = " << num_iotasks);
       PIOc_Init_Intracomm(comp_comm, num_iotasks,
@@ -461,9 +465,13 @@ GDAL_Handler::GDAL_Handler(
 
     // fill in the GDAL_Handler object
     gdalSystemDesc =  0;
-    gdalFileDesc = new OGRDataSourceH[ntilesArg];
+    gdalFileDesc = new GDALDatasetH[ntilesArg];
     for (int i = 0; i < ntilesArg; ++i) {
       gdalFileDesc[i] = NULL;
+    }
+    gdalFileID = new int[ntilesArg];
+    for (int i = 0; i < ntilesArg; ++i) {
+      gdalFileID[i] = NULL;
     }
     localrc = ESMF_SUCCESS;
     new_file = new bool[ntilesArg];
@@ -563,9 +571,11 @@ void GDAL_Handler::arrayReadOneTileFile(
   int * arrDims;                          // Array shape
   int narrDims;                           // Array rank
   int iodesc;                             // GDAL IO descriptor
-  OGRDataSourceH filedesc;                // GDAL file descriptor
+  GDALDatasetH filedesc;                // GDAL file descriptor
+  int fileID;
   int fielddesc;                          // GDAL field descriptor
   int basegdaltype;                       // GDAL version of Array data type
+  int basepiotype;                        // PIO version of Array data type
   void *baseAddress;                      // The address of the Array IO data
   int localDE;                            // DE to use for IO
   int nField;                             // Number of field in file
@@ -587,6 +597,7 @@ void GDAL_Handler::arrayReadOneTileFile(
     return;
 
   filedesc = gdalFileDesc[tile-1]; // note that tile indices are 1-based
+  fileID   = gdalFileID[tile-1];   // note that tile indices are 1-based
 
   if (filedesc == NULL) {
     PRINTMSG("DataSource is NULL X");
@@ -614,9 +625,8 @@ void GDAL_Handler::arrayReadOneTileFile(
  
     int nDims;
 
-    // If frame >= 0 then we need to not use the unlimited dim in the iodesc.
     iodesc = getIODesc(gdalSystemDesc, arr_p, tile, &ioDims, &nioDims,
-		       &arrDims, &narrDims, &basegdaltype, &localrc);
+		       &arrDims, &narrDims, &basepiotype, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
 				      ESMC_CONTEXT, rc)) return;
 
@@ -628,11 +638,10 @@ void GDAL_Handler::arrayReadOneTileFile(
       fieldname = arr_p->getName();
     }
 
-    PRINTMSG("Field " << fieldname.c_str());
-    PRINTMSG("NLayers 1: " << OGR_DS_GetLayerCount(filedesc));
-//<<>>    gdalrc = GDALc_inq_fieldid(filedesc, fieldname.c_str(), &fielddesc);
+    gdalrc = GDALc_inq_fieldid(fileID, fieldname.c_str(), &fielddesc);
+    PRINTMSG("Field " << fieldname.c_str() << " FieldDesc " << fielddesc << " gdalrc " << gdalrc);
     // An error here means the variable is not in the file
-    if (gdalrc == -1) {
+    if (gdalrc != PIO_NOERR) {
       PRINTMSG("Field " << fieldname.c_str() << " not found in file");
 //    if (!CHECKGDALERROR(gdalrc, errmsg, ESMF_RC_FILE_READ, (*rc))) {
       return;
@@ -662,7 +671,7 @@ void GDAL_Handler::arrayReadOneTileFile(
 // TBD! THIS REQUIRES SOME DISCUSSION: HOW TO DEAL WITH FILES W/O DATE/TIME DEFS?
       int dimid_time;
       MPI_Offset time_len;
-      gdalrc = GDALc_inq_timeid(filedesc, &dimid_time);
+      gdalrc = GDALc_inq_timeid(fileID, &dimid_time);
 //>>      if (!CHECKGDALERROR(gdalrc, "No time dimension found in file", ESMF_RC_FILE_READ, (*rc))) {
 //>>        return;
 //>>      }
@@ -698,10 +707,10 @@ void GDAL_Handler::arrayReadOneTileFile(
 //        GDALc_setframe(filedesc, vardesc, frame-1);
 //    }
       PRINTPOS;
-      PRINTMSG("calling read_darray, gdal type = " << basegdaltype << ", address = " << baseAddress);
+      PRINTMSG("calling read_darray, gdal type = " << basepiotype << ", address = " << baseAddress);
   // Read in the array
       
-  gdalrc = GDALc_read_darray(filedesc, fielddesc, iodesc,
+  gdalrc = PIOc_read_darray(fileID, fielddesc, iodesc,
                            arrlen, (void *)baseAddress);
 
 //
@@ -1173,7 +1182,7 @@ void GDAL_Handler::arrayWriteOneTileFile(
 // !IROUTINE:  ESMCI::GDAL_Handler::openOneTileFile    - open a stream with stored filename, for the given tile
 //
 // !INTERFACE:
-void GDAL_Handler::GDAL_openOneTileFile(
+void GDAL_Handler::openOneTileFile(
 //
 // !RETURN VALUE:
 //
@@ -1202,6 +1211,16 @@ void GDAL_Handler::GDAL_openOneTileFile(
   int numtasks =  vm->getPetCount();
   int petspernode = vm->getSsiMaxPetCount();
 
+
+  struct iofmt_map_t {
+    int esmf_iofmt;
+    int gdal_fmt;
+  } iofmt_map[] = {
+    { ESMF_IOFMT_SHP, PIO_IOTYPE_GDAL } // This needs mods for different GIS types soon <<MSL>>
+  };
+
+  int iofmt_map_size = sizeof (iofmt_map)/sizeof (iofmt_map_t);
+
   if (rc != NULL) {
     *rc = ESMF_RC_NOT_IMPL;               // final return code
   }
@@ -1227,18 +1246,18 @@ void GDAL_Handler::GDAL_openOneTileFile(
     return;
 #endif
 
-//>>  int i_loop;
-//>>  for (i_loop=0; i_loop<iofmt_map_size; i_loop++) {
-//>>    if (getFormat() == iofmt_map[i_loop].esmf_iofmt) {
-//>>      iotype = iofmt_map[i_loop].gdal_fmt;
-//>>      break;
-//>>    }
-//>>  }
-//>>  if (i_loop == iofmt_map_size) {
-//>>    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD,
-//>>        "unsupported/unknown I/O format", ESMC_CONTEXT, rc))
-//>>      return;
-//>>  }
+  int i_loop;
+  for (i_loop=0; i_loop<iofmt_map_size; i_loop++) {
+    if (getFormat() == iofmt_map[i_loop].esmf_iofmt) {
+      iotype = iofmt_map[i_loop].gdal_fmt;
+      break;
+    }
+  }
+  if (i_loop == iofmt_map_size) {
+    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD,
+        "unsupported/unknown I/O format", ESMC_CONTEXT, rc))
+      return;
+  }
 
   // Check to see if we are able to open file properly
   bool okToCreate = false;
@@ -1306,14 +1325,13 @@ void GDAL_Handler::GDAL_openOneTileFile(
 //>>        return;
 //>>    }
   } else {
-    PRINTMSG(" calling GDALc_openfile with mode = " << mode <<
-             ", file = \"" << thisFilename << "\"");
+    PRINTMSG(" calling GDALc_openfile with mode = " << mode << ", file = \"" << thisFilename << "\"");
     // Looks like we are ready to go
     ESMCI_IOREGION_ENTER("GDALc_openfile");
-    gdalrc = GDALc_openfile(gdalSystemDesc, (&gdalFileDesc[tile-1]),
+    gdalrc = GDALc_openfile(gdalSystemDesc, (&gdalFileID[tile-1]), (&gdalFileDesc[tile-1]),
                           &iotype, thisFilename.c_str(), mode);
     ESMCI_IOREGION_EXIT("GDALc_openfile");
-    PRINTMSG("NLayers 0: " << OGR_DS_GetLayerCount(gdalFileDesc[tile-1]));
+//    PRINTMSG("NLayers 0: " << OGR_DS_GetLayerCount(gdalFileDesc[tile-1]));
     PRINTMSG(", called GDALc_openfile on " << thisFilename);
     if (!CHECKGDALWARN(gdalrc, std::string("Unable to open existing file: ") + thisFilename,
         ESMF_RC_FILE_OPEN, (*rc))) {
@@ -1355,7 +1373,7 @@ void GDAL_Handler::attPackPut (
 //-----------------------------------------------------------------------------
   int localrc;
   int gdalrc;
-  OGRDataSourceH filedesc = gdalFileDesc[tile-1]; // note that tile indices are 1-based
+  GDALDatasetH filedesc = gdalFileDesc[tile-1]; // note that tile indices are 1-based
 
 //>>  const json &j = attPack->getStorageRef();
 //>>  for (json::const_iterator it=j.cbegin(); it!=j.cend(); it++) {
@@ -1468,7 +1486,7 @@ ESMC_Logical GDAL_Handler::isOpen(
 //EOPI
 //-----------------------------------------------------------------------------
   PRINTPOS;
-  OGRDataSourceH filedesc = gdalFileDesc[tile-1]; // note that tile indices are 1-based
+  GDALDatasetH filedesc = gdalFileDesc[tile-1]; // note that tile indices are 1-based
   if (filedesc == NULL) {
     PRINTMSG("gdalFileDesc is NULL");
     return ESMF_FALSE;
@@ -1527,9 +1545,9 @@ void GDAL_Handler::flushOneTileFile(
 //>>    ESMCI_IOREGION_ENTER("GDALc_sync");
     if (gdalFileDesc[tile-1] != NULL) {
 //      OGR_DS_Destroy(gdalFileDesc[tile-1]);
-      printf("Closing tile %d, hDS %p\n", tile, (void *)gdalFileDesc[tile-1]);
-      gdalrc = GDALClose(gdalFileDesc[tile-1]);
-      printf("Close code: %d, tile %d\n",gdalrc, tile);
+      printf("Flushing tile %d, hDS %p\n", tile, (void *)gdalFileDesc[tile-1]);
+      gdalrc = PIOc_sync(gdalFileID[tile-1]);
+      printf("Flush code: %d, tile %d\n",gdalrc, tile);
     }
 //>>    GDALc_sync(gdalFileDesc[tile-1]);
 //>>    ESMCI_IOREGION_EXIT("GDALc_sync");
@@ -1576,14 +1594,15 @@ void GDAL_Handler::closeOneTileFile(
 
 //>>  PRINTPOS;
 //>>  // Not open? No problem, just skip
-//>>  if (isOpen(tile) == ESMF_TRUE) {
-//>>    ESMCI_IOREGION_ENTER("GDALc_closefile");
-//>>    int gdalrc = GDALc_closefile(gdalFileDesc[tile-1]);
-//>>    ESMCI_IOREGION_EXIT("GDALc_closefile");
-//>>    gdalFileDesc[tile-1] = 0;
-//>>    new_file[tile-1] = false;
-//>>    if (rc != NULL) *rc = gdalrc;
-//>>  }
+  if (isOpen(tile) == ESMF_TRUE) {
+    ESMCI_IOREGION_ENTER("GDALc_closefile");
+    int gdalrc = PIOc_closefile(gdalFileID[tile-1]);
+    ESMCI_IOREGION_EXIT("GDALc_closefile");
+    gdalFileID[tile-1] = 0;
+    gdalFileDesc[tile-1] = NULL;
+    new_file[tile-1] = false;
+    if (rc != NULL) *rc = gdalrc;
+  }
 
   // return successfully
   if (rc != NULL) {
@@ -1615,7 +1634,7 @@ void GDAL_Handler::closeOneTileFile(
   int *nioDims,                       // (out) - Rank of Array IO
   int ** arrDims,                     // (out) - Array shape for IO
   int *narrDims,                      // (out) - Rank of Array IO
-  int *basegdaltype,                  // (out) - Data type for IO
+  int *basepiotype,                  // (out) - Data type for IO
   int *rc                             // (out) - Error return code
   ) {
 //
@@ -1666,8 +1685,8 @@ void GDAL_Handler::closeOneTileFile(
     }
   }
   PRINTMSG("getDims complete, calling getIOType");
-  if (basegdaltype != (int *)NULL) {
-    *basegdaltype = GDAL_IODescHandler::getIOType(new_io_desc, &localrc);
+  if (basepiotype != (int *)NULL) {
+    *basepiotype = GDAL_IODescHandler::getIOType(new_io_desc, &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc);
   }
@@ -1983,12 +2002,14 @@ int GDAL_IODescHandler::constructGdalDecomp(
   switch(arr_p->getTypekind()) {
   case ESMC_TYPEKIND_I4:
     handle->basegdaltype = OFTInteger;
+    handle->basepiotype  = PIO_INT;
     break;
    case ESMC_TYPEKIND_R4:
 //    handle->basegdaltype = OFTReal;
 //    break;
    case ESMC_TYPEKIND_R8:
     handle->basegdaltype = OFTReal;
+    handle->basepiotype  = PIO_DOUBLE;
     break;
   case ESMC_TYPEKIND_I1:
   case ESMC_TYPEKIND_I2:
@@ -2073,7 +2094,7 @@ int GDAL_IODescHandler::constructGdalDecomp(
       ddims[i] = handle->dims[handle->nDims - i - 1];
   // Create the decomposition
   ESMCI_IOREGION_ENTER("GDALc_InitDecomp");
-  PIOc_InitDecomp(iosys, handle->basegdaltype, handle->nDims,
+  PIOc_InitDecomp(iosys, handle->basepiotype, handle->nDims,
                   ddims, gdalDofCount, gdalDofList,
                   &(handle->io_descriptor), NULL, NULL, NULL);
   ESMCI_IOREGION_EXIT("GDALc_InitDecomp");
@@ -2260,7 +2281,7 @@ int GDAL_IODescHandler::getIOType(
        it < GDAL_IODescHandler::activeGdalIoDescriptors.end();
        it++) {
     if (iodesc == (*it)->io_descriptor) {
-      iotype = (*it)->basegdaltype;
+      iotype = (*it)->basepiotype;
       localrc = ESMF_SUCCESS;
     }
   }
