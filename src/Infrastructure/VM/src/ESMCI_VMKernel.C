@@ -370,7 +370,11 @@ void VMK::set(bool globalResourceControl){
     omp_set_num_threads(1);
 #endif
 #ifndef ESMF_NO_OPENACC
+#ifdef __NVCOMPILER
+    // under NVHPC, multi-cpu-core threading (for OpenACC and standard language
+    // constructs) is implemented based on OpenACC: NVHPC extended OpenACC API
     acc_set_num_cores(1);
+#endif
 #endif
   }
 #endif
@@ -777,7 +781,11 @@ VMK::Affinities VMK::setAffinities(void *ssarg){
       numthreads = sarg->openmpnumthreads;
     omp_set_num_threads(numthreads);
 #ifndef ESMF_NO_OPENACC
+#ifdef __NVCOMPILER
+    // under NVHPC, multi-cpu-core threading (for OpenACC and standard language
+    // constructs) is implemented based on OpenACC: NVHPC extended OpenACC API
     acc_set_num_cores(numthreads);
+#endif
 #endif
 #if !defined(ESMF_OS_Darwin) && !defined(ESMF_OS_Cygwin)
     if (sarg->openmphandling>1){
@@ -2721,6 +2729,17 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
     << omp_get_max_threads();
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
+#endif
+#ifndef ESMF_NO_OPENACC
+#ifdef __NVCOMPILER
+  // under NVHPC, multi-cpu-core threading (for OpenACC and standard language
+  // constructs) is implemented based on OpenACC: NVHPC extended OpenACC API
+  // output OpenACC info
+  msg << prefix << "Current system level ACC_NUM_CORES setting for local PET: "
+    << acc_get_num_cores();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+#endif
 #endif
   msg << prefix << "ssiCount=" << getSsiCount()
     << " localSsi=" << ssiid[cid[mypet][0]];
