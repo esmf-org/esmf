@@ -311,7 +311,8 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
   real(ESMF_KIND_R8), allocatable, save       :: global_tile1(:,:,:)
   integer                       :: shapLon(2), shapLat(2)
 
-    allocate(global_tile1(npts+1,npts+1,ndims))
+!#    allocate(global_tile1(npts+1,npts+1,ndims))
+
     allocate(tile_local(count(1)+1,count(2)+1,ndims) )
 
 !#    call gnomonic_grids(grid_type, npts, global_tile1(:,:,1), global_tile1(:,:,2))
@@ -336,6 +337,7 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
            if (ABS(tile_local(i,j,2)) < 1.e-10) tile_local(i,j,2) = 0.0
        enddo
     enddo
+
     if (present(schmidtTransform)) then
      call direct_transform(schmidtTransform%stretch_factor,schmidtTransform%target_lon,&
           schmidtTransform%target_lat,tile_local(:,:,1),tile_local(:,:,2))
@@ -347,6 +349,7 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
        LonEdge=tile_local(1:shapLon(1),1:shapLon(2),1)
        LatEdge=tile_local(1:shapLat(1),1:shapLat(2),2)
     endif
+
 
     if (present(LonCenter) .and. present(LatCenter)) then
         do j=1, count(2)
@@ -361,7 +364,6 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
            enddo
         enddo
      end if
-
      deallocate(tile_local)
 !#     deallocate(global_tile1)
 
@@ -376,8 +378,8 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
      integer, intent(in) :: grid_type
      integer, intent(in) :: im
      integer, intent(in) :: start(:)
-     real(ESMF_KIND_R8), intent(out):: lon(start(1):,start(2):)
-     real(ESMF_KIND_R8), intent(out):: lat(start(1):,start(2):)
+     real(ESMF_KIND_R8), intent(out):: lon(:,:)
+     real(ESMF_KIND_R8), intent(out):: lat(:,:)
 
      integer i, j
      
@@ -430,37 +432,38 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
     
     ! Local:
     real(ESMF_KIND_R8) :: pp(3,lbound(lambda,1):ubound(lambda,1), lbound(lambda,2):ubound(lambda,2))
-    real(ESMF_KIND_R8) :: rsq3, alpha, beta
+    real(ESMF_KIND_R8) :: rsq3, alpha, beta, dely
     real(ESMF_KIND_R8) :: b(1:im+1)
     integer i, j
 
     rsq3 = 1./sqrt(3.) 
     alpha = asin( rsq3 )
+    dely = alpha / im
 
     ! Compute distances along cube edge (segment) at equispaced
     ! angles.  The formula is same for i and for j, but for local
     ! region these may or may not overlap.   Worst case we
     ! do this twice for a "diagonal subdomain"
-    
+
     do i = lbound(lambda,1), ubound(lambda,1)
-       beta = (alpha/im) * (im + 2 - 2*i)
-       b(i) = tan(beta)*cos(alpha/2)
+       beta = -dely * (im + 2 - 2*i)
+       b(i) = tan(beta)*cos(alpha)
     end do
 
     do j = lbound(lambda,2), ubound(lambda,2)
-       beta = (alpha/im) * (im + 2 - 2*j)
-       b(j) = tan(beta)*cos(alpha/2)
+       beta = -dely * (im + 2 - 2*j)
+       b(j) = tan(beta)*cos(alpha)
     end do
 
     ! Use the edge position to construct an array of
     ! cartesian points in the local domain.
     do j = lbound(lambda,2), ubound(lambda,2)
        do i = lbound(lambda,1), ubound(lambda,1)
-          pp(:,i,j) = [-rsq3, b(i), b(j)]
+          pp(:,i,j) = [-rsq3, -b(i), b(j)]
        end do
     end do
     
-    call cart_to_latlon( (im+1)*(im+1), pp, lambda, theta)
+    call cart_to_latlon_new(pp, lambda, theta)
 
  end subroutine get_gnomonic_ed_coords
 
@@ -1011,6 +1014,8 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
 
                case (6)
                   ang = 90.
+                  sa = 1
+                  ca = 0
                   call rot_3d_new( 2, x1, y1, z1, sa, ca, x2, y2, z2, 1)  ! rotate about the y-axis
                   ang = 0.
                   sa = 0
@@ -1165,15 +1170,18 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
  !-------------------------------------------------------------------------------
 ! vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv !
 !
-!     rot_3d_new :: rotate points on a sphere in xyz coords given sin and cos of angle.
-!                   Only works for {0,-1,+1} - 90 degree rotations.
+!     rot_3d_new :: rotate points on a sphere in xyz coords given sin
+!                   and cos of angle.  Only works for {0,-1,+1} - 90
+!                   degree rotations.  This approach guarantees
+!                   symmetry by avoiding roundoff associated with
+!                   inexact values of pi (and thus cos(pi/2)).
 
 !
       subroutine rot_3d_new(axis, x1in, y1in, z1in, sa, ca, x2out, y2out, z2out, convert)
 
          integer, intent(IN) :: axis         ! axis of rotation 1=x, 2=y, 3=z
          real(ESMF_KIND_R8) , intent(IN)    :: x1in, y1in, z1in
-         real(ESMF_KIND_R8) , intent(INOUT) :: sa, ca   ! sin and cos of angle to rotate in radians
+         real(ESMF_KIND_R8) , intent(IN)    :: sa, ca   ! sin and cos of angle to rotate in radians
          real(ESMF_KIND_R8) , intent(OUT)   :: x2out, y2out, z2out
          integer, intent(IN), optional :: convert ! if present convert input point
                                                   ! from spherical to cartesian, rotate, 
