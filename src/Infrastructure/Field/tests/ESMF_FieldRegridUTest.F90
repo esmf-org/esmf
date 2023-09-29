@@ -45754,6 +45754,7 @@ end subroutine test_regridSMMArbGrid
   type(ESMF_RouteHandle) :: routeHandle
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_VM) :: vm
+  integer(ESMF_KIND_I4), pointer :: farrayPtrMask(:,:)
   real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:)
   real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:)
   real(ESMF_KIND_R8), pointer :: farrayPtr1DXC(:)
@@ -45966,6 +45967,14 @@ end subroutine test_regridSMMArbGrid
     return
   endif
 
+  ! Add Mask
+  call ESMF_GridAddItem(dstGrid, staggerloc=ESMF_STAGGERLOC_CORNER, &
+         itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+  
 
   ! Create Fields
   dstField = ESMF_FieldCreate(dstGrid,  typekind=ESMF_TYPEKIND_R8, &
@@ -46080,6 +46089,14 @@ end subroutine test_regridSMMArbGrid
         return
      endif
 
+     call ESMF_GridGetItem(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CORNER, &
+          itemflag=ESMF_GRIDITEM_MASK, farrayPtr=farrayPtrMask, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     
 
      call ESMF_FieldGet(dstField, lDE, farrayPtr, &
           computationalLBound=fclbnd, computationalUBound=fcubnd, &
@@ -46125,8 +46142,6 @@ end subroutine test_regridSMMArbGrid
            
         ! Get basis vectors at that point
         call calc_unit_basis_vecs(lon_rad, lat_rad, e_vec, n_vec)
-
-        ! TODO: NEED A BETTER TEST CASE THAT'S TANGENT TO SPHERE, BUT IS CONSISTENT OVER POLE
         
         ! Dot with 3D vector (x,y,z) to get components to give a consistent direction to test case
         call calc_test_field(lon_rad, lat_rad, xfarrayPtr(i1,i2,1), xfarrayPtr(i1,i2,2))
@@ -46139,6 +46154,15 @@ end subroutine test_regridSMMArbGrid
         dst3DVecfarrayPtr(i1,i2,1)=1.0
         dst3DVecfarrayPtr(i1,i2,2)=2.0
         dst3DVecfarrayPtr(i1,i2,3)=3.0
+
+        ! Mask out the east and west ends because the test field is ill defined there
+        if ((lat > -10.0) .and. (lat < 10.0) .and.   &
+             ((lon > 80.0) .and. (lon < 100.0)) .or. &
+             ((lon < 260.0) .and. (lon < 280.0))) then
+           farrayPtrMask(i1,i2)=1 
+        else
+           farrayPtrMask(i1,i2)=0 
+        endif
         
      enddo
      enddo
@@ -46159,6 +46183,7 @@ end subroutine test_regridSMMArbGrid
   call ESMF_FieldRegridStore( &
           srcField, &
           dstField=dstField, &
+          dstMaskValues=(/1/), &
           vectorRegrid=.true., & 
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
@@ -46238,10 +46263,31 @@ end subroutine test_regridSMMArbGrid
         return
      endif
 
+     call ESMF_GridGetItem(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CORNER, &
+          itemflag=ESMF_GRIDITEM_MASK, farrayPtr=farrayPtrMask, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     
      !! Loop looking at error
      do i1=fclbnd(1),fcubnd(1)
      do i2=fclbnd(2),fcubnd(2)
 
+        ! Init in case masked
+        angleFarrayPtr(i1,i2) = 0.0
+        magDiffFarrayPtr(i1,i2) = 0.0
+        tmpFarrayPtr(i1,i2) = xfarrayPtr(i1,i2,2)
+        dst3DVecfarrayPtr(i1,i2,1) = 0.0
+        dst3DVecfarrayPtr(i1,i2,2) = 0.0
+        dst3DVecfarrayPtr(i1,i2,3) = 0.0
+
+
+        ! Ignore masked points
+        if (farrayPtrMask(i1,i2) .eq. 1) cycle
+        
         ! Get X coord from Grid
         lon = farrayPtr1DXC(i1)
         lon_rad = DEG2RAD*(lon)
