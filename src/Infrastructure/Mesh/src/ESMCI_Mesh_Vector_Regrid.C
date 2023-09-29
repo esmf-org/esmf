@@ -317,65 +317,43 @@ void CoordFromId::add(PointList *pl) {
     Throw() << "CoordFromId object has already been made searchable, more points can't be added.";
   }
 
+  // If it doesn't have original coords, then exit and complain
+  if (!pl->hasOrigCoords()) {
+    Throw() << "Vector regridding not allowed without original coords.";
+  }
   
-  // Get spatial (coordinate) dim
-  int sdim=pl->get_coord_dim();
+  // Get original spatial (coordinate) dim
+  int orig_sdim=pl->get_orig_coord_dim();
 
   // Reserve to the correct size
   searchable.reserve(pl->get_curr_num_pts());
-
-  printf("Pl->hasOrigCoords=%d\n",pl->hasOrigCoords());
-
   
-  // Add points based on spatial dim
-  if (sdim == 2) { 
-    // Loop adding ids and points
-    int num_pts = pl->get_curr_num_pts();
-    for (int i=0; i<num_pts; i++) {
-      
-      // Get point id
-      int id = pl->get_id(i);
-      
-      // Get point coords
-      const double *c = pl->get_coord_ptr(i);   
-      
-      // Add to list
-      searchable.push_back(CoordFromIdEntry(id,c[0],c[1]));          
-    }
-  } else if (sdim == 3) { 
-    // Loop adding ids and points
-    int num_pts = pl->get_curr_num_pts();
-    for (int i=0; i<num_pts; i++) {
-      
-      // Get point id
-      int id = pl->get_id(i);
-      
-      // Get point coords
-      const double *c = pl->get_coord_ptr(i);   
-
-      // Convert 3D Cart to lon, lat, etc.in radians
-      double lon, lat, rad;
-      convert_cart_to_sph_rad(c[0], c[1], c[2],
-                              &lon, &lat, &rad);
-
-      
-      // Add to list
-      //searchable.push_back(CoordFromIdEntry(id,lon,lat));
-      double oc[3];
-      pl->get_orig_coord(i,oc);   
-
+  // Can handle anything over 2D, since only using first 2 dimensions
+  if (orig_sdim < 2) {
+    Throw() << "Geometries of spatial dim= "<<orig_sdim<<" not supported in vector regridding.";
+  }
+  
+  // Loop adding ids and points
+  int num_pts = pl->get_curr_num_pts();
+  for (int i=0; i<num_pts; i++) {
+    
+    // Get point id
+    int id = pl->get_id(i);
+    
+    // Get original coords
+    double oc[ESMF_MAXDIM];
+    pl->get_orig_coord(i,oc);   
+    
+    // If necessary convert to radians
+    if (pl->get_orig_coord_sys() == ESMC_COORDSYS_SPH_DEG) {
       oc[0] *= ESMC_CoordSys_Deg2Rad;
       oc[1] *= ESMC_CoordSys_Deg2Rad;
-      
-      //      printf("id=%d converted coords=%f %f  orig coords=%f %f\n",id,lon,lat,oc[0],oc[1]);
-
-      searchable.push_back(CoordFromIdEntry(id,oc[0],oc[1]));
-      
-    }    
-  } else {
-    Throw() << "Geometries of spatial dim= "<<sdim<<" not supported in vector regridding.";
+    }
+    
+    // Add to list
+    searchable.push_back(CoordFromIdEntry(id,oc[0],oc[1]));      
   }
-
+  
 }
 
  void CoordFromId::make_searchable() {

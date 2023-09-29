@@ -130,6 +130,11 @@ namespace ESMCI {
       return coord_dim;
     }
 
+    // Get number of origina dimensions
+    int get_orig_coord_dim() const {
+      return orig_coord_dim;
+    }
+
     // Get maximum number of points
     int get_max_num_pts() const {
       return max_num_pts;
