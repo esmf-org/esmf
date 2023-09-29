@@ -88,7 +88,7 @@ namespace ESMCI {
     max_num_pts=_max_num_pts;
     curr_num_pts=0;
     orig_coord_sys=_orig_coord_sys;
-    
+
     // Allocate point memory
     points = NULL;
     if (max_num_pts>=0) {

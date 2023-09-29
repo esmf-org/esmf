@@ -332,6 +332,7 @@ void CoordFromId::add(PointList *pl) {
   if (orig_sdim < 2) {
     Throw() << "Geometries of spatial dim= "<<orig_sdim<<" not supported in vector regridding.";
   }
+
   
   // Loop adding ids and points
   int num_pts = pl->get_curr_num_pts();
@@ -619,9 +620,6 @@ void create_vector_sparse_mat_from_reg_sparse_mat(int num_entries, int *iientrie
       Throw()<<"src id="<<src_id<<" not found in coordinate search.";
     }
 
-    // printf("id=%d src_coords=%f %f %f\n",src_id,src_coords[0],src_coords[1],src_coords[2]);
-
-    
     // Get dst coords, complain if not there
     double dst_coords[2];
     if (!dstCoordFromId.search(dst_id, dst_coords)) {

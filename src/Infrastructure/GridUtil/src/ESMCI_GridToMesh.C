@@ -1022,7 +1022,7 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 
     // If needed get coordsys
     ESMC_CoordSys_Flag coordSys=ESMC_COORDSYS_UNINIT;
-    if (add_orig_coords) coordSys==grid.getCoordSys();
+    if (add_orig_coords) coordSys=grid.getCoordSys();
     
     // Loop nodes of the grid.  Here we loop all nodes, both owned and not.
     ESMCI::GridIter *gni=new ESMCI::GridIter(&grid,staggerLoc,true);
