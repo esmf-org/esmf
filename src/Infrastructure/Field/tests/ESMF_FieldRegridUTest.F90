@@ -46151,14 +46151,14 @@ end subroutine test_regridSMMArbGrid
         farrayPtr(i1,i2,2)=0.0
 
         ! initialize dest vec field
-        dst3DVecfarrayPtr(i1,i2,1)=1.0
-        dst3DVecfarrayPtr(i1,i2,2)=2.0
-        dst3DVecfarrayPtr(i1,i2,3)=3.0
+        dst3DVecfarrayPtr(i1,i2,1)=0.0
+        dst3DVecfarrayPtr(i1,i2,2)=0.0
+        dst3DVecfarrayPtr(i1,i2,3)=0.0
 
         ! Mask out the east and west ends because the test field is ill defined there
-        if ((lat > -10.0) .and. (lat < 10.0) .and.   &
-             ((lon > 80.0) .and. (lon < 100.0)) .or. &
-             ((lon < 260.0) .and. (lon < 280.0))) then
+        if (((lat > -10.0) .and. (lat < 10.0)) .and. &
+             (((lon > 170.0) .and. (lon < 190.0)) .or. &
+             ((lon >350.0) .or. (lon < 10.0)))) then  ! NOTE: <-that ".or." is correct
            farrayPtrMask(i1,i2)=1 
         else
            farrayPtrMask(i1,i2)=0 
@@ -46284,6 +46284,9 @@ end subroutine test_regridSMMArbGrid
         dst3DVecfarrayPtr(i1,i2,2) = 0.0
         dst3DVecfarrayPtr(i1,i2,3) = 0.0
 
+        ! Set temp array to mask
+        tmpFarrayPtr(i1,i2) = REAL(farrayPtrMask(i1,i2))
+
 
         ! Ignore masked points
         if (farrayPtrMask(i1,i2) .eq. 1) cycle
@@ -46320,14 +46323,19 @@ end subroutine test_regridSMMArbGrid
         if (exact_len .ne. 0.0) then
            dot=dot/exact_len
         endif
+
         
+        ! Make sure dot isn't slightly out of range
+        if (dot > 1.0) dot=1.0
+        if (dot < -1.0) dot=-1.0
+
+        ! Compute angle
         angle=acos(dot) 
 
 
         ! For debugging   
         angleFarrayPtr(i1,i2) = angle
         magDiffFarrayPtr(i1,i2) = exact_len-regrid_len
-        tmpFarrayPtr(i1,i2) = xfarrayPtr(i1,i2,2)
 
         ! Calculate debug output from src field and basis vectors
         dst3DVecfarrayPtr(i1,i2,1) = farrayPtr(i1,i2,1)*e_vec(1)+farrayPtr(i1,i2,2)*n_vec(1)
