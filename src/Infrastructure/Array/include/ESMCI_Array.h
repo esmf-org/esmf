@@ -385,6 +385,8 @@ namespace ESMCI {
     const int *getTotalLBound()             const {return totalLBound;}
     const int *getTotalUBound()             const {return totalUBound;}
     int getTensorCount()                    const {return tensorCount;}
+    int getReplicatedDimCount()             const
+      {return getReplicatedDimCountImpl(distgrid->getDimCount(), distgridToArrayMap);}
     const int *getUndistLBound()            const {return undistLBound;}
     const int *getUndistUBound()            const {return undistUBound;}
     const int *getExclusiveElementCountPDe()const
@@ -503,6 +505,8 @@ namespace ESMCI {
     static void superVecParam(Array *array, int localDeCount,
       bool superVectorOkay, int superVecSizeUnd[3], int *superVecSizeDis[2],
       int &vectorLength);
+  private:
+    static int getReplicatedDimCountImpl(int dimCount, int *distgridToArrayMap);
 
   };  // class Array
   //============================================================================

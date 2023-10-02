@@ -650,9 +650,7 @@ Array *Array::create(
     }
   }
   // determine replicatorCount
-  int replicatorCount = 0;  // initialize
-  for (int i=0; i<dimCount; i++)
-    if (distgridToArrayMapArray[i] == 0) ++replicatorCount;
+  int replicatorCount = getReplicatedDimCountImpl(dimCount, distgridToArrayMapArray);
   // determine reduced dimCount -> redDimCount
   int redDimCount = dimCount - replicatorCount;
   // determine tensorCount
@@ -1400,9 +1398,7 @@ Array *Array::create(
     }
   }
   // determine replicatorCount
-  int replicatorCount = 0;  // initialize
-  for (int i=0; i<dimCount; i++)
-    if (distgridToArrayMapArray[i] == 0) ++replicatorCount;
+  int replicatorCount = getReplicatedDimCountImpl(dimCount, distgridToArrayMapArray);
   // determine reduced dimCount -> redDimCount
   int redDimCount = dimCount - replicatorCount;
   // determine tensorCount
@@ -12697,6 +12693,18 @@ void Array::superVecParam(
 }
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::getReplicatedDimCountImpl()"
+int Array::getReplicatedDimCountImpl(int dimCount, int *distgridToArrayMap) {
+  int replicatorCount = 0;
+  for (int i=0; i<dimCount; i++) {
+    if (distgridToArrayMap[i] == 0) ++replicatorCount;
+  }
+
+  return replicatorCount;
+}
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
