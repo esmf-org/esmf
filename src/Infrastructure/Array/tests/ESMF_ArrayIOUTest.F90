@@ -1309,7 +1309,7 @@ program ESMF_ArrayIOUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-! Array with repliocated dimension(s) decomp along dim 1
+! Array with replicated dimension(s) decomp along dim 1
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
@@ -1512,7 +1512,7 @@ program ESMF_ArrayIOUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
-! Array with repliocated dimension(s) decomp along dim 2
+! Array with replicated dimension(s) decomp along dim 2
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
@@ -1684,7 +1684,7 @@ program ESMF_ArrayIOUTest
 #if 0
 ! This test is disabled because currently there is no support of scattering
 ! data during read into DEs along replicated dims that hold data outside
-! the exclusive regrion of the index space of the DistGrid.
+! the exclusive region of the index space of the DistGrid.
 !------------------------------------------------------------------------
   !NEX_disabled_UTest_Multi_Proc_Only
 ! ! Compare read-in Array to expected
