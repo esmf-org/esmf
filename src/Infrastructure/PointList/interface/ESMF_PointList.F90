@@ -405,10 +405,13 @@ contains
     type(ESMF_DistGrid) :: distgridOut
     integer :: seqCount
     type(ESMF_Array)       :: XArr,YArr,ZArr,MArr
-
-    type(ESMF_CoordSys_Flag) :: coordSysLocal
+    integer :: origCoordDim
+    type(ESMF_CoordSys_Flag) :: coordSysLocal, origCoordSys
     type(ESMF_PointList)  :: pointlist
 
+    logical :: addOrigCoords=.true.
+    
+    
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -537,7 +540,17 @@ contains
       enddo
     enddo
 
-    pointlist = ESMF_PointListCreate(maxpts=num_local_pts,numdims=regrid_dims, rc=localrc)
+    ! Set original coordinates info based on whether they are requested
+    origCoordDim=0 ! 0 -> don't add original coords
+    if (addOrigCoords) origCoordDim=dimcount
+
+    origCoordSys=ESMF_COORDSYS_UNINIT
+    if (addOrigCoords) origCoordSys=coordSysLocal
+
+    
+    ! Create pointlist 
+    pointlist = ESMF_PointListCreate(maxpts=num_local_pts,numdims=regrid_dims, &
+         origCoordDim=origCoordDim, origCoordSys=origCoordSys, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -627,11 +640,18 @@ contains
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
 
-          call ESMF_PointListAdd(pointlist=pointlist,id=seqInd(j-cl+1), &
-                                 loc_coords=cart_coords, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-        endif
+          if (addOrigCoords) then
+             call ESMF_PointListAdd(pointlist=pointlist,id=seqInd(j-cl+1), &
+                  loc_coords=cart_coords, loc_orig_coords=mycoords, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+          else
+             call ESMF_PointListAdd(pointlist=pointlist,id=seqInd(j-cl+1), &
+                  loc_coords=cart_coords, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return            
+          endif
+       endif
       enddo
       deallocate(seqInd, stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
