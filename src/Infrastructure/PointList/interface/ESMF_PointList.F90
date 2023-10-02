@@ -663,14 +663,17 @@ contains
 ! !IROUTINE: ESMF_PointListCreateFrmInput - Create a new PointList from user input
 
 ! !INTERFACE:
-  function ESMF_PointListCreateFrmInput(maxpts, numdims, rc)
+  function ESMF_PointListCreateFrmInput(maxpts, numdims, &
+       origCoordDim, origCoordSys, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_PointList) :: ESMF_PointListCreateFrmInput
 !
 ! !ARGUMENTS:
-    integer, intent(in)                             :: maxpts, numdims
-    integer, intent(out), optional                  :: rc
+    integer, intent(in)                            :: maxpts, numdims
+    integer, intent(in), optional                  :: origCoordDim
+    type(ESMF_CoordSys_Flag), intent(in), optional :: origCoordSys
+    integer, intent(out), optional                 :: rc
 !
 ! !DESCRIPTION:
 !   Allocates memory for a new {\tt ESMF\_PointList} object and
@@ -682,6 +685,11 @@ contains
 !     The maximum number of points to hold in the PointList.
 !   \item[{numdims}]
 !     The number of dimensions for points in the PointList.
+!   \item[{[origCoordDim]}]
+!     The number of dimensions for original (i.e. before conversion to Cart.) coords
+!     If not specified or specified to 0, then no original coordinates are stored.     
+!   \item[{[origCoordSys]}]
+!    The coordinate system of the original coordinates.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -697,8 +705,8 @@ contains
     pointlist%this = ESMF_NULL_POINTER
 
     ! Call C++ create code
-
-    call c_ESMC_PointListCreateFrmInput(maxpts, numdims, pointlist, localrc)
+    call c_ESMC_PointListCreateFrmInput(maxpts, numdims, pointlist, &
+         origCoordDim, origCoordSys, localrc)
 
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -921,13 +929,14 @@ contains
 ! !IROUTINE: ESMF_PointListAdd - Adds a point to a PointList
 
 ! !INTERFACE:
-  subroutine ESMF_PointListAdd(pointlist, id, loc_coords, rc)
+  subroutine ESMF_PointListAdd(pointlist, id, loc_coords, loc_orig_coords, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_PointList), intent(in)               :: pointlist
-    integer,            intent(in)               :: id
-    real(ESMF_KIND_R8), intent(in), dimension(:) :: loc_coords
-    integer,            intent(out), optional    :: rc
+    type(ESMF_PointList), intent(in)                      :: pointlist
+    integer,            intent(in)                        :: id
+    real(ESMF_KIND_R8), intent(in), dimension(:)          :: loc_coords
+    real(ESMF_KIND_R8), intent(in), dimension(:),optional :: loc_orig_coords
+    integer,            intent(out), optional             :: rc
 !
 ! !DESCRIPTION:
 !   Add a point to an {\tt ESMF\_PointList} with the given values.
@@ -940,6 +949,10 @@ contains
 !          The id associated with point to add.
 !     \item[{[loc_coords]}]
 !          The array of coordinates associated with point to add.
+!     \item[{[loc_orig_coords]}]
+!          The array of orig. coordinates associated with point to add.
+!          (Only valid if the pointlist has been created to hold original
+!           coords (e.g. by creating with origCoordDim != 0.0))
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -954,7 +967,7 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_PointListGetInit,pointlist,rc)
 
-    call c_ESMC_PointListAdd(pointlist, id, loc_coords, localrc)
+    call c_ESMC_PointListAdd(pointlist, id, loc_coords, loc_orig_coords, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

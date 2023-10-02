@@ -121,6 +121,8 @@ extern "C" {
 
   void FTN_X(c_esmc_pointlistcreatefrminput)(int *maxpts, int *numdims,
                                              ESMCI::PointList **plptr,
+                                             int *_origCoordDim,
+                                             ESMC_CoordSys_Flag *_origCoordSys,
                                              int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_pointlistcreatefrminput()"
@@ -141,7 +143,15 @@ extern "C" {
 
       int localrc = ESMC_RC_NOT_IMPL;
 
-      *plptr = new ESMCI::PointList(*maxpts,*numdims);
+      // Handle orig. coord. inputs
+      int origCoordDim=0;
+      if (ESMC_NOT_PRESENT_FILTER(_origCoordDim) != ESMC_NULL_POINTER) origCoordDim=*_origCoordDim;
+      ESMC_CoordSys_Flag origCoordSys=ESMC_COORDSYS_UNINIT;
+      if (ESMC_NOT_PRESENT_FILTER(_origCoordSys) != ESMC_NULL_POINTER) origCoordSys=*_origCoordSys;
+
+      // Call into C++ interface
+      *plptr = new ESMCI::PointList(*maxpts,*numdims,origCoordDim,origCoordSys);
+
     } catch(std::exception &x) {
       // catch Mesh exception return code
       if (x.what()) {
@@ -258,8 +268,9 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_pointlistadd)(ESMCI::PointList **ptr, int *id, double *_coords,
-    int *rc){
+  void FTN_X(c_esmc_pointlistadd)(ESMCI::PointList **ptr, int *id,
+                                  double *_coords, double *_orig_coords, 
+                                  int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_pointlistadd()"
 
@@ -269,10 +280,20 @@ extern "C" {
       if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
       int localrc = ESMC_RC_NOT_IMPL;
 
-      // call into C++
-      localrc = (*ptr)->add(*id,_coords);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      // Call into C++ add based on presence of _orig_coords
+      if (ESMC_NOT_PRESENT_FILTER(_orig_coords) != ESMC_NULL_POINTER) {
+
+        localrc = (*ptr)->add(*id,_coords,_orig_coords);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                         ESMC_NOT_PRESENT_FILTER(rc))) throw localrc;
+        
+      } else {
+        localrc = (*ptr)->add(*id,_coords);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                          ESMC_NOT_PRESENT_FILTER(rc))) throw localrc;
+      }
+      
+
     } catch (std::exception &x) {
       // catch Grid exception return code
       if (x.what()) {
