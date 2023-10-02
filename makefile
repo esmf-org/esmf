@@ -255,15 +255,15 @@ endif
 	  fi; \
 	 fi
 	-@if [ -n "$(ESMF_XERCES)" ] ; then \
-	  echo "ESMF_XERCES:            $(ESMF_XERCES)" ; \
+	  echo "ESMF_XERCES:             $(ESMF_XERCES)" ; \
 	  if [ -n "$(ESMF_XERCES_INCLUDE)" ] ; then \
-	    echo "ESMF_XERCES_INCLUDE:    $(ESMF_XERCES_INCLUDE)" ; \
+	    echo "ESMF_XERCES_INCLUDE:     $(ESMF_XERCES_INCLUDE)" ; \
 	  fi; \
 	  if [ -n "$(ESMF_XERCES_LIBS)" ] ; then \
-	    echo "ESMF_XERCES_LIBS:       $(ESMF_XERCES_LIBS)" ; \
+	    echo "ESMF_XERCES_LIBS:        $(ESMF_XERCES_LIBS)" ; \
 	  fi; \
 	  if [ -n "$(ESMF_XERCES_LIBPATH)" ] ; then \
-	    echo "ESMF_XERCES_LIBPATH:    $(ESMF_XERCES_LIBPATH)" ; \
+	    echo "ESMF_XERCES_LIBPATH:     $(ESMF_XERCES_LIBPATH)" ; \
 	  fi; \
 	 fi
 	-@if [ -n "$(ESMF_YAMLCPP)" ] ; then \
@@ -279,27 +279,39 @@ endif
 	  fi; \
 	 fi
 	-@if [ -n "$(ESMF_PROJ4)" ] ; then \
-	  echo "ESMF_PROJ4:                $(ESMF_PROJ4)" ; \
+	  echo "ESMF_PROJ4:              $(ESMF_PROJ4)" ; \
 	  if [ -n "$(ESMF_PROJ4_INCLUDE)" ] ; then \
-	    echo "ESMF_PROJ4_INCLUDE:        $(ESMF_PROJ4_INCLUDE)" ; \
+	    echo "ESMF_PROJ4_INCLUDE:      $(ESMF_PROJ4_INCLUDE)" ; \
 	  fi; \
 	  if [ -n "$(ESMF_PROJ4_LIBS)" ] ; then \
-	    echo "ESMF_PROJ4_LIBS:           $(ESMF_PROJ4_LIBS)" ; \
+	    echo "ESMF_PROJ4_LIBS:         $(ESMF_PROJ4_LIBS)" ; \
 	  fi; \
 	  if [ -n "$(ESMF_PROJ4_LIBPATH)" ] ; then \
-	    echo "ESMF_PROJ4_LIBPATH:        $(ESMF_PROJ4_LIBPATH)" ; \
+	    echo "ESMF_PROJ4_LIBPATH:      $(ESMF_PROJ4_LIBPATH)" ; \
 	  fi; \
 	 fi
 	-@if [ -n "$(ESMF_BABELTRACE)" ] ; then \
-	  echo "ESMF_BABELTRACE:                $(ESMF_BABELTRACE)" ; \
+	  echo "ESMF_BABELTRACE:         $(ESMF_BABELTRACE)" ; \
 	  if [ -n "$(ESMF_BABELTRACE_INCLUDE)" ] ; then \
-	    echo "ESMF_BABELTRACE_INCLUDE:        $(ESMF_BABELTRACE_INCLUDE)" ; \
+	    echo "ESMF_BABELTRACE_INCLUDE: $(ESMF_BABELTRACE_INCLUDE)" ; \
 	  fi; \
 	  if [ -n "$(ESMF_BABELTRACE_LIBS)" ] ; then \
-	    echo "ESMF_BABELTRACE_LIBS:           $(ESMF_BABELTRACE_LIBS)" ; \
+	    echo "ESMF_BABELTRACE_LIBS:    $(ESMF_BABELTRACE_LIBS)" ; \
 	  fi; \
 	  if [ -n "$(ESMF_BABELTRACE_LIBPATH)" ] ; then \
-	    echo "ESMF_BABELTRACE_LIBPATH:        $(ESMF_BABELTRACE_LIBPATH)" ; \
+	    echo "ESMF_BABELTRACE_LIBPATH: $(ESMF_BABELTRACE_LIBPATH)" ; \
+	  fi; \
+	 fi
+	-@if [ -n "$(ESMF_NVML)" ] ; then \
+	  echo "ESMF_NVML:               $(ESMF_NVML)" ; \
+	  if [ -n "$(ESMF_NVML_INCLUDE)" ] ; then \
+	    echo "ESMF_NVML_INCLUDE:       $(ESMF_NVML_INCLUDE)" ; \
+	  fi; \
+	  if [ -n "$(ESMF_NVML_LIBS)" ] ; then \
+	    echo "ESMF_NVML_LIBS:          $(ESMF_NVML_LIBS)" ; \
+	  fi; \
+	  if [ -n "$(ESMF_NVML_LIBPATH)" ] ; then \
+	    echo "ESMF_NVML_LIBPATH:       $(ESMF_NVML_LIBPATH)" ; \
 	  fi; \
 	 fi
 	-@echo " "
@@ -644,15 +656,15 @@ endif
 	  fi; \
 	 fi
 	-@if [ -n "$(ESMF_XERCES)" ] ; then \
-	  echo "# ESMF_XERCES:           $(ESMF_XERCES)" >> $(MKINFO) ; \
+	  echo "# ESMF_XERCES:            $(ESMF_XERCES)" >> $(MKINFO) ; \
 	  if [ -n "$(ESMF_XERCES_INCLUDE)" ] ; then \
-	    echo "# ESMF_XERCES_INCLUDE:   $(ESMF_XERCES_INCLUDE)" >> $(MKINFO) ; \
+	    echo "# ESMF_XERCES_INCLUDE:    $(ESMF_XERCES_INCLUDE)" >> $(MKINFO) ; \
 	  fi; \
 	  if [ -n "$(ESMF_XERCES_LIBS)" ] ; then \
-	    echo "# ESMF_XERCES_LIBS:      $(ESMF_XERCES_LIBS)" >> $(MKINFO) ; \
+	    echo "# ESMF_XERCES_LIBS:       $(ESMF_XERCES_LIBS)" >> $(MKINFO) ; \
 	  fi; \
 	  if [ -n "$(ESMF_XERCES_LIBPATH)" ] ; then \
-	    echo "# ESMF_XERCES_LIBPATH:   $(ESMF_XERCES_LIBPATH)" >> $(MKINFO) ; \
+	    echo "# ESMF_XERCES_LIBPATH:    $(ESMF_XERCES_LIBPATH)" >> $(MKINFO) ; \
 	  fi; \
 	 fi
 	-@if [ -n "$(ESMF_YAMLCPP)" ] ; then \
@@ -668,15 +680,39 @@ endif
 	  fi; \
 	 fi
 	-@if [ -n "$(ESMF_PROJ4)" ] ; then \
-	  echo "# ESMF_PROJ4:               $(ESMF_PROJ4)" >> $(MKINFO) ; \
+	  echo "# ESMF_PROJ4:             $(ESMF_PROJ4)" >> $(MKINFO) ; \
 	  if [ -n "$(ESMF_PROJ4_INCLUDE)" ] ; then \
-	    echo "# ESMF_PROJ4_INCLUDE:       $(ESMF_PROJ4_INCLUDE)" >> $(MKINFO) ; \
+	    echo "# ESMF_PROJ4_INCLUDE:     $(ESMF_PROJ4_INCLUDE)" >> $(MKINFO) ; \
 	  fi; \
 	  if [ -n "$(ESMF_PROJ4_LIBS)" ] ; then \
-	    echo "# ESMF_PROJ4_LIBS:          $(ESMF_PROJ4_LIBS)" >> $(MKINFO) ; \
+	    echo "# ESMF_PROJ4_LIBS:        $(ESMF_PROJ4_LIBS)" >> $(MKINFO) ; \
 	  fi; \
 	  if [ -n "$(ESMF_PROJ4_LIBPATH)" ] ; then \
-	    echo "# ESMF_PROJ4_LIBPATH:       $(ESMF_PROJ4_LIBPATH)" >> $(MKINFO) ; \
+	    echo "# ESMF_PROJ4_LIBPATH:     $(ESMF_PROJ4_LIBPATH)" >> $(MKINFO) ; \
+	  fi; \
+	 fi
+	-@if [ -n "$(ESMF_BABELTRACE)" ] ; then \
+	  echo "# ESMF_BABELTRACE:        $(ESMF_BABELTRACE)" >> $(MKINFO) ; \
+	  if [ -n "$(ESMF_BABELTRACE_INCLUDE)" ] ; then \
+	    echo "# ESMF_BABELTRACE_INCLUDE:$(ESMF_BABELTRACE_INCLUDE)" >> $(MKINFO) ; \
+	  fi; \
+	  if [ -n "$(ESMF_BABELTRACE_LIBS)" ] ; then \
+	    echo "# ESMF_BABELTRACE_LIBS:   $(ESMF_BABELTRACE_LIBS)" >> $(MKINFO) ; \
+	  fi; \
+	  if [ -n "$(ESMF_BABELTRACE_LIBPATH)" ] ; then \
+	    echo "# ESMF_BABELTRACE_LIBPATH:$(ESMF_BABELTRACE_LIBPATH)" >> $(MKINFO) ; \
+	  fi; \
+	 fi
+	-@if [ -n "$(ESMF_NVML)" ] ; then \
+	  echo "# ESMF_NVML:              $(ESMF_NVML)" >> $(MKINFO) ; \
+	  if [ -n "$(ESMF_NVML_INCLUDE)" ] ; then \
+	    echo "# ESMF_NVML_INCLUDE:      $(ESMF_NVML_INCLUDE)" >> $(MKINFO) ; \
+	  fi; \
+	  if [ -n "$(ESMF_NVML_LIBS)" ] ; then \
+	    echo "# ESMF_NVML_LIBS:         $(ESMF_NVML_LIBS)" >> $(MKINFO) ; \
+	  fi; \
+	  if [ -n "$(ESMF_NVML_LIBPATH)" ] ; then \
+	    echo "# ESMF_NVML_LIBPATH:      $(ESMF_NVML_LIBPATH)" >> $(MKINFO) ; \
 	  fi; \
 	 fi
 	-@echo "#" >> $(MKINFO)
