@@ -1548,7 +1548,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Array with replicated dimension 1 (first) write to NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_repli1, fileName="Array_repli1_first.nc", &
+  call ESMF_ArrayWrite(array_repli1, fileName="Array_repli1_first_dim2.nc", &
       status=ESMF_FILESTATUS_REPLACE, iofmt=ESMF_IOFMT_NETCDF, rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1580,7 +1580,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, read the netCDF file.
   write(name, *) "Array with replicated dimension 1 (first) read from NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead(array_repli1_r, fileName="Array_repli1_first.nc", &
+  call ESMF_ArrayRead(array_repli1_r, fileName="Array_repli1_first_dim2.nc", &
       iofmt=ESMF_IOFMT_NETCDF, rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1640,7 +1640,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Array with replicated dimension 2 (first) write to NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_repli2, fileName="Array_repli2_first.nc", &
+  call ESMF_ArrayWrite(array_repli2, fileName="Array_repli2_first_dim2.nc", &
       status=ESMF_FILESTATUS_REPLACE, iofmt=ESMF_IOFMT_NETCDF, rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1672,7 +1672,7 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, read the netCDF file.
   write(name, *) "Array with replicated dimension 2 (first) read from NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead(array_repli2_r, fileName="Array_repli2_first.nc", &
+  call ESMF_ArrayRead(array_repli2_r, fileName="Array_repli2_first_dim2.nc", &
       iofmt=ESMF_IOFMT_NETCDF, rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
