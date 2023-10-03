@@ -4329,11 +4329,11 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, name, rc)
         ! Generate glocal edge coordinates and local center coordinates
         allocate(lonCenter(count(1,i), count(2,i)), latCenter(count(1,i), count(2,i)))
         if (i==1) then
-           call ESMF_UtilCreateCSCoords(tileSize, lonEdge=lonEdge, latEdge=latEdge, &
+           call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonEdge, latEdge=latEdge, &
                 start=start(:,i), count=count(:,i), &
                 tile=tileno(i), lonCenter=lonCenter, latCenter=latCenter)
         else
-           call ESMF_UtilCreateCSCoords(tileSize, start=start(:,i), count=count(:,i), &
+           call ESMF_UtilCreateCSCoordsPar(tileSize, start=start(:,i), count=count(:,i), &
                  tile=tileno(i), lonCenter=lonCenter, latCenter=latCenter)
         endif
         !call ESMF_VMWtime(endtime, rc=rc)
