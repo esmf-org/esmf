@@ -67,7 +67,7 @@
 ! call ESMF_MeshSetMOAB(.true.)
 
 ! This #if surrounds all the tests to enable turning on just one test
-#if 0
+#if 1
      !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid between -180-180 sphere and a 360 sphere

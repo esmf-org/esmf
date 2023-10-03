@@ -352,7 +352,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 #ifndef FRS_OLDWAY
 
-
+    
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldRegridStoreNX"
@@ -715,7 +715,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer(ESMF_KIND_I4),       pointer :: tmp_indices(:,:)
         real(ESMF_KIND_R8),          pointer :: tmp_weights(:)
         real(ESMF_KIND_R8) :: beg_time, end_time
-
+        logical :: addOrigCoordsToPointList
+                  
         ! Debug Timing stuff
         ! call ESMF_VMWtime(beg_time)
         ! ESMF_METHOD_ENTER(localrc)
@@ -956,9 +957,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 
+
+
+
+        
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         !!!! Get information (e.g. meshes) from Fields needed for regridding !!!!
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+        ! Decide if we should use original coordinates in PointLists created in this section
+        addOrigCoordsToPointList=.false.
+        if (localVectorRegrid) addOrigCoordsToPointList=.true.
 
         ! Init variables tracking if we are using a PointList
         srcUsingPointList=.false.
@@ -988,7 +997,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
            ! Get dst PointList with points on Field location
-           call getPointListOnFieldLoc(dstField, dstMaskValues, &
+           call getPointListOnFieldLoc(dstField, dstMaskValues, addOrigCoordsToPointList, &
                 dstCreatedTmpPointList, dstPointlist, rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1016,7 +1025,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
            ! Get dst PointList with points on Field location
-           call getPointListOnFieldLoc(dstField, dstMaskValues, &
+           call getPointListOnFieldLoc(dstField, dstMaskValues, addOrigCoordsToPointList, &
                 dstCreatedTmpPointList, dstPointlist, rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1038,7 +1047,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         else if (lregridmethod .eq. ESMF_REGRIDMETHOD_NEAREST_STOD) then
 
            ! Get src PointList with points on Field location
-           call getPointListOnFieldLoc(srcField, srcMaskValues, &
+           call getPointListOnFieldLoc(srcField, srcMaskValues, addOrigCoordsToPointList, &
                 srcCreatedTmpPointList, srcPointlist, rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1047,7 +1056,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            srcUsingPointList=.true.
 
            ! Get dst PointList with points on Field location
-           call getPointListOnFieldLoc(dstField, dstMaskValues, &
+           call getPointListOnFieldLoc(dstField, dstMaskValues, addOrigCoordsToPointList, &
                 dstCreatedTmpPointList, dstPointlist, rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1069,7 +1078,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         else if (lregridmethod .eq. ESMF_REGRIDMETHOD_NEAREST_DTOS) then
 
            ! Get src PointList with points on Field location
-           call getPointListOnFieldLoc(srcField, srcMaskValues, &
+           call getPointListOnFieldLoc(srcField, srcMaskValues, addOrigCoordsToPointList, &
                 srcCreatedTmpPointList, srcPointlist, rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1078,7 +1087,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            srcUsingPointList=.true.
 
            ! Get dst PointList with points on Field location
-           call getPointListOnFieldLoc(dstField, dstMaskValues, &
+           call getPointListOnFieldLoc(dstField, dstMaskValues, addOrigCoordsToPointList, &
                 dstCreatedTmpPointList, dstPointlist, rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1557,11 +1566,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine getMeshOnCornersWFieldOnCenter
 
     ! Get or create a pointlist with points on the Field location
-    subroutine getPointListOnFieldLoc(field, maskValues, &
+    subroutine getPointListOnFieldLoc(field, maskValues, addOrigCoords, &
          createdTmpPointList, pointlist, rc)
 
       type(ESMF_Field), intent(in)  :: field
       integer(ESMF_KIND_I4), intent(in),  optional :: maskValues(:)
+      logical, intent(in), optional :: addOrigCoords
       logical,          intent(out) :: createdTmpPointList
       type(ESMF_PointList),  intent(out) :: pointlist
       integer,          intent(out),   optional :: rc 
@@ -1599,7 +1609,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               
          ! Create PointList
          pointlist=ESMF_PointListCreate(grid,staggerloc, &
-              maskValues=maskValues, &
+              maskValues=maskValues, addOrigCoords=addOrigCoords, &
               rc=localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1615,7 +1625,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Create PointList from Mesh
-          pointlist=ESMF_PointListCreate(tmpMesh, meshloc, &
+          pointlist=ESMF_PointListCreate(tmpMesh, meshloc, addOrigCoords=addOrigCoords, &
                maskValues=maskValues, &
                rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1638,7 +1648,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           ! Create PointList from Mesh
           ! (Until we have an XGrid location indicator, assume center/element) 
-          pointlist=ESMF_PointListCreate(tmpMesh, ESMF_MESHLOC_ELEMENT, &
+          pointlist=ESMF_PointListCreate(tmpMesh, ESMF_MESHLOC_ELEMENT, addOrigCoords=addOrigCoords, &
                maskValues=maskValues, &
                rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1657,7 +1667,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           ! Create PointList 
           pointlist=ESMF_PointListCreate(tmpLocStream, &
-               maskValues=maskValues, &
+               maskValues=maskValues, addOrigCoords=addOrigCoords, &
                rc=localrc)          
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2464,7 +2474,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                    ESMF_CONTEXT, rcToReturn=rc)) return
               
               srcPointList=ESMF_PointListCreate(srcGrid,srcStaggerloc, &
-                   maskValues=srcMaskValues, &
+                   maskValues=srcMaskValues, addOrigCoords=addOrigCoords, &
                    rc=localrc)
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2561,7 +2571,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              endif
 
              srcPointList=ESMF_PointListCreate(tempMesh, srcMeshloc, &
-                                               maskValues=srcMaskValues, &
+                                               maskValues=srcMaskValues, addOrigCoords=addOrigCoords, &
                                                rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
