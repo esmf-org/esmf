@@ -92,8 +92,9 @@ namespace ESMCI {
     void fit_on_vm(VM **vm, int *rc);
 
     void MeshCap_to_PointList(ESMC_MeshLoc_Flag meshLoc,
-                              ESMCI::InterArray<int> *maskValuesArg, PointList **out_pl,
-                              int *rc);
+                              ESMCI::InterArray<int> *maskValuesArg,
+                              bool addOrigCoords, 
+                              PointList **out_pl, int *rc);
 
     static MeshCap *create_from_ptr(void *_mesh, int *rc);
 

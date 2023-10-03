@@ -126,8 +126,9 @@ void change_comm(MPI_Comm new_comm);
  */
 void resolve_cspec_delete_owners(UInt obj_type);
 
- ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<int> *maskValuesArg, int *rc);
+ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<int> *maskValuesArg, bool add_orig_coords, int *rc);
 
+  
   public:
 // STUFF FOR SPLIT MESH
 // TODO: MOVE TO MESHCXX AND CALL THAT FROM F90

@@ -1001,14 +1001,17 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 #endif
 
   // Convert Grid To PointList
-  void GridToPointList(Grid &grid, ESMC_StaggerLoc staggerLoc, ESMCI::InterArray<int> *maskValuesArg, ESMCI::PointList **_pl, int *rc) {
+  void GridToPointList(Grid &grid, ESMC_StaggerLoc staggerLoc, ESMCI::InterArray<int> *maskValuesArg, bool add_orig_coords, ESMCI::PointList **_pl, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "GridToPointList()"
     Trace __trace("GridToPointList()");
 
-    bool add_orig_coords=true;
-    
+    // Handy declarations
     int localrc;
+
+    // Debug
+    if (add_orig_coords) printf("GToP: Adding original coords!!!\n");
+
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());

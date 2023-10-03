@@ -40,7 +40,9 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-  void FTN_X(c_esmc_pointlistcreatefrmgrid)(ESMCI::Grid **gptr, ESMC_StaggerLoc *staggerLoc, ESMCI::InterArray<int> *maskValuesArg, ESMCI::PointList **plptr, int *rc){
+  void FTN_X(c_esmc_pointlistcreatefrmgrid)(ESMCI::Grid **gptr, ESMC_StaggerLoc *staggerLoc,
+                                            ESMCI::InterArray<int> *maskValuesArg, ESMC_Logical *_addOrigCoords,
+                                            ESMCI::PointList **plptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_pointlistcreatefrmgrid()"
 
@@ -51,8 +53,14 @@ extern "C" {
       if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
       int localrc = ESMC_RC_NOT_IMPL;
 
+      // Convert from F90/C++ crossover
+      bool addOrigCoords=false;
+      if (ESMC_NOT_PRESENT_FILTER(_addOrigCoords) != ESMC_NULL_POINTER) {
+        if (*_addOrigCoords == ESMF_TRUE) addOrigCoords = true;
+      }
+      
       // call into C++
-      ESMCI::GridToPointList(**gptr, *staggerLoc, maskValuesArg, plptr, &localrc);
+      ESMCI::GridToPointList(**gptr, *staggerLoc, maskValuesArg, addOrigCoords, plptr, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                         ESMC_NOT_PRESENT_FILTER(rc))) throw localrc;
     } catch (std::exception &x) {
@@ -79,7 +87,9 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_pointlistcreatefrmmesh)(ESMCI::MeshCap **mptr, ESMC_MeshLoc_Flag *meshLoc, ESMCI::InterArray<int> *maskValuesArg, ESMCI::PointList **plptr, int *rc){
+  void FTN_X(c_esmc_pointlistcreatefrmmesh)(ESMCI::MeshCap **mptr, ESMC_MeshLoc_Flag *meshLoc,
+                                            ESMCI::InterArray<int> *maskValuesArg, ESMC_Logical *_addOrigCoords,
+                                            ESMCI::PointList **plptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_pointlistcreatefrmmesh()"
 
@@ -88,8 +98,14 @@ extern "C" {
       if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
       int localrc = ESMC_RC_NOT_IMPL;
 
+      // Convert from F90/C++ crossover
+      bool addOrigCoords=false;
+      if (ESMC_NOT_PRESENT_FILTER(_addOrigCoords) != ESMC_NULL_POINTER) {
+        if (*_addOrigCoords == ESMF_TRUE) addOrigCoords = true;
+      }
+      
       // call into C++
-      (*mptr)->MeshCap_to_PointList(*meshLoc, maskValuesArg, plptr, &localrc);
+      (*mptr)->MeshCap_to_PointList(*meshLoc, maskValuesArg, addOrigCoords, plptr, &localrc);
       //      *plptr = (*mptr)->MeshToPointList(*meshLoc, maskValuesArg, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                         ESMC_NOT_PRESENT_FILTER(rc))) throw localrc;

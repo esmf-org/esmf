@@ -1888,12 +1888,13 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
 }
 
 // This method converts a Mesh to a PointList
- ESMCI::PointList *Mesh::MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<int> *maskValuesArg, int *rc) {
+ ESMCI::PointList *Mesh::MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<int> *maskValuesArg, bool add_orig_coords, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Mesh::MeshToPointList()"
 
-   // Add original coords
-   bool add_orig_coords=true;
+   // Debug
+   if (add_orig_coords) printf("MToP: adding original coords!!!\n");
+
    
    ESMCI::PointList *plp = NULL;
 
