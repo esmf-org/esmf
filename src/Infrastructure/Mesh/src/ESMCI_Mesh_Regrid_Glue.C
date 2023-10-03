@@ -145,9 +145,6 @@ void ESMCI_regrid_create(
     // transalate vectorRegrid to C++ bool
     bool vectorRegrid=false;
     if (*_vectorRegrid == 1) vectorRegrid=true;
-
-    if (vectorRegrid) printf("vectorRegrid is on!!!\n");
-
     
     // transalate ignoreDegenerate to C++ bool
     bool ignoreDegenerate=false;
@@ -202,15 +199,34 @@ void ESMCI_regrid_create(
       }
     }
 
-    /// vectorRegrid not supported with Cartesian meshes
+    /// vectorRegrid only supported with spherical geometries
     if (vectorRegrid) {
-      if (srcmesh != NULL) {
-        if (srcmesh->coordsys == ESMC_COORDSYS_CART) {
-          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                                           "Vector regridding currently not supported for Cartesian geometries.",
-                                           ESMC_CONTEXT, &localrc)) throw localrc;
-        }
-      } 
+
+      // Get src coordSys
+      ESMC_CoordSys_Flag src_coord_sys=ESMC_COORDSYS_UNINIT;
+      if (srcmesh != NULL) src_coord_sys=srcmesh->coordsys;
+      else if (srcpointlist != NULL) src_coord_sys=srcpointlist->get_orig_coord_sys();
+
+      // Check that it's spherical 
+      if ((src_coord_sys != ESMC_COORDSYS_SPH_DEG) && (src_coord_sys != ESMC_COORDSYS_SPH_RAD)) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                         "Vector regridding currently only supported for source geometries (e.g. Grids) with a spherical coordinate system.",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+
+
+      // Get dst coordSys
+      ESMC_CoordSys_Flag dst_coord_sys=ESMC_COORDSYS_UNINIT;
+      if (dstmesh != NULL) dst_coord_sys=dstmesh->coordsys;
+      else if (dstpointlist != NULL) dst_coord_sys=dstpointlist->get_orig_coord_sys();
+
+      // Check that it's spherical 
+      if ((dst_coord_sys != ESMC_COORDSYS_SPH_DEG) && (dst_coord_sys != ESMC_COORDSYS_SPH_RAD)) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                         "Vector regridding currently only supported for destination geometries (e.g. Grids) with a spherical coordinate system.",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+
     }
 
     

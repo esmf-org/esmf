@@ -67,7 +67,7 @@
 ! call ESMF_MeshSetMOAB(.true.)
 
 ! This #if surrounds all the tests to enable turning on just one test
-#if 1
+#if 0
      !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid between -180-180 sphere and a 360 sphere
@@ -45626,6 +45626,8 @@ end subroutine test_regridSMMArbGrid
   endif
 
   ! If PET 0, report output
+  ! (Turn off by default just to make output smaller) 
+#if 0
   if (localPet == 0) then
      write(*,*) "Max angle difference=",maxGlobal(1)
      write(*,*) "Avg angle difference=",totGlobal(1)/totGlobal(3)
@@ -45633,7 +45635,7 @@ end subroutine test_regridSMMArbGrid
      write(*,*) "Max magnitude difference=",maxGlobal(2)
      write(*,*) "Avg magnitude difference=",totGlobal(2)/totGlobal(3)
   endif
-
+#endif
 
   ! Fail if average angle error bigger than produced by vector regrid
   if (totGlobal(1)/totGlobal(3) > 2.0E-3) correct=.false.
@@ -46370,6 +46372,8 @@ end subroutine test_regridSMMArbGrid
   endif
 
   ! If PET 0, report output
+  ! (Turn off by default just to make output smaller) 
+#if 0
   if (localPet == 0) then
      write(*,*) "Max angle difference=",maxGlobal(1)
      write(*,*) "Avg angle difference=",totGlobal(1)/totGlobal(3)
@@ -46377,7 +46381,7 @@ end subroutine test_regridSMMArbGrid
      write(*,*) "Max magnitude difference=",maxGlobal(2)
      write(*,*) "Avg magnitude difference=",totGlobal(2)/totGlobal(3)
   endif
-
+#endif
 
   ! Fail if average angle error bigger than produced by vector regrid
   if (totGlobal(1)/totGlobal(3) > 2.0E-3) correct=.false.

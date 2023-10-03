@@ -234,9 +234,14 @@ void CoordFromId::add(Mesh *mesh, MeshObj::id_type obj_type) {
   }
   
   // Get spatial dimension
-  int orig_sdim=mesh->spatial_dim();
+  int orig_sdim=mesh->orig_spatial_dim;
   if (orig_sdim < 2) Throw() << "Vector regridding only supported with meshes with >=2 coordinate dims.";
 
+  // Make sure that it's spherical
+  if ((mesh->coordsys != ESMC_COORDSYS_SPH_DEG) && (mesh->coordsys != ESMC_COORDSYS_SPH_RAD)) {
+    Throw() << "Vector regridding currently only supported for geometries (e.g. Grids) with a spherical coordinate system.";
+  }
+  
   
   // Add based on obj_type
   if (obj_type == MeshObj::NODE) {
@@ -320,6 +325,11 @@ void CoordFromId::add(PointList *pl) {
   // If it doesn't have original coords, then exit and complain
   if (!pl->hasOrigCoords()) {
     Throw() << "Vector regridding not allowed without original coords.";
+  }
+
+  // Make sure that it's spherical
+  if ((pl->get_orig_coord_sys() != ESMC_COORDSYS_SPH_DEG) && (pl->get_orig_coord_sys() != ESMC_COORDSYS_SPH_RAD)) {
+    Throw() << "Vector regridding currently only supported for geometries (e.g. Grids) with a spherical coordinate system.";
   }
   
   // Get original spatial (coordinate) dim
