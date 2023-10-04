@@ -671,7 +671,7 @@ class MCT {
       try {
         int localrc;
         
-        mesh->MeshCap_to_PointList(ESMC_MESHLOC_ELEMENT, NULL, &pl, &localrc);
+        mesh->MeshCap_to_PointList(ESMC_MESHLOC_ELEMENT, NULL, false, &pl, &localrc);
         ESMC_CHECK_THROW(localrc);
 
         // verify the original mesh is still valid
@@ -696,7 +696,7 @@ class MCT {
         int localrc;
         
         PointList *pl;
-        mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, &pl, &localrc);
+        mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, false, &pl, &localrc);
         ESMC_CHECK_THROW(localrc);
 
         // verify the original mesh is still valid
@@ -867,13 +867,16 @@ class MCT {
         int has_status_array = 0;
         ESMCI::Array *dummy_status_array = NULL;
         int check_flag = 0;
+        int vectorRegrid=0;
 
+        
         // calculate weights between mesh and pointlist
         MeshCap::regrid_create(&mesh, &array, &pl, 
                                &target, &array, &target_pl, 
                                &regrid_method, 
                                &map_type, 
-                               &norm_type, 
+                               &norm_type,
+                               &vectorRegrid, 
                                &pole_type, &regrid_pole_npnts, 
                                &extrap_method, &extrap_num_src_pts,
                                &extrap_dist_exponent, &extrap_num_levels,
@@ -912,7 +915,7 @@ class MCT {
         // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_BILINEAR;
         int regrid_method = 0;
 
-        mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, &target_pl, &localrc);
+        mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, false,  &target_pl, &localrc);
         ESMC_CHECK_THROW(localrc);
 
         // only build target as copy of mesh for creep or will fail at
@@ -1025,7 +1028,7 @@ class MCT {
         // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_PATCH;
         int regrid_method = 1;
 
-        mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, &target_pl, &localrc);
+        mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, false, &target_pl, &localrc);
         ESMC_CHECK_THROW(localrc);
 
         // only build target as copy of mesh for creep or will fail at
@@ -1068,10 +1071,10 @@ class MCT {
         // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_DTOS;
         int regrid_method = 4;
 
-        mesh->MeshCap_to_PointList(ESMC_MESHLOC_ELEMENT, NULL, &pl, &localrc);
+        mesh->MeshCap_to_PointList(ESMC_MESHLOC_ELEMENT, NULL, false,  &pl, &localrc);
         ESMC_CHECK_THROW(localrc);
         
-        mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, &target_pl, &localrc);
+        mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, false, &target_pl, &localrc);
         ESMC_CHECK_THROW(localrc);
         
         localrc = regrid_generic(regrid_method, 
@@ -1107,10 +1110,10 @@ class MCT {
         // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_STOD;
         int regrid_method = 3;
 
-        mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, &pl, &localrc);
+        mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, false,  &pl, &localrc);
         ESMC_CHECK_THROW(localrc);
 
-        mesh->MeshCap_to_PointList(ESMC_MESHLOC_ELEMENT, NULL, &target_pl, &localrc);
+        mesh->MeshCap_to_PointList(ESMC_MESHLOC_ELEMENT, NULL, false, &target_pl, &localrc);
         ESMC_CHECK_THROW(localrc);
 
         localrc = regrid_generic(regrid_method, 
