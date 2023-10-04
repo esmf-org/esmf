@@ -151,19 +151,19 @@ public:
 
 // Set of templated calls to support different id types in allreduce
 template<class IDTYPE>
-static void _get_global_minmax(IDTYPE lmin, IDTYPE lmax, IDTYPE &t_gmin, IDTYPE &t_gmax) {
+void DINFO_get_global_minmax(IDTYPE lmin, IDTYPE lmax, IDTYPE &t_gmin, IDTYPE &t_gmax) {
   Throw() << "Unsupported id type.";
 }
 
 template<>
-static void _get_global_minmax(int lmin, int lmax, int &t_gmin, int &t_gmax) {
+void DINFO_get_global_minmax(int lmin, int lmax, int &t_gmin, int &t_gmax) {
   MPI_Allreduce(&lmin, &t_gmin, 1, MPI_INT, MPI_MIN, Par::Comm());
   MPI_Allreduce(&lmax, &t_gmax, 1, MPI_INT, MPI_MAX, Par::Comm());
 }
 
 // Set of templated call to calculate proc from id and global info
 template<class IDTYPE>
-static UInt _calc_proc_from_id(IDTYPE id, UInt petCount, IDTYPE gmin, IDTYPE gmax) {
+UInt DINFO_calc_proc_from_id(IDTYPE id, UInt petCount, IDTYPE gmin, IDTYPE gmax) {
   //std::cout << "id ="<<id<<" petCount="<<petCount<<" gmin="<<gmin<<" gmax="<<gmax<<std::endl;
 
   UInt num_per_proc = ((gmax-gmin+1) + petCount -1) / petCount;
@@ -193,7 +193,7 @@ void DInfo<IDTYPE, INFOTYPE> :: commit() {
   }
   
   // Get global min and max id
-  _get_global_minmax(lmin, lmax, gmin, gmax);
+  DINFO_get_global_minmax(lmin, lmax, gmin, gmax);
   
   // Loop ids, set up sends
   std::vector<UInt> to_proc; // procs I will send to
@@ -201,7 +201,7 @@ void DInfo<IDTYPE, INFOTYPE> :: commit() {
   for (auto i = 0; i < staging.size(); i++) {
 
     // Figure out which proc this id would be on
-    UInt tproc = _calc_proc_from_id(staging[i].id, petCount, gmin, gmax);
+    UInt tproc = DINFO_calc_proc_from_id(staging[i].id, petCount, gmin, gmax);
 
     // Add to send list 
     to_proc.push_back(tproc);
@@ -231,7 +231,7 @@ void DInfo<IDTYPE, INFOTYPE> :: commit() {
   for (auto i = 0; i < staging.size(); i++) {
 
     // Figure out which proc this id would be on
-    UInt tproc = _calc_proc_from_id(staging[i].id, petCount, gmin, gmax);
+    UInt tproc = DINFO_calc_proc_from_id(staging[i].id, petCount, gmin, gmax);
 
     // Get buffer for tproc
     SparseMsg::buffer &b = *msg.getSendBuffer(tproc);
@@ -371,7 +371,7 @@ void DInfo<IDTYPE, INFOTYPE> :: search(int num_search,
     for (auto i = 0; i < num_search; i++) {
 
       // Figure out which proc this id would be on
-      UInt proc = _calc_proc_from_id(search_ids[i], petCount, gmin, gmax);
+      UInt proc = DINFO_calc_proc_from_id(search_ids[i], petCount, gmin, gmax);
 
       // Add proc to list
       to_proc.push_back(proc);
@@ -399,7 +399,7 @@ void DInfo<IDTYPE, INFOTYPE> :: search(int num_search,
     for (auto i = 0; i < num_search; i++) {
       
       // Figure out which proc this id would be on
-      UInt proc = _calc_proc_from_id(search_ids[i], petCount, gmin, gmax);
+      UInt proc = DINFO_calc_proc_from_id(search_ids[i], petCount, gmin, gmax);
 
       // Get buffer going to that proc
       SparseMsg::buffer &b = *msg.getSendBuffer(proc);
@@ -540,7 +540,7 @@ void DInfo<IDTYPE, INFOTYPE> :: search(int num_search,
     for (UInt i = 0; i < num_search; i++) {
       
       // Figure out which proc this search id would be on
-      UInt proc = _calc_proc_from_id(search_ids[i], petCount, gmin, gmax);
+      UInt proc = DINFO_calc_proc_from_id(search_ids[i], petCount, gmin, gmax);
 
       // Get buffer for this proc
       SparseMsg::buffer &b = *msg.getRecvBuffer(proc);
