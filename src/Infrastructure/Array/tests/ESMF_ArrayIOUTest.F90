@@ -1332,14 +1332,10 @@ program ESMF_ArrayIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Array with replicated dimension 1 get and fill Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"  
-  ! access the pointer to the allocated memory on each DE
-  call ESMF_ArrayGet(array_repli1, farrayPtr=arrayPtrR8D1, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call fillArray1d(array_repli1, arrayPtrR8D1, rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-  ! initialize data
-  arrayPtrR8D1 = 12345._ESMF_KIND_R8*localPet
-
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Given an ESMF array, write the netCDF file.
@@ -1392,7 +1388,7 @@ program ESMF_ArrayIOUTest
   write(name, *) "Array with replicated dimension 1 comparison Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  passfail = all (arrayPtrR8D1_r == 12345.0_ESMF_KIND_R8*localPet)
+  passfail = all (arrayPtrR8D1_r == arrayPtrR8D1)
 #else
   passfail = .true.
 #endif
@@ -1424,13 +1420,9 @@ program ESMF_ArrayIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Array with replicated dimension 2 get and fill Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"  
-  ! access the pointer to the allocated memory on each DE
-  call ESMF_ArrayGet(array_repli2, farrayPtr=arrayPtrR8D1, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call fillArray1d(array_repli2, arrayPtrR8D1, rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
-  ! initialize data
-  arrayPtrR8D1 = 12345._ESMF_KIND_R8*localPet
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -1484,7 +1476,7 @@ program ESMF_ArrayIOUTest
   write(name, *) "Array with replicated dimension 2 comparison Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  passfail = all (arrayPtrR8D1_r == 12345.0_ESMF_KIND_R8*localPet)
+  passfail = all (arrayPtrR8D1_r == arrayPtrR8D1)
 #else
   passfail = .true.
 #endif
@@ -1535,14 +1527,10 @@ program ESMF_ArrayIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Array with replicated dimension 1 get and fill Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"  
-  ! access the pointer to the allocated memory on each DE
-  call ESMF_ArrayGet(array_repli1, farrayPtr=arrayPtrR8D1, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call fillArray1d(array_repli1, arrayPtrR8D1, rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-  ! initialize data
-  arrayPtrR8D1 = 12345._ESMF_KIND_R8*localPet
-
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Given an ESMF array, write the netCDF file.
@@ -1595,7 +1583,7 @@ program ESMF_ArrayIOUTest
   write(name, *) "Array with replicated dimension 1 comparison Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  passfail = all (arrayPtrR8D1_r == 12345.0_ESMF_KIND_R8*localPet)
+  passfail = all (arrayPtrR8D1_r == arrayPtrR8D1)
 #else
   passfail = .true.
 #endif
@@ -1627,14 +1615,10 @@ program ESMF_ArrayIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Array with replicated dimension 2 get and fill Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"  
-  ! access the pointer to the allocated memory on each DE
-  call ESMF_ArrayGet(array_repli2, farrayPtr=arrayPtrR8D1, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call fillArray1d(array_repli2, arrayPtrR8D1, rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-  ! initialize data
-  arrayPtrR8D1 = 12345._ESMF_KIND_R8*localPet
-
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
 ! ! Given an ESMF array, write the netCDF file.
@@ -1691,7 +1675,7 @@ program ESMF_ArrayIOUTest
   write(name, *) "Array with replicated dimension 2 comparison Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  passfail = all (arrayPtrR8D1_r == 12345.0_ESMF_KIND_R8*localPet)
+  passfail = all (arrayPtrR8D1_r == arrayPtrR8D1)
 #else
   passfail = .true.
 #endif
@@ -1871,5 +1855,28 @@ program ESMF_ArrayIOUTest
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
   !-----------------------------------------------------------------------------
+
+contains
+
+  subroutine fillArray1d(arrayToFill, arrayToFillPtr, rc)
+    ! Fills a 1-d ESMF_Array with data (localPet times index), and returns a pointer to
+    ! the Array's data
+    !
+    ! Assumes 1 DE per PET; works best if arrayToFill is created with ESMF_INDEX_GLOBAL
+
+    type(ESMF_Array), intent(in) :: arrayToFill
+    real(ESMF_KIND_R8), pointer, intent(out) :: arrayToFillPtr(:)
+    integer, intent(out) :: rc
+
+    integer :: i
+
+    call ESMF_ArrayGet(arrayToFill, farrayPtr=arrayToFillPtr, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    do i = lbound(arrayToFillPtr, 1), ubound(arrayToFillPtr, 1)
+       arrayToFillPtr(i) = localPet*100._ESMF_KIND_R8 + i
+    end do
+
+  end subroutine fillArray1d
 
   end program ESMF_ArrayIOUTest
