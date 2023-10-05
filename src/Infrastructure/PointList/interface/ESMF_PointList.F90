@@ -1015,11 +1015,20 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_PointListGetInit,pointlist,rc)
 
-    call c_ESMC_PointListAdd(pointlist, id, loc_coords, loc_orig_coords, localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! Add based on presence of orig coords.
+    if (present(loc_orig_coords)) then
+       call c_ESMC_PointListAddWOrig(pointlist, id, loc_coords, loc_orig_coords, localrc)
+       if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+       call c_ESMC_PointListAdd(pointlist, id, loc_coords, localrc)
+       if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
+    
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
