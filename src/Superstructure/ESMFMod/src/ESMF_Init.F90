@@ -1595,6 +1595,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         rc = ESMF_RC_NOT_IMPL
       endif
 
+      abortFlag = .false.
+      keepMpiFlag = ESMF_FALSE
+      if (present(endflag)) then
+        if (endflag==ESMF_END_ABORT) abortFlag = .true.
+        if (endflag==ESMF_END_KEEPMPI) keepMpiFlag = ESMF_TRUE
+      endif
+
       if (already_final) then
           if (rcpresent) rc = ESMF_SUCCESS
           return
@@ -1610,17 +1617,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call c_esmc_getComplianceCheckTrace(traceIsOn, profileIsOn, localrc)
       if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error checking ESMF_RUNTIME_* env variables"
-          return
       endif
       if (traceIsOn == 1 .or. profileIsOn == 1) then
         call ESMF_TraceClose()
         if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error closing trace stream"
-          return
         endif
       endif
-
-
 
       ! Close the Config file  
       ! TODO: write this routine and remove the status= line
@@ -1630,7 +1633,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_LogRc2Msg (localrc, errmsg, errmsg_l)
           write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
               ": Error finalizing config file: ", errmsg(:errmsg_l)
-          return
       endif
 
       ! Delete any internal built-in time manager calendars
@@ -1639,7 +1641,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_LogRc2Msg (localrc, errmsg, errmsg_l)
           write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
               ": Error finalizing the time manager calendars"
-          return
       endif
 
       ! Flush log to avoid lost messages
@@ -1649,13 +1650,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
               ": Error flushing log file: ", errmsg(:errmsg_l)
       end if
-
-      abortFlag = .false.
-      keepMpiFlag = ESMF_FALSE
-      if (present(endflag)) then
-        if (endflag==ESMF_END_ABORT) abortFlag = .true.
-        if (endflag==ESMF_END_KEEPMPI) keepMpiFlag = ESMF_TRUE
-      endif
 
       if (abortFlag) then
         ! Abort the VM
