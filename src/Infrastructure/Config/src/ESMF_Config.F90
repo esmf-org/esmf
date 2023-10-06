@@ -3944,7 +3944,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE:  ESMF_ConfigEQ - Compare two Config objects for equality
 !
 ! !INTERFACE:
-  function ESMF_ConfigEQ(Config1, Config2)
+  impure elemental function ESMF_ConfigEQ(Config1, Config2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_ConfigEQ
@@ -3970,7 +3970,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE:  ESMF_ConfigEQ - Compare two Config objects for inequality
 !
 ! !INTERFACE:
-  function ESMF_ConfigNE(Config1, Config2)
+  impure elemental function ESMF_ConfigNE(Config1, Config2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_ConfigNE

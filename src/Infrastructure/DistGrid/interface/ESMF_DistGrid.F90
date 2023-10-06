@@ -440,7 +440,7 @@ contains
 ! !IROUTINE:  ESMF_DistGridEQ - Compare two DistGrids for equality
 !
 ! !INTERFACE:
-  function ESMF_DistGridEQ(distgrid1, distgrid2)
+  impure elemental function ESMF_DistGridEQ(distgrid1, distgrid2)
 ! 
 ! !RETURN VALUE:
     logical :: ESMF_DistGridEQ
@@ -491,7 +491,7 @@ contains
 ! !IROUTINE:  ESMF_DistGridNE - Compare two DistGrids for non-equality
 !
 ! !INTERFACE:
-  function ESMF_DistGridNE(distgrid1, distgrid2)
+  impure elemental function ESMF_DistGridNE(distgrid1, distgrid2)
 ! 
 ! !RETURN VALUE:
     logical :: ESMF_DistGridNE

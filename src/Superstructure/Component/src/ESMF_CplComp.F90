@@ -269,7 +269,7 @@ contains
 ! !IROUTINE:  ESMF_CplCompEQ - Compare two CplComps for equality
 !
 ! !INTERFACE:
-  function ESMF_CplCompEQ(cplcomp1, cplcomp2)
+  impure elemental function ESMF_CplCompEQ(cplcomp1, cplcomp2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_CplCompEQ
@@ -320,7 +320,7 @@ contains
 ! !IROUTINE:  ESMF_CplCompNE - Compare two CplComps for non-equality
 !
 ! !INTERFACE:
-  function ESMF_CplCompNE(cplcomp1, cplcomp2)
+  impure elemental function ESMF_CplCompNE(cplcomp1, cplcomp2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_CplCompNE
