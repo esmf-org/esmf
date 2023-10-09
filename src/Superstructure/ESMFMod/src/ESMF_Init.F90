@@ -1619,7 +1619,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error checking ESMF_RUNTIME_* env variables"
       endif
       if (traceIsOn == 1 .or. profileIsOn == 1) then
-        call ESMF_TraceClose()
+        call ESMF_TraceClose(rc=localrc)
         if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error closing trace stream"
         endif
