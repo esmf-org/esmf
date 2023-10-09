@@ -93,6 +93,10 @@ using namespace std;
 #include <openacc.h>
 #endif
 
+#ifdef ESMF_NVML
+#include <nvml.h>
+#endif
+
 // macros used within this source file
 #define VERBOSITY             (1)       // 0: off, 10: max
 #define VM_TID_MPI_TAG        (10)      // mpi tag used to send/recv TID
@@ -137,9 +141,12 @@ int VMK::mpi_init_outside_esmf;
 int VMK::pre_mpi_init = 0;
 int VMK::nssiid;
 int VMK::ncores;
+int VMK::ndevs;
+int VMK::ndevsSSI;
 int *VMK::cpuid;
 int *VMK::ssiid;
 int *VMK::ssipe;
+int *VMK::ssidevs;
 double VMK::wtime0;
 // Static data members to support command line arguments
 int VMK::argc;
@@ -383,6 +390,8 @@ void VMK::set(bool globalResourceControl){
 
 
 void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::init()"
   // initialize the physical machine and a default (all MPI) virtual machine
   // obtain command line arguments and store in the VM class
   argc = 0; // reset
@@ -455,8 +464,13 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   default_mpi_c = mpi_c;
 #if (MPI_VERSION >= 3)
   // set up communicator across single-system-images SSIs
-  MPI_Comm_split_type(mpi_c, MPI_COMM_TYPE_SHARED, 0, MPI_INFO_NULL, 
+  MPI_Comm_split_type(mpi_c, MPI_COMM_TYPE_SHARED, 0, MPI_INFO_NULL,
     &mpi_c_ssi);
+  // set up communicator across root pets of each SSI
+  int color;
+  MPI_Comm_rank(mpi_c_ssi, &color);
+  if (color>0) color = MPI_UNDEFINED; // only root PET on each SSI participates
+  MPI_Comm_split(mpi_c, color, 0, &mpi_c_ssi_roots);
 #endif
   // initialize the shared memory variables
   pth_finish_count = NULL;
@@ -625,7 +639,64 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   MPI_Allgather(&num_adevices, 1, MPI_INTEGER,
                 nadevs, 1, MPI_INTEGER, mpi_c);
 #endif
-  // Creating large contiguous MPI data types
+  // device discovery
+  ndevsSSI = 0; // no devices by default.
+  bool ndevInit = false;
+#ifdef ESMF_NVML
+  // Have access to NVIDIA management library (NVML)
+  nvmlInit_v2();  // initialize NVML
+  unsigned int nvmlDeviceCount;
+  nvmlDeviceGetCount_v2(&nvmlDeviceCount);
+  ndevsSSI = nvmlDeviceCount;
+  ndevInit = true;
+#endif
+#ifndef ESMF_NO_OPENACC
+  // Have access to OpenACC
+  int openaccDeviceCount;
+  openaccDeviceCount = acc_get_num_devices(acc_device_not_host);
+  if (ndevInit){
+    if (openaccDeviceCount != ndevsSSI){
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "OpenACC device count must match already determined device count!",
+        ESMC_CONTEXT, &localrc);
+      throw localrc;  // bail out with exception
+    }
+  }else{
+    ndevsSSI = openaccDeviceCount;
+    ndevInit = true;
+  }
+#endif
+#ifndef ESMF_NO_OPENMP
+  // Have access to OpenMP
+  int openmpDeviceCount;
+  openmpDeviceCount = omp_get_num_devices();
+  if (ndevInit){
+    if (openmpDeviceCount != ndevsSSI){
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "OpenMP device count must match already determined device count!",
+        ESMC_CONTEXT, &localrc);
+      throw localrc;  // bail out with exception
+    }
+  }else{
+    ndevsSSI = openmpDeviceCount;
+    ndevInit = true;
+  }
+#endif
+  // Now that ndevsSSI is known on every PET, determine total number ndevs
+  if (mpi_c_ssi_roots != MPI_COMM_NULL)
+    MPI_Allreduce(&ndevsSSI, &ndevs, 1, MPI_INTEGER, MPI_SUM, mpi_c_ssi_roots);
+  if (mpi_c_ssi != MPI_COMM_NULL)
+    MPI_Bcast(&ndevs, 1, MPI_INTEGER, 0, mpi_c_ssi);
+  // Set the instance variables for devices for the global VM
+  devCount = ndevs;
+  devCountSSI = ndevsSSI;
+  devListSSI = new int[devCountSSI];
+  for (auto i=0; i<devCountSSI; i++)
+    devListSSI[i] = i;  // default each PET associated with all local devices
+  // Creating large contiguous MPI data types in support of large MPI messages
+  // within the 32-bit count limit of MPI version < 4.
   int byteCount=1;
   for (auto i=0; i<(signed)customType.size(); i++){
     byteCount *= 2;
@@ -638,6 +709,8 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
 
 
 void VMK::finalize(int finalizeMpi){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::finalize()"
   // finalize default (all MPI) virtual machine, deleting all its allocations
   epochFinal(); // close down epoch handling
   for (int k=0; k<100; k++)
@@ -682,6 +755,11 @@ void VMK::finalize(int finalizeMpi){
     delete [] cid[i];
   delete [] cid;
   delete [] ssiLocalPetList;
+  delete [] devListSSI;
+#ifdef ESMF_NVML
+  // Have access to NVIDIA management library (NVML)
+  nvmlShutdown();  // shut down NVML
+#endif
   // conditionally finalize MPI
   int finalized;
   MPI_Finalized(&finalized);
@@ -2702,8 +2780,23 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
   msg << prefix << "vm located at: " << this;
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
-  msg << prefix << "petCount=" << getPetCount() << " localPet=" << getLocalPet()
-    << " mypthid=" << mypthid << " currentSsiPe=" << getCurrentSsiPe();
+  msg << prefix << "ndevs=" << ndevs
+    << " ndevsSSI=" << ndevsSSI;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "ssiCount=" << getSsiCount()
+    << " localSsi=" << ssiid[cid[mypet][0]]
+    << " devCount=" << getDevCount()
+    << " devCountSSI=" << getDevCountSSI();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "petCount=" << getPetCount()
+    << " localPet=" << getLocalPet()
+    << " mypthid=" << mypthid
+    << " currentSsiPe=" << getCurrentSsiPe();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "mpionly=" << mpionly << " threadsflag=" << threadsflag;
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
 #ifndef ESMF_NO_PTHREADS
@@ -2729,25 +2822,81 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
     << omp_get_max_threads();
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
+  msg << prefix << "Current system level OMP_NUM_PROCS setting for local PET: "
+    << omp_get_num_procs();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "Current system level OMP_NUM_DEVICES setting for local PET: "
+    << omp_get_num_devices();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "Current system level OMP_DEVICE_NUM setting for local PET: "
+    << omp_get_device_num();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "Current system level OMP_DEFAULT_DEVICE setting for local PET: "
+    << omp_get_default_device();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
 #endif
 #ifndef ESMF_NO_OPENACC
+  // output OpenACC info
 #ifdef __NVCOMPILER
   // under NVHPC, multi-cpu-core threading (for OpenACC and standard language
   // constructs) is implemented based on OpenACC: NVHPC extended OpenACC API
-  // output OpenACC info
   msg << prefix << "Current system level ACC_NUM_CORES setting for local PET: "
     << acc_get_num_cores();
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
 #endif
+  msg << prefix << "Current system level ACC_NUM_DEVICES (acc_device_not_host)";
+  msg << " setting for local PET: ";
+  msg << acc_get_num_devices(acc_device_not_host);
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "Current system level ACC_DEVICE_NUM (acc_device_not_host)";
+  msg << " setting for local PET: ";
+  msg << acc_get_device_num(acc_device_not_host);
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "Current system level ACC_DEVICE_TYPE";
+  msg << " setting for local PET: ";
+  msg << acc_get_device_type();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
 #endif
-  msg << prefix << "ssiCount=" << getSsiCount()
-    << " localSsi=" << ssiid[cid[mypet][0]];
+
+#ifdef ESMF_NVML
+  nvmlReturn_t nvlmRC;
+  nvlmRC = nvmlInit_v2();
+  msg << prefix << "nvmlInit_v2: " << nvlmRC;
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
-  msg << prefix << "mpionly=" << mpionly << " threadsflag=" << threadsflag;
+
+  unsigned int nvmlDeviceCount;
+  nvlmRC = nvmlDeviceGetCount_v2(&nvmlDeviceCount);
+  msg << prefix << "nvmlDeviceGetCount_v2: " << nvlmRC;
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
+  msg << prefix << "nvmlDeviceCount: " << nvmlDeviceCount;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  
+  char nvmlVersion[80];
+  nvlmRC = nvmlSystemGetNVMLVersion(nvmlVersion, 80);
+  msg << prefix << "nvmlSystemGetNVMLVersion: " << nvlmRC;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "nvmlVersion: " << nvmlVersion;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+
+  nvlmRC = nvmlShutdown();
+  msg << prefix << "nvmlShutdown: " << nvlmRC;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+#endif
+
   msg << prefix << "ESMF level logical PET->PE association "
    << "(but consider system level affinity pinning!):";
   ESMC_LogDefault.Write(msg.str(), msgType);
