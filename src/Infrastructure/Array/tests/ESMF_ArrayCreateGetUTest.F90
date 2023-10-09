@@ -54,6 +54,7 @@ program ESMF_ArrayCreateGetUTest
   !LOCAL VARIABLES:
   type(ESMF_VM):: vm
   integer:: i,j,k,l, next, rank
+  integer:: replicatedDimCount
   integer:: petCount, localPet, deCount, de, localDeCount, lde, ssiLocalDeCount
   integer, allocatable  :: regDecomp(:)
   type(ESMF_ArraySpec)  :: arrayspec, arrayspec2
@@ -315,6 +316,19 @@ program ESMF_ArrayCreateGetUTest
   write(name, *) "Verify name returned from Array"
   write(failMsg, *) "Incorrect name"
   call ESMF_Test((trim(arrayName)=="MyArray with ArraySpec"), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet replicatedDimCount Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(array, replicatedDimCount=replicatedDimCount, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify replicatedDimCount returned from Array"
+  write(failMsg, *) "Incorrect replicatedDimCount"
+  call ESMF_Test(replicatedDimCount==0, name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only

@@ -1308,6 +1308,7 @@ program ESMF_ArrayEx
 
 !BOE
 ! \subsubsection{Arrays with replicated dimensions}
+! \label{sec:array:usage:replicated_dims}
 !
 ! Thus far most examples demonstrated cases where the DistGrid {\tt dimCount}
 ! was equal to the Array {\tt rank}. The previous section introduced the
