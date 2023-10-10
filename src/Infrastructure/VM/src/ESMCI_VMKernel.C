@@ -977,6 +977,13 @@ void VMK::construct(void *ssarg){
   mpi_c_ssi = sarg->mpi_c_ssi;
 #endif
 
+  // device management
+  devCount = ndevs;         //TODO: needs to consider devList
+  devCountSSI = ndevsSSI;   //TODO: needs to consider devList
+  devListSSI = new int[devCountSSI];
+  for (auto i=0; i<devCountSSI; i++)
+    devListSSI[i] = i; //TODO: needs to consider devList
+
   // pthread mutex control
   pth_mutex2 = sarg->pth_mutex2;
   pth_mutex = sarg->pth_mutex;
@@ -1193,6 +1200,7 @@ void VMK::destruct(){
     delete [] cid[i];
   delete [] cid;
   delete [] ssiLocalPetList;
+  delete [] devListSSI;
 }
 
 
@@ -1660,8 +1668,8 @@ static void *vmk_block(void *arg){
 }
 
 
-void *VMK::startup(class VMKPlan *vmp, 
-  void *(fctp)(void *, void *), void *cargo, int *rc){
+void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
+  void *cargo, int *rc){
 #if (VERBOSITY > 9)
   vmp->vmkplan_print();
 #endif
@@ -2807,6 +2815,12 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
     << " localSsi=" << ssiid[cid[mypet][0]]
     << " devCount=" << getDevCount()
     << " devCountSSI=" << getDevCountSSI();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix;
+  for (auto i=0; i<getDevCountSSI(); i++)
+    msg << " devListSSI[" << i << "]=" << devListSSI[i]
+      << "->" << ssidevs[devListSSI[i]];
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
   msg << prefix << "petCount=" << getPetCount()

@@ -321,7 +321,9 @@ class VMK{
     int devCount;   // number of devices associated with this VMK all SSI
     int devCountSSI;// number of devices associated with this VMK on local SSI
     int *devListSSI;// list of SSI-local device indices associated with this VMK
-                    // use this index to look up global device index in 
+                    // Use this index to make local association calls (e.g. via
+                    // acc_set_device_num() or omp_set_default_device()), and
+                    // to look up global device index in ssidevs array.
     // general information about this VMK
     int mpionly;    // 0: there is multi-threading, 1: MPI-only
     bool threadsflag; // threaded or none-threaded VM
