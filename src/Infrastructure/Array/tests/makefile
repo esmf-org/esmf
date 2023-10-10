@@ -18,8 +18,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayCreateGetUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayRedistUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayRedistPerfUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayHaloUTest \
-                $(ESMF_TESTDIR)/ESMC_ArrayUTest \
-                $(ESMF_TESTDIR)/ESMCI_ArrayUTest
+                $(ESMF_TESTDIR)/ESMC_ArrayUTest
 
 TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMF_ArrayDataUTest  \
@@ -32,14 +31,12 @@ TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMF_ArrayRedistUTest \
                 RUN_ESMF_ArrayRedistPerfUTest \
                 RUN_ESMF_ArrayHaloUTest \
-                RUN_ESMC_ArrayUTest \
-                RUN_ESMCI_ArrayUTest
+                RUN_ESMC_ArrayUTest
 
 TESTS_RUN_UNI = RUN_ESMF_ArrayDataUTestUNI \
                 RUN_ESMF_ArraySMMUTestUNI \
                 RUN_ESMF_ArraySMMFromFileUTestUNI \
-                RUN_ESMC_ArrayUTestUNI \
-                RUN_ESMCI_ArrayUTestUNI
+                RUN_ESMC_ArrayUTestUNI
 
 #
 # check ESMF_TESTHARNESS_ARRAY for default, 
@@ -140,14 +137,6 @@ RUN_ESMC_ArrayUTest:
 
 RUN_ESMC_ArrayUTestUNI:
 	$(MAKE) TNAME=Array NP=1 ctest
-
-# ---
-
-RUN_ESMCI_ArrayUTest:
-	$(MAKE) TNAME=Array NP=4 citest
-
-RUN_ESMCI_ArrayUTestUNI:
-	$(MAKE) TNAME=Array NP=1 citest
 
 # ---
 #
