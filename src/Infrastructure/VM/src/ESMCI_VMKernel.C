@@ -689,6 +689,23 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
     MPI_Allreduce(&ndevsSSI, &ndevs, 1, MPI_INTEGER, MPI_SUM, mpi_c_ssi_roots);
   if (mpi_c_ssi != MPI_COMM_NULL)
     MPI_Bcast(&ndevs, 1, MPI_INTEGER, 0, mpi_c_ssi);
+  // Set up global device indices for the list of SSI local devices
+  ssidevs = new int[ndevsSSI];
+  if (mpi_c_ssi_roots != MPI_COMM_NULL){
+    // ssi roots figure out global labeling of ssi local devices
+    std::vector<int> ndevsOnSSI(ssiCount);
+    MPI_Allgather(&ndevsSSI, 1, MPI_INTEGER, &(ndevsOnSSI[0]), 1, MPI_INTEGER,
+      mpi_c_ssi_roots);
+    int devStart=0;
+    for (auto i=0; i<localSsi; i++)
+      devStart += ndevsOnSSI[i];
+    for (auto i=0; i<ndevsSSI; i++)
+      ssidevs[i] = devStart + i;
+  }
+  if (mpi_c_ssi != MPI_COMM_NULL){
+    // ssi roots broadcast locally constructed ssidevs list to PET on same SSI
+    MPI_Bcast(ssidevs, ndevsSSI, MPI_INTEGER, 0, mpi_c_ssi);
+  }
   // Set the instance variables for devices for the global VM
   devCount = ndevs;
   devCountSSI = ndevsSSI;
@@ -746,6 +763,7 @@ void VMK::finalize(int finalizeMpi){
   delete [] cpuid;
   delete [] ssiid;
   delete [] ssipe;
+  delete [] ssidevs;
   delete [] lpid;
   delete [] pid;
   delete [] tid;
@@ -823,7 +841,7 @@ struct SpawnArg{
   void *cargo;
 };
 
-    
+
 void VMK::abort(){
   // abort default (all MPI) virtual machine
   int finalized;
@@ -2780,8 +2798,9 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
   msg << prefix << "vm located at: " << this;
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
-  msg << prefix << "ndevs=" << ndevs
-    << " ndevsSSI=" << ndevsSSI;
+  msg << prefix << "ndevs=" << ndevs << " ndevsSSI=" << ndevsSSI;
+  for (auto i=0; i<ndevsSSI; i++)
+    msg << " ssidevs[" << i << "]=" << ssidevs[i];
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
   msg << prefix << "ssiCount=" << getSsiCount()
@@ -2806,7 +2825,7 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
   pthread_getaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
   msg << prefix << "Current system level affinity pinning for local PET:";
   ESMC_LogDefault.Write(msg.str(), msgType);
-  for (int i=0; i<CPU_SETSIZE; i++){
+  for (auto i=0; i<CPU_SETSIZE; i++){
     if (CPU_ISSET(i, &cpuset)){
       msg.str("");  // clear
       msg << prefix << " SSIPE=" << i;
@@ -2900,13 +2919,13 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
   msg << prefix << "ESMF level logical PET->PE association "
    << "(but consider system level affinity pinning!):";
   ESMC_LogDefault.Write(msg.str(), msgType);
-  for (int i=0; i<npets; i++){
+  for (auto i=0; i<npets; i++){
     msg.str("");  // clear
     msg << prefix << "PET=" << i << " lpid=" << lpid[i] << " tid=" << tid[i]
       << " pid=" << pid[i] << " peCount=" << ncpet[i]
       << " accCount=" << nadevs[i];
     ESMC_LogDefault.Write(msg.str(), msgType);
-    for (int j=0; j<ncpet[i]; j++){
+    for (auto j=0; j<ncpet[i]; j++){
       msg.str("");  // clear
       msg << prefix << " PE=" << cid[i][j] << " SSI=" << ssiid[cid[i][j]]
         << " SSIPE=" << ssipe[cid[i][j]];
