@@ -128,12 +128,13 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()
-  subroutine ESMF_ArrayGetDefault(array, keywordEnforcer, arrayspec, typekind, &
-    rank, replicatedDimCount, localarrayList, indexflag, distgridToArrayMap, &
+subroutine ESMF_ArrayGetDefault(array, keywordEnforcer, arrayspec, typekind, &
+    rank, localarrayList, indexflag, distgridToArrayMap, &
     distgridToPackedArrayMap, arrayToDistGridMap, undistLBound, &
     undistUBound, exclusiveLBound, exclusiveUBound, computationalLBound, &
     computationalUBound, totalLBound, totalUBound, computationalLWidth, &
-    computationalUWidth, totalLWidth, totalUWidth, distgrid, dimCount, &
+    computationalUWidth, totalLWidth, totalUWidth, distgrid, &
+    dimCount, replicatedDimCount, &
     tileCount, minIndexPTile, maxIndexPTile, deToTileMap, indexCountPDe, &
     delayout, deCount, localDeCount, ssiLocalDeCount, localDeToDeMap, &
     localDeList, &    ! DEPRECATED ARGUMENT
@@ -145,7 +146,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_ArraySpec),          intent(out), optional :: arrayspec
     type(ESMF_TypeKind_Flag),      intent(out), optional :: typekind
     integer,                       intent(out), optional :: rank
-    integer,                       intent(out), optional :: replicatedDimCount
     type(ESMF_LocalArray), target, intent(out), optional :: localarrayList(:)
     type(ESMF_Index_Flag),         intent(out), optional :: indexflag
     integer,               target, intent(out), optional :: distgridToArrayMap(:)
@@ -165,6 +165,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,               target, intent(out), optional :: totalUWidth(:,:)
     type(ESMF_DistGrid),           intent(out), optional :: distgrid
     integer,                       intent(out), optional :: dimCount
+    integer,                       intent(out), optional :: replicatedDimCount
     integer,                       intent(out), optional :: tileCount
     integer,                       intent(out), optional :: minIndexPTile(:,:)
     integer,                       intent(out), optional :: maxIndexPTile(:,:)
@@ -217,10 +218,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     TypeKind of the Array object.
 !   \item[{[rank]}]
 !     Rank of the Array object.
-!   \item[{[replicatedDimCount]}]
-!     Number of replicated dimensions in the Array. (See
-!     Section~\ref{sec:array:usage:replicated_dims} for an explanation of replicated
-!     dimensions.)
 !   \item[{[localarrayList]}]
 !     Upon return this holds a list of the associated {\tt ESMC\_LocalArray}
 !     objects. {\tt localarrayList} must be allocated to be of size
@@ -319,6 +316,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Upon return this holds the associated {\tt ESMF\_DistGrid} object.
 !   \item[{[dimCount]}]
 !     Number of dimensions (rank) of {\tt distgrid}.
+!   \item[{[replicatedDimCount]}]
+!     Number of replicated dimensions in the Array. (See
+!     Section~\ref{sec:array:usage:replicated_dims} for an explanation of replicated
+!     dimensions.)
 !   \item[{[tileCount]}]
 !     Number of tiles in {\tt distgrid}.
 !   \item[{[minIndexPTile]}]
