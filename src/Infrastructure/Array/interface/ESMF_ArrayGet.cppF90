@@ -217,6 +217,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     TypeKind of the Array object.
 !   \item[{[rank]}]
 !     Rank of the Array object.
+!   \item[{[replicatedDimCount]}]
+!     Number of replicated dimensions in the Array. (See
+!     Section~\ref{sec:array:usage:replicated_dims} for an explanation of replicated
+!     dimensions.)
 !   \item[{[localarrayList]}]
 !     Upon return this holds a list of the associated {\tt ESMC\_LocalArray}
 !     objects. {\tt localarrayList} must be allocated to be of size
@@ -315,10 +319,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Upon return this holds the associated {\tt ESMF\_DistGrid} object.
 !   \item[{[dimCount]}]
 !     Number of dimensions (rank) of {\tt distgrid}.
-!   \item[{[replicatedDimCount]}]
-!     Number of replicated dimensions in the Array. (See
-!     Section~\ref{sec:array:usage:replicated_dims} for an explanation of replicated
-!     dimensions.)
 !   \item[{[tileCount]}]
 !     Number of tiles in {\tt distgrid}.
 !   \item[{[minIndexPTile]}]
