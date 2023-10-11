@@ -403,12 +403,6 @@ int processPolygon(OGRGeometryH fGeom, int runtyp, double *nodeXCoords, double *
   // If populating, (i.e. if runtyp = 1), then populate
   if ( runtyp == 1 ) {
     // Set nodeIDs & nodeCoords
-//    for (i = 0; i < points-1; i++) {
-//      nodeXCoords[totpoints+i] = OGR_G_GetX(fGeom, i);
-//      nodeYCoords[totpoints+i] = OGR_G_GetY(fGeom, i);
-//      nodeIDs[totpoints+i]     = totpoints+i+1; // increment from 1, not 0
-//      elemConn[totpoints+i]    = totpoints+i+1;
-//    }    
     // assumes OGR reads a clockwise ring. This loop reverses it.
     int ii=0;
     for (int i = points-2; i >=0; i--) {
