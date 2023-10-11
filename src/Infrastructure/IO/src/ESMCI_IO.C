@@ -1262,8 +1262,15 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int pet
   std::vector<int> maxIndexPDimPTileVec;
   std::vector<int> distgridToArrayMapVec;
   if (replicatedDims>0){
-    // FIXME(wjs, 2023-05-26) Still need to fix this loop to work with the multi-tile
-    // case; then remove the following error check
+    // TODO(wjs, 2023-05-26) Still need to fix this loop to work with the multi-tile
+    // case; then remove the following error check.
+    //
+    // See commit 28f951b333 (reverted in c5f596127e) for an attempt to get this working
+    // in the multi-tile case. However, this attempt was aborted due to finding what
+    // appear to be issues with I/O with Arrays with replicated dimensions even in the
+    // single-tile case - see https://github.com/esmf-org/esmf/issues/184. We have decided
+    // to leave this functionality in place in case anyone is relying on it, but we do not
+    // expect I/O with Arrays with replicated dimensions to work reliably or consistently.
     if (tileCount > 1) {
       ESMC_LogDefault.MsgFoundError(ESMF_RC_NOT_IMPL,
         "Multi-tile with > 1 DE per PET and replicated dims not yet implemented", ESMC_CONTEXT, rc);
