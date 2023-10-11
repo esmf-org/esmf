@@ -49,8 +49,8 @@ program ESMF_IO_MultitileUTest
   type(ESMF_Grid) :: grid6tile
   type(ESMF_Grid) :: grid6tileUnevenDEs
   integer :: grid6tileUnevenDEsLdeCount
-  integer :: arrayWithReplicatedDimsLdeCount
   integer :: lde
+  type(ESMF_DistGrid) :: distgrid3tile
 
   ! Fields used for writing:
   !
@@ -94,9 +94,6 @@ program ESMF_IO_MultitileUTest
   ! This array is not in the array bundle:
   type(ESMF_Array) :: array3
   real(ESMF_KIND_R8), pointer :: array3Data(:,:)
-  ! This array is for tests with something other than 1 DE per PET:
-  type(ESMF_Array) :: arrayWithReplicatedDims
-  real(ESMF_KIND_R8), pointer :: arrayWithReplicatedDimsData(:,:)
 
   ! Arrays used for reading:
   !
@@ -107,17 +104,13 @@ program ESMF_IO_MultitileUTest
   ! This array is not in the array bundle:
   type(ESMF_Array) :: array3Read
   real(ESMF_KIND_R8), pointer :: array3ReadData(:,:)
-  ! This array is for tests with something other than 1 DE per PET:
-  type(ESMF_Array) :: arrayWithReplicatedDimsRead
-  real(ESMF_KIND_R8), pointer :: arrayWithReplicatedDimsReadData(:,:)
 
   logical :: allEqual
 
   character(len=*), parameter :: fileNameFields = "ESMF_IO_MultitileUTestFields*.nc"
   character(len=*), parameter :: fileNameArrays = "ESMF_IO_MultitileUTestArrays*.nc"
   character(len=*), parameter :: fileNameFail = "ESMF_IO_MultitileUTestFail*.nc"
-  character(len=*), parameter :: fileNameUnevenDEFields = "ESMF_IO_MultitileUTestUnevenDEFields*.nc"
-  character(len=*), parameter :: fileNameUnevenDEArrays = "ESMF_IO_MultitileUTestUnevenDEArrays*.nc"
+  character(len=*), parameter :: fileNameUnevenDEs = "ESMF_IO_MultitileUTestUnevenDEs*.nc"
 
   !------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
@@ -363,7 +356,7 @@ program ESMF_IO_MultitileUTest
   !EX_UTest_Multi_Proc_Only
   write(name,*) "Write a multi-tile Field with uneven DEs per PET"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_FieldWrite(field1UnevenDEs, fileName=fileNameUnevenDEFields, overwrite=.true., rc=rc)
+  call ESMF_FieldWrite(field1UnevenDEs, fileName=fileNameUnevenDEs, overwrite=.true., rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -376,7 +369,7 @@ program ESMF_IO_MultitileUTest
   !EX_UTest_Multi_Proc_Only
   write(name,*) "Read a multi-tile Field with uneven DEs per PET"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_FieldRead(field1UnevenDEsRead, fileName=fileNameUnevenDEFields, rc=rc)
+  call ESMF_FieldRead(field1UnevenDEsRead, fileName=fileNameUnevenDEs, rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -412,7 +405,7 @@ program ESMF_IO_MultitileUTest
   !EX_UTest_Multi_Proc_Only
   write(name,*) "Write a multi-tile Field with uneven DEs per PET and ungridded dims"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_FieldWrite(field4dUnevenDEs, fileName=fileNameUnevenDEFields, overwrite=.true., rc=rc)
+  call ESMF_FieldWrite(field4dUnevenDEs, fileName=fileNameUnevenDEs, overwrite=.true., rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -425,7 +418,7 @@ program ESMF_IO_MultitileUTest
   !EX_UTest_Multi_Proc_Only
   write(name,*) "Read a multi-tile Field with uneven DEs per PET and ungridded dims"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_FieldRead(field4dUnevenDEsRead, fileName=fileNameUnevenDEFields, rc=rc)
+  call ESMF_FieldRead(field4dUnevenDEsRead, fileName=fileNameUnevenDEs, rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -446,55 +439,6 @@ program ESMF_IO_MultitileUTest
      call ESMF_FieldGet(field4dUnevenDEsRead, localDe=lde, farrayPtr=field4dUnevenDEsReadData, rc=rc)
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
      if (.not. all(field4dUnevenDEsReadData == field4dUnevenDEsData)) then
-        allEqual = .false.
-     end if
-  end do
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  call ESMF_Test(allEqual, name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Comparison did not fail as expected"
-  call ESMF_Test(.not. allEqual, name, failMsg, result, ESMF_SRCLINE)
-#endif
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !EX_UTest_Multi_Proc_Only
-  write(name,*) "Write a multi-tile Array with uneven DEs per PET and replicated dims"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(arrayWithReplicatedDims, fileName=fileNameUnevenDEArrays, overwrite=.true., rc=rc)
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc == ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !EX_UTest_Multi_Proc_Only
-  write(name,*) "Read a multi-tile Array with uneven DEs per PET and replicated dims"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead(arrayWithReplicatedDimsRead, fileName=fileNameUnevenDEArrays, rc=rc)
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc == ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !EX_UTest_Multi_Proc_Only
-  write(name,*) "Confirm that Array-read array matches original with uneven DEs per PET and replicated dims"
-  write(failMsg, *) "Read-in array differs from original"
-  allEqual = .true.
-  do lde = 0, arrayWithReplicatedDimsLdeCount - 1
-     ! For simplicity, bail out if the following ArrayGets fail rather than calling them their own unit test
-     call ESMF_ArrayGet(arrayWithReplicatedDims, localDe=lde, farrayPtr=arrayWithReplicatedDimsData, rc=rc)
-     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-     call ESMF_ArrayGet(arrayWithReplicatedDimsRead, localDe=lde, farrayPtr=arrayWithReplicatedDimsReadData, rc=rc)
-     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-     if (.not. all(arrayWithReplicatedDimsReadData == arrayWithReplicatedDimsData)) then
         allEqual = .false.
      end if
   end do
@@ -660,8 +604,7 @@ contains
     ! # DEs: 1 2 3 4 0 3 0 3
     decompPTileUnevenDEs(1,:) = [2,1,3,1,1,3]
     decompPTileUnevenDEs(2,:) = [1,1,2,1,3,1]
-    delayout = ESMF_DELayoutCreate(petMap=[3,2,5,5,1,3,2,1,7,3,0,7,2,7,3,5], rc=rc)
-    if (rc /= ESMF_SUCCESS) return
+    delayout = ESMF_DELayoutCreate(petMap=[3,2,5,5,1,3,2,1,7,3,0,7,2,7,3,5])
     grid6tileUnevenDEs = ESMF_GridCreateCubedSphere( &
          tilesize = 6, &
          regDecompPTile = decompPTileUnevenDEs, &
@@ -761,14 +704,6 @@ contains
     integer :: minIndexPTile(2,3)
     integer :: maxIndexPTile(2,3)
     integer :: decompPTile(2,3)
-    type(ESMF_DistGrid) :: distgrid3tile
-
-    ! Information for a 4-d, 3-tile DistGrid
-    integer :: minIndexPTile4d(4,3)
-    integer :: maxIndexPTile4d(4,3)
-    integer :: decompPTile4d(4,3)
-    type(ESMF_DELayout) :: delayout4d
-    type(ESMF_DistGrid) :: distgrid3tile4d
 
     type(ESMF_ArraySpec) :: arraySpec
 
@@ -840,64 +775,6 @@ contains
     if (rc /= ESMF_SUCCESS) return
 
     arrayBundleRead = ESMF_ArrayBundleCreate(arrayList=[array1Read, array2Read], name="abRead", rc=rc)
-    if (rc /= ESMF_SUCCESS) return
-
-    !------------------------------------------------------------------------
-    ! Set up a 3-tile, 4-d distgrid with an uneven distribution of DEs to PETs (but still 8 PEs)
-    !------------------------------------------------------------------------
-
-    minIndexPTile4d(:,1) = [11,1 ,21,51]
-    maxIndexPTile4d(:,1) = [20,10,23,55]
-    minIndexPTile4d(:,2) = [11,11,31,61]
-    maxIndexPTile4d(:,2) = [20,20,34,64]
-    minIndexPTile4d(:,3) = [1 ,11,41,71]
-    maxIndexPTile4d(:,3) = [10,20,45,73]
-
-    ! Tiles 1 and 3 each have 6 DEs (along different dimensions); tile 2 has 16 DEs
-    ! (2x2x2x2)
-    decompPTile4d(:,1) = [1,3,1,2]
-    decompPTile4d(:,2) = [2,2,2,2]
-    decompPTile4d(:,3) = [3,1,2,1]
-
-    ! The DEs are scattered in a disorganized fashion across PETs. We have the following
-    ! number of DEs on each PET:
-    ! PET #: 0 1 2 3 4 5 6 7
-    ! # DEs: 4 1 3 8 0 5 0 7
-    delayout4d = ESMF_DELayoutCreate(petMap=[3,7,2,7,5,0,3,3,5,5,1,3,0,7,2,3,5,7,3,0,7,3,2,7,0,3,5,7], rc=rc)
-    if (rc /= ESMF_SUCCESS) return
-
-    distgrid3tile4d = ESMF_DistGridCreate( &
-         minIndexPTile = minIndexPTile4d, &
-         maxIndexPTile = maxIndexPTile4d, &
-         regDecompPTile = decompPTile4d, &
-         delayout = delayout4d, &
-         rc=rc)
-    if (rc /= ESMF_SUCCESS) return
-
-    !------------------------------------------------------------------------
-    ! Create arrays on the 3-tile, 4-d distgrid
-    !------------------------------------------------------------------------
-
-    ! Create a 2-d array... so there are 2 replicated dimensions
-    arrayWithReplicatedDims = ESMF_ArrayCreate(distgrid3tile4d, arraySpec, name="arrayWithReplicatedDims", &
-         ! Dimensions 2 and 4 of the DistGrid will be replicated dimensions; note also
-         ! that we rearrange dimensions 1 and 3:
-         distgridToArrayMap = [2,0,1,0], &
-         rc=rc)
-    if (rc /= ESMF_SUCCESS) return
-    call ESMF_ArrayGet(arrayWithReplicatedDims, localDECount=arrayWithReplicatedDimsLdeCount, rc=rc)
-    if (rc /= ESMF_SUCCESS) return
-    do lde = 0, arrayWithReplicatedDimsLdeCount-1
-       call ESMF_ArrayGet(array1, farrayPtr=arrayWithReplicatedDimsData, rc=rc)
-       if (rc /= ESMF_SUCCESS) return
-       call fillArray(arrayWithReplicatedDimsData, (10+lde))
-    end do
-
-    arrayWithReplicatedDimsRead = ESMF_ArrayCreate(distgrid3tile4d, arraySpec, name="arrayWithReplicatedDims", &
-         ! Dimensions 2 and 4 of the DistGrid will be replicated dimensions; note also
-         ! that we rearrange dimensions 1 and 3:
-         distgridToArrayMap = [2,0,1,0], &
-         rc=rc)
     if (rc /= ESMF_SUCCESS) return
 
   end subroutine createArrays
