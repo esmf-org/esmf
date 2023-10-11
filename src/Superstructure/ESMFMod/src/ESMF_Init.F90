@@ -128,8 +128,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[7.0.0] Added argument {\tt logAppendFlag} to allow specifying that the existing
-!              log files will be overwritten.
+! \item[7.0.0] Added argument {\tt logAppendFlag} to allow specifying that the
+!              existing log files will be overwritten.
 ! \item[8.2.0] Added argument {\tt globalResourceControl} to support ESMF-aware
 !              threading and resource control on the global VM level.\newline
 !              Added argument {\tt config} to return default handle to the
@@ -151,8 +151,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              configurations.\newline
 !              Added argument {\tt configFilenameFromArgNum} to support config
 !              file specification via the command line.
-! \item[8.6.0] Added {\tt defaultDefaultCalKind} argument to allow specifiation of
-!              a default for {\tt defaultCalKind}.
+! \item[8.6.0] Added {\tt defaultDefaultCalKind} argument to allow specifiation
+!              of a default for {\tt defaultCalKind}.
 ! \end{description}
 ! \end{itemize}
 !
@@ -1629,11 +1629,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
       endif
 
+#ifdef LOG_FINALIZE
       call ESMF_LogWrite("Done closing ESMF_Trace", &
         ESMF_LOGMSG_INFO, rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
       endif
+#endif
 
       ! Close the Config file
       ! TODO: write this routine and remove the status= line
@@ -1653,11 +1655,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ": Error finalizing the time manager calendars"
       endif
 
+#ifdef LOG_FINALIZE
       call ESMF_LogWrite("Done finalizing ESMF_Calendar", &
         ESMF_LOGMSG_INFO, rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
       endif
+#endif
 
       ! Flush log to avoid lost messages
       call ESMF_LogFlush (rc=localrc)
@@ -1667,11 +1671,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ": Error flushing log file: ", errmsg(:errmsg_l)
       end if
 
+#ifdef LOG_FINALIZE
       call ESMF_LogWrite("Done flushing ESMF_Log", &
         ESMF_LOGMSG_INFO, rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
       endif
+#endif
 
       if (abortFlag) then
         ! Abort the VM
@@ -1693,11 +1699,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
       endif
 
+#ifdef LOG_FINALIZE
       call ESMF_LogWrite("Done finalizing ESMF_VM", &
         ESMF_LOGMSG_INFO, rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
       endif
+#endif
 
       ! Shut down the log file
       call ESMF_LogFinalize(localrc)
