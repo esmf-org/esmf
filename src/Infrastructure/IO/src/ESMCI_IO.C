@@ -1297,15 +1297,6 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int pet
     distgridToArrayMap = &(distgridToArrayMapVec[0]);
   }
 
-  if (tileCount == 1) {
-    // FIXME(wjs, 2023-05-26) Generalize this error-check to work with the multi-tile case
-    if ((maxIndexPDimPTile[0]-minIndexPDimPTile[0]+1)<petCount){
-      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD,
-        "Index space too small to be distributed across all PETs", ESMC_CONTEXT, rc);
-      return; // bail out
-    }
-  }
-
   DistGrid *distgrid;
   if (tileCount == 1) {
     ESMCI::InterArray<int> minIndexInterface((int*)minIndexPDimPTile, ndims-replicatedDims);
