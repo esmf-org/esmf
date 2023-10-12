@@ -4465,7 +4465,7 @@ int Array::serialize(
     for (int i=0; i<delayout->getDeCount(); i++)
       *ip++ = exclusiveElementCountPDe[i];
   } else
-    ip += 2 + 2*tensorCount + 2*distgrid->getDimCount () +
+    ip += 3 + 2*tensorCount + 2*distgrid->getDimCount () +
       rank + delayout->getDeCount ();
 
   // fix offset
