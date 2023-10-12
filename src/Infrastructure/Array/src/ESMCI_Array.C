@@ -160,6 +160,7 @@ Array::Array(
   int *totalUBoundArg,                    // (in)
   int tensorCountArg,                     // (in)
   int tensorElementCountArg,              // (in)
+  int replicatedDimCountArg,              // (in)
   int *undistLBoundArray,                 // (in)
   int *undistUBoundArray,                 // (in)
   int *distgridToArrayMapArray,           // (in)
@@ -259,6 +260,8 @@ Array::Array(
     memcpy(undistLBound, undistLBoundArray, tensorCountArg * sizeof(int));
     memcpy(undistUBound, undistUBoundArray, tensorCountArg * sizeof(int));
   }
+  // replicated dimension count
+  replicatedDimCount = replicatedDimCountArg;
   // distgridToArrayMap, arrayToDistGridMap and distgridToPackedArrayMap
   int dimCount = distgrid->getDimCount();
   distgridToArrayMap = new int[dimCount];
@@ -511,6 +514,19 @@ int Array::constructContiguousFlag(int redDimCount){
 }
 //-----------------------------------------------------------------------------
 
+// Helper for create
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::calcReplicatedDimCount()"
+  int calcReplicatedDimCount(int dimCount, int *distgridToArrayMap) {
+    int replicatorCount = 0;
+    for (int i=0; i<dimCount; i++) {
+      if (distgridToArrayMap[i] == 0) ++replicatorCount;
+    }
+
+    return replicatorCount;
+  }
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 //
@@ -650,9 +666,7 @@ Array *Array::create(
     }
   }
   // determine replicatorCount
-  int replicatorCount = 0;  // initialize
-  for (int i=0; i<dimCount; i++)
-    if (distgridToArrayMapArray[i] == 0) ++replicatorCount;
+  int replicatorCount = calcReplicatedDimCount(dimCount, distgridToArrayMapArray);
   // determine reduced dimCount -> redDimCount
   int redDimCount = dimCount - replicatorCount;
   // determine tensorCount
@@ -1240,7 +1254,7 @@ Array *Array::create(
       ssiLocalDeCountArg, NULL, distgrid, false,
       exclusiveLBound, exclusiveUBound, computationalLBound,
       computationalUBound, totalLBound, totalUBound, tensorCount,
-      tensorElementCount, undistLBoundArray, undistUBoundArray,
+      tensorElementCount, replicatorCount, undistLBoundArray, undistUBoundArray,
       distgridToArrayMapArray, arrayToDistGridMapArray,
       distgridToPackedArrayMap, indexflag, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -1400,9 +1414,7 @@ Array *Array::create(
     }
   }
   // determine replicatorCount
-  int replicatorCount = 0;  // initialize
-  for (int i=0; i<dimCount; i++)
-    if (distgridToArrayMapArray[i] == 0) ++replicatorCount;
+  int replicatorCount = calcReplicatedDimCount(dimCount, distgridToArrayMapArray);
   // determine reduced dimCount -> redDimCount
   int redDimCount = dimCount - replicatorCount;
   // determine tensorCount
@@ -2050,7 +2062,7 @@ Array *Array::create(
       ssiLocalDeCountArg, localDeToDeMapArg, distgrid, false,
       exclusiveLBound, exclusiveUBound, computationalLBound,
       computationalUBound, totalLBound, totalUBound, tensorCount,
-      tensorElementCount, undistLBoundArray, undistUBoundArray,
+      tensorElementCount, replicatorCount, undistLBoundArray, undistUBoundArray,
       distgridToArrayMapArray, arrayToDistGridMapArray,
       distgridToPackedArrayMap, indexflag, &localrc, vm);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -2155,6 +2167,7 @@ Array *Array::create(
     int tensorCount =
       arrayOut->tensorCount = arrayIn->tensorCount
         - rmLeadingTensors - rmTrailingTensors;
+    arrayOut->replicatedDimCount = arrayIn->replicatedDimCount;
     arrayOut->vasLocalDeCount = arrayIn->vasLocalDeCount;
     if (copyflag == DATACOPY_REFERENCE){
       // sharing reference means also sharing memhandle
@@ -2470,6 +2483,7 @@ Array *Array::create(
       arrayOut->tensorElementCount = 1;
     else
       arrayOut->tensorElementCount = arrayIn->tensorElementCount;
+    arrayOut->replicatedDimCount = arrayIn->replicatedDimCount;
     arrayOut->distgrid = arrayIn->distgrid; // copy reference
     arrayOut->distgridCreator = false;      // not a locally created object
     arrayOut->delayout = arrayIn->delayout; // copy reference
@@ -4447,10 +4461,11 @@ int Array::serialize(
     for (int i=0; i<distgrid->getDimCount(); i++)
       *ip++ = distgridToPackedArrayMap[i];
     *ip++ = tensorElementCount;
+    *ip++ = replicatedDimCount;
     for (int i=0; i<delayout->getDeCount(); i++)
       *ip++ = exclusiveElementCountPDe[i];
   } else
-    ip += 2 + 2*tensorCount + 2*distgrid->getDimCount () +
+    ip += 3 + 2*tensorCount + 2*distgrid->getDimCount () +
       rank + delayout->getDeCount ();
 
   // fix offset
@@ -4542,6 +4557,7 @@ int Array::deserialize(
   for (int i=0; i<distgrid->getDimCount(); i++)
     distgridToPackedArrayMap[i] = *ip++;
   tensorElementCount = *ip++;
+  replicatedDimCount = *ip++;
   exclusiveElementCountPDe = new int[delayout->getDeCount()];
   for (int i=0; i<delayout->getDeCount(); i++)
     exclusiveElementCountPDe[i] = *ip++;
