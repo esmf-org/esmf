@@ -58,13 +58,21 @@ void ESMCI_GDAL_process_shapefile_serial(OGRDataSourceH hDS, double *&nodeCoords
 			      int *&elemConn, int *&numElemConn,
 			      int *totNumElemConn, int *numNodes, 
 			      int *numElems);
-void ESMCI_GDAL_process_shapefile_distributed(OGRDataSourceH hDS,
-			      int *nFeatures, int *&featureIDs, int *&globFeatureIDs,
-			      double *&nodeCoords, 
-			      int *&nodeIDs, int *&elemIDs, 
-			      int *&elemConn, int *&numElemConn,
-			      int *totNumElemConn, int *numNodes, 
-			      int *numElems);
+void ESMCI_GDAL_process_shapefile_distributed(
+// inputs
+		       OGRDataSourceH hDS, 
+		       int *nFeatures,
+		       int *&featureIDs,
+		       int *&globFeatureIDs,
+// outputs
+		       double *&nodeCoords, 
+		       std::vector<int> &nodeIDs, 
+		       std::vector<int> &elemIDs, 
+		       std::vector<int> &elemConn,
+		       std::vector<int> &numElemConn, 
+		       int *totNumElemConn, 
+		       int *nNodes, 
+		       int *nElems);
 void ESMCI_mesh_create_from_SHP_file();
 
 void ESMCI_GDAL_SHP_get_feature_info(OGRDataSourceH hDS, int *nFeatures, int *&FeatureIDs);

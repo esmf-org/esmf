@@ -1346,11 +1346,12 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     int num_nodes;
     int num_elems=0;
     int totNumElemConn=0;
-    int *numElemConn=NULL;
-    int *elemConn=NULL;
     double *nodeCoords=NULL;
-    int *node_IDs=NULL;
-    int *elem_IDs=NULL;
+    std::vector<int> nodeIDs, elemIDs, elemConn, numElemConn;
+    int *num_ElemConn=NULL;
+    int *elem_Conn=NULL;
+    int *node_IDs=NULL; // Pointer. Will point to vector.
+    int *elem_IDs;
 
     // Processes polygons in hDS. Polygons are flattened to 2D
 //    process_shapefile_serial(hDS,nodeCoords,node_IDs,elem_IDs,elemConn,numElemConn,
@@ -1376,10 +1377,28 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
 
     // Processes polygons in hDS. Polygons are flattened to 2D
     ESMCI_GDAL_process_shapefile_distributed(hDS,&num_features,feature_IDs,globalFeature_IDs,
-					     nodeCoords,node_IDs,elem_IDs,
+					     nodeCoords,nodeIDs,elemIDs,
 					     elemConn,numElemConn,
 					     &totNumElemConn, &num_nodes, &num_elems);
-    printf(">>>>> nElems, %d, nFeatures, %d\n", num_elems, num_features);
+//    printf(">>>>> nElems, %d, nFeatures, %d\n", num_elems, num_features);
+
+    node_IDs=&nodeIDs[0];
+    elem_Conn=&elemConn[0];
+    num_ElemConn=&numElemConn[0];
+    num_elems = num_features;
+
+    int sumElemConn=0;
+    for(std::vector<int>::iterator it = numElemConn.begin(); it != numElemConn.end(); ++it)
+      sumElemConn += *it;
+
+//    printf("dim: %d\n",dim);
+//    printf("numElemConn: %d\n",numElemConn.size());
+//    printf("elemConn: %d\n",elemConn.size());
+//    printf("num_elems:    %d\n",num_elems);
+//    printf("num_ftrs:     %d\n",num_features);
+//    printf("num_nodes:    %d\n",num_nodes);
+//    printf("totNumElmCon: %d\n",totNumElemConn);
+//    printf("sum_of_elems: %d\n",sumElemConn);
 
     // TBD: Coord system conversion
 
@@ -1427,11 +1446,11 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     int areaPresent = 0;
     int centerCoordsPresent=0;
     ESMCI_meshaddelements(out_mesh,
-			  &num_elems, elem_IDs, numElemConn, //elementType, <- using numElemConn in place of elementType assumes 2D!!
+			  &num_elems, feature_IDs, num_ElemConn, //elementType, <- using numElemConn in place of elementType assumes 2D!!
 			  NULL, // No mask
 			  &areaPresent, NULL, // No areas
 			  &centerCoordsPresent, NULL, // No center coords
-			  &totNumElemConn, elemConn, 
+			  &sumElemConn, elem_Conn, 
 			  &coord_sys_mesh, &orig_sdim, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 				      &localrc)) throw localrc;
@@ -1439,13 +1458,13 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     // printf("Finished adding elements: %d\n", localrc);
 
     // Cleanup
-    OGR_DS_Destroy( hDS );
+    GDALClose( hDS );
 
-    delete [] elem_IDs;
-    delete [] elemConn;
-    delete [] node_IDs;
-    delete [] numElemConn;
-    delete [] nodeCoords;
+//    delete [] elem_IDs;
+//    delete [] elem_Conn;
+//    delete [] node_IDs;
+//    delete [] num_ElemConn;
+//    delete [] nodeCoords;
 
   } catch(std::exception &x) {
 

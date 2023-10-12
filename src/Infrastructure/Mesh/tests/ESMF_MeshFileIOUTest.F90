@@ -6913,7 +6913,7 @@ subroutine   test_create_mesh_from_SH_file(correct, rc)
   if (rc /= ESMF_SUCCESS) return
 
   ! Create Mesh from shape file
-  mesh=ESMF_MeshCreate("data/cb_2018_us_county_500k.shp", &
+  mesh=ESMF_MeshCreate("data/cb_2018_us_county_20m.shp", &
 !  mesh=ESMF_MeshCreate("data/complex_3.shp", &
        fileformat=ESMF_FILEFORMAT_SHAPEFILE, &
        rc=rc)
