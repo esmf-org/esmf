@@ -27,16 +27,16 @@ decompfile="ROUNDROBIN", or decompfile="BLOCK"
 
 They call init_ideal_dof which internally generates a dof as follows:
 
-    if(doftype .eq. 'ROUNDROBIN') then                                          
-       do i=1,varsize                                                           
-          compmap(i) = (i-1)*npe+mype+1                                         
-       enddo                                                                    
-    else if(doftype .eq. 'BLOCK') then                                          
-       do i=1,varsize                                                           
-          compmap(i) =  (i+varsize*mype)                                        
-       enddo                                                                    
+    if(doftype .eq. 'ROUNDROBIN') then
+       do i=1,varsize
+          compmap(i) = (i-1)*npe+mype+1
+       enddo
+    else if(doftype .eq. 'BLOCK') then
+       do i=1,varsize
+          compmap(i) =  (i+varsize*mype)
+       enddo
     endif
-    
+
 The size of the variable is npes*varsize where varsize can be set in
 the namelist. varsize is the variable array size per task. You can add
 variables by changing nvars in the namelist.

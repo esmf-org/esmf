@@ -53,6 +53,7 @@ void ESMCI_regrid_create(Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Poi
                          int *regridMethod,
                          int *map_type,
                          int *norm_type,
+                         int *_vectorRegrid, 
                          int *regridPoleType, int *regridPoleNPnts,
                          int *extrapMethod,
                          int *extrapNumSrcPnts,

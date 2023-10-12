@@ -11,8 +11,9 @@
 #include <pio.h>
 #include <sys/time.h>
 #include "pio_err_macros.h"
+#include "ncint.h"
 
-#define FILE_NAME "tst_ncint_perf.nc"
+#define FILE_PREFIX "tst_ncint_perf"
 #define VAR_NAME "data_var"
 #define DIM_NAME_UNLIMITED "dim_unlimited"
 #define DIM_NAME_X "dim_x"
@@ -24,7 +25,7 @@
 #define NDIM2 2
 #define NDIM3 3
 #define NUM_TIMESTEPS 1
-#define NUM_MODES 4
+
 
 extern NC_Dispatch NCINT_dispatcher;
 
@@ -45,7 +46,7 @@ main(int argc, char **argv)
     if (MPI_Comm_size(MPI_COMM_WORLD, &ntasks)) PERR;
 
     if (!my_rank)
-        printf("\n*** Testing netCDF integration PIO performance.\n");
+      printf("\n*** Testing netCDF integration PIO performance.\n");
     if (!my_rank)
         printf("*** testing simple intercomm use of netCDF integration layer...\n");
     {
@@ -58,11 +59,11 @@ main(int argc, char **argv)
         int *my_data;
         int num_io_procs;
         int i;
-
+        int found_format;
         /* Turn on logging for PIO library. */
-        /* PIOc_set_log_level(4); */
-        /* if (!my_rank) */
-        /*     nc_set_log_level(3); */
+/*         PIOc_set_log_level(4);
+         if (!my_rank)
+         nc_set_log_level(3);  */
         if (ntasks <= 16)
             num_io_procs = 1;
         else if (ntasks <= 64)
@@ -87,13 +88,6 @@ main(int argc, char **argv)
             float num_megabytes = DIM_LEN_X * DIM_LEN_Y * sizeof(int) / (float)1000000 * NUM_TIMESTEPS;
             float delta_in_sec;
             float mb_per_sec;
-            int cmode[NUM_MODES] = {NC_PIO, NC_PIO|NC_NETCDF4,
-                                    NC_PIO|NC_NETCDF4|NC_MPIIO,
-                                    NC_PIO|NC_PNETCDF};
-            char mode_name[NUM_MODES][NC_MAX_NAME + 1] = {"classic sequential   ",
-                                                          "netCDF-4 sequential  ",
-                                                          "netCDF-4 parallel I/O",
-                                                          "pnetcdf              "};
             int t, m;
 
             /* Print header. */
@@ -104,7 +98,13 @@ main(int argc, char **argv)
             for (m = 0; m < NUM_MODES; m++)
             {
                 /* Create a file with a 3D record var. */
-                if (nc_create(FILE_NAME, cmode[m], &ncid)) PERR;
+                char filename[strlen(FILE_PREFIX)+16];
+                sprintf(filename,"%s%d.nc",FILE_PREFIX,cmode[m]);
+                /* Turn on logging for PIO library. */
+                if(m==9) PIOc_set_log_level(2);
+//                if (!my_rank)
+//                    nc_set_log_level(2);
+                if (nc_create(filename, cmode[m], &ncid)) PERR;
                 if (nc_def_dim(ncid, DIM_NAME_UNLIMITED, dimlen[0], &dimid[0])) PERR;
                 if (nc_def_dim(ncid, DIM_NAME_X, dimlen[1], &dimid[1])) PERR;
                 if (nc_def_dim(ncid, DIM_NAME_Y, dimlen[2], &dimid[2])) PERR;
@@ -139,8 +139,19 @@ main(int argc, char **argv)
                 /* Write some data with distributed arrays. */
                 for (t = 0; t < NUM_TIMESTEPS; t++)
                     if (nc_put_vard_int(ncid, varid, ioid, t, my_data)) PERR;
-                if (nc_close(ncid)) PERR;
 
+                /* check the file format */
+                if (nc_inq_format_extended(ncid, NULL, &found_format)) PERR;
+                if (found_format != expected_format[m]) {
+                        printf("expected format 0x%x found format 0x%x\n",expected_format[m],
+                           found_format);
+                    PERR;
+                }
+
+                if (nc_close(ncid)) PERR;
+//                PIOc_set_log_level(0);
+//                if (!my_rank)
+//                    nc_set_log_level(0);
                 /* Stop the clock. */
                 gettimeofday(&endtime, NULL);
 
@@ -154,9 +165,9 @@ main(int argc, char **argv)
                     printf("%s,\t%d,\t%d,\t%d,\t%8.3f,\t%8.1f,\t%8.3f\n", mode_name[m],
                            ntasks, num_io_procs, 1, delta_in_sec, num_megabytes,
                            mb_per_sec);
-		
-		free(my_data);
-		if (nc_free_decomp(ioid)) PERR;
+
+                free(my_data);
+                if (nc_free_decomp(ioid)) PERR;
 
             } /* next mode flag */
         }

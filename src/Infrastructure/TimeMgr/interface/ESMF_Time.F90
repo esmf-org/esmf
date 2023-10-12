@@ -1707,7 +1707,7 @@
 ! !IROUTINE: ESMF_TimeEQ - Test if Time 1 is equal to Time 2
 !
 ! !INTERFACE:
-      function ESMF_TimeEQ(time1, time2)
+      impure elemental function ESMF_TimeEQ(time1, time2)
 !
 ! !RETURN VALUE:
       logical :: ESMF_TimeEQ
@@ -1742,7 +1742,7 @@
 ! !IROUTINE: ESMF_TimeNE - Test if Time 1 is not equal to Time 2
 !
 ! !INTERFACE:
-      function ESMF_TimeNE(time1, time2)
+      impure elemental function ESMF_TimeNE(time1, time2)
 !
 ! !RETURN VALUE:
       logical :: ESMF_TimeNE

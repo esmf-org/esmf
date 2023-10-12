@@ -54,6 +54,7 @@ program ESMF_ArrayCreateGetUTest
   !LOCAL VARIABLES:
   type(ESMF_VM):: vm
   integer:: i,j,k,l, next, rank
+  integer:: replicatedDimCount
   integer:: petCount, localPet, deCount, de, localDeCount, lde, ssiLocalDeCount
   integer, allocatable  :: regDecomp(:)
   type(ESMF_ArraySpec)  :: arrayspec, arrayspec2
@@ -315,6 +316,19 @@ program ESMF_ArrayCreateGetUTest
   write(name, *) "Verify name returned from Array"
   write(failMsg, *) "Incorrect name"
   call ESMF_Test((trim(arrayName)=="MyArray with ArraySpec"), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet replicatedDimCount Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(array, replicatedDimCount=replicatedDimCount, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify replicatedDimCount returned from Array with 0 replicated dims"
+  write(failMsg, *) "Incorrect replicatedDimCount"
+  call ESMF_Test(replicatedDimCount==0, name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -2532,6 +2546,43 @@ program ESMF_ArrayCreateGetUTest
   write(name, *) "ArrayGet Fortran array pointer, 4D ESMF_TYPEKIND_I4 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr4D, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayDestroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayCreate Allocate 2D with 4D DistGrid Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+    ! Dimensions 1 and 3 are replicated dimensions
+    distgridToArrayMap = [0,1,0,2], &
+    indexflag=ESMF_INDEX_GLOBAL, name="2D Array with 4D DistGrid", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet replicatedDimCount Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(array, replicatedDimCount=replicatedDimCount, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify replicatedDimCount returned from Array with 2 replicated dims"
+  write(failMsg, *) "Incorrect replicatedDimCount"
+  call ESMF_Test(replicatedDimCount==2, name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet Fortran array pointer from Array with 2 replicated dims Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr2D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------

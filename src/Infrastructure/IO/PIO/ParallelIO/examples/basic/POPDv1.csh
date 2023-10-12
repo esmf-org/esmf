@@ -17,4 +17,3 @@ set id = 012211-1449
 ./testpio_bench.pl --maxiter 10 --iofmt snc --pecount 4000 --bench POPD --numIO 640 --log ${host}.4000.snc.box.iotask_640.log.${id}
 
 #./testpio_bench.pl --maxiter 2 --iofmt pnc --pecount 8000 --bench POPD --numIO 640 --log ${host}.8000.pnc.iotask_640.log.${id}
-

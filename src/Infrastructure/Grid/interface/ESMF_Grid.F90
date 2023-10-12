@@ -1193,7 +1193,7 @@ contains
 ! !IROUTINE:  ESMF_GridEQ - Compare two Grids for equality
 !
 ! !INTERFACE:
-  function ESMF_GridEQ(grid1, grid2)
+  impure elemental function ESMF_GridEQ(grid1, grid2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_GridEQ
@@ -1244,7 +1244,7 @@ contains
 ! !IROUTINE:  ESMF_GridNE - Compare two Grids for non-equality
 !
 ! !INTERFACE:
-  function ESMF_GridNE(grid1, grid2)
+  impure elemental function ESMF_GridNE(grid1, grid2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_GridNE
@@ -28021,7 +28021,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridConnEqual - Equality of GridConns
 !
 ! !INTERFACE:
-      function ESMF_GridConnEqual(GridConn1, GridConn2)
+      impure elemental function ESMF_GridConnEqual(GridConn1, GridConn2)
 
 ! !RETURN VALUE:
       logical :: ESMF_GridConnEqual
@@ -28055,7 +28055,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridConnNotEqual - Non-equality of GridConns
 !
 ! !INTERFACE:
-      function ESMF_GridConnNotEqual(GridConn1, GridConn2)
+      impure elemental function ESMF_GridConnNotEqual(GridConn1, GridConn2)
 
 ! !RETURN VALUE:
       logical :: ESMF_GridConnNotEqual
@@ -28091,7 +28091,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridDecompEqual - Equality of GridDecomps
 !
 ! !INTERFACE:
-      function ESMF_GridDecompEqual(GridDecomp1, GridDecomp2)
+      impure elemental function ESMF_GridDecompEqual(GridDecomp1, GridDecomp2)
 
 ! !RETURN VALUE:
       logical :: ESMF_GridDecompEqual
@@ -28125,7 +28125,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridDecompNotEqual - Non-equality of GridDecomps
 !
 ! !INTERFACE:
-      function ESMF_GridDecompNotEqual(GridDecomp1, GridDecomp2)
+      impure elemental function ESMF_GridDecompNotEqual(GridDecomp1, GridDecomp2)
 
 ! !RETURN VALUE:
       logical :: ESMF_GridDecompNotEqual
@@ -28644,7 +28644,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridStatusEqual - Equality of GridStatus statuses
 !
 ! !INTERFACE:
-      function ESMF_GridStatusEqual(GridStatus1, GridStatus2)
+      impure elemental function ESMF_GridStatusEqual(GridStatus1, GridStatus2)
 
 ! !RETURN VALUE:
       logical :: ESMF_GridStatusEqual
@@ -28678,7 +28678,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridStatusNotEqual - Non-equality of GridStatus statuses
 !
 ! !INTERFACE:
-      function ESMF_GridStatusNotEqual(GridStatus1, GridStatus2)
+      impure elemental function ESMF_GridStatusNotEqual(GridStatus1, GridStatus2)
 
 ! !RETURN VALUE:
       logical :: ESMF_GridStatusNotEqual
@@ -28855,7 +28855,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridMatchEqual - Equality of GridMatch statuses
 !
 ! !INTERFACE:
-      function ESMF_GridMatchEqual(GridMatch1, GridMatch2)
+      impure elemental function ESMF_GridMatchEqual(GridMatch1, GridMatch2)
 
 ! !RETURN VALUE:
       logical :: ESMF_GridMatchEqual
@@ -28889,7 +28889,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridMatchNotEqual - Non-equality of GridMatch statuses
 !
 ! !INTERFACE:
-      function ESMF_GridMatchNotEqual(GridMatch1, GridMatch2)
+      impure elemental function ESMF_GridMatchNotEqual(GridMatch1, GridMatch2)
 
 ! !RETURN VALUE:
       logical :: ESMF_GridMatchNotEqual
@@ -31220,7 +31220,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_PoleTypeEqual - Equality of PoleType statuses
 !
 ! !INTERFACE:
-      function ESMF_PoleTypeEqual(PoleType1, PoleType2)
+      impure elemental function ESMF_PoleTypeEqual(PoleType1, PoleType2)
 
 ! !RETURN VALUE:
       logical :: ESMF_PoleTypeEqual
@@ -31254,7 +31254,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_PoleTypeNotEqual - Non-equality of PoleType statuses
 !
 ! !INTERFACE:
-      function ESMF_PoleTypeNotEqual(PoleType1, PoleType2)
+      impure elemental function ESMF_PoleTypeNotEqual(PoleType1, PoleType2)
 
 ! !RETURN VALUE:
       logical :: ESMF_PoleTypeNotEqual

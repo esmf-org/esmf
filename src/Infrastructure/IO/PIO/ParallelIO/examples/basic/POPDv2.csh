@@ -35,5 +35,3 @@ set host = 'hopper'
 #./testpio_bench.pl --maxiter 10 --iofmt pnc --pecount 1600 --bench POPD --numIO 320 --mpi-cb-buffer-size=8388608 --logfile-suffix DnR1
 #./testpio_bench.pl --maxiter 10 --iofmt pnc --pecount 2000 --bench POPD --numIO 640 --mpi-cb-buffer-size=8388608 --logfile-suffix DnR1
 #./testpio_bench.pl --maxiter 10 --iofmt pnc --pecount 4000 --bench POPD --numIO 640 --mpi-cb-buffer-size=8388608 --logfile-suffix DnR1
-
-

@@ -323,7 +323,7 @@ class VMK{
     bool threadsflag; // threaded or none-threaded VM
     // MPI Communicator handles
     MPI_Comm mpi_c;     // communicator across the entire VM
-#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
+#if (MPI_VERSION >= 3)
     MPI_Comm mpi_c_ssi; // communicator holding PETs on the same SSI
 #endif
     // Shared mutex and thread_finish variables. These are pointers that will be
@@ -490,10 +490,13 @@ class VMK{
       return true;
 #endif
     }
-    static bool isSsiSharedMemoryEnabled();
-      //TODO: For now had to implement this method in the source file, because
-      //TODO: of the way the ESMF_NO_MPI3 macro is being determined.
-      //TODO: Move it into the VMKernel header once includes are fixed.
+    static bool isSsiSharedMemoryEnabled(){
+#if (MPI_VERSION >= 3) || (defined ESMF_MPIUNI)
+      return true;
+#else
+      return false;
+#endif
+    }
 
 #define XSTR(X) STR(X)
 #define STR(X) #X

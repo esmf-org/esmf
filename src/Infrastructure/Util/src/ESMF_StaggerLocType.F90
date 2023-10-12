@@ -286,7 +286,7 @@ end subroutine
 ! !IROUTINE: ESMF_StaggerLocEqual - Equality of StaggerLoc statuses
 !
 ! !INTERFACE:
-      function ESMF_StaggerLocEqual(StaggerLoc1, StaggerLoc2)
+      impure elemental function ESMF_StaggerLocEqual(StaggerLoc1, StaggerLoc2)
 
 ! !RETURN VALUE:
       logical :: ESMF_StaggerLocEqual
@@ -320,7 +320,7 @@ end subroutine
 ! !IROUTINE: ESMF_StaggerLocNotEqual - Non-equality of StaggerLoc statuses
 !
 ! !INTERFACE:
-      function ESMF_StaggerLocNotEqual(StaggerLoc1, StaggerLoc2)
+      impure elemental function ESMF_StaggerLocNotEqual(StaggerLoc1, StaggerLoc2)
 
 ! !RETURN VALUE:
       logical :: ESMF_StaggerLocNotEqual

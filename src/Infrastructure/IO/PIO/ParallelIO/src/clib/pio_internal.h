@@ -13,9 +13,14 @@
 #include <config.h>
 #include <pio.h>
 #include <pio_error.h>
+#include <stdint.h>
 #include <limits.h>
 #include <math.h>
 #include <netcdf.h>
+#ifdef NC_HAS_PAR_FILTERS
+#include <netcdf_filter.h>
+#include <netcdf_meta.h>
+#endif
 #ifdef _NETCDF4
 #include <netcdf_par.h>
 #endif
@@ -29,6 +34,22 @@
 #ifdef USE_MPE
 #include <mpe.h>
 #endif /* USE_MPE */
+
+/* define an MPI type equivalent to size_t */
+#if SIZE_MAX == UCHAR_MAX
+   #define PIO_MPI_SIZE_T MPI_UNSIGNED_CHAR
+#elif SIZE_MAX == USHRT_MAX
+   #define PIO_MPI_SIZE_T MPI_UNSIGNED_SHORT
+#elif SIZE_MAX == UINT_MAX
+   #define PIO_MPI_SIZE_T MPI_UNSIGNED
+#elif SIZE_MAX == ULONG_MAX
+   #define PIO_MPI_SIZE_T MPI_UNSIGNED_LONG
+#elif SIZE_MAX == ULLONG_MAX
+   #define PIO_MPI_SIZE_T MPI_UNSIGNED_LONG_LONG
+#else
+   #error "what is happening here?"
+#endif
+
 
 //#ifndef MPI_OFFSET
 /** MPI_OFFSET is an integer type of size sufficient to represent the
@@ -65,7 +86,7 @@
 /** Some MPI implementations do not allow passing MPI_DATATYPE_NULL to
  * comm functions even though the send or recv length is 0, in these
  * cases we use MPI_CHAR, after this issue raised its ugly head again in mpich
- * 4.0.0 we decided to use this workaround in all cases.  
+ * 4.0.0 we decided to use this workaround in all cases.
  * See https://github.com/NCAR/ParallelIO/issues/1945 */
 
 #define PIO_DATATYPE_NULL MPI_CHAR
@@ -613,6 +634,7 @@ enum PIO_MSG
     PIO_MSG_DEF_VAR_DEFLATE,
     PIO_MSG_INQ_VAR_DEFLATE,
     PIO_MSG_INQ_VAR_SZIP,
+    PIO_MSG_DEF_VAR_SZIP,
     PIO_MSG_DEF_VAR_FLETCHER32,
     PIO_MSG_INQ_VAR_FLETCHER32,
     PIO_MSG_DEF_VAR_CHUNKING,
@@ -638,7 +660,24 @@ enum PIO_MSG
     PIO_MSG_GET_ATT,
     PIO_MSG_PUT_ATT,
     PIO_MSG_INQ_TYPE,
-    PIO_MSG_INQ_UNLIMDIMS
+    PIO_MSG_INQ_UNLIMDIMS,
+#ifdef NC_HAS_BZ2
+    PIO_MSG_INQ_VAR_BZIP2,
+    PIO_MSG_DEF_VAR_BZIP2,
+#endif
+#ifdef NC_HAS_ZSTD
+    PIO_MSG_INQ_VAR_ZSTANDARD,
+    PIO_MSG_DEF_VAR_ZSTANDARD,
+#endif
+    PIO_MSG_DEF_VAR_FILTER,
+    PIO_MSG_INQ_VAR_FILTER_IDS,
+    PIO_MSG_INQ_VAR_FILTER_INFO,
+    PIO_MSG_INQ_FILTER_AVAIL,
+
+#ifdef NC_HAS_QUANTIZE
+    PIO_MSG_DEF_VAR_QUANTIZE,
+    PIO_MSG_INQ_VAR_QUANTIZE,
+#endif
 };
 
 #endif /* __PIO_INTERNAL__ */

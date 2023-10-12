@@ -383,6 +383,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 
 
+
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
 ! !IROUTINE: ESMF_MeshOperator(/=) - Mesh not equal operator
@@ -477,7 +478,7 @@ end subroutine
  ! !IROUTINE:  ESMF_MeshEQ - Compare two Meshes for equality
 !
 ! !INTERFACE:
-  function ESMF_MeshEQ(mesh1, mesh2)
+  impure elemental function ESMF_MeshEQ(mesh1, mesh2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_MeshEQ
@@ -528,7 +529,7 @@ end subroutine
 ! !IROUTINE:  ESMF_MeshNE - Compare two Meshes for non-equality
 !
 ! !INTERFACE:
-  function ESMF_MeshNE(mesh1, mesh2)
+  impure elemental function ESMF_MeshNE(mesh1, mesh2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_MeshNE
@@ -6923,7 +6924,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_MeshLocEqual - Equality of MeshLocs
 !
 ! !INTERFACE:
-      function ESMF_MeshLocEqual(MeshLoc1, MeshLoc2)
+      impure elemental function ESMF_MeshLocEqual(MeshLoc1, MeshLoc2)
 
 ! !RETURN VALUE:
       logical :: ESMF_MeshLocEqual

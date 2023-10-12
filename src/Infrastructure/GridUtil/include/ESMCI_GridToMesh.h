@@ -44,7 +44,8 @@ class Array;
  void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array);
 
 #endif
- void GridToPointList(ESMCI::Grid &grid, ESMC_StaggerLoc staggerLoc, ESMCI::InterArray<int> *maskValuesArg, ESMCI::PointList **_pl, int *localrc);
+  
+ void GridToPointList(ESMCI::Grid &grid, ESMC_StaggerLoc staggerLoc, ESMCI::InterArray<int> *maskValuesArg,  bool add_orig_coords, ESMCI::PointList **_pl, int *localrc);
 
 } // namespace
 

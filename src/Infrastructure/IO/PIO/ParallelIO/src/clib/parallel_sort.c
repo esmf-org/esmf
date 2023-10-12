@@ -1,5 +1,5 @@
 /**
- * c.f.: https://raw.githubusercontent.com/rabauke/mpl/master/examples/parallel_sort_mpi.c
+ * c.f.: https://raw.githubusercontent.com/rabauke/mpl/main/examples/parallel_sort_mpi.c
  * parallel sort algorithm for distributed memory computers
  *
  * algorithm works as follows:
@@ -96,8 +96,8 @@ bool is_unique(CVector v) {
  * @param comm the MPI communicator over which v is distributed
  * @param v A CVector distributed over comm
  * @param ierr indicates an error was encountered
- * @return A CVector sorted over comm, the size of the new vector may be different 
- *         than v with a worst case of the entire result on one task. 
+ * @return A CVector sorted over comm, the size of the new vector may be different
+ *         than v with a worst case of the entire result on one task.
  */
 
 CVector parallel_sort(MPI_Comm comm, CVector v, int *ierr) {
@@ -130,7 +130,7 @@ CVector parallel_sort(MPI_Comm comm, CVector v, int *ierr) {
 
   if(!(pivot_pos = malloc((size + 1) * sizeof(*pivot_pos))))
       *ierr = pio_err(NULL, NULL, PIO_ENOMEM, __FILE__,__LINE__);
-  
+
   pivot_pos[0] = v.data;
   for (size_t i = 0; i < size - 1; ++i)
     pivot_pos[i + 1] = partition(pivot_pos[i], v.data + v.N, local_pivots[i]);
@@ -189,15 +189,15 @@ CVector parallel_sort(MPI_Comm comm, CVector v, int *ierr) {
  */
 int run_unique_check(MPI_Comm comm, size_t N,datatype *v, bool *has_dups)
 {
-  int rank, size, i, r;
-  int mpierr=MPI_SUCCESS, mpierr2;
+  int rank, size;
+  int mpierr=MPI_SUCCESS;
   int ierr;
   if ((mpierr = MPI_Comm_rank(comm, &rank)))
-    check_mpi(NULL, NULL, mpierr2, __FILE__, __LINE__);
+    check_mpi(NULL, NULL, mpierr, __FILE__, __LINE__);
 
   if ((mpierr = MPI_Comm_size(comm, &size)))
-    check_mpi(NULL, NULL, mpierr2, __FILE__, __LINE__);
-    
+    check_mpi(NULL, NULL, mpierr, __FILE__, __LINE__);
+
   srand(time(NULL) * rank);
 
   CVector sorted = parallel_sort(comm, (CVector){v, N}, &ierr);
@@ -205,13 +205,13 @@ int run_unique_check(MPI_Comm comm, size_t N,datatype *v, bool *has_dups)
   int i_have_dups = is_unique(sorted) ? 0:1;
   int global_dups;
   if ((mpierr = MPI_Allreduce(&i_have_dups, &global_dups, 1, MPI_INT, MPI_MAX, comm)))
-    check_mpi(NULL, NULL, mpierr2, __FILE__, __LINE__);
-    
+    check_mpi(NULL, NULL, mpierr, __FILE__, __LINE__);
+
   if(global_dups > 0)
     *has_dups = true;
   else
     *has_dups = false;
-  
+
 #ifdef DEBUG_PARALLEL_SORT
   for (r=0; r<size; r++)
     {

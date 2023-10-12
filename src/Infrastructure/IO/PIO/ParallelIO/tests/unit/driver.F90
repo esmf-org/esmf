@@ -37,9 +37,9 @@ Program pio_unit_test_driver
 #endif
 
   !! call MPI_Errhandler_set(MPI_COMM_WORLD, MPI_ERRORS_RETURN, ierr)
-  master_task = my_rank.eq.0
+  main_task = my_rank.eq.0
 
-  if (master_task) then
+  if (main_task) then
      ltest_netcdf     = .false.
      ltest_netcdf4p     = .false.
      ltest_netcdf4c     = .false.
@@ -132,31 +132,31 @@ Program pio_unit_test_driver
         ! Make sure i is a valid test number
         select case (test_id)
         case (NETCDF4P)
-           if (master_task) &
+           if (main_task) &
                 write(*,"(A)") "Testing PIO's netcdf4 parallel input / output:"
         case (NETCDF4C)
-           if (master_task) &
+           if (main_task) &
                 write(*,"(A)") "Testing PIO's netcdf4 compressed input / output:"
         case (NETCDF)
-           if (master_task) &
+           if (main_task) &
                 write(*,"(A)") "Testing PIO's netcdf input / output:"
         case (PNETCDF)
-           if (master_task) &
+           if (main_task) &
                 write(*,"(A)") "Testing PIO's pnetcdf input / output:"
         case DEFAULT
-           if (master_task) &
+           if (main_task) &
                 write(*,"(A,I0)") "Error, not configured for test #", test_id
            call MPI_Abort(MPI_COMM_WORLD, 0, ierr)
         end select
 
         ! test_create()
-        if (master_task) write(*,"(3x,A,1x)") "testing PIO_createfile..."
+        if (main_task) write(*,"(3x,A,1x)") "testing PIO_createfile..."
         call test_create(test_id, err_msg)
         call parse(err_msg, fail_cnt)
 
         ! test_open()
 
-        if (master_task) write(*,"(3x,A,I3)", advance="no") "testing PIO_openfile...",test_id
+        if (main_task) write(*,"(3x,A,I3)", advance="no") "testing PIO_openfile...",test_id
         call test_open(test_id, err_msg)
         call parse(err_msg, fail_cnt)
 
@@ -164,16 +164,16 @@ Program pio_unit_test_driver
         ! netcdf-specific tests
         if (is_netcdf(iotypes(test_id))) then
 
-           if (master_task) write(*,"(3x,A,1x)", advance="no") "testing PIO_redef..."
+           if (main_task) write(*,"(3x,A,1x)", advance="no") "testing PIO_redef..."
            call test_redef(test_id, err_msg)
            call parse(err_msg, fail_cnt)
 
-           if (master_task) write(*,"(3x,A,1x)", advance="no") "testing PIO_enddef..."
+           if (main_task) write(*,"(3x,A,1x)", advance="no") "testing PIO_enddef..."
            call test_enddef(test_id, err_msg)
            print *, 'err_msg =', err_msg, ' fail_cnt = ', fail_cnt
            call parse(err_msg, fail_cnt)
 
-           if (master_task) write(*,"(3x,A,1x)", advance="no") "testing PIO netCDF-4 functions..."
+           if (main_task) write(*,"(3x,A,1x)", advance="no") "testing PIO netCDF-4 functions..."
            print *, 'err_msg =', err_msg, ' fail_cnt = ', fail_cnt
            call test_nc4(test_id, err_msg)
            print *, 'err_msg =', err_msg, ' fail_cnt = ', fail_cnt
@@ -181,13 +181,13 @@ Program pio_unit_test_driver
         end if
 
 
-        if (master_task) write(*,*) ""
+        if (main_task) write(*,*) ""
 
      end if ! ltest(test_id)
 
   end do
 
-  if (master_task) then
+  if (main_task) then
      write(*,"(A,I0)") "Total failure count: ", fail_cnt
      if (fail_cnt.eq.0) then
         write(*,"(A)") "PASSED unit testing."
@@ -214,7 +214,7 @@ Contains
     integer,          intent(inout) :: fail_counter
     logical                         :: test_passed
 
-    if (master_task) then
+    if (main_task) then
        test_passed = (trim(err_msg).eq."no_error")
        if (test_passed) then
           write(*,"(A)") "success!"

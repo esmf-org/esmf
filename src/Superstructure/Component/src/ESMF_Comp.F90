@@ -511,13 +511,13 @@ contains
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_Method derived types to see if they're the same 
 
-  function ESMF_meeq(me1, me2)
+  impure elemental function ESMF_meeq(me1, me2)
     logical ESMF_meeq
     type(ESMF_Method_Flag), intent(in) :: me1, me2
     ESMF_meeq = (me1%method == me2%method)    
   end function
 
-  function ESMF_mene(me1, me2)
+  impure elemental function ESMF_mene(me1, me2)
     logical ESMF_mene
     type(ESMF_Method_Flag), intent(in) :: me1, me2
     ESMF_mene = (me1%method /= me2%method)
@@ -528,13 +528,13 @@ contains
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_CompType_Flags to see if they're the same 
 
-  function ESMF_cteq(ct1, ct2)
+  impure elemental function ESMF_cteq(ct1, ct2)
     logical ESMF_cteq
     type(ESMF_CompType_Flag), intent(in) :: ct1, ct2
     ESMF_cteq = (ct1%ctype == ct2%ctype)    
   end function
 
-  function ESMF_ctne(ct1, ct2)
+  impure elemental function ESMF_ctne(ct1, ct2)
     logical ESMF_ctne
     type(ESMF_CompType_Flag), intent(in) :: ct1, ct2
     ESMF_ctne = (ct1%ctype /= ct2%ctype)

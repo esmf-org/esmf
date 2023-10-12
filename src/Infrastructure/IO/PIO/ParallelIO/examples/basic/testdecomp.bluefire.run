@@ -27,6 +27,3 @@ cp -f $srcdir/testdecomp_in ./testdecomp_in
 mpirun.lsf ./testdecomp >& testdecomp.out.$LID
 
 cp testdecomp.out.$LID $srcdir/
-
-
-

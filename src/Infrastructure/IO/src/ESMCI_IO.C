@@ -1254,9 +1254,7 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int pet
   int rank = src_array_p->getRank();
   int tileCount = dg_orig->getTileCount();
 
-  int replicatedDims=0;
-  for (int i=0; i<ndims; i++)
-    if (distgridToArrayMap[i]==0) ++replicatedDims;
+  int replicatedDims = src_array_p->getReplicatedDimCount();
 
   std::vector<int> minIndexPDimPTileVec;
   std::vector<int> maxIndexPDimPTileVec;

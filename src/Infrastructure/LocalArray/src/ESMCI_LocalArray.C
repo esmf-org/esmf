@@ -65,7 +65,7 @@ extern "C" {
     void FTN_X(f_esmf_localarraycopyf90ptr)(const ESMCI::LocalArray** laIn, 
     ESMCI::LocalArray** laOut, ESMCI::DataCopyFlag *copyflag, int *rc);
 
-  void FTN_X(f_esmf_localarrayctof90)(ESMCI::LocalArray**, void *, int *, 
+  void FTN_X(f_esmf_localarrayctof90)(ESMCI::LocalArray**, void **, int *, 
     ESMC_TypeKind_Flag*, int *, int *, int *, int *);
 
 #ifndef ESMF_NO_INTEGER_1_BYTE
@@ -211,7 +211,7 @@ int LocalArray::construct(
   }else if (docopy == DATACOPY_REFERENCE){
     // call into Fortran to cast ibase_addr to Fortran pointer
     LocalArray *aptr = this;
-    FTN_X(f_esmf_localarrayctof90)(&aptr, ibase_addr, &rank, &typekind, counts, 
+    FTN_X(f_esmf_localarrayctof90)(&aptr, &ibase_addr, &rank, &typekind, counts, 
       lbound, ubound, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
