@@ -1272,7 +1272,8 @@ extern "C" {
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
   void FTN_X(c_esmc_vmplanconstruct)(ESMCI::VMPlan **ptr, ESMCI::VM **vm,
-    int *npetlist, int *petlist, ESMC_ContextFlag *contextflag, int *rc){
+    int *npetlist, int *petlist, int *ndevlist, int *devlist,
+    ESMC_ContextFlag *contextflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmplanconstruct()"
     // Initialize return code; assume routine not implemented
@@ -1286,7 +1287,12 @@ extern "C" {
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return;
     }
-    (*ptr) = new ESMCI::VMPlan;
+    if (*ndevlist > 0){
+      int localrc = ESMCI::VMK::checkDevList(devlist, *ndevlist);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+    }
+    (*ptr) = new ESMCI::VMPlan(*ndevlist, devlist);
     if (*contextflag==ESMF_CHILD_IN_PARENT_VM)
       (*ptr)->vmkplan_useparentvm(**vm);
     else if (*npetlist > 0){

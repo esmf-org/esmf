@@ -9713,14 +9713,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMPlanConstruct - Construct a default plan
 
 ! !INTERFACE:
-  subroutine ESMF_VMPlanConstruct(vmplan, vm, npetlist, petlist, contextflag, &
-    rc)
+  subroutine ESMF_VMPlanConstruct(vmplan, vm, npetlist, petlist, &
+    ndevlist, devlist, contextflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VMPlan),       intent(inout)         :: vmplan
     type(ESMF_VM),           intent(in)            :: vm
     integer,                 intent(in)            :: npetlist
     integer,                 intent(in)            :: petlist(:)
+    integer,                 intent(in)            :: ndevlist
+    integer,                 intent(in)            :: devlist(:)
     type(ESMF_Context_Flag), intent(in)            :: contextflag
     integer,                 intent(out), optional :: rc
 !
@@ -9729,15 +9731,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[vmplan] 
+!   \item[vmplan]
 !        VMPlan
-!   \item[vm] 
+!   \item[vm]
 !        VM
-!   \item[npetlist] 
+!   \item[npetlist]
 !        Number of PETs in petlist
-!   \item[petlist] 
-!        List of PETs that the parent VM will provide to the child VM
-!   \item[{[rc]}] 
+!   \item[petlist]
+!        List of PETs that the parent VM will provide to the child VM.
+!   \item[ndevlist]
+!        Number of DEVs in devlist
+!   \item[devlist]
+!        List of DEVs that are associated with the child VM.
+!   \item[{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -9753,8 +9759,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Call into the C++ interface.
-    call c_ESMC_VMPlanConstruct(vmplan, vm, npetlist, petlist, contextflag, &
-      localrc)
+    call c_ESMC_VMPlanConstruct(vmplan, vm, npetlist, petlist, &
+      ndevlist, devlist, contextflag, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

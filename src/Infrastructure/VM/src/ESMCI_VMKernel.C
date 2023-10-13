@@ -70,6 +70,7 @@
 #include <cmath>
 #include <vector>
 #include <set>
+#include <algorithm>
 #ifdef __sun
 #include <signal.h>
 #else
@@ -469,7 +470,7 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   // set up communicator across root pets of each SSI
   int color;
   MPI_Comm_rank(mpi_c_ssi, &color);
-  if (color>0) color = MPI_UNDEFINED; // only root PET on each SSI participates
+  if (color>0) color = MPI_UNDEFINED; // only root PETs on each SSI
   MPI_Comm_split(mpi_c, color, 0, &mpi_c_ssi_roots);
 #endif
   // initialize the shared memory variables
@@ -823,10 +824,15 @@ struct SpawnArg{
   int **cid;
   MPI_Comm mpi_c;
   MPI_Comm mpi_c_ssi;
+  MPI_Comm mpi_c_ssi_roots;
   int mpi_c_freeflag;
   bool threadsflag;
   int openmphandling;
   int openmpnumthreads;
+  // device variables
+  int devCount;
+  int devCountSSI;
+  int *devListSSI;
   // shared memory variables
   esmf_pthread_mutex_t *pth_mutex2;
   esmf_pthread_mutex_t *pth_mutex;
@@ -975,14 +981,16 @@ void VMK::construct(void *ssarg){
   mpi_c = sarg->mpi_c;
 #if (MPI_VERSION >= 3)
   mpi_c_ssi = sarg->mpi_c_ssi;
+  mpi_c_ssi = sarg->mpi_c_ssi_roots;
+#else
+  mpi_c_ssi = MPI_COMM_NULL;
+  mpi_c_ssi_roots = MPI_COMM_NULL;
 #endif
 
   // device management
-  devCount = ndevs;         //TODO: needs to consider devList
-  devCountSSI = ndevsSSI;   //TODO: needs to consider devList
-  devListSSI = new int[devCountSSI];
-  for (auto i=0; i<devCountSSI; i++)
-    devListSSI[i] = i; //TODO: needs to consider devList
+  devCount = sarg->devCount;
+  devCountSSI = sarg->devCountSSI;
+  devListSSI = sarg->devListSSI;
 
   // pthread mutex control
   pth_mutex2 = sarg->pth_mutex2;
@@ -1200,7 +1208,6 @@ void VMK::destruct(){
     delete [] cid[i];
   delete [] cid;
   delete [] ssiLocalPetList;
-  delete [] devListSSI;
 }
 
 
@@ -2016,8 +2023,12 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
   MPI_Comm new_mpi_c;
 #if (MPI_VERSION >= 3)
   MPI_Comm new_mpi_c_ssi;
+  MPI_Comm new_mpi_c_ssi_roots;
 #endif
-  
+  int devCount;
+  int devCountSSI;
+  int *devListSSI;
+
 #ifdef VM_MEMLOG_on
       VM::logMemInfo(std::string("VMK::startup():12.0"));
 #endif
@@ -2052,7 +2063,13 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
           // set up communicator across single-system-images SSIs
           MPI_Comm_split_type(vmp->mpi_c_part, MPI_COMM_TYPE_SHARED, 0, 
             MPI_INFO_NULL, &new_mpi_c_ssi);
+          // set up communicator across root pets of each SSI
+          int color;
+          MPI_Comm_rank(new_mpi_c_ssi, &color);
+          if (color>0) color = MPI_UNDEFINED; // only root PETs on each SSI
+          MPI_Comm_split(mpi_c, color, 0, &new_mpi_c_ssi_roots);
           sarg[0].mpi_c_ssi = new_mpi_c_ssi;
+          sarg[0].mpi_c_ssi_roots = new_mpi_c_ssi_roots;
 #ifdef VM_SSISHMLOG_on
           {
             std::stringstream msg;
@@ -2064,6 +2081,40 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
           }
 #endif
 #endif
+          // device management
+          if (vmp->ndevlist > 0){
+            std::vector<int> devListVec(vmp->devlist,
+              vmp->devlist + vmp->ndevlist);
+            std::sort(devListVec.begin(), devListVec.end());
+            std::vector<int> devListSsiVec;
+            auto it=devListVec.begin();
+            for (auto i=0; i<VMK::ndevsSSI; i++){
+              // loop over DEVs on the local SSI
+              int gDev = VMK::ssidevs[i]; // global id of SSI local device
+              for (; (it!=devListVec.end()) && (*it<=gDev); ++it){
+                if (*it == gDev){
+                  // found matching entry in devListVec
+                  devListSsiVec.push_back(i);
+                }
+              }
+            }
+            devCountSSI = devListSsiVec.size();
+            devListSSI = new int[devCountSSI];
+            for (auto i=0; i<devCountSSI; i++)
+              devListSSI[i] = devListSsiVec[i];
+            if (new_mpi_c_ssi_roots != MPI_COMM_NULL)
+              MPI_Allreduce(&devCountSSI, &devCount, 1, MPI_INTEGER, MPI_SUM,
+                new_mpi_c_ssi_roots);
+            if (new_mpi_c_ssi != MPI_COMM_NULL)
+              MPI_Bcast(&devCount, 1, MPI_INTEGER, 0, new_mpi_c_ssi);
+          }else{
+            devCount = 0;
+            devCountSSI = 0;
+            devListSSI = NULL;
+          }
+          sarg[0].devCount = devCount;
+          sarg[0].devCountSSI = devCountSSI;
+          sarg[0].devListSSI = devListSSI;
         }else{
           // I am not the first under this lpid and must receive 
 #if (VERBOSITY > 9)
@@ -2073,6 +2124,7 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
           sarg[0].mpi_c_freeflag = 0; // not responsible to free the communicat.
 #if (MPI_VERSION >= 3)
           recv(&new_mpi_c_ssi, sizeof(MPI_Comm), foundfirstpet);
+          recv(&new_mpi_c_ssi_roots, sizeof(MPI_Comm), foundfirstpet);
 #ifdef VM_SSISHMLOG_on
           {
             std::stringstream msg;
@@ -2085,6 +2137,9 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
           }
 #endif
 #endif
+          recv(&devCount, sizeof(int), foundfirstpet);
+          recv(&devCountSSI, sizeof(int), foundfirstpet);
+          recv(devListSSI, devCount*sizeof(int), foundfirstpet);
         }
       }else if (mypet == foundfirstpet){
         // I am the master and must send the communicator
@@ -2094,6 +2149,7 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
         send(&new_mpi_c, sizeof(MPI_Comm), i);
 #if (MPI_VERSION >= 3)
         send(&new_mpi_c_ssi, sizeof(MPI_Comm), i);
+        send(&new_mpi_c_ssi_roots, sizeof(MPI_Comm), i);
 #ifdef VM_SSISHMLOG_on
         {
           std::stringstream msg;
@@ -2106,11 +2162,14 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
         }
 #endif
 #endif
+        send(&devCount, sizeof(int), i);
+        send(&devCountSSI, sizeof(int), i);
+        send(devListSSI, devCount*sizeof(int), i);
       }
     }
   }
   delete [] grouplist;
-  
+
 #if (VERBOSITY > 9)
   printf("now valid new_mpi_c exists\n");
 #endif
@@ -2308,6 +2367,7 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
     sarg[i].mpi_c = new_mpi_c;
 #if (MPI_VERSION >= 3)
     sarg[i].mpi_c_ssi = new_mpi_c_ssi;
+    sarg[i].mpi_c_ssi_roots = new_mpi_c_ssi_roots;
 #ifdef VM_SSISHMLOG_on
     {
       std::stringstream msg;
@@ -2348,6 +2408,10 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
     sarg[i].ipshmMutex = new_ipshmMutex;
     sarg[i].ipSetupMutex = new_ipSetupMutex;
     sarg[i].pref_intra_ssi = vmp->pref_intra_ssi;
+    // device management
+    sarg[i].devCount = devCount;
+    sarg[i].devCountSSI = devCountSSI;
+    sarg[i].devListSSI = devListSSI;
     // cargo
     sarg[i].cargo = cargo;
     // threading stuff
@@ -2706,7 +2770,6 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
         }else{
           msg << "VMK::shutdown()#" << __LINE__
             << " about to call MPI_Comm_free() on mpi_c_ssi == MPI_COMM_NULL";
-          
         }
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
@@ -2714,7 +2777,12 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
 #endif
       MPI_Comm_free(&(sarg[0].mpi_c_ssi));
     }
+    if (sarg[0].mpi_c_ssi_roots != MPI_COMM_NULL){
+      MPI_Comm_free(&(sarg[0].mpi_c_ssi_roots));
+    }
 #endif
+    if (sarg[0].devListSSI)
+      delete [] sarg[0].devListSSI;
   }
   // done holding info in SpawnArg array -> delete now
   delete [] sarg;
@@ -2758,6 +2826,49 @@ int VMK::checkPetList(int *petList, int count){
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_ERROR);
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_DUP,
       "There appear to be duplicate PETs in the petList.",
+      ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  return ESMF_SUCCESS;
+}
+
+
+int VMK::checkDevList(int *devList, int count){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::checkDevList()"
+  int rc;
+  if (!devList){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "devList must not be NULL.",
+      ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  std::vector<int> devListVec(devList, devList + count);
+  std::set<int> devListSet(devListVec.begin(), devListVec.end());
+  if (devListSet.size() != devListVec.size()){
+    // there must be at least one duplicate element in devList
+    auto it=devListVec.begin();
+    for (int i=0; i<count/10; i++){
+      std::stringstream msg;
+      msg << "{ ";
+      for (int j=0; j<9; j++){
+        msg << *it << ", ";
+        ++it;
+      }
+      msg << *it << "}";
+      ++it;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_ERROR);
+    }
+    std::stringstream msg;
+    msg << "{ ";
+    for (int j=0; j<count%10-1; j++){
+      msg << *it << ", ";
+      ++it;
+    }
+    msg << *it << "}";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_ERROR);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_DUP,
+      "There appear to be duplicate DEVs in the devList.",
       ESMC_CONTEXT, &rc);
     return rc;
   }
@@ -2817,11 +2928,13 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
     << " devCountSSI=" << getDevCountSSI();
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
-  msg << prefix;
-  for (auto i=0; i<getDevCountSSI(); i++)
-    msg << " devListSSI[" << i << "]=" << devListSSI[i]
-      << "->" << ssidevs[devListSSI[i]];
-  ESMC_LogDefault.Write(msg.str(), msgType);
+  if (getDevCountSSI() > 0){
+    msg << prefix;
+    for (auto i=0; i<getDevCountSSI(); i++)
+      msg << " devListSSI[" << i << "]=" << devListSSI[i]
+        << "->" << ssidevs[devListSSI[i]];
+    ESMC_LogDefault.Write(msg.str(), msgType);
+  }
   msg.str("");  // clear
   msg << prefix << "petCount=" << getPetCount()
     << " localPet=" << getLocalPet()
@@ -3138,7 +3251,7 @@ int VMK::getMaxTag(){
 // --- VMKPlan methods ---
 
 
-VMKPlan::VMKPlan(){
+VMKPlan::VMKPlan(int _ndevlist, int *_devlist){
   // native constructor
   supportContributors = false; // by default do not support contributors
   eachChildPetOwnPthread = false; // by default do not create new Pthreads
@@ -3160,6 +3273,9 @@ VMKPlan::VMKPlan(){
   // invalidate members that deal with communicator of participating PETs
   lpid_mpi_g_part_map = NULL;
   commfreeflag = 0;
+  // devlist
+  ndevlist = _ndevlist;
+  devlist = _devlist;
 }
 
 

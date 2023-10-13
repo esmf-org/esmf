@@ -436,6 +436,9 @@ class VMK{
     static int checkPetList(int *petList, int count);
       // ensure there are no duplicate PETs listed
 
+    static int checkDevList(int *devList, int count);
+      // ensure there are no duplicate DEVs listed
+
     void print() const;
     void log(std::string prefix,
       ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO)const;
@@ -624,6 +627,8 @@ class VMKPlan{
     int npets;
     int nplist;       // number of PETs in petlist that participate
     int *petlist;     // keeping sequence of parent pets
+    int ndevlist;     // number of DEVs in devList
+    int *devlist;     // list of associated devices
     bool supportContributors;     // default: false
     bool eachChildPetOwnPthread;  // default: false
     int parentVMflag; // 0-create child VM, 1-run on parent VM
@@ -650,7 +655,7 @@ class VMKPlan{
     int openmpnumthreads; // -1 default: local peCount
 
   public:
-    VMKPlan();
+    VMKPlan(int _ndevlist=0, int *_devlist=NULL);
       // native constructor (sets communication preferences to defaults)
     ~VMKPlan();
       // native destructor
