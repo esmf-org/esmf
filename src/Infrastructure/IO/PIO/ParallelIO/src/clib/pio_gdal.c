@@ -32,7 +32,7 @@ GDALc_inq_file_metadata(file_desc_t *file, GDALDatasetH hDS, int iotype, int *nv
 
       OGRFeatureDefnH hFD = OGR_L_GetLayerDefn(hLayer);
       *nvars = OGR_FD_GetFieldCount(hFD);
-      printf(">>>>> NVARS: %d\n",*nvars);
+//      printf(">>>>> NVARS: %d\n",*nvars);
       if (nvars == 0) // empty file
 	return pio_err(NULL, file, PIO_ENOMEM, __FILE__, __LINE__);
 
@@ -64,12 +64,13 @@ GDALc_inq_file_metadata(file_desc_t *file, GDALDatasetH hDS, int iotype, int *nv
 	  size_t type_size;
 
 	  //	    
-	  var_ndims = 2; // FIXED FOR NOW ... OGR_G_GetCoordinateDimension(OGRGeometryH);
+	  var_ndims = 1; // FIXED FOR NOW. For data-read purposes, it's a 1D stream across the number of
+                         // elements.
 	  (*ndims)[v] = var_ndims;
 	  //>>            if ((ret = nc_inq_var(ncid, v, NULL, &my_type, &var_ndims, NULL, NULL)))
 	  //>>                return pio_err(NULL, file, ret, __FILE__, __LINE__);
 	  OGRFieldType Fld = OGR_Fld_GetType(OGR_FD_GetFieldDefn(hFD,v));
-	  printf(">>>>> FIELDNAME: %s, TYPE: %d\n",OGR_Fld_GetNameRef(OGR_FD_GetFieldDefn(hFD,v)),Fld);
+//	  printf(">>>>> FIELDNAME: %s, TYPE: %d\n",OGR_Fld_GetNameRef(OGR_FD_GetFieldDefn(hFD,v)),Fld);
 	  bool typeOK = true; // assume we're good
 	  switch (Fld) {
 	  case OFTReal:
@@ -87,7 +88,7 @@ GDALc_inq_file_metadata(file_desc_t *file, GDALDatasetH hDS, int iotype, int *nv
 	  //>>	      break;
 	  //>>	    case OFTDateTime:
 	  default:
-	    printf(">>>> Fld Type: %d\n",Fld);
+//	    printf(">>>> Fld Type: %d\n",Fld);
 	    typeOK = false;
 	    break;
 //	    return pio_err(file->iosystem, file, PIO_EBADIOTYPE, __FILE__, __LINE__);
@@ -96,7 +97,7 @@ GDALc_inq_file_metadata(file_desc_t *file, GDALDatasetH hDS, int iotype, int *nv
 	  //>>                return check_netcdf(file, ret, __FILE__, __LINE__);
 	  //>>            (*pio_type_size)[v] = type_size;
 
-	  printf(">>>>> TEST: hDS %p, hFD %p\n", (void *)hDS, (void *)hFD);
+//	  printf(">>>>> TEST: hDS %p, hFD %p\n", (void *)hDS, (void *)hFD);
     
 	  if (!typeOK) // Not a usable type 
 	    continue;
@@ -469,7 +470,7 @@ int GDALc_inq_timeid(int fileid, int *timeid) { // Is there a field of type OFTD
     OGRFeatureDefnH hFD = OGR_L_GetLayerDefn(hLayer);
     if (hFD == NULL)
         return pio_err(NULL, NULL, ierr, __FILE__, __LINE__);
-    printf("XXXXX NFLDS: %d, FID  %d, hDS %p, hFD %p\n", file->nvars, fileid, (void *)file->hDS, (void *)hFD);
+//    printf("XXXXX NFLDS: %d, FID  %d, hDS %p, hFD %p\n", file->nvars, fileid, (void *)file->hDS, (void *)hFD);
     int nFld = OGR_FD_GetFieldCount(hFD);
     OGRFieldDefnH hTMP = OGR_FD_GetFieldDefn(hFD,1);
                   hTMP = OGR_FD_GetFieldDefn(hFD,0);
@@ -480,7 +481,7 @@ int GDALc_inq_timeid(int fileid, int *timeid) { // Is there a field of type OFTD
       OGRFieldType Fld = OGR_Fld_GetType(hFlD);
       if (Fld == NULL)
         return pio_err(NULL, NULL, ierr, __FILE__, __LINE__);
-      printf("XXXXX FIELDNAME: %s, TYPE: %d\n",OGR_Fld_GetNameRef(OGR_FD_GetFieldDefn(hFD,i)),Fld);
+//      printf("XXXXX FIELDNAME: %s, TYPE: %d\n",OGR_Fld_GetNameRef(OGR_FD_GetFieldDefn(hFD,i)),Fld);
 
 //      const char* FldTyp = OGR_GetFieldTypeName(Fld);
 //      PRINTMSG("Field type: " << FldTyp);
@@ -739,15 +740,14 @@ pio_read_darray_shp(file_desc_t *file, io_desc_t *iodesc, int vid,
                     case PIO_SHORT:
                         return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);
                     case PIO_INT:
-		        printf("Int: Start %d, Count %d\n", start, count);
+		        printf("Int 1: Start %d, Count %d, fndims %d\n", start[0], count[0],fndims);
+		        printf("Int 2: Start %d, Count %d\n", start[fndims-1], count[fndims-1]);
                         ierr = GDALc_shp_get_int_field(file->pio_ncid);
                         break;
                     case PIO_FLOAT:
                         return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);
                     case PIO_DOUBLE:
-		        printf("Double 1: Start %d, Count %d\n", start[0], count[0]);
-		        printf("Double 2: Start %d, Count %d\n", start[fndims-1], count[fndims-1]);
-                        ierr = GDALc_shp_get_double_field(file->pio_ncid);
+                        ierr = GDALc_shp_get_double_field(file->pio_ncid, vid, start, count, (double *)bufptr);
                         break;
                     default:
                         return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);
@@ -763,7 +763,6 @@ pio_read_darray_shp(file_desc_t *file, io_desc_t *iodesc, int vid,
                  * ios->num_iotasks is the number of iotasks actually
                  * used in this decomposition. */
                 if (rtask < ios->num_iotasks && tmp_bufsize > 0){
-		  
                     if ((mpierr = MPI_Send(iobuf, tmp_bufsize, iodesc->mpitype, rtask,
                                            4 * ios->num_iotasks + rtask, ios->io_comm)))
                         return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
@@ -787,8 +786,30 @@ GDALc_shp_get_int_field(int fileid)
   return PIO_NOERR;
 }
 int
-GDALc_shp_get_double_field(int fileid)
+GDALc_shp_get_double_field(int fileid, int varid, const size_t *startp,
+                           const size_t *countp, double *ip)
 {
+  OGRFeatureH hF;
+  file_desc_t *file;         /* Pointer to file information. */
+  int ierr;
+
+  /* Get file info based on fileid. */
+  if ((ierr = pio_get_file(fileid, &file)))
+    return pio_err(NULL, NULL, ierr, __FILE__, __LINE__);
+  if (file->hDS == NULL)
+    return pio_err(NULL, NULL, ierr, __FILE__, __LINE__);
+
+  OGRLayerH hL = OGR_DS_GetLayer( file->hDS, 0 );
+
+  // here, we have to assume start and count are only one dimension, and have
+  // only one assigned value.
+  for (size_t i = startp[0]; i<countp[0]; i++) {
+    
+    hF     = OGR_L_GetFeature(hL,i);
+    ip[i] = OGR_F_GetFieldAsDouble(hF,varid);
+//    printf("Data %d: %0.2f\n",i,ip[i]);
+  }
+
   return PIO_NOERR;
 }
 /**
