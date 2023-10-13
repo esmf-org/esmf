@@ -47,6 +47,9 @@ program ESMF_IO_MultitileUTest
   type(ESMF_VM) :: vm
   integer :: localPet
   type(ESMF_Grid) :: grid6tile
+  type(ESMF_Grid) :: grid6tileUnevenDEs
+  integer :: grid6tileUnevenDEsLdeCount
+  integer :: lde
   type(ESMF_DistGrid) :: distgrid3tile
 
   ! Fields used for writing:
@@ -58,6 +61,10 @@ program ESMF_IO_MultitileUTest
   ! This field is not in the field bundle:
   type(ESMF_Field) :: field3
   real(ESMF_KIND_R8), pointer :: field3Data(:,:)
+  ! These fields are for tests with something other than 1 DE per PET:
+  type(ESMF_Field) :: field1UnevenDEs, field4dUnevenDEs
+  real(ESMF_KIND_R8), pointer :: field1UnevenDEsData(:,:)
+  real(ESMF_KIND_R8), pointer :: field4dUnevenDEsData(:,:,:,:)
 
   ! Fields used for reading:
   !
@@ -68,6 +75,10 @@ program ESMF_IO_MultitileUTest
   ! This field is not in the field bundle:
   type(ESMF_Field) :: field3Read
   real(ESMF_KIND_R8), pointer :: field3ReadData(:,:)
+  ! These fields are for tests with something other than 1 DE per PET:
+  type(ESMF_Field) :: field1UnevenDEsRead, field4dUnevenDEsRead
+  real(ESMF_KIND_R8), pointer :: field1UnevenDEsReadData(:,:)
+  real(ESMF_KIND_R8), pointer :: field4dUnevenDEsReadData(:,:,:,:)
 
   ! This is used for error testing:
   type(ESMF_Grid) :: gridSingleTile
@@ -99,6 +110,7 @@ program ESMF_IO_MultitileUTest
   character(len=*), parameter :: fileNameFields = "ESMF_IO_MultitileUTestFields*.nc"
   character(len=*), parameter :: fileNameArrays = "ESMF_IO_MultitileUTestArrays*.nc"
   character(len=*), parameter :: fileNameFail = "ESMF_IO_MultitileUTestFail*.nc"
+  character(len=*), parameter :: fileNameUnevenDEs = "ESMF_IO_MultitileUTestUnevenDEs*.nc"
 
   !------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
@@ -340,6 +352,104 @@ program ESMF_IO_MultitileUTest
 #endif
   !------------------------------------------------------------------------
 
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name,*) "Write a multi-tile Field with uneven DEs per PET"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_FieldWrite(field1UnevenDEs, fileName=fileNameUnevenDEs, overwrite=.true., rc=rc)
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc == ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name,*) "Read a multi-tile Field with uneven DEs per PET"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_FieldRead(field1UnevenDEsRead, fileName=fileNameUnevenDEs, rc=rc)
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc == ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name,*) "Confirm that Field-read field matches original with uneven DEs per PET"
+  write(failMsg, *) "Read-in field differs from original"
+  allEqual = .true.
+  do lde = 0, grid6tileUnevenDEsLdeCount - 1
+     ! For simplicity, bail out if the following FieldGets fail rather than calling them their own unit test
+     call ESMF_FieldGet(field1UnevenDEs, localDe=lde, farrayPtr=field1UnevenDEsData, rc=rc)
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+     call ESMF_FieldGet(field1UnevenDEsRead, localDe=lde, farrayPtr=field1UnevenDEsReadData, rc=rc)
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+     if (.not. all(field1UnevenDEsReadData == field1UnevenDEsData)) then
+        allEqual = .false.
+     end if
+  end do
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test(allEqual, name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Comparison did not fail as expected"
+  call ESMF_Test(.not. allEqual, name, failMsg, result, ESMF_SRCLINE)
+#endif
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name,*) "Write a multi-tile Field with uneven DEs per PET and ungridded dims"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_FieldWrite(field4dUnevenDEs, fileName=fileNameUnevenDEs, overwrite=.true., rc=rc)
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc == ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name,*) "Read a multi-tile Field with uneven DEs per PET and ungridded dims"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_FieldRead(field4dUnevenDEsRead, fileName=fileNameUnevenDEs, rc=rc)
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc == ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name,*) "Confirm that Field-read field matches original with uneven DEs per PET and ungridded dims"
+  write(failMsg, *) "Read-in field differs from original"
+  allEqual = .true.
+  do lde = 0, grid6tileUnevenDEsLdeCount - 1
+     ! For simplicity, bail out if the following FieldGets fail rather than calling them their own unit test
+     call ESMF_FieldGet(field4dUnevenDEs, localDe=lde, farrayPtr=field4dUnevenDEsData, rc=rc)
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+     call ESMF_FieldGet(field4dUnevenDEsRead, localDe=lde, farrayPtr=field4dUnevenDEsReadData, rc=rc)
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+     if (.not. all(field4dUnevenDEsReadData == field4dUnevenDEsData)) then
+        allEqual = .false.
+     end if
+  end do
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test(allEqual, name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Comparison did not fail as expected"
+  call ESMF_Test(.not. allEqual, name, failMsg, result, ESMF_SRCLINE)
+#endif
+  !------------------------------------------------------------------------
+
 #endif  ! ESMF_TESTEXHAUSTIVE
 
   !------------------------------------------------------------------------
@@ -353,9 +463,11 @@ contains
     integer, intent(out) :: rc
 
     integer :: decompPTile(2,6)
+    integer :: decompPTileUnevenDEs(2,6)
     type(ESMF_ArraySpec) :: arraySpec
     type(ESMF_ArraySpec) :: arraySpec_w_ungridded
     type(ESMF_Array) :: array1
+    type(ESMF_DELayout) :: delayout
     real(ESMF_KIND_R8), pointer :: coordPtrX(:,:), coordPtrY(:,:)
     integer :: u1, u2, i, j
     real :: multiplier
@@ -473,6 +585,76 @@ contains
     fieldBundleRead = ESMF_FieldBundleCreate(name="fbRead", rc=rc)
     if (rc /= ESMF_SUCCESS) return
     call ESMF_FieldBundleAdd(fieldBundleRead, [field1Read, field2Read, field1CopyRead, field4dRead], rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    ! Set up a 6-tile grid with an uneven distribution of DEs to PETs, and create fields
+    ! on this grid
+    !------------------------------------------------------------------------
+
+    ! Decomposition for 8 PEs but 16 DEs
+    !
+    ! The number of DEs per tile is:
+    ! Tile : 1 2 3 4 5 6
+    ! # DEs: 2 1 6 1 3 3
+    !
+    ! The DEs are scattered in a disorganized fashion across PETs. We have the following
+    ! number of DEs on each PET:
+    ! PET #: 0 1 2 3 4 5 6 7
+    ! # DEs: 1 2 3 4 0 3 0 3
+    decompPTileUnevenDEs(1,:) = [2,1,3,1,1,3]
+    decompPTileUnevenDEs(2,:) = [1,1,2,1,3,1]
+    delayout = ESMF_DELayoutCreate(petMap=[3,2,5,5,1,3,2,1,7,3,0,7,2,7,3,5])
+    grid6tileUnevenDEs = ESMF_GridCreateCubedSphere( &
+         tilesize = 6, &
+         regDecompPTile = decompPTileUnevenDEs, &
+         delayout = delayout, &
+         staggerLocList = [ESMF_STAGGERLOC_CENTER], &
+         rc = rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_GridGet(grid6tileUnevenDEs, localDECount=grid6tileUnevenDEsLdeCount, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    field1UnevenDEs = ESMF_FieldCreate(grid6tileUnevenDEs, arraySpec, name="field1UnevenDEs", rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_FieldFill(field1UnevenDEs, dataFillScheme='sincos', member=1, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    ! Note that we can't get farrayPtr here because we'll need to do that in a loop over DEs
+
+    field1UnevenDEsRead = ESMF_FieldCreate(grid6tileUnevenDEs, arraySpec, name="field1UnevenDEs", rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    ! Note that we can't get farrayPtr here because we'll need to do that in a loop over DEs
+
+    field4dUnevenDEs = ESMF_FieldCreate(grid6tileUnevenDEs, arraySpec_w_ungridded, name="field4dUnevenDEs", &
+         ungriddedLBound=[2,15], ungriddedUBound=[4,18], &
+         ! 2nd and 4th dimensions are ungridded dimensions
+         gridToFieldMap=[1,3], &
+         rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    do lde = 0, grid6tileUnevenDEsLdeCount-1
+       call ESMF_FieldGet(field4dUnevenDEs, localDe=lde, farrayPtr=field4dUnevenDEsData, rc=rc)
+       if (rc /= ESMF_SUCCESS) return
+       call ESMF_GridGetCoord(grid6tileUnevenDEs, coordDim=1, localDe=lde, farrayPtr=coordPtrX, rc=rc)
+       if (rc /= ESMF_SUCCESS) return
+       call ESMF_GridGetCoord(grid6tileUnevenDEs, coordDim=2, localDe=lde, farrayPtr=coordPtrY, rc=rc)
+       if (rc /= ESMF_SUCCESS) return
+       do u1 = 2,4
+          do u2 = 15,18
+             do i = lbound(field4dUnevenDEsData, 1), ubound(field4dUnevenDEsData, 1)
+                do j = lbound(field4dUnevenDEsData, 3), ubound(field4dUnevenDEsData, 3)
+                   multiplier = 5.**(u2-15)
+                   field4dUnevenDEsData(i,u1,j,u2) = u1*multiplier*(coordPtrX(i,j) - coordPtrY(i,j))
+                end do
+             end do
+          end do
+       end do
+    end do
+
+    field4dUnevenDEsRead = ESMF_FieldCreate(grid6tileUnevenDEs, arraySpec_w_ungridded, name="field4dUnevenDEs", &
+         ungriddedLBound=[2,15], ungriddedUBound=[4,18], &
+         ! 2nd and 4th dimensions are ungridded dimensions
+         gridToFieldMap=[1,3], &
+         rc=rc)
     if (rc /= ESMF_SUCCESS) return
 
   end subroutine createFields
