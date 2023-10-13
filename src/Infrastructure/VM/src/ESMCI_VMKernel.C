@@ -2920,14 +2920,11 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
   msg << prefix << "vm located at: " << this;
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
-  msg << prefix << "ndevs=" << ndevs << " ndevsSSI=" << ndevsSSI;
-  for (auto i=0; i<ndevsSSI; i++)
-    msg << " ssidevs[" << i << "]=" << ssidevs[i];
+  msg << prefix << "ssiCount=" << getSsiCount()
+    << " localSsi=" << ssiid[cid[mypet][0]];
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
-  msg << prefix << "ssiCount=" << getSsiCount()
-    << " localSsi=" << ssiid[cid[mypet][0]]
-    << " devCount=" << getDevCount()
+  msg << prefix << "devCount=" << getDevCount()
     << " devCountSSI=" << getDevCountSSI();
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
@@ -3096,6 +3093,14 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
       << " SSIPE=" << ssipe[i];
     ESMC_LogDefault.Write(msg.str(), msgType);
   }
+  msg.str("");  // clear
+  msg << prefix << "ndevs=" << ndevs << " ndevsSSI=" << ndevsSSI;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix;
+  for (auto i=0; i<ndevsSSI; i++)
+    msg << " ssidevs[" << i << "]=" << ssidevs[i];
+  ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
 #ifndef ESMF_MPIUNI
   bool mpi_t_okay = true;
