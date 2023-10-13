@@ -645,11 +645,14 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   bool ndevInit = false;
 #ifdef ESMF_NVML
   // Have access to NVIDIA management library (NVML)
-  nvmlInit_v2();  // initialize NVML
-  unsigned int nvmlDeviceCount;
-  nvmlDeviceGetCount_v2(&nvmlDeviceCount);
-  ndevsSSI = nvmlDeviceCount;
-  ndevInit = true;
+  nvmlReturn_t nvlmRC;
+  nvlmRC = nvmlInit_v2();  // initialize NVML
+  if (nvlmRC == NVML_SUCCESS){
+    unsigned int nvmlDeviceCount;
+    nvmlDeviceGetCount_v2(&nvmlDeviceCount);
+    ndevsSSI = nvmlDeviceCount;
+    ndevInit = true;
+  }
 #endif
 #ifndef ESMF_NO_OPENACC
   // Have access to OpenACC
