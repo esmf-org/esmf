@@ -1254,6 +1254,15 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int pet
   int rank = src_array_p->getRank();
   int tileCount = dg_orig->getTileCount();
 
+  if (tileCount > petCount) {
+    // If tileCount > petCount, the decomposition created by the default DistGrid sets
+    // deCount = tileCount, which leads to having more DEs than PETs, which is exactly
+    // what we're trying to avoid in this function.
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD,
+      "Multi-tile I/O requires at least as many PETs as tiles", ESMC_CONTEXT, rc);
+    return; // bail out
+  }
+
   int replicatedDims = src_array_p->getReplicatedDimCount();
 
   std::vector<int> minIndexPDimPTileVec;
