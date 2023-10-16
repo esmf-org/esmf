@@ -566,12 +566,13 @@ extern "C" {
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
-  
-  void FTN_X(c_esmc_vmget)(ESMCI::VM **vm, int *localPet, int *currentSsiPe, 
+
+  void FTN_X(c_esmc_vmget)(ESMCI::VM **vm, int *localPet, int *currentSsiPe,
     int *petCount, int *peCount, int *ssiCount, int *ssiMinPetCount,
-    int *ssiMaxPetCount, int *ssiLocalPetCount, int *mpiCommunicator,
-    ESMC_Logical *pthreadsEnabledFlag, ESMC_Logical *openMPEnabledFlag,
-    ESMC_Logical *ssiSharedMemoryEnabledFlag, int *rc){
+    int *ssiMaxPetCount, int *ssiLocalPetCount, int *ssiLocalDevCount,
+    int *mpiCommunicator, ESMC_Logical *pthreadsEnabledFlag,
+    ESMC_Logical *openMPEnabledFlag, ESMC_Logical *ssiSharedMemoryEnabledFlag,
+    int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmget()"
     // Initialize return code; assume routine not implemented
@@ -601,6 +602,8 @@ extern "C" {
       *ssiMaxPetCount = (*vm)->getSsiMaxPetCount();
     if (ESMC_NOT_PRESENT_FILTER(ssiLocalPetCount) != ESMC_NULL_POINTER)
       *ssiLocalPetCount = (*vm)->getSsiLocalPetCount();
+    if (ESMC_NOT_PRESENT_FILTER(ssiLocalDevCount) != ESMC_NULL_POINTER)
+      *ssiLocalDevCount = (*vm)->getSsiLocalDevCount();
     if (ESMC_NOT_PRESENT_FILTER(mpiCommunicator) != ESMC_NULL_POINTER){
       mpiCommTemp = (*vm)->getMpi_c();
 #ifdef ESMF_DONT_HAVE_MPI_COMM_C2F
@@ -628,6 +631,36 @@ extern "C" {
       else
         *ssiSharedMemoryEnabledFlag = ESMF_FALSE;
     }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_vmgetssilocaldevlist)(ESMCI::VM **vm,
+    ESMCI::InterArray<int> *ssiLocalDevListArg, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmgetssilocaldevlist()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    // access and transfer information
+    if (ssiLocalDevListArg->dimCount != 1){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+        "ssiLocalDevListArg must enter with one dimension",
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    int ssiLocalDevCount = ssiLocalDevListArg->extent[0];
+    if (ssiLocalDevCount != (*vm)->getSsiLocalDevCount()){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+        "ssiLocalDevListArg provide ssiLocalDevCount many elements",
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    int *ssiLocalDevList = ssiLocalDevListArg->array;
+    memcpy(ssiLocalDevList, (*vm)->getSsiLocalDevList(),
+      ssiLocalDevCount * sizeof(int));
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }

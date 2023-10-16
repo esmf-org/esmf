@@ -473,6 +473,8 @@ class VMK{
     int getSsiMaxPetCount() const {return ssiMaxPetCount;}
     int getSsiLocalPetCount() const {return ssiLocalPetCount;}
     const int *getSsiLocalPetList() const {return ssiLocalPetList;}
+    int getSsiLocalDevCount() const {return devCountSSI;}
+    const int *getSsiLocalDevList() const {return devListSSI;}
     int getDevCount() const {return devCount;}
     int getDevCountSSI() const {return devCountSSI;}
     esmf_pthread_t getLocalPthreadId() const {return mypthid;}

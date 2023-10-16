@@ -5175,8 +5175,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_VMGet()
   recursive subroutine ESMF_VMGetDefault(vm, keywordEnforcer, localPet, &
     currentSsiPe, petCount, peCount, ssiCount, ssiMap, ssiMinPetCount, ssiMaxPetCount, &
-    ssiLocalPetCount, mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag, &
-    ssiSharedMemoryEnabledFlag, esmfComm, rc)
+    ssiLocalPetCount, ssiLocalDevCount, ssiLocalDevList, mpiCommunicator, &
+    pthreadsEnabledFlag, openMPEnabledFlag, ssiSharedMemoryEnabledFlag, esmfComm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),        intent(in)            :: vm
@@ -5190,6 +5190,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: ssiMinPetCount
     integer,              intent(out), optional :: ssiMaxPetCount
     integer,              intent(out), optional :: ssiLocalPetCount
+    integer,              intent(out), optional :: ssiLocalDevCount
+    integer, allocatable, intent(out), optional :: ssiLocalDevList(:)
     integer,              intent(out), optional :: mpiCommunicator
     logical,              intent(out), optional :: pthreadsEnabledFlag
     logical,              intent(out), optional :: openMPEnabledFlag
@@ -5216,6 +5218,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   of the mapping of PETs to single system images across the entire VM.
 ! \item[8.2.0] Added argument {\tt esmfComm} to provide easy access to the
 !   {\tt ESMF\_COMM} setting used by the ESMF installation.
+! \item[8.6.0] Added arguments {\tt ssiLocalDevCount} and {\tt ssiLocalDevCount}
+!   to provide information about devices associated with the VM on the local
+!   SSI.
 ! \end{description}
 ! \end{itemize}
 !
@@ -5245,7 +5250,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[ssiMap]}]
 !        Upon return this array is allocated and holds the single system image
 !        id for each PET across the {\tt vm}. The size of {\tt ssiMap} is
-!        equal to {\tt petCount}, with lower bound 0 and upper bound petCount-1.
+!        equal to {\tt petCount}, with lower bound 0 and upper bound
+!        {\tt petCount - 1}.
 !   \item[{[ssiMinPetCount]}]
 !        Upon return this holds the smallest number of PETs running in the same
 !        single system images under {\tt vm}.
@@ -5255,6 +5261,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[ssiLocalPetCount]}]
 !        Upon return this holds the number of PETs running in the same
 !        single system as {\tt localPet}.
+!   \item[{[ssiLocalDevCount]}]
+!        Upon return this holds the number of devices associated with this VM
+!        on the local single system.
+!   \item[{[ssiLocalDevList]}]
+!        Upon return this array is allocated and holds the local device ids
+!        of devices associated with this VM. The size of {\tt ssiLocalDevList}
+!        is equal to {\tt ssiLocalDevCount}, with lower bound 0 and upper
+!        bound {\tt ssiLocalDevCount - 1}. Local device ids can be used to
+!        target specific devices using OpenMP, OpenACC, or similar device
+!        API.
 !   \item[{[mpiCommunicator]}]
 !        Upon return this holds the MPI intra-communicator used by the 
 !        specified {\tt ESMF\_VM} object. This communicator may be used for
@@ -5302,9 +5318,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Logical)      :: pthreadsEnabledFlagArg         ! helper variable
     type(ESMF_Logical)      :: openMPEnabledFlagArg           ! helper variable
     type(ESMF_Logical)      :: ssiSharedMemoryEnabledFlagArg  ! helper variable
-    integer                 :: petCountArg, i;                ! helper variable
+    integer                 :: petCountArg, ssiLocalDevCountArg ! helper variable
+    integer                 :: i;                ! helper variable
     integer                 :: localrc  ! local return code
     character(len=40)       :: esmfCommArg
+    type(ESMF_InterArray)   :: ssiLocalDevListArg       ! interface variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -5317,8 +5335,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Call into the C++ interface.
       call c_ESMC_VMGet(vm, localPet, currentSsiPe, petCountArg, peCount, &
         ssiCount, ssiMinPetCount, ssiMaxPetCount, ssiLocalPetCount, &
-        mpiCommunicator, pthreadsEnabledFlagArg, openMPEnabledFlagArg, &
-        ssiSharedMemoryEnabledFlagArg, localrc)
+        ssiLocalDevCountArg, mpiCommunicator, pthreadsEnabledFlagArg, &
+        openMPEnabledFlagArg, ssiSharedMemoryEnabledFlagArg, localrc)
       if (present(petCount)) petCount = petCountArg
       if (present (pthreadsEnabledFlag))  &
         pthreadsEnabledFlag = pthreadsEnabledFlagArg
@@ -5336,11 +5354,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
       endif
+      if (present(ssiLocalDevCount)) ssiLocalDevCount = ssiLocalDevCountArg
+      if (present(ssiLocalDevList)) then
+        allocate(ssiLocalDevList(0:ssiLocalDevCountArg-1))
+        ssiLocalDevListArg = ESMF_InterArrayCreate(ssiLocalDevList, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        call c_ESMC_VMGetSsiLocalDevList(vm, ssiLocalDevListArg, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_InterArrayDestroy(ssiLocalDevListArg, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
     else
       ! Only very specific cases are supported for a NULL this pointer
       if (present(petCount) .or. present(peCount) .or. present(ssiCount) .or. &
         present(ssiMap) .or. present(ssiMinPetCount) .or. &
         present(ssiMaxPetCount) .or. present(ssiLocalPetCount) .or. &
+        present(ssiLocalDevCount) .or. present(ssiLocalDevList) .or. &
         present(pthreadsEnabledFlag) .or. present(openMPEnabledFlag) .or. &
         present(ssiSharedMemoryEnabledFlag)) then
         call ESMF_LogSetError(ESMF_RC_PTR_NULL, &
