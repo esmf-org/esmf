@@ -191,6 +191,8 @@ namespace ESMCI {
     int *totalUBound;                 // [redDimCount*ssiLocalDeCount]
     int tensorCount;                  // number of tensor dimensions
     int tensorElementCount;           // number of tensor elements per element
+    int replicatedDimCount;           // number of replicated dimensions
+                                      // (i.e., dimensions where distgridToArrayMap[i] == 0)
     int *undistLBound;                // [tensorCount]
     int *undistUBound;                // [tensorCount]
     int *distgridToArrayMap;          // [dimCount] - entries are basis 1
@@ -262,6 +264,7 @@ namespace ESMCI {
       totalLBound = NULL;
       totalUBound = NULL;
       tensorCount = 0;
+      replicatedDimCount = 0;
       undistLBound = NULL;
       undistUBound = NULL;
       distgridToArrayMap = NULL;
@@ -300,6 +303,7 @@ namespace ESMCI {
       totalLBound = NULL;
       totalUBound = NULL;
       tensorCount = 0;
+      replicatedDimCount = 0;
       undistLBound = NULL;
       undistUBound = NULL;
       distgridToArrayMap = NULL;
@@ -327,8 +331,8 @@ namespace ESMCI {
       int *localDeToDeMap, DistGrid *distgrid, bool distgridCreator,
       int *exclusiveLBound, int *exclusiveUBound, int *computationalLBound,
       int *computationalUBound, int *totalLBound, int *totalUBound,
-      int tensorCount, int tensorElementCount, int *undistLBoundArray,
-      int *undistUBoundArray, int *distgridToArrayMapArray,
+      int tensorCount, int tensorElementCount, int replicatedDimCount,
+      int *undistLBoundArray, int *undistUBoundArray, int *distgridToArrayMapArray,
       int *arrayToDistGridMapArray, int *distgridToPackedArrayMapArray,
       ESMC_IndexFlag indexflagArg, int *rc,
       VM *vm=NULL); // allow specific VM instead default
@@ -385,6 +389,7 @@ namespace ESMCI {
     const int *getTotalLBound()             const {return totalLBound;}
     const int *getTotalUBound()             const {return totalUBound;}
     int getTensorCount()                    const {return tensorCount;}
+    int getReplicatedDimCount()             const {return replicatedDimCount;}
     const int *getUndistLBound()            const {return undistLBound;}
     const int *getUndistUBound()            const {return undistUBound;}
     const int *getExclusiveElementCountPDe()const

@@ -143,7 +143,7 @@ ESMF_CXXMAJORVERSION      = $(shell $(ESMF_DIR)/scripts/version.intel 1 ${ESMF_C
 ############################################################
 # Special debug flags
 #
-ESMF_F90OPTFLAG_G       += -traceback -check arg_temp_created,bounds,format,output_conversion,stack,uninit
+ESMF_F90OPTFLAG_G       += -traceback -check arg_temp_created,bounds,format,output_conversion,stack
 ESMF_CXXOPTFLAG_G       += -traceback -Wcheck
 
 ############################################################

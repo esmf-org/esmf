@@ -128,8 +128,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[7.0.0] Added argument {\tt logAppendFlag} to allow specifying that the existing
-!              log files will be overwritten.
+! \item[7.0.0] Added argument {\tt logAppendFlag} to allow specifying that the
+!              existing log files will be overwritten.
 ! \item[8.2.0] Added argument {\tt globalResourceControl} to support ESMF-aware
 !              threading and resource control on the global VM level.\newline
 !              Added argument {\tt config} to return default handle to the
@@ -151,8 +151,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              configurations.\newline
 !              Added argument {\tt configFilenameFromArgNum} to support config
 !              file specification via the command line.
-! \item[8.6.0] Added {\tt defaultDefaultCalKind} argument to allow specifiation of
-!              a default for {\tt defaultCalKind}.
+! \item[8.6.0] Added {\tt defaultDefaultCalKind} argument to allow specifiation
+!              of a default for {\tt defaultCalKind}.
 ! \end{description}
 ! \end{itemize}
 !
@@ -1582,7 +1582,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical :: abortFlag
       type(ESMF_Logical) :: keepMpiFlag
       integer :: localrc
-      character(ESMF_MAXSTR) :: errmsg
+      character(ESMF_MAXSTR) :: errmsg, msgStr
       integer :: errmsg_l
       logical, save :: already_final = .false.    ! Static, maintains state.
 
@@ -1595,14 +1595,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         rc = ESMF_RC_NOT_IMPL
       endif
 
+      abortFlag = .false.
+      keepMpiFlag = ESMF_FALSE
+      if (present(endflag)) then
+        if (endflag==ESMF_END_ABORT) abortFlag = .true.
+        if (endflag==ESMF_END_KEEPMPI) keepMpiFlag = ESMF_TRUE
+      endif
+
       if (already_final) then
           if (rcpresent) rc = ESMF_SUCCESS
           return
       endif
 
       ! Write final message to the log
-      call ESMF_LogWrite("Finalizing ESMF", &
-        ESMF_LOGMSG_INFO, rc=localrc)
+      write(msgStr,*) "Finalizing ESMF"
+      if (abortFlag) &
+        write(msgStr,*) "Finalizing ESMF with endflag==ESMF_END_ABORT"
+      if (keepMpiFlag==ESMF_TRUE) &
+        write(msgStr,*) "Finalizing ESMF with endflag==ESMF_END_KEEPMPI"
+      call ESMF_LogWrite(trim(msgStr), ESMF_LOGMSG_INFO, rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
       endif
@@ -1610,19 +1621,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call c_esmc_getComplianceCheckTrace(traceIsOn, profileIsOn, localrc)
       if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error checking ESMF_RUNTIME_* env variables"
-          return
       endif
       if (traceIsOn == 1 .or. profileIsOn == 1) then
-        call ESMF_TraceClose()
+        call ESMF_TraceClose(rc=localrc)
         if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error closing trace stream"
-          return
         endif
       endif
 
+#ifdef LOG_FINALIZE
+      call ESMF_LogWrite("Done closing ESMF_Trace", &
+        ESMF_LOGMSG_INFO, rc=localrc)
+      if (localrc /= ESMF_SUCCESS) then
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
+      endif
+#endif
 
-
-      ! Close the Config file  
+      ! Close the Config file
       ! TODO: write this routine and remove the status= line
       ! call ESMF_ConfigFinalize(localrc)
       localrc = ESMF_SUCCESS
@@ -1630,7 +1645,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_LogRc2Msg (localrc, errmsg, errmsg_l)
           write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
               ": Error finalizing config file: ", errmsg(:errmsg_l)
-          return
       endif
 
       ! Delete any internal built-in time manager calendars
@@ -1639,8 +1653,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_LogRc2Msg (localrc, errmsg, errmsg_l)
           write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
               ": Error finalizing the time manager calendars"
-          return
       endif
+
+#ifdef LOG_FINALIZE
+      call ESMF_LogWrite("Done finalizing ESMF_Calendar", &
+        ESMF_LOGMSG_INFO, rc=localrc)
+      if (localrc /= ESMF_SUCCESS) then
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
+      endif
+#endif
 
       ! Flush log to avoid lost messages
       call ESMF_LogFlush (rc=localrc)
@@ -1650,12 +1671,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ": Error flushing log file: ", errmsg(:errmsg_l)
       end if
 
-      abortFlag = .false.
-      keepMpiFlag = ESMF_FALSE
-      if (present(endflag)) then
-        if (endflag==ESMF_END_ABORT) abortFlag = .true.
-        if (endflag==ESMF_END_KEEPMPI) keepMpiFlag = ESMF_TRUE
+#ifdef LOG_FINALIZE
+      call ESMF_LogWrite("Done flushing ESMF_Log", &
+        ESMF_LOGMSG_INFO, rc=localrc)
+      if (localrc /= ESMF_SUCCESS) then
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
       endif
+#endif
 
       if (abortFlag) then
         ! Abort the VM
@@ -1676,6 +1698,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           return
         endif
       endif
+
+#ifdef LOG_FINALIZE
+      call ESMF_LogWrite("Done finalizing ESMF_VM", &
+        ESMF_LOGMSG_INFO, rc=localrc)
+      if (localrc /= ESMF_SUCCESS) then
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
+      endif
+#endif
 
       ! Shut down the log file
       call ESMF_LogFinalize(localrc)

@@ -1765,7 +1765,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE:  ESMF_AlarmEQ - Compare two Alarms for equality
 !
 ! !INTERFACE:
-      function ESMF_AlarmEQ(alarm1, alarm2)
+      impure elemental function ESMF_AlarmEQ(alarm1, alarm2)
 !
 ! !RETURN VALUE:
       logical :: ESMF_AlarmEQ
@@ -1815,7 +1815,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE:  ESMF_AlarmNE - Compare two Alarms for inequality
 !
 ! !INTERFACE:
-      function ESMF_AlarmNE(alarm1, alarm2)
+      impure elemental function ESMF_AlarmNE(alarm1, alarm2)
 !
 ! !RETURN VALUE:
       logical :: ESMF_AlarmNE

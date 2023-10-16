@@ -273,7 +273,7 @@ contains
 ! !IROUTINE:  ESMF_GridCompEQ - Compare two GridComps for equality
 !
 ! !INTERFACE:
-  function ESMF_GridCompEQ(gridcomp1, gridcomp2)
+  impure elemental function ESMF_GridCompEQ(gridcomp1, gridcomp2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_GridCompEQ
@@ -325,7 +325,7 @@ contains
 ! !IROUTINE:  ESMF_GridCompNE - Compare two GridComps for non-equality
 !
 ! !INTERFACE:
-  function ESMF_GridCompNE(gridcomp1, gridcomp2)
+  impure elemental function ESMF_GridCompNE(gridcomp1, gridcomp2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_GridCompNE

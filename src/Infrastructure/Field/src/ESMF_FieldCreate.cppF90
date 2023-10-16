@@ -279,7 +279,7 @@ contains
 ! !IROUTINE:  ESMF_FieldEQ - Compare two Fields for equality
 !
 ! !INTERFACE:
-  function ESMF_FieldEQ(field1, field2)
+  impure elemental function ESMF_FieldEQ(field1, field2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_FieldEQ
@@ -330,7 +330,7 @@ contains
 ! !IROUTINE:  ESMF_FieldNE - Compare two Fields for non-equality
 !
 ! !INTERFACE:
-  function ESMF_FieldNE(field1, field2)
+  impure elemental function ESMF_FieldNE(field1, field2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_FieldNE
