@@ -2137,7 +2137,23 @@ Array *Array::create(
       ESMC_LogDefault.MsgAllocError("for new ESMCI::Array.", ESMC_CONTEXT, rc);
       return NULL;
     }
-    //TODO: sanity check requested tensor handling (leading and trailing)
+    // ensure there are at least the number of requested rmLeadingTensors
+    // number of leading tensor dims available in arrayIn
+    if (rmLeadingTensors >= arrayIn->rank){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+        "Number of leading tensor dims removed must be smaller than rank",
+        ESMC_CONTEXT, rc);
+      return ESMC_NULL_POINTER;
+    }
+    for (auto i=0; i<rmLeadingTensors; i++){
+      if (arrayIn->arrayToDistGridMap[i] != 0 ){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          "Number of available leading tensor dims is too small",
+          ESMC_CONTEXT, rc);
+        return ESMC_NULL_POINTER;
+      }
+    }
+    // deal with trailing tensor dim removal
     int rmTrailingTensors = 0;
     if (present(trailingTensorSlice)){
       if (trailingTensorSlice->dimCount != 1){
@@ -2145,6 +2161,22 @@ Array *Array::create(
           "trailingTensorSlice array must be of rank 1", ESMC_CONTEXT, rc);
       }
       rmTrailingTensors = trailingTensorSlice->extent[0];
+      // ensure there are at least the number of requested rmTrailingTensors
+      // number of trailing tensor dims available in arrayIn
+      if (rmTrailingTensors >= arrayIn->rank){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          "Number of trailing tensor dims removed must be smaller than rank",
+          ESMC_CONTEXT, rc);
+        return ESMC_NULL_POINTER;
+      }
+      for (auto i=arrayIn->rank-1; i>=arrayIn->rank-rmTrailingTensors; i--){
+        if (arrayIn->arrayToDistGridMap[i] != 0 ){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+            "Number of available trailing tensor dims is too small",
+            ESMC_CONTEXT, rc);
+          return ESMC_NULL_POINTER;
+        }
+      }
     }
     // copy all scalar members and reference members
     ESMC_TypeKind_Flag typekind =
