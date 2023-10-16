@@ -714,10 +714,10 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   }
   // Set the instance variables for devices for the global VM
   devCount = ndevs;
-  devCountSSI = ndevsSSI;
-  devListSSI = new int[devCountSSI];
-  for (auto i=0; i<devCountSSI; i++)
-    devListSSI[i] = i;  // default each PET associated with all local devices
+  ssiLocalDevCount = ndevsSSI;
+  ssiLocalDevList = new int[ssiLocalDevCount];
+  for (auto i=0; i<ssiLocalDevCount; i++)
+    ssiLocalDevList[i] = i;  // default each PET associated with all local devices
   // Creating large contiguous MPI data types in support of large MPI messages
   // within the 32-bit count limit of MPI version < 4.
   int byteCount=1;
@@ -779,7 +779,7 @@ void VMK::finalize(int finalizeMpi){
     delete [] cid[i];
   delete [] cid;
   delete [] ssiLocalPetList;
-  delete [] devListSSI;
+  delete [] ssiLocalDevList;
 #ifdef ESMF_NVML
   // Have access to NVIDIA management library (NVML)
   nvmlShutdown();  // shut down NVML
@@ -836,8 +836,8 @@ struct SpawnArg{
   int openmpnumthreads;
   // device variables
   int devCount;
-  int devCountSSI;
-  int *devListSSI;
+  int ssiLocalDevCount;
+  int *ssiLocalDevList;
   // shared memory variables
   esmf_pthread_mutex_t *pth_mutex2;
   esmf_pthread_mutex_t *pth_mutex;
@@ -995,8 +995,8 @@ void VMK::construct(void *ssarg){
 
   // device management
   devCount = sarg->devCount;
-  devCountSSI = sarg->devCountSSI;
-  devListSSI = sarg->devListSSI;
+  ssiLocalDevCount = sarg->ssiLocalDevCount;
+  ssiLocalDevList = sarg->ssiLocalDevList;
 
   // pthread mutex control
   pth_mutex2 = sarg->pth_mutex2;
@@ -2032,8 +2032,8 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
   MPI_Comm new_mpi_c_ssi_roots;
 #endif
   int devCount;
-  int devCountSSI;
-  int *devListSSI;
+  int ssiLocalDevCount;
+  int *ssiLocalDevList;
 
 #ifdef VM_MEMLOG_on
       VM::logMemInfo(std::string("VMK::startup():12.0"));
@@ -2092,7 +2092,7 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
             std::vector<int> devListVec(vmp->devlist,
               vmp->devlist + vmp->ndevlist);
             std::sort(devListVec.begin(), devListVec.end());
-            std::vector<int> devListSsiVec;
+            std::vector<int> ssiLocalDevListVec;
             auto it=devListVec.begin();
             for (auto i=0; i<VMK::ndevsSSI; i++){
               // loop over DEVs on the local SSI
@@ -2100,27 +2100,27 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
               for (; (it!=devListVec.end()) && (*it<=gDev); ++it){
                 if (*it == gDev){
                   // found matching entry in devListVec
-                  devListSsiVec.push_back(i);
+                  ssiLocalDevListVec.push_back(i);
                 }
               }
             }
-            devCountSSI = devListSsiVec.size();
-            devListSSI = new int[devCountSSI];
-            for (auto i=0; i<devCountSSI; i++)
-              devListSSI[i] = devListSsiVec[i];
+            ssiLocalDevCount = ssiLocalDevListVec.size();
+            ssiLocalDevList = new int[ssiLocalDevCount];
+            for (auto i=0; i<ssiLocalDevCount; i++)
+              ssiLocalDevList[i] = ssiLocalDevListVec[i];
             if (new_mpi_c_ssi_roots != MPI_COMM_NULL)
-              MPI_Allreduce(&devCountSSI, &devCount, 1, MPI_INTEGER, MPI_SUM,
+              MPI_Allreduce(&ssiLocalDevCount, &devCount, 1, MPI_INTEGER, MPI_SUM,
                 new_mpi_c_ssi_roots);
             if (new_mpi_c_ssi != MPI_COMM_NULL)
               MPI_Bcast(&devCount, 1, MPI_INTEGER, 0, new_mpi_c_ssi);
           }else{
             devCount = 0;
-            devCountSSI = 0;
-            devListSSI = NULL;
+            ssiLocalDevCount = 0;
+            ssiLocalDevList = NULL;
           }
           sarg[0].devCount = devCount;
-          sarg[0].devCountSSI = devCountSSI;
-          sarg[0].devListSSI = devListSSI;
+          sarg[0].ssiLocalDevCount = ssiLocalDevCount;
+          sarg[0].ssiLocalDevList = ssiLocalDevList;
         }else{
           // I am not the first under this lpid and must receive 
 #if (VERBOSITY > 9)
@@ -2144,8 +2144,8 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
 #endif
 #endif
           recv(&devCount, sizeof(int), foundfirstpet);
-          recv(&devCountSSI, sizeof(int), foundfirstpet);
-          recv(devListSSI, devCount*sizeof(int), foundfirstpet);
+          recv(&ssiLocalDevCount, sizeof(int), foundfirstpet);
+          recv(ssiLocalDevList, devCount*sizeof(int), foundfirstpet);
         }
       }else if (mypet == foundfirstpet){
         // I am the master and must send the communicator
@@ -2169,8 +2169,8 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
 #endif
 #endif
         send(&devCount, sizeof(int), i);
-        send(&devCountSSI, sizeof(int), i);
-        send(devListSSI, devCount*sizeof(int), i);
+        send(&ssiLocalDevCount, sizeof(int), i);
+        send(ssiLocalDevList, devCount*sizeof(int), i);
       }
     }
   }
@@ -2416,8 +2416,8 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
     sarg[i].pref_intra_ssi = vmp->pref_intra_ssi;
     // device management
     sarg[i].devCount = devCount;
-    sarg[i].devCountSSI = devCountSSI;
-    sarg[i].devListSSI = devListSSI;
+    sarg[i].ssiLocalDevCount = ssiLocalDevCount;
+    sarg[i].ssiLocalDevList = ssiLocalDevList;
     // cargo
     sarg[i].cargo = cargo;
     // threading stuff
@@ -2787,8 +2787,8 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
       MPI_Comm_free(&(sarg[0].mpi_c_ssi_roots));
     }
 #endif
-    if (sarg[0].devListSSI)
-      delete [] sarg[0].devListSSI;
+    if (sarg[0].ssiLocalDevList)
+      delete [] sarg[0].ssiLocalDevList;
   }
   // done holding info in SpawnArg array -> delete now
   delete [] sarg;
@@ -2928,14 +2928,14 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
   msg << prefix << "devCount=" << getDevCount()
-    << " devCountSSI=" << getDevCountSSI();
+    << " ssiLocalDevCount=" << getSsiLocalDevCount();
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
-  if (getDevCountSSI() > 0){
+  if (getSsiLocalDevCount() > 0){
     msg << prefix;
-    for (auto i=0; i<getDevCountSSI(); i++)
-      msg << " devListSSI[" << i << "]=" << devListSSI[i]
-        << "->" << ssidevs[devListSSI[i]];
+    for (auto i=0; i<getSsiLocalDevCount(); i++)
+      msg << " ssiLocalDevList[" << i << "]=" << ssiLocalDevList[i]
+        << "->" << ssidevs[ssiLocalDevList[i]];
     ESMC_LogDefault.Write(msg.str(), msgType);
   }
   msg.str("");  // clear

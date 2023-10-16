@@ -320,8 +320,8 @@ class VMK{
     int ssiLocalPet;      // id of local PET in the local SSI
     int *ssiLocalPetList; // PETs that are on the same SSI as localPet (incl.)
     int devCount;   // number of devices associated with this VMK all SSI
-    int devCountSSI;// number of devices associated with this VMK on local SSI
-    int *devListSSI;// list of SSI-local device indices associated with this VMK
+    int ssiLocalDevCount;// number of devices associated with this VMK on local SSI
+    int *ssiLocalDevList;// list of SSI-local device indices associated with this VMK
                     // Use this index to make local association calls (e.g. via
                     // acc_set_device_num() or omp_set_default_device()), and
                     // to look up global device index in ssidevs array.
@@ -475,10 +475,9 @@ class VMK{
     int getSsiLocalPetCount() const {return ssiLocalPetCount;}
     int getSsiLocalPet() const {return ssiLocalPet;}
     const int *getSsiLocalPetList() const {return ssiLocalPetList;}
-    int getSsiLocalDevCount() const {return devCountSSI;}
-    const int *getSsiLocalDevList() const {return devListSSI;}
+    int getSsiLocalDevCount() const {return ssiLocalDevCount;}
+    const int *getSsiLocalDevList() const {return ssiLocalDevList;}
     int getDevCount() const {return devCount;}
-    int getDevCountSSI() const {return devCountSSI;}
     esmf_pthread_t getLocalPthreadId() const {return mypthid;}
     static bool isPthreadsEnabled(){
 #ifdef ESMF_NO_PTHREADS
