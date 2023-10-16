@@ -2064,15 +2064,9 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
           sarg[0].mpi_c_freeflag = 1; // responsible to free the communicator
 #if (MPI_VERSION >= 3)
           // set up communicator across single-system-images SSIs
-          MPI_Comm_split_type(vmp->mpi_c_part, MPI_COMM_TYPE_SHARED, 0, 
+          MPI_Comm_split_type(vmp->mpi_c_part, MPI_COMM_TYPE_SHARED, 0,
             MPI_INFO_NULL, &new_mpi_c_ssi);
-          // set up communicator across root pets of each SSI
-          int color;
-          MPI_Comm_rank(new_mpi_c_ssi, &color);
-          if (color>0) color = MPI_UNDEFINED; // only root PETs on each SSI
-          MPI_Comm_split(mpi_c, color, 0, &new_mpi_c_ssi_roots);
           sarg[0].mpi_c_ssi = new_mpi_c_ssi;
-          sarg[0].mpi_c_ssi_roots = new_mpi_c_ssi_roots;
 #ifdef VM_SSISHMLOG_on
           {
             std::stringstream msg;
@@ -2083,6 +2077,12 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
             ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
+          // set up communicator across root pets of each SSI
+          int color;
+          MPI_Comm_rank(new_mpi_c_ssi, &color);
+          if (color>0) color = MPI_UNDEFINED; // only root PETs on each SSI
+          MPI_Comm_split(vmp->mpi_c_part, color, 0, &new_mpi_c_ssi_roots);
+          sarg[0].mpi_c_ssi_roots = new_mpi_c_ssi_roots;
 #endif
           // device management
           if (vmp->ndevlist > 0){
