@@ -2029,10 +2029,8 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
   // current VMK makes that call, even if this process will not participate
   // in the new VMK...
   MPI_Comm new_mpi_c;
-#if (MPI_VERSION >= 3)
   MPI_Comm new_mpi_c_ssi;
   MPI_Comm new_mpi_c_ssi_roots;
-#endif
   int devCount;
   int ssiLocalDevCount;
   int *ssiLocalDevList;
@@ -2071,12 +2069,11 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
           // set up communicator across single-system-images SSIs
           MPI_Comm_split_type(vmp->mpi_c_part, MPI_COMM_TYPE_SHARED, 0,
             MPI_INFO_NULL, &new_mpi_c_ssi);
-          sarg[0].mpi_c_ssi = new_mpi_c_ssi;
 #ifdef VM_SSISHMLOG_on
           {
             std::stringstream msg;
             int sz;
-            MPI_Comm_size(sarg[0].mpi_c_ssi, &sz);
+            MPI_Comm_size(new_mpi_c_ssi, &sz);
             msg << "VMK::startup()#" << __LINE__
               << " created mpi_c_ssi of size=" << sz;
             ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
@@ -2087,8 +2084,12 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
           MPI_Comm_rank(new_mpi_c_ssi, &color);
           if (color>0) color = MPI_UNDEFINED; // only root PETs on each SSI
           MPI_Comm_split(vmp->mpi_c_part, color, 0, &new_mpi_c_ssi_roots);
-          sarg[0].mpi_c_ssi_roots = new_mpi_c_ssi_roots;
+#else
+          new_mpi_c_ssi = MPI_COMM_NULL;
+          new_mpi_c_ssi_roots = MPI_COMM_NULL;
 #endif
+          sarg[0].mpi_c_ssi = new_mpi_c_ssi;
+          sarg[0].mpi_c_ssi_roots = new_mpi_c_ssi_roots;
           // device management
           if (vmp->ndevlist > 0){
             std::vector<int> devListVec(vmp->devlist,
