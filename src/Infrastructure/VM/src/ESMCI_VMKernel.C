@@ -674,6 +674,7 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   }
 #endif
 #ifndef ESMF_NO_OPENMP
+#ifdef ESMF_OPENMP4
   // Have access to OpenMP
   int openmpDeviceCount;
   openmpDeviceCount = omp_get_num_devices();
@@ -689,6 +690,7 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
     ndevsSSI = openmpDeviceCount;
     ndevInit = true;
   }
+#endif
 #endif
   // Now that ndevsSSI is known on every PET, determine total number ndevs
   if (mpi_c_ssi_roots != MPI_COMM_NULL)
@@ -2976,6 +2978,7 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
     << omp_get_num_procs();
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
+#ifdef ESMF_OPENMP4
   msg << prefix << "Current system level OMP_NUM_DEVICES setting for local PET: "
     << omp_get_num_devices();
   ESMC_LogDefault.Write(msg.str(), msgType);
@@ -2988,6 +2991,7 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
     << omp_get_default_device();
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
+#endif
 #endif
 #ifndef ESMF_NO_OPENACC
   // output OpenACC info
