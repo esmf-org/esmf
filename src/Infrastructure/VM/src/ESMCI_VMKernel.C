@@ -988,10 +988,10 @@ void VMK::construct(void *ssarg){
   }
   mpi_c = sarg->mpi_c;
 #if (MPI_VERSION >= 3)
-  mpi_c_ssi = sarg->mpi_c_ssi;
-  mpi_c_ssi = sarg->mpi_c_ssi_roots;
+  mpi_c_ssi       = sarg->mpi_c_ssi;
+  mpi_c_ssi_roots = sarg->mpi_c_ssi_roots;
 #else
-  mpi_c_ssi = MPI_COMM_NULL;
+  mpi_c_ssi       = MPI_COMM_NULL;
   mpi_c_ssi_roots = MPI_COMM_NULL;
 #endif
 
