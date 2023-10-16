@@ -317,6 +317,7 @@ class VMK{
     int ssiMinPetCount;   // minimum PETs on a single system image
     int ssiMaxPetCount;   // maximum PETs on a single system image
     int ssiLocalPetCount; // number of PETs on the same SSI as localPet (incl.)
+    int ssiLocalPet;      // id of local PET in the local SSI
     int *ssiLocalPetList; // PETs that are on the same SSI as localPet (incl.)
     int devCount;   // number of devices associated with this VMK all SSI
     int devCountSSI;// number of devices associated with this VMK on local SSI
@@ -472,6 +473,7 @@ class VMK{
     int getSsiMinPetCount() const {return ssiMinPetCount;}
     int getSsiMaxPetCount() const {return ssiMaxPetCount;}
     int getSsiLocalPetCount() const {return ssiLocalPetCount;}
+    int getSsiLocalPet() const {return ssiLocalPet;}
     const int *getSsiLocalPetList() const {return ssiLocalPetList;}
     int getSsiLocalDevCount() const {return devCountSSI;}
     const int *getSsiLocalDevList() const {return devListSSI;}

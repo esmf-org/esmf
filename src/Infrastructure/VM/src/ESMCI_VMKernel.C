@@ -560,6 +560,7 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   ssiMinPetCount=1;
   ssiMaxPetCount=1;
   ssiLocalPetCount=1;
+  ssiLocalPet=0;
   ssiLocalPetList = new int[1];
   ssiLocalPetList[0] = mypet;
 #else
@@ -613,6 +614,7 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   for (int i=0; i<ncores; i++){
     if (ssiid[i]==localSsi){
       ssiLocalPetList[j] = i;
+      if (i == mypet) ssiLocalPet=j;
       ++j;
     }
   }
@@ -978,6 +980,7 @@ void VMK::construct(void *ssarg){
   for (int i=0; i<npets; i++){
     if (ssiid[cid[i][0]]==ssiid[cid[mypet][0]]){
       ssiLocalPetList[j] = i;
+      if (i == mypet) ssiLocalPet=j;
       ++j;
     }
   }
@@ -2939,6 +2942,7 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
   msg << prefix << "petCount=" << getPetCount()
     << " localPet=" << getLocalPet()
     << " mypthid=" << mypthid
+    << " ssiLocalPet=" << getSsiLocalPet()
     << " currentSsiPe=" << getCurrentSsiPe();
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear

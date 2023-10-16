@@ -5175,7 +5175,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_VMGet()
   recursive subroutine ESMF_VMGetDefault(vm, keywordEnforcer, localPet, &
     currentSsiPe, petCount, peCount, ssiCount, ssiMap, ssiMinPetCount, ssiMaxPetCount, &
-    ssiLocalPetCount, ssiLocalDevCount, ssiLocalDevList, mpiCommunicator, &
+    ssiLocalPetCount, ssiLocalPet, ssiLocalDevCount, ssiLocalDevList, mpiCommunicator, &
     pthreadsEnabledFlag, openMPEnabledFlag, ssiSharedMemoryEnabledFlag, esmfComm, rc)
 !
 ! !ARGUMENTS:
@@ -5190,6 +5190,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: ssiMinPetCount
     integer,              intent(out), optional :: ssiMaxPetCount
     integer,              intent(out), optional :: ssiLocalPetCount
+    integer,              intent(out), optional :: ssiLocalPet
     integer,              intent(out), optional :: ssiLocalDevCount
     integer, allocatable, intent(out), optional :: ssiLocalDevList(:)
     integer,              intent(out), optional :: mpiCommunicator
@@ -5220,7 +5221,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_COMM} setting used by the ESMF installation.
 ! \item[8.6.0] Added arguments {\tt ssiLocalDevCount} and {\tt ssiLocalDevCount}
 !   to provide information about devices associated with the VM on the local
-!   SSI.
+!   SSI. \newline
+!   Added argument {\tt ssiLocalPet} to help with SSI specific assignment
+!   between PET and device resources.
 ! \end{description}
 ! \end{itemize}
 !
@@ -5261,6 +5264,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[ssiLocalPetCount]}]
 !        Upon return this holds the number of PETs running in the same
 !        single system as {\tt localPet}.
+!   \item[{[ssiLocalPet]}]
+!        Upon return this holds the SSI local index of the executing
+!        {\tt localPet}.
 !   \item[{[ssiLocalDevCount]}]
 !        Upon return this holds the number of devices associated with this VM
 !        on the local single system.
@@ -5335,8 +5341,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Call into the C++ interface.
       call c_ESMC_VMGet(vm, localPet, currentSsiPe, petCountArg, peCount, &
         ssiCount, ssiMinPetCount, ssiMaxPetCount, ssiLocalPetCount, &
-        ssiLocalDevCountArg, mpiCommunicator, pthreadsEnabledFlagArg, &
-        openMPEnabledFlagArg, ssiSharedMemoryEnabledFlagArg, localrc)
+        ssiLocalPet, ssiLocalDevCountArg, mpiCommunicator, &
+        pthreadsEnabledFlagArg, openMPEnabledFlagArg, &
+        ssiSharedMemoryEnabledFlagArg, localrc)
       if (present(petCount)) petCount = petCountArg
       if (present (pthreadsEnabledFlag))  &
         pthreadsEnabledFlag = pthreadsEnabledFlagArg
@@ -5372,6 +5379,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(petCount) .or. present(peCount) .or. present(ssiCount) .or. &
         present(ssiMap) .or. present(ssiMinPetCount) .or. &
         present(ssiMaxPetCount) .or. present(ssiLocalPetCount) .or. &
+        present(ssiLocalPetCount) .or. &
         present(ssiLocalDevCount) .or. present(ssiLocalDevList) .or. &
         present(pthreadsEnabledFlag) .or. present(openMPEnabledFlag) .or. &
         present(ssiSharedMemoryEnabledFlag)) then
