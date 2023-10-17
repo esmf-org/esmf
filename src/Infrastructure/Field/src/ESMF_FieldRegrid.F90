@@ -550,7 +550,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           as the components of a vector. If true and there is more than one ungridded dimension in either
 !           the source or destination, then an error will be returned. Currently this functionality only
 !           works when both the source and destination Fields are build on a geometry (e.g. an ESMF Grid) with
-!           a spherical coordinate sytem (e.g. ESMF\_COORDSYS\_SPH\_DEG). If not specified, this argument defaults to false.
+!           a spherical coordinate system (e.g. ESMF\_COORDSYS\_SPH\_DEG). See section~\ref{sec::vectorRegrid} for further
+!           information on this functionality. If not specified, this argument defaults to false.
 !     \item [{[extrapMethod]}]
 !           The type of extrapolation. Please see Section~\ref{opt:extrapmethod} 
 !           for a list of valid options. If not specified, defaults to 
