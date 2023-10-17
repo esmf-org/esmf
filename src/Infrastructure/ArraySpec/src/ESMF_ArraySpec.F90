@@ -242,7 +242,7 @@ contains
 ! !IROUTINE: ESMF_ArraySpecEQ - Test if ArraySpec 1 is equal to ArraySpec 2
 !
 ! !INTERFACE:
-  function ESMF_ArraySpecEQ(arrayspec1, arrayspec2)
+  impure elemental function ESMF_ArraySpecEQ(arrayspec1, arrayspec2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_ArraySpecEQ
@@ -281,7 +281,7 @@ contains
 ! !IROUTINE: ESMF_ArraySpecNE - Test if ArraySpec 1 is not equal to ArraySpec 2
 !
 ! !INTERFACE:
-  function ESMF_ArraySpecNE(arrayspec1, arrayspec2)
+  impure elemental function ESMF_ArraySpecNE(arrayspec1, arrayspec2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_ArraySpecNE

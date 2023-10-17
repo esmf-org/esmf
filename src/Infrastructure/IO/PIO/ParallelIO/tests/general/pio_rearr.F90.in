@@ -197,7 +197,7 @@ PIO_TF_AUTO_TEST_SUB_BEGIN test_rearrs_combs
                   pio_rearr_subset, pio_rearr_subset,&
                   pio_rearr_box, pio_rearr_box/),&
                   (/NUM_REARRANGERS,MAX_PERMS/)&
-              ) 
+              )
   character(len=PIO_TF_MAX_STR_LEN) :: rearrs_perms_info(NUM_REARRANGERS,MAX_PERMS) =&
             reshape(&
               (/"PIO_REARR_SUBSET", "PIO_REARR_BOX   ",&
@@ -248,4 +248,3 @@ PIO_TF_AUTO_TEST_SUB_BEGIN test_rearrs_combs
     deallocate(iotype_descs)
   end if
 PIO_TF_AUTO_TEST_SUB_END test_rearrs_combs
-

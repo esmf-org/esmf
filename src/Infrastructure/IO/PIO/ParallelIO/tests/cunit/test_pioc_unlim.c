@@ -102,24 +102,24 @@ int create_test_file(int iosysid, int ioid, int iotype, int my_rank, int *ncid, 
 
     /* Create the filename. */
     sprintf(filename, "%s_iotype_%d.nc", TEST_NAME, iotype);
-    
+
     /* Create the netCDF output file. */
     if ((ret = PIOc_createfile(iosysid, ncid, &iotype, filename, PIO_CLOBBER)))
         ERR(ret);
-    
+
     /* Define netCDF dimensions and variable. */
     for (int d = 0; d < NDIM; d++)
         if ((ret = PIOc_def_dim(*ncid, dim_name[d], (PIO_Offset)dim_len[d], &dimids[d])))
             ERR(ret);
-    
+
     /* Define a variable. */
     if ((ret = PIOc_def_var(*ncid, VAR_NAME, PIO_FLOAT, NDIM, dimids, varid)))
         ERR(ret);
-    
+
     /* End define mode. */
     if ((ret = PIOc_enddef(*ncid)))
         ERR(ret);
-    
+
     return PIO_NOERR;
 }
 
@@ -147,11 +147,11 @@ int run_multiple_unlim_test(int iosysid, int ioid, int iotype, int my_rank,
 
     /* Add unlimited dimension. */
     if ((ret = PIOc_def_dim(ncid, UDIM1_NAME, NC_UNLIMITED, &dimid[0])))
-        ERR(ret);        
+        ERR(ret);
 
     /* Add another unlimited dimension. */
     if ((ret = PIOc_def_dim(ncid, UDIM2_NAME, NC_UNLIMITED, &dimid[1])))
-        ERR(ret);        
+        ERR(ret);
 
     /* Check for correctness. */
     if ((ret = PIOc_inq_unlimdims(ncid, &nunlimdims, unlimdimids)))
@@ -168,7 +168,7 @@ int run_multiple_unlim_test(int iosysid, int ioid, int iotype, int my_rank,
     {
         int nunlimdims;
         int unlimdimids[NUM_UNLIM_DIMS];
-        
+
         /* These should also work. */
         if ((ret = PIOc_inq_unlimdims(ncid, NULL, NULL)))
             ERR(ret);
@@ -191,7 +191,7 @@ int run_multiple_unlim_test(int iosysid, int ioid, int iotype, int my_rank,
     if (PIOc_def_var(ncid, VAR_NAME2, PIO_INT, NUM_UNLIM_DIMS, unlimdimids,
                      &varid) != PIO_EINVAL)
         ERR(ERR_WRONG);
-    
+
     /* Close the file. */
     if ((PIOc_closefile(ncid)))
         return ret;
@@ -203,10 +203,10 @@ int run_multiple_unlim_test(int iosysid, int ioid, int iotype, int my_rank,
         int ncid;
         int dimids[NUM_UNLIM_DIMS];
         int varid;
-        
+
         if ((ret = nc_create(NETCDF4_UNLIM_FILE_NAME, NC_CLOBBER|NC_NETCDF4, &ncid)))
             ERR(ret);
-        
+
         if ((ret = nc_def_dim(ncid, DIM_NAME1, NC_UNLIMITED, &dimids[0])))
             ERR(ret);
         if ((ret = nc_def_dim(ncid, DIM_NAME2, NC_UNLIMITED, &dimids[1])))
@@ -241,7 +241,7 @@ int test_all(int iosysid, int num_flavors, int *flavor, int my_rank, MPI_Comm te
 
     if ((ret = MPI_Comm_size(test_comm, &my_test_size)))
         MPIERR(ret);
-    
+
     /* This will be our file name for writing out decompositions. */
     sprintf(filename, "decomp_%d.txt", my_rank);
 
@@ -273,7 +273,7 @@ int test_all(int iosysid, int num_flavors, int *flavor, int my_rank, MPI_Comm te
                 return ret;
             if (vdesc->record != 1)
                 return ERR_WRONG;
-            
+
             if ((PIOc_closefile(ncid)))
                 return ret;
 

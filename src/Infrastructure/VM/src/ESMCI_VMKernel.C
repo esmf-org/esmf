@@ -336,18 +336,6 @@ void VMK::obtain_args(){
 }
 
 
-bool VMK::isSsiSharedMemoryEnabled(){
-  //TODO: For now had to implement this method in the source file, because
-  //TODO: of the way the ESMF_NO_MPI3 macro is being determined.
-  //TODO: Move it into the VMKernel header once includes are fixed.
-#ifdef ESMF_NO_MPI3
-  return false;
-#else
-  return true;
-#endif
-}
-
-    
 void VMK::InitPreMPI(){
 #if !defined (ESMF_NO_SIGNALS)
   // initialize signal handling -> this MUST happen before MPI_Init is called!!
@@ -461,7 +449,7 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   MPI_Group_free(&mpi_g);
   // ... and copy the Comm object into the class static default variable...
   default_mpi_c = mpi_c;
-#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
+#if (MPI_VERSION >= 3)
   // set up communicator across single-system-images SSIs
   MPI_Comm_split_type(mpi_c, MPI_COMM_TYPE_SHARED, 0, MPI_INFO_NULL, 
     &mpi_c_ssi);
@@ -695,7 +683,7 @@ void VMK::finalize(int finalizeMpi){
   MPI_Finalized(&finalized);
   if (!finalized){
     MPI_Comm_free(&mpi_c);
-#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
+#if (MPI_VERSION >= 3)
     MPI_Comm_free(&mpi_c_ssi);
 #endif
     if (finalizeMpi)
@@ -881,7 +869,7 @@ void VMK::construct(void *ssarg){
     }
   }
   mpi_c = sarg->mpi_c;
-#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
+#if (MPI_VERSION >= 3)
   mpi_c_ssi = sarg->mpi_c_ssi;
 #endif
 
@@ -1914,7 +1902,7 @@ void *VMK::startup(class VMKPlan *vmp,
   // current VMK makes that call, even if this process will not participate
   // in the new VMK...
   MPI_Comm new_mpi_c;
-#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
+#if (MPI_VERSION >= 3)
   MPI_Comm new_mpi_c_ssi;
 #endif
   
@@ -1948,7 +1936,7 @@ void *VMK::startup(class VMKPlan *vmp,
           // store the communicator on this PET with info to free
           sarg[0].mpi_c = new_mpi_c;
           sarg[0].mpi_c_freeflag = 1; // responsible to free the communicator
-#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
+#if (MPI_VERSION >= 3)
           // set up communicator across single-system-images SSIs
           MPI_Comm_split_type(vmp->mpi_c_part, MPI_COMM_TYPE_SHARED, 0, 
             MPI_INFO_NULL, &new_mpi_c_ssi);
@@ -1971,7 +1959,7 @@ void *VMK::startup(class VMKPlan *vmp,
 #endif
           recv(&new_mpi_c, sizeof(MPI_Comm), foundfirstpet);
           sarg[0].mpi_c_freeflag = 0; // not responsible to free the communicat.
-#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
+#if (MPI_VERSION >= 3)
           recv(&new_mpi_c_ssi, sizeof(MPI_Comm), foundfirstpet);
 #ifdef VM_SSISHMLOG_on
           {
@@ -1992,7 +1980,7 @@ void *VMK::startup(class VMKPlan *vmp,
         printf("mypet %d sends new_mpi_c to pet %d\n", mypet, i);
 #endif
         send(&new_mpi_c, sizeof(MPI_Comm), i);
-#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
+#if (MPI_VERSION >= 3)
         send(&new_mpi_c_ssi, sizeof(MPI_Comm), i);
 #ifdef VM_SSISHMLOG_on
         {
@@ -2206,7 +2194,7 @@ void *VMK::startup(class VMKPlan *vmp,
         sarg[i].cid[j][k] = new_cid[j][k];
     }
     sarg[i].mpi_c = new_mpi_c;
-#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
+#if (MPI_VERSION >= 3)
     sarg[i].mpi_c_ssi = new_mpi_c_ssi;
 #ifdef VM_SSISHMLOG_on
     {
@@ -2593,7 +2581,7 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
     if (sarg[0].mpi_c != MPI_COMM_NULL){
       MPI_Comm_free(&(sarg[0].mpi_c));
     }
-#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
+#if (MPI_VERSION >= 3)
     if (sarg[0].mpi_c_ssi != MPI_COMM_NULL){
 #ifdef VM_SSISHMLOG_on
       {
@@ -6877,7 +6865,7 @@ void VMK::wtimedelay(double delay){
 
 int VMK::ssishmAllocate(vector<unsigned long>&bytes, memhandle *memh, 
   bool contigFlag){
-#ifndef ESMF_NO_MPI3
+#if (MPI_VERSION >= 3) || (defined ESMF_MPIUNI)
 #ifndef ESMF_MPIUNI
   MPI_Comm_rank(mpi_c_ssi, &(memh->localPet));
   MPI_Comm_size(mpi_c_ssi, &(memh->localPetCount));
@@ -6937,7 +6925,7 @@ int VMK::ssishmAllocate(vector<unsigned long>&bytes, memhandle *memh,
 }
 
 int VMK::ssishmFree(memhandle *memh){
-#ifndef ESMF_NO_MPI3
+#if (MPI_VERSION >= 3) || (defined ESMF_MPIUNI)
 #ifdef VM_SSISHMLOG_on
   {
     std::stringstream msg;
@@ -6981,7 +6969,7 @@ int VMK::ssishmFree(memhandle *memh){
 
 int VMK::ssishmGetMems(memhandle memh, int pet, vector<void *>*mems,
   vector<unsigned long> *bytes){
-#ifndef ESMF_NO_MPI3
+#if (MPI_VERSION >= 3) || (defined ESMF_MPIUNI)
   // error check the incoming information
   if (pet < 0 || pet > memh.localPetCount){
     std::stringstream msg;
@@ -7024,7 +7012,7 @@ int VMK::ssishmGetMems(memhandle memh, int pet, vector<void *>*mems,
 }
 
 int VMK::ssishmSync(memhandle memh){
-#ifndef ESMF_NO_MPI3
+#if (MPI_VERSION >= 3) || (defined ESMF_MPIUNI)
 #ifdef VM_SSISHMLOG_on
   {
     std::stringstream msg;

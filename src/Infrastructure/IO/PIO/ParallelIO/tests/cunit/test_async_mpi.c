@@ -63,7 +63,7 @@ int resultlen;
 int get_test_comm(int my_rank, int ntasks, int min_ntasks, int max_ntasks, MPI_Comm *comm)
 {
     int ret;
-    
+
     /* Check that a valid number of processors was specified. */
     if (ntasks < min_ntasks)
     {
@@ -102,7 +102,7 @@ int get_test_comm(int my_rank, int ntasks, int min_ntasks, int max_ntasks, MPI_C
  * This function is called by the IO task.  This function will not
  * return, unless there is an error.
  *
- * @param verbose non-zero to turn on printf statements. 
+ * @param verbose non-zero to turn on printf statements.
  * @param my_rank rank of this task.
  * @param io_rank rank of the IO processor in union_comm.
  * @param component_count number of computation components
@@ -260,22 +260,22 @@ int main(int argc, char **argv)
         MPI_Group world_group;
         MPI_Comm io_comm;
         MPI_Group io_group;
-        int my_io_proc_list[1] = {0}; /* List of processors in IO component. */        
+        int my_io_proc_list[1] = {0}; /* List of processors in IO component. */
         int num_io_procs = 1;
         int num_procs_per_comp[COMPONENT_COUNT] = {1, 1};
         int in_io = my_rank ? 0 : 1; /* Non-zero if this task is in IO. */
         int io_rank = -1;            /* Rank of current process in IO comm. */
         int comp_rank = -1;
-        int iomaster;  /* MPI_ROOT on master IO task, MPI_PROC_NULL otherwise. */
+        int iomain;  /* MPI_ROOT on main IO task, MPI_PROC_NULL otherwise. */
         MPI_Group group[COMPONENT_COUNT];       /* Group with comp tasks. */
         MPI_Group union_group[COMPONENT_COUNT]; /* Group with IO and comp tasks. */
         int my_proc_list[COMPONENT_COUNT][1] = {{1}, {2}};   /* Tasks for computation components. */
-        MPI_Comm comp_comm[COMPONENT_COUNT];    
+        MPI_Comm comp_comm[COMPONENT_COUNT];
         MPI_Comm union_comm[COMPONENT_COUNT];
         MPI_Comm intercomm[COMPONENT_COUNT];
         int in_cmp[COMPONENT_COUNT] = {0, 0};    /* Is this process in this computation component? */
 	int verbose = 0;    /* Non-zero to turn on printf statements. */
-        
+
         /* Create group for world. */
         if ((ret = MPI_Comm_group(test_comm, &world_group)))
             MPIERR(ret);
@@ -296,12 +296,12 @@ int main(int argc, char **argv)
         {
             if ((ret = MPI_Comm_rank(io_comm, &io_rank)))
                 MPIERR(ret);
-            iomaster = !io_rank ? MPI_ROOT : MPI_PROC_NULL;
+            iomain = !io_rank ? MPI_ROOT : MPI_PROC_NULL;
         }
         if (verbose)
             printf("my_rank %d in_io %d io_rank %d IO %s\n", my_rank, in_io,
-                   io_rank, iomaster == MPI_ROOT ? "MASTER" : "SERVANT");
-        
+                   io_rank, iomain == MPI_ROOT ? "main" : "SERVANT");
+
         /* For each computation component. */
         for (int cmp = 0; cmp < COMPONENT_COUNT; cmp++)
         {
@@ -317,7 +317,7 @@ int main(int argc, char **argv)
             int union_rank = -1;
             int pidx;
             MPI_Comm io_comm2;
-            
+
             /* Create a group for this component. */
             if ((ret = MPI_Group_incl(world_group, 1, my_proc_list[cmp], &group[cmp])))
                 MPIERR(ret);
@@ -345,7 +345,7 @@ int main(int argc, char **argv)
             if ((ret = MPI_Comm_create(test_comm, group[cmp], &comp_comm[cmp])))
                 MPIERR(ret);
             MPI_Group_free(&group[cmp]);
-            
+
             if (in_cmp[cmp])
             {
                 /* Get the rank in this comp comm. */
@@ -355,7 +355,7 @@ int main(int argc, char **argv)
             if (verbose)
                 printf("my_rank %d intracomm created for cmp = %d comp_comm[cmp] = %lld comp_rank = %d\n",
                        my_rank, cmp, (long long int)comp_comm[cmp], comp_rank);
-            
+
             /* If this is the IO component, make a copy of the IO comm for
              * each computational component. */
             if (in_io)
@@ -386,7 +386,7 @@ int main(int argc, char **argv)
                     MPIERR(ret);
                 if (verbose)
                     printf("my_rank %d union_rank %d\n", my_rank, union_rank);
-                
+
                 if (in_io)
                 {
                     /* Create the intercomm from IO to computation component. */
@@ -414,7 +414,7 @@ int main(int argc, char **argv)
         if (in_io)
 	{
 	    int comproot[COMPONENT_COUNT] = {1, 1};
-	    
+
             if ((ret = msg_handler(verbose, my_rank, 0, COMPONENT_COUNT, union_comm, comp_comm,
                                    comproot, io_comm)))
                 ERR(ret);
@@ -429,7 +429,7 @@ int main(int argc, char **argv)
                 {
 		    int ioroot = 0;
 		    int msg = MSG_EXIT;
-		    
+
                     /* if (verbose) */
                     /*     printf("my_rank %d sending exit message on union_comm %d\n", my_rank, union_comm[cmp]); */
                     if ((mpierr = MPI_Send(&msg, 1, MPI_INT, ioroot, 1, union_comm[cmp])))
@@ -443,7 +443,7 @@ int main(int argc, char **argv)
             printf("my_rank %d freeing resources\n", my_rank);
         for (int cmp = 0; cmp < COMPONENT_COUNT; cmp++)
         {
-            if (comp_comm[cmp] != MPI_COMM_NULL)            
+            if (comp_comm[cmp] != MPI_COMM_NULL)
                 MPI_Comm_free(&comp_comm[cmp]);
             if (union_comm[cmp] != MPI_COMM_NULL)
                 MPI_Comm_free(&union_comm[cmp]);
@@ -451,12 +451,12 @@ int main(int argc, char **argv)
                 MPI_Comm_free(&intercomm[cmp]);
         }
         MPI_Group_free(&world_group);
-        if (io_comm != MPI_COMM_NULL)            
-            MPI_Comm_free(&io_comm);            
+        if (io_comm != MPI_COMM_NULL)
+            MPI_Comm_free(&io_comm);
     }
 
     /* Free the MPI communicator for this test. */
-    MPI_Comm_free(&test_comm);    
+    MPI_Comm_free(&test_comm);
 
     /* Finalize MPI. */
     MPI_Finalize();

@@ -295,7 +295,7 @@ contains
 ! !IROUTINE:  ESMF_ArrayEQ - Compare two Calendars for equality
 !
 ! !INTERFACE:
-  function ESMF_ArrayEQ(array1, array2)
+  impure elemental function ESMF_ArrayEQ(array1, array2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_ArrayEQ
@@ -346,7 +346,7 @@ contains
 ! !IROUTINE:  ESMF_ArrayNE - Compare two Calendars for non-equality
 !
 ! !INTERFACE:
-  function ESMF_ArrayNE(array1, array2)
+  impure elemental function ESMF_ArrayNE(array1, array2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_ArrayNE

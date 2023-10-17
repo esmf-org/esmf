@@ -83,7 +83,13 @@ program ESMF_RegridWeightGenApp
 
   
   terminateProg = .false.
-  
+
+  ! Initial checks of whether we can run this program
+#ifndef ESMF_NETCDF
+  write(*,*) "ESMF_NETCDF not defined when lib was compiled; this is required for ESMF_RegridWeightGen"
+  stop 1
+#endif
+
   ! Check if --no_log is given, if so, call ESMF_Initialize() with ESMF_LOGKIND_NONE flag
 #ifndef ESMF_MPIUNI
   call MPI_Init(rc)

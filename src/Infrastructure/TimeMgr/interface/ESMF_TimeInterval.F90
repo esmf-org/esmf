@@ -3381,7 +3381,7 @@
 ! !IROUTINE: ESMF_TimeIntervalEQ - Test if TimeInterval 1 is equal to TimeInterval 2
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalEQ(timeinterval1, timeinterval2)
+      impure elemental function ESMF_TimeIntervalEQ(timeinterval1, timeinterval2)
 !
 ! !RETURN VALUE:
       logical :: ESMF_TimeIntervalEQ
@@ -3417,7 +3417,7 @@
 ! !IROUTINE:  ESMF_TimeIntervalNE - Test if TimeInterval 1 is not equal to TimeInterval 2
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalNE(timeinterval1, timeinterval2)
+      impure elemental function ESMF_TimeIntervalNE(timeinterval1, timeinterval2)
 !
 ! !RETURN VALUE:
       logical :: ESMF_TimeIntervalNE

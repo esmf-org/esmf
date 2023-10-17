@@ -19,7 +19,7 @@
     - \ref PIO_inquire_variable
     - \ref PIO_inq_att
   \section metadata Defining Metadata
-    - \ref PIO_def_dim 
+    - \ref PIO_def_dim
     - \ref PIO_def_var
     - \ref PIO_get_att
     - \ref PIO_put_att
