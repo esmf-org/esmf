@@ -2656,7 +2656,8 @@ contains
         type(ESMF_Field)            :: field1, field2
         type(ESMF_Grid)             :: grid
         character(80)               :: msgStrg
-        real(ESMF_KIND_R4), pointer :: fptr1(:,:,:,:,:), fptr2(:,:,:)
+        real(ESMF_KIND_R4), pointer :: fptr1a(:,:,:,:,:), fptr2a(:,:,:)
+        real(ESMF_KIND_R4), pointer :: fptr1b(:,:,:), fptr2b(:,:)
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
@@ -2674,48 +2675,48 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         field2 = ESMF_FieldCreate(field1, name="Field#2", &
-          trailingUngridSlice=[1,1], rc=localrc)
+          trailingUngridSlice=[3,7], rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldGet(field1, farrayPtr=fptr1, rc=localrc)
+        call ESMF_FieldGet(field1, farrayPtr=fptr1a, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        write(msgStrg,*) "shape(fptr1)=", shape(fptr1)
+        write(msgStrg,*) "shape(fptr1a)=", shape(fptr1a)
         call ESMF_LogWrite(msgStrg, ESMF_LOGMSG_INFO, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        write(msgStrg,*) "lbound(fptr1)=", lbound(fptr1)
+        write(msgStrg,*) "lbound(fptr1a)=", lbound(fptr1a)
         call ESMF_LogWrite(msgStrg, ESMF_LOGMSG_INFO, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        write(msgStrg,*) "ubound(fptr1)=", ubound(fptr1)
+        write(msgStrg,*) "ubound(fptr1a)=", ubound(fptr1a)
         call ESMF_LogWrite(msgStrg, ESMF_LOGMSG_INFO, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldGet(field2, farrayPtr=fptr2, rc=localrc)
+        call ESMF_FieldGet(field2, farrayPtr=fptr2a, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        write(msgStrg,*) "shape(fptr2)=", shape(fptr2)
+        write(msgStrg,*) "shape(fptr2a)=", shape(fptr2a)
         call ESMF_LogWrite(msgStrg, ESMF_LOGMSG_INFO, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        write(msgStrg,*) "lbound(fptr2)=", lbound(fptr2)
+        write(msgStrg,*) "lbound(fptr2a)=", lbound(fptr2a)
         call ESMF_LogWrite(msgStrg, ESMF_LOGMSG_INFO, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        write(msgStrg,*) "ubound(fptr2)=", ubound(fptr2)
+        write(msgStrg,*) "ubound(fptr2a)=", ubound(fptr2a)
         call ESMF_LogWrite(msgStrg, ESMF_LOGMSG_INFO, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2727,6 +2728,61 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldDestroy(field2, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        field1 = ESMF_FieldCreate(grid, ESMF_TYPEKIND_R4, &
+          gridToFieldMap=[0,0], name="Field#1 with replicated dims", &
+          ungriddedLBound=[1,1,1], ungriddedUBound=[10,20,30], rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        field2 = ESMF_FieldCreate(field1, name="Field#2", &
+          trailingUngridSlice=[4], rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_FieldGet(field1, farrayPtr=fptr1b, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        write(msgStrg,*) "shape(fptr1b)=", shape(fptr1b)
+        call ESMF_LogWrite(msgStrg, ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        write(msgStrg,*) "lbound(fptr1b)=", lbound(fptr1b)
+        call ESMF_LogWrite(msgStrg, ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        write(msgStrg,*) "ubound(fptr1b)=", ubound(fptr1b)
+        call ESMF_LogWrite(msgStrg, ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_FieldGet(field2, farrayPtr=fptr2b, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        write(msgStrg,*) "shape(fptr2b)=", shape(fptr2b)
+        call ESMF_LogWrite(msgStrg, ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        write(msgStrg,*) "lbound(fptr2b)=", lbound(fptr2b)
+        call ESMF_LogWrite(msgStrg, ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        write(msgStrg,*) "ubound(fptr2b)=", ubound(fptr2b)
+        call ESMF_LogWrite(msgStrg, ESMF_LOGMSG_INFO, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return

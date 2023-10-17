@@ -5111,7 +5111,7 @@ TypeKindRankDeclarationMacro(FieldCreateXGDataPtr)
     integer                 :: localrc    ! local return code
     type(ESMF_Array)        :: array, arrayOut
     type(ESMF_Geom)         :: geom
-    integer                 :: dimCount, rankOut
+    integer                 :: dimCount
     integer, allocatable    :: gridToFieldMap(:)
     integer, allocatable    :: ungriddedLBound(:), ungriddedUBound(:)
 
@@ -5153,18 +5153,15 @@ call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_ArrayGet(arrayOut, rank=rankOut, dimCount=dimCount, rc=localrc)
+    call ESMF_ArrayGet(arrayOut, undistDimCount=dimCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-write(msgStr,*) "ESMF_FieldCreateFromField() Array dimCount: ", dimCount
+write(msgStr,*) "ESMF_FieldCreateFromField() Array undistDimCount: ", dimCount
 call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
 
-write(msgStr,*) "ESMF_FieldCreateFromField() Array  rankOut: ", rankOut
-call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
-
-    allocate(ungriddedLBound(rankOut-dimCount))
-    allocate(ungriddedUBound(rankOut-dimCount))
+    allocate(ungriddedLBound(dimCount))
+    allocate(ungriddedUBound(dimCount))
 
     call ESMF_ArrayGet(arrayOut, undistLBound=ungriddedLBound, &
       undistUBound=ungriddedUBound, rc=localrc)
