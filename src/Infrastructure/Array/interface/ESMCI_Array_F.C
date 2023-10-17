@@ -193,7 +193,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_arrayget)(ESMCI::Array **ptr, ESMC_TypeKind_Flag *typekind,
-    int *rank, int *replicatedDimCount,
+    int *rank, int *undistDimCount, int *replicatedDimCount,
     int *ssiLocalDeCount, ESMCI::LocalArray **opt_localArrayList,
     int *len_localArrayList, ESMCI::InterArray<int> *localDeToDeMap,
     ESMCI::DistGrid **distgrid, ESMCI::DELayout **delayout,
@@ -228,6 +228,8 @@ extern "C" {
       *typekind = (*ptr)->getTypekind();
     if (ESMC_NOT_PRESENT_FILTER(rank) != ESMC_NULL_POINTER)
       *rank = (*ptr)->getRank();
+    if (ESMC_NOT_PRESENT_FILTER(undistDimCount) != ESMC_NULL_POINTER)
+      *undistDimCount = (*ptr)->getTensorCount();
     if (ESMC_NOT_PRESENT_FILTER(replicatedDimCount) != ESMC_NULL_POINTER)
       *replicatedDimCount = (*ptr)->getReplicatedDimCount();
     if (ESMC_NOT_PRESENT_FILTER(ssiLocalDeCount) != ESMC_NULL_POINTER)
