@@ -773,23 +773,25 @@ Figure~\ref{line_type_support} shows which line types are supported for each reg
 
 \subsubsection{Vector regridding}\label{sec::vectorRegrid}
 
-ESMF's initial vector regridding capability is intended to give cleaner results for spherical vectors expressed in
-terms of local directions (e.g. east and north) than just regridding each vector component separately. To do this, it
-converts the vectors to 3D Cartesian space and does the regridding there. This allows all the vectors participating in
-the regridding to have a consistent representation. After regridding, the resulting vectors are then converted
-back to the local direction form. The entire process is expressed in the usual weight matrix and/or routeHandle form and so
+ESMF's initial vector regridding capability is intended to give cleaner results for 2D spherical vectors expressed in
+terms of local directions (e.g. east and north) than regridding each vector component separately. To do this, it
+converts the vectors to 3D Cartesian space and then does the regridding there. This allows all the vectors participating in
+the regridding to have a consistent representation. After regridding, the resulting 3D vectors are then converted
+back to the local direction form. This entire process is expressed in the usual weight matrix and/or routeHandle form and so
 the typical {\tt ESMF\_FieldRegridStore()/ESMF\_FieldRegrid()/ESMF\_FieldRegridRelease()} regridding paradigm can be used.
 However, the weight matrix will be in the format that allows it to contain tensor dimension indices (i.e. the leading
 dimension of the {\tt factorIndexList} will be of size 4). 
 
 In this initial version the meaning of the different components in the vector is fixed. They will be interpreted as:
+\vspace{-1em}
 \begin{description}
   \itemsep0em
-  \item[1st component] the east component.
-  \item[2nd component] the north component.
+  \item[1st component] the east value
+  \item[2nd component] the north value
 \end{description}
 
-Note that because the different components are mixed, using vector regridding with a conservative regrid method will {\bf NOT} necessarily be conservative. 
+Note that because the different components are mixed, using vector regridding with a conservative regrid method will not necessarily produce vectors whose components
+are conservative. 
 
 
 \subsubsection{Troubleshooting guide}
