@@ -1795,6 +1795,38 @@ endif
 endif
 
 #-------------------------------------------------------------------------------
+# NVML
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_NVML),ON)
+ESMF_NVML = standard
+endif
+ifeq ($(ESMF_NVML),standard)
+ifneq ($(origin ESMF_NVML_LIBS), environment)
+ESMF_NVML_LIBS = -lnvidia-ml
+endif
+endif
+
+ifdef ESMF_NVML
+ESMF_CPPFLAGS                += -DESMF_NVML=1
+ifdef ESMF_NVML_INCLUDE
+ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_NVML_INCLUDE)
+ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_NVML_INCLUDE)
+endif
+ifdef ESMF_NVML_LIBS
+ESMF_CXXLINKLIBS          += $(ESMF_NVML_LIBS)
+ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_NVML_LIBS))))
+ESMF_F90LINKLIBS          += $(ESMF_NVML_LIBS)
+ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_NVML_LIBS))))
+endif
+ifdef ESMF_NVML_LIBPATH
+ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_NVML_LIBPATH)
+ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_NVML_LIBPATH)
+ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_NVML_LIBPATH)
+ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_NVML_LIBPATH)
+endif
+endif
+
+#-------------------------------------------------------------------------------
 # Set the correct MPIRUN command with appropriate options
 #-------------------------------------------------------------------------------
 ESMF_MPIRUNCOMMAND  = $(shell $(ESMF_DIR)/scripts/mpirun.command $(ESMF_DIR)/scripts $(ESMF_MPIRUN))
@@ -1820,7 +1852,11 @@ ifeq ($(ESMF_OPENMP),OFF)
 ESMF_CPPFLAGS       += -DESMF_NO_OPENMP
 endif
 
-ifeq ($(ESMF_OPENMP),ON)
+ifeq ($(ESMF_OPENMP),OMP4)
+ESMF_CPPFLAGS       += -DESMF_OPENMP4
+endif
+
+ifneq ($(ESMF_OPENMP),OFF)
 ESMF_F90COMPILEOPTS += $(ESMF_OPENMP_F90COMPILEOPTS)
 ESMF_F90LINKOPTS    += $(ESMF_OPENMP_F90LINKOPTS)
 ESMF_CXXCOMPILEOPTS += $(ESMF_OPENMP_CXXCOMPILEOPTS)

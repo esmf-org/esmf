@@ -306,26 +306,32 @@ class VMK{
     int mypet;          // PET id of this instance
     esmf_pthread_t mypthid;  // my pthread id
     // pet -> core mapping
-    int npets;      // number of PETs in this VMK
+    int npets;      // number of PETs in this VMK all SSI
     int *lpid;      // local pid (equal to rank in local MPI context)
     int *pid;       // pid (equal to rank in MPI_COMM_WORLD)
     int *tid;       // thread index
     int *ncpet;     // number of cores this pet references
-    int *nadevs;    // number of accelerator devices accessible from this pet
+    int *nadevs;//TODO: to be removed // number of accelerator devices accessible from this pet
     int **cid;      // core id of the cores this pet references
     int ssiCount;   // number of single system images in this VMK
     int ssiMinPetCount;   // minimum PETs on a single system image
     int ssiMaxPetCount;   // maximum PETs on a single system image
     int ssiLocalPetCount; // number of PETs on the same SSI as localPet (incl.)
+    int ssiLocalPet;      // id of local PET in the local SSI
     int *ssiLocalPetList; // PETs that are on the same SSI as localPet (incl.)
+    int devCount;   // number of devices associated with this VMK all SSI
+    int ssiLocalDevCount;// number of devices associated with this VMK on local SSI
+    int *ssiLocalDevList;// list of SSI-local device indices associated with this VMK
+                    // Use this index to make local association calls (e.g. via
+                    // acc_set_device_num() or omp_set_default_device()), and
+                    // to look up global device index in ssidevs array.
     // general information about this VMK
     int mpionly;    // 0: there is multi-threading, 1: MPI-only
     bool threadsflag; // threaded or none-threaded VM
     // MPI Communicator handles
     MPI_Comm mpi_c;     // communicator across the entire VM
-#if (MPI_VERSION >= 3)
     MPI_Comm mpi_c_ssi; // communicator holding PETs on the same SSI
-#endif
+    MPI_Comm mpi_c_ssi_roots; // communicator holding root PETs on each SSI
     // Shared mutex and thread_finish variables. These are pointers that will be
     // pointing to shared memory variables between different thread-instances of
     // the VMK object.
@@ -355,9 +361,14 @@ class VMK{
     // static info of physical machine
     static int nssiid;  // total number of single system image ids
     static int ncores;  // total number of cores in the physical machine
+    static int ndevs;   // total number of devices in physical machine
+    static int ndevsSSI;// total number of devices in physical machine on SSI
+    //TODO: consider using SSI shared memory for the following arrays
     static int *cpuid;  // cpuid associated with certain core (multi-core cpus)
-    static int *ssiid;  // single system image id to which this core belongs
-    static int *ssipe;  // PE id on the SSI on which this PE resides
+    static int *ssiid;  // single system image on which a certain core resides
+    static int *ssipe;  // ssi-local PE id of a certain core
+    static int *ssidevs;// list of global device ids for all ssi-local devices
+    // begin of execution reference time
     static double wtime0; // the MPI WTime at the very beginning of execution
   public:
     // Declaration of static data members - Definitions are in the header of
@@ -426,6 +437,9 @@ class VMK{
     static int checkPetList(int *petList, int count);
       // ensure there are no duplicate PETs listed
 
+    static int checkDevList(int *devList, int count);
+      // ensure there are no duplicate DEVs listed
+
     void print() const;
     void log(std::string prefix,
       ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO)const;
@@ -459,7 +473,11 @@ class VMK{
     int getSsiMinPetCount() const {return ssiMinPetCount;}
     int getSsiMaxPetCount() const {return ssiMaxPetCount;}
     int getSsiLocalPetCount() const {return ssiLocalPetCount;}
+    int getSsiLocalPet() const {return ssiLocalPet;}
     const int *getSsiLocalPetList() const {return ssiLocalPetList;}
+    int getSsiLocalDevCount() const {return ssiLocalDevCount;}
+    const int *getSsiLocalDevList() const {return ssiLocalDevList;}
+    int getDevCount() const {return devCount;}
     esmf_pthread_t getLocalPthreadId() const {return mypthid;}
     static bool isPthreadsEnabled(){
 #ifdef ESMF_NO_PTHREADS
@@ -612,6 +630,8 @@ class VMKPlan{
     int npets;
     int nplist;       // number of PETs in petlist that participate
     int *petlist;     // keeping sequence of parent pets
+    int ndevlist;     // number of DEVs in devList
+    int *devlist;     // list of associated devices
     bool supportContributors;     // default: false
     bool eachChildPetOwnPthread;  // default: false
     int parentVMflag; // 0-create child VM, 1-run on parent VM
@@ -638,7 +658,7 @@ class VMKPlan{
     int openmpnumthreads; // -1 default: local peCount
 
   public:
-    VMKPlan();
+    VMKPlan(int _ndevlist=0, int *_devlist=NULL);
       // native constructor (sets communication preferences to defaults)
     ~VMKPlan();
       // native destructor
