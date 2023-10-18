@@ -82,12 +82,15 @@ extern void *MPIUNI_TMP;
 #define MPI_COMM_WORLD       1
 #define MPI_COMM_SELF        MPI_COMM_WORLD
 #define MPI_COMM_NULL        0
+#define MPI_GROUP_NULL       0
 #define MPI_SUCCESS          0
 #define MPI_IDENT            0
 #define MPI_CONGRUENT        0
 #define MPI_SIMILAR          0
 #define MPI_UNEQUAL          3
 #define MPI_ANY_SOURCE     (-2)
+#define MPI_PROC_NULL      (-3)
+#define MPI_ROOT           (-4)
 #define MPI_KEYVAL_INVALID   0
 #define MPI_ERR_UNKNOWN     18
 #define MPI_ERR_INTERN      21
@@ -109,13 +112,14 @@ typedef int MPI_Info;         /* handle */
 
 #define MPI_INFO_NULL (0)
 
-
+#define MPI_IN_PLACE (void *)(-1)
 
 extern int MPIUNI_Memcpy(void*,const void*,int);
 
 /* In order to handle datatypes, we make them into "sizeof(raw-type)";
     this allows us to do the MPIUNI_Memcpy's easily */
 #define MPI_Datatype        int
+#define MPI_DATATYPE_NULL   0
 #define MPI_FLOAT           sizeof(float)
 #define MPI_DOUBLE          sizeof(double)
 #define MPI_LONG_DOUBLE     sizeof(long double)
@@ -140,6 +144,7 @@ extern int MPIUNI_Memcpy(void*,const void*,int);
 #define MPI_2INTEGER        (2*sizeof(int))
 #define MPI_UNSIGNED_CHAR   sizeof(unsigned char)
 #define MPI_UNSIGNED_LONG   sizeof(unsigned long)
+#define MPI_OFFSET          sizeof(MPI_Offset)
 #define MPIU_PETSCLOGDOUBLE sizeof(PetscLogDouble)
 #define MPI_REQUEST_NULL    ((MPI_Request)0)
 
@@ -465,12 +470,14 @@ extern double ESMC_MPI_Wtime(void);
      (*(newtype) = (count)*(oldtype),MPI_SUCCESS)
 #define MPI_Type_vector(count,blocklength,stride,oldtype, newtype) MPI_SUCCESS
 #define MPI_Type_hvector(count,blocklength,stride,oldtype, newtype) MPI_SUCCESS
+#define MPI_Type_create_hvector(count,blocklength,stride,oldtype, newtype) MPI_SUCCESS
 #define MPI_Type_indexed(count,array_of_blocklengths,\
      array_of_displacements, oldtype,\
      newtype) MPI_SUCCESS
 #define MPI_Type_hindexed(count,array_of_blocklengths,\
      array_of_displacements, oldtype,\
      newtype) MPI_SUCCESS
+#define MPI_Type_create_indexed_block(count,blocklength,displacements,oldtype, newtype) MPI_SUCCESS
 #define MPI_Type_struct(count,array_of_blocklengths,\
      array_of_displacements,\
      array_of_types, newtype) MPI_SUCCESS
@@ -569,6 +576,9 @@ extern double ESMC_MPI_Wtime(void);
 #define MPI_Alltoallv(sendbuf,sendcounts,sdispls,\
      sendtype, recvbuf,recvcounts,\
      rdispls, recvtype,comm) MPI_Abort(MPI_COMM_WORLD,0)
+#define MPI_Alltoallw(sendbuf,sendcounts,sdispls,                       \
+     sendtypes, recvbuf,recvcounts,                     \
+     rdispls, recvtypes,comm) MPI_Abort(MPI_COMM_WORLD,0)
 #define MPI_Reduce(sendbuf, recvbuf,count,\
      datatype,op,root,comm) \
      (MPIUNI_Memcpy(recvbuf,sendbuf,(count)*(datatype)),\
@@ -625,6 +635,15 @@ extern double ESMC_MPI_Wtime(void);
 #define MPI_Intercomm_create(local_comm,local_leader,peer_comm,\
      remote_leader,tag,newintercomm) MPI_SUCCESS
 #define MPI_Intercomm_merge(intercomm,high,newintracomm) MPI_SUCCESS
+
+#define MPI_Info_create(info) \
+  (MPIUNI_TMP = (void*)(long) (info),\
+   MPI_SUCCESS)
+#define MPI_Info_set(info,key,value) \
+  (MPIUNI_TMP = (void*)(long) (info),\
+   MPIUNI_TMP = (void*)(long) (key),\
+   MPIUNI_TMP = (void*)(long) (value),\
+   MPI_SUCCESS)
 
 #define MPI_Topo_test(comm,status) MPI_SUCCESS
 #define MPI_Cart_create(comm_old,ndims,dims,periods,\
