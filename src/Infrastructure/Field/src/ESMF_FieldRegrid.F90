@@ -458,7 +458,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              set how many levels to extrapolate. 
 !
 ! \item[8.1.0] Added argument {\tt checkFlag} to enable the user to turn on more
-!              expensive error checking during regrid weight calculation. 
+!              expensive error checking during regrid weight calculation.
+!
+! \item[8.6.0] Added argument {\tt vectorRegrid} to enable the user to turn on vector regridding. This
+!              functionality treats an undistributed dimension of the input Fields as the components of a vector and
+!              maps it through 3D Cartesian space to give more consistent results (especially near the pole) than
+!              just regridding the components individually. 
 !              
 ! \end{description}
 ! \end{itemize}
@@ -543,7 +548,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[vectorRegrid]}]
 !           If true, treat a single ungridded dimension in the source and destination Fields
 !           as the components of a vector. If true and there is more than one ungridded dimension in either
-!           the source or destination, then an error will be returned. If not specified, defaults to false.      
+!           the source or destination, then an error will be returned. Currently this functionality only
+!           works when both the source and destination Fields are build on a geometry (e.g. an ESMF Grid) with
+!           a spherical coordinate system (e.g. ESMF\_COORDSYS\_SPH\_DEG). See section~\ref{sec::vectorRegrid} for further
+!           information on this functionality. If not specified, this argument defaults to false.
 !     \item [{[extrapMethod]}]
 !           The type of extrapolation. Please see Section~\ref{opt:extrapmethod} 
 !           for a list of valid options. If not specified, defaults to 
