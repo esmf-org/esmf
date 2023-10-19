@@ -5169,7 +5169,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMGetDefault()"
 !BOP
-! !IROUTINE: ESMF_VMGet - Get information from a VM
+! !IROUTINE: ESMF_VMGet - Get general information from a VM
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGet()
@@ -5416,19 +5416,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMGetPetSpecific()"
 !BOP
-! !IROUTINE: ESMF_VMGet - Get PET specific VM information
+! !IROUTINE: ESMF_VMGet - Get PET specific information from a VM
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGet()
   subroutine ESMF_VMGetPetSpecific(vm, pet, keywordEnforcer, peCount, &
-    accDeviceCount, ssiId, threadCount, threadId, vas, rc)
+    accDeviceCount, &   ! DEPRECATED ARGUMENT
+    ssiId, threadCount, threadId, vas, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM), intent(in)            :: vm
     integer,       intent(in)            :: pet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,       intent(out), optional :: peCount
-    integer,       intent(out), optional :: accDeviceCount
+    integer,       intent(out), optional :: accDeviceCount ! DEPRECATED ARGUMENT
     integer,       intent(out), optional :: ssiId
     integer,       intent(out), optional :: threadCount
     integer,       intent(out), optional :: threadId
@@ -5442,6 +5443,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[7.0.0] Added argument {\tt accDeviceCount}.
 !   The argument provides access to the number of available accelerator devices.
+! \item[8.6.0] Started deprecation of argument {\tt accDeviceCount} in favor of
+!   the new arguments {\tt ssiLocalDevCount} and {\tt ssiLocalDevList} offered
+!   by the general {\tt ESMF\_VMGet()} method.
 ! \end{description}
 ! \end{itemize}
 !
@@ -5461,6 +5465,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[accDeviceCount]}]
 !        Upon return this holds the number of accelerated devices accessible
 !        from the specified PET in the {\tt ESMF\_VM} object.
+!       \apiDeprecatedArgWithReplacement{ssiLocalDevCount}
 !   \item[{[ssiId]}]
 !        Upon return this holds the id of the single-system image (SSI) the
 !        specified PET is running on.
