@@ -51,6 +51,7 @@ module ESMF_FieldCreateMod
   use ESMF_VMMod
 
   use ESMF_FieldMod
+  use ESMF_FieldGetMod
   use ESMF_FieldEmptyMod
 
   implicit none
@@ -124,6 +125,7 @@ module ESMF_FieldCreateMod
     TypeKindRankInterfaceMacro(FieldCreateXGData)
     TypeKindRankInterfaceMacro(FieldCreateXGDataPtr)
 
+    module procedure ESMF_FieldCreateFromField
 
 ! !DESCRIPTION:
 !   This interface provides an entry point for methods that create a complete
@@ -993,7 +995,7 @@ end function ESMF_FieldCreateGBTKR
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateGBArray"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldCreate - Create a Field from Geom and Array
 
 ! !INTERFACE:
@@ -1093,7 +1095,7 @@ end function ESMF_FieldCreateGBTKR
 ! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
     integer :: localrc                       !  Local error code
@@ -2759,7 +2761,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            return @\
         endif @\
      endif@\
-    ! Error check staggerloc  @\     
+    ! Error check staggerloc  @\
     if (present(staggerloc)) then @\
        if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. & @\
           (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then @\
@@ -5054,6 +5056,130 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 TypeKindRankDeclarationMacro(FieldCreateXGDataPtr)
 
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldCreateFromField()"
+!BOP
+! !IROUTINE: ESMF_FieldCreate - Create Field object from an existing Field object
+
+! !INTERFACE:
+  ! Private name; call using ESMF_FieldCreate()
+  function ESMF_FieldCreateFromField(field, keywordEnforcer, datacopyflag, &
+    trailingUngridSlice, name, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_Field) :: ESMF_FieldCreateFromField
+!
+! !ARGUMENTS:
+       type(ESMF_Field),           intent(in)            :: field
+       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+       type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag
+       integer,                    intent(in),  optional :: trailingUngridSlice(:)
+       character (len=*),          intent(in),  optional :: name
+       integer,                    intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Create an {\tt ESMF\_Field} object from an existing Field.
+!
+! The return value is the newly created {\tt ESMF\_Field} object. Supports array
+! slicing.
+!
+! The arguments are:
+! \begin{description}
+! \item[field]
+!     {\tt ESMF\_Field} object to be used as originator.
+! \item[{[datacopyflag]}]
+!      Specifies whether the created Field object references the memory
+!      allocation provided by {\tt field} directly or copies the data from
+!      {\tt field} into a new memory allocation. For valid values see
+!      \ref{const:datacopyflag}. The default is {\tt ESMF\_DATACOPY\_VALUE}.
+! \item[{[trailingUngridSlice]}]
+!      If present, the returned Field refers to the array slice of {\tt field}
+!      as defined by the specified tuple, applied to the right most
+!      trailing ungridded dimensions.
+! \item[{[name]}]
+!      Name of the Field object.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc    ! local return code
+    type(ESMF_Array)        :: array, arrayOut
+    type(ESMF_Geom)         :: geom
+    integer                 :: dimCount
+    integer, allocatable    :: gridToFieldMap(:)
+    integer, allocatable    :: ungriddedLBound(:), ungriddedUBound(:)
+
+character(160)  :: msgStr
+character(80)   :: fieldName
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit, field, rc)
+
+call ESMF_FieldGet(field, name=fieldName, rc=localrc)
+if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  ESMF_CONTEXT, rcToReturn=rc)) return
+
+write(msgStr,*) "ESMF_FieldCreateFromField() for fieldName: ", trim(fieldName)
+call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
+
+    call ESMF_FieldGet(field, array=array, geom=geom, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_GeomGet(geom, dimCount=dimCount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+write(msgStr,*) "ESMF_FieldCreateFromField() Geom  dimCount: ", dimCount
+call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
+
+    allocate(gridToFieldMap(dimCount))
+    call ESMF_FieldGet(field, gridToFieldMap=gridToFieldMap, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! created array slice
+    arrayOut = ESMF_ArrayCreate(array, datacopyflag=datacopyflag, &
+      trailingUndistSlice=trailingUngridSlice, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_ArrayGet(arrayOut, undistDimCount=dimCount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+write(msgStr,*) "ESMF_FieldCreateFromField() Array undistDimCount: ", dimCount
+call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
+
+    allocate(ungriddedLBound(dimCount))
+    allocate(ungriddedUBound(dimCount))
+
+    call ESMF_ArrayGet(arrayOut, undistLBound=ungriddedLBound, &
+      undistUBound=ungriddedUBound, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_FieldCreateFromField = ESMF_FieldCreate(geom, arrayOut, &
+      ESMF_DATACOPY_REFERENCE, gridToFieldMap=gridToFieldMap, &
+      ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
+!      totalLWidth, totalUWidth, &
+      name=name, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_FieldCreateFromField
 !------------------------------------------------------------------------------
 
 

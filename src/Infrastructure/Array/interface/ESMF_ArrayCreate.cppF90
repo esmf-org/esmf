@@ -3869,7 +3869,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
   function ESMF_ArrayCreateFromArray(array, keywordEnforcer, datacopyflag, delayout, &
-    trailingUndistSlice, rc)
+    trailingUndistSlice, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateFromArray
@@ -3880,6 +3880,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
        type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag
        type(ESMF_DELayout),        intent(in),  optional :: delayout
        integer,                    intent(in),  optional :: trailingUndistSlice(:)
+       character (len=*),          intent(in),  optional :: name
        integer,                    intent(out), optional :: rc
 !
 ! !STATUS:
@@ -3892,19 +3893,21 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !   Added argument {\tt delayout} to create Array with different localDe -> DE
 !   mapping. This is identical to a change in DE -> PET mapping.
 ! \item[8.6.0] Added argument {\tt trailingUndistSlice} to allow slicing of
-!   arrays created by reference.
+!   arrays.\newline
+!   Added argument {\tt name} to allow specification during creation.
 ! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Create an {\tt ESMF\_Array} object from an existing Array.
+! Create an {\tt ESMF\_Array} object from an existing Array. Supports array
+! slicing.
 !
 ! The return value is the newly created {\tt ESMF\_Array} object.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[array]
-!     {\tt ESMF\_Array} object to be copied.
+!     {\tt ESMF\_Array} object to be used as originator.
 ! \item[{[datacopyflag]}]
 !      Specifies whether the created Array object references the memory
 !      allocation provided by {\tt array} directly or copies the data from
@@ -3914,9 +3917,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      If present, override the DELayout of the incoming {\tt distgrid}.
 !      By default use the DELayout defined in {\tt distgrid}.
 ! \item[{[trailingUndistSlice]}]
-!      If present, the returned Array references the data of the array slice
+!      If present, the returned Array refers to the array slice of {\tt array}
 !      as defined by the specified tuple, applied to the right most
 !      trailing undistributed dimensions.
+! \item[{[name]}]
+!      Name of the Array object.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3958,6 +3963,13 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     call ESMF_InterArrayDestroy(trailingUndistSliceArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set name
+    if (present(name)) then
+      call c_ESMC_SetName(arrayOut, "Array", name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! Set return value
     ESMF_ArrayCreateFromArray = arrayOut

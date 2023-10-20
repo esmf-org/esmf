@@ -791,7 +791,7 @@ end interface
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GeomGet"
 !BOP
-! !IROUTINE: ESMF_GeomGet - Get information about a Grid
+! !IROUTINE: ESMF_GeomGet - Get information about a Geom
 
 ! !INTERFACE:
       subroutine ESMF_GeomGet(geom, &
