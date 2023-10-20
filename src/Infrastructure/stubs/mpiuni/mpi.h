@@ -113,8 +113,13 @@ typedef int MPI_Info;         /* handle */
 #define MPI_INFO_NULL (0)
 
 #define MPI_IN_PLACE (void *)(-1)
+enum CheckForMPIInPlace_Flag {
+  CHECK_FOR_MPI_IN_PLACE_NONE,
+  CHECK_FOR_MPI_IN_PLACE_SOURCE,
+  CHECK_FOR_MPI_IN_PLACE_DEST
+};
 
-extern int MPIUNI_Memcpy(void*,const void*,int);
+extern int MPIUNI_Memcpy(void*,const void*,int,enum CheckForMPIInPlace_Flag);
 
 /* In order to handle datatypes, we make them into "sizeof(raw-type)";
     this allows us to do the MPIUNI_Memcpy's easily */
@@ -463,7 +468,7 @@ extern double ESMC_MPI_Wtime(void);
      dest,sendtag,recvbuf,recvcount,\
      recvtype,source,recvtag,\
      comm,status) \
-     MPIUNI_Memcpy(recvbuf,sendbuf,(sendcount) * (sendtype))
+     MPIUNI_Memcpy(recvbuf,sendbuf,(sendcount) * (sendtype),CHECK_FOR_MPI_IN_PLACE_NONE)
 #define MPI_Sendrecv_replace(buf,count, datatype,dest,sendtag,\
      source,recvtag,comm,status) MPI_SUCCESS
 #define MPI_Type_contiguous(count, oldtype,newtype) \
@@ -520,7 +525,7 @@ extern double ESMC_MPI_Wtime(void);
      MPIUNI_TMP = (void*)(long) (root),\
      MPIUNI_TMP = (void*)(long) (recvtype),\
      MPIUNI_TMP = (void*)(long) (comm),\
-     MPIUNI_Memcpy(recvbuf,sendbuf,(sendcount)* (sendtype)),\
+     MPIUNI_Memcpy(recvbuf,sendbuf,(sendcount)* (sendtype),CHECK_FOR_MPI_IN_PLACE_SOURCE),  \
      MPI_SUCCESS)
 #define MPI_Gatherv(sendbuf,sendcount, sendtype,\
      recvbuf,recvcounts,displs,\
@@ -530,7 +535,7 @@ extern double ESMC_MPI_Wtime(void);
      MPIUNI_TMP = (void*)(long) (recvtype),\
      MPIUNI_TMP = (void*)(long) (root),\
      MPIUNI_TMP = (void*)(long) (comm),\
-     MPIUNI_Memcpy(recvbuf,sendbuf,(sendcount)* (sendtype)),\
+     MPIUNI_Memcpy(recvbuf,sendbuf,(sendcount)* (sendtype),CHECK_FOR_MPI_IN_PLACE_SOURCE),  \
      MPI_SUCCESS)
 #define MPI_Scatter(sendbuf,sendcount, sendtype,\
      recvbuf,recvcount, recvtype,\
@@ -560,7 +565,7 @@ extern double ESMC_MPI_Wtime(void);
      (MPIUNI_TMP = (void*)(long) (recvcount),\
      MPIUNI_TMP = (void*)(long) (recvtype),\
      MPIUNI_TMP = (void*)(long) (comm),\
-     MPIUNI_Memcpy(recvbuf,sendbuf,(sendcount)* (sendtype)),\
+     MPIUNI_Memcpy(recvbuf,sendbuf,(sendcount)* (sendtype),CHECK_FOR_MPI_IN_PLACE_SOURCE),  \
      MPI_SUCCESS)
 #define MPI_Allgatherv(sendbuf,sendcount, sendtype,\
      recvbuf,recvcounts,displs,recvtype,comm) \
@@ -568,7 +573,7 @@ extern double ESMC_MPI_Wtime(void);
      MPIUNI_TMP = (void*)(long) (displs),\
      MPIUNI_TMP = (void*)(long) (recvtype),\
      MPIUNI_TMP = (void*)(long) (comm),\
-     MPIUNI_Memcpy(recvbuf,sendbuf,(sendcount)* (sendtype)),\
+     MPIUNI_Memcpy(recvbuf,sendbuf,(sendcount)* (sendtype),CHECK_FOR_MPI_IN_PLACE_SOURCE),  \
      MPI_SUCCESS)
 #define MPI_Alltoall(sendbuf,sendcount, sendtype,\
      recvbuf,recvcount, recvtype,\
@@ -581,13 +586,13 @@ extern double ESMC_MPI_Wtime(void);
      rdispls, recvtypes,comm) MPI_Abort(MPI_COMM_WORLD,0)
 #define MPI_Reduce(sendbuf, recvbuf,count,\
      datatype,op,root,comm) \
-     (MPIUNI_Memcpy(recvbuf,sendbuf,(count)*(datatype)),\
+     (MPIUNI_Memcpy(recvbuf,sendbuf,(count)*(datatype),CHECK_FOR_MPI_IN_PLACE_SOURCE), \
      MPIUNI_TMP = (void*)(long) (comm),MPI_SUCCESS)
 #define MPI_Allreduce(sendbuf, recvbuf,count,datatype,op,comm) \
-     (MPIUNI_Memcpy(recvbuf,sendbuf,(count)*(datatype)),\
+     (MPIUNI_Memcpy(recvbuf,sendbuf,(count)*(datatype),CHECK_FOR_MPI_IN_PLACE_SOURCE), \
      MPIUNI_TMP = (void*)(long) (comm),MPI_SUCCESS)
 #define MPI_Scan(sendbuf, recvbuf,count,datatype,op,comm) \
-     (MPIUNI_Memcpy(recvbuf,sendbuf,(count)*(datatype)),\
+     (MPIUNI_Memcpy(recvbuf,sendbuf,(count)*(datatype),CHECK_FOR_MPI_IN_PLACE_SOURCE), \
      MPIUNI_TMP = (void*)(long) (comm),MPI_SUCCESS)
 #define MPI_Reduce_scatter(sendbuf, recvbuf,recvcounts,\
      datatype,op,comm) \
@@ -668,7 +673,7 @@ extern double ESMC_MPI_Wtime(void);
 #define MPI_Cart_map(comm,ndims,dims,periods,newrank) MPI_Abort(MPI_COMM_WORLD,0)
 #define MPI_Graph_map(comm,a,b,c,d) MPI_Abort(MPI_COMM_WORLD,0)
 #define MPI_Get_processor_name(name,result_len) \
-     (MPIUNI_Memcpy(name,"localhost",9*sizeof(char)),name[10] = 0,*(result_len) = 10)
+     (MPIUNI_Memcpy(name,"localhost",9*sizeof(char),CHECK_FOR_MPI_IN_PLACE_NONE),name[10] = 0,*(result_len) = 10)
 #define MPI_Errhandler_create(function,errhandler) \
      (MPIUNI_TMP = (void*)(long) (errhandler),\
      MPI_SUCCESS)

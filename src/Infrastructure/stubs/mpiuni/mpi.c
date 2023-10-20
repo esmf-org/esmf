@@ -55,8 +55,28 @@ static int      num_attr = 1,mpi_tag_ub = 100000000;
 
 /* 
    To avoid problems with prototypes to the system memcpy() it is duplicated here
+
+   This version also supports checking for MPI_IN_PLACE
 */
-int MPIUNI_Memcpy(void *a,const void* b,int n) {
+int MPIUNI_Memcpy(void *a,const void* b,int n,enum CheckForMPIInPlace_Flag check_flag) {
+  switch(check_flag) {
+  case CHECK_FOR_MPI_IN_PLACE_NONE:
+    // No pre-check in this case; proceed to the actual memcpy
+    break;
+  case CHECK_FOR_MPI_IN_PLACE_SOURCE:
+    if (b == MPI_IN_PLACE) {
+      // If the source is MPI_IN_PLACE, do nothing
+      return 0;
+    }
+    break;
+  case CHECK_FOR_MPI_IN_PLACE_DEST:
+    if (a == MPI_IN_PLACE) {
+      // If the dest is MPI_IN_PLACE, do nothing
+      return 0;
+    }
+    break;
+  }
+
   int  i;
   char *aa= (char*)a;
   char *bb= (char*)b;
@@ -403,7 +423,7 @@ void MPIUNI_STDCALL mpi_allreduce(void *sendbuf,void *recvbuf,int *count,int *da
     *ierr = MPI_ERR_OP;
     return;
   }
-  MPIUNI_Memcpy(recvbuf,sendbuf,(*count)*MPIUNI_DATASIZE[*datatype]);
+  MPIUNI_Memcpy(recvbuf,sendbuf,(*count)*MPIUNI_DATASIZE[*datatype],CHECK_FOR_MPI_IN_PLACE_SOURCE);
   *ierr = MPI_SUCCESS;
 } 
 void MPIUNI_STDCALL mpi_allreduce_(void *sendbuf,void *recvbuf,int *count,int *datatype,int *op,int *comm,int *ierr) 
