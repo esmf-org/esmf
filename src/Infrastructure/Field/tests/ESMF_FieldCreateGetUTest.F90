@@ -2655,7 +2655,7 @@ contains
         integer                     :: localrc
         type(ESMF_Field)            :: field1, field2
         type(ESMF_Grid)             :: grid
-        character(80)               :: msgStrg
+        character(160)              :: msgStrg
         real(ESMF_KIND_R4), pointer :: fptr1a(:,:,:,:,:), fptr2a(:,:,:)
         real(ESMF_KIND_R4), pointer :: fptr1b(:,:,:), fptr2b(:,:)
 
