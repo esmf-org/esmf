@@ -2037,6 +2037,9 @@ endif
 ifneq (,$(findstring mpich,$(ESMF_COMM)))
 ESMF_PRELOAD_SH = $(ESMF_PRELOADSCRIPT)
 endif
+ifeq ($(ESMF_COMM),openmpi)
+ESMF_PRELOAD_SH = $(ESMF_PRELOADSCRIPT)
+endif
 ifeq ($(ESMF_COMM),mpi)
 ESMF_PRELOAD_SH = $(ESMF_PRELOADSCRIPT)
 endif
