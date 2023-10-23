@@ -2,7 +2,8 @@
  *
  * preload_io.c
  *
- * Functions that will be preloaded with LD_PRELOAD, thereby
+ * Functions that will be preloaded with LD_PRELOAD,
+ * (or DYLD_INSERT_LIBRARIES on Darwin), thereby
  * overriding system library functions so we can call into our
  * wrapper function.
  *

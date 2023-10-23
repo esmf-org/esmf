@@ -2022,10 +2022,14 @@ ifeq ($(ESMF_TRACE_BUILD_SHARED),ON)
 ESMF_TRACE_LDPRELOAD := $(ESMF_LIBDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX)
 ESMF_PRELOADSCRIPT = $(ESMF_LIBDIR)/preload.sh
 
-ifneq ($(ESMF_OS),Darwin)
-ESMF_ENV_PRELOAD = LD_PRELOAD
+ifeq ($(ESMF_OS),Darwin)
+ESMF_ENV_PRELOAD          = DYLD_INSERT_LIBRARIES
+ESMF_ENV_PRELOAD_DELIMIT  = ':'
+ESMF_SL_PRELOAD_LIBLINKER = $(ESMF_F90LINKER)
 else
-ESMF_ENV_PRELOAD = DYLD_INSERT_LIBRARIES
+ESMF_ENV_PRELOAD          = LD_PRELOAD
+ESMF_ENV_PRELOAD_DELIMIT  = ' '
+ESMF_SL_PRELOAD_LIBLINKER = $(ESMF_SL_LIBLINKER)
 endif
 
 # MPI implementations do not pick up LD_PRELOAD
@@ -2048,7 +2052,11 @@ endif
 build_preload_script:
 	-@echo "#!/bin/sh" > $(ESMF_PRELOADDIR)/preload.sh
 	-@echo "# Script to preload ESMF dynamic trace library" >> $(ESMF_PRELOADDIR)/preload.sh
-	-@echo 'env LD_PRELOAD="$$LD_PRELOAD $(ESMF_PRELOADDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX)" $$*' >> $(ESMF_PRELOADDIR)/preload.sh
+	-@echo 'if [ "$$$(ESMF_ENV_PRELOAD)" != "" ]; then' >> $(ESMF_PRELOADDIR)/preload.sh
+	-@echo 'env $(ESMF_ENV_PRELOAD)="$$$(ESMF_ENV_PRELOAD)$(ESMF_ENV_PRELOAD_DELIMIT)$(ESMF_PRELOADDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX)" $$*' >> $(ESMF_PRELOADDIR)/preload.sh
+	-@echo 'else' >> $(ESMF_PRELOADDIR)/preload.sh
+	-@echo 'env $(ESMF_ENV_PRELOAD)="$(ESMF_PRELOADDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX)" $$*' >> $(ESMF_PRELOADDIR)/preload.sh
+	-@echo 'fi' >> $(ESMF_PRELOADDIR)/preload.sh
 	chmod 755 $(ESMF_PRELOADDIR)/preload.sh
 
 ESMF_TRACE_STATICLINKLIBS := -lesmftrace_static
