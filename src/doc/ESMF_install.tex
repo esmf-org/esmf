@@ -549,6 +549,41 @@ the application.
 
 \end{description}
 
+\subsubsection{NVML}
+\label{sec:NVML}
+
+The NVIDIA Management Library
+(\htmladdnormallink{NVML}{https://docs.nvidia.com/deploy/nvml-api/index.html})
+can be used to discover NVIDIA GPUs that are accessible at run-time.
+
+\begin{description}
+
+\item[ESMF\_NVML] Possible values: {\tt "ON"}, {\tt "standard"}, {\tt "OFF"} (default).
+
+\begin{description}
+\item[{\tt "ON"}/{\tt "standard"}] The NVML dependent code inside of ESMF will
+be enabled.
+The {\tt ESMF\_NVML\_LIBS} environment variable will be set to
+{\tt "-lnvidia-ml"}.
+
+\item[{\tt "OFF"} (default)] Disables NVML dependent code.
+\end{description}
+
+\item[ESMF\_NVML\_INCLUDE] Typically not needed. (no default).
+
+Specifies the path where the NVML header files are located.
+
+\item[ESMF\_NVML\_LIBPATH] Typically not needed. (no default).
+
+Specifies the path where the NVML library file is located.
+
+\item[ESMF\_NVML\_LIBS] Typical value: {\tt "-lnvidia-ml"} (no default).
+
+Specifies the linker directives needed to link the NVML library to
+the application.
+
+\end{description}
+
 \subsection{ESMF Environment Variables}
 \label{EnvironmentVariables}
 

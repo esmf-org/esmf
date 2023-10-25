@@ -2,6 +2,8 @@
 
 ESMX is the **E**arth **S**ystem **M**odel e**X**ecutable layer.
 
+http://earthsystemmodeling.org/esmx/
+
 The ESMX layer is built on top of the ESMF and NUOPC APIs.
 
 The idea behind ESMX is to make it as simple as possible for a user to build, run, and test NUOPC based systems. The approach implemented is the same whether applied to a single component, or a fully coupled system of NUOPC-compliant components. ESMX user interfaces are implemented through [YAML](https://yaml.org/) based configuration files.
@@ -289,6 +291,7 @@ This section affects the specific component instance.
 | --------------------- | --------------------------------------------------------------------- | --------------- |
 | `model`               | string associating the instance with a *component-name* defined in `esmxBuild.yaml` | *non-optional*  |
 | `petList`             | list of PETs on which the component executes                          | *None*          |
+| `devList`             | list of DEVs (accelerator devices) to be associated with the component| *None*          |
 | `ompNumThreads`       | setting of /NUOPC/Hint/PePerPet/MaxCount (see NUOPC ref doc)          | *None*          |
 | `attributes`          | map of key value pairs, each defining a component attribute           | *None*          |
 | *model specific yaml* | each model can define its own YAML section, e.g. with key value pairs, etc. | *None*          |

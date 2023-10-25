@@ -248,11 +248,13 @@ however on some systems (such as Cray), static linking may be used.
 Note that for either option, ESMF must be built with {\tt ESMF\_TRACE\_BUILD\_LIB=ON},
 which is the default.
 
-In {\em dynamically linked applications}, the {\tt LD\_PRELOAD} environment variable
-must be used when executing the MPI application.  This instructs the dynamic
-linker to interpose certain MPI symbols so they can be captured by the ESMF
-profiler.  To simplify this process, a script is provided at
-{\tt \$(ESMF\_INSTALL\_LIBDIR)/preload.sh} that sets the {\tt LD\_PRELOAD} variable.
+In {\em dynamically linked applications}, the {\tt LD\_PRELOAD} (Linux) or
+{\tt DYLD\_INSERT\_LIBRARIES} (Darwin) environment variable must be used when
+executing the MPI application.  This instructs the dynamic loader to interpose
+certain MPI symbols so they can be captured by the ESMF profiler.  To simplify
+this process, a script is provided at {\tt \$(ESMF\_INSTALL\_LIBDIR)/preload.sh}
+that sets the appropriate variable.
+
 For example, if you typically execute your application as as follows:
 
 \begin{verbatim}
