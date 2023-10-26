@@ -215,6 +215,10 @@ ifndef ESMF_TRACE_LIB_BUILD
 export ESMF_TRACE_LIB_BUILD = default
 endif
 
+ifndef ESMF_TRACE_PRELOAD_LINKED
+export ESMF_TRACE_PRELOAD_LINKED = default
+endif
+
 ifndef ESMF_FORTRANSYMBOLS
 export ESMF_FORTRANSYMBOLS = default
 endif
@@ -443,6 +447,10 @@ endif
 
 ifneq ($(ESMF_TRACE_LIB_BUILD),OFF)
 export ESMF_TRACE_LIB_BUILD = ON
+endif
+
+ifneq ($(ESMF_TRACE_PRELOAD_LINKED),ON)
+export ESMF_TRACE_PRELOAD_LINKED = OFF
 endif
 
 ifneq ($(ESMF_TESTCOMPTUNNEL),OFF)
@@ -987,6 +995,7 @@ ESMF_F90LINKLIBS = $(ESMF_F90LINKLIBS_ENV)
 endif
 ESMF_F90LINKLIBS     +=
 ESMF_F90ESMFLINKLIBS += -lesmf $(ESMF_F90LINKLIBS)
+ESMF_F90ESMFPRELOADLINKLIBS += -lesmf $(ESMF_TRACE_DYNAMICLINKLIBS) $(ESMF_F90LINKLIBS)
 
 # - CXXLINKER
 ifneq ($(origin ESMF_CXXLINKER), environment)
@@ -2065,6 +2074,8 @@ build_preload_script:
 	-@echo 'env $(ESMF_ENV_PRELOAD)="$(ESMF_PRELOADDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX)" $$*' >> $(ESMF_PRELOADDIR)/preload.sh
 	-@echo 'fi' >> $(ESMF_PRELOADDIR)/preload.sh
 	chmod 755 $(ESMF_PRELOADDIR)/preload.sh
+
+ESMF_TRACE_DYNAMICLINKLIBS := -lesmftrace_preload
 
 ESMF_TRACE_STATICLINKLIBS := -lesmftrace_static
 

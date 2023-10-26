@@ -1,11 +1,11 @@
-# $Id$ 
+# $Id$
 
 ALL: tracelib_preload tracelib_static
 
 SOURCEC	  = preload.C preload_io.C preload_mpi.C wrappers.C wrappers_io.C wrappers_mpi.C
-SOURCEF	  = 
-SOURCEH	  = 
-STOREH    = 
+SOURCEF	  =
+SOURCEH	  =
+STOREH    =
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
@@ -14,16 +14,16 @@ LIBBASE	  = libesmf
 LOCDIR	  = src/Infrastructure/Trace/preload
 
 CLEANDIRS   =
-CLEANFILES  = $(ESMF_LDIR)/libesmftrace_* 
+CLEANFILES  = $(ESMF_LDIR)/libesmftrace_*
 CLOBBERDIRS =
 
 include $(ESMF_DIR)/makefile
 
 #ESMF_CXXCOMPILEOPTS += -save-temps
 
-DIRS	  = 
+DIRS	  =
 
-ESMF_TRACE_ESMFLIB = 
+ESMF_TRACE_ESMFLIB =
 ifeq ($(ESMF_OS),Darwin)
   ESMF_TRACE_ESMFLIB = -lesmf
 endif
