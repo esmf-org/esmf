@@ -549,7 +549,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           If true, treat a single ungridded dimension in the source and destination Fields
 !           as the components of a vector. If true and there is more than one ungridded dimension in either
 !           the source or destination, then an error will be returned. Currently, only undistributed (vector) dimensions of
-!           size 2 are supported, and the first component will be interpreted as east and the second as north. 
+!           size 2 are supported. In the vector dimension, the first entry is interpreted as the east component and the
+!           second as the north component.
 !           In addition, this functionality presently only
 !           works when both the source and destination Fields are build on a geometry (e.g. an ESMF Grid) with
 !           a spherical coordinate system (e.g. ESMF\_COORDSYS\_SPH\_DEG). We expect these restrictions to be loosened over
