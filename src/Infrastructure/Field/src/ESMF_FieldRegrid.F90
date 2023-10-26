@@ -548,9 +548,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[vectorRegrid]}]
 !           If true, treat a single ungridded dimension in the source and destination Fields
 !           as the components of a vector. If true and there is more than one ungridded dimension in either
-!           the source or destination, then an error will be returned. Currently this functionality only
+!           the source or destination, then an error will be returned. Currently, only undistributed (vector) dimensions of
+!           size 2 are supported, and the first component will be interpreted as east and the second as north. 
+!           In addition, this functionality presently only
 !           works when both the source and destination Fields are build on a geometry (e.g. an ESMF Grid) with
-!           a spherical coordinate system (e.g. ESMF\_COORDSYS\_SPH\_DEG). See section~\ref{sec::vectorRegrid} for further
+!           a spherical coordinate system (e.g. ESMF\_COORDSYS\_SPH\_DEG). We expect these restrictions to be loosened over
+!           time as new requirements come in from users. See section~\ref{sec::vectorRegrid} for further
 !           information on this functionality. If not specified, this argument defaults to false.
 !     \item [{[extrapMethod]}]
 !           The type of extrapolation. Please see Section~\ref{opt:extrapmethod} 
