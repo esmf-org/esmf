@@ -5115,21 +5115,11 @@ TypeKindRankDeclarationMacro(FieldCreateXGDataPtr)
     integer, allocatable    :: gridToFieldMap(:)
     integer, allocatable    :: ungriddedLBound(:), ungriddedUBound(:)
 
-character(160)  :: msgStr
-character(80)   :: fieldName
-
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit, field, rc)
-
-call ESMF_FieldGet(field, name=fieldName, rc=localrc)
-if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-  ESMF_CONTEXT, rcToReturn=rc)) return
-
-write(msgStr,*) "ESMF_FieldCreateFromField() for fieldName: ", trim(fieldName)
-call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
 
     call ESMF_FieldGet(field, array=array, geom=geom, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5138,9 +5128,6 @@ call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
     call ESMF_GeomGet(geom, dimCount=dimCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-write(msgStr,*) "ESMF_FieldCreateFromField() Geom  dimCount: ", dimCount
-call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
 
     allocate(gridToFieldMap(dimCount))
     call ESMF_FieldGet(field, gridToFieldMap=gridToFieldMap, rc=localrc)
@@ -5156,9 +5143,6 @@ call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
     call ESMF_ArrayGet(arrayOut, undistDimCount=dimCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-write(msgStr,*) "ESMF_FieldCreateFromField() Array undistDimCount: ", dimCount
-call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
 
     allocate(ungriddedLBound(dimCount))
     allocate(ungriddedUBound(dimCount))
