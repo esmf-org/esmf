@@ -782,16 +782,15 @@ the typical {\tt ESMF\_FieldRegridStore()/ESMF\_FieldRegrid()/ESMF\_FieldRegridR
 However, the weight matrix will be in the format that allows it to contain tensor dimension indices (i.e. the leading
 dimension of the {\tt factorIndexList} will be of size 4). 
 
-In this initial version the meaning of the different components in the vector is fixed. They will be interpreted as:
+In this initial version, the meaning of the different entries in the vector dimension are fixed. They will be interpreted as:
 \vspace{-1em}
 \begin{description}
   \itemsep0em
-  \item[1st component] the east value
-  \item[2nd component] the north value
+  \item[1st entry] the east component of the vector
+  \item[2nd entry] the north component of the vector
 \end{description}
 
-Note that because the different components are mixed, using vector regridding with a conservative regrid method will not necessarily produce vectors whose components
-are conservative. 
+Note that because the different components are mixed, using vector regridding with a conservative regrid method will not necessarily produce vectors whose components are conservative. 
 
 
 \subsubsection{Troubleshooting guide}
