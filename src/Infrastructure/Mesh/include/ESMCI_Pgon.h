@@ -49,22 +49,38 @@ class Vert {
 public: 
   
   double pnt[GEOM::pnt_size];
-
+  double t;  // Parameter distance of this vertex between enclosing original vertices
+  bool orig; // Part of the original 
   Vert *next, *prev;
 
-  Vert(double x, double y): next(NULL), prev(NULL) {
+  // Base constructor
+  // Inits everything except points which are handled below
+  Vert( ): next(NULL), prev(NULL), t(-1.0), orig(false) {
+
+  }
+
+  Vert(double x, double y);
+
+  Vert(double x, double y, double z);
+
+  Vert(double *_pnt ): Vert() {
+    GEOM::copy(pnt, _pnt); 
+  }
+  
+#if 0  
+
     pnt[0]=x;
     pnt[1]=y;
   }
 
-  Vert(double x, double y, double z): next(NULL), prev(NULL) {
+  Vert(double x, double y, double z): Vert() {
     if (GEOM::pnt_size == 2) Throw() << "This instance of Pgon only supports 2D points.";
     pnt[0]=x;
     pnt[1]=y;
     pnt[2]=z;
   }
 
-  Vert(double *_pnt): next(NULL), prev(NULL) {
+  Vert(double *_pnt ): Vert() {
 
     // Add point 0 & 1
     pnt[0]=_pnt[0];
@@ -75,7 +91,8 @@ public:
 
     // Only support 3 coords right now, this is error checked in Pgon creation
   }
-
+#endif
+  
   // TODO: review this again
   void add_next(Vert *v) {
     
@@ -97,8 +114,7 @@ public:
    next=this;
    prev=this;
   }
- 
-  
+   
 };
 
 
@@ -211,6 +227,9 @@ private:
 
     // Leave if no points
     if (num_pnts == 0) return;
+
+    printf("pack coords num_pnts=%d\n",num_pnts);
+
     
     // Clear vector
     coord_buff.clear();

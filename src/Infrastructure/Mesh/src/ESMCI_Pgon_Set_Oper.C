@@ -84,7 +84,56 @@ void _intersect_and_classify_edge(Pgon<GEOM> &pg1, Pgon<GEOM> &pg2,
         intertype=PGON_INTERTYPE_NONE;        
       }
 
-      printf("t1=%f t2=%f intertype=%d\n",pg1_t,pg2_t,intertype);
+      //      printf("t1=%f t2=%f intertype=%d\n",pg1_t,pg2_t,intertype);
+
+      // React to intesection classifications
+      switch(intertype) {
+      
+      case PGON_INTERTYPE_X:
+
+        // Calc new point
+        double new_pnt[GEOM::pnt_size];
+        GEOM::calc_pnt_between(v1_pg1->pnt, v2_pg1->pnt, pg1_t, new_pnt);
+        
+        // Create new vertex and add to polygon 1
+        Vert<GEOM> *vnew_pg1=new Vert<GEOM>(new_pnt);
+        v1_pg1->add_next(vnew_pg1);
+
+        // Create new vertex and add to polygon 1
+        Vert<GEOM> *vnew_pg2=new Vert<GEOM>(new_pnt);
+        v1_pg2->add_next(vnew_pg2);
+        
+        // Connect vertices together
+        
+        break;
+#if 0
+
+        
+      case PGON_INTERTYPE_T_P1:
+        
+        // Create new vertex and add to polygon 2
+        Vert<GEOM> *vnew_pg2=new Vert<GEOM>(v1_pg1->pnt);
+        v1_pg2->add_next(vnew_pg2);
+        
+      case PGON_INTERTYPE_T_P2:
+        
+        // Create new vertex and add to polygon 1
+        Vert<GEOM> *vnew_pg1=new Vert<GEOM>(v1_pg2->pnt);
+        v1_pg1->add_next(vnew_pg1);
+        
+
+        // Connect vertices together
+        
+        break;
+#endif
+        
+        //      case PGON_INTERTYPE_UNDEF:
+        //Throw() << " Trying to use undefined polygon intersection type.";        
+        //break;
+        
+      } 
+
+      
 }
 
 

@@ -162,17 +162,26 @@ int main(void){
    
     // Create Pgon square object
     Pgon<GEOM_CART2D> square;
-    square.push_back_pnt(0.5,0.5);
-    square.push_back_pnt(1.5,0.5);
-    square.push_back_pnt(1.5,1.5);
-    square.push_back_pnt(0.5,1.5);
+    square.push_back_pnt(0.3,0.3);
+    square.push_back_pnt(1.3,0.3);
+    square.push_back_pnt(1.3,1.3);
+    square.push_back_pnt(0.3,1.3);
 
+    std::cout << "Before: \n";
+    std::cout << square;
+    
     // Debug output
     square.write_to_vtk("square_2DCart");
 
     // Intersection
     Pgon<GEOM_CART2D> result;
     Pgon<GEOM_CART2D>::intersection(tri, square, result);
+
+    // Debug output
+    std::cout << "After: \n";
+    std::cout << square;
+    
+    square.write_to_vtk("square_2DCart_afteri");
     
     
   } catch(...) {
@@ -184,6 +193,121 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+
+  ////// Simple test of intersection of 2D Cart Pgons touching at one point in middle of edge///////
+
+  //NEX_UTest
+  strcpy(name, "Simple test of 2D Cartesian Pgon intersection at one point in middle of edge");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+
+  // Init to sucess
+  rc=ESMF_SUCCESS;
+
+  // Try catch to catch errors
+  try { 
+  
+    // Create Pgon triangle object
+    Pgon<GEOM_CART2D> tri;
+    tri.push_back_pnt(0.0,0.0);
+    tri.push_back_pnt(1.0,0.0);
+    tri.push_back_pnt(0.0,1.0);
+
+    // Debug output
+    tri.write_to_vtk("tri_2DCart");
+
+   
+    // Create Pgon square object
+    Pgon<GEOM_CART2D> square;
+    square.push_back_pnt(0.5,0.5);
+    square.push_back_pnt(1.5,0.5);
+    square.push_back_pnt(1.5,1.5);
+    square.push_back_pnt(0.5,1.5);
+
+    std::cout << "Before: \n";
+    std::cout << square;
+    
+    // Debug output
+    square.write_to_vtk("square_2DCart");
+
+    // Intersection
+    Pgon<GEOM_CART2D> result;
+    Pgon<GEOM_CART2D>::intersection(tri, square, result);
+
+    // Debug output
+    std::cout << "After: \n";
+    std::cout << square;
+    
+    square.write_to_vtk("square_2DCart_afteri");
+    
+    
+  } catch(...) {
+    // Change to error if we detect an error
+    rc=ESMF_FAILURE;
+  }
+  
+  // Output test info
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+
+   ////// Simple test of intersection of 2D Cart Pgons touching at cornere///////
+
+  //NEX_UTest
+  strcpy(name, "Simple test of 2D Cartesian Pgon intersection at one point at corners");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+
+  // Init to sucess
+  rc=ESMF_SUCCESS;
+
+  // Try catch to catch errors
+  try { 
+  
+    // Create Pgon triangle object
+    Pgon<GEOM_CART2D> tri;
+    tri.push_back_pnt(0.0,0.0);
+    tri.push_back_pnt(1.0,0.0);
+    tri.push_back_pnt(0.0,1.0);
+
+    // Debug output
+    tri.write_to_vtk("tri_2DCart");
+
+   
+    // Create Pgon square object
+    Pgon<GEOM_CART2D> square;
+    square.push_back_pnt(1.0,0.0);
+    square.push_back_pnt(2.0,0.0);
+    square.push_back_pnt(2.0,1.0);
+    square.push_back_pnt(1.0,1.0);
+
+    std::cout << "Before: \n";
+    std::cout << square;
+    
+    // Debug output
+    square.write_to_vtk("square_2DCart");
+
+    // Intersection
+    Pgon<GEOM_CART2D> result;
+    Pgon<GEOM_CART2D>::intersection(tri, square, result);
+
+    // Debug output
+    std::cout << "After: \n";
+    std::cout << square;
+    
+    square.write_to_vtk("square_2DCart_afteri");
+    
+    
+  } catch(...) {
+    // Change to error if we detect an error
+    rc=ESMF_FAILURE;
+  }
+  
+  // Output test info
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+
+
+  
 
 
   

@@ -283,6 +283,11 @@ struct GEOM_CART2D {
   static void intersect_segs(double *p1, double *p2, double *q1, double *q2, double *p_t, double *q_t) {
     intersect_segs_cart2D(p1, p2, q1, q2, p_t, q_t);
   }
+
+  static void calc_pnt_between(double *p1, double *p2, double t, double *p_new) {
+    p_new[0]=(1.0-t)*p1[0]+t*p2[0];
+    p_new[1]=(1.0-t)*p1[1]+t*p2[1];    
+  }
   
 };
 
@@ -328,6 +333,12 @@ struct GEOM_SPH2D3D {
 
   static void intersect_segs(double *p1, double *p2, double *q1, double *q2, double *p_t, double *q_t) {
     intersect_segs_sph2D3D(p1, p2, q1, q2, p_t, q_t);
+  }
+
+  static void calc_pnt_between(double *p1, double *p2, double t, double *p_new) {
+    p_new[0]=(1.0-t)*p1[0]+t*p2[0];
+    p_new[1]=(1.0-t)*p1[1]+t*p2[1];
+    p_new[2]=(1.0-t)*p1[2]+t*p2[2];    
   }
   
 };
