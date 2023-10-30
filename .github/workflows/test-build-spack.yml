@@ -82,7 +82,7 @@ jobs:
         sudo apt-get -qq update
         sudo apt-get -qq install tar unzip file curl gringo
         sudo apt-get -qq install build-essential binutils-dev gfortran gdb
-        sudo apt-get -qq install libgfortran-12 libgfortran-13
+        sudo apt-get -qq install gfortran-12 gfortran-13
         sudo apt-get -qq install python3-dev
 
     # restore Intel oneAPI compiler installation from cache
