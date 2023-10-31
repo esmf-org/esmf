@@ -31,7 +31,7 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # These lists almost certainly will not be an exhaustive list of 
 # all of the dependent files, but even a partial listing  will be helpful.
 #
-REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) XGrid_desc.tex XGrid_implnotes.tex XGrid_options.tex XGrid_rest.tex
+REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) XGrid_desc.tex XGrid_implnotes.tex XGrid_options.tex XGrid_rest.tex XGrid_cdesc.tex
 
 include $(ESMF_DIR)/makefile
 
