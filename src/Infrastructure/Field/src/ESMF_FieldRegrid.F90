@@ -379,7 +379,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     routehandle, &
                     factorList, factorIndexList, & 
                     weights, indices, &  ! DEPRECATED ARGUMENTS
-                    transposeRoutehandle,
+                    transposeRoutehandle, &
                     srcFracField, dstFracField, &
                     dstStatusField, &
                     unmappedDstList, &
@@ -1242,7 +1242,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   unmappedaction, localIgnoreDegenerate, &
                                   srcTermProcessing, pipeLineDepth, &
                                   routehandle, &
-                                  transposeRoutehandle, &
+                                  transposeRoutehandle=transposeRoutehandle, &
                                   unmappedDstList=unmappedDstList, &
                                   checkFlag=localCheckFlag, &
                                   rc=localrc)
