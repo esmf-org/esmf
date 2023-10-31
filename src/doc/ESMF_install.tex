@@ -953,14 +953,16 @@ Not normally set by user. Setting this variable to {\tt FALSE} instructs
 ESMF to generating data array interfaces for data types of 2-byte integers.
 
 \item[ESMF\_OPENACC]
-Possible value: {\tt ON}, {\tt OFF} (default)
+Possible value: {\tt ON}, {\tt OFF} (default is system dependent)
 
 Compiles and links the ESMF library with OpenACC compiler flags.
 
 \item[ESMF\_OPENMP]
-Possible value: {\tt ON}, {\tt OFF} (default is system dependent)
+Possible value: {\tt OMP4}, {\tt ON}, {\tt OFF} (default is system dependent)
 
 Compiles and links the ESMF library with OpenMP compiler flags.
+Both {\tt OMP4} and {\tt ON} enable the ESMF OpenMP features. Only with
+{\tt OMP4} will those features assume OpenMP 4.0 and higher.
 
 \item[ESMF\_OPTLEVEL]
 Possible value: {\em numerical value}
