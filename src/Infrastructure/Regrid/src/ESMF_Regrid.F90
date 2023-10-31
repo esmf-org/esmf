@@ -165,6 +165,7 @@ end function my_xor
                  pipelineDepth, &
                  routehandle, &
                  indices, weights, &
+                 transposeRoutehandle, &
                  unmappedDstList, &
                  checkFlag, &
                  rc)
@@ -194,6 +195,7 @@ end function my_xor
       integer,                       intent(inout), optional :: srcTermProcessing
       integer,                       intent(inout), optional :: pipelineDepth
       type(ESMF_RouteHandle),  intent(inout), optional       :: routehandle
+      type(ESMF_RouteHandle),  intent(inout), optional       :: transposeRoutehandle
       integer(ESMF_KIND_I4), pointer, optional               :: indices(:,:)
       real(ESMF_KIND_R8), pointer, optional                  :: weights(:)
       integer(ESMF_KIND_I4),       pointer, optional         :: unmappedDstList(:)
@@ -239,7 +241,7 @@ end function my_xor
 !     \end{description}
 !EOPI
        integer :: localrc
-       integer :: has_rh, has_iw, nentries
+       integer :: has_rh, has_trh, has_iw, nentries
        type(ESMF_TempWeights) :: tweights
        integer :: has_udl, num_udl
        type(ESMF_TempUDL) :: tudl
@@ -262,7 +264,9 @@ end function my_xor
        endif
 
        ! Next, we require that the user request at least something
-       if (.not.(present(routehandle) .or. present(indices))) then
+       if (.not.(present(routehandle) .or. &
+                 present(transposeRoutehandle) .or. &
+                 present(indices))) then
          localrc = ESMF_RC_ARG_BAD
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
@@ -274,14 +278,23 @@ end function my_xor
        ! Initialize return code; assume failure until success is certain
        localrc = ESMF_RC_NOT_IMPL
        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
+       
+       ! Record if routehandle is present
        has_rh = 0
-        has_iw = 0
-       has_udl=0
        if (present(routehandle)) has_rh = 1
+       
+       ! Record if weights are present        
+       has_iw = 0
        if (present(indices)) has_iw = 1
+       
+       ! Record if unmapped destination list is present        
+       has_udl=0
        if (present(unmappedDstList)) has_udl = 1
 
+       ! Record if transpose routehandle is present
+       has_trh = 0
+       if (present(transposeRoutehandle)) has_trh = 1
+       
        if (present(unmappedaction)) then
           localunmappedaction=unmappedaction
        else
@@ -364,8 +377,9 @@ end function my_xor
                    localunmappedaction%unmappedaction, &
                    localIgnoreDegenerate, &
                    srcTermProcessing, pipelineDepth, &
-                   routehandle, has_rh, has_iw, &
-                   nentries, tweights, &
+                   routehandle, has_rh, &
+                   has_iw, nentries, tweights, &
+                   transposeRoutehandle, has_trh, &
                    has_udl, num_udl, tudl, &
                    has_statusArrayInt, statusArray, &
                    checkFlagInt, &
@@ -408,6 +422,14 @@ end function my_xor
          ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
+      ! Mark transpose route handle created
+      if (present(transposeRoutehandle)) then 
+         call ESMF_RouteHandleSetInitCreated(transposeRoutehandle, localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+      
+      
       rc = ESMF_SUCCESS
        end subroutine ESMF_RegridStore
 
