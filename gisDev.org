@@ -80,11 +80,21 @@ ESMF_FieldRead() <ESMF_FieldPr.F90>
 -- -- -- -- -- IO_Handler::arrayRead() <ESMCI_IO_Handler.C>
 -- -- -- -- -- -- PIO_Handler::arrayReadOneTileFile() <ESMCI_PIO_Handler.C>
 -- -- -- -- -- -- -- PIOc_Read_Array() <pio_darray.c>
+* Field Write
+ESMF_FieldWrite()
+-- ESMF_IOWrite() <ESMF_IO.F90>
+-- -- c_ESMC_IOWrite() <ESMCI_IO_F.C>
+-- -- -- (*ptr)->write() <ESMCI_IO.C>
+-- -- -- -- IO::write() <ESMCI_IO.C>
+-- -- -- -- -- IO_Handler::arrayWrite() <ESMCI_IO_Handler.C>
+-- -- -- -- -- -- PIO_Handler::arrayWriteOneTileFile() <ESMCI_PIO_Handler.C>
+-- -- -- -- -- -- -- PIOc_write_darray() <pio_darray.c>
 * Questions:
 ** What about CRS and projection to/from GEOS? 
 Will area (spatial extent) be conserved? e.g. if the GIS CRS is curvilinear, is the mapping in ESMF able to handle that?
 i.e. is ESMF mapping only planar?
 *** Solution: add a transformation routine from->to. e.g. from ESMF planar to GIS curvilear, or vice versa
+** How to deal with time slices? Can we use '%' tags like in ExtData?
 * Sept 21, 2023
 ** MeshCreate:
 *** Need to create an index that identifies which multipolygon feature ID
@@ -97,3 +107,22 @@ i.e. is ESMF mapping only planar?
 
     - the index needs to be a handle of type OGRFeatureH <- NOPE. Get Feature Index of type GBigInt
     - It needs to happen in the meshgrid processing step
+
+* Oct 16, 2023 - file write
+1) Create a new file (if needed)
+2) add variable
+3) add data
+
+Right now, we have to assume:
+- CRS
+- Layer name
+
+Proposed workflow: 
+- Call PIO all the way down to PIOc_write_darray_multi
+- Use file->iodesc & file->hDS to determine if its GDAL
+- If GDAL, call GDAL specific write routine (in pioc_gdal.c)
+
+* Oct 26, 2023 - filw write, cont'd
+1) Determine file type
+2) Get driver
+3) Define spatial reference w/ CRS

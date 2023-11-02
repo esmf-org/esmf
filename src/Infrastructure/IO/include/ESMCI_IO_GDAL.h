@@ -154,7 +154,7 @@ enum GDAL_REARRANGERS
   int GDALc_inq_vardimid(int ncid, int varid, int *dimidsp);
 
   int GDALc_deletefile(int iosysid, const char *filename);
-  int GDALc_createfile(int iosysid, OGRDataSourceH *ncidp,  int *iotype, const char *fname, bool mode);
+//  int GDALc_createfile(int iosysid, OGRDataSourceH *ncidp,  int *iotype, const char *fname, bool mode);
   int GDALc_create(int iosysid, const char *path, int cmode, int *ncidp);
 //  int GDALc_openfile(int iosysid, OGRDataSourceH *hDSp, int *iotype, const char *fname, bool mode);
   int GDALc_open(int iosysid, const char *path, int mode, int *ncidp);

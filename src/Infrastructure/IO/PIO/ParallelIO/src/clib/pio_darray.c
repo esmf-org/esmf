@@ -181,7 +181,7 @@ PIOc_write_darray_multi(int ncid, const int *varids, int ioid, int nvars,
 
     /* Run these on all tasks if async is not in use, but only on
      * non-IO tasks if async is in use. */
-    if (!ios->async || !ios->ioproc)
+    if ((!ios->async || !ios->ioproc) && (file->iotype != PIO_IOTYPE_GDAL))
     {
         /* Get the number of dims for this var. */
         PLOG((3, "about to call PIOc_inq_varndims varids[0] = %d", varids[0]));
@@ -332,6 +332,12 @@ PIOc_write_darray_multi(int ncid, const int *varids, int ioid, int nvars,
                                               DARRAY_DATA, frame)))
             return pio_err(ios, file, ierr, __FILE__, __LINE__);
 
+        break;
+    case PIO_IOTYPE_GDAL:
+//        if ((ierr = gdal_write_darray_multi_serial(file, nvars, fndims, varids, iodesc,
+        if ((ierr = gdal_write_darray_multi_serial(file, nvars, 1, varids, iodesc,
+                                              DARRAY_DATA, frame)))
+            return pio_err(ios, file, ierr, __FILE__, __LINE__);
         break;
     default:
         return pio_err(NULL, NULL, PIO_EBADIOTYPE, __FILE__, __LINE__);
@@ -661,6 +667,7 @@ PIOc_write_darray(int ncid, int varid, int ioid, PIO_Offset arraylen, void *arra
 #endif /* USE_MPE */
 
     /* Get the file info. */
+    printf(">>>> getting file %d\n",ncid);
     if ((ierr = pio_get_file(ncid, &file)))
         return pio_err(NULL, NULL, PIO_EBADID, __FILE__, __LINE__);
     ios = file->iosystem;
@@ -686,9 +693,12 @@ PIOc_write_darray(int ncid, int varid, int ioid, PIO_Offset arraylen, void *arra
           arraylen, iodesc->ndof));
 
     /* Get var description. */
+    PLOG((3, "here1"));
+    printf(">>>> NCID: %d, %d\n",file->pio_ncid, file->fh);
     if ((ierr = get_var_desc(varid, &file->varlist, &vdesc)))
         return pio_err(ios, file, ierr, __FILE__, __LINE__);
 
+    PLOG((3, "here2"));
     /* If the type of the var doesn't match the type of the
      * decomposition, return an error. */
     /* if (iodesc->piotype != vdesc->pio_type) */
@@ -697,13 +707,14 @@ PIOc_write_darray(int ncid, int varid, int ioid, PIO_Offset arraylen, void *arra
     /*           __FILE__, __LINE__); */
 
     /* If we don't know the fill value for this var, get it. */
-    if (!vdesc->fillvalue)
+    if (!vdesc->fillvalue && file->iotype != PIO_IOTYPE_GDAL)
         if ((ierr = find_var_fillvalue(file, varid, vdesc)))
             return pio_err(ios, file, PIO_EBADID, __FILE__, __LINE__);
 
     /* Check that if the user passed a fill value, it is correct. If
      * use_fill is false, then find_var_fillvalue will not end up
      * getting a fill value. */
+    PLOG((3, "here3"));
     if (fillvalue && vdesc->use_fill)
         if (memcmp(fillvalue, vdesc->fillvalue, vdesc->pio_type_size))
             return pio_err(ios, file, PIO_EINVAL, __FILE__, __LINE__);
@@ -950,7 +961,7 @@ PIOc_read_darray(int ncid, int varid, int ioid, PIO_Offset arraylen,
             return pio_err(ios, file, ierr, __FILE__, __LINE__);
         break;
     case PIO_IOTYPE_GDAL:
-        if ((ierr = pio_read_darray_shp(file, iodesc, varid, iobuf)))
+        if ((ierr = gdal_read_darray_shp(file, iodesc, varid, iobuf)))
             return pio_err(ios, file, ierr, __FILE__, __LINE__);
         break;
     default:

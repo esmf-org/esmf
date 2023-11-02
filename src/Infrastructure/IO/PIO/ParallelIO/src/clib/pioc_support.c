@@ -873,11 +873,11 @@ find_mpi_type(int pio_type, MPI_Datatype *mpi_type, int *type_size)
         my_mpi_type = MPI_UNSIGNED_LONG_LONG;
         my_type_size = NETCDF_DOUBLE_INT64_SIZE;
         break;
+#endif /* _NETCDF4 */
     case PIO_STRING:
         my_mpi_type = MPI_CHAR;
         my_type_size = NETCDF_CHAR_SIZE;
         break;
-#endif /* _NETCDF4 */
     default:
         return PIO_EBADTYPE;
     }

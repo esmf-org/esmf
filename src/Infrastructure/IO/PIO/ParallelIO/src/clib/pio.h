@@ -1344,6 +1344,9 @@ extern "C" {
     int GDALc_shp_get_int_field(int fileid);
     int GDALc_shp_get_double_field(int fileid, int varid, const size_t *startp,
                                    const size_t *countp, double *ip);
+    int GDALc_createfile(int iosysid, int *fileidp,  int *iotype, const char *fname, bool mode);
+    int GDALc_createfile_shp(int iosysid, int *fileidp, int *iotype, const char *filename, bool mode);
+    int GDALc_def_field(int fileid, const char *name, int xtype, int *varidp);
 
 #if defined(__cplusplus)
 }

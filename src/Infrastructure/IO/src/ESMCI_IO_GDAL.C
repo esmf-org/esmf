@@ -270,29 +270,29 @@ int GDALc_inq_field(int ncid, int varid, char *name, int *xtypep, int *ndimsp,
 //>>    return PIO_NOERR;
   }
 
-int GDALc_createfile(int iosysid, OGRDataSourceH *ncidp, int *iotype, const char *filename,
-                    bool mode)
-{
-    iosystem_desc_t *ios;  /* Pointer to io system information. */
-    int ret;               /* Return code from function calls. */
-
-//>>    /* Get the IO system info from the id. */
-//>>    if (!(ios = pio_get_iosystem_from_id(iosysid)))
-//>>        return pio_err(NULL, NULL, PIO_EBADID, __FILE__, __LINE__);
+//>>int GDALc_createfile(int iosysid, OGRDataSourceH *ncidp, int *iotype, const char *filename,
+//>>                    bool mode)
+//>>{
+//>>    iosystem_desc_t *ios;  /* Pointer to io system information. */
+//>>    int ret;               /* Return code from function calls. */
 //>>
-//>>    PLOG((1, "PIOc_createfile iosysid = %d iotype = %d filename = %s mode = %d",
-//>>          iosysid, *iotype, filename, mode));
+//>>//>>    /* Get the IO system info from the id. */
+//>>//>>    if (!(ios = pio_get_iosystem_from_id(iosysid)))
+//>>//>>        return pio_err(NULL, NULL, PIO_EBADID, __FILE__, __LINE__);
+//>>//>>
+//>>//>>    PLOG((1, "PIOc_createfile iosysid = %d iotype = %d filename = %s mode = %d",
+//>>//>>          iosysid, *iotype, filename, mode));
+//>>//>>
+//>>//>>    /* Create the file. */
+//>>//>>    if ((ret = PIOc_createfile_int(iosysid, ncidp, iotype, filename, mode, 0)))
+//>>//>>        return pio_err(ios, NULL, ret, __FILE__, __LINE__);
+//>>//>>
+//>>//>>    /* Set the fill mode to NOFILL. */
+//>>//>>    if ((ret = PIOc_set_fill(*ncidp, NC_NOFILL, NULL)))
+//>>//>>        return ret;
 //>>
-//>>    /* Create the file. */
-//>>    if ((ret = PIOc_createfile_int(iosysid, ncidp, iotype, filename, mode, 0)))
-//>>        return pio_err(ios, NULL, ret, __FILE__, __LINE__);
-//>>
-//>>    /* Set the fill mode to NOFILL. */
-//>>    if ((ret = PIOc_set_fill(*ncidp, NC_NOFILL, NULL)))
-//>>        return ret;
-
-    return ret;
-}
+//>>    return ret;
+//>>}
 
 //<<>>int GDALc_openfile(int iosysid, OGRDataSourceH *hDSp, int *iotype, const char *filename,
 //<<>>                  bool mode)
