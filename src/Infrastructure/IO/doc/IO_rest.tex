@@ -4,8 +4,8 @@
 
 \item {\bf Limited data formats supported.}
 Currently a small fraction of the anticipated data formats is implemented by 
-ESMF.  The data I/O uses NetCDF format, and ESMF Attribute
-I/O uses XML format.  Different libraries are employed for these
+ESMF.  The data I/O uses NetCDF format, and ESMF Info
+I/O uses JSON format.  Different libraries are employed for these
 different formats.  In future development, a more centralized I/O technique
 will likely be defined to provide efficient utilities with a set of standard
 APIs that will allow manipulation of multiple standard formats.  Also, the 
@@ -18,6 +18,8 @@ I/O requires at least as many PETs as there are tiles, and for I/O of
 ArrayBundles and FieldBundles, all Arrays / Fields in the bundle must
 contain the same number of tiles.
 
+% See https://github.com/esmf-org/esmf/issues/184 for more details on
+% these issues with I/O of replicated dimensions.
 \item {\bf Replicated dimensions.}
 I/O of Arrays / Fields with replicated dimensions (section
 \ref{sec:array:usage:replicated_dims}) is only partially working. In
@@ -29,9 +31,6 @@ can have garbage values in the output file. In addition, there is an
 inconsistency when outputting Arrays / Fields that have a decomposition
 with more than one DE per PET: in this case, replicated dimensions are
 removed in the output file. Finally, I/O cannot be performed on
-multi-tile Arrays / Fields with replicated dimensions. (More details on
-the I/O issues with replicated dimensions can be found in
-\htmladdnormallink{the relevant GitHub
-issue}{https://github.com/esmf-org/esmf/issues/184}.)
+multi-tile Arrays / Fields with replicated dimensions.
 
 \end{enumerate}
