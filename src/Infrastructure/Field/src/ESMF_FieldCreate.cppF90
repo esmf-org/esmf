@@ -5098,13 +5098,13 @@ TypeKindRankDeclarationMacro(FieldCreateXGDataPtr)
 !      \ref{const:datacopyflag}. The default is {\tt ESMF\_DATACOPY\_VALUE}.
 ! \item[{[trailingUngridSlice]}]
 !      If present, the returned Field refers to a slice of {\tt field}
-!      created by removing some or all of the trailing undistributed dimensions
-!      from the incoming Field object.
+!      created by removing some or all of the trailing (i.e. rightmost)
+!      ungridded dimensions from the incoming Field object.
 !      The number of trailing dimensions removed is equal to the size $n$
 !      of {\tt trailingUngridSlice}, which must be less than or equal to the
-!      total number of trailing undistributed dimensions in {\tt field}. Under
-!      this condition, the {\tt trailingUngridSlice} argument is interpreted
-!      as an index tuple for the $n$ rightmost trailing undistributed
+!      total number of trailing ungridded dimensions in {\tt field}.
+!      The {\tt trailingUngridSlice} argument is interpreted
+!      as an index tuple for the $n$ trailing ungridded
 !      dimensions in {\tt field} in order, and the Field slice at that
 !      location is returned.
 ! \item[{[name]}]
