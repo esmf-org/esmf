@@ -5,7 +5,7 @@
 The ESMF I/O provides an unified interface for input and output of
 high level ESMF objects such as Fields.  ESMF I/O capability is integrated
 with third-party software such as \htmladdnormallink{Parallel I/O (PIO)}{https://github.com/NCAR/ParallelIO}
-to read and write Fortran array data in MPI\_IO binary or NetCDF format, and 
+to read and write Fortran array data in NetCDF format, and 
 \htmladdnormallink{JSON for Modern C++}{https://github.com/nlohmann/json}
 Library to read Info attribute data in JSON format.  Other file I/O
 functionalities, such as writing of error and log messages, input of
@@ -78,14 +78,16 @@ I/O Utilities, \ref{sec:IOUtil} respectively.
 
 \begin{sloppypar}
 ESMF provides interfaces for high performance, parallel I/O using ESMF data
-objects such as Arrays and Fields.  Currently ESMF supports I/O of binary and
+objects such as Arrays and Fields.  Currently ESMF only supports I/O of
 NetCDF files.  The current ESMF implementation relies on the 
 \htmladdnormallink{Parallel I/O (PIO)}{https://github.com/NCAR/ParallelIO}
 library developed as a collaboration between NCAR and DOE laboratories.  PIO
 is built as part of the ESMF build when the environment variable ESMF\_PIO is
-set to "internal"; by default it is not set. When PIO is built with ESMF, the
-ESMF methods internally call the PIO interfaces.  When PIO is not built with
-ESMF, the ESMF methods are non-operable (no-op) stubs that simply return with
+set to "internal", or is linked against when ESMF\_PIO is set to "external"; by
+default ESMF\_PIO is not set (which results in using the internal PIO if other
+aspects of the ESMF build configuration allow it).  When PIO is built with ESMF,
+the ESMF methods internally call the PIO interfaces.  When ESMF is not built with
+PIO, the ESMF methods are non-operable (no-op) stubs that simply return with
 a return code of ESMF\_RC\_LIB\_NOT\_PRESENT.  Details about the environment
 variables can be found in ESMF User Guide, "Building and Installing the ESMF",
 "Third Party Libraries".
@@ -107,13 +109,10 @@ The following methods support parallel data I/O using PIO:
 
 \subsection{Data formats}
 
-Two formats are supported, namely, NetCDF and binary (through MPI\_IO). 
-The environment variables that are enabled when ESMF is built determine the 
-format.  The environment variables ESMF\_NETCDF or/and ESMF\_PNETCDF should be 
-set as appropriate to enable NetCDF I/O format.  If neither ESMF\_NETCDF nor
-ESMF\_PNETCDF are set, and MPI\_IO is enabled in MPI, the format will be 
-binary.  Details about the environment variables can be found in ESMF User 
-Guide, "Building and Installing the ESMF", "Third Party Libraries".
+The only format currently supported is NetCDF. The environment variables
+ESMF\_NETCDF and/or ESMF\_PNETCDF must be set to enable this NetCDF-based I/O.
+Details about the environment variables can be found in ESMF User Guide,
+"Building and Installing the ESMF", "Third Party Libraries".
 
 \begin{description}
 \item[\bf NetCDF] Network Common Data Form (NetCDF) is an interface for 
@@ -131,15 +130,6 @@ To the extent that data on unstructured grids (or even observations) can be
 represented as one-dimensional arrays, NetCDF can also be used to store these 
 data. However, it does not provide a high-level abstraction for this type of 
 data. 
-
-\item[\bf IEEE Binary Streams]
-A natural way for a machine to represent data is to use a native
-binary data representation. There are two choices of ordering of bytes
-(so-called {\it Big Endian} and {\it Little Endian}), and a lot of
-ambiguity in representing floating point data. The latter, however, is
-specified, if IEEE Floating Point Standard 754 is satisfied.
-(\cite{IEEE-Floating-Point}, \cite{Kahan-IEEE-754}). 
-\cite{XML-W3C}.
 
 \end{description}
 
