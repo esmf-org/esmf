@@ -96,12 +96,10 @@ void _intersect_and_classify_edge(Pgon<GEOM> &pg1, Pgon<GEOM> &pg2,
         GEOM::calc_pnt_between(v1_pg1->pnt, v2_pg1->pnt, pg1_t, new_pnt);
         
         // Create new vertex and add to polygon 1
-        Vert<GEOM> *vnew_pg1=new Vert<GEOM>(new_pnt);
-        v1_pg1->add_next(vnew_pg1);
+        Vert<GEOM> *vnew_pg1=pg1.add_inter_vert_between(v1_pg1, v2_pg1, new_pnt, pg1_t);
 
-        // Create new vertex and add to polygon 1
-        Vert<GEOM> *vnew_pg2=new Vert<GEOM>(new_pnt);
-        v1_pg2->add_next(vnew_pg2);
+        // Create new vertex and add to polygon 2
+        Vert<GEOM> *vnew_pg2=pg2.add_inter_vert_between(v1_pg2, v2_pg2, new_pnt, pg2_t);
         
         // Connect vertices together
         
@@ -143,7 +141,7 @@ template<class GEOM>
 void _intersect_pgons(Pgon<GEOM> &pg1, Pgon<GEOM> &pg2) {
 
   // Loop through vertices in both polygons adding intersections
-  for (Vert<GEOM> *v1_pg1 : pg1.get_VertIter()) {
+  for (Vert<GEOM> *v1_pg1 : pg1.get_VertIter(PGON_VERTITERTYPE_ORIG)) {
 
     // Get next vert
     // TODO: Make method to get next
@@ -152,7 +150,7 @@ void _intersect_pgons(Pgon<GEOM> &pg1, Pgon<GEOM> &pg2) {
     // Debug output
     //std::cout << "["<<*v1_pg1<<"]->["<<*v2_pg1<<"] \n";
 
-    for (Vert<GEOM> *v1_pg2 : pg2.get_VertIter()) {
+    for (Vert<GEOM> *v1_pg2 : pg2.get_VertIter(PGON_VERTITERTYPE_ORIG)) {
       
       // Get next vert
       // TODO: Make method to get next

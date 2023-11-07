@@ -50,14 +50,13 @@ public:
   
   double pnt[GEOM::pnt_size];
   double t;  // Parameter distance of this vertex between enclosing original vertices
-  bool orig; // Part of the original 
+  bool orig; // Part of the original Pgon
+  bool inter; // An intersection vertex (not necessarily disjoint from orig) basically it means that it's connected with another polygon
   Vert *next, *prev;
 
   // Base constructor
   // Inits everything except points which are handled below
-  Vert( ): next(NULL), prev(NULL), t(-1.0), orig(false) {
-
-  }
+  Vert( ): t(-1.0), orig(false), inter(false), next(NULL), prev(NULL) {}
 
   Vert(double x, double y);
 
@@ -66,33 +65,7 @@ public:
   Vert(double *_pnt ): Vert() {
     GEOM::copy(pnt, _pnt); 
   }
-  
-#if 0  
-
-    pnt[0]=x;
-    pnt[1]=y;
-  }
-
-  Vert(double x, double y, double z): Vert() {
-    if (GEOM::pnt_size == 2) Throw() << "This instance of Pgon only supports 2D points.";
-    pnt[0]=x;
-    pnt[1]=y;
-    pnt[2]=z;
-  }
-
-  Vert(double *_pnt ): Vert() {
-
-    // Add point 0 & 1
-    pnt[0]=_pnt[0];
-    pnt[1]=_pnt[1];
-
-    // Maybe add 3
-    if (GEOM::pnt_size > 2) pnt[2]=_pnt[2];
-
-    // Only support 3 coords right now, this is error checked in Pgon creation
-  }
-#endif
-  
+    
   // TODO: review this again
   void add_next(Vert *v) {
     
@@ -129,6 +102,13 @@ template <class GEOMVO>
   return os;
 }
 
+enum VertIterType {
+  PGON_VERTITERTYPE_ALL,
+  PGON_VERTITERTYPE_ORIG,
+  PGON_VERTITERTYPE_INTER,
+  PGON_VERTITERTYPE_CROSS_INTER
+};
+
 
 template <class GEOMVI>
 class VertIter {
@@ -136,7 +116,11 @@ class VertIter {
 private:
   class iterator {
   public: 
-    iterator(Vert<GEOMVI> *_beg): beg(_beg), curr(_beg) {}
+    iterator(Vert<GEOMVI> *_beg, VertIterType _type): beg(_beg), curr(_beg), type(_type) {
+
+      // If beg not NULL (i.e. this isn't the end), start with curr at first vertex of type
+      if (beg != NULL)  find_first_Vert_of_type();
+    }
 
     const iterator& operator++() {
       next_Vert();
@@ -154,7 +138,80 @@ private:
   private:
     Vert<GEOMVI> *beg;
     Vert<GEOMVI> *curr;
+    VertIterType type; 
     
+    // Move curr to the next vertex of the correct type
+    // If at end then marks at end by setting both beg and end to NULL
+   void find_first_Vert_of_type() {
+
+     // If we're at end, just leave
+     if (curr == NULL) return;
+
+     // Find the first based on type
+     switch(type) {
+     case PGON_VERTITERTYPE_ALL:
+       // Don't do anything because for _ALL curr will always be correct 
+       break;
+
+     case PGON_VERTITERTYPE_ORIG:
+       if (!curr->orig) {
+         // Since curr wasn't orig, shift to next (also moves away from beg)
+         curr=curr->next; 
+
+         // Loop until we find orig (this'll be a noop if new curr is orig)
+         while (!curr->orig && curr != beg) {
+           curr=curr->next;
+         }
+
+         // If we've come back to beg, then we're at end
+         if (curr == beg) {
+           curr=NULL;
+           beg=NULL;
+         }
+       }
+       break;
+       
+     case PGON_VERTITERTYPE_INTER:
+       if (!curr->inter) {
+         // Since curr wasn't inter, shift to next (also moves away from beg)
+         curr=curr->next; 
+
+         // Loop until we find inter (this'll be a noop if new curr is inter)
+         while (!curr->inter && curr != beg) {
+           curr=curr->next;
+         }
+
+         // If we've come back to beg, then we're at end
+         if (curr == beg) {
+           curr=NULL;
+           beg=NULL;
+         }
+       }
+       break;
+       
+     case PGON_VERTITERTYPE_CROSS_INTER:
+       if (!curr->inter) {
+         // Since curr wasn't inter, shift to next (also moves away from beg)
+         curr=curr->next; 
+
+         // Loop until we find inter (this'll be a noop if new curr is inter)
+         while (!curr->inter && curr != beg) {
+           curr=curr->next;
+         }
+
+         // If we've come back to beg, then we're at end
+         if (curr == beg) {
+           curr=NULL;
+           beg=NULL;
+         }
+       }
+
+       break;
+       
+     }
+   }
+    
+
     // Go to next Vert in the list
    Vert<GEOMVI> *next_Vert() {
 
@@ -164,24 +221,52 @@ private:
      // Go to next
      curr=curr->next;
 
+     // Move along until we're at the next of the correct type
+     switch(type) {
+     case PGON_VERTITERTYPE_ALL:
+       // Don't do anything because for _ALL curr will always be correct 
+       break;
+
+     case PGON_VERTITERTYPE_ORIG:
+       while (!curr->orig && curr != beg) {
+         curr=curr->next;
+       }
+       break;
+       
+     case PGON_VERTITERTYPE_INTER:
+       while (!curr->inter && curr != beg) {
+         curr=curr->next;
+       }
+       break;
+       
+     case PGON_VERTITERTYPE_CROSS_INTER:
+       // TODO: Still need to add the cross part
+       while (!curr->inter && curr != beg) {
+         curr=curr->next;
+       }
+       break;
+     }
+
+
      // If we're back at the beginning, then mark as end
      if (curr == beg) {
        curr=NULL;
        beg=NULL;
      }
-
+     
      // return current vertex
      return curr;
    }
   };
 
 public:
-  VertIter() : beg(NULL) {};
+  VertIter() : beg(NULL), type(PGON_VERTITERTYPE_ALL) {};
 
-  iterator begin() { return iterator(beg); }
-  iterator end() { return iterator(NULL); }
+  iterator begin() { return iterator(beg,type); }
+  iterator end() { return iterator(NULL,type); }
 
-  Vert<GEOMVI> *beg;  
+  Vert<GEOMVI> *beg;
+  VertIterType type;
 };
 
 
@@ -228,9 +313,6 @@ private:
     // Leave if no points
     if (num_pnts == 0) return;
 
-    printf("pack coords num_pnts=%d\n",num_pnts);
-
-    
     // Clear vector
     coord_buff.clear();
 
@@ -238,7 +320,7 @@ private:
     coord_buff.reserve(num_pnts*GEOM2::pnt_size);
 
     // Loop adding points
-    for (Vert<GEOM2> *v : get_VertIter()) {
+    for (Vert<GEOM2> *v : get_VertIter(PGON_VERTITERTYPE_ALL)) {
 
       // Pack coords
       coord_buff.push_back(v->pnt[0]);
@@ -261,7 +343,7 @@ public:
 
   // Loop over vertices
   // TODO: Make this so it makes an independant iterator object? So you can have more than one per polygon
-  VertIter<GEOM2> &get_VertIter(Vert<GEOM2> *first=NULL) {
+  VertIter<GEOM2> &get_VertIter(VertIterType type, Vert<GEOM2> *first=NULL) {
     
     // Set beginning
     if (first == NULL) {
@@ -269,6 +351,9 @@ public:
     } else {
       vertIter.beg=first;
     }
+
+    // Set type
+    vertIter.type=type;
 
     return vertIter;
   }
@@ -287,35 +372,90 @@ public:
     coord_buff.reserve(num_pnts*GEOM2::pnt_size);
   }
 
+
+  // TODO: THINK ABOUT THE WHOLE ORIG/INTER VERT THING AND
+  //       SEE IF YOU WANT TO KEEP SEPERATE METHODS FOR CREATING OR
+  //       HAVE A FLAG OR SOMETHING. ALSO MAYE INSTEAD OF LINK()
+  //       CALL IT MAKE INTER() AND AT THAT POINT SET TO INTER=TRUE
+  //       MAYBE HAVE A FLAG FOR THE OTHER METHODS TO JUST BE ORIG TRUE/FALSE??
   
-  // Add a point
-  void push_back_pnt(double *pnt) {
+ 
+  // Add an original vert to the end of the polygon
+  Vert<GEOM2> *push_back_orig_vert(double *pnt) {
 
     // create vert
     Vert<GEOM2> *vert=new Vert<GEOM2>(pnt);
 
+    // Mark as origin
+    vert->orig=true;
+    
     // Add
     push_back_Vert(vert);
+
+    // Return new vert
+    return vert;
   }
 
-  // Add a point 2D case
-  void push_back_pnt(double x, double y) {
+
+  // Add an original vert to the end of the polygon
+ Vert<GEOM2> *push_back_orig_vert(double x, double y) {
 
     // create vert
     Vert<GEOM2> *vert=new Vert<GEOM2>(x,y);
 
+    // Mark as origin
+    vert->orig=true;
+    
     // Add
     push_back_Vert(vert);
+
+    // Return new vert
+    return vert;
   }
 
-  // Add a point 3D case
-  void push_back_pnt(double x, double y, double z) {
+  // Add an original vert to the end of the polygon
+ Vert<GEOM2> *push_back_orig_vert(double x, double y, double z) {
 
     // create vert
     Vert<GEOM2> *vert=new Vert<GEOM2>(x,y,z);
 
+    // Mark as original
+    vert->orig=true;
+    
     // Add
     push_back_Vert(vert);
+
+    // Return new vert
+    return vert;
+  }
+
+
+  // Insert intersection vert between vert, order by t if more than 1
+  Vert<GEOM2> *add_inter_vert_between(Vert<GEOM2> *beg, Vert<GEOM2> *end, double *pnt, double t) {
+
+    // Create vert
+    Vert<GEOM2> *vert=new Vert<GEOM2>(pnt);
+
+    // Mark as not origin
+    vert->orig=false;
+
+    // Mark as intersection
+    vert->inter=true;
+
+    // Set t
+    vert->t=t;
+
+    // Loop finding vert that's right before place to add
+    Vert<GEOM2> *just_before=beg;
+    while ((just_before->next != end) && (just_before->next->t < t)) {
+      just_before=just_before->next;
+    } 
+
+    // Add vert
+    just_before->add_next(vert);
+
+    // Return new vert
+    return vert;
   }
 
    
@@ -387,7 +527,7 @@ template <class GEOM3>
   if (pg.beg == NULL) return (os); // Leave if empty
 
   // Loop outputting vertices
-  for (Vert<GEOM3> *v : pg.get_VertIter()) {
+  for (Vert<GEOM3> *v : pg.get_VertIter(PGON_VERTITERTYPE_ALL)) {
 
     // Output Vert
     os<<"  ["<<*v<<"] ";
