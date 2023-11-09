@@ -89,8 +89,10 @@ echo "-------------"
 echo "PASSED TESTS:"
 echo "-------------"
 cat testProtos_summary.log | grep "PASS"
-if [[ ! -z "$result_fail" ]]; then
-  echo "Some of NUOPC app prototypes are failed! Exiting ..."
-  exit 1
-fi
 echo "::endgroup::"
+
+if [[ ! -z "$result_fail" ]]; then
+  echo "NUOPC_APP_PROTO_PASS=$(echo 'false')" >> $GITHUB_ENV
+else
+  echo "NUOPC_APP_PROTO_PASS=$(echo 'true')" >> $GITHUB_ENV
+fi

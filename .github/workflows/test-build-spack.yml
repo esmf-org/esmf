@@ -103,20 +103,20 @@ jobs:
         scripts/install_oneapi.sh -c ${{ matrix.compiler }}
 
     # concretize test environment 
-    - name: Concretize Spack Environment Using YAML Specification
-      run: |
-        ${{ github.workspace }}/.github/workflows/scripts/spack_concretize.sh \
-          -a x86_64 \
-          -c ${{ matrix.compiler }} \
-          -d ${{ matrix.esmf }} \
-          -i ~/.spack-ci \
-          -r ${{ github.workspace }} 
+    #- name: Concretize Spack Environment Using YAML Specification
+    #  run: |
+    #    ${{ github.workspace }}/.github/workflows/scripts/spack_concretize.sh \
+    #      -a x86_64 \
+    #      -c ${{ matrix.compiler }} \
+    #      -d ${{ matrix.esmf }} \
+    #      -i ~/.spack-ci \
+    #      -r ${{ github.workspace }} 
 
     # install test environment
-    - name: Install ESMF with Spack 
-      run: |
-        ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
-          -r ${{ github.workspace }}
+    #- name: Install ESMF with Spack 
+    #  run: |
+    #    ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
+    #      -r ${{ github.workspace }}
 
     # checkout NUOPC app prototypes
     - name: Checkout NUOPC app prototypes
@@ -133,3 +133,29 @@ jobs:
           -c ${{ matrix.compiler }} \
           -r ${{ github.workspace }}/nuopc-app-prototypes \
           -s ~/.spack-ci
+
+    # compress run directory of NUOPC app prototypes
+    - name: Compress Run Directory
+      run: |
+        tar -cvf nuopc-app-prototypes.tar ${{ github.workspace }}/nuopc-app-prototypes
+        gzip nuopc-app-prototypes.tar
+
+    # push test results to artifacts
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: nuopc-app-prototypes.tar.gz 
+        path: ${{ github.workspace }}
+        retention-days: 5
+
+    # force to fail if there is any failed nuopc app prototypes
+    - name: Result of Baseline Check
+      run: |
+        if [[ "${{ env.NUOPC_APP_PROTO_PASS }}" == "false" ]]; then
+          echo "Some of NUOPC app prototypes are failed! Exiting ..."
+          exit 1
+        else
+          echo "All tests are passed."
+          exit 0
+        fi
+      shell: bash
