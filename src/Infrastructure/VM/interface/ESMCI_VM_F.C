@@ -566,10 +566,11 @@ extern "C" {
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
-  
-  void FTN_X(c_esmc_vmget)(ESMCI::VM **vm, int *localPet, int *currentSsiPe, 
+
+  void FTN_X(c_esmc_vmget)(ESMCI::VM **vm, int *localPet, int *currentSsiPe,
     int *petCount, int *peCount, int *ssiCount, int *ssiMinPetCount,
-    int *ssiMaxPetCount, int *ssiLocalPetCount, int *mpiCommunicator,
+    int *ssiMaxPetCount, int *ssiLocalPetCount, int *ssiLocalPet,
+    int *ssiLocalDevCount, int *mpiCommunicator,
     ESMC_Logical *pthreadsEnabledFlag, ESMC_Logical *openMPEnabledFlag,
     ESMC_Logical *ssiSharedMemoryEnabledFlag, int *rc){
 #undef  ESMC_METHOD
@@ -601,6 +602,10 @@ extern "C" {
       *ssiMaxPetCount = (*vm)->getSsiMaxPetCount();
     if (ESMC_NOT_PRESENT_FILTER(ssiLocalPetCount) != ESMC_NULL_POINTER)
       *ssiLocalPetCount = (*vm)->getSsiLocalPetCount();
+    if (ESMC_NOT_PRESENT_FILTER(ssiLocalPet) != ESMC_NULL_POINTER)
+      *ssiLocalPet = (*vm)->getSsiLocalPet();
+    if (ESMC_NOT_PRESENT_FILTER(ssiLocalDevCount) != ESMC_NULL_POINTER)
+      *ssiLocalDevCount = (*vm)->getSsiLocalDevCount();
     if (ESMC_NOT_PRESENT_FILTER(mpiCommunicator) != ESMC_NULL_POINTER){
       mpiCommTemp = (*vm)->getMpi_c();
 #ifdef ESMF_DONT_HAVE_MPI_COMM_C2F
@@ -628,6 +633,36 @@ extern "C" {
       else
         *ssiSharedMemoryEnabledFlag = ESMF_FALSE;
     }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_vmgetssilocaldevlist)(ESMCI::VM **vm,
+    ESMCI::InterArray<int> *ssiLocalDevListArg, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmgetssilocaldevlist()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    // access and transfer information
+    if (ssiLocalDevListArg->dimCount != 1){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+        "ssiLocalDevListArg must enter with one dimension",
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    int ssiLocalDevCount = ssiLocalDevListArg->extent[0];
+    if (ssiLocalDevCount != (*vm)->getSsiLocalDevCount()){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+        "ssiLocalDevListArg provide ssiLocalDevCount many elements",
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    int *ssiLocalDevList = ssiLocalDevListArg->array;
+    memcpy(ssiLocalDevList, (*vm)->getSsiLocalDevList(),
+      ssiLocalDevCount * sizeof(int));
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
@@ -1170,6 +1205,33 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
+  void FTN_X(c_esmc_vmsetenv)(char *name, char *value, int *rc,
+    ESMCI_FortranStrLenArg name_l, ESMCI_FortranStrLenArg value_l){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmsetenv()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    try{
+      std::string nameStr(name, name_l);
+      std::string valueStr(value, value_l);
+      ESMCI::VM::setenv(nameStr.c_str(), valueStr.c_str());
+    }catch(int localrc){
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc))
+        return; // bail out
+    }catch(std::exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return; // bail out
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception", 
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
   void FTN_X(c_esmc_vmfinalize)(ESMC_Logical *keepMpiFlag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmfinalize()"
@@ -1245,7 +1307,8 @@ extern "C" {
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
   void FTN_X(c_esmc_vmplanconstruct)(ESMCI::VMPlan **ptr, ESMCI::VM **vm,
-    int *npetlist, int *petlist, ESMC_ContextFlag *contextflag, int *rc){
+    int *npetlist, int *petlist, int *ndevlist, int *devlist,
+    ESMC_ContextFlag *contextflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmplanconstruct()"
     // Initialize return code; assume routine not implemented
@@ -1259,7 +1322,12 @@ extern "C" {
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return;
     }
-    (*ptr) = new ESMCI::VMPlan;
+    if (*ndevlist > 0){
+      int localrc = ESMCI::VMK::checkDevList(devlist, *ndevlist);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+    }
+    (*ptr) = new ESMCI::VMPlan(*ndevlist, devlist);
     if (*contextflag==ESMF_CHILD_IN_PARENT_VM)
       (*ptr)->vmkplan_useparentvm(**vm);
     else if (*npetlist > 0){

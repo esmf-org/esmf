@@ -150,6 +150,7 @@ end function my_xor
                  regridmethod, &
                  lineType, &
                  normType, &
+                 vectorRegrid, &
                  polemethod, regridPoleNPnts, &
                  hasStatusArray, &
                  statusArray, &
@@ -169,36 +170,37 @@ end function my_xor
                  rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Mesh), intent(inout)         :: srcMesh
-      type(ESMF_Array), intent(inout)        :: srcArray
-      type(ESMF_PointList), intent(inout)    :: srcPointList
-      logical, intent(in)                    :: src_pl_used
-      type(ESMF_Mesh), intent(inout)         :: dstMesh
-      type(ESMF_Array), intent(inout)        :: dstArray
-      type(ESMF_PointList), intent(inout)    :: dstPointList
-      logical, intent(in)                    :: dst_pl_used
-      type(ESMF_RegridMethod_Flag), intent(in)    :: regridmethod
-      type(ESMF_LineType_Flag), intent(in)    :: lineType
-      type(ESMF_NormType_Flag), intent(in)    :: normType
-      type(ESMF_PoleMethod_Flag), intent(in)      :: polemethod
-      integer, intent(in)                    :: regridPoleNPnts
-      type(ESMF_ExtrapMethod_Flag),   intent(in) :: extrapMethod
-      integer, intent(in)                    :: extrapNumSrcPnts
-      real(ESMF_KIND_R8)                     :: extrapDistExponent
-      integer, intent(in)                    :: extrapNumLevels
-      integer, intent(in)                    :: extrapNumInputLevels
-      type(ESMF_UnmappedAction_Flag), intent(in), optional :: unmappedaction
-      logical, intent(in)                              :: ignoreDegenerate
+      type(ESMF_Mesh), intent(inout)                         :: srcMesh
+      type(ESMF_Array), intent(inout)                        :: srcArray
+      type(ESMF_PointList), intent(inout)                    :: srcPointList
+      logical, intent(in)                                    :: src_pl_used
+      type(ESMF_Mesh), intent(inout)                         :: dstMesh
+      type(ESMF_Array), intent(inout)                        :: dstArray
+      type(ESMF_PointList), intent(inout)                    :: dstPointList
+      logical, intent(in)                                    :: dst_pl_used
+      type(ESMF_RegridMethod_Flag), intent(in)               :: regridmethod
+      type(ESMF_LineType_Flag), intent(in)                   :: lineType
+      type(ESMF_NormType_Flag), intent(in)                   :: normType
+      logical, intent(in)                                    :: vectorRegrid
+      type(ESMF_PoleMethod_Flag), intent(in)                 :: polemethod
+      integer, intent(in)                                    :: regridPoleNPnts
+      type(ESMF_ExtrapMethod_Flag),   intent(in)             :: extrapMethod
+      integer, intent(in)                                    :: extrapNumSrcPnts
+      real(ESMF_KIND_R8)                                     :: extrapDistExponent
+      integer, intent(in)                                    :: extrapNumLevels
+      integer, intent(in)                                    :: extrapNumInputLevels
+      type(ESMF_UnmappedAction_Flag), intent(in), optional   :: unmappedaction
+      logical, intent(in)                                    :: ignoreDegenerate
       integer,                       intent(inout), optional :: srcTermProcessing
       integer,                       intent(inout), optional :: pipelineDepth
-      type(ESMF_RouteHandle),  intent(inout), optional :: routehandle
-      integer(ESMF_KIND_I4), pointer, optional         :: indices(:,:)
-      real(ESMF_KIND_R8), pointer, optional            :: weights(:)
-      integer(ESMF_KIND_I4),       pointer, optional   :: unmappedDstList(:)
-      logical                     :: hasStatusArray
-      type(ESMF_Array)            :: statusArray
-      logical :: checkFlag
-      integer,                  intent(  out), optional :: rc
+      type(ESMF_RouteHandle),  intent(inout), optional       :: routehandle
+      integer(ESMF_KIND_I4), pointer, optional               :: indices(:,:)
+      real(ESMF_KIND_R8), pointer, optional                  :: weights(:)
+      integer(ESMF_KIND_I4),       pointer, optional         :: unmappedDstList(:)
+      logical                                                :: hasStatusArray
+      type(ESMF_Array)                                       :: statusArray
+      logical                                                :: checkFlag
+      integer,                  intent(  out), optional      :: rc
 !
 ! !DESCRIPTION:
  !     The arguments are:
@@ -247,7 +249,7 @@ end function my_xor
        integer :: localIgnoreDegenerate
        integer :: src_pl_used_int, dst_pl_used_int
        integer ::  has_statusArrayInt
-       integer :: checkFlagInt
+       integer :: checkFlagInt, vectorRegridInt
 
 
        ! Logic to determine if valid optional args are passed.  
@@ -342,12 +344,17 @@ end function my_xor
        checkFlagInt=0
        if (checkFlag) checkFlagInt=1
 
+       ! Covert vectorRegrid to int
+       vectorRegridInt=0
+       if (vectorRegrid) vectorRegridInt=1
+
         ! Call through to the C++ object that does the work
         call c_ESMC_regrid_create(srcMesh%this, srcArray, srcPointList, src_pl_used_int, &
                    dstMesh%this, dstArray, dstPointList, dst_pl_used_int, &
                    regridmethod,  &
                    lineType, &
                    normType, &
+                   vectorRegridInt, & 
                    polemethod, regridPoleNPnts, &    
                    extrapMethod, &
                    extrapNumSrcPnts, &

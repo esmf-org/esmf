@@ -4,10 +4,10 @@ name: cmake_ubuntu-latest
 on:
   push:
     branches:
-      - master
+      - mainnot
   pull_request:
     branches:
-      - master
+      - mainnot
 
 jobs:
   build:
@@ -17,10 +17,10 @@ jobs:
     env:
       CC: mpicc
       FC: mpifort
-      CPPFLAGS: "-I/usr/include -I/usr/local/include -I/home/runner/pnetcdf/include"
-      LDFLAGS: "-L/home/runner/pnetcdf/lib"
-      LD_LIBRARY_PATH: "/home/runner/pnetcdf/lib"
-      PNETCDF_VERSION: 1.12.3
+      CPPFLAGS: "-I/usr/include -I/usr/local/include -I${GITHUB_WORKSPACE}/pnetcdf/include"
+      LDFLAGS: "-L${GITHUB_WORKSPACE}/pnetcdf/lib -L/usr/lib"
+      LD_LIBRARY_PATH: "${GITHUB_WORKSPACE}/pnetcdf/lib:/usr/lib"
+      PNETCDF_VERSION: checkpoint.1.12.3
       FCFLAGS: "-fallow-argument-mismatch"
     steps:
       - uses: actions/checkout@v3
@@ -41,28 +41,25 @@ jobs:
           path: ~/pnetcdf
           key: pnetcdf-${{ runner.os }}-${{ env.PNETCDF_VERSION }}
 
-      - name: build-pnetcdf
+      - name: Build PNetCDF
         if: steps.cache-pnetcdf.outputs.cache-hit != 'true'
-        run: |
-          set -x
-          wget https://parallel-netcdf.github.io/Release/pnetcdf-${{ env.PNETCDF_VERSION }}.tar.gz &> /dev/null
-          tar -xzvf pnetcdf-${{ env.PNETCDF_VERSION }}.tar.gz
-          pushd pnetcdf-${{ env.PNETCDF_VERSION }}
-          ./configure --prefix=/home/runner/pnetcdf --enable-shared --disable-cxx
-          make
-          sudo make install
-          popd
+        uses: ./.github/actions/buildpnetcdf
+        with:
+          pnetcdf_version: ${{ env.PNETCDF_VERSION }}
+          install_prefix: $HOME/pnetcdf
 
       - name: cmake build
+        uses: ./.github/actions/parallelio_cmake
+        with:
+          parallelio_version: ${{ env.GITHUB_SHA }}
+          pnetcdf_include_dir: $GITHUB_WORKSPACE/pnetcdf/include
+          pnetcdf_library: $GITHUB_WORKSPACE/pnetcdf/lib/libpnetcdf.so
+          netcdf_include_dir: /usr/include
+          netcdf_library: /usr/lib/x86_64-linux-gnu/libnetcdf.so
+          install_prefix: $GITHUB_WORKSPACE/parallelio
+          with_mpiexec: /usr/bin/mpiexec --oversubscribe
+      - name: run tests
         run: |
-          set -x
-          mkdir build
-          cd build
-          cmake -Wno-dev -DPIO_ENABLE_NETCDF_INTEGRATION=OFF \
-          -DNetCDF_C_LIBRARY=/usr/lib/x86_64-linux-gnu/libnetcdf.so \
-          -DNetCDF_C_INCLUDE_DIR=/usr/include -DPnetCDF_PATH='/home/runner/pnetcdf' \
-          -DPIO_ENABLE_FORTRAN=OFF \
-          -DPIO_ENABLE_LOGGING=On -DPIO_ENABLE_TIMING=Off -DMPIEXEC_PREFLAGS="--oversubscribe" ..
-          make VERBOSE=1
+          pushd $GITHUB_WORKSPACE/parallelio-src
           make tests VERBOSE=1
           ctest -VV

@@ -105,7 +105,7 @@ module esmx_data
       line=__LINE__, &
       file=__FILE__, &
       rcToReturn=rc)) return
-    call ESMF_GridCompSetInternalState(xdata, is, rc=rc)
+    call ESMF_GridCompSetInternalState(xdata, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
     xstate => is%ptr
@@ -211,7 +211,7 @@ module esmx_data
 
     ! query component for internal state
     nullify(is%ptr)
-    call ESMF_GridCompGetInternalState(xdata, is, rc=rc)
+    call ESMF_GridCompGetInternalState(xdata, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
     xstate => is%ptr
@@ -275,7 +275,7 @@ module esmx_data
 
     ! query component for internal state
     nullify(is%ptr)
-    call ESMF_GridCompGetInternalState(xdata, is, rc=rc)
+    call ESMF_GridCompGetInternalState(xdata, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
     xstate => is%ptr
@@ -354,7 +354,7 @@ module esmx_data
 
     ! query component for internal state
     nullify(is%ptr)
-    call ESMF_GridCompGetInternalState(xdata, is, rc=rc)
+    call ESMF_GridCompGetInternalState(xdata, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
     xstate => is%ptr
@@ -431,7 +431,7 @@ module esmx_data
 
     ! query component for internal State
     nullify(is%ptr)
-    call ESMF_GridCompGetInternalState(xdata, is, rc=rc)
+    call ESMF_GridCompGetInternalState(xdata, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
     xstate => is%ptr
@@ -489,7 +489,7 @@ module esmx_data
 
     ! query component for internal state
     nullify(is%ptr)
-    call ESMF_GridCompGetInternalState(xdata, is, rc=rc)
+    call ESMF_GridCompGetInternalState(xdata, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
     xstate => is%ptr
@@ -602,7 +602,7 @@ module esmx_data
 
     ! query component for internal state
     nullify(is%ptr)
-    call ESMF_GridCompGetInternalState(xdata, is, rc=rc)
+    call ESMF_GridCompGetInternalState(xdata, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
     xstate => is%ptr

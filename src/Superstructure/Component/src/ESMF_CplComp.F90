@@ -269,7 +269,7 @@ contains
 ! !IROUTINE:  ESMF_CplCompEQ - Compare two CplComps for equality
 !
 ! !INTERFACE:
-  function ESMF_CplCompEQ(cplcomp1, cplcomp2)
+  impure elemental function ESMF_CplCompEQ(cplcomp1, cplcomp2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_CplCompEQ
@@ -320,7 +320,7 @@ contains
 ! !IROUTINE:  ESMF_CplCompNE - Compare two CplComps for non-equality
 !
 ! !INTERFACE:
-  function ESMF_CplCompNE(cplcomp1, cplcomp2)
+  impure elemental function ESMF_CplCompNE(cplcomp1, cplcomp2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_CplCompNE
@@ -358,7 +358,7 @@ contains
 !
 ! !INTERFACE:
   recursive function ESMF_CplCompCreate(keywordEnforcer, config, configFile, &
-    clock, petList, contextflag, name, rc)
+    clock, petList, devList, contextflag, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_CplComp) :: ESMF_CplCompCreate
@@ -369,6 +369,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),        intent(in),  optional :: configFile
     type(ESMF_Clock),        intent(in),  optional :: clock
     integer,                 intent(in),  optional :: petList(:)
+    integer,                 intent(in),  optional :: devList(:)
     type(ESMF_Context_Flag), intent(in),  optional :: contextflag
     character(len=*),        intent(in),  optional :: name
     integer,                 intent(out), optional :: rc
@@ -376,6 +377,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.6.0] Added argument {\tt devList} to support management of accelerator
+!   devices.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -419,6 +425,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   parent {\tt PET}s are given to the child component. The order of
 !   PETs in {\tt petList} determines how the child local PETs map back to
 !   the parent PETs.
+! \item[{[devList]}]
+!   List of accelerator devices global ids {\tt DEV}s to be associated with the
+!   created child component. If {\tt devList} is not specified, or is empty,
+!   no devices are associated with the component.
 ! \item[{[contextflag]}]
 !   Specify the component's VM context. The default context is
 !   {\tt ESMF\_CONTEXT\_OWN\_VM}. See section \ref{const:contextflag} for a
@@ -456,7 +466,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! call Comp method
     call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
       configFile=configFile, config=config, clock=clock, petList=petList, &
-      contextflag=contextflag, rc=localrc)
+      devList=devList, contextflag=contextflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) then

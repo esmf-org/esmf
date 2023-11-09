@@ -128,12 +128,13 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()
-  subroutine ESMF_ArrayGetDefault(array, keywordEnforcer, arrayspec, typekind, &
+subroutine ESMF_ArrayGetDefault(array, keywordEnforcer, arrayspec, typekind, &
     rank, localarrayList, indexflag, distgridToArrayMap, &
     distgridToPackedArrayMap, arrayToDistGridMap, undistLBound, &
     undistUBound, exclusiveLBound, exclusiveUBound, computationalLBound, &
     computationalUBound, totalLBound, totalUBound, computationalLWidth, &
-    computationalUWidth, totalLWidth, totalUWidth, distgrid, dimCount, &
+    computationalUWidth, totalLWidth, totalUWidth, distgrid, &
+    dimCount,  undistDimCount, replicatedDimCount, &
     tileCount, minIndexPTile, maxIndexPTile, deToTileMap, indexCountPDe, &
     delayout, deCount, localDeCount, ssiLocalDeCount, localDeToDeMap, &
     localDeList, &    ! DEPRECATED ARGUMENT
@@ -164,6 +165,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,               target, intent(out), optional :: totalUWidth(:,:)
     type(ESMF_DistGrid),           intent(out), optional :: distgrid
     integer,                       intent(out), optional :: dimCount
+    integer,                       intent(out), optional :: undistDimCount
+    integer,                       intent(out), optional :: replicatedDimCount
     integer,                       intent(out), optional :: tileCount
     integer,                       intent(out), optional :: minIndexPTile(:,:)
     integer,                       intent(out), optional :: maxIndexPTile(:,:)
@@ -197,6 +200,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[8.5.0] Added argument {\tt isESMFAllocated} to support user query of
 !              whether ESMF or user is responsible for the data allocation
 !              referenced by this object.
+! \item[8.6.0] Added argument {\tt undistDimCount} to support direct user
+!              query of the number of undistributed dimensions in the Array
+!              object.\newline
+!              Added argument {\tt replicatedDimCount} to support direct user
+!              query of the number of replicated dimensions in the Array
+!              object.
 ! \end{description}
 ! \end{itemize}
 !         
@@ -314,6 +323,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Upon return this holds the associated {\tt ESMF\_DistGrid} object.
 !   \item[{[dimCount]}]
 !     Number of dimensions (rank) of {\tt distgrid}.
+!   \item[{[undistDimCount]}]
+!     Number of undistributed dimensions in the Array. (See
+!     Section~\ref{sec:array:usage:undistributed_dims} for an explanation
+!     of undistributed Array dimensions.)
+!   \item[{[replicatedDimCount]}]
+!     Number of replicated dimensions in the Array. (See
+!     Section~\ref{sec:array:usage:replicated_dims} for an explanation of
+!     replicated Array dimensions.)
 !   \item[{[tileCount]}]
 !     Number of tiles in {\tt distgrid}.
 !   \item[{[minIndexPTile]}]
@@ -462,7 +479,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayGet(array, opt_typekind, opt_rank, opt_ssiLocalDeCount, &
+    call c_ESMC_ArrayGet(array, opt_typekind, opt_rank, &
+      undistDimCount, replicatedDimCount, opt_ssiLocalDeCount, &
       opt_localarrayPtrList, len_localarrayPtrList, localDeToDeMapArg, &
       opt_distgrid, opt_delayout, indexflag, &
       distgridToArrayMapArg, distgridToPackedArrayMapArg, &

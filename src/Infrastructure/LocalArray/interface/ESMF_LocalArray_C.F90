@@ -30,7 +30,7 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_localarrayf90allocate"
-subroutine f_esmf_localarrayf90allocate(array, rank, typekind, counts, &
+subroutine f_esmf_localarrayf90allocate(arrayPtr, rank, typekind, counts, &
   lbounds, ubounds, rc)
   use ESMF_UtilTypesMod     ! ESMF base class
   use ESMF_BaseMod          ! ESMF base class
@@ -39,13 +39,18 @@ subroutine f_esmf_localarrayf90allocate(array, rank, typekind, counts, &
   
   implicit none
 
-  type(ESMF_LocalArray) :: array
+  type(ESMF_Pointer) :: arrayPtr
   integer :: rank
   type(ESMF_TypeKind_Flag) :: typekind
   integer :: counts(rank)
   integer :: lbounds(rank)
   integer :: ubounds(rank)
   integer :: rc
+
+  type(ESMF_LocalArray) :: array
+
+  array%this = arrayPtr
+  ESMF_INIT_SET_CREATED(array)
 
   ! Beware - these args are not in the same order
   call ESMF_LocalArrConstrF90Ptr(array, counts, typekind, rank, &
@@ -53,13 +58,13 @@ subroutine f_esmf_localarrayf90allocate(array, rank, typekind, counts, &
   if (ESMF_LogFoundError(rcToCheck=rc, &
     ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT)) return
-    
+
 end subroutine f_esmf_localarrayf90allocate
 
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_localarrayf90deallocate"
-subroutine f_esmf_localarrayf90deallocate(array, rank, typekind, rc)
+subroutine f_esmf_localarrayf90deallocate(arrayPtr, rank, typekind, rc)
   use ESMF_UtilTypesMod     ! ESMF base class
   use ESMF_BaseMod          ! ESMF base class
   use ESMF_LogErrMod        ! ESMF error logging
@@ -67,22 +72,27 @@ subroutine f_esmf_localarrayf90deallocate(array, rank, typekind, rc)
 
   implicit none
 
-  type(ESMF_LocalArray) :: array
+  type(ESMF_Pointer) :: arrayPtr
   integer :: rank
   type(ESMF_TypeKind_Flag) :: typekind
   integer :: rc
+
+  type(ESMF_LocalArray) :: array
+
+  array%this = arrayPtr
+  ESMF_INIT_SET_CREATED(array)
 
   call ESMF_LocalArrayF90Deallocate(array, typekind, rank, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, &
     ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT)) return
-    
+
 end subroutine f_esmf_localarrayf90deallocate
 
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_localarrayadjust"
-subroutine f_esmf_localarrayadjust(array, rank, typekind, counts, &
+subroutine f_esmf_localarrayadjust(arrayPtr, rank, typekind, counts, &
   lbounds, ubounds, rc)
   use ESMF_UtilTypesMod     ! ESMF base class
   use ESMF_BaseMod          ! ESMF base class
@@ -91,7 +101,7 @@ subroutine f_esmf_localarrayadjust(array, rank, typekind, counts, &
   
   implicit none
 
-  type(ESMF_LocalArray) :: array
+  type(ESMF_Pointer) :: arrayPtr
   integer :: rank
   type(ESMF_TypeKind_Flag) :: typekind
   integer :: counts(rank)
@@ -99,18 +109,54 @@ subroutine f_esmf_localarrayadjust(array, rank, typekind, counts, &
   integer :: ubounds(rank)
   integer :: rc
 
+  type(ESMF_LocalArray) :: array
+
+  array%this = arrayPtr
+  ESMF_INIT_SET_CREATED(array)
+
   call ESMF_LocalArrayAdjust(array, counts, typekind, rank, &
     lbounds, ubounds,rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, &
     ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT)) return
-    
+
 end subroutine f_esmf_localarrayadjust
 
 
 #undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_localarrayslice"
+subroutine f_esmf_localarrayslice(arrayPtr, trailingTensorSlice, rankIn, rankOut, rc)
+  use ESMF_UtilTypesMod     ! ESMF base class
+  use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LogErrMod        ! ESMF error logging
+  use ESMF_LocalArrayMod
+  use ESMF_F90InterfaceMod
+
+  implicit none
+
+  type(ESMF_Pointer) :: arrayPtr
+  type(ESMF_InterArray) :: trailingTensorSlice
+  integer :: rankIn, rankOut
+  integer :: rc
+
+  type(ESMF_LocalArray) :: array
+
+  array%this = arrayPtr         ! the incoming LocalArray
+  ESMF_INIT_SET_CREATED(array)
+
+  call ESMF_LocalArraySlice(array, trailingTensorSlice, rankIn, rankOut, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, &
+    ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT)) return
+
+  arrayPtr = array%this         ! the outgoing LocalArray
+
+end subroutine f_esmf_localarrayslice
+
+
+#undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_localarraycopyf90ptr"
-subroutine f_esmf_localarraycopyf90ptr(arrayInArg, arrayOutArg, datacopyflag, rc)
+subroutine f_esmf_localarraycopyf90ptr(arrayInPtr, arrayOutPtr, datacopyflag, rc)
   use ESMF_UtilTypesMod     ! ESMF base class
   use ESMF_BaseMod          ! ESMF base class
   use ESMF_LogErrMod        ! ESMF error logging
@@ -118,8 +164,8 @@ subroutine f_esmf_localarraycopyf90ptr(arrayInArg, arrayOutArg, datacopyflag, rc
   
   implicit none
 
-  type(ESMF_LocalArray)     :: arrayInArg
-  type(ESMF_LocalArray)     :: arrayOutArg
+  type(ESMF_Pointer)        :: arrayInPtr
+  type(ESMF_Pointer)        :: arrayOutPtr
   type(ESMF_DataCopy_Flag)  :: datacopyflag
   integer                   :: rc
   
@@ -133,12 +179,11 @@ subroutine f_esmf_localarraycopyf90ptr(arrayInArg, arrayOutArg, datacopyflag, rc
   ! F90 variables are necessary to work on the F90 side and this glue code will
   ! copy the "this" member in the derived type which is the part that actually
   ! needs to be passed between C and F90.
-  
-  arrayIn%this = arrayInArg%this    ! only access "this" member
-  ! need to set the valid init code 
+
+  arrayIn%this = arrayInPtr
   ESMF_INIT_SET_CREATED(arrayIn)
-  
-  arrayOut%this = arrayOutArg%this  ! only access "this" member
+
+  arrayOut%this = arrayOutPtr
 
   ! do the actual copy, allocating the required memory
   call ESMF_LocalArrayCopyF90Ptr(arrayIn, arrayOut, datacopyflag=datacopyflag, &
@@ -152,7 +197,7 @@ end subroutine f_esmf_localarraycopyf90ptr
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_localarrayctof90"
-subroutine f_esmf_localarrayctof90(array, cptr, rank, typekind, counts, &
+subroutine f_esmf_localarrayctof90(arrayPtr, cptr, rank, typekind, counts, &
   lbounds, ubounds, rc)
   use ESMF_UtilTypesMod     ! ESMF base class
   use ESMF_BaseMod          ! ESMF base class
@@ -162,7 +207,7 @@ subroutine f_esmf_localarrayctof90(array, cptr, rank, typekind, counts, &
   
   implicit none
 
-  type(ESMF_LocalArray)     :: array
+  type(ESMF_Pointer)        :: arrayPtr
   type(C_PTR)               :: cptr
   integer                   :: rank
   type(ESMF_TypeKind_Flag)  :: typekind
@@ -171,11 +216,16 @@ subroutine f_esmf_localarrayctof90(array, cptr, rank, typekind, counts, &
   integer                   :: ubounds(rank)
   integer                   :: rc
 
+  type(ESMF_LocalArray)     :: array
+
+  array%this = arrayPtr
+  ESMF_INIT_SET_CREATED(array)
+
   ! Beware - these args are not in the same order
   call ESMF_LocalArrCToF90Ptr(array, cptr, counts, typekind, rank, &
     lbounds, ubounds, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, &
     ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT)) return
-    
+
 end subroutine f_esmf_localarrayctof90

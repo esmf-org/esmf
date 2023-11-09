@@ -70,6 +70,7 @@
 #include <cmath>
 #include <vector>
 #include <set>
+#include <algorithm>
 #ifdef __sun
 #include <signal.h>
 #else
@@ -88,6 +89,14 @@ using namespace std;
 
 #include "ESMCI_AccInfo.h"
 #include "ESMCI_LogErr.h"
+
+#ifndef ESMF_NO_OPENACC
+#include <openacc.h>
+#endif
+
+#ifdef ESMF_NVML
+#include <nvml.h>
+#endif
 
 // macros used within this source file
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -119,6 +128,10 @@ typedef DWORD pid_t;
 #define VM_MPI_THREAD_LEVEL MPI_THREAD_MULTIPLE
 #endif
 
+// Utility macros to get a macro value into a string
+#define XSTR(X) STR(X)
+#define STR(X) #X
+
 namespace ESMCI {
 
 // Definition of class static data members
@@ -129,9 +142,12 @@ int VMK::mpi_init_outside_esmf;
 int VMK::pre_mpi_init = 0;
 int VMK::nssiid;
 int VMK::ncores;
+int VMK::ndevs;
+int VMK::ndevsSSI;
 int *VMK::cpuid;
 int *VMK::ssiid;
 int *VMK::ssipe;
+int *VMK::ssidevs;
 double VMK::wtime0;
 // Static data members to support command line arguments
 int VMK::argc;
@@ -328,18 +344,6 @@ void VMK::obtain_args(){
 }
 
 
-bool VMK::isSsiSharedMemoryEnabled(){
-  //TODO: For now had to implement this method in the source file, because
-  //TODO: of the way the ESMF_NO_MPI3 macro is being determined.
-  //TODO: Move it into the VMKernel header once includes are fixed.
-#ifdef ESMF_NO_MPI3
-  return false;
-#else
-  return true;
-#endif
-}
-
-    
 void VMK::InitPreMPI(){
 #if !defined (ESMF_NO_SIGNALS)
   // initialize signal handling -> this MUST happen before MPI_Init is called!!
@@ -373,6 +377,13 @@ void VMK::set(bool globalResourceControl){
 #ifndef ESMF_NO_OPENMP
     omp_set_num_threads(1);
 #endif
+#ifndef ESMF_NO_OPENACC
+#ifdef __NVCOMPILER
+    // under NVHPC, multi-cpu-core threading (for OpenACC and standard language
+    // constructs) is implemented based on OpenACC: NVHPC extended OpenACC API
+    acc_set_num_cores(1);
+#endif
+#endif
   }
 #endif
 #endif
@@ -380,6 +391,8 @@ void VMK::set(bool globalResourceControl){
 
 
 void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::init()"
   // initialize the physical machine and a default (all MPI) virtual machine
   // obtain command line arguments and store in the VM class
   argc = 0; // reset
@@ -413,9 +426,6 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
     // query the MPI thread support level as set by external MPI initialization
     MPI_Query_thread(&mpi_thread_level);
   }
-  // initialize the MPI tool interface
-  int provided_thread_level;
-  MPI_T_init_thread(VM_MPI_THREAD_LEVEL, &provided_thread_level);
 #else
   // MPIUNI simply set the thread level
   mpi_thread_level = MPI_THREAD_SERIALIZED;
@@ -453,10 +463,15 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   MPI_Group_free(&mpi_g);
   // ... and copy the Comm object into the class static default variable...
   default_mpi_c = mpi_c;
-#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
+#if (MPI_VERSION >= 3)
   // set up communicator across single-system-images SSIs
-  MPI_Comm_split_type(mpi_c, MPI_COMM_TYPE_SHARED, 0, MPI_INFO_NULL, 
+  MPI_Comm_split_type(mpi_c, MPI_COMM_TYPE_SHARED, 0, MPI_INFO_NULL,
     &mpi_c_ssi);
+  // set up communicator across root pets of each SSI
+  int color;
+  MPI_Comm_rank(mpi_c_ssi, &color);
+  if (color>0) color = MPI_UNDEFINED; // only root PETs on each SSI
+  MPI_Comm_split(mpi_c, color, 0, &mpi_c_ssi_roots);
 #endif
   // initialize the shared memory variables
   pth_finish_count = NULL;
@@ -545,6 +560,7 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   ssiMinPetCount=1;
   ssiMaxPetCount=1;
   ssiLocalPetCount=1;
+  ssiLocalPet=0;
   ssiLocalPetList = new int[1];
   ssiLocalPetList[0] = mypet;
 #else
@@ -598,6 +614,7 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   for (int i=0; i<ncores; i++){
     if (ssiid[i]==localSsi){
       ssiLocalPetList[j] = i;
+      if (i == mypet) ssiLocalPet=j;
       ++j;
     }
   }
@@ -625,7 +642,86 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   MPI_Allgather(&num_adevices, 1, MPI_INTEGER,
                 nadevs, 1, MPI_INTEGER, mpi_c);
 #endif
-  // Creating large contiguous MPI data types
+  // device discovery
+  ndevsSSI = 0; // no devices by default.
+  bool ndevInit = false;
+#ifdef ESMF_NVML
+  // Have access to NVIDIA management library (NVML)
+  nvmlReturn_t nvlmRC;
+  nvlmRC = nvmlInit_v2();  // initialize NVML
+  if (nvlmRC == NVML_SUCCESS){
+    unsigned int nvmlDeviceCount;
+    nvmlDeviceGetCount_v2(&nvmlDeviceCount);
+    ndevsSSI = nvmlDeviceCount;
+    ndevInit = true;
+  }
+#endif
+#ifndef ESMF_NO_OPENACC
+  // Have access to OpenACC
+  int openaccDeviceCount;
+  openaccDeviceCount = acc_get_num_devices(acc_device_not_host);
+  if (ndevInit){
+    if (openaccDeviceCount != ndevsSSI){
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "OpenACC device count must match already determined device count!",
+        ESMC_CONTEXT, &localrc);
+      throw localrc;  // bail out with exception
+    }
+  }else{
+    ndevsSSI = openaccDeviceCount;
+    ndevInit = true;
+  }
+#endif
+#ifndef ESMF_NO_OPENMP
+#ifdef ESMF_OPENMP4
+  // Have access to OpenMP
+  int openmpDeviceCount;
+  openmpDeviceCount = omp_get_num_devices();
+  if (ndevInit){
+    if (openmpDeviceCount != ndevsSSI){
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "OpenMP device count must match already determined device count!",
+        ESMC_CONTEXT, &localrc);
+      throw localrc;  // bail out with exception
+    }
+  }else{
+    ndevsSSI = openmpDeviceCount;
+    ndevInit = true;
+  }
+#endif
+#endif
+  // Now that ndevsSSI is known on every PET, determine total number ndevs
+  if (mpi_c_ssi_roots != MPI_COMM_NULL)
+    MPI_Allreduce(&ndevsSSI, &ndevs, 1, MPI_INTEGER, MPI_SUM, mpi_c_ssi_roots);
+  if (mpi_c_ssi != MPI_COMM_NULL)
+    MPI_Bcast(&ndevs, 1, MPI_INTEGER, 0, mpi_c_ssi);
+  // Set up global device indices for the list of SSI local devices
+  ssidevs = new int[ndevsSSI];
+  if (mpi_c_ssi_roots != MPI_COMM_NULL){
+    // ssi roots figure out global labeling of ssi local devices
+    std::vector<int> ndevsOnSSI(ssiCount);
+    MPI_Allgather(&ndevsSSI, 1, MPI_INTEGER, &(ndevsOnSSI[0]), 1, MPI_INTEGER,
+      mpi_c_ssi_roots);
+    int devStart=0;
+    for (auto i=0; i<localSsi; i++)
+      devStart += ndevsOnSSI[i];
+    for (auto i=0; i<ndevsSSI; i++)
+      ssidevs[i] = devStart + i;
+  }
+  if (mpi_c_ssi != MPI_COMM_NULL){
+    // ssi roots broadcast locally constructed ssidevs list to PET on same SSI
+    MPI_Bcast(ssidevs, ndevsSSI, MPI_INTEGER, 0, mpi_c_ssi);
+  }
+  // Set the instance variables for devices for the global VM
+  devCount = ndevs;
+  ssiLocalDevCount = ndevsSSI;
+  ssiLocalDevList = new int[ssiLocalDevCount];
+  for (auto i=0; i<ssiLocalDevCount; i++)
+    ssiLocalDevList[i] = i;  // default each PET associated with all local devices
+  // Creating large contiguous MPI data types in support of large MPI messages
+  // within the 32-bit count limit of MPI version < 4.
   int byteCount=1;
   for (auto i=0; i<(signed)customType.size(); i++){
     byteCount *= 2;
@@ -638,6 +734,8 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
 
 
 void VMK::finalize(int finalizeMpi){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::finalize()"
   // finalize default (all MPI) virtual machine, deleting all its allocations
   epochFinal(); // close down epoch handling
   for (int k=0; k<100; k++)
@@ -673,6 +771,7 @@ void VMK::finalize(int finalizeMpi){
   delete [] cpuid;
   delete [] ssiid;
   delete [] ssipe;
+  delete [] ssidevs;
   delete [] lpid;
   delete [] pid;
   delete [] tid;
@@ -682,14 +781,17 @@ void VMK::finalize(int finalizeMpi){
     delete [] cid[i];
   delete [] cid;
   delete [] ssiLocalPetList;
-  // finalize the MPI tool interface
-  MPI_T_finalize();
+  delete [] ssiLocalDevList;
+#ifdef ESMF_NVML
+  // Have access to NVIDIA management library (NVML)
+  nvmlShutdown();  // shut down NVML
+#endif
   // conditionally finalize MPI
   int finalized;
   MPI_Finalized(&finalized);
   if (!finalized){
     MPI_Comm_free(&mpi_c);
-#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
+#if (MPI_VERSION >= 3)
     MPI_Comm_free(&mpi_c_ssi);
 #endif
     if (finalizeMpi)
@@ -729,10 +831,15 @@ struct SpawnArg{
   int **cid;
   MPI_Comm mpi_c;
   MPI_Comm mpi_c_ssi;
+  MPI_Comm mpi_c_ssi_roots;
   int mpi_c_freeflag;
   bool threadsflag;
   int openmphandling;
   int openmpnumthreads;
+  // device variables
+  int devCount;
+  int ssiLocalDevCount;
+  int *ssiLocalDevList;
   // shared memory variables
   esmf_pthread_mutex_t *pth_mutex2;
   esmf_pthread_mutex_t *pth_mutex;
@@ -747,10 +854,8 @@ struct SpawnArg{
   void *cargo;
 };
 
-    
+
 void VMK::abort(){
-  // finalize the MPI tool interface
-  MPI_T_finalize();
   // abort default (all MPI) virtual machine
   int finalized;
   MPI_Finalized(&finalized);
@@ -784,6 +889,13 @@ VMK::Affinities VMK::setAffinities(void *ssarg){
     if (sarg->openmpnumthreads>=0)
       numthreads = sarg->openmpnumthreads;
     omp_set_num_threads(numthreads);
+#ifndef ESMF_NO_OPENACC
+#ifdef __NVCOMPILER
+    // under NVHPC, multi-cpu-core threading (for OpenACC and standard language
+    // constructs) is implemented based on OpenACC: NVHPC extended OpenACC API
+    acc_set_num_cores(numthreads);
+#endif
+#endif
 #if !defined(ESMF_OS_Darwin) && !defined(ESMF_OS_Cygwin)
     if (sarg->openmphandling>1){
 #pragma omp parallel
@@ -870,13 +982,23 @@ void VMK::construct(void *ssarg){
   for (int i=0; i<npets; i++){
     if (ssiid[cid[i][0]]==ssiid[cid[mypet][0]]){
       ssiLocalPetList[j] = i;
+      if (i == mypet) ssiLocalPet=j;
       ++j;
     }
   }
   mpi_c = sarg->mpi_c;
-#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
-  mpi_c_ssi = sarg->mpi_c_ssi;
+#if (MPI_VERSION >= 3)
+  mpi_c_ssi       = sarg->mpi_c_ssi;
+  mpi_c_ssi_roots = sarg->mpi_c_ssi_roots;
+#else
+  mpi_c_ssi       = MPI_COMM_NULL;
+  mpi_c_ssi_roots = MPI_COMM_NULL;
 #endif
+
+  // device management
+  devCount = sarg->devCount;
+  ssiLocalDevCount = sarg->ssiLocalDevCount;
+  ssiLocalDevList = sarg->ssiLocalDevList;
 
   // pthread mutex control
   pth_mutex2 = sarg->pth_mutex2;
@@ -1561,8 +1683,8 @@ static void *vmk_block(void *arg){
 }
 
 
-void *VMK::startup(class VMKPlan *vmp, 
-  void *(fctp)(void *, void *), void *cargo, int *rc){
+void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
+  void *cargo, int *rc){
 #if (VERBOSITY > 9)
   vmp->vmkplan_print();
 #endif
@@ -1907,10 +2029,12 @@ void *VMK::startup(class VMKPlan *vmp,
   // current VMK makes that call, even if this process will not participate
   // in the new VMK...
   MPI_Comm new_mpi_c;
-#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
   MPI_Comm new_mpi_c_ssi;
-#endif
-  
+  MPI_Comm new_mpi_c_ssi_roots;
+  int devCount;
+  int ssiLocalDevCount;
+  int *ssiLocalDevList;
+
 #ifdef VM_MEMLOG_on
       VM::logMemInfo(std::string("VMK::startup():12.0"));
 #endif
@@ -1941,22 +2065,65 @@ void *VMK::startup(class VMKPlan *vmp,
           // store the communicator on this PET with info to free
           sarg[0].mpi_c = new_mpi_c;
           sarg[0].mpi_c_freeflag = 1; // responsible to free the communicator
-#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
+#if (MPI_VERSION >= 3)
           // set up communicator across single-system-images SSIs
-          MPI_Comm_split_type(vmp->mpi_c_part, MPI_COMM_TYPE_SHARED, 0, 
+          MPI_Comm_split_type(vmp->mpi_c_part, MPI_COMM_TYPE_SHARED, 0,
             MPI_INFO_NULL, &new_mpi_c_ssi);
-          sarg[0].mpi_c_ssi = new_mpi_c_ssi;
 #ifdef VM_SSISHMLOG_on
           {
             std::stringstream msg;
             int sz;
-            MPI_Comm_size(sarg[0].mpi_c_ssi, &sz);
+            MPI_Comm_size(new_mpi_c_ssi, &sz);
             msg << "VMK::startup()#" << __LINE__
               << " created mpi_c_ssi of size=" << sz;
             ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
+          // set up communicator across root pets of each SSI
+          int color;
+          MPI_Comm_rank(new_mpi_c_ssi, &color);
+          if (color>0) color = MPI_UNDEFINED; // only root PETs on each SSI
+          MPI_Comm_split(vmp->mpi_c_part, color, 0, &new_mpi_c_ssi_roots);
+#else
+          new_mpi_c_ssi = MPI_COMM_NULL;
+          new_mpi_c_ssi_roots = MPI_COMM_NULL;
 #endif
+          sarg[0].mpi_c_ssi = new_mpi_c_ssi;
+          sarg[0].mpi_c_ssi_roots = new_mpi_c_ssi_roots;
+          // device management
+          if (vmp->ndevlist > 0){
+            std::vector<int> devListVec(vmp->devlist,
+              vmp->devlist + vmp->ndevlist);
+            std::sort(devListVec.begin(), devListVec.end());
+            std::vector<int> ssiLocalDevListVec;
+            auto it=devListVec.begin();
+            for (auto i=0; i<VMK::ndevsSSI; i++){
+              // loop over DEVs on the local SSI
+              int gDev = VMK::ssidevs[i]; // global id of SSI local device
+              for (; (it!=devListVec.end()) && (*it<=gDev); ++it){
+                if (*it == gDev){
+                  // found matching entry in devListVec
+                  ssiLocalDevListVec.push_back(i);
+                }
+              }
+            }
+            ssiLocalDevCount = ssiLocalDevListVec.size();
+            ssiLocalDevList = new int[ssiLocalDevCount];
+            for (auto i=0; i<ssiLocalDevCount; i++)
+              ssiLocalDevList[i] = ssiLocalDevListVec[i];
+            if (new_mpi_c_ssi_roots != MPI_COMM_NULL)
+              MPI_Allreduce(&ssiLocalDevCount, &devCount, 1, MPI_INTEGER, MPI_SUM,
+                new_mpi_c_ssi_roots);
+            if (new_mpi_c_ssi != MPI_COMM_NULL)
+              MPI_Bcast(&devCount, 1, MPI_INTEGER, 0, new_mpi_c_ssi);
+          }else{
+            devCount = 0;
+            ssiLocalDevCount = 0;
+            ssiLocalDevList = NULL;
+          }
+          sarg[0].devCount = devCount;
+          sarg[0].ssiLocalDevCount = ssiLocalDevCount;
+          sarg[0].ssiLocalDevList = ssiLocalDevList;
         }else{
           // I am not the first under this lpid and must receive 
 #if (VERBOSITY > 9)
@@ -1964,8 +2131,9 @@ void *VMK::startup(class VMKPlan *vmp,
 #endif
           recv(&new_mpi_c, sizeof(MPI_Comm), foundfirstpet);
           sarg[0].mpi_c_freeflag = 0; // not responsible to free the communicat.
-#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
+#if (MPI_VERSION >= 3)
           recv(&new_mpi_c_ssi, sizeof(MPI_Comm), foundfirstpet);
+          recv(&new_mpi_c_ssi_roots, sizeof(MPI_Comm), foundfirstpet);
 #ifdef VM_SSISHMLOG_on
           {
             std::stringstream msg;
@@ -1978,6 +2146,9 @@ void *VMK::startup(class VMKPlan *vmp,
           }
 #endif
 #endif
+          recv(&devCount, sizeof(int), foundfirstpet);
+          recv(&ssiLocalDevCount, sizeof(int), foundfirstpet);
+          recv(ssiLocalDevList, devCount*sizeof(int), foundfirstpet);
         }
       }else if (mypet == foundfirstpet){
         // I am the master and must send the communicator
@@ -1985,8 +2156,9 @@ void *VMK::startup(class VMKPlan *vmp,
         printf("mypet %d sends new_mpi_c to pet %d\n", mypet, i);
 #endif
         send(&new_mpi_c, sizeof(MPI_Comm), i);
-#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
+#if (MPI_VERSION >= 3)
         send(&new_mpi_c_ssi, sizeof(MPI_Comm), i);
+        send(&new_mpi_c_ssi_roots, sizeof(MPI_Comm), i);
 #ifdef VM_SSISHMLOG_on
         {
           std::stringstream msg;
@@ -1999,11 +2171,14 @@ void *VMK::startup(class VMKPlan *vmp,
         }
 #endif
 #endif
+        send(&devCount, sizeof(int), i);
+        send(&ssiLocalDevCount, sizeof(int), i);
+        send(ssiLocalDevList, devCount*sizeof(int), i);
       }
     }
   }
   delete [] grouplist;
-  
+
 #if (VERBOSITY > 9)
   printf("now valid new_mpi_c exists\n");
 #endif
@@ -2199,8 +2374,9 @@ void *VMK::startup(class VMKPlan *vmp,
         sarg[i].cid[j][k] = new_cid[j][k];
     }
     sarg[i].mpi_c = new_mpi_c;
-#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
+#if (MPI_VERSION >= 3)
     sarg[i].mpi_c_ssi = new_mpi_c_ssi;
+    sarg[i].mpi_c_ssi_roots = new_mpi_c_ssi_roots;
 #ifdef VM_SSISHMLOG_on
     {
       std::stringstream msg;
@@ -2241,6 +2417,10 @@ void *VMK::startup(class VMKPlan *vmp,
     sarg[i].ipshmMutex = new_ipshmMutex;
     sarg[i].ipSetupMutex = new_ipSetupMutex;
     sarg[i].pref_intra_ssi = vmp->pref_intra_ssi;
+    // device management
+    sarg[i].devCount = devCount;
+    sarg[i].ssiLocalDevCount = ssiLocalDevCount;
+    sarg[i].ssiLocalDevList = ssiLocalDevList;
     // cargo
     sarg[i].cargo = cargo;
     // threading stuff
@@ -2586,7 +2766,7 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
     if (sarg[0].mpi_c != MPI_COMM_NULL){
       MPI_Comm_free(&(sarg[0].mpi_c));
     }
-#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
+#if (MPI_VERSION >= 3)
     if (sarg[0].mpi_c_ssi != MPI_COMM_NULL){
 #ifdef VM_SSISHMLOG_on
       {
@@ -2599,7 +2779,6 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
         }else{
           msg << "VMK::shutdown()#" << __LINE__
             << " about to call MPI_Comm_free() on mpi_c_ssi == MPI_COMM_NULL";
-          
         }
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
@@ -2607,7 +2786,12 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
 #endif
       MPI_Comm_free(&(sarg[0].mpi_c_ssi));
     }
+    if (sarg[0].mpi_c_ssi_roots != MPI_COMM_NULL){
+      MPI_Comm_free(&(sarg[0].mpi_c_ssi_roots));
+    }
 #endif
+    if (sarg[0].ssiLocalDevList)
+      delete [] sarg[0].ssiLocalDevList;
   }
   // done holding info in SpawnArg array -> delete now
   delete [] sarg;
@@ -2658,6 +2842,49 @@ int VMK::checkPetList(int *petList, int count){
 }
 
 
+int VMK::checkDevList(int *devList, int count){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::checkDevList()"
+  int rc;
+  if (!devList){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "devList must not be NULL.",
+      ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  std::vector<int> devListVec(devList, devList + count);
+  std::set<int> devListSet(devListVec.begin(), devListVec.end());
+  if (devListSet.size() != devListVec.size()){
+    // there must be at least one duplicate element in devList
+    auto it=devListVec.begin();
+    for (int i=0; i<count/10; i++){
+      std::stringstream msg;
+      msg << "{ ";
+      for (int j=0; j<9; j++){
+        msg << *it << ", ";
+        ++it;
+      }
+      msg << *it << "}";
+      ++it;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_ERROR);
+    }
+    std::stringstream msg;
+    msg << "{ ";
+    for (int j=0; j<count%10-1; j++){
+      msg << *it << ", ";
+      ++it;
+    }
+    msg << *it << "}";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_ERROR);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_DUP,
+      "There appear to be duplicate DEVs in the devList.",
+      ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  return ESMF_SUCCESS;
+}
+
+
 void VMK::print()const{
   // print info about the VMK object
   printf("--- VMK::print() start ---\n");
@@ -2699,8 +2926,30 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
   msg << prefix << "vm located at: " << this;
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
-  msg << prefix << "petCount=" << getPetCount() << " localPet=" << getLocalPet()
-    << " mypthid=" << mypthid << " currentSsiPe=" << getCurrentSsiPe();
+  msg << prefix << "ssiCount=" << getSsiCount()
+    << " localSsi=" << ssiid[cid[mypet][0]];
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "devCount=" << getDevCount()
+    << " ssiLocalDevCount=" << getSsiLocalDevCount();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  if (getSsiLocalDevCount() > 0){
+    msg << prefix;
+    for (auto i=0; i<getSsiLocalDevCount(); i++)
+      msg << " ssiLocalDevList[" << i << "]=" << ssiLocalDevList[i]
+        << "->" << ssidevs[ssiLocalDevList[i]];
+    ESMC_LogDefault.Write(msg.str(), msgType);
+  }
+  msg.str("");  // clear
+  msg << prefix << "petCount=" << getPetCount()
+    << " localPet=" << getLocalPet()
+    << " mypthid=" << mypthid
+    << " ssiLocalPet=" << getSsiLocalPet()
+    << " currentSsiPe=" << getCurrentSsiPe();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "mpionly=" << mpionly << " threadsflag=" << threadsflag;
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
 #ifndef ESMF_NO_PTHREADS
@@ -2710,7 +2959,7 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
   pthread_getaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
   msg << prefix << "Current system level affinity pinning for local PET:";
   ESMC_LogDefault.Write(msg.str(), msgType);
-  for (int i=0; i<CPU_SETSIZE; i++){
+  for (auto i=0; i<CPU_SETSIZE; i++){
     if (CPU_ISSET(i, &cpuset)){
       msg.str("");  // clear
       msg << prefix << " SSIPE=" << i;
@@ -2726,24 +2975,93 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
     << omp_get_max_threads();
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
+  msg << prefix << "Current system level OMP_NUM_PROCS setting for local PET: "
+    << omp_get_num_procs();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+#ifdef ESMF_OPENMP4
+  msg << prefix << "Current system level OMP_NUM_DEVICES setting for local PET: "
+    << omp_get_num_devices();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "Current system level OMP_DEVICE_NUM setting for local PET: "
+    << omp_get_device_num();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "Current system level OMP_DEFAULT_DEVICE setting for local PET: "
+    << omp_get_default_device();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
 #endif
-  msg << prefix << "ssiCount=" << getSsiCount()
-    << " localSsi=" << ssiid[cid[mypet][0]];
+#endif
+#ifndef ESMF_NO_OPENACC
+  // output OpenACC info
+#ifdef __NVCOMPILER
+  // under NVHPC, multi-cpu-core threading (for OpenACC and standard language
+  // constructs) is implemented based on OpenACC: NVHPC extended OpenACC API
+  msg << prefix << "Current system level ACC_NUM_CORES setting for local PET: "
+    << acc_get_num_cores();
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
-  msg << prefix << "mpionly=" << mpionly << " threadsflag=" << threadsflag;
+#endif
+  msg << prefix << "Current system level ACC_NUM_DEVICES (acc_device_not_host)";
+  msg << " setting for local PET: ";
+  msg << acc_get_num_devices(acc_device_not_host);
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
+  msg << prefix << "Current system level ACC_DEVICE_NUM (acc_device_not_host)";
+  msg << " setting for local PET: ";
+  msg << acc_get_device_num(acc_device_not_host);
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "Current system level ACC_DEVICE_TYPE";
+  msg << " setting for local PET: ";
+  msg << acc_get_device_type();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+#endif
+
+#ifdef ESMF_NVML
+  nvmlReturn_t nvlmRC;
+  nvlmRC = nvmlInit_v2();
+  msg << prefix << "nvmlInit_v2: " << nvlmRC;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+
+  unsigned int nvmlDeviceCount;
+  nvlmRC = nvmlDeviceGetCount_v2(&nvmlDeviceCount);
+  msg << prefix << "nvmlDeviceGetCount_v2: " << nvlmRC;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "nvmlDeviceCount: " << nvmlDeviceCount;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  
+  char nvmlVersion[80];
+  nvlmRC = nvmlSystemGetNVMLVersion(nvmlVersion, 80);
+  msg << prefix << "nvmlSystemGetNVMLVersion: " << nvlmRC;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "nvmlVersion: " << nvmlVersion;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+
+  nvlmRC = nvmlShutdown();
+  msg << prefix << "nvmlShutdown: " << nvlmRC;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+#endif
+
   msg << prefix << "ESMF level logical PET->PE association "
    << "(but consider system level affinity pinning!):";
   ESMC_LogDefault.Write(msg.str(), msgType);
-  for (int i=0; i<npets; i++){
+  for (auto i=0; i<npets; i++){
     msg.str("");  // clear
     msg << prefix << "PET=" << i << " lpid=" << lpid[i] << " tid=" << tid[i]
       << " pid=" << pid[i] << " peCount=" << ncpet[i]
       << " accCount=" << nadevs[i];
     ESMC_LogDefault.Write(msg.str(), msgType);
-    for (int j=0; j<ncpet[i]; j++){
+    for (auto j=0; j<ncpet[i]; j++){
       msg.str("");  // clear
       msg << prefix << " PE=" << cid[i][j] << " SSI=" << ssiid[cid[i][j]]
         << " SSIPE=" << ssipe[cid[i][j]];
@@ -2785,42 +3103,83 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
     ESMC_LogDefault.Write(msg.str(), msgType);
   }
   msg.str("");  // clear
+  msg << prefix << "ndevs=" << ndevs << " ndevsSSI=" << ndevsSSI;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix;
+  for (auto i=0; i<ndevsSSI; i++)
+    msg << " ssidevs[" << i << "]=" << ssidevs[i];
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
 #ifndef ESMF_MPIUNI
-  msg << prefix << "--- VMK::logSystem() MPI Control Variables ---------------";
+  bool mpi_t_okay = true;
+  // information about MPI implementation
+  msg << prefix << "--- VMK::logSystem() MPI Layer ---------------------------";
   ESMC_LogDefault.Write(msg.str(), msgType);
-  int num_cvar;
-  MPI_T_cvar_get_num(&num_cvar);
-  char name[128], desc[1024];
-  int nameLen, descLen, verbosity, binding, scope;
-  MPI_T_enum enumtype;
-  MPI_Datatype datatype;
-  for (int i=0; i<num_cvar; i++){
-    nameLen = sizeof(name);
-    descLen = sizeof(desc);
-    MPI_T_cvar_get_info(i, name, &nameLen, &verbosity, &datatype, &enumtype,
-      desc, &descLen, &binding, &scope);
-    msg.str("");  // clear
-    msg << prefix << "index=" << std::setw(4) << i << std::setw(60) << name
-      << " : " << desc;
-    ESMC_LogDefault.Write(msg.str(), msgType);
-  }
-#if 0
-  // testing to change the MPICH EAGER limit for the shared memory channel
-  int ci;
-  MPI_T_cvar_get_index("MPIR_CVAR_NEMESIS_SHM_EAGER_MAX_SZ", &ci);
-  MPI_T_cvar_handle chandle; int nvals, eagersize;
-  MPI_T_cvar_handle_alloc(ci, NULL, &chandle, &nvals);
-  MPI_T_cvar_read(chandle, &eagersize);
   msg.str("");  // clear
-  msg << prefix << "old MPIR_CVAR_NEMESIS_SHM_EAGER_MAX_SZ=" << eagersize;
+  msg << prefix << "MPI_VERSION=" << XSTR(MPI_VERSION);
   ESMC_LogDefault.Write(msg.str(), msgType);
-  eagersize = 4000;
-  MPI_T_cvar_write(chandle, &eagersize);
-  MPI_T_cvar_read(chandle, &eagersize);
   msg.str("");  // clear
-  msg << prefix << "new MPIR_CVAR_NEMESIS_SHM_EAGER_MAX_SZ=" << eagersize;
+  msg << prefix << "MPI_SUBVERSION=" << XSTR(MPI_SUBVERSION);
   ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+#ifdef MPICH_VERSION
+  msg << prefix << "MPICH_VERSION=" << XSTR(MPICH_VERSION);
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
 #endif
+#ifdef CRAY_MPICH_VERSION
+  std::string cray_mpich_version(XSTR(CRAY_MPICH_VERSION));
+  msg << prefix << "CRAY_MPICH_VERSION=" << cray_mpich_version;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  if (cray_mpich_version.rfind("8.1", 0) == 0)  // broken mpi tools interface
+    mpi_t_okay = false;
+#endif
+  // initialize the MPI tool interface
+  msg << prefix << "mpi_t_okay=" << mpi_t_okay;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  if (mpi_t_okay){
+    int provided_thread_level;
+    MPI_T_init_thread(VM_MPI_THREAD_LEVEL, &provided_thread_level);
+    msg << prefix << "--- VMK::logSystem() MPI Tool Interface Control Vars ---";
+    ESMC_LogDefault.Write(msg.str(), msgType);
+    int num_cvar;
+    MPI_T_cvar_get_num(&num_cvar);
+    char name[128], desc[1024];
+    int nameLen, descLen, verbosity, binding, scope;
+    MPI_T_enum enumtype;
+    MPI_Datatype datatype;
+    for (int i=0; i<num_cvar; i++){
+      nameLen = sizeof(name);
+      descLen = sizeof(desc);
+      MPI_T_cvar_get_info(i, name, &nameLen, &verbosity, &datatype, &enumtype,
+        desc, &descLen, &binding, &scope);
+      msg.str("");  // clear
+      msg << prefix << "index=" << std::setw(4) << i << std::setw(60) << name
+        << " : " << desc;
+      ESMC_LogDefault.Write(msg.str(), msgType);
+    }
+#if 0
+    // testing to change the MPICH EAGER limit for the shared memory channel
+    int ci;
+    MPI_T_cvar_get_index("MPIR_CVAR_NEMESIS_SHM_EAGER_MAX_SZ", &ci);
+    MPI_T_cvar_handle chandle; int nvals, eagersize;
+    MPI_T_cvar_handle_alloc(ci, NULL, &chandle, &nvals);
+    MPI_T_cvar_read(chandle, &eagersize);
+    msg.str("");  // clear
+    msg << prefix << "old MPIR_CVAR_NEMESIS_SHM_EAGER_MAX_SZ=" << eagersize;
+    ESMC_LogDefault.Write(msg.str(), msgType);
+    eagersize = 4000;
+    MPI_T_cvar_write(chandle, &eagersize);
+    MPI_T_cvar_read(chandle, &eagersize);
+    msg.str("");  // clear
+    msg << prefix << "new MPIR_CVAR_NEMESIS_SHM_EAGER_MAX_SZ=" << eagersize;
+    ESMC_LogDefault.Write(msg.str(), msgType);
+#endif
+    MPI_T_finalize();
+  }
 #endif
   msg.str("");  // clear
   msg << prefix << "--- VMK::logSystem() end ---------------------------------";
@@ -2909,7 +3268,7 @@ int VMK::getMaxTag(){
 // --- VMKPlan methods ---
 
 
-VMKPlan::VMKPlan(){
+VMKPlan::VMKPlan(int _ndevlist, int *_devlist){
   // native constructor
   supportContributors = false; // by default do not support contributors
   eachChildPetOwnPthread = false; // by default do not create new Pthreads
@@ -2931,6 +3290,9 @@ VMKPlan::VMKPlan(){
   // invalidate members that deal with communicator of participating PETs
   lpid_mpi_g_part_map = NULL;
   commfreeflag = 0;
+  // devlist
+  ndevlist = _ndevlist;
+  devlist = _devlist;
 }
 
 
@@ -6837,7 +7199,7 @@ void VMK::wtimedelay(double delay){
 
 int VMK::ssishmAllocate(vector<unsigned long>&bytes, memhandle *memh, 
   bool contigFlag){
-#ifndef ESMF_NO_MPI3
+#if (MPI_VERSION >= 3) || (defined ESMF_MPIUNI)
 #ifndef ESMF_MPIUNI
   MPI_Comm_rank(mpi_c_ssi, &(memh->localPet));
   MPI_Comm_size(mpi_c_ssi, &(memh->localPetCount));
@@ -6897,7 +7259,7 @@ int VMK::ssishmAllocate(vector<unsigned long>&bytes, memhandle *memh,
 }
 
 int VMK::ssishmFree(memhandle *memh){
-#ifndef ESMF_NO_MPI3
+#if (MPI_VERSION >= 3) || (defined ESMF_MPIUNI)
 #ifdef VM_SSISHMLOG_on
   {
     std::stringstream msg;
@@ -6941,7 +7303,7 @@ int VMK::ssishmFree(memhandle *memh){
 
 int VMK::ssishmGetMems(memhandle memh, int pet, vector<void *>*mems,
   vector<unsigned long> *bytes){
-#ifndef ESMF_NO_MPI3
+#if (MPI_VERSION >= 3) || (defined ESMF_MPIUNI)
   // error check the incoming information
   if (pet < 0 || pet > memh.localPetCount){
     std::stringstream msg;
@@ -6984,7 +7346,7 @@ int VMK::ssishmGetMems(memhandle memh, int pet, vector<void *>*mems,
 }
 
 int VMK::ssishmSync(memhandle memh){
-#ifndef ESMF_NO_MPI3
+#if (MPI_VERSION >= 3) || (defined ESMF_MPIUNI)
 #ifdef VM_SSISHMLOG_on
   {
     std::stringstream msg;

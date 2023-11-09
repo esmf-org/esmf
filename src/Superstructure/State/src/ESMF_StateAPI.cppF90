@@ -345,7 +345,7 @@ contains
 ! !IROUTINE:  ESMF_StateEQ - Compare two States for equality
 !
 ! !INTERFACE:
-  function ESMF_StateEQ(state1, state2)
+  impure elemental function ESMF_StateEQ(state1, state2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_StateEQ
@@ -394,7 +394,7 @@ contains
 ! !IROUTINE:  ESMF_StateNE - Compare two States for non-equality
 !
 ! !INTERFACE:
-  function ESMF_StateNE(state1, state2)
+  impure elemental function ESMF_StateNE(state1, state2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_StateNE

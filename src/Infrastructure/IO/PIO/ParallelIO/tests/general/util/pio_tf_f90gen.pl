@@ -53,13 +53,13 @@ sub init_predef_types
 {
   $template_predef_typename_types{"PIO_TF_DATA_TYPE"} = [];
   $template_predef_typename_types{"PIO_TF_FC_DATA_TYPE"} = [];
-  push(@{$template_predef_typename_types{"PIO_TF_DATA_TYPE"}}, "PIO_int");
+  push(@{$template_predef_typename_types{"PIO_TF_DATA_TYPE"}}, "PIO_INT");
   push(@{$template_predef_typename_types{"PIO_TF_FC_DATA_TYPE"}}, "integer(kind=fc_int)");
-  push(@{$template_predef_typename_types{"PIO_TF_DATA_TYPE"}}, "PIO_short");
+  push(@{$template_predef_typename_types{"PIO_TF_DATA_TYPE"}}, "PIO_SHORT");
   push(@{$template_predef_typename_types{"PIO_TF_FC_DATA_TYPE"}}, "integer(kind=fc_short)");
-  push(@{$template_predef_typename_types{"PIO_TF_DATA_TYPE"}}, "PIO_real");
+  push(@{$template_predef_typename_types{"PIO_TF_DATA_TYPE"}}, "PIO_REAL");
   push(@{$template_predef_typename_types{"PIO_TF_FC_DATA_TYPE"}}, "real(kind=fc_real)");
-  push(@{$template_predef_typename_types{"PIO_TF_DATA_TYPE"}}, "PIO_double");
+  push(@{$template_predef_typename_types{"PIO_TF_DATA_TYPE"}}, "PIO_DOUBLE");
   push(@{$template_predef_typename_types{"PIO_TF_FC_DATA_TYPE"}}, "real(kind=fc_double)");
 }
 
@@ -624,7 +624,7 @@ sub get_default_test_main
   $out_line = $out_line . "    CALL MPI_Init(ierr)\n";
   $out_line = $out_line . "    DO i=1,SIZE(rearrs)\n";
   if($test_type eq "async"){
-    $out_line = $out_line . "      CALL PIO_TF_Init_async_(rearrs(i))\n";
+    $out_line = $out_line . "      CALL PIO_TF_Init_async_()\n";
   }else{
     $out_line = $out_line . "      CALL PIO_TF_Init_(rearrs(i))\n";
   }
@@ -698,6 +698,8 @@ sub get_default_test_driver
     $out_line = $out_line . "    END IF\n";
     $cur_test_case_num += 1;
   }
+  # This line just avoids a gfortran warning
+  $out_line = $out_line . "      mpierr = 0\n";
   $out_line = $out_line . "  END SUBROUTINE PIO_TF_Test_driver_\n";
   return $out_line;
 }

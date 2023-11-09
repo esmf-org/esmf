@@ -1,13 +1,18 @@
 name: Build ESMF Using Spack
 
 env:
-  compiler: gcc@11.3.0
+  compiler: gcc@latest
   esmf_version: 'esmf@develop'
   nuopc_app_version: 'develop'
 
 on:
   workflow_dispatch:
     inputs:
+      compiler:
+        description: 'Compiler version like gcc@12.3.0 or gcc@latest (latest available version on runner)'
+        required: false
+        type: string
+        default: 'gcc@latest'
       esmf_version: 
         description: 'ESMF version or tag like esmf@develop or esmf@=8.5.0b23'
         required: false
@@ -39,7 +44,11 @@ jobs:
         echo "ENV  : >${{ env.esmf_version }}< >${{ env.nuopc_app_version }}<"
 
         # create matrix JSON file
-        str1="{\"compiler\": [\"${{ env.compiler }}\"],"
+        if [ -z "${{ inputs.compiler }}" ]; then
+          str1="{\"compiler\": [\"${{ env.compiler }}\"],"
+        else
+          str1="{\"compiler\": [\"${{ inputs.compiler }}\"],"  
+        fi
         if [ -z "${{ inputs.esmf_version }}" ]; then
           str2="\"esmf\": [\"${{ env.esmf_version }}+external-parallelio\", \"${{ env.esmf_version }}~external-parallelio\"]}"
           echo "nuopc_app_version=${{ env.nuopc_app_version }}" >> $GITHUB_OUTPUT

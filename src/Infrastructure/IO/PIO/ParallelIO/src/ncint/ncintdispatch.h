@@ -147,15 +147,15 @@ extern "C" {
 
     extern int
     PIO_NCINT_def_var_deflate(int ncid, int varid, int shuffle, int deflate,
-			      int deflate_level);
+                              int deflate_level);
 
     extern int
     PIO_NCINT_def_var_chunking(int ncid, int varid, int storage, const size_t *chunksizesp);
 
-
+#if NC_DISPATCH_VERSION == 2
     extern int
     PIO_NCINT_filter_actions(int ncid, int varid, int action, struct NC_Filterobject* spec);
-
+#endif
 #if defined(__cplusplus)
 }
 #endif

@@ -860,9 +860,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    logical                 :: ssL, svL
-    integer                 :: i
-    integer                 :: ioerr
+    logical                   :: ssL, svL
+    integer                   :: i
+    integer                   :: ioerr
+    character(:), allocatable :: tempString
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -881,7 +882,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         rcToReturn=rc)
       return ! bail out
     endif
-    
+
+    tempString = trim(adjustl(string))! remove leading and trailing white spaces
+
     if (ssL) then
       ! special strings and values present
       if (size(specialStringList) /= size(specialValueList)) then
@@ -894,7 +897,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return ! bail out
       endif
       do i=1, size(specialStringList)
-        if (trim(string)==trim(specialStringList(i))) then
+        if (tempString==trim(specialStringList(i))) then
           ! found a matching special string
           ESMF_UtilString2Int = specialValueList(i)
           return ! successful early return
@@ -902,12 +905,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       enddo
     endif
     
-    if (verify(trim(adjustl(string)),"-+0123456789e") == 0) then
+    if (verify(tempString,"-+0123456789") == 0) then
       ! should convert to integer just fine
-      read (string, "(i12)", iostat=ioerr) ESMF_UtilString2Int
+      read (tempString, "(i12)", iostat=ioerr) ESMF_UtilString2Int
       if (ioerr /= 0) then
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="The string '"//trim(string)//"' could not be converted to integer.", &
+            msg="The string '"//tempString//"' could not be converted to integer.", &
             line=__LINE__, &
             file=ESMF_FILENAME, &
             rcToReturn=rc)
@@ -916,7 +919,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
       ! the string contains characters besides numbers
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="The string '"//trim(string)//"' contains characters besides "// &
+        msg="The string '"//tempString//"' contains characters besides "// &
           "numbers, cannot convert to integer.", &
         line=__LINE__, &
         file=ESMF_FILENAME, &
@@ -958,18 +961,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                 :: ioerr
+    integer                   :: ioerr
+    character(:), allocatable :: tempString
 
     if (present(rc)) rc = ESMF_SUCCESS
 
     ESMF_UtilString2Real = 0 ! initialize
 
-    if (verify(trim(adjustl(string)),".-+0123456789e") == 0) then
+    tempString = trim(adjustl(string))! remove leading and trailing white spaces
+
+    if (verify(tempString,".-+0123456789e") == 0) then
       ! should convert to real just fine
-      read (string, *, iostat=ioerr) ESMF_UtilString2Real
+      read (tempString, *, iostat=ioerr) ESMF_UtilString2Real
       if (ioerr /= 0) then
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="The string '"//trim(string)//"' could not be converted to real.", &
+            msg="The string '"//tempString//"' could not be converted to real.", &
             line=__LINE__, &
             file=ESMF_FILENAME, &
             rcToReturn=rc)
@@ -978,7 +984,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
       ! the string contains characters besides numbers
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="The string '"//trim(string)//"' contains characters besides "// &
+        msg="The string '"//tempString//"' contains characters besides "// &
           "numbers, cannot convert to real.", &
         line=__LINE__, &
         file=ESMF_FILENAME, &

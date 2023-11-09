@@ -30,8 +30,6 @@ ifeq ($(ESMF_COMM),mpi)
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpiCC
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------

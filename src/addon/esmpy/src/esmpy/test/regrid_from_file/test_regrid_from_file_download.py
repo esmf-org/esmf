@@ -11,14 +11,12 @@ the regridding.
 import sys
 import os
 
-from esmpy.util.cache_data import cache_data_file, DATA_DIR
+from esmpy.util.cache_data import cache_data_file, do_download, DATA_DIR
 from esmpy.test.regrid_from_file.read_test_cases_from_control_file import read_control_file
 
 def cache_data_files_for_test_cases(test_cases):
-    wget = True
-    if 'ESMPY_DATA_DIR' in os.environ:
-        wget = False
-    else:
+    wget = do_download()
+    if wget:
         print ('Data directory: {}'.format(DATA_DIR))
 
     # Create data subdirectory if it doesn't exist.

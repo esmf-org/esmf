@@ -109,7 +109,8 @@ program ESMF_TraceMPIUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(failMsg, *) "MPI_ALLREDUCE failed with ierr =", ierr
+  write(name, *) "Test MPI_ALLREDUCE ierr==0"
+  write(failMsg, *) "MPI_ALLREDUCE failed with ierr=", ierr
 #if (!defined ESMF_MPIUNI && defined ESMF_TESTTRACE)
   call ESMF_Test((ierr==0), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -119,8 +120,8 @@ program ESMF_TraceMPIUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest
-  print *, "MPI_ALLREDUCE returned ", recv
-  write(failMsg, *) "MPI_ALLREDUCE produced unexpected result. Expected 4, got ", recv
+  write(name, *) "Test MPI_ALLREDUCE recv==4"
+  write(failMsg, *) "MPI_ALLREDUCE produced unexpected result. recv=", recv
 #if (!defined ESMF_MPIUNI && defined ESMF_TESTTRACE)
   call ESMF_Test((recv==petCount), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -133,7 +134,8 @@ program ESMF_TraceMPIUTest
     
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(failMsg, *) "MPI call not profiled"
+  write(name, *) "Test MPI_ALLREDUCE call recorded as profiled"
+  write(failMsg, *) "MPI_ALLREDUCE call not profiled"
 #if (!defined ESMF_MPIUNI && defined ESMF_TESTTRACE)
   call ESMF_Test((mpicheck==1), name, failMsg, result, ESMF_SRCLINE)
 #else

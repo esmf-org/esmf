@@ -1,0 +1,52 @@
+description: 'Build the pnetcdf library'
+inputs:
+  pnetcdf_version:
+    description: 'Tag in the pnetcdf repository to use'
+    default: checkpoint.1.12.3
+    required: False
+    type: string
+  install_prefix:
+    description: 'Install path of pnetcdf'
+    default: $GITHUB_WORKSPACE/pnetcdf
+    required: False
+    type: string
+  enable_shared:
+    description: 'Enable shared library build'
+    default: True
+    required: False
+    type: boolean
+  enable_fortran:
+    description: "Build the fortran library"
+    default: False
+    required: False
+    type: boolean
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        repository: Parallel-NetCDF/PnetCDF
+        path: pnetcdf-src
+        ref: ${{ inputs.pnetcdf_version }}
+    - id: Build-PnetCDF
+      shell: bash
+      run: |
+        pushd pnetcdf-src
+        config_opts="--prefix=${{ inputs.install_prefix }} --disable-cxx "
+        if [ "${{ inputs.enable_fortran }}" = "false" ];
+        then
+          config_opts="${config_opts} --disable-fortran"
+        fi
+        if [ "${{ inputs.enable_shared }}" = "true" ];
+        then
+          config_opts="${config_opts} --enable-shared=yes"
+        fi
+
+        config_opts="${config_opts}"
+        echo "config_opts=$config_opts"
+        autoreconf -i
+        ./configure $config_opts
+
+        make
+        make install
+        popd

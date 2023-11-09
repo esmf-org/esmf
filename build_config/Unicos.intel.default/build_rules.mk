@@ -50,7 +50,7 @@ ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -V
 ############################################################
 # Special debug flags
 #
-ESMF_F90OPTFLAG_G       += -traceback -check arg_temp_created,bounds,format,output_conversion,stack,uninit
+ESMF_F90OPTFLAG_G       += -traceback -check arg_temp_created,bounds,format,output_conversion,stack
 ESMF_CXXOPTFLAG_G       += -traceback -Wcheck
 
 ############################################################

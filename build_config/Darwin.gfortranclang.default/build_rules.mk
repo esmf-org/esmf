@@ -39,8 +39,6 @@ ESMF_CXXDEFAULT         = mpiCC
 ESMF_CDEFAULT           = mpicc
 ESMF_CLINKERDEFAULT     = mpiCC
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),mpich2)
 # Mpich2 ---------------------------------------------------
@@ -50,8 +48,6 @@ ESMF_CDEFAULT           = mpicc
 ESMF_CLINKERDEFAULT     = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),mpich)
 # Mpich3 and up --------------------------------------------
@@ -82,8 +78,6 @@ ESMF_CDEFAULT           = mpicc
 ESMF_CLINKERDEFAULT     = mpic++
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),openmpi)
 # OpenMPI --------------------------------------------------
@@ -286,6 +280,11 @@ ESMF_SL_LIBLIBS  += $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)
 ifeq ($(ESMF_SHARED_LIB_BUILD),OFF)
 ESMF_TRACE_LIB_BUILD = OFF
 endif
+
+############################################################
+# Preloading the dynamic trace library is generally not supported on Darwin
+# when System Integrity Protection (SIP) is enabled. Link directly instead.
+ESMF_TRACE_PRELOAD_LINKED=ON
 
 ############################################################
 # Shared object options

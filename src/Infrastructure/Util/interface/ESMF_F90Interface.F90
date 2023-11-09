@@ -1,10 +1,10 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
-! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-! Laboratory, University of Michigan, National Centers for Environmental 
-! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !
@@ -30,12 +30,12 @@ module ESMF_F90InterfaceMod
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
   private
-      
+
   public ESMF_InterArray
   public ESMF_InterArrayCreate
   public ESMF_InterArrayGet
   public ESMF_InterArrayDestroy
-  
+
 !------------------------------------------------------------------------------
 ! ESMF_InterArray:
 !   Handling of [optional] integer arrays on the Fortran-to-C++ interface.
@@ -66,12 +66,13 @@ module ESMF_F90InterfaceMod
     real(ESMF_KIND_R8), pointer :: farray1DR8(:)       ! Fortran reference
     real(ESMF_KIND_R8), pointer :: farray2DR8(:,:)     ! Fortran reference
     real(ESMF_KIND_R8), pointer :: farray3DR8(:,:,:)   ! Fortran reference
+    logical   :: owner    ! flag need for deallocation during Destroy()
 
   end type
 
 
 !==============================================================================
-! 
+!
 ! INTERFACE BLOCKS
 !
 !==============================================================================
@@ -87,9 +88,9 @@ module ESMF_F90InterfaceMod
 !
     module procedure ESMF_InterArrayCreateTrg
     module procedure ESMF_InterArrayCreatePtr
-      
-! !DESCRIPTION: 
-!EOPI 
+
+! !DESCRIPTION:
+!EOPI
   end interface
 !==============================================================================
 
@@ -125,7 +126,7 @@ contains
     real(ESMF_KIND_R8), target,    intent(in),  optional :: farray2DR8(:,:)
     real(ESMF_KIND_R8), target,    intent(in),  optional :: farray3DR8(:,:,:)
     integer,                       intent(out), optional :: rc
-!         
+!
 ! !RETURN VALUE:
     type(ESMF_InterArray) :: InterArrayCreateTrg
 !
@@ -170,17 +171,16 @@ contains
     real(ESMF_KIND_R8), pointer           :: farray2DR8Ptr(:,:)
     real(ESMF_KIND_R8), pointer           :: farray3DR8Ptr(:,:,:)
 
-    
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! mark this InterArray as invalid
     call c_ESMC_InterArraySetInvalid(array, localrc)
     InterArrayCreateTrg = array
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     ! initialize
     nullify(farray1DPtr)
     nullify(farray2DPtr)
@@ -192,8 +192,6 @@ contains
     nullify(farray2DR8Ptr)
     nullify(farray3DR8Ptr)
 
-    
-    ! set references
     if (present(farray1D)) farray1DPtr => farray1D
     if (present(farray2D)) farray2DPtr => farray2D
     if (present(farray3D)) farray3DPtr => farray3D
@@ -203,7 +201,7 @@ contains
     if (present(farray1DR8)) farray1DR8Ptr => farray1DR8
     if (present(farray2DR8)) farray2DR8Ptr => farray2DR8
     if (present(farray3DR8)) farray3DR8Ptr => farray3DR8
-    
+
     ! create InterArray object
     array = ESMF_InterArrayCreate(farray1DPtr, farray2DPtr, farray3DPtr, &
       farray1DI8Ptr, farray2DI8Ptr, farray3DI8Ptr,  &
@@ -211,13 +209,13 @@ contains
       transferOwnership=.false., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     ! set return value
     InterArrayCreateTrg = array
- 
+
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end function ESMF_InterArrayCreateTrg
 !------------------------------------------------------------------------------
 
@@ -247,14 +245,14 @@ contains
     real(ESMF_KIND_R8), pointer,        optional :: farray3DR8(:,:,:)
     logical,               intent(in)            :: transferOwnership
     integer,               intent(out), optional :: rc
-!         
+!
 ! !RETURN VALUE:
     type(ESMF_InterArray) :: InterArrayCreatePtr
 !
 ! !DESCRIPTION:
-!   Create an {\tt ESMF\_InterArray} from Fortran array. The 
+!   Create an {\tt ESMF\_InterArray} from Fortran array. The
 !   {\tt transferOwnership} allows ownership of the Fortran array to be
-!   transferred to the InterArray object. InterArrayDestroy() will call 
+!   transferred to the InterArray object. InterArrayDestroy() will call
 !   deallocate() for Fortran arrays whose ownership was transferred.
 !
 !   The arguments are:
@@ -292,17 +290,17 @@ contains
     integer                 :: checkCount
     integer(ESMF_KIND_I8)   :: dummyI8
     real(ESMF_KIND_R8)      :: dummyR8
-    
+
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! mark this InterArray as invalid
     call c_ESMC_InterArraySetInvalid(array, localrc)
     InterArrayCreatePtr = array
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     ! initialize Fortran array references
     nullify(array%farray1D)
     nullify(array%farray2D)
@@ -313,7 +311,7 @@ contains
     nullify(array%farray1DR8)
     nullify(array%farray2DR8)
     nullify(array%farray3DR8)
-    
+
     ! check that only one of the array arguments is present
     checkCount = 0  ! reset
     if (present(farray1D)) then
@@ -350,11 +348,13 @@ contains
       return
     endif
 
+    ! set owner flag
+    array%owner = transferOwnership
+
     ! call into the C++ interface, depending on whether or not farray is present
     if (present(farray1D)) then
       if (associated(farray1D)) then
-        if (transferOwnership) &
-          array%farray1D => farray1D
+        array%farray1D => farray1D
         allocate(len(1))
         len = shape(farray1D)
         if (all(len .ne. 0)) then
@@ -371,8 +371,7 @@ contains
     endif
     if (present(farray2D)) then
       if (associated(farray2D)) then
-        if (transferOwnership) &
-          array%farray2D => farray2D
+        array%farray2D => farray2D
         allocate(len(2))
         len = shape(farray2D)
         if (all(len .ne. 0)) then
@@ -389,8 +388,7 @@ contains
     endif
     if (present(farray3D)) then
       if (associated(farray3D)) then
-        if (transferOwnership) &
-          array%farray3D => farray3D
+        array%farray3D => farray3D
         allocate(len(3))
         len = shape(farray3D)
         if (all(len .ne. 0)) then
@@ -407,8 +405,7 @@ contains
     endif
     if (present(farray1DI8)) then
       if (associated(farray1DI8)) then
-        if (transferOwnership) &
-          array%farray1DI8 => farray1DI8
+        array%farray1DI8 => farray1DI8
         allocate(len(1))
         len = shape(farray1DI8)
         if (all(len .ne. 0)) then
@@ -425,8 +422,7 @@ contains
     endif
     if (present(farray2DI8)) then
       if (associated(farray2DI8)) then
-        if (transferOwnership) &
-          array%farray2DI8 => farray2DI8
+        array%farray2DI8 => farray2DI8
         allocate(len(2))
         len = shape(farray2DI8)
         if (all(len .ne. 0)) then
@@ -444,8 +440,7 @@ contains
     endif
     if (present(farray3DI8)) then
       if (associated(farray3DI8)) then
-        if (transferOwnership) &
-          array%farray3DI8 => farray3DI8
+        array%farray3DI8 => farray3DI8
         allocate(len(3))
         len = shape(farray3DI8)
         if (all(len .ne. 0)) then
@@ -464,8 +459,7 @@ contains
 
     if (present(farray1DR8)) then
       if (associated(farray1DR8)) then
-        if (transferOwnership) &
-          array%farray1DR8 => farray1DR8
+        array%farray1DR8 => farray1DR8
         allocate(len(1))
         len = shape(farray1DR8)
         if (all(len .ne. 0)) then
@@ -482,8 +476,7 @@ contains
     endif
     if (present(farray2DR8)) then
       if (associated(farray2DR8)) then
-        if (transferOwnership) &
-          array%farray2DR8 => farray2DR8
+        array%farray2DR8 => farray2DR8
         allocate(len(2))
         len = shape(farray2DR8)
         if (all(len .ne. 0)) then
@@ -501,8 +494,7 @@ contains
     endif
     if (present(farray3DR8)) then
       if (associated(farray3DR8)) then
-        if (transferOwnership) &
-          array%farray3DR8 => farray3DR8
+        array%farray3DR8 => farray3DR8
         allocate(len(3))
         len = shape(farray3DR8)
         if (all(len .ne. 0)) then
@@ -518,13 +510,13 @@ contains
         deallocate(len)
       endif
     endif
-    
+
     ! set return value
     InterArrayCreatePtr = array
- 
+
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end function ESMF_InterArrayCreatePtr
 !------------------------------------------------------------------------------
 
@@ -540,7 +532,7 @@ contains
     farray1DI8, farray2DI8, farray3DI8, farray1DR8, farray2DR8, farray3DR8, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_InterArray), intent(inout)           :: array
+    type(ESMF_InterArray), intent(in)              :: array
     integer,                 pointer,     optional :: farray1D(:)
     integer,                 pointer,     optional :: farray2D(:,:)
     integer,                 pointer,     optional :: farray3D(:,:,:)
@@ -551,7 +543,7 @@ contains
     real(ESMF_KIND_R8),      pointer,     optional :: farray2DR8(:,:)
     real(ESMF_KIND_R8),      pointer,     optional :: farray3DR8(:,:,:)
     integer,                 intent(out), optional :: rc
-!         
+!
 !
 ! !DESCRIPTION:
 !   Get pointer out of an {\tt ESMF\_InterArray} object.
@@ -586,11 +578,11 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: stat         ! Fortran return code
-    
+
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     if (present(farray1D)) farray1D => array%farray1D
     if (present(farray2D)) farray2D => array%farray2D
     if (present(farray3D)) farray3D => array%farray3D
@@ -603,7 +595,7 @@ contains
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end subroutine ESMF_InterArrayGet
 !------------------------------------------------------------------------------
 
@@ -620,7 +612,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_InterArray), intent(inout)         :: array
     integer,                 intent(out), optional :: rc
-!         
+!
 !
 ! !DESCRIPTION:
 !   Destroy an {\tt ESMF\_InterArray} object. Deallocate Fortran arrays
@@ -638,71 +630,73 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: stat         ! Fortran return code
-    
+
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
-    ! deallocate Fortran arrays whose ownership was transferred
-    if (associated(array%farray1D)) then
-      deallocate(array%farray1D, stat=stat)
-      if (ESMF_LogFoundDeallocError(stat, msg="deallocating array%farray1D", &
-        ESMF_CONTEXT)) &
-        return  ! bail out
-    endif
-    if (associated(array%farray2D)) then
-      deallocate(array%farray2D, stat=stat)
-      if (ESMF_LogFoundDeallocError(stat, msg="deallocating array%farray2D", &
-        ESMF_CONTEXT)) &
-        return  ! bail out
-    endif
-    if (associated(array%farray3D)) then
-      deallocate(array%farray3D, stat=stat)
-      if (ESMF_LogFoundDeallocError(stat, msg="deallocating array%farray3D", &
-        ESMF_CONTEXT)) &
-        return  ! bail out
-    endif
-    if (associated(array%farray1DI8)) then
-      deallocate(array%farray1DI8, stat=stat)
-      if (ESMF_LogFoundDeallocError(stat, msg="deallocating array%farray1DI8", &
-        ESMF_CONTEXT)) &
-        return  ! bail out
-    endif
-    if (associated(array%farray2DI8)) then
-      deallocate(array%farray2DI8, stat=stat)
-      if (ESMF_LogFoundDeallocError(stat, msg="deallocating array%farray2DI8", &
-        ESMF_CONTEXT)) &
-        return  ! bail out
-    endif
-    if (associated(array%farray3DI8)) then
-      deallocate(array%farray3DI8, stat=stat)
-      if (ESMF_LogFoundDeallocError(stat, msg="deallocating array%farray3DI8", &
-        ESMF_CONTEXT)) &
-        return  ! bail out
+
+    ! deallocate Fortran arrays if ownership was transferred
+    if (array%owner) then
+      if (associated(array%farray1D)) then
+        deallocate(array%farray1D, stat=stat)
+        if (ESMF_LogFoundDeallocError(stat, msg="deallocating array%farray1D", &
+          ESMF_CONTEXT)) &
+          return  ! bail out
+      endif
+      if (associated(array%farray2D)) then
+        deallocate(array%farray2D, stat=stat)
+        if (ESMF_LogFoundDeallocError(stat, msg="deallocating array%farray2D", &
+          ESMF_CONTEXT)) &
+          return  ! bail out
+      endif
+      if (associated(array%farray3D)) then
+        deallocate(array%farray3D, stat=stat)
+        if (ESMF_LogFoundDeallocError(stat, msg="deallocating array%farray3D", &
+          ESMF_CONTEXT)) &
+          return  ! bail out
+      endif
+      if (associated(array%farray1DI8)) then
+        deallocate(array%farray1DI8, stat=stat)
+        if (ESMF_LogFoundDeallocError(stat, msg="deallocating array%farray1DI8", &
+          ESMF_CONTEXT)) &
+          return  ! bail out
+      endif
+      if (associated(array%farray2DI8)) then
+        deallocate(array%farray2DI8, stat=stat)
+        if (ESMF_LogFoundDeallocError(stat, msg="deallocating array%farray2DI8", &
+          ESMF_CONTEXT)) &
+          return  ! bail out
+      endif
+      if (associated(array%farray3DI8)) then
+        deallocate(array%farray3DI8, stat=stat)
+        if (ESMF_LogFoundDeallocError(stat, msg="deallocating array%farray3DI8", &
+          ESMF_CONTEXT)) &
+          return  ! bail out
+      endif
+
+      if (associated(array%farray1DR8)) then
+        deallocate(array%farray1DR8, stat=stat)
+        if (ESMF_LogFoundDeallocError(stat, msg="deallocating array%farray1DR8", &
+          ESMF_CONTEXT)) &
+          return  ! bail out
+      endif
+      if (associated(array%farray2DR8)) then
+        deallocate(array%farray2DR8, stat=stat)
+        if (ESMF_LogFoundDeallocError(stat, msg="deallocating array%farray2DR8", &
+          ESMF_CONTEXT)) &
+          return  ! bail out
+      endif
+      if (associated(array%farray3DR8)) then
+        deallocate(array%farray3DR8, stat=stat)
+        if (ESMF_LogFoundDeallocError(stat, msg="deallocating array%farray3DR8", &
+          ESMF_CONTEXT)) &
+          return  ! bail out
+      endif
     endif
 
-    if (associated(array%farray1DR8)) then
-      deallocate(array%farray1DR8, stat=stat)
-      if (ESMF_LogFoundDeallocError(stat, msg="deallocating array%farray1DR8", &
-        ESMF_CONTEXT)) &
-        return  ! bail out
-    endif
-    if (associated(array%farray2DR8)) then
-      deallocate(array%farray2DR8, stat=stat)
-      if (ESMF_LogFoundDeallocError(stat, msg="deallocating array%farray2DR8", &
-        ESMF_CONTEXT)) &
-        return  ! bail out
-    endif
-    if (associated(array%farray3DR8)) then
-      deallocate(array%farray3DR8, stat=stat)
-      if (ESMF_LogFoundDeallocError(stat, msg="deallocating array%farray3DR8", &
-        ESMF_CONTEXT)) &
-        return  ! bail out
-    endif
-    
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end subroutine ESMF_InterArrayDestroy
 !------------------------------------------------------------------------------
 

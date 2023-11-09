@@ -1,9 +1,41 @@
 % $Id$
 
+\begin{enumerate}
+
+% See https://github.com/esmf-org/esmf/issues/131
+\item {\bf I/O of NetCDF files requires a real MPI library.}
+Currently I/O of NetCDF files (which uses PIO) requires a real MPI
+library: it cannot be done with ESMF\_COMM set to "mpiuni".
+
+\item {\bf Limited data formats supported.}
 Currently a small fraction of the anticipated data formats is implemented by 
-ESMF.  The data I/O uses NetCDF and MPI\_IO binary formats, and ESMF Attribute
-I/O uses XML format.  Different libraries are employed for these
+ESMF.  The data I/O uses NetCDF format, and ESMF Info
+I/O uses JSON format.  Different libraries are employed for these
 different formats.  In future development, a more centralized I/O technique
 will likely be defined to provide efficient utilities with a set of standard
 APIs that will allow manipulation of multiple standard formats.  Also, the 
 ability to automatically detect file formats at runtime will be developed.
+
+\item {\bf Some limitations with multi-tile I/O.}
+There are a few limitations when doing I/O on multi-tile Arrays and
+Fields (e.g., a cubed sphere grid represented as a six-tile grid): This
+I/O requires at least as many PETs as there are tiles, and for I/O of
+ArrayBundles and FieldBundles, all Arrays / Fields in the bundle must
+contain the same number of tiles.
+
+% See https://github.com/esmf-org/esmf/issues/184 for more details on
+% these issues with I/O of replicated dimensions.
+\item {\bf Replicated dimensions.}
+I/O of Arrays / Fields with replicated dimensions (section
+\ref{sec:array:usage:replicated_dims}) is only partially working. In
+most situations, replicated dimensions appear as dimensions in the
+output file; ideally, these replicated dimensions would be removed in
+the output file, and we plan to make that change in the future.
+Furthermore, slices of the replicated dimensions other than the first
+can have garbage values in the output file. In addition, there is an
+inconsistency when outputting Arrays / Fields that have a decomposition
+with more than one DE per PET: in this case, replicated dimensions are
+removed in the output file. Finally, I/O cannot be performed on
+multi-tile Arrays / Fields with replicated dimensions.
+
+\end{enumerate}

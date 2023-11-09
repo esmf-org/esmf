@@ -38,8 +38,10 @@
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/Legacy/ESMCI_Phedra.h"
 #include "Mesh/include/ESMCI_Mesh_Regrid_Glue.h"
+#include "Mesh/include/ESMCI_Mesh_Vector_Regrid.h"
 #include "Mesh/include/Legacy/ESMCI_MeshMerge.h"
 #include "Mesh/include/ESMCI_Mesh_GToM_Glue.h"
+
 
 #include <iostream>
 #include <vector>
@@ -55,8 +57,6 @@
 
 
 using namespace ESMCI;
-
-
 
 
 // prototypes from below
@@ -88,8 +88,9 @@ void ESMCI_regrid_create(
                      Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
                      Mesh **meshdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
                      int *regridMethod,
-                      int *map_type,
+                     int *map_type,
                      int *norm_type,
+                     int *_vectorRegrid, 
                      int *regridPoleType, int *regridPoleNPnts,
                      int *extrapMethod,
                      int *extrapNumSrcPnts,
@@ -141,7 +142,10 @@ void ESMCI_regrid_create(
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;  // bail out with exception
     
-
+    // transalate vectorRegrid to C++ bool
+    bool vectorRegrid=false;
+    if (*_vectorRegrid == 1) vectorRegrid=true;
+    
     // transalate ignoreDegenerate to C++ bool
     bool ignoreDegenerate=false;
     if (*_ignoreDegenerate == 1) ignoreDegenerate=true;
@@ -150,6 +154,7 @@ void ESMCI_regrid_create(
     bool checkFlag=false;
     if (*_checkFlag == 1) checkFlag=true;
 
+    
     // Output Warning message about checkFlag
     if (checkFlag){
       ESMC_LogDefault.Write("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
@@ -194,6 +199,55 @@ void ESMCI_regrid_create(
       }
     }
 
+    /// vectorRegrid only supported with spherical geometries
+    if (vectorRegrid) {
+
+      // Get src coordSys
+      ESMC_CoordSys_Flag src_coord_sys=ESMC_COORDSYS_UNINIT;
+      if (srcmesh != NULL) src_coord_sys=srcmesh->coordsys;
+      else if (srcpointlist != NULL) src_coord_sys=srcpointlist->get_orig_coord_sys();
+
+      // Check that it's spherical 
+      if ((src_coord_sys != ESMC_COORDSYS_SPH_DEG) && (src_coord_sys != ESMC_COORDSYS_SPH_RAD)) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                         "Vector regridding currently only supported for source geometries (e.g. Grids) with a spherical coordinate system.",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+
+
+      // Get dst coordSys
+      ESMC_CoordSys_Flag dst_coord_sys=ESMC_COORDSYS_UNINIT;
+      if (dstmesh != NULL) dst_coord_sys=dstmesh->coordsys;
+      else if (dstpointlist != NULL) dst_coord_sys=dstpointlist->get_orig_coord_sys();
+
+      // Check that it's spherical 
+      if ((dst_coord_sys != ESMC_COORDSYS_SPH_DEG) && (dst_coord_sys != ESMC_COORDSYS_SPH_RAD)) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                         "Vector regridding currently only supported for destination geometries (e.g. Grids) with a spherical coordinate system.",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+
+    }
+
+    
+    /// vectorRegrid currently only supported with 1 ungridded dim
+    if (vectorRegrid) {
+
+      // Check src
+      if (srcarray.getTensorCount() != 1) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                         "srcField must have exactly 1 ungridded dimension to use vector regridding.",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+
+      // Check dst
+      if (dstarray.getTensorCount() != 1) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                         "dstField must have exactly 1 ungridded dimension to use vector regridding.",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+    }
+    
     
      //// Precheck Meshes for errors
     bool degenerate=false;
@@ -232,6 +286,41 @@ void ESMCI_regrid_create(
     }
 
 
+
+
+    // Get vectorRegrid dims
+    // TODO: Move to a better place
+    int num_vec_dims;
+    int src_vec_dims_undist_seqind[ESMF_MAXDIM];
+    int dst_vec_dims_undist_seqind[ESMF_MAXDIM];
+    if (vectorRegrid) {
+
+      // Get src info
+      int src_num_vec_dims;
+      get_vec_dims_for_vectorRegrid(srcarray, src_num_vec_dims, src_vec_dims_undist_seqind);
+
+      // Get dst info
+      int dst_num_vec_dims;
+      get_vec_dims_for_vectorRegrid(dstarray, dst_num_vec_dims, dst_vec_dims_undist_seqind);
+
+      // The size of the dimensions must match
+      if (src_num_vec_dims != dst_num_vec_dims) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                  "The srcField and the dstField must have the same size ungridded dimension to use vector regridding.",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+
+      // Set num vector dims
+      // (Setting to src, but dst should be the same as checked above)
+      num_vec_dims=src_num_vec_dims;
+    }
+
+
+
+
+
+
+    
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Entering weight generation.", ESMC_LOGMSG_INFO);
 #endif
@@ -368,19 +457,17 @@ void ESMCI_regrid_create(
     VM::logMemInfo(std::string("RegridCreate4.0"));
 #endif
 
+    
     /////// We have the weights, now set up the sparsemm object /////
 
-    // Firstly, the index list
+    // Get the size of the sparse matrix and allocate space for it
     std::pair<UInt,UInt> iisize = wts->count_matrix_entries();
     int num_entries = iisize.first;
+    int iientries_entry_size=2;
     int *iientries = new int[2*iisize.first];
-    int larg[2] = {2, static_cast<int>(iisize.first)};
-    // Gather the list
-    ESMCI::InterArray<int> ii(iientries, 2, larg);
-    ESMCI::InterArray<int> *iiptr = &ii;
-
     double *factors = new double[iisize.first];
 
+    
 
     // Translate weights to sparse matrix representation
     if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) {
@@ -459,6 +546,36 @@ void ESMCI_regrid_create(
       if (*norm_type==ESMC_NORM_TYPE_FRACAREA) change_wts_to_be_fracarea(dstmesh, num_entries, iientries, factors);
     }
 
+
+    ///// If requested, then change weights to be vector weights
+    if (vectorRegrid) {
+
+      // Declare vector Matrix
+      int num_entries_vec;
+      int *iientries_vec;
+      double *factors_vec;
+
+      // Create vector weights from regular weights
+      create_vector_sparse_mat_from_reg_sparse_mat(num_entries, iientries, factors,
+                                                    num_vec_dims, src_vec_dims_undist_seqind, dst_vec_dims_undist_seqind,
+                                                    srcmesh, srcpointlist,
+                                                    dstmesh, dstpointlist,
+                                                    num_entries_vec, iientries_vec, factors_vec);
+
+      // Get rid of old matrix
+      delete [] factors;
+      delete [] iientries;
+      num_entries = 0;      
+      
+      // Swap matrix to vector version
+      num_entries=num_entries_vec;
+      iientries=iientries_vec;
+      factors=factors_vec;
+      iientries_entry_size=4;  // Because we have the ungridded dims entries the matrix is now of size 4
+    }
+
+
+    
     // Copy status info from WMat to Array
     if (has_statusArray) {
       if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
@@ -486,6 +603,8 @@ void ESMCI_regrid_create(
     VM::logMemInfo(std::string("RegridCreate5.1"));
 #endif
 
+
+   
 #ifdef C_SIDE_REGRID_FREED_MESH
     // enabling this freature currently breaks several tests
     delete srcmesh;
@@ -499,10 +618,19 @@ void ESMCI_regrid_create(
 
     ESMCI_REGRID_TRACE_ENTER("NativeMesh ArraySMMStore");
 
-    // Build the ArraySMM
+    // Build the RouteHandle using ArraySMMStore() 
     if (*has_rh != 0) {
+      
+      // Set some flags
       enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
       ESMC_Logical ignoreUnmatched = ESMF_FALSE;
+
+      // Wrap factorIndexList in InterArray
+      int larg[2] = {iientries_entry_size, num_entries};
+      ESMCI::InterArray<int> ii(iientries, 2, larg);
+      ESMCI::InterArray<int> *iiptr = &ii;
+      
+      // Call into Array sparse matrix multiply store to create RouteHandle
       FTN_X(c_esmc_arraysmmstoreind4)(arraysrcpp, arraydstpp, rh, &tk, factors,
             &num_entries, iiptr, &ignoreUnmatched, srcTermProcessing,
             pipelineDepth, &localrc);

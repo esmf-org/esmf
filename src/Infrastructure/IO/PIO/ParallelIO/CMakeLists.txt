@@ -9,9 +9,8 @@ project (PIO C)
 
 # The project version number.
 set(VERSION_MAJOR   2   CACHE STRING "Project major version number.")
-set(VERSION_MINOR   5   CACHE STRING "Project minor version number.")
-set(VERSION_PATCH  10   CACHE STRING "Project patch version number.")
-
+set(VERSION_MINOR   6   CACHE STRING "Project minor version number.")
+set(VERSION_PATCH   2   CACHE STRING "Project patch version number.")
 mark_as_advanced(VERSION_MAJOR VERSION_MINOR VERSION_PATCH)
 
 # Create version info in autotools parlance for pio_meta.h.
@@ -24,6 +23,9 @@ SET(PACKAGE_VERSION ${PIO_VERSION_MAJOR}.${PIO_VERSION_MINOR}.${PIO_VERSION_PATC
 
 # This provides cmake_print_variables() function for debugging.
 include(CMakePrintHelpers)
+
+# This provides check_symbol_exists
+include(CheckSymbolExists)
 
 # Determine the configure date.
 IF(DEFINED ENV{SOURCE_DATE_EPOCH})
@@ -124,12 +126,6 @@ else()
   set(NETCDF_INTEGRATION 0)
 endif()
 
-if(PIO_USE_MPISERIAL)
-  set(USE_MPI_SERIAL 1)
-else()
-  set(USE_MPI_SERIAL 0)
-endif()
-
 #==============================================================================
 #  PREPEND TO CMAKE MODULE PATH
 #==============================================================================
@@ -169,14 +165,16 @@ if (PIO_USE_MPISERIAL)
   if (MPISERIAL_C_FOUND)
     set (CMAKE_REQUIRED_INCLUDES ${MPISERIAL_C_INCLUDE_DIRS})
   endif ()
+  set(USE_MPI_SERIAL 1)
 else ()
   find_package (MPI REQUIRED)
   set (CMAKE_REQUIRED_INCLUDES ${MPI_INCLUDE_PATH})
+  set(USE_MPI_SERIAL 0)
 endif ()
 
-#SET(CMAKE_EXTRA_INCLUDE_FILES "mpi.h")
-#check_type_size("MPI_Offset" SIZEOF_MPI_OFFSET)
-#SET(CMAKE_EXTRA_INCLUDE_FILES)
+SET(CMAKE_EXTRA_INCLUDE_FILES "mpi.h")
+CHECK_TYPE_SIZE("MPI_Offset" SIZEOF_MPI_OFFSET)
+SET(CMAKE_EXTRA_INCLUDE_FILES)
 
 #===== Library Variables =====
 set (PIO_FILESYSTEM_HINTS IGNORE CACHE STRING "Filesystem hints (lustre or gpfs)")
@@ -248,6 +246,7 @@ endif ()
 # Allow argument mismatch in gfortran versions > 10 for mpi library compatibility
 if (CMAKE_C_COMPILER_NAME STREQUAL "GNU")
   if ("${CMAKE_Fortran_COMPILER_VERSION}" VERSION_LESS 10)
+    message (WARNING "gfortran version is ${CMAKE_Fortran_COMPILER_VERSION}")
   else()
     set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-argument-mismatch")
   endif()
@@ -358,14 +357,13 @@ int main() {return 0;}" HAVE_SZIP_WRITE)
 ###
 # Check to see if parallel filters are supported by HDF5/netcdf-c.
 ###
-CHECK_C_SOURCE_COMPILES("
+if (HAVE_NETCDF_PAR)
+  CHECK_C_SOURCE_COMPILES("
 #include <netcdf_meta.h>
 #if !NC_HAS_PAR_FILTERS
-      choke me
+    choke me
 #endif
-int main() {return 0;}" HDF5_HAS_PAR_FILTERS)
-if(HDF5_HAS_PAR_FILTERS)
-  set(HAVE_PAR_FILTERS 1)
+int main() {return 0;}" HAVE_PAR_FILTERS)
 else()
   set(HAVE_PAR_FILTERS 0)
 endif()
@@ -385,18 +383,21 @@ if (HAVE_472)
 endif ()
 
 ###
-# Check to see if dispatch table version 2 is supported for netcdf integration.
+# Check to see if dispatch table is supported for netcdf integration.
 ###
 CHECK_C_SOURCE_COMPILES("
 #include <netcdf_meta.h>
-#if NC_DISPATCH_VERSION != 2
+#if NC_DISPATCH_VERSION < 2
       choke me
 #endif
-int main() {return 0;}" HAVE_DISPATCH2)
+#if NC_DISPATCH_VERSION > 5
+    choke me
+#endif
+int main() {return 0;}" HAVE_DISPATCH)
 
 if (NETCDF_INTEGRATION)
-  if (NOT HAVE_DISPATCH2)
-    message (FATAL_ERROR "Need newer version of netcdf-c for netcdf integration feature, please upgrade your netCDF library")
+  if (NOT HAVE_DISPATCH)
+    message (FATAL_ERROR "The netcdf-c netcdf integration layer is incompatible with the one in this ParallelIO version")
   endif ()
   set(HAVE_NETCDF_INTEGRATION 1)
 else ()
@@ -451,15 +452,18 @@ SET(LDFLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_EXE_LINKER_FLAGS_${CMAKE_BUILD_TY
 
 is_disabled(BUILD_SHARED_LIBS enable_static)
 is_enabled(BUILD_SHARED_LIBS enable_shared)
-
+is_enabled(HAVE_PAR_FILTERS have_par_filters)
 is_enabled(USE_SZIP HAS_SZIP_WRITE)
 is_enabled(STATUS_PNETCDF HAS_PNETCDF)
 is_enabled(HAVE_H5Z_SZIP HAS_SZLIB)
-is_enabled(HDF5_HAS_PAR_FILTERS HAS_PAR_FILTERS)
 is_enabled(HAVE_NETCDF4 HAS_NETCDF4)
 is_enabled(HAVE_NETCDF_PAR HAS_NETCDF4_PAR)
 is_enabled(HAVE_NETCDF_INTEGRATION HAS_NETCDF_INTEGRATION)
 is_enabled(PIO_ENABLE_FORTRAN HAS_PIO_FORTRAN)
+
+if(HAVE_PAR_FILTERS)
+  SET(PIO_HAS_PAR_FILTERS 1)
+endif()
 
 # Generate file from template.
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/libpio.settings.in"
@@ -473,12 +477,16 @@ FILE(READ "${CMAKE_CURRENT_BINARY_DIR}/libpio.settings"
   LIBPIO_SETTINGS)
 MESSAGE(STATUS ${LIBPIO_SETTINGS})
 
+# Set RPATH for shared libraries
+set(CMAKE_MACOSX_RPATH 1)
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
 # Install libpio.settings file into same location
 # as the libraries.
 INSTALL(FILES "${PIO_BINARY_DIR}/libpio.settings"
   DESTINATION lib
   COMPONENT libraries)
-
+  
 #####
 # Create pio_meta.h include file.
 #####

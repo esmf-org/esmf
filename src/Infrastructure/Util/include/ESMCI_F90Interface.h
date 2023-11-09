@@ -80,7 +80,7 @@ namespace ESMCI {
       void set(std::vector<T> &arrayArg);
       void set(T *arrayArg, int dimArg, const int *lenArg);
   };
-  
+
   // implementation of a present() method to detect present/absent optional
   template<typename T> bool present(InterArray<T> *ptr);
 
@@ -113,7 +113,7 @@ namespace ESMCI {
       extent[i]=0;
   }
 
-  template<typename T> InterArray<T>::InterArray(T *arrayArg, 
+  template<typename T> InterArray<T>::InterArray(T *arrayArg,
     int dimArg, const int *lenArg){
     // constructor
     array = arrayArg;
@@ -131,7 +131,7 @@ namespace ESMCI {
     for (int i=dimCount; i<7; i++)
       extent[i]=0;
   }
-  
+
   template<typename T> void InterArray<T>::set(void){
     // set NULL
     array = NULL;
@@ -158,7 +158,7 @@ namespace ESMCI {
       extent[i]=0;
   }
 
-  template<typename T> void InterArray<T>::set(T *arrayArg, int dimArg, 
+  template<typename T> void InterArray<T>::set(T *arrayArg, int dimArg,
     const int *lenArg){
     // set
     array = arrayArg;
@@ -168,11 +168,11 @@ namespace ESMCI {
     for (int i=dimCount; i<7; i++)
       extent[i]=0;
   }
-  
+
   template<typename T> bool present(InterArray<T> *ptr){
     return ( (ptr != NULL) && (ptr->array != NULL) );
   }
-  
+
 } // namespace ESMCI
 
 

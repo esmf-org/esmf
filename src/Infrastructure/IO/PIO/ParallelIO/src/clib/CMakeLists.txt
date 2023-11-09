@@ -9,8 +9,8 @@ project (PIOC C)
 if (CMAKE_BUILD_TYPE)
     define_property(
         SOURCE
-        PROPERTY COMPILE_FLAGS 
-        INHERITED 
+        PROPERTY COMPILE_FLAGS
+        INHERITED
         BRIEF_DOCS "brief-doc"
         FULL_DOCS  "full-doc"
     )
@@ -34,10 +34,10 @@ add_library (pioc ${src})
 # Always use -fPIC
 set_property(TARGET pioc PROPERTY POSITION_INDEPENDENT_CODE ON)
 
-set_source_files_properties( 
-    pioc_async.c 
+set_source_files_properties(
+    pioc_async.c
     PROPERTIES
-    COMPILE_FLAGS -O0 
+    COMPILE_FLAGS -O0
 )
 
 
@@ -63,7 +63,7 @@ target_compile_definitions (pioc
 
 # Compiler-specific compiler options
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-  string(APPEND CMAKE_C_FLAGS  " -std=c99 " )
+  string(APPEND CMAKE_C_FLAGS  " -std=gnu99 " )
 elseif ("${CMAKE_C_COMPILER_ID}" STREQUAL "PGI")
   string(APPEND CMAKE_C_FLAGS  " -c99 ")
 elseif ("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
