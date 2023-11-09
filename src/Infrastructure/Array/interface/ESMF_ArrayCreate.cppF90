@@ -3917,9 +3917,16 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      If present, override the DELayout of the incoming {\tt distgrid}.
 !      By default use the DELayout defined in {\tt distgrid}.
 ! \item[{[trailingUndistSlice]}]
-!      If present, the returned Array refers to the array slice of {\tt array}
-!      as defined by the specified tuple, applied to the right most
-!      trailing undistributed dimensions.
+!      If present, the returned Array refers to a slice of {\tt array}
+!      created by removing some or all of the trailing (i.e. rightmost)
+!      undistributed dimensions from the incoming Array object.
+!      The number of trailing dimensions removed is equal to the size $n$
+!      of {\tt trailingUndistSlice}, which must be less than or equal to the
+!      total number of trailing undistributed dimensions in {\tt array}.
+!      The {\tt trailingUndistSlice} argument is interpreted
+!      as an index tuple for the $n$ trailing undistributed
+!      dimensions in {\tt array} in order, and the Array slice at that
+!      location is returned.
 ! \item[{[name]}]
 !      Name of the Array object.
 ! \item[{[rc]}]
