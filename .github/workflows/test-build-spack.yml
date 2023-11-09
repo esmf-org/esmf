@@ -103,20 +103,20 @@ jobs:
         scripts/install_oneapi.sh -c ${{ matrix.compiler }}
 
     # concretize test environment 
-    #- name: Concretize Spack Environment Using YAML Specification
-    #  run: |
-    #    ${{ github.workspace }}/.github/workflows/scripts/spack_concretize.sh \
-    #      -a x86_64 \
-    #      -c ${{ matrix.compiler }} \
-    #      -d ${{ matrix.esmf }} \
-    #      -i ~/.spack-ci \
-    #      -r ${{ github.workspace }} 
+    - name: Concretize Spack Environment Using YAML Specification
+      run: |
+        ${{ github.workspace }}/.github/workflows/scripts/spack_concretize.sh \
+          -a x86_64 \
+          -c ${{ matrix.compiler }} \
+          -d ${{ matrix.esmf }} \
+          -i ~/.spack-ci \
+          -r ${{ github.workspace }} 
 
     # install test environment
-    #- name: Install ESMF with Spack 
-    #  run: |
-    #    ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
-    #      -r ${{ github.workspace }}
+    - name: Install ESMF with Spack 
+      run: |
+        ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
+          -r ${{ github.workspace }}
 
     # checkout NUOPC app prototypes
     - name: Checkout NUOPC app prototypes
@@ -145,7 +145,7 @@ jobs:
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: Artifacts for ${{ matrix.compiler }} ${{ matrix.esmf_version }} ${{ matrix.nuopc_app_version }} 
+        name: Artifacts for ${{ matrix.compiler }} ${{ matrix.esmf }}
         path: ${{ github.workspace }}/nuopc-app-prototypes.tar.gz
         retention-days: 5
 
