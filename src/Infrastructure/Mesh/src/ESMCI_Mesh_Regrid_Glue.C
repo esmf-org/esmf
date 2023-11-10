@@ -155,6 +155,8 @@ void ESMCI_regrid_create(
     bool checkFlag=false;
     if (*_checkFlag == 1) checkFlag=true;
 
+    // Tranlate 
+
     
     // Output Warning message about checkFlag
     if (checkFlag){
@@ -648,6 +650,82 @@ void ESMCI_regrid_create(
 #ifdef MEMLOG_on
     VM::logMemInfo(std::string("RegridCreate6.0"));
 #endif
+
+    // If requested, build the transpose RouteHandle using ArraySMMStore() 
+    if (*has_trh != 0) {
+
+      ESMCI_REGRID_TRACE_ENTER("NativeMesh Transpose ArraySMMStore");
+      
+      // Allocate transpose matrix
+      int *transpose_iientries = new int[iientries_entry_size*num_entries];
+      
+      // Init to beginning entries of factor index lists
+      int *entry=iientries;
+      int *t_entry=transpose_iientries;
+      
+      // Depending on size of matrix entries, loop constructing transpose matrix
+      if (iientries_entry_size == 2) {
+        
+        // Loop through entries
+        for (int i=0; i<num_entries; i++) {
+          
+          // Swap src and dst values
+          t_entry[0]=entry[1];
+          t_entry[1]=entry[0];
+          
+          // Next entry
+          entry += 2;
+          t_entry += 2;
+        }
+      } else if (iientries_entry_size == 4) {
+
+        // Loop through entries
+        for (int i=0; i<num_entries; i++) {
+          
+          // Swap src and dst values
+          t_entry[0]=entry[2];
+          t_entry[1]=entry[3];
+          t_entry[2]=entry[0];
+          t_entry[3]=entry[1];
+          
+          // Next entry
+          entry += 4;
+          t_entry += 4;
+        }
+      } else {
+        Throw() << "Unsupported tuple size of "<<iientries_entry_size<<" in weight matrix.";
+      } 
+      
+      
+      // Set some flags
+      enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
+      ESMC_Logical ignoreUnmatched = ESMF_FALSE; // TODO: Maybe for transpose this should be true? 
+
+      // Wrap factorIndexList in InterArray
+      int transpose_larg[2] = {iientries_entry_size, num_entries};
+      ESMCI::InterArray<int> transpose_ii(transpose_iientries, 2, transpose_larg);
+      
+      // Call into Array sparse matrix multiply store to create RouteHandle
+      FTN_X(c_esmc_arraysmmstoreind4)(arraydstpp, arraysrcpp, trh, &tk, factors,
+                                      &num_entries, &transpose_ii, &ignoreUnmatched,
+                                      srcTermProcessing, pipelineDepth, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                        ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+
+      // Get rid of transposed factor index list
+      delete [] transpose_iientries;
+
+      ESMCI_REGRID_TRACE_EXIT("NativeMesh Transpose ArraySMMStore");
+      
+#ifdef PROGRESSLOG_on
+    ESMC_LogDefault.Write("c_esmc_regrid_create(): Returned from transpose ArraySMMStore().", ESMC_LOGMSG_INFO);
+#endif
+
+#ifdef MEMLOG_on
+    VM::logMemInfo(std::string("RegridCreate7.0"));
+#endif
+      
+    }
 
     *nentries = num_entries;
     // Clean up.  If has_iw, then we will use the arrays to
