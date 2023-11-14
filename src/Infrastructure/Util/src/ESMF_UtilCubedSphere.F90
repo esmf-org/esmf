@@ -1331,6 +1331,140 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
   end subroutine mirror_grid_local_new
 
 
+!! Old global mirror grid which needs to be kept until ESMF_UtilCreateCSCoords() goes away
+      subroutine mirror_grid(grid_global,ng,npx,npy,ndims,nregions)
+         integer, intent(IN)    :: ng,npx,npy,ndims,nregions
+         real(ESMF_KIND_R8)   , intent(INOUT) :: grid_global(1-ng:npx  +ng,1-ng:npy  +ng,ndims,1:nregions)
+         integer :: i,j,n,n1,n2,nreg
+         real(ESMF_KIND_R8) :: x1,y1,z1, x2,y2,z2, ang
+!
+!    Mirror Across the 0-longitude
+!
+         nreg = 1
+         do j=1,ceiling(npy/2.)
+            do i=1,ceiling(npx/2.)
+
+            x1 = 0.25 * (ABS(grid_global(i        ,j        ,1,nreg)) + &
+                         ABS(grid_global(npx-(i-1),j        ,1,nreg)) + &
+                         ABS(grid_global(i        ,npy-(j-1),1,nreg)) + &
+                         ABS(grid_global(npx-(i-1),npy-(j-1),1,nreg)))
+            grid_global(i        ,j        ,1,nreg) = SIGN(x1,grid_global(i        ,j        ,1,nreg))
+            grid_global(npx-(i-1),j        ,1,nreg) = SIGN(x1,grid_global(npx-(i-1),j        ,1,nreg))
+            grid_global(i        ,npy-(j-1),1,nreg) = SIGN(x1,grid_global(i        ,npy-(j-1),1,nreg))
+            grid_global(npx-(i-1),npy-(j-1),1,nreg) = SIGN(x1,grid_global(npx-(i-1),npy-(j-1),1,nreg))
+
+            y1 = 0.25 * (ABS(grid_global(i        ,j        ,2,nreg)) + &   
+                         ABS(grid_global(npx-(i-1),j        ,2,nreg)) + &
+                         ABS(grid_global(i        ,npy-(j-1),2,nreg)) + &
+                         ABS(grid_global(npx-(i-1),npy-(j-1),2,nreg)))
+            grid_global(i        ,j        ,2,nreg) = SIGN(y1,grid_global(i        ,j        ,2,nreg))
+            grid_global(npx-(i-1),j        ,2,nreg) = SIGN(y1,grid_global(npx-(i-1),j        ,2,nreg))
+            grid_global(i        ,npy-(j-1),2,nreg) = SIGN(y1,grid_global(i        ,npy-(j-1),2,nreg))
+            grid_global(npx-(i-1),npy-(j-1),2,nreg) = SIGN(y1,grid_global(npx-(i-1),npy-(j-1),2,nreg))
+             
+           ! force dateline/greenwich-meridion consitency
+            if (mod(npx,2) /= 0) then
+              if ( (i==1+(npx-1)/2.0) ) then
+                 grid_global(i,j        ,1,nreg) = 0.0
+                 grid_global(i,npy-(j-1),1,nreg) = 0.0
+              endif
+            endif
+
+            enddo
+         enddo
+
+         do nreg=2,nregions
+           do j=1,npy
+             do i=1,npx
+
+               x1 = grid_global(i,j,1,1)
+               y1 = grid_global(i,j,2,1)
+               z1 = radius
+
+               if (nreg == 2) then
+                  ang = -90.
+                  call rot_3d( 3, x1, y1, z1, ang, x2, y2, z2, 1, 1)  ! rotate about the z-axis
+               elseif (nreg == 3) then
+                  ang = -90.
+                  call rot_3d( 3, x1, y1, z1, ang, x2, y2, z2, 1, 1)  ! rotate about the z-axis
+                  ang = 90.
+                  call rot_3d( 1, x2, y2, z2, ang, x1, y1, z1, 1, 1)  ! rotate about the x-axis
+                  x2=x1
+                  y2=y1
+                  z2=z1
+
+           ! force North Pole and dateline/greenwich-meridion consitency
+                  if (mod(npx,2) /= 0) then
+                     if ( (i==1+(npx-1)/2.0) .and. (i==j) ) then
+                        x2 = 0.0
+                        y2 = pi/2.0
+                     endif
+                     if ( (j==1+(npy-1)/2.0) .and. (i < 1+(npx-1)/2.0) ) then
+                        x2 = 0.0
+                     endif
+                     if ( (j==1+(npy-1)/2.0) .and. (i > 1+(npx-1)/2.0) ) then
+                        x2 = pi
+                     endif
+                  endif
+
+               elseif (nreg == 4) then
+                  ang = -180.
+                  call rot_3d( 3, x1, y1, z1, ang, x2, y2, z2, 1, 1)  ! rotate about the z-axis
+                  ang = 90.
+                  call rot_3d( 1, x2, y2, z2, ang, x1, y1, z1, 1, 1)  ! rotate about the x-axis
+                  x2=x1
+                  y2=y1
+                  z2=z1
+
+               ! force dateline/greenwich-meridion consitency
+                  if (mod(npx,2) /= 0) then
+                    if ( (j==1+(npy-1)/2.0) ) then
+                       x2 = pi
+                    endif
+                  endif
+
+               elseif (nreg == 5) then
+                  ang = 90.
+                  call rot_3d( 3, x1, y1, z1, ang, x2, y2, z2, 1, 1)  ! rotate about the z-axis
+                  ang = 90.
+                  call rot_3d( 2, x2, y2, z2, ang, x1, y1, z1, 1, 1)  ! rotate about the y-axis
+                  x2=x1
+                  y2=y1
+                  z2=z1
+               elseif (nreg == 6) then
+                  ang = 90.
+                  call rot_3d( 2, x1, y1, z1, ang, x2, y2, z2, 1, 1)  ! rotate about the y-axis
+                  ang = 0.
+                  call rot_3d( 3, x2, y2, z2, ang, x1, y1, z1, 1, 1)  ! rotate about the z-axis
+                  x2=x1
+                  y2=y1
+                  z2=z1
+
+           ! force South Pole and dateline/greenwich-meridion consitency
+                  if (mod(npx,2) /= 0) then
+                     if ( (i==1+(npx-1)/2.0) .and. (i==j) ) then
+                        x2 = 0.0
+                        y2 = -pi/2.0
+                     endif
+                     if ( (i==1+(npx-1)/2.0) .and. (j > 1+(npy-1)/2.0) ) then
+                        x2 = 0.0
+                     endif
+                     if ( (i==1+(npx-1)/2.0) .and. (j < 1+(npy-1)/2.0) ) then
+                        x2 = pi
+                     endif
+                  endif
+
+               endif
+
+               grid_global(i,j,1,nreg) = x2
+               grid_global(i,j,2,nreg) = y2
+
+              enddo
+            enddo
+          enddo
+
+  end subroutine mirror_grid
+
   !-------------------------------------------------------------------------------
   ! vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv !
   !
