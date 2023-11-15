@@ -195,38 +195,45 @@ int main(void){
   // Try catch to catch errors
   try { 
   
-    // Create Pgon triangle object
-    Pgon<GEOM_CART2D> tri;
-    tri.push_back_orig_vert(0.0,0.0);
-    tri.push_back_orig_vert(1.0,0.0);
-    tri.push_back_orig_vert(0.0,1.0);
+    // Create Pgon sqaure
+    Pgon<GEOM_CART2D> square1;
+    square1.push_back_orig_vert(0.0,0.0);
+    square1.push_back_orig_vert(2.0,0.0);
+    square1.push_back_orig_vert(2.0,2.0);
+    square1.push_back_orig_vert(0.0,2.0);
 
-    // Debug output
-    tri.write_to_vtk("tri_2DCart");
-
-   
-    // Create Pgon square object
-    Pgon<GEOM_CART2D> square;
-    square.push_back_orig_vert(0.3,0.3);
-    square.push_back_orig_vert(1.3,0.3);
-    square.push_back_orig_vert(1.3,1.3);
-    square.push_back_orig_vert(0.3,1.3);
-
-    std::cout << "Before: \n";
-    std::cout << square;
+    std::cout << "Before square 1: \n";
+    std::cout << square1;
     
     // Debug output
-    square.write_to_vtk("square_2DCart");
+    square1.write_to_vtk("square1_2DCart");
+
+    
+    // Create Pgon square object
+    Pgon<GEOM_CART2D> square2;
+    square2.push_back_orig_vert(1.0,1.0);
+    square2.push_back_orig_vert(3.0,1.0);
+    square2.push_back_orig_vert(3.0,3.0);
+    square2.push_back_orig_vert(1.0,3.0);
+
+    std::cout << "Before square 2: \n";
+    std::cout << square2;
+    
+    // Debug output
+    square2.write_to_vtk("square2_2DCart");
 
     // Intersection
     Pgon<GEOM_CART2D> result;
-    Pgon<GEOM_CART2D>::intersection(tri, square, result);
+    Pgon<GEOM_CART2D>::intersection(square1, square2, result);
 
     // Debug output
-    std::cout << "After: \n";
-    std::cout << square;
+    std::cout << "After square1: \n";
+    std::cout << square1;
+
+    std::cout << "\nAfter square2: \n";
+    std::cout << square2;
     
-    square.write_to_vtk("square_2DCart_afteri");
+    square1.write_to_vtk("square1_2DCart_afteri");
     
     
   } catch(...) {
@@ -284,6 +291,8 @@ int main(void){
     std::cout << square;
     
     square.write_to_vtk("square_2DCart_afteri");
+
+    tri.write_to_vtk("tri_2DCart_afteri");
     
     
   } catch(...) {

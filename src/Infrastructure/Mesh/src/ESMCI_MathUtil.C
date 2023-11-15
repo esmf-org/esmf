@@ -3998,6 +3998,23 @@ bool is_pnt_in_polygon(int num_p, double *p, double *pnt, double tol, int *tri_i
   void intersect_segs_cart2D(double *p1, double *p2, double *q1, double *q2,
                              double *p_t, double *q_t) {
 
+
+    // Bottom of P_t
+    double p_t_btm=(p1[0]-p2[0])*(q1[1]-q2[1])-(p1[1]-p2[1])*(q1[0]-q2[0]);
+
+    // The rest of the p_t calc
+    *p_t=((p1[0]-q1[0])*(q1[1]-q2[1])-(p1[1]-q1[1])*(q1[0]-q2[0]))/p_t_btm;
+
+    
+    // Bottom of q_t
+    double q_t_btm=(q1[0]-q2[0])*(p1[1]-p2[1])-(q1[1]-q2[1])*(p1[0]-p2[0]);
+
+    // The rest of the q_t calc
+    *q_t=((q1[0]-p1[0])*(p1[1]-p2[1])-(q1[1]-p1[1])*(p1[0]-p2[0]))/q_t_btm;
+
+   
+
+#if 0   
     // Calculate thing to divide both line equations by
     double ttdb=
       p1[0]*(q2[1] - q1[1]) +
@@ -4030,7 +4047,9 @@ bool is_pnt_in_polygon(int num_p, double *p, double *pnt, double tol, int *tri_i
       -(p1[0]*(q1[1]-p2[1]) +
         p2[0]*(p1[1]-q1[1]) +
         q1[0]*(p2[1]-p1[1]))/ttdb;
-   
+
+#endif
+    
   }
 
   

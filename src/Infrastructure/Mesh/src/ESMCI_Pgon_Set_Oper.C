@@ -61,6 +61,8 @@ void _intersect_and_classify_edge(Pgon<GEOM> &pg1, Pgon<GEOM> &pg2,
                                   Vert<GEOM> *v1_pg1, Vert<GEOM> *v2_pg1,
                                   Vert<GEOM> *v1_pg2, Vert<GEOM> *v2_pg2) {
 
+      std::cout << "["<<*v1_pg1<<"]->["<<*v2_pg1<<"] with ["<<*v1_pg2<<"]->["<<*v2_pg2<<"] \n";
+  
      // Intersect edges
       double pg1_t,pg2_t;
       GEOM::intersect_segs(v1_pg1->pnt,v2_pg1->pnt,v1_pg2->pnt,v2_pg2->pnt,&pg1_t,&pg2_t); 
@@ -73,10 +75,16 @@ void _intersect_and_classify_edge(Pgon<GEOM> &pg1, Pgon<GEOM> &pg2,
       } else if (pg1_t == 0.0) {
         intertype=PGON_INTERTYPE_T_P1;
       } else if (pg1_t < 1.0) {
-        if (pg2_t == 0.0) {
-          intertype=PGON_INTERTYPE_T_P2;        
-        } else {
-          intertype=PGON_INTERTYPE_X;
+        if (pg2_t < 0.0) {
+ 
+        } else if (pg2_t == 0.0) {
+          intertype=PGON_INTERTYPE_T_P2;         
+        } else if (pg2_t < 1.0) {
+          intertype=PGON_INTERTYPE_X; 
+        } else if (pg1_t == 1.0) {
+          
+        } else { // pg1_t > 1.0
+          intertype=PGON_INTERTYPE_NONE;        
         }
       } else if (pg1_t == 1.0) {
         
@@ -86,6 +94,8 @@ void _intersect_and_classify_edge(Pgon<GEOM> &pg1, Pgon<GEOM> &pg2,
 
       //      printf("t1=%f t2=%f intertype=%d\n",pg1_t,pg2_t,intertype);
 
+      std::cout << "    intertype="<<intertype<<"\n";
+      
       // React to intesection classifications
       switch(intertype) {
       
@@ -93,15 +103,20 @@ void _intersect_and_classify_edge(Pgon<GEOM> &pg1, Pgon<GEOM> &pg2,
 
         // Calc new point
         double new_pnt[GEOM::pnt_size];
-        GEOM::calc_pnt_between(v1_pg1->pnt, v2_pg1->pnt, pg1_t, new_pnt);
+
         
         // Create new vertex and add to polygon 1
+        GEOM::calc_pnt_between(v1_pg1->pnt, v2_pg1->pnt, pg1_t, new_pnt);
         Vert<GEOM> *vnew_pg1=pg1.add_inter_vert_between(v1_pg1, v2_pg1, new_pnt, pg1_t);
 
         // Create new vertex and add to polygon 2
+        GEOM::calc_pnt_between(v1_pg2->pnt, v2_pg2->pnt, pg2_t, new_pnt);
         Vert<GEOM> *vnew_pg2=pg2.add_inter_vert_between(v1_pg2, v2_pg2, new_pnt, pg2_t);
         
         // Connect vertices together
+
+        std::cout << "    adding:"<<*vnew_pg1<<" to pg1\n";
+        std::cout << "    adding:"<<*vnew_pg2<<" to pg2\n";
         
         break;
 #if 0
@@ -157,7 +172,6 @@ void _intersect_pgons(Pgon<GEOM> &pg1, Pgon<GEOM> &pg2) {
       Vert<GEOM> *v2_pg2 = v1_pg2->next;
       
       // Debug output
-      std::cout << "["<<*v1_pg1<<"]->["<<*v2_pg1<<"] with ["<<*v1_pg2<<"]->["<<*v2_pg2<<"] \n";
       _intersect_and_classify_edge(pg1, pg2,
                                    v1_pg1, v2_pg1,
                                    v1_pg2, v2_pg2);
