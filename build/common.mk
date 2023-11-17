@@ -227,6 +227,10 @@ ifndef ESMF_TESTEXHAUSTIVE
 export ESMF_TESTEXHAUSTIVE = default
 endif
 
+ifndef ESMF_TESTPERFORMANCE
+export ESMF_TESTPERFORMANCE = default
+endif
+
 ifndef ESMF_TESTCOMPTUNNEL
 export ESMF_TESTCOMPTUNNEL = default
 endif
@@ -451,6 +455,10 @@ endif
 
 ifneq ($(ESMF_TRACE_PRELOAD_LINKED),ON)
 export ESMF_TRACE_PRELOAD_LINKED = OFF
+endif
+
+ifneq ($(ESMF_TESTPERFORMANCE),OFF)
+export ESMF_TESTPERFORMANCE = ON
 endif
 
 ifneq ($(ESMF_TESTCOMPTUNNEL),OFF)
@@ -1905,6 +1913,15 @@ endif
 # between the different BOPT modes.
 #-------------------------------------------------------------------------------
 ESMF_CPPFLAGS       += -DESMF_BOPT_$(ESMF_BOPT)
+
+#-------------------------------------------------------------------------------
+# ESMF_TESTPERFORMANCE is passed (by CPP) into test programs to control whether
+# to run performance tests (these can be turned off on machines where
+# performance tests are highly variable and can lead to spurious failures).
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_TESTPERFORMANCE),ON)
+ESMF_CPPFLAGS       += -DESMF_TESTPERFORMANCE
+endif
 
 #-------------------------------------------------------------------------------
 # ESMF_TESTCOMPTUNNEL is passed (by CPP) into test programs to control the
