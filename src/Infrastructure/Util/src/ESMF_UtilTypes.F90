@@ -782,6 +782,21 @@
 
 
 !------------------------------------------------------------------------------
+      type ESMF_CubedSphereCalc_Flag
+#ifndef ESMF_NO_SEQUENCE
+      sequence
+#endif
+!  private
+         integer :: cubedspherecalc
+      end type
+
+
+      type(ESMF_CubedSphereCalc_Flag), parameter :: &
+           ESMF_CUBEDSPHERECALC_UNINIT = ESMF_CubedSphereCalc_Flag(0), &
+           ESMF_CUBEDSPHERECALC_AVG_SYM = ESMF_CubedSphereCalc_Flag(1), &
+           ESMF_CUBEDSPHERECALC_CALC_SYM = ESMF_CubedSphereCalc_Flag(2)
+      
+!------------------------------------------------------------------------------
       type ESMF_LineType_Flag
 #ifndef ESMF_NO_SEQUENCE
       sequence
@@ -1155,6 +1170,12 @@
              ESMF_EXTRAPMETHOD_CREEP, &
              ESMF_EXTRAPMETHOD_CREEP_NRST_D
 
+      public ESMF_CubedSphereCalc_Flag, &
+             ESMF_CUBEDSPHERECALC_UNINIT, &
+             ESMF_CUBEDSPHERECALC_AVG_SYM, &
+             ESMF_CUBEDSPHERECALC_CALC_SYM 
+      
+      
       public ESMF_LineType_Flag, &
              ESMF_LINETYPE_CART, &
              ESMF_LINETYPE_GREAT_CIRCLE
