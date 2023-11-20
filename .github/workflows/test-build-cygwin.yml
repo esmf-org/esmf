@@ -9,6 +9,9 @@ permissions:
   contents: read # to fetch code (actions/checkout)
 
 env:
+  SHELLOPTS: igncr
+  CYGWIN_NOWINPATH: 1
+  CHERE_INVOKING: 1
   ESMF_DIR: /cygdrive/d/a/esmf/esmf
   ESMF_BOPT: O
   ESMF_OPTLEVEL: 2
@@ -34,6 +37,7 @@ jobs:
   cygwin_build_test:
     runs-on: windows-latest
     steps:
+      - run: git config --global core.autocrlf input
       - uses: actions/checkout@v3
         with:
           submodules: recursive
