@@ -43,7 +43,7 @@ jobs:
           install-dir: 'C:\tools\cygwin'
           packages: >-
             openmpi gcc-core gcc-fortran gcc-g++ libnetcdf-devel libnetcdf-fortran-devel 
-            texlive-collection-latex perl
+            texlive-collection-latex perl make
       - name: Build ESMF
         run: |
           C:\tools\cygwin\bin\dash.exe -c "make all"
