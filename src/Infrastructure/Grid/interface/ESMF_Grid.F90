@@ -14706,7 +14706,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[coordCalcFlag]}]
 !          A flag which controls the method used to calculate the cubed sphere coordinates.
 !          Please see section~\ref{const:cubedspherecalcflag} for a list of options. If not set,
-!          defaults to {\tt ESMF\_CUBEDSPHERECALC\_AVG\_SYM} which was the original method used
+!          defaults to {\tt ESMF\_CUBEDSPHERECALC\_GLOBAL} which was the original method used
 !          to calculate coordinates.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -14831,7 +14831,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   endif
 
   ! Set default coord. calc. flag
-  coordCalcFlagLocal=ESMF_CUBEDSPHERECALC_AVG_SYM
+  coordCalcFlagLocal=ESMF_CUBEDSPHERECALC_GLOBAL
   if (present(coordCalcFlag)) coordCalcFlagLocal= coordCalcFlag
   
   ! set defaults
@@ -14994,7 +14994,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
          ! Set coordinate calc method balop's[ed on flag (by setting local_algorithm switch)
          local_algorithm=.false.
-         if (coordCalcFlag == ESMF_CUBEDSPHERECALC_CALC_SYM) local_algorithm=.true.
+         if (coordCalcFlag == ESMF_CUBEDSPHERECALC_LOCAL) local_algorithm=.true.
          
          ! Generate glocal edge coordinates and local center coordinates         
          if (docenter .and. docorner) then
@@ -15183,7 +15183,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[coordCalcFlag]}]
 !          A flag which controls the method used to calculate the cubed sphere coordinates.
 !          Please see section~\ref{const:cubedspherecalcflag} for a list of options. If not set,
-!          defaults to {\tt ESMF\_CUBEDSPHERECALC\_AVG\_SYM} which was the original method used
+!          defaults to {\tt ESMF\_CUBEDSPHERECALC\_GLOBAL} which was the original method used
 !          to calculate coordinates.    
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -15348,7 +15348,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   endif
 
   ! Set default coord. calc. flag
-  coordCalcFlagLocal=ESMF_CUBEDSPHERECALC_AVG_SYM
+  coordCalcFlagLocal=ESMF_CUBEDSPHERECALC_GLOBAL
   if (present(coordCalcFlag)) coordCalcFlagLocal= coordCalcFlag
 
   
@@ -15493,7 +15493,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
          ! Set coordinate calc method balop's[ed on flag (by setting local_algorithm switch)
          local_algorithm=.false.
-         if (coordCalcFlag == ESMF_CUBEDSPHERECALC_CALC_SYM) local_algorithm=.true.
+         if (coordCalcFlag == ESMF_CUBEDSPHERECALC_LOCAL) local_algorithm=.true.
          
          ! Generate glocal edge coordinates and local center coordinates
          if (docenter .and. docorner) then

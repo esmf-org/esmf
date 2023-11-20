@@ -790,10 +790,10 @@
          integer :: cubedspherecalc
       end type
 
-
+      
       type(ESMF_CubedSphereCalc_Flag), parameter :: &
-           ESMF_CUBEDSPHERECALC_AVG_SYM = ESMF_CubedSphereCalc_Flag(1), &
-           ESMF_CUBEDSPHERECALC_CALC_SYM = ESMF_CubedSphereCalc_Flag(2)
+           ESMF_CUBEDSPHERECALC_GLOBAL = ESMF_CubedSphereCalc_Flag(1), &
+           ESMF_CUBEDSPHERECALC_LOCAL = ESMF_CubedSphereCalc_Flag(2)
       
 !------------------------------------------------------------------------------
       type ESMF_LineType_Flag
@@ -1170,8 +1170,8 @@
              ESMF_EXTRAPMETHOD_CREEP_NRST_D
 
       public ESMF_CubedSphereCalc_Flag, &
-             ESMF_CUBEDSPHERECALC_AVG_SYM, &
-             ESMF_CUBEDSPHERECALC_CALC_SYM 
+             ESMF_CUBEDSPHERECALC_GLOBAL, &
+             ESMF_CUBEDSPHERECALC_LOCAL 
       
       
       public ESMF_LineType_Flag, &
