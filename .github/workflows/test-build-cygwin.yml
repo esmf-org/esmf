@@ -46,7 +46,7 @@ jobs:
             texlive-collection-latex perl make bash dash
       - name: Check location
         run: |
-          C:\tools\cygwin\bin\dash.exe -c "pwd; echo ${ESMF_DIR}"
+          C:\tools\cygwin\bin\dash.exe -c "echo PWD; pwd; echo ESMF_DIR=${ESMF_DIR}"
       - name: Build ESMF
         run: |
           C:\tools\cygwin\bin\dash.exe -c "/usr/bin/make all"
