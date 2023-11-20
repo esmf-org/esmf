@@ -47,7 +47,7 @@ jobs:
           install-dir: 'C:\tools\cygwin'
           packages: >-
             openmpi gcc-core gcc-fortran gcc-g++ libnetcdf-devel libnetcdf-fortran-devel 
-            texlive-collection-latex perl make bash dash
+            texlive-collection-latex perl make bash dash liblapack-devel
       - name: Check location
         run: |
           C:\tools\cygwin\bin\dash.exe -c "echo PWD; pwd; echo ESMF_DIR=${ESMF_DIR}"
