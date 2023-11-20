@@ -9,6 +9,7 @@ permissions:
   contents: read # to fetch code (actions/checkout)
 
 env:
+  ESMF_DIR: /cygdrive/d/a/esmf/esmf
   ESMF_BOPT: O
   ESMF_OPTLEVEL: 2
   ESMF_COMM: mpiuni
