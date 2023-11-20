@@ -4011,10 +4011,10 @@ $(ESMF_LOCOBJDIR)/%.o : %.cpp
 .F90.$(ESMF_SL_SUFFIX):
 	$(ESMF_F90COMPILEFREECPP_CMD) $(ESMF_SO_F90COMPILEOPTS) $<
 	if [ ${ESMF_SL_SUFFIX} -ne "dll.a" ] ; then \
-	$(ESMF_F90LINKER) $(ESMF_SO_F90LINKOPTS) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $*.o $(ESMF_F90ESMFLINKLIBS) \
+	$(ESMF_F90LINKER) $(ESMF_SO_F90LINKOPTS) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $*.o $(ESMF_F90ESMFLINKLIBS); \
 	else \
-	$(ESMF_F90LINKER) $(ESMF_SO_F90LINKOPTS) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) -shared -o $(@:.dll.a=.dll) -Wl,--out-implib=$@ -Wl,--export-all-symbols -Wl,--whole-archive $*.o -Wl,--no-whole-archive $(ESMF_F90ESMFLINKLIBS) \
-	fi
+	$(ESMF_F90LINKER) $(ESMF_SO_F90LINKOPTS) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) -shared -o $(@:.dll.a=.dll) -Wl,--out-implib=$@ -Wl,--export-all-symbols -Wl,--whole-archive $*.o -Wl,--no-whole-archive $(ESMF_F90ESMFLINKLIBS); \
+	fi;
 
 .F90.$(ESMF_LIB_SUFFIX):
 	$(ESMF_F90COMPILEFREECPP_CMD) $<
