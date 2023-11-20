@@ -14615,10 +14615,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreateCubedSphere()
   function ESMF_GridCreateCubedSphereReg(tileSize,keywordEnforcer, &
-        regDecompPTile, decompflagPTile,                        &
-        coordSys, coordTypeKind,                                &
-        deLabelList, staggerLocList,                            &
-        delayout, indexflag, name, transformArgs, rc)
+       regDecompPTile, decompflagPTile,                            &
+       coordSys, coordTypeKind,                                    &
+       deLabelList, staggerLocList,                                &
+       delayout, indexflag, name, transformArgs, coordCalcFlag,    &
+       rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Grid) :: ESMF_GridCreateCubedSphereReg
@@ -14636,6 +14637,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Index_Flag),          intent(in),  optional :: indexflag
     character(len=*),               intent(in),  optional :: name
     type(ESMF_CubedSphereTransform_Args), intent(in),  optional :: transformArgs
+    type(ESMF_CubedSphereCalc_Flag),intent(in),  optional :: coordCalcFlag           
     integer,                        intent(out), optional :: rc
 
 !
@@ -14693,14 +14695,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          {\tt regDecompPTile} will be constructed accordingly.
 !     \item[{[indexflag]}]
 !          Indicates the indexing scheme to be used in the new Grid. Please see
-!          Section~\ref{const:indexflag} for the list of options. If not present,
+!          section~\ref{const:indexflag} for the list of options. If not present,
 !          defaults to ESMF\_INDEX\_DELOCAL.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[transformArgs]}]
 !          A data type containing the stretch factor, target longitude, and target latitude
-!          to perform a Schmidt transformation on the Cubed-Sphere grid. See section
+!          to perform a Schmidt transformation on the Cubed-Sphere grid. 
 !          \ref{sec:usage:cubedspherewttransform} for details.
+!     \item[{[coordCalcFlag]}]
+!          A flag which controls the method used to calculate the cubed sphere coordinates.
+!          Please see section~\ref{const:cubedspherecalcflag} for a list of options. If not set,
+!          defaults to {\tt ESMF\_CUBEDSPHERECALC\_AVG\_SYM} which was the original method used
+!          to calculate coordinates.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -14734,10 +14741,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Index_Flag)                      :: localIndexFlag
     type(ESMF_CoordSys_Flag)                   :: coordSysLocal
     type(ESMF_TypeKind_Flag)                   :: coordTypeKindLocal
+    type(ESMF_CubedSphereCalc_Flag)            :: coordCalcFlagLocal
     integer                                    :: s
     logical                                    :: docenter, docorner
     !real(ESMF_KIND_R8)                        :: starttime, endtime
-
+    logical                                    :: local_algorithm
+    
     if (present(rc)) rc=ESMF_SUCCESS
   !------------------------------------------------------------------------
   ! get global vm information
@@ -14820,6 +14829,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
      coordTypeKindLocal=ESMF_TYPEKIND_R8
   endif
 
+  ! Set default coord. calc. flag
+  coordCalcFlagLocal=ESMF_CUBEDSPHERECALC_AVG_SYM
+  if (present(coordCalcFlag)) coordCalcFlagLocal= coordCalcFlag
+  
   ! set defaults
   docenter = .false.
   docorner = .false.
@@ -14978,21 +14991,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          endif  
          !call ESMF_VMWtime(starttime, rc=localrc)
          ! Generate glocal edge coordinates and local center coordinates
-
+  
+         ! Set coordinate calc method balop's[ed on flag (by setting local_algorithm switch)
+         local_algorithm=.false.
+         if (coordCalcFlag == ESMF_CUBEDSPHERECALC_CALC_SYM) local_algorithm=.true.
+         
          if (docenter .and. docorner) then
             call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR8, &
                latEdge=latCornerPtrR8, start=start, count=count, &
                tile=tile, lonCenter=lonPtrR8, latCenter=latPtrR8, &
-               schmidtTransform=transformArgs)
+               schmidtTransform=transformArgs, local_algorithm=local_algorithm)
          elseif (docorner) then
             call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR8, &
               latEdge=latCornerPtrR8, start=start, count=count, tile=tile, &
-              schmidtTransform=transformArgs)
+              schmidtTransform=transformArgs, local_algorithm=local_algorithm)
          else
             call ESMF_UtilCreateCSCoordsPar(tileSize, &
                start=start, count=count, &
                tile=tile, lonCenter=lonPtrR8, latCenter=latPtrR8, &
-               schmidtTransform=transformArgs)
+               schmidtTransform=transformArgs, local_algorithm=local_algorithm)
          endif
 
          !call ESMF_VMWtime(endtime, rc=localrc)

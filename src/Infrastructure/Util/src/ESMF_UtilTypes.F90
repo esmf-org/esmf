@@ -792,7 +792,6 @@
 
 
       type(ESMF_CubedSphereCalc_Flag), parameter :: &
-           ESMF_CUBEDSPHERECALC_UNINIT = ESMF_CubedSphereCalc_Flag(0), &
            ESMF_CUBEDSPHERECALC_AVG_SYM = ESMF_CubedSphereCalc_Flag(1), &
            ESMF_CUBEDSPHERECALC_CALC_SYM = ESMF_CubedSphereCalc_Flag(2)
       
@@ -1171,7 +1170,6 @@
              ESMF_EXTRAPMETHOD_CREEP_NRST_D
 
       public ESMF_CubedSphereCalc_Flag, &
-             ESMF_CUBEDSPHERECALC_UNINIT, &
              ESMF_CUBEDSPHERECALC_AVG_SYM, &
              ESMF_CUBEDSPHERECALC_CALC_SYM 
       
@@ -1316,6 +1314,7 @@ interface operator (==)
   module procedure ESMF_FileStatusEq
   module procedure ESMF_RegridMethodEq
   module procedure ESMF_ExtrapMethodEq
+  module procedure ESMF_CubedSphereCalcEq
   module procedure ESMF_CoordSysEqual
   module procedure ESMF_LineTypeEqual
   module procedure ESMF_NormTypeEqual
@@ -1341,6 +1340,7 @@ interface operator (/=)
   module procedure ESMF_FileStatusNe
   module procedure ESMF_RegridMethodNe
   module procedure ESMF_ExtrapMethodNe
+  module procedure ESMF_CubedSphereCalcNe
   module procedure ESMF_CoordSysNotEqual
   module procedure ESMF_LineTypeNotEqual
   module procedure ESMF_NormTypeNotEqual
@@ -2048,6 +2048,23 @@ impure elemental function ESMF_RegridMethodNe(rp1, rp2)
  type(ESMF_RegridMethod_Flag), intent(in) :: rp1, rp2
 
  ESMF_RegridMethodNe = (rp1%regridmethod /= rp2%regridmethod)
+end function
+
+!------------------------------------------------------------------------------
+! function to compare two ESMF_CubedSphereCalc types
+
+impure elemental function ESMF_CubedSphereCalcEq(csc1, csc2)
+ logical ESMF_CubedSphereCalcEq
+ type(ESMF_CubedSphereCalc_Flag), intent(in) :: csc1, csc2
+
+ ESMF_CubedSphereCalcEq = (csc1%cubedspherecalc == csc2%cubedspherecalc)
+end function
+
+impure elemental function ESMF_CubedSphereCalcNe(csc1, csc2)
+ logical ESMF_CubedSphereCalcNe
+ type(ESMF_CubedSphereCalc_Flag), intent(in) :: csc1, csc2
+
+ ESMF_CubedSphereCalcNe = (csc1%cubedspherecalc /= csc2%cubedspherecalc)
 end function
 
 !------------------------------------------------------------------------------
