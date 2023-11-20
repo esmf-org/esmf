@@ -1,0 +1,51 @@
+name: Test on Cygwin
+on: ["push", "pull_request"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read # to fetch code (actions/checkout)
+
+env:
+  ESMF_BOPT: O
+  ESMF_OPTLEVEL: 2
+  ESMF_COMM: mpiuni
+  ESMF_COMPILER: gfortran
+  ESMF_TESTSHAREDOBJ: ON
+  ESMF_RANLIB: ranlib
+  ESMF_LAPACK: system
+  ESMF_LAPACK_LIBPATH: /usr/lib
+  ESMF_LAPACK_LIBS: -llapack -lblas
+  NETCDF: /usr
+  ESMF_NETCDF: split
+  ESMF_NETCDF_INCLUDE: /usr/include
+  ESMF_NETCDF_LIBPATH: /usr/lib
+  ESMF_CXX: g++
+  ESMF_CXXCOMPILEOPTS: "-g -O2"
+  ESMF_F90: gfortran
+  ESMF_F90COMPILEOPTS: "-g -O2"
+  ESMF_INSTALL_PREFIX: /tmp/fakeroot/usr
+  ESMF_INSTALL_DOCDIR: share/doc/esmf
+
+jobs:
+  cygwin_build_test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - uses: cygwin/cygwin-install-action@v4
+        with:
+          platform: x86_64
+          install-dir: 'C:\tools\cygwin'
+          packages: >-
+            openmpi gcc-core gcc-fortran gcc-g++ libnetcdf-devel libnetcdf-fortran-devel 
+            texlive-collection-latex perl
+      - name: Build ESMF
+        run: |
+          C:\tools\cygwin\bin\dash.exe -c "make all"
+      - name: Build ESMF Docs
+        run: |
+          C:\tools\cygwin\bin\dash.exe -c "make doc"
