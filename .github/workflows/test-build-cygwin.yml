@@ -50,6 +50,10 @@ jobs:
             texlive-collection-latex texlive-collection-latexextra perl make bash dash 
             liblapack-devel
             python39-devel python39-pip python39-numpy python39-pytest
+      - name: Set Windows PATH
+        uses: egor-tensin/cleanup-path@v3
+        with:
+          dirs: 'C:\tools\cygwin\bin;C:\tools\cygwin\lib\lapack'
       - name: Check location
         run: |
           C:\tools\cygwin\bin\dash.exe -c "echo PWD; pwd; echo ESMF_DIR=${ESMF_DIR}"
