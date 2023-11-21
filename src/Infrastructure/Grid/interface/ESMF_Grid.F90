@@ -14829,7 +14829,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   else
      coordTypeKindLocal=ESMF_TYPEKIND_R8
   endif
-
+  
   ! Set default coord. calc. flag
   coordCalcFlagLocal=ESMF_CUBEDSPHERECALC_1TILE
   if (present(coordCalcFlag)) coordCalcFlagLocal= coordCalcFlag
@@ -14994,7 +14994,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
          ! Set coordinate calc method balop's[ed on flag (by setting local_algorithm switch)
          local_algorithm=.false.
-         if (coordCalcFlag == ESMF_CUBEDSPHERECALC_LOCAL) local_algorithm=.true.
+         if (coordCalcFlagLocal == ESMF_CUBEDSPHERECALC_LOCAL) local_algorithm=.true.
          
          ! Generate glocal edge coordinates and local center coordinates         
          if (docenter .and. docorner) then
@@ -15493,7 +15493,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
          ! Set coordinate calc method balop's[ed on flag (by setting local_algorithm switch)
          local_algorithm=.false.
-         if (coordCalcFlag == ESMF_CUBEDSPHERECALC_LOCAL) local_algorithm=.true.
+         if (coordCalcFlagLocal == ESMF_CUBEDSPHERECALC_LOCAL) local_algorithm=.true.
          
          ! Generate glocal edge coordinates and local center coordinates
          if (docenter .and. docorner) then
