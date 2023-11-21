@@ -215,7 +215,10 @@ module ESMF_CompMod
 
     integer             :: npetlist         ! number of PETs in petlist
     integer, pointer    :: petlist(:)       ! list of usable parent PETs 
-    
+
+    integer             :: ndevlist         ! number of DEVs in devlist
+    integer, pointer    :: devlist(:)       ! list of global DEV ids for comp
+
     type(ESMF_VMPlan)   :: vmplan           ! reference to VMPlan
     type(ESMF_Pointer)  :: vm_info          ! holding pointer to info
     type(ESMF_Pointer)  :: vm_cargo         ! holding pointer to cargo
@@ -554,7 +557,7 @@ contains
 
 ! !INTERFACE:
   recursive subroutine ESMF_CompConstruct(compp, compType, name, &
-    dirPath, configFile, config, clock, petlist, contextflag, rc)
+    dirPath, configFile, config, clock, petlist, devlist, contextflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass),     pointer               :: compp
@@ -565,6 +568,7 @@ contains
     type(ESMF_Config),        intent(in),  optional :: config
     type(ESMF_Clock),         intent(in),  optional :: clock
     integer,                  intent(in),  optional :: petlist(:)
+    integer,                  intent(in),  optional :: devlist(:)
     type(ESMF_Context_Flag),  intent(in),  optional :: contextflag
     integer,                  intent(out), optional :: rc 
 !
@@ -591,6 +595,8 @@ contains
 !    Private {\tt clock} for this {\tt Component}.
 !   \item[{[petlist]}]
 !    List of {\tt PET}s for this component. The default is to use all PETs.
+!   \item[{[devlist]}]
+!    List of {\tt DEV}s for this component. By default no devices are associated.
 !   \item[{[contextflag]}]
 !    Specify the component's VM context. The default context is
 !    {\tt ESMF\_CONTEXT\_OWN\_VM}. See section \ref{const:contextflag} for a
@@ -603,7 +609,7 @@ contains
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
     integer :: npets, mypet, i, petCount
-    integer, pointer :: petlist_loc(:)
+    integer, pointer :: petlist_loc(:), devlist_loc(:)
     character(len=ESMF_MAXPATHLEN) :: fullpath    ! config file + dirPath
     character(len=ESMF_MAXSTR)     :: msgbuf
     type(ESMF_VM):: vm
@@ -628,8 +634,10 @@ contains
     compp%configFile = "uninitialized"
     compp%dirPath = "uninitialized"
     compp%npetlist = 0
+    compp%ndevlist = 0
     nullify(compp%compw%compp)
     nullify(compp%petlist)
+    nullify(compp%devlist)
     compp%vm_info = ESMF_NULL_POINTER
     compp%vm_cargo = ESMF_NULL_POINTER
     compp%vm_recursionCount = 0
@@ -719,6 +727,21 @@ contains
         ESMF_CONTEXT, rcToReturn=rc)) return 
     endif
 
+    ! devlist
+    if (present(devlist)) then
+      compp%ndevlist = size(devlist)
+      allocate(devlist_loc(compp%ndevlist), stat=localrc)
+      if (ESMF_LogFoundAllocError(localrc, msg="local devlist", &
+        ESMF_CONTEXT, rcToReturn=rc)) return 
+      compp%devlist => devlist_loc
+      compp%devlist = devlist     ! copy contents of devlist
+    else
+      compp%ndevlist = 0
+      allocate(compp%devlist(1), stat=localrc)
+      if (ESMF_LogFoundAllocError(localrc, msg="local devlist", &
+        ESMF_CONTEXT, rcToReturn=rc)) return 
+    endif
+
     ! check for consistency between contextflag and petlist
     call ESMF_VMGet(vm=compp%vm_parent, localPet=mypet, petCount=npets, &
       rc=localrc)
@@ -782,6 +805,7 @@ contains
     ! instantiate a default VMPlan
     call ESMF_VMPlanConstruct(vmplan=compp%vmplan, vm=compp%vm_parent, &
       npetlist=compp%npetlist, petlist=compp%petlist, &
+      ndevlist=compp%ndevlist, devlist=compp%devlist, &
       contextflag=compp%contextflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -952,6 +976,11 @@ contains
         ! deallocate space held for petlist
         deallocate(compp%petlist, stat=localrc)
         if (ESMF_LogFoundDeallocError(localrc, msg="local petlist", &
+          ESMF_CONTEXT, rcToReturn=rc)) return 
+
+        ! deallocate space held for devlist
+        deallocate(compp%devlist, stat=localrc)
+        if (ESMF_LogFoundDeallocError(localrc, msg="local devlist", &
           ESMF_CONTEXT, rcToReturn=rc)) return 
 
         ! call C++ to release function and data pointer tables.

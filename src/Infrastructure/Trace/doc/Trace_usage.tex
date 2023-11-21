@@ -245,14 +245,16 @@ The procedure for including MPI
 functions in the timing profile depends on whether the application is
 dynamically or statically linked. Most applications are dynamically linked,
 however on some systems (such as Cray), static linking may be used.
-Note that for either option, ESMF must be built with {\tt ESMF\_TRACE\_BUILD\_LIB=ON},
+Note that for either option, ESMF must be built with {\tt ESMF\_TRACE\_LIB\_BUILD=ON},
 which is the default.
 
-In {\em dynamically linked applications}, the {\tt LD\_PRELOAD} environment variable
-must be used when executing the MPI application.  This instructs the dynamic
-linker to interpose certain MPI symbols so they can be captured by the ESMF
-profiler.  To simplify this process, a script is provided at
-{\tt \$(ESMF\_INSTALL\_LIBDIR)/preload.sh} that sets the {\tt LD\_PRELOAD} variable.
+In {\em dynamically linked applications}, the {\tt LD\_PRELOAD} (Linux) or
+{\tt DYLD\_INSERT\_LIBRARIES} (Darwin) environment variable must be used when
+executing the MPI application.  This instructs the dynamic loader to interpose
+certain MPI symbols so they can be captured by the ESMF profiler.  To simplify
+this process, a script is provided at {\tt \$(ESMF\_INSTALL\_LIBDIR)/preload.sh}
+that sets the appropriate variable.
+
 For example, if you typically execute your application as as follows:
 
 \begin{verbatim}
@@ -263,13 +265,38 @@ then you should add the {\em preload.sh} script in front of the
 executable when starting the application as follows:
 
 \begin{verbatim}
-# replace $(ESMF_INSTALL_LIBDIR) with absolute path to the ESMF installation lib directory
+# replace $(ESMF_INSTALL_LIBDIR) with absolute path
+# ... to the ESMF installation lib directory
 $ mpirun -np 8 $(ESMF_INSTALL_LIBDIR)/preload.sh ./myApp
 \end{verbatim}
 
 An advantage of this approach is that your application does {\em not} need to
 be recompiled. The MPI timing information will be included in the per-PET profiles and/or the summary
-profile, depending on the setting of {\tt ESMF\_RUNTIME\_PROFILE\_OUTPUT}.
+profile, depending on the setting of environment variable
+{\tt ESMF\_RUNTIME\_PROFILE\_OUTPUT}.
+
+Notice that an additional step is required for dynamically linked applications
+on {\em Darwin} systems with System Integrity Protection (SIP) enabled! In
+addition to using the {\tt \$(ESMF\_INSTALL\_LIBDIR)/preload.sh} script during
+launching of the executable as shown above, the executable must {\em also be
+linked} against the dynamic ESMF trace preload library. This must happen during
+the link step of the executable. It is most easily accomplished by using
+variable {\tt \$(ESMF\_F90ESMFPRELOADLINKLIBS)} instead of the typical
+{\tt \$(ESMF\_F90ESMFLINKLIBS)} variable for the final link command. Both
+variables are defined in the {\em esmf.mk} file that should be imported by
+the application Makefile. For example:
+
+\begin{verbatim}
+# import esmf.mk
+include $(ESMFMKFILE)
+
+# other makefile targets here...
+
+# example final link command, with $(ESMF_F90ESMFPRELOADLINKLIBS)
+myApp: myApp.o driver.o model.o
+        $(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) \
+        $(ESMF_F90LINKRPATHS) -o $@ $^ $(ESMF_F90ESMFPRELOADLINKLIBS)
+\end{verbatim}
 
 In {\em statically linked applications}, the application must be re-linked
 with specific options provided to the linker.  These options instruct the linker
@@ -288,9 +315,12 @@ include $(ESMFMKFILE)
 
 # other makefile targets here...
 
-# example final link command, with $(ESMF_TRACE_STATICLINKOPTS) and $(ESMF_TRACE_STATICLINKLIBS) added
+# example final link command, with $(ESMF_TRACE_STATICLINKOPTS)
+# ... and $(ESMF_TRACE_STATICLINKLIBS) added
 myApp: myApp.o driver.o model.o
-	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $^ $(ESMF_F90ESMFLINKLIBS) $(ESMF_TRACE_STATICLINKOPTS) $(ESMF_TRACE_STATICLINKLIBS)
+        $(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) \
+        $(ESMF_F90LINKRPATHS) -o $@ $^ $(ESMF_F90ESMFLINKLIBS) \
+        $(ESMF_TRACE_STATICLINKOPTS) $(ESMF_TRACE_STATICLINKLIBS)
 \end{verbatim}
 
 This option will statically wrap all of the MPI functions and include them

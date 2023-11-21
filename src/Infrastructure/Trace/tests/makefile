@@ -50,13 +50,20 @@ CLOBBERDIRS =
 ESMF_TESTTRACE_TARGET = ftest_profile
 
 ifeq ($(ESMF_TRACE_LIB_BUILD),ON)
+# activate trace testing
 ESMF_F90COMPILEOPTS += -DESMF_TESTTRACE
-# add link options for static builds, if required
 ifneq ($(ESMF_TRACE_BUILD_SHARED),ON)
+# add link options for static builds
 ESMF_F90LINKOPTS += $(ESMF_TRACE_STATICLINKOPTS)
 ESMF_F90ESMFLINKLIBS += $(ESMF_TRACE_STATICLINKLIBS)
 else
+ifeq ($(ESMF_TRACE_PRELOAD_LINKED),ON)
+ESMF_F90LINKLIBS := $(ESMF_TRACE_DYNAMICLINKLIBS) $(ESMF_F90LINKLIBS)
 ESMF_TESTTRACE_TARGET = ftest_profile_preload
+else
+# set dynamic preload trace test target
+ESMF_TESTTRACE_TARGET = ftest_profile_preload
+endif
 endif
 endif
 

@@ -625,7 +625,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   subroutine ESMF_ArrayRead(array, fileName, keywordEnforcer, variableName, &
     timeslice, iofmt, rc)
-!   ! We need to terminate the strings on the way to C++
 !
 ! !ARGUMENTS:
     type(ESMF_Array),      intent(inout)         :: array

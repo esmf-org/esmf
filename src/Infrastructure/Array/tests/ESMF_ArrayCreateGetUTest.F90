@@ -53,15 +53,15 @@ program ESMF_ArrayCreateGetUTest
 
   !LOCAL VARIABLES:
   type(ESMF_VM):: vm
-  integer:: i,j,k,l, next, rank
-  integer:: replicatedDimCount
+  integer:: i,j,k,l, next, rank, dimCount
+  integer:: undistDimCount, replicatedDimCount
   integer:: petCount, localPet, deCount, de, localDeCount, lde, ssiLocalDeCount
   integer, allocatable  :: regDecomp(:)
   type(ESMF_ArraySpec)  :: arrayspec, arrayspec2
   type(ESMF_LocalArray), allocatable :: localArrayList(:)
   type(ESMF_Array):: array, arrayAlias, arrayDup, arrayUnInit
   type(ESMF_DELayout):: delayout
-  type(ESMF_DistGrid):: distgrid, distgrid2
+  type(ESMF_DistGrid):: distgrid
   real(ESMF_KIND_R8)      :: diffR8
   real(ESMF_KIND_R4)      :: diffR4
   real(ESMF_KIND_R8)      :: farray1D(10)
@@ -82,6 +82,7 @@ program ESMF_ArrayCreateGetUTest
   integer, allocatable:: minIndexPDe(:,:), maxIndexPDe(:,:)
   integer, allocatable:: exclusiveLBound(:,:), exclusiveUBound(:,:)
   integer, allocatable:: localDeToDeMap(:), arrayToDistGridMap(:)
+  integer, allocatable:: undistLBound(:), undistUBound(:)
   logical:: arrayBool
   logical:: isCreated
   logical:: dataCorrect
@@ -749,6 +750,78 @@ program ESMF_ArrayCreateGetUTest
   call ESMF_ArrayDestroy(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   deallocate(farrayPtr3D)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayCreate with 1D farray on 2D DistGrid all replicated dims Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(farrayPtr1D(-10:15))
+  array = ESMF_ArrayCreate(farrayPtr=farrayPtr1D, distgrid=distgrid, &
+    distgridToArrayMap=(/0,0/), name="MyArrayAllReplicated", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet for all replicated dims Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(array, rank=rank, dimCount=dimCount, &
+    undistDimCount=undistDimCount, replicatedDimCount=replicatedDimCount, &
+    rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Validate rank==1 for all replicated dims Test"
+  write(failMsg, *) "Rank is wrong: ", rank
+  call ESMF_Test((rank==1), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Validate dimCount==2 for all replicated dims Test"
+  write(failMsg, *) "dimCount is wrong:", dimCount
+  call ESMF_Test((dimCount==2), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Validate undistDimCount==1 for all replicated dims Test"
+  write(failMsg, *) "undistDimCount is wrong: ", undistDimCount
+  call ESMF_Test((undistDimCount==1), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Validate replicatedDimCount==2 for all replicated dims Test"
+  write(failMsg, *) "replicatedDimCount is wrong: ", replicatedDimCount
+  call ESMF_Test((replicatedDimCount==2), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet undist bounds for all replicated dims Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(undistLBound(undistDimCount),undistUBound(undistDimCount))
+  call ESMF_ArrayGet(array, undistLBound=undistLBound, &
+    undistUBound=undistUBound, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Validate undistLBound==[-10] for all replicated dims Test"
+  write(failMsg, *) "undistLBound is wrong: ", undistLBound
+  call ESMF_Test(all(undistLBound==[-10]), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Validate undistUBound==[15] for all replicated dims Test"
+  write(failMsg, *) "undistUBound is wrong: ", undistUBound
+  call ESMF_Test(all(undistUBound==[15]), name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate(undistLBound,undistUBound)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayDestroy for all replicated dims Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -2637,7 +2710,7 @@ program ESMF_ArrayCreateGetUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   do de=0, deCount-1
-    write (msg,*) "DistGrid2 DE=",de," minIndexPDe=", minIndexPDe(:,de), &
+    write (msg,*) "DistGrid DE=",de," minIndexPDe=", minIndexPDe(:,de), &
       " maxIndexPDe=", maxIndexPDe(:,de)
     call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)

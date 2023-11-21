@@ -5169,14 +5169,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMGetDefault()"
 !BOP
-! !IROUTINE: ESMF_VMGet - Get information from a VM
+! !IROUTINE: ESMF_VMGet - Get general information from a VM
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGet()
   recursive subroutine ESMF_VMGetDefault(vm, keywordEnforcer, localPet, &
     currentSsiPe, petCount, peCount, ssiCount, ssiMap, ssiMinPetCount, ssiMaxPetCount, &
-    ssiLocalPetCount, mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag, &
-    ssiSharedMemoryEnabledFlag, esmfComm, rc)
+    ssiLocalPetCount, ssiLocalPet, ssiLocalDevCount, ssiLocalDevList, mpiCommunicator, &
+    pthreadsEnabledFlag, openMPEnabledFlag, ssiSharedMemoryEnabledFlag, esmfComm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),        intent(in)            :: vm
@@ -5190,6 +5190,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: ssiMinPetCount
     integer,              intent(out), optional :: ssiMaxPetCount
     integer,              intent(out), optional :: ssiLocalPetCount
+    integer,              intent(out), optional :: ssiLocalPet
+    integer,              intent(out), optional :: ssiLocalDevCount
+    integer, allocatable, intent(out), optional :: ssiLocalDevList(:)
     integer,              intent(out), optional :: mpiCommunicator
     logical,              intent(out), optional :: pthreadsEnabledFlag
     logical,              intent(out), optional :: openMPEnabledFlag
@@ -5216,6 +5219,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   of the mapping of PETs to single system images across the entire VM.
 ! \item[8.2.0] Added argument {\tt esmfComm} to provide easy access to the
 !   {\tt ESMF\_COMM} setting used by the ESMF installation.
+! \item[8.6.0] Added arguments {\tt ssiLocalDevCount} and {\tt ssiLocalDevCount}
+!   to provide information about devices associated with the VM on the local
+!   SSI. \newline
+!   Added argument {\tt ssiLocalPet} to help with SSI specific assignment
+!   between PET and device resources.
 ! \end{description}
 ! \end{itemize}
 !
@@ -5245,7 +5253,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[ssiMap]}]
 !        Upon return this array is allocated and holds the single system image
 !        id for each PET across the {\tt vm}. The size of {\tt ssiMap} is
-!        equal to {\tt petCount}, with lower bound 0 and upper bound petCount-1.
+!        equal to {\tt petCount}, with lower bound 0 and upper bound
+!        {\tt petCount - 1}.
 !   \item[{[ssiMinPetCount]}]
 !        Upon return this holds the smallest number of PETs running in the same
 !        single system images under {\tt vm}.
@@ -5255,6 +5264,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[ssiLocalPetCount]}]
 !        Upon return this holds the number of PETs running in the same
 !        single system as {\tt localPet}.
+!   \item[{[ssiLocalPet]}]
+!        Upon return this holds the SSI local index of the executing
+!        {\tt localPet}.
+!   \item[{[ssiLocalDevCount]}]
+!        Upon return this holds the number of devices associated with this VM
+!        on the local single system.
+!   \item[{[ssiLocalDevList]}]
+!        Upon return this array is allocated and holds the local device ids
+!        of devices associated with this VM. The size of {\tt ssiLocalDevList}
+!        is equal to {\tt ssiLocalDevCount}, with lower bound 0 and upper
+!        bound {\tt ssiLocalDevCount - 1}. Local device ids can be used to
+!        target specific devices using OpenMP, OpenACC, or similar device
+!        API.
 !   \item[{[mpiCommunicator]}]
 !        Upon return this holds the MPI intra-communicator used by the 
 !        specified {\tt ESMF\_VM} object. This communicator may be used for
@@ -5302,9 +5324,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Logical)      :: pthreadsEnabledFlagArg         ! helper variable
     type(ESMF_Logical)      :: openMPEnabledFlagArg           ! helper variable
     type(ESMF_Logical)      :: ssiSharedMemoryEnabledFlagArg  ! helper variable
-    integer                 :: petCountArg, i;                ! helper variable
+    integer                 :: petCountArg, ssiLocalDevCountArg ! helper variable
+    integer                 :: i;                ! helper variable
     integer                 :: localrc  ! local return code
     character(len=40)       :: esmfCommArg
+    type(ESMF_InterArray)   :: ssiLocalDevListArg       ! interface variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -5317,7 +5341,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Call into the C++ interface.
       call c_ESMC_VMGet(vm, localPet, currentSsiPe, petCountArg, peCount, &
         ssiCount, ssiMinPetCount, ssiMaxPetCount, ssiLocalPetCount, &
-        mpiCommunicator, pthreadsEnabledFlagArg, openMPEnabledFlagArg, &
+        ssiLocalPet, ssiLocalDevCountArg, mpiCommunicator, &
+        pthreadsEnabledFlagArg, openMPEnabledFlagArg, &
         ssiSharedMemoryEnabledFlagArg, localrc)
       if (present(petCount)) petCount = petCountArg
       if (present (pthreadsEnabledFlag))  &
@@ -5336,11 +5361,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
       endif
+      if (present(ssiLocalDevCount)) ssiLocalDevCount = ssiLocalDevCountArg
+      if (present(ssiLocalDevList)) then
+        allocate(ssiLocalDevList(0:ssiLocalDevCountArg-1))
+        ssiLocalDevListArg = ESMF_InterArrayCreate(ssiLocalDevList, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        call c_ESMC_VMGetSsiLocalDevList(vm, ssiLocalDevListArg, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_InterArrayDestroy(ssiLocalDevListArg, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
     else
       ! Only very specific cases are supported for a NULL this pointer
       if (present(petCount) .or. present(peCount) .or. present(ssiCount) .or. &
         present(ssiMap) .or. present(ssiMinPetCount) .or. &
         present(ssiMaxPetCount) .or. present(ssiLocalPetCount) .or. &
+        present(ssiLocalPetCount) .or. &
+        present(ssiLocalDevCount) .or. present(ssiLocalDevList) .or. &
         present(pthreadsEnabledFlag) .or. present(openMPEnabledFlag) .or. &
         present(ssiSharedMemoryEnabledFlag)) then
         call ESMF_LogSetError(ESMF_RC_PTR_NULL, &
@@ -5376,19 +5416,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMGetPetSpecific()"
 !BOP
-! !IROUTINE: ESMF_VMGet - Get PET specific VM information
+! !IROUTINE: ESMF_VMGet - Get PET specific information from a VM
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGet()
   subroutine ESMF_VMGetPetSpecific(vm, pet, keywordEnforcer, peCount, &
-    accDeviceCount, ssiId, threadCount, threadId, vas, rc)
+    accDeviceCount, &   ! DEPRECATED ARGUMENT
+    ssiId, threadCount, threadId, vas, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM), intent(in)            :: vm
     integer,       intent(in)            :: pet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,       intent(out), optional :: peCount
-    integer,       intent(out), optional :: accDeviceCount
+    integer,       intent(out), optional :: accDeviceCount ! DEPRECATED ARGUMENT
     integer,       intent(out), optional :: ssiId
     integer,       intent(out), optional :: threadCount
     integer,       intent(out), optional :: threadId
@@ -5402,6 +5443,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[7.0.0] Added argument {\tt accDeviceCount}.
 !   The argument provides access to the number of available accelerator devices.
+! \item[8.6.0] Started deprecation of argument {\tt accDeviceCount} in favor of
+!   the new arguments {\tt ssiLocalDevCount} and {\tt ssiLocalDevList} offered
+!   by the general {\tt ESMF\_VMGet()} method.
 ! \end{description}
 ! \end{itemize}
 !
@@ -5421,6 +5465,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[accDeviceCount]}]
 !        Upon return this holds the number of accelerated devices accessible
 !        from the specified PET in the {\tt ESMF\_VM} object.
+!       \apiDeprecatedArgWithReplacement{ssiLocalDevCount}
 !   \item[{[ssiId]}]
 !        Upon return this holds the id of the single-system image (SSI) the
 !        specified PET is running on.
@@ -9713,14 +9758,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMPlanConstruct - Construct a default plan
 
 ! !INTERFACE:
-  subroutine ESMF_VMPlanConstruct(vmplan, vm, npetlist, petlist, contextflag, &
-    rc)
+  subroutine ESMF_VMPlanConstruct(vmplan, vm, npetlist, petlist, &
+    ndevlist, devlist, contextflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VMPlan),       intent(inout)         :: vmplan
     type(ESMF_VM),           intent(in)            :: vm
     integer,                 intent(in)            :: npetlist
     integer,                 intent(in)            :: petlist(:)
+    integer,                 intent(in)            :: ndevlist
+    integer,                 intent(in)            :: devlist(:)
     type(ESMF_Context_Flag), intent(in)            :: contextflag
     integer,                 intent(out), optional :: rc
 !
@@ -9729,15 +9776,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[vmplan] 
+!   \item[vmplan]
 !        VMPlan
-!   \item[vm] 
+!   \item[vm]
 !        VM
-!   \item[npetlist] 
+!   \item[npetlist]
 !        Number of PETs in petlist
-!   \item[petlist] 
-!        List of PETs that the parent VM will provide to the child VM
-!   \item[{[rc]}] 
+!   \item[petlist]
+!        List of PETs that the parent VM will provide to the child VM.
+!   \item[ndevlist]
+!        Number of DEVs in devlist
+!   \item[devlist]
+!        List of DEVs that are associated with the child VM.
+!   \item[{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -9753,8 +9804,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Call into the C++ interface.
-    call c_ESMC_VMPlanConstruct(vmplan, vm, npetlist, petlist, contextflag, &
-      localrc)
+    call c_ESMC_VMPlanConstruct(vmplan, vm, npetlist, petlist, &
+      ndevlist, devlist, contextflag, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

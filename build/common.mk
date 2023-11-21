@@ -215,12 +215,20 @@ ifndef ESMF_TRACE_LIB_BUILD
 export ESMF_TRACE_LIB_BUILD = default
 endif
 
+ifndef ESMF_TRACE_PRELOAD_LINKED
+export ESMF_TRACE_PRELOAD_LINKED = default
+endif
+
 ifndef ESMF_FORTRANSYMBOLS
 export ESMF_FORTRANSYMBOLS = default
 endif
 
 ifndef ESMF_TESTEXHAUSTIVE
 export ESMF_TESTEXHAUSTIVE = default
+endif
+
+ifndef ESMF_TESTPERFORMANCE
+export ESMF_TESTPERFORMANCE = default
 endif
 
 ifndef ESMF_TESTCOMPTUNNEL
@@ -443,6 +451,14 @@ endif
 
 ifneq ($(ESMF_TRACE_LIB_BUILD),OFF)
 export ESMF_TRACE_LIB_BUILD = ON
+endif
+
+ifneq ($(ESMF_TRACE_PRELOAD_LINKED),ON)
+export ESMF_TRACE_PRELOAD_LINKED = OFF
+endif
+
+ifneq ($(ESMF_TESTPERFORMANCE),OFF)
+export ESMF_TESTPERFORMANCE = ON
 endif
 
 ifneq ($(ESMF_TESTCOMPTUNNEL),OFF)
@@ -987,6 +1003,7 @@ ESMF_F90LINKLIBS = $(ESMF_F90LINKLIBS_ENV)
 endif
 ESMF_F90LINKLIBS     +=
 ESMF_F90ESMFLINKLIBS += -lesmf $(ESMF_F90LINKLIBS)
+ESMF_F90ESMFPRELOADLINKLIBS += -lesmf $(ESMF_TRACE_DYNAMICLINKLIBS) $(ESMF_F90LINKLIBS)
 
 # - CXXLINKER
 ifneq ($(origin ESMF_CXXLINKER), environment)
@@ -1789,6 +1806,38 @@ endif
 endif
 
 #-------------------------------------------------------------------------------
+# NVML
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_NVML),ON)
+ESMF_NVML = standard
+endif
+ifeq ($(ESMF_NVML),standard)
+ifneq ($(origin ESMF_NVML_LIBS), environment)
+ESMF_NVML_LIBS = -lnvidia-ml
+endif
+endif
+
+ifdef ESMF_NVML
+ESMF_CPPFLAGS                += -DESMF_NVML=1
+ifdef ESMF_NVML_INCLUDE
+ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_NVML_INCLUDE)
+ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_NVML_INCLUDE)
+endif
+ifdef ESMF_NVML_LIBS
+ESMF_CXXLINKLIBS          += $(ESMF_NVML_LIBS)
+ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_NVML_LIBS))))
+ESMF_F90LINKLIBS          += $(ESMF_NVML_LIBS)
+ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_NVML_LIBS))))
+endif
+ifdef ESMF_NVML_LIBPATH
+ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_NVML_LIBPATH)
+ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_NVML_LIBPATH)
+ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_NVML_LIBPATH)
+ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_NVML_LIBPATH)
+endif
+endif
+
+#-------------------------------------------------------------------------------
 # Set the correct MPIRUN command with appropriate options
 #-------------------------------------------------------------------------------
 ESMF_MPIRUNCOMMAND  = $(shell $(ESMF_DIR)/scripts/mpirun.command $(ESMF_DIR)/scripts $(ESMF_MPIRUN))
@@ -1814,7 +1863,11 @@ ifeq ($(ESMF_OPENMP),OFF)
 ESMF_CPPFLAGS       += -DESMF_NO_OPENMP
 endif
 
-ifeq ($(ESMF_OPENMP),ON)
+ifeq ($(ESMF_OPENMP),OMP4)
+ESMF_CPPFLAGS       += -DESMF_OPENMP4
+endif
+
+ifneq ($(ESMF_OPENMP),OFF)
 ESMF_F90COMPILEOPTS += $(ESMF_OPENMP_F90COMPILEOPTS)
 ESMF_F90LINKOPTS    += $(ESMF_OPENMP_F90LINKOPTS)
 ESMF_CXXCOMPILEOPTS += $(ESMF_OPENMP_CXXCOMPILEOPTS)
@@ -1854,6 +1907,15 @@ endif
 # between the different BOPT modes.
 #-------------------------------------------------------------------------------
 ESMF_CPPFLAGS       += -DESMF_BOPT_$(ESMF_BOPT)
+
+#-------------------------------------------------------------------------------
+# ESMF_TESTPERFORMANCE is passed (by CPP) into test programs to control whether
+# to run performance tests (these can be turned off on machines where
+# performance tests are highly variable and can lead to spurious failures).
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_TESTPERFORMANCE),ON)
+ESMF_CPPFLAGS       += -DESMF_TESTPERFORMANCE
+endif
 
 #-------------------------------------------------------------------------------
 # ESMF_TESTCOMPTUNNEL is passed (by CPP) into test programs to control the
@@ -1980,15 +2042,26 @@ ifeq ($(ESMF_TRACE_BUILD_SHARED),ON)
 ESMF_TRACE_LDPRELOAD := $(ESMF_LIBDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX)
 ESMF_PRELOADSCRIPT = $(ESMF_LIBDIR)/preload.sh
 
-ifneq ($(ESMF_OS),Darwin)
-ESMF_ENV_PRELOAD = LD_PRELOAD
+ESMF_SL_PRELOAD_LIBLINKER = $(ESMF_CXXCOMPILER)
+
+ifeq ($(ESMF_OS),Darwin)
+ESMF_ENV_PRELOAD          = DYLD_INSERT_LIBRARIES
+ESMF_ENV_PRELOAD_DELIMIT  = ':'
+ifeq ($(ESMF_COMM),openmpi)
+# make sure to link in the Fortran MPI bindings
+ESMF_SL_PRELOAD_LIBLINKER = $(ESMF_F90COMPILER)
+endif
 else
-ESMF_ENV_PRELOAD = DYLD_INSERT_LIBRARIES
+ESMF_ENV_PRELOAD          = LD_PRELOAD
+ESMF_ENV_PRELOAD_DELIMIT  = ' '
 endif
 
 # MPI implementations do not pick up LD_PRELOAD
 # so we pass a small script to each MPI task
 ifneq (,$(findstring mpich,$(ESMF_COMM)))
+ESMF_PRELOAD_SH = $(ESMF_PRELOADSCRIPT)
+endif
+ifeq ($(ESMF_COMM),openmpi)
 ESMF_PRELOAD_SH = $(ESMF_PRELOADSCRIPT)
 endif
 ifeq ($(ESMF_COMM),mpi)
@@ -2006,8 +2079,14 @@ endif
 build_preload_script:
 	-@echo "#!/bin/sh" > $(ESMF_PRELOADDIR)/preload.sh
 	-@echo "# Script to preload ESMF dynamic trace library" >> $(ESMF_PRELOADDIR)/preload.sh
-	-@echo 'env LD_PRELOAD="$$LD_PRELOAD $(ESMF_PRELOADDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX)" $$*' >> $(ESMF_PRELOADDIR)/preload.sh
+	-@echo 'if [ "$$$(ESMF_ENV_PRELOAD)" != "" ]; then' >> $(ESMF_PRELOADDIR)/preload.sh
+	-@echo 'env $(ESMF_ENV_PRELOAD)="$$$(ESMF_ENV_PRELOAD)$(ESMF_ENV_PRELOAD_DELIMIT)$(ESMF_PRELOADDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX)" $$*' >> $(ESMF_PRELOADDIR)/preload.sh
+	-@echo 'else' >> $(ESMF_PRELOADDIR)/preload.sh
+	-@echo 'env $(ESMF_ENV_PRELOAD)="$(ESMF_PRELOADDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX)" $$*' >> $(ESMF_PRELOADDIR)/preload.sh
+	-@echo 'fi' >> $(ESMF_PRELOADDIR)/preload.sh
 	chmod 755 $(ESMF_PRELOADDIR)/preload.sh
+
+ESMF_TRACE_DYNAMICLINKLIBS := -lesmftrace_preload
 
 ESMF_TRACE_STATICLINKLIBS := -lesmftrace_static
 
