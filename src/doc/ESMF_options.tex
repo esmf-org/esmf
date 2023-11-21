@@ -133,6 +133,29 @@ The valid values are:
 
 \end{description}
 
+\subsection{ESMF\_CUBEDSPHERECALC}
+\label{const:cubedspherecalcflag}
+{\sf DESCRIPTION:\\}  
+Indicates the method used to calculate coordinates during cubed sphere creation. 
+
+The type of this flag is:
+
+{\tt type(ESMF\_CubedSphereCalc\_Flag)}
+
+The valid values are:
+\begin{description}
+
+\item [ESMF\_CUBEDSPHERECALC\_1TILE:]
+  This is the original method used to calculate coordinates for the ESMF cubed sphere. It uses
+  an array the size of one tile of the cubed sphere on each PET to calculate coordinates
+  and ensure their symmetry. 
+\item [ESMF\_CUBEDSPHERECALC\_LOCAL:]
+  This method just uses an array large enough to hold the local cubed sphere coordinates on each PET.
+  It relies on careful design of loops and calculation to ensure symmetry of the coordinates. This
+  method will in general use less memory than ESMF\_CUBEDSPHERECALC\_1TILE.
+\end{description}
+
+
 \subsection{ESMF\_DATACOPY}
 \label{const:datacopyflag}
 {\sf DESCRIPTION:\\}

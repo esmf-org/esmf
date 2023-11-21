@@ -792,7 +792,7 @@
 
       
       type(ESMF_CubedSphereCalc_Flag), parameter :: &
-           ESMF_CUBEDSPHERECALC_GLOBAL = ESMF_CubedSphereCalc_Flag(1), &
+           ESMF_CUBEDSPHERECALC_1TILE = ESMF_CubedSphereCalc_Flag(1), &
            ESMF_CUBEDSPHERECALC_LOCAL = ESMF_CubedSphereCalc_Flag(2)
       
 !------------------------------------------------------------------------------
@@ -1170,7 +1170,7 @@
              ESMF_EXTRAPMETHOD_CREEP_NRST_D
 
       public ESMF_CubedSphereCalc_Flag, &
-             ESMF_CUBEDSPHERECALC_GLOBAL, &
+             ESMF_CUBEDSPHERECALC_1TILE, &
              ESMF_CUBEDSPHERECALC_LOCAL 
       
       
