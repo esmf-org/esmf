@@ -100,10 +100,8 @@ void _intersect_and_classify_edge(Pgon<GEOM> &pg1, Pgon<GEOM> &pg2,
       switch(intertype) {
       
       case PGON_INTERTYPE_X:
-
-        // Calc new point
+        // Declare new point
         double new_pnt[GEOM::pnt_size];
-
         
         // Create new vertex and add to polygon 1
         GEOM::calc_pnt_between(v1_pg1->pnt, v2_pg1->pnt, pg1_t, new_pnt);
@@ -113,8 +111,9 @@ void _intersect_and_classify_edge(Pgon<GEOM> &pg1, Pgon<GEOM> &pg2,
         GEOM::calc_pnt_between(v1_pg2->pnt, v2_pg2->pnt, pg2_t, new_pnt);
         Vert<GEOM> *vnew_pg2=pg2.add_between(v1_pg2, v2_pg2, new_pnt, pg2_t, false);
         
-        // Connect vertices together
-
+        // Connect vertices together as an intersection
+        make_intersection_Vert(vnew_pg1, vnew_pg2);
+        
         std::cout << "    adding:"<<*vnew_pg1<<" to pg1\n";
         std::cout << "    adding:"<<*vnew_pg2<<" to pg2\n";
         

@@ -52,6 +52,7 @@ public:
   double t;  // Parameter distance of this vertex between enclosing original vertices
   bool orig; // Part of the original Pgon
   bool inter; // An intersection vertex (not necessarily disjoint from orig) basically it means that it's connected with another polygon
+  Vert *nbr;
   Vert *next, *prev;
 
   // Base constructor
@@ -91,6 +92,16 @@ public:
   
 };
 
+// Make intersection
+// Connects two vertices as an intersection
+template <class GEOMVINTER>
+void make_intersection_Vert(Vert<GEOMVINTER> *v1, Vert<GEOMVINTER> *v2) {
+  v1->nbr=v2;
+  v1->inter=true;
+  
+  v2->nbr=v1;
+  v2->inter=true;
+}
 
   // Debug output
 template <class GEOMVO>
