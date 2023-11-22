@@ -107,11 +107,11 @@ void _intersect_and_classify_edge(Pgon<GEOM> &pg1, Pgon<GEOM> &pg2,
         
         // Create new vertex and add to polygon 1
         GEOM::calc_pnt_between(v1_pg1->pnt, v2_pg1->pnt, pg1_t, new_pnt);
-        Vert<GEOM> *vnew_pg1=pg1.add_inter_vert_between(v1_pg1, v2_pg1, new_pnt, pg1_t);
+        Vert<GEOM> *vnew_pg1=pg1.add_between(v1_pg1, v2_pg1, new_pnt, pg1_t, false);
 
         // Create new vertex and add to polygon 2
         GEOM::calc_pnt_between(v1_pg2->pnt, v2_pg2->pnt, pg2_t, new_pnt);
-        Vert<GEOM> *vnew_pg2=pg2.add_inter_vert_between(v1_pg2, v2_pg2, new_pnt, pg2_t);
+        Vert<GEOM> *vnew_pg2=pg2.add_between(v1_pg2, v2_pg2, new_pnt, pg2_t, false);
         
         // Connect vertices together
 

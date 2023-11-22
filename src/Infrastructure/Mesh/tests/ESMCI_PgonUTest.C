@@ -88,9 +88,9 @@ int main(void){
     std::cout << tri;
     
     // Add points
-    tri.push_back_orig_vert(0.0,0.0);
-    tri.push_back_orig_vert(1.0,0.0);
-    tri.push_back_orig_vert(0.0,1.0);
+    tri.push_back(0.0,0.0);
+    tri.push_back(1.0,0.0);
+    tri.push_back(0.0,1.0);
 
     // DEBUG OUTPUT: write to file
     tri.write_to_vtk("tri2DCart");
@@ -122,9 +122,9 @@ int main(void){
   
     // Create new Pgon triangle object
     Pgon<GEOM_SPH2D3D> tri;
-    tri.push_back_orig_vert(0.0,0.0,0.0);
-    tri.push_back_orig_vert(1.0,0.0,0.0);
-    tri.push_back_orig_vert(0.0,1.0,0.0);
+    tri.push_back(0.0,0.0,0.0);
+    tri.push_back(1.0,0.0,0.0);
+    tri.push_back(0.0,1.0,0.0);
 
     // DEBUG OUTPUT: write to file
     tri.write_to_vtk("tri2DSph");
@@ -153,14 +153,14 @@ int main(void){
    
     // Create Pgon square object
     Pgon<GEOM_CART2D> square;
-    square.push_back_orig_vert(0.0,0.0);
-    square.push_back_orig_vert(1.0,0.0);
-    Vert<GEOM_CART2D> *v1=square.push_back_orig_vert(1.0,1.0);
-    Vert<GEOM_CART2D> *v2=square.push_back_orig_vert(0.0,1.0);
+    square.push_back(0.0,0.0);
+    square.push_back(1.0,0.0);
+    Vert<GEOM_CART2D> *v1=square.push_back(1.0,1.0);
+    Vert<GEOM_CART2D> *v2=square.push_back(0.0,1.0);
 
-    // Add an inter vert inbetween
+    // Add a vert between
     double pnt[2]={0.5,1.0};
-    square.add_inter_vert_between(v1, v2, pnt, 0.5);    
+    square.add_between(v1, v2, pnt, 0.5);    
     
     // Loop outputting origin vertices
     std::cout << "Orig square:\n";
@@ -169,10 +169,6 @@ int main(void){
       // Output Vert
       std::cout<<"  ["<<*v<<"] \n";      
     }
-
-
-
-    
     
   } catch(...) {
     // Change to error if we detect an error
@@ -197,10 +193,10 @@ int main(void){
   
     // Create Pgon sqaure
     Pgon<GEOM_CART2D> square1;
-    square1.push_back_orig_vert(0.0,0.0);
-    square1.push_back_orig_vert(2.0,0.0);
-    square1.push_back_orig_vert(2.0,2.0);
-    square1.push_back_orig_vert(0.0,2.0);
+    square1.push_back(0.0,0.0);
+    square1.push_back(2.0,0.0);
+    square1.push_back(2.0,2.0);
+    square1.push_back(0.0,2.0);
 
     std::cout << "Before square 1: \n";
     std::cout << square1;
@@ -211,10 +207,10 @@ int main(void){
     
     // Create Pgon square object
     Pgon<GEOM_CART2D> square2;
-    square2.push_back_orig_vert(1.0,1.0);
-    square2.push_back_orig_vert(3.0,1.0);
-    square2.push_back_orig_vert(3.0,3.0);
-    square2.push_back_orig_vert(1.0,3.0);
+    square2.push_back(1.0,1.0);
+    square2.push_back(3.0,1.0);
+    square2.push_back(3.0,3.0);
+    square2.push_back(1.0,3.0);
 
     std::cout << "Before square 2: \n";
     std::cout << square2;
@@ -261,9 +257,9 @@ int main(void){
   
     // Create Pgon triangle object
     Pgon<GEOM_CART2D> tri;
-    tri.push_back_orig_vert(0.0,0.0);
-    tri.push_back_orig_vert(1.0,0.0);
-    tri.push_back_orig_vert(0.0,1.0);
+    tri.push_back(0.0,0.0);
+    tri.push_back(1.0,0.0);
+    tri.push_back(0.0,1.0);
 
     // Debug output
     tri.write_to_vtk("tri_2DCart");
@@ -271,10 +267,10 @@ int main(void){
    
     // Create Pgon square object
     Pgon<GEOM_CART2D> square;
-    square.push_back_orig_vert(1.0,0.0);
-    square.push_back_orig_vert(2.0,0.0);
-    square.push_back_orig_vert(2.0,1.0);
-    square.push_back_orig_vert(1.0,1.0);
+    square.push_back(1.0,0.0);
+    square.push_back(2.0,0.0);
+    square.push_back(2.0,1.0);
+    square.push_back(1.0,1.0);
 
     std::cout << "Before: \n";
     std::cout << square;

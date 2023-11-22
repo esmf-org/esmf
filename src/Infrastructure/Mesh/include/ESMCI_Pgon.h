@@ -66,28 +66,29 @@ public:
     GEOM::copy(pnt, _pnt); 
   }
     
-  // TODO: review this again
+  // Add a new vertex after this one
   void add_next(Vert *v) {
     
     // Point new vert appropriately 
     v->next=next;
     v->prev=this;
-    
+
     // If there's something after, point it's prev to this
     if (next != NULL) {
       next->prev=v;
     }
 
     // Make the next node the new one
-    next=v;
+    // (Needs to be after the above)
+    next=v;    
   }
 
- void make_first() {    
-   // Point new node appropriately 
+ // Point new node appropriately 
+ void add_first() {    
    next=this;
    prev=this;
   }
-   
+  
 };
 
 
@@ -276,13 +277,16 @@ template <class GEOM2>
 class Pgon {
 
   public:
-  // Buffer for holding Coords when they need to be passed someplace
+
+  // Buffer for holding Coords when they need to be passed someplace    
   std::vector<double> coord_buff;
+  // TODO: add a flag that tracks whether new points have been added since last pack, so
+  //       we only pack when necessary       
 
+  
+  int num_pnts; // Size of polygon  
   Vert<GEOM2> *beg,*end; // List of vertices
-
-  int num_pnts; // Size of polygon
-
+  
 protected:
   VertIter<GEOM2> vertIter;
   
@@ -290,20 +294,31 @@ protected:
   // private methods 
 private: 
 
-  void push_back_Vert(Vert<GEOM2> *vert) {
-    // If empty, then just make the only one
-    if (beg == NULL) {
-      vert->make_first();
-      beg=end=vert;      
-    } else { // Add at end
-      end->add_next(vert);
-      end=vert;
-    }
-
+  // All new vertex addition should eventually go through the following two methods, because
+  // they will do the complete set of processing necessary to do that.
+  
+  // Add the first vertex to the polygon 
+  void add_new_first(Vert<GEOM2> *v_new) {
+    
+    // Make this the first vertex
+    v_new->add_first();
+    
     // Increase the number of points
     num_pnts++;
   }
 
+
+  // Add a new vertex to the polygon after v
+  void add_new_next(Vert<GEOM2> *v, Vert<GEOM2> *v_new) {
+    
+    // Add if after this vert
+    v->add_next(v_new);
+    
+    // Increase the number of points
+    num_pnts++;
+  }
+
+  
   ////////////////////////
   /// TODO: Look into having specific template overriding for particular GEOMS for some methods to avoid ifs
   ////////////////////////
@@ -379,81 +394,92 @@ public:
   //       CALL IT MAKE INTER() AND AT THAT POINT SET TO INTER=TRUE
   //       MAYBE HAVE A FLAG FOR THE OTHER METHODS TO JUST BE ORIG TRUE/FALSE??
   
- 
-  // Add an original vert to the end of the polygon
-  Vert<GEOM2> *push_back_orig_vert(double *pnt) {
+  void push_back(Vert<GEOM2> *v) {
+
+    // If nothing added yet, make the first
+    if (end == NULL) {
+      add_new_first(v);
+      beg=end=v;
+    } else { // Otherwise, add it after the end and make it the new end
+      add_new_next(end, v);
+      end=v;
+    }
+  }
+
+  
+  // Add a vert to the end of the polygon
+  // Assumes is original, unless specified otherwise
+  Vert<GEOM2> *push_back(double *pnt, bool orig=true) {
 
     // create vert
     Vert<GEOM2> *vert=new Vert<GEOM2>(pnt);
 
-    // Mark as origin
-    vert->orig=true;
+    // Set orig status
+    vert->orig=orig;
     
-    // Add
-    push_back_Vert(vert);
+    // Add to end
+    push_back(vert);
 
     // Return new vert
     return vert;
   }
 
 
-  // Add an original vert to the end of the polygon
- Vert<GEOM2> *push_back_orig_vert(double x, double y) {
+  // Add a vert to the end of the polygon
+  Vert<GEOM2> *push_back(double x, double y, bool orig=true) {
 
     // create vert
     Vert<GEOM2> *vert=new Vert<GEOM2>(x,y);
 
     // Mark as origin
-    vert->orig=true;
+    vert->orig=orig;
     
-    // Add
-    push_back_Vert(vert);
+    // Add to end
+    push_back(vert);
 
     // Return new vert
     return vert;
   }
 
   // Add an original vert to the end of the polygon
- Vert<GEOM2> *push_back_orig_vert(double x, double y, double z) {
+  Vert<GEOM2> *push_back(double x, double y, double z, bool orig=true) {
 
     // create vert
     Vert<GEOM2> *vert=new Vert<GEOM2>(x,y,z);
 
     // Mark as original
-    vert->orig=true;
+    vert->orig=orig;
     
-    // Add
-    push_back_Vert(vert);
+    // Add to end
+    push_back(vert);
 
     // Return new vert
     return vert;
   }
 
 
-  // Insert intersection vert between vert, order by t if more than 1
-  Vert<GEOM2> *add_inter_vert_between(Vert<GEOM2> *beg, Vert<GEOM2> *end, double *pnt, double t) {
+  // Insert vert between two vert, order by t if more than 1
+  // Doesn't look at t's of v0 or v1
+  Vert<GEOM2> *add_between(Vert<GEOM2> *v0, Vert<GEOM2> *v1, double *pnt, double t, bool orig=true) {
 
     // Create vert
     Vert<GEOM2> *vert=new Vert<GEOM2>(pnt);
 
-    // Mark as not origin
-    vert->orig=false;
-
-    // Mark as intersection
-    vert->inter=true;
+    // Set original
+    vert->orig=orig;
 
     // Set t
     vert->t=t;
 
     // Loop finding vert that's right before place to add
-    Vert<GEOM2> *just_before=beg;
-    while ((just_before->next != end) && (just_before->next->t < t)) {
+    Vert<GEOM2> *just_before=v0;
+    while ((just_before->next != v1) && (just_before->next->t < t)) {
       just_before=just_before->next;
     } 
 
-    // Add vert
-    just_before->add_next(vert);
-
+    // Add new vert next after just_before
+    add_new_next(just_before, vert);
+    
     // Return new vert
     return vert;
   }
