@@ -32,7 +32,6 @@ GDALc_inq_file_metadata(file_desc_t *file, GDALDatasetH hDS, int iotype, int *nv
 
       OGRFeatureDefnH hFD = OGR_L_GetLayerDefn(hLayer);
       *nvars = OGR_FD_GetFieldCount(hFD);
-//      printf(">>>>> NVARS: %d\n",*nvars);
       if (nvars == 0) // empty file
 	return pio_err(NULL, file, PIO_ENOMEM, __FILE__, __LINE__);
 
@@ -63,12 +62,9 @@ GDALc_inq_file_metadata(file_desc_t *file, GDALDatasetH hDS, int iotype, int *nv
 	   * learn about type. */
 	  size_t type_size;
 
-	  //	    
 	  var_ndims = 1; // FIXED FOR NOW. For data-read purposes, it's a 1D stream across the number of
                          // elements.
 	  (*ndims)[v] = var_ndims;
-	  //>>            if ((ret = nc_inq_var(ncid, v, NULL, &my_type, &var_ndims, NULL, NULL)))
-	  //>>                return pio_err(NULL, file, ret, __FILE__, __LINE__);
 	  OGRFieldType Fld = OGR_Fld_GetType(OGR_FD_GetFieldDefn(hFD,v));
 	  printf(">>>>> FIELDNAME: %s, TYPE: %d\n",OGR_Fld_GetNameRef(OGR_FD_GetFieldDefn(hFD,v)),Fld);
 	  bool typeOK = true; // assume we're good
@@ -96,14 +92,7 @@ GDALc_inq_file_metadata(file_desc_t *file, GDALDatasetH hDS, int iotype, int *nv
 	  default:
 	    typeOK = false;
 	    break;
-//	    return pio_err(file->iosystem, file, PIO_EBADIOTYPE, __FILE__, __LINE__);
 	  }
-	  //>>            if ((ret = nc_inq_type(ncid, (*pio_type)[v], NULL, &type_size)))
-	  //>>                return check_netcdf(file, ret, __FILE__, __LINE__);
-	  //>>            (*pio_type_size)[v] = type_size;
-
-//	  printf(">>>>> TEST: hDS %p, hFD %p\n", (void *)hDS, (void *)hFD);
-    
 	  printf(">>>> Fld Type: %d %d\n",(*pio_type)[v],PIO_STRING);
 	    
 	  if (!typeOK) // Not a usable type 
@@ -120,19 +109,6 @@ GDALc_inq_file_metadata(file_desc_t *file, GDALDatasetH hDS, int iotype, int *nv
 	    if ((mpierr = MPI_Type_size((*mpi_type)[v], &(*mpi_type_size)[v])))
 	      return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
 	  
-//>>	  /* What are the dimids associated with this var? */
-//>>	  if (var_ndims)
-//>>	    {
-//>>	      int var_dimids[var_ndims];
-//>>	      if (iotype == PIO_IOTYPE_GDAL)
-//>>		{
-//>>//>>                if ((ret = nc_inq_vardimid(ncid, v, var_dimids)))
-//>>//>>                    return pio_err(NULL, file, ret, __FILE__, __LINE__);
-//>>		}
-//>>
-//>>	    }
-
-//	  OGR_FD_Destroy(hFD);
 	} /* next var */
     } /* If PIO_TYPE_GDAL */
     return PIO_NOERR;
@@ -202,7 +178,6 @@ GDALc_inq_fieldid(int fileid, const char *name, int *fieldidp)
     {
       GDALDatasetH *hDS = file->hDS;
         if (file->do_io) { // We assume that its a GDAL file
-//	  printf("NLayers: %d\n", OGR_DS_GetLayerCount(hDS));
 	  OGRLayerH hLayer = OGR_DS_GetLayer( hDS, 0 );
 	  OGR_L_ResetReading(hLayer);
 	  if (hLayer == NULL) {
@@ -211,7 +186,6 @@ GDALc_inq_fieldid(int fileid, const char *name, int *fieldidp)
 	  }
 	  *fieldidp = OGR_L_FindFieldIndex(hLayer,name,1);
 
-//	  pioassert(*fieldidp > 0, "variable not found", __FILE__, __LINE__);
 	  printf("INQ_FIELDID FIELD %s INDEX: %d\n", name, *fieldidp);
 
 	}
@@ -233,7 +207,6 @@ GDALc_inq_fieldid(int fileid, const char *name, int *fieldidp)
 
 int
 GDALc_openfile(int iosysid, int *fileIDp, GDALDatasetH *hDSp,int *iotype, const char *filename, bool mode)
-//GDALc_openfile(int iosysid, GDALDatasetH *hDSp, int *iotype, const char *filename, bool mode)
 {
     iosystem_desc_t *ios;      /* Pointer to io system information. */
     file_desc_t *file;         /* Pointer to file information. */
@@ -262,9 +235,6 @@ GDALc_openfile(int iosysid, int *fileIDp, GDALDatasetH *hDSp,int *iotype, const 
         return pio_err(ios, NULL, PIO_EINVAL, __FILE__, __LINE__);
     if (*iotype != PIO_IOTYPE_GDAL )
         return pio_err(ios, NULL, PIO_EINVAL, __FILE__, __LINE__);
-
-//    PLOG((2, "PIOc_openfile_retry iosysid = %d iotype = %d filename = %s mode = %d retry = %d",
-//          iosysid, *iotype, filename, mode, retry));
 
     /* Allocate space for the file info. */
     if (!(file = calloc(sizeof(*file), 1)))
@@ -303,8 +273,6 @@ GDALc_openfile(int iosysid, int *fileIDp, GDALDatasetH *hDSp,int *iotype, const 
                 mpierr = MPI_Bcast(&file->iotype, 1, MPI_INT, ios->compmaster, ios->intercomm);
             if (!mpierr)
                 mpierr = MPI_Bcast(&mode, 1, MPI_INT, ios->compmaster, ios->intercomm);
-//>>            if (!mpierr)
-//>>                mpierr = MPI_Bcast(&use_ext_ncid, 1, MPI_INT, ios->compmaster, ios->intercomm);
         }
 
         /* Handle MPI errors. */
@@ -358,14 +326,6 @@ GDALc_openfile(int iosysid, int *fileIDp, GDALDatasetH *hDSp,int *iotype, const 
     /* Broadcast writability to all tasks. */
     if ((mpierr = MPI_Bcast(&file->writable, 1, MPI_INT, ios->ioroot, ios->my_comm)))
         return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
-
-    /* Broadcast some values to all tasks from io root. */
-//>>    if (ios->async)
-//>>    {
-//>>        PLOG((3, "open bcasting pio_next_ncid %d ios->ioroot %d", pio_next_ncid, ios->ioroot));
-//>>        if ((mpierr = MPI_Bcast(&pio_next_ncid, 1, MPI_INT, ios->ioroot, ios->my_comm)))
-//>>            return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
-//>>    }
 
     if ((mpierr = MPI_Bcast(&nvars, 1, MPI_INT, ios->ioroot, ios->my_comm)))
         return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
@@ -477,7 +437,6 @@ int GDALc_inq_timeid(int fileid, int *timeid) { // Is there a field of type OFTD
     OGRFeatureDefnH hFD = OGR_L_GetLayerDefn(hLayer);
     if (hFD == NULL)
         return pio_err(NULL, NULL, ierr, __FILE__, __LINE__);
-//    printf("XXXXX NFLDS: %d, FID  %d, hDS %p, hFD %p\n", file->nvars, fileid, (void *)file->hDS, (void *)hFD);
     int nFld = OGR_FD_GetFieldCount(hFD);
     OGRFieldDefnH hTMP = OGR_FD_GetFieldDefn(hFD,1);
                   hTMP = OGR_FD_GetFieldDefn(hFD,0);
@@ -488,13 +447,7 @@ int GDALc_inq_timeid(int fileid, int *timeid) { // Is there a field of type OFTD
       OGRFieldType Fld = OGR_Fld_GetType(hFlD);
       if (Fld == NULL)
         return pio_err(NULL, NULL, ierr, __FILE__, __LINE__);
-//      printf("XXXXX FIELDNAME: %s, TYPE: %d\n",OGR_Fld_GetNameRef(OGR_FD_GetFieldDefn(hFD,i)),Fld);
-
-//      const char* FldTyp = OGR_GetFieldTypeName(Fld);
-//      PRINTMSG("Field type: " << FldTyp);
     }
-
-//    OGR_FD_Destroy(hFD);
 
     return 0;
   }
@@ -530,6 +483,8 @@ gdal_read_darray_shp(file_desc_t *file, io_desc_t *iodesc, int vid,
     MPI_Status status;
     int mpierr;  /* Return code from MPI functions. */
     int ierr;
+
+    PLOG((1, "XXX fndims = %d vid = %d maxvars = %d", fndims, vid, PIO_MAX_VARS));
 
     /* Check inputs. */
     pioassert(file && file->iosystem && iodesc && vid >= 0 && vid <= PIO_MAX_VARS,
@@ -925,54 +880,6 @@ GDALc_createfile_shp(int iosysid, int *fileidp, int *iotype, const char *filenam
 
     PLOG((2, "file->do_io = %d ios->async = %d", file->do_io, ios->async));
 
-    /* If async is in use, and this is not an IO task, bcast the
-     * parameters. */
-//>>    if (ios->async)
-//>>    {
-//>>        if (!ios->ioproc)
-//>>        {
-//>>            int msg = PIO_MSG_CREATE_FILE;
-//>>            size_t len = strlen(filename);
-//>>            char fileidp_present = fileidp ? 1 : 0;
-//>>
-//>>            /* Send the message to the message handler. */
-//>>            PLOG((3, "msg %d ios->union_comm %d MPI_COMM_NULL %d", msg, ios->union_comm, MPI_COMM_NULL));
-//>>            if (ios->compmaster == MPI_ROOT)
-//>>                mpierr = MPI_Send(&msg, 1, MPI_INT, ios->ioroot, 1, ios->union_comm);
-//>>
-//>>            /* Send the parameters of the function call. */
-//>>            if (!mpierr)
-//>>                mpierr = MPI_Bcast(&len, 1, MPI_INT, ios->compmaster, ios->intercomm);
-//>>            if (!mpierr)
-//>>                mpierr = MPI_Bcast((void *)filename, len + 1, MPI_CHAR, ios->compmaster, ios->intercomm);
-//>>            if (!mpierr)
-//>>                mpierr = MPI_Bcast(&file->iotype, 1, MPI_INT, ios->compmaster, ios->intercomm);
-//>>            if (!mpierr)
-//>>                mpierr = MPI_Bcast(&mode, 1, MPI_INT, ios->compmaster, ios->intercomm);
-//>>            if (!mpierr)
-//>>                mpierr = MPI_Bcast(&use_ext_fileid, 1, MPI_INT, ios->compmaster, ios->intercomm);
-//>>            if (!mpierr)
-//>>                mpierr = MPI_Bcast(&fileidp_present, 1, MPI_CHAR, ios->compmaster, ios->intercomm);
-//>>            if (fileidp_present)
-//>>                if (!mpierr)
-//>>                    mpierr = MPI_Bcast(fileidp, 1, MPI_INT, ios->compmaster, ios->intercomm);
-//>>#ifdef NETCDF_INTEGRATION
-//>>            if (!mpierr)
-//>>                mpierr = MPI_Bcast(&diosysid, 1, MPI_INT, ios->compmaster, ios->intercomm);
-//>>#endif /* NETCDF_INTEGRATION */
-//>>            PLOG((2, "len %d filename %s iotype %d mode %d use_ext_fileid %d "
-//>>                  "fileidp_present %d", len, filename, file->iotype, mode,
-//>>                  use_ext_fileid, fileidp_present));
-//>>        }
-//>>
-//>>        /* Handle MPI errors. */
-//>>        PLOG((2, "handling mpi errors mpierr = %d", mpierr));
-//>>        if ((mpierr2 = MPI_Bcast(&mpierr, 1, MPI_INT, ios->comproot, ios->my_comm)))
-//>>            return check_mpi(NULL, file, mpierr2, __FILE__, __LINE__);
-//>>        if (mpierr)
-//>>            return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
-//>>    }
-
     /* If this task is in the IO component, do the IO. */
     if (ios->ioproc)
     {
@@ -981,7 +888,7 @@ GDALc_createfile_shp(int iosysid, int *fileidp, int *iotype, const char *filenam
         case PIO_IOTYPE_GDAL:
             PLOG((2, "Calling GDALCreate io_comm = %d mode = %d fh = %d",
                   ios->io_comm, mode, file->fh));
-//            ierr = nc_create_par(filename, mode, ios->io_comm, ios->info, &file->fh);
+
 	    OGRSpatialReferenceH hSpatial=OSRNewSpatialReference( NULL );
 	    int err = OSRSetWellKnownGeogCS( hSpatial, "WGS84");
 	    if (err != OGRERR_NONE ) {
@@ -1033,13 +940,6 @@ GDALc_createfile_shp(int iosysid, int *fileidp, int *iotype, const char *filenam
      * because files may be opened on mutilple iosystems, causing the
      * underlying library to reuse fileids. Hilarious confusion
      * ensues. */
-//>>    if (ios->async)
-//>>    {
-//>>        PLOG((3, "createfile bcasting pio_next_fileid %d", pio_next_ncid));
-//>>        if ((mpierr = MPI_Bcast(&pio_next_ncid, 1, MPI_INT, ios->ioroot, ios->my_comm)))
-//>>            return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
-//>>        PLOG((3, "createfile bcast pio_next_ncid %d", pio_next_ncid));
-//>>    }
 
     /* Assign the PIO ncid. */
     file->pio_ncid = pio_next_ncid++;
@@ -1189,9 +1089,6 @@ GDALc_def_field(int fileid, const char *name, int xtype, int *varidp)
     /* If this is an IO task, then call the GDAL function. */
     if (ios->ioproc)
     {
-//        if (file->iotype != PIO_IOTYPE_PNETCDF && file->do_io)
-//            ierr = nc_def_var(file->fh, name, xtype, ndims, dimidsp, &varid);
-//        PLOG((3, "defined var ierr %d file->iotype %d", ierr, file->iotype));
       OGRLayerH      hL = OGR_DS_GetLayer( file->hDS, 0 );
       OGRFieldDefnH hFD = OGR_Fld_Create( name, OFTReal );
       if( OGR_L_CreateField( hL, hFD, TRUE ) != OGRERR_NONE )
@@ -1428,6 +1325,8 @@ recv_and_write_shp(file_desc_t *file, const int *varids, const int *frame,
 
                     /* Call the netCDF functions to write the data. */
 //                    if (needtowrite)
+		    // ADD POLYGONS
+		    // ADD DATA
 //                        if ((ierr = nc_put_vara(file->fh, varids[nv], start, count, bufptr)))
 //                            return check_netcdf2(ios, NULL, ierr, __FILE__, __LINE__);
 

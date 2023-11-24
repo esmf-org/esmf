@@ -105,8 +105,10 @@ program ESMF_IO_GDALUTest
   write(name, *) "Read a multi-tile Field"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldRead(field, fileName=fileNameFields, iofmt=ESMF_IOFMT_SHP, rc=rc)
-  call ESMF_FieldWrite(field, "test.shp", iofmt=ESMF_IOFMT_SHP, overwrite=.true.,rc=rc)
-!  call ESMF_FieldWrite(field, "test.nc", rc=rc)
+!  call ESMF_FieldWrite(field, "test.shp", iofmt=ESMF_IOFMT_SHP, overwrite=.true.,rc=rc)
+  call ESMF_FieldWrite(field, "test.nc", rc=rc)
+  !! Write mesh for debugging
+  call ESMF_MeshWrite(mesh,"complex_3",rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_GDAL))
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else

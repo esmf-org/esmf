@@ -126,3 +126,6 @@ Proposed workflow:
 1) Determine file type
 2) Get driver
 3) Define spatial reference w/ CRS
+
+* Nov 16, 2023 - WriteMesh
+Legacy/ESMCI_MeshRead.C -> call to WriteVTKMesh() in ESMCI_VTKMesh.C
