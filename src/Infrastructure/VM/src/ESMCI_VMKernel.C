@@ -551,6 +551,7 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   // determine SSI ids and ssipe
   ssiid = new int[ncores];
   ssipe = new int[ncores];
+  int localSsi;
 #ifdef ESMF_NO_GETHOSTID
   for (int i=0; i<ncores; i++){
     ssiid[i]=i;                 // hardcoded assumption of single-CPU SSIs
@@ -563,6 +564,7 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   ssiLocalPet=0;
   ssiLocalPetList = new int[1];
   ssiLocalPetList[0] = mypet;
+  localSsi = mypet;
 #else
   int *temp_ssiPetCount = new int[ncores];
   long int *temp_ssiid = new long int[ncores];
@@ -597,7 +599,7 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
     if (temp_ssiPetCount[i] > ssiMaxPetCount)
       ssiMaxPetCount = temp_ssiPetCount[i];
   }
-  int localSsi = ssiid[mypet];
+  localSsi = ssiid[mypet];
   ssiLocalPetCount=temp_ssiPetCount[localSsi];
 #if 0
 {
