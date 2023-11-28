@@ -119,7 +119,7 @@ jobs:
           -r ${{ github.workspace }}
 
     # checkout NUOPC app prototypes
-    - name: Checkout NUOPC app prototypes
+    - name: Checkout NUOPC App Prototypes
       uses: actions/checkout@v3
       with:
         repository: esmf-org/nuopc-app-prototypes
@@ -127,9 +127,36 @@ jobs:
         ref: ${{ needs.set-matrix.outputs.nuopc_app_version }}
 
     # test installation using NUOPC app prototypes
-    - name: Run NUOPC app prototypes
+    - name: Run NUOPC App Prototypes
       run: |
         ${{ github.workspace }}/.github/workflows/scripts/run_nuopc_app_proto.sh \
           -c ${{ matrix.compiler }} \
           -r ${{ github.workspace }}/nuopc-app-prototypes \
           -s ~/.spack-ci
+
+    # compress run directory of NUOPC app prototypes
+    - name: Prepare NUOPC App Prototypes Artifacts Directory
+      run: |
+        cd ${{ github.workspace }}/nuopc-app-prototypes
+        mkdir Artifacts
+        mv NUOPC-PROTO-RESULTS Artifacts/
+
+   # push test results to artifacts
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: Artifacts for ${{ matrix.compiler }} ${{ matrix.esmf }}
+        path: ${{ github.workspace }}/nuopc-app-prototypes/Artifacts
+        retention-days: 5
+
+    # force to fail if there is any failed nuopc app prototypes
+    - name: Check Result of NUOPC App Prototypes 
+      run: |
+        if [[ "${{ env.NUOPC_APP_PROTO_PASS }}" == "false" ]]; then
+          echo "Some of NUOPC app prototypes are failed! Exiting ..."
+          exit 1
+        else
+          echo "All tests are passed."
+          exit 0
+        fi
+      shell: bash
