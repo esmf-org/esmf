@@ -473,6 +473,11 @@ PIOc_sync(int ncid)
                 flush_output_buffer(file, true, 0);
                 break;
 #endif
+//#ifdef _GDAL
+	   case PIO_IOTYPE_GDAL:
+	     printf("<<>> PIOc_sync() TEST <<>>");
+	     break;
+//#endif
             default:
                 return pio_err(ios, file, PIO_EBADIOTYPE, __FILE__, __LINE__);
             }

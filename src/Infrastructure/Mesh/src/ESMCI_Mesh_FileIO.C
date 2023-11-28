@@ -130,10 +130,6 @@ void ESMCI_mesh_create_from_file(char *filename,
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI_mesh_create_from_file()"
 
-  
-  //  printf("in new scalable mesh create from file filename=%s\n",filename);
-
-
   // Try-catch block around main part of method
   try {
     // local return code
@@ -1354,8 +1350,6 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     int *elem_IDs;
 
     // Processes polygons in hDS. Polygons are flattened to 2D
-//    process_shapefile_serial(hDS,nodeCoords,node_IDs,elem_IDs,elemConn,numElemConn,
-//			     &totNumElemConn, &num_nodes, &num_elems);
 
     // 1) Get DS global params: number of features & feature IDs
 
@@ -1380,7 +1374,6 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
 					     nodeCoords,nodeIDs,elemIDs,
 					     elemConn,numElemConn,
 					     &totNumElemConn, &num_nodes, &num_elems);
-//    printf(">>>>> nElems, %d, nFeatures, %d\n", num_elems, num_features);
 
     node_IDs=&nodeIDs[0];
     elem_Conn=&elemConn[0];
@@ -1390,15 +1383,6 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     int sumElemConn=0;
     for(std::vector<int>::iterator it = numElemConn.begin(); it != numElemConn.end(); ++it)
       sumElemConn += *it;
-
-//    printf("dim: %d\n",dim);
-//    printf("numElemConn: %d\n",numElemConn.size());
-//    printf("elemConn: %d\n",elemConn.size());
-//    printf("num_elems:    %d\n",num_elems);
-//    printf("num_ftrs:     %d\n",num_features);
-//    printf("num_nodes:    %d\n",num_nodes);
-//    printf("totNumElmCon: %d\n",totNumElemConn);
-//    printf("sum_of_elems: %d\n",sumElemConn);
 
     // TBD: Coord system conversion
 
@@ -1429,8 +1413,6 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 				      &localrc)) throw localrc;
 
-    // printf("Finished creating mesh: %d\n", localrc);
-
     // Add nodes
     ESMCI_meshaddnodes(out_mesh, &num_nodes, node_IDs,
 		       nodeCoords, NULL, NULL,
@@ -1439,8 +1421,6 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 				      &localrc)) throw localrc;
       
-    // printf("Finished adding nodes: %d\n", localrc);
-
     // Add elements
     // !!! None of the elements have shared edges.
     int areaPresent = 0;
@@ -1455,16 +1435,8 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 				      &localrc)) throw localrc;
 
-    // printf("Finished adding elements: %d\n", localrc);
-
     // Cleanup
     GDALClose( hDS );
-
-//    delete [] elem_IDs;
-//    delete [] elem_Conn;
-//    delete [] node_IDs;
-//    delete [] num_ElemConn;
-//    delete [] nodeCoords;
 
   } catch(std::exception &x) {
 

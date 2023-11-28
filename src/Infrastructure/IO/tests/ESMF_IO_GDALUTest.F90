@@ -60,8 +60,7 @@ program ESMF_IO_GDALUTest
 
   type(ESMF_ArraySpec) :: arraySpec
 
-!  character(len=*), parameter :: fileNameFields = "data/complex_3.shp"
-  character(len=*), parameter :: fileNameFields = "data/cb_2018_us_county_20m.shp"
+  character(len=*), parameter :: fileNameFields = "data/complex_3.shp"
 
   !------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
@@ -87,8 +86,7 @@ program ESMF_IO_GDALUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArraySpecSet(arraySpec, 1, typekind=ESMF_TYPEKIND_R8, rc=rc)
   if (rc /= ESMF_SUCCESS) return
-  field = ESMF_FieldCreate(mesh, arraySpec, name="GEOID", meshLoc=ESMF_MESHLOC_ELEMENT, rc=rc)
-!  field = ESMF_FieldCreate(mesh, arraySpec, name="DistFld", meshLoc=ESMF_MESHLOC_ELEMENT, rc=rc)
+  field = ESMF_FieldCreate(mesh, arraySpec, name="DistFld", meshLoc=ESMF_MESHLOC_ELEMENT, rc=rc)
   if (rc /= ESMF_SUCCESS) return
 !  call ESMF_FieldPrint(field, rc=rc)
 !  if (rc /= ESMF_SUCCESS) return
@@ -105,7 +103,6 @@ program ESMF_IO_GDALUTest
   write(name, *) "Read a multi-tile Field"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldRead(field, fileName=fileNameFields, iofmt=ESMF_IOFMT_SHP, rc=rc)
-  call ESMF_FieldWrite(field, "test.nc",overwrite=.true.,rc=rc)
 #if (defined ESMF_PIO && (defined ESMF_GDAL))
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else

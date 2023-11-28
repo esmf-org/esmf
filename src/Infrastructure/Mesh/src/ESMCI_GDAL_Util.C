@@ -105,7 +105,6 @@ void ESMCI_GDAL_SHP_get_feature_info(OGRDataSourceH hDS, int *nFeatures, int *&F
   for (int i=0;i<*nFeatures;i++) {
     hFeature = OGR_L_GetNextFeature(hLayer);
     FeatureIDs[i] = OGR_F_GetFID(hFeature);
-//    printf("FEATURE ID %d\n", FeatureIDs[i]);
     OGR_F_Destroy( hFeature );
   }
 
@@ -293,8 +292,6 @@ void ESMCI_GDAL_process_shapefile_distributed(
   int nGeom   = 0;
   int ierr    = getLayerInfo(hLayer, &nPoints, &nGeom);
 
-//  printf("Number of shapefile elements/points/geometries: %d/%d/%d\n\n",nElements,nPoints,nGeom);
-
   // Rewind to the beginning, just in case
   OGR_L_ResetReading(hLayer);
 
@@ -340,7 +337,6 @@ void ESMCI_GDAL_process_shapefile_distributed(
   // Pass OGR Values to Mesh arrays
   int j = 0;
   for (int i=0;i<totpoints;i++) {
-//    printf("%d: %.2f, %.2f\n",nodeIDs[i],XCoords[i],YCoords[i]);
     nodeCoords[j]   = XCoords[i];
     nodeCoords[j+1] = YCoords[i];
     j+=2;
@@ -385,10 +381,6 @@ int processPolygon(
     polyNodeIDs.push_back(polyXCoords.size()+i+1);
   }
   numPolyConn.push_back(*nPpoints);
-
-  //for (int n : polyNodeIDs)
-  //  printf(" %d",n);
-  //printf("\n");
 
   // -- Set coords: 
   //    this is done this way because it appears GDAL reads these clockwise
@@ -442,7 +434,7 @@ int processMultiPolygon(
     } // Or RECURSE INTO SUB MULTIPOLYGON
     else if(wkbFlatten(OGR_G_GetGeometryType(fGeom)) == wkbMultiPolygon) {
       // To be done. For multiPolygons made of multiPolygons.
-      printf("MPMP!!");
+      printf("Multipolygon of multipolygons!!");
       exit(1);
       // processMultiPolygon(fGeom,runtyp, mpolyXCoords, mpolyYCoords);
     }
@@ -462,8 +454,6 @@ int processMultiPolygon(
       nPolyConn[nPolyConn.size()-2] += nPolyConn.back();
       nPolyConn.pop_back();
     }
-
-    // printf("nPolyConn: %d/%d, %d\n", nPolyConn.back(),nPpoints,polyConn.back());
 
     // -- append the coordinate vectors
     //mpolyXCoords.insert(mpolyXCoords.end(),polyXCoords.begin(),polyXCoords.end());
@@ -519,7 +509,7 @@ int getLayerInfo( OGRLayerH hL, int *nPoints, int *nGeom)
 	} // Or RECURSE INTO SUB MULTIPOLYGON
 	else if(wkbFlatten(OGR_G_GetGeometryType(hGeom2)) == wkbMultiPolygon) {
 	  // To be done. For multiPolygons made of multiPolygons.
-	  printf("MPMP!!");
+	  printf("Multipolygon of multipolygons!!");
 	  exit(1);
 	}
       }

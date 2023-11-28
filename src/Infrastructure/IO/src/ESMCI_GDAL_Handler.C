@@ -21,6 +21,7 @@
 // The code in this file implements the C++ {\tt ESMC\_GDAL_Handler} methods
 // declared in the companion file {\tt ESMCI\_GDAL_Handler.h}
 //
+// This was adapted from the module ESMCI_PIO_Handler.C -- MSL
 //-------------------------------------------------------------------------
 #define GDAL_DEBUG_LEVEL 4
 // include associated header file
@@ -201,7 +202,7 @@ void GDAL_Handler::initialize (
         // Just return error (error code may be different on different PEs).
         // Broadcast the error to all PEs (consistant error handling)
 //        GDALc_Set_IOSystem_Error_Handling(instance, GDAL_BCAST_ERROR);
-        PRINTMSG("After GDALc_Set_IOSystem_Error_Handling");
+//        PRINTMSG("After GDALc_Set_IOSystem_Error_Handling");
         // Add the instance to the global list
         GDAL_Handler::activeGdalInstances.push_back(instance);
         PRINTMSG("push_back");
@@ -668,7 +669,7 @@ void GDAL_Handler::arrayReadOneTileFile(
 //>>	arrlen *= arrDims[i];
 //>>      }
 
-// TBD! THIS REQUIRES SOME DISCUSSION: HOW TO DEAL WITH FILES W/O DATE/TIME DEFS?
+//>> TBD! THIS REQUIRES SOME DISCUSSION: HOW TO DEAL WITH FILES W/O DATE/TIME DEFS? -- MSL
       int dimid_time;
       MPI_Offset time_len;
       gdalrc = GDALc_inq_timeid(fileID, &dimid_time);
@@ -677,35 +678,35 @@ void GDAL_Handler::arrayReadOneTileFile(
 //>>      }
 
       // Check to make sure the requested record is in the file
-//      gdalrc = GDALc_inq_dimlen(filedesc,
-//          dimid_time, &time_len);
-//      if (!CHECKGDALERROR(gdalrc, "Error finding time length", ESMF_RC_FILE_READ, (*rc))) {
-//        return;
-//      }
-//      if (*timeslice > time_len) {
-//        PRINTMSG(" (" << my_rank << "): " <<
-//                 "Timeframe is greater than that in file" <<
-//                 getFilename(tile) << ", file time = " << time_len <<
-//                 ", requested record = " << *timeslice);
-//        if (ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_UNEXPECTED,
-//            "Timeframe is greater than max in file",
-//            ESMC_CONTEXT, rc)) {
-//          return;
-//        }
-//      }
-//      frame = (*timeslice);
-//    } else {
-//      frame = -1;
-//      for (int i=0; i<narrDims; i++){
-//        // Note that arrDims[i] will be 0 if this DE doesn't own the current tile
-//	arrlen *= arrDims[i];
-//      }
-//
-//    }
-//    if (unlim >= 0 && frame > 0) {
-//        PRINTMSG("calling setframe for read_darray, frame = " << frame);
-//        GDALc_setframe(filedesc, vardesc, frame-1);
-//    }
+//>>      gdalrc = GDALc_inq_dimlen(filedesc,
+//>>          dimid_time, &time_len);
+//>>      if (!CHECKGDALERROR(gdalrc, "Error finding time length", ESMF_RC_FILE_READ, (*rc))) {
+//>>        return;
+//>>      }
+//>>      if (*timeslice > time_len) {
+//>>        PRINTMSG(" (" << my_rank << "): " <<
+//>>                 "Timeframe is greater than that in file" <<
+//>>                 getFilename(tile) << ", file time = " << time_len <<
+//>>                 ", requested record = " << *timeslice);
+//>>        if (ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_UNEXPECTED,
+//>>            "Timeframe is greater than max in file",
+//>>            ESMC_CONTEXT, rc)) {
+//>>          return;
+//>>        }
+//>>      }
+//>>      frame = (*timeslice);
+//>>    } else {
+//>>      frame = -1;
+//>>      for (int i=0; i<narrDims; i++){
+//>>        // Note that arrDims[i] will be 0 if this DE doesn't own the current tile
+//>>	arrlen *= arrDims[i];
+//>>      }
+//>>
+//>>    }
+//>>    if (unlim >= 0 && frame > 0) {
+//>>        PRINTMSG("calling setframe for read_darray, frame = " << frame);
+//>>        GDALc_setframe(filedesc, vardesc, frame-1);
+//>>    }
       PRINTPOS;
       PRINTMSG("calling read_darray, gdal type = " << basepiotype << ", address = " << baseAddress);
   // Read in the array
@@ -713,10 +714,10 @@ void GDAL_Handler::arrayReadOneTileFile(
   gdalrc = PIOc_read_darray(fileID, fielddesc, iodesc,
                            arrlen, (void *)baseAddress);
 
-//
-//  if (!CHECKGDALERROR(gdalrc, "Error reading array data", ESMF_RC_FILE_READ, (*rc))) {
-//    return;
-//  }
+
+  if (!CHECKGDALERROR(gdalrc, "Error reading array data", ESMF_RC_FILE_READ, (*rc))) {
+    return;
+  }
 
   // return
   if (rc != NULL) {
@@ -1319,11 +1320,6 @@ void GDAL_Handler::openOneTileFile(
       new_file[tile-1] = true;
       PRINTMSG("call to GDALc_createfile: success for " << thisFilename << " iotype= "<< iotype << " Mode "<< mode << " ESMF FMT "<<getFormat() );
     }
-//>>    gdalrc = GDALc_set_fill(gdalFileDesc[tile-1], GDAL_NOFILL, NULL);
-//>>    if (!CHECKGDALWARN(gdalrc, std::string("Unable to set fill on file: ") + thisFilename,
-//>>                      ESMF_RC_FILE_OPEN, (*rc))) {
-//>>        return;
-//>>    }
   } else {
     PRINTMSG(" calling GDALc_openfile with mode = " << mode << ", file = \"" << thisFilename << "\"");
     // Looks like we are ready to go
@@ -1331,7 +1327,7 @@ void GDAL_Handler::openOneTileFile(
     gdalrc = GDALc_openfile(gdalSystemDesc, (&gdalFileID[tile-1]), (&gdalFileDesc[tile-1]),
                           &iotype, thisFilename.c_str(), mode);
     ESMCI_IOREGION_EXIT("GDALc_openfile");
-//    PRINTMSG("NLayers 0: " << OGR_DS_GetLayerCount(gdalFileDesc[tile-1]));
+//>> DEBUG:    PRINTMSG("NLayers 0: " << OGR_DS_GetLayerCount(gdalFileDesc[tile-1]));
     PRINTMSG(", called GDALc_openfile on " << thisFilename);
     if (!CHECKGDALWARN(gdalrc, std::string("Unable to open existing file: ") + thisFilename,
         ESMF_RC_FILE_OPEN, (*rc))) {
@@ -1366,7 +1362,7 @@ void GDAL_Handler::attPackPut (
   ) {
 //
 // !DESCRIPTION:
-//    Puts the Attributes and their values into the NetCDF file.  If vardesc is 0, the
+//    Puts the Attributes and their values into the GDAL file.  If vardesc is 0, the
 //    attribute will be considered a global attribute.
 //
 //EOPI
@@ -1488,10 +1484,10 @@ ESMC_Logical GDAL_Handler::isOpen(
   PRINTPOS;
   GDALDatasetH filedesc = gdalFileDesc[tile-1]; // note that tile indices are 1-based
   if (filedesc == NULL) {
-    PRINTMSG("gdalFileDesc is NULL");
+//>>    PRINTMSG("gdalFileDesc is NULL");
     return ESMF_FALSE;
   } else if (filedesc != NULL) {
-    PRINTMSG("File is open");
+//>>    PRINTMSG("File is open");
     return ESMF_TRUE;
   } else {
     // This really should not happen, warn and clean up just in case
@@ -1544,10 +1540,8 @@ void GDAL_Handler::flushOneTileFile(
     PRINTMSG("calling sync");
 //>>    ESMCI_IOREGION_ENTER("GDALc_sync");
     if (gdalFileDesc[tile-1] != NULL) {
-//      OGR_DS_Destroy(gdalFileDesc[tile-1]);
-      printf("Flushing tile %d, hDS %p\n", tile, (void *)gdalFileDesc[tile-1]);
+//>>      OGR_DS_Destroy(gdalFileDesc[tile-1]);
       gdalrc = PIOc_sync(gdalFileID[tile-1]);
-      printf("Flush code: %d, tile %d\n",gdalrc, tile);
     }
 //>>    GDALc_sync(gdalFileDesc[tile-1]);
 //>>    ESMCI_IOREGION_EXIT("GDALc_sync");
@@ -2154,27 +2148,27 @@ int GDAL_IODescHandler::freeGdalDecomp(
     return ESMF_RC_ARG_BAD;
   }
 
-//>>  // Look for newDecomp_p in the active handle instances
-//>>  for (it = GDAL_IODescHandler::activeGdalIoDescriptors.begin();
-//>>       it < GDAL_IODescHandler::activeGdalIoDescriptors.end(); ++it) {
-//>>    handle = *it;
-//>>    if (*decomp_p == handle->io_descriptor) {
-//>>      foundHandle = true;
-//>>      delete handle;
-//>>      handle = (GDAL_IODescHandler *)NULL;
-//>>      *decomp_p = (int)NULL;
-//>>      break;
-//>>    }
-//>>  }
-//>>
-//>>  // If we didn't find the handle, that is bad
-//>>  if (foundHandle) {
-//>>    localrc = ESMF_SUCCESS;
-//>>  } else {
-//>>    ESMC_LogDefault.Write("GDAL IO descriptor not found or freed",
-//>>                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-//>>    localrc = ESMF_RC_MEM_DEALLOCATE;
-//>>  }
+  // Look for newDecomp_p in the active handle instances
+  for (it = GDAL_IODescHandler::activeGdalIoDescriptors.begin();
+       it < GDAL_IODescHandler::activeGdalIoDescriptors.end(); ++it) {
+    handle = *it;
+    if (*decomp_p == handle->io_descriptor) {
+      foundHandle = true;
+      delete handle;
+      handle = (GDAL_IODescHandler *)NULL;
+      *decomp_p = (int)NULL;
+      break;
+    }
+  }
+
+  // If we didn't find the handle, that is bad
+  if (foundHandle) {
+    localrc = ESMF_SUCCESS;
+  } else {
+    ESMC_LogDefault.Write("GDAL IO descriptor not found or freed",
+                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+    localrc = ESMF_RC_MEM_DEALLOCATE;
+  }
 
   return localrc;
 } // GDAL_IODescHandler::freeGdalDecomp()
