@@ -134,12 +134,19 @@ jobs:
           -r ${{ github.workspace }}/nuopc-app-prototypes \
           -s ~/.spack-ci
 
-    # push test results to artifacts
+    # compress run directory of NUOPC app prototypes
+    - name: Prepare NUOPC App Prototypes Artifacts Directory
+      run: |
+        cd ${{ github.workspace }}/nuopc-app-prototypes
+        mkdir Artifacts
+        mv NUOPC-PROTO-RESULTS Artifacts/
+
+   # push test results to artifacts
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3
       with:
         name: Artifacts for ${{ matrix.compiler }} ${{ matrix.esmf }}
-        path: ${{ github.workspace }}/nuopc-app-prototypes/NUOPC-PROTO-RESULTS
+        path: ${{ github.workspace }}/nuopc-app-prototypes/Artifacts
         retention-days: 5
 
     # force to fail if there is any failed nuopc app prototypes
