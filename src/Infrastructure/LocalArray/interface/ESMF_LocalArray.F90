@@ -20,11 +20,10 @@ module ESMF_LocalArrayMod
 ! This file contains the sub modules for LocalArray class definition and methods
 !
 !------------------------------------------------------------------------------
-  use iso_c_binding
-  
+
   use ESMF_LocalArrayCreateMod
   use ESMF_LocalArrayGetMod
-  
+
 #ifndef ESMF_NO_F2018ASSUMEDTYPE
   public c_esmf_f90ptrsizeprint
 #endif

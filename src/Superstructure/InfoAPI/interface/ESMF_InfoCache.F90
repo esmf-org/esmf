@@ -24,6 +24,11 @@ use ESMF_UtilTypesMod     ! ESMF utility types
 use ESMF_InitMacrosMod    ! ESMF initializer macros
 use ESMF_BaseMod          ! ESMF base class
 use ESMF_LogErrMod        ! ESMF error handling
+use ESMF_StateMod
+use ESMF_StateItemMod
+use ESMF_FieldMod
+use ESMF_FieldGetMod
+use ESMF_FieldBundleMod
 
 use ESMF_VMMod
 use ESMF_InfoMod
@@ -37,8 +42,17 @@ implicit none
 ! =============================================================================
 ! =============================================================================
 
-!private
-!public
+private
+
+public c_infocache_initialize
+public c_infocache_destroy
+public c_infocache_updatefields
+public ESMF_InfoCacheFindField
+public ESMF_InfoCacheReassembleField
+public ESMF_InfoCacheReassembleFieldsFinalize
+public ESMF_InfoCacheReassembleFields
+
+public ESMF_InfoDescribe
 
 interface ! ===================================================================
 
