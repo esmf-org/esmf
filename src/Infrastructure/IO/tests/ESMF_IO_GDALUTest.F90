@@ -87,7 +87,10 @@ program ESMF_IO_GDALUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArraySpecSet(arraySpec, 1, typekind=ESMF_TYPEKIND_R8, rc=rc)
   if (rc /= ESMF_SUCCESS) return
+<<<<<<< HEAD
 !  field = ESMF_FieldCreate(mesh, arraySpec, name="GEOID", meshLoc=ESMF_MESHLOC_ELEMENT, rc=rc)
+=======
+>>>>>>> msl/shapefile_io_v1.0.1
   field = ESMF_FieldCreate(mesh, arraySpec, name="DistFld", meshLoc=ESMF_MESHLOC_ELEMENT, rc=rc)
   if (rc /= ESMF_SUCCESS) return
 !  call ESMF_FieldPrint(field, rc=rc)
@@ -105,10 +108,13 @@ program ESMF_IO_GDALUTest
   write(name, *) "Read a multi-tile Field"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldRead(field, fileName=fileNameFields, iofmt=ESMF_IOFMT_SHP, rc=rc)
+<<<<<<< HEAD
 !  call ESMF_FieldWrite(field, "test.shp", iofmt=ESMF_IOFMT_SHP, overwrite=.true.,rc=rc)
   call ESMF_FieldWrite(field, "test.nc", rc=rc)
   !! Write mesh for debugging
   call ESMF_MeshWrite(mesh,"complex_3",rc=rc)
+=======
+>>>>>>> msl/shapefile_io_v1.0.1
 #if (defined ESMF_PIO && (defined ESMF_GDAL))
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
