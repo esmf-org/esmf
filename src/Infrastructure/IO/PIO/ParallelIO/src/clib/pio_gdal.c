@@ -92,15 +92,6 @@ GDALc_inq_file_metadata(file_desc_t *file, GDALDatasetH hDS, int iotype, int *nv
 	    typeOK = false;
 	    break;
 	  }
-<<<<<<< HEAD
-	  printf(">>>> Fld Type: %d %d\n",(*pio_type)[v],PIO_STRING);
-	    
-=======
-	  //>>            if ((ret = nc_inq_type(ncid, (*pio_type)[v], NULL, &type_size)))
-	  //>>                return check_netcdf(file, ret, __FILE__, __LINE__);
-	  //>>            (*pio_type_size)[v] = type_size;
-
->>>>>>> msl/shapefile_io_v1.0.1
 	  if (!typeOK) // Not a usable type 
 	    continue;
 
@@ -191,13 +182,6 @@ GDALc_inq_fieldid(int fileid, const char *name, int *fieldidp)
 	    return -1;
 	  }
 	  *fieldidp = OGR_L_FindFieldIndex(hLayer,name,1);
-
-<<<<<<< HEAD
-	  printf("INQ_FIELDID FIELD %s INDEX: %d\n", name, *fieldidp);
-=======
-	  pioassert(*fieldidp > 0, "variable not found", __FILE__, __LINE__);
->>>>>>> msl/shapefile_io_v1.0.1
-
 	}
     }
 
@@ -456,12 +440,6 @@ int GDALc_inq_timeid(int fileid, int *timeid) { // Is there a field of type OFTD
       OGRFieldType Fld = OGR_Fld_GetType(hFlD);
       if (Fld == NULL)
         return pio_err(NULL, NULL, ierr, __FILE__, __LINE__);
-<<<<<<< HEAD
-=======
-
-//      const char* FldTyp = OGR_GetFieldTypeName(Fld);
-//      PRINTMSG("Field type: " << FldTyp);
->>>>>>> msl/shapefile_io_v1.0.1
     }
 
     return 0;
