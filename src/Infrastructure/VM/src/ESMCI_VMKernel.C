@@ -3126,12 +3126,21 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
 #ifdef MPICH_VERSION
-  msg << prefix << "MPICH_VERSION=" << XSTR(MPICH_VERSION);
+  std::string mpich_version(XSTR(MPICH_VERSION));
+  mpich_version.erase(
+    std::remove(mpich_version.begin(), mpich_version.end(),
+    '"'), mpich_version.end());
+  msg << prefix << "MPICH_VERSION=" << mpich_version;
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
+  if (mpich_version.rfind("3.3", 0) == 0)  // broken mpi tools interface
+    mpi_t_okay = false;
 #endif
 #ifdef CRAY_MPICH_VERSION
   std::string cray_mpich_version(XSTR(CRAY_MPICH_VERSION));
+  cray_mpich_version.erase(
+    std::remove(cray_mpich_version.begin(), cray_mpich_version.end(),
+    '"'), cray_mpich_version.end());
   msg << prefix << "CRAY_MPICH_VERSION=" << cray_mpich_version;
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
@@ -3143,12 +3152,27 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
   if (mpi_t_okay){
+    int mpi_rc;
     int provided_thread_level;
-    MPI_T_init_thread(VM_MPI_THREAD_LEVEL, &provided_thread_level);
+    mpi_rc = MPI_T_init_thread(VM_MPI_THREAD_LEVEL, &provided_thread_level);
+    if (mpi_rc != MPI_SUCCESS){
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "MPI_T_init_thread() did not return MPI_SUCCESS.",
+        ESMC_CONTEXT, &localrc);
+      throw localrc;  // bail out with exception
+    }
     msg << prefix << "--- VMK::logSystem() MPI Tool Interface Control Vars ---";
     ESMC_LogDefault.Write(msg.str(), msgType);
     int num_cvar;
-    MPI_T_cvar_get_num(&num_cvar);
+    mpi_rc = MPI_T_cvar_get_num(&num_cvar);
+    if (mpi_rc != MPI_SUCCESS){
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "MPI_T_cvar_get_num() did not return MPI_SUCCESS.",
+        ESMC_CONTEXT, &localrc);
+      throw localrc;  // bail out with exception
+    }
     char name[128], desc[1024];
     int nameLen, descLen, verbosity, binding, scope;
     MPI_T_enum enumtype;
@@ -3156,8 +3180,15 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
     for (int i=0; i<num_cvar; i++){
       nameLen = sizeof(name);
       descLen = sizeof(desc);
-      MPI_T_cvar_get_info(i, name, &nameLen, &verbosity, &datatype, &enumtype,
-        desc, &descLen, &binding, &scope);
+      mpi_rc = MPI_T_cvar_get_info(i, name, &nameLen, &verbosity, &datatype,
+        &enumtype, desc, &descLen, &binding, &scope);
+      if (mpi_rc != MPI_SUCCESS){
+        int localrc;
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+          "MPI_T_cvar_get_info() did not return MPI_SUCCESS.",
+          ESMC_CONTEXT, &localrc);
+        throw localrc;  // bail out with exception
+      }
       msg.str("");  // clear
       msg << prefix << "index=" << std::setw(4) << i << std::setw(60) << name
         << " : " << desc;
@@ -3180,7 +3211,14 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
     msg << prefix << "new MPIR_CVAR_NEMESIS_SHM_EAGER_MAX_SZ=" << eagersize;
     ESMC_LogDefault.Write(msg.str(), msgType);
 #endif
-    MPI_T_finalize();
+    mpi_rc = MPI_T_finalize();
+    if (mpi_rc != MPI_SUCCESS){
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "MPI_T_finalize() did not return MPI_SUCCESS.",
+        ESMC_CONTEXT, &localrc);
+      throw localrc;  // bail out with exception
+    }
   }
 #endif
   msg.str("");  // clear
