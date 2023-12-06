@@ -1812,6 +1812,38 @@ endif
 endif
 
 #-------------------------------------------------------------------------------
+# NUMA
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_NUMA),ON)
+ESMF_NUMA = standard
+endif
+ifeq ($(ESMF_NUMA),standard)
+ifneq ($(origin ESMF_NUMA_LIBS), environment)
+ESMF_NUMA_LIBS = -lnuma
+endif
+endif
+
+ifdef ESMF_NUMA
+ESMF_CPPFLAGS                += -DESMF_NUMA=1
+ifdef ESMF_NUMA_INCLUDE
+ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_NUMA_INCLUDE)
+ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_NUMA_INCLUDE)
+endif
+ifdef ESMF_NUMA_LIBS
+ESMF_CXXLINKLIBS          += $(ESMF_NUMA_LIBS)
+ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_NUMA_LIBS))))
+ESMF_F90LINKLIBS          += $(ESMF_NUMA_LIBS)
+ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_NUMA_LIBS))))
+endif
+ifdef ESMF_NUMA_LIBPATH
+ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_NUMA_LIBPATH)
+ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_NUMA_LIBPATH)
+ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_NUMA_LIBPATH)
+ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_NUMA_LIBPATH)
+endif
+endif
+
+#-------------------------------------------------------------------------------
 # NVML
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_NVML),ON)

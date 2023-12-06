@@ -94,6 +94,12 @@ using namespace std;
 #include <openacc.h>
 #endif
 
+// NUMA support
+#ifdef ESMF_NUMA
+#include <numa.h>
+#endif
+
+// NVML support
 #ifdef ESMF_NVML
 #include <nvml.h>
 #endif
@@ -157,6 +163,10 @@ char **VMK::argv = &(argv_store[0]);
 int VMK::argc_mpich;
 char *VMK::argv_mpich_store[100];
 char **VMK::argv_mpich = &(argv_mpich_store[0]);
+// NUMA support
+bool VMK::nvmlEnabled;
+// NUMA support
+bool VMK::numaEnabled;
 
 } // namespace ESMCI
 
@@ -447,12 +457,12 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   mypthid=0;
 #endif
 #ifdef ESMF_MPIUNI
-  mpionly=0;          // this way the commtype will be checked in comm calls
+  mpionly=false;        // this way the commtype will be checked in comm calls
 #else
   if (npets==1)
-    mpionly=0;          // this way the commtype will be checked in comm calls
+    mpionly=false;      // this way the commtype will be checked in comm calls
   else
-    mpionly=1;          // normally the default VM can only be MPI-only
+    mpionly=true;       // normally the default VM can only be MPI-only
 #endif
   // no threading in default global VM
   threadsflag = false;
@@ -472,6 +482,19 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   MPI_Comm_rank(mpi_c_ssi, &color);
   if (color>0) color = MPI_UNDEFINED; // only root PETs on each SSI
   MPI_Comm_split(mpi_c, color, 0, &mpi_c_ssi_roots);
+#endif
+  // check whether NVML support is enabled
+#ifdef ESMF_NVML
+  nvmlEnabled = true;
+#else
+  nvmlEnabled = false;
+#endif
+  // check whether NUMA support is enabled
+#ifdef ESMF_NUMA
+  numaEnabled = true;
+  if (numa_available()<0) numaEnabled = false;  // NUMA not available at runtime
+#else
+  numaEnabled = false;
 #endif
   // initialize the shared memory variables
   pth_finish_count = NULL;
@@ -1101,15 +1124,15 @@ void VMK::construct(void *ssarg){
   }
 #ifdef ESMF_MPIUNI
   // don't set mpionly flag so that comm call check for commtype
-  mpionly=0;
+  mpionly=false;
 #else
   if (npets==1)
-    mpionly=0;
+    mpionly=false;
   else{
     // determine whether we are dealing with an MPI-only VMK
-    mpionly=1;  // assume this is MPI-only VMK until found otherwise
+    mpionly=true;  // assume this is MPI-only VMK until found otherwise
     for (int i=0; i<npets; i++)
-      if (tid[i]>0) mpionly=0;    // found multi-threading PET
+      if (tid[i]>0) mpionly=false;    // found multi-threading PET
   }
 #endif
   threadsflag = sarg->threadsflag;
@@ -3094,6 +3117,12 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
   msg << prefix << "isSsiSharedMemoryEnabled=" << isSsiSharedMemoryEnabled();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "isNvmlEnabled=" << isNvmlEnabled();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "isNumaEnabled=" << isNumaEnabled();
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
   msg << prefix << "ssiCount=" << nssiid << " peCount=" << ncores;

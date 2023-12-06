@@ -313,21 +313,26 @@ class VMK{
     int *ncpet;     // number of cores this pet references
     int *nadevs;//TODO: to be removed // number of accelerator devices accessible from this pet
     int **cid;      // core id of the cores this pet references
+    // SSI
     int ssiCount;   // number of single system images in this VMK
     int ssiMinPetCount;   // minimum PETs on a single system image
     int ssiMaxPetCount;   // maximum PETs on a single system image
     int ssiLocalPetCount; // number of PETs on the same SSI as localPet (incl.)
     int ssiLocalPet;      // id of local PET in the local SSI
     int *ssiLocalPetList; // PETs that are on the same SSI as localPet (incl.)
+    // SSI DEV
     int devCount;   // number of devices associated with this VMK all SSI
     int ssiLocalDevCount;// number of devices associated with this VMK on local SSI
     int *ssiLocalDevList;// list of SSI-local device indices associated with this VMK
                     // Use this index to make local association calls (e.g. via
                     // acc_set_device_num() or omp_set_default_device()), and
                     // to look up global device index in ssidevs array.
+    // SSI NUMA
+    int ssiLocalNumaCount; // number of NUMA modes on the same SSI as localPet (incl.)
+    int *ssiLocalNumaList; // NUMA nodes
     // general information about this VMK
-    int mpionly;    // 0: there is multi-threading, 1: MPI-only
-    bool threadsflag; // threaded or none-threaded VM
+    bool mpionly;         // false: there is multi-threading, true: MPI-only
+    bool threadsflag;     // threaded or none-threaded VM
     // MPI Communicator handles
     MPI_Comm mpi_c;     // communicator across the entire VM
     MPI_Comm mpi_c_ssi; // communicator holding PETs on the same SSI
@@ -399,6 +404,10 @@ class VMK{
     static int argc_mpich;
     static char *argv_mpich_store[100];
     static char **argv_mpich;
+    // NVML support
+    static bool nvmlEnabled;     // NVML support enabled or disabled
+    // NUMA support
+    static bool numaEnabled;     // NUMA support enabled or disabled
 
   // methods
   private:
@@ -514,6 +523,12 @@ class VMK{
 #else
       return false;
 #endif
+    }
+    static bool isNvmlEnabled(){
+      return nvmlEnabled;
+    }
+    static bool isNumaEnabled(){
+      return numaEnabled;
     }
 
 #define XSTR(X) STR(X)
