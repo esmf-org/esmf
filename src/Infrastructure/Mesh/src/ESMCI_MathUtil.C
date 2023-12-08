@@ -3984,72 +3984,63 @@ bool is_pnt_in_polygon(int num_p, double *p, double *pnt, double tol, int *tri_i
   // p_t   - output position of intersection point in segment p
   // q_t   - output position of intersection point in segment q
   void intersect_segs_sph2D3D(double *p1, double *p2, double *q1, double *q2,
-                              double *p_t, double *q_t) {
-
+                              bool &parallel, bool &colinear,
+                              double &p_t, double &q_t) {
+                             
     
 
   }
 
   // Do a very careful intersection of segments on a 2D plane
-  // p1,p2 - endpoints of first segment of size 3
-  // q1,q2 - endpoints of second segment of size 3
+  // p1,p2 - endpoints of first segment of size 2
+  // q1,q2 - endpoints of second segment of size 2
   // p_t   - output position of intersection point in segment p
   // q_t   - output position of intersection point in segment q
   void intersect_segs_cart2D(double *p1, double *p2, double *q1, double *q2,
-                             double *p_t, double *q_t) {
+                             bool &parallel, bool &colinear,
+                             double &p_t, double &q_t) {
 
+    // Set parallel tol
+#define PARALLEL_TOL 1.0E-15
 
-    // Bottom of P_t
+    
+    // Init output
+    p_t=-1.0;
+    q_t=-1.0;
+    parallel=false;
+    colinear=false;
+
+    
+    // Bottom of p_t
     double p_t_btm=(p1[0]-p2[0])*(q1[1]-q2[1])-(p1[1]-p2[1])*(q1[0]-q2[0]);
 
-    // The rest of the p_t calc
-    *p_t=((p1[0]-q1[0])*(q1[1]-q2[1])-(p1[1]-q1[1])*(q1[0]-q2[0]))/p_t_btm;
+    // If close to 0.0, then parallel, so compute those and leave
+    if (std::abs(p_t_btm) < PARALLEL_TOL) {
 
-    
-    // Bottom of q_t
-    double q_t_btm=(q1[0]-q2[0])*(p1[1]-p2[1])-(q1[1]-q2[1])*(p1[0]-p2[0]);
+      // Set parallel
+      parallel=true;
 
-    // The rest of the q_t calc
-    *q_t=((q1[0]-p1[0])*(p1[1]-p2[1])-(q1[1]-p1[1])*(p1[0]-p2[0]))/q_t_btm;
-
-   
-
-#if 0   
-    // Calculate thing to divide both line equations by
-    double ttdb=
-      p1[0]*(q2[1] - q1[1]) +
-      p2[0]*(q1[1] - q2[1]) +
-      q1[0]*(p1[1] - p2[1]) +
-      q2[0]*(p2[1] - p1[1]);
-
-
-#if 0
-    // if ttdb is 0.0 then the lines are parallel, this
-    // shouldn't happen, but if it does it makes the
-    // most sense to add the out point
-    if (ttdb == 0.0) {
-      p[0]=q2[0];
-      p[1]=q2[1];
-      return true;
+      // Is colinear
+      colinear=false;  // Just set to false for now
+      
+      // Leave and don't calculate ts
+      return;
     }
-#endif
 
 
-    // Calculate p_t
-    *p_t=
-      -(q1[0]*(p1[1]-q2[1]) +
-        q2[0]*(q1[1]-p1[1]) +
-        p1[0]*(q2[1]-q1[1]))/ttdb;
+    // The rest of the p_t calc
+    p_t=((p1[0]-q1[0])*(q1[1]-q2[1])-(p1[1]-q1[1])*(q1[0]-q2[0]))/p_t_btm;
 
+    // Bottom of q_t
+    // (Just the negative of p_t_btm)
+    //    double q_t_btm=(q1[0]-q2[0])*(p1[1]-p2[1])-(q1[1]-q2[1])*(p1[0]-p2[0]);
+    double q_t_btm=-p_t_btm;
     
-    // Calculate q_t
-    *q_t=
-      -(p1[0]*(q1[1]-p2[1]) +
-        p2[0]*(p1[1]-q1[1]) +
-        q1[0]*(p2[1]-p1[1]))/ttdb;
+    // The rest of the q_t calc
+    q_t=((q1[0]-p1[0])*(p1[1]-p2[1])-(q1[1]-p1[1])*(p1[0]-p2[0]))/q_t_btm;
 
-#endif
-    
+
+#undef PARALLEL_TOL
   }
 
   

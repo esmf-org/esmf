@@ -43,6 +43,19 @@
 
 using namespace ESMCI;
 
+enum PGON_INTERLABEL {
+  PGON_INTERLABEL_ERROR=0,
+  PGON_INTERLABEL_CROSSING,
+  PGON_INTERLABEL_BOUNCING,
+  PGON_INTERLABEL_LEFT_ON,
+  PGON_INTERLABEL_RIGHT_ON,
+  PGON_INTERLABEL_ON_ON,
+  PGON_INTERLABEL_ON_LEFT,
+  PGON_INTERLABEL_ON_RIGHT,
+  PGON_INTERLABEL_NUM
+};
+
+
 template <class GEOM>
 class Vert {
   
@@ -52,6 +65,7 @@ public:
   double t;  // Parameter distance of this vertex between enclosing original vertices
   bool orig; // Part of the original Pgon
   bool inter; // An intersection vertex (not necessarily disjoint from orig) basically it means that it's connected with another polygon
+  PGON_INTERLABEL interlabel; // Type of intersection    
   Vert *nbr;
   Vert *next, *prev;
 

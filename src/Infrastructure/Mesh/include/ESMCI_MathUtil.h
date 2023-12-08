@@ -121,10 +121,12 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
                                int *num_out, double *out);
 
   void intersect_segs_sph2D3D(double *p1, double *p2, double *q1, double *q2,
-                              double *p_t, double *q_t);
+                              bool &parallel, bool &colinear, 
+                              double &p_t, double &q_t);
   
   void intersect_segs_cart2D(double *p1, double *p2, double *q1, double *q2,
-                             double *p_t, double *q_t);
+                             bool &parallel, bool &colinear, 
+                             double &p_t, double &q_t);
 
   
 //// Handy macros ////
@@ -253,6 +255,7 @@ struct GEOM_CART2D {
 
   // Direction of turn between vectors a and b, starting both starting from point p
   // based on cross product
+  // Positve values mean a is to the left of b, negative are right
   static double turn(double *a, double *b, double *p) {return a[0]*b[1]-a[1]*b[0];}
 
   // Used as an approximation of sharpness of angle between two vectors
@@ -280,8 +283,10 @@ struct GEOM_CART2D {
     return area_of_flat_2D_polygon(num, coords);
   }   
 
-  static void intersect_segs(double *p1, double *p2, double *q1, double *q2, double *p_t, double *q_t) {
-    intersect_segs_cart2D(p1, p2, q1, q2, p_t, q_t);
+  static void intersect_segs(double *p1, double *p2, double *q1, double *q2,
+                             bool &parallel, bool &colinear,
+                             double &p_t, double &q_t)  {
+    intersect_segs_cart2D(p1, p2, q1, q2, parallel, colinear, p_t, q_t);
   }
 
   static void calc_pnt_between(double *p1, double *p2, double t, double *p_new) {
@@ -300,6 +305,7 @@ struct GEOM_SPH2D3D {
 
   // direction of turn between vectors a and b, starting both starting from point p
   // based on cross product
+  // Positve values mean a is to the left of b, negative are right
   static double turn(double *a, double *b, double *p) {return p[0]*(a[1]*b[2]-a[2]*b[1])+p[1]*(a[2]*b[0]-a[0]*b[2])+p[2]*(a[0]*b[1]-a[1]*b[0]);}
 
   // Bob 7/24/19: This was used in XGrid debugging work, I don't think that it made much of a difference, but left it here in case we need to switch to it. 
@@ -331,8 +337,11 @@ struct GEOM_SPH2D3D {
   }
 
 
-  static void intersect_segs(double *p1, double *p2, double *q1, double *q2, double *p_t, double *q_t) {
-    intersect_segs_sph2D3D(p1, p2, q1, q2, p_t, q_t);
+  static void intersect_segs(double *p1, double *p2, double *q1, double *q2,
+                             bool &parallel, bool &colinear,
+                             double &p_t, double &q_t) {
+    intersect_segs_sph2D3D(p1, p2, q1, q2,
+                           parallel, colinear, p_t, q_t);
   }
 
   static void calc_pnt_between(double *p1, double *p2, double t, double *p_new) {
