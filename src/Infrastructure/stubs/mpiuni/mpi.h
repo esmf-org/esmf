@@ -208,6 +208,10 @@ extern int    Petsc_MPI_Initialized(int *);
 extern int    Petsc_MPI_Comm_dup(MPI_Comm,MPI_Comm *);
 extern int    Petsc_MPI_Finalize(void);
 extern int    Petsc_MPI_Finalized(int *);
+extern int    ESMC_MPI_Alltoallw(void *,int *,int *,MPI_Datatype *,
+                                 void *,int *,int *,MPI_Datatype *,MPI_Comm);
+extern int    ESMC_MPI_Type_create_indexed_block(int,int,const int[],MPI_Datatype,MPI_Datatype *);
+extern int    ESMC_MPI_Type_size(MPI_Datatype,int *);
 extern double ESMC_MPI_Wtime(void);
 
 #define MPI_Abort         Petsc_MPI_Abort
@@ -221,6 +225,9 @@ extern double ESMC_MPI_Wtime(void);
 #define MPI_Comm_dup      Petsc_MPI_Comm_dup
 #define MPI_Finalize      Petsc_MPI_Finalize
 #define MPI_Finalized     Petsc_MPI_Finalized
+#define MPI_Alltoallw     ESMC_MPI_Alltoallw
+#define MPI_Type_create_indexed_block ESMC_MPI_Type_create_indexed_block
+#define MPI_Type_size     ESMC_MPI_Type_size
 #define MPI_Wtime         ESMC_MPI_Wtime
 
 /* 
@@ -483,15 +490,12 @@ extern double ESMC_MPI_Wtime(void);
 #define MPI_Type_hindexed(count,array_of_blocklengths,\
      array_of_displacements, oldtype,\
      newtype) MPI_SUCCESS
-#define MPI_Type_create_indexed_block(count,blocklength,displacements,oldtype, newtype) MPI_SUCCESS
 #define MPI_Type_struct(count,array_of_blocklengths,\
      array_of_displacements,\
      array_of_types, newtype) MPI_SUCCESS
 #define MPI_Address(location,address) \
      (*(address) = (long)(char *)(location),MPI_SUCCESS)
 #define MPI_Type_extent(datatype,extent) \
-     MPI_Abort(MPI_COMM_WORLD,0)
-#define MPI_Type_size(datatype,size) \
      MPI_Abort(MPI_COMM_WORLD,0)
 #define MPI_Type_lb(datatype,displacement) \
      MPI_Abort(MPI_COMM_WORLD,0)
@@ -582,9 +586,6 @@ extern double ESMC_MPI_Wtime(void);
 #define MPI_Alltoallv(sendbuf,sendcounts,sdispls,\
      sendtype, recvbuf,recvcounts,\
      rdispls, recvtype,comm) MPI_Abort(MPI_COMM_WORLD,0)
-#define MPI_Alltoallw(sendbuf,sendcounts,sdispls,                       \
-     sendtypes, recvbuf,recvcounts,                     \
-     rdispls, recvtypes,comm) MPI_Abort(MPI_COMM_WORLD,0)
 #define MPI_Reduce(sendbuf, recvbuf,count,\
      datatype,op,root,comm) \
      (MPIUNI_Memcpy(recvbuf,sendbuf,(count)*(datatype),CHECK_FOR_MPI_IN_PLACE_SOURCE), \

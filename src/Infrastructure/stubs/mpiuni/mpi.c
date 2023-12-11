@@ -199,6 +199,50 @@ int Petsc_MPI_Finalize(void)
   return 0;
 }
 
+int ESMC_MPI_Alltoallw(void *sendbuf, int *sendcounts, int *sdispls,
+                       MPI_Datatype *sendtypes, void *recvbuf, int *recvcounts,
+                       int *rdispls, MPI_Datatype *recvtypes, MPI_Comm comm)
+{
+  // Since we are only implementing this for the single-processor case, the counts, displs
+  // and types arguments should all have length 1. We assume that's the case in this
+  // implementation.
+
+  // Displacements are not implemented so return an error code if they are non-zero
+  if (sdispls[0] != 0 || rdispls[0] != 0) {
+    return MPI_ERR_INTERN;
+  }
+
+  MPIUNI_Memcpy(recvbuf, sendbuf, sendcounts[0]*sendtypes[0], CHECK_FOR_MPI_IN_PLACE_SOURCE);
+  return MPI_SUCCESS;
+}
+
+int ESMC_MPI_Type_create_indexed_block(int count, int blocklength,
+                                       const int array_of_displacements[],
+                                       MPI_Datatype oldtype,
+                                       MPI_Datatype *newtype)
+{
+  // Some generalizations are not implemented here, so return an error code if there is an
+  // attempt to call this with any not-yet-implemented generality:
+  if (count != 1) {
+    return MPI_ERR_INTERN;
+  }
+  if (array_of_displacements[0] != 0) {
+    return MPI_ERR_INTERN;
+  }
+
+  // Simple implementation given the assurances above that count==1 and displacement==0,
+  // and mpiuni's definition of each datatype as sizeof(raw-type).
+  *newtype = blocklength*oldtype;
+  return MPI_SUCCESS;
+}
+
+int ESMC_MPI_Type_size(MPI_Datatype datatype, int *size)
+{
+  // Note that, conveniently, mpiuni defines each datatype as sizeof(raw-type)
+  *size = datatype;
+  return MPI_SUCCESS;
+}
+
 #if !defined (ESMF_OS_MinGW)
 // POSIX version
 double ESMC_MPI_Wtime(void)
