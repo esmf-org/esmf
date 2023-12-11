@@ -258,6 +258,12 @@ PGON_RELPOSTYPE _calc_relative_postion(Vert<GEOM> *w, Vert<GEOM> *v_prev, Vert<G
 template<class GEOM>
 void _label_intersections(Pgon<GEOM> &pg) {
 
+  // QUESTION: MAYBE WE NEED TO DO EACH (OR SOME) OF THESE SECTIONS TO ALL PGons BEFORE MOVING ON TO THE NEXT, so MAYBE WE
+  //           NEED TO PASS BOTH IN???
+
+  
+  // TODO: MAYBE MAKE EACH OF THESE SEPERATE SUBROUTINES???
+  
   // Loop through intersections labeling them according to the positions of their neighbors
   for (Vert<GEOM> *v : pg.get_VertIter(PGON_VERTITERTYPE_INTER)) {
 
@@ -275,9 +281,22 @@ void _label_intersections(Pgon<GEOM> &pg) {
     // Map relative positions to intesection label
     v->interlabel=relpostype_to_label[v_nbr_prev_pos][v_nbr_next_pos];
     
-    // Debug output
-    //std::cout << "["<<*v1_pg1<<"]->["<<*v2_pg1<<"] \n";    
   }
+  
+  // Spread labels down chains
+  for (Vert<GEOM> *v : pg.get_VertIter(PGON_VERTITERTYPE_INTER)) {
+
+    // Start of a 
+
+    // STOPPED HERE
+    
+  }
+
+  // Copy labels from pg to other polygons it's intersected with
+  for (Vert<GEOM> *v : pg.get_VertIter(PGON_VERTITERTYPE_INTER)) {
+    v->nbr->interlabel = v->interlabel;
+  }
+
   
 }
 
