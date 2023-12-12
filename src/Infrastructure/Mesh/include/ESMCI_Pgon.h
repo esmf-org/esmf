@@ -45,6 +45,7 @@ using namespace ESMCI;
 
 enum PGON_INTERLABEL {
   PGON_INTERLABEL_ERROR=0,
+  PGON_INTERLABEL_NONE,
   PGON_INTERLABEL_CROSSING,
   PGON_INTERLABEL_BOUNCING,
   PGON_INTERLABEL_LEFT_ON,
@@ -52,6 +53,8 @@ enum PGON_INTERLABEL {
   PGON_INTERLABEL_ON_ON,
   PGON_INTERLABEL_ON_LEFT,
   PGON_INTERLABEL_ON_RIGHT,
+  PGON_INTERLABEL_DELAYED_CROSSING,
+  PGON_INTERLABEL_DELAYED_BOUNCING,
   PGON_INTERLABEL_NUM
 };
 
@@ -71,7 +74,8 @@ public:
 
   // Base constructor
   // Inits everything except points which are handled below
-  Vert( ): t(-1.0), orig(false), inter(false), next(NULL), prev(NULL) {}
+  Vert( ): t(-1.0), orig(false), inter(false), interlabel(PGON_INTERLABEL_NONE),
+           nbr(NULL), next(NULL), prev(NULL) {}
 
   Vert(double x, double y);
 

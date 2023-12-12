@@ -286,16 +286,46 @@ void _label_intersections(Pgon<GEOM> &pg) {
   // Spread labels down chains
   for (Vert<GEOM> *v : pg.get_VertIter(PGON_VERTITERTYPE_INTER)) {
 
-    // Start of a 
+    // If we're starting a chain
+    if ((v->interlabel == PGON_INTERLABEL_LEFT_ON) || (v->interlabel == PGON_INTERLABEL_RIGHT_ON)) {
 
-    // STOPPED HERE
-    
+      // Save start vertex
+      Vert<GEOM> *chain_start = v;
+
+      // Move to end of chain, setting to NONE along chain
+      do {
+        v->interlabel=PGON_INTERLABEL_NONE; // TODO: SHOULD WE HAVE A SPECIAL LABEL FOR THIS???
+        v=v->next;
+      } while (v->interlabel == PGON_INTERLABEL_ON_ON);
+
+      // Decide label of whole chain by comparing start and end
+      PGON_INTERLABEL chain_label;
+      if ((chain_start->interlabel == PGON_INTERLABEL_LEFT_ON) && (v->interlabel == PGON_INTERLABEL_ON_LEFT)) {
+        chain_label=PGON_INTERLABEL_DELAYED_BOUNCING;
+      } else if ((chain_start->interlabel == PGON_INTERLABEL_RIGHT_ON) && (v->interlabel == PGON_INTERLABEL_ON_RIGHT)) {
+          chain_label=PGON_INTERLABEL_DELAYED_BOUNCING;
+        } else if ((chain_start->interlabel == PGON_INTERLABEL_LEFT_ON) && (v->interlabel == PGON_INTERLABEL_ON_RIGHT)) {
+        chain_label=PGON_INTERLABEL_DELAYED_CROSSING;
+      } else if ((chain_start->interlabel == PGON_INTERLABEL_RIGHT_ON) && (v->interlabel == PGON_INTERLABEL_ON_LEFT)) {
+        chain_label=PGON_INTERLABEL_DELAYED_CROSSING;
+      } else {
+        Throw() << "Unexpected crossing situation.";
+      }
+
+      // Mark both ends with chain label
+      chain_start->interlabel = chain_label;  // chain start
+      v->interlabel = chain_label;            // chain end
+    }      
   }
 
+  
   // Copy labels from pg to other polygons it's intersected with
   for (Vert<GEOM> *v : pg.get_VertIter(PGON_VERTITERTYPE_INTER)) {
     v->nbr->interlabel = v->interlabel;
   }
+
+
+
 
   
 }
