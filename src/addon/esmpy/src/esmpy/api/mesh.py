@@ -512,10 +512,17 @@ class Mesh(object):
             self._node_owners = node_owners
 
         if node_mask is not None:
-            node_mask = np.asarray(node_mask).astype(np.int32, copy=False)
+            node_mask = np.asarray(node_mask).astype(np.int32, copy=False).reshape(-1)
         self._node_mask = node_mask
         self._mask[0] = self._node_mask
- 
+
+
+        if node_mask is not None and len(node_mask) != node_count:
+            raise ValueError(
+                "`node_mask` must have the same length as the number of nodes"
+                f" (expected {node_count}, got {len(node_mask)})"
+            )
+
         # call into ctypes layer
         ESMP_MeshAddNodes(self, self.node_count, self.node_ids, 
                           self.node_coords, self.node_owners, self._node_mask)
