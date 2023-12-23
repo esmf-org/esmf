@@ -614,9 +614,8 @@ contains
 !-------------------------------------------------------------------------------
 
     ESMF_INIT_TYPE init1, init2
-    integer :: localrc1, localrc2
-    logical :: lval1, lval2
-
+    type(ESMF_Logical) :: isEqual
+    
     ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain
     ! init checks on both args, and in the case where both are uninitialized,
     ! to distinguish equality based on uninitialized type (uncreated,
@@ -629,7 +628,16 @@ contains
     ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
     if (init1 .eq. ESMF_INIT_CREATED .and. &
       init2 .eq. ESMF_INIT_CREATED) then
-      ESMF_HConfigEQ = all(HConfig1%shallowMemory .eq. HConfig2%shallowMemory)
+
+       ! Call into the C++ interface to determine equality
+       call c_ESMC_HConfigEqual(HConfig1, HConfig2, isEqual)
+
+       ! Translate from ESMF logical to Fortran logical
+       ESMF_HConfigEQ= .false.
+       if (isEqual == ESMF_TRUE) then
+          ESMF_HConfigEQ= .true.
+       endif
+
     else
       ESMF_HConfigEQ = .false.
     endif
@@ -662,8 +670,7 @@ contains
 !-------------------------------------------------------------------------------
 
     ESMF_INIT_TYPE init1, init2
-    integer :: localrc1, localrc2
-    logical :: lval1, lval2
+    type(ESMF_Logical) :: isEqual
 
     ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain
     ! init checks on both args, and in the case where both are uninitialized,
@@ -677,7 +684,18 @@ contains
     ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
     if (init1 .eq. ESMF_INIT_CREATED .and. &
       init2 .eq. ESMF_INIT_CREATED) then
-      ESMF_HConfigIterEQ = all(HConfig1%shallowMemory .eq. HConfig2%shallowMemory)
+
+       ! Call into the C++ interface to determine equality
+       ! For now use HConfig equality since HConfig iterators and HConfig are
+       ! stored in the same class
+       call c_ESMC_HConfigEqual(HConfig1, HConfig2, isEqual)
+
+       ! Translate from ESMF logical to Fortran logical
+       ESMF_HConfigIterEQ= .false.
+       if (isEqual == ESMF_TRUE) then
+          ESMF_HConfigIterEQ= .true.
+       endif
+       
     else
       ESMF_HConfigIterEQ = .false.
     endif
