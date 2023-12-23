@@ -481,7 +481,8 @@ class Mesh(object):
     def add_nodes(self, node_count,
                   node_ids,
                   node_coords,
-                  node_owners):
+                  node_owners,
+                  node_mask=None):
         """
         Add nodes to a :class:`~esmpy.api.mesh.Mesh`, this must be done before adding elements.
 
@@ -509,10 +510,15 @@ class Mesh(object):
             self._node_owners = np.array(node_owners, dtype=np.int32)
         else:
             self._node_owners = node_owners
+
+        if node_mask is not None:
+            node_mask = node_mask.astype(np.int32, copy=False)
+        self._node_mask = node_mask
+        self._mask[0] = self._node_mask
  
         # call into ctypes layer
         ESMP_MeshAddNodes(self, self.node_count, self.node_ids, 
-                          self.node_coords, self.node_owners)
+                          self.node_coords, self.node_owners, self._node_mask)
         # can't get the sizes until mesh is "committed" in element call
 
     def copy(self):
