@@ -7,11 +7,64 @@ import pytest
 
 import os
 
+import numpy as np
+from numpy.testing import assert_array_equal
+
 from esmpy import *
 from esmpy.test.base import TestBase
 from esmpy.api.constants import _ESMF_NETCDF, _ESMF_PIO
 from esmpy.util.mesh_utilities import *
 from esmpy.util.cache_data import DATA_DIR
+
+
+@pytest.mark.parametrize(
+    "mask",
+    (
+        None,
+        [0] * 12,
+        [True] * 12,
+        [1] * 12,
+        [False] * 12,
+        [0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
+        [[0, 0, 0, 0], [-1, -1, -1, -1], [0, 0, 0, 0]],
+    ),
+)
+def test_add_nodes_with_mask(mask):
+    src = Mesh(parametric_dim=2, spatial_dim=2, coord_sys=esmpy.CoordSys.CART)
+
+    x_of_points, y_of_points = np.meshgrid([0.0, 1.0, 2.0, 3.0], [0.0, 1.0, 2.0])
+    xy_of_points = np.c_[x_of_points.flat, y_of_points.flat]
+
+    src.add_nodes(
+        len(xy_of_points),
+        np.arange(len(xy_of_points)),
+        xy_of_points,
+        np.zeros(len(xy_of_points), dtype=int),
+        node_mask=mask,
+    )
+
+    assert src.mask[1] is None
+    if mask is None:
+        assert src.mask[0] is None
+    else:
+        assert_array_equal(src.mask[0], np.asarray(mask).flat)
+
+
+def test_add_nodes_with_mask_bad():
+    src = Mesh(parametric_dim=2, spatial_dim=2, coord_sys=esmpy.CoordSys.CART)
+
+    x_of_points, y_of_points = np.meshgrid([0.0, 1.0, 2.0, 3.0], [0.0, 1.0, 2.0])
+    xy_of_points = np.c_[x_of_points.flat, y_of_points.flat]
+
+    with pytest.raises(ValueError):
+        src.add_nodes(
+            len(xy_of_points),
+            np.arange(len(xy_of_points)),
+            xy_of_points,
+            np.zeros(len(xy_of_points), dtype=int),
+            node_mask=[1, 2, 3],
+        )
+
 
 class TestMesh(TestBase):
 
