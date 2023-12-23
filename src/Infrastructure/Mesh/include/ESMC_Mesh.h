@@ -212,7 +212,8 @@ int ESMC_MeshAddNodes(
   int nodeCount,           // in
   int *nodeIds,            // in
   double *nodeCoords,      // in
-  int *nodeOwners          // in
+  int *nodeOwners,         // in
+  int *nodeMask            // in
 );
 
 // !RETURN VALUE:
