@@ -238,18 +238,12 @@ int ESMC_MPI_Type_create_indexed_block(int count, int blocklength,
                                        MPI_Datatype oldtype,
                                        MPI_Datatype *newtype)
 {
-  // The implementation here assumes contiguous data - i.e., the displacements go in
-  // increments of blocklength. Return an error code if there is an attempt to call this
-  // with any not-yet-implemented generality:
-  for (int i=0; i<count; i++) {
-    if (array_of_displacements[i] != i*blocklength) {
-      return MPI_ERR_INTERN;
-    }
-  }
-
-  // Simple implementation given the assurance above that the displacements go in
-  // increments of blocklength, and mpiuni's definition of each datatype as
-  // sizeof(raw-type).
+  // Note mpiuni's definition of each datatype as sizeof(raw-type).
+  //
+  // From some experimentation with a real MPI library, the MPI_Type_size of newtype is
+  // independent of the values in array_of_displacements. Since the MPI_Datatype in mpiuni
+  // is just the size of the datatype, we ignore the possible complexity of
+  // array_of_displacements in this implementation.
   *newtype = count*blocklength*oldtype;
   return MPI_SUCCESS;
 }
