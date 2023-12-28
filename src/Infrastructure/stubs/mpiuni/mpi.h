@@ -212,7 +212,9 @@ extern int    ESMC_MPI_Alltoallw(void *,int *,int *,MPI_Datatype *,
                                  void *,int *,int *,MPI_Datatype *,MPI_Comm);
 extern int    ESMC_MPI_Scatterv(void *,int *,int *,MPI_Datatype,
                                 void *,int,MPI_Datatype,int,MPI_Comm);
+extern int    ESMC_MPI_Type_create_hvector(int,int,MPI_Aint,MPI_Datatype,MPI_Datatype *);
 extern int    ESMC_MPI_Type_create_indexed_block(int,int,const int[],MPI_Datatype,MPI_Datatype *);
+extern int    ESMC_MPI_Type_hvector(int,int,MPI_Aint,MPI_Datatype,MPI_Datatype *);
 extern int    ESMC_MPI_Type_size(MPI_Datatype,int *);
 extern double ESMC_MPI_Wtime(void);
 
@@ -229,7 +231,9 @@ extern double ESMC_MPI_Wtime(void);
 #define MPI_Finalized     Petsc_MPI_Finalized
 #define MPI_Alltoallw     ESMC_MPI_Alltoallw
 #define MPI_Scatterv      ESMC_MPI_Scatterv
+#define MPI_Type_create_hvector ESMC_MPI_Type_create_hvector
 #define MPI_Type_create_indexed_block ESMC_MPI_Type_create_indexed_block
+#define MPI_Type_hvector  ESMC_MPI_Type_hvector
 #define MPI_Type_size     ESMC_MPI_Type_size
 #define MPI_Wtime         ESMC_MPI_Wtime
 
@@ -485,8 +489,6 @@ extern double ESMC_MPI_Wtime(void);
 #define MPI_Type_contiguous(count, oldtype,newtype) \
      (*(newtype) = (count)*(oldtype),MPI_SUCCESS)
 #define MPI_Type_vector(count,blocklength,stride,oldtype, newtype) MPI_SUCCESS
-#define MPI_Type_hvector(count,blocklength,stride,oldtype, newtype) MPI_SUCCESS
-#define MPI_Type_create_hvector(count,blocklength,stride,oldtype, newtype) MPI_SUCCESS
 #define MPI_Type_indexed(count,array_of_blocklengths,\
      array_of_displacements, oldtype,\
      newtype) MPI_SUCCESS

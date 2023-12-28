@@ -233,6 +233,18 @@ int ESMC_MPI_Scatterv(void *sendbuf, int *sendcounts, int *displs,
   return MPI_SUCCESS;
 }
 
+int ESMC_MPI_Type_create_hvector(int count, int blocklength, MPI_Aint stride,
+                                 MPI_Datatype oldtype, MPI_Datatype *newtype)
+{
+  // Note mpiuni's definition of each datatype as sizeof(raw-type).
+  //
+  // From some experimentation with a real MPI library, the MPI_Type_size of newtype is
+  // independent of the value of stride. Since the MPI_Datatype in mpiuni is just the size
+  // of the datatype, we ignore the possible complexity of stride in this implementation.
+  *newtype = count*blocklength*oldtype;
+  return MPI_SUCCESS;
+}
+
 int ESMC_MPI_Type_create_indexed_block(int count, int blocklength,
                                        const int array_of_displacements[],
                                        MPI_Datatype oldtype,
@@ -246,6 +258,16 @@ int ESMC_MPI_Type_create_indexed_block(int count, int blocklength,
   // array_of_displacements in this implementation.
   *newtype = count*blocklength*oldtype;
   return MPI_SUCCESS;
+}
+
+int ESMC_MPI_Type_hvector(int count, int blocklength, MPI_Aint stride,
+                          MPI_Datatype oldtype, MPI_Datatype *newtype)
+{
+  // MPI_Type_hvector is a deprecated version of MPI_Type_create_hvector; the only
+  // difference is in how stride is specified (bytes vs. elements); since we ignore stride
+  // in our implementation of MPI_Type_create_hvector, we can use the same implementation
+  // for both.
+  return ESMC_MPI_Type_create_hvector(count, blocklength, stride, oldtype, newtype);
 }
 
 int ESMC_MPI_Type_size(MPI_Datatype datatype, int *size)
