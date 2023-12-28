@@ -210,6 +210,8 @@ extern int    Petsc_MPI_Finalize(void);
 extern int    Petsc_MPI_Finalized(int *);
 extern int    ESMC_MPI_Alltoallw(void *,int *,int *,MPI_Datatype *,
                                  void *,int *,int *,MPI_Datatype *,MPI_Comm);
+extern int    ESMC_MPI_Scatterv(void *,int *,int *,MPI_Datatype,
+                                void *,int,MPI_Datatype,int,MPI_Comm);
 extern int    ESMC_MPI_Type_create_indexed_block(int,int,const int[],MPI_Datatype,MPI_Datatype *);
 extern int    ESMC_MPI_Type_size(MPI_Datatype,int *);
 extern double ESMC_MPI_Wtime(void);
@@ -226,6 +228,7 @@ extern double ESMC_MPI_Wtime(void);
 #define MPI_Finalize      Petsc_MPI_Finalize
 #define MPI_Finalized     Petsc_MPI_Finalized
 #define MPI_Alltoallw     ESMC_MPI_Alltoallw
+#define MPI_Scatterv      ESMC_MPI_Scatterv
 #define MPI_Type_create_indexed_block ESMC_MPI_Type_create_indexed_block
 #define MPI_Type_size     ESMC_MPI_Type_size
 #define MPI_Wtime         ESMC_MPI_Wtime
@@ -547,18 +550,6 @@ extern double ESMC_MPI_Wtime(void);
      root,comm) \
      (MPIUNI_TMP = (void*)(long) (sendbuf),\
      MPIUNI_TMP = (void*)(long) (sendcount),\
-     MPIUNI_TMP = (void*)(long) (sendtype),\
-     MPIUNI_TMP = (void*)(long) (recvbuf),\
-     MPIUNI_TMP = (void*)(long) (recvcount),\
-     MPIUNI_TMP = (void*)(long) (recvtype),\
-     MPIUNI_TMP = (void*)(long) (root),\
-     MPIUNI_TMP = (void*)(long) (comm),MPI_Abort(MPI_COMM_WORLD,0))
-#define MPI_Scatterv(sendbuf,sendcounts,displs,\
-     sendtype, recvbuf,recvcount,\
-     recvtype,root,comm) \
-     (MPIUNI_TMP = (void*)(long) (sendbuf),\
-     MPIUNI_TMP = (void*)(long) (sendcounts),\
-     MPIUNI_TMP = (void*)(long) (displs),\
      MPIUNI_TMP = (void*)(long) (sendtype),\
      MPIUNI_TMP = (void*)(long) (recvbuf),\
      MPIUNI_TMP = (void*)(long) (recvcount),\

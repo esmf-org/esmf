@@ -216,23 +216,41 @@ int ESMC_MPI_Alltoallw(void *sendbuf, int *sendcounts, int *sdispls,
   return MPI_SUCCESS;
 }
 
+int ESMC_MPI_Scatterv(void *sendbuf, int *sendcounts, int *displs,
+                      MPI_Datatype sendtype, void *recvbuf, int recvcount,
+                      MPI_Datatype recvtype, int root, MPI_Comm comm)
+{
+  // Since we are only implementing this for the single-processor case, the sendcounts and
+  // displs arguments should have length 1. We assume that's the case in this
+  // implementation.
+
+  // Displacements are not implemented so return an error code if they are non-zero
+  if (displs[0] != 0) {
+    return MPI_ERR_INTERN;
+  }
+
+  MPIUNI_Memcpy(recvbuf, sendbuf, sendcounts[0]*sendtype, CHECK_FOR_MPI_IN_PLACE_DEST);
+  return MPI_SUCCESS;
+}
+
 int ESMC_MPI_Type_create_indexed_block(int count, int blocklength,
                                        const int array_of_displacements[],
                                        MPI_Datatype oldtype,
                                        MPI_Datatype *newtype)
 {
-  // Some generalizations are not implemented here, so return an error code if there is an
-  // attempt to call this with any not-yet-implemented generality:
-  if (count != 1) {
-    return MPI_ERR_INTERN;
-  }
-  if (array_of_displacements[0] != 0) {
-    return MPI_ERR_INTERN;
+  // The implementation here assumes contiguous data - i.e., the displacements go in
+  // increments of blocklength. Return an error code if there is an attempt to call this
+  // with any not-yet-implemented generality:
+  for (int i=0; i<count; i++) {
+    if (array_of_displacements[i] != i*blocklength) {
+      return MPI_ERR_INTERN;
+    }
   }
 
-  // Simple implementation given the assurances above that count==1 and displacement==0,
-  // and mpiuni's definition of each datatype as sizeof(raw-type).
-  *newtype = blocklength*oldtype;
+  // Simple implementation given the assurance above that the displacements go in
+  // increments of blocklength, and mpiuni's definition of each datatype as
+  // sizeof(raw-type).
+  *newtype = count*blocklength*oldtype;
   return MPI_SUCCESS;
 }
 
