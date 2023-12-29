@@ -495,6 +495,13 @@ class Mesh(object):
             tuples into a numpy array that correspond to node_ids.
         :param ndarray node_owners: a numpy array of shape (node_count, 1) to
             specify the rank of the processor that owns each node.
+
+        *OPTIONAL:*
+
+        :param ndarray node_mask: a numpy array of shape
+            ``(node_count, 1)`` containing integer values to specify masked
+            nodes. The specific values that are masked are specified in the
+            :class:`~esmpy.api.regrid.Regrid` constructor.
         """
 
         self._node_count = node_count

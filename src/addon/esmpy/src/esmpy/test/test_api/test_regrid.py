@@ -143,6 +143,7 @@ def test_regrid_with_const_node_mask(mask_value, method):
 )
 @pytest.mark.parametrize("method", NON_CONSERVATIVE_METHODS)
 def test_regrid_with_node_mask(mask, method):
+    """Check that unmasked nodes are regridded and masked nodes remain unchanged."""
     src = create_raster_field([0.0, 1.0, 2.0, 3.0], [0.0, 1.0, 2.0], node_mask=mask)
     dst = create_raster_field([0.0, 1.0, 2.0, 3.0], [0.0, 1.0, 2.0], node_mask=mask)
     src.data[:] = 100.0
@@ -168,6 +169,7 @@ def test_regrid_with_node_mask(mask, method):
 
 @pytest.mark.parametrize("method", NON_CONSERVATIVE_METHODS)
 def test_regrid_with_random_node_mask(method):
+    """Check regridding that masks random input data."""
     n_rows, n_cols = 100, 200
 
     src_data = np.random.uniform(-1.0, 1.0, size=n_rows * n_cols)
@@ -201,6 +203,7 @@ def test_regrid_with_random_node_mask(method):
 
 @pytest.mark.parametrize("method", NON_CONSERVATIVE_METHODS)
 def test_regrid_with_multivalued_node_mask(method):
+    """Check regridding that masks multiple values."""
     n_rows, n_cols = 100, 200
 
     src_data = np.random.uniform(-1.0, 1.0, size=n_rows * n_cols)

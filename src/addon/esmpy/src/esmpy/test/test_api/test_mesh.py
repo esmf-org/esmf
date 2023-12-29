@@ -32,6 +32,7 @@ from numpy.testing import assert_array_equal
     ),
 )
 def test_add_nodes_with_mask(mask_value):
+    """Check adding masked nodes to a mesh."""
     if mask_value is None:
         mask = None
     else:
@@ -57,6 +58,7 @@ def test_add_nodes_with_mask(mask_value):
 
 
 def test_add_nodes_with_mask_bad():
+    """Check that adding a mask with an incorrect size raises an error."""
     mesh = Mesh(parametric_dim=2, spatial_dim=2, coord_sys=CoordSys.CART)
 
     x_of_points, y_of_points = np.meshgrid([0.0, 1.0, 2.0, 3.0], [0.0, 1.0, 2.0])
