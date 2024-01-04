@@ -701,6 +701,13 @@ gdal_read_darray_shp(file_desc_t *file, io_desc_t *iodesc, int vid,
                         return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);
                     case PIO_DOUBLE:
                         ierr = GDALc_shp_get_double_field(file->pio_ncid, vid, start, count, (double *)bufptr);
+//>>			if (ios->ioproc) {
+//>>			  printf("bufptr: \n");   
+//>>			  int length = sizeof((double *)bufptr)/sizeof((double *)bufptr[0]);
+//>>			  for (int i = 0; i < length; i++) {     
+//>>			    printf("%d ", (double *)bufptr[i]);     
+//>>			  } 
+//>>			}
                         break;
                     default:
                         return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);
