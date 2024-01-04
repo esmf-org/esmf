@@ -581,6 +581,25 @@ module ESMF_HConfigMod
 !------------------------------------------------------------------------------
 
 
+!------------------------------------------------------------------------------
+! ! Interoperability interfaces
+
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
+
+  interface
+
+    subroutine c_ESMC_HConfigEqual(HConfig1, HConfig2, isEqual)
+      import                :: ESMF_Logical
+      type(*)               :: HConfig1, HConfig2
+      type(ESMF_Logical)    :: isEqual
+    end subroutine
+
+  end interface
+
+#endif
+
+!------------------------------------------------------------------------------
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
