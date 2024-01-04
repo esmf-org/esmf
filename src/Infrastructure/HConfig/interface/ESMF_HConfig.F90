@@ -615,7 +615,7 @@ contains
 
     ESMF_INIT_TYPE init1, init2
     type(ESMF_Logical) :: isEqual
-    
+
     ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain
     ! init checks on both args, and in the case where both are uninitialized,
     ! to distinguish equality based on uninitialized type (uncreated,
@@ -625,6 +625,9 @@ contains
     init1 = ESMF_HConfigGetInit(HConfig1)
     init2 = ESMF_HConfigGetInit(HConfig2)
 
+    ! initialize return value
+    ESMF_HConfigEQ = .false.
+
     ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
     if (init1 .eq. ESMF_INIT_CREATED .and. &
       init2 .eq. ESMF_INIT_CREATED) then
@@ -633,13 +636,8 @@ contains
        call c_ESMC_HConfigEqual(HConfig1, HConfig2, isEqual)
 
        ! Translate from ESMF logical to Fortran logical
-       ESMF_HConfigEQ= .false.
-       if (isEqual == ESMF_TRUE) then
-          ESMF_HConfigEQ= .true.
-       endif
+       ESMF_HConfigEQ = isEqual
 
-    else
-      ESMF_HConfigEQ = .false.
     endif
 
   end function ESMF_HConfigEQ
@@ -681,6 +679,9 @@ contains
     init1 = ESMF_HConfigIterGetInit(HConfig1)
     init2 = ESMF_HConfigIterGetInit(HConfig2)
 
+    ! initialize return value
+    ESMF_HConfigIterEQ = .false.
+
     ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
     if (init1 .eq. ESMF_INIT_CREATED .and. &
       init2 .eq. ESMF_INIT_CREATED) then
@@ -691,13 +692,8 @@ contains
        call c_ESMC_HConfigEqual(HConfig1, HConfig2, isEqual)
 
        ! Translate from ESMF logical to Fortran logical
-       ESMF_HConfigIterEQ= .false.
-       if (isEqual == ESMF_TRUE) then
-          ESMF_HConfigIterEQ= .true.
-       endif
-       
-    else
-      ESMF_HConfigIterEQ = .false.
+       ESMF_HConfigIterEQ = isEqual
+
     endif
 
   end function ESMF_HConfigIterEQ
