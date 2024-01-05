@@ -161,6 +161,7 @@ This section contains a key for for each *component-name*, specifying component 
 | `library_dir`    | subdirectory for library file                 | `lib`                  |
 | `include_dir`    | subdirectory for fortran module file          | `include`              |
 | `link_paths`     | search path for external libraries            | *None*                 |
+| `link_into_app`  | whether to link component into the app        | `True`                 |
 | `link_libraries` | external libraries, linked to esmx            | *None*                 |
 | `git_repository` | URL for downloading git repository            | *None*                 |
 | `git_tag`        | tag for downloading git repository            | *None*                 |
