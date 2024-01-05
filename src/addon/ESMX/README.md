@@ -9,6 +9,7 @@ The ESMX layer is built on top of the ESMF and NUOPC APIs.
 The idea behind ESMX is to make it as simple as possible for a user to build, run, and test NUOPC based systems. The approach implemented is the same whether applied to a single component, or a fully coupled system of NUOPC-compliant components. ESMX user interfaces are implemented through [YAML](https://yaml.org/) based configuration files.
 
 Major objectives of ESMX are:
+
  - **Simplification** of standing up new NUOPC-based systems.
  - **Promotion** of hierarchical model component testing.
  - **Reduction** of maintenance cost for established NUOPC-based systems.
@@ -299,8 +300,9 @@ This section affects the specific component instance.
 ### Dynamically loading components from shared objects at run-time
 
 There are two options recognized when specifying the value of the `model` field for a component in the `esmxRun.yaml` file:
+
 - First, if the value specified is recognized as a *component-name* provided by any of the components built into `esmx` during build-time, as specified by `esmxBuild.yaml`, the respective component is accessed via its Fortran module.
-- Second, if the value does not match a build-time dependency, it is assumed to correspond to a shared object instead. In that case the attempt is made to load the specified shared object at run-time, and to associate with the generic component label.
+- Second, if the value does not match a build-time dependency, it is assumed to correspond to a shared object instead. In that case the attempt is made to load the specified shared object file at run-time, and to associate with the generic component label. The search order details of the OS dependent dynamic linker apply to find the specified shared object file. A convenient way to indicate a specific shared object file is to use an absolute or relative path that contains a slash ("/") as part of the specified `model` field value.
 
 ## The Unfied ESMX_Driver
 
@@ -383,6 +385,7 @@ ESMX includes a data component, which can be used for testing NUOPC caps. This c
 ## ESMX Software Dependencies
 
 The ESMX layer has the following dependencies:
+
 - **ESMF Library**: The ESMX layer is part of the ESMF repository. In order to use ESMX as described above, the ESMF library first needs to be built following the instructions for [Building ESMF](https://github.com/esmf-org/esmf#building-esmf).
 - **CMake**: v3.22 or greater.
 - **Python**: v3.5 or greater.
