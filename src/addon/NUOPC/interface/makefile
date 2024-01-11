@@ -2,7 +2,7 @@
 
 ALL: build_here 
 
-SOURCEC	  = NUOPC.c
+SOURCEC	  = NUOPC_F.c
 SOURCEF	  = NUOPC_c.F90
 SOURCEH	  = 
 

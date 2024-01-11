@@ -15,7 +15,7 @@
 ! INCLUDES
 #include "ESMF.h"
 
-subroutine f_nuopc_modelsetservices(compPtr, rc)
+subroutine f_nuopc_modelsetservices(gcomp, rc)
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_nuopc_modelsetservices"
 
@@ -24,17 +24,13 @@ subroutine f_nuopc_modelsetservices(compPtr, rc)
   use NUOPC_Model, only: SetServices
   implicit none
 
-  type(ESMF_CompClass), pointer :: compPtr   !in
-  integer, intent(out)  :: rc         !out
+  type(ESMF_GridComp)   :: gcomp  !in
+  integer, intent(out)  :: rc     !out
 
-  type(ESMF_GridComp)   :: gcomp
   integer :: localrc
 
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
-
-  gcomp%compp = compPtr
-  ESMF_INIT_SET_CREATED(gcomp)
 
   call SetServices(gcomp, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
