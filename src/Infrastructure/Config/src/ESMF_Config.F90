@@ -3744,18 +3744,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             endif
 
             ninsert = nchar - lenThisLine
-            do k = config%cptr%nbuf, i+lenThisLine, -1
-               config%cptr%buffer(k+ninsert:k+ninsert) = config%cptr%buffer(k:k)
-            enddo
+            config%cptr%buffer(i+lenThisLine+ninsert:config%cptr%nbuf+ninsert) = &
+               config%cptr%buffer(i+lenThisLine:config%cptr%nbuf)
             config%cptr%nbuf = config%cptr%nbuf + ninsert
 
          ! or if we need less space and remove characters;
          ! shift buffer up
          elseif ( nchar .lt. lenThisLine ) then
-           ndelete = lenThisLine - nchar
-            do k = j+1, config%cptr%nbuf
-               config%cptr%buffer(k:k) = config%cptr%buffer(k+ndelete:k+ndelete)
-            enddo
+            ndelete = lenThisLine - nchar
+            config%cptr%buffer(i+lenThisLine-ndelete:config%cptr%nbuf-ndelete) = &
+               config%cptr%buffer(i+lenThisLine:config%cptr%nbuf)
             config%cptr%nbuf = config%cptr%nbuf - ndelete
          endif
       endif
