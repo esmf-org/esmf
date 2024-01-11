@@ -3685,7 +3685,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else ! attribute found
         ! set config buffer for overwriting/inserting
         i = config%cptr%value_begin
-        curVal = BLK // trim(curVal) // BLK // EOL ! like config%cptr%this_line
       endif
 
       ! for appending, create new attribute string with label and value
@@ -3721,15 +3720,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          !  check if we need more space to insert new characters;
          !  shift buffer down (linked-list redesign would be better!)
          nchar = j-i+1
-         lenThisLine = len_trim(curVal) - 1
+         lenThisLine = index(config%cptr%buffer(i:config%cptr%nbuf), EOL)
+         if (lenThisLine .lt. 1) lenThisLine = config%cptr%nbuf - 1
          if ( nchar .gt. lenThisLine) then
 
             ! check to ensure length of extended line doesn't exceed LSZ
-            do m = i, 1, -1
-              if (config%cptr%buffer(m:m) .eq. EOL) then
-                exit
-              endif
-            enddo
+            m = index(config%cptr%buffer(1:i), EOL, back=.true.)
+            if (m .lt. 1) m = 1
             if (j-m+1 .gt. LSZ) then
                write(logmsg, *) ", attribute label, value & EOL are ", j-m+1, &
                   " characters long, only ", LSZ, " characters allowed per line"
@@ -3747,7 +3744,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             endif
 
             ninsert = nchar - lenThisLine
-            do k = config%cptr%nbuf, j, -1
+            do k = config%cptr%nbuf, i+lenThisLine, -1
                config%cptr%buffer(k+ninsert:k+ninsert) = config%cptr%buffer(k:k)
             enddo
             config%cptr%nbuf = config%cptr%nbuf + ninsert
@@ -3757,14 +3754,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          elseif ( nchar .lt. lenThisLine ) then
            ndelete = lenThisLine - nchar
             do k = j+1, config%cptr%nbuf
-               config%cptr%buffer(k-ndelete:k-ndelete) = config%cptr%buffer(k:k)
+               config%cptr%buffer(k:k) = config%cptr%buffer(k+ndelete:k+ndelete)
             enddo
             config%cptr%nbuf = config%cptr%nbuf - ndelete
          endif
       endif
 
       ! write new attribute value into config
-      config%cptr%buffer(i:j) = newVal(1:len_trim(newVal))
+      config%cptr%buffer(i:j) = newVal(1:nchar)
 
       ! if appended, reset EOB marker and nbuf
       if (i .eq. config%cptr%nbuf) then
