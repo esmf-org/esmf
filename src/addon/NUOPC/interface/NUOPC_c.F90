@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -39,3 +39,38 @@ subroutine f_nuopc_modelsetservices(gcomp, rc)
   rc = localrc
 
 end subroutine f_nuopc_modelsetservices
+
+
+subroutine f_nuopc_compspecialize(gcomp, specLabel, specRoutine, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_nuopc_compspecialize"
+
+  use ESMF
+  use NUOPC
+  implicit none
+
+  type(ESMF_GridComp)   :: gcomp  !in
+  character(len=*), intent(in)            :: specLabel
+    interface
+      subroutine specRoutine(gridcomp, rc)
+        use ESMF
+        implicit none
+        type(ESMF_GridComp)        :: gridcomp ! must not be optional
+        integer, intent(out)       :: rc       ! must not be optional
+      end subroutine
+    end interface
+  integer, intent(out)  :: rc     !out
+
+  integer :: localrc
+
+  ! Initialize return code; assume routine not implemented
+  rc = ESMF_RC_NOT_IMPL
+
+  call NUOPC_CompSpecialize(gcomp, specLabel, specRoutine=specRoutine, &
+    rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  rc = localrc
+
+end subroutine f_nuopc_compspecialize

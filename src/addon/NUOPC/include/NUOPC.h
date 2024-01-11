@@ -18,9 +18,31 @@
 #ifndef NUOPC_H
 #define NUOPC_H
 
+// TODO: access these string constants via ISO_C interop. from Fortran definition
+const char *label_InternalState = "ModelBase_InternalState";
+const char *label_Advance = "ModelBase_Advance";
+const char *label_AdvanceClock = "ModelBase_AdvanceClock";
+const char *label_CheckImport = "ModelBase_CheckImport";
+const char *label_SetRunClock = "ModelBase_SetRunClock";
+const char *label_TimestampExport = "ModelBase_TimestampExport";
+const char *label_Finalize = "ModelBase_Finalize";
+const char *label_Advertise = "ModelBase_Advertise";
+const char *label_ModifyAdvertised = "ModelBase_ModifyAdvertised";
+const char *label_RealizeProvided = "ModelBase_RealizeProvided";
+const char *label_AcceptTransfer = "ModelBase_AcceptTransfer";
+const char *label_RealizeAccepted = "ModelBase_RealizeAccepted";
+const char *label_SetClock = "ModelBase_SetClock";
+const char *label_DataInitialize = "ModelBase_DataInitialize";
+
 int NUOPC_CompDerive(
-  ESMC_GridComp comp,                           // in
+  ESMC_GridComp     ,                           // in
   void (*userRoutine)(ESMC_GridComp, int *)     // in
+);
+
+int NUOPC_CompSpecialize(
+  ESMC_GridComp,                                // in
+  char *,                                       // in
+  void (*specLabel)(ESMC_GridComp, int *)       // in
 );
 
 void NUOPC_ModelSetServices(ESMC_GridComp, int *);
