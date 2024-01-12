@@ -99,6 +99,7 @@ program ESMF_GridCreateUTest
   type(ESMF_Staggerloc) :: staggerLocList(2)
   type(ESMF_CubedSphereTransform_Args) :: transformArgs
   type(ESMF_Routehandle)  :: rh
+  type(ESMF_Info) :: info
 
 
   !-----------------------------------------------------------------------------
@@ -3325,6 +3326,14 @@ program ESMF_GridCreateUTest
                                   coordCalcFlag=ESMF_CUBEDSPHERECALC_LOCAL, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
+  write(*,*) "BOB: ESMF_SUCCESS=",ESMF_SUCCESS
+  write(*,*) "BOB: After ESMF_GridCreateCubedSphere()=",localrc
+
+  ! Get Info object
+  call ESMF_InfoGetFromHost(grid, info, rc=localrc)
+  write(*,*) "BOB: After ESMF_InfoGetFromHost()=",localrc
+  call ESMF_InfoSet(info, 'mapl/geom/id', 1, rc=localrc)
+  write(*,*) "BOB: After ESMF_InfoSet()=",localrc
 
   ! Write to make sure it looks ok
   call ESMF_GridCellWriteVTK(grid, "csGrid", rc=localrc)
@@ -3362,7 +3371,6 @@ program ESMF_GridCreateUTest
   ! destroy grid
   call ESMF_GridDestroy(grid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
   
