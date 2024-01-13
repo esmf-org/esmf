@@ -928,7 +928,7 @@
       module procedure ESMF_TimeIntervalSetDurStart
       module procedure ESMF_TimeIntervalSetDurCal
       module procedure ESMF_TimeIntervalSetDurCalTyp
-
+      module procedure ESMF_TimeIntervalSetString
 ! !DESCRIPTION:
 !     This interface provides a single entry point for {\tt ESMF\_TimeInterval}
 !     Set methods.
@@ -2763,6 +2763,58 @@
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_TimeIntervalSetDurCalTyp
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeIntervalSetString()"
+!BOP
+! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval from ISO format string
+
+! !INTERFACE:
+      ! Private name; call using ESMF_TimeIntervalSet()
+      subroutine ESMF_TimeIntervalSetString(timeinterval, timeIntervalString, rc)
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(inout)         :: timeinterval
+      character(*),            intent(in)            :: timeIntervalString  
+      integer,                 intent(out), optional :: rc
+
+!
+!
+! !DESCRIPTION:
+!     Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
+!     string in ISO duration format (P[n]Y[n]M[n]DT[n]H[n]M[n]S).
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The object instance to initialize.
+!     \item[timeIntervalString]
+!          ISO format duration string. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+      integer :: localrc                        ! local return code
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+      ! DEBUG:
+      write(*,*) "Duration string is:",timeIntervalString
+      
+      ! Parse string into values for each time unit
+
+
+      ! Set time interval using time unit values parsed above
+      
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
+      end subroutine ESMF_TimeIntervalSetString
+      
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TimeIntervalValidate()"
