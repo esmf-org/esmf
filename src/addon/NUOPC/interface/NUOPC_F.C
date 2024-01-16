@@ -8,7 +8,7 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //-----------------------------------------------------------------------------
-#define ESMC_FILENAME "NUOPC.c"
+#define ESMC_FILENAME "NUOPC_F.C"
 //==============================================================================
 //
 // ESMC Array method implementation (body) file
@@ -16,6 +16,16 @@
 //-----------------------------------------------------------------------------
 // include associated header file
 #include "NUOPC.h"
+
+// include ESMF headers
+#include "ESMCI_Arg.h"
+#include "ESMCI_LogErr.h"
+#include "ESMC_Interface.h"
+
+// include std headers
+#include <cstring>
+
+extern "C" {
 
 int NUOPC_CompDerive(
   ESMC_GridComp comp,                           // in
@@ -56,3 +66,5 @@ void FTN_X(f_nuopc_modelsetservices)(void* gcomp, int* rc);
 void NUOPC_ModelSetServices(ESMC_GridComp comp, int *rc){
   FTN_X(f_nuopc_modelsetservices)((void*)comp.ptr, rc);
 }
+
+}; // extern "C"

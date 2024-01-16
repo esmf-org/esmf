@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#define FILENAME "src/addon/NUOPC/interface/NUOPC_c.F90"
+#define FILENAME "src/addon/NUOPC/interface/NUOPC_C.F90"
 !==============================================================================
 !------------------------------------------------------------------------------
 ! INCLUDES

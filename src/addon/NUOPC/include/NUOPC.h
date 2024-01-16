@@ -18,6 +18,10 @@
 #ifndef NUOPC_H
 #define NUOPC_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // TODO: access these string constants via ISO_C interop. from Fortran definition
 const char *label_InternalState = "ModelBase_InternalState";
 const char *label_Advance = "ModelBase_Advance";
@@ -46,5 +50,9 @@ int NUOPC_CompSpecialize(
 );
 
 void NUOPC_ModelSetServices(ESMC_GridComp, int *);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif  // NUOPC_H

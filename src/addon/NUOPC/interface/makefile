@@ -2,8 +2,8 @@
 
 ALL: build_here 
 
-SOURCEC	  = NUOPC_F.c
-SOURCEF	  = NUOPC_c.F90
+SOURCEC	  = NUOPC_F.C
+SOURCEF	  = NUOPC_C.F90
 SOURCEH	  = 
 
 # List all .h files which should be copied to common include dir
