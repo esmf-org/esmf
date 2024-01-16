@@ -39,33 +39,40 @@ const char *label_SetClock = "ModelBase_SetClock";
 const char *label_DataInitialize = "ModelBase_DataInitialize";
 
 int NUOPC_CompDerive(
-  ESMC_GridComp     ,                           // in
+  ESMC_GridComp comp,                           // in
   void (*userRoutine)(ESMC_GridComp, int *)     // in
 );
 
 int NUOPC_CompSpecialize(
-  ESMC_GridComp,                                // in
-  const char *,                                 // in
-  void (*specLabel)(ESMC_GridComp, int *)       // in
+  ESMC_GridComp comp,                           // in
+  const char *specLabel,                        // in
+  void (*specRoutine)(ESMC_GridComp, int *)     // in
 );
 
 void NUOPC_ModelSetServices(
-  ESMC_GridComp,                                // in
-  int *                                         // out
+  ESMC_GridComp comp,                           // in
+  int *rc                                       // out
 );
+
 void NUOPC_ModelSetVM(
-  ESMC_GridComp,                                // in
-  int *                                         // out
+  ESMC_GridComp comp,                           // in
+  int *rc                                       // out
 );
 
 ESMC_State NUOPC_ModelGetExportState(
-  ESMC_GridComp,                                // in
-  int *                                         // out
+  ESMC_GridComp comp,                           // in
+  int *rc                                       // out
 );
 
 ESMC_State NUOPC_ModelGetImportState(
-  ESMC_GridComp,                                // in
-  int *                                         // out
+  ESMC_GridComp comp,                           // in
+  int *rc                                       // out
+);
+
+int NUOPC_Advertise(
+  ESMC_State state,                             // in
+  const char *standardName,                     // in
+  const char *fieldName                         // in
 );
 
 #ifdef __cplusplus

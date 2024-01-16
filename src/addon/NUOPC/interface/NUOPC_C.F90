@@ -159,3 +159,31 @@ subroutine f_nuopc_modelgetimportstate(gcomp, state, rc)
   rc = ESMF_SUCCESS
 end subroutine f_nuopc_modelgetimportstate
 !------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+subroutine f_nuopc_advertise(state, standardName, fieldName, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_nuopc_advertise"
+  use ESMF
+  use NUOPC
+  implicit none
+
+  type(ESMF_State)                        :: state        !in
+  character(len=*), intent(in)            :: standardName !in
+  character(len=*), intent(in)            :: fieldName    !in
+  integer, intent(out)                    :: rc           !out
+
+  integer :: localrc
+
+  ! Initialize return code; assume routine not implemented
+  rc = ESMF_RC_NOT_IMPL
+
+  call NUOPC_Advertise(state, standardName, name=fieldName, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Return successfully
+  rc = ESMF_SUCCESS
+end subroutine f_nuopc_advertise
+!------------------------------------------------------------------------------

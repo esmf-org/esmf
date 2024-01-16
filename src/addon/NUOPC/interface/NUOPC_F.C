@@ -152,4 +152,26 @@ ESMC_State NUOPC_ModelGetImportState(ESMC_GridComp comp, int *rc){
 }
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
+void FTN_X(f_nuopc_advertise)(const ESMCI::State*, const char *, const char *,
+  int* rc, ESMCI_FortranStrLenArg, ESMCI_FortranStrLenArg);
+#undef  ESMC_METHOD
+#define ESMC_METHOD "NUOPC_Advertise()"
+int NUOPC_Advertise(ESMC_State state, const char *standardName,
+  const char *fieldName){
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  FTN_X(f_nuopc_advertise)((const ESMCI::State *)state.ptr, standardName,
+    fieldName, &localrc, (ESMCI_FortranStrLenArg)strlen(standardName),
+    (ESMCI_FortranStrLenArg)strlen(fieldName));
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
 }; // extern "C"
