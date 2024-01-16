@@ -92,4 +92,21 @@ void NUOPC_ModelSetServices(ESMC_GridComp comp, int *rc){
 }
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
+void FTN_X(f_nuopc_modelsetvm)(void* gcomp, int* rc);
+#undef  ESMC_METHOD
+#define ESMC_METHOD "NUOPC_ModelSetVM()"
+void NUOPC_ModelSetVM(ESMC_GridComp comp, int *rc){
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  FTN_X(f_nuopc_modelsetvm)((void*)comp.ptr, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return;  // bail out
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
 }; // extern "C"

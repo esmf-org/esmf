@@ -15,36 +15,10 @@
 ! INCLUDES
 #include "ESMF.h"
 
-subroutine f_nuopc_modelsetservices(gcomp, rc)
-#undef  ESMF_METHOD
-#define ESMF_METHOD "f_nuopc_modelsetservices"
-
-  use ESMF
-  use NUOPC
-  use NUOPC_Model, only: SetServices
-  implicit none
-
-  type(ESMF_GridComp)   :: gcomp  !in
-  integer, intent(out)  :: rc     !out
-
-  integer :: localrc
-
-  ! Initialize return code; assume routine not implemented
-  rc = ESMF_RC_NOT_IMPL
-
-  call SetServices(gcomp, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
-    ESMF_CONTEXT, rcToReturn=rc)) return
-
-  rc = localrc
-
-end subroutine f_nuopc_modelsetservices
-
-
+!------------------------------------------------------------------------------
 subroutine f_nuopc_compspecialize(gcomp, specLabel, specRoutine, rc)
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_nuopc_compspecialize"
-
   use ESMF
   use NUOPC
   implicit none
@@ -71,6 +45,63 @@ subroutine f_nuopc_compspecialize(gcomp, specLabel, specRoutine, rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
     ESMF_CONTEXT, rcToReturn=rc)) return
 
-  rc = localrc
-
+  ! Return successfully
+  rc = ESMF_SUCCESS
 end subroutine f_nuopc_compspecialize
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+subroutine f_nuopc_modelsetservices(gcomp, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_nuopc_modelsetservices"
+  use ESMF
+  use NUOPC
+  use NUOPC_Model, only: SetServices
+  implicit none
+
+  type(ESMF_GridComp)   :: gcomp  !in
+  integer, intent(out)  :: rc     !out
+
+  integer :: localrc
+
+  ! Initialize return code; assume routine not implemented
+  rc = ESMF_RC_NOT_IMPL
+
+  call SetServices(gcomp, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Return successfully
+  rc = ESMF_SUCCESS
+end subroutine f_nuopc_modelsetservices
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+subroutine f_nuopc_modelsetvm(gcomp, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_nuopc_modelsetvm"
+  use ESMF
+  use NUOPC
+  use NUOPC_Model, only: SetVM
+  implicit none
+
+  type(ESMF_GridComp)   :: gcomp  !in
+  integer, intent(out)  :: rc     !out
+
+  integer :: localrc
+
+  ! Initialize return code; assume routine not implemented
+  rc = ESMF_RC_NOT_IMPL
+
+  call SetVM(gcomp, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Return successfully
+  rc = ESMF_SUCCESS
+end subroutine f_nuopc_modelsetvm
+!------------------------------------------------------------------------------
+
+
