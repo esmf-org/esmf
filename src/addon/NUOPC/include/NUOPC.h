@@ -75,6 +75,11 @@ int NUOPC_Advertise(
   const char *fieldName                         // in
 );
 
+int NUOPC_Realize(
+  ESMC_State state,                             // in
+  ESMC_Field field                              // in
+);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

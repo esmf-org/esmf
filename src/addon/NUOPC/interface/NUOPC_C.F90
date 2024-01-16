@@ -187,3 +187,30 @@ subroutine f_nuopc_advertise(state, standardName, fieldName, rc)
   rc = ESMF_SUCCESS
 end subroutine f_nuopc_advertise
 !------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+subroutine f_nuopc_realize(state, field, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_nuopc_realize"
+  use ESMF
+  use NUOPC
+  implicit none
+
+  type(ESMF_State)                        :: state        !in
+  type(ESMF_Field)                        :: field        !in
+  integer, intent(out)                    :: rc           !out
+
+  integer :: localrc
+
+  ! Initialize return code; assume routine not implemented
+  rc = ESMF_RC_NOT_IMPL
+
+  call NUOPC_Realize(state, field, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Return successfully
+  rc = ESMF_SUCCESS
+end subroutine f_nuopc_realize
+!------------------------------------------------------------------------------

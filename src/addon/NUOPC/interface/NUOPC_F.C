@@ -174,4 +174,23 @@ int NUOPC_Advertise(ESMC_State state, const char *standardName,
 }
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
+void FTN_X(f_nuopc_realize)(const ESMCI::State*, const ESMCI::Field*, int* rc);
+#undef  ESMC_METHOD
+#define ESMC_METHOD "NUOPC_Realize()"
+int NUOPC_Realize(ESMC_State state, ESMC_Field field){
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  FTN_X(f_nuopc_realize)((const ESMCI::State *)state.ptr,
+    (const ESMCI::Field *)field.ptr, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
 }; // extern "C"
