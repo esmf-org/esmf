@@ -45,7 +45,7 @@ int NUOPC_CompDerive(
 
 int NUOPC_CompSpecialize(
   ESMC_GridComp,                                // in
-  char *,                                       // in
+  const char *,                                 // in
   void (*specLabel)(ESMC_GridComp, int *)       // in
 );
 
