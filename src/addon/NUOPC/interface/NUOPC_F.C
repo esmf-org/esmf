@@ -131,4 +131,25 @@ ESMC_State NUOPC_ModelGetExportState(ESMC_GridComp comp, int *rc){
 }
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
+void FTN_X(f_nuopc_modelgetimportstate)(const ESMCI::Comp *, ESMCI::State*,
+  int* rc);
+#undef  ESMC_METHOD
+#define ESMC_METHOD "NUOPC_ModelGetImportState()"
+ESMC_State NUOPC_ModelGetImportState(ESMC_GridComp comp, int *rc){
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  ESMC_State state;
+  state.ptr = new ESMCI::State;  //TODO: this leaves a memory leak!
+  FTN_X(f_nuopc_modelgetimportstate)((const ESMCI::Comp *)comp.ptr,
+    (ESMCI::State *)state.ptr, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return state;  // bail out
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return state;
+}
+//-----------------------------------------------------------------------------
+
 }; // extern "C"

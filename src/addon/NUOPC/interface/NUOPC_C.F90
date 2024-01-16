@@ -131,3 +131,31 @@ subroutine f_nuopc_modelgetexportstate(gcomp, state, rc)
   rc = ESMF_SUCCESS
 end subroutine f_nuopc_modelgetexportstate
 !------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+subroutine f_nuopc_modelgetimportstate(gcomp, state, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_nuopc_modelgetimportstate"
+  use ESMF
+  use NUOPC
+  use NUOPC_Model, only: NUOPC_ModelGet
+  implicit none
+
+  type(ESMF_GridComp)   :: gcomp  !in
+  type(ESMF_State)      :: state  !out
+  integer, intent(out)  :: rc     !out
+
+  integer :: localrc
+
+  ! Initialize return code; assume routine not implemented
+  rc = ESMF_RC_NOT_IMPL
+
+  call NUOPC_ModelGet(gcomp, importState=state, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Return successfully
+  rc = ESMF_SUCCESS
+end subroutine f_nuopc_modelgetimportstate
+!------------------------------------------------------------------------------
