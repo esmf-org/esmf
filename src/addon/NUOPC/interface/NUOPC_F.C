@@ -21,7 +21,8 @@
 #include "ESMCI_Base.h"
 #include "ESMCI_Arg.h"
 #include "ESMCI_LogErr.h"
-#include "ESMC_Interface.h"
+#include "ESMCI_Comp.h"
+#include "ESMCI_State.h"
 
 // include std headers
 #include <cstring>
@@ -51,7 +52,7 @@ int NUOPC_CompDerive(
 
 
 //-----------------------------------------------------------------------------
-void FTN_X(f_nuopc_compspecialize)(void* gcomp, const char *specLabel,
+void FTN_X(f_nuopc_compspecialize)(const ESMCI::Comp *, const char *,
   void (*specRoutine)(ESMC_GridComp, int *), int *rc, ESMCI_FortranStrLenArg);
 #undef  ESMC_METHOD
 #define ESMC_METHOD "NUOPC_CompSpecialize()"
@@ -64,8 +65,8 @@ int NUOPC_CompSpecialize(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  FTN_X(f_nuopc_compspecialize)((void*)comp.ptr, specLabel, specRoutine,
-    &localrc, (ESMCI_FortranStrLenArg)strlen(specLabel));
+  FTN_X(f_nuopc_compspecialize)((const ESMCI::Comp *)comp.ptr, specLabel,
+    specRoutine, &localrc, (ESMCI_FortranStrLenArg)strlen(specLabel));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
 
@@ -77,13 +78,13 @@ int NUOPC_CompSpecialize(
 
 
 //-----------------------------------------------------------------------------
-void FTN_X(f_nuopc_modelsetservices)(void* gcomp, int* rc);
+void FTN_X(f_nuopc_modelsetservices)(const ESMCI::Comp *, int* rc);
 #undef  ESMC_METHOD
 #define ESMC_METHOD "NUOPC_ModelSetServices()"
 void NUOPC_ModelSetServices(ESMC_GridComp comp, int *rc){
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  FTN_X(f_nuopc_modelsetservices)((void*)comp.ptr, &localrc);
+  FTN_X(f_nuopc_modelsetservices)((const ESMCI::Comp *)comp.ptr, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return;  // bail out
 
@@ -94,18 +95,39 @@ void NUOPC_ModelSetServices(ESMC_GridComp comp, int *rc){
 
 
 //-----------------------------------------------------------------------------
-void FTN_X(f_nuopc_modelsetvm)(void* gcomp, int* rc);
+void FTN_X(f_nuopc_modelsetvm)(const ESMCI::Comp *, int* rc);
 #undef  ESMC_METHOD
 #define ESMC_METHOD "NUOPC_ModelSetVM()"
 void NUOPC_ModelSetVM(ESMC_GridComp comp, int *rc){
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  FTN_X(f_nuopc_modelsetvm)((void*)comp.ptr, &localrc);
+  FTN_X(f_nuopc_modelsetvm)((const ESMCI::Comp *)comp.ptr, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return;  // bail out
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+void FTN_X(f_nuopc_modelgetexportstate)(const ESMCI::Comp *, ESMCI::State*,
+  int* rc);
+#undef  ESMC_METHOD
+#define ESMC_METHOD "NUOPC_ModelGetExportState()"
+ESMC_State NUOPC_ModelGetExportState(ESMC_GridComp comp, int *rc){
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  ESMC_State state;
+  state.ptr = new ESMCI::State;  //TODO: this leaves a memory leak!
+  FTN_X(f_nuopc_modelgetexportstate)((const ESMCI::Comp *)comp.ptr,
+    (ESMCI::State *)state.ptr, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return state;  // bail out
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return state;
 }
 //-----------------------------------------------------------------------------
 

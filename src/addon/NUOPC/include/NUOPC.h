@@ -52,6 +52,8 @@ int NUOPC_CompSpecialize(
 void NUOPC_ModelSetServices(ESMC_GridComp, int *);
 void NUOPC_ModelSetVM(ESMC_GridComp, int *);
 
+ESMC_State NUOPC_ModelGetExportState(ESMC_GridComp, int *);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
