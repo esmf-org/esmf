@@ -199,6 +199,10 @@
                                                   ! will do a bound check
 
        character, parameter :: BLK = achar(32)   ! blank (space)
+       character, parameter :: QTD = achar(34)   ! double quotation "
+       character, parameter :: CMT = achar(35)   ! number sign #
+       character, parameter :: DSN = achar(36)   ! dollar sign $
+       character, parameter :: QTS = achar(39)   ! single quotation '
        character, parameter :: TAB = achar(09)   ! TAB
        character, parameter :: EOL = achar(10)   ! end of line mark (newline)
        character, parameter :: EOB = achar(00)   ! end of buffer mark (null)
@@ -2954,12 +2958,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION: Resource file filename is loaded into memory
 !
 !EOPI -------------------------------------------------------------------
-      integer :: i, ls, ptr
+      integer :: i, j, lsz, lst, led, qst, qed, cst, ptr
       integer :: lu, nrecs
       integer :: iostat
-      character(len=LSZ) :: line
       integer :: localrc
-      character(LSZ), allocatable :: line_buffer(:)
+      character(NBUF_MAX) :: line_buffer
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2991,33 +2994,69 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       rewind (lu)
 
-      allocate (line_buffer(nrecs))
-      do, i = 1, nrecs
-        read (lu, '(a)') line_buffer(i)
-      end do
-
 !     Read to end of file
 !     -------------------
       config%cptr%buffer(1:1) = EOL
       ptr = 2                         ! next buffer position
       do, i = 1, nrecs
-
 !        Read next line
 !        --------------
-         line = line_buffer(i)            ! copy next line
-         call ESMF_Config_trim ( line )      ! remove trailing white space
-         call ESMF_Config_pad ( line )       ! Pad with # from end of line
-
-!        A non-empty line
-!        ----------------
-         ls = index_(line,'#' ) - 1    ! line length
-         if ( ls .gt. 0 ) then
-            if ( (ptr+ls) .gt. NBUF_MAX ) then
-               if (ESMF_LogFoundError(ESMF_RC_MEM, msg="exceeded NBUF_MAX size", &
-                   ESMF_CONTEXT, rcToReturn=rc)) return
-            end if
-            config%cptr%buffer(ptr:ptr+ls) = line(1:ls) // EOL
-            ptr = ptr + ls + 1
+         read (lu, '(a)', iostat=iostat) line_buffer
+         if (iostat /= 0) then
+           if (ESMF_LogFoundError(ESMF_RC_FILE_READ, &
+             msg="error reading file - "//trim(filename), &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+         end if
+         ! find comment start, skip quoted comments
+         ! lst = line start, led = line end
+         ! qst = next quote start, qed = last quote end
+         ! cst = comment start
+         led = verify(line_buffer,BLK//TAB//DSN,back=.true.)
+         if (led .gt. 0) then
+           ! replace TAB's with blanks for convenience
+           ! backwards compatibility after removing ESMF_Config_pad
+           do j = 1, led
+             if (line_buffer(j:j) .eq. TAB) line_buffer(j:j) = BLK
+           end do
+           lst = verify(line_buffer(:led),BLK)
+           qst = scan(line_buffer(:led),QTS//QTD)
+           cst = index(line_buffer(:led),CMT)
+           if (cst .eq. 0) cst = led + 1
+           qed = 0
+           do while ((qst .ne. qed) .and. (qst .lt. cst))
+             ! find end of quotation
+             if (qst .eq. led) then
+               qed = qst
+             else
+               qed = qst + index(line_buffer(qst+1:led),line_buffer(qst:qst))
+             end if
+             if (qed .eq. qst) then
+               if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                 msg="missing end quote - "//trim(filename), &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+             else
+               ! find next quotation start
+               qst = qed + scan(line_buffer(qed+1:led),QTS//QTD)
+               ! find next comment start
+               cst = index(line_buffer(qed+1:led),CMT)
+               if (cst .eq. 0) then
+                 cst = led + 1
+               else
+                 cst = qed + cst
+               end if
+             end if
+           end do
+           led = len_trim(line_buffer(1:cst-1))
+           lsz = led - lst + 1
+           ! append line to buffer
+           if ( lsz .gt. 0 ) then
+              if ( (ptr+lsz) .ge. NBUF_MAX ) then
+                 if (ESMF_LogFoundError(ESMF_RC_MEM, msg="exceeded NBUF_MAX size", &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+              end if
+              config%cptr%buffer(ptr:ptr+lsz) = line_buffer(lst:led) // EOL
+              ptr = ptr + lsz + 1
+           end if
          end if
 
       end do
@@ -4071,58 +4110,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_Config_trim
 
-
-    subroutine ESMF_Config_pad ( string )
-
-!-------------------------------------------------------------------------!
-! !ROUTINE:  ESMF_CONFIG_Pad() --- Pad strings.
-! 
-! !DESCRIPTION: 
-!
-!     Pads from the right with the comment character (\#). It also
-!  replaces TAB's with blanks for convenience. This is a low level
-!  i90 routine.
-!
-! !CALLING SEQUENCE: 
-!
-!      call ESMF_Config_pad ( string )
-!
-! !INPUT PARAMETERS: 
-!
-       character(*), intent(inout) :: string       ! input string
-
-! !OUTPUT PARAMETERS:            ! modified string
-!
-!      character(*), intent(inout) :: string
-!
-! !BUGS:  
-!
-!      It alters TAB's even inside strings.
-!
-!
-! !REVISION HISTORY: 
-!
-!  19Jun96   da Silva   Original code.
-!-------------------------------------------------------------------------
-
-      integer :: i
-
-!     Pad end of string with #
-!     ------------------------
-      do i = len (string), 1, -1 
-         if ( string(i:i) .ne. ' ' .and. &
-            string(i:i) .ne. '$' ) exit
-         string(i:i) = '#'
-      end do
-
-!     Replace TAB's with blanks
-!     -------------------------
-      do i = 1, len (string)
-         if ( string(i:i) .eq. TAB ) string(i:i) = BLK
-         if ( string(i:i) .eq. '#' ) exit
-      end do
-
-    end subroutine ESMF_Config_pad
 
 !-----------------------------------------------------------------------
 ! !IROUTINE: opntext - portably open a text file
