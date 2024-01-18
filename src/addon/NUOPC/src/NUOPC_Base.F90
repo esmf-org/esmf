@@ -3172,11 +3172,12 @@ module NUOPC_Base
 !BOPI
 ! !IROUTINE: NUOPC_LogIntro - Log entering a method
 ! !INTERFACE:
-  subroutine NUOPC_LogIntro(name, rName, verbosity, rc)
+  subroutine NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc)
 ! !ARGUMENTS:
     character(len=*), intent(in)   :: name
     character(len=*), intent(in)   :: rName
     integer,          intent(in)   :: verbosity
+    type(ESMF_State), intent(in)   :: importState, exportState
     integer,          intent(out)  :: rc
 ! !DESCRIPTION:
 !   Write information into Log on entering a method, according to the verbosity
@@ -3190,6 +3191,10 @@ module NUOPC_Base
 !     Routine name.
 !   \item[verbosity]
 !     Bit field corresponding to verbosity aspects.
+!   \item[importState]
+!     The importState of the component using this method.
+!   \item[exportState]
+!     The exportState of the component using this method.
 !   \item[rc]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3251,6 +3256,16 @@ module NUOPC_Base
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
+    if (btest(verbosity,4)) then
+      call ESMF_StateLog(importState, trim(name)//": "//rName//" intro:", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,5)) then
+      call ESMF_StateLog(exportState, trim(name)//": "//rName//" intro:", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
     ! return successfully
     rc = ESMF_SUCCESS
   end subroutine
@@ -3260,11 +3275,12 @@ module NUOPC_Base
 !BOPI
 ! !IROUTINE: NUOPC_LogExtro - Log exiting a method
 ! !INTERFACE:
-  subroutine NUOPC_LogExtro(name, rName, verbosity, rc)
+  subroutine NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc)
 ! !ARGUMENTS:
     character(len=*), intent(in)   :: name
     character(len=*), intent(in)   :: rName
     integer,          intent(in)   :: verbosity
+    type(ESMF_State), intent(in)   :: importState, exportState
     integer,          intent(out)  :: rc
 ! !DESCRIPTION:
 !   Write information into Log on exiting a method, according to the verbosity
@@ -3278,6 +3294,10 @@ module NUOPC_Base
 !     Routine name.
 !   \item[verbosity]
 !     Bit field corresponding to verbosity aspects.
+!   \item[importState]
+!     The importState of the component using this method.
+!   \item[exportState]
+!     The exportState of the component using this method.
 !   \item[rc]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3286,6 +3306,16 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     integer :: indentCount
+    if (btest(verbosity,4)) then
+      call ESMF_StateLog(importState, trim(name)//": "//rName//" intro:", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,5)) then
+      call ESMF_StateLog(exportState, trim(name)//": "//rName//" intro:", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
     if (btest(verbosity,2)) then
       call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" extro:", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
