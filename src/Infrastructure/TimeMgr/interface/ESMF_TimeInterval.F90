@@ -2763,6 +2763,30 @@
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_TimeIntervalSetDurCalTyp
 
+
+! Internal subroutine to parse an ISO duration string and return
+! the corresponding numeric time values      
+subroutine ParseDurationString(timeintervalString, &
+        yy_i8, mm_i8, d_i8, s_i8, &
+        h_r8, m_r8, s_r8, rc)
+
+        character(*),            intent(in)            :: timeIntervalString  
+        integer(ESMF_KIND_I8),   intent(in),  optional :: yy_i8
+        integer(ESMF_KIND_I8),   intent(in),  optional :: mm_i8
+        integer(ESMF_KIND_I8),   intent(in),  optional :: d_i8
+        integer(ESMF_KIND_I8),   intent(in),  optional :: s_i8
+        real(ESMF_KIND_R8),      intent(in),  optional :: h_r8
+        real(ESMF_KIND_R8),      intent(in),  optional :: m_r8
+        real(ESMF_KIND_R8),      intent(in),  optional :: s_r8
+        integer,                 intent(out), optional :: rc
+
+
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
+        
+end subroutine ParseDurationString
+
+      
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TimeIntervalSetString()"
@@ -2798,7 +2822,15 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
       integer :: localrc                        ! local return code
-
+      integer(ESMF_KIND_I8) :: yy_i8
+      integer(ESMF_KIND_I8) :: mm_i8
+      integer(ESMF_KIND_I8) :: d_i8
+      integer(ESMF_KIND_I8) :: s_i8
+      real(ESMF_KIND_R8)    :: d_r8
+      real(ESMF_KIND_R8)    :: h_r8
+      real(ESMF_KIND_R8)    :: m_r8
+      real(ESMF_KIND_R8)    :: s_r8
+           
       ! Assume failure until success
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
@@ -2807,10 +2839,32 @@
       write(*,*) "Duration string is:",timeIntervalString
       
       ! Parse string into values for each time unit
-
-
+      call ParseDurationString(timeintervalString, &
+           yy_i8=yy_i8, mm_i8=mm_i8, d_i8=d_i8, s_i8=s_i8, &
+           h_r8=h_r8, m_r8=m_r8, s_r8=s_r8, rc=localrc)      
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+      
       ! Set time interval using time unit values parsed above
       
+      ! NOTE: Just use I8 for integer values, since it looks like integer values
+      !       are stored that way anyway. Also, for times (h,m,s), it looks like both R8
+      !       and I8 are added together, so you can just
+      !       use both and whichever isn't needed set to 0.
+      !       It's unclear if that's true for days, so don't do it for that. 
+      call ESMF_TimeIntervalSetDur(timeinterval, &
+           yy_i8=yy_i8, &
+           mm_i8=mm_i8, &
+           d_i8=d_i8, &
+           s_i8=s_i8, &
+           !        d_r8=d_r8, &  ! Not supported right now
+           h_r8=h_r8, &
+           m_r8=m_r8, &
+           s_r8=s_r8, &
+           rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
       ! Return success
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_TimeIntervalSetString
