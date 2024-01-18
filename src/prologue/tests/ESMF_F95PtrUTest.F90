@@ -171,7 +171,7 @@ contains
   ! types either contain F95 component initialization, or do not have a
   ! SEQUENCE statement.  This prevents them from being placed into
   ! COMMON blocks.  Note that the Standard does not even allow a pointer to
-  ! such types to reside in COMMON.  (See Constraint 589 in §5.5.2 of F2003.)
+  ! such types to reside in COMMON.  (See Constraint 589 in Section 5.5.2 of F2003.)
 
   !-----------------------------------------------------------------------------
   !NEX_disabled_UTest
