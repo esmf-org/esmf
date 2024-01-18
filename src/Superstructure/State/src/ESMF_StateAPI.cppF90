@@ -1841,7 +1841,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!   Log the State.
+!   Output information about {\tt state} to the ESMF default Log.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1893,8 +1893,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logMsg = ESMF_LOGMSG_INFO ! default
     if (present(logMsgFlag)) logMsg = logMsgFlag
 
-    call ESMF_LogWrite(trim(prefixStr)//"--- StateLog() start -----------------", &
-      logMsg, rc=localrc)
+    call ESMF_LogWrite(ESMF_StringConcat(trim(prefixStr), &
+      "--- StateLog() start -----------------"), logMsg, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1904,8 +1904,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_LogWrite(trim(prefixStr)//"--- StateLog() end -------------------", &
-      logMsg, rc=localrc)
+    call ESMF_LogWrite(ESMF_StringConcat(trim(prefixStr), &
+      "--- StateLog() end -------------------"), logMsg, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1936,8 +1936,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       localrc = ESMF_RC_NOT_IMPL
       if (.not. ESMF_StateIsCreated(stateR)) then
-        call ESMF_LogWrite(prefix//"State object is invalid!"//&
-          " Not created or deleted", logMsg, rc=localrc)
+        call ESMF_LogWrite(ESMF_StringConcat(prefix, &
+          "State object is invalid! Not created or deleted"), &
+          logMsg, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1963,8 +1964,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           tempString = "Out or range STATEINTENT!!!"
         endif
 
-        write (msgString,'(A,I4,A)') prefix//"State object is valid!"//&
-          " <name: "//trim(name)//"> <intent: "//trim(tempString)//">"//&
+        write (msgString,'(A,A,A,A,A,A,A,A,I4,A)') &
+          prefix, "State object is valid!", &
+          " <name: ", trim(name), "> <intent: ", trim(tempString), ">", &
           " <itemCount: ", itemCount, ">"
         call ESMF_LogWrite(trim(msgString), logMsg, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -1982,9 +1984,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           do item=1, itemCount
             ! basic item information
-            write (msgString,'(A,I4.4,A)') prefix//"+-<item: ", item, &
-              "> <itemType: "//ESMF_StateItemString(itemtypeList(item))// &
-              "> <itemName: "//trim(itemNameList(item))//">"
+            write (msgString,'(A,A,I4.4,A,A,A,A,A)') &
+              prefix, "+-<item: ", item, &
+              "> <itemType: ", ESMF_StateItemString(itemtypeList(item)), &
+              "> <itemName: ", trim(itemNameList(item)), ">"
             call ESMF_LogWrite(trim(msgString), logMsg, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -1998,8 +2001,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-              call StateLog(stateR=nestedState, prefix=prefix//"! ", &
-                rc=localrc)
+              call StateLog(stateR=nestedState, &
+                prefix=ESMF_StringConcat(prefix, "! "), rc=localrc)
               if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2012,7 +2015,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 if (ESMF_LogFoundError(localrc, &
                   ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
-!                call ESMF_FieldLog(field, prefix=prefix//"! ", &
+!                call ESMF_FieldLog(field, &
+!                  prefix=ESMF_StringConcat(prefix, "! "), &
 !                  logMsgFlag=logMsg, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                   ESMF_ERR_PASSTHRU, &
@@ -2034,7 +2038,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 if (ESMF_LogFoundError(localrc, &
                   ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
-!                call ESMF_ArrayLog(array, prefix=prefix//"! ", &
+!                call ESMF_ArrayLog(array, &
+!                  prefix=ESMF_StringConcat(prefix, "! "), &
 !                  logMsgFlag=logMsg, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                   ESMF_ERR_PASSTHRU, &
@@ -2045,7 +2050,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 if (ESMF_LogFoundError(localrc, &
                   ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
-!                call ESMF_ArrayBundleLog(arraybundle, prefix=prefix//, &
+!                call ESMF_ArrayBundleLog(arraybundle, &
+!                  prefix=ESMF_StringConcat(prefix, "! "), &
 !                  logMsgFlag=logMsg, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                   ESMF_ERR_PASSTHRU, &
@@ -2056,7 +2062,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 if (ESMF_LogFoundError(localrc, &
                   ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
-!                call ESMF_RouteHandleLog(routehandle, prefix=prefix//"! ", &
+!                call ESMF_RouteHandleLog(routehandle, &
+!                  prefix=ESMF_StringConcat(prefix, "! "), &
 !                  logMsgFlag=logMsg, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                   ESMF_ERR_PASSTHRU, &
