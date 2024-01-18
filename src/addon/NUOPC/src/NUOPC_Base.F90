@@ -3257,12 +3257,14 @@ module NUOPC_Base
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     if (btest(verbosity,4)) then
-      call ESMF_StateLog(importState, trim(name)//": "//rName//" intro:", rc=rc)
+      call ESMF_StateLog(importState, trim(name)//": "//rName//" intro:", &
+        nestedFlag=.true., deepFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     if (btest(verbosity,5)) then
-      call ESMF_StateLog(exportState, trim(name)//": "//rName//" intro:", rc=rc)
+      call ESMF_StateLog(exportState, trim(name)//": "//rName//" intro:", &
+        nestedFlag=.true., deepFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -3307,12 +3309,14 @@ module NUOPC_Base
     ! local variables
     integer :: indentCount
     if (btest(verbosity,4)) then
-      call ESMF_StateLog(importState, trim(name)//": "//rName//" intro:", rc=rc)
+      call ESMF_StateLog(importState, trim(name)//": "//rName//" extro:", &
+        nestedFlag=.true., deepFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     if (btest(verbosity,5)) then
-      call ESMF_StateLog(exportState, trim(name)//": "//rName//" intro:", rc=rc)
+      call ESMF_StateLog(exportState, trim(name)//": "//rName//" extro:", &
+        nestedFlag=.true., deepFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
