@@ -8196,10 +8196,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Destroys an {\tt ESMF\_HConfig}, releasing the resources associated
 !   with the object.
 !
-!   By default a small remnant of the object is kept in memory in order to
-!   prevent problems with dangling aliases. The default garbage collection
-!   mechanism can be overridden with the {\tt noGarbage} argument.
-!
 ! The arguments are:
 ! \begin{description}
 ! \item[hconfig]
