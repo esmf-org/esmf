@@ -3279,11 +3279,11 @@ module NUOPC_Base
 ! !INTERFACE:
   subroutine NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc)
 ! !ARGUMENTS:
-    character(len=*), intent(in)   :: name
-    character(len=*), intent(in)   :: rName
-    integer,          intent(in)   :: verbosity
-    type(ESMF_State), intent(in)   :: importState, exportState
-    integer,          intent(out)  :: rc
+    character(len=*),           intent(in)   :: name
+    character(len=*),           intent(in)   :: rName
+    integer,                    intent(in)   :: verbosity
+    type(ESMF_State), optional, intent(in)   :: importState, exportState
+    integer,                    intent(out)  :: rc
 ! !DESCRIPTION:
 !   Write information into Log on exiting a method, according to the verbosity
 !   aspects.
@@ -3296,9 +3296,9 @@ module NUOPC_Base
 !     Routine name.
 !   \item[verbosity]
 !     Bit field corresponding to verbosity aspects.
-!   \item[importState]
+!   \item[{[importState]}]
 !     The importState of the component using this method.
-!   \item[exportState]
+!   \item[{[exportState]}]
 !     The exportState of the component using this method.
 !   \item[rc]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3309,16 +3309,20 @@ module NUOPC_Base
     ! local variables
     integer :: indentCount
     if (btest(verbosity,4)) then
-      call ESMF_StateLog(importState, trim(name)//": "//rName//" extro:", &
-        nestedFlag=.true., deepFlag=.true., rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (present(importState)) then
+        call ESMF_StateLog(importState, trim(name)//": "//rName//" extro:", &
+          nestedFlag=.true., deepFlag=.true., rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
     endif
     if (btest(verbosity,5)) then
-      call ESMF_StateLog(exportState, trim(name)//": "//rName//" extro:", &
-        nestedFlag=.true., deepFlag=.true., rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (present(exportState)) then
+        call ESMF_StateLog(exportState, trim(name)//": "//rName//" extro:", &
+          nestedFlag=.true., deepFlag=.true., rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
     endif
     if (btest(verbosity,2)) then
       call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" extro:", rc=rc)
