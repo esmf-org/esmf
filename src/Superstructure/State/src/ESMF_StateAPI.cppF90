@@ -921,6 +921,14 @@ StateAddRepListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%s
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+      ! Initialize the pointers to null.
+      nullify(ESMF_StateCreate%statep)
+      nullify(stypep)
+
+      allocate(stypep, stat=memstat)
+      if (ESMF_LogFoundAllocError(memstat, msg="State type", &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
       ! Must make sure the local PET is associated with an actual member
       actualFlag = .true.
       if (present(vm)) then
@@ -964,15 +972,6 @@ ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,nestedStateList(i),rc)
 ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
            enddo
         endif
-
-
-        ! Initialize the pointers to null.
-        nullify(ESMF_StateCreate%statep)
-        nullify(stypep)
-
-        allocate(stypep, stat=memstat)
-        if (ESMF_LogFoundAllocError(memstat, msg="State type", &
-                 ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_StateConstruct(stypep,  &
                  statename=name, stateintent=stateintent, &
