@@ -2764,27 +2764,125 @@
       end subroutine ESMF_TimeIntervalSetDurCalTyp
 
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ParseDurationString()"
+      
 ! Internal subroutine to parse an ISO duration string and return
 ! the corresponding numeric time values      
-subroutine ParseDurationString(timeintervalString, &
+subroutine ESMF_ParseDurationString(timeintervalString, &
         yy_i8, mm_i8, d_i8, s_i8, &
         h_r8, m_r8, s_r8, rc)
 
-        character(*),            intent(in)            :: timeIntervalString  
-        integer(ESMF_KIND_I8),   intent(in),  optional :: yy_i8
-        integer(ESMF_KIND_I8),   intent(in),  optional :: mm_i8
-        integer(ESMF_KIND_I8),   intent(in),  optional :: d_i8
-        integer(ESMF_KIND_I8),   intent(in),  optional :: s_i8
-        real(ESMF_KIND_R8),      intent(in),  optional :: h_r8
-        real(ESMF_KIND_R8),      intent(in),  optional :: m_r8
-        real(ESMF_KIND_R8),      intent(in),  optional :: s_r8
+        character(*),            intent(in)  :: timeIntervalString  
+        integer(ESMF_KIND_I8),   intent(out)  :: yy_i8
+        integer(ESMF_KIND_I8),   intent(out)  :: mm_i8
+        integer(ESMF_KIND_I8),   intent(out)  :: d_i8
+        integer(ESMF_KIND_I8),   intent(out)  :: s_i8
+        real(ESMF_KIND_R8),      intent(out)  :: h_r8
+        real(ESMF_KIND_R8),      intent(out)  :: m_r8
+        real(ESMF_KIND_R8),      intent(out)  :: s_r8
         integer,                 intent(out), optional :: rc
 
+        integer :: localrc
+        integer :: beg_loc, end_loc
+        integer :: t_loc
 
       ! Return success
       if (present(rc)) rc = ESMF_SUCCESS
-        
-end subroutine ParseDurationString
+
+      ! See if T is there and if so where
+      t_loc=0
+      t_loc=INDEX(timeIntervalString,"T")
+      
+      !! TODO: Break this into two subroutine one handling dates the other handling times. That'll be an easier way to deal with the M thing
+      
+      ! Make sure P is there and find beginning of string
+      beg_loc=INDEX(timeIntervalString,"P")
+
+      ! Complain if it doesn't start with P
+      if (beg_loc < 1) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+               msg=" ISO 8601 duration strings need to begin with: P", &
+               ESMF_CONTEXT, rcToReturn=rc)
+           return           
+      endif
+
+      ! Advance to slot after P
+      beg_loc=beg_loc+1
+
+      ! Look for Y (year), and if it exists process it
+      end_loc=INDEX(timeIntervalString,"Y")
+      if (end_loc > 0) then
+         ! Shift position before Y for end loc
+         end_loc=end_loc-1
+
+         ! Make sure that it isn't empty
+         if (end_loc < beg_loc) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+                 msg=" Y value missing in ISO duration string.", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+            return           
+         endif
+
+         ! Read year value
+         read(timeIntervalString(beg_loc:end_loc), *) yy_i8
+
+         ! New beg_loc is after indicator
+         beg_loc=end_loc+2
+      endif
+
+      ! Look for M (month), and if it exists process it
+      end_loc=INDEX(timeIntervalString,"M")
+      if (end_loc > 0) then
+         ! Shift position before M for end loc
+         end_loc=end_loc-1
+
+         ! Make sure that it isn't empty
+         if (end_loc < beg_loc) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+                 msg=" M value missing in ISO duration string.", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+            return           
+         endif
+
+         ! Read year value
+         read(timeIntervalString(beg_loc:end_loc), *) mm_i8
+
+         ! New beg_loc is after indicator
+         beg_loc=end_loc+2
+      endif
+
+      ! Look for D (days), and if it exists process it
+      end_loc=INDEX(timeIntervalString,"D")
+      if (end_loc > 0) then
+         ! Shift position before M for end loc
+         end_loc=end_loc-1
+
+         ! Make sure that it isn't empty
+         if (end_loc < beg_loc) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+                 msg=" D value missing in ISO duration string.", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+            return           
+         endif
+
+         ! Read year value
+         read(timeIntervalString(beg_loc:end_loc), *) d_i8
+
+         ! New beg_loc is after indicator
+         beg_loc=end_loc+2
+      endif
+
+     
+      write(*,*) "Year value=",yy_i8
+      write(*,*) "Month value=",mm_i8
+      write(*,*) "Days value=",d_i8
+
+
+    
+      
+end subroutine ESMF_ParseDurationString
 
       
 !------------------------------------------------------------------------------
@@ -2839,7 +2937,7 @@ end subroutine ParseDurationString
       write(*,*) "Duration string is:",timeIntervalString
       
       ! Parse string into values for each time unit
-      call ParseDurationString(timeintervalString, &
+      call ESMF_ParseDurationString(timeintervalString, &
            yy_i8=yy_i8, mm_i8=mm_i8, d_i8=d_i8, s_i8=s_i8, &
            h_r8=h_r8, m_r8=m_r8, s_r8=s_r8, rc=localrc)      
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
