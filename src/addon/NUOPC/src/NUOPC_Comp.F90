@@ -2994,16 +2994,16 @@ module NUOPC_Comp
       ! set component kind specific verbosity levels
       if (trim(valueString)=="Driver") then
         max   = 65535  ! all 16 lower bits set
-        high  = 32529  ! bits 0, 4, 8, 9, 10, 11, 12, 13, 14
-        low   =  9985  ! bits 0, 8, 9, 10, 13 
+        high  = 32625  ! bits 0, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14
+        low   =  9985  ! bits 0, 8, 9, 10, 13
       else if (trim(valueString)=="Model") then
         max   = 65535  ! all 16 lower bits set
-        high  = 32513  ! bits 0, 8, 9, 10, 11, 12, 13, 14
-        low   =  9985  ! bits 0, 8, 9, 10, 13 
+        high  = 32561  ! bits 0, 4, 5, 8, 9, 10, 11, 12, 13, 14
+        low   =  9985  ! bits 0, 8, 9, 10, 13
       else if (trim(valueString)=="Mediator") then
         max   = 65535  ! all 16 lower bits set
-        high  = 32513  ! bits 0, 8, 9, 10, 11, 12, 13, 14
-        low   =  9985  ! bits 0, 8, 9, 10, 13 
+        high  = 32561  ! bits 0, 4, 5, 8, 9, 10, 11, 12, 13, 14
+        low   =  9985  ! bits 0, 8, 9, 10, 13
       endif
       ! query the component for Verbosity
       call NUOPC_CompAttributeGet(comp, name="Verbosity", value=valueString, &
@@ -3098,7 +3098,7 @@ module NUOPC_Comp
       verbosity = 0
       ! set specific verbosity levels
       max   = 65535  ! all 16 lower bits set
-      high  = 65281  ! bits 0, 8, 9, 10, 11, 12, 13, 14, 15
+      high  = 65329  ! bits 0, 4, 5, 8, 9, 10, 11, 12, 13, 14, 15
       low   =  8193  ! bits 0, 13
       ! query the component for Verbosity
       call NUOPC_CompAttributeGet(comp, name="Verbosity", value=valueString, &
