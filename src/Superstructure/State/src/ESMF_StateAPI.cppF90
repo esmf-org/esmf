@@ -1921,7 +1921,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out)   :: rc
       ! - local variables
       integer                     :: localrc
-      character(160)              :: msgString
+      character(800)              :: msgString
       character(ESMF_MAXSTR)      :: name, tempString
       type(ESMF_StateIntent_Flag) :: stateIntent
       integer                     :: itemCount, item
