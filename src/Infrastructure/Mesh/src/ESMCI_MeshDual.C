@@ -53,7 +53,7 @@ namespace ESMCI {
 
   const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype);
 
-  void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind, 
+  void triangulate(int sdim, int num_p, int id, double *p, double *td, int *ti, int *tri_ind, 
                    double *tri_frac);
   
   void get_num_elems_around_node(MeshObj *node, int *_num_ids);
@@ -697,7 +697,7 @@ namespace ESMCI {
           }
 
           // Triangulate polygon
-          triangulate(sdim, elemType[e], polyCoords, polyDblBuf, polyIntBuf, 
+          triangulate(sdim, elemType[e], elemId[e], polyCoords, polyDblBuf, polyIntBuf, 
                       triInd, triFrac); 
           
 
@@ -924,7 +924,7 @@ const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype) {
 // ti    = temporary integer buffer size = num_p
 // tri_ind = output array  size = 3*(nump-2)
 // tri_frac = fraction each triangle is of whole poly size=(num_p-2)
-void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind, 
+void triangulate(int sdim, int num_p, int id, double *p, double *td, int *ti, int *tri_ind, 
                  double *tri_frac) {
           int localrc;
           
@@ -947,7 +947,8 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
             if (ret == ESMCI_TP_DEGENERATE_POLY) {
               Throw() << " - can't triangulate a polygon with less than 3 sides"; 
             } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
-              Throw() <<" - there was a problem with triangulation (e.g. repeated points, clockwise poly, etc.)";
+              Throw() <<" - there was a problem with triangulation of id="<<id<<" (e.g. repeated points, clockwise poly, etc.)";
+              write_3D_poly_to_vtk("BadPoly", id, num_p, p);              
             } else {
               Throw() <<" - unknown error in triangulation";
             }
