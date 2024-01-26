@@ -2884,11 +2884,12 @@ subroutine ESMF_ParseDurTimeString(timeintervalString, &
          ! New beg_loc is after indicator
          beg_loc=end_loc+2
       endif
-     
-      write(*,*) "Hour value=",h_r8
-      write(*,*) "Minute value=",m_r8
-      write(*,*) "Seconds value=",s_r8
-      write(*,*) "Seconds value=",s_i8
+
+      ! DEBUG OUTPUT
+      ! write(*,*) "Hour value=",h_r8
+      ! write(*,*) "Minute value=",m_r8
+      ! write(*,*) "Seconds value=",s_r8
+      ! write(*,*) "Seconds value=",s_i8
 
       ! Return success
       if (present(rc)) rc = ESMF_SUCCESS      
@@ -3015,11 +3016,12 @@ subroutine ESMF_ParseDurDateString(timeintervalString, &
          ! New beg_loc is after indicator
          beg_loc=end_loc+2
       endif
-     
-      write(*,*) "Year value=",yy_i8
-      write(*,*) "Month value=",mm_i8
-      write(*,*) "Days value=",d_i8
-      write(*,*) "Days value=",d_r8
+
+      ! DEBUG OUTPUT
+      ! write(*,*) "Year value=",yy_i8
+      ! write(*,*) "Month value=",mm_i8
+      ! write(*,*) "Days value (I8)=",d_i8
+      ! write(*,*) "Days value (R8)=",d_r8
 
       ! Return success
       if (present(rc)) rc = ESMF_SUCCESS      
@@ -3053,6 +3055,16 @@ subroutine ESMF_ParseDurString(timeintervalString, &
         integer :: beg_loc, end_loc
         integer :: t_loc
 
+        ! Init output to 0
+        yy_i8=0
+        mm_i8=0
+        d_i8=0
+        d_r8=0.0
+        h_r8=0.0
+        m_r8=0.0
+        s_r8=0.0
+        s_i8=0
+        
       ! Make sure P is there and find beginning of string
       beg_loc=INDEX(timeIntervalString,"P")
 
@@ -3163,8 +3175,8 @@ end subroutine ESMF_ParseDurString
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ! DEBUG:
-      write(*,*) "Duration string is:",timeIntervalString
+      ! DEBUG OUTPUT:
+      !write(*,*) "Duration string is:",timeIntervalString
       
       ! Parse string into values for each time unit
       call ESMF_ParseDurString(timeintervalString, &
