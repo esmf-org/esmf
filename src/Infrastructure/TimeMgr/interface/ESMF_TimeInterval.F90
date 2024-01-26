@@ -2865,8 +2865,12 @@ subroutine ESMF_ParseDurTimeString(timeintervalString, &
             return           
          endif
 
-         ! Read year value
-         read(timeIntervalString(beg_loc:end_loc), *, ioStat=ioStatus) s_i8
+         ! Read second value depending on if it looks like an integer or a real
+         if (VERIFY(timeIntervalString(beg_loc:end_loc),"+-0123456789") == 0) then
+            read(timeIntervalString(beg_loc:end_loc), *, ioStat=ioStatus) s_i8
+         else
+            read(timeIntervalString(beg_loc:end_loc), *, ioStat=ioStatus) s_r8
+         endif
          if (ioStatus /=0) then
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
                  msg=" An error occurred while reading S value in ISO duration string.", &
@@ -2910,7 +2914,8 @@ subroutine ESMF_ParseDurDateString(timeintervalString, &
         integer :: localrc
         integer :: beg_loc, end_loc
         integer :: t_loc
-
+        integer :: ioStatus
+        
       ! Init output to 0
       yy_i8=0
       mm_i8=0
