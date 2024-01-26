@@ -2773,13 +2773,13 @@
 ! ISO duration string and return
 ! the corresponding numeric time values      
 subroutine ESMF_ParseDurTimeString(timeintervalString, &
-     h_r8, m_r8, s_r8, s_i8, rc)
+     h_r8, m_r8, s_i8, s_r8, rc)
 
         character(*),            intent(in)  :: timeIntervalString  
         real(ESMF_KIND_R8),      intent(out)  :: h_r8
         real(ESMF_KIND_R8),      intent(out)  :: m_r8
+        integer(ESMF_KIND_I8),   intent(out)  :: s_i8  
         real(ESMF_KIND_R8),      intent(out)  :: s_r8
-        integer(ESMF_KIND_I8),   intent(out)  :: s_i8        
         integer,                 intent(out), optional :: rc
 
         integer :: localrc
@@ -2788,15 +2788,16 @@ subroutine ESMF_ParseDurTimeString(timeintervalString, &
         integer :: ioStatus
 
       ! Init output to 0
-      h_r8=0
-      m_r8=0
-      s_r8=0
+      h_r8=0.0
+      m_r8=0.0
+      s_r8=0.0
       s_i8=0
       
       ! Start at the beginning of the string
       beg_loc=1
 
       ! Look for H (hours), and if it exists process it
+      ! Use R8 for both real and integer, since R8 can exactly represent I4
       end_loc=INDEX(timeIntervalString,"H")
       if (end_loc > 0) then
          ! Shift position before Y for end loc
@@ -2824,6 +2825,7 @@ subroutine ESMF_ParseDurTimeString(timeintervalString, &
       endif
 
       ! Look for M (minutes), and if it exists process it
+      ! Use R8 for both real and integer, since R8 can exactly represent I4
       end_loc=INDEX(timeIntervalString,"M")
       if (end_loc > 0) then
          ! Shift position before M for end loc
@@ -2903,12 +2905,13 @@ end subroutine ESMF_ParseDurTimeString
 ! ISO duration string and return
 ! the corresponding numeric time values      
 subroutine ESMF_ParseDurDateString(timeintervalString, &
-     yy_i8, mm_i8, d_i8, rc)
+     yy_i8, mm_i8, d_i8, d_r8, rc)
 
         character(*),            intent(in)  :: timeIntervalString  
         integer(ESMF_KIND_I8),   intent(out)  :: yy_i8
         integer(ESMF_KIND_I8),   intent(out)  :: mm_i8
         integer(ESMF_KIND_I8),   intent(out)  :: d_i8
+        real(ESMF_KIND_R8),      intent(out)  :: d_r8
         integer,                 intent(out), optional :: rc
 
         integer :: localrc
@@ -2920,6 +2923,7 @@ subroutine ESMF_ParseDurDateString(timeintervalString, &
       yy_i8=0
       mm_i8=0
       d_i8=0
+      d_r8=0.0
       
       ! Start at the beginning of the string
       beg_loc=1
@@ -2932,7 +2936,7 @@ subroutine ESMF_ParseDurDateString(timeintervalString, &
 
          ! Make sure that it isn't empty
          if (end_loc < beg_loc) then
-            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
+            Call Esmf_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
                  msg=" Y value missing in ISO duration string.", &
                  ESMF_CONTEXT, rcToReturn=rc)
             return           
@@ -2994,8 +2998,12 @@ subroutine ESMF_ParseDurDateString(timeintervalString, &
             return           
          endif
 
-         ! Read year value
-         read(timeIntervalString(beg_loc:end_loc), *, ioStat=ioStatus) d_i8
+         ! Read day value depending on if it looks like an integer or a real
+         if (VERIFY(timeIntervalString(beg_loc:end_loc),"+-0123456789") == 0) then
+            read(timeIntervalString(beg_loc:end_loc), *, ioStat=ioStatus) d_i8
+         else
+            read(timeIntervalString(beg_loc:end_loc), *, ioStat=ioStatus) d_r8
+         endif         
          if (ioStatus /=0) then
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
                  msg=" An error occurred while reading D value in ISO duration string.", &
@@ -3011,6 +3019,7 @@ subroutine ESMF_ParseDurDateString(timeintervalString, &
       write(*,*) "Year value=",yy_i8
       write(*,*) "Month value=",mm_i8
       write(*,*) "Days value=",d_i8
+      write(*,*) "Days value=",d_r8
 
       ! Return success
       if (present(rc)) rc = ESMF_SUCCESS      
@@ -3026,16 +3035,17 @@ end subroutine ESMF_ParseDurDateString
 ! Internal subroutine to parse an ISO duration string and return
 ! the corresponding numeric time values      
 subroutine ESMF_ParseDurString(timeintervalString, &
-        yy_i8, mm_i8, d_i8, s_i8, &
-        h_r8, m_r8, s_r8, rc)
+        yy_i8, mm_i8, d_i8, d_r8, &
+        h_r8, m_r8, s_i8, s_r8, rc)
 
         character(*),            intent(in)  :: timeIntervalString  
         integer(ESMF_KIND_I8),   intent(out)  :: yy_i8
         integer(ESMF_KIND_I8),   intent(out)  :: mm_i8
         integer(ESMF_KIND_I8),   intent(out)  :: d_i8
-        integer(ESMF_KIND_I8),   intent(out)  :: s_i8
+        real(ESMF_KIND_R8),      intent(out)  :: d_r8
         real(ESMF_KIND_R8),      intent(out)  :: h_r8
         real(ESMF_KIND_R8),      intent(out)  :: m_r8
+        integer(ESMF_KIND_I8),   intent(out)  :: s_i8        
         real(ESMF_KIND_R8),      intent(out)  :: s_r8
         integer,                 intent(out), optional :: rc
 
@@ -3074,7 +3084,7 @@ subroutine ESMF_ParseDurString(timeintervalString, &
       ! If not empty, parse just the date part of the string
       if (beg_loc <= end_loc) then
          call ESMF_ParseDurDateString(timeintervalString(beg_loc:end_loc), &
-              yy_i8, mm_i8, d_i8, rc=localrc)
+              yy_i8, mm_i8, d_i8, d_r8, rc=localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return      
       endif
@@ -3092,7 +3102,7 @@ subroutine ESMF_ParseDurString(timeintervalString, &
          ! If not empty, parse just the time part of the string
          if (beg_loc <= end_loc) then
             call ESMF_ParseDurTimeString(timeintervalString(beg_loc:end_loc), &
-                 h_r8, m_r8, s_r8, s_i8, rc=localrc)
+                 h_r8, m_r8, s_i8, s_r8, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                  ESMF_CONTEXT, rcToReturn=rc)) return      
          endif         
@@ -3158,8 +3168,8 @@ end subroutine ESMF_ParseDurString
       
       ! Parse string into values for each time unit
       call ESMF_ParseDurString(timeintervalString, &
-           yy_i8=yy_i8, mm_i8=mm_i8, d_i8=d_i8, s_i8=s_i8, &
-           h_r8=h_r8, m_r8=m_r8, s_r8=s_r8, rc=localrc)      
+           yy_i8=yy_i8, mm_i8=mm_i8, d_i8=d_i8, d_r8=d_r8, &
+           h_r8=h_r8, m_r8=m_r8, s_i8=s_i8, s_r8=s_r8, rc=localrc)      
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -3169,13 +3179,14 @@ end subroutine ESMF_ParseDurString
       !       are stored that way anyway. Also, for times (h,m,s), it looks like both R8
       !       and I8 are added together, so you can just
       !       use both and whichever isn't needed set to 0.
-      !       It's unclear if that's true for days, so don't do it for that. 
+      !       An R8 can exactly represent an I4, so just use R8 for hours and minutes
+      !       where an I4 is all that's available.
       call ESMF_TimeIntervalSetDur(timeinterval, &
            yy_i8=yy_i8, &
            mm_i8=mm_i8, &
            d_i8=d_i8, &
            s_i8=s_i8, &
-           !        d_r8=d_r8, &  ! Not supported right now
+           d_r8=d_r8, &
            h_r8=h_r8, &
            m_r8=m_r8, &
            s_r8=s_r8, &

@@ -3899,7 +3899,7 @@
       ! Testing ESMF_TimeIntervalSet from an ISO duration string
       write(name, *) "Set an ESMF_TimeInterval using an ISO duration string."
       write(failMsg, *) "Output did not match duration set in string."
-      call ESMF_TimeIntervalSet(timeInterval1, timeIntervalString="P1Y2M3DT4H5M6.1S", rc=rc)
+      call ESMF_TimeIntervalSet(timeInterval1, timeIntervalString="P1Y2M3.3DT4H5M6S", rc=rc)
       !call ESMF_TimeIntervalGet(timeInterval1, s=S, sN=sN, sD=sD, rc=rc)
       call ESMF_Test((rc .eq. ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
