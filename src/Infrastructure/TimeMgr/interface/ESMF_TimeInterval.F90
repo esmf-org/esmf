@@ -928,7 +928,10 @@
       module procedure ESMF_TimeIntervalSetDurStart
       module procedure ESMF_TimeIntervalSetDurCal
       module procedure ESMF_TimeIntervalSetDurCalTyp
-      module procedure ESMF_TimeIntervalSetString
+      module procedure ESMF_TimeIntervalSetStr
+      module procedure ESMF_TimeIntervalSetStrStart
+      module procedure ESMF_TimeIntervalSetStrCal
+      module procedure ESMF_TimeIntervalSetStrCalTyp
 ! !DESCRIPTION:
 !     This interface provides a single entry point for {\tt ESMF\_TimeInterval}
 !     Set methods.
@@ -3056,6 +3059,7 @@ subroutine ESMF_ParseDurString(timeintervalString, &
         integer :: t_loc
 
         ! Init output to 0
+        ! NOTE: Need to do all of these here in case date or time parsing isn't done below
         yy_i8=0
         mm_i8=0
         d_i8=0
@@ -3129,13 +3133,13 @@ end subroutine ESMF_ParseDurString
       
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_TimeIntervalSetString()"
+#define ESMF_METHOD "ESMF_TimeIntervalSetStr()"
 !BOP
 ! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval from ISO format string
 
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalSet()
-      subroutine ESMF_TimeIntervalSetString(timeinterval, timeIntervalString, rc)
+      subroutine ESMF_TimeIntervalSetStr(timeinterval, timeIntervalString, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
@@ -3208,7 +3212,286 @@ end subroutine ESMF_ParseDurString
 
       ! Return success
       if (present(rc)) rc = ESMF_SUCCESS
-      end subroutine ESMF_TimeIntervalSetString
+      end subroutine ESMF_TimeIntervalSetStr
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeIntervalSetStrCal()"
+!BOP
+! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval from ISO format string
+
+! !INTERFACE:
+      ! Private name; call using ESMF_TimeIntervalSet()
+      subroutine ESMF_TimeIntervalSetStrCal(timeinterval, calendar, &
+           timeIntervalString, rc)
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(inout)         :: timeinterval
+      type(ESMF_Calendar),     intent(in)            :: calendar
+      character(*),            intent(in)            :: timeIntervalString  
+      integer,                 intent(out), optional :: rc
+
+!
+!
+! !DESCRIPTION:
+!     Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
+!     string in ISO duration format (P[n]Y[n]M[n]DT[n]H[n]M[n]S).
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The object instance to initialize.
+!     \item[calendar]
+!          {\tt Calendar} used to give better definition to 
+!          calendar interval (yy, mm, and/or d) for arithmetic, comparison, 
+!          and conversion operations.  Allows calendar interval to "float" 
+!          across all times on a specific calendar.  Default = NULL; 
+!          if startTime also not specified, calendar interval "floats" across 
+!          all calendars and times.  Mutually exclusive with startTime since 
+!          it contains a calendar.  Alternate to, and mutually exclusive with, 
+!          calkindflag below.  Primarily for specifying a custom calendar kind.
+!     \item[timeIntervalString]
+!          ISO format duration string. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+      integer :: localrc                        ! local return code
+      integer(ESMF_KIND_I8) :: yy_i8
+      integer(ESMF_KIND_I8) :: mm_i8
+      integer(ESMF_KIND_I8) :: d_i8
+      integer(ESMF_KIND_I8) :: s_i8
+      real(ESMF_KIND_R8)    :: d_r8
+      real(ESMF_KIND_R8)    :: h_r8
+      real(ESMF_KIND_R8)    :: m_r8
+      real(ESMF_KIND_R8)    :: s_r8
+           
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+      ! DEBUG OUTPUT:
+      !write(*,*) "Duration string is:",timeIntervalString
+      
+      ! Parse string into values for each time unit
+      call ESMF_ParseDurString(timeintervalString, &
+           yy_i8=yy_i8, mm_i8=mm_i8, d_i8=d_i8, d_r8=d_r8, &
+           h_r8=h_r8, m_r8=m_r8, s_i8=s_i8, s_r8=s_r8, rc=localrc)      
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      ! Set time interval using time unit values parsed above
+      
+      ! NOTE: Just use I8 for integer values, since it looks like integer values
+      !       are stored that way anyway. Also, for times (h,m,s), it looks like both R8
+      !       and I8 are added together, so you can just
+      !       use both and whichever isn't needed set to 0.
+      !       An R8 can exactly represent an I4, so just use R8 for hours and minutes
+      !       where an I4 is all that's available.
+      call ESMF_TimeIntervalSetDurCal(timeinterval, calendar, &
+           yy_i8=yy_i8, &
+           mm_i8=mm_i8, &
+           d_i8=d_i8, &
+           s_i8=s_i8, &
+           d_r8=d_r8, &
+           h_r8=h_r8, &
+           m_r8=m_r8, &
+           s_r8=s_r8, &
+           rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
+      end subroutine ESMF_TimeIntervalSetStrCal
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeIntervalSetStrCalTyp()"
+!BOP
+! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval from ISO format string
+
+! !INTERFACE:
+      ! Private name; call using ESMF_TimeIntervalSet()
+      subroutine ESMF_TimeIntervalSetStrCalTyp(timeinterval, calkindflag, &
+           timeIntervalString, rc)
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(inout)         :: timeinterval
+      type(ESMF_CalKind_Flag), intent(in)            :: calkindflag
+      character(*),            intent(in)            :: timeIntervalString  
+      integer,                 intent(out), optional :: rc
+
+!
+!
+! !DESCRIPTION:
+!     Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
+!     string in ISO duration format (P[n]Y[n]M[n]DT[n]H[n]M[n]S).
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The object instance to initialize.
+!     \item[calkindflag]
+!          Alternate to, and mutually exclusive with, 
+!          calendar above.  More convenient way of specifying a built-in 
+!          calendar kind.
+!     \item[timeIntervalString]
+!          ISO format duration string. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+      integer :: localrc                        ! local return code
+      integer(ESMF_KIND_I8) :: yy_i8
+      integer(ESMF_KIND_I8) :: mm_i8
+      integer(ESMF_KIND_I8) :: d_i8
+      integer(ESMF_KIND_I8) :: s_i8
+      real(ESMF_KIND_R8)    :: d_r8
+      real(ESMF_KIND_R8)    :: h_r8
+      real(ESMF_KIND_R8)    :: m_r8
+      real(ESMF_KIND_R8)    :: s_r8
+           
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+      ! DEBUG OUTPUT:
+      !write(*,*) "Duration string is:",timeIntervalString
+      
+      ! Parse string into values for each time unit
+      call ESMF_ParseDurString(timeintervalString, &
+           yy_i8=yy_i8, mm_i8=mm_i8, d_i8=d_i8, d_r8=d_r8, &
+           h_r8=h_r8, m_r8=m_r8, s_i8=s_i8, s_r8=s_r8, rc=localrc)      
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      ! Set time interval using time unit values parsed above
+      
+      ! NOTE: Just use I8 for integer values, since it looks like integer values
+      !       are stored that way anyway. Also, for times (h,m,s), it looks like both R8
+      !       and I8 are added together, so you can just
+      !       use both and whichever isn't needed set to 0.
+      !       An R8 can exactly represent an I4, so just use R8 for hours and minutes
+      !       where an I4 is all that's available.
+      call ESMF_TimeIntervalSetDurCalTyp(timeinterval, calkindflag, &
+           yy_i8=yy_i8, &
+           mm_i8=mm_i8, &
+           d_i8=d_i8, &
+           s_i8=s_i8, &
+           d_r8=d_r8, &
+           h_r8=h_r8, &
+           m_r8=m_r8, &
+           s_r8=s_r8, &
+           rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
+      end subroutine ESMF_TimeIntervalSetStrCalTyp
+      
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeIntervalSetStrStart()"
+!BOP
+! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval from ISO format string
+
+! !INTERFACE:
+      ! Private name; call using ESMF_TimeIntervalSet()
+      subroutine ESMF_TimeIntervalSetStrStart(timeinterval, startTime, &
+           timeIntervalString, rc)
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(inout)         :: timeinterval
+      type(ESMF_Time),         intent(in)            :: startTime
+      character(*),            intent(in)            :: timeIntervalString  
+      integer,                 intent(out), optional :: rc
+
+!
+!
+! !DESCRIPTION:
+!     Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
+!     string in ISO duration format (P[n]Y[n]M[n]DT[n]H[n]M[n]S).
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The object instance to initialize.
+!     \item[startTime]
+!          Starting time of an absolute calendar interval 
+!          (yy, mm, and/or d); pins a calendar interval to a specific point 
+!          in time.  If not set, and calendar also not set, calendar interval 
+!          "floats" across all calendars and times.
+!     \item[timeIntervalString]
+!          ISO format duration string. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+      integer :: localrc                        ! local return code
+      integer(ESMF_KIND_I8) :: yy_i8
+      integer(ESMF_KIND_I8) :: mm_i8
+      integer(ESMF_KIND_I8) :: d_i8
+      integer(ESMF_KIND_I8) :: s_i8
+      real(ESMF_KIND_R8)    :: d_r8
+      real(ESMF_KIND_R8)    :: h_r8
+      real(ESMF_KIND_R8)    :: m_r8
+      real(ESMF_KIND_R8)    :: s_r8
+           
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+      ! DEBUG OUTPUT:
+      !write(*,*) "Duration string is:",timeIntervalString
+      
+      ! Parse string into values for each time unit
+      call ESMF_ParseDurString(timeintervalString, &
+           yy_i8=yy_i8, mm_i8=mm_i8, d_i8=d_i8, d_r8=d_r8, &
+           h_r8=h_r8, m_r8=m_r8, s_i8=s_i8, s_r8=s_r8, rc=localrc)      
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      ! Set time interval using time unit values parsed above
+      
+      ! NOTE: Just use I8 for integer values, since it looks like integer values
+      !       are stored that way anyway. Also, for times (h,m,s), it looks like both R8
+      !       and I8 are added together, so you can just
+      !       use both and whichever isn't needed set to 0.
+      !       An R8 can exactly represent an I4, so just use R8 for hours and minutes
+      !       where an I4 is all that's available.
+      call ESMF_TimeIntervalSetDurStart(timeinterval, startTime, &
+           yy_i8=yy_i8, &
+           mm_i8=mm_i8, &
+           d_i8=d_i8, &
+           s_i8=s_i8, &
+           d_r8=d_r8, &
+           h_r8=h_r8, &
+           m_r8=m_r8, &
+           s_r8=s_r8, &
+           rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
+      end subroutine ESMF_TimeIntervalSetStrStart
+
+
+
       
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

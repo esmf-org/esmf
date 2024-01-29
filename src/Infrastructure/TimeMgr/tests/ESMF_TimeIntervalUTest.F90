@@ -83,6 +83,7 @@
       type(ESMF_TimeInterval) :: timeInterval1, timeInterval2, timeInterval3, &
                                  timeInterval4, timeInterval5, timeInterval6
       type(ESMF_TimeInterval) :: diffTime, absoluteTime
+      type(ESMF_CalKind_Flag) :: calkindflag
       logical :: correct
 
 #endif
@@ -2959,6 +2960,34 @@
 
       !print *, "yy=", YY, "mm=", MM, "d=", D, "h=", H, "m=", M, "s=", S
 
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Test ISO String and Calendar set interface."
+      write(failMsg, *) " Did not return 24 months or ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, timeIntervalString="P2Y", calendar=gregorianCalendar, &
+                                rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, mm=months, rc=rc)
+
+      call ESMF_Test((months==24 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Test ISO String and startTime set interface."
+      write(failMsg, *) " Did not return 24 months or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, d=1200, h=12, m=17, s=58, &
+           calendar=julianDayCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, startTime, timeIntervalString="P2Y", &
+                                rc=rc)
+
+      call ESMF_Test((rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      
+      
       call ESMF_CalendarDestroy(julianDayCalendar)
       call ESMF_CalendarDestroy(day360Calendar)
       call ESMF_CalendarDestroy(noLeapCalendar)
@@ -4030,9 +4059,37 @@
 
       call ESMF_Test((rc .eq. ESMF_SUCCESS) .and. correct, &
                       name, failMsg, result, ESMF_SRCLINE)
+
       
+! ----------------------------------------------------------------------------
+      
+      !EX_UTest
+      ! Testing ESMF_TimeIntervalSet from an ISO duration string
+      write(name, *) "Set an ESMF_TimeInterval using an ISO duration string and caltype"
+      write(failMsg, *) "Output did not match duration set in string."
+      call ESMF_TimeIntervalSet(timeInterval1, timeIntervalString="P1Y", &
+           calkindflag=ESMF_CALKIND_GREGORIAN, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, yy=YY, calkindflag=calkindflag, &
+           rc=rc)
 
+      ! Check answers
+      correct=.true.
+      if (yy /= 1) correct=.false.
+      if (calkindflag /= ESMF_CALKIND_GREGORIAN) correct=.false.
 
+      !      Debug output      
+!      write(*,*) "yy=",yy
+!      write(*,*) "mm=",months
+!      write(*,*) "dd=",days
+!      write(*,*) "h=",h
+!      write(*,*) "m=",m
+!      write(*,*) "s=",s
+
+      
+      call ESMF_Test((rc .eq. ESMF_SUCCESS) .and. correct, &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      
       ! ----------------------------------------------------------------------------
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
