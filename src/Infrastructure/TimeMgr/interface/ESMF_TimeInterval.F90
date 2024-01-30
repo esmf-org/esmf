@@ -3150,8 +3150,17 @@ end subroutine ESMF_ParseDurString
 !
 ! !DESCRIPTION:
 !     Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
-!     string in ISO duration format (P[n]Y[n]M[n]DT[n]H[n]M[n]S).
-!
+!     string in ISO duration format P[y]Y[mm]M[d]DT[h]H[m]M[s]S. See ~\cite{ISO} and ~\cite{ISOnotes}. In ESMF's implementation 
+!     the values can have the following types: 
+!     \begin{description}
+!      \item[y] the number of years expressed in up to a 64-bit integer.
+!      \item[mm] the number of months expressed in up to a 64-bit integer.
+!      \item[d]  the number of days expressed in up to a 64-bit integer or a 64-bit floating point value (double).
+!      \item[h] the number of hours expressed in up to a 32-bit integer or a 64-bit floating point value (double).
+!      \item[m] the number of minutes expressed in up to a 32-bit integer or a 64-bit floating point value (double).
+!      \item[s] the number of seconds expressed in up to a 64-bit integer or a 64-bit floating point value (double).
+!     \end{description}
+!     
 !     The arguments are:
 !     \begin{description}
 !     \item[timeinterval]
