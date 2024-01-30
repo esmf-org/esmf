@@ -777,7 +777,8 @@ contains
 !
 !   The supported <Type> options are:
 !   \begin{itemize}
-!   \item {\tt type(HConfig)} (scalar only variant!)
+!   \item {\tt type(HConfig)} (Scalar only variant!
+!                             Only a single HConfig object can be provided.)
 !   \item {\tt integer(ESMF\_KIND\_I4)}
 !   \item {\tt integer(ESMF\_KIND\_I8)}
 !   \item {\tt logical}
@@ -2053,7 +2054,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The supported <Type> options are:
 !   \begin{itemize}
-!   \item {\tt type(HConfig)} (scalar only variant!)
+!   \item {\tt type(HConfig)} (Scalar only variant!
+!                             Only a single HConfig object can be provided.)
 !   \item {\tt integer(ESMF\_KIND\_I4)}
 !   \item {\tt integer(ESMF\_KIND\_I8)}
 !   \item {\tt logical}
@@ -2784,7 +2786,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The supported <Type> options are:
 !   \begin{itemize}
-!   \item {\tt type(HConfig)} (scalar only variant!)
+!   \item {\tt type(HConfig)} (Scalar only variant!
+!                             Only a single HConfig object can be provided.)
 !   \item {\tt integer(ESMF\_KIND\_I4)}
 !   \item {\tt integer(ESMF\_KIND\_I8)}
 !   \item {\tt logical}
@@ -11209,7 +11212,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
 !    type(ESMF_HConfig[Iter]), intent(in)      :: hconfig
-!    <Type>,             intent(in)            :: content[(:}]
+!    <Type>,             intent(in)            :: content[(:)]
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,            intent(in),  optional :: index
 !    character(*),       intent(in),  optional :: keyString
@@ -11225,7 +11228,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The supported <Type> options are:
 !   \begin{itemize}
-!   \item {\tt type(HConfig)} (scalar only variant!)
+!   \item {\tt type(HConfig)} (Scalar only variant!
+!                             Only a single HConfig object can be provided.)
 !   \item {\tt integer(ESMF\_KIND\_I4)}
 !   \item {\tt integer(ESMF\_KIND\_I8)}
 !   \item {\tt logical}
@@ -12366,7 +12370,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
 !    type(ESMF_HConfigIter), intent(in)        :: hconfig
-!    <Type>,             intent(in)            :: content[(:}]
+!    <Type>,             intent(in)            :: content[(:)]
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,            intent(in),  optional :: index
 !    character(*),       intent(in),  optional :: keyString
@@ -12382,7 +12386,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The supported <Type> options are:
 !   \begin{itemize}
-!   \item {\tt type(HConfig)} (scalar only variant!)
+!   \item {\tt type(HConfig)} (Scalar only variant!
+!                             Only a single HConfig object can be provided.)
 !   \item {\tt integer(ESMF\_KIND\_I4)}
 !   \item {\tt integer(ESMF\_KIND\_I8)}
 !   \item {\tt logical}
@@ -13030,7 +13035,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
 !    type(ESMF_HConfigIter), intent(in)        :: hconfig
-!    <Type>,             intent(in)            :: content[(:}]
+!    <Type>,             intent(in)            :: content[(:)]
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,            intent(in),  optional :: index
 !    character(*),       intent(in),  optional :: keyString
@@ -13046,7 +13051,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The supported <Type> options are:
 !   \begin{itemize}
-!   \item {\tt type(HConfig)} (scalar only variant!)
+!   \item {\tt type(HConfig)} (Scalar only variant!
+!                             Only a single HConfig object can be provided.)
 !   \item {\tt integer(ESMF\_KIND\_I4)}
 !   \item {\tt integer(ESMF\_KIND\_I8)}
 !   \item {\tt logical}
