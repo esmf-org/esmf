@@ -204,10 +204,10 @@ int PIOc_set_global_log_level(int iosysid, int level)
         if(!ios->ioproc)
         {
             int msg = PIO_MSG_SETLOGLEVEL;
-            if (ios->compmaster == MPI_ROOT)
+            if (ios->compmain == MPI_ROOT)
                 mpierr = MPI_Send(&msg, 1, MPI_INT, ios->ioroot, 1, ios->union_comm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&iosysid, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&iosysid, 1, MPI_INT, ios->compmain, ios->intercomm);
         }
 
     }
@@ -755,11 +755,10 @@ pio_err(iosystem_desc_t *ios, file_desc_t *file, int err_num, const char *fname,
         MPI_Abort(MPI_COMM_WORLD, -1);
     }
 
-    /* What should we do here??? */
-    if (err_handler == PIO_BCAST_ERROR)
-    {
-        /* ??? */
-    }
+    /* Do nothing, error is bcast to all tasks and application will handle */
+//    if (err_handler == PIO_BCAST_ERROR)
+//    {
+//    }
 
     /* If abort was not called, we'll get here. */
     return err_num;
@@ -873,11 +872,11 @@ find_mpi_type(int pio_type, MPI_Datatype *mpi_type, int *type_size)
         my_mpi_type = MPI_UNSIGNED_LONG_LONG;
         my_type_size = NETCDF_DOUBLE_INT64_SIZE;
         break;
-#endif /* _NETCDF4 */
     case PIO_STRING:
         my_mpi_type = MPI_CHAR;
         my_type_size = NETCDF_CHAR_SIZE;
         break;
+#endif /* _NETCDF4 */
     default:
         return PIO_EBADTYPE;
     }
@@ -1016,13 +1015,13 @@ PIOc_freedecomp(int iosysid, int ioid)
         {
             int msg = PIO_MSG_FREEDECOMP; /* Message for async notification. */
 
-            if (ios->compmaster == MPI_ROOT)
+            if (ios->compmain == MPI_ROOT)
                 mpierr = MPI_Send(&msg, 1, MPI_INT, ios->ioroot, 1, ios->union_comm);
 
             if (!mpierr)
-                mpierr = MPI_Bcast(&iosysid, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&iosysid, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&ioid, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&ioid, 1, MPI_INT, ios->compmain, ios->intercomm);
             PLOG((2, "PIOc_freedecomp iosysid = %d ioid = %d", iosysid, ioid));
         }
 
@@ -1685,8 +1684,8 @@ pioc_read_nc_decomp_int(int iosysid, const char *filename, int *ndims, int **glo
         return pio_err(ios, NULL, PIO_EINVAL, __FILE__, __LINE__);
 
     PLOG((1, "pioc_read_nc_decomp_int iosysid = %d filename = %s", iosysid, filename));
-    
-    
+
+
     /* Open the netCDF decomp file. */
     if ((ret = PIOc_open(iosysid, filename, NC_WRITE, &ncid)))
         return pio_err(ios, NULL, ret, __FILE__, __LINE__);
@@ -2093,28 +2092,28 @@ PIOc_createfile_int(int iosysid, int *ncidp, int *iotype, const char *filename,
 
             /* Send the message to the message handler. */
             PLOG((3, "msg %d ios->union_comm %d MPI_COMM_NULL %d", msg, ios->union_comm, MPI_COMM_NULL));
-            if (ios->compmaster == MPI_ROOT)
+            if (ios->compmain == MPI_ROOT)
                 mpierr = MPI_Send(&msg, 1, MPI_INT, ios->ioroot, 1, ios->union_comm);
 
             /* Send the parameters of the function call. */
             if (!mpierr)
-                mpierr = MPI_Bcast(&len, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&len, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast((void *)filename, len + 1, MPI_CHAR, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast((void *)filename, len + 1, MPI_CHAR, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&file->iotype, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&file->iotype, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&mode, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&mode, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&use_ext_ncid, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&use_ext_ncid, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&ncidp_present, 1, MPI_CHAR, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&ncidp_present, 1, MPI_CHAR, ios->compmain, ios->intercomm);
             if (ncidp_present)
                 if (!mpierr)
-                    mpierr = MPI_Bcast(ncidp, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                    mpierr = MPI_Bcast(ncidp, 1, MPI_INT, ios->compmain, ios->intercomm);
 #ifdef NETCDF_INTEGRATION
             if (!mpierr)
-                mpierr = MPI_Bcast(&diosysid, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&diosysid, 1, MPI_INT, ios->compmain, ios->intercomm);
 #endif /* NETCDF_INTEGRATION */
             PLOG((2, "len %d filename %s iotype %d mode %d use_ext_ncid %d "
                   "ncidp_present %d", len, filename, file->iotype, mode,
@@ -2148,8 +2147,10 @@ PIOc_createfile_int(int iosysid, int *ncidp, int *iotype, const char *filename,
         case PIO_IOTYPE_NETCDF:
             if (!ios->io_rank)
             {
+//                PIOc_set_log_level(3);
                 PLOG((2, "Calling nc_create mode = %d", mode));
                 ierr = nc_create(filename, mode, &file->fh);
+                PLOG((2, "Called nc_create mode = %d %d %s", mode, ierr, filename));
             }
             break;
 #ifdef _PNETCDF
@@ -2330,7 +2331,7 @@ inq_file_metadata(file_desc_t *file, int ncid, int iotype, int *nvars,
     /* Check inputs. */
     pioassert(rec_var && pio_type && pio_type_size && mpi_type && mpi_type_size,
               "pointers must be provided", __FILE__, __LINE__);
-
+    ret = PIO_NOERR;
     /* How many vars in the file? */
     if (iotype == PIO_IOTYPE_PNETCDF)
     {
@@ -2384,7 +2385,6 @@ inq_file_metadata(file_desc_t *file, int ncid, int iotype, int *nvars,
             return pio_err(NULL, file, ret, __FILE__, __LINE__);
 #endif /* _NETCDF4 */
     }
-
     /* Learn the unlimited dimension ID(s), if there are any. */
     if (nunlimdims)
     {
@@ -2542,7 +2542,6 @@ find_iotype_from_omode(int mode, int *iotype)
         else
             *iotype = PIO_IOTYPE_NETCDF;
     }
-
     return PIO_NOERR;
 }
 
@@ -2623,12 +2622,12 @@ PIOc_openfile_retry(int iosysid, int *ncidp, int *iotype, const char *filename,
     int *mpi_type_size = NULL;
     int *ndims = NULL;
     int mpierr = MPI_SUCCESS, mpierr2;  /** Return code from MPI function codes. */
-    int ierr = PIO_NOERR;      /* Return code from function calls. */
+    int ierr;      /* Return code from function calls. */
 
 #ifdef USE_MPE
     pio_start_mpe_log(OPEN);
 #endif /* USE_MPE */
-
+    ierr = PIO_NOERR;      /* Return code from function calls. */
     /* Get the IO system info from the iosysid. */
     if (!(ios = pio_get_iosystem_from_id(iosysid)))
         return pio_err(NULL, NULL, PIO_EBADID, __FILE__, __LINE__);
@@ -2639,8 +2638,8 @@ PIOc_openfile_retry(int iosysid, int *ncidp, int *iotype, const char *filename,
     if (*iotype < PIO_IOTYPE_PNETCDF || *iotype > PIO_IOTYPE_NETCDF4P)
         return pio_err(ios, NULL, PIO_EINVAL, __FILE__, __LINE__);
 
-    PLOG((2, "PIOc_openfile_retry iosysid = %d iotype = %d filename = %s mode = %d retry = %d",
-          iosysid, *iotype, filename, mode, retry));
+    PLOG((2, "PIOc_openfile_retry iosysid = %d iotype = %d filename = %s mode = %d retry = %d ierr=%d",
+          iosysid, *iotype, filename, mode, retry, ierr));
 
     /* Allocate space for the file info. */
     if (!(file = calloc(sizeof(*file), 1)))
@@ -2667,23 +2666,23 @@ PIOc_openfile_retry(int iosysid, int *ncidp, int *iotype, const char *filename,
         if (!ios->ioproc)
         {
             /* Send the message to the message handler. */
-            if (ios->compmaster == MPI_ROOT)
+            if (ios->compmain == MPI_ROOT)
                 mpierr = MPI_Send(&msg, 1, MPI_INT, ios->ioroot, 1, ios->union_comm);
 
             /* Send the parameters of the function call. */
             if (!mpierr)
-                mpierr = MPI_Bcast(&len, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&len, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast((void *)filename, len + 1, MPI_CHAR, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast((void *)filename, len + 1, MPI_CHAR, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&file->iotype, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&file->iotype, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&mode, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&mode, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&use_ext_ncid, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&use_ext_ncid, 1, MPI_INT, ios->compmain, ios->intercomm);
 #ifdef NETCDF_INTEGRATION
             if (!mpierr)
-                mpierr = MPI_Bcast(&diosysid, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&diosysid, 1, MPI_INT, ios->compmain, ios->intercomm);
 #endif /* NETCDF_INTEGRATION */
         }
 
@@ -2693,6 +2692,8 @@ PIOc_openfile_retry(int iosysid, int *ncidp, int *iotype, const char *filename,
         if (mpierr)
             return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
     }
+    PLOG((2, "%d: PIOc_openfile_retry ierr=%d",__LINE__,ierr));
+
 
     /* If this is an IO task, then call the netCDF function. */
     if (ios->ioproc)
@@ -2707,9 +2708,11 @@ PIOc_openfile_retry(int iosysid, int *ncidp, int *iotype, const char *filename,
 #else
             imode = mode |  NC_MPIIO;
             if ((ierr = nc_open_par(filename, imode, ios->io_comm, ios->info,
-                                    &file->fh)))
-                break;
+                                    &file->fh))){
+	      PLOG((2, "%d: PIOc_openfile_retry nc_open_par ierr=%d",__LINE__,ierr));
 
+	      break;
+	    }
             /* Check the vars for valid use of unlim dims. */
             if ((ierr = check_unlim_use(file->fh)))
                 break;
@@ -2727,11 +2730,15 @@ PIOc_openfile_retry(int iosysid, int *ncidp, int *iotype, const char *filename,
         case PIO_IOTYPE_NETCDF4C:
             if (ios->io_rank == 0)
             {
-                if ((ierr = nc_open(filename, mode, &file->fh)))
+                if ((ierr = nc_open(filename, mode, &file->fh))){
+                    PLOG((2, "%d: PIOc_openfile_retry ierr=%d filename=%s mode=%d",__LINE__,ierr, filename, mode));
                     break;
+                }
                 /* Check the vars for valid use of unlim dims. */
-                if ((ierr = check_unlim_use(file->fh)))
+                if ((ierr = check_unlim_use(file->fh))){
+                    PLOG((2, "%d: PIOc_openfile_retry ierr=%d",__LINE__,ierr));
                     break;
+                }
                 ierr = inq_file_metadata(file, file->fh, PIO_IOTYPE_NETCDF4C,
                                          &nvars, &rec_var, &pio_type,
                                          &pio_type_size, &mpi_type,
@@ -2739,6 +2746,7 @@ PIOc_openfile_retry(int iosysid, int *ncidp, int *iotype, const char *filename,
                 PLOG((2, "PIOc_openfile_retry:nc_open for 4C filename = %s mode = %d "
                       "ierr = %d", filename, mode, ierr));
             }
+        PLOG((2, "%d: PIOc_openfile_retry ierr=%d",__LINE__,ierr));
             break;
 #endif /* _NETCDF4 */
 
@@ -2763,7 +2771,7 @@ PIOc_openfile_retry(int iosysid, int *ncidp, int *iotype, const char *filename,
             // This should only be done with a file opened to append
             if (ierr == PIO_NOERR && (mode & PIO_WRITE))
             {
-                if (ios->iomaster == MPI_ROOT)
+                if (ios->iomain == MPI_ROOT)
                     PLOG((2, "%d Setting IO buffer %ld", __LINE__,
                           pio_pnetcdf_buffer_size_limit));
                 ierr = ncmpi_buffer_attach(file->fh, pio_pnetcdf_buffer_size_limit);
@@ -2782,15 +2790,17 @@ PIOc_openfile_retry(int iosysid, int *ncidp, int *iotype, const char *filename,
             return pio_err(ios, file, PIO_EBADIOTYPE, __FILE__, __LINE__);
         }
 
+        PLOG((2, "%d: PIOc_openfile_retry ierr=%d",__LINE__,ierr));
+
         /* If the caller requested a retry, and we failed to open a
            file due to an incompatible type of NetCDF, try it once
            with just plain old basic NetCDF. */
         if (retry)
         {
             PLOG((2, "retry error code ierr = %d io_rank %d", ierr, ios->io_rank));
-            if ((ierr == NC_ENOTNC || ierr == NC_EINVAL) && (file->iotype != PIO_IOTYPE_NETCDF))
+            if ((ierr == NC_ENOTNC || ierr == NC_EINVAL || ierr == NC_ENOTBUILT) && (file->iotype != PIO_IOTYPE_NETCDF))
             {
-                if (ios->iomaster == MPI_ROOT)
+                if (ios->iomain == MPI_ROOT)
                     printf("PIO2 pio_file.c retry NETCDF\n");
 
                 /* reset ierr on all tasks */
@@ -2821,6 +2831,7 @@ PIOc_openfile_retry(int iosysid, int *ncidp, int *iotype, const char *filename,
     if (ios->ioroot == ios->union_rank)
         PLOG((2, "Bcasting error code ierr %d ios->ioroot %d ios->my_comm %d",
               ierr, ios->ioroot, ios->my_comm));
+
     if ((mpierr = MPI_Bcast(&ierr, 1, MPI_INT, ios->ioroot, ios->my_comm)))
         return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
     PLOG((2, "Bcast openfile_retry error code ierr = %d", ierr));
@@ -3026,13 +3037,13 @@ pioc_change_def(int ncid, int is_enddef)
         if (!ios->ioproc)
         {
             int msg = is_enddef ? PIO_MSG_ENDDEF : PIO_MSG_REDEF;
-            if (ios->compmaster == MPI_ROOT)
+            if (ios->compmain == MPI_ROOT)
               {
                 PLOG((2, "pioc_change_def request sent"));
                 mpierr = MPI_Send(&msg, 1, MPI_INT, ios->ioroot, 1, ios->union_comm);
               }
             if (!mpierr)
-                mpierr = MPI_Bcast(&ncid, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&ncid, 1, MPI_INT, ios->compmain, ios->intercomm);
             PLOG((3, "pioc_change_def ncid = %d mpierr = %d", ncid, mpierr));
         }
 
@@ -3100,15 +3111,15 @@ iotype_is_valid(int iotype)
         ret++;
 
     /* Some builds include netCDF-4. */
-#ifdef _NETCDF4
+#ifdef NC_HAS_NC4
     if (iotype == PIO_IOTYPE_NETCDF4C || iotype == PIO_IOTYPE_NETCDF4P)
         ret++;
 #endif /* _NETCDF4 */
 
     /* Some builds include pnetcdf. */
+#ifdef _PNETCDF
     if (iotype == PIO_IOTYPE_PNETCDF)
         ret++;
-#ifdef _PNETCDF
 #endif /* _PNETCDF */
 
     if (iotype == PIO_IOTYPE_GDAL)
@@ -3253,7 +3264,7 @@ determine_procs(int num_io_procs, int component_count, int *num_procs_per_comp,
 
 /**
  * Used in check_compmap to sort the compmap in accending order.
- * 
+ *
  * @param a pointer to an offset
  * @param b pointer to another offset
  * @returns 0 if offsets are the same or if either pointer is NULL
@@ -3267,7 +3278,7 @@ int offsetsort(const void *a,const void *b)
 
 /**
  * check_compmap gathers the entire compmap to comp task 0, sorts it into accending order
- * then looks for repeated values > 0.  If any repeated values are found the iodesc is marked 
+ * then looks for repeated values > 0.  If any repeated values are found the iodesc is marked
  * read only.
  *
  * @param ios pointer to the iosystem_desc_t struct.
@@ -3285,11 +3296,11 @@ bool check_compmap(iosystem_desc_t *ios, io_desc_t *iodesc,const PIO_Offset *com
     int ierr;
     bool readonly = 0;
 
-    if(ios->compproc) 
+    if(ios->compproc)
     {
 #ifdef OLDWAY
         int *gmaplen;
-        if(ios->compmaster == MPI_ROOT)
+        if(ios->compmain == MPI_ROOT)
             gmaplen = malloc(ios->num_comptasks * sizeof(int));
         else
             gmaplen = NULL;
@@ -3326,7 +3337,7 @@ bool check_compmap(iosystem_desc_t *ios, io_desc_t *iodesc,const PIO_Offset *com
         int *displs;
         int gcompmaplen=0;
         int *gcompmaps;
-        if(ios->compmaster == MPI_ROOT)
+        if(ios->compmain == MPI_ROOT)
         {
             displs = malloc(ios->num_comptasks * sizeof(int));
             displs[0] = 0;
@@ -3335,7 +3346,7 @@ bool check_compmap(iosystem_desc_t *ios, io_desc_t *iodesc,const PIO_Offset *com
                 displs[i] = displs[i-1] + gmaplen[i-1];
             }
             gcompmaplen = displs[ios->num_comptasks-1] + gmaplen[ios->num_comptasks-1];
-            gcompmaps = malloc(gcompmaplen * sizeof(PIO_Offset)); 
+            gcompmaps = malloc(gcompmaplen * sizeof(PIO_Offset));
 //            printf("gcompmaplen %d\n",gcompmaplen);
 //            for(int i=0;i<ios->num_comptasks; i++)
 //                printf("gmaplen=%d displs[%d]=%d\n",gmaplen[i], i,displs[i]);
@@ -3345,7 +3356,7 @@ bool check_compmap(iosystem_desc_t *ios, io_desc_t *iodesc,const PIO_Offset *com
         if ((ierr = MPI_Gatherv(compmap, iodesc->maplen, MPI_OFFSET, gcompmaps, gmaplen, displs, MPI_OFFSET, 0, ios->comp_comm)))
             return check_mpi(ios, NULL, ierr, __FILE__,__LINE__);
 
-        if(ios->compmaster == MPI_ROOT)
+        if(ios->compmain == MPI_ROOT)
         {
             /* sort */
             qsort(gcompmaps, gcompmaplen, sizeof(MPI_OFFSET), offsetsort);
@@ -3362,7 +3373,7 @@ bool check_compmap(iosystem_desc_t *ios, io_desc_t *iodesc,const PIO_Offset *com
             free(displs);
             free(gcompmaps);
         }
-        
+
     }
     MPI_Bcast(&readonly, 1, MPI_CHAR, ios->comproot, ios->my_comm);
 #else

@@ -63,10 +63,6 @@ program ESMF_IO_GDALUTest
 
   type(ESMF_ArraySpec) :: arraySpec
 
-<<<<<<< Updated upstream
-  character(len=*), parameter :: fileNameFields = "data/complex_3.shp"
-!  character(len=*), parameter :: fileNameFields = "data/cb_2018_us_county_20m.shp"
-=======
 !  character(len=*), parameter :: fileNameFields = "data/complex_3.shp"
 !  character(len=*), parameter :: fileNameFields = "data/cb_2018_us_county_20m.shp"
   character(len=*), parameter :: fileNameFields = "data/cb_2018_us_region_20m.shp"
@@ -94,7 +90,6 @@ program ESMF_IO_GDALUTest
   integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
   integer :: numNodes, numElems
   integer :: numQuadElems,numTriElems, numTotElems
->>>>>>> Stashed changes
 
   !------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
@@ -305,16 +300,6 @@ program ESMF_IO_GDALUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 !  write(*,*) '-- arrayspecset'
   call ESMF_ArraySpecSet(arraySpec, 1, typekind=ESMF_TYPEKIND_R8, rc=rc)
-<<<<<<< Updated upstream
-  if (rc /= ESMF_SUCCESS) return
-<<<<<<< HEAD
-!  field = ESMF_FieldCreate(mesh, arraySpec, name="GEOID", meshLoc=ESMF_MESHLOC_ELEMENT, rc=rc)
-=======
->>>>>>> msl/shapefile_io_v1.0.1
-  field = ESMF_FieldCreate(mesh, arraySpec, name="DistFld", meshLoc=ESMF_MESHLOC_ELEMENT, rc=rc)
-  if (rc /= ESMF_SUCCESS) return
-!  call ESMF_FieldPrint(field, rc=rc)
-=======
   if (rc /= ESMF_SUCCESS)     write(*,*) 'Failed at arrayspecset'
 !  write(*,*) '-- fieldcreate'
 !  field = ESMF_FieldCreate(mesh, arraySpec, name="DistFld", meshLoc=ESMF_MESHLOC_ELEMENT, rc=rc)
@@ -322,7 +307,6 @@ program ESMF_IO_GDALUTest
 !   field = ESMF_FieldCreate(mesh, arrayspec, &
 !                        name="source", rc=rc)
   if (rc /= ESMF_SUCCESS) write(*,*) 'Failed at mesh fieldcreate'
->>>>>>> Stashed changes
 !  if (rc /= ESMF_SUCCESS) return
 !  write(*,*) 'fieldget'
   call ESMF_FieldGet(field, farrayPtr=fieldReadData, rc=rc)
@@ -344,21 +328,6 @@ program ESMF_IO_GDALUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 !  write(*,*) 'reading'
   call ESMF_FieldRead(field, fileName=fileNameFields, iofmt=ESMF_IOFMT_SHP, rc=rc)
-<<<<<<< Updated upstream
-<<<<<<< HEAD
-!  call ESMF_FieldWrite(field, "test.shp", iofmt=ESMF_IOFMT_SHP, overwrite=.true.,rc=rc)
-  call ESMF_FieldWrite(field, "test.nc", rc=rc)
-  !! Write mesh for debugging
-  call ESMF_MeshWrite(mesh,"complex_3",rc=rc)
-=======
->>>>>>> msl/shapefile_io_v1.0.1
-#if (defined ESMF_PIO && (defined ESMF_GDAL))
-  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc == ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif
-=======
   call ESMF_FieldPrint(field, rc=rc)
   write(*,*) 'DATA: ', fieldReadData
 !  call ESMF_FieldWrite(field, "test.shp", iofmt=ESMF_IOFMT_SHP, overwrite=.true.,rc=rc)
@@ -390,7 +359,6 @@ program ESMF_IO_GDALUTest
 !      return
 !   endif
 
->>>>>>> Stashed changes
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------

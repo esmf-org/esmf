@@ -1,6 +1,6 @@
-module load mpi/openmpi-x86_64
+module load mpi/mpich-x86_64
 export ESMF_DIR=/home/ilcentro/Work/NASA/ALI/ESMF
-export ESMF_COMM=openmpi
+export ESMF_COMM=mpich
 export ESMF_PIO=internal
 export ESMF_NETCDF=nc-config
 export ESMF_NETCDF_INCLUDE=/usr/lib64/gfortran/modules

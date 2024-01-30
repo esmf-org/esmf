@@ -1,4 +1,5 @@
 #include "config.h"
+#include <netcdf_meta.h>
 !>
 !! @file
 !! Derived datatypes and constants for PIO Fortran API.
@@ -153,6 +154,26 @@ module pio_types
      enumerator :: PIO_rearr_comm_p2p = 0 !< do point-to-point communications using mpi send and recv calls.
      enumerator :: PIO_rearr_comm_coll    !< use the MPI_ALLTOALLW function of the mpi library
   end enum
+#ifdef NC_HAS_QUANTIZE
+  enum, bind(c)
+     enumerator :: PIO_NOQUANTIZE = 0
+     enumerator :: PIO_QUANTIZE_BITGROOM
+     enumerator :: PIO_QUANTIZE_GRANULARBR
+     enumerator :: PIO_QUANTIZE_BITROUND
+  end enum
+#endif
+#ifdef NC_HAS_MULTIFILTERS
+  enum, bind(c)
+     enumerator :: PIO_FILTER_NONE = 0
+     enumerator :: PIO_FILTER_DEFLATE
+     enumerator :: PIO_FILTER_SHUFFLE
+     enumerator :: PIO_FILTER_FLETCHER32
+     enumerator :: PIO_FILTER_SZIP
+     enumerator :: PIO_FILTER_NBIT
+     enumerator :: PIO_FILTER_SCALEOFFSET
+  end ENUM
+#endif
+
 
   !>
   !! @defgroup PIO_rearr_comm_t Rearranger Communication
@@ -206,6 +227,9 @@ module pio_types
   end type PIO_rearr_opt_t
 
   public :: PIO_rearr_comm_p2p, PIO_rearr_comm_coll,&
+#ifdef NC_HAS_QUANTIZE
+       PIO_NOQUANTIZE, PIO_QUANTIZE_BITGROOM, PIO_QUANTIZE_GRANULARBR, PIO_QUANTIZE_BITROUND, &
+#endif
        PIO_rearr_comm_fc_2d_enable, PIO_rearr_comm_fc_1d_comp2io,&
        PIO_rearr_comm_fc_1d_io2comp, PIO_rearr_comm_fc_2d_disable
 

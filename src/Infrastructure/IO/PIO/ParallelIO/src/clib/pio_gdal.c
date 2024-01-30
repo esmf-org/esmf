@@ -62,23 +62,20 @@ GDALc_inq_file_metadata(file_desc_t *file, GDALDatasetH hDS, int iotype, int *nv
 	   * learn about type. */
 	  size_t type_size;
 
+	  //	    
 	  var_ndims = 1; // FIXED FOR NOW. For data-read purposes, it's a 1D stream across the number of
                          // elements.
 	  (*ndims)[v] = var_ndims;
+	  //>>            if ((ret = nc_inq_var(ncid, v, NULL, &my_type, &var_ndims, NULL, NULL)))
+	  //>>                return pio_err(NULL, file, ret, __FILE__, __LINE__);
 	  OGRFieldType Fld = OGR_Fld_GetType(OGR_FD_GetFieldDefn(hFD,v));
 	  bool typeOK = true; // assume we're good
 	  switch (Fld) {
 	  case OFTReal:
 	    (*pio_type)[v] = (int)PIO_DOUBLE;
-	    (*pio_type_size)[v] = sizeof(double);
 	    break;
 	  case OFTInteger:
 	    (*pio_type)[v] = (int)PIO_INT;
-	    (*pio_type_size)[v] = sizeof(int);
-	    break;
-	  case OFTString:
-	    (*pio_type)[v] = (int)PIO_STRING;
-	    (*pio_type_size)[v] = -1;
 	    break;
 	  // This needs to be done. How do we deal with timestamps etc in GDAL vector fields?
 	  //>>case OFTDate:
@@ -91,7 +88,12 @@ GDALc_inq_file_metadata(file_desc_t *file, GDALDatasetH hDS, int iotype, int *nv
 	  default:
 	    typeOK = false;
 	    break;
+//	    return pio_err(file->iosystem, file, PIO_EBADIOTYPE, __FILE__, __LINE__);
 	  }
+	  //>>            if ((ret = nc_inq_type(ncid, (*pio_type)[v], NULL, &type_size)))
+	  //>>                return check_netcdf(file, ret, __FILE__, __LINE__);
+	  //>>            (*pio_type_size)[v] = type_size;
+
 	  if (!typeOK) // Not a usable type 
 	    continue;
 
@@ -150,17 +152,17 @@ GDALc_inq_fieldid(int fileid, const char *name, int *fieldidp)
         {
             int msg = PIO_MSG_INQ_VARID;
 
-            if (ios->compmaster == MPI_ROOT)
+            if (ios->compmain == MPI_ROOT)
                 mpierr = MPI_Send(&msg, 1,MPI_INT, ios->ioroot, 1, ios->union_comm);
 
             if (!mpierr)
-                mpierr = MPI_Bcast(&fileid, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&fileid, 1, MPI_INT, ios->compmain, ios->intercomm);
             int namelen;
             namelen = strlen(name);
             if (!mpierr)
-                mpierr = MPI_Bcast(&namelen, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&namelen, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast((void *)name, namelen + 1, MPI_CHAR, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast((void *)name, namelen + 1, MPI_CHAR, ios->compmain, ios->intercomm);
         }
 
         /* Handle MPI errors. */
@@ -182,6 +184,9 @@ GDALc_inq_fieldid(int fileid, const char *name, int *fieldidp)
 	    return -1;
 	  }
 	  *fieldidp = OGR_L_FindFieldIndex(hLayer,name,1);
+
+	  pioassert(*fieldidp > 0, "variable not found", __FILE__, __LINE__);
+
 	}
     }
 
@@ -201,6 +206,7 @@ GDALc_inq_fieldid(int fileid, const char *name, int *fieldidp)
 
 int
 GDALc_openfile(int iosysid, int *fileIDp, GDALDatasetH *hDSp,int *iotype, const char *filename, bool mode)
+//GDALc_openfile(int iosysid, GDALDatasetH *hDSp, int *iotype, const char *filename, bool mode)
 {
     iosystem_desc_t *ios;      /* Pointer to io system information. */
     file_desc_t *file;         /* Pointer to file information. */
@@ -230,6 +236,9 @@ GDALc_openfile(int iosysid, int *fileIDp, GDALDatasetH *hDSp,int *iotype, const 
     if (*iotype != PIO_IOTYPE_GDAL )
         return pio_err(ios, NULL, PIO_EINVAL, __FILE__, __LINE__);
 
+//    PLOG((2, "PIOc_openfile_retry iosysid = %d iotype = %d filename = %s mode = %d retry = %d",
+//          iosysid, *iotype, filename, mode, retry));
+
     /* Allocate space for the file info. */
     if (!(file = calloc(sizeof(*file), 1)))
         return pio_err(ios, NULL, PIO_ENOMEM, __FILE__, __LINE__);
@@ -242,8 +251,7 @@ GDALc_openfile(int iosysid, int *fileIDp, GDALDatasetH *hDSp,int *iotype, const 
 
     /* Set to true if this task should participate in IO (only true
      * for one task with netcdf serial files. */
-    if (file->iotype == PIO_IOTYPE_GDAL ||
-        ios->io_rank == 0)
+    if (file->iotype == PIO_IOTYPE_GDAL && ios->io_rank == 0)
         file->do_io = 1;
 
     /* If async is in use, and this is not an IO task, bcast the parameters. */
@@ -255,18 +263,20 @@ GDALc_openfile(int iosysid, int *fileIDp, GDALDatasetH *hDSp,int *iotype, const 
         if (!ios->ioproc)
         {
             /* Send the message to the message handler. */
-            if (ios->compmaster == MPI_ROOT)
+            if (ios->compmain == MPI_ROOT)
                 mpierr = MPI_Send(&msg, 1, MPI_INT, ios->ioroot, 1, ios->union_comm);
 
             /* Send the parameters of the function call. */
             if (!mpierr)
-                mpierr = MPI_Bcast(&len, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&len, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast((void *)filename, len + 1, MPI_CHAR, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast((void *)filename, len + 1, MPI_CHAR, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&file->iotype, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&file->iotype, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&mode, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&mode, 1, MPI_INT, ios->compmain, ios->intercomm);
+//>>            if (!mpierr)
+//>>                mpierr = MPI_Bcast(&use_ext_ncid, 1, MPI_INT, ios->compmain, ios->intercomm);
         }
 
         /* Handle MPI errors. */
@@ -282,9 +292,9 @@ GDALc_openfile(int iosysid, int *fileIDp, GDALDatasetH *hDSp,int *iotype, const 
         switch (file->iotype)
         {
         case PIO_IOTYPE_GDAL:
-//            if (ios->io_rank == 0)
+            if (ios->io_rank == 0)
             {
-	      *hDSp = OGROpen( filename, mode, NULL );
+	      *hDSp = OGROpen( filename, FALSE, NULL );
 	      if( hDSp != NULL )
 
                 ierr = GDALc_inq_file_metadata(file, *hDSp, PIO_IOTYPE_GDAL,
@@ -292,7 +302,7 @@ GDALc_openfile(int iosysid, int *fileIDp, GDALDatasetH *hDSp,int *iotype, const 
                                          &pio_type_size, &mpi_type,
                                          &mpi_type_size, &ndims);
                 PLOG((2, "GDALc_openfile:OGROpen for filename = %s mode = %d "
-                      "ierr = %d nvars = %d", filename, mode, ierr, nvars));
+                      "ierr = %d", filename, mode, ierr));
             }
             break;
 
@@ -320,6 +330,14 @@ GDALc_openfile(int iosysid, int *fileIDp, GDALDatasetH *hDSp,int *iotype, const 
     /* Broadcast writability to all tasks. */
     if ((mpierr = MPI_Bcast(&file->writable, 1, MPI_INT, ios->ioroot, ios->my_comm)))
         return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
+
+    /* Broadcast some values to all tasks from io root. */
+//>>    if (ios->async)
+//>>    {
+//>>        PLOG((3, "open bcasting pio_next_ncid %d ios->ioroot %d", pio_next_ncid, ios->ioroot));
+//>>        if ((mpierr = MPI_Bcast(&pio_next_ncid, 1, MPI_INT, ios->ioroot, ios->my_comm)))
+//>>            return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
+//>>    }
 
     if ((mpierr = MPI_Bcast(&nvars, 1, MPI_INT, ios->ioroot, ios->my_comm)))
         return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
@@ -368,11 +386,11 @@ GDALc_openfile(int iosysid, int *fileIDp, GDALDatasetH *hDSp,int *iotype, const 
     pio_add_to_file_list(file);
 
     /* Add info about the variables to the file_desc_t struct. */
-    for (int v = 0; v < nvars; v++) {
+    for (int v = 0; v < nvars; v++)
         if ((ierr = add_to_varlist(v, rec_var[v], pio_type[v], pio_type_size[v],
                                    mpi_type[v], mpi_type_size[v], ndims[v],
                                    &file->varlist)))
-            return pio_err(ios, NULL, ierr, __FILE__, __LINE__);}
+            return pio_err(ios, NULL, ierr, __FILE__, __LINE__);
     file->nvars = nvars;
 
     /* Free resources. */
@@ -440,7 +458,12 @@ int GDALc_inq_timeid(int fileid, int *timeid) { // Is there a field of type OFTD
       OGRFieldType Fld = OGR_Fld_GetType(hFlD);
       if (Fld == NULL)
         return pio_err(NULL, NULL, ierr, __FILE__, __LINE__);
+
+//      const char* FldTyp = OGR_GetFieldTypeName(Fld);
+//      PRINTMSG("Field type: " << FldTyp);
     }
+
+//    OGR_FD_Destroy(hFD);
 
     return 0;
   }
@@ -466,7 +489,7 @@ int GDALc_inq_timeid(int fileid, int *timeid) { // Is there a field of type OFTD
  * @author Jim Edwards, Ed Hartnett
  */
 int
-gdal_read_darray_shp(file_desc_t *file, io_desc_t *iodesc, int vid,
+pio_read_darray_shp(file_desc_t *file, io_desc_t *iodesc, int vid,
                           void *iobuf)
 {
     iosystem_desc_t *ios;  /* Pointer to io system information. */
@@ -476,8 +499,6 @@ gdal_read_darray_shp(file_desc_t *file, io_desc_t *iodesc, int vid,
     MPI_Status status;
     int mpierr;  /* Return code from MPI functions. */
     int ierr;
-
-    PLOG((1, "XXX fndims = %d vid = %d maxvars = %d", fndims, vid, PIO_MAX_VARS));
 
     /* Check inputs. */
     pioassert(file && file->iosystem && iodesc && vid >= 0 && vid <= PIO_MAX_VARS,
@@ -701,13 +722,6 @@ gdal_read_darray_shp(file_desc_t *file, io_desc_t *iodesc, int vid,
                         return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);
                     case PIO_DOUBLE:
                         ierr = GDALc_shp_get_double_field(file->pio_ncid, vid, start, count, (double *)bufptr);
-//>>			if (ios->ioproc) {
-//>>			  printf("bufptr: \n");   
-//>>			  int length = sizeof((double *)bufptr)/sizeof((double *)bufptr[0]);
-//>>			  for (int i = 0; i < length; i++) {     
-//>>			    printf("%d ", (double *)bufptr[i]);     
-//>>			  } 
-//>>			}
                         break;
                     default:
                         return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);
@@ -736,7 +750,7 @@ gdal_read_darray_shp(file_desc_t *file, io_desc_t *iodesc, int vid,
         return pio_err(ios, NULL, ierr, __FILE__, __LINE__);
 #endif /* TIMING */
 
-    PLOG((2, "pio_read_darray_nc_serial complete ierr %d", ierr));
+    PLOG((2, "pio_read_darray_shp complete ierr %d", ierr));
     return PIO_NOERR;
 }
 
@@ -770,580 +784,6 @@ GDALc_shp_get_double_field(int fileid, int varid, const size_t *startp,
   }
 
   return PIO_NOERR;
-}
-
-/**
- * Create a new file GDAL using pio. Input parameters are read on comp task
- * 0 and ignored elsewhere. NOFILL mode will be turned on in all
- * cases.
- *
- * @param iosysid A defined pio system ID, obtained from
- * PIOc_InitIntercomm() or PIOc_InitAsync().
- * @param fileidp A pointer that gets the fileid of the newly created
- * file.
- * @param iotype A pointer to a pio output format. Must be of type
- * PIO_IOTYPE_GDAL
- * @param filename The filename to create.
- * @param mode The mode for the create operation.
- * @returns 0 for success, error code otherwise.
- * @ingroup PIO_create_file_c
- * @author Michael Long. Adapted from work by Jim Edwards, Ed Hartnett
- */
-int
-GDALc_createfile(int iosysid, int *ncidp, int *iotype, const char *filename,
-                    bool mode)
-{
-    iosystem_desc_t *ios;  /* Pointer to io system information. */
-    int ret;               /* Return code from function calls. */
-
-    /* Get the IO system info from the id. */
-    if (!(ios = pio_get_iosystem_from_id(iosysid)))
-        return pio_err(NULL, NULL, PIO_EBADID, __FILE__, __LINE__);
-
-    PLOG((1, "GDALc_createfile iosysid = %d iotype = %d filename = %s mode = %d",
-          iosysid, *iotype, filename, mode));
-
-    /* Create the file. */
-    if ((ret = GDALc_createfile_shp(iosysid, ncidp, iotype, filename, mode)))
-        return pio_err(ios, NULL, ret, __FILE__, __LINE__);
-
-    /* Set the fill mode to NOFILL. */
-//    if ((ret = PIOc_set_fill(*ncidp, NC_NOFILL, NULL)))
-//        return ret;
-
-    return ret;
-}
-/**
- * Create a new file using pio. This is an internal function that is
- * called by GDALc_createfile(). Input
- * parameters are read on comp task 0 and ignored elsewhere.
- *
- * @param iosysid A defined pio system ID, obtained from
- * PIOc_Init_Intracomm() or PIOc_InitAsync().
- * @param fileidp A pointer that gets the fileid of the newly created
- * file. This is the PIO fileid. Within PIO, the file will have a
- * different ID, the file->fh.
- * @param iotype A pointer to a pio output format. Must be of type
- * PIO_IOTYPE_GDAL.
- * @param filename The filename to create.
- * @param mode The mode for the create operation.
- *
- * @returns 0 for success, error code otherwise.
- * @ingroup PIO_createfile_c
- * @author Michael Long. Adapted from work by Ed Hartnett
- */
-int
-GDALc_createfile_shp(int iosysid, int *fileidp, int *iotype, const char *filename, bool mode)
-{
-    iosystem_desc_t *ios;  /* Pointer to io system information. */
-    file_desc_t *file;     /* Pointer to file information. */
-    int mpierr = MPI_SUCCESS, mpierr2;  /* Return code from MPI function codes. */
-    int ierr;              /* Return code from function calls. */
-
-#ifdef USE_MPE
-    pio_start_mpe_log(CREATE);
-#endif /* USE_MPE */
-
-    /* Get the IO system info from the iosysid. */
-    if (!(ios = pio_get_iosystem_from_id(iosysid)))
-        return pio_err(NULL, NULL, PIO_EBADID, __FILE__, __LINE__);
-
-    /* User must provide valid input for these parameters. */
-    if (!fileidp || !iotype || !filename || strlen(filename) > PIO_MAX_NAME)
-        return pio_err(ios, NULL, PIO_EINVAL, __FILE__, __LINE__);
-
-    /* A valid iotype must be specified. */
-    if (!iotype_is_valid(*iotype))
-        return pio_err(ios, NULL, PIO_EINVAL, __FILE__, __LINE__);
-
-    PLOG((1, "GDALc_createfile_int iosysid %d iotype %d filename %s mode %d "
-          , iosysid, *iotype, filename, mode));
-
-    /* Allocate space for the file info. */
-    if (!(file = calloc(sizeof(file_desc_t), 1)))
-        return pio_err(ios, NULL, PIO_ENOMEM, __FILE__, __LINE__);
-
-    /* Fill in some file values. */
-    file->fh = -1;
-    file->iosystem = ios;
-    file->iotype = *iotype;
-    file->buffer = NULL;
-    file->writable = 1;
-
-    /* Set to true if this task should participate in IO (only true for
-     * one task with netcdf serial files. */
-    if (ios->io_rank == 0)
-        file->do_io = 1;
-
-    PLOG((2, "file->do_io = %d ios->async = %d", file->do_io, ios->async));
-
-    /* If this task is in the IO component, do the IO. */
-    if (ios->ioproc)
-    {
-        switch (file->iotype)
-        {
-        case PIO_IOTYPE_GDAL:
-            PLOG((2, "Calling GDALCreate io_comm = %d mode = %d fh = %d",
-                  ios->io_comm, mode, file->fh));
-
-	    OGRSpatialReferenceH hSpatial=OSRNewSpatialReference( NULL );
-	    int err = OSRSetWellKnownGeogCS( hSpatial, "WGS84");
-	    if (err != OGRERR_NONE ) {
-	      printf("Error setting CRS. %d\n", err);
-	    }
-
-	    const char *pszDriverName = "ESRI Shapefile";
-	    GDALDriverH hDriver = GDALGetDriverByName( pszDriverName );
-	    if( hDriver == NULL )
-	      {
-		printf( "%s driver not available.\n", pszDriverName );
-		exit( 1 );
-	      }
-
-	    file->hDS = GDALCreate( hDriver, filename, 0, 0, 0, GDT_Unknown, NULL );
-	    if( file->hDS == NULL )
-	      {
-		printf( "Creation of output file failed.\n" );
-		exit( 1 );
-	      }
-            PLOG((2, "GDALCreate returned %d file->fh = %d", ierr, file->fh));
-	    OGRLayerH hLayer =  OGR_DS_CreateLayer( file->hDS, "test_", hSpatial, wkbMultiPolygon, NULL );
-	    if( hLayer == NULL )
-	      {
-		printf( "Layer creation failed.\n" );
-		exit( 1 );
-	      }
-            break;
-        }
-        PLOG((3, "create call complete file->fh %d", file->fh));
-    }
-
-    /* Broadcast and check the return code. */
-    if ((mpierr = MPI_Bcast(&ierr, 1, MPI_INT, ios->ioroot, ios->my_comm)))
-        return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
-
-    /* If there was an error, free the memory we allocated and handle error. */
-    if (ierr)
-    {
-        free(file);
-        return check_netcdf2(ios, NULL, ierr, __FILE__, __LINE__);
-    }
-
-    /* Broadcast writablility to all tasks. */
-    if ((mpierr = MPI_Bcast(&file->writable, 1, MPI_INT, ios->ioroot, ios->my_comm)))
-        return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
-
-    /* Broadcast next fileid to all tasks from io root, necessary
-     * because files may be opened on mutilple iosystems, causing the
-     * underlying library to reuse fileids. Hilarious confusion
-     * ensues. */
-
-    /* Assign the PIO ncid. */
-    file->pio_ncid = pio_next_ncid++;
-
-    PLOG((2, "file->fh = %d file->pio_ncid = %d", file->fh, file->pio_ncid));
-
-    /* Return the ncid to the caller. */
-    *fileidp = file->pio_ncid;
-
-    /* Add the struct with this files info to the global list of
-     * open files. */
-    pio_add_to_file_list(file);
-
-#ifdef USE_MPE
-    pio_stop_mpe_log(CREATE, __func__);
-#endif /* USE_MPE */
-    PLOG((2, "Created file %s file->fh = %d file->pio_ncid = %d", filename,
-          file->fh, file->pio_ncid));
-
-    return ierr;
-}
-
-/**
- * The PIO-C interface for the NetCDF function nc_def_var
- *
- * This routine is called collectively by all tasks in the communicator
- * ios.union_comm. For more information on the underlying NetCDF commmand
- * please read about this function in the NetCDF documentation at:
- * http://www.unidata.ucar.edu/software/netcdf/docs/group__variables.html
- *
- * @param ncid the ncid of the open file, obtained from
- * PIOc_openfile() or PIOc_createfile().
- * @param name the variable name.
- * @param xtype the PIO_TYPE of the variable.
- * @param ndims the number of dimensions.
- * @param dimidsp pointer to array of dimension IDs.
- * @param varidp a pointer that will get the variable ID.
- * @return PIO_NOERR for success, error code otherwise.
- * @ingroup PIO_def_var_c
- * @author Jim Edwards, Ed Hartnett
- */
-int
-GDALc_def_field(int fileid, const char *name, int xtype, int *varidp)
-{
-    iosystem_desc_t *ios;      /* Pointer to io system information. */
-    file_desc_t *file;         /* Pointer to file information. */
-    int invalid_unlim_dim = 0; /* True invalid dims are used. */
-    int varid;                 /* The varid of the created var. */
-    int rec_var = 0;           /* Non-zero if this var uses unlimited dim. */
-    PIO_Offset pio_type_size;  /* Size of pio type in bytes. */
-    MPI_Datatype mpi_type;     /* The correspoding MPI type. */
-    int mpi_type_size;         /* Size of mpi type. */
-    int mpierr = MPI_SUCCESS, mpierr2;  /* Return code from MPI function codes. */
-    int ierr;                  /* Return code from function calls. */
-
-    int ndims = 1; // fixed for the moment
-
-    /* Get the file information. */
-    if ((ierr = pio_get_file(fileid, &file)))
-        return pio_err(NULL, NULL, ierr, __FILE__, __LINE__);
-    ios = file->iosystem;
-
-    /* User must provide name. */
-    if (!name || strlen(name) > NC_MAX_NAME)
-        return pio_err(ios, file, PIO_EINVAL, __FILE__, __LINE__);
-
-//    PLOG((1, "GDALc_def_var ncid = %d name = %s xtype = %d ndims = %d", ncid, name,
-//          xtype, ndims));
-
-    /* Run this on all tasks if async is not in use, but only on
-     * non-IO tasks if async is in use. Learn whether each dimension
-     * is unlimited. */
-    if (!ios->async || !ios->ioproc)
-    {
-        int nunlimdims;
-
-        /* Get size of type. */
-	  switch (xtype) {
-	  case PIO_DOUBLE:
-	    pio_type_size = sizeof(double);
-	    break;
-	  case PIO_REAL:
-	    pio_type_size = sizeof(double);
-	    break;
-	  case PIO_INT:
-	    pio_type_size = sizeof(int);
-	    break;
-	  // This needs to be done. How do we deal with timestamps etc in GDAL vector fields?
-	  //>>case OFTDate:
-	  //>>  break;
-	  //>>	    case OFTTime:
-	  //>>	      break;
-	  //>>	    case OFTDate:
-	  //>>	      break;
-	  //>>	    case OFTDateTime:
-	  default:
-	    break;
-	  }
-        /* Get the MPI type corresponding with the PIO type. */
-        if ((ierr = find_mpi_type(xtype, &mpi_type, NULL)))
-            return pio_err(ios, NULL, ierr, __FILE__, __LINE__);
-
-        /* Get the size of the MPI type. */
-        if(mpi_type == MPI_DATATYPE_NULL)
-            mpi_type_size = 0;
-        else
-            if ((mpierr = MPI_Type_size(mpi_type, &mpi_type_size)))
-                return check_mpi(ios, NULL, mpierr, __FILE__, __LINE__);
-    }
-
-    /* If using async, and not an IO task, then send parameters. */
-    if (ios->async)
-    {
-        if (!ios->ioproc)
-        {
-            int msg = PIO_MSG_DEF_VAR;
-            int namelen = strlen(name);
-
-            if (ios->compmaster == MPI_ROOT)
-                mpierr = MPI_Send(&msg, 1, MPI_INT, ios->ioroot, 1, ios->union_comm);
-
-            if (!mpierr)
-                mpierr = MPI_Bcast(&(fileid), 1, MPI_INT, ios->compmaster, ios->intercomm);
-            if (!mpierr)
-                mpierr = MPI_Bcast(&namelen, 1, MPI_INT,  ios->compmaster, ios->intercomm);
-            if (!mpierr)
-                mpierr = MPI_Bcast((void *)name, namelen + 1, MPI_CHAR, ios->compmaster, ios->intercomm);
-            if (!mpierr)
-                mpierr = MPI_Bcast(&xtype, 1, MPI_INT, ios->compmaster, ios->intercomm);
-        }
-
-        /* Handle MPI errors. */
-        if ((mpierr2 = MPI_Bcast(&mpierr, 1, MPI_INT, ios->comproot, ios->my_comm)))
-            check_mpi(NULL, file, mpierr2, __FILE__, __LINE__);
-        if (mpierr)
-            return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
-
-        /* Broadcast values currently only known on computation tasks to IO tasks. */
-        if ((mpierr = MPI_Bcast(&pio_type_size, 1, MPI_OFFSET, ios->comproot, ios->my_comm)))
-            check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
-        if ((mpierr = MPI_Bcast(&mpi_type, 1, MPI_INT, ios->comproot, ios->my_comm)))
-            check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
-        if ((mpierr = MPI_Bcast(&mpi_type_size, 1, MPI_INT, ios->comproot, ios->my_comm)))
-            check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
-    }
-
-    /* If this is an IO task, then call the GDAL function. */
-    if (ios->ioproc)
-    {
-      OGRLayerH      hL = OGR_DS_GetLayer( file->hDS, 0 );
-      OGRFieldDefnH hFD = OGR_Fld_Create( name, OFTReal );
-      if( OGR_L_CreateField( hL, hFD, TRUE ) != OGRERR_NONE )
-	{
-	  printf( "Creating field failed.\n" );
-	  exit( 1 );
-	}
-      varid = OGR_L_FindFieldIndex(hL,name,1);
-      OGR_Fld_Destroy(hFD);
-    }
-
-    /* Broadcast and check the return code. */
-    if ((mpierr = MPI_Bcast(&ierr, 1, MPI_INT, ios->ioroot, ios->my_comm)))
-        return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
-    if (ierr)
-        return check_netcdf(file, ierr, __FILE__, __LINE__);
-
-    /* Broadcast results. */
-    if ((mpierr = MPI_Bcast(&varid, 1, MPI_INT, ios->ioroot, ios->my_comm)))
-        check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
-    if (varidp)
-        *varidp = varid;
-
-    /* Add to the list of var_desc_t structs for this file. */
-    if ((ierr = add_to_varlist(varid, rec_var, xtype, (int)pio_type_size, mpi_type,
-                               mpi_type_size, ndims, &file->varlist)))
-        return pio_err(ios, NULL, ierr, __FILE__, __LINE__);
-    file->nvars++;
-
-    return PIO_NOERR;
-}
-
-/* */
-int
-gdal_write_darray_multi_serial(file_desc_t *file, int nvars, int fndims, const int *varids,
-                          io_desc_t *iodesc, int fill, const int *frame)
-{
-    iosystem_desc_t *ios;  /* Pointer to io system information. */
-    var_desc_t *vdesc;     /* Contains info about the variable. */
-    int ierr;              /* Return code. */
-
-    PLOG((1, "nvars = %d fndims = %d varids[0] = %d maxvars = %d", nvars, fndims, varids[0], PIO_MAX_VARS));
-
-    /* Check inputs. */
-    pioassert(file && file->iosystem && varids && varids[0] >= 0 &&
-              varids[0] <= PIO_MAX_VARS && iodesc, "invalid input", __FILE__, __LINE__);
-
-    PLOG((1, "write_darray_multi_serial nvars = %d fndims = %d iodesc->ndims = %d "
-          "iodesc->mpitype = %d", nvars, fndims, iodesc->ndims, iodesc->mpitype));
-
-    /* Get the iosystem info. */
-    ios = file->iosystem;
-
-    /* Get the var info. */
-    if ((ierr = get_var_desc(varids[0], &file->varlist, &vdesc)))
-        return pio_err(NULL, file, ierr, __FILE__, __LINE__);
-
-    /* Set these differently for data and fill writing. iobuf may be
-     * null if array size < number of nodes. */
-    int num_regions = fill ? iodesc->maxfillregions: iodesc->maxregions;
-    io_region *region = fill ? iodesc->fillregion : iodesc->firstregion;
-    PIO_Offset llen = fill ? iodesc->holegridsize : iodesc->llen;
-    void *iobuf = fill ? vdesc->fillbuf : file->iobuf;
-
-#ifdef TIMING
-    /* Start timer if desired. */
-    if ((ierr = pio_start_timer("PIO:write_darray_multi_serial")))
-        return pio_err(ios, NULL, ierr, __FILE__, __LINE__);
-#endif /* TIMING */
-
-    /* Only IO tasks participate in this code. */
-    if (ios->ioproc)
-    {
-        size_t tmp_start[fndims * num_regions]; /* A start array for each region. */
-        size_t tmp_count[fndims * num_regions]; /* A count array for each region. */
-
-        PLOG((3, "num_regions = %d", num_regions));
-
-        /* Fill the tmp_start and tmp_count arrays, which contain the
-         * start and count arrays for all regions. */
-        if ((ierr = find_all_start_count(region, num_regions, fndims, iodesc->ndims, vdesc,
-                                         tmp_start, tmp_count)))
-            return pio_err(ios, file, ierr, __FILE__, __LINE__);
-
-        /* Tasks other than 0 will send their data to task 0. */
-        if (ios->io_rank > 0)
-        {
-            /* Send the tmp_start and tmp_count arrays from this IO task
-             * to task 0. */
-            if ((ierr = send_all_start_count(ios, iodesc, llen, num_regions, nvars, fndims,
-                                             tmp_start, tmp_count, iobuf)))
-                return pio_err(ios, file, ierr, __FILE__, __LINE__);
-        }
-        else
-        {
-            /* Task 0 will receive data from all other IO tasks. */
-
-            if ((ierr = recv_and_write_shp(file, varids, frame, iodesc, llen, num_regions, nvars, fndims,
-                                            tmp_start, tmp_count, iobuf)))
-                return pio_err(ios, file, ierr, __FILE__, __LINE__);
-        }
-    }
-
-#ifdef TIMING
-    if ((ierr = pio_stop_timer("PIO:write_darray_multi_serial")))
-        return pio_err(ios, NULL, ierr, __FILE__, __LINE__);
-#endif /* TIMING */
-
-    return PIO_NOERR;
-}
-
-int
-recv_and_write_shp(file_desc_t *file, const int *varids, const int *frame,
-                    io_desc_t *iodesc, PIO_Offset llen, int maxregions, int nvars,
-                    int fndims, size_t *tmp_start, size_t *tmp_count, void *iobuf)
-{
-    iosystem_desc_t *ios;  /* Pointer to io system information. */
-    size_t rlen;    /* Length of IO buffer on this task. */
-    int rregions;   /* Number of regions in buffer for this task. */
-    size_t start[fndims], count[fndims];
-    size_t loffset;
-    void *bufptr;
-    var_desc_t *vdesc;    /* Contains info about the variable. */
-    MPI_Status status;     /* Recv status for MPI. */
-    int mpierr;  /* Return code from MPI function codes. */
-    int ierr;    /* Return code. */
-
-    /* Check inputs. */
-    pioassert(file && varids && iodesc && tmp_start && tmp_count, "invalid input",
-              __FILE__, __LINE__);
-
-    PLOG((2, "recv_and_write_data llen = %d maxregions = %d nvars = %d fndims = %d",
-          llen, maxregions, nvars, fndims));
-
-    /* Get pointer to IO system. */
-    ios = file->iosystem;
-
-    /* For each of the other tasks that are using this task
-     * for IO. */
-    for (int rtask = 0; rtask < ios->num_iotasks; rtask++)
-    {
-        /* From the remote tasks, we send information about
-         * the data regions. and also the data. */
-        if (rtask)
-        {
-            /* handshake - tell the sending task I'm ready */
-            if ((mpierr = MPI_Send(&ierr, 1, MPI_INT, rtask, 0, ios->io_comm)))
-                return check_mpi(ios, NULL, mpierr, __FILE__, __LINE__);
-
-            /* Get length of iobuffer for each field on this
-             * task (all fields are the same length). */
-            if ((mpierr = MPI_Recv(&rlen, 1, MPI_OFFSET, rtask, rtask, ios->io_comm,
-                                   &status)))
-                return check_mpi(ios, NULL, mpierr, __FILE__, __LINE__);
-            PLOG((3, "received rlen = %d", rlen));
-
-            /* Get the number of regions, the start/count
-             * values for all regions, and the data buffer. */
-            if (rlen > 0)
-            {
-                if ((mpierr = MPI_Recv(&rregions, 1, MPI_INT, rtask, rtask + ios->num_iotasks,
-                                       ios->io_comm, &status)))
-                    return check_mpi(ios, NULL, mpierr, __FILE__, __LINE__);
-                if ((mpierr = MPI_Recv(tmp_start, rregions * fndims, MPI_OFFSET, rtask,
-                                       rtask + 2 * ios->num_iotasks, ios->io_comm, &status)))
-                    return check_mpi(ios, NULL, mpierr, __FILE__, __LINE__);
-                if ((mpierr = MPI_Recv(tmp_count, rregions * fndims, MPI_OFFSET, rtask,
-                                       rtask + 3 * ios->num_iotasks, ios->io_comm, &status)))
-                    return check_mpi(ios, NULL, mpierr, __FILE__, __LINE__);
-                if ((mpierr = MPI_Recv(iobuf, nvars * rlen, iodesc->mpitype, rtask,
-                                       rtask + 4 * ios->num_iotasks, ios->io_comm, &status)))
-                    return check_mpi(ios, NULL, mpierr, __FILE__, __LINE__);
-                PLOG((3, "received data rregions = %d fndims = %d", rregions, fndims));
-            }
-        }
-        else /* task 0 */
-        {
-            rlen = llen;
-            rregions = maxregions;
-        }
-        PLOG((3, "rtask = %d rlen = %d rregions = %d", rtask, rlen, rregions));
-
-        /* If there is data from this task, write it. */
-        if (rlen > 0)
-        {
-            loffset = 0;
-            for (int regioncnt = 0; regioncnt < rregions; regioncnt++)
-            {
-                PLOG((3, "writing data for region with regioncnt = %d", regioncnt));
-                bool needtowrite = true;
-
-                if ((ierr = get_var_desc(varids[0], &file->varlist, &vdesc)))
-                    return pio_err(NULL, file, ierr, __FILE__, __LINE__);
-
-                /* Get the start/count arrays for this region. */
-                for (int i = 0; i < fndims; i++)
-                {
-                    start[i] = tmp_start[i + regioncnt * fndims];
-                    count[i] = tmp_count[i + regioncnt * fndims];
-                    PLOG((3, "needtowrite %d count[%d] %d\n",needtowrite, i, count[i]));
-                    if(i>0 || vdesc->record <0)
-                        needtowrite = (count[i] > 0 && needtowrite);
-                }
-
-                /* Process each variable in the buffer. */
-                for (int nv = 0; nv < nvars; nv++)
-                {
-                    PLOG((3, "writing buffer var %d", nv));
-
-                    /* Get a pointer to the correct part of the buffer. */
-                    bufptr = (void *)((char *)iobuf + iodesc->mpitype_size * (nv * rlen + loffset));
-
-                    /* If this var has an unlimited dim, set
-                     * the start on that dim to the frame
-                     * value for this variable. */
-                    if (vdesc->record >= 0)
-                    {
-                        if (fndims > 1 && iodesc->ndims < fndims && count[1] > 0)
-                        {
-                            count[0] = 1;
-                            start[0] = frame[nv];
-                        }
-                        else if (fndims == iodesc->ndims)
-                        {
-                            start[0] += vdesc->record;
-                        }
-                    }
-
-#ifdef LOGGING
-                    if(needtowrite)
-                        for (int i = 1; i < fndims; i++)
-                            PLOG((3, "(serial) start[%d] %d count[%d] %d needtowrite %d", i, start[i], i, count[i], needtowrite));
-#endif /* LOGGING */
-
-                    /* Call the netCDF functions to write the data. */
-//                    if (needtowrite)
-		    // ADD POLYGONS
-		    // ADD DATA
-//                        if ((ierr = nc_put_vara(file->fh, varids[nv], start, count, bufptr)))
-//                            return check_netcdf2(ios, NULL, ierr, __FILE__, __LINE__);
-
-                } /* next var */
-
-                /* Calculate the total size. */
-                size_t tsize = 1;
-                for (int i = 0; i < fndims; i++)
-                    tsize *= count[i];
-
-                /* Keep track of where we are in the buffer. */
-                loffset += tsize;
-
-                PLOG((3, " at bottom of loop regioncnt = %d tsize = %d loffset = %d", regioncnt,
-                      tsize, loffset));
-            } /* next regioncnt */
-        } /* endif (rlen > 0) */
-    } /* next rtask */
-
-    return PIO_NOERR;
 }
 /**
  * @}

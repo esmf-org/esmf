@@ -77,30 +77,30 @@ PIOc_put_att_tc(int ncid, int varid, const char *name, nc_type atttype,
         {
             int msg = PIO_MSG_PUT_ATT;
 
-            if (ios->compmaster == MPI_ROOT)
+            if (ios->compmain == MPI_ROOT)
                 mpierr = MPI_Send(&msg, 1, MPI_INT, ios->ioroot, 1, ios->union_comm);
 
             if (!mpierr)
-                mpierr = MPI_Bcast(&ncid, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&ncid, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&varid, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&varid, 1, MPI_INT, ios->compmain, ios->intercomm);
             int namelen = strlen(name);
             if (!mpierr)
-                mpierr = MPI_Bcast(&namelen, 1, MPI_INT,  ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&namelen, 1, MPI_INT,  ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast((void *)name, namelen + 1, MPI_CHAR, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast((void *)name, namelen + 1, MPI_CHAR, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&atttype, 1, MPI_INT,  ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&atttype, 1, MPI_INT,  ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&len, 1, MPI_OFFSET,  ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&len, 1, MPI_OFFSET,  ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&atttype_len, 1, MPI_OFFSET,  ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&atttype_len, 1, MPI_OFFSET,  ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&memtype, 1, MPI_INT,  ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&memtype, 1, MPI_INT,  ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&memtype_len, 1, MPI_OFFSET,  ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&memtype_len, 1, MPI_OFFSET,  ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast((void *)op, len * memtype_len, MPI_BYTE, ios->compmaster,
+                mpierr = MPI_Bcast((void *)op, len * memtype_len, MPI_BYTE, ios->compmain,
                                    ios->intercomm);
             PLOG((2, "PIOc_put_att finished bcast ncid = %d varid = %d namelen = %d name = %s "
                   "len = %d atttype_len = %d memtype = %d memtype_len = %d", ncid, varid, namelen,
@@ -299,32 +299,32 @@ PIOc_get_att_tc(int ncid, int varid, const char *name, nc_type memtype, void *ip
             int msg = PIO_MSG_GET_ATT;
             PLOG((2, "sending parameters"));
 
-            /* Send the message to IO master. */
-            if (ios->compmaster == MPI_ROOT)
+            /* Send the message to IO main. */
+            if (ios->compmain == MPI_ROOT)
                 mpierr = MPI_Send(&msg, 1,MPI_INT, ios->ioroot, 1, ios->union_comm);
 
             /* Send the function parameters. */
             if (!mpierr)
-                mpierr = MPI_Bcast(&ncid, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&ncid, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&varid, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&varid, 1, MPI_INT, ios->compmain, ios->intercomm);
             int namelen = strlen(name);
             if (!mpierr)
-                mpierr = MPI_Bcast(&namelen, 1, MPI_INT,  ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&namelen, 1, MPI_INT,  ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast((void *)name, namelen + 1, MPI_CHAR, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast((void *)name, namelen + 1, MPI_CHAR, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&file->iotype, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&file->iotype, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&atttype, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&atttype, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&attlen, 1, MPI_OFFSET, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&attlen, 1, MPI_OFFSET, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&atttype_len, 1, MPI_OFFSET, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&atttype_len, 1, MPI_OFFSET, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&memtype, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&memtype, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&memtype_len, 1, MPI_OFFSET, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&memtype_len, 1, MPI_OFFSET, ios->compmain, ios->intercomm);
             PLOG((2, "Bcast complete ncid = %d varid = %d namelen = %d name = %s iotype = %d "
                   "atttype = %d attlen = %d atttype_len = %d", ncid, varid, namelen, name, file->iotype,
                   atttype, attlen, atttype_len));
@@ -563,35 +563,35 @@ PIOc_get_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
         {
             int msg = PIO_MSG_GET_VARS;
 
-            if (ios->compmaster == MPI_ROOT)
+            if (ios->compmain == MPI_ROOT)
                 mpierr = MPI_Send(&msg, 1, MPI_INT, ios->ioroot, 1, ios->union_comm);
 
             /* Send the function parameters and associated informaiton
              * to the msg handler. */
             if (!mpierr)
-                mpierr = MPI_Bcast(&ncid, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&ncid, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&varid, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&varid, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&ndims, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&ndims, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&start_present, 1, MPI_CHAR, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&start_present, 1, MPI_CHAR, ios->compmain, ios->intercomm);
             if (!mpierr && start_present)
-                mpierr = MPI_Bcast((PIO_Offset *)start, ndims, MPI_OFFSET, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast((PIO_Offset *)start, ndims, MPI_OFFSET, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&count_present, 1, MPI_CHAR, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&count_present, 1, MPI_CHAR, ios->compmain, ios->intercomm);
             if (!mpierr && count_present)
-                mpierr = MPI_Bcast((PIO_Offset *)count, ndims, MPI_OFFSET, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast((PIO_Offset *)count, ndims, MPI_OFFSET, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&stride_present, 1, MPI_CHAR, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&stride_present, 1, MPI_CHAR, ios->compmain, ios->intercomm);
             if (!mpierr && stride_present)
-                mpierr = MPI_Bcast((PIO_Offset *)stride, ndims, MPI_OFFSET, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast((PIO_Offset *)stride, ndims, MPI_OFFSET, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&xtype, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&xtype, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&num_elem, 1, MPI_OFFSET, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&num_elem, 1, MPI_OFFSET, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&typelen, 1, MPI_OFFSET, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&typelen, 1, MPI_OFFSET, ios->compmain, ios->intercomm);
             PLOG((2, "PIOc_get_vars_tc ncid = %d varid = %d ndims = %d start_present = %d "
                   "count_present = %d stride_present = %d xtype = %d num_elem = %d", ncid, varid,
                   ndims, start_present, count_present, stride_present, xtype, num_elem));
@@ -641,9 +641,9 @@ PIOc_get_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
             if ((ierr = ncmpi_begin_indep_data(file->fh)))
                 return pio_err(ios, file, ierr, __FILE__, __LINE__);
 
-            /* Only the IO master does the IO, so we are not really
+            /* Only the IO main does the IO, so we are not really
              * getting parallel IO here. */
-            if (ios->iomaster == MPI_ROOT)
+            if (ios->iomain == MPI_ROOT)
             {
                 switch(xtype)
                 {
@@ -1010,42 +1010,42 @@ PIOc_put_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
         {
             int msg = PIO_MSG_PUT_VARS;
 
-            if (ios->compmaster == MPI_ROOT)
+            if (ios->compmain == MPI_ROOT)
                 mpierr = MPI_Send(&msg, 1, MPI_INT, ios->ioroot, 1, ios->union_comm);
 
             /* Send the function parameters and associated informaiton
              * to the msg handler. */
             if (!mpierr)
-                mpierr = MPI_Bcast(&ncid, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&ncid, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&varid, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&varid, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&ndims, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&ndims, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&start_present, 1, MPI_CHAR, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&start_present, 1, MPI_CHAR, ios->compmain, ios->intercomm);
             if (!mpierr && start_present)
-                mpierr = MPI_Bcast((PIO_Offset *)start, ndims, MPI_OFFSET, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast((PIO_Offset *)start, ndims, MPI_OFFSET, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&count_present, 1, MPI_CHAR, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&count_present, 1, MPI_CHAR, ios->compmain, ios->intercomm);
             if (!mpierr && count_present)
-                mpierr = MPI_Bcast((PIO_Offset *)count, ndims, MPI_OFFSET, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast((PIO_Offset *)count, ndims, MPI_OFFSET, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&stride_present, 1, MPI_CHAR, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&stride_present, 1, MPI_CHAR, ios->compmain, ios->intercomm);
             if (!mpierr && stride_present)
-                mpierr = MPI_Bcast((PIO_Offset *)stride, ndims, MPI_OFFSET, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast((PIO_Offset *)stride, ndims, MPI_OFFSET, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&xtype, 1, MPI_INT, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&xtype, 1, MPI_INT, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&num_elem, 1, MPI_OFFSET, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&num_elem, 1, MPI_OFFSET, ios->compmain, ios->intercomm);
             if (!mpierr)
-                mpierr = MPI_Bcast(&typelen, 1, MPI_OFFSET, ios->compmaster, ios->intercomm);
+                mpierr = MPI_Bcast(&typelen, 1, MPI_OFFSET, ios->compmain, ios->intercomm);
             PLOG((2, "PIOc_put_vars_tc ncid = %d varid = %d ndims = %d start_present = %d "
                   "count_present = %d stride_present = %d xtype = %d num_elem = %d", ncid, varid,
                   ndims, start_present, count_present, stride_present, xtype, num_elem));
 
             /* Send the data. */
             if (!mpierr)
-                mpierr = MPI_Bcast((void *)buf, num_elem * typelen, MPI_BYTE, ios->compmaster,
+                mpierr = MPI_Bcast((void *)buf, num_elem * typelen, MPI_BYTE, ios->compmain,
                                    ios->intercomm);
         }
 
@@ -1085,95 +1085,38 @@ PIOc_put_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
 #ifdef _PNETCDF
         if (file->iotype == PIO_IOTYPE_PNETCDF)
         {
-            /* Scalars have to be handled differently. */
-            if (ndims == 0)
-            {
-                /* This is a scalar var. */
-                PLOG((2, "pnetcdf writing scalar with ncmpi_put_vars_*() file->fh = %d varid = %d",
-                      file->fh, varid));
-                pioassert(!start && !count && !stride, "expected NULLs", __FILE__, __LINE__);
-
-                /* Turn on independent access for pnetcdf file. */
-                if ((ierr = ncmpi_begin_indep_data(file->fh)))
-                    return pio_err(ios, file, ierr, __FILE__, __LINE__);
-
-                /* Only the IO master does the IO, so we are not really
-                 * getting parallel IO here. */
-                if (ios->iomaster == MPI_ROOT)
-                {
-                    switch(xtype)
-                    {
-                    case NC_BYTE:
-                        ierr = ncmpi_put_vars_schar(file->fh, varid, start, count, stride, buf);
-                        break;
-                    case NC_CHAR:
-                        ierr = ncmpi_put_vars_text(file->fh, varid, start, count, stride, buf);
-                        break;
-                    case NC_SHORT:
-                        ierr = ncmpi_put_vars_short(file->fh, varid, start, count, stride, buf);
-                        break;
-                    case NC_INT:
-                        ierr = ncmpi_put_vars_int(file->fh, varid, start, count, stride, buf);
-                        break;
-                    case PIO_LONG_INTERNAL:
-                        ierr = ncmpi_put_vars_long(file->fh, varid, start, count, stride, buf);
-                        break;
-                    case NC_FLOAT:
-                        ierr = ncmpi_put_vars_float(file->fh, varid, start, count, stride, buf);
-                        break;
-                    case NC_DOUBLE:
-                        ierr = ncmpi_put_vars_double(file->fh, varid, start, count, stride, buf);
-                        break;
-                    default:
-                        return pio_err(ios, file, PIO_EBADIOTYPE, __FILE__, __LINE__);
-                    }
-                }
-
-                /* Turn off independent access for pnetcdf file. */
-                if ((ierr = ncmpi_end_indep_data(file->fh)))
-                    return pio_err(ios, file, ierr, __FILE__, __LINE__);
-            }
-            else
+            if (ios->iomain == MPI_ROOT)
             {
                 /* This is not a scalar var. */
                 var_desc_t *vdesc;
-                int *request;
-
+                
                 PLOG((2, "PIOc_put_vars_tc calling pnetcdf function"));
-                flush_output_buffer(file, false, num_elem*typelen);
-
-                /*vdesc = &file->varlist[varid];*/
+                
                 if ((ierr = get_var_desc(varid, &file->varlist, &vdesc)))
                     return pio_err(ios, file, ierr, __FILE__, __LINE__);
-                if (vdesc->nreqs % PIO_REQUEST_ALLOC_CHUNK == 0)
-                    if (!(vdesc->request = realloc(vdesc->request,
-                                                   sizeof(int) * (vdesc->nreqs + PIO_REQUEST_ALLOC_CHUNK))))
-                        return pio_err(ios, file, PIO_ENOMEM, __FILE__, __LINE__);
-                request = vdesc->request + vdesc->nreqs;
-                PLOG((2, "PIOc_put_vars_tc request = %d size = %d", vdesc->request, num_elem*typelen));
-
+                
                 switch(xtype)
                 {
                 case NC_BYTE:
-                    ierr = ncmpi_bput_vars_schar(file->fh, varid, start, count, fake_stride, buf, request);
+                    ierr = ncmpi_bput_vars_schar(file->fh, varid, start, count, fake_stride, buf, NULL);
                     break;
                 case NC_CHAR:
-                    ierr = ncmpi_bput_vars_text(file->fh, varid, start, count, fake_stride, buf, request);
+                    ierr = ncmpi_bput_vars_text(file->fh, varid, start, count, fake_stride, buf, NULL);
                     break;
                 case NC_SHORT:
-                    ierr = ncmpi_bput_vars_short(file->fh, varid, start, count, fake_stride, buf, request);
+                    ierr = ncmpi_bput_vars_short(file->fh, varid, start, count, fake_stride, buf, NULL);
                     break;
                 case NC_INT:
-                    ierr = ncmpi_bput_vars_int(file->fh, varid, start, count, fake_stride, buf, request);
+                    ierr = ncmpi_bput_vars_int(file->fh, varid, start, count, fake_stride, buf, NULL);
                     break;
                 case PIO_LONG_INTERNAL:
-                    ierr = ncmpi_bput_vars_long(file->fh, varid, start, count, fake_stride, buf, request);
+                    ierr = ncmpi_bput_vars_long(file->fh, varid, start, count, fake_stride, buf, NULL);
                     break;
                 case NC_FLOAT:
-                    ierr = ncmpi_bput_vars_float(file->fh, varid, start, count, fake_stride, buf, request);
+                    ierr = ncmpi_bput_vars_float(file->fh, varid, start, count, fake_stride, buf, NULL);
                     break;
                 case NC_DOUBLE:
-                    ierr = ncmpi_bput_vars_double(file->fh, varid, start, count, fake_stride, buf, request);
+                    ierr = ncmpi_bput_vars_double(file->fh, varid, start, count, fake_stride, buf, NULL);
                     break;
                 default:
                     return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);
@@ -1182,13 +1125,11 @@ PIOc_put_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
 
 
                 vdesc->nreqs++;
-//                flush_output_buffer(file, ierr == PIO_EINSUFFBUF, 0);
-//                PLOG((2, "PIOc_put_vars_tc flushed output buffer"));
 
                 if(ierr == PIO_EINVALCOORDS)
                     for(int i=0; i<ndims; i++)
                         PLOG((2,"start[%d] %ld count[%d] %ld\n",i,start[i],i,count[i]));
-            } /* endif ndims == 0 */
+            } /* end if MPI_ROOT */
         }
 #endif /* _PNETCDF */
 

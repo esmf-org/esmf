@@ -780,130 +780,130 @@ void GDAL_Handler::arrayWriteOneTileFile(
   int timesliceVal = -1;                  // Used time value (from timeslice)
   bool varExists = false;                 // true if varname is defined in file
   std::string varname;                    // Variable name
-  if (rc != NULL) {
-    *rc = ESMF_RC_NOT_IMPL;               // final return code
-  }
-
-  PRINTPOS;
-
-  if ((int *)NULL != timeslice) {
-    timesliceVal = *timeslice;
-  }
-  // File open?
-  if (isOpen(tile) != ESMF_TRUE)
-    if (ESMC_LogDefault.MsgFoundError (ESMF_RC_FILE_READ, "file not open",
-        ESMC_CONTEXT, rc)) return;
-
-  // Array compatible with this object?
-  localrc = checkArray(arr_p);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
-    return;
-
-  filedesc = gdalFileDesc[tile-1]; // note that tile indices are 1-based
-  fileID   = gdalFileID[tile-1];   // note that tile indices are 1-based
-  iodesc = getIODesc(gdalSystemDesc, arr_p, tile, &ioDims, &nioDims,
-      &arrDims, &narrDims, &basegdaltype, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-      ESMC_CONTEXT, rc)) return;
-  for (int i=0; i<narrDims; i++) {
-    if (arrDims[i] < 0) {
-      if (ESMC_LogDefault.MsgFoundError (ESMF_RC_INTNRL_BAD, "array dimension extent < 0",
-            ESMC_CONTEXT, rc)) return;
-    }
-  }
-
-  if (dimLabels.size() > 0 && dimLabels.size() < (unsigned int)nioDims) {
-    std::stringstream errmsg;
-    errmsg << dimLabels.size() << " user dimension label(s) supplied, " << nioDims << " expected";
-    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_SIZE, errmsg,
-            ESMC_CONTEXT, rc)) return;
-  }
-
-
-  // Get a pointer to the array data
-  // Still have the one DE restriction so use localDE = 0
-  localDE = 0;
-  int tileOfThisDe = arr_p->getDistGrid()->getTilePLocalDe(localDE, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-				    ESMC_CONTEXT, rc)) return;
-  int arrlen;
-  if (tileOfThisDe == tile) {
-    baseAddress = arr_p->getLocalarrayList()[localDE]->getBaseAddr();
-    PRINTMSG("baseAddress = 0x" << (void *)baseAddress);
-    // arrlen = arr_p->getLocalarrayList()[localDE]->getByteCount();
-    arrlen = 1;
-    const int *counts = arr_p->getLocalarrayList()[localDE]->getCounts();
-    for (int i=0; i<narrDims; i++)
-      arrlen *= counts[i];
-  } else {
-    baseAddress = NULL;
-    arrlen = 0;
-  }
-  PRINTMSG("arrlen = " << arrlen);
-
-  // Define the variable name and check the file
-  if (((char *)NULL != name) && (strlen(name) > 0)) {
-    varname = name;
-  } else {
-    varname = arr_p->getName();
-  }
-  PRINTMSG("varname = \"" << varname << "\"");
-  if (ESMF_TRUE == isNewFile(tile)) {
-    varExists = false;
-  } else {
-    int nVar;                           // Number of variables in file
-    int nAtt;                           // Number of attributes in file
-    int nfDims;                         // Number of dimensions in file
-
-    // We have a GDAL file, see if the variable is in there
-    PRINTMSG("Looking for variable in file");
-    gdalrc = GDALc_inq_fieldid(fileID, varname.c_str(), &vardesc);
-    PRINTMSG("Variable in file result: " << gdalrc << vardesc);
-    // This should succeed if the variable exists
-    varExists = ( vardesc >= 0 );
-  }
-
-  // Check consistency of time dimension with timeslice
-  bool hasTimeDim;
-
-  int dimidTime;
-//  GDAL_Offset timeLen;
-  PRINTMSG("Checking time dimension");
-
-  // NetCDF does not specify which error code goes with with
-  // condition so we will guess that there is no time dimension
-  // on any error condition (This may be an error depending on context).
-  hasTimeDim = (PIO_NOERR == gdalrc && dimidTime != -1);
-  PRINTMSG("inq_dimid  = " << gdalrc);
-  PRINTMSG("hasTimeDim = " << hasTimeDim);
-  PRINTMSG("unlim = " << unlim);
-
-// 1) Create the datasource and file. <-- Should be created by openOneFile()
-// 2) Define the layer
-// 3) Define the field
-  if (!varExists) {
-    ESMCI_IOREGION_ENTER("GDALc_write_darray");
-    gdalrc =  GDALc_def_field(fileID, varname.c_str(), basegdaltype, &vardesc);
-    if (!CHECKGDALERROR(gdalrc, "Attempting to define GDAL/PIO vardesc for: " + varname,
-        ESMF_RC_FILE_WRITE, (*rc))) {
-      return;
-    }
-  }
-
-  PRINTMSG("calling write_darray, gdal type = " << basegdaltype << ", address = " << baseAddress);
-  // Write the array
-  ESMCI_IOREGION_ENTER("GDALc_write_darray");
-  gdalrc =  PIOc_write_darray(fileID, vardesc, iodesc, arrlen,
-			       (void *)baseAddress, NULL);
-  if (!CHECKGDALERROR(gdalrc, "Attempting to write file",
-		      ESMF_RC_FILE_WRITE, (*rc))) {
-    return;
-  }
-  new_file[tile-1] = false;
-  ESMCI_IOREGION_EXIT("GDALc_write_darray");
-
-  // Cleanup & return
-  PRINTMSG("cleanup and return");
+//>>>  if (rc != NULL) {
+//>>>    *rc = ESMF_RC_NOT_IMPL;               // final return code
+//>>>  }
+//>>>
+//>>>  PRINTPOS;
+//>>>
+//>>>  if ((int *)NULL != timeslice) {
+//>>>    timesliceVal = *timeslice;
+//>>>  }
+//>>>  // File open?
+//>>>  if (isOpen(tile) != ESMF_TRUE)
+//>>>    if (ESMC_LogDefault.MsgFoundError (ESMF_RC_FILE_READ, "file not open",
+//>>>        ESMC_CONTEXT, rc)) return;
+//>>>
+//>>>  // Array compatible with this object?
+//>>>  localrc = checkArray(arr_p);
+//>>>  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+//>>>    return;
+//>>>
+//>>>  filedesc = gdalFileDesc[tile-1]; // note that tile indices are 1-based
+//>>>  fileID   = gdalFileID[tile-1];   // note that tile indices are 1-based
+//>>>  iodesc = getIODesc(gdalSystemDesc, arr_p, tile, &ioDims, &nioDims,
+//>>>      &arrDims, &narrDims, &basegdaltype, &localrc);
+//>>>  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+//>>>      ESMC_CONTEXT, rc)) return;
+//>>>  for (int i=0; i<narrDims; i++) {
+//>>>    if (arrDims[i] < 0) {
+//>>>      if (ESMC_LogDefault.MsgFoundError (ESMF_RC_INTNRL_BAD, "array dimension extent < 0",
+//>>>            ESMC_CONTEXT, rc)) return;
+//>>>    }
+//>>>  }
+//>>>
+//>>>  if (dimLabels.size() > 0 && dimLabels.size() < (unsigned int)nioDims) {
+//>>>    std::stringstream errmsg;
+//>>>    errmsg << dimLabels.size() << " user dimension label(s) supplied, " << nioDims << " expected";
+//>>>    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_SIZE, errmsg,
+//>>>            ESMC_CONTEXT, rc)) return;
+//>>>  }
+//>>>
+//>>>
+//>>>  // Get a pointer to the array data
+//>>>  // Still have the one DE restriction so use localDE = 0
+//>>>  localDE = 0;
+//>>>  int tileOfThisDe = arr_p->getDistGrid()->getTilePLocalDe(localDE, &localrc);
+//>>>  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+//>>>				    ESMC_CONTEXT, rc)) return;
+//>>>  int arrlen;
+//>>>  if (tileOfThisDe == tile) {
+//>>>    baseAddress = arr_p->getLocalarrayList()[localDE]->getBaseAddr();
+//>>>    PRINTMSG("baseAddress = 0x" << (void *)baseAddress);
+//>>>    // arrlen = arr_p->getLocalarrayList()[localDE]->getByteCount();
+//>>>    arrlen = 1;
+//>>>    const int *counts = arr_p->getLocalarrayList()[localDE]->getCounts();
+//>>>    for (int i=0; i<narrDims; i++)
+//>>>      arrlen *= counts[i];
+//>>>  } else {
+//>>>    baseAddress = NULL;
+//>>>    arrlen = 0;
+//>>>  }
+//>>>  PRINTMSG("arrlen = " << arrlen);
+//>>>
+//>>>  // Define the variable name and check the file
+//>>>  if (((char *)NULL != name) && (strlen(name) > 0)) {
+//>>>    varname = name;
+//>>>  } else {
+//>>>    varname = arr_p->getName();
+//>>>  }
+//>>>  PRINTMSG("varname = \"" << varname << "\"");
+//>>>  if (ESMF_TRUE == isNewFile(tile)) {
+//>>>    varExists = false;
+//>>>  } else {
+//>>>    int nVar;                           // Number of variables in file
+//>>>    int nAtt;                           // Number of attributes in file
+//>>>    int nfDims;                         // Number of dimensions in file
+//>>>
+//>>>    // We have a GDAL file, see if the variable is in there
+//>>>    PRINTMSG("Looking for variable in file");
+//>>>    gdalrc = GDALc_inq_fieldid(fileID, varname.c_str(), &vardesc);
+//>>>    PRINTMSG("Variable in file result: " << gdalrc << vardesc);
+//>>>    // This should succeed if the variable exists
+//>>>    varExists = ( vardesc >= 0 );
+//>>>  }
+//>>>
+//>>>  // Check consistency of time dimension with timeslice
+//>>>  bool hasTimeDim;
+//>>>
+//>>>  int dimidTime;
+//>>>//  GDAL_Offset timeLen;
+//>>>  PRINTMSG("Checking time dimension");
+//>>>
+//>>>  // NetCDF does not specify which error code goes with with
+//>>>  // condition so we will guess that there is no time dimension
+//>>>  // on any error condition (This may be an error depending on context).
+//>>>  hasTimeDim = (PIO_NOERR == gdalrc && dimidTime != -1);
+//>>>  PRINTMSG("inq_dimid  = " << gdalrc);
+//>>>  PRINTMSG("hasTimeDim = " << hasTimeDim);
+//>>>  PRINTMSG("unlim = " << unlim);
+//>>>
+//>>>// 1) Create the datasource and file. <-- Should be created by openOneFile()
+//>>>// 2) Define the layer
+//>>>// 3) Define the field
+//>>>  if (!varExists) {
+//>>>    ESMCI_IOREGION_ENTER("GDALc_write_darray");
+//>>>    gdalrc =  GDALc_def_field(fileID, varname.c_str(), basegdaltype, &vardesc);
+//>>>    if (!CHECKGDALERROR(gdalrc, "Attempting to define GDAL/PIO vardesc for: " + varname,
+//>>>        ESMF_RC_FILE_WRITE, (*rc))) {
+//>>>      return;
+//>>>    }
+//>>>  }
+//>>>
+//>>>  PRINTMSG("calling write_darray, gdal type = " << basegdaltype << ", address = " << baseAddress);
+//>>>  // Write the array
+//>>>  ESMCI_IOREGION_ENTER("GDALc_write_darray");
+//>>>  gdalrc =  PIOc_write_darray(fileID, vardesc, iodesc, arrlen,
+//>>>			       (void *)baseAddress, NULL);
+//>>>  if (!CHECKGDALERROR(gdalrc, "Attempting to write file",
+//>>>		      ESMF_RC_FILE_WRITE, (*rc))) {
+//>>>    return;
+//>>>  }
+//>>>  new_file[tile-1] = false;
+//>>>  ESMCI_IOREGION_EXIT("GDALc_write_darray");
+//>>>
+//>>>  // Cleanup & return
+//>>>  PRINTMSG("cleanup and return");
   if (rc != NULL) {
     *rc = ESMF_SUCCESS;
   }
@@ -1044,8 +1044,8 @@ void GDAL_Handler::openOneTileFile(
     // Looks like we are ready to try and create the file
     ESMCI_IOREGION_ENTER("GDALc_createfile");
 
-    gdalrc = GDALc_createfile(gdalSystemDesc, &(gdalFileID[tile-1]),
-                            &iotype, thisFilename.c_str(), mode);
+//>>>    gdalrc = GDALc_createfile(gdalSystemDesc, &(gdalFileID[tile-1]),
+//>>>                            &iotype, thisFilename.c_str(), mode);
     ESMCI_IOREGION_EXIT("GDALc_createfile");
     if (!CHECKGDALWARN(gdalrc, std::string("Unable to create file: ") + thisFilename,
       ESMF_RC_FILE_OPEN, (*rc))) {

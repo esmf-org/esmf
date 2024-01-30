@@ -17,9 +17,18 @@
 #include <uthash.h>
 
 #include <netcdf.h>
+#include <netcdf_meta.h>
 
 #include <gdal.h>
-//#include <ogr_api.h>
+
+#define NETCDF_VERSION_LE(Maj, Min, Pat) \
+    (((NC_VERSION_MAJOR == Maj) && (NC_VERSION_MINOR == Min) && (NC_VERSION_PATCH <= Pat)) || \
+     ((NC_VERSION_MAJOR == Maj) && (NC_VERSION_MINOR < Min)) || (NC_VERSION_MAJOR < Maj))
+
+#define NETCDF_VERSION_GE(Maj, Min, Pat) \
+    (((NC_VERSION_MAJOR == Maj) && (NC_VERSION_MINOR == Min) && (NC_VERSION_PATCH >= Pat)) || \
+     ((NC_VERSION_MAJOR == Maj) && (NC_VERSION_MINOR > Min)) || (NC_VERSION_MAJOR > Maj))
+
 
 /** PIO_OFFSET is an integer type of size sufficient to represent the
  * size (in bytes) of the largest file supported by MPI. This is not
@@ -117,7 +126,7 @@ typedef struct var_desc_t
     int record;
 
     /** ID of each outstanding pnetcdf request for this variable. */
-    int *request;
+//    int *request;
 
     /** Number of requests pending with pnetcdf. */
     int nreqs;
@@ -309,7 +318,7 @@ typedef struct io_desc_t
      * sort it. */
     bool needssort;
 
-    /** If the decomp has repeated values it can only be used for reading 
+    /** If the decomp has repeated values it can only be used for reading
         since it doesn't make sense to write a single value from more than one location. */
     bool readonly;
 
@@ -453,13 +462,13 @@ typedef struct iosystem_desc_t
      * process is not part of the IO communicator. */
     int io_rank;
 
-    /** Set to MPI_ROOT if this task is the master of IO communicator, 0
+    /** Set to MPI_ROOT if this task is the main of IO communicator, 0
      * otherwise. */
-    int iomaster;
+    int iomain;
 
-    /** Set to MPI_ROOT if this task is the master of comp communicator, 0
+    /** Set to MPI_ROOT if this task is the main of comp communicator, 0
      * otherwise. */
-    int compmaster;
+    int compmain;
 
     /** Rank of IO root task (which is rank 0 in io_comm) in the union
      * communicator. */
@@ -690,6 +699,13 @@ enum PIO_ERROR_HANDLERS
 #define PIO_64BIT_OFFSET NC_64BIT_OFFSET /**< Use large (64-bit) file offsets. Mode flag for nc_create(). */
 #define PIO_64BIT_DATA NC_64BIT_DATA /**< CDF5 format. */
 
+#ifdef NC_HAS_QUANTIZE
+#define PIO_NOQUANTIZE NC_NOQUANTIZE
+#define PIO_QUANTIZE_BITGROOM NC_QUANTIZE_BITGROOM
+#define PIO_QUANTIZE_GRANULARBR NC_QUANTIZE_GRANULARBR
+#define PIO_QUANTIZE_BITROUND  NC_QUANTIZE_BITROUND  /**< Use BitRound quantization. */
+#endif
+
 /** Define the netCDF-based error codes. */
 #define PIO_NOERR  NC_NOERR           /**< No Error */
 #define PIO_EBADID NC_EBADID          /**< Bad ncid */
@@ -780,7 +796,7 @@ enum PIO_ERROR_HANDLERS
 #define PIO_FILL_UINT64 NC_FILL_UINT64 /**< Default fill value for this type. */
 
 #define PIO_EINDEP  (-203)  /**< independent access error. */
-
+#define PIO_EINSUFFBUF (-219)         /**< Insufficient buffer size (pnetcdf only) */
 #define PIO_FIRST_ERROR_CODE (-500)  /**< The first error code for PIO. */
 #define PIO_EBADIOTYPE  (-500)       /**< Bad IOTYPE error. */
 #define PIO_EVARDIMMISMATCH (-501)   /**< Variable dimensions do not match in a multivar call. */
@@ -959,6 +975,13 @@ extern "C" {
     int PIOc_set_fill(int ncid, int fillmode, int *old_modep);
     int PIOc_def_var_fill(int ncid, int varid, int no_fill, const void *fill_value);
     int PIOc_inq_var_fill(int ncid, int varid, int *no_fill, void *fill_valuep);
+#ifdef NC_HAS_BZ2
+  int PIOc_inq_var_bzip2(int ncid, int varid, int* hasfilterp, int *levelp);
+#endif
+#ifdef NC_HAS_ZSTD
+  int PIOc_def_var_zstandard(int ncid, int varid, int level);
+  int PIOc_inq_var_zstandard(int ncid, int varid, int* hasfilterp, int *levelp);
+#endif
     int PIOc_rename_var(int ncid, int varid, const char *name);
 
     /* These variable settings only apply to netCDF-4 files. */
@@ -1257,6 +1280,17 @@ extern "C" {
     int PIOc_put_vard_ulonglong(int ncid, int varid, int decompid, const PIO_Offset recnum,
                                 const unsigned long long *op);
 
+#ifdef NC_HAS_PAR_FILTERS
+  int PIOc_def_var_filter(int ncid, int varid,unsigned int id, size_t nparams, unsigned int *params);
+  int PIOc_inq_var_filter_ids(int ncid, int varid, size_t *nfiltersp, unsigned int *ids);
+  int PIOc_inq_var_filter_info(int ncid, int varid, unsigned int id, size_t *nparamsp, unsigned int *params );
+  int PIOc_inq_filter_avail(int ncid, unsigned int id );
+#endif
+#ifdef NC_HAS_QUANTIZE
+  int PIOc_def_var_quantize(int ncid, int varid, int quantize_mode, int nsd );
+  int PIOc_inq_var_quantize(int ncid, int varid, int *quantize_mode, int *nsdp );
+#endif
+
     /* These functions are for the netCDF integration layer. */
     int nc_def_iosystem(MPI_Comm comp_comm, int num_iotasks, int stride, int base, int rearr,
                          int *iosysidp);
@@ -1338,15 +1372,10 @@ extern "C" {
     /* These functions are for the GDAL integration layer. MSL - 9/7/2023 */
     int GDALc_inq_fieldid(int fileid, const char *name, int *varidp);
     int GDALc_inq_timeid(int fileid, int *timeid); // Is there a field of type OFTDate, OFTTime, or OFTDateTime?
-//    int GDALc_openfile(int iosysid, GDALDatasetH *hDSp, int *iotype, const char *fname, bool mode);
     int GDALc_openfile(int iosysid, int *fileIDp, GDALDatasetH *hDSp, int *iotype, const char *fname, bool mode);
     int GDALc_sync(int fileid);
     int GDALc_shp_get_int_field(int fileid);
-    int GDALc_shp_get_double_field(int fileid, int varid, const size_t *startp,
-                                   const size_t *countp, double *ip);
-    int GDALc_createfile(int iosysid, int *fileidp,  int *iotype, const char *fname, bool mode);
-    int GDALc_createfile_shp(int iosysid, int *fileidp, int *iotype, const char *filename, bool mode);
-    int GDALc_def_field(int fileid, const char *name, int xtype, int *varidp);
+    int GDALc_shp_get_double_field(int fileid, int varid, const size_t *startp, const size_t *countp, double *ip);
 
 #if defined(__cplusplus)
 }
