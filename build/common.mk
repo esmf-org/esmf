@@ -2049,6 +2049,8 @@ ESMF_TRACE_LDPRELOAD := $(ESMF_LIBDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX)
 ESMF_PRELOADSCRIPT = $(ESMF_LIBDIR)/preload.sh
 
 ESMF_SL_PRELOAD_LIBLINKER = $(ESMF_CXXCOMPILER)
+ESMF_SL_PRELOAD_LIBOPTS = $(ESMF_CXXLINKOPTS)
+ESMF_SL_PRELOAD_LIBLIBS = $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_CXXLINKLIBS)
 
 ifeq ($(ESMF_OS),Darwin)
 ESMF_ENV_PRELOAD          = DYLD_INSERT_LIBRARIES
@@ -2056,6 +2058,10 @@ ESMF_ENV_PRELOAD_DELIMIT  = ':'
 ifeq ($(ESMF_COMM),openmpi)
 # make sure to link in the Fortran MPI bindings
 ESMF_SL_PRELOAD_LIBLINKER = $(ESMF_F90COMPILER)
+# and since we're using the F90 compiler as the linker, make sure to use link
+# options and libs appropriate for the F90 compiler instead of the C++ compiler
+ESMF_SL_PRELOAD_LIBOPTS = $(ESMF_F90LINKOPTS)
+ESMF_SL_PRELOAD_LIBLIBS = $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) $(ESMF_F90LINKLIBS)
 endif
 else
 ESMF_ENV_PRELOAD          = LD_PRELOAD
