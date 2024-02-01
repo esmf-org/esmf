@@ -667,6 +667,25 @@ void get_elemConn_info_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, ch
                                       ESMC_CONTEXT, &localrc)) throw localrc;
   }
 
+
+  //// Handle start_index attribute
+
+#if 0 
+  // Get start_index attribute, otherwise default to 0.
+  int start_index=0; // Set to default
+  int att_start_index=0;
+  piorc = PIOc_get_att_int(pioFileDesc, elementConn_id, "start_index", &att_start_index);
+  if (piorc == PIO_NOERR) {
+    start_index=att_start_index;
+  }
+  
+  // Given start_index switch base of connections to be 1-based (what's expected by mesh create code) 
+  for (int i=0; i<totNumElementConn; i++) {
+    elementConn[i] = elementConn[i]-start_index+1;
+  }
+#endif
+
+  
   // Check if there's a polybreak attribute on elementConn and if so get it
   int polygon_break_value;
   piorc = PIOc_get_att_int(pioFileDesc, varid, "polygon_break_value", &polygon_break_value);
