@@ -1408,7 +1408,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             endif
           else
             call ESMF_ConfigFindLabel(configInternal, &
-              label="ESMF_RUNTIME_PROFILE:", isPresent=isPresent, rc=localrc)
+              label=trim(env_var_name)//":", isPresent=isPresent, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           endif
@@ -1421,7 +1421,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               stringSet = trim(stringAlloc)
             else
               call ESMF_ConfigGetAttribute(configInternal, stringS, &
-                label="defaultLogFilename:", default="---invalid---", rc=localrc)
+                label=trim(env_var_name)//":", default="---invalid---", &
+                rc=localrc)
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
               if (trim(stringS)/="---invalid---") then
