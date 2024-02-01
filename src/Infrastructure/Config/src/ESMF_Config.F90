@@ -3367,7 +3367,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       do while ( i .lt. config%cptr%nbuf )
 
         ! get next line from buffer
-        j = i + index_(config%cptr%buffer(i:config%cptr%nbuf), EOL) - 1
+        j = index_(config%cptr%buffer(i:config%cptr%nbuf), EOL)
+        if (j .eq. 0) then
+          j = config%cptr%nbuf - 1
+        else
+          j = i + j - 1
+        endif
         this_label = config%cptr%buffer(i:j)
 
         ! look for label in this_label; non-blank characters followed by a colon
@@ -3665,10 +3670,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       ! for appending, create new attribute string with label and value
-      if ( i .eq. config%cptr%nbuf .and. present(label) ) then
-        write(newVal, *) label, BLK, value
+      if ( i .eq. config%cptr%nbuf ) then
+        if ( present(label) ) then
+          write(newVal, *) trim(label), BLK, value
+        else
+          write(newVal, *) "__MISSING__:", BLK, value
+        endif
         newVal = trim(adjustl(newVal)) // EOL
-        j = i + len_trim(newVal)
+        nchar = len_trim(newVal)
+        j = i + nchar
 
         ! check if enough space left in config buffer
         if (j .ge. NBUF_MAX) then   ! room for EOB if necessary
@@ -3730,7 +3740,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! if appended, reset EOB marker and nbuf
       if (i .eq. config%cptr%nbuf) then
-        config%cptr%buffer(j:j) = EOB
+        config%cptr%buffer(j+1:j+1) = EOB
         config%cptr%nbuf = j
       endif
 
