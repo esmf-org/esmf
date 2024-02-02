@@ -635,20 +635,20 @@ void get_elemConn_info_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, ch
 
   // Declare some useful vars
   int dimid;
-  int varid;
+  int elementConn_id;
   int localrc;
   int piorc;
-
+  
   // Figure out dimension of elementConn array
   int dimElementConn=2;
 
   // Get elementConn varid
-  piorc = PIOc_inq_varid(pioFileDesc, "elementConn", &varid);
+  piorc = PIOc_inq_varid(pioFileDesc, "elementConn", &elementConn_id);
   if (!CHECKPIOERROR(piorc, std::string("Error elementConn variable not in file ") + filename,
                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
   // Get elementConn number of dims
-  piorc = PIOc_inq_varndims(pioFileDesc, varid, &dimElementConn);
+  piorc = PIOc_inq_varndims(pioFileDesc, elementConn_id, &dimElementConn);
   if (!CHECKPIOERROR(piorc, std::string("Error getting number of dims for elementConn variable in file ") + filename,
                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
@@ -667,12 +667,39 @@ void get_elemConn_info_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, ch
                                       ESMC_CONTEXT, &localrc)) throw localrc;
   }
 
-  // Check if there's a polybreak attribute on elementConn and if so get it
-  int polygon_break_value;
-  piorc = PIOc_get_att_int(pioFileDesc, varid, "polygon_break_value", &polygon_break_value);
 
-  // Found value so convert to internal mesh polygon_break_value
+  //// Handle start_index attribute
+  // Get start_index attribute, otherwise default to 1.
+  int start_index=1; // Set to default for ESMFMesh
+  int att_start_index=1; // Set to default ESMFMesh
+  piorc = PIOc_get_att_int(pioFileDesc, elementConn_id, "start_index", &att_start_index);
+
+  // If there's a start_index then record it and modify elementConn accordingly
+  // NOTE: the default start_index of 1, doesn't require the elementConn to be changed
   if (piorc == PIO_NOERR) {
+    
+    // Get start_index value
+    start_index=att_start_index;
+
+    // Given start_index switch base of connections to be 1-based (what's expected by mesh create code)
+    for (int i=0; i<totNumElementConn; i++) {
+      elementConn[i] = elementConn[i]-start_index+1;
+    }
+  }
+  
+  
+  // Check if there's a polybreak attribute on elementConn and if so get its value
+  int polygon_break_value;
+  piorc = PIOc_get_att_int(pioFileDesc, elementConn_id, "polygon_break_value", &polygon_break_value);
+  
+  // If there is a polygon break attribute, switch matching values to be the internal break value
+  if (piorc == PIO_NOERR) {
+  
+    // Modify polygon_break_value by start_index to correspond with that change to elementConns
+    // NOTE: for default start_index of 1, this corresponds to no change to polygon_break_value
+    polygon_break_value = polygon_break_value-start_index+1;
+
+    // Loop changing any connection entries that match to value expected by mesh create code
     for (int i=0; i<totNumElementConn; i++) {
       if (elementConn[i] == polygon_break_value) elementConn[i] = MESH_POLYBREAK_IND;
     }
