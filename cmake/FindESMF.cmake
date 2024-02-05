@@ -109,6 +109,11 @@ if(EXISTS ${ESMFMKFILE})
     endif()
   endif()
 
+  # Add target alias to facilitate unambiguous linking
+  if(NOT TARGET ESMF::ESMF)
+    add_library(ESMF::ESMF ALIAS ESMF)
+  endif()
+
   # Add ESMF include directories
   set(ESMF_INCLUDE_DIRECTORIES "")
   separate_arguments(_ESMF_F90COMPILEPATHS UNIX_COMMAND ${ESMF_F90COMPILEPATHS})
