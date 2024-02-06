@@ -6920,7 +6920,8 @@ int VMK::allgatherv(void *in, int inCount, void *out, int *outCounts,
 int VMK::alltoall(void *in, int inCount, void *out, int outCount,
   vmType type){
   int localrc=0;
-  if (mpionly){
+  if (false){
+//  if (mpionly){
     // Find corresponding MPI data type
     MPI_Datatype mpitype;
     switch (type){
@@ -6999,7 +7000,8 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
 int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
   int *outCounts, int *outOffsets, vmType type){
   int localrc=0;
-  if (mpionly){
+  if (false){
+//  if (mpionly){
     // Find corresponding MPI data type
     MPI_Datatype mpitype;
     switch (type){
