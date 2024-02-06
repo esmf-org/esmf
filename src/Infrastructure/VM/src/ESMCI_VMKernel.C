@@ -6920,8 +6920,8 @@ int VMK::allgatherv(void *in, int inCount, void *out, int *outCounts,
 int VMK::alltoall(void *in, int inCount, void *out, int outCount,
   vmType type){
   int localrc=0;
-  if (false){
-//  if (mpionly){
+//  if (false){
+  if (mpionly){
     // Find corresponding MPI data type
     MPI_Datatype mpitype;
     switch (type){
@@ -6944,7 +6944,14 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
       mpitype = MPI_LOGICAL;
       break;
     }
+#if 0
     localrc = MPI_Alltoall(in, inCount, mpitype, out, outCount, mpitype, mpi_c);
+#else
+    MPI_Request req;
+    localrc = MPI_Ialltoall(in, inCount, mpitype, out, outCount, mpitype, mpi_c,
+      &req);
+    MPI_Wait(&req, MPI_STATUS_IGNORE);
+#endif
   }else{
     // This is a very simplistic, probably very bad peformance implementation.
     int size=0;
@@ -7000,8 +7007,8 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
 int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
   int *outCounts, int *outOffsets, vmType type){
   int localrc=0;
-  if (false){
-//  if (mpionly){
+//  if (false){
+  if (mpionly){
     // Find corresponding MPI data type
     MPI_Datatype mpitype;
     switch (type){
@@ -7024,8 +7031,15 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
       mpitype = MPI_LOGICAL;
       break;
     }
+#if 0
     localrc = MPI_Alltoallv(in, inCounts, inOffsets, mpitype, out, outCounts,
       outOffsets, mpitype, mpi_c);
+#else
+    MPI_Request req;
+    localrc = MPI_Ialltoallv(in, inCounts, inOffsets, mpitype, out, outCounts,
+      outOffsets, mpitype, mpi_c, &req);
+    MPI_Wait(&req, MPI_STATUS_IGNORE);
+#endif
   }else{
     // This is a very simplistic, probably very bad peformance implementation.
     int size=0;
