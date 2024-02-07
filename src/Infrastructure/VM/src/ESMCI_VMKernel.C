@@ -6920,37 +6920,50 @@ int VMK::allgatherv(void *in, int inCount, void *out, int *outCounts,
 int VMK::alltoall(void *in, int inCount, void *out, int outCount,
   vmType type){
   int localrc=0;
-//  if (false){
   if (mpionly){
     // Find corresponding MPI data type
     MPI_Datatype mpitype;
+    int size=0;
     switch (type){
     case vmBYTE:
       mpitype = MPI_BYTE;
+      size=1;
       break;
     case vmI4:
       mpitype = MPI_INT;
+      size=4;
       break;
     case vmI8:
       mpitype = MPI_LONG_LONG_INT;
+      size=8;
       break;
     case vmR4:
       mpitype = MPI_FLOAT;
+      size=4;
       break;
     case vmR8:
       mpitype = MPI_DOUBLE;
+      size=8;
       break;
     case vmL4:
       mpitype = MPI_LOGICAL;
+      size=4;
       break;
     }
 #if 0
     localrc = MPI_Alltoall(in, inCount, mpitype, out, outCount, mpitype, mpi_c);
-#else
+#endif
+#if 0
     MPI_Request req;
     localrc = MPI_Ialltoall(in, inCount, mpitype, out, outCount, mpitype, mpi_c,
       &req);
     MPI_Wait(&req, MPI_STATUS_IGNORE);
+#endif
+#if 1
+    for (int i=0; i<npets; i++){
+      MPI_Scatter(in, inCount, mpitype, out+outCount*i*size, outCount, mpitype,
+        i, mpi_c);
+    }
 #endif
   }else{
     // This is a very simplistic, probably very bad peformance implementation.
@@ -7007,7 +7020,6 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
 int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
   int *outCounts, int *outOffsets, vmType type){
   int localrc=0;
-//  if (false){
   if (mpionly){
     // Find corresponding MPI data type
     MPI_Datatype mpitype;
