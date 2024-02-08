@@ -10,6 +10,7 @@ from esmpy.api.constants import _ESMF_NETCDF
 from esmpy.api.constants import _ESMF_PIO
 from esmpy.api.constants import _ESMF_USE_INMEM_FACTORS
 from esmpy.api.constants import CoordSys
+from esmpy.api.constants import GridItem
 from esmpy.api.constants import LineType
 from esmpy.api.constants import Region
 from esmpy.api.constants import StaggerLoc
@@ -23,6 +24,7 @@ from esmpy.api.mesh import Mesh
 from esmpy.api.mesh import MeshElemType
 from esmpy.api.mesh import MeshLoc
 from esmpy.api.regrid import Regrid
+from esmpy.api.regrid import RegridFromFile
 from esmpy.api.regrid import RegridMethod
 from esmpy.test.base import TestBase
 from esmpy.util.cache_data import DATA_DIR
@@ -82,7 +84,7 @@ def create_raster_field(x_of_col, y_of_row, node_mask=None):
 
     mesh.add_nodes(
         n_points,
-        id_of_point.flatten(),
+        id_of_point.flatten()+1, #PR204 esmpy currently uses 1-based indexing for mesh node ids
         xy_of_point.flatten(),
         np.zeros(n_points, dtype=int),
         node_mask=node_mask,
@@ -90,10 +92,10 @@ def create_raster_field(x_of_col, y_of_row, node_mask=None):
 
     mesh.add_elements(
         n_elements,
-        np.arange(n_elements, dtype=int),
+        np.arange(n_elements, dtype=int)+1, #PR204 esmpy currently uses 1-based indexing for mesh element ids
         np.full(n_elements, MeshElemType.QUAD, dtype=int),
         points_at_element,
-        xy_of_element,
+        xy_of_element, #PR204 this is an optional parameter, should use a keyword to specify which desired
     )
 
     return Field(mesh, meshloc=MeshLoc.NODE)

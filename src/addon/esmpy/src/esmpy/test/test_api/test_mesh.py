@@ -19,6 +19,7 @@ from esmpy.util.cache_data import DATA_DIR
 from esmpy.util.mesh_utilities import *
 from numpy.testing import assert_array_equal
 
+from esmpy.api.constants import FileFormat
 
 @pytest.mark.parametrize(
     "mask_value",
@@ -31,6 +32,7 @@ from numpy.testing import assert_array_equal
         [[0, 0, 0, 0], [-1, -1, -1, -1], [1, 1, 1, 1]],
     ),
 )
+
 def test_add_nodes_with_mask(mask_value):
     """Check adding masked nodes to a mesh."""
     if mask_value is None:
@@ -44,7 +46,7 @@ def test_add_nodes_with_mask(mask_value):
 
     mesh.add_nodes(
         len(xy_of_points),
-        np.arange(len(xy_of_points)),
+        np.arange(len(xy_of_points))+1, #PR204 esmpy currently uses 1-based indexing for mesh node ids
         xy_of_points,
         np.zeros(len(xy_of_points), dtype=int),
         node_mask=mask,
@@ -67,7 +69,7 @@ def test_add_nodes_with_mask_bad():
     with pytest.raises(ValueError):
         mesh.add_nodes(
             len(xy_of_points),
-            np.arange(len(xy_of_points)),
+            np.arange(len(xy_of_points))+1, #PR204 esmpy currently uses 1-based indexing for mesh node ids
             xy_of_points,
             np.zeros(len(xy_of_points), dtype=int),
             node_mask=[1, 2, 3],
