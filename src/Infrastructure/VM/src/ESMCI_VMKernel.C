@@ -6967,6 +6967,11 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
 #endif
 #if 1
     {
+  {
+    std::stringstream msg;
+    msg << "VMK::alltoall(): hierarchical implementation inCount=" << inCount;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
       // Hierarchical Alltoall implementation, with SSI roots as intermediary
       // Step-0: SSI-local exchange via alltoallv to avoid data movements.
       std::vector<int> inCounts(ssiLocalPetCount, inCount);
@@ -6985,6 +6990,11 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
       if (ssiCount > 1){
         // Multiple SSIs in the VM, under each mpi_c_ssi communicator,
         // using task 0 as the SSI root PET below.
+  {
+    std::stringstream msg;
+    msg << "VMK::alltoall(): ssiCount=" << ssiCount;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
         // Step-1: SSI root PETs gather xfer data on their SSI.
         // - Each PET prepares an xferBuffer to send its "in" data that is
         //   destined for PETs outside the local SSI to its SSI root PET.
@@ -6997,6 +7007,12 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
           memcpy(xferBC+outCount*size*j, inC+inCount*size*i, inCount*size);
           ++j;
         }
+  {
+    std::stringstream msg;
+    msg << "VMK::alltoall(): line=" << __LINE__
+      << " inCount=" << inCount;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
         // - SSI roots gather xfer data from their SSI PETs toward other SSI
         char *xferSsiBC = NULL;
         std::vector<char> xferSsiBuffer;
@@ -7007,8 +7023,23 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
         }
         MPI_Gather(xferBC, (npets-ssiLocalPetCount)*inCount, mpitype,
           xferSsiBC, (npets-ssiLocalPetCount)*outCount, mpitype, 0, mpi_c_ssi);
+  {
+    std::stringstream msg;
+    msg << "VMK::alltoall(): line=" << __LINE__
+      << " gathered into xferSsiBuffer bytes =" << (npets-ssiLocalPetCount)
+            *inCount*size*ssiLocalPetCount;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
         // Total exchange between SSI roots
         if (mpi_c_ssi_roots != MPI_COMM_NULL){
+          // - SSI roots prepare local xferPetMap
+          std::map<int,int> xferPetMap;
+          j=0;
+          for (int i=0; i<npets; i++){
+            if (ssiLocalPetSet.find(i) != ssiLocalPetSet.end()) continue; //skip
+            xferPetMap[i]=j;
+            ++j;
+          }
           // - SSI roots exchange their ssiLocalPetCount
           std::vector<int> ssiLocalPetCounts(ssiCount);
           MPI_Allgather(&ssiLocalPetCount, 1, MPI_INT,
@@ -7024,6 +7055,7 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
             &(ssiLocalPetLists[0]), &(ssiLocalPetCounts[0]), &(offsets[0]),
             MPI_INT, mpi_c_ssi_roots);
           // - SSI roots keep track of all the PETs in the other SSIs
+          // -> TODO: might be obsolete
           std::vector<std::set<int> > ssiLocalPetSets(ssiCount);
           j=0;
           for (int i=0; i<ssiCount; i++){
@@ -7038,12 +7070,19 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
           char *xferSsiSBC = (char *)&(xferSsiSendBuffer[0]);
           int localSsi; // rank of local SSI's root, same as SSI index
           MPI_Comm_rank(mpi_c_ssi_roots, &localSsi);
+  {
+    std::stringstream msg;
+    msg << "VMK::alltoall(): line=" << __LINE__
+      << " localSsi=" << localSsi;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
+
           std::vector<int> xferInCounts(ssiCount);
           std::vector<int> xferInOffsets(ssiCount);
           std::vector<int> xferOutCounts(ssiCount);
           std::vector<int> xferOutOffsets(ssiCount);
           xferInOffsets[0] = xferOutOffsets[0] = 0;
-          j=0; int jj=0;
+          j=0;
           for (int i=0; i<ssiCount; i++){
             // prep data block to send to PETs in SSI i
             if (i > 0){
@@ -7063,18 +7102,21 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
                 // prepare block from local SSI local PET l to PET k on SSI i
                 memcpy(xferSsiSBC+inCount*size*j, xferSsiBC
                   +inCount*size*(npets-ssiLocalPetCount)*l
-                  +inCount*size*ssiLocalPetLists[offsets[i]+k],
+                  +inCount*size*xferPetMap[ssiLocalPetLists[offsets[i]+k]],
                   inCount*size);
                 ++j;
               }
             }
           }
+#if 1
           // - Alltoallv xferSsiSendBuffer -> xferSsiBuffer
           MPI_Alltoallv(xferSsiSBC, &(xferInCounts[0]), &(xferInOffsets[0]),
             mpitype, xferSsiBC, &(xferOutCounts[0]), &(xferOutOffsets[0]),
-            mpitype, mpi_c_ssi);
+            mpitype, mpi_c_ssi_roots);
+#endif
         }
       }
+      MPI_Barrier(mpi_c); //TODO: remove once implementation done
     }
 #endif
   }else{
