@@ -6959,10 +6959,122 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
       &req);
     MPI_Wait(&req, MPI_STATUS_IGNORE);
 #endif
-#if 1
+#if 0
     for (int i=0; i<npets; i++){
       MPI_Scatter(in, inCount, mpitype, out+outCount*i*size, outCount, mpitype,
         i, mpi_c);
+    }
+#endif
+#if 1
+    {
+      // Hierarchical Alltoall implementation, with SSI roots as intermediary
+      // Step-0: SSI-local exchange via alltoallv to avoid data movements.
+      std::vector<int> inCounts(ssiLocalPetCount, inCount);
+      std::vector<int> outCounts(ssiLocalPetCount, outCount);
+      std::vector<int> inOffsets(ssiLocalPetCount);
+      std::vector<int> outOffsets(ssiLocalPetCount);
+      std::set<int> ssiLocalPetSet;
+      for (int i=0; i<ssiLocalPetCount; i++){
+        ssiLocalPetSet.insert(ssiLocalPetList[i]);
+        inOffsets[i] = ssiLocalPetList[i] * inCount;
+        outOffsets[i] = ssiLocalPetList[i] * outCount;
+      }
+      MPI_Alltoallv(in, &(inCounts[0]), &(inOffsets[0]), mpitype,
+        out, &(outCounts[0]), &(outOffsets[0]), mpitype, mpi_c_ssi);
+      // Only go up the hierarchy if there are more than one SSI in the VM
+      if (ssiCount > 1){
+        // Multiple SSIs in the VM, under each mpi_c_ssi communicator,
+        // using task 0 as the SSI root PET below.
+        // Step-1: SSI root PETs gather xfer data on their SSI.
+        // - Each PET prepares an xferBuffer to send its "in" data that is
+        //   destined for PETs outside the local SSI to its SSI root PET.
+        std::vector<char> xferBuffer((npets-ssiLocalPetCount)*inCount*size);
+        char *xferBC = (char *)&(xferBuffer[0]);
+        char *inC = (char *)in;
+        int j=0;
+        for (int i=0; i<npets; i++){
+          if (ssiLocalPetSet.find(i) != ssiLocalPetSet.end()) continue; // skip
+          memcpy(xferBC+outCount*size*j, inC+inCount*size*i, inCount*size);
+          ++j;
+        }
+        // - SSI roots gather xfer data from their SSI PETs toward other SSI
+        char *xferSsiBC = NULL;
+        std::vector<char> xferSsiBuffer;
+        if (mpi_c_ssi_roots != MPI_COMM_NULL){
+          xferSsiBuffer.resize((npets-ssiLocalPetCount)
+            *inCount*size*ssiLocalPetCount);
+          xferSsiBC = (char *)&(xferSsiBuffer[0]);
+        }
+        MPI_Gather(xferBC, (npets-ssiLocalPetCount)*inCount, mpitype,
+          xferSsiBC, (npets-ssiLocalPetCount)*outCount, mpitype, 0, mpi_c_ssi);
+        // Total exchange between SSI roots
+        if (mpi_c_ssi_roots != MPI_COMM_NULL){
+          // - SSI roots exchange their ssiLocalPetCount
+          std::vector<int> ssiLocalPetCounts(ssiCount);
+          MPI_Allgather(&ssiLocalPetCount, 1, MPI_INT,
+            &(ssiLocalPetCounts[0]), 1, MPI_INT, mpi_c_ssi_roots);
+          // - Construct offsets array to match the received ssiLocalPetCounts
+          std::vector<int> offsets(ssiCount);
+          offsets[0] = 0;
+          for (int i=1; i<ssiCount; i++)
+            offsets[i] = offsets[i-1] + ssiLocalPetCounts[i-1];
+          // - SSI roots exchange their ssiLocalPetList information
+          std::vector<int> ssiLocalPetLists(npets);
+          MPI_Allgatherv(ssiLocalPetList, ssiLocalPetCount, MPI_INT,
+            &(ssiLocalPetLists[0]), &(ssiLocalPetCounts[0]), &(offsets[0]),
+            MPI_INT, mpi_c_ssi_roots);
+          // - SSI roots keep track of all the PETs in the other SSIs
+          std::vector<std::set<int> > ssiLocalPetSets(ssiCount);
+          j=0;
+          for (int i=0; i<ssiCount; i++){
+            for (int k=0; k<ssiLocalPetCounts[i]; k++){
+              ssiLocalPetSets[i].insert(ssiLocalPetLists[j]);
+              ++j;
+            }
+          }
+          // - SSI roots collate data into SSI blocks for sending
+          std::vector<char> xferSsiSendBuffer((npets-ssiLocalPetCount)
+            *inCount*size*ssiLocalPetCount);
+          char *xferSsiSBC = (char *)&(xferSsiSendBuffer[0]);
+          int localSsi; // rank of local SSI's root, same as SSI index
+          MPI_Comm_rank(mpi_c_ssi_roots, &localSsi);
+          std::vector<int> xferInCounts(ssiCount);
+          std::vector<int> xferInOffsets(ssiCount);
+          std::vector<int> xferOutCounts(ssiCount);
+          std::vector<int> xferOutOffsets(ssiCount);
+          xferInOffsets[0] = xferOutOffsets[0] = 0;
+          j=0; int jj=0;
+          for (int i=0; i<ssiCount; i++){
+            // prep data block to send to PETs in SSI i
+            if (i > 0){
+              xferInOffsets[i] = xferInOffsets[i-1] + xferInCounts[i-1];
+              xferOutOffsets[i] = xferOutOffsets[i-1] + xferOutCounts[i-1];
+            }
+            if (i == localSsi){
+              xferInCounts[i] = xferOutCounts[i] = 0;
+              continue;  // no self communication to local SSI
+            }else{
+              xferInCounts[i] = ssiLocalPetCounts[i]*ssiLocalPetCount*inCount;
+              xferOutCounts[i] = ssiLocalPetCounts[i]*ssiLocalPetCount*outCount;
+            }
+            for (int k=0; k<ssiLocalPetCounts[i]; k++){
+              // prepare block to SSI local PET k on SSI i
+              for (int l=0; l<ssiLocalPetCount; l++){
+                // prepare block from local SSI local PET l to PET k on SSI i
+                memcpy(xferSsiSBC+inCount*size*j, xferSsiBC
+                  +inCount*size*(npets-ssiLocalPetCount)*l
+                  +inCount*size*ssiLocalPetLists[offsets[i]+k],
+                  inCount*size);
+                ++j;
+              }
+            }
+          }
+          // - Alltoallv xferSsiSendBuffer -> xferSsiBuffer
+          MPI_Alltoallv(xferSsiSBC, &(xferInCounts[0]), &(xferInOffsets[0]),
+            mpitype, xferSsiBC, &(xferOutCounts[0]), &(xferOutOffsets[0]),
+            mpitype, mpi_c_ssi);
+        }
+      }
     }
 #endif
   }else{
@@ -7043,7 +7155,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
       mpitype = MPI_LOGICAL;
       break;
     }
-#if 0
+#if 1
     localrc = MPI_Alltoallv(in, inCounts, inOffsets, mpitype, out, outCounts,
       outOffsets, mpitype, mpi_c);
 #else
