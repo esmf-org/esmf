@@ -3135,10 +3135,12 @@ end subroutine ESMF_ParseDurString
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TimeIntervalSetStr()"
 !BOP
+!\label{API:TimeIntervalSetStr} 
 ! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval from ISO format string
 
 ! !INTERFACE:
-      ! Private name; call using ESMF_TimeIntervalSet()
+! Private name; call using ESMF_TimeIntervalSet()
+
       subroutine ESMF_TimeIntervalSetStr(timeinterval, timeIntervalString, rc)
 
 ! !ARGUMENTS:
@@ -3169,7 +3171,7 @@ end subroutine ESMF_ParseDurString
 !     \item[timeinterval]
 !          The object instance to initialize.
 !     \item[timeIntervalString]
-!          ISO format duration string. 
+!          ISO format duration string (i.e. P[y]Y[mm]M[d]DT[h]H[m]M[s]S ).  
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3247,9 +3249,12 @@ end subroutine ESMF_ParseDurString
 !
 !
 ! !DESCRIPTION:
-!     Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
-!     string in ISO duration format (P[n]Y[n]M[n]DT[n]H[n]M[n]S).
-!
+!  Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
+!  string in ISO duration format P[y]Y[mm]M[d]DT[h]H[m]M[s]S. See ~\cite{ISO} and ~\cite{ISOnotes} for
+!  information about the format. Also, see the description for the method
+! {\tt ESMF\_TimeIntervalSetStr()}~\ref{API:TimeIntervalSetStr}
+! for more details about the specific types supported by ESMF for the time values in the duration string. 
+!      
 !     The arguments are:
 !     \begin{description}
 !     \item[timeinterval]
@@ -3264,7 +3269,7 @@ end subroutine ESMF_ParseDurString
 !          it contains a calendar.  Alternate to, and mutually exclusive with, 
 !          calkindflag below.  Primarily for specifying a custom calendar kind.
 !     \item[timeIntervalString]
-!          ISO format duration string. 
+!          ISO format duration string (i.e. P[y]Y[mm]M[d]DT[h]H[m]M[s]S ).
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
