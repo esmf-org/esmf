@@ -7034,6 +7034,8 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
         // Step-2: Total exchange between SSI roots
+        char *xferSsiSBC = NULL;
+        std::vector<char> xferSsiSendBuffer;
         if (mpi_c_ssi_roots != MPI_COMM_NULL){
           // - SSI roots prepare local xferPetMap
           std::map<int,int> xferPetMap;
@@ -7071,8 +7073,8 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
           bufferSize = inCount * size;
           bufferSize *= npets - ssiLocalPetCount;
           bufferSize *= ssiLocalPetCount;
-          std::vector<char> xferSsiSendBuffer(bufferSize);
-          char *xferSsiSBC = (char *)&(xferSsiSendBuffer[0]);
+          xferSsiSendBuffer.resize(bufferSize);
+          xferSsiSBC = (char *)&(xferSsiSendBuffer[0]);
           int localSsi; // rank of local SSI's root, same as SSI index
           MPI_Comm_rank(mpi_c_ssi_roots, &localSsi);
   {
@@ -7134,7 +7136,7 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
         }
         // Step-3: SSI roots scatter xfer data to PETs on their SSI
         // - SSI roots scatter xfer data to their SSI PETs from other SSI
-        MPI_Scatter(xferSsiBC, (npets-ssiLocalPetCount)*inCount, mpitype,
+        MPI_Scatter(xferSsiSBC, (npets-ssiLocalPetCount)*inCount, mpitype,
           xferBC, (npets-ssiLocalPetCount)*outCount, mpitype, 0, mpi_c_ssi);
         // - Each PET upacks the xferBuffer into its "out" data.
         char *outC = (char *)out;
