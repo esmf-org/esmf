@@ -3135,10 +3135,12 @@ end subroutine ESMF_ParseDurString
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TimeIntervalSetStr()"
 !BOP
-! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval from ISO format string
+! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval from an ISO format string
+! \label{API:TimeIntervalSetStr}
 
 ! !INTERFACE:
-      ! Private name; call using ESMF_TimeIntervalSet()
+! Private name; call using ESMF_TimeIntervalSet()
+
       subroutine ESMF_TimeIntervalSetStr(timeinterval, timeIntervalString, rc)
 
 ! !ARGUMENTS:
@@ -3150,14 +3152,25 @@ end subroutine ESMF_ParseDurString
 !
 ! !DESCRIPTION:
 !     Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
-!     string in ISO duration format (P[n]Y[n]M[n]DT[n]H[n]M[n]S).
+!     string in ISO duration format P[y]Y[mm]M[d]DT[h]H[m]M[s]S. See ~\cite{ISO} and ~\cite{ISOnotes} for information about the format. In ESMF's implementation the time values can have the following types: 
+!     \begin{description}
+!      \item[y] - the number of years expressed in up to a 64-bit integer
+!      \item[mm] - the number of months expressed in up to a 64-bit integer
+!      \item[d]  - the number of days expressed in up to a 64-bit integer or a 64-bit floating point value (double)
+!      \item[h] - the number of hours expressed in up to a 32-bit integer or a 64-bit floating point value (double)
+!      \item[m] - the number of minutes expressed in up to a 32-bit integer or a 64-bit floating point value (double)
+!      \item[s] - the number of seconds expressed in up to a 64-bit integer or a 64-bit floating point value (double)
+!     \end{description}
 !
+!   As with the ISO format, in ESMF's implementation the specifier and value can be left out if the value is 0. For example, P1YT1H3M4S is a valid format if the number of months and
+!   days are both 0. The time part including the T can also be left off if the time values are all 0, so P1Y is a valid string if just 1 year is being specified. 
+!      
 !     The arguments are:
 !     \begin{description}
 !     \item[timeinterval]
 !          The object instance to initialize.
 !     \item[timeIntervalString]
-!          ISO format duration string. 
+!          ISO format duration string (e.g. P[y]Y[mm]M[d]DT[h]H[m]M[s]S).
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3179,9 +3192,6 @@ end subroutine ESMF_ParseDurString
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ! DEBUG OUTPUT:
-      !write(*,*) "Duration string is:",timeIntervalString
-      
       ! Parse string into values for each time unit
       call ESMF_ParseDurString(timeintervalString, &
            yy_i8=yy_i8, mm_i8=mm_i8, d_i8=d_i8, d_r8=d_r8, &
@@ -3219,7 +3229,7 @@ end subroutine ESMF_ParseDurString
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TimeIntervalSetStrCal()"
 !BOP
-! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval from ISO format string
+! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval from an ISO format string and calendar
 
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalSet()
@@ -3235,9 +3245,12 @@ end subroutine ESMF_ParseDurString
 !
 !
 ! !DESCRIPTION:
-!     Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
-!     string in ISO duration format (P[n]Y[n]M[n]DT[n]H[n]M[n]S).
-!
+!  Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
+!  string in ISO duration format P[y]Y[mm]M[d]DT[h]H[m]M[s]S. See ~\cite{ISO} and ~\cite{ISOnotes} for
+!  information about the format. Also, see the description for the method
+! {\tt ESMF\_TimeIntervalSetStr()}~\ref{API:TimeIntervalSetStr}
+! for the specific types supported by ESMF for the values in the duration string. 
+!      
 !     The arguments are:
 !     \begin{description}
 !     \item[timeinterval]
@@ -3252,7 +3265,7 @@ end subroutine ESMF_ParseDurString
 !          it contains a calendar.  Alternate to, and mutually exclusive with, 
 !          calkindflag below.  Primarily for specifying a custom calendar kind.
 !     \item[timeIntervalString]
-!          ISO format duration string. 
+!          ISO format duration string (e.g. P[y]Y[mm]M[d]DT[h]H[m]M[s]S).
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3274,9 +3287,6 @@ end subroutine ESMF_ParseDurString
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ! DEBUG OUTPUT:
-      !write(*,*) "Duration string is:",timeIntervalString
-      
       ! Parse string into values for each time unit
       call ESMF_ParseDurString(timeintervalString, &
            yy_i8=yy_i8, mm_i8=mm_i8, d_i8=d_i8, d_r8=d_r8, &
@@ -3315,7 +3325,7 @@ end subroutine ESMF_ParseDurString
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TimeIntervalSetStrCalTyp()"
 !BOP
-! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval from ISO format string
+! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval from an ISO format string and calendar kind
 
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalSet()
@@ -3331,8 +3341,11 @@ end subroutine ESMF_ParseDurString
 !
 !
 ! !DESCRIPTION:
-!     Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
-!     string in ISO duration format (P[n]Y[n]M[n]DT[n]H[n]M[n]S).
+!  Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
+!  string in ISO duration format P[y]Y[mm]M[d]DT[h]H[m]M[s]S. See ~\cite{ISO} and ~\cite{ISOnotes} for
+!  information about the format. Also, see the description for the method
+! {\tt ESMF\_TimeIntervalSetStr()}~\ref{API:TimeIntervalSetStr}
+! for the specific types supported by ESMF for the values in the duration string. 
 !
 !     The arguments are:
 !     \begin{description}
@@ -3343,7 +3356,7 @@ end subroutine ESMF_ParseDurString
 !          calendar above.  More convenient way of specifying a built-in 
 !          calendar kind.
 !     \item[timeIntervalString]
-!          ISO format duration string. 
+!          ISO format duration string (e.g. P[y]Y[mm]M[d]DT[h]H[m]M[s]S).
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3365,10 +3378,7 @@ end subroutine ESMF_ParseDurString
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ! DEBUG OUTPUT:
-      !write(*,*) "Duration string is:",timeIntervalString
-      
-      ! Parse string into values for each time unit
+       ! Parse string into values for each time unit
       call ESMF_ParseDurString(timeintervalString, &
            yy_i8=yy_i8, mm_i8=mm_i8, d_i8=d_i8, d_r8=d_r8, &
            h_r8=h_r8, m_r8=m_r8, s_i8=s_i8, s_r8=s_r8, rc=localrc)      
@@ -3404,7 +3414,7 @@ end subroutine ESMF_ParseDurString
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TimeIntervalSetStrStart()"
 !BOP
-! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval from ISO format string
+! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval from an ISO format string and start time
 
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalSet()
@@ -3420,8 +3430,11 @@ end subroutine ESMF_ParseDurString
 !
 !
 ! !DESCRIPTION:
-!     Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
-!     string in ISO duration format (P[n]Y[n]M[n]DT[n]H[n]M[n]S).
+!  Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
+!  string in ISO duration format P[y]Y[mm]M[d]DT[h]H[m]M[s]S. See ~\cite{ISO} and ~\cite{ISOnotes} for
+!  information about the format. Also, see the description for the method
+! {\tt ESMF\_TimeIntervalSetStr()}~\ref{API:TimeIntervalSetStr}
+! for the specific types supported by ESMF for the values in the duration string. 
 !
 !     The arguments are:
 !     \begin{description}
@@ -3433,7 +3446,7 @@ end subroutine ESMF_ParseDurString
 !          in time.  If not set, and calendar also not set, calendar interval 
 !          "floats" across all calendars and times.
 !     \item[timeIntervalString]
-!          ISO format duration string. 
+!          ISO format duration string (e.g. P[y]Y[mm]M[d]DT[h]H[m]M[s]S).
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3455,9 +3468,6 @@ end subroutine ESMF_ParseDurString
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ! DEBUG OUTPUT:
-      !write(*,*) "Duration string is:",timeIntervalString
-      
       ! Parse string into values for each time unit
       call ESMF_ParseDurString(timeintervalString, &
            yy_i8=yy_i8, mm_i8=mm_i8, d_i8=d_i8, d_r8=d_r8, &
