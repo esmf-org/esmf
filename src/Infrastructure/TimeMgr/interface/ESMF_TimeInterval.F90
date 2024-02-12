@@ -3154,12 +3154,12 @@ end subroutine ESMF_ParseDurString
 !     Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
 !     string in ISO duration format P[y]Y[mm]M[d]DT[h]H[m]M[s]S. See ~\cite{ISO} and ~\cite{ISOnotes} for information about the format. In ESMF's implementation the time values can have the following types: 
 !     \begin{description}
-!      \item[y] the number of years expressed in up to a 64-bit integer.
-!      \item[mm] the number of months expressed in up to a 64-bit integer.
-!      \item[d]  the number of days expressed in up to a 64-bit integer or a 64-bit floating point value (double).
-!      \item[h] the number of hours expressed in up to a 32-bit integer or a 64-bit floating point value (double).
-!      \item[m] the number of minutes expressed in up to a 32-bit integer or a 64-bit floating point value (double).
-!      \item[s] the number of seconds expressed in up to a 64-bit integer or a 64-bit floating point value (double).
+!      \item[y] - the number of years expressed in up to a 64-bit integer
+!      \item[mm] - the number of months expressed in up to a 64-bit integer
+!      \item[d]  - the number of days expressed in up to a 64-bit integer or a 64-bit floating point value (double)
+!      \item[h] - the number of hours expressed in up to a 32-bit integer or a 64-bit floating point value (double)
+!      \item[m] - the number of minutes expressed in up to a 32-bit integer or a 64-bit floating point value (double)
+!      \item[s] - the number of seconds expressed in up to a 64-bit integer or a 64-bit floating point value (double)
 !     \end{description}
 !
 !   As with the ISO format, in ESMF's implementation the specifier and value can be left out if the value is 0. For example, P1YT1H3M4S is a valid format if the number of months and
