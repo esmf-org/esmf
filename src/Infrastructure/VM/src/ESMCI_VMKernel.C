@@ -7047,16 +7047,6 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
           MPI_Allgatherv(ssiLocalPetList, ssiLocalPetCount, MPI_INT,
             &(ssiLocalPetLists[0]), &(ssiLocalPetCounts[0]), &(offsets[0]),
             MPI_INT, mpi_c_ssi_roots);
-          // - SSI roots keep track of all the PETs in the other SSIs
-          // -> TODO: might be obsolete
-          std::vector<std::set<int> > ssiLocalPetSets(ssiCount);
-          j=0;
-          for (int i=0; i<ssiCount; i++){
-            for (int k=0; k<ssiLocalPetCounts[i]; k++){
-              ssiLocalPetSets[i].insert(ssiLocalPetLists[j]);
-              ++j;
-            }
-          }
           // - SSI roots collate data into SSI blocks for sending
           bufferSize = inCount * size;
           bufferSize *= npets - ssiLocalPetCount;
@@ -7128,7 +7118,6 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
           ++j;
         }
       }
-      MPI_Barrier(mpi_c); //TODO: remove once implementation done
     }
 #endif
   }else{
