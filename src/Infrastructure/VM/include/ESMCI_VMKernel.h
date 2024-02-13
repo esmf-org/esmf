@@ -47,7 +47,7 @@ typedef pthread_t       esmf_pthread_t;
 #endif
 
 // define NULL
-#include <cstddef> 
+#include <cstddef>
 
 #include "ESMCI_LogErr.h"
 
@@ -58,6 +58,11 @@ enum vmOp   { vmSUM=1, vmMIN, vmMAX};
 enum vmType { vmBYTE=1, vmI4, vmI8, vmR4, vmR8, vmL4};
 // epochs
 enum vmEpoch  { epochNone=0, epochBuffer};
+// alltoall implementations
+enum vmAlltoall  { alltoallDefault=0, alltoallIalltoall, alltoallSendRecv,
+  alltoallScatter, alltoallHierarchical};
+enum vmAlltoallv  { alltoallvDefault=0, alltoallIalltoallv, alltoallvSendRecv,
+  alltoallvScatter, alltoallvHierarchical};
 
 // Pthread stack sizes
 #define VM_PTHREAD_STACKSIZE_SERVICE  (4194304) //  4MiB for service threads
@@ -352,6 +357,9 @@ class VMK{
     // Communication requests queue
     int nhandles;
     commhandle *firsthandle;
+    // Alltoall implementation options
+    vmAlltoall alltoallMode;
+    vmAlltoallv alltoallvMode;
     // Epoch support
     vmEpoch epoch;
     int epochThrottle;
