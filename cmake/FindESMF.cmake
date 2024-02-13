@@ -109,7 +109,7 @@ if(EXISTS ${ESMFMKFILE})
     endif()
   endif()
 
-  # Add target alias to facilitate unambiguous linking
+  # Add ESMF as an alias to ESMF::ESMF for backward compatibility
   if(NOT TARGET ESMF)
     add_library(ESMF ALIAS ESMF::ESMF)
   endif()
