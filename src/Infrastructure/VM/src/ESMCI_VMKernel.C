@@ -1124,6 +1124,18 @@ void VMK::construct(void *ssarg){
   threadsflag = sarg->threadsflag;
   epochInit();  // start epoch support
 
+  // alltoall implementation options
+#ifdef ESMF_ALLTOALL_MODE
+  alltoallMode = ESMF_ALLTOALL_MODE;
+#else
+  alltoallMode = alltoallDefault;
+#endif
+#ifdef ESMF_ALLTOALLV_MODE
+  alltoallvMode = ESMF_ALLTOALLV_MODE;
+#else
+  alltoallvMode = alltoallvDefault;
+#endif
+
   // need a barrier here before any of the PETs get into user code...
   //barrier();
 }
