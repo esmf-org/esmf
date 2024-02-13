@@ -95,6 +95,8 @@ namespace ESMCI{
     Time         currTime;  // current time
     Time         prevTime;  // previous time
 
+    TimeInterval repeatDuration;  // Duration to repeat over if it's a repeating clock
+   
     ESMC_I8      advanceCount;             // number of times
                                                 //   ESMCI_ClockAdvance has
                                                 //   been called (number of
@@ -229,7 +231,7 @@ namespace ESMCI{
     // friend function to allocate and initialize clock from heap
     friend Clock *ESMCI_ClockCreate(int, const char*, TimeInterval*,
                                  Time*, Time*, TimeInterval*,
-                                 int*, Time*, int*);
+                                 int*, Time*, TimeInterval*, int*);
 // TODO: add overload for ESMC_R8  *runTimeStepCount
 
     // friend function to copy a clock
@@ -284,6 +286,7 @@ namespace ESMCI{
                                  int               *runTimeStepCount=0,
 // TODO: add overload for ESMC_R8             *runTimeStepCount=0,
                                  Time*         refTime=0,
+                                 TimeInterval *repeatDuration=0,
                                  int*               rc=0);
 
     // friend function to copy a clock

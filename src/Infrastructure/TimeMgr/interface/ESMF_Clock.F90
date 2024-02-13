@@ -426,7 +426,7 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_ClockCreate()
       function ESMF_ClockCreateNew(timeStep, startTime, keywordEnforcer, &
-        stopTime, runDuration, runTimeStepCount, refTime, name, rc)
+        stopTime, runDuration, runTimeStepCount, refTime, repeatDuration, name, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Clock) :: ESMF_ClockCreateNew
@@ -439,6 +439,7 @@
       type(ESMF_TimeInterval), intent(in),  optional :: runDuration
       integer,                 intent(in),  optional :: runTimeStepCount
       type(ESMF_Time),         intent(in),  optional :: refTime
+      type(ESMF_TimeInterval), intent(in),  optional :: repeatDuration
       character (len=*),       intent(in),  optional :: name
       integer,                 intent(out), optional :: rc
 
@@ -482,6 +483,9 @@
 !     \item[{[refTime]}]
 !          The {\tt ESMF\_Clock}'s reference time.  Provides reference point
 !          for simulation time (see currSimTime in ESMF\_ClockGet() below).
+!     \item[{[repeatDuration]}]
+!          If specified and not 0, then makes {\tt ESMF\_Clock} a repeating clock that runs for
+!          {\tt repeatDuration} and then resets back to {\tt statTime}.
 !     \item[{[name]}]
 !          The name for the newly created clock.  If not specified, a
 !          default unique name will be generated: "ClockNNN" where NNN
@@ -518,7 +522,7 @@
       ! invoke C to C++ entry point to allocate and initialize new clock
       call c_ESMC_ClockCreateNew(ESMF_ClockCreateNew, nameLen, name, &
                                  timeStep, startTime, stopTime, runDuration, &
-                                 runTimeStepCount, refTime, localrc)
+                                 runTimeStepCount, refTime, repeatDuration, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 

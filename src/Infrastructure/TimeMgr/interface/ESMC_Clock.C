@@ -73,7 +73,7 @@ ESMC_Clock ESMC_ClockCreate(
                               (ESMCI::Time *)&startTime,
                               (ESMCI::Time *)&stopTime,
                               (ESMCI::TimeInterval *)NULL, (int *)NULL,
-                              (ESMCI::Time *)NULL, &localrc);
+                              (ESMCI::Time *)NULL, (ESMCI::TimeInterval *)NULL, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,                                       rc)) {
     clock.ptr = NULL;  // defensive; should already be set in ClockCreate()
     return clock;  // bail out

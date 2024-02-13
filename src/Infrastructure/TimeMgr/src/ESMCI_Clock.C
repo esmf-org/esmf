@@ -61,16 +61,17 @@ int Clock::count=0;
 // !RETURN VALUE:
 //     pointer to newly allocated Clock
 //
-// !ARGUMENTS:
-      int                nameLen,          // in
-      const char        *name,             // in
+// !ARGUMENTS: 
+      int          nameLen,           // in
+      const char   *name,             // in
       TimeInterval *timeStep,         // in
       Time         *startTime,        // in
       Time         *stopTime,         // in
       TimeInterval *runDuration,      // in
-      int               *runTimeStepCount, // in
+      int          *runTimeStepCount, // in
       Time         *refTime,          // in
-      int               *rc) {             // out - return code
+      TimeInterval *repeatDuration,   // in
+      int          *rc) {             // out - return code
 
 // !DESCRIPTION:
 //      Allocates and Initializes a {\tt ESMC\_Clock} with given values

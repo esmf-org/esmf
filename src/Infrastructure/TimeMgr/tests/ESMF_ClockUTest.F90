@@ -91,7 +91,8 @@
 
       ! instantiate a clock 
       type(ESMF_Clock) :: topClock,  clock_360day, clock_no_leap, &
-          clock_gregorian, clock1, clock2, clock3, clock4
+           clock_gregorian, clock1, clock2, clock3, clock4, &
+           repeatClock
 
 
       ! instantiate a calendar
@@ -107,7 +108,7 @@
       integer(ESMF_KIND_I8) :: advanceCounts, nTimeSteps, &
                                year_i8, YY_i8, second_i8
       type(ESMF_TimeInterval) :: timeStep2, currentSimTime, previousSimTime, &
-                                 timeDiff
+                                 timeDiff, repeatDuration
       character(ESMF_MAXSTR) :: clockName
 #endif
 
@@ -2612,6 +2613,33 @@ call ESMF_LogSet (flush=.true.)
       call ESMF_ClockDestroy(clock, rc=rc)
 
       ! ----------------------------------------------------------------------------
+
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(name, *) "Basic repeating clock create test"
+
+      ! Set repeat duration to one hour
+      call ESMF_TimeIntervalSet(repeatDuration, h=1, rc=rc)
+      
+      ! Create Clock
+      repeatClock = ESMF_ClockCreate(timeStep, startTime, &
+           repeatDuration=repeatDuration, rc=rc)
+      
+      ! Free Clock
+      call ESMF_ClockDestroy(repeatClock, rc=rc)
+      
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      
+      ! ----------------------------------------------------------------------------
+
+
+
+      
 #endif
       ! destroy calendars
       call ESMF_CalendarDestroy(gregorianCalendar, rc=rc)
