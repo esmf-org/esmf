@@ -24,6 +24,9 @@
 #define VM_SSISHMLOG_off
 #define VM_SIZELOG_off
 
+#define VM_PROFILE_ALLTOALL
+#define VM_PROFILE_ALLTOALLV
+
 // On SunOS systems there are a couple of macros that need to be set
 // in order to get POSIX compliant functions IPC, pthreads, gethostid
 #ifdef __sun
@@ -89,6 +92,7 @@ using namespace std;
 
 #include "ESMCI_AccInfo.h"
 #include "ESMCI_LogErr.h"
+#include "ESMCI_TraceRegion.h"
 
 #ifndef ESMF_NO_OPENACC
 #include <openacc.h>
@@ -6945,6 +6949,12 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VMK::alltoall()"
   int localrc=0;
+#ifdef VM_PROFILE_ALLTOALL
+  std::stringstream traceTag;
+  traceTag << "VMK::alltoall() inCount=" << inCount
+    << " outCount=" << outCount << " type=" << vmTypeString(type);
+  TraceEventRegionEnter(traceTag.str(), &localrc);
+#endif
   if (mpionly){
     // Find corresponding MPI data type
     MPI_Datatype mpitype;
@@ -7194,6 +7204,9 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
       if (localrc) return localrc;
     }
   }
+#ifdef VM_PROFILE_ALLTOALL
+  TraceEventRegionExit(traceTag.str(), &localrc);
+#endif
   return localrc;
 }
 
@@ -7203,6 +7216,18 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VMK::alltoallv()"
   int localrc=0;
+#ifdef VM_PROFILE_ALLTOALLV
+  unsigned long long int inCount = 0;
+  unsigned long long int outCount = 0;
+  for (int i=0; i < npets; i++){
+    inCount += inCounts[i];
+    outCount += outCounts[i];
+  }
+  std::stringstream traceTag;
+  traceTag << "VMK::alltoallv() inCount=" << inCount
+    << " outCount=" << outCount << " type=" << vmTypeString(type);
+  TraceEventRegionEnter(traceTag.str(), &localrc);
+#endif
   if (mpionly){
     // Find corresponding MPI data type
     MPI_Datatype mpitype;
@@ -7284,6 +7309,9 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
       if (localrc) return localrc;
     }
   }
+#ifdef VM_PROFILE_ALLTOALLV
+  TraceEventRegionExit(traceTag.str(), &localrc);
+#endif
   return localrc;
 }
 

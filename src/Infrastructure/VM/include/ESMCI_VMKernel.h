@@ -527,6 +527,22 @@ class VMK{
 #define XSTR(X) STR(X)
 #define STR(X) #X
     static std::string getEsmfComm(){return std::string(XSTR(ESMF_COMM));}
+    static std::string vmTypeString(vmType type){
+      if (type==vmBYTE){
+        return std::string("vmBYTE");
+      }else if (type=vmI4){
+        return std::string("vmI4");
+      }else if (type=vmI8){
+        return std::string("vmI8");
+      }else if (type=vmR4){
+        return std::string("vmR4");
+      }else if (type=vmR8){
+        return std::string("vmR8");
+      }else if (type=vmL4){
+        return std::string("vmL4");
+      }
+      return std::string("Unknown vmType");
+    }
 
     // p2p communication calls
     int send(const void *message, unsigned long long int size, int dest,
