@@ -30,6 +30,8 @@
 #define VM_PROFILE_ALLTOALLV
 #define VM_LOG_ALLTOALLV
 
+#define VM_ALLTOALL_END_BARRIER
+
 // On SunOS systems there are a couple of macros that need to be set
 // in order to get POSIX compliant functions IPC, pthreads, gethostid
 #ifdef __sun
@@ -7239,6 +7241,9 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
       if (localrc) return localrc;
     }
   }
+#ifdef VM_ALLTOALL_END_BARRIER
+  MPI_Barrier(mpi_c);
+#endif
 #ifdef VM_PROFILE_ALLTOALL
   TraceEventRegionExit(traceTag.str(), &localrc);
 #endif
@@ -7349,6 +7354,9 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
       if (localrc) return localrc;
     }
   }
+#ifdef VM_ALLTOALL_END_BARRIER
+  MPI_Barrier(mpi_c);
+#endif
 #ifdef VM_PROFILE_ALLTOALLV
   TraceEventRegionExit(traceTag.str(), &localrc);
 #endif
