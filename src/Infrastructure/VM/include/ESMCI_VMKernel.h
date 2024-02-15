@@ -61,7 +61,7 @@ enum vmEpoch  { epochNone=0, epochBuffer};
 // alltoall implementations
 enum vmAlltoall  { alltoallDefault=0, alltoallIalltoall, alltoallSendRecv,
   alltoallScatter, alltoallHierarchical};
-enum vmAlltoallv  { alltoallvDefault=0, alltoallIalltoallv, alltoallvSendRecv,
+enum vmAlltoallv  { alltoallvDefault=0, alltoallvIalltoall, alltoallvSendRecv,
   alltoallvScatter, alltoallvHierarchical};
 
 // Pthread stack sizes
@@ -530,18 +530,46 @@ class VMK{
     static std::string vmTypeString(vmType type){
       if (type==vmBYTE){
         return std::string("vmBYTE");
-      }else if (type=vmI4){
+      }else if (type==vmI4){
         return std::string("vmI4");
-      }else if (type=vmI8){
+      }else if (type==vmI8){
         return std::string("vmI8");
-      }else if (type=vmR4){
+      }else if (type==vmR4){
         return std::string("vmR4");
-      }else if (type=vmR8){
+      }else if (type==vmR8){
         return std::string("vmR8");
-      }else if (type=vmL4){
+      }else if (type==vmL4){
         return std::string("vmL4");
       }
       return std::string("Unknown vmType");
+    }
+    static std::string alltoallModeString(vmAlltoall alltoallMode){
+      if (alltoallMode==alltoallDefault){
+        return std::string("alltoallDefault");
+      }else if (alltoallMode==alltoallIalltoall){
+        return std::string("alltoallIalltoall");
+      }else if (alltoallMode==alltoallSendRecv){
+        return std::string("alltoallSendRecv");
+      }else if (alltoallMode==alltoallScatter){
+        return std::string("alltoallScatter");
+      }else if (alltoallMode==alltoallHierarchical){
+        return std::string("alltoallHierarchical");
+      }
+      return std::string("Unknown vmAlltoall Mode");
+    }
+    static std::string alltoallvModeString(vmAlltoallv alltoallvMode){
+      if (alltoallvMode==alltoallvDefault){
+        return std::string("alltoallvDefault");
+      }else if (alltoallvMode==alltoallvIalltoall){
+        return std::string("alltoallvIalltoall");
+      }else if (alltoallvMode==alltoallvSendRecv){
+        return std::string("alltoallvSendRecv");
+      }else if (alltoallvMode==alltoallvScatter){
+        return std::string("alltoallvScatter");
+      }else if (alltoallvMode==alltoallvHierarchical){
+        return std::string("alltoallvHierarchical");
+      }
+      return std::string("Unknown vmAlltoallv Mode");
     }
 
     // p2p communication calls

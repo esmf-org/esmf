@@ -6957,7 +6957,8 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
 #if (defined VM_PROFILE_ALLTOALL) || (defined VM_LOG_ALLTOALL)
   std::stringstream traceTag;
   traceTag << "VMK::alltoall() inCount=" << inCount
-    << " outCount=" << outCount << " type=" << vmTypeString(type);
+    << " outCount=" << outCount << " type=" << vmTypeString(type)
+    << " alltoallMode=" << alltoallModeString(alltoallMode);
 #endif
 #ifdef VM_PROFILE_ALLTOALL
   TraceEventRegionEnter(traceTag.str(), &localrc);
@@ -7008,6 +7009,7 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
       for (int i=0; i<npets; i++){
         MPI_Scatter(in, inCount, mpitype, outC+outCount*i*size, outCount,
           mpitype, i, mpi_c);
+        MPI_Barrier(mpi_c);
       }
     }else if (alltoallMode == alltoallHierarchical){
 #ifdef VM_LOG_ALLTOALL
@@ -7265,7 +7267,8 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
   }
   std::stringstream traceTag;
   traceTag << "VMK::alltoallv() inCount=" << inCount
-    << " outCount=" << outCount << " type=" << vmTypeString(type);
+    << " outCount=" << outCount << " type=" << vmTypeString(type)
+    << " alltoallvMode=" << alltoallvModeString(alltoallvMode);
 #endif
 #ifdef VM_PROFILE_ALLTOALLV
   TraceEventRegionEnter(traceTag.str(), &localrc);
@@ -7276,35 +7279,53 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
   if (mpionly){
     // Find corresponding MPI data type
     MPI_Datatype mpitype;
+    int size=0;
     switch (type){
     case vmBYTE:
       mpitype = MPI_BYTE;
+      size=1;
       break;
     case vmI4:
       mpitype = MPI_INT;
+      size=4;
       break;
     case vmI8:
       mpitype = MPI_LONG_LONG_INT;
+      size=8;
       break;
     case vmR4:
       mpitype = MPI_FLOAT;
+      size=4;
       break;
     case vmR8:
       mpitype = MPI_DOUBLE;
+      size=8;
       break;
     case vmL4:
       mpitype = MPI_LOGICAL;
+      size=4;
       break;
     }
-#if 1
-    localrc = MPI_Alltoallv(in, inCounts, inOffsets, mpitype, out, outCounts,
-      outOffsets, mpitype, mpi_c);
-#else
-    MPI_Request req;
-    localrc = MPI_Ialltoallv(in, inCounts, inOffsets, mpitype, out, outCounts,
-      outOffsets, mpitype, mpi_c, &req);
-    MPI_Wait(&req, MPI_STATUS_IGNORE);
-#endif
+    if (alltoallvMode == alltoallvDefault){
+      localrc = MPI_Alltoallv(in, inCounts, inOffsets, mpitype, out, outCounts,
+        outOffsets, mpitype, mpi_c);
+    }else if (alltoallvMode == alltoallvIalltoall){
+      MPI_Request req;
+      localrc = MPI_Ialltoallv(in, inCounts, inOffsets, mpitype, out, outCounts,
+        outOffsets, mpitype, mpi_c, &req);
+      MPI_Wait(&req, MPI_STATUS_IGNORE);
+    }else if (alltoallvMode == alltoallvScatter){
+      char *outC = (char *)out;
+      for (int i=0; i<npets; i++){
+        MPI_Scatterv(in, inCounts, inOffsets, mpitype,
+          outC+outOffsets[i]*size, outCounts[i], mpitype, i, mpi_c);
+        MPI_Barrier(mpi_c);
+      }
+    }else{
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+        "Unsupported `alltoallvMode`", ESMC_CONTEXT, &localrc);
+      return localrc;
+    }
   }else{
     // This is a very simplistic, probably very bad peformance implementation.
     int size=0;
