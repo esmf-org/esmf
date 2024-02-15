@@ -12,6 +12,7 @@
 #define ESMF_FILENAME "ESMF_StateReconcile.F90"
 !
 #define RECONCILE_ZAP_LOG_off
+#define RECONCILE_LOG
 !
 ! ESMF StateReconcile module
 module ESMF_StateReconcileMod
@@ -356,6 +357,9 @@ contains
     ! -------------------------------------------------------------------------
     ! 0.) Interchange item counts between PETs.  Set up counts/displacements
     ! -------------------------------------------------------------------------
+#ifdef RECONCILE_LOG
+    call ESMF_LogWrite("0.) Interchange item counts", ESMF_LOGMSG_INFO)
+#endif
     if (profile) then
       call ESMF_TraceRegionEnter("0.) Interchange item counts", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -391,6 +395,9 @@ contains
     ! and VMId info for each object contained in the State.
     ! Note that element zero is reserved for the State itself.
     ! -------------------------------------------------------------------------
+#ifdef RECONCILE_LOG
+    call ESMF_LogWrite("1.) Construct send arrays", ESMF_LOGMSG_INFO)
+#endif
     if (profile) then
       call ESMF_TraceRegionEnter("1.) Construct send arrays", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -536,6 +543,9 @@ contains
     ! 2.) All PETs send their items Ids and VMIds to all the other PETs,
     ! then create local directories of which PETs have which ids/VMIds.
     ! -------------------------------------------------------------------------
+#ifdef RECONCILE_LOG
+    call ESMF_LogWrite("2.) Send arrays exchange", ESMF_LOGMSG_INFO)
+#endif
     if (profile) then
       call ESMF_TraceRegionEnter("2.) Send arrays exchange", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -581,6 +591,9 @@ contains
     ! currently-being-processed sending PET.  Note that multiple PETs
     ! can 'offer' an item.
     ! -------------------------------------------------------------------------
+#ifdef RECONCILE_LOG
+    call ESMF_LogWrite("3.) Construct needs list", ESMF_LOGMSG_INFO)
+#endif
     if (profile) then
       call ESMF_TraceRegionEnter("3.) Construct needs list", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -619,6 +632,9 @@ contains
     ! and corresponds to, the ID and VMId arrays that were previously
     ! offered.
     ! -------------------------------------------------------------------------
+#ifdef RECONCILE_LOG
+    call ESMF_LogWrite("4.) Communicate needs back", ESMF_LOGMSG_INFO)
+#endif
     if (profile) then
       call ESMF_TraceRegionEnter("4.) Communicate needs back", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -653,6 +669,9 @@ contains
     ! -------------------------------------------------------------------------
     ! 5.) Serialize needed objects
     ! -------------------------------------------------------------------------
+#ifdef RECONCILE_LOG
+    call ESMF_LogWrite("5.) Serialize needed objects", ESMF_LOGMSG_INFO)
+#endif
     if (profile) then
       call ESMF_TraceRegionEnter("5.) Serialize needed objects", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -691,6 +710,9 @@ contains
     ! -------------------------------------------------------------------------
     ! 6.) Send/receive serialized objects to whoever needed them
     ! -------------------------------------------------------------------------
+#ifdef RECONCILE_LOG
+    call ESMF_LogWrite("6.) Send/receive serialized objects", ESMF_LOGMSG_INFO)
+#endif
     if (profile) then
       call ESMF_TraceRegionEnter("6.) Send/receive serialized objects", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -731,6 +753,9 @@ contains
     ! 7.) Deserialize received objects and create proxies (recurse on
     !     nested States as needed)
     ! -------------------------------------------------------------------------
+#ifdef RECONCILE_LOG
+    call ESMF_LogWrite("7.) Deserialize received objects and create proxies", ESMF_LOGMSG_INFO)
+#endif
     if (profile) then
       call ESMF_TraceRegionEnter("7.) Deserialize received objects and create proxies", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -852,6 +877,9 @@ contains
     ! -------------------------------------------------------------------------
     ! 8.) Attributes on the State itself
     ! -------------------------------------------------------------------------
+#ifdef RECONCILE_LOG
+    call ESMF_LogWrite("8.) Attributes on the State itself", ESMF_LOGMSG_INFO)
+#endif
     if (profile) then
       call ESMF_TraceRegionEnter("8.) Attributes on the State itself", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
