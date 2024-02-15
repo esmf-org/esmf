@@ -25,7 +25,10 @@
 #define VM_SIZELOG_off
 
 #define VM_PROFILE_ALLTOALL
+#define VM_LOG_ALLTOALL
+
 #define VM_PROFILE_ALLTOALLV
+#define VM_LOG_ALLTOALLV
 
 // On SunOS systems there are a couple of macros that need to be set
 // in order to get POSIX compliant functions IPC, pthreads, gethostid
@@ -6949,11 +6952,16 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VMK::alltoall()"
   int localrc=0;
-#ifdef VM_PROFILE_ALLTOALL
+#if (defined VM_PROFILE_ALLTOALL) || (defined VM_LOG_ALLTOALL)
   std::stringstream traceTag;
   traceTag << "VMK::alltoall() inCount=" << inCount
     << " outCount=" << outCount << " type=" << vmTypeString(type);
+#endif
+#ifdef VM_PROFILE_ALLTOALL
   TraceEventRegionEnter(traceTag.str(), &localrc);
+#endif
+#ifdef VM_LOG_ALLTOALL
+  ESMC_LogDefault.Write(traceTag.str(), ESMC_LOGMSG_DEBUG);
 #endif
   if (mpionly){
     // Find corresponding MPI data type
@@ -7000,11 +7008,14 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
           mpitype, i, mpi_c);
       }
     }else if (alltoallMode == alltoallHierarchical){
-  {
-    std::stringstream msg;
-    msg << "VMK::alltoall(): hierarchical implementation inCount=" << inCount;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
-  }
+#ifdef VM_LOG_ALLTOALL
+      {
+        std::stringstream msg;
+        msg << "VMK::alltoall(): hierarchical implementation inCount="
+          << inCount;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
       // Hierarchical Alltoall implementation, with SSI roots as intermediary
       // Step-0: SSI-local exchange via alltoallv to avoid data movements.
       std::vector<int> inCounts(ssiLocalPetCount, inCount);
@@ -7023,16 +7034,26 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
       if (ssiCount > 1){
         // Multiple SSIs in the VM, under each mpi_c_ssi communicator,
         // using task 0 as the SSI root PET below.
-  {
-    std::stringstream msg;
-    msg << "VMK::alltoall(): ssiCount=" << ssiCount;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
-  }
+#ifdef VM_LOG_ALLTOALL
+        {
+          std::stringstream msg;
+          msg << "VMK::alltoall(): ssiCount=" << ssiCount;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        }
+#endif
         // Step-1: SSI root PETs gather xfer data on their SSI.
         // - Each PET prepares an xferBuffer to send its "in" data that is
         //   destined for PETs outside the local SSI to its SSI root PET.
         unsigned long bufferSize = inCount * size;
         bufferSize *= npets - ssiLocalPetCount;
+#ifdef VM_LOG_ALLTOALL
+        {
+          std::stringstream msg;
+          msg << "VMK::alltoall(): line=" << __LINE__ << " Step-1: ";
+          msg << "bufferSize=" << bufferSize;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        }
+#endif
         std::vector<char> xferBuffer(bufferSize);
         char *xferBC = (char *)&(xferBuffer[0]);
         char *inC = (char *)in;
@@ -7055,6 +7076,13 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
         MPI_Gather(xferBC, (npets-ssiLocalPetCount)*inCount, mpitype,
           xferSsiBC, (npets-ssiLocalPetCount)*outCount, mpitype, 0, mpi_c_ssi);
         // Step-2: Total exchange between SSI roots
+#ifdef VM_LOG_ALLTOALL
+        {
+          std::stringstream msg;
+          msg << "VMK::alltoall(): line=" << __LINE__ << " Step-2: ";
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        }
+#endif
         char *xferSsiSBC = NULL;
         std::vector<char> xferSsiSendBuffer;
         if (mpi_c_ssi_roots != MPI_COMM_NULL){
@@ -7140,6 +7168,13 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
         }
         // Step-3: SSI roots scatter xfer data to PETs on their SSI
         // - SSI roots scatter xfer data to their SSI PETs from other SSI
+#ifdef VM_LOG_ALLTOALL
+        {
+          std::stringstream msg;
+          msg << "VMK::alltoall(): line=" << __LINE__ << " Step-3: ";
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        }
+#endif
         MPI_Scatter(xferSsiSBC, (npets-ssiLocalPetCount)*inCount, mpitype,
           xferBC, (npets-ssiLocalPetCount)*outCount, mpitype, 0, mpi_c_ssi);
         // - Each PET upacks the xferBuffer into its "out" data.
@@ -7216,7 +7251,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VMK::alltoallv()"
   int localrc=0;
-#ifdef VM_PROFILE_ALLTOALLV
+#if (defined VM_PROFILE_ALLTOALLV) || (defined VM_LOG_ALLTOALLV)
   unsigned long long int inCount = 0;
   unsigned long long int outCount = 0;
   for (int i=0; i < npets; i++){
@@ -7226,7 +7261,12 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
   std::stringstream traceTag;
   traceTag << "VMK::alltoallv() inCount=" << inCount
     << " outCount=" << outCount << " type=" << vmTypeString(type);
+#endif
+#ifdef VM_PROFILE_ALLTOALLV
   TraceEventRegionEnter(traceTag.str(), &localrc);
+#endif
+#ifdef VM_LOG_ALLTOALLV
+  ESMC_LogDefault.Write(traceTag.str(), ESMC_LOGMSG_DEBUG);
 #endif
   if (mpionly){
     // Find corresponding MPI data type
