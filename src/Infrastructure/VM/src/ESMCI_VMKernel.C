@@ -26,6 +26,7 @@
 
 #define VM_PROFILE_ALLTOALL
 #define VM_LOG_ALLTOALL
+#define VM_MEMLOG_AllTOALL
 
 #define VM_PROFILE_ALLTOALLV
 #define VM_LOG_ALLTOALLV
@@ -6966,6 +6967,9 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
 #ifdef VM_LOG_ALLTOALL
   ESMC_LogDefault.Write(traceTag.str(), ESMC_LOGMSG_DEBUG);
 #endif
+#ifdef VM_MEMLOG_AllTOALL
+  VM::logMemInfo(std::string("VMK::alltoall() intro: "));
+#endif
   if (mpionly){
     // Find corresponding MPI data type
     MPI_Datatype mpitype;
@@ -7080,13 +7084,6 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
         MPI_Gather(xferBC, (npets-ssiLocalPetCount)*inCount, mpitype,
           xferSsiBC, (npets-ssiLocalPetCount)*outCount, mpitype, 0, mpi_c_ssi);
         // Step-2: Total exchange between SSI roots
-#ifdef VM_LOG_ALLTOALL
-        {
-          std::stringstream msg;
-          msg << "VMK::alltoall(): line=" << __LINE__ << " Step-2: ";
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
-        }
-#endif
         char *xferSsiSBC = NULL;
         std::vector<char> xferSsiSendBuffer;
         if (mpi_c_ssi_roots != MPI_COMM_NULL){
@@ -7116,6 +7113,14 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
           bufferSize = inCount * size;
           bufferSize *= npets - ssiLocalPetCount;
           bufferSize *= ssiLocalPetCount;
+#ifdef VM_LOG_ALLTOALL
+        {
+          std::stringstream msg;
+          msg << "VMK::alltoall(): line=" << __LINE__ << " Step-2: ";
+          msg << "bufferSize=" << bufferSize;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        }
+#endif
           xferSsiSendBuffer.resize(bufferSize);
           xferSsiSBC = (char *)&(xferSsiSendBuffer[0]);
           int localSsi; // rank of local SSI's root, same as SSI index
