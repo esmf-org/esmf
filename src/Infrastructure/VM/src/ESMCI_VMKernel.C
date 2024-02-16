@@ -2105,32 +2105,35 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
               MPI_INFO_NULL, &new_mpi_c_ssi);
           else
             new_mpi_c_ssi = MPI_COMM_NULL;
+          // set up communicator across root pets of each SSI
+          if (new_mpi_c != MPI_COMM_NULL){
+            int color;
+            MPI_Comm_rank(new_mpi_c_ssi, &color);
+            if (color>0) color = MPI_UNDEFINED; // only root PETs on each SSI
+            MPI_Comm_split(new_mpi_c, color, 0, &new_mpi_c_ssi_roots);
+          }else{
+            new_mpi_c_ssi_roots = MPI_COMM_NULL;
+          }
 #ifdef VM_SSISHMLOG_on
           {
             std::stringstream msg;
-            int sz1, sz2, sz3;
-            sz1 = sz2 = sz3 = -1;
+            int sz1, sz2, sz3, sz4;
+            sz1 = sz2 = sz3 = sz4 = -1;
             MPI_Comm_size(vmp->mpi_c_part, &sz1);
             if (new_mpi_c != MPI_COMM_NULL)
               MPI_Comm_size(new_mpi_c, &sz2);
             if (new_mpi_c_ssi != MPI_COMM_NULL)
               MPI_Comm_size(new_mpi_c_ssi, &sz3);
+            if (new_mpi_c_ssi_roots != MPI_COMM_NULL)
+              MPI_Comm_size(new_mpi_c_ssi_roots, &sz4);
             msg << "VMK::startup()#" << __LINE__
               << ", mpi_c_part of size=" << sz1
               << ", new_mpi_c of size=" << sz2
-              << ", created mpi_c_ssi of size=" << sz3;
+              << ", created new_mpi_c_ssi of size=" << sz3
+              << ", created new_mpi_c_ssi_roots of size=" << sz4;
             ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
-          // set up communicator across root pets of each SSI
-          if (new_mpi_c_ssi != MPI_COMM_NULL){
-            int color;
-            MPI_Comm_rank(new_mpi_c_ssi, &color);
-            if (color>0) color = MPI_UNDEFINED; // only root PETs on each SSI
-            MPI_Comm_split(vmp->mpi_c_part, color, 0, &new_mpi_c_ssi_roots);
-          }else{
-            new_mpi_c_ssi_roots = MPI_COMM_NULL;
-          }
 #else
           new_mpi_c_ssi = MPI_COMM_NULL;
           new_mpi_c_ssi_roots = MPI_COMM_NULL;
