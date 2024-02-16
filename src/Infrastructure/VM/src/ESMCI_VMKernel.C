@@ -21,7 +21,7 @@
 #define VM_COMMQUEUELOG_off
 #define VM_EPOCHLOG_off
 #define VM_EPOCHMEMLOG_off
-#define VM_SSISHMLOG_off
+#define VM_SSISHMLOG_on
 #define VM_SIZELOG_off
 
 #define VM_PROFILE_ALLTOALL
