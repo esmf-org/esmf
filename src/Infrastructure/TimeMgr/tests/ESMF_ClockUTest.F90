@@ -65,7 +65,7 @@
       type(ESMF_TimeInterval) :: timeStep
       type(ESMF_Time) :: startTime
 
-      logical :: isCreated
+      logical :: isCreated, correct
 
 #ifdef ESMF_TESTEXHAUSTIVE
 
@@ -102,13 +102,13 @@
       type(ESMF_Time) :: stopTime, stopTime2, stopTime3, stopTime4, syncTime, &
                          previousTime, current_time, currentTime, startTime2
       real(ESMF_KIND_R8) :: realSeconds
-      integer :: timeStepCount
+      integer :: timeStepCount,i
       integer :: datetime(8)
       integer(ESMF_KIND_I4) :: day 
       integer(ESMF_KIND_I8) :: advanceCounts, nTimeSteps, &
-                               year_i8, YY_i8, second_i8
+                               year_i8, YY_i8, second_i8, repeatCount
       type(ESMF_TimeInterval) :: timeStep2, currentSimTime, previousSimTime, &
-                                 timeDiff, repeatDuration
+                                 timeDiff, repeatDuration,repeatDurationOut
       character(ESMF_MAXSTR) :: clockName
 #endif
 
@@ -2619,14 +2619,75 @@ call ESMF_LogSet (flush=.true.)
 
       !EX_UTest
       write(failMsg, *) " Returned ESMF_FAILURE"
-      write(name, *) "Basic repeating clock create test"
+      write(name, *) "Basic repeating clock create and get test."
 
+      ! Simple test of repeating within one hour
+      
+      ! Set start time 
+      call ESMF_TimeSet(startTime, yy=2024, mm=3, dd=14, h=5, &
+                                calendar=gregorianCalendar, rc=rc)
+
+      ! Set timeStep to one minute
+      call ESMF_TimeIntervalSet(timeStep, m=1, rc=rc)
+      
       ! Set repeat duration to one hour
       call ESMF_TimeIntervalSet(repeatDuration, h=1, rc=rc)
+
+      ! Create Clock
+      repeatClock = ESMF_ClockCreate(timeStep, startTime, &
+           repeatDuration=repeatDuration, rc=rc)
+
+      ! Make sure repeat information is correct
+      call ESMF_ClockGet(repeatClock, &
+           repeatDuration=repeatDurationOut, &
+           repeatCount=repeatCount, rc=rc)
+
+      ! Check info
+      correct=.true.
+      if (repeatDuration .ne. repeatDurationOut) correct=.false.
+      if (repeatCount .ne. 0) correct=.false.
+      
+      ! Free Clock
+      call ESMF_ClockDestroy(repeatClock, rc=rc)
+      
+      call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      
+      ! ----------------------------------------------------------------------------
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(name, *) "Basic repeating clock create and run test"
+
+      ! Simple test of repeating within one hour
+      
+      ! Set start time 
+      call ESMF_TimeSet(startTime, yy=2024, mm=3, dd=14, h=5, &
+                                calendar=gregorianCalendar, rc=rc)
+
+      ! Set timeStep to one minute
+      call ESMF_TimeIntervalSet(timeStep, m=1, rc=rc)
+      
+      ! Set repeat duration to one hour
+      call ESMF_TimeIntervalSet(repeatDuration, h=1, rc=rc)
+
       
       ! Create Clock
       repeatClock = ESMF_ClockCreate(timeStep, startTime, &
            repeatDuration=repeatDuration, rc=rc)
+
+      ! Iterate for 120 minutes
+      do i=1,120
+        call ESMF_ClockAdvance(repeatClock, rc=rc)
+      end do
+
+      ! Make sure advance count is correct
+      call ESMF_ClockGet(repeatClock, advanceCount=advanceCounts, rc=rc)
+
+      write(*,*) "advanceCounts=",advanceCounts
       
       ! Free Clock
       call ESMF_ClockDestroy(repeatClock, rc=rc)
@@ -2637,6 +2698,7 @@ call ESMF_LogSet (flush=.true.)
       
       ! ----------------------------------------------------------------------------
 
+      
 
 
       

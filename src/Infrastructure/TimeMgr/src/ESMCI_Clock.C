@@ -155,6 +155,16 @@ int Clock::count=0;
 
     clock->prevTime = clock->currTime = clock->startTime;
 
+    // Set repeat information
+    clock->repeat=false;
+    clock->repeatDuration=(TimeInterval)0;
+    clock->repeatCount=0;
+    if ((repeatDuration != ESMC_NULL_POINTER) &&
+        (*repeatDuration !=0 )){ // Gives a way to not have repeat, but still have arg. (useful for C->F)
+      clock->repeat=true;
+      clock->repeatDuration=*repeatDuration;
+    }
+
     returnCode = clock->validate();
     if (ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, 
       ESMC_CONTEXT, rc)) {
@@ -410,7 +420,10 @@ int Clock::count=0;
       int            *timeZone,         // out
       ESMC_I8        *advanceCount,     // out
       int            *alarmCount,       // out
-      ESMC_Direction *direction) {      // out
+      ESMC_Direction *direction,        // out
+      TimeInterval   *repeatDuration,   // out
+      ESMC_I8        *repeatCount       // out
+                     ) {      
 
 // !DESCRIPTION:
 //      Gets a {\tt ESMC\_Clock}'s property values
@@ -528,7 +541,10 @@ int Clock::count=0;
     if (advanceCount != ESMC_NULL_POINTER) *advanceCount = this->advanceCount;
     if (alarmCount   != ESMC_NULL_POINTER) *alarmCount   = this->alarmCount;
     if (direction    != ESMC_NULL_POINTER) *direction    = this->direction;
+    if (repeatDuration  != ESMC_NULL_POINTER) *repeatDuration  = this->repeatDuration;
+    if (repeatCount  != ESMC_NULL_POINTER) *repeatCount  = this->repeatCount;
 
+    
     return(rc);
 
  } // end Clock::get
@@ -1385,12 +1401,16 @@ int Clock::count=0;
       refTime              = clock.refTime;
       currTime             = clock.currTime;
       prevTime             = clock.prevTime;
+      repeat               = clock.repeat;
+      repeatDuration       = clock.repeatDuration;
+      repeatCount          = clock.repeatCount;
       advanceCount         = clock.advanceCount;
       direction            = clock.direction;
       userChangedDirection = clock.userChangedDirection;
       stopTimeEnabled      = clock.stopTimeEnabled;
       id                   = clock.id;
 
+      
       // copy = true;   // TODO: Unique copy ? (id = ++count) (review operator==
                         //       and operator!=)  Must do same in assignment
                         //       overloaded method and interface from F90.
@@ -1908,6 +1928,10 @@ int Clock::count=0;
     userChangedDirection = false;
     stopTimeEnabled = false;
     id = ++count;  // TODO: inherit from ESMC_Base class
+    repeat               = false;
+    repeatDuration       = (TimeInterval)0;
+    repeatCount          = 0;
+    
     // copy = false;  // TODO: see notes in constructors and destructor below
 
  } // end Clock

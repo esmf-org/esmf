@@ -156,9 +156,12 @@ int ESMC_ClockGet(ESMC_Clock clock, ESMC_TimeInterval *currSimTime,
                              (ESMCI::Calendar **)NULL,
                              (ESMC_CalKind_Flag *)NULL,
                              (int *)NULL,
-                                                    advanceCount,
+                             advanceCount,
                              (int *)NULL,
-                             (ESMC_Direction *)NULL);
+                             (ESMC_Direction *)NULL,
+                             (ESMCI::TimeInterval *)NULL,
+                             (ESMC_I8 *)NULL                                              
+                                               );
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                     &rc)) return rc;  // bail out
   // return successfully

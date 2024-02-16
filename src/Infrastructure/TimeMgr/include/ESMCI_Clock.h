@@ -95,7 +95,11 @@ namespace ESMCI{
     Time         currTime;  // current time
     Time         prevTime;  // previous time
 
+   
+    bool         repeat;  // If true, this is a repeating clock
     TimeInterval repeatDuration;  // Duration to repeat over if it's a repeating clock
+    ESMC_I8     repeatCount;             // the number of times the clock has repeated
+   
    
     ESMC_I8      advanceCount;             // number of times
                                                 //   ESMCI_ClockAdvance has
@@ -165,7 +169,10 @@ namespace ESMCI{
                       int               *timeZone=0,
                       ESMC_I8      *advanceCount=0, 
                       int               *alarmCount=0,
-                      ESMC_Direction    *direction=0);
+                      ESMC_Direction    *direction=0,
+                      TimeInterval *repeatDuration=0,
+                      ESMC_I8      *repeatCount=0
+            );
 
     int advance(TimeInterval *timeStep=0,
                           char *ringingAlarmList1stElementPtr=0, 
