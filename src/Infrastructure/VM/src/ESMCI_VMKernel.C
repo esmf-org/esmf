@@ -2105,10 +2105,14 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
 #ifdef VM_SSISHMLOG_on
           {
             std::stringstream msg;
-            int sz;
-            MPI_Comm_size(new_mpi_c_ssi, &sz);
+            int sz1, sz2, sz3;
+            MPI_Comm_size(vmp->mpi_c_part, &sz1);
+            MPI_Comm_size(new_mpi_c, &sz2);
+            MPI_Comm_size(new_mpi_c_ssi, &sz3);
             msg << "VMK::startup()#" << __LINE__
-              << " created mpi_c_ssi of size=" << sz;
+              << " mpi_c_part of size=" << sz1
+              << " new_mpi_c of size=" << sz2
+              << " created mpi_c_ssi of size=" << sz3;
             ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
