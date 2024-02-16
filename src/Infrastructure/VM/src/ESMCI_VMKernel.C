@@ -7036,6 +7036,17 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
         inOffsets[i] = ssiLocalPetList[i] * inCount;
         outOffsets[i] = ssiLocalPetList[i] * outCount;
       }
+#ifdef VM_LOG_ALLTOALL
+      {
+        int mpi_c_ssi_size;
+        MPI_Comm_size(mpi_c_ssi, &mpi_c_ssi_size);
+        std::stringstream msg;
+        msg << "VMK::alltoall(): line=" << __LINE__ << " Step-0: ";
+        msg << " ssiLocalPetCount=" << ssiLocalPetCount;
+        msg << " mpi_c_ssi_size=" << mpi_c_ssi_size;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
       MPI_Alltoallv(in, &(inCounts[0]), &(inOffsets[0]), mpitype,
         out, &(outCounts[0]), &(outOffsets[0]), mpitype, mpi_c_ssi);
       // Only go up the hierarchy if there are more than one SSI in the VM
