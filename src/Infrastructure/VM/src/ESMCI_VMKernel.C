@@ -2100,27 +2100,37 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
           sarg[0].mpi_c_freeflag = 1; // responsible to free the communicator
 #if (MPI_VERSION >= 3)
           // set up communicator across single-system-images SSIs
-          MPI_Comm_split_type(vmp->mpi_c_part, MPI_COMM_TYPE_SHARED, 0,
-            MPI_INFO_NULL, &new_mpi_c_ssi);
+          if (new_mpi_c != MPI_COMM_NULL)
+            MPI_Comm_split_type(new_mpi_c, MPI_COMM_TYPE_SHARED, 0,
+              MPI_INFO_NULL, &new_mpi_c_ssi);
+          else
+            new_mpi_c_ssi = MPI_COMM_NULL;
 #ifdef VM_SSISHMLOG_on
           {
             std::stringstream msg;
             int sz1, sz2, sz3;
+            sz1 = sz2 = sz3 = -1;
             MPI_Comm_size(vmp->mpi_c_part, &sz1);
-            MPI_Comm_size(new_mpi_c, &sz2);
-            MPI_Comm_size(new_mpi_c_ssi, &sz3);
+            if (new_mpi_c != MPI_COMM_NULL)
+              MPI_Comm_size(new_mpi_c, &sz2);
+            if (new_mpi_c_ssi != MPI_COMM_NULL)
+              MPI_Comm_size(new_mpi_c_ssi, &sz3);
             msg << "VMK::startup()#" << __LINE__
-              << " mpi_c_part of size=" << sz1
-              << " new_mpi_c of size=" << sz2
-              << " created mpi_c_ssi of size=" << sz3;
+              << ", mpi_c_part of size=" << sz1
+              << ", new_mpi_c of size=" << sz2
+              << ", created mpi_c_ssi of size=" << sz3;
             ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
           // set up communicator across root pets of each SSI
-          int color;
-          MPI_Comm_rank(new_mpi_c_ssi, &color);
-          if (color>0) color = MPI_UNDEFINED; // only root PETs on each SSI
-          MPI_Comm_split(vmp->mpi_c_part, color, 0, &new_mpi_c_ssi_roots);
+          if (new_mpi_c_ssi != MPI_COMM_NULL){
+            int color;
+            MPI_Comm_rank(new_mpi_c_ssi, &color);
+            if (color>0) color = MPI_UNDEFINED; // only root PETs on each SSI
+            MPI_Comm_split(vmp->mpi_c_part, color, 0, &new_mpi_c_ssi_roots);
+          }else{
+            new_mpi_c_ssi_roots = MPI_COMM_NULL;
+          }
 #else
           new_mpi_c_ssi = MPI_COMM_NULL;
           new_mpi_c_ssi_roots = MPI_COMM_NULL;
