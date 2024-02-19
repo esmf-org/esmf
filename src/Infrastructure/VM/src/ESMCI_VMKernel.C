@@ -7470,7 +7470,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
             ssiLocalOutOffsets[i] = rootBufferOutSize;
             ssiLocalInCounts[i] = ssiLocalInCounts[i] = 0;
             for (int k=0; k<npets; k++){
-              if (ssiLocalPetSet.find(i) != ssiLocalPetSet.end())
+              if (ssiLocalPetSet.find(k) != ssiLocalPetSet.end())
                 continue; // skip PETs on the same SSI
               ssiLocalInCounts[i] += ssiInCounts[i*npets+k];
               ssiLocalOutCounts[i] += ssiOutCounts[i*npets+k];
