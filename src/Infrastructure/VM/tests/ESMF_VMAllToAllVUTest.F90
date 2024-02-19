@@ -164,6 +164,7 @@ program ESMF_VMAllToAllVUTest
   enddo
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+
   !Testing with Real*4 arguments
   !==============================
   !------------------------------------------------------------------------
@@ -272,7 +273,7 @@ program ESMF_VMAllToAllVUTest
   enddo
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#endif
+
   !Test with VMId arguments
   !===========================
 #if 0
@@ -390,6 +391,7 @@ program ESMF_VMAllToAllVUTest
   call ESMF_VMIdDestroy (vmids_array3, rc=rc)
   deallocate (vmids_array3)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   call ESMF_TestEnd(ESMF_SRCLINE)
 
