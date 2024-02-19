@@ -37,6 +37,9 @@
 #include <cstdio>
 #include <string>
 #include <sstream>
+#include <vector>
+#include <iostream>
+#include <iomanip>
 
 // use this macro to test for NULL pointer in the interface layer
 // -> here assume rcvar is not a pointer, and must be returned directly
@@ -144,6 +147,27 @@ private:
     int Write(const std::stringstream& msg, int msgtype,
         int LINE, const std::string &FILE, const std::string &method) {
       return Write(msg.str(), msgtype, LINE, FILE, method);
+    }
+    template<typename T> int Write(const std::string& msg,
+      const std::vector<T> array, int msgtype){
+      int rc = ESMC_RC_NOT_IMPL;
+      auto it = array.begin();
+      while (it != array.end()){
+        std::stringstream line;
+        line << msg;
+        int i=0;
+        while ((it != array.end()) && (i < 10)){
+          line << std::setw(16) << *it;
+          ++it; ++i;
+        }
+        rc = Write(line, msgtype);
+      }
+      return rc;
+    }
+    template<typename T> int Write(const std::string& msg,
+      const T *array, int N, int msgtype){
+      std::vector<T> v(array, array+N);
+      return Write(msg, v, msgtype);
     }
 
 // !PUBLIC Variables:
