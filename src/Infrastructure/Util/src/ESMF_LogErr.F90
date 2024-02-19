@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#define ESMF_FILENAME "ESMF_LogErr.F90"
+#define FILENAME "ESMF_LogErr.F90"
 !==============================================================================
 !
 !     ESMF LogErr module
@@ -255,6 +255,17 @@ end type ESMF_LogPrivate
 
 !  Overloaded = operator functions
    public :: operator(==), operator(/=), operator(>)
+
+!------------------------------------------------------------------------------
+! ! Interface blocks
+
+  interface ESMF_LogWrite
+    module procedure ESMF_LogWriteDefault
+    module procedure ESMF_LogWrite1DI4
+    module procedure ESMF_LogWrite1DI8
+    module procedure ESMF_LogWrite1DR4
+    module procedure ESMF_LogWrite1DR8
+  end interface
 
 ! overload == and > with additional derived types so you can compare
 !  them as if they were simple integers.
@@ -2474,12 +2485,13 @@ end subroutine ESMF_LogSetError
 
 !--------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LogWrite()"
+#define ESMF_METHOD "ESMF_LogWriteDefault()"
 !BOP
 ! !IROUTINE: ESMF_LogWrite - Write to Log file(s)
 
 ! !INTERFACE:
-      recursive subroutine ESMF_LogWrite(msg, logmsgFlag, &
+  ! Private name; call using ESMF_LogWrite()
+  recursive subroutine ESMF_LogWriteDefault(msg, logmsgFlag, &
                         logmsgList,      & ! DEPRECATED ARGUMENT
                         keywordEnforcer, line, file, method, log, rc)
 !
@@ -2542,6 +2554,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \end{description}
 !
 !EOP
+!--------------------------------------------------------------------------
     interface
       subroutine f_ESMF_VMAbort(rc)
         integer, intent(out), optional :: rc
@@ -2754,9 +2767,375 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end if
     endif
 
-end subroutine ESMF_LogWrite
+end subroutine ESMF_LogWriteDefault
+!------------------------------------------------------------------------------
 
-!--------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogWrite1DI4()"
+!BOP
+! !IROUTINE: ESMF_LogWrite - Write Fortran array elements to Log file(s)
+
+! !INTERFACE:
+  ! Private name; call using ESMF_LogWrite()
+  recursive subroutine ESMF_LogWrite1DI4(msg, array, logmsgFlag, &
+                                 keywordEnforcer, line, file, method, log, rc)
+!
+!
+! !ARGUMENTS:
+      character(len=*),      intent(in)             :: msg
+      integer(ESMF_KIND_I4), intent(in), target     :: array(:)
+      type(ESMF_LogMsg_Flag),intent(in),   optional :: logmsgFlag
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,               intent(in),   optional :: line
+      character(len=*),      intent(in),   optional :: file
+      character(len=*),      intent(in),   optional :: method
+      type(ESMF_Log),        intent(inout),optional :: log
+      integer,               intent(out),  optional :: rc
+
+!
+! !DESCRIPTION:
+!      This subroutine writes to the file associated with an {\tt ESMF\_Log}.
+!
+!      The arguments are:
+!      \begin{description}
+!
+!      \item [msg]
+!            User-provided message string.
+!      \item [array]
+!            User-provided Fortran array.
+!      \item [{[logmsgFlag]}]
+!            The type of message.  See Section~\ref{const:logmsgflag} for
+!            possible values.  If not specified, the default is {\tt ESMF\_LOGMSG\_INFO}.
+!      \item [{[line]}]
+!            Integer source line number.  Expected to be set by
+!            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
+!      \item [{[file]}]
+!            User-provided source file name.
+!      \item [{[method]}]
+!            User-provided method string.
+!      \item [{[log]}]
+!            An optional {\tt ESMF\_Log} object that can be used instead
+!            of the default Log.
+!      \item [{[rc]}]
+!            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    ! local variables
+    character(len=160)                 :: arrayBuffer
+    integer                            :: i, lineCount, extra, localrc
+    integer(ESMF_KIND_I4)              :: arrayT(10)
+    integer(ESMF_KIND_I4), allocatable :: arrayTe(:)
+
+    lineCount = size(array)/10
+    extra = size(array) - (size(array)/10)*10
+
+    do i=1, lineCount
+      arrayT(:) = array((i-1)*10+1:i*10)
+      write (arrayBuffer, "(10I16)") arrayT
+      call ESMF_LogWrite(trim(msg)//arrayBuffer, logmsgFlag, line=line, &
+        file=file, method=method, log=log, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg="Error found", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    enddo
+
+    if (extra>0) then
+      allocate(arrayTe(extra))
+      arrayTe(:) = array((i-1)*10+1:(i-1)*10+extra)
+      write (arrayBuffer, "(10I16)") arrayTe
+      call ESMF_LogWrite(trim(msg)//arrayBuffer, logmsgFlag, line=line, &
+        file=file, method=method, log=log, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg="Error found", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      deallocate(arrayTe)
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogWrite1DI8()"
+!BOP
+! !IROUTINE: ESMF_LogWrite - Write Fortran array elements to Log file(s)
+
+! !INTERFACE:
+  ! Private name; call using ESMF_LogWrite()
+  recursive subroutine ESMF_LogWrite1DI8(msg, array, logmsgFlag, &
+                                 keywordEnforcer, line, file, method, log, rc)
+!
+!
+! !ARGUMENTS:
+      character(len=*),      intent(in)             :: msg
+      integer(ESMF_KIND_I8), intent(in), target     :: array(:)
+      type(ESMF_LogMsg_Flag),intent(in),   optional :: logmsgFlag
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,               intent(in),   optional :: line
+      character(len=*),      intent(in),   optional :: file
+      character(len=*),      intent(in),   optional :: method
+      type(ESMF_Log),        intent(inout),optional :: log
+      integer,               intent(out),  optional :: rc
+
+!
+! !DESCRIPTION:
+!      This subroutine writes to the file associated with an {\tt ESMF\_Log}.
+!
+!      The arguments are:
+!      \begin{description}
+!
+!      \item [msg]
+!            User-provided message string.
+!      \item [array]
+!            User-provided Fortran array.
+!      \item [{[logmsgFlag]}]
+!            The type of message.  See Section~\ref{const:logmsgflag} for
+!            possible values.  If not specified, the default is {\tt ESMF\_LOGMSG\_INFO}.
+!      \item [{[line]}]
+!            Integer source line number.  Expected to be set by
+!            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
+!      \item [{[file]}]
+!            User-provided source file name.
+!      \item [{[method]}]
+!            User-provided method string.
+!      \item [{[log]}]
+!            An optional {\tt ESMF\_Log} object that can be used instead
+!            of the default Log.
+!      \item [{[rc]}]
+!            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    ! local variables
+    character(len=160)                 :: arrayBuffer
+    integer                            :: i, lineCount, extra, localrc
+    integer(ESMF_KIND_I8)              :: arrayT(10)
+    integer(ESMF_KIND_I8), allocatable :: arrayTe(:)
+
+    lineCount = size(array)/10
+    extra = size(array) - (size(array)/10)*10
+
+    do i=1, lineCount
+      arrayT(:) = array((i-1)*10+1:i*10)
+      write (arrayBuffer, "(10I16)") arrayT
+      call ESMF_LogWrite(trim(msg)//arrayBuffer, logmsgFlag, line=line, &
+        file=file, method=method, log=log, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg="Error found", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    enddo
+
+    if (extra>0) then
+      allocate(arrayTe(extra))
+      arrayTe(:) = array((i-1)*10+1:(i-1)*10+extra)
+      write (arrayBuffer, "(10I16)") arrayTe
+      call ESMF_LogWrite(trim(msg)//arrayBuffer, logmsgFlag, line=line, &
+        file=file, method=method, log=log, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg="Error found", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      deallocate(arrayTe)
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogWrite1DR4()"
+!BOP
+! !IROUTINE: ESMF_LogWrite - Write Fortran array elements to Log file(s)
+
+! !INTERFACE:
+  ! Private name; call using ESMF_LogWrite()
+  recursive subroutine ESMF_LogWrite1DR4(msg, array, logmsgFlag, &
+                                 keywordEnforcer, line, file, method, log, rc)
+!
+!
+! !ARGUMENTS:
+      character(len=*),      intent(in)             :: msg
+      real(ESMF_KIND_R4),    intent(in), target     :: array(:)
+      type(ESMF_LogMsg_Flag),intent(in),   optional :: logmsgFlag
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,               intent(in),   optional :: line
+      character(len=*),      intent(in),   optional :: file
+      character(len=*),      intent(in),   optional :: method
+      type(ESMF_Log),        intent(inout),optional :: log
+      integer,               intent(out),  optional :: rc
+
+!
+! !DESCRIPTION:
+!      This subroutine writes to the file associated with an {\tt ESMF\_Log}.
+!
+!      The arguments are:
+!      \begin{description}
+!
+!      \item [msg]
+!            User-provided message string.
+!      \item [array]
+!            User-provided Fortran array.
+!      \item [{[logmsgFlag]}]
+!            The type of message.  See Section~\ref{const:logmsgflag} for
+!            possible values.  If not specified, the default is {\tt ESMF\_LOGMSG\_INFO}.
+!      \item [{[line]}]
+!            Integer source line number.  Expected to be set by
+!            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
+!      \item [{[file]}]
+!            User-provided source file name.
+!      \item [{[method]}]
+!            User-provided method string.
+!      \item [{[log]}]
+!            An optional {\tt ESMF\_Log} object that can be used instead
+!            of the default Log.
+!      \item [{[rc]}]
+!            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    ! local variables
+    character(len=160)              :: arrayBuffer
+    integer                         :: i, lineCount, extra, localrc
+    real(ESMF_KIND_R4)              :: arrayT(10)
+    real(ESMF_KIND_R4), allocatable :: arrayTe(:)
+
+    lineCount = size(array)/10
+    extra = size(array) - (size(array)/10)*10
+
+    do i=1, lineCount
+      arrayT(:) = array((i-1)*10+1:i*10)
+      write (arrayBuffer, "(10G16.9)") arrayT
+      call ESMF_LogWrite(trim(msg)//arrayBuffer, logmsgFlag, line=line, &
+        file=file, method=method, log=log, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg="Error found", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    enddo
+
+    if (extra>0) then
+      allocate(arrayTe(extra))
+      arrayTe(:) = array((i-1)*10+1:(i-1)*10+extra)
+      write (arrayBuffer, "(10G16.9)") arrayTe
+      call ESMF_LogWrite(trim(msg)//arrayBuffer, logmsgFlag, line=line, &
+        file=file, method=method, log=log, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg="Error found", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      deallocate(arrayTe)
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogWrite1DR8()"
+!BOP
+! !IROUTINE: ESMF_LogWrite - Write Fortran array elements to Log file(s)
+
+! !INTERFACE:
+  ! Private name; call using ESMF_LogWrite()
+  recursive subroutine ESMF_LogWrite1DR8(msg, array, logmsgFlag, &
+                                 keywordEnforcer, line, file, method, log, rc)
+!
+!
+! !ARGUMENTS:
+      character(len=*),      intent(in)             :: msg
+      real(ESMF_KIND_R8),    intent(in), target     :: array(:)
+      type(ESMF_LogMsg_Flag),intent(in),   optional :: logmsgFlag
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,               intent(in),   optional :: line
+      character(len=*),      intent(in),   optional :: file
+      character(len=*),      intent(in),   optional :: method
+      type(ESMF_Log),        intent(inout),optional :: log
+      integer,               intent(out),  optional :: rc
+
+!
+! !DESCRIPTION:
+!      This subroutine writes to the file associated with an {\tt ESMF\_Log}.
+!
+!      The arguments are:
+!      \begin{description}
+!
+!      \item [msg]
+!            User-provided message string.
+!      \item [array]
+!            User-provided Fortran array.
+!      \item [{[logmsgFlag]}]
+!            The type of message.  See Section~\ref{const:logmsgflag} for
+!            possible values.  If not specified, the default is {\tt ESMF\_LOGMSG\_INFO}.
+!      \item [{[line]}]
+!            Integer source line number.  Expected to be set by
+!            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
+!      \item [{[file]}]
+!            User-provided source file name.
+!      \item [{[method]}]
+!            User-provided method string.
+!      \item [{[log]}]
+!            An optional {\tt ESMF\_Log} object that can be used instead
+!            of the default Log.
+!      \item [{[rc]}]
+!            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    ! local variables
+    character(len=160)              :: arrayBuffer
+    integer                         :: i, lineCount, extra, localrc
+    real(ESMF_KIND_R8)              :: arrayT(10)
+    real(ESMF_KIND_R8), allocatable :: arrayTe(:)
+
+    lineCount = size(array)/10
+    extra = size(array) - (size(array)/10)*10
+
+    do i=1, lineCount
+      arrayT(:) = array((i-1)*10+1:i*10)
+      write (arrayBuffer, "(10G16.9)") arrayT
+      call ESMF_LogWrite(trim(msg)//arrayBuffer, logmsgFlag, line=line, &
+        file=file, method=method, log=log, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg="Error found", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    enddo
+
+    if (extra>0) then
+      allocate(arrayTe(extra))
+      arrayTe(:) = array((i-1)*10+1:(i-1)*10+extra)
+      write (arrayBuffer, "(10G16.9)") arrayTe
+      call ESMF_LogWrite(trim(msg)//arrayBuffer, logmsgFlag, line=line, &
+        file=file, method=method, log=log, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg="Error found", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      deallocate(arrayTe)
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LogEntryCopy()"
 !BOPI
@@ -2785,6 +3164,7 @@ end subroutine ESMF_LogWrite
 !      \end{description}
 !
 !EOPI
+!------------------------------------------------------------------------------
 
     integer :: memstat
 
@@ -2817,6 +3197,7 @@ end subroutine ESMF_LogWrite
     endif
 
 end subroutine ESMF_LogEntryCopy
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
