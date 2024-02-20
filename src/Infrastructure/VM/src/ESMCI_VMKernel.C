@@ -7636,16 +7636,21 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
           xferSsiSBC = (char *)&(xferSsiSendBuffer[0]);
           // - SSI roots re-arrange data for scattering to PETs on same SSI
           j=0;
-          for (int l=0; l<ssiLocalPetCount; l++){
-            for (int i=0; i<ssiCount; i++){
-              // data block received from PETs in SSI i
-              if (i == localSsi) continue;  // no self communication for local SSI
-              for (int k=0; k<ssiLocalPetCounts[i]; k++){
+          for (int i=0; i<ssiCount; i++){
+            // data block received from PETs in SSI i
+            if (i == localSsi) continue;  // no self communication for local SSI
+            for (int k=0; k<ssiLocalPetCounts[i]; k++){
+              for (int l=0; l<ssiLocalPetCount; l++){
 #ifdef VM_LOG_ALLTOALLV
         {
           std::stringstream msg;
           msg << "VMK::alltoallv(): line=" << __LINE__;
-          msg << " l=" << l << " i=" << i << " k=" << k;
+          msg << " i=" << i << " k=" << k << " l=" << l << " j=" << j;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        }
+        {
+          std::stringstream msg;
+          msg << "VMK::alltoallv(): line=" << __LINE__;
           msg << " offsets[i]=" << offsets[i];
           msg << " ssiLocalPetLists[offsets[i]+k]=" << ssiLocalPetLists[offsets[i]+k];
           ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
@@ -7653,21 +7658,21 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
         {
           std::stringstream msg;
           msg << "VMK::alltoallv(): line=" << __LINE__;
+          msg << " ssiLocalOutOffsets[l]=" << ssiLocalOutOffsets[l];
           msg << " ssiOutOffsets[...]=" << ssiOutOffsets[l*npets+ssiLocalPetLists[offsets[i]+k]];
-          msg << " ssiOutCounts[...]=" << ssiOutCounts[l*npets+ssiLocalPetLists[offsets[i]+k]];
+          msg << " sumOffsets=" << ssiLocalOutOffsets[l] + ssiOutOffsets[l*npets+ssiLocalPetLists[offsets[i]+k]];
           ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         }
         {
           std::stringstream msg;
           msg << "VMK::alltoallv(): line=" << __LINE__;
-          msg << " xferOutOffsets[i]=" << xferOutOffsets[i];
+          msg << " ssiOutCounts[...]=" << ssiOutCounts[l*npets+ssiLocalPetLists[offsets[i]+k]];
           ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
-                memcpy(xferSsiSBC + size*j,
-                  xferSsiBC
-                  + size*xferOutOffsets[i]
-                  + size*ssiOutOffsets[l*npets+ssiLocalPetLists[offsets[i]+k]],
+                memcpy(xferSsiSBC + size
+                  *(ssiLocalOutOffsets[l] + ssiOutOffsets[l*npets+ssiLocalPetLists[offsets[i]+k]]),
+                  xferSsiBC + size*j,
                   size*ssiOutCounts[l*npets+ssiLocalPetLists[offsets[i]+k]]);
                 j+=ssiOutCounts[l*npets+ssiLocalPetLists[offsets[i]+k]];
               }
