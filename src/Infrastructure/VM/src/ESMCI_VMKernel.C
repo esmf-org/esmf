@@ -31,7 +31,7 @@
 
 #define VM_PROFILE_ALLTOALLV_on
 #define VM_LOG_ALLTOALLV_INTRO_on
-#define VM_LOG_ALLTOALLV_off
+#define VM_LOG_ALLTOALLV_on
 #define VM_MEMLOG_AllTOALLV_off
 
 #define VM_ALLTOALL_END_BARRIER
@@ -7393,14 +7393,14 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
         msg << " ssiLocalPetCount=" << ssiLocalPetCount;
         msg << " mpi_c_ssi_size=" << mpi_c_ssi_size;
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
-        ESMC_LogDefault.Write("in data: ", (int *)in, inCount, ESMC_LOGMSG_DEBUG);
+//        ESMC_LogDefault.Write("in data: ", (int *)in, inCount, ESMC_LOGMSG_DEBUG);
       }
 #endif
       MPI_Alltoallv(in, &(ssiInCounts[0]), &(ssiInOffsets[0]), mpitype,
         out, &(ssiOutCounts[0]), &(ssiOutOffsets[0]), mpitype, mpi_c_ssi);
 #ifdef VM_LOG_ALLTOALLV_on
       {
-        ESMC_LogDefault.Write("out data: ", (int *)out, outCount, ESMC_LOGMSG_DEBUG);
+//        ESMC_LogDefault.Write("out data: ", (int *)out, outCount, ESMC_LOGMSG_DEBUG);
       }
 #endif
       // Only go up the hierarchy if there are more than one SSI in the VM
@@ -7448,7 +7448,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
         }
 #ifdef VM_LOG_ALLTOALLV_on
         {
-          ESMC_LogDefault.Write("xferBC: ", (int *)xferBC, bufferInSize, ESMC_LOGMSG_DEBUG);
+//          ESMC_LogDefault.Write("xferBC: ", (int *)xferBC, bufferInSize, ESMC_LOGMSG_DEBUG);
         }
 #endif
         // - SSI roots gather count and offset info from their SSI PETs
@@ -7494,14 +7494,14 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
           rootBufferOutSize *= size;
 #ifdef VM_LOG_ALLTOALLV_on
       {
-        ESMC_LogDefault.Write("ssiInCounts: ", ssiInCounts, ESMC_LOGMSG_DEBUG);
-        ESMC_LogDefault.Write("ssiInOffsets: ", ssiInOffsets, ESMC_LOGMSG_DEBUG);
-        ESMC_LogDefault.Write("ssiOutCounts: ", ssiOutCounts, ESMC_LOGMSG_DEBUG);
-        ESMC_LogDefault.Write("ssiOutOffsets: ", ssiOutOffsets, ESMC_LOGMSG_DEBUG);
-        ESMC_LogDefault.Write("ssiLocalInCounts: ", ssiLocalInCounts, ESMC_LOGMSG_DEBUG);
-        ESMC_LogDefault.Write("ssiLocalInOffsets: ", ssiLocalInOffsets, ESMC_LOGMSG_DEBUG);
-        ESMC_LogDefault.Write("ssiLocalOutCounts: ", ssiLocalOutCounts, ESMC_LOGMSG_DEBUG);
-        ESMC_LogDefault.Write("ssiLocalOutOffsets: ", ssiLocalOutOffsets, ESMC_LOGMSG_DEBUG);
+//        ESMC_LogDefault.Write("ssiInCounts: ", ssiInCounts, ESMC_LOGMSG_DEBUG);
+//        ESMC_LogDefault.Write("ssiInOffsets: ", ssiInOffsets, ESMC_LOGMSG_DEBUG);
+//        ESMC_LogDefault.Write("ssiOutCounts: ", ssiOutCounts, ESMC_LOGMSG_DEBUG);
+//        ESMC_LogDefault.Write("ssiOutOffsets: ", ssiOutOffsets, ESMC_LOGMSG_DEBUG);
+//        ESMC_LogDefault.Write("ssiLocalInCounts: ", ssiLocalInCounts, ESMC_LOGMSG_DEBUG);
+//        ESMC_LogDefault.Write("ssiLocalInOffsets: ", ssiLocalInOffsets, ESMC_LOGMSG_DEBUG);
+//        ESMC_LogDefault.Write("ssiLocalOutCounts: ", ssiLocalOutCounts, ESMC_LOGMSG_DEBUG);
+//        ESMC_LogDefault.Write("ssiLocalOutOffsets: ", ssiLocalOutOffsets, ESMC_LOGMSG_DEBUG);
       }
 #endif
 #ifdef VM_LOG_ALLTOALLV_on
@@ -7519,7 +7519,8 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
           0, mpi_c_ssi);
 #ifdef VM_LOG_ALLTOALLV_on
         {
-          ESMC_LogDefault.Write("xferSsiBC: ", (int *)xferSsiBC, rootBufferInSize/size, ESMC_LOGMSG_DEBUG);
+            ESMC_LogDefault.Write("After MPI_Gatherv(mpi_c_ssi)", ESMC_LOGMSG_DEBUG);
+//          ESMC_LogDefault.Write("xferSsiBC: ", (int *)xferSsiBC, rootBufferInSize/size, ESMC_LOGMSG_DEBUG);
         }
 #endif
         // Step-2: Total exchange between SSI roots
@@ -7556,9 +7557,9 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
           msg << "rootBufferInSize=" << rootBufferInSize;
           msg << ", rootBufferOutSize=" << rootBufferOutSize;
           ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
-          ESMC_LogDefault.Write("ssiLocalPetCounts: ", ssiLocalPetCounts, ESMC_LOGMSG_DEBUG);
-          ESMC_LogDefault.Write("ssiLocalPetLists: ", ssiLocalPetLists, ESMC_LOGMSG_DEBUG);
-          ESMC_LogDefault.Write("offsets: ", offsets, ESMC_LOGMSG_DEBUG);
+//          ESMC_LogDefault.Write("ssiLocalPetCounts: ", ssiLocalPetCounts, ESMC_LOGMSG_DEBUG);
+//          ESMC_LogDefault.Write("ssiLocalPetLists: ", ssiLocalPetLists, ESMC_LOGMSG_DEBUG);
+//          ESMC_LogDefault.Write("offsets: ", offsets, ESMC_LOGMSG_DEBUG);
         }
 #endif
           xferSsiSendBuffer.resize(rootBufferInSize);
@@ -7591,7 +7592,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
             }
             for (int k=0; k<ssiLocalPetCounts[i]; k++){
               // prepare block to SSI local PET k on SSI i
-#ifdef VM_LOG_ALLTOALLV_on
+#ifdef VM_LOG_ALLTOALLV_on_OFF
         {
           std::stringstream msg;
           msg << "VMK::alltoallv(): line=" << __LINE__;
@@ -7611,11 +7612,11 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
           }
 #ifdef VM_LOG_ALLTOALLV_on
         {
-          ESMC_LogDefault.Write("xferInCounts: ", xferInCounts, ESMC_LOGMSG_DEBUG);
-          ESMC_LogDefault.Write("xferInOffsets: ", xferInOffsets, ESMC_LOGMSG_DEBUG);
-          ESMC_LogDefault.Write("xferOutCounts: ", xferOutCounts, ESMC_LOGMSG_DEBUG);
-          ESMC_LogDefault.Write("xferOutOffsets: ", xferOutOffsets, ESMC_LOGMSG_DEBUG);
-          ESMC_LogDefault.Write("xferSsiSBC: ", (int *)xferSsiSBC, rootBufferInSize/size, ESMC_LOGMSG_DEBUG);
+//          ESMC_LogDefault.Write("xferInCounts: ", xferInCounts, ESMC_LOGMSG_DEBUG);
+//          ESMC_LogDefault.Write("xferInOffsets: ", xferInOffsets, ESMC_LOGMSG_DEBUG);
+//          ESMC_LogDefault.Write("xferOutCounts: ", xferOutCounts, ESMC_LOGMSG_DEBUG);
+//          ESMC_LogDefault.Write("xferOutOffsets: ", xferOutOffsets, ESMC_LOGMSG_DEBUG);
+//          ESMC_LogDefault.Write("xferSsiSBC: ", (int *)xferSsiSBC, rootBufferInSize/size, ESMC_LOGMSG_DEBUG);
         }
 #endif
           // - Resize the xferSsiBuffer for rootBufferOutSize
@@ -7630,7 +7631,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
           std::stringstream msg;
           msg << "VMK::alltoallv(): line=" << __LINE__ << " after MPI_Alltoallv(mpi_c_ssi_roots)";
           ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
-          ESMC_LogDefault.Write("xferSsiBC: ", (int *)xferSsiBC, rootBufferOutSize/size, ESMC_LOGMSG_DEBUG);
+//          ESMC_LogDefault.Write("xferSsiBC: ", (int *)xferSsiBC, rootBufferOutSize/size, ESMC_LOGMSG_DEBUG);
         }
 #endif
           // - Resize the xferSsiSendBuffer for rootBufferOutSize
@@ -7643,7 +7644,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
             if (i == localSsi) continue;  // no self communication for local SSI
             for (int l=0; l<ssiLocalPetCount; l++){
               for (int k=0; k<ssiLocalPetCounts[i]; k++){
-#ifdef VM_LOG_ALLTOALLV_on
+#ifdef VM_LOG_ALLTOALLV_on_OFF
         {
           std::stringstream msg;
           msg << "VMK::alltoallv(): line=" << __LINE__;
@@ -7685,7 +7686,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
           std::stringstream msg;
           msg << "VMK::alltoallv(): line=" << __LINE__ << " after memcpy(xferSsiSBC <- xferSsiBC)";
           ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
-          ESMC_LogDefault.Write("xferSsiSBC: ", (int *)xferSsiSBC, rootBufferOutSize/size, ESMC_LOGMSG_DEBUG);
+//          ESMC_LogDefault.Write("xferSsiSBC: ", (int *)xferSsiSBC, rootBufferOutSize/size, ESMC_LOGMSG_DEBUG);
         }
 #endif
         }
@@ -7705,7 +7706,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
           xferBC, bufferOutSize, mpitype, 0, mpi_c_ssi);
 #ifdef VM_LOG_ALLTOALLV_on
         {
-          ESMC_LogDefault.Write("xferBC: ", (int *)xferBC, bufferOutSize, ESMC_LOGMSG_DEBUG);
+//          ESMC_LogDefault.Write("xferBC: ", (int *)xferBC, bufferOutSize, ESMC_LOGMSG_DEBUG);
         }
 #endif
         // - Each PET upacks the xferBuffer into its "out" data.
@@ -7719,7 +7720,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
         }
 #ifdef VM_LOG_ALLTOALLV_on
         {
-          ESMC_LogDefault.Write("out data: ", (int *)out, outCount, ESMC_LOGMSG_DEBUG);
+//          ESMC_LogDefault.Write("out data: ", (int *)out, outCount, ESMC_LOGMSG_DEBUG);
         }
 #endif
       }
