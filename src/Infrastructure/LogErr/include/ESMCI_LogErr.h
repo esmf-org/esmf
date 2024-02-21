@@ -157,7 +157,7 @@ private:
         line << msg;
         int i=0;
         while ((it != array.end()) && (i < 10)){
-          line << std::setw(16) << *it;
+          line << std::setw(16) << +(*it);  // the +() ensures numeric output
           ++it; ++i;
         }
         rc = Write(line, msgtype);
