@@ -7639,8 +7639,8 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
           for (int i=0; i<ssiCount; i++){
             // data block received from PETs in SSI i
             if (i == localSsi) continue;  // no self communication for local SSI
-            for (int k=0; k<ssiLocalPetCounts[i]; k++){
-              for (int l=0; l<ssiLocalPetCount; l++){
+            for (int l=0; l<ssiLocalPetCount; l++){
+              for (int k=0; k<ssiLocalPetCounts[i]; k++){
 #ifdef VM_LOG_ALLTOALLV
         {
           std::stringstream msg;
