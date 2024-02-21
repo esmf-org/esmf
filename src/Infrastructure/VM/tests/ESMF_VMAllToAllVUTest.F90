@@ -96,10 +96,10 @@ program ESMF_VMAllToAllVUTest
   nsize = 33
   nlen1 = 0
   do i=1, petCount
-    sendOffsets(i) = nlen1 * nsize
     sendCounts(i) = i * nsize
-    recvOffsets(i) = (i-1) * (localPet + 1) * nsize
+    sendOffsets(i) = nlen1 * nsize
     recvCounts(i) = (localPet + 1) * nsize
+    recvOffsets(i) = (i-1) * (localPet + 1) * nsize
     nlen1 = nlen1 + i
   enddo
   nlen1 = nlen1 * nsize
@@ -122,13 +122,21 @@ program ESMF_VMAllToAllVUTest
   k=1
   do i=1, petCount
     do j=1, nsize * i
-      iarray1(k) = i + 100 * k + 10000 * j
-      f4array1(k) = real(iarray1(k), ESMF_KIND_R4)
-      f8array1(k) = real(iarray1(k), ESMF_KIND_R8)
+      iarray1(k) = i + 100 * k + 10000 * j + 1000000 * (localPet+1)
       larray1(k) = mod (i, 3) == 0
       k = k+1
     enddo
   enddo
+
+  ! prepare all other data arrays
+  iarray2 = -1
+  iarray3 = -1
+  f4array1 = real(iarray1, ESMF_KIND_R4)
+  f4array2 = real(iarray2, ESMF_KIND_R4)
+  f4array3 = real(iarray3, ESMF_KIND_R4)
+  f8array1 = real(iarray1, ESMF_KIND_R8)
+  f8array2 = real(iarray2, ESMF_KIND_R8)
+  f8array3 = real(iarray3, ESMF_KIND_R8)
 
   !Testing with Integer arguments
   !==============================
