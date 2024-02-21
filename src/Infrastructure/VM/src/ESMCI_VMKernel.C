@@ -21,15 +21,17 @@
 #define VM_COMMQUEUELOG_off
 #define VM_EPOCHLOG_off
 #define VM_EPOCHMEMLOG_off
-#define VM_SSISHMLOG_on
+#define VM_SSISHMLOG_off
 #define VM_SIZELOG_off
 
-#define VM_PROFILE_ALLTOALL
-#define VM_LOG_ALLTOALL
+#define VM_PROFILE_ALLTOALL_on
+#define VM_LOG_ALLTOALL_INTRO_on
+#define VM_LOG_ALLTOALL_off
 #define VM_MEMLOG_AllTOALL_off
 
-#define VM_PROFILE_ALLTOALLV
-#define VM_LOG_ALLTOALLV
+#define VM_PROFILE_ALLTOALLV_on
+#define VM_LOG_ALLTOALLV_INTRO_on
+#define VM_LOG_ALLTOALLV_off
 #define VM_MEMLOG_AllTOALLV_off
 
 #define VM_ALLTOALL_END_BARRIER
@@ -6973,19 +6975,19 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VMK::alltoall()"
   int localrc=0;
-#if (defined VM_PROFILE_ALLTOALL) || (defined VM_LOG_ALLTOALL)
+#if (defined VM_PROFILE_ALLTOALL_on) || (defined VM_LOG_ALLTOALL_on) || (defined VM_LOG_ALLTOALL_INTRO_on)
   std::stringstream traceTag;
   traceTag << "VMK::alltoall() inCount=" << inCount
     << " outCount=" << outCount << " type=" << vmTypeString(type)
     << " alltoallMode=" << alltoallModeString(alltoallMode);
 #endif
-#ifdef VM_PROFILE_ALLTOALL
+#ifdef VM_PROFILE_ALLTOALL_on
   TraceEventRegionEnter(traceTag.str(), &localrc);
 #endif
-#ifdef VM_LOG_ALLTOALL
+#ifdef VM_LOG_ALLTOALL_INTRO_on
   ESMC_LogDefault.Write(traceTag.str(), ESMC_LOGMSG_DEBUG);
 #endif
-#ifdef VM_MEMLOG_AllTOALL
+#ifdef VM_MEMLOG_AllTOALL_on
   VM::logMemInfo(std::string("VMK::alltoall() intro: "));
 #endif
   if (mpionly){
@@ -7034,7 +7036,7 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
         MPI_Barrier(mpi_c);
       }
     }else if (alltoallMode == alltoallHierarchical){
-#ifdef VM_LOG_ALLTOALL
+#ifdef VM_LOG_ALLTOALL_on
       {
         std::stringstream msg;
         msg << "VMK::alltoall(): hierarchical implementation size=" << size;
@@ -7053,7 +7055,7 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
         inOffsets[i] = ssiLocalPetList[i] * inCount;
         outOffsets[i] = ssiLocalPetList[i] * outCount;
       }
-#ifdef VM_LOG_ALLTOALL
+#ifdef VM_LOG_ALLTOALL_on
       {
         int mpi_c_ssi_size;
         MPI_Comm_size(mpi_c_ssi, &mpi_c_ssi_size);
@@ -7071,7 +7073,7 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
         // Multiple SSIs in the VM, under each mpi_c_ssi communicator,
         // using task 0 as the SSI root PET below.
         int ssiOtherPetCount = npets-ssiLocalPetCount;
-#ifdef VM_LOG_ALLTOALL
+#ifdef VM_LOG_ALLTOALL_on
         {
           std::stringstream msg;
           msg << "VMK::alltoall(): ssiCount=" << ssiCount
@@ -7084,7 +7086,7 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
         //   destined for PETs outside the local SSI to its SSI root PET.
         unsigned long bufferSize = inCount * size;
         bufferSize *= npets - ssiLocalPetCount;
-#ifdef VM_LOG_ALLTOALL
+#ifdef VM_LOG_ALLTOALL_on
         {
           std::stringstream msg;
           msg << "VMK::alltoall(): line=" << __LINE__ << " Step-1: ";
@@ -7139,7 +7141,7 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
             &(ssiLocalPetLists[0]), &(ssiLocalPetCounts[0]), &(offsets[0]),
             MPI_INT, mpi_c_ssi_roots);
           // - SSI roots collate data into SSI blocks for sending
-#ifdef VM_LOG_ALLTOALL
+#ifdef VM_LOG_ALLTOALL_on
         {
           std::stringstream msg;
           msg << "VMK::alltoall(): line=" << __LINE__ << " Step-2: ";
@@ -7207,7 +7209,7 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
         }
         // Step-3: SSI roots scatter xfer data to PETs on their SSI
         // - SSI roots scatter xfer data to their SSI PETs from other SSI
-#ifdef VM_LOG_ALLTOALL
+#ifdef VM_LOG_ALLTOALL_on
         {
           std::stringstream msg;
           msg << "VMK::alltoall(): line=" << __LINE__ << " Step-3: ";
@@ -7282,7 +7284,7 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
 #ifdef VM_ALLTOALL_END_BARRIER
   MPI_Barrier(mpi_c);
 #endif
-#ifdef VM_PROFILE_ALLTOALL
+#ifdef VM_PROFILE_ALLTOALL_on
   TraceEventRegionExit(traceTag.str(), &localrc);
 #endif
   return localrc;
@@ -7294,7 +7296,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VMK::alltoallv()"
   int localrc=0;
-#if (defined VM_PROFILE_ALLTOALLV) || (defined VM_LOG_ALLTOALLV)
+#if (defined VM_PROFILE_ALLTOALLV_on) || (defined VM_LOG_ALLTOALLV_on) || (defined VM_LOG_ALLTOALLV_INTRO_on)
   unsigned long long int inCount = 0;
   unsigned long long int outCount = 0;
   for (int i=0; i < npets; i++){
@@ -7306,13 +7308,13 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
     << " outCount=" << outCount << " type=" << vmTypeString(type)
     << " alltoallvMode=" << alltoallvModeString(alltoallvMode);
 #endif
-#ifdef VM_PROFILE_ALLTOALLV
+#ifdef VM_PROFILE_ALLTOALLV_on
   TraceEventRegionEnter(traceTag.str(), &localrc);
 #endif
-#ifdef VM_LOG_ALLTOALLV
+#ifdef VM_LOG_ALLTOALLV_INTRO_on
   ESMC_LogDefault.Write(traceTag.str(), ESMC_LOGMSG_DEBUG);
 #endif
-#ifdef VM_MEMLOG_AllTOALLV
+#ifdef VM_MEMLOG_AllTOALLV_on
   VM::logMemInfo(std::string("VMK::alltoallv() intro: "));
 #endif
   if (mpionly){
@@ -7361,7 +7363,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
         MPI_Barrier(mpi_c);
       }
     }else if (alltoallvMode == alltoallvHierarchical){
-#ifdef VM_LOG_ALLTOALLV
+#ifdef VM_LOG_ALLTOALLV_on
       {
         std::stringstream msg;
         msg << "VMK::alltoallv(): hierarchical implementation size=" << size;
@@ -7382,7 +7384,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
         ssiInOffsets[i] = inOffsets[ssiLocalPetList[i]];
         ssiOutOffsets[i] = outOffsets[ssiLocalPetList[i]];
       }
-#ifdef VM_LOG_ALLTOALLV
+#ifdef VM_LOG_ALLTOALLV_on
       {
         int mpi_c_ssi_size;
         MPI_Comm_size(mpi_c_ssi, &mpi_c_ssi_size);
@@ -7396,7 +7398,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
 #endif
       MPI_Alltoallv(in, &(ssiInCounts[0]), &(ssiInOffsets[0]), mpitype,
         out, &(ssiOutCounts[0]), &(ssiOutOffsets[0]), mpitype, mpi_c_ssi);
-#ifdef VM_LOG_ALLTOALLV
+#ifdef VM_LOG_ALLTOALLV_on
       {
         ESMC_LogDefault.Write("out data: ", (int *)out, outCount, ESMC_LOGMSG_DEBUG);
       }
@@ -7406,7 +7408,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
         // Multiple SSIs in the VM, under each mpi_c_ssi communicator,
         // using task 0 as the SSI root PET below.
         int ssiOtherPetCount = npets-ssiLocalPetCount;
-#ifdef VM_LOG_ALLTOALLV
+#ifdef VM_LOG_ALLTOALLV_on
         {
           std::stringstream msg;
           msg << "VMK::alltoallv(): ssiCount=" << ssiCount
@@ -7425,7 +7427,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
           bufferInSize += inCounts[i];
           bufferOutSize += outCounts[i];
         }
-#ifdef VM_LOG_ALLTOALLV
+#ifdef VM_LOG_ALLTOALLV_on
         {
           std::stringstream msg;
           msg << "VMK::alltoallv(): line=" << __LINE__ << " Step-1: ";
@@ -7444,7 +7446,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
           memcpy(xferBC+size*j, inC+inOffsets[i]*size, inCounts[i]*size);
           j+=inCounts[i];
         }
-#ifdef VM_LOG_ALLTOALLV
+#ifdef VM_LOG_ALLTOALLV_on
         {
           ESMC_LogDefault.Write("xferBC: ", (int *)xferBC, bufferInSize, ESMC_LOGMSG_DEBUG);
         }
@@ -7490,7 +7492,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
           xferSsiBuffer.resize(rootBufferInSize);
           xferSsiBC = (char *)&(xferSsiBuffer[0]);
           rootBufferOutSize *= size;
-#ifdef VM_LOG_ALLTOALLV
+#ifdef VM_LOG_ALLTOALLV_on
       {
         ESMC_LogDefault.Write("ssiInCounts: ", ssiInCounts, ESMC_LOGMSG_DEBUG);
         ESMC_LogDefault.Write("ssiInOffsets: ", ssiInOffsets, ESMC_LOGMSG_DEBUG);
@@ -7502,7 +7504,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
         ESMC_LogDefault.Write("ssiLocalOutOffsets: ", ssiLocalOutOffsets, ESMC_LOGMSG_DEBUG);
       }
 #endif
-#ifdef VM_LOG_ALLTOALLV
+#ifdef VM_LOG_ALLTOALLV_on
           {
             std::stringstream msg;
             msg << "VMK::alltoallv(): line=" << __LINE__ << " Step-1b: ";
@@ -7515,7 +7517,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
         MPI_Gatherv(xferBC, bufferInSize, mpitype,
           xferSsiBC, &(ssiLocalInCounts[0]), &(ssiLocalInOffsets[0]), mpitype,
           0, mpi_c_ssi);
-#ifdef VM_LOG_ALLTOALLV
+#ifdef VM_LOG_ALLTOALLV_on
         {
           ESMC_LogDefault.Write("xferSsiBC: ", (int *)xferSsiBC, rootBufferInSize/size, ESMC_LOGMSG_DEBUG);
         }
@@ -7547,7 +7549,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
             &(ssiLocalPetLists[0]), &(ssiLocalPetCounts[0]), &(offsets[0]),
             MPI_INT, mpi_c_ssi_roots);
           // - SSI roots collate data into SSI blocks for sending
-#ifdef VM_LOG_ALLTOALLV
+#ifdef VM_LOG_ALLTOALLV_on
         {
           std::stringstream msg;
           msg << "VMK::alltoallv(): line=" << __LINE__ << " Step-2: ";
@@ -7589,7 +7591,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
             }
             for (int k=0; k<ssiLocalPetCounts[i]; k++){
               // prepare block to SSI local PET k on SSI i
-#ifdef VM_LOG_ALLTOALLV
+#ifdef VM_LOG_ALLTOALLV_on
         {
           std::stringstream msg;
           msg << "VMK::alltoallv(): line=" << __LINE__;
@@ -7607,7 +7609,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
               }
             }
           }
-#ifdef VM_LOG_ALLTOALLV
+#ifdef VM_LOG_ALLTOALLV_on
         {
           ESMC_LogDefault.Write("xferInCounts: ", xferInCounts, ESMC_LOGMSG_DEBUG);
           ESMC_LogDefault.Write("xferInOffsets: ", xferInOffsets, ESMC_LOGMSG_DEBUG);
@@ -7623,7 +7625,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
           MPI_Alltoallv(xferSsiSBC, &(xferInCounts[0]), &(xferInOffsets[0]),
             mpitype, xferSsiBC, &(xferOutCounts[0]), &(xferOutOffsets[0]),
             mpitype, mpi_c_ssi_roots);
-#ifdef VM_LOG_ALLTOALLV
+#ifdef VM_LOG_ALLTOALLV_on
         {
           std::stringstream msg;
           msg << "VMK::alltoallv(): line=" << __LINE__ << " after MPI_Alltoallv(mpi_c_ssi_roots)";
@@ -7641,7 +7643,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
             if (i == localSsi) continue;  // no self communication for local SSI
             for (int l=0; l<ssiLocalPetCount; l++){
               for (int k=0; k<ssiLocalPetCounts[i]; k++){
-#ifdef VM_LOG_ALLTOALLV
+#ifdef VM_LOG_ALLTOALLV_on
         {
           std::stringstream msg;
           msg << "VMK::alltoallv(): line=" << __LINE__;
@@ -7678,7 +7680,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
               }
             }
           }
-#ifdef VM_LOG_ALLTOALLV
+#ifdef VM_LOG_ALLTOALLV_on
         {
           std::stringstream msg;
           msg << "VMK::alltoallv(): line=" << __LINE__ << " after memcpy(xferSsiSBC <- xferSsiBC)";
@@ -7689,7 +7691,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
         }
         // Step-3: SSI roots scatter xfer data to PETs on their SSI
         // - SSI roots scatter xfer data to their SSI PETs from other SSI
-#ifdef VM_LOG_ALLTOALLV
+#ifdef VM_LOG_ALLTOALLV_on
         {
           std::stringstream msg;
           msg << "VMK::alltoallv(): line=" << __LINE__ << " Step-3: ";
@@ -7701,7 +7703,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
         MPI_Scatterv(xferSsiSBC,
           &(ssiLocalOutCounts[0]), &(ssiLocalOutOffsets[0]), mpitype,
           xferBC, bufferOutSize, mpitype, 0, mpi_c_ssi);
-#ifdef VM_LOG_ALLTOALLV
+#ifdef VM_LOG_ALLTOALLV_on
         {
           ESMC_LogDefault.Write("xferBC: ", (int *)xferBC, bufferOutSize, ESMC_LOGMSG_DEBUG);
         }
@@ -7715,7 +7717,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
           memcpy(outC+outOffsets[i]*size, xferBC+size*j, outCounts[i]*size);
           j+=outCounts[i];
         }
-#ifdef VM_LOG_ALLTOALLV
+#ifdef VM_LOG_ALLTOALLV_on
         {
           ESMC_LogDefault.Write("out data: ", (int *)out, outCount, ESMC_LOGMSG_DEBUG);
         }
@@ -7778,7 +7780,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
 #ifdef VM_ALLTOALL_END_BARRIER
   MPI_Barrier(mpi_c);
 #endif
-#ifdef VM_PROFILE_ALLTOALLV
+#ifdef VM_PROFILE_ALLTOALLV_on
   TraceEventRegionExit(traceTag.str(), &localrc);
 #endif
   return localrc;
