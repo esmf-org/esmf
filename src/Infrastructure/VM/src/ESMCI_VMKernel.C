@@ -36,6 +36,8 @@
 
 #define VM_ALLTOALL_END_BARRIER
 
+#define VM_USE_MPI4_off
+
 // On SunOS systems there are a couple of macros that need to be set
 // in order to get POSIX compliant functions IPC, pthreads, gethostid
 #ifdef __sun
@@ -7419,8 +7421,13 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
         // Step-1: SSI root PETs gather xfer data on their SSI.
         // - Each PET prepares an xferBuffer to send its "in" data that is
         //   destined for PETs outside the local SSI to its SSI root PET.
+#ifdef VM_USE_MPI4
         MPI_Count bufferInSize = 0;
         MPI_Count bufferOutSize = 0;
+#else
+        int bufferInSize = 0;
+        int bufferOutSize = 0;
+#endif
         for (int i=0; i<npets; i++){
           if (ssiLocalPetSet.find(i) != ssiLocalPetSet.end())
             continue; // skip PETs on the same SSI
@@ -7465,12 +7472,21 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
         // - SSI roots gather xfer data from their SSI PETs toward other SSI
         char *xferSsiBC = NULL;
         std::vector<char> xferSsiBuffer;
+#ifdef VM_USE_MPI4
         std::vector<MPI_Count> ssiLocalInCounts(ssiLocalPetCount);
         std::vector<MPI_Count> ssiLocalInOffsets(ssiLocalPetCount);
         std::vector<MPI_Count> ssiLocalOutCounts(ssiLocalPetCount);
         std::vector<MPI_Count> ssiLocalOutOffsets(ssiLocalPetCount);
         MPI_Count rootBufferInSize = 0;
         MPI_Count rootBufferOutSize = 0;
+#else
+        std::vector<int> ssiLocalInCounts(ssiLocalPetCount);
+        std::vector<int> ssiLocalInOffsets(ssiLocalPetCount);
+        std::vector<int> ssiLocalOutCounts(ssiLocalPetCount);
+        std::vector<int> ssiLocalOutOffsets(ssiLocalPetCount);
+        long int rootBufferInSize = 0;
+        long int rootBufferOutSize = 0;
+#endif
         if (mpi_c_ssi_roots != MPI_COMM_NULL){
           for (int i=0; i<ssiLocalPetCount; i++){
             ssiLocalInOffsets[i] = rootBufferInSize;
@@ -7514,9 +7530,15 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
           }
 #endif
         }
+#ifdef VM_USE_MPI4
         MPI_Gatherv_c(xferBC, bufferInSize, mpitype,
           xferSsiBC, &(ssiLocalInCounts[0]), &(ssiLocalInOffsets[0]), mpitype,
           0, mpi_c_ssi);
+#else
+        MPI_Gatherv(xferBC, bufferInSize, mpitype,
+          xferSsiBC, &(ssiLocalInCounts[0]), &(ssiLocalInOffsets[0]), mpitype,
+          0, mpi_c_ssi);
+#endif
 #ifdef VM_LOG_ALLTOALLV_on
         {
             ESMC_LogDefault.Write("VMK::alltoallv(): After MPI_Gatherv(mpi_c_ssi)", ESMC_LOGMSG_DEBUG);
