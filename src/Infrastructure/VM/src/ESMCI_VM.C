@@ -3353,12 +3353,12 @@ VM *VM::initialize(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::VM::set()"
+#define ESMC_METHOD "ESMCI::VM::setGlobal()"
 //BOPI
-// !IROUTINE:  ESMCI::VM::set
+// !IROUTINE:  ESMCI::VM::setGobal
 //
 // !INTERFACE:
-void VM::set(
+void VM::setGlobal(
 //
 // !RETURN VALUE:
 //    void
@@ -3384,7 +3384,7 @@ void VM::set(
   }
 
   try{
-    GlobalVM->VMK::set(globalResourceControl);
+    GlobalVM->VMK::setGlobal(globalResourceControl);
   }catch(int catchrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU,

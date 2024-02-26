@@ -1192,6 +1192,13 @@
       !------------------------------------------------------------------------
       !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM Set Test"
+      call ESMF_VMSet(vm, mode=ESMF_VMMODE_NORMAL, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Get Test"
       call ESMF_VMGet(vm, localPet=localPet, petCount=npets, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

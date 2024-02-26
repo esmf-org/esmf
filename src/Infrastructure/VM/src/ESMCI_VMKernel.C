@@ -24,6 +24,16 @@
 #define VM_SSISHMLOG_off
 #define VM_SIZELOG_off
 
+#define VM_PROFILE_ALLTOALL_on
+#define VM_LOG_ALLTOALL_INTRO_on
+#define VM_LOG_ALLTOALL_off
+#define VM_MEMLOG_AllTOALL_off
+
+#define VM_PROFILE_ALLTOALLV_on
+#define VM_LOG_ALLTOALLV_INTRO_on
+#define VM_LOG_ALLTOALLV_on
+#define VM_MEMLOG_AllTOALLV_off
+
 // On SunOS systems there are a couple of macros that need to be set
 // in order to get POSIX compliant functions IPC, pthreads, gethostid
 #ifdef __sun
@@ -89,6 +99,7 @@ using namespace std;
 
 #include "ESMCI_AccInfo.h"
 #include "ESMCI_LogErr.h"
+#include "ESMCI_TraceRegion.h"
 
 #ifndef ESMF_NO_OPENACC
 #include <openacc.h>
@@ -361,7 +372,12 @@ void VMK::InitPreMPI(){
 }
 
 
-void VMK::set(bool globalResourceControl){
+void VMK::set(vmMode mode){
+  ESMC_LogDefault.Write("Hi from VMK::set()!", ESMC_LOGMSG_DEBUG);
+}
+
+
+void VMK::setGlobal(bool globalResourceControl){
 #ifndef ESMF_NO_GETHOSTID
 #ifndef ESMF_NO_PTHREADS
   if (globalResourceControl){
@@ -618,7 +634,7 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
       ++j;
     }
   }
-  set(globalResourceControl);
+  setGlobal(globalResourceControl);
 #endif
   // ESMCI::VMK pet -> core mapping
   lpid = new int[npets];
@@ -2067,23 +2083,40 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
           sarg[0].mpi_c_freeflag = 1; // responsible to free the communicator
 #if (MPI_VERSION >= 3)
           // set up communicator across single-system-images SSIs
-          MPI_Comm_split_type(vmp->mpi_c_part, MPI_COMM_TYPE_SHARED, 0,
-            MPI_INFO_NULL, &new_mpi_c_ssi);
+          if (new_mpi_c != MPI_COMM_NULL)
+            MPI_Comm_split_type(new_mpi_c, MPI_COMM_TYPE_SHARED, 0,
+              MPI_INFO_NULL, &new_mpi_c_ssi);
+          else
+            new_mpi_c_ssi = MPI_COMM_NULL;
+          // set up communicator across root pets of each SSI
+          if (new_mpi_c != MPI_COMM_NULL){
+            int color;
+            MPI_Comm_rank(new_mpi_c_ssi, &color);
+            if (color>0) color = MPI_UNDEFINED; // only root PETs on each SSI
+            MPI_Comm_split(new_mpi_c, color, 0, &new_mpi_c_ssi_roots);
+          }else{
+            new_mpi_c_ssi_roots = MPI_COMM_NULL;
+          }
 #ifdef VM_SSISHMLOG_on
           {
             std::stringstream msg;
-            int sz;
-            MPI_Comm_size(new_mpi_c_ssi, &sz);
+            int sz1, sz2, sz3, sz4;
+            sz1 = sz2 = sz3 = sz4 = -1;
+            MPI_Comm_size(vmp->mpi_c_part, &sz1);
+            if (new_mpi_c != MPI_COMM_NULL)
+              MPI_Comm_size(new_mpi_c, &sz2);
+            if (new_mpi_c_ssi != MPI_COMM_NULL)
+              MPI_Comm_size(new_mpi_c_ssi, &sz3);
+            if (new_mpi_c_ssi_roots != MPI_COMM_NULL)
+              MPI_Comm_size(new_mpi_c_ssi_roots, &sz4);
             msg << "VMK::startup()#" << __LINE__
-              << " created mpi_c_ssi of size=" << sz;
+              << ", mpi_c_part of size=" << sz1
+              << ", new_mpi_c of size=" << sz2
+              << ", created new_mpi_c_ssi of size=" << sz3
+              << ", created new_mpi_c_ssi_roots of size=" << sz4;
             ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
-          // set up communicator across root pets of each SSI
-          int color;
-          MPI_Comm_rank(new_mpi_c_ssi, &color);
-          if (color>0) color = MPI_UNDEFINED; // only root PETs on each SSI
-          MPI_Comm_split(vmp->mpi_c_part, color, 0, &new_mpi_c_ssi_roots);
 #else
           new_mpi_c_ssi = MPI_COMM_NULL;
           new_mpi_c_ssi_roots = MPI_COMM_NULL;
@@ -6919,7 +6952,23 @@ int VMK::allgatherv(void *in, int inCount, void *out, int *outCounts,
 
 int VMK::alltoall(void *in, int inCount, void *out, int outCount,
   vmType type){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::alltoall()"
   int localrc=0;
+#if (defined VM_PROFILE_ALLTOALL_on) || (defined VM_LOG_ALLTOALL_on) || (defined VM_LOG_ALLTOALL_INTRO_on)
+  std::stringstream traceTag;
+  traceTag << "VMK::alltoall() inCount=" << inCount
+    << " outCount=" << outCount << " type=" << vmTypeString(type);
+#endif
+#ifdef VM_PROFILE_ALLTOALL_on
+  TraceEventRegionEnter(traceTag.str(), &localrc);
+#endif
+#ifdef VM_LOG_ALLTOALL_INTRO_on
+  ESMC_LogDefault.Write(traceTag.str(), ESMC_LOGMSG_DEBUG);
+#endif
+#ifdef VM_MEMLOG_AllTOALL_on
+  VM::logMemInfo(std::string("VMK::alltoall() intro: "));
+#endif
   if (mpionly){
     // Find corresponding MPI data type
     MPI_Datatype mpitype;
@@ -6992,13 +7041,38 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
       if (localrc) return localrc;
     }
   }
+#ifdef VM_PROFILE_ALLTOALL_on
+  TraceEventRegionExit(traceTag.str(), &localrc);
+#endif
   return localrc;
 }
 
 
 int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
   int *outCounts, int *outOffsets, vmType type){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::alltoallv()"
   int localrc=0;
+#if (defined VM_PROFILE_ALLTOALLV_on) || (defined VM_LOG_ALLTOALLV_on) || (defined VM_LOG_ALLTOALLV_INTRO_on)
+  unsigned long long int inCount = 0;
+  unsigned long long int outCount = 0;
+  for (int i=0; i < npets; i++){
+    inCount += inCounts[i];
+    outCount += outCounts[i];
+  }
+  std::stringstream traceTag;
+  traceTag << "VMK::alltoallv() inCount=" << inCount
+    << " outCount=" << outCount << " type=" << vmTypeString(type);
+#endif
+#ifdef VM_PROFILE_ALLTOALLV_on
+  TraceEventRegionEnter(traceTag.str(), &localrc);
+#endif
+#ifdef VM_LOG_ALLTOALLV_INTRO_on
+  ESMC_LogDefault.Write(traceTag.str(), ESMC_LOGMSG_DEBUG);
+#endif
+#ifdef VM_MEMLOG_AllTOALLV_on
+  VM::logMemInfo(std::string("VMK::alltoallv() intro: "));
+#endif
   if (mpionly){
     // Find corresponding MPI data type
     MPI_Datatype mpitype;
@@ -7073,6 +7147,9 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
       if (localrc) return localrc;
     }
   }
+#ifdef VM_PROFILE_ALLTOALLV_on
+  TraceEventRegionExit(traceTag.str(), &localrc);
+#endif
   return localrc;
 }
 

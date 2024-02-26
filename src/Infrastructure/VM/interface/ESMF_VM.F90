@@ -393,8 +393,28 @@ module ESMF_VMMod
   type(ESMF_VMEpoch_Flag), parameter:: &
     ESMF_VMEPOCH_NONE      = ESMF_VMEpoch_Flag(0), &
     ESMF_VMEPOCH_BUFFER    = ESMF_VMEpoch_Flag(1)
-    
+
   public ESMF_VMEpoch_Flag, ESMF_VMEPOCH_NONE, ESMF_VMEPOCH_BUFFER
+
+!------------------------------------------------------------------------------
+  ! ESMF_VMMode_Flag
+  type ESMF_VMMode_Flag
+  private
+#ifdef ESMF_NO_INITIALIZERS
+    integer :: value
+#else
+    integer :: value = 0
+#endif
+  end type
+
+  type(ESMF_VMMode_Flag), parameter:: &
+    ESMF_VMMODE_NORMAL     = ESMF_VMMode_Flag(0), &
+    ESMF_VMMODE_SSIGROUP   = ESMF_VMMode_Flag(1), &
+    ESMF_VMMODE_SSIROOT    = ESMF_VMMode_Flag(2)
+
+  public ESMF_VMMode_Flag, &
+    ESMF_VMMODE_NORMAL, ESMF_VMMODE_SSIGROUP, ESMF_VMMODE_SSIROOT
+
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -458,6 +478,7 @@ module ESMF_VMMod
   public ESMF_VMInitializePreMPI
   public ESMF_VMInitialize
   public ESMF_VMSet
+  public ESMF_VMSetGlobal
   public ESMF_VMSetEnv
   public ESMF_VMFinalize
   public ESMF_VMAbort
@@ -9340,10 +9361,60 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMSet()"
 !BOPI
-! !IROUTINE: ESMF_VMSet - Set properties of the Global VM
+! !IROUTINE: ESMF_VMSet - Set properties internal to the VM
 
 ! !INTERFACE:
-  subroutine ESMF_VMSet(globalResourceControl, rc)
+  subroutine ESMF_VMSet(vm, keywordEnforcer, mode, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),          intent(in)            :: vm
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_VMMode_Flag), intent(in),  optional :: mode
+    integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Set properties internal to the VM
+!
+!   The arguments are:
+!   \begin{description}
+!     \item[vm] 
+!       The {\tt ESMF\_VM} object affected.
+!     \item [{[mode]}]
+!       Mode to switch to.
+!   \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Call into the C++ interface.
+    if (present(mode)) then
+      call c_ESMC_VMSet(vm, mode, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMSet
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMSetGlobal()"
+!BOPI
+! !IROUTINE: ESMF_VMSetGlobal - Set properties of the Global VM
+
+! !INTERFACE:
+  subroutine ESMF_VMSetGlobal(globalResourceControl, rc)
 !
 ! !ARGUMENTS:
     logical, intent(in),  optional :: globalResourceControl
@@ -9383,14 +9454,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Call into the C++ interface.
-    call c_ESMC_VMSet(globalResourceControl_opt, localrc)
+    call c_ESMC_VMSetGlobal(globalResourceControl_opt, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_VMSet
+  end subroutine ESMF_VMSetGlobal
 !------------------------------------------------------------------------------
 
 
