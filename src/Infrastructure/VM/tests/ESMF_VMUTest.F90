@@ -32,8 +32,8 @@
 
 !     !Module global variables
       type(ESMF_VM),save :: vm, test_vm, vmAlias
-      integer:: localPet, npets, rootPet, time_values(8)
-      integer:: test_localPet, test_npets
+      integer:: localPet, petCount, rootPet, time_values(8)
+      integer:: test_localPet, test_petCount
       integer:: init_sec, end_sec, delay_time
       integer, allocatable:: array1(:), array3(:),array3_soln(:)
       integer, allocatable:: array4(:), array5(:)
@@ -77,7 +77,7 @@
       !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Test_VM Get Test"
-      call ESMF_VMGet(test_vm, localPet=test_localPet, petCount=test_npets, &
+      call ESMF_VMGet(test_vm, localPet=test_localPet, petCount=test_petCount, &
         ssiMap=ssiMap, esmfComm=esmfComm, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -93,14 +93,14 @@
       !EX_UTest
       write(failMsg, *) "Did not return correct bounds"
       write(name, *) "Test bounds of ssiMap"
-      call ESMF_Test(((lbound(ssiMap,1)==0).and.(ubound(ssiMap,1)==test_npets-1)),&
+      call ESMF_Test(((lbound(ssiMap,1)==0).and.(ubound(ssiMap,1)==test_petCount-1)),&
         name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
       write(failMsg, *) "Did have correct PET infoS"
       write(name, *) "Verify the VM is correct Test"
-      call ESMF_Test(((localPet.eq.test_localPet).and.(npets.eq.test_npets)), &
+      call ESMF_Test(((localPet.eq.test_localPet).and.(petCount.eq.test_petCount)), &
           name, failMsg, result, ESMF_SRCLINE)
 
       end subroutine test_vm_current
@@ -205,7 +205,7 @@
       !EX_UTest
       array4 = (/50,50/)
       ! Set expected results
-      if (npets == 1) then
+      if (petCount == 1) then
         array5 = (/1,2/)
       else
         array5 = (/604,608/)
@@ -240,7 +240,7 @@
       !EX_UTest
       farray4 = (/50.0,50.0/)
       ! Set expected results
-      if (npets == 1) then
+      if (petCount == 1) then
         farray5 = (/1.0,2.0/)
       else
         farray5 = (/604.0,608.0/)
@@ -278,7 +278,7 @@
       !EX_UTest
       f4array4 = (/50.0,50.0/)
       ! Set expected results
-      if (npets == 1) then
+      if (petCount == 1) then
         f4array5 = (/1.0,2.0/)
       else
         f4array5 = (/604.0,608.0/)
@@ -452,7 +452,7 @@
       !EX_UTest
       array4 = (/50,50/)
       ! Set expected results
-      if (npets == 1) then
+      if (petCount == 1) then
         array5 = (/1,2/)
       else
         array5 = (/301,302/)
@@ -487,7 +487,7 @@
       !EX_UTest
       farray4 = (/50.0,50.0/)
       ! Set expected results
-      if (npets == 1) then
+      if (petCount == 1) then
         farray5 = (/1.0,2.0/)
       else
         farray5 = (/301.0,302.0/)
@@ -525,7 +525,7 @@
       !EX_UTest
       f4array4 = (/50.0,50.0/)
       ! Set expected results
-      if (npets == 1) then
+      if (petCount == 1) then
         f4array5 = (/1.0,2.0/)
       else
         f4array5 = (/301.0,302.0/)
@@ -792,7 +792,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       isum=0
-      do j=1,npets
+      do j=1,petCount
       end do
       do i=1,nsize
         array3_soln(i) = sum( array2(i,:) )
@@ -810,7 +810,7 @@
       ! EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM All Reduce scalar ESMF_REDUCE_SUM Test"
-      i = npets
+      i = petCount
       j = -1
       call ESMF_VMAllReduce (vm, sendData=i, recvData=j,  &
                              reduceflag=ESMF_REDUCE_SUM, rc=rc)
@@ -820,7 +820,7 @@
       !EX_UTest
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Reduce scalar ESMF_REDUCE_SUM Results Test"
-      call ESMF_Test(j == npets*npets, name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test(j == petCount*petCount, name, failMsg, result, ESMF_SRCLINE)
 
 
       !Test with ESMF_KIND_R8  arguments
@@ -1006,7 +1006,7 @@
       !EX_UTest
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Reduce scalar ESMF_REDUCE_MAXResults Test"
-      call ESMF_Test(j+1 == npets, name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test(j+1 == petCount, name, failMsg, result, ESMF_SRCLINE)
 
 
       !Tests using ESMF_KIND_R8 arguments
@@ -1123,7 +1123,7 @@
       !NEX_UTest
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "VM Get before initialization Test"
-      call ESMF_VMGet(vm, petCount=npets, rc=rc)
+      call ESMF_VMGet(vm, petCount=petCount, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -1144,16 +1144,16 @@
       !NEX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Get Test"
-      call ESMF_VMGet(vm, petCount=npets, ssiCount=ssiCount, &
+      call ESMF_VMGet(vm, petCount=petCount, ssiCount=ssiCount, &
         ssiMinPetCount=ssiMinPetCount, ssiMaxPetCount=ssiMaxPetCount, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      if (npets .ne. 1 .and. npets .ne. 4) then
-        print *, 'PET count must be 1 or 4, npets =', npets
+      if (petCount .ne. 1 .and. petCount .ne. 4) then
+        print *, 'PET count must be 1 or 4, petCount =', petCount
         call ESMF_Finalize (endflag=ESMF_END_ABORT)
       end if
 
-      write(msg,*) "petCount=", npets, " ssiCount=", ssiCount
+      write(msg,*) "petCount=", petCount, " ssiCount=", ssiCount
       call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
       write(msg,*) "ssiMinPetCount=", ssiMinPetCount, &
         " ssiMaxPetCount=", ssiMaxPetCount
@@ -1191,17 +1191,54 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
+      write(name, *) "VM Set ESMF_VMMODE_SSIGROUP Test"
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM Set Test"
+      call ESMF_VMSet(vm, mode=ESMF_VMMODE_SSIGROUP, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "VM Get for ESMF_VMMODE_SSIGROUP Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      write(msg,*) "localPet=", localPet, " petCount=", petCount
+      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "VM Set ESMF_VMMODE_SSIROOTS Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_VMSet(vm, mode=ESMF_VMMODE_SSIROOTS, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "VM Get for ESMF_VMMODE_SSIROOTS Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      write(msg,*) "localPet=", localPet, " petCount=", petCount
+      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "VM Set ESMF_VMMODE_NORMAL Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
       call ESMF_VMSet(vm, mode=ESMF_VMMODE_NORMAL, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Get Test"
-      call ESMF_VMGet(vm, localPet=localPet, petCount=npets, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      write(msg,*) "localPet=", localPet, " petCount=", petCount
+      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
 
 
       !------------------------------------------------------------------------
@@ -1234,10 +1271,10 @@
       enddo
 
       ! Populate array2
-      allocate(array2(nsize,npets))
-      allocate(farray2(nsize,npets))
-      allocate(f4array2(nsize,npets))
-      do j=1, npets 
+      allocate(array2(nsize,petCount))
+      allocate(farray2(nsize,petCount))
+      allocate(f4array2(nsize,petCount))
+      do j=1, petCount 
         do i=1, nsize
           array2(i,j) = (j-1) * 100 + i
           farray2(i,j)  = real( array2(i,j) , ESMF_KIND_R8)

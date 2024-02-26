@@ -171,7 +171,7 @@ contains
 !
 !EOP
 
-    integer :: localrc
+    integer :: localrc, ssiCount, localPet
     type(ESMF_VM) :: localvm
     type(ESMF_AttReconcileFlag) :: lattreconflag
 
@@ -213,11 +213,63 @@ contains
         rcToReturn=rc)) return
     endif
 
-    call ESMF_StateReconcile_driver (state, vm=localvm, &
-        attreconflag=lattreconflag, rc=localrc)
+    call ESMF_VMGet(localvm, ssiCount=ssiCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT,  &
+      rcToReturn=rc)) return
+
+    if (ssiCount > 1) then
+
+      call ESMF_VMSet(localvm, mode=ESMF_VMMODE_SSIGROUP, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+      call ESMF_StateReconcile_driver (state, vm=localvm, &
+        attreconflag=lattreconflag, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+      call ESMF_VMSet(localvm, mode=ESMF_VMMODE_SSIROOTS, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+      call ESMF_VMGet(localvm, localPet=localPet, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+      if (localPet /= -1) then
+        call ESMF_StateReconcile_driver (state, vm=localvm, &
+          attreconflag=lattreconflag, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+      endif
+
+      call ESMF_VMSet(localvm, mode=ESMF_VMMODE_SSIGROUP, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+      call ESMF_StateReconcile_driver (state, vm=localvm, &
+        attreconflag=lattreconflag, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+      call ESMF_VMSet(localvm, mode=ESMF_VMMODE_NORMAL, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    else
+
+      call ESMF_StateReconcile_driver (state, vm=localvm, &
+        attreconflag=lattreconflag, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    endif
 
     if (profile) then
       call ESMF_TraceRegionExit("ESMF_StateReconcile_driver", rc=localrc)
@@ -437,6 +489,9 @@ contains
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ': *** Step 1.1 - Translate VM identifiers to integers')
     end if
+#ifdef RECONCILE_LOG
+    call ESMF_LogWrite("1.1 - Translate VM identifiers to integers", ESMF_LOGMSG_INFO)
+#endif
 
     ! Translate VmId objects to an integer representation to minimize memory
     ! usage. This is also beneficial for performance.
@@ -500,6 +555,9 @@ contains
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ': *** Step 1.2 - Update Field metadata for unique geometries')
     end if
+#ifdef RECONCILE_LOG
+    call ESMF_LogWrite("1.2 - Update Field metadata for unique geometries", ESMF_LOGMSG_INFO)
+#endif
 
     ! Update Field metadata for unique geometries. This will traverse the state
     ! hierarchy adding reconcile-specific attributes that will find unique

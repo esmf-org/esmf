@@ -59,7 +59,7 @@ enum vmType { vmBYTE=1, vmI4, vmI8, vmR4, vmR8, vmL4};
 // epochs
 enum vmEpoch  { epochNone=0, epochBuffer};
 // modes
-enum vmMode  { modeNormal=0, modeSsiGroup, modeSsiRoot};
+enum vmMode  { modeNormal=0, modeSsiGroup, modeSsiRoots};
 
 // Pthread stack sizes
 #define VM_PTHREAD_STACKSIZE_SERVICE  (4194304) //  4MiB for service threads
@@ -321,6 +321,8 @@ class VMK{
     int ssiLocalPetCount; // number of PETs on the same SSI as localPet (incl.)
     int ssiLocalPet;      // id of local PET in the local SSI
     int *ssiLocalPetList; // PETs that are on the same SSI as localPet (incl.)
+    int ssiRootPet;       // id of local PET in the SSI roots communicator
+    int *ssiRootPetList;  // PETs that are the SSI roots
     int devCount;   // number of devices associated with this VMK all SSI
     int ssiLocalDevCount;// number of devices associated with this VMK on local SSI
     int *ssiLocalDevList;// list of SSI-local device indices associated with this VMK
@@ -332,8 +334,10 @@ class VMK{
     bool threadsflag; // threaded or none-threaded VM
     // MPI Communicator handles
     MPI_Comm mpi_c;     // communicator across the entire VM
+    MPI_Comm mpi_c_bak; // communicator backup for mpi_c
     MPI_Comm mpi_c_ssi; // communicator holding PETs on the same SSI
     MPI_Comm mpi_c_ssi_roots; // communicator holding root PETs on each SSI
+    vmMode mode;
     // Shared mutex and thread_finish variables. These are pointers that will be
     // pointing to shared memory variables between different thread-instances of
     // the VMK object.
@@ -478,6 +482,8 @@ class VMK{
     int getSsiLocalPetCount() const {return ssiLocalPetCount;}
     int getSsiLocalPet() const {return ssiLocalPet;}
     const int *getSsiLocalPetList() const {return ssiLocalPetList;}
+    int getSsiRootPet() const {return ssiRootPet;}
+    const int *getSsiRootPetList() const {return ssiRootPetList;}
     int getSsiLocalDevCount() const {return ssiLocalDevCount;}
     const int *getSsiLocalDevList() const {return ssiLocalDevList;}
     int getDevCount() const {return devCount;}
@@ -537,6 +543,16 @@ class VMK{
         return std::string("vmL4");
       }
       return std::string("Unknown vmType");
+    }
+    static std::string vmModeString(vmMode mode){
+      if (mode==modeNormal){
+        return std::string("modeNormal");
+      }else if (mode==modeSsiGroup){
+        return std::string("modeSsiGroup");
+      }else if (mode==modeSsiRoots){
+        return std::string("modeSsiRoots");
+      }
+      return std::string("Unknown vmMode");
     }
 
     // p2p communication calls

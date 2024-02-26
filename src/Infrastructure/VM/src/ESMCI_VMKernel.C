@@ -373,7 +373,26 @@ void VMK::InitPreMPI(){
 
 
 void VMK::set(vmMode mode){
-  ESMC_LogDefault.Write("Hi from VMK::set()!", ESMC_LOGMSG_DEBUG);
+  std::stringstream msg;
+  msg << "VMK::set() vmMode=" << vmModeString(mode);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+  this->mode = mode;
+  if (mode==modeNormal){
+    mpi_c = mpi_c_bak;
+    MPI_Comm_size(mpi_c, &npets);
+    MPI_Comm_rank(mpi_c, &mypet);
+  }else if (mode==modeSsiGroup){
+    npets = ssiLocalPetCount;
+    mypet = ssiLocalPet;
+    mpi_c = mpi_c_ssi;
+  }else if (mode==modeSsiRoots){
+    npets = ssiCount;
+    if (mpi_c_ssi_roots != MPI_COMM_NULL)
+      MPI_Comm_rank(mpi_c_ssi_roots, &mypet);
+    else
+      mypet = -1;
+    mpi_c = mpi_c_ssi_roots;
+  }
 }
 
 
@@ -477,6 +496,8 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   MPI_Comm_group(mpiCommunicator, &mpi_g);
   MPI_Comm_create(mpiCommunicator, mpi_g, &mpi_c);
   MPI_Group_free(&mpi_g);
+  mpi_c_bak = mpi_c;
+  mode = modeNormal;
   // ... and copy the Comm object into the class static default variable...
   default_mpi_c = mpi_c;
 #if (MPI_VERSION >= 3)
@@ -579,6 +600,9 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   ssiLocalPet=0;
   ssiLocalPetList = new int[1];
   ssiLocalPetList[0] = mypet;
+  ssiRootPet=0;
+  ssiRootPetList = new int[1];
+  ssiRootPetList[0] = mypet;
 #else
   int *temp_ssiPetCount = new int[ncores];
   long int *temp_ssiid = new long int[ncores];
@@ -631,6 +655,15 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
     if (ssiid[i]==localSsi){
       ssiLocalPetList[j] = i;
       if (i == mypet) ssiLocalPet=j;
+      ++j;
+    }
+  }
+  ssiRootPetList = new int[ssiCount];
+  j=0;
+  for (int i=0; i<ncores; i++){
+    if (mpi_c_ssi_roots != MPI_COMM_NULL){
+      ssiRootPetList[j] = i;
+      if (i == mypet) ssiRootPet=j;
       ++j;
     }
   }
@@ -797,6 +830,7 @@ void VMK::finalize(int finalizeMpi){
     delete [] cid[i];
   delete [] cid;
   delete [] ssiLocalPetList;
+  delete [] ssiRootPetList;
   delete [] ssiLocalDevList;
 #ifdef ESMF_NVML
   // Have access to NVIDIA management library (NVML)
@@ -1002,7 +1036,9 @@ void VMK::construct(void *ssarg){
       ++j;
     }
   }
+  mode = modeNormal;
   mpi_c = sarg->mpi_c;
+  mpi_c_bak = mpi_c;
 #if (MPI_VERSION >= 3)
   mpi_c_ssi       = sarg->mpi_c_ssi;
   mpi_c_ssi_roots = sarg->mpi_c_ssi_roots;
@@ -1010,6 +1046,15 @@ void VMK::construct(void *ssarg){
   mpi_c_ssi       = MPI_COMM_NULL;
   mpi_c_ssi_roots = MPI_COMM_NULL;
 #endif
+  ssiRootPetList = new int[ssiCount];
+  j=0;
+  for (int i=0; i<ncores; i++){
+    if (mpi_c_ssi_roots != MPI_COMM_NULL){
+      ssiRootPetList[j] = i;
+      if (i == mypet) ssiRootPet=j;
+      ++j;
+    }
+  }
 
   // device management
   devCount = sarg->devCount;
@@ -1232,6 +1277,7 @@ void VMK::destruct(){
     delete [] cid[i];
   delete [] cid;
   delete [] ssiLocalPetList;
+  delete [] ssiRootPetList;
 }
 
 
@@ -3276,7 +3322,12 @@ int VMK::getTid(int i){
 }
 
 int VMK::getVas(int i){
-  return pid[i];
+  if (mode==modeNormal)
+    return pid[i];
+  else if (mode==modeSsiGroup)
+    return pid[ssiLocalPetList[i]];
+  else if (mode==modeSsiRoots)
+    return pid[ssiRootPetList[i]];
 }
 
 int VMK::getLpid(int i){

@@ -410,10 +410,10 @@ module ESMF_VMMod
   type(ESMF_VMMode_Flag), parameter:: &
     ESMF_VMMODE_NORMAL     = ESMF_VMMode_Flag(0), &
     ESMF_VMMODE_SSIGROUP   = ESMF_VMMode_Flag(1), &
-    ESMF_VMMODE_SSIROOT    = ESMF_VMMode_Flag(2)
+    ESMF_VMMODE_SSIROOTS   = ESMF_VMMode_Flag(2)
 
   public ESMF_VMMode_Flag, &
-    ESMF_VMMODE_NORMAL, ESMF_VMMODE_SSIGROUP, ESMF_VMMODE_SSIROOT
+    ESMF_VMMODE_NORMAL, ESMF_VMMODE_SSIGROUP, ESMF_VMMODE_SSIROOTS
 
 !------------------------------------------------------------------------------
 
@@ -11191,7 +11191,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     do i=lbound(ids,1),ubound(ids,1)
       ids(i) = ids(i) + 1
     enddo
-    
+call ESMF_LogWrite("After c_ESMC_VMTranslateVMId()", ESMF_LOGMSG_DEBUG)
     if (present(vmIdMap)) then
       ! Must construct vmIdMap
 
