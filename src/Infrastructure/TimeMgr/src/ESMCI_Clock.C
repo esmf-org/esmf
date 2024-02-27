@@ -601,13 +601,46 @@ int Clock::count=0;
       prevAdvanceTimeStep = currAdvanceTimeStep;
       currAdvanceTimeStep = (timeStep != ESMC_NULL_POINTER) ?
                             *timeStep : this->timeStep;
-      currTime += currAdvanceTimeStep;
 
+      // Advance based on whether repeat clock or not
+      if (repeat) {
+
+        // Time at which we repeat
+        Time repeatTime=startTime+repeatDuration;
+        
+        // At first use whole time step
+        TimeInterval leftoverTimeStep = currAdvanceTimeStep;
+
+        // Loop while we still have time step left
+        while (currTime+leftoverTimeStep > repeatTime) {
+
+          // Check alarms from currTime to repeatTime
+
+          // Take off part to get to repeatTime
+          TimeInterval leftoverTimeStep = (currTime+leftoverTimeStep)-repeatTime;
+
+          // Move currTime back to startTime
+          currTime=startTime;
+          
+          // Because we went back to startTime, advance repeatCount
+          repeatCount++;                      
+        }
+
+        // Add remaining part of time step to currTime
+        currTime += leftoverTimeStep;
+
+        // Check Alarms from currTime to currTime+leftoverTimeStep
+        
+      } else {
+        currTime += currAdvanceTimeStep;
+      }
+
+      
       // count number of timesteps
       advanceCount++;
 
     } else { // ESMF_DIRECTION_REVERSE
-
+      
       // TODO: make more robust by removing simplifying assumptions:
       //       1) timeSteps are constant throughout clock run.
 
@@ -620,6 +653,13 @@ int Clock::count=0;
       //        Clock::set() and then reversed, the advanceCount does not
       //        account for the "missing" timeSteps.
 
+      // Repeat isn't supported yet with reverse direction
+      if (repeat) {
+        ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_INCONS,
+         "repeating clocks are not currently supported with reverse direction.", ESMC_CONTEXT, &rc);
+        return(rc);
+      }
+      
       // step backwards; use passed-in timestep if specified, otherwise
       //   use the clock's prevTime
       currTime -= (timeStep != ESMC_NULL_POINTER) ? *timeStep : this->timeStep;

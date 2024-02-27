@@ -110,6 +110,7 @@
       type(ESMF_TimeInterval) :: timeStep2, currentSimTime, previousSimTime, &
                                  timeDiff, repeatDuration,repeatDurationOut
       character(ESMF_MAXSTR) :: clockName
+      integer(ESMF_KIND_I8) :: repeatCounts
 #endif
 
       ! initialize ESMF framework
@@ -2680,19 +2681,46 @@ call ESMF_LogSet (flush=.true.)
            repeatDuration=repeatDuration, rc=rc)
 
       ! Iterate for 120 minutes
-      do i=1,120
+      do i=1,121
         call ESMF_ClockAdvance(repeatClock, rc=rc)
       end do
 
       ! Make sure advance count is correct
-      call ESMF_ClockGet(repeatClock, advanceCount=advanceCounts, rc=rc)
+      call ESMF_ClockGet(repeatClock, &
+           advanceCount=advanceCounts, &
+           repeatCount=repeatCounts, &
+           currTime=currentTime, &
+           rc=rc)
 
-      write(*,*) "advanceCounts=",advanceCounts
       
+      write(*,*) "advanceCounts=",advanceCounts
+      write(*,*) "repeatCounts=",repeatCounts
+      
+      call ESMF_TimeGet(currentTime, &
+           yy=YY, mm=MM, dd=dd, h=H, m=M, &
+           rc=rc)
+
+
+      write(*,*) "YY=",YY
+      write(*,*) "MM=",MM
+      write(*,*) "dd=",dd
+      write(*,*) "H=",H
+      write(*,*) "M=",M
+
+      ! Check info
+      correct=.true.
+      if (advanceCounts .ne. 121) correct=.false.
+      if (repeatCounts .ne. 2) correct=.false.
+      if (YY .ne. 2024) correct=.false.
+      if (MM .ne. 3) correct=.false.
+      if (dd .ne. 14) correct=.false.
+      if (H .ne. 5) correct=.false.
+      if (M .ne. 1) correct=.false.
+
       ! Free Clock
       call ESMF_ClockDestroy(repeatClock, rc=rc)
       
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+      call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       
