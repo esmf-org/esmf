@@ -605,6 +605,14 @@ int Clock::count=0;
       // Advance based on whether repeat clock or not
       if (repeat) {
 
+        // Repeat isn't supported yet with a negative time step or one that's 0
+        // The code below will have to be re-thought to support either. 
+        if (currAdvanceTimeStep <= (TimeInterval)0) {
+          ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_INCONS,
+                 "repeating clocks currently do not support negative or 0 time steps.", ESMC_CONTEXT, &rc);
+          return(rc);
+        }
+        
         // Time at which we repeat
         Time repeatTime=startTime+repeatDuration;
         
@@ -612,12 +620,12 @@ int Clock::count=0;
         TimeInterval leftoverTimeStep = currAdvanceTimeStep;
 
         // Loop while we still have time step left
-        while (currTime+leftoverTimeStep > repeatTime) {
+        while (currTime+leftoverTimeStep >= repeatTime) {
 
           // Check alarms from currTime to repeatTime
 
           // Take off part to get to repeatTime
-          TimeInterval leftoverTimeStep = (currTime+leftoverTimeStep)-repeatTime;
+          leftoverTimeStep = (currTime+leftoverTimeStep)-repeatTime;
 
           // Move currTime back to startTime
           currTime=startTime;
