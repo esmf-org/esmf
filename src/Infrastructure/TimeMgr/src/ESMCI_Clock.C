@@ -1036,14 +1036,58 @@ int Clock::count=0;
       return(rc);
     }
 
+    // Get tmp time step to use 
+    TimeInterval tmpTimeStep;
     if (timeStep != ESMC_NULL_POINTER) {
       // use passed-in timeStep if specified
-      *nextTime = currTime + *timeStep;
+      tmpTimeStep=*timeStep;
     } else {
       // otherwise use clock's own timestep
-      *nextTime = currTime + this->timeStep;
+      tmpTimeStep=this->timeStep;
     }
 
+    // Save currTime, so we don't change it
+    Time tmpCurrTime=currTime;
+
+    // Calculate nextTime taking repeat into account
+    if (repeat) {
+
+      // Repeat isn't supported yet with a negative time step or one that's 0
+      // The code below will have to be re-thought to support either. 
+      if (tmpTimeStep <= (TimeInterval)0) {
+        ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_INCONS,
+         "repeating clocks currently do not support negative or 0 time steps.", ESMC_CONTEXT, &rc);
+        return(rc);
+      }
+        
+      // Time at which we repeat
+      Time repeatTime=startTime+repeatDuration;
+      
+      // At first use whole time step
+      TimeInterval leftoverTimeStep = tmpTimeStep;
+      
+      // Loop while we still have time step left
+      while (tmpCurrTime+leftoverTimeStep >= repeatTime) {
+        
+        // Take off part to get to repeatTime
+        leftoverTimeStep = (tmpCurrTime+leftoverTimeStep)-repeatTime;
+        
+        // Move tmpCurrTime back to startTime
+        tmpCurrTime=startTime;
+        
+        // Because we went back to startTime, advance repeatCount
+        repeatCount++;                      
+      }
+      
+      // Add remaining part of time step to tmpCurrTime to get nextTime
+      *nextTime= tmpCurrTime + leftoverTimeStep;
+      
+    } else {
+      // If not repeating, then nextTime is just tmpCurrTime + timeStep
+      *nextTime= tmpCurrTime + tmpTimeStep;
+    }
+
+    // Return success
     return(ESMF_SUCCESS);
 
  } // end Clock::getNextTime

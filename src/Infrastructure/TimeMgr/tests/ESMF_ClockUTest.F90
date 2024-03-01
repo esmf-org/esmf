@@ -100,7 +100,7 @@
 
       ! instantiate timestep, start and stop times
       type(ESMF_Time) :: stopTime, stopTime2, stopTime3, stopTime4, syncTime, &
-                         previousTime, current_time, currentTime, startTime2
+                         previousTime, current_time, currentTime, startTime2,nextTime
       real(ESMF_KIND_R8) :: realSeconds
       integer :: timeStepCount,i
       integer :: datetime(8)
@@ -2727,6 +2727,71 @@ call ESMF_LogSet (flush=.true.)
       
       ! ----------------------------------------------------------------------------
 
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(name, *) "Test ESMF_ClockGetNextTime() with a repeating Clock."
+
+      ! Simple test of repeating within one hour
+      
+      ! Set start time 
+      call ESMF_TimeSet(startTime, yy=2024, mm=3, dd=14, h=23, m=0, s=0, &
+                                calendar=gregorianCalendar, rc=rc)
+
+      ! Set timeStep to one minute
+      call ESMF_TimeIntervalSet(timeStep, m=1, rc=rc)
+      
+      ! Set repeat duration to one hour
+      call ESMF_TimeIntervalSet(repeatDuration, h=1, rc=rc)
+      
+      ! Create Clock
+      repeatClock = ESMF_ClockCreate(timeStep, startTime, &
+           repeatDuration=repeatDuration, rc=rc)
+
+      ! Iterate for 59 minutes
+      do i=1,59
+        call ESMF_ClockAdvance(repeatClock, rc=rc)
+      end do
+        
+      ! Get next time
+      call ESMF_ClockGetNextTime(repeatClock, &
+           nextTime=nextTime, &
+           rc=rc)
+
+       ! Get time
+       call ESMF_TimeGet(nextTime, &
+        yy=YY, mm=MM, dd=dd, h=H, m=M, &
+        rc=rc)
+
+      ! DEBUG OUTPUT
+      ! write(*,*) "YY=",YY
+      ! write(*,*) "MM=",MM
+      ! write(*,*) "dd=",dd
+      ! write(*,*) "H=",H
+      ! write(*,*) "M=",M
+
+      
+      ! Check info
+      correct=.true.
+      if (advanceCounts .ne. 120) correct=.false.
+      if (repeatCounts .ne. 2) correct=.false.
+      if (YY .ne. 2024) correct=.false.
+      if (MM .ne. 3) correct=.false.
+      if (dd .ne. 14) correct=.false.
+      if (H .ne. 23) correct=.false.
+      if (M .ne. 0) correct=.false.
+
+      ! Free Clock
+      call ESMF_ClockDestroy(repeatClock, rc=rc)
+      
+      call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      
+      ! ----------------------------------------------------------------------------
+
+      
       
 
 
