@@ -132,7 +132,7 @@ int main(void){
   // Add node information to the mesh
   strcpy(name, "MeshAddNodes");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshAddNodes(mesh, num_node, nodeId, nodeCoord, nodeOwner);
+  rc = ESMC_MeshAddNodes(mesh, num_node, nodeId, nodeCoord, nodeOwner, NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

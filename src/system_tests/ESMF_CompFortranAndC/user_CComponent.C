@@ -110,7 +110,7 @@ void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
   }
 
   // Add node information to the mesh
-  *rc = ESMC_MeshAddNodes(mesh, num_node, nodeId, nodeCoord, nodeOwner);
+  *rc = ESMC_MeshAddNodes(mesh, num_node, nodeId, nodeCoord, nodeOwner, NULL);
   if (*rc!=ESMF_SUCCESS) return;  // bail out
   
   // Add element information to the mesh

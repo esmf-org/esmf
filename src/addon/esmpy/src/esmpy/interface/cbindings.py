@@ -1135,13 +1135,16 @@ def ESMP_MeshAddElements(mesh, elementCount,
                         '.    '+constants._errmsg)
 
 _ESMF.ESMC_MeshAddNodes.restype = ct.c_int
-_ESMF.ESMC_MeshAddNodes.argtypes = [ct.c_void_p, ct.c_int,
-                                    np.ctypeslib.ndpointer(dtype=np.int32),
-                                    np.ctypeslib.ndpointer(dtype=np.float64),
-                                    np.ctypeslib.ndpointer(dtype=np.int32)]
+_ESMF.ESMC_MeshAddNodes.argtypes = [
+    ct.c_void_p,  # mesh
+    ct.c_int,  # nodeCount
+    np.ctypeslib.ndpointer(dtype=np.int32),  # nodeIds
+    np.ctypeslib.ndpointer(dtype=np.float64),  # nodeCoords
+    np.ctypeslib.ndpointer(dtype=np.int32),  # nodeOwners
+    OptionalNumpyArrayInt32,  # nodeMask
+]
 
-def ESMP_MeshAddNodes(mesh, nodeCount,
-                      nodeIds, nodeCoords, nodeOwners):
+def ESMP_MeshAddNodes(mesh, nodeCount, nodeIds, nodeCoords, nodeOwners, nodeMask=None):
     """
     Preconditions: An ESMP_Mesh has been created.  'nodeIds' holds the
                    IDs of the nodes, 'nodeCoords' holds the coordinates
@@ -1163,9 +1166,9 @@ def ESMP_MeshAddNodes(mesh, nodeCount,
     nodeCoordsD = np.array(nodeCoords, dtype=np.float64)
     # this variant uses the ndarray.astype casting function
     nodeOwnersD = np.ndarray.astype(nodeOwners, np.int32)
-
-    rc = _ESMF.ESMC_MeshAddNodes(mesh.struct.ptr, lnc,
-                                 nodeIdsD, nodeCoordsD, nodeOwnersD)
+    rc = _ESMF.ESMC_MeshAddNodes(
+        mesh.struct.ptr, lnc, nodeIdsD, nodeCoordsD, nodeOwnersD, nodeMask
+    )
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_MeshAddNodes() failed with rc = '+str(rc)+'.    '+
                         constants._errmsg)
