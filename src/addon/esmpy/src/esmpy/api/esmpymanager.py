@@ -89,7 +89,6 @@ class Manager(object):
         ``None``, defaults to False.
     :param bool keepMpi: determines whether MPI should be kept active on
         ESMF finalization. If False, then MPI_Finalize will be called on finalization.
-        If ``None``, defaults to False.
     '''
     # The singleton instance for this class
     __singleton = None
@@ -125,8 +124,6 @@ class Manager(object):
             import atexit; atexit.register(self.__del__)
             self.__esmp_initialized = True
             self.__esmp_keep_mpi = keepMpi
-            if self.__esmp_keep_mpi is None:
-                self.__esmp_keep_mpi = True
 
             # set information related to the ESMF Virtual Machine
             vm = ESMP_VMGetGlobal()
