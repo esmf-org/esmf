@@ -167,7 +167,7 @@ char **globalargv;
 
     int rc;
 
-    FTN_X(f_esmf_frameworkfinalize)(&rc, keepMpi == ESMF_TRUE ? true : false);
+    FTN_X(f_esmf_frameworkfinalize)(&rc, keepMpi == ESMF_TRUE);
 
     return rc;
 
