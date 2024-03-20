@@ -159,7 +159,7 @@ char **globalargv;
 //    int error return code
 //
 // !ARGUMENTS:
-      void) {
+      ESMC_Logical keepMpi) {
 //
 // !DESCRIPTION:
 //
@@ -167,7 +167,7 @@ char **globalargv;
 
     int rc;
 
-    FTN_X(f_esmf_frameworkfinalize)(&rc);
+    FTN_X(f_esmf_frameworkfinalize)(&rc, keepMpi == ESMF_TRUE ? true : false);
 
     return rc;
 

@@ -87,11 +87,14 @@ class Manager(object):
 
     :param bool debug: outputs logging information to ESMF logfiles. If
         ``None``, defaults to False.
+    :param bool keepMpi: determines whether MPI should be kept active on
+        ESMF finalization. If False, then MPI_Finalize will be called on finalization.
+        If ``None``, defaults to False.
     '''
     # The singleton instance for this class
     __singleton = None
     
-    def __new__(cls, debug=False):
+    def __new__(cls, debug=False, keepMpi=False):
         '''
         Returns the singleton instance of this class, creating it if it does 
         not already exist.
@@ -106,7 +109,7 @@ class Manager(object):
         return cls.__singleton
 
 
-    def __init__(self, debug=False):
+    def __init__(self, debug=False, keepMpi=False):
         # Return no-op
         if self.__esmp_finalized:
             return
@@ -121,6 +124,9 @@ class Manager(object):
             ESMP_Initialize(logkind=logkind)
             import atexit; atexit.register(self.__del__)
             self.__esmp_initialized = True
+            self.__esmp_keep_mpi = keepMpi
+            if self.__esmp_keep_mpi is None:
+                self.__esmp_keep_mpi = True
 
             # set information related to the ESMF Virtual Machine
             vm = ESMP_VMGetGlobal()
@@ -183,7 +189,7 @@ class Manager(object):
             return
 
         # Call ESMP_Finalize and set flags indicating this has been done
-        ESMP_Finalize()
+        ESMP_Finalize(self.__esmp_keep_mpi)
         self.__esmp_initialized = False
         self.__esmp_finalized = True
 

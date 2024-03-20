@@ -51,7 +51,7 @@ int ESMCI_Initialize(ESMC_CalKind_Flag defaultCalendar=ESMC_CALKIND_NOCALENDAR);
 int ESMCI_Initialize(int argc, char **argv,
   ESMC_CalKind_Flag defaultCalendar=ESMC_CALKIND_NOCALENDAR);
 
-int ESMCI_Finalize(void);
+int ESMCI_Finalize(ESMC_Logical keepMpi=ESMF_FALSE);
 
 
 // prototypes for fortran interface routines
@@ -63,7 +63,7 @@ extern "C" {
                                         ESMC_LogKind_Flag *defaultLogType,
                                         int *rc, ESMCI_FortranStrLenArg count1,
                                         ESMCI_FortranStrLenArg count2);
-   void FTN_X(f_esmf_frameworkfinalize)(int *rc);
+   void FTN_X(f_esmf_frameworkfinalize)(int *rc, bool keepMpi);
 };
 
 
