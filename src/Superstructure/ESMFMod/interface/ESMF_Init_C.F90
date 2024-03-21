@@ -70,12 +70,11 @@
        integer :: rc
        logical(kind=c_bool), intent(in), optional :: keepMpi
        type(ESMF_End_Flag) :: endflag
+       endflag = ESMF_END_NORMAL
 
        if (present(keepMpi)) then
          if (keepMpi) then
             endflag = ESMF_END_KEEPMPI
-         else
-            endflag = ESMF_END_NORMAL
          endif
        endif
 
