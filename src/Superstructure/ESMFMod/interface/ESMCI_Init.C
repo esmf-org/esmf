@@ -166,7 +166,7 @@ char **globalargv;
 //EOP
 
     int rc;
-    ESMC_End_Flag endflag=ESMF_END_NORMAL;
+    ESMC_End_Flag endflag=ESMC_END_NORMAL;
 
     FTN_X(f_esmf_frameworkfinalize)(&rc, &endflag);
 

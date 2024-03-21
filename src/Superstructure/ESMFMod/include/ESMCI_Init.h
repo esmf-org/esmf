@@ -54,7 +54,7 @@ int ESMCI_Initialize(int argc, char **argv,
 
 int ESMCI_Finalize();
 
-int ESMCI_Finalize(ESMC_End_Flag endFlag=ESMF_END_NORMAL);
+int ESMCI_Finalize(ESMC_End_Flag endFlag=ESMC_END_NORMAL);
 
 
 // prototypes for fortran interface routines
