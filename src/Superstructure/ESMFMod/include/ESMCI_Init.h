@@ -66,7 +66,7 @@ extern "C" {
                                         ESMC_LogKind_Flag *defaultLogType,
                                         int *rc, ESMCI_FortranStrLenArg count1,
                                         ESMCI_FortranStrLenArg count2);
-   void FTN_X(f_esmf_frameworkfinalize)(int *rc, ESMC_End_Flag *keepMpi);
+   void FTN_X(f_esmf_frameworkfinalize)(int *rc, ESMC_End_Flag *endFlag);
 };
 
 

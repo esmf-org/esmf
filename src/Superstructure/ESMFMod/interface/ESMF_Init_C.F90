@@ -59,7 +59,7 @@
 
    end subroutine f_esmf_frameworkinitialize
 
-   subroutine f_esmf_frameworkfinalize(rc, endflag)
+   subroutine f_esmf_frameworkfinalize(rc, endFlag)
        use ESMF_CompMod
        use ESMF_InitMod
        use ESMF_UtilTypesMod
@@ -67,8 +67,8 @@
        implicit none
 
        integer :: rc
-       type(ESMF_End_Flag) :: endflag
+       type(ESMF_End_Flag) :: endFlag
 
-       call ESMF_Finalize(rc=rc, endflag=endflag)
+       call ESMF_Finalize(rc=rc, endflag=endFlag)
 
    end subroutine f_esmf_frameworkfinalize
