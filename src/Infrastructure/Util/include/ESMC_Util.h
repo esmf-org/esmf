@@ -59,9 +59,9 @@ enum ESMC_Decomp_Flag {ESMC_DECOMP_INVALID=0,
                        ESMC_DECOMP_RESTLAST, ESMC_DECOMP_CYCLIC};
 
 // end flag
-enum ESMC_End_Flag { ESMF_END_NORMAL=1,
-                     ESMF_END_KEEPMPI,
-                     ESMF_END_ABORT};
+typedef enum ESMC_End_Flag { ESMF_END_NORMAL=1,
+                             ESMF_END_KEEPMPI,
+                             ESMF_END_ABORT} ESMC_End_Flag;
 
 enum ESMC_ExtrapMethod_Flag {ESMC_EXTRAPMETHOD_NONE=0,
                              ESMC_EXTRAPMETHOD_NEAREST_STOD,
