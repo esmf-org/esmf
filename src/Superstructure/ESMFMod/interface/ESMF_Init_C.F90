@@ -69,6 +69,6 @@
        integer :: rc
        type(ESMF_End_Flag) :: endFlag
 
-       call ESMF_Finalize(rc=rc, endflag=endFlag)
+       call ESMF_Finalize(endflag=endFlag, rc=rc)
 
    end subroutine f_esmf_frameworkfinalize
