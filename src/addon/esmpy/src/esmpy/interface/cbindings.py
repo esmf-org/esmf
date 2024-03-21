@@ -222,7 +222,7 @@ def ESMP_Finalize(endFlag = constants.EndAction.NORMAL):
     """
     Preconditions: ESMF has been initialized.
     Postconditions: ESMF has been finalized, all heap memory has been
-                    released, and, if 'endFlag' is False, all MPI states
+                    released, and, if 'endFlag' is not set to KEEP_MPI, all MPI states
                     have been cleaned up. This method can only be called
                     once per execution, and must be preceded by one and
                     only one call to ESMP_Initialize(). \n
