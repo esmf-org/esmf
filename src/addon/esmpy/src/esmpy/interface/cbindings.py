@@ -218,7 +218,7 @@ def ESMP_Initialize(logkind = constants.LogKind.MULTI):
 _ESMF.ESMC_Finalize.restype = ct.c_int
 _ESMF.ESMC_Finalize.argtypes = []
 
-def ESMP_Finalize(keepMpi=False):
+def ESMP_Finalize(endFlag = constants.EndAction.NORMAL):
     """
     Preconditions: ESMF has been initialized.
     Postconditions: ESMF has been finalized, all heap memory has been
@@ -227,9 +227,13 @@ def ESMP_Finalize(keepMpi=False):
                     once per execution, and must be preceded by one and
                     only one call to ESMP_Initialize(). \n
     Arguments:\n
-        bool :: keepMpi\n
+        EndAction (optional) :: keepMpi\n
+            Argument Values:\n
+                (default) NORMAL\n
+                KEEP_MPI\n
+                ABORT\n
     """
-    rc = _ESMF.ESMC_FinalizeMPI(keepMpi)
+    rc = _ESMF.ESMC_FinalizeWithFlag(endFlag)
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_Finalize() failed with rc = '+str(rc)+'.    '+
                         constants._errmsg)

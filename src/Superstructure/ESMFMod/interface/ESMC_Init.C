@@ -128,13 +128,13 @@ extern "C" {
 // !IROUTINE:  ESMC_Finalize - Finalize the ESMF Framework
 //
 // !INTERFACE:
-  int ESMC_FinalizeMPI(
+  int ESMC_FinalizeWithFlag(
 //
 // !RETURN VALUE:
 //  int return code
 //
 // !ARGUMENTS:
-    ESMC_Logical keepMpi){
+    ESMC_End_Flag endFlag){
 //  
 // !DESCRIPTION:
 //
@@ -142,7 +142,7 @@ extern "C" {
 
     int localrc;
 
-    localrc = ESMCI_Finalize(keepMpi);
+    localrc = ESMCI_Finalize(endFlag);
 
     return localrc;
 
@@ -169,7 +169,7 @@ extern "C" {
     int localrc;
     
     // todo: it may be better to go directly into F90 instead of using C++
-    localrc = ESMC_FinalizeMPI(ESMF_FALSE);
+    localrc = ESMC_Finalize();
     
     // todo: use LogErr to do error handling for localrc
 

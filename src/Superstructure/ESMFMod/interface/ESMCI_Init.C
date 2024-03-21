@@ -166,8 +166,9 @@ char **globalargv;
 //EOP
 
     int rc;
+    ESMC_End_Flag endflag=ESMF_END_NORMAL;
 
-    FTN_X(f_esmf_frameworkfinalize)(&rc, false);
+    FTN_X(f_esmf_frameworkfinalize)(&rc, &endflag);
 
     return rc;
 
@@ -184,10 +185,7 @@ char **globalargv;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Logical keepMpi) { // in - boolean specifying whether
-                              //      MPI should be finalized. If
-                              //      set to ESMF_FALSE, then MPI_Finalize()
-                              //      will be called.
+      ESMC_End_Flag endFlag) { // in - optional end action kind
 //
 // !DESCRIPTION:
 //
@@ -195,7 +193,7 @@ char **globalargv;
 
     int rc;
 
-    FTN_X(f_esmf_frameworkfinalize)(&rc, keepMpi == ESMF_TRUE);
+    FTN_X(f_esmf_frameworkfinalize)(&rc, &endFlag);
 
     return rc;
 

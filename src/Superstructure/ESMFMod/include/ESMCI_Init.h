@@ -28,6 +28,7 @@
 // !USES:
 #include "ESMCI_Macros.h"
 #include "ESMCI_Calendar.h"
+#include "ESMCI_Util.h"
 
 // public globals, filled in by ESMC_Initialize()
 //  and used by MPI_Init().   set once, treat as read-only!
@@ -53,7 +54,7 @@ int ESMCI_Initialize(int argc, char **argv,
 
 int ESMCI_Finalize();
 
-int ESMCI_Finalize(ESMC_Logical keepMpi=ESMF_FALSE);
+int ESMCI_Finalize(ESMC_End_Flag endFlag=ESMF_END_NORMAL);
 
 
 // prototypes for fortran interface routines
@@ -65,7 +66,7 @@ extern "C" {
                                         ESMC_LogKind_Flag *defaultLogType,
                                         int *rc, ESMCI_FortranStrLenArg count1,
                                         ESMCI_FortranStrLenArg count2);
-   void FTN_X(f_esmf_frameworkfinalize)(int *rc, bool keepMpi);
+   void FTN_X(f_esmf_frameworkfinalize)(int *rc, ESMC_End_Flag *keepMpi);
 };
 
 

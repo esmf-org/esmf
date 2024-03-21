@@ -59,24 +59,15 @@
 
    end subroutine f_esmf_frameworkinitialize
 
-   subroutine f_esmf_frameworkfinalize(rc, keepMpi)
+   subroutine f_esmf_frameworkfinalize(rc, endflag)
        use ESMF_CompMod
        use ESMF_InitMod
        use ESMF_UtilTypesMod
-       use, intrinsic :: iso_c_binding
 
        implicit none
 
        integer :: rc
-       logical(kind=c_bool), intent(in), optional :: keepMpi
        type(ESMF_End_Flag) :: endflag
-       endflag = ESMF_END_NORMAL
-
-       if (present(keepMpi)) then
-         if (keepMpi) then
-            endflag = ESMF_END_KEEPMPI
-         endif
-       endif
 
        call ESMF_Finalize(rc=rc, endflag=endflag)
 
