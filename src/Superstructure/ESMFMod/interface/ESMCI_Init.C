@@ -159,7 +159,35 @@ char **globalargv;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Logical keepMpi) {
+      void) {
+//
+// !DESCRIPTION:
+//
+//EOP
+
+    int rc;
+
+    FTN_X(f_esmf_frameworkfinalize)(&rc, false);
+
+    return rc;
+
+ } // end ESMCI_Finalize
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMCI_Finalize - Finalize the ESMF Framework
+//
+// !INTERFACE:
+      int ESMCI_Finalize(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_Logical keepMpi) { // in - boolean specifying whether
+                              //      MPI should be finalized. If
+                              //      set to ESMF_FALSE, then MPI_Finalize()
+                              //      will be called.
 //
 // !DESCRIPTION:
 //
@@ -171,5 +199,4 @@ char **globalargv;
 
     return rc;
 
- } // end ESMCI_FrameworkFinallize
-
+ } // end ESMCI_Finalize
