@@ -52,7 +52,7 @@ int ESMCI_Initialize(ESMC_CalKind_Flag defaultCalendar=ESMC_CALKIND_NOCALENDAR);
 int ESMCI_Initialize(int argc, char **argv,
   ESMC_CalKind_Flag defaultCalendar=ESMC_CALKIND_NOCALENDAR);
 
-int ESMCI_Finalize();
+int ESMCI_Finalize(void);
 
 int ESMCI_Finalize(ESMC_End_Flag endFlag);
 
