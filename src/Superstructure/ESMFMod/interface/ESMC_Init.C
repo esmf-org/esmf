@@ -169,7 +169,7 @@ extern "C" {
     int localrc;
     
     // todo: it may be better to go directly into F90 instead of using C++
-    localrc = ESMC_Finalize();
+    localrc = ESMCI_Finalize();
     
     // todo: use LogErr to do error handling for localrc
 
