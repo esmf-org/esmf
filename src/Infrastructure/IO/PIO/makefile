@@ -17,6 +17,14 @@ else
   PIO_CMAKE_OPTS += -DPIO_ENABLE_LOGGING=OFF -DCMAKE_BUILD_TYPE=release
 endif
 
+ifeq ($(ESMF_COMM),mpiuni)
+  # Use ESMF's mpiuni as a stand-in for the mpi-serial library that PIO expects
+  PIO_CMAKE_OPTS += -DPIO_USE_MPISERIAL=ON -DMPISERIAL_PATH=$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+
+  # There are problems building PIO's tests with mpiuni; for now, just disable this internal testing
+  PIO_CMAKE_OPTS += -DPIO_ENABLE_TESTS=OFF
+endif
+
 ifdef ESMF_NETCDF_INCLUDE
   ifneq ("$(wildcard $(ESMF_NETCDF_LIBPATH)/libnetcdf.a)","")
     PIO_CMAKE_OPTS += -DNetCDF_C_INCLUDE_DIR=$(ESMF_NETCDF_INCLUDE) -DNetCDF_C_LIBRARY=$(ESMF_NETCDF_LIBPATH)/libnetcdf.a

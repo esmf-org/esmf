@@ -68,6 +68,8 @@ with open(esmfmk, 'r') as MKFILE:
             esmfabi = line.split(":")[1]
         elif 'ESMF_NETCDF:' in line:
             netcdf = True
+        elif 'ESMF_PIO:' in line:
+            pio = True
         elif 'ESMF_COMM:' in line:
             esmfcomm = line.split(":")[1]
         elif 'ESMF_VERSION_STRING=' in line:
@@ -127,7 +129,7 @@ if netcdf:
     constants._ESMF_NETCDF = True
 
 # set _ESMF_PIO
-if "mpiuni" not in esmfcomm:
+if pio:
     constants._ESMF_PIO = True
 
 # set _ESMF_COMM
