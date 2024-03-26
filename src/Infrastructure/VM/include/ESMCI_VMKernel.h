@@ -738,6 +738,11 @@ class ComPat{
  
   virtual void messagePrepare(int srcPet, int dstPet, char *buffer)const =0;
     // will be called only for localPet==srcPet
+
+  virtual void messagePrepareSearch(VMK *vmk, 
+                                    int sendIndexOffset, int iiStart, int iiEnd, 
+                                    std::vector<char *> &sendBuffer
+                                    )const = 0;
   
   virtual void messageProcess(int srcPet, int dstPet, char *buffer)      =0;
     // will be called only for localPet==dstPet
