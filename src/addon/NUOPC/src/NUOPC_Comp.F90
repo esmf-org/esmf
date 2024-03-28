@@ -3012,8 +3012,8 @@ module NUOPC_Comp
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       verbosity = ESMF_UtilString2Int(valueString, &
-        specialStringList=(/"max ", "high", "low ", "off "/), &
-        specialValueList=(/max, high, low, 0/), &
+        specialStringList=(/"max ", "high", "low ", "off ", "F   "/), &
+        specialValueList=(/max, high, low, 0, 0/), &
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
@@ -3030,8 +3030,8 @@ module NUOPC_Comp
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       profiling = ESMF_UtilString2Int(valueString, &
-        specialStringList=(/"max ", "high", "low ", "off "/), &
-        specialValueList=(/65535, 511, 73, 0/), &
+        specialStringList=(/"max ", "high", "low ", "off ", "F   "/), &
+        specialValueList=(/65535, 511, 73, 0, 0/), &
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
@@ -3048,8 +3048,8 @@ module NUOPC_Comp
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       diagnostic = ESMF_UtilString2Int(valueString, &
-        specialStringList=(/"max ", "high", "low ", "off "/), &
-        specialValueList=(/65535, 65535, 65535, 0/), &
+        specialStringList=(/"max ", "high", "low ", "off ", "F   "/), &
+        specialValueList=(/65535, 65535, 65535, 0, 0/), &
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
@@ -3107,8 +3107,8 @@ module NUOPC_Comp
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       verbosity = ESMF_UtilString2Int(valueString, &
-        specialStringList=(/"max ", "high", "low ", "off "/), &
-        specialValueList=(/max, high, low, 0/), &
+        specialStringList=(/"max ", "high", "low ", "off ", "F   "/), &
+        specialValueList=(/max, high, low, 0, 0/), &
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
@@ -3129,8 +3129,8 @@ module NUOPC_Comp
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       profiling = ESMF_UtilString2Int(valueString, &
-        specialStringList=(/"max ", "high", "low ", "off "/), &
-        specialValueList=(/65535, 511, 73, 0/), &
+        specialStringList=(/"max ", "high", "low ", "off ", "F   "/), &
+        specialValueList=(/65535, 511, 73, 0, 0/), &
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
@@ -3147,8 +3147,8 @@ module NUOPC_Comp
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       diagnostic = ESMF_UtilString2Int(valueString, &
-        specialStringList=(/"max ", "high", "low ", "off "/), &
-        specialValueList=(/65535, 65535, 65535, 0/), &
+        specialStringList=(/"max ", "high", "low ", "off ", "F   "/), &
+        specialValueList=(/65535, 65535, 65535, 0, 0/), &
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
