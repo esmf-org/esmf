@@ -1351,13 +1351,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       ib = config%cptr%next_item
-      ie = config%cptr%next_line-1
+      ie = config%cptr%next_line-2
       if ( config%cptr%eolflag ) then
          ! reached end of line
          config%cptr%next_item = config%cptr%next_line-1
-         value = BLK
          if ( present ( default )) then
            value = default
+         else
+           value = BLK
          endif
          if (present (eolFlag)) then
            eolFlag = .true.
@@ -1376,6 +1377,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           value = BLK
           config%cptr%eolflag = .true.
           config%cptr%next_item = config%cptr%next_line-1
+          if (present (eolFlag)) then
+            eolFlag = .true.
+          end if
+          localrc = ESMF_SUCCESS
         else
           ! shift to first non blank
           ib = ib + nb - 1
@@ -1411,12 +1416,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               if (nb .eq. 0) config%cptr%eolflag = .true.
             end if
           end if
-        end if
-        value = config%cptr%buffer(ib:ie)
-        if (len (value) >= ie-ib+1) then
-          localrc = ESMF_SUCCESS
-        else
-          localrc = ESMF_RC_ARG_SIZE
+          value = config%cptr%buffer(ib:ie)
+          ! error if value truncated
+          if (len (value) >= ie-ib+1) then
+            localrc = ESMF_SUCCESS
+          else
+            localrc = ESMF_RC_ARG_SIZE
+          end if
         end if
       end if
 
