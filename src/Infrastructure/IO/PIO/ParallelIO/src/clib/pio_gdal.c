@@ -68,7 +68,8 @@ GDALc_inq_file_metadata(file_desc_t *file, GDALDatasetH hDS, int iotype, int *nv
 	  (*ndims)[v] = var_ndims;
 	  //>>            if ((ret = nc_inq_var(ncid, v, NULL, &my_type, &var_ndims, NULL, NULL)))
 	  //>>                return pio_err(NULL, file, ret, __FILE__, __LINE__);
-	  OGRFieldType Fld = OGR_Fld_GetType(OGR_FD_GetFieldDefn(hFD,v));
+	  OGRFieldType     Fld = OGR_Fld_GetType(OGR_FD_GetFieldDefn(hFD,v));
+
 	  bool typeOK = true; // assume we're good
 	  switch (Fld) {
 	  case OFTReal:
@@ -719,7 +720,8 @@ pio_read_darray_shp(file_desc_t *file, io_desc_t *iodesc, int vid,
                         ierr = GDALc_shp_get_int_field(file->pio_ncid);
                         break;
                     case PIO_FLOAT:
-                        return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);
+                        ierr = GDALc_shp_get_float_field(file->pio_ncid, vid, start, count, (float *)bufptr);
+                        break;
                     case PIO_DOUBLE:
                         ierr = GDALc_shp_get_double_field(file->pio_ncid, vid, start, count, (double *)bufptr);
                         break;
@@ -781,6 +783,33 @@ GDALc_shp_get_double_field(int fileid, int varid, const size_t *startp,
     
     hF     = OGR_L_GetFeature(hL,i);
     ip[i] = OGR_F_GetFieldAsDouble(hF,varid);
+    printf("<<>> ip[%d]=%f\n",i,ip[i]);
+  }
+
+  return PIO_NOERR;
+}
+GDALc_shp_get_float_field(int fileid, int varid, const size_t *startp,
+                           const size_t *countp, float *ip)
+{
+  OGRFeatureH hF;
+  file_desc_t *file;         /* Pointer to file information. */
+  int ierr;
+
+  /* Get file info based on fileid. */
+  if ((ierr = pio_get_file(fileid, &file)))
+    return pio_err(NULL, NULL, ierr, __FILE__, __LINE__);
+  if (file->hDS == NULL)
+    return pio_err(NULL, NULL, ierr, __FILE__, __LINE__);
+
+  OGRLayerH hL = OGR_DS_GetLayer( file->hDS, 0 );
+
+  // here, we have to assume start and count are only one dimension, and have
+  // only one assigned value.
+  for (size_t i = startp[0]; i<countp[0]; i++) {
+    
+    hF     = OGR_L_GetFeature(hL,i);
+    ip[i] = (float)OGR_F_GetFieldAsDouble(hF,varid);
+    printf("<<>> ip[%d]=%f\n",i,ip[i]);
   }
 
   return PIO_NOERR;

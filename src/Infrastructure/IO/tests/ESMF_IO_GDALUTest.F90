@@ -52,11 +52,11 @@ program ESMF_IO_GDALUTest
   !
   ! The following fields make up the field bundle:
   type(ESMF_Field) :: field1Read, field2Read, field1CopyRead, field4dRead
-  real(ESMF_KIND_R8), pointer :: field1ReadData(:,:), field2ReadData(:,:), field1CopyReadData(:,:), field4dReadData(:,:,:,:)
+  real(ESMF_KIND_R4), pointer :: field1ReadData(:,:), field2ReadData(:,:), field1CopyReadData(:,:), field4dReadData(:,:,:,:)
   type(ESMF_FieldBundle) :: fieldBundleRead
   ! This field is not in the field bundle:
   type(ESMF_Field) :: field
-  real(ESMF_KIND_R8), pointer :: fieldReadData(:), dstFieldData(:,:)
+  real(ESMF_KIND_R4), pointer :: fieldReadData(:), dstFieldData(:,:)
   real(ESMF_KIND_R8), allocatable :: meshcoords(:)
   integer sd,nc
   integer, allocatable :: decomptile(:,:)
@@ -66,6 +66,8 @@ program ESMF_IO_GDALUTest
 !  character(len=*), parameter :: fileNameFields = "data/complex_3.shp"
 !  character(len=*), parameter :: fileNameFields = "data/cb_2018_us_county_20m.shp"
   character(len=*), parameter :: fileNameFields = "data/cb_2018_us_region_20m.shp"
+!  character(len=*), parameter :: fileNameFields = "data/cb_2018_us_state_5m.shp"
+!  character(len=*), parameter :: fileNameFields = "data/States_shapefile.shp"
 
   type(ESMF_Grid) :: dstGrid
   type(ESMF_Field) :: dstField
@@ -79,14 +81,14 @@ program ESMF_IO_GDALUTest
   integer :: clbnd(2),cubnd(2)
   integer :: fclbnd(2),fcubnd(2)
   integer :: i1,i2,i3, index(2)
-  real(ESMF_KIND_R8) :: dst_minx,dst_miny
-  real(ESMF_KIND_R8) :: dst_maxx,dst_maxy
-  real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:), farrayPtr1D(:)
+  real(ESMF_KIND_R4) :: dst_minx,dst_miny
+  real(ESMF_KIND_R4) :: dst_maxx,dst_maxy
+  real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:)
   real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:)
-  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:),farrayPtr2(:,:)
+  real(ESMF_KIND_R4), pointer :: farrayPtr(:,:),farrayPtr2(:,:),farrayPtr1D(:)
 
   integer, pointer :: nodeIds(:),nodeOwners(:)
-  real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+  real(ESMF_KIND_R4), pointer :: nodeCoords(:)
   integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
   integer :: numNodes, numElems
   integer :: numQuadElems,numTriElems, numTotElems
@@ -207,8 +209,8 @@ program ESMF_IO_GDALUTest
   decomptile(:,5)=(/1,2/) ! Tile 5
   decomptile(:,6)=(/1,2/) ! Tile 6
   ! Create cubed sphere grid
-  dstGrid = ESMF_GridCreateCubedSphere(tileSize=6, regDecompPTile=decomptile, &
-       staggerLocList=(/ESMF_STAGGERLOC_CORNER, ESMF_STAGGERLOC_CORNER/), &
+  dstGrid = ESMF_GridCreateCubedSphere(tileSize=48, regDecompPTile=decomptile, &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CENTER/), &
        coordSys=ESMF_COORDSYS_SPH_DEG, rc=rc)
   
   if (rc /=ESMF_SUCCESS) then
@@ -226,7 +228,7 @@ program ESMF_IO_GDALUTest
 
 !  write(*,*) 'Fin grid'
   
-  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
+  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
 
   dstField = ESMF_FieldCreate(dstGrid, arrayspec, &
        staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=rc)
@@ -243,7 +245,7 @@ program ESMF_IO_GDALUTest
   do lDE=0,localDECount-1
 
      !! get coords
-     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
+     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=rc)
      if (rc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
@@ -251,7 +253,7 @@ program ESMF_IO_GDALUTest
         return
      endif
 
-     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=2, &
+     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=rc)
      if (rc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
@@ -267,6 +269,7 @@ program ESMF_IO_GDALUTest
         return
      endif
 
+     farrayPtr = 0.0e0
 
      !! set coords
      do i1=clbnd(1),cubnd(1)
@@ -280,7 +283,7 @@ program ESMF_IO_GDALUTest
 
         write(*,*) farrayPtrXC(i1,i2), farrayPtrYC(i1,i2)
         ! initialize destination field
-!        farrayPtr(i1,i2)=0.0
+!       farrayPtr(i1,i2)=0.0
 
      enddo
      enddo
@@ -295,24 +298,20 @@ program ESMF_IO_GDALUTest
 !  endif
   !------------------------------------------------------------------------
 
-!  write(*,*) 'mesh field'
+
   write(name, *) "Get a multi-tile Field"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-!  write(*,*) '-- arrayspecset'
-  call ESMF_ArraySpecSet(arraySpec, 1, typekind=ESMF_TYPEKIND_R8, rc=rc)
+
+  call ESMF_ArraySpecSet(arraySpec, 1, typekind=ESMF_TYPEKIND_R4, rc=rc)
   if (rc /= ESMF_SUCCESS)     write(*,*) 'Failed at arrayspecset'
-!  write(*,*) '-- fieldcreate'
-!  field = ESMF_FieldCreate(mesh, arraySpec, name="DistFld", meshLoc=ESMF_MESHLOC_ELEMENT, rc=rc)
+
   field = ESMF_FieldCreate(mesh, arraySpec, name="GEOID", meshLoc=ESMF_MESHLOC_ELEMENT, rc=rc)
-!   field = ESMF_FieldCreate(mesh, arrayspec, &
-!                        name="source", rc=rc)
+
   if (rc /= ESMF_SUCCESS) write(*,*) 'Failed at mesh fieldcreate'
-!  if (rc /= ESMF_SUCCESS) return
-!  write(*,*) 'fieldget'
+
   call ESMF_FieldGet(field, farrayPtr=fieldReadData, rc=rc)
   call ESMF_FieldGet(dstField, farrayPtr=dstFieldData, rc=rc)
-  write(*,*) 'fieldReadData: ', fieldReadData
-!  fieldReadData = 1.
+
   dstFieldData = 0.
 #if (defined ESMF_PIO && (defined ESMF_GDAL))
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -323,41 +322,41 @@ program ESMF_IO_GDALUTest
 
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
-!  write(*,*) 'fieldread'
+
   write(name, *) "Read a multi-tile Field"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-!  write(*,*) 'reading'
+
   call ESMF_FieldRead(field, fileName=fileNameFields, iofmt=ESMF_IOFMT_SHP, rc=rc)
-  call ESMF_FieldPrint(field, rc=rc)
-  write(*,*) 'DATA: ', fieldReadData
-!  call ESMF_FieldWrite(field, "test.shp", iofmt=ESMF_IOFMT_SHP, overwrite=.true.,rc=rc)
-!  call ESMF_FieldWrite(field, "test.nc", rc=rc)
+
   !! Write mesh for debugging
-!  call ESMF_MeshWrite(mesh,"complex_3",rc=rc)
+  call ESMF_MeshWrite(mesh,"meshinit",rc=rc)
+  call ESMF_GridWriteVTK(dstGrid,filename="gridtest",rc=rc)
+  write(failMsg, *) "GridWriteVTK failed"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
-  call ESMF_FieldGet(field, dimCount=sd, rank=nc)
-  write(*,*) 'mesh field dim/rank: ', sd, nc
-
-  call ESMF_FieldGet(dstField, dimCount=sd, rank=nc)
-  write(*,*) 'grid field dim/rank: ', sd, nc
+!  call ESMF_FieldGet(field, dimCount=sd, rank=nc)
+!  write(*,*) 'mesh field dim/rank: ', sd, nc
+!
+!  call ESMF_FieldGet(dstField, dimCount=sd, rank=nc)
+!  write(*,*) 'grid field dim/rank: ', sd, nc
 
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
-!>>>   call ESMF_FieldRegridStore( &
-!>>>          field, &
-!>>>          dstField=dstField, &
-!>>>          routeHandle=routeHandle, &
-!>>>          regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
-!>>>          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
-!>>>          rc=rc)
-!>>>  write(failMsg, *) "RegridStore failed"
-!>>>  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!>>>  write(*,*) "RegridStore", rc
+   call ESMF_FieldRegridStore( &
+          field, &
+          dstField=dstField, &
+          routeHandle=routeHandle, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
+          unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+          rc=rc)
+  write(failMsg, *) "RegridStore failed"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !  if (rc /=ESMF_SUCCESS) then
 !      rc=ESMF_FAILURE
 !      return
 !   endif
+
+  call ESMF_MeshWrite(mesh,"meshtest",rc=rc)
 
   !------------------------------------------------------------------------
 

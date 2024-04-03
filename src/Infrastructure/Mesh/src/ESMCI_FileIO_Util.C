@@ -134,6 +134,7 @@ void convert_global_elem_conn_to_local_node_and_elem_info(int num_local_elem, in
 
     // Add an entry for this in local_elem_conn
     local_elem_conn[convert_list[i].local_elem_conn_pos]=node_ids_pos+1; // +1 to make base-1
+//<<MSL debugging>>    printf("<<>> num_node_con %d: node_ids_pos: %d local_elem_conn_pos: %d local_elem_conn %d\n",num_node_conn,node_ids_pos,convert_list[i].local_elem_conn_pos,local_elem_conn[convert_list[i].local_elem_conn_pos]);
   }
 
 

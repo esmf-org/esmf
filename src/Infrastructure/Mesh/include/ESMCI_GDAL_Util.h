@@ -69,6 +69,7 @@ void ESMCI_GDAL_process_shapefile_distributed(
 		       std::vector<int> &nodeIDs, 
 		       std::vector<int> &elemIDs, 
 		       std::vector<int> &elemConn,
+		       std::vector<double> &elemCoords,
 		       std::vector<int> &numElemConn, 
 		       int *totNumElemConn, 
 		       int *nNodes, 
@@ -77,6 +78,7 @@ void ESMCI_mesh_create_from_SHP_file();
 
 void ESMCI_GDAL_SHP_get_feature_info(OGRDataSourceH hDS, int *nFeatures, int *&FeatureIDs);
 
+void convert_global_elem_conn_to_local_elem_info(int num_local_elem, int tot_num_elem_conn, int *num_elem_conn, int *global_elem_conn, int*& local_elem_conn);
 #endif // ifdef ESMF_GDAL
 
 #endif // ESMCI_GDAL_UTIL_H

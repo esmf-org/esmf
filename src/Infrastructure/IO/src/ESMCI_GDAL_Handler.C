@@ -181,7 +181,7 @@ void GDAL_Handler::initialize (
   try {
 
 #ifdef ESMFIO_DEBUG
-    PIOc_set_log_level(GDAL_DEBUG_LEVEL);
+//    PIOc_set_log_level(GDAL_DEBUG_LEVEL);
 #endif // ESMFIO_DEBUG
     if (!instanceFound) {
       PRINTMSG("Before GDALc_Init_Intracomm, num_iotasks = " << num_iotasks);
@@ -1733,8 +1733,9 @@ int GDAL_IODescHandler::constructGdalDecomp(
     handle->basepiotype  = PIO_INT;
     break;
    case ESMC_TYPEKIND_R4:
-//    handle->basegdaltype = OFTReal;
-//    break;
+    handle->basegdaltype = OFTReal;
+    handle->basepiotype  = PIO_FLOAT;
+    break;
    case ESMC_TYPEKIND_R8:
     handle->basegdaltype = OFTReal;
     handle->basepiotype  = PIO_DOUBLE;

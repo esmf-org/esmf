@@ -46,7 +46,7 @@
 #include "Mesh/include/ESMCI_Mesh_Glue.h"
 #include "Mesh/include/ESMCI_FileIO_Util.h"
 
-// These internal functions can only be used if PIO is available
+// These internal functions can only be used if GDAL is available
 #ifdef ESMF_GDAL
 
 // TODO: SWITCH THIS TO SHAPELIB, WHEN WE KNOW WHAT IT'S CALLED
@@ -105,6 +105,7 @@ void ESMCI_GDAL_SHP_get_feature_info(OGRDataSourceH hDS, int *nFeatures, int *&F
   for (int i=0;i<*nFeatures;i++) {
     hFeature = OGR_L_GetNextFeature(hLayer);
     FeatureIDs[i] = OGR_F_GetFID(hFeature);
+//    printf("<<>> FeatureID[%d]: %d\n",i,FeatureIDs[i]);
     OGR_F_Destroy( hFeature );
   }
 
@@ -265,6 +266,7 @@ void ESMCI_GDAL_process_shapefile_distributed(
 		       std::vector<int> &nodeIDs, 
 		       std::vector<int> &elemIDs, 
 		       std::vector<int> &elemConn,
+		       std::vector<double> &elemCoords,
 		       std::vector<int> &numElemConn, 
 		       int *totNumElemConn, 
 		       int *nNodes, 
@@ -308,12 +310,21 @@ void ESMCI_GDAL_process_shapefile_distributed(
     OGRGeometryH hGeom,fGeom;
     int nFTRpoints;
     
+    OGRGeometryH Cpoint = OGR_G_CreateGeometry(wkbPoint);
+
     hFeature = OGR_L_GetFeature(hLayer, globFeatureIDs[featureIDs[i]-1]); // Distributed
 
     // Get geometry handles
     hGeom = OGR_F_GetGeometryRef(hFeature); // looks like this should be a polygon
     fGeom = OGR_G_GetGeometryRef(hGeom,0);  // and this should be linestring
-    
+
+    // Get element coordinates
+    // ASSUME: 2D
+    OGR_G_Centroid(hGeom,Cpoint);
+    elemCoords.push_back(OGR_G_GetX(Cpoint, 0));
+    elemCoords.push_back(OGR_G_GetY(Cpoint, 0));
+//    printf("X,Y: %f,%f\n",OGR_G_GetX(Cpoint, 0),OGR_G_GetY(Cpoint, 0));
+  
     // ADD POLYGON
     if (wkbFlatten(OGR_G_GetGeometryType(hGeom)) == wkbPolygon) {
       processPolygon(fGeom, XCoords, YCoords, elemConn, numElemConn, nodeIDs, &nFTRpoints);
@@ -342,7 +353,12 @@ void ESMCI_GDAL_process_shapefile_distributed(
     j+=2;
   }
   *nNodes = totpoints;
-  *totNumElemConn = numElemConn.size();
+  // Get total number of connections on this PET
+  *totNumElemConn=0;
+  for (int i=0; i<(int)numElemConn.size(); i++) {
+    *totNumElemConn += numElemConn[i];
+  }
+//  *totNumElemConn = numElemConn.size();
 
   // Cleanup
   //int rc = GDALClose( hDS );
@@ -519,6 +535,77 @@ int getLayerInfo( OGRLayerH hL, int *nPoints, int *nGeom)
   return 0;
 }
 
+struct NODE_INFO {
+  int node_id;
+  int local_elem_conn_pos;
+
+  bool operator< (const NODE_INFO &rhs) const {
+    return node_id < rhs.node_id;
+  }
+
+};
+
+// Note that local_elem_conn is base-1 (as expected by mesh create routines)
+void convert_global_elem_conn_to_local_elem_info(int num_local_elem, int tot_num_elem_conn, int *num_elem_conn, int *global_elem_conn, int*& local_elem_conn) {
+  // Init output
+  local_elem_conn=NULL;
+
+  // If nothing to do leave
+  if (tot_num_elem_conn < 1) return;
+
+  // Allocate conversion list
+  NODE_INFO *convert_list=new NODE_INFO[tot_num_elem_conn];
+
+  // Copy global elem connection info into conversion list
+  int num_node_conn=0; // Number of connections that are nodes (vs. polybreak)
+  for (int i=0; i<tot_num_elem_conn; i++) {
+
+    // Skip polygon break entries 
+    if (global_elem_conn[i] == MESH_POLYBREAK_IND) continue;
+    
+    // Add node entiries to conversion list
+    convert_list[num_node_conn].node_id=global_elem_conn[i];
+    convert_list[num_node_conn].local_elem_conn_pos=i;
+    num_node_conn++;
+  }
+
+  // Sort list by node_id, to make it easy to find unique node_ids
+  std::sort(convert_list,convert_list+num_node_conn);
+
+  // Count number of unique node ids in  convert_list
+  int num_unique_node_ids=1;                 // There has to be at least 1, 
+  int prev_node_id=convert_list[0].node_id;  // because we leave if < 1 above
+  for (int i=1; i<num_node_conn; i++) {
+
+    // If not the same as the last one count a new one
+    if (convert_list[i].node_id != prev_node_id) {
+      num_unique_node_ids++;
+      prev_node_id=convert_list[i].node_id;
+    }
+  }
+
+  // Allocate local elem conn
+  local_elem_conn=new int[tot_num_elem_conn];
+
+  // Set to polybreak value so that it's in the correct places
+  // after the code below fills in the node connection values
+  for (int i=0; i<tot_num_elem_conn; i++) {
+    local_elem_conn[i]=MESH_POLYBREAK_IND;
+  }
+  
+  // Translate convert_list to node_ids and local_elem_conn
+  int node_ids_pos=0;                             // There has to be at least 1, 
+  local_elem_conn[convert_list[0].local_elem_conn_pos]=node_ids_pos+1; // +1 to make base-1
+  for (int i=1; i<num_node_conn; i++) {
+
+    // Add an entry for this in local_elem_conn
+    local_elem_conn[convert_list[i].local_elem_conn_pos]=node_ids_pos+1; // +1 to make base-1
+  }
+
+
+  // Get rid of conversion list
+  delete [] convert_list;    
+}
 
 #endif // ifdef ESMF_GDAL
 

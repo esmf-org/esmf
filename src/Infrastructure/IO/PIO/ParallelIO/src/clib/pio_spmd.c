@@ -137,7 +137,6 @@ int pio_swapm(void *sendbuf, int *sendcounts, int *sdispls, MPI_Datatype *sendty
     offset_t = ntasks;
 
     /* Send to self. */
-    printf("sendcounts %d my_rank %d\n",sendcounts[my_rank],my_rank);
     if (sendcounts[my_rank] > 0)
     {
         void *sptr, *rptr;
@@ -160,12 +159,9 @@ int pio_swapm(void *sendbuf, int *sendcounts, int *sdispls, MPI_Datatype *sendty
 /*                                    my_rank, tag, comm, &status))) */
 /*             return check_mpi(NULL, NULL, mpierr, __FILE__, __LINE__); */
 /* #else */
-	printf("here\n");
-
         if ((mpierr = MPI_Irecv(rptr, recvcounts[my_rank], recvtypes[my_rank],
                                 my_rank, tag, comm, rcvids)))
             return check_mpi(NULL, NULL, mpierr, __FILE__, __LINE__);
-	printf("rtest %d %f\n",my_rank, rptr);
         if ((mpierr = MPI_Send(sptr, sendcounts[my_rank], sendtypes[my_rank],
                                my_rank, tag, comm)))
             return check_mpi(NULL, NULL, mpierr, __FILE__, __LINE__);
@@ -269,7 +265,6 @@ int pio_swapm(void *sendbuf, int *sendcounts, int *sdispls, MPI_Datatype *sendty
             if ((mpierr = MPI_Irecv(ptr, recvcounts[p], recvtypes[p], p, tag, comm,
                                     rcvids + istep)))
                 return check_mpi(NULL, NULL, mpierr, __FILE__, __LINE__);
-	    printf("test %d %f\n",p, ptr);
 
             if (fc->hs)
                 if ((mpierr = MPI_Send(&hs, 1, MPI_INT, p, tag, comm)))

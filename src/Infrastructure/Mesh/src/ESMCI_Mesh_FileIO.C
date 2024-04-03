@@ -534,12 +534,30 @@ void ESMCI_mesh_create_from_ESMFMesh_file(char *filename,
     get_elemConn_info_from_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, elementCount, num_elems, elem_ids, 
                                          totNumElementConn, numElementConn, elementConn);
 
+//>>    for (int i = 0; i < num_elems; i++) { 
+//>>      printf("pet: %d num_elems: %d elem_id: %d\n",local_pet,num_elems,elem_ids[i]);
+//>>    }
+
     // Convert global elem info into node info
     int num_nodes;
     int *node_ids=NULL;
     int *local_elem_conn=NULL;
     convert_global_elem_conn_to_local_node_and_elem_info(num_elems, totNumElementConn, numElementConn, elementConn,
                                                           num_nodes, node_ids, local_elem_conn);
+
+//>>    for (int i = 0; i < *numElementConn; i++) { 
+//>>      printf("pet: %d numconn: %d/%d elementConn: %d\n",local_pet,totNumElementConn,*numElementConn,elementConn[i]);
+//>>    }
+//    for (int i = 0; i < totNumElementConn; i++) { 
+//      printf("pet: %d numconn: %d glob_elem_conn: %d local_elem_conn: %d\n",local_pet,totNumElementConn,elementConn[i],local_elem_conn[i]);
+//    }
+//>>    for (int i = 0; i < totNumElementConn; i++) { 
+//>>      printf("pet: %d numconn: %d local_elem_conn: %d\n",local_pet,totNumElementConn,local_elem_conn[i]);
+//>>    }
+//>>
+//>>    for (int i = 0; i < num_nodes; i++) { 
+//>>      printf("pet: %d num_nodes: %d node_id: %d\n",local_pet,num_nodes,node_ids[i]);
+//>>    }
 
     // Convert numElementsConn to elementTypes
     int *elementType=NULL;
@@ -1344,8 +1362,10 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     int totNumElemConn=0;
     double *nodeCoords=NULL;
     std::vector<int> nodeIDs, elemIDs, elemConn, numElemConn;
+    std::vector<double> elemCoords;
     int *num_ElemConn=NULL;
     int *elem_Conn=NULL;
+    double *elem_Coords=NULL;
     int *node_IDs=NULL; // Pointer. Will point to vector.
     int *elem_IDs;
 
@@ -1372,13 +1392,30 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     // Processes polygons in hDS. Polygons are flattened to 2D
     ESMCI_GDAL_process_shapefile_distributed(hDS,&num_features,feature_IDs,globalFeature_IDs,
 					     nodeCoords,nodeIDs,elemIDs,
-					     elemConn,numElemConn,
+					     elemConn,elemCoords,numElemConn,
 					     &totNumElemConn, &num_nodes, &num_elems);
+
+    printf("totNumElemConn: %d\n",totNumElemConn);
 
     node_IDs=&nodeIDs[0];
     elem_Conn=&elemConn[0];
+    elem_Coords=&elemCoords[0];
     num_ElemConn=&numElemConn[0];
     num_elems = num_features;
+
+    // Convert global elem info into node info
+//    int num_nodes;
+//    int *node_ids=NULL;
+    int *local_elem_conn=NULL;
+    convert_global_elem_conn_to_local_node_and_elem_info(num_elems, totNumElemConn, num_ElemConn, elem_Conn,
+                                                          num_nodes, node_IDs, local_elem_conn);
+
+//    for (int i = 0; i < num_elems; i++) { 
+//      printf("pet: %d numelem: %d glob_elem_conn: %d local_elem_conn: %d\n",local_pet,num_elems,num_ElemConn[i]);
+//    }
+//    for (int i = 0; i < totNumElemConn; i++) { 
+//      printf("pet: %d numconn: %d glob_elem_conn: %d local_elem_conn: %d\n",local_pet,totNumElemConn,elem_Conn[i],local_elem_conn[i]);
+//    }
 
     int sumElemConn=0;
     for(std::vector<int>::iterator it = numElemConn.begin(); it != numElemConn.end(); ++it)
@@ -1406,6 +1443,7 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
       
     // Get coordsys from file
     ESMC_CoordSys_Flag coord_sys_mesh=ESMC_COORDSYS_SPH_DEG; // Assume "degrees" for now.
+//    ESMC_CoordSys_Flag coord_sys_mesh=ESMC_COORDSYS_CART; // Assume "degrees" for now.
     // NOTE DEFINED YET      get_coordsys_from_SHP_file(pioFileDesc, filename, dim, nodeCoord_ids, coord_sys_file);
 
     // Create Mesh
@@ -1414,8 +1452,9 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
 				      &localrc)) throw localrc;
 
     // Add nodes
+    InterArray<int> nodeMaskIA(NULL, num_nodes);
     ESMCI_meshaddnodes(out_mesh, &num_nodes, node_IDs,
-		       nodeCoords, NULL, NULL,
+		       nodeCoords, NULL, &nodeMaskIA,
 		       &coord_sys_mesh, &orig_sdim,
 		       &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -1424,13 +1463,14 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     // Add elements
     // !!! None of the elements have shared edges.
     int areaPresent = 0;
-    int centerCoordsPresent=0;
+    int centerCoordsPresent=1; // Need to have center/element coords for regridding.
     ESMCI_meshaddelements(out_mesh,
 			  &num_elems, feature_IDs, num_ElemConn, //elementType, <- using numElemConn in place of elementType assumes 2D!!
 			  NULL, // No mask
 			  &areaPresent, NULL, // No areas
-			  &centerCoordsPresent, NULL, // No center coords
-			  &sumElemConn, elem_Conn, 
+			  &centerCoordsPresent, elem_Coords, // No center coords
+                          &totNumElemConn, local_elem_conn, 
+//			  &sumElemConn, elem_Conn, 
 			  &coord_sys_mesh, &orig_sdim, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 				      &localrc)) throw localrc;

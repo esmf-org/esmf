@@ -6913,7 +6913,7 @@ subroutine   test_create_mesh_from_SH_file(correct, rc)
   if (rc /= ESMF_SUCCESS) return
 
   ! Create Mesh from shape file
-  mesh=ESMF_MeshCreate("data/cb_2018_us_county_20m.shp", &
+  mesh=ESMF_MeshCreate("data/cb_2018_us_region_20m.shp", &
 !  mesh=ESMF_MeshCreate("data/complex_3.shp", &
        fileformat=ESMF_FILEFORMAT_SHAPEFILE, &
        rc=rc)
@@ -6921,7 +6921,7 @@ subroutine   test_create_mesh_from_SH_file(correct, rc)
 
 
   !! Write mesh for debugging
-   call ESMF_MeshWrite(mesh,"complex_3",rc=rc)
+   call ESMF_MeshWrite(mesh,"meshtest",rc=rc)
    if (rc /= ESMF_SUCCESS) return
 
   ! Get rid of Mesh
