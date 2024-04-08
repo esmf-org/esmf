@@ -25,7 +25,7 @@
 #define VM_SIZELOG_off
 
 // On SunOS systems there are a couple of macros that need to be set
-// in order to get POSIX compliant functions IPC, pthreads, gethostid
+// in order to get POSIX compliant functions for IPC, pthreads
 #ifdef __sun
 #define _POSIX_SOURCE
 #define _POSIX_C_SOURCE 199309L
@@ -35,8 +35,8 @@
 
 #include <sys/types.h>
 
-// On OSF1 (i.e. Tru64) systems there is a problem with picking up the 
-// prototype of gethostid() from unistd.h from within C++....
+// On OSF1 (i.e. Tru64) systems there is a problem with picking up some
+// prototypes from unistd.h from within C++....
 #ifdef __osf__
 #define _XOPEN_SOURCE_EXTENDED
 #endif
@@ -48,8 +48,8 @@
 #include <windows.h>
 #endif
 
-// On OSF1 (i.e. Tru64) systems there is a problem with picking up the 
-// prototype of gethostid() from unistd.h from within C++....
+// On OSF1 (i.e. Tru64) systems there is a problem with picking up some
+// prototypes from unistd.h from within C++....
 #ifdef __osf__
 #undef _XOPEN_SOURCE_EXTENDED
 #endif
@@ -362,7 +362,6 @@ void VMK::InitPreMPI(){
 
 
 void VMK::set(bool globalResourceControl){
-#ifndef ESMF_NO_GETHOSTID
 #ifndef ESMF_NO_PTHREADS
   if (globalResourceControl){
 #if !defined(ESMF_OS_Darwin) && !defined(ESMF_OS_Cygwin)
@@ -385,7 +384,6 @@ void VMK::set(bool globalResourceControl){
 #endif
 #endif
   }
-#endif
 #endif
 }
 
@@ -554,7 +552,7 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   // determine SSI ids and ssipe
   ssiid = new int[ncores];
   ssipe = new int[ncores];
-#if (MPI_VERSION >= 8)
+#if (MPI_VERSION >= 3)
   if (mpi_c_ssi_roots != MPI_COMM_NULL)
     MPI_Comm_size(mpi_c_ssi_roots, &ssiCount);
   MPI_Bcast(&ssiCount, 1, MPI_INTEGER, 0, mpi_c_ssi);
@@ -575,7 +573,7 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   memset(hostname, 0, MPI_MAX_PROCESSOR_NAME);
   int resultLen;
   MPI_Get_processor_name(hostname, &resultLen);
-#if 1
+#if 0
 {
   std::stringstream msg;
   msg << "VMK::init()#" << __LINE__
@@ -616,7 +614,7 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   int localSsi = ssiid[mypet];
   ssiLocalPetCount=temp_ssiPetCount[localSsi];
 #endif
-#if 1
+#if 0
 {
   std::stringstream msg;
   msg << "VMK::init()#" << __LINE__
@@ -946,8 +944,8 @@ void VMK::construct(void *ssarg){
   nadevs = new int[npets];
   cid = new int*[npets];
   ssiCount=0;
-  int *temp_ssiPetCount = new int[npets];
-  int *temp_ssiid = new int[npets];
+  std::vector<int> temp_ssiPetCount(npets);
+  std::vector<int> temp_ssiid(npets);
   for (int i=0; i<npets; i++){
     lpid[i]=sarg->lpid[i];
     pid[i]=sarg->pid[i];
@@ -973,7 +971,6 @@ void VMK::construct(void *ssarg){
     }
   }
   int localSsi = temp_ssiid[mypet];
-  delete [] temp_ssiid;
   ssiMinPetCount=npets;
   ssiMaxPetCount=0;
   for (int i=0; i<ssiCount; i++){
@@ -991,7 +988,6 @@ void VMK::construct(void *ssarg){
   ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 }
 #endif
-  delete [] temp_ssiPetCount;
   ssiLocalPetList = new int[ssiLocalPetCount];
   int j=0;
   for (int i=0; i<npets; i++){
