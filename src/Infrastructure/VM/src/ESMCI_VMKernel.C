@@ -554,7 +554,7 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   // determine SSI ids and ssipe
   ssiid = new int[ncores];
   ssipe = new int[ncores];
-#if (MPI_VERSION >= 3)
+#if (MPI_VERSION >= 8)
   if (mpi_c_ssi_roots != MPI_COMM_NULL)
     MPI_Comm_size(mpi_c_ssi_roots, &ssiCount);
   MPI_Bcast(&ssiCount, 1, MPI_INTEGER, 0, mpi_c_ssi);
@@ -569,51 +569,29 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   MPI_Allreduce(&ssiLocalPetCount, &ssiMinPetCount, 1, MPI_INT, MPI_MIN, mpi_c);
   MPI_Allreduce(&ssiLocalPetCount, &ssiMaxPetCount, 1, MPI_INT, MPI_MAX, mpi_c);
   int localSsi = ssiid[mypet];
+#else
+  std::vector<int> temp_ssiPetCount(ncores);
+  char hostname[MPI_MAX_PROCESSOR_NAME];
+  memset(hostname, 0, MPI_MAX_PROCESSOR_NAME);
+  int resultLen;
+  MPI_Get_processor_name(hostname, &resultLen);
 #if 1
 {
   std::stringstream msg;
   msg << "VMK::init()#" << __LINE__
-    << " ssiLocalPetCount=" << ssiLocalPetCount;
+    << " hostname=" << string(hostname, resultLen);
   ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 }
 #endif
-  nssiid = ssiCount;
-  ssiLocalPetList = new int[ssiLocalPetCount];
-  int j=0;
-  for (int i=0; i<ncores; i++){
-    if (ssiid[i]==localSsi){
-      ssiLocalPetList[j] = i;
-      if (i == mypet) ssiLocalPet=j;
-      ++j;
-    }
-  }
-  set(globalResourceControl);
-#else
-#ifdef ESMF_NO_GETHOSTID
-  for (int i=0; i<ncores; i++){
-    ssiid[i]=i;                 // hardcoded assumption of single-CPU SSIs
-    ssipe[i]=0;
-  }
-  ssiCount = ncores;
-  ssiMinPetCount=1;
-  ssiMaxPetCount=1;
-  ssiLocalPetCount=1;
-  ssiLocalPet=0;
-  ssiLocalPetList = new int[1];
-  ssiLocalPetList[0] = mypet;
-#else
-  int *temp_ssiPetCount = new int[ncores];
-  long int *temp_ssiid = new long int[ncores];
-  long hostid = gethostid();
-  MPI_Allgather(&hostid, 1, MPI_LONG,
-             temp_ssiid, 1, MPI_LONG, mpi_c);
-//  std::vector<char[MPI_MAX_PROCESSOR_NAME]> hostname(ncores);
-  // now re-number the ssiid[] to go like 0, 1, 2, ...
+  std::vector<char[MPI_MAX_PROCESSOR_NAME]> hostnames(ncores);
+  MPI_Allgather(hostname, MPI_MAX_PROCESSOR_NAME, MPI_CHAR,
+    &(hostnames[0]), MPI_MAX_PROCESSOR_NAME, MPI_CHAR, mpi_c);
+  // now number the ssiid[] to go like 0, 1, 2, ...
   ssiCount=0;
   for (int i=0; i<ncores; i++){
     int j;
     for (j=0; j<i; j++)
-      if (temp_ssiid[j] == temp_ssiid[i]) break;
+      if (string(hostnames[j]) == string(hostnames[i])) break;
     if (j==i){
       // found new ssiid
       ssiid[i]=ssiCount;
@@ -627,7 +605,6 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
       temp_ssiPetCount[ssiid[i]]++;
     }
   }
-  delete [] temp_ssiid;
   ssiMinPetCount=ncores;
   ssiMaxPetCount=0;
   for (int i=0; i<ssiCount; i++){
@@ -638,6 +615,7 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   }
   int localSsi = ssiid[mypet];
   ssiLocalPetCount=temp_ssiPetCount[localSsi];
+#endif
 #if 1
 {
   std::stringstream msg;
@@ -646,7 +624,6 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 }
 #endif
-  delete [] temp_ssiPetCount;
   nssiid = ssiCount;
   ssiLocalPetList = new int[ssiLocalPetCount];
   int j=0;
@@ -658,8 +635,6 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
     }
   }
   set(globalResourceControl);
-#endif
-#endif
   // ESMCI::VMK pet -> core mapping
   lpid = new int[npets];
   pid = new int[npets];
