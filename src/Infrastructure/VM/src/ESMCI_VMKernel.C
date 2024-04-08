@@ -2966,6 +2966,9 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
   msg << prefix << "vm located at: " << this;
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
+  msg << prefix << "mpionly=" << mpionly << " threadsflag=" << threadsflag;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
   msg << prefix << "ssiCount=" << getSsiCount()
     << " localSsi=" << ssiid[cid[mypet][0]];
   ESMC_LogDefault.Write(msg.str(), msgType);
@@ -2983,13 +2986,13 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
   }
   msg.str("");  // clear
   msg << prefix << "petCount=" << getPetCount()
-    << " localPet=" << getLocalPet()
+    << " ssiLocalPetCount=" << getSsiLocalPetCount();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "localPet=" << getLocalPet()
     << " mypthid=" << mypthid
     << " ssiLocalPet=" << getSsiLocalPet()
     << " currentSsiPe=" << getCurrentSsiPe();
-  ESMC_LogDefault.Write(msg.str(), msgType);
-  msg.str("");  // clear
-  msg << prefix << "mpionly=" << mpionly << " threadsflag=" << threadsflag;
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
 #ifndef ESMF_NO_PTHREADS
