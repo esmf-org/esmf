@@ -84,11 +84,6 @@ ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_DLFCN
 
 ############################################################
-# XT compute nodes do not have support for "gethostid()"
-#
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_GETHOSTID
-
-############################################################
 # XT compute nodes do not have support for signals
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SIGNALS
