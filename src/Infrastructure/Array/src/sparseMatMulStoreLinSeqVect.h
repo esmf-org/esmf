@@ -1114,10 +1114,15 @@ template<typename IT1, typename IT2>
       int petCount = vmk->getNpets();
       int localPet = vmk->getMypet();
 
-      // Memory to hold pointers into buffers
+      // Allocate memory to hold pointers into buffers
       int **bufferIntArray = new int*[petCount];
+
+      // Init to NULL
+      for (int i=0; i<petCount; i++) {
+        bufferIntArray[i] = NULL;
+      }
       
-      // Get beginning of buffers
+      // Get beginning of buffers for range
       for (int ii=sendIndexOffset-iiStart; ii>sendIndexOffset-iiEnd; ii--){
         int dstPet = ii%petCount;  // fold back into [0,..,petCount-1] range
         bufferIntArray[dstPet] = (int *)(sendBuffer[dstPet]);
@@ -1145,7 +1150,8 @@ template<typename IT1, typename IT2>
               int dstPet=(int)(seqIndPos-seqIndexInterval);
               if (dstPet >= petCount) continue;
               if (dstPet == localPet) continue;
-
+              if (bufferIntArray[dstPet] == NULL) continue;
+              
               IT seqIndMin = seqIndexInterval[dstPet].min;
               IT seqIndMax = seqIndexInterval[dstPet].max;              
               
@@ -1192,7 +1198,13 @@ template<typename IT1, typename IT2>
               arrayElement.next();
               continue;
             }
-              
+
+	    // If buffer doesn't exist, then skip
+            if (bufferIntArray[dstPet] == NULL) {
+              arrayElement.next();
+              continue;
+            }
+            
             IT seqIndMin = seqIndexInterval[dstPet].min;
             IT seqIndMax = seqIndexInterval[dstPet].max;              
             
