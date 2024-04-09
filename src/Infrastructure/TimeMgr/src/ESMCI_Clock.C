@@ -334,7 +334,21 @@ int Clock::count=0;
       }
     }
 
-    if (timeStep  != ESMC_NULL_POINTER) this->timeStep  = *timeStep;
+    if (timeStep  != ESMC_NULL_POINTER) {
+
+      // Repeat isn't supported yet with a negative time step or one that's 0
+      // The code below will have to be re-thought to support either. 
+      if (*timeStep <= (TimeInterval)0) {
+        ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_INCONS,
+          "repeating clocks currently do not support negative or 0 time steps.", &
+                                      ESMC_CONTEXT, &rc);
+          return(rc);
+      }
+
+      // Set new timeStep
+      this->timeStep  = *timeStep;
+    }
+    
     if (startTime != ESMC_NULL_POINTER) this->startTime = *startTime;
     if (stopTime  != ESMC_NULL_POINTER) {
       this->stopTime  = *stopTime;
@@ -378,6 +392,13 @@ int Clock::count=0;
     if (direction != ESMC_NULL_POINTER) {
       this->direction = *direction;
       this->userChangedDirection = true;
+
+      if ((this->repeat) && (this->direction==ESMF_DIRECTION_REVERSE)) {
+        ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_INCONS,
+         "repeating clocks are not currently supported with reverse direction.",
+                                      ESMC_CONTEXT, &rc);
+        return(rc);        
+      }
     }
 
     rc = Clock::validate();
