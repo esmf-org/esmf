@@ -843,6 +843,7 @@ namespace ESMCI{
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
             "; calkindflag is 360DAY. Only GREGORIAN and JULIAN are supported.",
             ESMC_CONTEXT, &rc);
+          return(rc);
           break;
 
         case ESMC_CALKIND_JULIANDAY:
