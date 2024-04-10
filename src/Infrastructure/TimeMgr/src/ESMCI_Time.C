@@ -834,42 +834,42 @@ namespace ESMCI{
     {
         case ESMC_CALKIND_NOLEAP:
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-            "; calkindflag is NOLEAP. Only GREGORIAN and JULIAN are supported.",
+            "; calkindflag is NOLEAP. Only GREGORIAN and JULIAN are supported when syncing to real time.",
             ESMC_CONTEXT, &rc);
           return(rc);
           break;
 
         case ESMC_CALKIND_360DAY:
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-            "; calkindflag is 360DAY. Only GREGORIAN and JULIAN are supported.",
+            "; calkindflag is 360DAY. Only GREGORIAN and JULIAN are supported when syncing to real time.",
             ESMC_CONTEXT, &rc);
           return(rc);
           break;
 
         case ESMC_CALKIND_JULIANDAY:
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-            "; calkindflag is JULIANDAY. Only GREGORIAN and JULIAN are supported.",
+            "; calkindflag is JULIANDAY. Only GREGORIAN and JULIAN are supported when syncing to real time.",
             ESMC_CONTEXT, &rc);
           return(rc);
           break;
 
         case ESMC_CALKIND_MODJULIANDAY:
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-            "; calkindflag is MODJULIANDAY. Only GREGORIAN and JULIAN are supported.",
+            "; calkindflag is MODJULIANDAY. Only GREGORIAN and JULIAN are supported when syncing to real time.",
             ESMC_CONTEXT, &rc);
           return(rc);
           break;
 
         case ESMC_CALKIND_NOCALENDAR:
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-            "; calkindflag is NOCALENDAR. Only GREGORIAN and JULIAN are supported.",
+            "; calkindflag is NOCALENDAR. Only GREGORIAN and JULIAN are supported when syncing to real time.",
             ESMC_CONTEXT, &rc);
           return(rc);
           break;
 
         case ESMC_CALKIND_CUSTOM:
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-            "; calkindflag is CUSTOM. Only GREGORIAN and JULIAN are supported.",
+            "; calkindflag is CUSTOM. Only GREGORIAN and JULIAN are supported when syncing to real time.",
             ESMC_CONTEXT, &rc);
           return(rc);
           break;
