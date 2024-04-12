@@ -141,8 +141,8 @@ namespace ESMCI{
                timeZone     != ESMC_NULL_POINTER) {
       // only calendar and/or timezone specified, do not re-initialize basetime
 
-      // initialize basetime only if not done previously 
-      if (BaseTime::validate() != ESMF_SUCCESS) {
+      // Initialize basetime only if not done previously 
+      if (BaseTime::uninit()) {
         Fraction::set(0,0,1);  // set seconds = 0
                                // set fractional seconds numerator = 0
                                // set fractional seconds denominator = 1

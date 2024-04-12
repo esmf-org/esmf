@@ -73,7 +73,7 @@
  
       ! instantitate some general times and timeintervals
       type(ESMF_Time) :: time1, time2, time3, time4, time5, time6, time7, &
-                         midMonth, startTime2
+                         midMonth, startTime2, time8
       type(ESMF_TimeInterval) :: timeInterval2, timeInterval3, timeInterval4, &
                                  timeInterval5, timeInterval6, timeInterval7
 
@@ -1136,6 +1136,18 @@
 
       ! ----------------------------------------------------------------------------
 
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Setting just a calendar in an uninit time
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Setting just a calendar in an uninitialized Time object."      
+      call ESMF_TimeSet(time8, calendar=julianCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(.not.bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
 
