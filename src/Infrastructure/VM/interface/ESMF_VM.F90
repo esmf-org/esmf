@@ -5832,19 +5832,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMLog()"
 !BOP
-! !IROUTINE: ESMF_VMLog - Log
+! !IROUTINE: ESMF_VMLog - Log VM information
 
 ! !INTERFACE:
-  subroutine ESMF_VMLog(vm, prefix, logMsgFlag, rc)
+  subroutine ESMF_VMLog(vm, keywordEnforcer, prefix, logMsgFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),          intent(in)              :: vm
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),       intent(in),   optional  :: prefix
     type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
     integer, intent(out),                 optional  :: rc
 !
 ! !DESCRIPTION:
-!   Log the VM.
+!   Write information about {\tt vm} to the ESMF default Log.
 !
 !   The arguments are:
 !   \begin{description}

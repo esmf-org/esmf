@@ -1826,13 +1826,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_StateLog()"
 !BOP
-! !IROUTINE: ESMF_StateLog - Log
+! !IROUTINE: ESMF_StateLog - Log State information
 
 ! !INTERFACE:
-  subroutine ESMF_StateLog(state, prefix, logMsgFlag, nestedFlag, deepFlag, rc)
+  subroutine ESMF_StateLog(state, keywordEnforcer, prefix, logMsgFlag, nestedFlag, deepFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State),       intent(in)              :: state
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),       intent(in),   optional  :: prefix
     type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
     logical,                intent(in),   optional  :: nestedFlag
@@ -1840,7 +1841,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!   Output information about {\tt state} to the ESMF default Log.
+!   Write information about {\tt state} to the ESMF default Log.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1936,7 +1937,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       localrc = ESMF_RC_NOT_IMPL
       if (.not. ESMF_StateIsCreated(stateR)) then
         call ESMF_LogWrite(ESMF_StringConcat(prefix, &
-          "State object is invalid! Not created or deleted"), &
+          "State object is invalid! Not created or deleted!"), &
           logMsg, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -2049,9 +2050,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 if (ESMF_LogFoundError(localrc, &
                   ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
-!                call ESMF_ArrayBundleLog(arraybundle, &
-!                  prefix=ESMF_StringConcat(prefix, "! "), &
-!                  logMsgFlag=logMsg, rc=localrc)
+                call ESMF_ArrayBundleLog(arraybundle, &
+                  prefix=ESMF_StringConcat(prefix, "! "), &
+                  logMsgFlag=logMsg, deepFlag=deepLog, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                   ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
