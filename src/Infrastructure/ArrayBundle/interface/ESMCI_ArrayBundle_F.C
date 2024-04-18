@@ -382,14 +382,18 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_arraybundlelog)(ESMCI::ArrayBundle **arraybundle,
-    char *prefix, ESMC_LogMsgType_Flag *logMsgFlag, int *rc,
-    ESMCI_FortranStrLenArg prefix_l){
+    char *prefix, ESMC_LogMsgType_Flag *logMsgFlag, ESMC_Logical *deep,
+    int *rc, ESMCI_FortranStrLenArg prefix_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlelog()"
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // convert to bool
+    bool deepFlag = false;  // default
+    if (ESMC_NOT_PRESENT_FILTER(deep) != ESMC_NULL_POINTER)
+      if (*deep == ESMF_TRUE) deepFlag = true;
     try{
       std::string prefixStr(prefix, prefix_l);
-      (*arraybundle)->log(prefixStr, *logMsgFlag);
+      (*arraybundle)->log(prefixStr, *logMsgFlag, deepFlag);
     }catch(int localrc){
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc))

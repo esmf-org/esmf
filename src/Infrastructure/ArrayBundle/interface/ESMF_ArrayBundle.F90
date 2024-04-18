@@ -1629,6 +1629,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_LogMsg_Flag)  :: logMsg
+    type(ESMF_Logical)      :: deep
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1636,13 +1637,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
-    
-    ! deal with optionl logMsgFlag
+
+    ! deal with optional logMsgFlag
     logMsg = ESMF_LOGMSG_INFO ! default
     if (present(logMsgFlag)) logMsg = logMsgFlag
 
+    ! deal with optional deepFlag
+    deep = ESMF_FALSE ! default
+    if (present(deepFlag)) deep = deepFlag
+
     ! Call into the C++ interface.
-    call c_esmc_arraybundlelog(arraybundle, prefix, logMsg, localrc)
+    call c_esmc_arraybundlelog(arraybundle, prefix, logMsg, deep, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

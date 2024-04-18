@@ -164,7 +164,7 @@ program ESMF_ArrayBundleCreateUTest
   !NEX_UTest
   write(name, *) "ArrayBundleLog #1 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayBundleLog(arraybundle, prefix="#1: ", rc=rc)
+  call ESMF_ArrayBundleLog(arraybundle, prefix="log-#1: ", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
@@ -273,7 +273,7 @@ program ESMF_ArrayBundleCreateUTest
   !NEX_UTest
   write(name, *) "ArrayBundleLog #2 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayBundleLog(arraybundle, prefix="#2: ", rc=rc)
+  call ESMF_ArrayBundleLog(arraybundle, prefix="log-#2: ", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
@@ -469,7 +469,8 @@ program ESMF_ArrayBundleCreateUTest
   !NEX_UTest
   write(name, *) "ArrayBundleLog #3 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayBundleLog(arraybundle, prefix="#3: ", rc=rc)
+  call ESMF_ArrayBundleLog(arraybundle, prefix="log-#3: ", deepFlag=.true., &
+    rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------

@@ -122,7 +122,7 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
               int *timeslice, ESMC_IOFmt_Flag *iofmt);
     // misc.
     void log(std::string prefix,
-      ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO)const;
+      ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO, bool deepFlag=false)const;
     int print() const;
     // serialize() and deserialize()
     int serialize(char *buffer,int *length,int *offset,

@@ -543,10 +543,17 @@ int ArrayBundle::write(
 // !IROUTINE:  ESMCI::ArrayBundle::log
 //
 // !INTERFACE:
-void ArrayBundle::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
+void ArrayBundle::log(
 //
 // !DESCRIPTION:
-//    Log details of ArrayBundle object 
+//    Log details of ArrayBundle object
+//
+// !ARGUMENTS:
+//
+  std::string prefix,
+  ESMC_LogMsgType_Flag msgType,
+  bool deepFlag
+  )const{
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -563,10 +570,14 @@ void ArrayBundle::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
     msg << prefix << "ArrayBundle object is valid!"
       << " <name: " << getName() << "> <itemCount: " << getCount() << ">";
     ESMC_LogDefault.Write(msg.str(), msgType);
-    for (auto it = arrayContainer.begin(); it != arrayContainer.end(); ++it){
+    int item=0;
+    for (auto it = arrayContainer.begin(); it != arrayContainer.end(); ++it,
+      item++){
       msg.str("");  // clear
-      msg << prefix << "+-<itemName: " << it->second->second->getName() << ">";
+      msg << prefix << "+-<item: " << item << "> <itemName: "
+        << it->second->second->getName() << ">";
       ESMC_LogDefault.Write(msg.str(), msgType);
+      if (deepFlag) it->second->second->log(prefix+"! ", msgType, deepFlag);
     }
   }
   msg.str("");  // clear
