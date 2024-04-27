@@ -207,6 +207,7 @@ program ESMF_HConfigUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_HConfigSet(hconfig, content="[1, 2, 3]", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -222,6 +223,15 @@ program ESMF_HConfigUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_HConfigFileLoad(hconfig, fileName="sample.yaml", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ESMF_HConfigLog()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_HConfigLog(hconfig, prefix="log-sample: ", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest

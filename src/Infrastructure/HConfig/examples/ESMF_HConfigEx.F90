@@ -1597,9 +1597,16 @@ program ESMF_HConfigEx
 ! ...
 ! \end{verbatim}
 !
-! The optional {\tt doc} argument can be specified when saving the
-! multi-document {\tt hconfig} to file. Only the specified document, by index,
-! is written to file.
+! The content of the {\tt hconfig} object can be written to the ESMF log file
+! as usual.
+!EOE
+!BOC
+  call ESMF_HConfigLog(hconfig, prefix="my-multi-doc: ", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The optional {\tt doc} argument can be specified to save or log a specific
+! document of the multi-document {\tt hconfig} object.
 !EOE
 !BOC
   call ESMF_HConfigFileSave(hconfig, filename="multi_01.yaml", doc=2, rc=rc)

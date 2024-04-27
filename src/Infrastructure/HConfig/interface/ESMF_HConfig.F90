@@ -228,6 +228,8 @@ module ESMF_HConfigMod
 
   public ESMF_HConfigLoad
 
+  public ESMF_HConfigLog
+
   public ESMF_HConfigRemove
 
   public ESMF_HConfigSet
@@ -11104,6 +11106,70 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_HConfigLoad
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigLog()"
+!BOP
+! !IROUTINE: ESMF_HConfigLog - Log HConfig contents
+
+! !INTERFACE:
+  subroutine ESMF_HConfigLog(hconfig, keywordEnforcer, prefix, logMsgFlag, doc, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig),     intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(len=*),       intent(in),  optional :: prefix
+    type(ESMF_LogMsg_Flag), intent(in),  optional :: logMsgFlag
+    integer,                intent(in),  optional :: doc
+    integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Write the {\tt HConfig} contents to the ESMF default Log.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[hconfig]
+!     {\tt ESMF\_HConfig} object written to log.
+!   \item [{[prefix]}]
+!     String to prefix the log message. Default is no prefix.
+!   \item [{[logMsgFlag]}]
+!     Type of log message generated. See section \ref{const:logmsgflag} for
+!     a list of valid message types. Default is {\tt ESMF\_LOGMSG\_INFO}.
+!   \item[{[doc]}]
+!     The doc index. If specified, only content of the indicated
+!     single document is written to log. Defaults to {\em all} docs.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_LogMsg_Flag)  :: logMsg
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! deal with optionl logMsgFlag
+    logMsg = ESMF_LOGMSG_INFO ! default
+    if (present(logMsgFlag)) logMsg = logMsgFlag
+
+    ! Call into the C++ interface.
+    call c_esmc_hconfiglog(hconfig, prefix, logMsg, doc, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_HConfigLog
 !------------------------------------------------------------------------------
 
 

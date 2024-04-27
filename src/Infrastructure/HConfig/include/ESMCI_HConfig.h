@@ -130,6 +130,9 @@ namespace ESMCI {
       HConfig iterEndMapVal(int *rc=NULL);
       int iterNext();
 
+      void log(std::string prefix,
+        ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO, int *docIndex=NULL)const;
+
       template<typename T> T as(bool *asOkay, int *rc=NULL);
       template<typename T> T asMapKey(bool *asOkay, int *rc=NULL);
       template<typename T> T asMapVal(bool *asOkay, int *rc=NULL);

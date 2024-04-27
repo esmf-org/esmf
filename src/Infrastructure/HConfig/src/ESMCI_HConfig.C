@@ -3145,6 +3145,95 @@ int HConfig::iterNext(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::log()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::log
+//
+// !INTERFACE:
+void HConfig::log(
+//
+// !DESCRIPTION:
+//    Log HConfig contents
+//
+// !ARGUMENTS:
+//
+  std::string prefix,
+  ESMC_LogMsgType_Flag msgType,
+  int *docIndex
+  )const{
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;
+
+  std::stringstream msg;
+  msg << prefix << "--- HConfig::log() start ---------------------------------";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+
+#ifdef ESMF_YAMLCPP
+  int docI = 0; // default
+  if (docIndex) docI = *docIndex - 1;
+
+  try{
+    std::stringstream hconfigstream;
+    if (doc){
+      // node
+      if (doc->size() == 1){
+        // a single document
+        hconfigstream << (*doc)[0];
+      }else{
+        // multiple documents
+        if (docIndex){
+          // only save the specified doc
+          hconfigstream << (*doc)[docI];
+        }else{
+          // save all of the docs
+          for (auto it=doc->begin(); it!=doc->end(); ++it){
+            hconfigstream << "---\n";
+            hconfigstream << *it;
+            hconfigstream << "\n...\n";
+          }
+        }
+      }
+    }else{
+      // iterator
+      if (type==YAML::NodeType::Map){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object must NOT be map iterator", ESMC_CONTEXT, &rc);
+        throw rc;
+      }else
+        hconfigstream << (YAML::Node)(*iter);
+    }
+    for (std::string line; std::getline(hconfigstream, line);)
+      ESMC_LogDefault.Write(prefix + line, msgType);
+  }catch(int catchrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc);
+    throw rc;
+  }catch(...){
+    std::stringstream msg;
+    msg << "Caught exception writing HConfig content to log.";
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg, ESMC_CONTEXT, &rc);
+    throw rc;
+  }
+#else
+  msg.str("");  // clear
+  msg << prefix << "!!! ESMF_YAMLCPP not enabled !!!";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+#endif
+
+  msg.str("");  // clear
+  msg << prefix << "--- HConfig::log() end -----------------------------------";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::HConfig::as()"
 //BOP
 // !IROUTINE:  ESMCI::HConfig::as - Interpret value
