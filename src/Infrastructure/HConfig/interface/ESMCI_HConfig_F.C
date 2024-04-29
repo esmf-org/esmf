@@ -1684,12 +1684,24 @@ extern "C" {
         rc);
       return; // bail out
     }catch(...){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception", 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
         ESMC_CONTEXT, rc);
       return;
     }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_hconfigmatch)(ESMCI::HConfig *ptr1, ESMCI::HConfig *ptr2,
+    ESMCI::HConfigMatch_Flag *matchResult, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_hconfigmatch()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    *matchResult = ESMCI::HConfig::match(ptr1, ptr2, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
   }
 
   void FTN_X(c_esmc_hconfigtoconfig)(ESMCI::HConfig *ptr, ESMCI_Config **ptr2,

@@ -3234,6 +3234,119 @@ void HConfig::log(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::match()"
+//BOPI
+// !IROUTINE:  ESMCI::HConfig::match
+//
+// !INTERFACE:
+HConfigMatch_Flag HConfig::match(
+//
+// !RETURN VALUE:
+//    HConfigMatch_Flag match level
+//
+// !ARGUMENTS:
+//
+  HConfig *hconfig1,                      // in
+  HConfig *hconfig2,                      // in
+  int *rc                                 // (out) return code
+  ){
+//
+// !DESCRIPTION:
+//    Determine to what level hconfig1 and hconfig2 match.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  // initialize return value
+  HConfigMatch_Flag matchResult = HCONFIGMATCH_INVALID;
+
+  // return with errors for NULL pointer
+  if (hconfig1 == NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "Not a valid pointer to HConfig", ESMC_CONTEXT, rc);
+    return matchResult;
+  }
+  if (hconfig2 == NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "Not a valid pointer to HConfig", ESMC_CONTEXT, rc);
+    return matchResult;
+  }
+
+  // ALIAS:
+  if (equal(hconfig1, hconfig2)){
+    // alias match
+    matchResult = HCONFIGMATCH_ALIAS;
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
+
+  // NONE:
+  matchResult = HCONFIGMATCH_NONE;
+
+  // EXACT:
+  std::stringstream hconfigstream1;
+  if (hconfig1->doc){
+    // node
+    if (hconfig1->doc->size() == 1){
+      // a single document
+      hconfigstream1 << (*(hconfig1->doc))[0];
+    }else{
+      // multiple documents
+      // save all of the docs
+      for (auto it=hconfig1->doc->begin(); it!=hconfig1->doc->end(); ++it){
+        hconfigstream1 << "---\n";
+        hconfigstream1 << *it;
+        hconfigstream1 << "\n...\n";
+      }
+    }
+  }else{
+    // iterator
+    if (hconfig1->type==YAML::NodeType::Map){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must NOT be map iterator", ESMC_CONTEXT, rc);
+      return matchResult;
+    }else
+      hconfigstream1 << (YAML::Node)(*(hconfig1->iter));
+  }
+  std::stringstream hconfigstream2;
+  if (hconfig2->doc){
+    // node
+    if (hconfig2->doc->size() == 1){
+      // a single document
+      hconfigstream2 << (*(hconfig2->doc))[0];
+    }else{
+      // multiple documents
+      // save all of the docs
+      for (auto it=hconfig2->doc->begin(); it!=hconfig2->doc->end(); ++it){
+        hconfigstream2 << "---\n";
+        hconfigstream2 << *it;
+        hconfigstream2 << "\n...\n";
+      }
+    }
+  }else{
+    // iterator
+    if (hconfig2->type==YAML::NodeType::Map){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must NOT be map iterator", ESMC_CONTEXT, rc);
+      return matchResult;
+    }else
+      hconfigstream2 << (YAML::Node)(*(hconfig2->iter));
+  }
+  if (hconfigstream1.str() == hconfigstream2.str())
+    matchResult = HCONFIGMATCH_EXACT;
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+  return matchResult;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::HConfig::as()"
 //BOP
 // !IROUTINE:  ESMCI::HConfig::as - Interpret value

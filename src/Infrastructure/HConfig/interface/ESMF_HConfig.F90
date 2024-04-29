@@ -105,10 +105,29 @@ module ESMF_HConfigMod
 
 !------------------------------------------------------------------------------
 
+  ! HConfigMatch_Flag
+  type ESMF_HConfigMatch_Flag
+  private
+#ifdef ESMF_NO_INITIALIZERS
+    integer :: value
+#else
+    integer :: value = 0
+#endif
+  end type
+
+  type(ESMF_HConfigMatch_Flag), parameter:: &
+    ESMF_HCONFIGMATCH_INVALID      = ESMF_HConfigMatch_Flag(0), &
+    ESMF_HCONFIGMATCH_NONE         = ESMF_HConfigMatch_Flag(1), &
+    ESMF_HCONFIGMATCH_EXACT        = ESMF_HConfigMatch_Flag(2), &
+    ESMF_HCONFIGMATCH_ALIAS        = ESMF_HConfigMatch_Flag(3)
+
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public ESMF_HConfig
   public ESMF_HConfigIter
+  public ESMF_HConfigMatch_Flag, ESMF_HCONFIGMATCH_INVALID, &
+    ESMF_HCONFIGMATCH_NONE, ESMF_HCONFIGMATCH_EXACT,&
+    ESMF_HCONFIGMATCH_ALIAS
 
 !------------------------------------------------------------------------------
 !
@@ -229,6 +248,7 @@ module ESMF_HConfigMod
   public ESMF_HConfigLoad
 
   public ESMF_HConfigLog
+  public ESMF_HConfigMatch
 
   public ESMF_HConfigRemove
 
@@ -502,6 +522,42 @@ module ESMF_HConfigMod
     module procedure ESMF_HConfigSetMapValStringSeq
   end interface
 
+! -------------------------- ESMF-internal interface --------------------------
+  interface operator(==)
+    module procedure ESMF_HConfigMatch_FlagEQ
+  end interface
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-internal interface --------------------------
+  interface operator(/=)
+    module procedure ESMF_HConfigMatch_FlagNE
+  end interface
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-internal interface --------------------------
+  interface operator(<)
+    module procedure ESMF_HConfigMatch_FlagLT
+  end interface
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-internal interface --------------------------
+  interface operator(>)
+    module procedure ESMF_HConfigMatch_FlagGT
+  end interface
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-internal interface --------------------------
+  interface operator(<=)
+    module procedure ESMF_HConfigMatch_FlagLE
+  end interface
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-internal interface --------------------------
+  interface operator(>=)
+    module procedure ESMF_HConfigMatch_FlagGE
+  end interface
+!------------------------------------------------------------------------------
+
 ! -------------------------- ESMF-public interface ----------------------------
 !BOP
 ! !IROUTINE: ESMF_HConfigOperator(==) - HConfig equality operator
@@ -522,7 +578,7 @@ module ESMF_HConfigMod
 !   Test whether hconfig1 and hconfig2 are valid aliases to the same ESMF
 !   HConfig object in memory. For a more general comparison of two
 !   ESMF HConfigs, going beyond the simple alias test, the
-!   {\tt ESMF\_HConfigMatch()} function (not yet fully implemented) must
+!   {\tt ESMF\_HConfigMatch()} function (\ref{HConfigMatch}) must
 !   be used.
 !
 !   The arguments are:
@@ -562,7 +618,7 @@ module ESMF_HConfigMod
 !   Test whether hconfig1 and hconfig2 are {\it not} valid aliases to the
 !   same ESMF HConfig object in memory. For a more general comparison of two
 !   ESMF HConfigs, going beyond the simple alias test, the
-!   {\tt ESMF\_HConfigMatch()} function (not yet fully implemented) must
+!   {\tt ESMF\_HConfigMatch()} function (\ref{HConfigMatch}) must
 !   be used.
 !
 !   The arguments are:
@@ -609,6 +665,168 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigMatch_FlagEQ()"
+!BOPI
+! !IROUTINE:  ESMF_HConfigMatch_FlagEQ - Compare two HConfigMatch_Flags
+!
+! !INTERFACE:
+  function ESMF_HConfigMatch_FlagEQ(hcmt1, hcmt2)
+!
+! !RETURN VALUE:
+    logical :: ESMF_HConfigMatch_FlagEQ
+
+! !ARGUMENTS:
+    type(ESMF_HConfigMatch_Flag), intent(in) :: hcmt1
+    type(ESMF_HConfigMatch_Flag), intent(in) :: hcmt2
+
+! !DESCRIPTION:
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_HConfigMatch_FlagEQ = hcmt1%value .eq. hcmt2%value
+
+  end function ESMF_HConfigMatch_FlagEQ
+!-------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigMatch_FlagNE()"
+!BOPI
+! !IROUTINE:  ESMF_HConfigMatch_FlagNE - Compare two HConfigMatch_Flags
+!
+! !INTERFACE:
+  function ESMF_HConfigMatch_FlagNE(hcmt1, hcmt2)
+!
+! !RETURN VALUE:
+    logical :: ESMF_HConfigMatch_FlagNE
+
+! !ARGUMENTS:
+    type(ESMF_HConfigMatch_Flag), intent(in) :: hcmt1
+    type(ESMF_HConfigMatch_Flag), intent(in) :: hcmt2
+
+! !DESCRIPTION:
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_HConfigMatch_FlagNE = .not.ESMF_HConfigMatch_FlagEQ(hcmt1, hcmt2)
+
+  end function ESMF_HConfigMatch_FlagNE
+!-------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigMatch_FlagLT()"
+!BOPI
+! !IROUTINE:  ESMF_HConfigMatch_FlagLT - Compare two HConfigMatch_Flags
+!
+! !INTERFACE:
+  function ESMF_HConfigMatch_FlagLT(hcmt1, hcmt2)
+!
+! !RETURN VALUE:
+    logical :: ESMF_HConfigMatch_FlagLT
+
+! !ARGUMENTS:
+    type(ESMF_HConfigMatch_Flag), intent(in) :: hcmt1
+    type(ESMF_HConfigMatch_Flag), intent(in) :: hcmt2
+
+! !DESCRIPTION:
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_HConfigMatch_FlagLT = hcmt1%value .lt. hcmt2%value
+
+  end function ESMF_HConfigMatch_FlagLT
+!-------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigMatch_FlagGT()"
+!BOPI
+! !IROUTINE:  ESMF_HConfigMatch_FlagGT - Compare two HConfigMatch_Flags
+!
+! !INTERFACE:
+  function ESMF_HConfigMatch_FlagGT(hcmt1, hcmt2)
+!
+! !RETURN VALUE:
+    logical :: ESMF_HConfigMatch_FlagGT
+
+! !ARGUMENTS:
+    type(ESMF_HConfigMatch_Flag), intent(in) :: hcmt1
+    type(ESMF_HConfigMatch_Flag), intent(in) :: hcmt2
+
+! !DESCRIPTION:
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_HConfigMatch_FlagGT = hcmt1%value .gt. hcmt2%value
+
+  end function ESMF_HConfigMatch_FlagGT
+!-------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigMatch_FlagLE()"
+!BOPI
+! !IROUTINE:  ESMF_HConfigMatch_FlagLE - Compare two HConfigMatch_Flags
+!
+! !INTERFACE:
+  function ESMF_HConfigMatch_FlagLE(hcmt1, hcmt2)
+!
+! !RETURN VALUE:
+    logical :: ESMF_HConfigMatch_FlagLE
+
+! !ARGUMENTS:
+    type(ESMF_HConfigMatch_Flag), intent(in) :: hcmt1
+    type(ESMF_HConfigMatch_Flag), intent(in) :: hcmt2
+
+! !DESCRIPTION:
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_HConfigMatch_FlagLE = hcmt1%value .le. hcmt2%value
+
+  end function ESMF_HConfigMatch_FlagLE
+!-------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigMatch_FlagGE()"
+!BOPI
+! !IROUTINE:  ESMF_HConfigMatch_FlagGE - Compare two HConfigMatch_Flags
+!
+! !INTERFACE:
+  function ESMF_HConfigMatch_FlagGE(hcmt1, hcmt2)
+!
+! !RETURN VALUE:
+    logical :: ESMF_HConfigMatch_FlagGE
+
+! !ARGUMENTS:
+    type(ESMF_HConfigMatch_Flag), intent(in) :: hcmt1
+    type(ESMF_HConfigMatch_Flag), intent(in) :: hcmt2
+
+! !DESCRIPTION:
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_HConfigMatch_FlagGE = hcmt1%value .ge. hcmt2%value
+
+  end function ESMF_HConfigMatch_FlagGE
+!-------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-internal method -----------------------------
@@ -11170,6 +11388,74 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_HConfigLog
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigMatch()"
+!BOP
+! !IROUTINE: ESMF_HConfigMatch - Check if two HConfig objects match
+
+! !INTERFACE:
+  function ESMF_HConfigMatch(hconfig1, hconfig2, keywordEnforcer, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_HConfigMatch_Flag) :: ESMF_HConfigMatch
+
+! !ARGUMENTS:
+    type(ESMF_HConfig),  intent(in)             :: hconfig1
+    type(ESMF_HConfig),  intent(in)             :: hconfig2
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,              intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Determine to which level {\tt hconfig} and {\tt hconfig2} match.
+!
+!   Returns a range of values of type {\tt ESMF\_HConfigMatch\_Flag},
+!   indicating how closely the two HConfig objects match. For a description of
+!   the possible return values, see~\ref{const:honfigmatch}.
+!   Note that this call only performs PET local matching. Different return values
+!   may be returned on different PETs for the same HConfig pair.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[hconfig1]
+!     {\tt ESMF\_HConfig} object.
+!   \item[hconfig2]
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                       :: localrc      ! local return code
+    type(ESMF_HConfigMatch_Flag)  :: matchResult
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Initialize return value to invalid, in case of bail-out
+    ESMF_HConfigMatch = ESMF_HCONFIGMATCH_INVALID
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig1, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig2, rc)
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_HConfigMatch(hconfig1, hconfig2, matchResult, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set the actual return value
+    ESMF_HConfigMatch = matchResult
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_HConfigMatch
 !------------------------------------------------------------------------------
 
 
