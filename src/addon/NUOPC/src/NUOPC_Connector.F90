@@ -802,6 +802,7 @@ module NUOPC_Connector
       integer                :: item, itemCount
       character(ESMF_MAXSTR) :: providerTransferOffer, acceptorTransferOffer
       character(ESMF_MAXSTR) :: acceptorStateName
+      character(ESMF_MAXSTR) :: providerCompName
       type(ESMF_State)       :: providerNestedState
       type(ESMF_State)       :: acceptorNestedState
       character(ESMF_MAXSTR) :: nestedStateName
@@ -836,6 +837,11 @@ module NUOPC_Connector
       if (vmThis == ESMF_NULL_POINTER) then
         actualFlag = .false.  ! local PET is not for an actual member
       endif
+
+      call NUOPC_GetAttribute(providerState, name="CompName", &
+        value=providerCompName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
       call ESMF_StateGet(acceptorState, name=acceptorStateName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1012,6 +1018,12 @@ module NUOPC_Connector
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
+
+          ! Add extra metadata to the field in acceptor side about provider
+          call NUOPC_SetAttribute(fieldAdv, name="ProviderCompName", &
+            value=trim(providerCompName), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         end do
       endif
       
