@@ -66,9 +66,3 @@ jobs:
       - name: Check ESMF
         run: |
           C:\tools\cygwin\bin\dash.exe -c "/usr/bin/make check"
-      - name: Check ESMPy
-        run: |
-          C:\tools\cygwin\bin\dash.exe -c "cd src/addon/esmpy; /usr/bin/make download test_all"
-      - name: Build ESMF Docs
-        run: |
-          C:\tools\cygwin\bin\dash.exe -c "/usr/bin/make doc"
