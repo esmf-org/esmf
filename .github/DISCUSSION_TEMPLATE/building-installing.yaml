@@ -1,0 +1,49 @@
+labels: ["source: discussions", "build/porting"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Instructions
+        Before submitting a new discussion please review the [ESMF User's Guide](https://earthsystemmodeling.org/doc/) and check for existing [discussions](https://github.com/danrosen25/esmf/discussions?discussions_q=).
+        - For essential services contact esmf_support@ucar.edu
+  - type: checkboxes
+    attributes:
+      label: Requirements
+      options:
+        - label: Reviewed [ESMF User's Guide](https://earthsystemmodeling.org/doc/)
+          required: true
+        - label: Searched [GitHub Discussions](https://github.com/danrosen25/esmf/discussions?discussions_q=)
+          required: true
+  - type: input
+    id: affiliation
+    attributes:
+      label: Affiliation(s)
+      description: "Are you affiliated with an organization?"
+      placeholder: "NASA, NOAA, NRL, NSF-NCAR, University, ..."
+    validations:
+      required: false
+  - type: input
+    id: version
+    attributes:
+      label: ESMF Version
+      description: "What version of ESMF are you using?"
+      placeholder: "v0.0.0"
+    validations:
+      required: false
+  - type: textarea
+    id: question
+    attributes:
+      label: Issue
+      description: "What is your question or issue?"
+      placeholder: "enter issue here"
+    validations:
+      required: true
+  - type: dropdown
+    id: tag
+    attributes:
+      label: Autotag
+      options:
+        - "@oehmke"
+      default: 0
+    validations:
+      required: true
