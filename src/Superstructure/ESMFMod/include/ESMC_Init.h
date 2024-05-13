@@ -146,12 +146,12 @@ extern "C" {
 // internal resources cleanly.
 //
 // The \texttt{endFlag} argument has one of three options:
-// \being{description}
-//   \item [\texttt{ESMC_END_NORMAL}]
+// \begin{description}
+//   \item [\texttt{ESMC\_END\_NORMAL}]
 //      Finalize normally.
-//   \item [\texttt{ESMC_END_KEEPMPI}]
+//   \item [\texttt{ESMC\_END\_KEEPMPI}]
 //      Finalize normally without finalizing MPI.
-//   \item [\texttt{ESMC_END_ABORT}]
+//   \item [\texttt{ESMC\_END\_ABORT}]
 //      Abort on finalization.
 // \end{description}
 //EOP
