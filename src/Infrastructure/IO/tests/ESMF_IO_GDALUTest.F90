@@ -46,7 +46,7 @@ program ESMF_IO_GDALUTest
 
   type(ESMF_VM) :: vm
   integer :: localPet
-  type(ESMF_Mesh) :: mesh
+  type(ESMF_Mesh) :: mesh, esmfmesh
 
   ! Fields used for reading:
   !
@@ -66,6 +66,7 @@ program ESMF_IO_GDALUTest
 !  character(len=*), parameter :: fileNameFields = "data/complex_3.shp"
 !  character(len=*), parameter :: fileNameFields = "data/cb_2018_us_county_20m.shp"
   character(len=*), parameter :: fileNameFields = "data/cb_2018_us_region_20m.shp"
+!  character(len=*), parameter :: fileNameFields = "data/esmf_3x3_mesh.shp"
 !  character(len=*), parameter :: fileNameFields = "data/cb_2018_us_state_5m.shp"
 !  character(len=*), parameter :: fileNameFields = "data/States_shapefile.shp"
 
@@ -87,12 +88,6 @@ program ESMF_IO_GDALUTest
   real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:)
   real(ESMF_KIND_R4), pointer :: farrayPtr(:,:),farrayPtr2(:,:),farrayPtr1D(:)
 
-  integer, pointer :: nodeIds(:),nodeOwners(:)
-  real(ESMF_KIND_R4), pointer :: nodeCoords(:)
-  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
-  integer :: numNodes, numElems
-  integer :: numQuadElems,numTriElems, numTotElems
-
   !------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -104,80 +99,24 @@ program ESMF_IO_GDALUTest
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-  ! Set number of nodes
-  numNodes=9
   
-  ! Allocate and fill the node id array.
-  allocate(nodeIds(numNodes))
-  nodeIds=(/1,2,3,4,5,6,7,8,9/)
-  
-  ! Allocate and fill node coordinate array.
-  ! Since this is a 2D Mesh the size is 2x the
-  ! number of nodes.
-  allocate(nodeCoords(2*numNodes))
-  nodeCoords=(/0.0,0.0, & ! node id 1
-               45.0,0.0, & ! node id 2
-               90.0,0.0, & ! node id 3
-               0.0,45.0, & ! node id 4
-               45.0,45.0, & ! node id 5
-               90.0,45.0, & ! node id 6
-               0.0,90.0, & ! node id 7
-               45.0,90.0, & ! node id 8
-               90.0,90.0 /) ! node id 9
-  
-  ! Allocate and fill the node owner array.
-  ! Since this Mesh is all on PET 0, it's just set to all 0.
-  allocate(nodeOwners(numNodes))
-  nodeOwners=0 ! everything on PET 0
-  
-  ! Set the number of each type of element, plus the total number.
-  numQuadElems=3
-  numTriElems=2
-  numTotElems=numQuadElems+numTriElems
-  
-  ! Allocate and fill the element id array.
-  allocate(elemIds(numTotElems))
-  elemIds=(/1,2,3,4,5/)
-  
-  
-  ! Allocate and fill the element topology type array.
-  allocate(elemTypes(numTotElems))
-  elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! elem id 1
-       ESMF_MESHELEMTYPE_TRI,  & ! elem id 2
-       ESMF_MESHELEMTYPE_TRI,  & ! elem id 3
-       ESMF_MESHELEMTYPE_QUAD, & ! elem id 4
-       ESMF_MESHELEMTYPE_QUAD/)  ! elem id 5
-  
-  
-  ! Allocate and fill the element connection type array.
-  ! Note that entries in this array refer to the
-  ! positions in the nodeIds, etc. arrays and that
-  ! the order and number of entries for each element
-  ! reflects that given in the Mesh options
-  ! section for the corresponding entry
-  ! in the elemTypes array.
-  allocate(elemConn(4*numQuadElems+3*numTriElems))
-  elemConn=(/1,2,5,4, &  ! elem id 1
-       2,3,5,   &  ! elem id 2
-       3,6,5,   &  ! elem id 3
-       4,5,8,7, &  ! elem id 4
-       5,6,9,8/)   ! elem id 5
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-  ! Create Mesh from shape file
+! Create Mesh from shape file
   write(name, *) "Creating a Mesh to use in Field Tests"
   mesh=ESMF_MeshCreate(fileNameFields, &
        fileformat=ESMF_FILEFORMAT_SHAPEFILE, &
 !       coordSys=ESMF_COORDSYS_CART, &
        rc=rc)
-    ! Create Mesh structure in 1 step
-!>>    mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
-!>>        coordSys=ESMF_COORDSYS_SPH_DEG, &
-!>>         nodeIds=nodeIds, nodeCoords=nodeCoords, &
-!>>         nodeOwners=nodeOwners, elementIds=elemIds,&
-!>>         elementTypes=elemTypes, elementConn=elemConn, rc=rc)
-!  if (rc /= ESMF_SUCCESS) return
+
+! Create mesh from ESMF file
+  esmfmesh=ESMF_MeshCreate("data/test_sph_3x3_esmf.nc", &
+       fileformat=ESMF_FILEFORMAT_ESMFMESH, &
+       rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -209,7 +148,7 @@ program ESMF_IO_GDALUTest
   decomptile(:,5)=(/1,2/) ! Tile 5
   decomptile(:,6)=(/1,2/) ! Tile 6
   ! Create cubed sphere grid
-  dstGrid = ESMF_GridCreateCubedSphere(tileSize=48, regDecompPTile=decomptile, &
+  dstGrid = ESMF_GridCreateCubedSphere(tileSize=90, regDecompPTile=decomptile, &
        staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CENTER/), &
        coordSys=ESMF_COORDSYS_SPH_DEG, rc=rc)
   
@@ -219,15 +158,6 @@ program ESMF_IO_GDALUTest
     return
   endif
 
-!>>  call ESMF_GridAddCoord(dstGrid, staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
-!>>  if (rc /=ESMF_SUCCESS) then
-!>>    rc=ESMF_FAILURE
-!>>!    write(*,*) 'Failed at GridAddCoord'
-!>>    return
-!>>  endif
-
-!  write(*,*) 'Fin grid'
-  
   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
 
   dstField = ESMF_FieldCreate(dstGrid, arrayspec, &
@@ -305,7 +235,9 @@ program ESMF_IO_GDALUTest
   call ESMF_ArraySpecSet(arraySpec, 1, typekind=ESMF_TYPEKIND_R4, rc=rc)
   if (rc /= ESMF_SUCCESS)     write(*,*) 'Failed at arrayspecset'
 
-  field = ESMF_FieldCreate(mesh, arraySpec, name="GEOID", meshLoc=ESMF_MESHLOC_ELEMENT, rc=rc)
+!  field = ESMF_FieldCreate(esmfmesh, arraySpec, meshLoc=ESMF_MESHLOC_ELEMENT, rc=rc)
+  field = ESMF_FieldCreate(mesh, arraySpec, name="DistFld", meshLoc=ESMF_MESHLOC_ELEMENT, rc=rc)
+!  field = ESMF_FieldCreate(mesh, arraySpec, name="GEOID", meshLoc=ESMF_MESHLOC_ELEMENT, rc=rc)
 
   if (rc /= ESMF_SUCCESS) write(*,*) 'Failed at mesh fieldcreate'
 
@@ -326,10 +258,12 @@ program ESMF_IO_GDALUTest
   write(name, *) "Read a multi-tile Field"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
-  call ESMF_FieldRead(field, fileName=fileNameFields, iofmt=ESMF_IOFMT_SHP, rc=rc)
+!  call ESMF_FieldRead(field, fileName=fileNameFields, iofmt=ESMF_IOFMT_SHP, rc=rc)
+!  write(*,*) 'Field read: ', rc
 
   !! Write mesh for debugging
-  call ESMF_MeshWrite(mesh,"meshinit",rc=rc)
+  call ESMF_MeshWrite(mesh,"shpmesh",rc=rc)
+  call ESMF_MeshWrite(esmfmesh,"esmfmesh",rc=rc)
   call ESMF_GridWriteVTK(dstGrid,filename="gridtest",rc=rc)
   write(failMsg, *) "GridWriteVTK failed"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -356,7 +290,7 @@ program ESMF_IO_GDALUTest
 !      return
 !   endif
 
-  call ESMF_MeshWrite(mesh,"meshtest",rc=rc)
+  call ESMF_MeshWrite(mesh,"shpmesh_afterregridstore",rc=rc)
 
   !------------------------------------------------------------------------
 

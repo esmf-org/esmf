@@ -558,6 +558,9 @@ void ESMCI_mesh_create_from_ESMFMesh_file(char *filename,
 //>>    for (int i = 0; i < num_nodes; i++) { 
 //>>      printf("pet: %d num_nodes: %d node_id: %d\n",local_pet,num_nodes,node_ids[i]);
 //>>    }
+//    for (int i = 0; i < num_nodes; i++) { 
+//      printf("pet: %d node_ids: %d\n",local_pet,node_ids[i]);
+//    }
 
     // Convert numElementsConn to elementTypes
     int *elementType=NULL;
@@ -1395,7 +1398,7 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
 					     elemConn,elemCoords,numElemConn,
 					     &totNumElemConn, &num_nodes, &num_elems);
 
-    printf("totNumElemConn: %d\n",totNumElemConn);
+//    printf("totNumElemConn: %d\n",totNumElemConn);
 
     node_IDs=&nodeIDs[0];
     elem_Conn=&elemConn[0];
@@ -1415,6 +1418,9 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
 //    }
 //    for (int i = 0; i < totNumElemConn; i++) { 
 //      printf("pet: %d numconn: %d glob_elem_conn: %d local_elem_conn: %d\n",local_pet,totNumElemConn,elem_Conn[i],local_elem_conn[i]);
+//    }
+//    for (int i = 0; i < num_nodes; i++) { 
+//      printf("pet: %d nodeIDs: %d\n",local_pet,node_IDs[i]);
 //    }
 
     int sumElemConn=0;
