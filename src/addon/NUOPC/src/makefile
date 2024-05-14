@@ -16,6 +16,9 @@ SOURCEF	  = NUOPC_FreeFormatDef.F90 \
             NUOPC_Connector.F90
 SOURCEH	  = 
 
+# List all .h files which should be copied to common include dir
+STOREH	  = 
+
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 TEXFILES  = $(addsuffix _fapi.tex, $(basename $(AUTOGEN)))

@@ -5355,7 +5355,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
       if (present(ssiMap)) then
         allocate(ssiMap(0:petCountArg-1))
-        do i=0, petCount-1
+        do i=0, petCountArg-1
           call ESMF_VMGet(vm, pet=i, ssiId=ssiMap(i), rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
