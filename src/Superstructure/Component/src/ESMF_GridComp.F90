@@ -2608,8 +2608,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   standard Component Initialize(), Run(), and Finalize() methods.
 !   \end{sloppypar}
 ! \item[{[sharedObj]}]
-!   Name of shared object that contains {\tt userRoutine}. If the
-!   {\tt sharedObj} argument is not provided the executable itself will be
+!   Name of shared object that contains {\tt userRoutine}. The asterisk
+!   character {\tt (*)} is supported as a wildcard for the file name suffix.
+!   When present, the asterisk is replaced by "so", "dylib", and "dll", in this
+!   order, and the first successfully loaded object is used to search for
+!   {\tt userRoutine}.
+!   If the {\tt sharedObj} argument is not provided, the executable itself is
 !   searched for {\tt userRoutine}.
 ! \item[{[userRoutineFound]}]
 !   Report back whether the specified {\tt userRoutine} was found and executed,
@@ -2989,8 +2993,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_GridCompSetVMxxx()} methods to set the properties of the VM
 !   associated with the Gridded Component.
 ! \item[{[sharedObj]}]
-!   Name of shared object that contains {\tt userRoutine}. If the
-!   {\tt sharedObj} argument is not provided the executable itself will be
+!   Name of shared object that contains {\tt userRoutine}. The asterisk
+!   character {\tt (*)} is supported as a wildcard for the file name suffix.
+!   When present, the asterisk is replaced by "so", "dylib", and "dll", in this
+!   order, and the first successfully loaded object is used to search for
+!   {\tt userRoutine}.
+!   If the {\tt sharedObj} argument is not provided, the executable itself is
 !   searched for {\tt userRoutine}.
 ! \item[{[userRoutineFound]}]
 !   Report back whether the specified {\tt userRoutine} was found and executed,

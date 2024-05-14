@@ -4112,6 +4112,11 @@ module NUOPC_Comp
 !   and execute the routine. An attempt is made to find a routine that
 !   is close in name to "{\tt SetServices}", allowing for compiler name
 !   mangling, i.e. upper and lower case, as well as trailing underscores.
+!   The asterisk character {\tt (*)} is supported as a wildcard for the
+!   file name suffix in {\tt sharedObj}. When present, the asterisk is replaced
+!   by "so", "dylib", and "dll", in this order, and the first successfully
+!   loaded object is used. If the {\tt sharedObj} argument is not provided, the
+!   executable itself is searched.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -4247,6 +4252,11 @@ module NUOPC_Comp
 !   and execute the routine. An attempt is made to find a routine that
 !   is close in name to "{\tt SetVM}", allowing for compiler name
 !   mangling, i.e. upper and lower case, as well as trailing underscores.
+!   The asterisk character {\tt (*)} is supported as a wildcard for the
+!   file name suffix in {\tt sharedObj}. When present, the asterisk is replaced
+!   by "so", "dylib", and "dll", in this order, and the first successfully
+!   loaded object is used. If the {\tt sharedObj} argument is not provided, the
+!   executable itself is searched.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables

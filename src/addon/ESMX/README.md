@@ -302,8 +302,8 @@ This section affects the specific component instance.
 
 There are two options recognized when specifying the value of the `model` field for a component in the `esmxRun.yaml` file:
 
-- First, if the value specified is recognized as a *component-name* provided by any of the components built into `esmx` during build-time, as specified by `esmxBuild.yaml`, the respective component is accessed via its Fortran module.
-- Second, if the value does not match a build-time dependency, it is assumed to correspond to a shared object instead. In that case the attempt is made to load the specified shared object file at run-time, and to associate with the generic component label. The search order details of the OS dependent dynamic linker apply to find the specified shared object file. A convenient way to indicate a specific shared object file is to use an absolute or relative path that contains a slash ("/") as part of the specified `model` field value.
+- First, if the value specified is recognized as a *component-name* provided by any of the components built into the `esmx_app` during build-time, as specified by `esmxBuild.yaml`, the respective component is accessed via its Fortran module.
+- Second, if the value does *not* match a build-time dependency, it is assumed to correspond to a shared object file instead. In that case the attempt is made to load the specified shared object file at run-time, and, if successful, is associated with the generic component label. The search order details of the OS dependent dynamic linker apply when looking for the specified shared object file on the system. A convenient way to target a shared object file at a specific location is to use absolute or relative paths, i.e. the value specified in the `model` field contains at least one slash ("/") character. The asterisk character ("*") is supported as a wildcard for the file name suffix of the specified shared object. This allows portability across systems that differ in shared object suffix. The implemented search order is "so", followed by "dylib", and finally "dll", where the first successfully loaded shared object file is used.
 
 ## The Unfied ESMX_Driver
 
