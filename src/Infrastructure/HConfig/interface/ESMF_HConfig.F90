@@ -560,6 +560,34 @@ module ESMF_HConfigMod
 
 ! -------------------------- ESMF-public interface ----------------------------
 !BOP
+! !IROUTINE: ESMF_HConfigAssignment(=) - HConfig assignment
+!
+! !INTERFACE:
+!   interface assignment(=)
+!   hconfig1 = hconfig2
+!
+! !ARGUMENTS:
+!   type(ESMF_HConfig) :: hconfig1
+!   type(ESMF_HConfig) :: hconfig2
+!
+! !DESCRIPTION:
+!   Assign hconfig1 as an alias to the same ESMF HConfig object in memory
+!   as hconfig2. If hconfig2 is invalid, then hconfig1 will be equally
+!   invalid after the assignment.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[hconfig1]
+!     The {\tt ESMF\_HConfig} object on the left hand side of the assignment.
+!   \item[hconfig2]
+!     The {\tt ESMF\_HConfig} object on the right hand side of the assignment.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public interface ----------------------------
+!BOP
 ! !IROUTINE: ESMF_HConfigOperator(==) - HConfig equality operator
 !
 ! !INTERFACE:
@@ -11410,6 +11438,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
+!   \label{HConfigMatch}
 !   Determine the level to which {\tt hconfig1} and {\tt hconfig2} match.
 !
 !   Returns a value of type {\tt ESMF\_HConfigMatch\_Flag},
