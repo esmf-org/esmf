@@ -11345,7 +11345,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Write the {\tt HConfig} contents to the ESMF default Log.
+!   Write the contents of {\tt hconfig} to the ESMF default Log.
 !
 !   The arguments are:
 !   \begin{description}
@@ -11410,12 +11410,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Determine to which level {\tt hconfig} and {\tt hconfig2} match.
+!   Determine the level to which {\tt hconfig1} and {\tt hconfig2} match.
 !
-!   Returns a range of values of type {\tt ESMF\_HConfigMatch\_Flag},
+!   Returns a value of type {\tt ESMF\_HConfigMatch\_Flag},
 !   indicating how closely the two HConfig objects match. For a description of
-!   the possible return values, see~\ref{const:honfigmatch}.
-!   Note that this call only performs PET local matching. Different return values
+!   the possible return values, see~\ref{const:hconfigmatch}.
+!   Note that this call only performs PET local matching. Different match values
 !   may be returned on different PETs for the same HConfig pair.
 !
 !   The arguments are:
