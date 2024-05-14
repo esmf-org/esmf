@@ -4,15 +4,16 @@ body:
     attributes:
       value: |
         ### Instructions
-        Before submitting a new discussion please review the [ESMF Documentation](https://earthsystemmodeling.org/doc/) and check for existing [discussions](https://github.com/danrosen25/esmf/discussions?discussions_q=).
-        - For essential services contact esmf_support@ucar.edu
+        Before submitting a new discussion please review the [ESMF Documentation](https://earthsystemmodeling.org/doc/) and check for [existing discussions](https://github.com/orgs/esmf-org/discussions?discussions_q=).
+       
+        **Note:** The ESMF Core Team continues to operate the esmf_support@ucar.edu address. If you have privacy concerns posting to ESMF Discussions or if you prefer email then send us an email.
   - type: checkboxes
     attributes:
       label: Requirements
       options:
         - label: Reviewed [ESMF Documentation](https://earthsystemmodeling.org/doc/)
           required: true
-        - label: Searched [GitHub Discussions](https://github.com/danrosen25/esmf/discussions?discussions_q=)
+        - label: Searched [GitHub Discussions](https://github.com/orgs/esmf-org/discussions?discussions_q=)
           required: true
   - type: input
     id: affiliation
