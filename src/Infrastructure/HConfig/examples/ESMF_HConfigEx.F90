@@ -27,8 +27,11 @@ program ESMF_HConfigEx
   type(ESMF_HConfig)              :: hconfig, hconfigTemp, hconfigTemp2
   type(ESMF_HConfigIter)          :: hconfigIter, hconfigIterBegin, hconfigIterEnd
   type(ESMF_Config)               :: config
+  type(ESMF_HConfigMatch_Flag)    :: match
   logical                         :: asOkay, valueL, isDefined
   logical                         :: isNull, isScalar, isSequence, isMap
+  logical                         :: isAlias, isNotAlias, isExact, isMatch
+  logical                         :: isNone
   logical, allocatable            :: valueLSeq(:)
   character(len=:), allocatable   :: string, stringKey, tag
   character(len=:), allocatable   :: valueSSeq(:)
@@ -1181,6 +1184,159 @@ program ESMF_HConfigEx
 !BOC
   ! Destroy hconfig when done with it.
   call ESMF_HConfigDestroy(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!-------------------------------------------------------------------------------
+!BOE
+! \subsubsection{Comparing HConfig objects}
+!
+! The HConfig class follows the standard behavior of ESMF deep classes as
+! described in section \ref{assignment_equality_copy_compare}. To demonstrate
+! the operations of assignment, equality, and comparison based on content, we
+! start by creating a simple HConfig object.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfig
+  hconfig = ESMF_HConfigCreate(content="{car: red, bike: 22, plane: TRUE}", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! A simple assignment results in an alias to the same deep HConfig object.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfigTemp
+  hconfigTemp = hconfig
+!EOC
+!BOE
+! The equality {\tt (==)} and inequality {\tt (/=)} operators are
+! overloaded to check for the alias condition when used between two
+! HConfig objects.
+!EOE
+!BOC
+  ! logical :: isAlias
+  isAlias = (hconfigTemp == hconfig)
+!EOC
+  write (msgString, '("isAlias: ", L)') isAlias
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  ! logical :: isNotAlias
+  isNotAlias = (hconfigTemp /= hconfig)
+!EOC
+  write (msgString, '("isNotAlias: ", L)') isNotAlias
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Alias equality can also be tested by using the {\tt ESMF\_HConfigMatch()}
+! function. The return value of this function is of type
+! {\tt ESMF\_HConfigMatch\_Flag}, which allows for a wider range of possible
+! comparison results. See section~\ref{const:hconfigmatch} for all the
+! implemented return values.
+!EOE
+!BOC
+  ! type(ESMF_HConfigMatch_Flag)  :: match
+  match = ESMF_HConfigMatch(hconfig, hconfigTemp, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! For the case of an alias match, the value of {\tt ESMF\_HCONFIGMATCH\_ALIAS}
+! is returned.
+!EOE
+!BOC
+  isAlias = (match == ESMF_HCONFIGMATCH_ALIAS)
+!EOC
+  write (msgString, '("isAlias from match: ", L)') isAlias
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! To demonstrate content matching for HConfig objects that are not aliases, we
+! create a separate object with the same content as {\tt hconfig}.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfigTemp
+  hconfigTemp = ESMF_HConfigCreate(content="{car: red, bike: 22, plane: TRUE}", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The simple alias check now returns {\tt .false.}.
+!EOE
+!BOC
+  ! logical :: isAlias
+  isAlias = (hconfigTemp == hconfig)
+!EOC
+  write (msgString, '("isAlias for diff objects: ", L)') isAlias
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! However, for two separate HConfig objects that have exactly matching
+! content, as is the case for {\tt hconfig} and {\tt hconfigTemp}, function
+! {\tt ESMF\_HConfigMatch()} returns value {\tt ESMF\_HCONFIGMATCH\_EXACT}.
+!EOE
+!BOC
+  ! type(ESMF_HConfigMatch_Flag)  :: match
+  match = ESMF_HConfigMatch(hconfig, hconfigTemp, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  ! logical :: isExact
+  isExact = (match == ESMF_HCONFIGMATCH_EXACT)
+!EOC
+  write (msgString, '("isExact: ", L)') isExact
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The values returned by {\tt ESMF\_HConfigMatch()} are constructed in
+! a monotonically increasing manner to simplify general comparisons that
+! ensure two objects are either aliases of each other {\em or} their content
+! matches exactly. This common case is demonstrated in the following code that
+! sets {\tt isMatch} to {\tt .true.} for the alias or exact match condition,
+! and {\tt .false.} otherwise, using {\tt (>=)} logic.
+!EOE
+!BOC
+  ! logical :: isMatch
+  isMatch = (match >= ESMF_HCONFIGMATCH_EXACT)
+!EOC
+  write (msgString, '("isMatch: ", L)') isMatch
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! While there is an exact match of the content of {\tt hconfig} and
+! {\tt hconfigTemp}, they are distinct objects in memory, which can be modified
+! independent of each other. E.g. another key-value pair can be added to
+! {\tt hconfigTemp} without affecting the content of {\tt hconfig}.
+!EOE
+!BOC
+  call ESMF_HConfigAdd(hconfigTemp, addKeyString="kNew", content=7, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Now that the content of {\tt hconfig} and {\tt hconfigTemp} differs, function
+! {\tt ESMF\_HConfigMatch()} returns value {\tt ESMF\_HCONFIGMATCH\_NONE}.
+!EOE
+!BOC
+  ! type(ESMF_HConfigMatch_Flag)  :: match
+  match = ESMF_HConfigMatch(hconfig, hconfigTemp, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  ! logical :: isNone
+  isNone = (match == ESMF_HCONFIGMATCH_NONE)
+!EOC
+  write (msgString, '("isNone: ", L)') isNone
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Finally clean up both HConfig objects.
+!EOE
+!BOC
+  ! Destroy hconfig when done with it.
+  call ESMF_HConfigDestroy(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  ! Destroy hconfigTemp when done with it.
+  call ESMF_HConfigDestroy(hconfigTemp, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
