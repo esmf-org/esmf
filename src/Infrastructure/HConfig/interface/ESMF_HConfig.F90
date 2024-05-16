@@ -136,6 +136,10 @@ module ESMF_HConfigMod
 ! - ESMF-public methods:
   public operator(==)
   public operator(/=)
+  public operator(<)
+  public operator(>)
+  public operator(<=)
+  public operator(>=)
 
   public ESMF_HConfigAdd
   public ESMF_HConfigAddMapKey
