@@ -11,4 +11,4 @@ value_ten:              Null
 value_eleven:
 value_twelve:  !myStuff xyz
 value_thirteen:         NO
-value_fourteen:         'NO'
+value_fourteen:         "NO"
