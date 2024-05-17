@@ -83,7 +83,7 @@ jobs:
         sudo add-apt-repository ppa:ubuntu-toolchain-r/test
         sudo apt-get -qq install tar unzip file curl gringo
         sudo apt-get -qq install build-essential binutils-dev gfortran gdb
-        sudo apt-get -qq install gfortran-12 gfortran-13
+        sudo apt-get -qq install gfortran-12 g++-13 gfortran-13
         sudo apt-get -qq install python3-dev
 
     # restore Intel oneAPI compiler installation from cache
