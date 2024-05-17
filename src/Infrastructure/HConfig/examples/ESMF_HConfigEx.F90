@@ -969,6 +969,8 @@ program ESMF_HConfigEx
   call ESMF_HConfigFileLoad(hconfig, filename="exampleWithTags.yaml", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_HConfigLog(hconfig, prefix="WithTagsStart: ", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The file contains the following YAML:
 ! \begin{verbatim}
@@ -1132,9 +1134,11 @@ program ESMF_HConfigEx
 !      TRUE   |   FALSE
 ! \end{verbatim}
 !
-! \paragraph{More Boolean values and the "Norway problem"}
-! The YAMLCPP backend used by {\tt ESMF\_HConfig} interprets several
-! additional values as boolean for convenience:
+! \paragraph{Additional Boolean values and the "Norway problem"}
+! The YAMLCPP backend used by {\tt ESMF\_HConfig} interprets all of the values
+! recognized as such under  \htmladdnormallink{YAML 1.1}
+! {https://yaml.org/type/bool.html} as boolean. This extends the above list with
+! additional options:
 ! \begin{verbatim}
 !      yes    |   no
 !      Yes    |   No
@@ -1145,43 +1149,39 @@ program ESMF_HConfigEx
 !      On     |   Off
 !      ON     |   OFF
 ! \end{verbatim}
-! The interpretation of value {\tt ON} as a boolean, instead of a literal
-! string, leads to the so-called {\em "Norway problem"}, where the same string
-! is often used as country code instead. The more general problem referred to
-! here is the misinterpretation of a value by YAML.
+! The interpretation of value {\tt NO} as a boolean, instead of a literal
+! string, can be problematic. It leads to the so-called {\em "Norway problem"},
+! because the same string is often used as country code instead. The underlying
+! problem is the misinterpretation of values by YAML.
 !EOE
-#if 1
   tag = ESMF_HConfigGetTag(hconfig, keyString="value_thirteen", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   write (msgString, '("value_thirteen HConfig tag:    ", A30)') tag
   call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-#endif
 !BOE
 ! Strictly speaking this is not a YAML problem, but instead a schema specific
 ! issue. Fortunately there are two simple solutions to ensure the correct and
-! intended interpretation of values by the YAML schema used by
-! {\tt ESMF\_HConfig}:
+! intended interpretation of values by {\tt ESMF\_HConfig}:
 !
 ! \begin{enumerate}
-! \item Explicit quotation of strings. See for instance the {\em map value}
-!  for {\tt value\_fourteen}, which is {\tt "NO"}, and is consequently
-!  interpreted as a literal string, identified as {\tt tag:yaml.org,2002:str}.
+! \item Explicit quotation of strings: See for instance the {\em map value}
+! for {\tt value\_fourteen} in the current example. Using explicit quotes for
+! {\tt "NO"}, the entry is safely interpreted as a literal string, and if
+! queried for its tag, will return {\tt tag:yaml.org,2002:str}.
 !
-! \item Explicit standard tags. This option allows explicit specificaitonof any
-! tag and is discussed below.
+! \item Explicit standard tags: This option allows explicit specificaiton of any
+! tag, e.g. the standard short-hand tag {\tt !str} for literal strings. This
+! approach is discussed in more detal below.
 ! \end{enumerate}
 !EOE
-#if 0
   tag = ESMF_HConfigGetTag(hconfig, keyString="value_fourteen", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   write (msgString, '("value_fourteen HConfig tag:    ", A30)') tag
   call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-#endif
 
-  call ESMF_HConfigAdd(hconfig, addKeyString="value_added", content="'NO'", &
-    rc=rc)
+  call ESMF_HConfigAdd(hconfig, addKeyString="value_added",content="'NO'",rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   tag = ESMF_HConfigGetTag(hconfig, keyString="value_added", rc=rc)
@@ -1190,17 +1190,8 @@ program ESMF_HConfigEx
   call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigLog(hconfig, prefix="WithTags: ", rc=rc)
+  call ESMF_HConfigLog(hconfig, prefix="WithTagsFinish: ", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-#if 1
-  tag = ESMF_HConfigGetTag(hconfig, keyString="value_fourteen", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  write (msgString, '("value_fourteen HConfig tag:    ", A30)') tag
-  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-#endif
-
 !BOE
 ! \paragraph{Explicit standard tags}
 ! Standard short-hand tags can be specified to change the default resolution.
