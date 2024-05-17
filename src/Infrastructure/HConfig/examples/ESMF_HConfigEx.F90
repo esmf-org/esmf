@@ -984,6 +984,8 @@ program ESMF_HConfigEx
 ! value_ten:              Null
 ! value_eleven:
 ! value_twelve:  !myStuff xyz
+! value_thirteen:         NO
+! value_fourteen:         "NO"
 ! \end{verbatim}
 !
 ! The value associated with {\em map key} "value\_ten" is explicitly set to
@@ -1123,9 +1125,83 @@ program ESMF_HConfigEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The Core schema tag resolves to {\tt{\bf tag:yaml.org,2002:bool}}. The
-! supported boolean values are {\tt true}, {\tt True}, {\tt TRUE},
-! {\tt false}, {\tt False}, and {\tt FALSE}.
+! supported boolean values are:
+! \begin{verbatim}
+!      true   |   false
+!      True   |   False
+!      TRUE   |   FALSE
+! \end{verbatim}
 !
+! \paragraph{More Boolean values and the "Norway problem"}
+! The YAMLCPP backend used by {\tt ESMF\_HConfig} interprets several
+! additional values as boolean for convenience:
+! \begin{verbatim}
+!      yes    |   no
+!      Yes    |   No
+!      YES    |   NO
+!      y      |   n
+!      Y      |   N
+!      on     |   off
+!      On     |   Off
+!      ON     |   OFF
+! \end{verbatim}
+! The interpretation of value {\tt ON} as a boolean, instead of a literal
+! string, leads to the so-called {\em "Norway problem"}, where the same string
+! is often used as country code instead. The more general problem referred to
+! here is the misinterpretation of a value by YAML.
+!EOE
+#if 1
+  tag = ESMF_HConfigGetTag(hconfig, keyString="value_thirteen", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("value_thirteen HConfig tag:    ", A30)') tag
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+#endif
+!BOE
+! Strictly speaking this is not a YAML problem, but instead a schema specific
+! issue. Fortunately there are two simple solutions to ensure the correct and
+! intended interpretation of values by the YAML schema used by
+! {\tt ESMF\_HConfig}:
+!
+! \begin{enumerate}
+! \item Explicit quotation of strings. See for instance the {\em map value}
+!  for {\tt value\_fourteen}, which is {\tt "NO"}, and is consequently
+!  interpreted as a literal string, identified as {\tt tag:yaml.org,2002:str}.
+!
+! \item Explicit standard tags. This option allows explicit specificaitonof any
+! tag and is discussed below.
+! \end{enumerate}
+!EOE
+#if 0
+  tag = ESMF_HConfigGetTag(hconfig, keyString="value_fourteen", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("value_fourteen HConfig tag:    ", A30)') tag
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+#endif
+
+  call ESMF_HConfigAdd(hconfig, addKeyString="value_added", content="'NO'", &
+    rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  tag = ESMF_HConfigGetTag(hconfig, keyString="value_added", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("value_added HConfig tag:    ", A30)') tag
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigLog(hconfig, prefix="WithTags: ", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+#if 1
+  tag = ESMF_HConfigGetTag(hconfig, keyString="value_fourteen", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("value_fourteen HConfig tag:    ", A30)') tag
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+#endif
+
+!BOE
 ! \paragraph{Explicit standard tags}
 ! Standard short-hand tags can be specified to change the default resolution.
 ! This is demonstrated for {\em map keys} "value\_four", "value\_six", and

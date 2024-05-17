@@ -382,9 +382,14 @@ int HConfig::load(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if (doc)
-      (*doc)[0] = YAML::Load(content);
-    else{
+    string contentTemp;
+    if (content.front()=='\'' || content.front()=='"')
+      contentTemp = "!!str " + content; // identified as quoted string, preserve
+    else
+      contentTemp = content;
+    if (doc){
+      (*doc)[0] = YAML::Load(contentTemp);
+    }else{
       // iterator cannot be used here
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "HConfig object must NOT be iterator", ESMC_CONTEXT, &rc);
