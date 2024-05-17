@@ -1643,8 +1643,11 @@ int HConfig::getSizeMapVal(
 
 //-----------------------------------------------------------------------------
 inline string HConfig::tagRef(YAML::Node &self){
-  string value = self.Tag();
+  string valueOrig = self.Tag();
+  string value = valueOrig;
+  bool mustReset = false;
   if ((value == "?") || (value == "")){
+     mustReset = true;
     // not a valid tag found -> implement implicit tag resolution
     switch (self.Type()){
       case YAML::NodeType::Null:
@@ -1673,16 +1676,21 @@ inline string HConfig::tagRef(YAML::Node &self){
     }
     value = self.Tag();  // determine final outcome
   }else if (value == "!"){
+     mustReset = true;
     // yaml-cpp seems to do this for a quoted string
     self.SetTag("tag:yaml.org,2002:str");
     value = self.Tag();  // determine final outcome
   }
+  if (mustReset) self.SetTag(valueOrig);
   return value;
 }
 //-----------------------------------------------------------------------------
 inline string HConfig::tag(YAML::Node self){
-  string value = self.Tag();
+  string valueOrig = self.Tag();
+  string value = valueOrig;
+  bool mustReset = false;
   if ((value == "?") || (value == "")){
+     mustReset = true;
     // not a valid tag found -> implement implicit tag resolution
     switch (self.Type()){
       case YAML::NodeType::Null:
@@ -1711,10 +1719,12 @@ inline string HConfig::tag(YAML::Node self){
     }
     value = self.Tag();  // determine final outcome
   }else if (value == "!"){
+     mustReset = true;
     // yaml-cpp seems to do this for a quoted string
     self.SetTag("tag:yaml.org,2002:str");
     value = self.Tag();  // determine final outcome
   }
+  if (mustReset) self.SetTag(valueOrig);
   return value;
 }
 //-----------------------------------------------------------------------------
