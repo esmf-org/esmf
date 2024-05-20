@@ -1901,7 +1901,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
 ! !INTERFACE:
   recursive subroutine ESMF_CompSet(compp, name, vm, vm_info, grid, gridList, &
     mesh, meshList, locstream, locstreamList, xgrid, xgridList, clock, &
-    dirPath, configFile, config, rc)
+    dirPath, configFile, config, hconfig, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass),    pointer               :: compp
@@ -1920,7 +1920,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     character(len=*),        intent(in),  optional :: dirPath
     character(len=*),        intent(in),  optional :: configFile
     type(ESMF_Config),       intent(in),  optional :: config
-    integer,                 intent(out), optional :: rc             
+    type(ESMF_HConfig),      intent(in),  optional :: hconfig
+    integer,                 intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -2072,14 +2073,29 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     endif
 
     ! config handling
-    if (present(config)) then
+    if (present(hconfig)) then
+      if (present(config).or.present(configFile)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Must only specify one of: "// &
+          "'hconfig', 'config', or 'configFile' arguments!", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+      compp%config = ESMF_ConfigCreate(hconfig=hconfig, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      compp%compStatus%configIsPresent = .true.
+    else if (present(config)) then
+      if (present(configFile)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Must only specify one of: "// &
+          "'hconfig', 'config', or 'configFile' arguments!", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
       compp%config = config
       compp%compStatus%configIsPresent = .true.
-      if (present(configFile)) then
-        ! a config object gets priority over a name if both are specified.
-        call ESMF_LogWrite("Ignoring configFile because config object given.", &
-          ESMF_LOGMSG_WARNING)
-      endif
     else if (present(configFile)) then
       ! name of a specific config file.  open it and store the config object.
       compp%configFile = configFile

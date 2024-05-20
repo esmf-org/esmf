@@ -905,6 +905,58 @@
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
+!   !  Test creation of a Component
+    write(name, *) "Creating a Component Test"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
+
+    gcomp2 = ESMF_GridCompCreate(name="TestComp", rc=rc)
+
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Set a hconfig
+    write(name, *) "Setting HConfig Test"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
+
+    call ESMF_GridCompSet(gcomp2, hconfig=hconfig, rc=rc)
+
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Set a config
+    write(name, *) "Setting Config Test"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
+
+    call ESMF_GridCompSet(gcomp2, config=config, rc=rc)
+
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Set a hconfig and config
+    write(name, *) "Setting HConfig and Config Test"
+    write(failMsg, *) "Did not return expected return code"
+
+    call ESMF_GridCompSet(gcomp2, hconfig=hconfig, config=config, rc=rc)
+
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+    write(name, *) "GridCompDestroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_GridCompDestroy(gcomp2, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
     write(name, *) "GridCompDestroy Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_GridCompDestroy(gcomp, rc=rc)

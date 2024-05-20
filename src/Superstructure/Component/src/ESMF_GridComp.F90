@@ -2130,7 +2130,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   subroutine ESMF_GridCompSet(gridcomp, keywordEnforcer, grid, gridList, &
     mesh, meshList, locstream, locstreamList, xgrid, xgridList, &
-    config, configFile, clock, name, rc)
+    hconfig, config, configFile, clock, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),    intent(inout)         :: gridcomp
@@ -2143,6 +2143,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocStream),   intent(in),  optional :: locstreamList(:)
     type(ESMF_XGrid),       intent(in),  optional :: xgrid
     type(ESMF_XGrid),       intent(in),  optional :: xgridList(:)
+    type(ESMF_HConfig),     intent(in),  optional :: hconfig
     type(ESMF_Config),      intent(in),  optional :: config
     character(len=*),       intent(in),  optional :: configFile
     type(ESMF_Clock),       intent(in),  optional :: clock
@@ -2160,6 +2161,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   These arguments add support for holding references to multiple geom objects,
 !   either of the same type, or different type, in the same
 !   {\tt ESMF\_GridComp} object.
+! \item[8.7.0] Added argument {\tt hconfig} to simplify direct usage of
+!   {\tt ESMF\_HConfig} objects with Components.
 ! \end{sloppypar}
 ! \end{description}
 ! \end{itemize}
@@ -2257,18 +2260,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   By default, i.e. if neither {\tt xgrid} nor {\tt xgridList} are provided,
 !   the {\tt ESMF\_XGrid} association of the incoming {\tt gridcomp}
 !   component remains unchanged.
+! \item[{[hconfig]}]
+!   An already-created {\tt ESMF\_HConfig} object to be attached to the
+!   component.
+!   Only one of {\tt hconfig}, {\tt config}, or {\tt configFile} must be
+!   specified.
 ! \item[{[config]}]
 !   An already-created {\tt ESMF\_Config} object to be attached to the
 !   component.
-!   If both {\tt config} and {\tt configFile} arguments are specified,
-!   {\tt config} takes priority.
+!   Only one of {\tt hconfig}, {\tt config}, or {\tt configFile} must be
+!   specified.
 ! \item[{[configFile]}]
-!   The filename of an {\tt ESMF\_Config} format file.
+!   The filename of a config file.
 !   If specified, a new {\tt ESMF\_Config} object is created and attached to the
 !   component. The {\tt configFile} file is opened and associated
 !   with the new config object.
-!   If both {\tt config} and {\tt configFile} arguments are specified,
-!   {\tt config} takes priority.
+!   Only one of {\tt hconfig}, {\tt config}, or {\tt configFile} must be
+!   specified.
 ! \item[{[clock]}]
 !   Set the private clock for this {\tt ESMF\_GridComp}.
 ! \item[{[name]}]
@@ -2287,6 +2295,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit,hconfig,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
@@ -2298,7 +2307,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         grid=grid, gridList=gridList, mesh=mesh, meshList=meshList, &
         locstream=locstream, locstreamList=locstreamList, xgrid=xgrid, &
         xgridList=xgridList, clock=clock, configFile=configFile, config=config, &
-        rc=localrc)
+        hconfig=hconfig, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2308,7 +2317,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         grid=grid, gridList=gridList, mesh=mesh, meshList=meshList, &
         locstream=locstream, locstreamList=locstreamList, xgrid=xgrid, &
         xgridList=xgridList, clock=clock, configFile=configFile, config=config, &
-        rc=localrc)
+        hconfig=hconfig, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return

@@ -456,6 +456,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_CplComp)            :: cplcomp
     integer :: localrc                                ! local error localrc
 
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit,hconfig,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
@@ -1887,12 +1888,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_CplCompSet - Set or reset information about the CplComp
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompSet(cplcomp, keywordEnforcer, config, configFile, &
-    clock, name, rc)
+  subroutine ESMF_CplCompSet(cplcomp, keywordEnforcer, hconfig, config, &
+    configFile, clock, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp), intent(inout)         :: cplcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_HConfig), intent(in),  optional :: hconfig
     type(ESMF_Config),  intent(in),  optional :: config
     character(len=*),   intent(in),  optional :: configFile
     type(ESMF_Clock),   intent(in),  optional :: clock
@@ -1902,6 +1904,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.7.0] Added argument {\tt hconfig} to simplify direct usage of
+!   {\tt ESMF\_HConfig} objects with Components.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1913,18 +1920,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_CplComp} to change.
 ! \item[{[name]}]
 !   Set the name of the {\tt ESMF\_CplComp}.
+! \item[{[hconfig]}]
+!   An already-created {\tt ESMF\_HConfig} object to be attached to the
+!   component.
+!   Only one of {\tt hconfig}, {\tt config}, or {\tt configFile} must be
+!   specified.
 ! \item[{[config]}]
 !   An already-created {\tt ESMF\_Config} object to be attached to the
 !   component.
-!   If both {\tt config} and {\tt configFile} arguments are specified,
-!   {\tt config} takes priority.
+!   Only one of {\tt hconfig}, {\tt config}, or {\tt configFile} must be
+!   specified.
 ! \item[{[configFile]}]
-!   The filename of an {\tt ESMF\_Config} format file.
+!   The filename of a config file.
 !   If specified, a new {\tt ESMF\_Config} object is created and attached to the
 !   component. The {\tt configFile} file is opened and associated
 !   with the new config object.
-!   If both {\tt config} and {\tt configFile} arguments are specified,
-!   {\tt config} takes priority.
+!   Only one of {\tt hconfig}, {\tt config}, or {\tt configFile} must be
+!   specified.
 ! \item[{[clock]}]
 !   Set the private clock for this {\tt ESMF\_CplComp}.
 ! \item[{[rc]}]
@@ -1940,6 +1952,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit,hconfig,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
@@ -1948,14 +1961,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       cplcomp%name = trim(name)
       ! call Comp method (without name)
       call ESMF_CompSet(cplcomp%compp, clock=clock, &
-        configFile=configFile, config=config, rc=localrc)
+        configFile=configFile, config=config, hconfig=hconfig, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! call Comp method
       call ESMF_CompSet(cplcomp%compp, name=name, clock=clock, &
-        configFile=configFile, config=config, rc=localrc)
+        configFile=configFile, config=config, hconfig=hconfig, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
