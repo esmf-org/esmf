@@ -68,6 +68,7 @@
     character(len=:), allocatable :: labelList(:)
     integer, allocatable          :: petList(:)
     character(160)                :: msgStr
+    type(ESMF_GridComp)           :: gcomp2
 #endif
 
 !-------------------------------------------------------------------------------
@@ -814,6 +815,92 @@
     write(failMsg, *) "Did not return correct value in fred"
     write(name, *) "HConfig handling Test - validate attribute value"
     call ESMF_Test((fred==1), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component
+    write(name, *) "Creating a Component with Config Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+    gcomp2 = ESMF_GridCompCreate(name="TestComp", config=config, rc=rc)
+
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+    write(name, *) "GridCompDestroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_GridCompDestroy(gcomp2, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component
+    write(name, *) "Creating a Component with HConfig Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+    gcomp2 = ESMF_GridCompCreate(name="TestComp", hconfig=hconfig, rc=rc)
+
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+    write(name, *) "GridCompDestroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_GridCompDestroy(gcomp2, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component
+    write(name, *) "Creating a Component with too many config args Test"
+    write(failMsg, *) "Did not return expected return code"
+
+    gcomp2 = ESMF_GridCompCreate(name="TestComp", hconfig=hconfig, &
+      config=config, rc=rc)
+
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component
+    write(name, *) "Creating a Component with too many config args Test"
+    write(failMsg, *) "Did not return expected return code"
+
+    gcomp2 = ESMF_GridCompCreate(name="TestComp", config=config, &
+      configFile="comp.yaml", rc=rc)
+
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component
+    write(name, *) "Creating a Component with too many config args Test"
+    write(failMsg, *) "Did not return expected return code"
+
+    gcomp2 = ESMF_GridCompCreate(name="TestComp", hconfig=hconfig, &
+      configFile="comp.yaml", rc=rc)
+
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component
+    write(name, *) "Creating a Component with too many config args Test"
+    write(failMsg, *) "Did not return expected return code"
+
+    gcomp2 = ESMF_GridCompCreate(name="TestComp", hconfig=hconfig, &
+      config=config, configFile="comp.yaml", rc=rc)
+
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !

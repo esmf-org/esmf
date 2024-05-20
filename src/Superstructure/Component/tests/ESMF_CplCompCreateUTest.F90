@@ -612,6 +612,92 @@
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
+!   !  Test creation of a Component
+    write(name, *) "Creating a Component with Config Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+    cpl2 = ESMF_CplCompCreate(name="TestComp", config=config, rc=rc)
+
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+    write(name, *) "GridCompDestroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_CplCompDestroy(cpl2, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component
+    write(name, *) "Creating a Component with HConfig Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+    cpl2 = ESMF_CplCompCreate(name="TestComp", hconfig=hconfig, rc=rc)
+
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+    write(name, *) "GridCompDestroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_CplCompDestroy(cpl2, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component
+    write(name, *) "Creating a Component with too many config args Test"
+    write(failMsg, *) "Did not return expected return code"
+
+    cpl2 = ESMF_CplCompCreate(name="TestComp", hconfig=hconfig, &
+      config=config, rc=rc)
+
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component
+    write(name, *) "Creating a Component with too many config args Test"
+    write(failMsg, *) "Did not return expected return code"
+
+    cpl2 = ESMF_CplCompCreate(name="TestComp", config=config, &
+      configFile="comp.yaml", rc=rc)
+
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component
+    write(name, *) "Creating a Component with too many config args Test"
+    write(failMsg, *) "Did not return expected return code"
+
+    cpl2 = ESMF_CplCompCreate(name="TestComp", hconfig=hconfig, &
+      configFile="comp.yaml", rc=rc)
+
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component
+    write(name, *) "Creating a Component with too many config args Test"
+    write(failMsg, *) "Did not return expected return code"
+
+    cpl2 = ESMF_CplCompCreate(name="TestComp", hconfig=hconfig, &
+      config=config, configFile="comp.yaml", rc=rc)
+
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
 !   ! Verifing that a CplCompDestroy for a regular component catches timeout
     
     call ESMF_CplCompDestroy(cpl, timeout=10, rc=rc)

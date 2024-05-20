@@ -557,8 +557,8 @@ contains
 ! !IROUTINE: ESMF_CompConstruct - Internal routine to fill in a comp struct
 
 ! !INTERFACE:
-  recursive subroutine ESMF_CompConstruct(compp, compType, name, &
-    dirPath, configFile, config, clock, petlist, devlist, contextflag, rc)
+  recursive subroutine ESMF_CompConstruct(compp, compType, name, dirPath, &
+    configFile, config, hconfig, clock, petlist, devlist, contextflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass),     pointer               :: compp
@@ -567,6 +567,7 @@ contains
     character(len=*),         intent(in),  optional :: dirPath
     character(len=*),         intent(in),  optional :: configFile
     type(ESMF_Config),        intent(in),  optional :: config
+    type(ESMF_HConfig),       intent(in),  optional :: hconfig
     type(ESMF_Clock),         intent(in),  optional :: clock
     integer,                  intent(in),  optional :: petlist(:)
     integer,                  intent(in),  optional :: devlist(:)
@@ -591,7 +592,9 @@ contains
 !    File containing configuration information, either absolute filename
 !    or relative to {\tt dirPath}.
 !   \item[{[config]}]
-!    Already created {\tt config} object.
+!    Already created Config object.
+!   \item[{[hconfig]}]
+!    Already created HConfig object.
 !   \item[{[clock]}]
 !    Private {\tt clock} for this {\tt Component}.
 !   \item[{[petlist]}]
@@ -611,9 +614,9 @@ contains
     integer :: localrc                        ! local return code
     integer :: npets, mypet, i, petCount
     integer, pointer :: petlist_loc(:), devlist_loc(:)
-    character(len=ESMF_MAXPATHLEN) :: fullpath    ! config file + dirPath
-    character(len=ESMF_MAXSTR)     :: msgbuf
-    type(ESMF_VM):: vm
+    character(len=ESMF_MAXPATHLEN)  :: fullpath    ! config file + dirPath
+    character(len=ESMF_MAXSTR)      :: msgbuf
+    type(ESMF_VM)                   :: vm
 
     ! Assume not implemented until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -674,14 +677,29 @@ contains
     endif
 
     ! config handling
-    if (present(config)) then
+    if (present(hconfig)) then
+      if (present(config).or.present(configFile)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Must only specify one of: "// &
+          "'hconfig', 'config', or 'configFile' arguments!", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+      compp%config = ESMF_ConfigCreate(hconfig=hconfig, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      compp%compStatus%configIsPresent = .true.
+    else if (present(config)) then
+      if (present(configFile)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Must only specify one of: "// &
+          "'hconfig', 'config', or 'configFile' arguments!", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
       compp%config = config
       compp%compStatus%configIsPresent = .true.
-      if (present(configFile)) then
-        ! a config object gets priority over a name if both are specified.
-        call ESMF_LogWrite("Ignoring configFile because config object given.", &
-          ESMF_LOGMSG_WARNING)
-      endif
     else if (present(configFile)) then
       ! name of a specific config file.  open it and store the config object.
       compp%configFile = configFile

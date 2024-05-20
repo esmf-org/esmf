@@ -358,14 +358,15 @@ contains
 ! !IROUTINE: ESMF_CplCompCreate - Create a CplComp
 !
 ! !INTERFACE:
-  recursive function ESMF_CplCompCreate(keywordEnforcer, config, configFile, &
-    clock, petList, devList, contextflag, name, rc)
+  recursive function ESMF_CplCompCreate(keywordEnforcer, hconfig, config, &
+    configFile, clock, petList, devList, contextflag, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_CplComp) :: ESMF_CplCompCreate
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_HConfig),      intent(in),  optional :: hconfig
     type(ESMF_Config),       intent(in),  optional :: config
     character(len=*),        intent(in),  optional :: configFile
     type(ESMF_Clock),        intent(in),  optional :: clock
@@ -382,6 +383,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[8.6.0] Added argument {\tt devList} to support management of accelerator
 !   devices.
+! \item[8.7.0] Added argument {\tt hconfig} to simplify direct usage of
+!   {\tt ESMF\_HConfig} objects with Components.
 ! \end{description}
 ! \end{itemize}
 !
@@ -400,18 +403,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! The arguments are:
 ! \begin{description}
+! \item[{[hconfig]}]
+!   An already-created {\tt ESMF\_HConfig} object to be attached to the newly
+!   created component.
+!   Only one of {\tt hconfig}, {\tt config}, or {\tt configFile} must be
+!   specified.
 ! \item[{[config]}]
 !   An already-created {\tt ESMF\_Config} object to be attached to the newly
 !   created component.
-!   If both {\tt config} and {\tt configFile} arguments are specified,
-!   {\tt config} takes priority.
+!   Only one of {\tt hconfig}, {\tt config}, or {\tt configFile} must be
+!   specified.
 ! \item[{[configFile]}]
-!   The filename of an {\tt ESMF\_Config} format file.
+!   The filename of a config file.
 !   If specified, a new {\tt ESMF\_Config} object is created and attached to the
 !   newly created component. The {\tt configFile} file is opened and associated
 !   with the new config object.
-!   If both {\tt config} and {\tt configFile} arguments are specified,
-!   {\tt config} takes priority.
+!   Only one of {\tt hconfig}, {\tt config}, or {\tt configFile} must be
+!   specified.
 ! \item[{[clock]}]
 !   \begin{sloppypar}
 !   Component-specific {\tt ESMF\_Clock}.  This clock is available to be
@@ -466,8 +474,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
-      configFile=configFile, config=config, clock=clock, petList=petList, &
-      devList=devList, contextflag=contextflag, rc=localrc)
+      configFile=configFile, config=config, hconfig=hconfig, clock=clock, &
+      petList=petList, devList=devList, contextflag=contextflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) then
