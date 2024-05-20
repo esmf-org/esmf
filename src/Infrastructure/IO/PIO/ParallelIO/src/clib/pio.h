@@ -1377,6 +1377,7 @@ extern "C" {
     int GDALc_shp_get_int_field(int fileid);
     int GDALc_shp_get_float_field(int fileid, int varid, const size_t *startp, const size_t *countp, float *ip);
     int GDALc_shp_get_double_field(int fileid, int varid, const size_t *startp, const size_t *countp, double *ip);
+    int pio_read_darray_shp(file_desc_t *file, io_desc_t *iodesc, int vid, void *iobuf);
 
 #if defined(__cplusplus)
 }
