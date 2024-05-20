@@ -40,6 +40,7 @@ module ESMF_CplCompMod
   use ESMF_BaseMod
   use ESMF_VMMod
   use ESMF_ConfigMod
+  use ESMF_HConfigMod
   use ESMF_ClockTypeMod
   use ESMF_ClockMod
   use ESMF_StateTypesMod
@@ -790,14 +791,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_CplCompGet - Get CplComp information
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompGet(cplcomp, keywordEnforcer, configIsPresent, config, &
-    configFileIsPresent, configFile, clockIsPresent, clock, localPet, &
+  subroutine ESMF_CplCompGet(cplcomp, keywordEnforcer, hconfigIsPresent, hconfig, &
+    configIsPresent, config, configFileIsPresent, configFile, clockIsPresent, clock, localPet, &
     petCount, contextflag, currentMethod, currentPhase, vmIsPresent, &
     vm, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),      intent(in)            :: cplcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                 intent(out), optional :: hconfigIsPresent
+    type(ESMF_HConfig),      intent(out), optional :: hconfig
     logical,                 intent(out), optional :: configIsPresent
     type(ESMF_Config),       intent(out), optional :: config
     logical,                 intent(out), optional :: configFileIsPresent
@@ -817,6 +820,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.7.0] Added arguments {\tt hconfigIsPresent} and {\tt hconfig} to
+!   simplify direct usage of {\tt ESMF\_HConfig} objects with Components.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -829,13 +837,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[configIsPresent]}]
 !   {\tt .true.} if {\tt config} was set in CplComp object,
 !   {\tt .false.} otherwise.
+! \item[{[hconfigIsPresent]}]
+!   {\tt .true.} if {\tt hconfig} is available in the CplComp object,
+!   {\tt .false.} otherwise.
+! \item[{[hconfig]}]
+!   Return the associated HConfig object.
+!   It is an error to query for the HConfig object if none is associated with
+!   the CplComp. If unsure, get {\tt hconfigIsPresent} first to determine
+!   the status.
+! \item[{[configIsPresent]}]
+!   {\tt .true.} if {\tt config} is available in the CplComp object,
+!   {\tt .false.} otherwise.
 ! \item[{[config]}]
-!   Return the associated Config.
+!   Return the associated Config object.
 !   It is an error to query for the Config if none is associated with
 !   the CplComp. If unsure, get {\tt configIsPresent} first to determine
 !   the status.
 ! \item[{[configFileIsPresent]}]
-!   {\tt .true.} if {\tt configFile} was set in CplComp object,
+!   {\tt .true.} if {\tt configFile} is available in the CplComp object,
 !   {\tt .false.} otherwise.
 ! \item[{[configFile]}]
 !   Return the associated configuration filename.
@@ -889,7 +908,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompGet(cplcomp%compp, name=name, vm=vm, contextflag=contextflag,&
-      clock=clock, configFile=configFile, config=config, &
+      clock=clock, configFile=configFile, config=config, hconfig=hconfig, &
       currentMethod=currentMethod, currentPhase=currentPhase, &
       localPet=localPet, petCount=petCount, compStatus=compStatus, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -904,6 +923,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! call Comp method
     call ESMF_CompStatusGet(compStatus, &
       clockIsPresent = clockIsPresent, &
+      hconfigIsPresent = hconfigIsPresent, &
       configIsPresent = configIsPresent, &
       configFileIsPresent = configFileIsPresent, &
       vmIsPresent = vmIsPresent, &

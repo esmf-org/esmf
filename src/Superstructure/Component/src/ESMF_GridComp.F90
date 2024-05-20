@@ -40,6 +40,7 @@ module ESMF_GridCompMod
   use ESMF_BaseMod
   use ESMF_VMMod
   use ESMF_ConfigMod
+  use ESMF_HConfigMod
   use ESMF_ClockTypeMod
   use ESMF_ClockMod
   use ESMF_StateTypesMod
@@ -903,10 +904,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     gridIsPresent, grid, gridList, meshIsPresent, mesh, meshList, &
     locstreamIsPresent, locstream, locstreamList, xgridIsPresent, &
     xgrid, xgridList, importStateIsPresent, importState, &
-    exportStateIsPresent, exportState, configIsPresent, config, &
-    configFileIsPresent, configFile, clockIsPresent, clock, localPet, &
-    petCount, contextflag, currentMethod, currentPhase, comptype, &
-    vmIsPresent, vm, name, rc)
+    exportStateIsPresent, exportState, hconfigIsPresent, hconfig, &
+    configIsPresent, config, configFileIsPresent, configFile, &
+    clockIsPresent, clock, localPet, petCount, contextflag, &
+    currentMethod, currentPhase, comptype, vmIsPresent, vm, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),           intent(in)            :: gridcomp
@@ -927,6 +928,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_State),              intent(out), optional :: importState
     logical,                       intent(out), optional :: exportStateIsPresent
     type(ESMF_State),              intent(out), optional :: exportState
+    logical,                       intent(out), optional :: hconfigIsPresent
+    type(ESMF_HConfig),            intent(out), optional :: hconfig
     logical,                       intent(out), optional :: configIsPresent
     type(ESMF_Config),             intent(out), optional :: config
     logical,                       intent(out), optional :: configFileIsPresent
@@ -956,6 +959,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   These arguments add support for accessing references to multiple geom objects,
 !   either of the same type, or different type, associated with the same
 !   {\tt ESMF\_GridComp} object.
+! \item[8.7.0] Added arguments {\tt hconfigIsPresent} and {\tt hconfig} to
+!   simplify direct usage of {\tt ESMF\_HConfig} objects with Components.
 ! \end{sloppypar}
 ! \end{description}
 ! \end{itemize}
@@ -1057,16 +1062,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   It is an error to query for the export State if none is associated with
 !   the GridComp. If unsure, get {\tt exportStateIsPresent} first to determine
 !   the status.
+! \item[{[hconfigIsPresent]}]
+!   {\tt .true.} if {\tt hconfig} is available in the GridComp object,
+!   {\tt .false.} otherwise.
+! \item[{[hconfig]}]
+!   Return the associated HConfig object.
+!   It is an error to query for the HConfig object if none is associated with
+!   the GridComp. If unsure, get {\tt hconfigIsPresent} first to determine
+!   the status.
 ! \item[{[configIsPresent]}]
-!   {\tt .true.} if {\tt config} was set in GridComp object,
+!   {\tt .true.} if {\tt config} is available in the GridComp object,
 !   {\tt .false.} otherwise.
 ! \item[{[config]}]
-!   Return the associated Config.
+!   Return the associated Config object.
 !   It is an error to query for the Config if none is associated with
 !   the GridComp. If unsure, get {\tt configIsPresent} first to determine
 !   the status.
 ! \item[{[configFileIsPresent]}]
-!   {\tt .true.} if {\tt configFile} was set in GridComp object,
+!   {\tt .true.} if {\tt configFile} is available in the GridComp object,
 !   {\tt .false.} otherwise.
 ! \item[{[configFile]}]
 !   Return the associated configuration filename.
@@ -1128,8 +1141,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       locstream=locstream, locstreamList=locstreamList, &
       xgrid=xgrid, xgridList=xgridList, &
       importState=importState, exportState=exportState, clock=clock,&
-      configFile=configFile, config=config, currentMethod=currentMethod, &
-      currentPhase=currentPhase, localPet=localPet, petCount=petCount, &
+      configFile=configFile, config=config, hconfig=hconfig, &
+      currentMethod=currentMethod, currentPhase=currentPhase, &
+      localPet=localPet, petCount=petCount, &
       comptype=comptype, compStatus=compStatus, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -1143,6 +1157,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! call Comp method
     call ESMF_CompStatusGet(compStatus, &
       clockIsPresent = clockIsPresent, &
+      hconfigIsPresent = hconfigIsPresent, &
       configIsPresent = configIsPresent, &
       configFileIsPresent = configFileIsPresent, &
       vmIsPresent = vmIsPresent, &

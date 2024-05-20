@@ -45,6 +45,7 @@ module ESMF_CompMod
   use ESMF_BaseMod
   use ESMF_VMMod
   use ESMF_ConfigMod
+  use ESMF_HConfigMod
   use ESMF_CalendarMod
   use ESMF_ClockMod
   use ESMF_GridMod
@@ -1325,8 +1326,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
   recursive subroutine ESMF_CompGet(compp, name, vm, vm_parent, vmplan, &
     vm_info, contextflag, grid, gridList, mesh, meshList, locstream, &
     locstreamList, xgrid, xgridList, importState, exportState, clock, dirPath, &
-    configFile, config, compType, currentMethod, currentPhase, timeout, &
-    localPet, petCount, petList, compStatus, compTunnel, rc)
+    configFile, config, hconfig, compType, currentMethod, currentPhase, &
+    timeout, localPet, petCount, petList, compStatus, compTunnel, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass),     pointer               :: compp
@@ -1350,6 +1351,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     character(len=*),         intent(out), optional :: dirPath
     character(len=*),         intent(out), optional :: configFile
     type(ESMF_Config),        intent(out), optional :: config
+    type(ESMF_HConfig),       intent(out), optional :: hconfig
     type(ESMF_CompType_Flag), intent(out), optional :: compType
     type(ESMF_Method_Flag),   intent(out), optional :: currentMethod
     integer,                  intent(out), optional :: currentPhase
@@ -1473,6 +1475,20 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
         return  ! bail out
       endif
       config = compp%config
+    endif
+
+    ! access hconfig
+    if (present(hconfig)) then
+      if (.not.compp%compStatus%configIsPresent) then
+        call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+          msg="requested HConfig object is not present.", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return  ! bail out
+      endif
+      call ESMF_ConfigGet(compp%config, hconfig=hconfig, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! access name
@@ -2717,13 +2733,14 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
 !
 ! !INTERFACE:
   recursive subroutine ESMF_CompStatusGet(compStatus, clockIsPresent, &
-    configIsPresent, configFileIsPresent, vmIsPresent, isIsPresent, &
-    esIsPresent, gridIsPresent, meshIsPresent, locstreamIsPresent, &
-    xgridIsPresent, rc)
+    hconfigIsPresent, configIsPresent, configFileIsPresent, vmIsPresent, &
+    isIsPresent, esIsPresent, gridIsPresent, meshIsPresent, &
+    locstreamIsPresent, xgridIsPresent, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompStatus), intent(in)            :: compStatus
     logical,               intent(out), optional :: clockIsPresent
+    logical,               intent(out), optional :: hconfigIsPresent
     logical,               intent(out), optional :: configIsPresent
     logical,               intent(out), optional :: configFileIsPresent
     logical,               intent(out), optional :: vmIsPresent
@@ -2751,6 +2768,10 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     
     if (present(clockIsPresent)) then
       clockIsPresent = compStatus%clockIsPresent
+    endif
+
+    if (present(hconfigIsPresent)) then
+      hconfigIsPresent = compStatus%configIsPresent ! hconfig kept in config
     endif
 
     if (present(configIsPresent)) then

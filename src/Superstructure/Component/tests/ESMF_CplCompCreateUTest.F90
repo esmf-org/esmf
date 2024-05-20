@@ -55,18 +55,20 @@
     end type
 
 #ifdef ESMF_TESTEXHAUSTIVE
-    logical                 :: bool
-    type(ESMF_VM)           :: vm
-    type(ESMF_CplComp)      :: cpl2
-    integer                 :: localPet
-    character(ESMF_MAXSTR)  :: cname, bname
-    type (dataWrapper)      :: wrap1, wrap2
-    type(testData), target  :: data1, data2
-    logical                 :: isPresent
-    type(ESMF_Config)       :: config
-    integer                 :: fred, i
+    logical                       :: bool
+    type(ESMF_VM)                 :: vm
+    type(ESMF_CplComp)            :: cpl2
+    integer                       :: localPet
+    character(ESMF_MAXSTR)        :: cname, bname
+    type (dataWrapper)            :: wrap1, wrap2
+    type(testData), target        :: data1, data2
+    logical                       :: isPresent
+    type(ESMF_Config)             :: config
+    type(ESMF_HConfig)            :: hconfig
+    integer                       :: fred, i
     character(len=:), allocatable :: labelList(:)
     integer, allocatable          :: petList(:)
+    character(160)                :: msgStr
 #endif
 
 !-------------------------------------------------------------------------------
@@ -104,7 +106,7 @@
     !------------------------------------------------------------------------
     !NEX_UTest
     cplname = "One Way Coupler"
-    cpl = ESMF_CplCompCreate(name=cplname, configFile="comp.rc", rc=rc)
+    cpl = ESMF_CplCompCreate(name=cplname, configFile="comp.yaml", rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Coupler Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -474,7 +476,7 @@
     !EX_UTest
 !   !  Set a configFile
 
-    call ESMF_CplCompSet(cpl, configFile="comp.rc", rc=rc)
+    call ESMF_CplCompSet(cpl, configFile="comp.yaml", rc=rc)
 
     write(failMsg, *) "Did return ESMF_SUCCESS"
     write(name, *) "Setting a ConfigFile Test"
@@ -509,7 +511,7 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Config handling Test - configIsPresent"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-    
+
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
@@ -517,7 +519,7 @@
     write(failMsg, *) "Did not return correct isPresent status"
     write(name, *) "Config handling Test - configIsPresent value"
     call ESMF_Test((isPresent), name, failMsg, result, ESMF_SRCLINE)
-    
+
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
@@ -534,8 +536,9 @@
     !EX_UTest
 !   !  Test correct config handling
 
+    fred = 0
     call ESMF_ConfigGetAttribute(config, fred, label="fred:", rc=rc)
-    
+
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Config handling Test - access attribute through config"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -545,10 +548,65 @@
     !EX_UTest
 !   !  Test correct config handling
 
-    print *, "fred = ", fred
+    write(msgStr,*) "fred = ", fred
+    call ESMF_LogWrite(msgStr, ESMF_LOGMSG_INFO, rc=rc)
 
     write(failMsg, *) "Did not return correct value in fred"
     write(name, *) "Config handling Test - validate attribute value"
+    call ESMF_Test((fred==1), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct hconfig handling
+
+    call ESMF_CplCompGet(cpl, hconfigIsPresent=isPresent, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "HConfig handling Test - hconfigIsPresent"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct hconfig handling
+    write(failMsg, *) "Did not return correct isPresent status"
+    write(name, *) "HConfig handling Test - hconfigIsPresent value"
+    call ESMF_Test((isPresent), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct hconfig handling
+
+    call ESMF_CplCompGet(cpl, hconfig=hconfig, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "HConfig handling Test - get hconfig"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct hconfig handling
+
+    fred = 0
+    fred = ESMF_HConfigAsI4(hconfig, keyString="fred", rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "HConfig handling Test - access map through hconfig"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct hconfig handling
+
+    write(msgStr,*) "fred = ", fred
+    call ESMF_LogWrite(msgStr, ESMF_LOGMSG_INFO, rc=rc)
+
+    write(failMsg, *) "Did not return correct value in fred"
+    write(name, *) "HConfig handling Test - validate attribute value"
     call ESMF_Test((fred==1), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
