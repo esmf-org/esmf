@@ -192,12 +192,6 @@ namespace ESMCI {
     // Communicate values to ghost cells
     src_mesh->GhostCommAllFields();
 
-    // BOB: Use convenince method to comm all fields 
-#if 0
-    src_mesh->GhostComm().SendFields(num_snd, snd, rcv);
-#endif
-
-
 #ifdef DEBUG_WRITE_MESH
   {int *rc;
   int len = 18; char fname[len];
