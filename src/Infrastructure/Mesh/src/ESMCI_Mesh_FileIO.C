@@ -1464,13 +1464,13 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     }
 
     // Create Mesh
-    ESMCI_meshcreate(out_mesh, &pdim, &orig_sdim, &coord_sys_file, &localrc);
+    ESMCI_meshcreate(out_mesh, &pdim, &orig_sdim, &coord_sys_mesh, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 				      &localrc)) throw localrc;
 
     // If center coords exist and
     //  file in different coordinate system than mesh, convert
-    if ((elem_Coords != NULL) && (coord_sys != coord_sys_file)) {
+    if ((elem_Coords != NULL) && (coord_sys_file != coord_sys_mesh)) {
       convert_coords_between_coord_sys(coord_sys_file, coord_sys_mesh, 
                                        dim, num_elems, elem_Coords);
     }
@@ -1479,7 +1479,7 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     InterArray<int> nodeMaskIA(NULL, num_nodes);
     ESMCI_meshaddnodes(out_mesh, &num_nodes, node_IDs,
 		       nodeCoords, NULL, &nodeMaskIA,
-		       &coord_sys_file, &orig_sdim,
+		       &coord_sys_mesh, &orig_sdim,
 		       &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 				      &localrc)) throw localrc;
@@ -1495,7 +1495,7 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
 			  &centerCoordsPresent, elem_Coords,
                           &totNumElemConn, local_elem_conn, 
 //			  &sumElemConn, elem_Conn, 
-			  &coord_sys_file, &orig_sdim, &localrc);
+			  &coord_sys_mesh, &orig_sdim, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 				      &localrc)) throw localrc;
 
