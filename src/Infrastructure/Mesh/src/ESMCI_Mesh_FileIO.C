@@ -97,6 +97,7 @@ void ESMCI_mesh_create_from_SCRIP_file(char *filename,
                                        Mesh **out_mesh);
 
 void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename, 
+				       ESMC_CoordSys_Flag coord_sys, 
                                        Mesh **out_mesh);
 
 void ESMCI_mesh_create_redist_mesh(Mesh *in_mesh, 
@@ -178,7 +179,8 @@ void ESMCI_mesh_create_from_file(char *filename,
                                         &tmp_mesh);
       
     } else if (fileformat == ESMC_FILEFORMAT_SHAPEFILE) {
-      ESMCI_mesh_create_from_SHAPEFILE_file(filename, 
+      ESMCI_mesh_create_from_SHAPEFILE_file(filename,
+					    coord_sys,
                                             &tmp_mesh);
 
     } else {
@@ -1308,6 +1310,7 @@ void ESMCI_mesh_create_redist_mesh(Mesh *in_mesh,
 //   out_mesh - the new mesh created from the file
 //
 void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename, 
+					   ESMC_CoordSys_Flag coord_sys, 
                                            Mesh **out_mesh){
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI_mesh_create_from_SHAPEFILE_file()"
@@ -1448,20 +1451,27 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     }
       
     // Get coordsys from file
-    ESMC_CoordSys_Flag coord_sys_mesh=ESMC_COORDSYS_SPH_DEG; // Assume "degrees" for now.
+    ESMC_CoordSys_Flag coord_sys_file=ESMC_COORDSYS_SPH_DEG; // Assume "degrees" for now.
 //    ESMC_CoordSys_Flag coord_sys_mesh=ESMC_COORDSYS_CART; // Assume "degrees" for now.
     // NOTE DEFINED YET      get_coordsys_from_SHP_file(pioFileDesc, filename, dim, nodeCoord_ids, coord_sys_file);
 
     // Create Mesh
-    ESMCI_meshcreate(out_mesh, &pdim, &orig_sdim, &coord_sys_mesh, &localrc);
+    ESMCI_meshcreate(out_mesh, &pdim, &orig_sdim, &coord_sys_file, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 				      &localrc)) throw localrc;
+
+    // If center coords exist and
+    //  file in different coordinate system than mesh, convert
+    if ((elem_Coords != NULL) && (coord_sys != coord_sys_file)) {
+      convert_coords_between_coord_sys(coord_sys_file, coord_sys, 
+                                       dim, num_elems, elem_Coords);
+    }
 
     // Add nodes
     InterArray<int> nodeMaskIA(NULL, num_nodes);
     ESMCI_meshaddnodes(out_mesh, &num_nodes, node_IDs,
 		       nodeCoords, NULL, &nodeMaskIA,
-		       &coord_sys_mesh, &orig_sdim,
+		       &coord_sys_file, &orig_sdim,
 		       &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 				      &localrc)) throw localrc;
@@ -1474,10 +1484,10 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
 			  &num_elems, feature_IDs, num_ElemConn, //elementType, <- using numElemConn in place of elementType assumes 2D!!
 			  NULL, // No mask
 			  &areaPresent, NULL, // No areas
-			  &centerCoordsPresent, elem_Coords, // No center coords
+			  &centerCoordsPresent, elem_Coords,
                           &totNumElemConn, local_elem_conn, 
 //			  &sumElemConn, elem_Conn, 
-			  &coord_sys_mesh, &orig_sdim, &localrc);
+			  &coord_sys_file, &orig_sdim, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 				      &localrc)) throw localrc;
 
