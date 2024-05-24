@@ -29,6 +29,5 @@ CLEANDIRS   =
 CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
-
-ESMF_FieldRegridPatchDisjoint:
+RUN_FieldRegridPatchDisjoint:
 	$(MAKE) TNAME=FieldRegridPatchDisjoint NP=5 stest
