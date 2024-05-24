@@ -1455,6 +1455,14 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
 //    ESMC_CoordSys_Flag coord_sys_mesh=ESMC_COORDSYS_CART; // Assume "degrees" for now.
     // NOTE DEFINED YET      get_coordsys_from_SHP_file(pioFileDesc, filename, dim, nodeCoord_ids, coord_sys_file);
 
+    // Decide which coord_sys the mesh should be created with
+    ESMC_CoordSys_Flag coord_sys_mesh;
+    if (coord_sys == ESMC_COORDSYS_UNINIT) {
+      coord_sys_mesh = coord_sys_file;
+    } else {
+      coord_sys_mesh = coord_sys;
+    }
+
     // Create Mesh
     ESMCI_meshcreate(out_mesh, &pdim, &orig_sdim, &coord_sys_file, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -1463,7 +1471,7 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     // If center coords exist and
     //  file in different coordinate system than mesh, convert
     if ((elem_Coords != NULL) && (coord_sys != coord_sys_file)) {
-      convert_coords_between_coord_sys(coord_sys_file, coord_sys, 
+      convert_coords_between_coord_sys(coord_sys_file, coord_sys_mesh, 
                                        dim, num_elems, elem_Coords);
     }
 

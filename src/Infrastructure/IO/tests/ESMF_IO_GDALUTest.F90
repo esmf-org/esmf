@@ -107,7 +107,7 @@ program ESMF_IO_GDALUTest
   write(name, *) "Creating a Mesh to use in Field Tests"
   mesh=ESMF_MeshCreate(fileNameFields, &
        fileformat=ESMF_FILEFORMAT_SHAPEFILE, &
-!       coordSys=ESMF_COORDSYS_CART, &
+       coordSys=ESMF_COORDSYS_SPH_RAD, &!       coordSys=ESMF_COORDSYS_CART, &
        rc=rc)
 
 ! Create mesh from ESMF file
