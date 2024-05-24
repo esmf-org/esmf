@@ -75,7 +75,7 @@
 !-------------------------------------------------------------------------
 !
     ! Initialize framework and get back default global VM
-    call ESMF_Initialize(vm=vm, defaultlogfilename="FieldRegridPatchDisjoint.Log", &
+    call ESMF_Initialize(vm=vm, defaultlogfilename="FieldRegridPatchDisjointSTest.Log", &
                         logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
@@ -366,12 +366,12 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10  print *, "System Test FieldRegridMeshToMesh complete."
+10  print *, "System Test FieldRegridPatchDisjoint complete."
 
 
     ! Normal ESMF Test output
     write(failMsg, *) "System Test failure"
-    write(testname, *) "System Test FieldRegridMeshToMesh: Field Regrid"
+    write(testname, *) "System Test FieldRegridPatchDisjoint: Field Regrid"
 
     if (rc .ne. ESMF_SUCCESS) then
       ! Separate message to console, for quick confirmation of success/failure
