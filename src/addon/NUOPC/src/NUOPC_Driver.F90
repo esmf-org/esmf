@@ -4648,11 +4648,12 @@ module NUOPC_Driver
 ! or by default across all of the Driver PETs.
 !
 ! The specified {\tt compSetServicesRoutine()} is called back immediately after
-! the new child component has been created internally. Very little around the
-! component is set up at that time (e.g. NUOPC component attributes will not be
-! available). The routine should therefore be very light weight, with the sole
-! purpose of setting the entry points of the component -- typically by deriving
-! from a generic component followed by the appropriate specilizations.
+! the new child component has been created internally.
+! Very little around the component is set up at that time (e.g. NUOPC component
+! attributes are not yet available at this stage). The routine should therefore
+! be very light weight, with the sole purpose of setting the entry points of
+! the component -- typically by deriving from a generic component followed by
+! the appropriate specilizations.
 !
 ! If provided, the {\tt compSetVMRoutine()} is called back before the
 ! {\tt compSetServicesRoutine()}. This allows the child component to set
@@ -4826,13 +4827,21 @@ module NUOPC_Driver
 ! component to a Driver. The component is created on the provided {\tt petList},
 ! or by default across all of the Driver PETs.
 !
-! The {\tt SetServices()} routine in the {\tt sharedObj} is called back
-! immediately after the
-! new child component has been created internally. Very little around the
-! component is set up at that time (e.g. NUOPC component attributes will not be
-! available). The routine should therefore be very light weight, with the sole
-! purpose of setting the entry points of the component -- typically by deriving
-! from a generic component followed by the appropriate specilizations.
+! The {\tt SetVM()} and {\tt SetServices()} routines in {\tt sharedObj}
+! are called back immediately after the new child component has been created
+! internally. 
+! Very little around the component is set up at that time (e.g. NUOPC component
+! attributes are not yet available at this stage). The routine should therefore
+! be very light weight, with the sole purpose of setting the entry points of
+! the component -- typically by deriving from a generic component followed by
+! the appropriate specilizations.
+!
+! The asterisk character {\tt (*)} is supported as a wildcard for the
+! file name suffix in {\tt sharedObj}. When present, the asterisk is replaced
+! by "so", "dylib", and "dll", in this order, and the first successfully
+! loaded object is used. If the {\tt sharedObj} argument is not provided, the
+! executable itself is searched for the "{\tt SetVM}" and "{\tt SetServices}"
+! symbols.
 !
 ! The {\tt info} argument can be used to pass custom attributes to the child
 ! component. These attributes are available on the component when
@@ -5039,11 +5048,12 @@ module NUOPC_Driver
 ! and {\tt dstCompLabel}.
 !
 ! The specified {\tt SetServices()} routine is called back immediately after the
-! new child component has been created internally. Very little around the
-! component is set up at that time (e.g. NUOPC component attributes will not be
-! available). The routine should therefore be very light weight, with the sole
-! purpose of setting the entry points of the component -- typically by deriving
-! from a generic component followed by the appropriate specilizations.
+! new child component has been created internally.
+! Very little around the component is set up at that time (e.g. NUOPC component
+! attributes are not yet available at this stage). The routine should therefore
+! be very light weight, with the sole purpose of setting the entry points of
+! the component -- typically by deriving from a generic component followed by
+! the appropriate specilizations.
 !
 ! The {\tt info} argument can be used to pass custom attributes to the child
 ! component. These attributes are available on the component when

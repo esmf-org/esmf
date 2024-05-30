@@ -2354,7 +2354,7 @@ endif
 lib: info
 	@$(MAKE) build_libs
 	@$(MAKE) build_tracelibs
-	@$(MAKE) info_mk
+	@$(MAKE) info_mk ESMF_CCOMPILEPATHS="$(ESMF_CCOMPILEPATHS) -I$(ESMF_CONFDIR)"
 	@echo "ESMF library built successfully on "`date`
 	@echo "To verify, build and run the unit and system tests with: $(MAKE) check"
 	@echo " or the more extensive: $(MAKE) all_tests"
