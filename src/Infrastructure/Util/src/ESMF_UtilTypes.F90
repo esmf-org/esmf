@@ -164,15 +164,7 @@
       sequence
 #endif
       !private
-#if 1
           integer(C_SIZE_T) :: ptr
-#else
-#if (ESMC_POINTER_SIZE == 4)
-          integer(selected_int_kind( 9)) :: ptr
-#else
-          integer(selected_int_kind(18)) :: ptr
-#endif
-#endif
       end type
 
       type(ESMF_Pointer), parameter :: ESMF_NULL_POINTER = ESMF_Pointer(0), &
