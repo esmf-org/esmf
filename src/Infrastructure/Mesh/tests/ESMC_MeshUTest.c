@@ -388,10 +388,15 @@ int main(void){
   localrc = ESMC_MeshAddElements(mesh, numElems, elemIds, elemTypes, elemConn, NULL, NULL, NULL);
   if (localrc != ESMF_SUCCESS) rc=ESMF_FAILURE;
 
+  // DEBUG OUTPUT
+  // localrc=ESMC_MeshWrite(mesh, "testMesh3D");
+  //if (localrc != ESMF_SUCCESS) rc=ESMF_FAILURE;
+    
   // Get rid of the mesh
   localrc = ESMC_MeshDestroy(&mesh);
   if (localrc != ESMF_SUCCESS) rc=ESMF_FAILURE;
   
+  // Check results
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
