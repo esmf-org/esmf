@@ -1463,17 +1463,21 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
       coord_sys_mesh = coord_sys;
     }
 
-    // Create Mesh
-    ESMCI_meshcreate(out_mesh, &pdim, &orig_sdim, &coord_sys_mesh, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-				      &localrc)) throw localrc;
-
     // If center coords exist and
     //  file in different coordinate system than mesh, convert
     if ((elem_Coords != NULL) && (coord_sys_file != coord_sys_mesh)) {
       convert_coords_between_coord_sys(coord_sys_file, coord_sys_mesh, 
                                        dim, num_elems, elem_Coords);
     }
+    if ((nodeCoords != NULL) && (coord_sys_file != coord_sys_mesh)) {
+      convert_coords_between_coord_sys(coord_sys_file, coord_sys_mesh, 
+                                       dim, num_nodes, nodeCoords);
+    }
+
+    // Create Mesh
+    ESMCI_meshcreate(out_mesh, &pdim, &orig_sdim, &coord_sys_mesh, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+				      &localrc)) throw localrc;
 
     // Add nodes
     InterArray<int> nodeMaskIA(NULL, num_nodes);

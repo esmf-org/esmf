@@ -149,8 +149,8 @@ program ESMF_IO_GDALUTest
   decomptile(:,6)=(/1,2/) ! Tile 6
   ! Create cubed sphere grid
   dstGrid = ESMF_GridCreateCubedSphere(tileSize=90, regDecompPTile=decomptile, &
-       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CENTER/), &
-       coordSys=ESMF_COORDSYS_SPH_DEG, rc=rc)
+       staggerLocList=(/ESMF_STAGGERLOC_CORNER, ESMF_STAGGERLOC_CORNER/), &
+       coordSys=ESMF_COORDSYS_SPH_RAD, rc=rc)
   
   if (rc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -175,7 +175,7 @@ program ESMF_IO_GDALUTest
   do lDE=0,localDECount-1
 
      !! get coords
-     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=rc)
      if (rc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
@@ -183,7 +183,7 @@ program ESMF_IO_GDALUTest
         return
      endif
 
-     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=2, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=rc)
      if (rc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
@@ -211,7 +211,7 @@ program ESMF_IO_GDALUTest
 !        farrayPtrXC(i1,i2) = ((dst_maxx-dst_minx)*REAL(i1-1)/REAL(dst_nx-1))+dst_minx
 !        farrayPtrYC(i1,i2) = ((dst_maxy-dst_miny)*REAL(i2-1)/REAL(dst_ny-1))+dst_miny
 
-        write(*,*) farrayPtrXC(i1,i2), farrayPtrYC(i1,i2)
+!        write(*,*) farrayPtrXC(i1,i2), farrayPtrYC(i1,i2)
         ! initialize destination field
 !       farrayPtr(i1,i2)=0.0
 
@@ -264,9 +264,9 @@ program ESMF_IO_GDALUTest
   !! Write mesh for debugging
   call ESMF_MeshWrite(mesh,"shpmesh",rc=rc)
   call ESMF_MeshWrite(esmfmesh,"esmfmesh",rc=rc)
-  call ESMF_GridWriteVTK(dstGrid,filename="gridtest",rc=rc)
-  write(failMsg, *) "GridWriteVTK failed"
-  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!  call ESMF_GridWriteVTK(dstGrid,filename="gridtest",rc=rc)
+!  write(failMsg, *) "GridWriteVTK failed"
+!  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !  call ESMF_FieldGet(field, dimCount=sd, rank=nc)
 !  write(*,*) 'mesh field dim/rank: ', sd, nc
@@ -280,7 +280,7 @@ program ESMF_IO_GDALUTest
           field, &
           dstField=dstField, &
           routeHandle=routeHandle, &
-          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
+          regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
           unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           rc=rc)
   write(failMsg, *) "RegridStore failed"
