@@ -1232,7 +1232,7 @@ void test_bit_overflow(int& rc, char failMsg[]) {
 
   // Test integer overflow
   try {
-    info.set("bigint", ((long int)(std::numeric_limits<int>::max()))+10, false);
+    info.set("bigint", ((long long int)(std::numeric_limits<int>::max()))+10, false);
     int too_small = info.get<int>("bigint");
     return finalizeFailure(rc, failMsg, "did not catch overflow");
   }
