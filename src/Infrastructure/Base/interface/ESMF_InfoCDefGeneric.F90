@@ -62,7 +62,7 @@ interface
     implicit none
     type(C_PTR), value :: info
     character(C_CHAR), intent(in) :: key(*)
-    integer(C_LONG), intent(out) :: value
+    integer(C_LONG_LONG), intent(out) :: value
     integer(C_INT), intent(inout) :: rc
     type(C_PTR), value :: default, idx
     integer(C_INT), intent(in) :: recursive
@@ -123,7 +123,7 @@ interface
     implicit none
     type(C_PTR), value :: info
     character(C_CHAR), intent(in) :: key(*)
-    integer(C_LONG), dimension(*), intent(out) :: value
+    integer(C_LONG_LONG), dimension(*), intent(out) :: value
     integer(C_INT), intent(out) :: itemcount
     integer(C_INT), intent(inout) :: rc
     integer(C_INT), intent(in) :: recursive
@@ -189,7 +189,7 @@ interface
     implicit none
     type(C_PTR), value :: info
     character(kind=C_CHAR), intent(in) :: key(*)
-    integer(C_LONG), intent(in) :: value
+    integer(C_LONG_LONG), intent(in) :: value
     logical(C_BOOL), intent(in) :: force
     integer(C_INT), intent(inout) :: rc
     type(C_PTR), value :: idx
@@ -261,7 +261,7 @@ interface
     implicit none
     type(C_PTR), value :: info
     character(kind=C_CHAR), intent(in) :: key(*)
-    integer(C_LONG), dimension(*), intent(in) :: value
+    integer(C_LONG_LONG), dimension(*), intent(in) :: value
     integer(C_INT), intent(in) :: itemcount
     logical(C_BOOL), intent(in) :: force
     integer(C_INT), intent(inout) :: rc

@@ -16,7 +16,7 @@ META = {}
 F = 'float'
 D = 'double'
 I = 'int'
-L = 'long int'
+L = 'long long int'
 ST = 'std::string'
 B = 'bool'
 A = 'ESMCI::Info'
@@ -41,7 +41,7 @@ THETYPES = {F: {'iso_ctype': 'C_FLOAT',
                 'ftype': 'integer',
                 'ctype': I,
                 'full_ftype': 'integer(ESMF_KIND_I4)'},
-            L: {'iso_ctype': 'C_LONG',
+            L: {'iso_ctype': 'C_LONG_LONG',
                 'esmf_type': 'ESMF_KIND_I8',
                 'json_type': 'number_integer_t',
                 'esmf_suffix': 'I8',
