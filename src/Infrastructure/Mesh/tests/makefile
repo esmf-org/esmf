@@ -16,6 +16,7 @@ TESTS_BUILD	  = \
                 $(ESMF_TESTDIR)/ESMCI_MeshMOABUTest \
                 $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
                 $(ESMF_TESTDIR)/ESMCI_MeshUTest \
+                $(ESMF_TESTDIR)/ESMC_MeshUTest \
                 $(ESMF_TESTDIR)/ESMCI_DInfoUTest \
                 $(ESMF_TESTDIR)/ESMC_MeshVTKUTest \
                 $(ESMF_TESTDIR)/ESMF_MeshOpUTest \
@@ -36,6 +37,7 @@ TESTS_RUN    =  \
                 RUN_ESMCI_MeshMOABUTest \
                 RUN_ESMCI_IntegrateUTest \
                 RUN_ESMCI_MeshUTest \
+                RUN_ESMC_MeshUTest \
                 RUN_ESMCI_DInfoUTest \
                 RUN_ESMC_MeshVTKUTest \
                 RUN_ESMF_MeshOpUTest \
@@ -51,6 +53,7 @@ TESTS_RUN_UNI = \
                 RUN_ESMCI_MeshMOABUTestUNI \
                 RUN_ESMCI_IntegrateUTestUNI \
                 RUN_ESMCI_MeshUTestUNI \
+                RUN_ESMC_MeshUTestUNI \
                 RUN_ESMCI_DInfoUTestUNI \
                 RUN_ESMF_MeshOpUTestUNI \
                 RUN_ESMF_MeshUTestUNI \
@@ -122,6 +125,14 @@ RUN_ESMCI_MeshUTest:
 RUN_ESMCI_MeshUTestUNI:
 	cp -r data $(ESMF_TESTDIR)
 	$(MAKE) TNAME=Mesh NP=1 citest
+
+RUN_ESMC_MeshUTest:
+	cp -r data $(ESMF_TESTDIR)
+	$(MAKE) TNAME=Mesh NP=1 ctest
+
+RUN_ESMC_MeshUTestUNI:
+	cp -r data $(ESMF_TESTDIR)
+	$(MAKE) TNAME=Mesh NP=1 ctest
 
 RUN_ESMCI_DInfoUTest:
 	$(MAKE) TNAME=DInfo NP=4 citest
