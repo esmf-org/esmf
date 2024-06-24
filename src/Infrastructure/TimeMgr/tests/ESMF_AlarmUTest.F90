@@ -59,17 +59,17 @@ program ESMF_AlarmTest
                              no_leapCalendar, esmf_360dayCalendar
 
       ! instantiate timestep, start and stop times
-      type(ESMF_TimeInterval) :: timeStep
+      type(ESMF_TimeInterval) :: timeStep, repeatDuration
       type(ESMF_Time) :: startTime, stopTime
-      type(ESMF_Time) :: alarmTime
+      type(ESMF_Time) :: alarmTime, ringTime
 
       logical :: isCreated
 
 #ifdef ESMF_TESTEXHAUSTIVE
-      logical :: bool
+      logical :: bool, correct
 
       ! instantiate a clock 
-      type(ESMF_Clock) :: clock, clock2, clock3, domainClock, CLOCK_ATM
+      type(ESMF_Clock) :: clock, clock2, clock3, domainClock, CLOCK_ATM, repeatClock
       logical :: alarmCountPass, isringing, sticky, enabled
       integer(ESMF_KIND_I8) :: forwardCount
       logical :: willRingNext, testPass, alarmsNotEqual, alarmsEqual
@@ -1165,6 +1165,8 @@ program ESMF_AlarmTest
 
       !print *, "bool is ", bool
 
+   
+      
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
@@ -1352,9 +1354,144 @@ program ESMF_AlarmTest
       write(name, *) "Destroying clock after alarm test"
       call ESMF_ClockDestroy (clock, rc=rc)
       call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      
 
       ! ----------------------------------------------------------------------------
 
+      !EX_UTest
+      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(name, *) "Not sticky ringTime Alarm with repeating clock test."
+
+      ! Init correct
+      correct=.true.      
+
+      ! Simple test of repeating within one hour
+      
+      ! Set start time 
+      call ESMF_TimeSet(startTime, yy=2024, mm=3, dd=14, h=5, m=0, s=0, &
+                                calendar=gregorianCalendar, rc=rc)
+
+      ! Set timeStep to one minute
+      call ESMF_TimeIntervalSet(timeStep, m=14, rc=rc)
+      
+      ! Set repeat duration to one hour
+      call ESMF_TimeIntervalSet(repeatDuration, h=1, rc=rc)
+      
+      ! Create Clock
+      repeatClock = ESMF_ClockCreate(timeStep, startTime, &
+           repeatDuration=repeatDuration, rc=rc)
+
+      ! Set ringTime
+      call ESMF_TimeSet(ringTime, yy=2024, mm=3, dd=14, h=5, m=11, s=30, &
+                                calendar=gregorianCalendar, rc=rc)
+      
+      ! Create ringTime Alarm 
+      alarm = ESMF_AlarmCreate(clock=repeatClock, ringTime=ringTime, &
+           sticky=.false., rc=rc)
+
+      ! Advance clock to 5:14
+      call ESMF_ClockAdvance(repeatClock, rc=rc)
+
+      ! Make sure ringing
+      if (.not. ESMF_AlarmIsRinging(alarm)) correct=.false.
+
+
+      ! Advance clock to 6:10 (e.g. 5:10) checking that it's not ringing
+      do i=1,4
+         
+         ! Advance
+         call ESMF_ClockAdvance(repeatClock, rc=rc)
+
+         ! Make sure not ringing
+         if (ESMF_AlarmIsRinging(alarm)) correct=.false.
+
+         write(*,*) i,"Alarm is ringing=",ESMF_AlarmIsRinging(alarm)
+
+      enddo
+
+      ! Advance clock to 5:24
+      call ESMF_ClockAdvance(repeatClock, rc=rc)
+
+      ! Make sure ringing (we passed the ringTime again
+      if (.not. ESMF_AlarmIsRinging(alarm)) correct=.false.
+      
+      ! DEBUG OUTPUT
+      !write(*,*) "Is ringing=",ESMF_AlarmIsRinging(alarm,rc=rc)
+            
+      ! Free Alarm
+      call ESMF_AlarmDestroy(alarm, rc=rc)
+      
+      ! Free Clock
+      call ESMF_ClockDestroy(repeatClock, rc=rc)
+      
+      call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      
+      ! ----------------------------------------------------------------------------
+
+      
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(name, *) "Sticky ringTime Alarm with repeating clock test."
+
+      ! Simple test of repeating within one hour
+      
+      ! Set start time 
+      call ESMF_TimeSet(startTime, yy=2024, mm=3, dd=14, h=5, m=0, s=0, &
+                                calendar=gregorianCalendar, rc=rc)
+
+      ! Set timeStep to one minute
+      call ESMF_TimeIntervalSet(timeStep, m=1, rc=rc)
+      
+      ! Set repeat duration to one hour
+      call ESMF_TimeIntervalSet(repeatDuration, h=1, rc=rc)
+      
+      ! Create Clock
+      repeatClock = ESMF_ClockCreate(timeStep, startTime, &
+           repeatDuration=repeatDuration, rc=rc)
+
+      ! Set ringTime
+      call ESMF_TimeSet(ringTime, yy=2024, mm=3, dd=14, h=5, m=0, s=30, &
+                                calendar=gregorianCalendar, rc=rc)
+      
+      ! Create Alarm
+      alarm = ESMF_AlarmCreate(clock=repeatClock, ringTime=ringTime, &
+           sticky=.true., rc=rc)
+
+      ! Advance clock (to alarm time)
+      call ESMF_ClockAdvance(repeatClock, rc=rc)
+
+      ! Advance clock (to time after alarmTime to check stickiness)
+      call ESMF_ClockAdvance(repeatClock, rc=rc)
+
+      ! Init correct
+      correct=.true.
+      
+      ! Check if ringing
+      if (.not. ESMF_AlarmIsRinging(alarm)) correct=.false.
+      
+      ! DEBUG OUTPUT
+      write(*,*) "Is ringing=",ESMF_AlarmIsRinging(alarm,rc=rc)
+      
+      
+      ! Free Alarm
+      call ESMF_AlarmDestroy(alarm, rc=rc)
+      
+      ! Free Clock
+      call ESMF_ClockDestroy(repeatClock, rc=rc)
+      
+      call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      
+      ! ----------------------------------------------------------------------------
+
+
+
+      
       !EX_UTest
       !Test Non-Sticky Alarms 1
       !  from Chris Hill via support issue 988241, bug 996229

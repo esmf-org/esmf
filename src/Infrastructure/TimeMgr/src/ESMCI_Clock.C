@@ -337,10 +337,9 @@ int Clock::count=0;
     if (timeStep  != ESMC_NULL_POINTER) {
 
       // Repeat isn't supported yet with a negative time step or one that's 0
-      // The code below will have to be re-thought to support either. 
-      if (*timeStep <= (TimeInterval)0) {
+      if ((this->repeat) && (*timeStep <= (TimeInterval)0)) {
         ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_INCONS,
-          "repeating clocks currently do not support negative or 0 time steps.", &
+          "repeating clocks currently do not support negative or 0 time steps.",
                                       ESMC_CONTEXT, &rc);
           return(rc);
       }
@@ -569,7 +568,7 @@ int Clock::count=0;
     return(rc);
 
  } // end Clock::get
-
+  
 //-------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  Clock::advance - increment a clock's time

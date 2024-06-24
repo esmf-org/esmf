@@ -814,12 +814,14 @@ int Alarm::count=0;
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMCI::Alarm::isRinging()"
 
+
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", ESMC_CONTEXT, rc);
       return(false);
     }
 
+    
     // Initialize return code; assume routine not implemented
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
@@ -1117,6 +1119,132 @@ int Alarm::count=0;
       ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
       return(false);
     }
+
+
+    // Handle repeat clock
+    // How alarms are triggered with the wrapping nature of the clock
+    // is fairly different, so just handle separately so as to not confuse/break things
+    // with the standard clock
+    // Also, the repeat clock only goes forward, so that makes the logic a bit simpler...
+    if (clock->repeat) {
+
+      // carry previous flag forward
+      ringingOnPrevTimeStep = ringingOnCurrTimeStep;
+      
+      // If not enabled, it looks like nothing happens, so just leave
+      if (!enabled) {
+        if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
+        return (false);
+      }
+
+       
+      // Chose previous time base on whether it's been advanced or not
+      Time prevTime = clock->startTime;
+      if (clock->advanceCount != 0) {
+        prevTime = clock->prevTime;
+      }
+
+      // Time at which we repeat
+      Time repeatTime=clock->startTime+clock->repeatDuration;
+
+      
+      //// See what the ringing state is due to the time step that just happened
+      bool ringingDueToCurrTimeStep=false;
+
+      //// Check for ringing due to stickiness
+      
+      // Sticky and ringing, then keep ringing
+      if (sticky && ringing) ringingDueToCurrTimeStep=true;
+
+      printf("H1 rDTCTS=%d\n",ringingDueToCurrTimeStep);
+      
+      //// Check for ringing due to ringTime within current time step:
+      
+      // If the timeStep is less than repeatDuration, then check for the various situations
+      // that can lead to ringing
+      if (clock->currAdvanceTimeStep < clock->repeatDuration) { 
+        // If currTime is after prevtime, then it needs to be within prevTime to currTime      
+        if (clock->currTime > prevTime) {
+          if ((ringTime > prevTime) && (ringTime <= clock->currTime)) {
+            ringingDueToCurrTimeStep=true;
+          }
+        } else if (clock->currTime < prevTime) { // It needs to be within the wrapped time
+          if ((ringTime > prevTime) && (ringTime < repeatTime)) {
+            ringingDueToCurrTimeStep=true;
+          } else if ((ringTime >= clock->startTime) && (ringTime <= clock->currTime)) {
+            ringingDueToCurrTimeStep=true;
+          }
+        } else { // prevTime == currTime, it has to be right on the currTime
+          if (ringTime == clock->currTime) {
+            ringingDueToCurrTimeStep=true;
+          }
+        }
+      } else { // if it's >=, then we're ringing no matter what
+        ringingDueToCurrTimeStep=true;
+      }
+
+      printf("H2 rDTCTS=%d\n",ringingDueToCurrTimeStep);     
+      
+      //// Check for ringing due to ringInterval:
+
+      //// Check for ringing due to repeatCount??
+             
+      // Turn alarm on and off depending on whether we are on the current time step and whether we were already on
+      if (ringingDueToCurrTimeStep) {
+        
+        // Set things if the alarm is just turning on now
+        // TODO: verify that this shouldn't reset everything we're turning on the alarm
+        if (!ringing) {
+          ringBegin=clock->currTime;
+        }
+        
+        // The things that always get done when it's ringing   
+        ringingOnCurrTimeStep = ringing = true;
+        timeStepRingingCount++;
+        
+      } else {
+
+        // If we're ringing, see if we should be kept on
+        if (ringing) {
+          
+          // We're thinking of turning off the alarm, see if it should be kept on
+          bool stopRinging=false;
+
+          // If ringTimeStepCount is 1 and ringDuration != 0, then check for ringing due to ringDuration:
+          TimeInterval zeroTimeInterval(0,0,1,0,0,0);
+          if ((ringTimeStepCount == 1) && (ringDuration != zeroTimeInterval)) { 
+            TimeInterval cumulativeRinging;
+            cumulativeRinging = clock->currTime - ringBegin;
+            // TODO: calculate so that the above wraps around the repeat time
+            if (cumulativeRinging.TimeInterval::absValue() >=
+                ringDuration.TimeInterval::absValue()) {
+              stopRinging=true;
+            }
+          } else if (ringTimeStepCount >= 1) {
+            // Check using ringTimeStepCount
+            if (timeStepRingingCount >= ringTimeStepCount) {
+              stopRinging=true;
+            }
+          }
+          
+          // React based on whether we should keep ringing or not
+          if (stopRinging) {
+            ringingOnCurrTimeStep = ringing = false;
+            timeStepRingingCount = 0;
+          } else {
+            ringingOnCurrTimeStep = ringing = true;
+            timeStepRingingCount++;
+          }
+
+        } 
+        
+      }
+      
+      // Return if ringing
+      if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
+      return(ringing);      
+    } 
+    
 
     // get clock's timestep direction: positive or negative
     bool positive = (clock->currAdvanceTimeStep.absValue() ==
