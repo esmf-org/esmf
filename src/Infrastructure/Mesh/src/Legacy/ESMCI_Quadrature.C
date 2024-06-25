@@ -39,34 +39,39 @@ std::string int2string(UInt i) {
   return oss.str();
 }
 
-// Straight from numerical recipes in C
-void gauss_legendre(UInt n, double locs[], double *wgts) {
-  UInt m;
-  double z, z1, pp, p1, p2, p3;
+void gauss_legendre(UInt num_points, double locs[], double *wgts) {
+  UInt half_points;
+  double root_approx, root_approx_prev;
+  double p1, p2, p3;
+  double p1_deriv;
   
-  m = (n+1)/2;
-  for (UInt i = 1; i <= m; i++) {
-    z = cos(M_PI*(i-0.25)/(n+0.5));
+  half_points = (num_points+1)/2;
+  for (UInt i = 1; i <= half_points; i++) {
+    root_approx = cos(M_PI*(i-0.25)/(num_points+0.5));
+
+    // Refine the root approximation by Newton's method
     do {
 
       p1 = 1.0; p2 = 0.0;
-      for (UInt j = 1; j <= n; j++) {
+      for (UInt j = 1; j <= num_points; j++) {
         p3 = p2;
         p2 = p1;
-        p1 = ((2.0*j-1.0)*z*p2-(j-1)*p3)/j;
+        p1 = ((2.0*j-1.0)*root_approx*p2-(j-1)*p3)/j;
       }
+      // p1 is now the desired Legendre polynomial evaluated at root_approx
 
-      pp = n*(z*p1-p2)/(z*z-1.0);
-      z1 = z;
-      z=z1-p1/pp;
-//std::cout << "z-z1=" << z-z1 << std::endl;
-    } while(std::abs(z-z1)> 1e-10);
+      p1_deriv = num_points*(root_approx*p1-p2)/(root_approx*root_approx-1.0);
+      root_approx_prev = root_approx;
+      root_approx = root_approx_prev-p1/p1_deriv;
+//std::cout << "root_approx-root_approx_prev=" << root_approx-root_approx_prev << std::endl;
+    } while(std::abs(root_approx-root_approx_prev)> 1e-10);
 
-    locs[i-1] = -z;
-    locs[n+1-i-1] = z;
+    // The roots are symmetric, so each computed root is put in two locations
+    locs[i-1] = -root_approx;
+    locs[num_points+1-i-1] = root_approx;
     if (wgts) {
-      wgts[i-1] = 2.0/((1.0-z*z)*pp*pp);
-      wgts[n+1-i-1] = wgts[i-1];
+      wgts[i-1] = 2.0/((1.0-root_approx*root_approx)*p1_deriv*p1_deriv);
+      wgts[num_points+1-i-1] = wgts[i-1];
     }
   } // for i
 }
