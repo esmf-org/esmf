@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -242,6 +242,72 @@ HConfig HConfig::create(
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return hconfig;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::equal()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::equal - check if two hconfigs are equal
+//
+// !INTERFACE:
+bool HConfig::equal(
+//
+// !RETURN VALUE:
+//  bool
+//
+// !ARGUMENTS:
+    HConfig *hconfig1,
+    HConfig *hconfig2) {
+//
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+#ifdef ESMF_YAMLCPP
+
+  // Check for error condition of NULL inputs, since this is used as an equality
+  // operator above, there isn't really a way to pass an error code, so return
+  // false instead (which seems to be the way this is handled in other equality
+  // operators in the framework).
+  if (hconfig1 == NULL) return false;
+  if (hconfig2 == NULL) return false;
+
+  // TODO: Move this into an equality operator for HConfig and call that instead
+
+  // See if the docs are equal
+  if (hconfig1->doc == hconfig2->doc) {
+
+    // They are both NULL, so this is an iterator
+    if (hconfig1->doc == NULL) {
+
+      // See if they are the same type
+      if (hconfig1->type == hconfig2->type) {
+
+        // Compare iterators to determine final equality
+        if (hconfig1->iter == hconfig2->iter) return true;
+        else return false;
+
+      } else {
+        return false; // Not the same type so not the same
+      }
+
+    } else { // Not NULL -> aren't iterators, but have the same docs -> equal
+      return true;
+    }
+
+  } else { // Not the same docs -> not equal
+    return false;
+  }
+
+#else
+  return false;
+#endif
+
 }
 //-----------------------------------------------------------------------------
 

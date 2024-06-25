@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -2871,7 +2871,7 @@ program ESMF_GridCreateUTest
 
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-
+ 
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Testing GridCreateCubedSphere with SchmidtTransform"
@@ -3313,6 +3313,59 @@ program ESMF_GridCreateUTest
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing GridCreateCubedSphere with calcCoordType=ESMF_CUBEDSPHERECALC_LOCAL"
+  write(failMsg, *) "Incorrect result"
+
+  ! create grid 
+  rc=ESMF_SUCCESS
+  grid=ESMF_GridCreateCubedSphere(15, &
+                                  staggerLocList = (/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
+                                  coordCalcFlag=ESMF_CUBEDSPHERECALC_LOCAL, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Write to make sure it looks ok
+  call ESMF_GridCellWriteVTK(grid, "csGrid", rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  
+  ! Loop through just making sure coordinates are there  
+  call ESMF_GridGet(grid, localDECount=localDECount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  do lde = 0, localDECount-1
+
+    call ESMF_GridGetCoord(grid, coordDim=1, localDE=lde, farrayPtr=fptr1, &
+                           exclusiveLBound=exlbnd, exclusiveUBound=exubnd, rc=localrc)
+    if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+    call ESMF_GridGetCoord(grid, coordDim=2, localDE=lde, farrayPtr=fptr2, &
+                           exclusiveLBound=exlbnd, exclusiveUBound=exubnd, rc=localrc)
+    if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+#if 0
+    print *, "coords from de", lde
+
+    print *, "lower bounds = [", exlbnd(1), ", ", exlbnd(2), "]"
+    print *, "upper bounds = [", exubnd(1), ", ", exubnd(2), "]"
+
+    print *, "["
+    do j = 1, exubnd(1)
+      do i = 1, exubnd(2)
+        print *, "[", fptr1(i,j), ", ", fptr2(i,j), "]"
+      enddo
+    enddo
+    print *, "]"
+#endif
+  enddo
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
   !-----------------------------------------------------------------------------
   ! Stop testing
   call ESMF_TestEnd(ESMF_SRCLINE)

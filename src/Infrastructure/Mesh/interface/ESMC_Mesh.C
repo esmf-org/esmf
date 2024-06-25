@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -217,11 +217,6 @@ int ESMC_MeshAddElements(ESMC_Mesh mesh, int elementCount, int *elementIds,
 
   MeshCap *mc = static_cast<MeshCap*> (mesh.ptr);
   
-  // count elemconn
-  int ec = 0;
-  for (unsigned int i = 0; i < elementCount; ++i)
-    ec += elementTypes[i];
-
   // evaluate presence of input parameters
   int apresent = 0;
   if (elementArea != nullptr) apresent = 1;
@@ -237,7 +232,7 @@ int ESMC_MeshAddElements(ESMC_Mesh mesh, int elementCount, int *elementIds,
                       em,
                       &apresent, elementArea, 
                       &cpresent, elementCoords, 
-                      &ec, elementConn,
+                      NULL, elementConn,
                       &(mc->coordsys_mc), &(mc->sdim_mc),
                       &localrc);
                       // elementConn, elementMask, elementArea, elementCoords);

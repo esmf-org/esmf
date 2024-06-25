@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -3000,7 +3000,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Collective {\tt ESMF\_VM} communication call that performs a total exchange
 !   operation on the contiguous data of <type><kind>. PET {\tt i} sends
 !   contiguous elements of its {\tt sendData} array to all PETs, including
-!   itself. The {\tt sendCount(j)} elements sent to PET {\tt j} are
+!   itself. The {\tt sendCounts(j)} elements sent to PET {\tt j} are
 !   those starting at position {\tt sendOffsets(j)}, and are
 !   stored in {\tt recvData} on PET $j$ in position {\tt recvOffsets(i)}.
 !
@@ -5355,7 +5355,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
       if (present(ssiMap)) then
         allocate(ssiMap(0:petCountArg-1))
-        do i=0, petCount-1
+        do i=0, petCountArg-1
           call ESMF_VMGet(vm, pet=i, ssiId=ssiMap(i), rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return

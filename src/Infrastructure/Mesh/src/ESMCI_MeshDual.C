@@ -2,7 +2,7 @@
 // $Id: ESMCI_MeshRedist.C,v 1.23 2012/01/06 20:17:51 svasquez Exp $
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -191,12 +191,6 @@ namespace ESMCI {
 
     // Communicate values to ghost cells
     src_mesh->GhostCommAllFields();
-
-    // BOB: Use convenince method to comm all fields 
-#if 0
-    src_mesh->GhostComm().SendFields(num_snd, snd, rcv);
-#endif
-
 
 #ifdef DEBUG_WRITE_MESH
   {int *rc;
