@@ -17,7 +17,6 @@ The following packages are *optional*:
 * ESMF installation with NetCDF - required to create :class:`Grids <esmpy.api.grid.Grid>`, :class:`Meshes <esmpy.api.mesh.Mesh>` and :class:`Fields <esmpy.api.field.Field>` from file, and to write regridding weights to file
     - NetCDF must be built as a shared library for ESMPy installation to succeed
 * ESMF installation with PIO (the Parallel IO library) - required to create :class:`Meshes <esmpy.api.mesh.Mesh>` and :class:`Fields <esmpy.api.field.Field>` from file, and to write regridding weights to file
-    - Note that building ESMF with PIO requires building with a real MPI library (not mpiuni)
 * `mpi4py <https://mpi4py.readthedocs.io/en/stable/>`_- python bindings to MPI, needed to run some of the parallel regridding examples
 * `pytest <https://docs.pytest.org/en/7.1.x/>`_ - for testing
 
