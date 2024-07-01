@@ -133,6 +133,35 @@ int Alarm::count=0;
       alarm->ringTime = alarm->prevRingTime = alarm->firstRingTime = *ringTime;
     }
     if (ringInterval != ESMC_NULL_POINTER) {
+
+      // Check for restrictions on ringInterval specific to repeatClock
+      if (clock->repeat) {
+
+        // ringInterval has to be shorter than repeatDuration
+        if (! (*ringInterval < clock->repeatDuration)) {
+          ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_INCONS,
+               "repeating clocks currently do not support having ringInterval >= clock repeatDuration.",
+                                         ESMC_CONTEXT, rc);
+          return(ESMC_NULL_POINTER);
+        }
+        
+        // Zero Interval
+        TimeInterval zeroTimeInterval(0,0,1,0,0,0);
+
+        // Find remainder of division of repeatDuration 
+        TimeInterval remainder=clock->repeatDuration%*ringInterval;
+
+        // For repeat clocks ringInterval has to divide evenly into repeatDuration
+        if (remainder != zeroTimeInterval) {
+          ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_INCONS,
+               "for repeating clocks ringInterval needs to evenly divide clock repeatDuration.",
+                                         ESMC_CONTEXT, rc);
+          return(ESMC_NULL_POINTER);
+        }
+      }
+
+
+      // Set ringInteral in object
       alarm->ringInterval = *ringInterval;
 
       // if ringTime not specified, calculate
@@ -145,12 +174,24 @@ int Alarm::count=0;
         // works for positive or negative ringInterval
         alarm->ringTime = clock->currTime + alarm->ringInterval;
         alarm->prevRingTime = alarm->firstRingTime = alarm->ringTime;
-      }
+      }      
     }
     if (stopTime != ESMC_NULL_POINTER) {
       alarm->stopTime = *stopTime;
     }
     if (ringDuration != ESMC_NULL_POINTER) {
+
+      // For repeat clocks make sure ringDuration is less than repeatDuration
+      if (clock->repeat) {
+        if (! (*ringDuration < clock->repeatDuration)) {
+          ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_INCONS,
+               "repeating clocks currently do not support having ringDuration >= clock repeatDuration.",
+                                         ESMC_CONTEXT, rc);
+          return(ESMC_NULL_POINTER);
+        }
+      }
+
+      // Set ringDuration
       alarm->ringDuration = *ringDuration;
     }
     if (ringTimeStepCount != ESMC_NULL_POINTER) {
@@ -1146,15 +1187,9 @@ int Alarm::count=0;
 
       // Time at which we repeat
       Time repeatTime=clock->startTime+clock->repeatDuration;
-
       
       //// See what the ringing state is due to the time step that just happened
       bool ringingDueToCurrTimeStep=false;
-
-      //// Check for ringing due to stickiness
-      
-      // Sticky and ringing, then keep ringing
-      if (sticky && ringing) ringingDueToCurrTimeStep=true;
 
       printf("H1 rDTCTS=%d\n",ringingDueToCurrTimeStep);
       
@@ -1204,21 +1239,43 @@ int Alarm::count=0;
         
       } else {
 
-        // If we're ringing, see if we should be kept on
-        if (ringing) {
+        // If we're not sticky and ringing, see if we should stop
+        if (!sticky && ringing) {
           
           // We're thinking of turning off the alarm, see if it should be kept on
           bool stopRinging=false;
-
-          // If ringTimeStepCount is 1 and ringDuration != 0, then check for ringing due to ringDuration:
+          
+          // If ringTimeStepCount is 1 and ringDuration != 0, then check for ringing due to ringDuration
           TimeInterval zeroTimeInterval(0,0,1,0,0,0);
           if ((ringTimeStepCount == 1) && (ringDuration != zeroTimeInterval)) { 
             TimeInterval cumulativeRinging;
-            cumulativeRinging = clock->currTime - ringBegin;
-            // TODO: calculate so that the above wraps around the repeat time
-            if (cumulativeRinging.TimeInterval::absValue() >=
-                ringDuration.TimeInterval::absValue()) {
-              stopRinging=true;
+
+            // We only handle this case, so error below if not true
+            if (ringDuration < clock->repeatDuration) { 
+
+              // Calculate cumulative ringing time, taking wrapping into account
+              if (clock->currTime > ringBegin) {
+                cumulativeRinging = clock->currTime - ringBegin;
+              } else if (clock->currTime < ringBegin) {
+                cumulativeRinging = repeatTime - ringBegin; // Time until it repeats
+                cumulativeRinging += clock->currTime-clock->startTime; // Time from startTime to where it is now
+              } else { // clock->currTime == ringBegin
+                // If timeStep != 0, then it went exactly all the way around
+                if (clock->currAdvanceTimeStep != zeroTimeInterval) {
+                  cumulativeRinging = clock->repeatDuration;
+                }               
+              }
+              
+              // See if we're past the ringDuration
+              if (cumulativeRinging.TimeInterval::absValue() >=
+                  ringDuration.TimeInterval::absValue()) {
+                stopRinging=true;
+              }
+            } else {
+              ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_INCONS,
+               "repeating clocks currently do not support having ringDuration >= clock repeatDuration.",
+                                            ESMC_CONTEXT, rc);
+              return(false);
             }
           } else if (ringTimeStepCount >= 1) {
             // Check using ringTimeStepCount
