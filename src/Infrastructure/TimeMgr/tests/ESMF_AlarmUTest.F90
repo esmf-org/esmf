@@ -1757,8 +1757,6 @@ program ESMF_AlarmTest
            ringInterval=ringInterval, sticky=.false., rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
       
-      ! XMRKX !
-#if 0      
       ! Advance clock to 5:14
       call ESMF_ClockAdvance(repeatClock, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -1773,8 +1771,8 @@ program ESMF_AlarmTest
       call ESMF_ClockAdvance(repeatClock, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-      ! Make sure ringing
-      if (.not. ESMF_AlarmIsRinging(alarm)) correct=.false.
+      ! Make sure not ringing
+      if (ESMF_AlarmIsRinging(alarm)) correct=.false.
 
       ! DEBUG OUTPUT
       !write(*,*) "5:28 Is ringing=",ESMF_AlarmIsRinging(alarm,rc=localrc)
@@ -1788,18 +1786,37 @@ program ESMF_AlarmTest
 
       ! DEBUG OUTPUT
       !write(*,*) "5:42 Is ringing=",ESMF_AlarmIsRinging(alarm,rc=localrc)
-
+      
       ! Advance clock to 5:56
       call ESMF_ClockAdvance(repeatClock, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-      ! Make sure has stopped ringing
-      if (ESMF_AlarmIsRinging(alarm)) correct=.false.
+      ! Make sure is ringing
+      !if (.not. ESMF_AlarmIsRinging(alarm)) correct=.false.
 
       ! DEBUG OUTPUT
       !write(*,*) "5:56 Is ringing=",ESMF_AlarmIsRinging(alarm,rc=localrc)
-#endif
-      
+
+      ! Advance clock to 5:10
+      call ESMF_ClockAdvance(repeatClock, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Make sure is not ringing
+      if (ESMF_AlarmIsRinging(alarm)) correct=.false.
+
+      ! DEBUG OUTPUT
+      !write(*,*) "5:10 Is ringing=",ESMF_AlarmIsRinging(alarm,rc=localrc)
+
+      ! Advance clock to 5:24
+      call ESMF_ClockAdvance(repeatClock, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Make sure is ringing
+      if (.not. ESMF_AlarmIsRinging(alarm)) correct=.false.
+
+      ! DEBUG OUTPUT
+      !write(*,*) "5:24 Is ringing=",ESMF_AlarmIsRinging(alarm,rc=localrc)
+
       ! Free Alarm
       call ESMF_AlarmDestroy(alarm, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -1854,7 +1871,7 @@ program ESMF_AlarmTest
       if (.not. ESMF_AlarmIsRinging(alarm)) correct=.false.
       
       ! DEBUG OUTPUT
-      write(*,*) "Is ringing=",ESMF_AlarmIsRinging(alarm,rc=rc)
+      !write(*,*) "Is ringing=",ESMF_AlarmIsRinging(alarm,rc=rc)
       
       
       ! Free Alarm

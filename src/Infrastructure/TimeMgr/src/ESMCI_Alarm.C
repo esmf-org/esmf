@@ -1169,6 +1169,9 @@ int Alarm::count=0;
     // Also, the repeat clock only goes forward, so that makes the logic a bit simpler...
     if (clock->repeat) {
 
+      // Useful a few places later
+      TimeInterval zeroTimeInterval(0,0,1,0,0,0);
+      
       // carry previous flag forward
       ringingOnPrevTimeStep = ringingOnCurrTimeStep;
       
@@ -1191,37 +1194,79 @@ int Alarm::count=0;
       //// See what the ringing state is due to the time step that just happened
       bool ringingDueToCurrTimeStep=false;
 
-      printf("H1 rDTCTS=%d\n",ringingDueToCurrTimeStep);
-      
-      //// Check for ringing due to ringTime within current time step:
-      
-      // If the timeStep is less than repeatDuration, then check for the various situations
-      // that can lead to ringing
-      if (clock->currAdvanceTimeStep < clock->repeatDuration) { 
-        // If currTime is after prevtime, then it needs to be within prevTime to currTime      
-        if (clock->currTime > prevTime) {
-          if ((ringTime > prevTime) && (ringTime <= clock->currTime)) {
-            ringingDueToCurrTimeStep=true;
-          }
-        } else if (clock->currTime < prevTime) { // It needs to be within the wrapped time
-          if ((ringTime > prevTime) && (ringTime < repeatTime)) {
-            ringingDueToCurrTimeStep=true;
-          } else if ((ringTime >= clock->startTime) && (ringTime <= clock->currTime)) {
-            ringingDueToCurrTimeStep=true;
-          }
-        } else { // prevTime == currTime, it has to be right on the currTime
-          if (ringTime == clock->currTime) {
-            ringingDueToCurrTimeStep=true;
-          }
-        }
-      } else { // if it's >=, then we're ringing no matter what
+      // If the timeStep is bigger than the repeatDuration, then alarms are
+      // ringing no matter what
+      if (clock->currAdvanceTimeStep >= clock->repeatDuration) {
         ringingDueToCurrTimeStep=true;
       }
-
-      printf("H2 rDTCTS=%d\n",ringingDueToCurrTimeStep);     
       
-      //// Check for ringing due to ringInterval:
 
+      // If not ringing yet, check for alarms due to ringTime and implied ringTimes 
+      if (!ringingDueToCurrTimeStep) {
+        
+        // If no ringInterval, then just check the single ringTime
+        if (ringInterval == zeroTimeInterval) {        
+          // If currTime is after prevtime, then it needs to be within prevTime to currTime      
+          if (clock->currTime > prevTime) {
+            if ((ringTime > prevTime) && (ringTime <= clock->currTime)) {
+              ringingDueToCurrTimeStep=true;
+            }
+          } else if (clock->currTime < prevTime) { // It needs to be within the wrapped time
+            if ((ringTime > prevTime) && (ringTime < repeatTime)) {
+              ringingDueToCurrTimeStep=true;
+            } else if ((ringTime >= clock->startTime) && (ringTime <= clock->currTime)) {
+              ringingDueToCurrTimeStep=true;
+            }
+          } else { // prevTime == currTime, it has to be right on the currTime
+            if (ringTime == clock->currTime) {
+              ringingDueToCurrTimeStep=true;
+            }
+          }
+        } else {  // Check for ringing due to ringInterval
+      
+          // Loop checking the set of times implied by the ringInterval
+          bool wrapped=false;
+          Time tmpRingTime=ringTime;
+          while (true) {
+
+            // Check for tmpRingTime ringing                        
+            if (clock->currTime > prevTime) { // If currTime is after prevtime, then it needs to be within prevTime to currTime 
+              if ((tmpRingTime > prevTime) && (tmpRingTime <= clock->currTime)) {
+                ringingDueToCurrTimeStep=true;
+              }
+            } else if (clock->currTime < prevTime) { // It needs to be within the wrapped time
+              if ((tmpRingTime > prevTime) && (tmpRingTime < repeatTime)) {
+                ringingDueToCurrTimeStep=true;
+              } else if ((tmpRingTime >= clock->startTime) && (tmpRingTime <= clock->currTime)) {
+                ringingDueToCurrTimeStep=true;
+              }
+            } else { // prevTime == currTime, it has to be right on the currTime
+              if (tmpRingTime == clock->currTime) {
+                ringingDueToCurrTimeStep=true;
+              }
+            }
+          
+            // Check for being done
+            if (ringingDueToCurrTimeStep) break;
+            
+            // Advance to the next ringtime
+            tmpRingTime=tmpRingTime+ringInterval;
+            
+            // If we're past repeatTime, then wrap
+            if (tmpRingTime >= repeatTime) {
+              tmpRingTime = clock->startTime + (tmpRingTime-repeatTime);
+              wrapped=true;
+            }
+            
+            // If we've wrapped and passed the original ringTime, then stop
+            if (wrapped && (tmpRingTime > ringTime)) break;
+                        
+          }
+        }
+      }
+    
+
+      
       //// Check for ringing due to repeatCount??
              
       // Turn alarm on and off depending on whether we are on the current time step and whether we were already on
@@ -1246,7 +1291,6 @@ int Alarm::count=0;
           bool stopRinging=false;
           
           // If ringTimeStepCount is 1 and ringDuration != 0, then check for ringing due to ringDuration
-          TimeInterval zeroTimeInterval(0,0,1,0,0,0);
           if ((ringTimeStepCount == 1) && (ringDuration != zeroTimeInterval)) { 
             TimeInterval cumulativeRinging;
 
