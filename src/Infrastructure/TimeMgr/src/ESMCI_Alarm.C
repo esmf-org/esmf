@@ -433,6 +433,34 @@ int Alarm::count=0;
       }
     }
     if (ringInterval != ESMC_NULL_POINTER) {
+
+      // Check for restrictions on ringInterval specific to repeatClock
+      if (this->clock->repeat) {
+
+        // ringInterval has to be shorter than repeatDuration
+        if (! (*ringInterval < this->clock->repeatDuration)) {
+          ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_INCONS,
+               "repeating clocks currently do not support having ringInterval >= clock repeatDuration.",
+                                         ESMC_CONTEXT, &rc);
+          return(rc);
+        }
+        
+        // Zero Interval
+        TimeInterval zeroTimeInterval(0,0,1,0,0,0);
+
+        // Find remainder of division of repeatDuration 
+        TimeInterval remainder=this->clock->repeatDuration%*ringInterval;
+
+        // For repeat clocks ringInterval has to divide evenly into repeatDuration
+        if (remainder != zeroTimeInterval) {
+          ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_INCONS,
+               "for repeating clocks ringInterval needs to evenly divide clock repeatDuration.",
+                                         ESMC_CONTEXT, &rc);
+          return(rc);
+        }
+      }
+      
+      // If it's changed then set the new one      
       if (this->ringInterval != *ringInterval) {
         this->ringInterval = *ringInterval;
         this->userChangedRingInterval = true;
@@ -442,6 +470,18 @@ int Alarm::count=0;
       this->stopTime = *stopTime;
     }
     if (ringDuration != ESMC_NULL_POINTER) {
+
+      // For repeat clocks make sure ringDuration is less than repeatDuration
+      if (this->clock->repeat) {
+        if (! (*ringDuration < this->clock->repeatDuration)) {
+          ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_INCONS,
+             "repeating clocks currently do not support having ringDuration >= clock repeatDuration.",
+                                        ESMC_CONTEXT, &rc);
+          return(rc);
+        }
+      }
+
+      // Set ringDuration
       this->ringDuration = *ringDuration;
     }
     if (ringTimeStepCount != ESMC_NULL_POINTER) {
