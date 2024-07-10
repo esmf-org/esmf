@@ -1902,6 +1902,251 @@ program ESMF_AlarmTest
       call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(name, *) "Not sticky Alarm with ringInterval and stopTime with repeating clock test."
+
+      ! Init correct
+      correct=.true.      
+      rc=ESMF_SUCCESS
+      
+      ! Simple test of repeating within one hour
+      
+      ! Set start time 
+      call ESMF_TimeSet(startTime, yy=2024, mm=3, dd=14, h=5, m=0, s=0, &
+                                calendar=gregorianCalendar, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      
+      ! Set timeStep to one minute
+      call ESMF_TimeIntervalSet(timeStep, m=14, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      
+      ! Set repeat duration to one hour
+      call ESMF_TimeIntervalSet(repeatDuration, h=1, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      
+      ! Create Clock
+      repeatClock = ESMF_ClockCreate(timeStep, startTime, &
+           repeatDuration=repeatDuration, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      
+      ! Set ringTime
+      call ESMF_TimeSet(ringTime, yy=2024, mm=3, dd=14, h=5, m=11, s=0, &
+                                calendar=gregorianCalendar, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Set stopTime
+      call ESMF_TimeSet(stopTime, yy=2024, mm=3, dd=14, h=5, m=50, s=0, &
+                                calendar=gregorianCalendar, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      
+      ! Set alarm Interval
+      call ESMF_TimeIntervalSet(ringInterval, m=20, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      
+      ! Create ringTime Alarm 
+      alarm = ESMF_AlarmCreate(clock=repeatClock, ringTime=ringTime, &
+           ringInterval=ringInterval, stopTime=stopTime, sticky=.false., rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      
+      ! Advance clock to 5:14
+      call ESMF_ClockAdvance(repeatClock, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      
+      ! Make sure ringing
+      if (.not. ESMF_AlarmIsRinging(alarm)) correct=.false.
+
+      ! DEBUG OUTPUT
+      !write(*,*) "5:14 Is ringing=",ESMF_AlarmIsRinging(alarm,rc=localrc)
+      
+      ! Advance clock to 5:28
+      call ESMF_ClockAdvance(repeatClock, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Make sure not ringing
+      if (ESMF_AlarmIsRinging(alarm)) correct=.false.
+
+      ! DEBUG OUTPUT
+      !write(*,*) "5:28 Is ringing=",ESMF_AlarmIsRinging(alarm,rc=localrc)
+
+      ! Advance clock to 5:42
+      call ESMF_ClockAdvance(repeatClock, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Make sure is ringing
+      if (.not. ESMF_AlarmIsRinging(alarm)) correct=.false.
+
+      ! DEBUG OUTPUT
+      !write(*,*) "5:42 Is ringing=",ESMF_AlarmIsRinging(alarm,rc=localrc)
+      
+      ! Advance clock to 5:56 (PAST stopTime)
+      call ESMF_ClockAdvance(repeatClock, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Make sure is NOT ringing
+      if (ESMF_AlarmIsRinging(alarm)) correct=.false.
+
+      ! DEBUG OUTPUT
+      !write(*,*) "5:56 Is ringing=",ESMF_AlarmIsRinging(alarm,rc=localrc)
+
+      ! Advance clock to 5:10 (PAST stopTime)
+      call ESMF_ClockAdvance(repeatClock, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Make sure is not ringing
+      if (ESMF_AlarmIsRinging(alarm)) correct=.false.
+
+      ! DEBUG OUTPUT
+      !write(*,*) "5:10 Is ringing=",ESMF_AlarmIsRinging(alarm,rc=localrc)
+
+      ! Advance clock to 5:24 (passing ringTime again...) 
+      call ESMF_ClockAdvance(repeatClock, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Make sure is ringing
+      if (.not. ESMF_AlarmIsRinging(alarm)) correct=.false.
+
+      ! DEBUG OUTPUT
+      !write(*,*) "5:24 Is ringing=",ESMF_AlarmIsRinging(alarm,rc=localrc)
+
+      ! Free Alarm
+      call ESMF_AlarmDestroy(alarm, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      
+      ! Free Clock
+      call ESMF_ClockDestroy(repeatClock, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      
+      call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(name, *) "Not sticky Alarm with ringInterval and wrapped stopTime with repeating clock test."
+
+      ! Init correct
+      correct=.true.      
+      rc=ESMF_SUCCESS
+      
+      ! Simple test of repeating within one hour
+      
+      ! Set start time 
+      call ESMF_TimeSet(startTime, yy=2024, mm=3, dd=14, h=5, m=0, s=0, &
+                                calendar=gregorianCalendar, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      
+      ! Set timeStep to one minute
+      call ESMF_TimeIntervalSet(timeStep, m=14, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      
+      ! Set repeat duration to one hour
+      call ESMF_TimeIntervalSet(repeatDuration, h=1, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      
+      ! Create Clock
+      repeatClock = ESMF_ClockCreate(timeStep, startTime, &
+           repeatDuration=repeatDuration, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      
+      ! Set ringTime
+      call ESMF_TimeSet(ringTime, yy=2024, mm=3, dd=14, h=5, m=31, s=0, &
+                                calendar=gregorianCalendar, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Set stopTime
+      call ESMF_TimeSet(stopTime, yy=2024, mm=3, dd=14, h=5, m=10, s=0, &
+                                calendar=gregorianCalendar, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      
+      ! Set alarm Interval
+      call ESMF_TimeIntervalSet(ringInterval, m=20, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      
+      ! Create ringTime Alarm 
+      alarm = ESMF_AlarmCreate(clock=repeatClock, ringTime=ringTime, &
+           ringInterval=ringInterval, stopTime=stopTime, sticky=.false., rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      
+      ! Advance clock to 5:14
+      call ESMF_ClockAdvance(repeatClock, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      
+      ! Make sure NOT ringing (it's not in 5:31 - 5:10)
+      if (ESMF_AlarmIsRinging(alarm)) correct=.false.
+
+      ! DEBUG OUTPUT
+      !write(*,*) "5:14 Is ringing=",ESMF_AlarmIsRinging(alarm,rc=localrc)
+      
+      ! Advance clock to 5:28
+      call ESMF_ClockAdvance(repeatClock, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Make sure NOT ringing (it's not in 5:31 - 5:10)
+      if (ESMF_AlarmIsRinging(alarm)) correct=.false.
+
+      ! DEBUG OUTPUT
+      !write(*,*) "5:28 Is ringing=",ESMF_AlarmIsRinging(alarm,rc=localrc)
+
+      ! Advance clock to 5:42
+      call ESMF_ClockAdvance(repeatClock, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Make sure is ringing
+      if (.not. ESMF_AlarmIsRinging(alarm)) correct=.false.
+
+      ! DEBUG OUTPUT
+      !write(*,*) "5:42 Is ringing=",ESMF_AlarmIsRinging(alarm,rc=localrc)
+      
+      ! Advance clock to 5:56
+      call ESMF_ClockAdvance(repeatClock, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Make sure is ringing
+      if (.not. ESMF_AlarmIsRinging(alarm)) correct=.false.
+
+      ! DEBUG OUTPUT
+      !write(*,*) "5:56 Is ringing=",ESMF_AlarmIsRinging(alarm,rc=localrc)
+
+      ! Advance clock to 5:10
+      call ESMF_ClockAdvance(repeatClock, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Make sure is not ringing 
+      if (ESMF_AlarmIsRinging(alarm)) correct=.false.
+
+      ! DEBUG OUTPUT
+      !write(*,*) "5:10 Is ringing=",ESMF_AlarmIsRinging(alarm,rc=localrc)
+
+      ! Advance clock to 5:24
+      call ESMF_ClockAdvance(repeatClock, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      ! Make sure NOT ringing (it's not in 5:31 - 5:10)
+      if (ESMF_AlarmIsRinging(alarm)) correct=.false.
+
+      ! DEBUG OUTPUT
+      !write(*,*) "5:24 Is ringing=",ESMF_AlarmIsRinging(alarm,rc=localrc)
+
+      ! Free Alarm
+      call ESMF_AlarmDestroy(alarm, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      
+      ! Free Clock
+      call ESMF_ClockDestroy(repeatClock, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      
+      call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+      
       ! ----------------------------------------------------------------------------
 
       !EX_UTest

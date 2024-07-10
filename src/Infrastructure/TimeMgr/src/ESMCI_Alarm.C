@@ -985,12 +985,25 @@ int Alarm::count=0;
             }
           }
         } else {  // Check for ringing due to ringInterval
-      
+
+          // If stopTime enabled, then set up flags
+          bool stopTimeEnabled=false;
+          bool stopTimeGERingTime=false;
+          if (stopTime.Time::validate("initialized") == ESMF_SUCCESS) {
+            stopTimeEnabled=true;
+            if (stopTime >= ringTime) stopTimeGERingTime=true;          
+          }
+          
           // Loop checking the set of times implied by the ringInterval
           bool wrapped=false;
           Time tmpRingTime=ringTime;
           while (true) {
 
+            // Check for stopTime greater than or equal to ringTime
+            if (stopTimeEnabled && stopTimeGERingTime) {
+              if (tmpRingTime >= stopTime) break;
+            }
+            
             // Check for tmpRingTime ringing                        
             if (currTime > prevTime) { // If currTime is after prevtime, then it needs to be within prevTime to currTime 
               if ((tmpRingTime > prevTime) && (tmpRingTime <= currTime)) {
@@ -1019,9 +1032,14 @@ int Alarm::count=0;
               tmpRingTime = clock->startTime + (tmpRingTime-repeatTime);
               wrapped=true;
             }
-            
+
             // If we've wrapped and passed the original ringTime, then stop
             if (wrapped && (tmpRingTime > ringTime)) break;
+
+            // Check for stopTime less than ringTime
+            if (wrapped && stopTimeEnabled && !stopTimeGERingTime) {
+              if (tmpRingTime >= stopTime) break;
+            }
                         
           }
         }
