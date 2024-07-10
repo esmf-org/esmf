@@ -870,6 +870,14 @@ int Alarm::count=0;
 
  } // end Alarm::ringerOff
 
+
+
+  
+
+
+
+
+  
 //-------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  Alarm::isRinging - check if Alarm is ringing
@@ -910,6 +918,123 @@ int Alarm::count=0;
 
  } // end Alarm::isRinging
 
+
+//-------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  Alarm::checkRingingDueToRepeatClockTimeStep - an internal routine
+ //                that checks if a repeat clock alarm should ring when it does a particular
+      //           time step     
+//
+// !INTERFACE:
+      int Alarm::checkRingingDueToRepeatClockTimeStep(Time &prevTime, Time &currTime, TimeInterval &timeStep, bool &ringingDueToTimeStep) const {
+//
+// !RETURN VALUE:
+//    return code
+//
+// !ARGUMENTS:
+//    prevTime - The time before it took the time step
+//    currTime - The time now that it look the time step
+//    timeStep - The time step that it took to get from prev to curr
+//    ringingDuetoTimeStep - should the alarm rign for the specified time step
+//
+// !DESCRIPTION:
+//        an internal routine that checks if a repeat clock alarm should ring when it does a particular
+//        time step. Note that this doesn't change any state in the alarm, it just checks for ringing. 
+//
+//EOPI
+// !REQUIREMENTS:  developer's guide for classes
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMCI::Alarm::checkRingingDueToRepeatClockTimeStep()"
+
+    // Initialize return code; assume routine not implemented
+     int rc = ESMC_RC_NOT_IMPL;
+
+     // Useful
+     TimeInterval zeroTimeInterval(0,0,1,0,0,0);
+     Time repeatTime=clock->startTime+clock->repeatDuration;
+     
+     // Init 
+     ringingDueToTimeStep=false;
+
+     // If the timeStep is bigger than the repeatDuration, then alarms are
+     // ringing no matter what
+     if (timeStep >= clock->repeatDuration) {
+       ringingDueToTimeStep=true;
+     }
+      
+      // If not ringing yet, check for alarms due to ringTime and implied ringTimes 
+      if (!ringingDueToTimeStep) {
+        
+        // If no ringInterval, then just check the single ringTime
+        if (ringInterval == zeroTimeInterval) {        
+          // If currTime is after prevtime, then it needs to be within prevTime to currTime      
+          if (currTime > prevTime) {
+            if ((ringTime > prevTime) && (ringTime <= currTime)) {
+              ringingDueToTimeStep=true;
+            }
+          } else if (currTime < prevTime) { // It needs to be within the wrapped time
+            if ((ringTime > prevTime) && (ringTime < repeatTime)) {
+              ringingDueToTimeStep=true;
+            } else if ((ringTime >= clock->startTime) && (ringTime <= currTime)) {
+              ringingDueToTimeStep=true;
+            }
+          } else { // prevTime == currTime, it has to be right on the currTime
+            if (ringTime == currTime) {
+              ringingDueToTimeStep=true;
+            }
+          }
+        } else {  // Check for ringing due to ringInterval
+      
+          // Loop checking the set of times implied by the ringInterval
+          bool wrapped=false;
+          Time tmpRingTime=ringTime;
+          while (true) {
+
+            // Check for tmpRingTime ringing                        
+            if (currTime > prevTime) { // If currTime is after prevtime, then it needs to be within prevTime to currTime 
+              if ((tmpRingTime > prevTime) && (tmpRingTime <= currTime)) {
+                ringingDueToTimeStep=true;
+              }
+            } else if (currTime < prevTime) { // It needs to be within the wrapped time
+              if ((tmpRingTime > prevTime) && (tmpRingTime < repeatTime)) {
+                ringingDueToTimeStep=true;
+              } else if ((tmpRingTime >= clock->startTime) && (tmpRingTime <= currTime)) {
+                ringingDueToTimeStep=true;
+              }
+            } else { // prevTime == currTime, it has to be right on the currTime
+              if (tmpRingTime == currTime) {
+                ringingDueToTimeStep=true;
+              }
+            }
+          
+            // Check for being done
+            if (ringingDueToTimeStep) break;
+            
+            // Advance to the next ringtime
+            tmpRingTime=tmpRingTime+ringInterval;
+            
+            // If we're past repeatTime, then wrap
+            if (tmpRingTime >= repeatTime) {
+              tmpRingTime = clock->startTime + (tmpRingTime-repeatTime);
+              wrapped=true;
+            }
+            
+            // If we've wrapped and passed the original ringTime, then stop
+            if (wrapped && (tmpRingTime > ringTime)) break;
+                        
+          }
+        }
+      }
+
+         
+    // Output success
+    rc = ESMF_SUCCESS;
+    return(rc);    
+
+ } // end Alarm::checkRingingDueToRepeatClockTimeStep
+
+  
 //-------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  Alarm::willRingNext - check if Alarm will ring upon the next clock timestep
@@ -963,9 +1088,29 @@ int Alarm::count=0;
     Time clockNextTime;
     clock->Clock::getNextTime(&clockNextTime, timeStep);
 
+
     // if specified, use passed-in timestep, otherwise use clock's
     TimeInterval tStep = (timeStep != ESMC_NULL_POINTER) ?
                                *timeStep : clock->timeStep;
+
+    
+    // IF a repeat clock, handle that and leave
+    if (clock->repeat) {
+      int localrc;
+      bool willRing = false;
+      
+      // Check if the alarm should go off due to the time step that will happen next
+      bool ringingDueToCurrTimeStep=false;
+      localrc=checkRingingDueToRepeatClockTimeStep(clock->currTime, clockNextTime, tStep, willRing);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+        return false;
+      }
+            
+      // Set output and exit
+      if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
+      return(willRing);
+    }
+    
 
     // get timestep direction: positive or negative
     bool positive = tStep.TimeInterval::absValue() == tStep ? true : false;
@@ -1181,9 +1326,10 @@ int Alarm::count=0;
 //EOP
 // !REQUIREMENTS:  TMG4.4, 4.6
 
- #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMCI::Alarm::checkRingTime()"
-
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Alarm::checkRingTime()"
+    int localrc;
+        
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", ESMC_CONTEXT, rc);
@@ -1192,7 +1338,7 @@ int Alarm::count=0;
 
     // default return code
     if (rc != ESMC_NULL_POINTER) *rc = ESMC_RC_NOT_IMPL;
-
+    
     // must be associated with a clock
     if(clock == ESMC_NULL_POINTER) {
       char logMsg[2*ESMF_MAXSTR];
@@ -1231,84 +1377,13 @@ int Alarm::count=0;
       // Time at which we repeat
       Time repeatTime=clock->startTime+clock->repeatDuration;
       
-      //// See what the ringing state is due to the time step that just happened
+      // Check if the alarm should go off due to the time step that just happened
       bool ringingDueToCurrTimeStep=false;
-
-      // If the timeStep is bigger than the repeatDuration, then alarms are
-      // ringing no matter what
-      if (clock->currAdvanceTimeStep >= clock->repeatDuration) {
-        ringingDueToCurrTimeStep=true;
+      localrc=checkRingingDueToRepeatClockTimeStep(prevTime, clock->currTime, clock->currAdvanceTimeStep, ringingDueToCurrTimeStep);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+        return false;
       }
       
-
-      // If not ringing yet, check for alarms due to ringTime and implied ringTimes 
-      if (!ringingDueToCurrTimeStep) {
-        
-        // If no ringInterval, then just check the single ringTime
-        if (ringInterval == zeroTimeInterval) {        
-          // If currTime is after prevtime, then it needs to be within prevTime to currTime      
-          if (clock->currTime > prevTime) {
-            if ((ringTime > prevTime) && (ringTime <= clock->currTime)) {
-              ringingDueToCurrTimeStep=true;
-            }
-          } else if (clock->currTime < prevTime) { // It needs to be within the wrapped time
-            if ((ringTime > prevTime) && (ringTime < repeatTime)) {
-              ringingDueToCurrTimeStep=true;
-            } else if ((ringTime >= clock->startTime) && (ringTime <= clock->currTime)) {
-              ringingDueToCurrTimeStep=true;
-            }
-          } else { // prevTime == currTime, it has to be right on the currTime
-            if (ringTime == clock->currTime) {
-              ringingDueToCurrTimeStep=true;
-            }
-          }
-        } else {  // Check for ringing due to ringInterval
-      
-          // Loop checking the set of times implied by the ringInterval
-          bool wrapped=false;
-          Time tmpRingTime=ringTime;
-          while (true) {
-
-            // Check for tmpRingTime ringing                        
-            if (clock->currTime > prevTime) { // If currTime is after prevtime, then it needs to be within prevTime to currTime 
-              if ((tmpRingTime > prevTime) && (tmpRingTime <= clock->currTime)) {
-                ringingDueToCurrTimeStep=true;
-              }
-            } else if (clock->currTime < prevTime) { // It needs to be within the wrapped time
-              if ((tmpRingTime > prevTime) && (tmpRingTime < repeatTime)) {
-                ringingDueToCurrTimeStep=true;
-              } else if ((tmpRingTime >= clock->startTime) && (tmpRingTime <= clock->currTime)) {
-                ringingDueToCurrTimeStep=true;
-              }
-            } else { // prevTime == currTime, it has to be right on the currTime
-              if (tmpRingTime == clock->currTime) {
-                ringingDueToCurrTimeStep=true;
-              }
-            }
-          
-            // Check for being done
-            if (ringingDueToCurrTimeStep) break;
-            
-            // Advance to the next ringtime
-            tmpRingTime=tmpRingTime+ringInterval;
-            
-            // If we're past repeatTime, then wrap
-            if (tmpRingTime >= repeatTime) {
-              tmpRingTime = clock->startTime + (tmpRingTime-repeatTime);
-              wrapped=true;
-            }
-            
-            // If we've wrapped and passed the original ringTime, then stop
-            if (wrapped && (tmpRingTime > ringTime)) break;
-                        
-          }
-        }
-      }
-    
-
-      
-      //// Check for ringing due to repeatCount??
-             
       // Turn alarm on and off depending on whether we are on the current time step and whether we were already on
       if (ringingDueToCurrTimeStep) {
         
