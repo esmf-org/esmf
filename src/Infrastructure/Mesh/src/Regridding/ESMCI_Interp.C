@@ -767,6 +767,16 @@ void calc_2nd_order_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, 
                                         struct Zoltan_Struct * zz, bool set_dst_status, WMat &dst_status) {
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
 
+
+  if ((srcmesh.side==3) || (dstmesh.side==3)) {
+    printf("src side=%d  src ind=%d\n",srcmesh.side,srcmesh.ind);
+    printf("dst side=%d  dst ind=%d\n",dstmesh.side,dstmesh.ind);
+  }
+
+
+  
+
+  
   // Get src coord field
   MEField<> *src_cfield = srcmesh.GetCoordField();
 

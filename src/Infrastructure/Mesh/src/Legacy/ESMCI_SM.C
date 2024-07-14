@@ -1070,4 +1070,199 @@ namespace ESMCI {
   //////////////// END CALC 2D 3D WEIGHTS //////////////////
 
 
+  // This method creates sm cells for a 2nd order interpolation going from a side mesh to an XGrid
+
+  // Here valid and wghts need to be resized to the same size as dst_elems before being passed into 
+  // this call. 
+  void create_dst_xgrid_SM_cells_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, 
+                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
+                                           double *src_elem_area,
+                                           std::vector<int> *valid, 
+                                           std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
+                                           std::vector<int> *tmp_valid, std::vector<double> *tmp_sintd_areas_out, std::vector<double> *tmp_dst_areas_out,
+                                           std::vector<SM_CELL> *sm_cells) {
+
+    //// STOPPED HERE ////
+
+    
+// Maximum size for a supported polygon
+// Since the elements are of a small 
+// limited size. Fixed sized buffers seem 
+// the best way to handle them
+
+#define  MAX_NUM_POLY_NODES 40
+#define  MAX_NUM_POLY_COORDS_3D (3*MAX_NUM_POLY_NODES) 
+
+    // Declaration for src polygon
+    int num_src_nodes;
+    double src_coords[MAX_NUM_POLY_COORDS_3D];
+    double tmp_coords[MAX_NUM_POLY_COORDS_3D];
+
+    // Get src coords
+    get_elem_coords_3D_ccw(src_elem, src_cfield, MAX_NUM_POLY_NODES, tmp_coords, &num_src_nodes, src_coords);
+
+    // Get rid of degenerate edges
+    remove_0len_edges3D(&num_src_nodes, src_coords);
+
+    // If less than a triangle invalidate everything and leave because it won't results in weights
+    // Decision about returning error for degeneracy is made above this subroutine
+    if (num_src_nodes<3) {
+      *src_elem_area=0.0;    
+      for (int i=0; i<dst_elems.size(); i++) {
+        (*valid)[i]=0;
+        (*sintd_areas_out)[i]=0.0;
+        (*dst_areas_out)[i]=0.0;
+      }
+      return;
+    }
+
+    // If a smashed quad invalidate everything and leave because it won't results in weights
+    // Decision about returning error for degeneracy is made above this subroutine
+    if (is_smashed_quad3D(num_src_nodes, src_coords)) {
+      *src_elem_area=0.0;    
+      for (int i=0; i<dst_elems.size(); i++) {
+        (*valid)[i]=0;
+        (*sintd_areas_out)[i]=0.0;
+        (*dst_areas_out)[i]=0.0;
+      }
+      return;
+    }
+
+    // See if concave
+    bool is_concave=false;
+    if (num_src_nodes > 3) {
+      bool left_turn=false;
+      bool right_turn=false;
+      
+      rot_2D_3D_sph(num_src_nodes, src_coords, &left_turn, &right_turn);
+      
+      if (left_turn && right_turn) is_concave=true;
+    }
+
+    // If not concave then just call into the lower level
+    if (!is_concave) {
+      create_SM_cells_2D_3D_sph_src_pnts(num_src_nodes, src_coords,  
+                                         dst_elems, dst_cfield, dst_mask_field, dst_frac2_field,
+                                         src_elem_area,
+                                         valid,  
+                                         sintd_areas_out, dst_areas_out, 
+                                         sm_cells);
+
+    } else { // else, break into two pieces...
+
+      // Space for temporary buffers
+      double td[3*4];
+      int ti[4];
+      int tri_ind[6];
+
+
+      // This must be a quad if not complain and exit
+      // IF NOT A QUAD, THEN THE ABOVE BUFFER SIZES MUST BE CHANGED!!!
+      // TO EMPHASIZE THAT IT MUST BE QUAD 4 IS PASSED IN FOR THE SIZE BELOW. 
+      if (num_src_nodes != 4) Throw() << " This isn't a quad, but it should be!";
+      int ret=triangulate_poly<GEOM_SPH2D3D>(4, src_coords, td,
+                                            ti, tri_ind);
+      // Error check
+      // Check return code
+      if (ret != ESMCI_TP_SUCCESS) {
+        if (ret == ESMCI_TP_DEGENERATE_POLY) Throw() << " - can't triangulate a polygon with less than 3 sides";
+        else if (ret == ESMCI_TP_CLOCKWISE_POLY) Throw() << " - clockwise polygons not supported in triangulation routine";
+        else Throw() << " - unknown error in triangulation";
+      }
+
+
+      // Because this is a quad it will be in 2 pieces. 
+      double tri[9];
+      
+      // Tri 1
+      tri[0]=src_coords[3*tri_ind[0]];
+      tri[1]=src_coords[3*tri_ind[0]+1];
+      tri[2]=src_coords[3*tri_ind[0]+2];
+
+      tri[3]=src_coords[3*tri_ind[1]];
+      tri[4]=src_coords[3*tri_ind[1]+1];
+      tri[5]=src_coords[3*tri_ind[1]+2];
+
+      tri[6]=src_coords[3*tri_ind[2]];
+      tri[7]=src_coords[3*tri_ind[2]+1];
+      tri[8]=src_coords[3*tri_ind[2]+2];
+
+      create_SM_cells_2D_3D_sph_src_pnts(3, tri,  
+                                         dst_elems, dst_cfield, dst_mask_field, dst_frac2_field,
+                                         src_elem_area,
+                                         valid,  
+                                         sintd_areas_out, dst_areas_out,
+                                         sm_cells);
+
+
+      // Tri 2
+      tri[0]=src_coords[3*tri_ind[3]];
+      tri[1]=src_coords[3*tri_ind[3]+1];
+      tri[2]=src_coords[3*tri_ind[3]+2];
+
+      tri[3]=src_coords[3*tri_ind[4]];
+      tri[4]=src_coords[3*tri_ind[4]+1];
+      tri[5]=src_coords[3*tri_ind[4]+2];
+
+      tri[6]=src_coords[3*tri_ind[5]];
+      tri[7]=src_coords[3*tri_ind[5]+1];
+      tri[8]=src_coords[3*tri_ind[5]+2];
+
+
+      // Tmp variables to hold info from second triangle
+      double src_elem_area2;
+   
+      // If need to expand arrays, expand
+      if (dst_elems.size() > tmp_valid->size()) {
+        tmp_valid->resize(dst_elems.size(),0);
+        tmp_sintd_areas_out->resize(dst_elems.size(),0.0);
+        tmp_dst_areas_out->resize(dst_elems.size(),0.0);
+      }
+
+      create_SM_cells_2D_3D_sph_src_pnts(3, tri,  
+                                         dst_elems, dst_cfield, dst_mask_field, dst_frac2_field,
+                                         &src_elem_area2,
+                                         tmp_valid, 
+                                         tmp_sintd_areas_out, tmp_dst_areas_out, 
+                                         sm_cells);
+
+      // Merge together src area
+      *src_elem_area=*src_elem_area+src_elem_area2;
+
+      //loop through merging valid, sintd area and dst area
+      for (int i=0; i<dst_elems.size(); i++) {
+
+        if ((*valid)[i]==1) {
+          if ((*tmp_valid)[i]==1) {
+            (*valid)[i]=1;
+            (*sintd_areas_out)[i]=(*sintd_areas_out)[i]+(*tmp_sintd_areas_out)[i];
+            // (*dst_areas_out)[i] already set
+          } else {
+            (*valid)[i]=1; 
+            // (*sintd_areas_out)[i] already set
+            // (*dst_areas_out)[i] already set
+          }
+        } else {
+          if ((*tmp_valid)[i]==1) {
+            (*valid)[i]=1;
+            (*sintd_areas_out)[i]=(*tmp_sintd_areas_out)[i];
+            (*dst_areas_out)[i]=(*tmp_dst_areas_out)[i];
+          } else {
+            (*valid)[i]=0;
+          }
+        }
+
+      }
+    }
+
+#undef  MAX_NUM_POLY_NODES
+#undef  MAX_NUM_POLY_COORDS_3D    
+  }
+
+
+  //////////////// END CALC 2D 3D WEIGHTS //////////////////
+
+
+  
+
 } // namespace

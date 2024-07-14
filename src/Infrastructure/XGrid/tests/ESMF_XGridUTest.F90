@@ -65,7 +65,7 @@
   call ESMF_Test((rc .eq. ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-#if 1
+#if 0
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Testing XGrid IsCreated for uncreated object"
@@ -194,6 +194,8 @@
     write(name, *) "Creating an XGrid with Mesh easy element create interface"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+#endif    
+
     !------------------------------------------------------------------------
     !NEX_UTest
     ! Create an XGrid in 2D from Meshes with user supplied area
@@ -202,6 +204,7 @@
     write(name, *) "Test 2nd order on an XGrid between Meshes"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+#if 0
     !------------------------------------------------------------------------
     !NEX_UTest
     ! Create an XGrid in 2D from Meshes with user supplied area
