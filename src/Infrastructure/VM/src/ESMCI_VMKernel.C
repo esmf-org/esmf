@@ -7649,28 +7649,21 @@ namespace ESMCI{
         }
       }
 
-
 #ifndef USE_OLD_MESSAGEPREPARE
 
-      
       // Allocate buffers
       for (int ii=sendIndexOffset-iiStart; ii>sendIndexOffset-iiEnd; ii--){
         // localPet-dependent shifted loop reduces communication contention
         int dstPet = ii%petCount;  // fold back into [0,..,petCount-1] range
-        // send message to Pet "i"
+        // send message to dstPet
         int size = messageSize(localPet, dstPet);
-        if (size>0){
+        if (size>0)
           sendBuffer[dstPet] = new char[size];
-        } else {
+        else
           sendBuffer[dstPet] = NULL;
-        }
       }
-
       // Fill buffers
-      messagePrepareSearch(vmk,
-                           sendIndexOffset, iiStart, iiEnd,
-                           sendBuffer);
-      
+      messagePrepareSearch(vmk, sendIndexOffset, iiStart, iiEnd, sendBuffer);
       // Communicate buffers
       for (int ii=sendIndexOffset-iiStart; ii>sendIndexOffset-iiEnd; ii--){
         // localPet-dependent shifted loop reduces communication contention
@@ -7678,7 +7671,6 @@ namespace ESMCI{
         // send message to Pet "i"
         int size = messageSize(localPet, dstPet);
         if (size>0){
-          
 #ifdef MUST_USE_BLOCKING_SEND
           vmk->send(sendBuffer[dstPet], size, dstPet);
 #else
@@ -7695,9 +7687,8 @@ namespace ESMCI{
           }
 #endif
         }
-      }      
-
-#else      
+      }
+#else
       // localPet acts as a sender, constructs message and sends to receiver
       for (int ii=sendIndexOffset-iiStart; ii>sendIndexOffset-iiEnd; ii--){
         // localPet-dependent shifted loop reduces communication contention
@@ -7726,7 +7717,6 @@ namespace ESMCI{
       }
 #endif
 
-      
       if (iiStart==localPet+1){
         // localPet does local prepare and process
 #ifdef DEBUG_COMPAT_on

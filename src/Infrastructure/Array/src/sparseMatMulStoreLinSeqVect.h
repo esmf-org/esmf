@@ -8,12 +8,10 @@ namespace DD{
     IT max;
     IT count;
 
-
-    // Just use max
-    // TODO: move this into separate compare function
+    // Just use max for comparison needed by lower_bound()
     bool operator<(const Interval<IT> &rhs) const {
       return max<rhs.max;
-    }    
+    }
 
   };
 
@@ -76,10 +74,8 @@ template<typename T>
 void clientRequest(T *t, int i, char **requestStreamClient);
 
 template<typename T>
-void clientRequestSearch(T *t,
-                            ESMCI::VM *vm,
-                            char **requestStreamClient);
-  
+void clientRequestSearch(T *t, ESMCI::VM *vm, char **requestStreamClient);
+
 template<typename T>
 void localClientServerExchange(T *t);
 
@@ -146,50 +142,46 @@ void accessLookup(
     // localPet-dependent shifted loop reduces communication contention
     int dstPet = ii%petCount;  // fold back into [0,..,petCount-1] range
     if (localElementsPerIntervalCount[dstPet]>0){
-      
-      // localPet has elements that are located in interval of server Pet "i"
+      // localPet has elements that are located in interval of server "dstPet"
       requestStreamClient[dstPet] =
         new char[requestFactor*localElementsPerIntervalCount[dstPet]];
-    } else {
+    }else{
       requestStreamClient[dstPet] = NULL;
     }
   }
 
   // Fill buffers
   clientRequestSearch(t, vm, requestStreamClient);
-  
+
   // Communicate buffers
   for (int ii=localPet+petCount-1; ii>localPet; ii--){
     // localPet-dependent shifted loop reduces communication contention
     int dstPet = ii%petCount;  // fold back into [0,..,petCount-1] range
     if (localElementsPerIntervalCount[dstPet]>0){
-  
       // send information to the serving Pet
       send1commhList[dstPet] = NULL;
-      
-//sprintf(msg, "posting nb-send to PET %d size=%d", i, requestFactor*localElementsPerIntervalCount[i]);
-//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG); 
+//sprintf(msg, "posting nb-send to PET %d size=%d", dstPet, requestFactor*localElementsPerIntervalCount[i]);
+//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #if (defined MUST_USE_BLOCKING_SEND || defined WORKAROUND_NONBLOCKPROGRESSBUG)
       vm->send(requestStreamClient[dstPet],
-        requestFactor*localElementsPerIntervalCount[dstPet], dstPet); 
+        requestFactor*localElementsPerIntervalCount[dstPet], dstPet);
 #else
       vm->send(requestStreamClient[dstPet],
-        requestFactor*localElementsPerIntervalCount[dstPet], dstPet, 
+        requestFactor*localElementsPerIntervalCount[dstPet], dstPet,
         &(send1commhList[dstPet]));
 #endif
       // post receive to obtain response size from server Pet
       recv1commhList[dstPet] = NULL;
-//sprintf(msg, "posting nb-recv for message from PET %d size=%d", i, sizeof(int));
+//sprintf(msg, "posting nb-recv for message from PET %d size=%d", dstPet, sizeof(int));
 //ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
-      
+
       vm->recv(&(responseStreamSizeClient[dstPet]), sizeof(int), dstPet,
         &(recv1commhList[dstPet]));
-
     }
   }
-  
 
-#else  
+#else
+
   for (int ii=localPet+petCount-1; ii>localPet; ii--){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
@@ -220,8 +212,9 @@ void accessLookup(
         &(recv1commhList[i]));
     }
   }
+
 #endif
-  
+
   // localPet locally acts as server and client to fill its own request
   // t-specific client-server routine
 //ESMC_LogDefault.Write("accessLookup: step 3", ESMC_LOGMSG_DEBUG); 
@@ -360,7 +353,7 @@ void accessLookup(
         delete [] responseStreamServer[i];
       }
     }
-  }  
+  }
   // garbage collection
   delete [] requestStreamClient;
   delete [] requestStreamServer;
@@ -380,14 +373,14 @@ void accessLookup(
 // --------------------------------------------------
 // FillLinSeqVectInfo-specific accessLookup routines:
 
-template<typename IT1, typename IT2> 
+template<typename IT1, typename IT2>
   int requestSizeFactor(FillLinSeqVectInfo<IT1,IT2> *fillLinSeqVectInfo){
   return 4*sizeof(int) + sizeof(IT1);
   // lookupIndex, j, decompSeqIndex, tensorSeqIndex, linIndex
 }
 
-template<typename IT1, typename IT2> 
-  void clientRequest(FillLinSeqVectInfo<IT1,IT2> *fillLinSeqVectInfo, 
+template<typename IT1, typename IT2>
+  void clientRequest(FillLinSeqVectInfo<IT1,IT2> *fillLinSeqVectInfo,
   int dstPet, char **requestStreamClient){
   const int localDeCount = fillLinSeqVectInfo->localDeCount;
   const int *localDeElementCount = fillLinSeqVectInfo->localDeElementCount;
@@ -448,37 +441,25 @@ template<typename IT1, typename IT2>
   }
 }
 
-  
-template<typename IT1> 
-  static bool _less_just_max(const Interval<IT1>  lhs, const Interval<IT1> rhs) {
-    return (lhs.max < rhs.max);
-  }
-  
-
-template<typename IT1, typename IT2> 
+template<typename IT1, typename IT2>
   void clientRequestSearch(FillLinSeqVectInfo<IT1,IT2> *fillLinSeqVectInfo,
-                                ESMCI::VM *vm, char **requestStreamClient){
+  ESMCI::VM *vm, char **requestStreamClient){
   const int localDeCount = fillLinSeqVectInfo->localDeCount;
   const int *localDeElementCount = fillLinSeqVectInfo->localDeElementCount;
   const Interval<IT1> *seqIndexInterval = fillLinSeqVectInfo->seqIndexInterval;
   const bool tensorMixFlag = fillLinSeqVectInfo->tensorMixFlag;
-
   // Get VM info
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
-  
   // Memory to hold pointers into buffers
   int **requestStreamClientIntArray = new int*[petCount];
-  
   // Allocate buffers
   for (int ii=localPet+petCount-1; ii>localPet; ii--){
     // localPet-dependent shifted loop reduces communication contention
     int dstPet = ii%petCount;  // fold back into [0,..,petCount-1] range
-    
     // Save pointer
     requestStreamClientIntArray[dstPet]=(int *)requestStreamClient[dstPet];
   }
-
   // fill the requestStreamClient[dstPet] element
   for (int j=0; j<localDeCount; j++){
     if (fillLinSeqVectInfo->haloRimFlag){
@@ -489,31 +470,21 @@ template<typename IT1, typename IT2>
         SeqIndex<IT1> seqIndex = (*rimSeqIndex)[j][k];
         if (seqIndex.valid()){
           IT1 seqInd = seqIndex.decompSeqIndex;
-
           // Figure out which Pet it's on
           Interval<IT1> tmpInt;
           tmpInt.min=0;
           tmpInt.max=seqInd;
           tmpInt.count=0;
-          
-          //         auto seqIndPos = std::lower_bound(seqIndexInterval, seqIndexInterval+petCount, tmpInt);
-          const Interval<IT1> *seqIndPos = std::lower_bound(seqIndexInterval, seqIndexInterval+petCount, tmpInt);
+          const Interval<IT1> *seqIndPos = std::lower_bound(seqIndexInterval,
+            seqIndexInterval+petCount, tmpInt);
           int p=(int)(seqIndPos-seqIndexInterval);
           if (p >= petCount) continue;
           if (p == localPet) continue;
-          
-          //         for (int p=0; p<petCount; p++) {
-          //if (p == localPet) continue; // localPET is handled elsewhere
-          // if (localElementsPerIntervalCount[p]<=0) continue;
-            
-            IT1 seqIndMin = seqIndexInterval[p].min;
-            IT1 seqIndMax = seqIndexInterval[p].max;
-
-            
+          IT1 seqIndMin = seqIndexInterval[p].min;
+          IT1 seqIndMax = seqIndexInterval[p].max;
           if (seqInd >= seqIndMin && seqInd <= seqIndMax){
             IT1 seqIndCount = seqIndexInterval[p].count;
             int *requestStreamClientInt = requestStreamClientIntArray[p];
-            
             int lookupIndex = (int)(seqInd - seqIndMin);
             if (tensorMixFlag)
               lookupIndex += (seqIndex.tensorSeqIndex - 1) * (int)seqIndCount;
@@ -525,14 +496,8 @@ template<typename IT1, typename IT2>
             *requestStreamClientInt++   = seqIndex.tensorSeqIndex;
             *requestStreamClientInt++   =
               fillLinSeqVectInfo->array->getRimLinIndex()[j][k];
-
             requestStreamClientIntArray[p]=requestStreamClientInt;
-            
-            //             break;
           }
-
-          //}
-          
         }
       }
     }else{
@@ -542,74 +507,53 @@ template<typename IT1, typename IT2>
       while(arrayElement.isWithin()){
         SeqIndex<IT1> seqIndex = arrayElement.getSequenceIndex<IT1>();
         IT1 seqInd = seqIndex.decompSeqIndex;
-
           // Figure out which Pet it's on
           Interval<IT1> tmpInt;
           tmpInt.min=0;
           tmpInt.max=seqInd;
           tmpInt.count=0;
-          
-          //         auto seqIndPos = std::lower_bound(seqIndexInterval, seqIndexInterval+petCount, tmpInt);
-          const Interval<IT1> *seqIndPos = std::lower_bound(seqIndexInterval, seqIndexInterval+petCount, tmpInt);
+          const Interval<IT1> *seqIndPos = std::lower_bound(seqIndexInterval,
+            seqIndexInterval+petCount, tmpInt);
           int p=(int)(seqIndPos-seqIndexInterval);
-          // printf("sI=%d p=%d\n",seqInd,p);
-
           // If not found, then skip (?)
           if (p >= petCount) {
             arrayElement.next();
             continue;
           }
-
           // If it's this PET, then skip, because those are handled later
           if (p == localPet) {
             arrayElement.next();
             continue;
           }
-        
-          //          for (int p=0; p<petCount; p++) {
-          // if (p == localPet) continue; // localPET is handled elsewhere
-          // if (localElementsPerIntervalCount[p]<=0) continue;
-            
-            IT1 seqIndMin = seqIndexInterval[p].min;
-            IT1 seqIndMax = seqIndexInterval[p].max;
-
-            //            printf("sI=%d int=[%d %d] p=%d\n",seqInd,seqIndMin,seqIndMax,p);
-            
-        if (seqInd >= seqIndMin && seqInd <= seqIndMax){
-          IT1 seqIndCount = seqIndexInterval[p].count;
-          int *requestStreamClientInt = requestStreamClientIntArray[p];
-          
-          int lookupIndex = (int)(seqInd - seqIndMin);
-          if (tensorMixFlag)
-            lookupIndex += (seqIndex.tensorSeqIndex - 1) * (int)seqIndCount;
-          *requestStreamClientInt++   = lookupIndex;
-          *requestStreamClientInt++   = j;
-          IT1 *requestStreamClientIT1 = (IT1 *)requestStreamClientInt;
-          *requestStreamClientIT1++   = seqIndex.decompSeqIndex;
-          requestStreamClientInt      = (int *)requestStreamClientIT1;
-          *requestStreamClientInt++   = seqIndex.tensorSeqIndex;
-          *requestStreamClientInt++   =
-            arrayElement.getLinearIndex();
-
-          requestStreamClientIntArray[p]=requestStreamClientInt;
-        }
-        //          }
-
+          IT1 seqIndMin = seqIndexInterval[p].min;
+          IT1 seqIndMax = seqIndexInterval[p].max;
+          if (seqInd >= seqIndMin && seqInd <= seqIndMax){
+            IT1 seqIndCount = seqIndexInterval[p].count;
+            int *requestStreamClientInt = requestStreamClientIntArray[p];
+            int lookupIndex = (int)(seqInd - seqIndMin);
+            if (tensorMixFlag)
+              lookupIndex += (seqIndex.tensorSeqIndex - 1) * (int)seqIndCount;
+            *requestStreamClientInt++   = lookupIndex;
+            *requestStreamClientInt++   = j;
+            IT1 *requestStreamClientIT1 = (IT1 *)requestStreamClientInt;
+            *requestStreamClientIT1++   = seqIndex.decompSeqIndex;
+            requestStreamClientInt      = (int *)requestStreamClientIT1;
+            *requestStreamClientInt++   = seqIndex.tensorSeqIndex;
+            *requestStreamClientInt++   = arrayElement.getLinearIndex();
+            requestStreamClientIntArray[p]=requestStreamClientInt;
+          }
         // Next element
         arrayElement.next();
       } // end while over all exclusive elements
     }
   }
-  
-
   // Free memory holding pointers into buffers
   delete [] requestStreamClientIntArray;
 }
 
 
-  
-template<typename IT1, typename IT2> 
-  void localClientServerExchange(FillLinSeqVectInfo<IT1,IT2> 
+template<typename IT1, typename IT2>
+  void localClientServerExchange(FillLinSeqVectInfo<IT1,IT2>
     *fillLinSeqVectInfo){
   const int localPet = fillLinSeqVectInfo->localPet;
   const int localDeCount = fillLinSeqVectInfo->localDeCount;
@@ -754,8 +698,8 @@ template<typename IT1, typename IT2>
       }
     }
   }
-}        
-        
+}
+
 template<typename IT1, typename IT2> 
   void clientProcess(FillLinSeqVectInfo<IT1,IT2> *fillLinSeqVectInfo, 
     char *responseStream, int responseStreamSize){
@@ -795,7 +739,7 @@ template<typename IT1, typename IT2>
     linSeqVect[j].push_back(element);
   }
 }
-        
+
 // -------------------------------------------------
 // FillPartnerDeInfo-specific accessLookup routines:
 
@@ -824,13 +768,12 @@ template<typename IT1, typename IT2>
   for (typename vector<DD::SeqIndexFactorLookup<IT2> >::const_iterator
     j=seqIndexFactorLookupOut.begin(); j!=seqIndexFactorLookupOut.end(); ++j){
     for (int k=0; k<j->factorCount; k++){
-      IT2 partnerSeqInd = j->factorList[k]
-        .partnerSeqIndex.decompSeqIndex;
+      IT2 partnerSeqInd = j->factorList[k].partnerSeqIndex.decompSeqIndex;
       if (partnerSeqInd >= seqIndMin && partnerSeqInd <= seqIndMax){
         int lookupIndex = (int)(partnerSeqInd - seqIndMin);
         if (tensorMixFlag){
-          lookupIndex += (j->factorList[k]
-            .partnerSeqIndex.tensorSeqIndex - 1) * (int)seqIndCount;
+          lookupIndex += (j->factorList[k].partnerSeqIndex.tensorSeqIndex - 1)
+            * (int)seqIndCount;
         }
         int *requestStreamClientInt = (int *)requestStreamClient[dstPet];
         requestStreamClientInt[3*jj] = lookupIndex;
@@ -852,10 +795,9 @@ template<typename IT1, typename IT2>
   }
 }
 
-
 template<typename IT1, typename IT2>
   void clientRequestSearch(FillPartnerDeInfo<IT1,IT2> *fillPartnerDeInfo,
-                              ESMCI::VM *vm, char **requestStreamClient){
+  ESMCI::VM *vm, char **requestStreamClient){
   const int localPetfpDEI = fillPartnerDeInfo->localPet;
   const Interval<IT1> *seqIndexIntervalIn =
     fillPartnerDeInfo->seqIndexIntervalIn;
@@ -864,17 +806,13 @@ template<typename IT1, typename IT2>
   vector<SeqIndexFactorLookup<IT2> > &seqIndexFactorLookupOut =
     fillPartnerDeInfo->seqIndexFactorLookupOut;
   const bool tensorMixFlag = fillPartnerDeInfo->tensorMixFlag;
-
   // Get VM info
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
-
   // Loop over pets  
   for (int ii=localPet+petCount-1; ii>localPet; ii--){
     // localPet-dependent shifted loop reduces communication contention
     int dstPet = ii%petCount;  // fold back into [0,..,petCount-1] range
-
- 
     // fill the requestStreamClient[dstPet] element
     IT1 seqIndMin = seqIndexIntervalIn[dstPet].min;
     IT1 seqIndMax = seqIndexIntervalIn[dstPet].max;
@@ -882,15 +820,14 @@ template<typename IT1, typename IT2>
     int jj = 0; // reset
     int localLookupIndex = 0; // reset
     for (typename vector<DD::SeqIndexFactorLookup<IT2> >::const_iterator
-           j=seqIndexFactorLookupOut.begin(); j!=seqIndexFactorLookupOut.end(); ++j){
+      j=seqIndexFactorLookupOut.begin(); j!=seqIndexFactorLookupOut.end(); ++j){
       for (int k=0; k<j->factorCount; k++){
-        IT2 partnerSeqInd = j->factorList[k]
-          .partnerSeqIndex.decompSeqIndex;
+        IT2 partnerSeqInd = j->factorList[k].partnerSeqIndex.decompSeqIndex;
         if (partnerSeqInd >= seqIndMin && partnerSeqInd <= seqIndMax){
           int lookupIndex = (int)(partnerSeqInd - seqIndMin);
           if (tensorMixFlag){
-            lookupIndex += (j->factorList[k]
-                            .partnerSeqIndex.tensorSeqIndex - 1) * (int)seqIndCount;
+            lookupIndex += (j->factorList[k].partnerSeqIndex.tensorSeqIndex - 1)
+              * (int)seqIndCount;
           }
           int *requestStreamClientInt = (int *)requestStreamClient[dstPet];
           requestStreamClientInt[3*jj] = lookupIndex;
@@ -910,9 +847,9 @@ template<typename IT1, typename IT2>
       }
       ++localLookupIndex;
     }
-  } 
+  }
 }
-  
+
 template<typename IT1, typename IT2>
   void localClientServerExchange(FillPartnerDeInfo<IT1,IT2> *fillPartnerDeInfo){
   const int localPet = fillPartnerDeInfo->localPet;
@@ -982,8 +919,8 @@ template<typename IT1, typename IT2>
     for (int j=0; j<size; j++)
       *responseStreamInt++ = seqIndexFactorLookupIn[lookupIndex].de[j]; // de
   }
-}        
-        
+}
+
 template<typename IT1, typename IT2>
   void clientProcess(FillPartnerDeInfo<IT1,IT2> *fillPartnerDeInfo,
     char *responseStream, int responseStreamSize){
@@ -1104,30 +1041,21 @@ template<typename IT1, typename IT2>
         }
       }
     }
-
-    virtual void messagePrepareSearch(VMK *vmk, 
-                                         int sendIndexOffset, int iiStart, int iiEnd, 
-                                         vector<char *> &sendBuffer
-                                         )const{
-
+    virtual void messagePrepareSearch(VMK *vmk, int sendIndexOffset,
+      int iiStart, int iiEnd, vector<char *> &sendBuffer)const{
       // Get Pet info
       int petCount = vmk->getNpets();
       int localPet = vmk->getMypet();
-
       // Allocate memory to hold pointers into buffers
       int **bufferIntArray = new int*[petCount];
-
       // Init to NULL
-      for (int i=0; i<petCount; i++) {
+      for (int i=0; i<petCount; i++)
         bufferIntArray[i] = NULL;
-      }
-      
       // Get beginning of buffers for range
       for (int ii=sendIndexOffset-iiStart; ii>sendIndexOffset-iiEnd; ii--){
         int dstPet = ii%petCount;  // fold back into [0,..,petCount-1] range
         bufferIntArray[dstPet] = (int *)(sendBuffer[dstPet]);
       }
-             
       // Find where eqch SeqInd goes
       for (int j=0; j<localDeCount; j++){
         int de = localDeToDeMap[j];  // global DE number
@@ -1139,35 +1067,30 @@ template<typename IT1, typename IT2>
             SeqIndex<IT> seqIndex = (*rimSeqIndex)[j][k];
             if (seqIndex.valid()){
               IT seqInd = seqIndex.decompSeqIndex;
-
               // Figure out which Pet it's on
               Interval<IT> tmpInt;
               tmpInt.min=0;
               tmpInt.max=seqInd;
               tmpInt.count=0;
-          
-              const Interval<IT> *seqIndPos = std::lower_bound(seqIndexInterval, seqIndexInterval+petCount, tmpInt);
+              const Interval<IT> *seqIndPos =
+                std::lower_bound(seqIndexInterval, seqIndexInterval+petCount,
+                tmpInt);
               int dstPet=(int)(seqIndPos-seqIndexInterval);
               if (dstPet >= petCount) continue;
               if (dstPet == localPet) continue;
               if (bufferIntArray[dstPet] == NULL) continue;
-              
               IT seqIndMin = seqIndexInterval[dstPet].min;
-              IT seqIndMax = seqIndexInterval[dstPet].max;              
-              
+              IT seqIndMax = seqIndexInterval[dstPet].max;
               if (seqInd >= seqIndMin && seqInd <= seqIndMax){
-              IT seqIndCount = seqIndexInterval[dstPet].count;                
+                IT seqIndCount = seqIndexInterval[dstPet].count;
                 int lookupIndex = (int)(seqInd - seqIndMin);
                 if (tensorMixFlag)
                   lookupIndex += (seqIndex.tensorSeqIndex - 1)
                   * (int)seqIndCount;
-
                 int *bufferInt = bufferIntArray[dstPet];
-                
                 *bufferInt++ = lookupIndex;
                 *bufferInt++ = de;
-                
-                bufferIntArray[dstPet]=bufferInt;                
+                bufferIntArray[dstPet] = bufferInt;
               }
             }
           }
@@ -1177,60 +1100,49 @@ template<typename IT1, typename IT2>
           while(arrayElement.isWithin()){
             SeqIndex<IT> seqIndex = arrayElement.getSequenceIndex<IT>();
             IT seqInd = seqIndex.decompSeqIndex;
-            
             // Figure out which Pet it's on
             Interval<IT> tmpInt;
             tmpInt.min=0;
             tmpInt.max=seqInd;
             tmpInt.count=0;
-            
-            const Interval<IT> *seqIndPos = std::lower_bound(seqIndexInterval, seqIndexInterval+petCount, tmpInt);
+            const Interval<IT> *seqIndPos =
+              std::lower_bound(seqIndexInterval, seqIndexInterval+petCount,
+              tmpInt);
             int dstPet=(int)(seqIndPos-seqIndexInterval);
-
             // If not found, then skip (?)
             if (dstPet >= petCount) {
               arrayElement.next();
               continue;
             }
-
             // If it's this PET, then skip, because those are handled later
             if (dstPet == localPet) {
               arrayElement.next();
               continue;
             }
-
-	    // If buffer doesn't exist, then skip
+            // If buffer doesn't exist, then skip
             if (bufferIntArray[dstPet] == NULL) {
               arrayElement.next();
               continue;
             }
-            
             IT seqIndMin = seqIndexInterval[dstPet].min;
-            IT seqIndMax = seqIndexInterval[dstPet].max;              
-            
+            IT seqIndMax = seqIndexInterval[dstPet].max;
             if (seqInd >= seqIndMin && seqInd <= seqIndMax){
-              IT seqIndCount = seqIndexInterval[dstPet].count;                
+              IT seqIndCount = seqIndexInterval[dstPet].count;
               int lookupIndex = (int)(seqInd - seqIndMin);
               if (tensorMixFlag)
                 lookupIndex += (seqIndex.tensorSeqIndex - 1) * (int)seqIndCount;
-              
               int *bufferInt = bufferIntArray[dstPet];
-              
               *bufferInt++ = lookupIndex;
               *bufferInt++ = de;
-              
-              bufferIntArray[dstPet]=bufferInt;                
+              bufferIntArray[dstPet] = bufferInt;
             }
             arrayElement.next();
           } // end while over all exclusive elements
         }
       }
-
       // Free memory holding pointers into buffers
-      delete [] bufferIntArray;      
+      delete [] bufferIntArray;
     }
-
-    
     virtual void messageProcess(int srcPet, int dstPet, char *buffer){
       int count = messageSizeCount(srcPet, dstPet);
       int *bufferInt = (int *)buffer;    
@@ -1298,7 +1210,7 @@ template<typename IT1, typename IT2>
       }
     }
   };
-        
+
   // -------------------------------------------------
   // abstract parent class for DE info fill stage1 and stage2
   template<typename IT> class SetupSeqIndexFactorLookup:public ComPat{
@@ -1402,32 +1314,23 @@ template<typename IT1, typename IT2>
         seqIntervFactorListLookupIndexToPet[dstPet].front()),
         messageSizeCount(srcPet, dstPet)*sizeof(int));
     }
-
-    virtual void messagePrepareSearch(VMK *vmk, 
-                                         int sendIndexOffset, int iiStart, int iiEnd, 
-                                         vector<char *> &sendBuffer
-                                         )const{
-
+    virtual void messagePrepareSearch(VMK *vmk, int sendIndexOffset,
+      int iiStart, int iiEnd, vector<char *> &sendBuffer)const{
       // Get Pet info
       int petCount = vmk->getNpets();
       int localPet = vmk->getMypet();
-      
-
       // localPet acts as a sender, constructs message and sends to receiver
       for (int ii=sendIndexOffset-iiStart; ii>sendIndexOffset-iiEnd; ii--){
         // localPet-dependent shifted loop reduces communication contention
         int dstPet = ii%petCount;  // fold back into [0,..,petCount-1] range
-        // send message to Pet "i"
+        // send message to dstPet
         int size = messageSize(localPet, dstPet);
         if (size>0){
-      
           // Just use the usual 1 PET messagePrepare
           messagePrepare(localPet, dstPet, sendBuffer[dstPet]);
         }
       }
-
     }
-    
     virtual void messageProcess(int srcPet, int dstPet, char *buffer){
       int *bufferInt = (int *)buffer;
       for (int i=0; i<messageSizeCount(srcPet, dstPet); i++){
@@ -1517,30 +1420,23 @@ template<typename IT1, typename IT2>
       else if (typekindFactors == ESMC_TYPEKIND_I8)
         fillStream<ESMC_I8>(srcPet, dstPet, buffer);
     }
-
-    virtual void messagePrepareSearch(VMK *vmk, 
-                                         int sendIndexOffset, int iiStart, int iiEnd, 
-                                         vector<char *> &sendBuffer
-                                         )const{
-
+    virtual void messagePrepareSearch(VMK *vmk, int sendIndexOffset,
+      int iiStart, int iiEnd, vector<char *> &sendBuffer)const{
       // Get Pet info
       int petCount = vmk->getNpets();
       int localPet = vmk->getMypet();
-
       // localPet acts as a sender, constructs message and sends to receiver
       for (int ii=sendIndexOffset-iiStart; ii>sendIndexOffset-iiEnd; ii--){
         // localPet-dependent shifted loop reduces communication contention
         int dstPet = ii%petCount;  // fold back into [0,..,petCount-1] range
-        // send message to Pet "i"
+        // send message to dstPet
         int size = messageSize(localPet, dstPet);
         if (size>0){
-
           // Just use the usual 1 PET messagePrepare
           messagePrepare(localPet, dstPet, sendBuffer[dstPet]);
         }
       }
     }
-    
     virtual void messageProcess(int srcPet, int dstPet, char *buffer){
       ESMC_TypeKind_Flag typekindFactors =
         SetupSeqIndexFactorLookup<IT>::typekindFactors;
@@ -2036,7 +1932,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
     // if there is not tensor mixing then default into tensor for tensor mode
     srcTensorElementCountEff = 1;
     dstTensorElementCountEff = 1;
-  }    
+  }
 
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.3"));
