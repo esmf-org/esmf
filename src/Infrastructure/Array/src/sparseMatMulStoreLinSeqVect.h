@@ -394,9 +394,9 @@ template<typename IT1, typename IT2>
   for (int j=0; j<localDeCount; j++){
     if (fillLinSeqVectInfo->haloRimFlag){
       // loop over the halo rim elements for localDe j
+      const std::vector<std::vector<SeqIndex<IT1> > > *rimSeqIndex;
+      fillLinSeqVectInfo->array->getRimSeqIndex(&rimSeqIndex);
       for (int k=0; k<fillLinSeqVectInfo->array->getRimElementCount()[j]; k++){
-        const std::vector<std::vector<SeqIndex<IT1> > > *rimSeqIndex;
-        fillLinSeqVectInfo->array->getRimSeqIndex(&rimSeqIndex);
         SeqIndex<IT1> seqIndex = (*rimSeqIndex)[j][k];
         if (seqIndex.valid()){
           IT1 seqInd = seqIndex.decompSeqIndex;
@@ -464,9 +464,9 @@ template<typename IT1, typename IT2>
   for (int j=0; j<localDeCount; j++){
     if (fillLinSeqVectInfo->haloRimFlag){
       // loop over the halo rim elements for localDe j
+      const std::vector<std::vector<SeqIndex<IT1> > > *rimSeqIndex;
+      fillLinSeqVectInfo->array->getRimSeqIndex(&rimSeqIndex);
       for (int k=0; k<fillLinSeqVectInfo->array->getRimElementCount()[j]; k++){
-        const std::vector<std::vector<SeqIndex<IT1> > > *rimSeqIndex;
-        fillLinSeqVectInfo->array->getRimSeqIndex(&rimSeqIndex);
         SeqIndex<IT1> seqIndex = (*rimSeqIndex)[j][k];
         if (seqIndex.valid()){
           IT1 seqInd = seqIndex.decompSeqIndex;
@@ -571,9 +571,9 @@ template<typename IT1, typename IT2>
   for (int j=0; j<localDeCount; j++){
     if (fillLinSeqVectInfo->haloRimFlag){
       // loop over the halo rim elements for localDe j
+      const std::vector<std::vector<SeqIndex<IT1> > > *rimSeqIndex;
+      fillLinSeqVectInfo->array->getRimSeqIndex(&rimSeqIndex);
       for (int k=0; k<fillLinSeqVectInfo->array->getRimElementCount()[j]; k++){
-        const std::vector<std::vector<SeqIndex<IT1> > > *rimSeqIndex;
-        fillLinSeqVectInfo->array->getRimSeqIndex(&rimSeqIndex);
         SeqIndex<IT1> seqIndex = (*rimSeqIndex)[j][k];
         if (seqIndex.valid()){
           IT1 seqInd = seqIndex.decompSeqIndex;
@@ -1005,9 +1005,9 @@ template<typename IT1, typename IT2>
         int de = localDeToDeMap[j];  // global DE number
         if (haloRimFlag){
           // loop over the halo rim elements for localDe j
+          const std::vector<std::vector<SeqIndex<IT> > > *rimSeqIndex;
+          array->getRimSeqIndex(&rimSeqIndex);
           for (int k=0; k<array->getRimElementCount()[j]; k++){
-            const std::vector<std::vector<SeqIndex<IT> > > *rimSeqIndex;
-            array->getRimSeqIndex(&rimSeqIndex);
             SeqIndex<IT> seqIndex = (*rimSeqIndex)[j][k];
             if (seqIndex.valid()){
               IT seqInd = seqIndex.decompSeqIndex;
@@ -1061,9 +1061,9 @@ template<typename IT1, typename IT2>
         int de = localDeToDeMap[j];  // global DE number
         if (haloRimFlag){
           // loop over the halo rim elements for localDe j
+          const std::vector<std::vector<SeqIndex<IT> > > *rimSeqIndex;
+          array->getRimSeqIndex(&rimSeqIndex);
           for (int k=0; k<array->getRimElementCount()[j]; k++){
-            const std::vector<std::vector<SeqIndex<IT> > > *rimSeqIndex;
-            array->getRimSeqIndex(&rimSeqIndex);
             SeqIndex<IT> seqIndex = (*rimSeqIndex)[j][k];
             if (seqIndex.valid()){
               IT seqInd = seqIndex.decompSeqIndex;
@@ -1165,9 +1165,9 @@ template<typename IT1, typename IT2>
         int de = localDeToDeMap[j];  // global DE number
         if (haloRimFlag){
           // loop over the halo rim elements for localDe j
+          const std::vector<std::vector<SeqIndex<IT> > > *rimSeqIndex;
+          array->getRimSeqIndex(&rimSeqIndex);
           for (int k=0; k<array->getRimElementCount()[j]; k++){
-            const std::vector<std::vector<SeqIndex<IT> > > *rimSeqIndex;
-            array->getRimSeqIndex(&rimSeqIndex);
             SeqIndex<IT> seqIndex = (*rimSeqIndex)[j][k];
             if (seqIndex.valid()){
               IT seqInd = seqIndex.decompSeqIndex;
