@@ -123,7 +123,33 @@ extern "C" {
   } // end ESMC_Initialize
 //-----------------------------------------------------------------------------
 
-  //-----------------------------------------------------------------------------
+ //-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Finalize - Finalize the ESMF Framework
+//
+// !INTERFACE:
+  int ESMC_FinalizeWithFlag(
+//
+// !RETURN VALUE:
+//  int return code
+//
+// !ARGUMENTS:
+    ESMC_End_Flag endFlag){
+//  
+// !DESCRIPTION:
+//
+//EOP
+
+    int localrc;
+
+    localrc = ESMCI_Finalize(endFlag);
+
+    return localrc;
+
+  } // end ESMC_FinalizeWithFlag
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_Finalize - Finalize the ESMF Framework
 //

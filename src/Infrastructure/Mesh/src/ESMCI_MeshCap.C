@@ -561,7 +561,7 @@ void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
 void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                               int *_areaPresent, double *elemArea,
                               int *_coordsPresent, double *elemCoords,
-                              int *_num_elemConn, int *elemConn, 
+                              int *_elemConn_size, int *elemConn, 
                               ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                               int *rc)
 {
@@ -576,7 +576,7 @@ void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, Inter
                           _num_elems, elemId, elemType, _elemMaskII ,
                           _areaPresent, elemArea,
                           _coordsPresent, elemCoords,
-                          _num_elemConn, elemConn, 
+                          _elemConn_size, elemConn, 
                           _coordSys, _orig_sdim,
                           &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,ESMC_CONTEXT, rc);
@@ -588,7 +588,7 @@ void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, Inter
                        _num_elems, elemId, elemType, _elemMaskII,
                        _areaPresent, elemArea,
                        _coordsPresent, elemCoords,
-                       _num_elemConn, elemConn,
+                       _elemConn_size, elemConn,
                        _coordSys, _orig_sdim,
                        &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,ESMC_CONTEXT, rc);

@@ -33,11 +33,14 @@ do
 done
 
 if [ $# -gt 0 ]; then
-# If relative path is used prepend a ./
-    progname=`dirname $1`/`basename $1`
+    progname=$1
     shift
+    # If the given command isn't in PATH, assume relative path is used, so prepend a ./
+    if ! command -v $progname &> /dev/null; then
+        progname=`dirname $progname`/`basename $progname`
+    fi
 
-# Execute the program
+    # Execute the program
     $progname $*
     exit $?
 fi

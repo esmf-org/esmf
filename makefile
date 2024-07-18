@@ -782,6 +782,7 @@ install: envdump
 	-@echo "Installing ESMF:"
 	-@echo " "
 	mkdir -p $(ESMF_INSTALL_HEADERDIR_ABSPATH)
+	cp -f $(ESMF_BUILD)/src/include/NUOPC.h $(ESMF_INSTALL_HEADERDIR_ABSPATH)
 	cp -f $(ESMF_BUILD)/src/include/ESMC.h $(ESMF_INSTALL_HEADERDIR_ABSPATH)
 	cp -f $(ESMF_BUILD)/src/include/ESMC_*.h $(ESMF_INSTALL_HEADERDIR_ABSPATH)
 	cp -f $(ESMF_DIR)/build_config/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_SITE)/ESMC_Conf.h $(ESMF_INSTALL_HEADERDIR_ABSPATH)

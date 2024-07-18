@@ -102,11 +102,16 @@ void RemoveGhost();
 
 bool HasGhost() const { return sghost != NULL; }
 
- CommReg &GhostComm() { ThrowRequire(sghost); return *sghost; }
+CommReg &GhostComm() { ThrowRequire(sghost); return *sghost; }
 
- // Convenience function to communicate all fields to ghost locations
- void GhostCommAllFields();
+// Convenience function to communicate fields to ghost locations
+void GhostCommFields(UInt nfields, MEField<> *const *sfields, MEField<> *const *rfields);
+  
+  
+// Convenience function to communicate all fields to ghost locations
+void GhostCommAllFields();
 
+  
 // Create the sym rel
 void build_sym_comm_rel(UInt obj_type);
 

@@ -180,6 +180,17 @@ class BaseTime : public Fraction { // it is a fraction !
     // internal validation
     int validate(const char *options=0) const;
 
+    // Check if BaseTime hasn't been initialized yet. 
+    // This was added to avoid going through validate and dumping the error message into the logs for an unset basetime
+    // in TimeSet(). 
+    // Right now this mimics validate() in that it checks for a 0 denominator in the fraction. This works because
+    // the entire structure is init to 0 on the F90 level via ESMF_TimeType.F90 and setting a 0 denominator in Time after that
+    // will result in an error due to the validate() that occurs after the BaseTime set in TimeSet.  
+    //  
+    bool uninit() {
+      return (getd() == 0);
+    }
+  
     // for testing/debugging
     int print(const char *options=0) const;
 
