@@ -732,19 +732,22 @@ class VMKPlan{
 class ComPat{
  private:
   // pure virtual methods to be implemented by user
-     
+
   virtual int messageSize(int srcPet, int dstPet)                  const =0;
     // will be called on both sides, i.e. localPet==srcPet and localPet==dstPet
- 
+
   virtual void messagePrepare(int srcPet, int dstPet, char *buffer)const =0;
     // will be called only for localPet==srcPet
-  
+
+  virtual void messagePrepareSearch(VMK *vmk, int sendIndexOffset, int iiStart,
+    int iiEnd, std::vector<char *> &sendBuffer)                    const =0;
+
   virtual void messageProcess(int srcPet, int dstPet, char *buffer)      =0;
     // will be called only for localPet==dstPet
-  
+
   virtual void localPrepareAndProcess(int localPet)                      =0;
     // will be called for every localPet once
-  
+
  public:
   // communication patterns
   void totalExchange(VMK *vmk);
@@ -754,28 +757,28 @@ class ComPat{
 class ComPat2{
  private:
   // pure virtual methods to be implemented by user
-     
+
   virtual void handleLocal() =0;
     // called on every localPet exactly once, before any other method
 
   virtual void generateRequest(int responsePet,
     char* &requestBuffer, int &requestSize) =0;
     // called on every localPet for every responsePet != localPet
- 
+
   virtual void handleRequest(int requestPet,
     char *requestBuffer, int requestSize,
     char* &responseBuffer, int &responseSize)const =0;
     // called on every localPet for every requestPet != localPet
- 
+
   virtual void handleResponse(int responsePet,
     char const *responseBuffer, int responseSize)const =0;
     // called on every localPet for every responsePet != localPet
 
  public:
-     
+
   // communication patterns
   void totalExchange(VMK *vmk);
-  void selectiveExchange(VMK *vmk, std::vector<int>&responderPet, 
+  void selectiveExchange(VMK *vmk, std::vector<int>&responderPet,
     std::vector<int>&requesterPet);
 }; // ComPat2
 
