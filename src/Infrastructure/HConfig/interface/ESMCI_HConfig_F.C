@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -170,6 +170,26 @@ extern "C" {
       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  // Check for equality
+  // Since this is used as equality operator above, there isn't a place to pass
+  // a return code, so just pass false for an error instead (as done with
+  // equality operators elsewhere in ESMF).
+  void FTN_X(c_esmc_hconfigequal)(ESMCI::HConfig *hconfig1,
+    ESMCI::HConfig *hconfig2, ESMC_Logical *isEqual){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_hconfigequal()"
+    // Init return
+    *isEqual = ESMF_FALSE;
+    // Test for NULL pointers
+    if (hconfig1 == NULL) return;
+    if (hconfig2 == NULL) return;
+    // call into C++
+    bool equal = ESMCI::HConfig::equal(hconfig1, hconfig2);
+    // Convert to ESMF Logical
+    if (equal) *isEqual=ESMF_TRUE;
+    else  *isEqual = ESMF_FALSE;
   }
 
   void FTN_X(c_esmc_hconfigdestroy)(ESMCI::HConfig *ptr, int *rc){

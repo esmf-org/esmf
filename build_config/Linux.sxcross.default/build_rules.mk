@@ -66,11 +66,6 @@ ESMF_F90LINKOPTS          += -Wf,"-L fmtlist,map,objlist,summary,transform"
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
 
 ############################################################
-# NEC SX compute nodes do not have support for "gethostid()"
-#
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_GETHOSTID
-
-############################################################
 # NEC SX compute nodes do not have support for "nanosleep()"
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_NANOSLEEP

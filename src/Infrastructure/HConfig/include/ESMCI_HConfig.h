@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -64,6 +64,7 @@ namespace ESMCI {
       static HConfig create(int *rc=NULL);
       template <typename T> static HConfig create(T content, int *rc=NULL);
       template <typename T> static HConfig create(T *content, int count, int *rc=NULL);
+      static bool equal(HConfig *hconfig1, HConfig *hconfig2);
       static int destroy(HConfig *hconfig);
 
       template <typename T> inline static YAML::Node find(T self, HConfig *key);
