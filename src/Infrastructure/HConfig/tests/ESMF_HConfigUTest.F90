@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -790,6 +790,14 @@ program ESMF_HConfigUTest
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test fix for issue where two HConfig begin iterators aren't equal."
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call HConfigNASAIterIssueTest(rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+  
+  !------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
   !------------------------------------------------------------------------
 
@@ -1074,4 +1082,69 @@ program ESMF_HConfigUTest
 
   end subroutine
 
+  ! Reproduce an issue found by NASA on NAG systems (support ticket #385) where two begin iterators produced by
+  ! subsequent calls to ESMF_HConfigIterBegin() aren't equal.
+  subroutine HConfigNASAIterIssueTest(rc)
+    integer, intent(out)  :: rc
+
+    type(ESMF_HConfig) :: base_config, temp_configs
+    type(ESMF_HConfigIter) :: hconfigIter,hconfigIterBegin,hconfigIterEnd
+    logical :: looped
+
+    ! Create base hconfig
+    base_config = ESMF_HConfigCreate(filename='iterequalrepro.yaml',rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    ! Does it have collections
+    if (ESMF_HConfigIsDefined(base_config,keyString='Collections')) then
+       ! Get Collection
+       temp_configs = ESMF_HConfigCreateAt(base_config,keyString="Collections",rc=rc)
+       if (rc /= ESMF_SUCCESS) return
+
+       ! Get iterator to collection
+       hconfigIter = ESMF_HConfigIterBegin(temp_configs,rc=rc)
+       if (rc /= ESMF_SUCCESS) return
+
+       ! Get begin iterator to collection
+       hconfigIterBegin = ESMF_HConfigIterBegin(temp_configs, rc=rc)
+       if (rc /= ESMF_SUCCESS) return
+       
+       ! Get end iterator to collection
+       hconfigIterEnd = ESMF_HConfigIterEnd(temp_configs,rc=rc)
+       if (rc /= ESMF_SUCCESS) return
+       
+       ! Both begin iterators should be the same
+       if (hconfigIter /= hconfigIterBegin) then
+          rc=ESMF_FAILURE
+          return
+       endif
+
+       ! Check if it's looping
+       looped=.false.
+       do while (ESMF_HConfigIterLoop(hconfigIter,hconfigIterBegin,hconfigIterEnd))
+          looped=.true.
+       enddo
+
+       ! Should have looped at least once
+       if (.not. looped) then
+          rc=ESMF_FAILURE
+          return
+       endif
+
+       ! Get rid of Collection hconfig
+       call ESMF_HConfigDestroy(temp_configs, rc=rc)
+       if (rc /= ESMF_SUCCESS) return
+    end if
+
+    ! Get rid of Collection hconfig
+    call ESMF_HConfigDestroy(base_config, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    
+    ! Return success
+    rc = ESMF_SUCCESS
+    
+  end subroutine HConfigNASAIterIssueTest
+
+    
+  
 end program ESMF_HConfigUTest

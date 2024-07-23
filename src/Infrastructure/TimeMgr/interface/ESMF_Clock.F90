@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -426,7 +426,7 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_ClockCreate()
       function ESMF_ClockCreateNew(timeStep, startTime, keywordEnforcer, &
-        stopTime, runDuration, runTimeStepCount, refTime, name, rc)
+        stopTime, runDuration, runTimeStepCount, refTime, repeatDuration, name, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Clock) :: ESMF_ClockCreateNew
@@ -439,6 +439,7 @@
       type(ESMF_TimeInterval), intent(in),  optional :: runDuration
       integer,                 intent(in),  optional :: runTimeStepCount
       type(ESMF_Time),         intent(in),  optional :: refTime
+      type(ESMF_TimeInterval), intent(in),  optional :: repeatDuration
       character (len=*),       intent(in),  optional :: name
       integer,                 intent(out), optional :: rc
 
@@ -482,6 +483,9 @@
 !     \item[{[refTime]}]
 !          The {\tt ESMF\_Clock}'s reference time.  Provides reference point
 !          for simulation time (see currSimTime in ESMF\_ClockGet() below).
+!     \item[{[repeatDuration]}]
+!          If specified and not 0, then makes {\tt ESMF\_Clock} a repeating clock that runs for
+!          {\tt repeatDuration} and then resets back to {\tt statTime}.
 !     \item[{[name]}]
 !          The name for the newly created clock.  If not specified, a
 !          default unique name will be generated: "ClockNNN" where NNN
@@ -518,7 +522,7 @@
       ! invoke C to C++ entry point to allocate and initialize new clock
       call c_ESMC_ClockCreateNew(ESMF_ClockCreateNew, nameLen, name, &
                                  timeStep, startTime, stopTime, runDuration, &
-                                 runTimeStepCount, refTime, localrc)
+                                 runTimeStepCount, refTime, repeatDuration, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -680,7 +684,8 @@
         timeStep, startTime, stopTime, &
         runDuration, runTimeStepCount, refTime, currTime, prevTime, &
         currSimTime, prevSimTime, calendar, calkindflag, timeZone, &
-        advanceCount, alarmCount, direction, name, rc)
+        advanceCount, alarmCount, direction, repeatDuration, repeatCount, &
+        name, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),        intent(in)            :: clock
@@ -701,6 +706,8 @@
       integer(ESMF_KIND_I8),   intent(out), optional :: advanceCount
       integer,                 intent(out), optional :: alarmCount
       type(ESMF_Direction_Flag),    intent(out), optional :: direction
+      type(ESMF_TimeInterval), intent(out), optional :: repeatDuration
+      integer(ESMF_KIND_I8),   intent(out), optional :: repeatCount
       character (len=*),       intent(out), optional :: name
       integer,                 intent(out), optional :: rc
 
@@ -762,6 +769,10 @@
 !          The {\tt ESMF\_Clock}'s time stepping direction.  See also
 !          {\tt ESMF\_ClockIsReverse()}, an alternative for convenient use in
 !          "if" and "do while" constructs.
+!     \item[{[repeatDuration]}]
+!          If not 0, then how long the clock should run before going back to startTime.
+!     \item[{[repeatCount]}]
+!          The number of times this clock has gone back to startTime when repeating.       
 !     \item[{[name]}]
 !          The name of this clock.
 !     \item[{[rc]}]
@@ -800,7 +811,8 @@
                            runDuration, runTimeStepCount, refTime, &
                            currTime, prevTime, currSimTime, prevSimTime, &
                            calendar, calkindflag, timeZone, advanceCount, &
-                           alarmCount, direction, localrc)
+                           alarmCount, direction, repeatDuration, repeatCount, &
+                           localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -821,7 +833,8 @@
       call ESMF_TimeIntervalInit(currSimTime)
       call ESMF_TimeIntervalInit(prevSimTime)
       call ESMF_CalendarSetInitCreated(calendar)
-
+      call ESMF_TimeIntervalInit(repeatDuration)
+      
       ! Return success
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_ClockGet

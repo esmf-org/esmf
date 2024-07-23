@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -315,7 +315,7 @@ module NUOPC_Connector
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -400,7 +400,7 @@ module NUOPC_Connector
     endif
     
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -472,7 +472,7 @@ module NUOPC_Connector
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -779,7 +779,7 @@ module NUOPC_Connector
     endif
     
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1093,7 +1093,7 @@ module NUOPC_Connector
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1318,7 +1318,7 @@ module NUOPC_Connector
     endif
     
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1396,7 +1396,7 @@ module NUOPC_Connector
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
@@ -1692,7 +1692,7 @@ module NUOPC_Connector
     endif
     
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1753,7 +1753,7 @@ module NUOPC_Connector
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1831,7 +1831,7 @@ module NUOPC_Connector
     endif
     
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1919,7 +1919,7 @@ module NUOPC_Connector
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2584,7 +2584,7 @@ module NUOPC_Connector
     endif
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2699,7 +2699,7 @@ module NUOPC_Connector
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -3701,7 +3701,7 @@ module NUOPC_Connector
     endif
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -3809,7 +3809,7 @@ module NUOPC_Connector
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -4548,7 +4548,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -4896,7 +4896,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -4985,7 +4985,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
     
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -5080,7 +5080,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -5537,7 +5537,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
     
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -6092,7 +6092,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -6105,7 +6105,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -6164,7 +6164,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -6174,7 +6174,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -6243,7 +6243,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -6464,7 +6464,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
     
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -6545,7 +6545,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -6780,7 +6780,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
     
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 

@@ -1699,12 +1699,6 @@ export ESMF_PIO = $(ESMF_PIODEFAULT)
 endif
 
 ifeq ($(ESMF_PIO),internal)
-ifeq ($(ESMF_COMM),mpiuni)
-#TODO: This turns PIO off if it was set to internal from a default setting.
-#TODO: We need to do this while our internal PIO does not support mpiuni mode,
-#TODO: but want to allow external PIO or explicit ESMF_PIO setting for developm. #TODO: Eventually this should become unnecessary.
-ESMF_PIO = OFF
-endif
 ifndef ESMF_NETCDF
 # PIO, starting with version 2, depends on NetCDF. Defaulting to internal needs
 # be turned off if there is no NetCDF available. Externally set PIO will be let
@@ -1814,6 +1808,10 @@ endif
 #-------------------------------------------------------------------------------
 # NVML
 #-------------------------------------------------------------------------------
+ifeq ($(ESMF_NVML),OFF)
+ESMF_NVML=
+endif
+
 ifeq ($(ESMF_NVML),ON)
 ESMF_NVML = standard
 endif
@@ -2049,6 +2047,8 @@ ESMF_TRACE_LDPRELOAD := $(ESMF_LIBDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX)
 ESMF_PRELOADSCRIPT = $(ESMF_LIBDIR)/preload.sh
 
 ESMF_SL_PRELOAD_LIBLINKER = $(ESMF_CXXCOMPILER)
+ESMF_SL_PRELOAD_LIBOPTS = $(ESMF_CXXLINKOPTS)
+ESMF_SL_PRELOAD_LIBLIBS = $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_CXXLINKLIBS)
 
 ifeq ($(ESMF_OS),Darwin)
 ESMF_ENV_PRELOAD          = DYLD_INSERT_LIBRARIES
@@ -2056,6 +2056,10 @@ ESMF_ENV_PRELOAD_DELIMIT  = ':'
 ifeq ($(ESMF_COMM),openmpi)
 # make sure to link in the Fortran MPI bindings
 ESMF_SL_PRELOAD_LIBLINKER = $(ESMF_F90COMPILER)
+# and since we're using the F90 compiler as the linker, make sure to use link
+# options and libs appropriate for the F90 compiler instead of the C++ compiler
+ESMF_SL_PRELOAD_LIBOPTS = $(ESMF_F90LINKOPTS)
+ESMF_SL_PRELOAD_LIBLIBS = $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) $(ESMF_F90LINKLIBS)
 endif
 else
 ESMF_ENV_PRELOAD          = LD_PRELOAD
@@ -2344,7 +2348,7 @@ endif
 lib: info
 	@$(MAKE) build_libs
 	@$(MAKE) build_tracelibs
-	@$(MAKE) info_mk
+	@$(MAKE) info_mk ESMF_CCOMPILEPATHS="$(ESMF_CCOMPILEPATHS) -I$(ESMF_CONFDIR)"
 	@echo "ESMF library built successfully on "`date`
 	@echo "To verify, build and run the unit and system tests with: $(MAKE) check"
 	@echo " or the more extensive: $(MAKE) all_tests"

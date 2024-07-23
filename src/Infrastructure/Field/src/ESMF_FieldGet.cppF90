@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -374,11 +374,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     type(ESMF_FieldType), pointer :: ftype
     integer :: localrc, fieldrank
-    type(ESMF_GridDecompType) :: decompType
-    type(ESMF_GeomType_Flag) :: localGeomType
     type(ESMF_Status) :: fieldstatus
-    type(ESMF_Grid)             :: l_grid
-    type(ESMF_Mesh)             :: l_mesh
     type(ESMF_DistGrid)         :: distgrid
 
     ! Initialize
@@ -407,16 +403,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       status = ftype%status
     endif
 
-    ! set default decomp type to non-arb.
-    decompType = ESMF_GRID_NONARBITRARY
-
     ! Get the geometry type
     if (present(geomtype)) then
-        call ESMF_GeomGet(ftype%geom, geomtype=localGeomType, rc=localrc)
+        call ESMF_GeomGet(ftype%geom, geomtype=geomtype, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        geomtype = localGeomType
     endif
 
     if (present(geom)) then
@@ -651,40 +643,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if(present(minIndex) .or. present(maxIndex) .or. present(elementCount) .or. &
          present(localMinIndex) .or. present(localMaxIndex) .or. present(localElementCount)) then
 
-       call ESMF_GeomGet(ftype%geom, geomtype=localGeomType, rc=localrc)
-       if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-       if (localGeomType == ESMF_GEOMTYPE_GRID) then
-          call ESMF_GeomGet(ftype%geom, &
-               grid=l_grid, rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
-               ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return
-          call ESMF_GridGet(l_grid, distgrid=distgrid, rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
-               ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return
-       else if (localGeomType == ESMF_GEOMTYPE_MESH) then
-          call ESMF_GeomGet(ftype%geom, &
-               mesh=l_mesh, rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
-               ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return
-          call ESMF_MeshGet(l_mesh, nodaldistgrid=distgrid, rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
-               ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return
-       else
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-               msg="Only implemented for Grid and Mesh.", &
-               ESMF_CONTEXT, rcToReturn=rc)
-          return
-       endif
-
        call ESMF_ArrayGet(ftype%array, rank=fieldrank, &
-            rc=localrc)
+            distgrid=distgrid, rc=localrc)
        if (localrc .ne. ESMF_SUCCESS) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
                msg="Cannot retrieve fieldrank from ftypep%array", &

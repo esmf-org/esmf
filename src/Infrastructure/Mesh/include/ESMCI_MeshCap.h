@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -138,7 +138,7 @@ namespace ESMCI {
     void meshaddelements(int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                          int *_areaPresent, double *elemArea,
                          int *_coordsPresent, double *elemCoords,
-                         int *_num_elemConn, int *elemConn, 
+                         int *_elemConn_size, int *elemConn, 
                          ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                          int *rc);
 
