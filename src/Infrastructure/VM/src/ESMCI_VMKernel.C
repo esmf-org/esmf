@@ -3134,6 +3134,8 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
 
 
 void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::logSystem()"
   std::stringstream msg;
   msg << prefix << "--- VMK::logSystem() start -------------------------------";
   ESMC_LogDefault.Write(msg.str(), msgType);
@@ -3245,17 +3247,18 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
       descLen = sizeof(desc);
       mpi_rc = MPI_T_cvar_get_info(i, name, &nameLen, &verbosity, &datatype,
         &enumtype, desc, &descLen, &binding, &scope);
-      if (mpi_rc != MPI_SUCCESS){
+      if (mpi_rc == MPI_SUCCESS){
+        msg.str("");  // clear
+        msg << prefix << "index=" << std::setw(4) << i << std::setw(60) << name
+          << " : " << desc;
+        ESMC_LogDefault.Write(msg.str(), msgType);
+      }else if (mpi_rc != MPI_T_ERR_INVALID_INDEX){
         int localrc;
         ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-          "MPI_T_cvar_get_info() did not return MPI_SUCCESS.",
+          "Call to MPI_T_cvar_get_info() failed in unsupported way.",
           ESMC_CONTEXT, &localrc);
         throw localrc;  // bail out with exception
       }
-      msg.str("");  // clear
-      msg << prefix << "index=" << std::setw(4) << i << std::setw(60) << name
-        << " : " << desc;
-      ESMC_LogDefault.Write(msg.str(), msgType);
     }
 #if 0
     // testing to change the MPICH EAGER limit for the shared memory channel
