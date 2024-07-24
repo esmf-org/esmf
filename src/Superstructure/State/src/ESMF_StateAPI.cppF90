@@ -45,6 +45,7 @@ module ESMF_StateAPIMod
       use ESMF_FieldMod
       use ESMF_FieldGetMod
       use ESMF_FieldCreateMod
+      use ESMF_FieldHaloMod
       use ESMF_FieldBundleMod
       use ESMF_RHandleMod
       use ESMF_StateTypesMod
@@ -1889,7 +1890,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     deepLog = .false. ! default
     if (present(deepFlag)) deepLog = deepFlag
 
-    ! deal with optionl logMsgFlag
+    ! deal with optional logMsgFlag
     logMsg = ESMF_LOGMSG_INFO ! default
     if (present(logMsgFlag)) logMsg = logMsgFlag
 
@@ -1964,9 +1965,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           tempString = "Out or range STATEINTENT!!!"
         endif
 
-        write (msgString,'(A,A,A,A,A,A,A,A,I4,A)') &
-          prefix, "State object is valid!", &
-          " <name: ", trim(name), "> <intent: ", trim(tempString), ">", &
+        write (msgString,'(A,A,A,A,A,A,A,I4,A)') &
+          prefix, "<name: ", trim(name), "> <intent: ", trim(tempString), ">", &
           " <itemCount: ", itemCount, ">"
         call ESMF_LogWrite(trim(msgString), logMsg, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -2015,9 +2015,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 if (ESMF_LogFoundError(localrc, &
                   ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
-!                call ESMF_FieldLog(field, &
-!                  prefix=ESMF_StringConcat(prefix, "! "), &
-!                  logMsgFlag=logMsg, rc=localrc)
+                call ESMF_FieldLog(field, &
+                  prefix=ESMF_StringConcat(prefix, "! "), &
+                  logMsgFlag=logMsg, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                   ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return

@@ -4185,8 +4185,7 @@ void Array::log(
     ESMC_LogDefault.Write(msg.str(), msgType);
   }else{
     msg.str("");  // clear
-    msg << prefix << "Array object is valid!"
-      << " <name: " << getName() << ">";
+    msg << prefix << " <name: " << getName() << ">";
     ESMC_LogDefault.Write(msg.str(), msgType);
     if (deepFlag) getDistGrid()->log(prefix+"! ", msgType, deepFlag);
   }
