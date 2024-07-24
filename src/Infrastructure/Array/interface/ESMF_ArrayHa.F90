@@ -576,12 +576,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out),                 optional  :: rc
 !
 ! !DESCRIPTION:
-!   Write information about {\tt Array} to the ESMF default Log.
+!   Write information about {\tt array} to the ESMF default Log.
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[array]
-!     {\tt ESMF\_Array} object logged.
+!     The {\tt ESMF\_Array} object logged.
 !   \item [{[prefix]}]
 !     String to prefix the log message. Default is no prefix.
 !   \item [{[logMsgFlag]}]
@@ -608,7 +608,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
 
-    ! deal with optionl logMsgFlag
+    ! deal with optional logMsgFlag
     logMsg = ESMF_LOGMSG_INFO ! default
     if (present(logMsgFlag)) logMsg = logMsgFlag
 

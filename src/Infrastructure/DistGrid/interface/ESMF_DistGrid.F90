@@ -3996,7 +3996,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
 
-    ! deal with optionl logMsgFlag
+    ! deal with optional logMsgFlag
     logMsg = ESMF_LOGMSG_INFO ! default
     if (present(logMsgFlag)) logMsg = logMsgFlag
 
