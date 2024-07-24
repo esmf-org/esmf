@@ -44,6 +44,7 @@ DIRS      = ESMF_CompCreate \
             ESMF_FieldRegridMesh \
             ESMF_FieldRegridMeshToMesh \
             ESMF_FieldRegridLS \
+            ESMF_FieldRegridPatchDisjoint \
             ESMF_FieldSparseMatMul \
             ESMF_FieldSharedDeSSI \
             ESMF_FieldLSRedistArb2Arb \
