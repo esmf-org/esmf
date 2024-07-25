@@ -1284,14 +1284,14 @@ program ESMF_HConfigEx
   ! logical :: isAlias
   isAlias = (hconfigTemp == hconfig)
 !EOC
-  write (msgString, '("isAlias: ", L)') isAlias
+  write (msgString, '("isAlias: ", l2)') isAlias
   call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   ! logical :: isNotAlias
   isNotAlias = (hconfigTemp /= hconfig)
 !EOC
-  write (msgString, '("isNotAlias: ", L)') isNotAlias
+  write (msgString, '("isNotAlias: ", l2)') isNotAlias
   call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
@@ -1313,7 +1313,7 @@ program ESMF_HConfigEx
 !BOC
   isAlias = (match == ESMF_HCONFIGMATCH_ALIAS)
 !EOC
-  write (msgString, '("isAlias from match: ", L)') isAlias
+  write (msgString, '("isAlias from match: ", l2)') isAlias
   call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
@@ -1332,7 +1332,7 @@ program ESMF_HConfigEx
   ! logical :: isAlias
   isAlias = (hconfigTemp == hconfig)
 !EOC
-  write (msgString, '("isAlias for diff objects: ", L)') isAlias
+  write (msgString, '("isAlias for diff objects: ", l2)') isAlias
   call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
@@ -1349,7 +1349,7 @@ program ESMF_HConfigEx
   ! logical :: isExact
   isExact = (match == ESMF_HCONFIGMATCH_EXACT)
 !EOC
-  write (msgString, '("isExact: ", L)') isExact
+  write (msgString, '("isExact: ", l2)') isExact
   call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
@@ -1364,7 +1364,7 @@ program ESMF_HConfigEx
   ! logical :: isMatch
   isMatch = (match >= ESMF_HCONFIGMATCH_EXACT)
 !EOC
-  write (msgString, '("isMatch: ", L)') isMatch
+  write (msgString, '("isMatch: ", l2)') isMatch
   call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
@@ -1390,7 +1390,7 @@ program ESMF_HConfigEx
   ! logical :: isNone
   isNone = (match == ESMF_HCONFIGMATCH_NONE)
 !EOC
-  write (msgString, '("isNone: ", L)') isNone
+  write (msgString, '("isNone: ", l2)') isNone
   call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
