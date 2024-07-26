@@ -69,7 +69,7 @@ module ESMF_InitMod
       public ESMF_IsInitialized, ESMF_IsFinalized
                   
       ! should be private to framework - needed by other modules
-      public ESMF_FrameworkInternalInit   
+      public ESMF_FrameworkInternalInit
 
 !EOPI
 
@@ -98,7 +98,8 @@ module ESMF_InitMod
         defaultDefaultLogFilename, defaultLogFilename, &
         defaultLogAppendFlag, logAppendFlag, defaultLogKindFlag, logKindFlag, &
         mpiCommunicator,  ioUnitLBound, ioUnitUBound, &
-        defaultGlobalResourceControl, globalResourceControl, config, vm, rc)
+        defaultGlobalResourceControl, globalResourceControl, config, hconfig, &
+        vm, rc)
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -119,6 +120,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical,                 intent(in),  optional :: defaultGlobalResourceControl
       logical,                 intent(in),  optional :: globalResourceControl
       type(ESMF_Config),       intent(out), optional :: config
+      type(ESMF_HConfig),      intent(out), optional :: hconfig
       type(ESMF_VM),           intent(out), optional :: vm
       integer,                 intent(out), optional :: rc
 
@@ -153,6 +155,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              file specification via the command line.
 ! \item[8.6.0] Added {\tt defaultDefaultCalKind} argument to allow specifiation
 !              of a default for {\tt defaultCalKind}.
+! \item[8.7.0] Added argument {\tt hconfig} to simplify direct access to the
+!              default {\tt ESMF\_HConfig} object.
 ! \end{description}
 ! \end{itemize}
 !
@@ -383,8 +387,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           Returns the default {\tt ESMF\_Config} if the
 !           {\tt configFilename} argument was provided. Otherwise the
 !           presence of this argument triggers an error.
+!     \item [{[hconfig]}]
+!           Returns the default {\tt ESMF\_HConfig} if the
+!           {\tt configFilename} argument was provided. Otherwise the
+!           presence of this argument triggers an error.
 !     \item [{[vm]}]
-!           Returns the global {\tt ESMF\_VM} that was created 
+!           Returns the global {\tt ESMF\_VM} that was created
 !           during initialization.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -412,13 +420,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ioUnitLBound=ioUnitLBound, ioUnitUBound=ioUnitUBound, &
         defaultGlobalResourceControl=defaultGlobalResourceControl, &
         globalResourceControl=globalResourceControl, &
-        config=config, rc=localrc)
-                                      
+        config=config, hconfig=hconfig, rc=localrc)
+
       ! on failure LogErr is not initialized -> explicit print on error
       if (localrc .ne. ESMF_SUCCESS) then
         write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing framework"
-        return 
-      endif 
+        return
+      endif
       ! on success LogErr is assumed to be functioning
 
       ! obtain global VM
@@ -490,14 +498,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! initialize pre MPI parts of global VM
       call ESMF_VMInitializePreMPI(rc=localrc)
-                                      
+
       ! on failure LogErr is not initialized -> explicit print on error
       if (localrc .ne. ESMF_SUCCESS) then
         write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing framework"
-        return 
-      endif 
+        return
+      endif
       ! on success LogErr is assumed to be functioning
-      
+
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_InitializePreMPI
 !------------------------------------------------------------------------------
@@ -515,7 +523,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         defaultDefaultLogFilename, defaultLogFilename, &
         defaultLogAppendFlag, logAppendFlag, defaultLogKindFlag, logKindFlag, &
         mpiCommunicator, ioUnitLBound, ioUnitUBound, &
-        defaultGlobalResourceControl, globalResourceControl, config, rc)
+        defaultGlobalResourceControl, globalResourceControl, config, hconfig, rc)
 !
 ! !ARGUMENTS:
       integer,                 intent(in)            :: lang
@@ -536,6 +544,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical,                 intent(in),  optional :: defaultGlobalResourceControl
       logical,                 intent(in),  optional :: globalResourceControl
       type(ESMF_Config),       intent(out), optional :: config
+      type(ESMF_HConfig),      intent(out), optional :: hconfig
       integer,                 intent(out), optional :: rc
 
 !
@@ -597,13 +606,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           Returns the default {\tt ESMF\_Config} if the
 !           {\tt configFilename} argument was provided. Otherwise the
 !           presence of this argument triggers an error.
+!     \item [{[hconfig]}]
+!           Returns the default {\tt ESMF\_HConfig} if the
+!           {\tt configFilename} argument was provided. Otherwise the
+!           presence of this argument triggers an error.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
 
-      logical :: rcpresent                       ! Return code present   
+      logical :: rcpresent                       ! Return code present
       integer :: localrc
       logical, save :: already_init = .false.    ! Static, maintains state.
       logical :: openflag, isPresent
@@ -619,7 +632,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(ESMF_MAXSTR) :: errmsg
       integer :: errmsg_l
       type(ESMF_Config)   :: configInternal
-      type(ESMF_HConfig)  :: hconfig, hconfigNode, hconfigNodePrev
+      type(ESMF_HConfig)  :: hconfigInternal, hconfigNode, hconfigNodePrev
 
       logical                 :: globalResourceControlSet, logAppendFlagSet
       character(160)          :: defaultLogFilenameSet, defaultLogFilenameS
@@ -809,10 +822,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! access hconfig
-        call ESMF_ConfigGet(configInternal, hconfig=hconfig, rc=localrc)
+        call ESMF_ConfigGet(configInternal, hconfig=hconfigInternal, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        isFlag = ESMF_HConfigIsNull(hconfig, rc=localrc)
+        isFlag = ESMF_HConfigIsNull(hconfigInternal, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         validHConfigNode = .false.  ! not until found
@@ -827,7 +840,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             return  ! bail out
           endif
           ! find the hconfigNode holding predefined label map
-          hconfigNode = ESMF_HConfigCreate(hconfig, rc=localrc)
+          hconfigNode = ESMF_HConfigCreate(hconfigInternal, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
           validHConfigNode = .true.
@@ -1319,12 +1332,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
         ! optionally destroy the Config
-        if (.not.present(config)) then
+        if (.not.(present(config).or.present(hconfig))) then
           call ESMF_ConfigDestroy(configInternal, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
-          config = configInternal ! return back to user
+          if (present(config)) then
+            config = configInternal ! return back to user
+          endif
+          if (present(hconfig)) then
+            hconfig = hconfigInternal ! return back to user
+          endif
         endif
       endif
 
@@ -1381,12 +1399,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       already_init = .true.
 
-      if (.not.haveConfig.and.present(config)) then
-        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          msg="Cannot request 'config' without identifying "// &
+      if (.not.haveConfig) then
+        if (present(config)) then
+          call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+            msg="Cannot request 'config' without identifying "// &
             "a valid config file", &
             ESMF_CONTEXT, rcToReturn=rc)
-        return  ! bail out
+          return  ! bail out
+        endif
+        if (present(hconfig)) then
+          call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+            msg="Cannot request 'hconfig' without identifying "// &
+            "a valid config file", &
+            ESMF_CONTEXT, rcToReturn=rc)
+          return  ! bail out
+        endif
       endif
 
       if (rcpresent) rc = ESMF_SUCCESS
