@@ -48,6 +48,11 @@ namespace ESMCI {
 
 namespace ESMCI {
 
+  // constants and enums
+
+  enum HConfigMatch_Flag {HCONFIGMATCH_INVALID=0, HCONFIGMATCH_NONE,
+    HCONFIGMATCH_EXACT, HCONFIGMATCH_ALIAS};
+
   // classes and structs
 
   class HConfig{
@@ -129,6 +134,11 @@ namespace ESMCI {
       HConfig iterBeginMapVal(int *rc=NULL);
       HConfig iterEndMapVal(int *rc=NULL);
       int iterNext();
+
+      void log(std::string prefix,
+        ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO, int *docIndex=NULL)const;
+      static HConfigMatch_Flag match(HConfig *hconfig1, HConfig *hconfig2,
+        int *rc=NULL);
 
       template<typename T> T as(bool *asOkay, int *rc=NULL);
       template<typename T> T asMapKey(bool *asOkay, int *rc=NULL);
