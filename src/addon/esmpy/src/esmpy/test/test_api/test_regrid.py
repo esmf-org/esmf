@@ -103,6 +103,7 @@ def create_raster_field(x_of_col, y_of_row, node_mask=None):
     return Field(mesh, meshloc=MeshLoc.NODE)
 
 
+@pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
 @pytest.mark.parametrize("mask_value", (None, 0, True, 1, False))
 @pytest.mark.parametrize("method", NON_CONSERVATIVE_METHODS)
 def test_regrid_with_const_node_mask(mask_value, method):
@@ -135,6 +136,7 @@ def test_regrid_with_const_node_mask(mask_value, method):
     assert_array_almost_equal(dst.data[mask], -999)
 
 
+@pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
 @pytest.mark.parametrize(
     "mask",
     (
@@ -171,6 +173,7 @@ def test_regrid_with_node_mask(mask, method):
     assert_array_almost_equal(dst.data[mask], -999)
 
 
+@pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
 @pytest.mark.parametrize("method", NON_CONSERVATIVE_METHODS)
 def test_regrid_with_multivalued_node_mask(method):
     """Check regridding that masks multiple values."""
