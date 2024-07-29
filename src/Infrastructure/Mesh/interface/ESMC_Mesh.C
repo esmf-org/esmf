@@ -179,7 +179,7 @@ ESMC_Mesh ESMC_MeshCreateFromFile(const char *filename, int fileTypeFlag,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshAddNodes"
 int ESMC_MeshAddNodes(ESMC_Mesh mesh, int nodeCount, int *nodeIds,
-                      double *nodeCoords, int *nodeOwners){
+                      double *nodeCoords, int *nodeOwners, int *nodeMask){
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;
@@ -187,12 +187,14 @@ int ESMC_MeshAddNodes(ESMC_Mesh mesh, int nodeCount, int *nodeIds,
 
   MeshCap *mc = static_cast<MeshCap*> (mesh.ptr);
 
-  // Wrap node_owners in IntArray
+  // Wrap nodeOwners and nodeMask in IntArray
   InterArray<int> nodeOwnersIA(nodeOwners,nodeCount);
+  InterArray<int> nodeMaskIA(nodeMask, nodeCount);
 
   // call into ESMCI method
   mc->meshaddnodes(&nodeCount, nodeIds, nodeCoords, &nodeOwnersIA,
-                   NULL, &(mc->coordsys_mc), &(mc->sdim_mc), &localrc);
+                   &nodeMaskIA, &(mc->coordsys_mc), &(mc->sdim_mc), &localrc);
+
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
 
