@@ -1,0 +1,33 @@
+% $Id$
+
+% Earth System Modeling Framework
+% Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+% Laboratory, University of Michigan, National Centers for Environmental
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+\subsubsection{ESMF\_HCONFIGMATCH}
+\label{const:hconfigmatch}
+
+{\sf DESCRIPTION:\\}
+Indicates the level to which two HConfig variables match.
+
+The type of this flag is:
+
+{\tt type(ESMF\_HConfigMatch\_Flag)}
+
+The valid values in ascending order are:
+\begin{description}
+\item [ESMF\_HCONFIGMATCH\_INVALID:] Indicates a non-valid matching level. One
+  or both HConfig objects are invalid.
+\item [ESMF\_HCONFIGMATCH\_NONE:] The lowest valid level of HConfig matching.
+  This indicates that the HConfig objects are valid, but their YAML
+  representation does not match.
+\item [ESMF\_HCONFIGMATCH\_EXACT:] There is an exact match between the YAML
+  representation of both HConfig objects. They may or may not be aliases to
+  the same object in memory.
+\item [ESMF\_HCONFIGMATCH\_ALIAS:] Both HConfig variables are aliases to the
+  exact same HConfig object in memory.
+\end{description}

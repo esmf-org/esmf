@@ -304,6 +304,18 @@ endif
 	    echo "ESMF_BABELTRACE_LIBPATH: $(ESMF_BABELTRACE_LIBPATH)" ; \
 	  fi; \
 	 fi
+	-@if [ -n "$(ESMF_NUMA)" ] ; then \
+	  echo "ESMF_NUMA:               $(ESMF_NUMA)" ; \
+	  if [ -n "$(ESMF_NUMA_INCLUDE)" ] ; then \
+	    echo "ESMF_NUMA_INCLUDE:       $(ESMF_NUMA_INCLUDE)" ; \
+	  fi; \
+	  if [ -n "$(ESMF_NUMA_LIBS)" ] ; then \
+	    echo "ESMF_NUMA_LIBS:          $(ESMF_NUMA_LIBS)" ; \
+	  fi; \
+	  if [ -n "$(ESMF_NUMA_LIBPATH)" ] ; then \
+	    echo "ESMF_NUMA_LIBPATH:       $(ESMF_NUMA_LIBPATH)" ; \
+	  fi; \
+	 fi
 	-@if [ -n "$(ESMF_NVML)" ] ; then \
 	  echo "ESMF_NVML:               $(ESMF_NVML)" ; \
 	  if [ -n "$(ESMF_NVML_INCLUDE)" ] ; then \
@@ -707,6 +719,18 @@ endif
 	  fi; \
 	  if [ -n "$(ESMF_BABELTRACE_LIBPATH)" ] ; then \
 	    echo "# ESMF_BABELTRACE_LIBPATH:$(ESMF_BABELTRACE_LIBPATH)" >> $(MKINFO) ; \
+	  fi; \
+	 fi
+	-@if [ -n "$(ESMF_NUMA)" ] ; then \
+	  echo "# ESMF_NUMA:              $(ESMF_NUMA)" >> $(MKINFO) ; \
+	  if [ -n "$(ESMF_NUMA_INCLUDE)" ] ; then \
+	    echo "# ESMF_NUMA_INCLUDE:      $(ESMF_NUMA_INCLUDE)" >> $(MKINFO) ; \
+	  fi; \
+	  if [ -n "$(ESMF_NUMA_LIBS)" ] ; then \
+	    echo "# ESMF_NUMA_LIBS:         $(ESMF_NUMA_LIBS)" >> $(MKINFO) ; \
+	  fi; \
+	  if [ -n "$(ESMF_NUMA_LIBPATH)" ] ; then \
+	    echo "# ESMF_NUMA_LIBPATH:      $(ESMF_NUMA_LIBPATH)" >> $(MKINFO) ; \
 	  fi; \
 	 fi
 	-@if [ -n "$(ESMF_NVML)" ] ; then \

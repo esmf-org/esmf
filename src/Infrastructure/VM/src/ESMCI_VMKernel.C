@@ -94,6 +94,12 @@ using namespace std;
 #include <openacc.h>
 #endif
 
+// NUMA support
+#ifdef ESMF_NUMA
+#include <numa.h>
+#endif
+
+// NVML support
 #ifdef ESMF_NVML
 #include <nvml.h>
 #endif
@@ -157,6 +163,10 @@ char **VMK::argv = &(argv_store[0]);
 int VMK::argc_mpich;
 char *VMK::argv_mpich_store[100];
 char **VMK::argv_mpich = &(argv_mpich_store[0]);
+// NUMA support
+bool VMK::nvmlEnabled;
+// NUMA support
+bool VMK::numaEnabled;
 
 } // namespace ESMCI
 
@@ -445,12 +455,12 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   mypthid=0;
 #endif
 #ifdef ESMF_MPIUNI
-  mpionly=0;          // this way the commtype will be checked in comm calls
+  mpionly=false;        // this way the commtype will be checked in comm calls
 #else
   if (npets==1)
-    mpionly=0;          // this way the commtype will be checked in comm calls
+    mpionly=false;      // this way the commtype will be checked in comm calls
   else
-    mpionly=1;          // normally the default VM can only be MPI-only
+    mpionly=true;       // normally the default VM can only be MPI-only
 #endif
   // no threading in default global VM
   threadsflag = false;
@@ -473,6 +483,19 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
 #else
   mpi_c_ssi = MPI_COMM_NULL;
   mpi_c_ssi_roots = MPI_COMM_NULL;
+#endif
+  // check whether NVML support is enabled
+#ifdef ESMF_NVML
+  nvmlEnabled = true;
+#else
+  nvmlEnabled = false;
+#endif
+  // check whether NUMA support is enabled
+#ifdef ESMF_NUMA
+  numaEnabled = true;
+  if (numa_available()<0) numaEnabled = false;  // NUMA not available at runtime
+#else
+  numaEnabled = false;
 #endif
   // initialize the shared memory variables
   pth_finish_count = NULL;
@@ -1115,15 +1138,15 @@ void VMK::construct(void *ssarg){
   }
 #ifdef ESMF_MPIUNI
   // don't set mpionly flag so that comm call check for commtype
-  mpionly=0;
+  mpionly=false;
 #else
   if (npets==1)
-    mpionly=0;
+    mpionly=false;
   else{
     // determine whether we are dealing with an MPI-only VMK
-    mpionly=1;  // assume this is MPI-only VMK until found otherwise
+    mpionly=true;  // assume this is MPI-only VMK until found otherwise
     for (int i=0; i<npets; i++)
-      if (tid[i]>0) mpionly=0;    // found multi-threading PET
+      if (tid[i]>0) mpionly=false;    // found multi-threading PET
   }
 #endif
   threadsflag = sarg->threadsflag;
@@ -3111,6 +3134,8 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
 
 
 void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::logSystem()"
   std::stringstream msg;
   msg << prefix << "--- VMK::logSystem() start -------------------------------";
   ESMC_LogDefault.Write(msg.str(), msgType);
@@ -3128,6 +3153,12 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
   msg << prefix << "isSsiSharedMemoryEnabled=" << isSsiSharedMemoryEnabled();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "isNvmlEnabled=" << isNvmlEnabled();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "isNumaEnabled=" << isNumaEnabled();
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
   msg << prefix << "ssiCount=" << nssiid << " peCount=" << ncores;
@@ -3160,12 +3191,21 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
 #ifdef MPICH_VERSION
-  msg << prefix << "MPICH_VERSION=" << XSTR(MPICH_VERSION);
+  std::string mpich_version(XSTR(MPICH_VERSION));
+  mpich_version.erase(
+    std::remove(mpich_version.begin(), mpich_version.end(),
+    '"'), mpich_version.end());
+  msg << prefix << "MPICH_VERSION=" << mpich_version;
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
+  if (mpich_version.rfind("3.3", 0) == 0)  // broken mpi tools interface
+    mpi_t_okay = false;
 #endif
 #ifdef CRAY_MPICH_VERSION
   std::string cray_mpich_version(XSTR(CRAY_MPICH_VERSION));
+  cray_mpich_version.erase(
+    std::remove(cray_mpich_version.begin(), cray_mpich_version.end(),
+    '"'), cray_mpich_version.end());
   msg << prefix << "CRAY_MPICH_VERSION=" << cray_mpich_version;
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
@@ -3177,12 +3217,27 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
   if (mpi_t_okay){
+    int mpi_rc;
     int provided_thread_level;
-    MPI_T_init_thread(VM_MPI_THREAD_LEVEL, &provided_thread_level);
+    mpi_rc = MPI_T_init_thread(VM_MPI_THREAD_LEVEL, &provided_thread_level);
+    if (mpi_rc != MPI_SUCCESS){
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "MPI_T_init_thread() did not return MPI_SUCCESS.",
+        ESMC_CONTEXT, &localrc);
+      throw localrc;  // bail out with exception
+    }
     msg << prefix << "--- VMK::logSystem() MPI Tool Interface Control Vars ---";
     ESMC_LogDefault.Write(msg.str(), msgType);
     int num_cvar;
-    MPI_T_cvar_get_num(&num_cvar);
+    mpi_rc = MPI_T_cvar_get_num(&num_cvar);
+    if (mpi_rc != MPI_SUCCESS){
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "MPI_T_cvar_get_num() did not return MPI_SUCCESS.",
+        ESMC_CONTEXT, &localrc);
+      throw localrc;  // bail out with exception
+    }
     char name[128], desc[1024];
     int nameLen, descLen, verbosity, binding, scope;
     MPI_T_enum enumtype;
@@ -3190,12 +3245,20 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
     for (int i=0; i<num_cvar; i++){
       nameLen = sizeof(name);
       descLen = sizeof(desc);
-      MPI_T_cvar_get_info(i, name, &nameLen, &verbosity, &datatype, &enumtype,
-        desc, &descLen, &binding, &scope);
-      msg.str("");  // clear
-      msg << prefix << "index=" << std::setw(4) << i << std::setw(60) << name
-        << " : " << desc;
-      ESMC_LogDefault.Write(msg.str(), msgType);
+      mpi_rc = MPI_T_cvar_get_info(i, name, &nameLen, &verbosity, &datatype,
+        &enumtype, desc, &descLen, &binding, &scope);
+      if (mpi_rc == MPI_SUCCESS){
+        msg.str("");  // clear
+        msg << prefix << "index=" << std::setw(4) << i << std::setw(60) << name
+          << " : " << desc;
+        ESMC_LogDefault.Write(msg.str(), msgType);
+      }else if (mpi_rc != MPI_T_ERR_INVALID_INDEX){
+        int localrc;
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+          "Call to MPI_T_cvar_get_info() failed in unsupported way.",
+          ESMC_CONTEXT, &localrc);
+        throw localrc;  // bail out with exception
+      }
     }
 #if 0
     // testing to change the MPICH EAGER limit for the shared memory channel
@@ -3214,7 +3277,14 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
     msg << prefix << "new MPIR_CVAR_NEMESIS_SHM_EAGER_MAX_SZ=" << eagersize;
     ESMC_LogDefault.Write(msg.str(), msgType);
 #endif
-    MPI_T_finalize();
+    mpi_rc = MPI_T_finalize();
+    if (mpi_rc != MPI_SUCCESS){
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "MPI_T_finalize() did not return MPI_SUCCESS.",
+        ESMC_CONTEXT, &localrc);
+      throw localrc;  // bail out with exception
+    }
   }
 #endif
   msg.str("");  // clear
@@ -7682,6 +7752,47 @@ namespace ESMCI{
 #endif
         }
       }
+
+#ifndef USE_OLD_MESSAGEPREPARE
+
+      // Allocate buffers
+      for (int ii=sendIndexOffset-iiStart; ii>sendIndexOffset-iiEnd; ii--){
+        // localPet-dependent shifted loop reduces communication contention
+        int dstPet = ii%petCount;  // fold back into [0,..,petCount-1] range
+        // send message to dstPet
+        int size = messageSize(localPet, dstPet);
+        if (size>0)
+          sendBuffer[dstPet] = new char[size];
+        else
+          sendBuffer[dstPet] = NULL;
+      }
+      // Fill buffers
+      messagePrepareSearch(vmk, sendIndexOffset, iiStart, iiEnd, sendBuffer);
+      // Communicate buffers
+      for (int ii=sendIndexOffset-iiStart; ii>sendIndexOffset-iiEnd; ii--){
+        // localPet-dependent shifted loop reduces communication contention
+        int dstPet = ii%petCount;  // fold back into [0,..,petCount-1] range
+        // send message to Pet "i"
+        int size = messageSize(localPet, dstPet);
+        if (size>0){
+#ifdef MUST_USE_BLOCKING_SEND
+          vmk->send(sendBuffer[dstPet], size, dstPet);
+#else
+          sendCommhList[dstPet] = NULL;
+          vmk->send(sendBuffer[dstPet], size, dstPet, &(sendCommhList[dstPet]));
+#endif
+#ifdef DEBUG_COMPAT_on
+          {
+            std::stringstream msg;
+            msg << "ComPat#" << __LINE__
+              << " posting send to i=" << dstPet << " size=" << size
+              << " sendBuffer=" << (void *)sendBuffer[dstPet];
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+          }
+#endif
+        }
+      }
+#else
       // localPet acts as a sender, constructs message and sends to receiver
       for (int ii=sendIndexOffset-iiStart; ii>sendIndexOffset-iiEnd; ii--){
         // localPet-dependent shifted loop reduces communication contention
@@ -7708,6 +7819,8 @@ namespace ESMCI{
 #endif
         }
       }
+#endif
+
       if (iiStart==localPet+1){
         // localPet does local prepare and process
 #ifdef DEBUG_COMPAT_on
