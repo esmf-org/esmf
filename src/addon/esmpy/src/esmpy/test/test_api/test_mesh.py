@@ -28,11 +28,8 @@ from esmpy.api.constants import FileFormat
     "mask_value",
     (
         None,
-        0,
-        True,
-        1,
-        False,
         [[0, 0, 0, 0], [-1, -1, -1, -1], [1, 1, 1, 1]],
+        [[False, False, False, False], [True, False, True, False], [True, True, True, True]],
     ),
 )
 def test_add_nodes_with_mask(mask_value):
@@ -40,7 +37,7 @@ def test_add_nodes_with_mask(mask_value):
     if mask_value is None:
         mask = None
     else:
-        mask = np.broadcast_to(mask_value, (3, 4))
+        mask = np.array(mask_value)
     mesh = Mesh(parametric_dim=2, spatial_dim=2, coord_sys=CoordSys.CART)
 
     x_of_points, y_of_points = np.meshgrid([0.0, 1.0, 2.0, 3.0], [0.0, 1.0, 2.0])
