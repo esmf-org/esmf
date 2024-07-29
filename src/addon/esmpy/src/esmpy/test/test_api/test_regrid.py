@@ -41,8 +41,11 @@ from esmpy.util.grid_utilities import initialize_field_grid_periodic_3d
 from esmpy.util.mesh_utilities import compute_mass_mesh
 from esmpy.util.mesh_utilities import initialize_field_mesh
 from esmpy.util.mesh_utilities import mesh_create_10
+from esmpy.util.mesh_utilities import mesh_create_10_parallel
 from esmpy.util.mesh_utilities import mesh_create_50
+from esmpy.util.mesh_utilities import mesh_create_50_parallel
 from esmpy.util.mesh_utilities import mesh_create_50_ngons
+from esmpy.util.mesh_utilities import mesh_create_50_ngons_parallel
 from numpy.testing import assert_array_almost_equal
 
 
