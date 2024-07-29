@@ -53,6 +53,8 @@ NON_CONSERVATIVE_METHODS = (
     RegridMethod.PATCH,
 )
 
+# Note that the tests of regridding fields with a mask are outside the test class because
+# some are parametrized, and pytest doesn't allow parametrized test methods within a class.
 
 def create_raster_field(x_of_col, y_of_row, node_mask=None):
     """Create a mesh that is a structured grid of squares."""

@@ -21,6 +21,9 @@ from numpy.testing import assert_array_equal
 
 from esmpy.api.constants import FileFormat
 
+# Note that the tests of adding nodes with a mask are outside the test class because some
+# are parametrized, and pytest doesn't allow parametrized test methods within a class.
+
 @pytest.mark.parametrize(
     "mask_value",
     (
@@ -32,7 +35,6 @@ from esmpy.api.constants import FileFormat
         [[0, 0, 0, 0], [-1, -1, -1, -1], [1, 1, 1, 1]],
     ),
 )
-
 def test_add_nodes_with_mask(mask_value):
     """Check adding masked nodes to a mesh."""
     if mask_value is None:
