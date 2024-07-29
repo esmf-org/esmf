@@ -481,7 +481,8 @@ class Mesh(object):
     def add_nodes(self, node_count,
                   node_ids,
                   node_coords,
-                  node_owners):
+                  node_owners,
+                  node_mask=None):
         """
         Add nodes to a :class:`~esmpy.api.mesh.Mesh`, this must be done before adding elements.
 
@@ -494,6 +495,13 @@ class Mesh(object):
             tuples into a numpy array that correspond to node_ids.
         :param ndarray node_owners: a numpy array of shape (node_count, 1) to
             specify the rank of the processor that owns each node.
+
+        *OPTIONAL:*
+
+        :param ndarray node_mask: a numpy array of shape
+            ``(node_count, 1)`` containing integer values to specify masked
+            nodes. The specific values that are masked are specified in the
+            :class:`~esmpy.api.regrid.Regrid` constructor.
         """
 
         self._node_count = node_count
@@ -509,10 +517,22 @@ class Mesh(object):
             self._node_owners = np.array(node_owners, dtype=np.int32)
         else:
             self._node_owners = node_owners
- 
+
+        if node_mask is not None:
+            node_mask = np.asarray(node_mask).astype(np.int32, copy=False).reshape(-1)
+        self._node_mask = node_mask
+        self._mask[0] = self._node_mask
+
+
+        if node_mask is not None and len(node_mask) != node_count:
+            raise ValueError(
+                "`node_mask` must have the same length as the number of nodes"
+                f" (expected {node_count}, got {len(node_mask)})"
+            )
+
         # call into ctypes layer
         ESMP_MeshAddNodes(self, self.node_count, self.node_ids, 
-                          self.node_coords, self.node_owners)
+                          self.node_coords, self.node_owners, self._node_mask)
         # can't get the sizes until mesh is "committed" in element call
 
     def copy(self):
