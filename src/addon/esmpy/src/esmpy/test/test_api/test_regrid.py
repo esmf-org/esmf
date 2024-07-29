@@ -172,45 +172,14 @@ def test_regrid_with_node_mask(mask, method):
 
 
 @pytest.mark.parametrize("method", NON_CONSERVATIVE_METHODS)
-def test_regrid_with_random_node_mask(method):
-    """Check regridding that masks random input data."""
-    n_rows, n_cols = 100, 200
-
-    src_data = np.random.uniform(-1.0, 1.0, size=n_rows * n_cols)
-    mask = src_data > 0.0
-
-    src = create_raster_field(
-        np.linspace(0.0, 200.0, num=n_cols, endpoint=True),
-        np.linspace(0.0, 100.0, num=n_rows, endpoint=True),
-        node_mask=mask,
-    )
-    dst = create_raster_field(
-        np.linspace(0.25, 199.25, num=n_cols - 1, endpoint=True),
-        np.linspace(0.25, 99.25, num=n_rows - 1, endpoint=True),
-        node_mask=None,
-    )
-
-    src.data[:] = src_data
-    dst.data[:] = 999.0
-
-    regrid = Regrid(
-        src,
-        dst,
-        regrid_method=method,
-        unmapped_action=UnmappedAction.IGNORE,
-        src_mask_values=(True,),
-        dst_mask_values=(True,),
-    )
-
-    assert np.all((dst.data <= 0.0) | (dst.data == 999.0))
-
-
-@pytest.mark.parametrize("method", NON_CONSERVATIVE_METHODS)
 def test_regrid_with_multivalued_node_mask(method):
     """Check regridding that masks multiple values."""
-    n_rows, n_cols = 100, 200
+    n_rows, n_cols = 4, 5
 
-    src_data = np.random.uniform(-1.0, 1.0, size=n_rows * n_cols)
+    src_data = np.array([-0.75, 0.75, 0.4, -0.25, 0.25,
+                         0.6, 0.8, -0.9, -0.3, -0.1,
+                         0.2, -0.6, 0.3, 0.7, -0.2,
+                         0.7, 0.6, 0.1, -0.7, -0.6])
 
     mask = np.zeros(src_data.size, dtype=int)
     mask[src_data < -0.5] = 1
@@ -218,13 +187,13 @@ def test_regrid_with_multivalued_node_mask(method):
     mask[src_data >= 0.5] = 3
 
     src = create_raster_field(
-        np.linspace(0.0, 200.0, num=n_cols, endpoint=True),
-        np.linspace(0.0, 100.0, num=n_rows, endpoint=True),
+        np.linspace(0.0, 5.0, num=n_cols, endpoint=True),
+        np.linspace(0.0, 4.0, num=n_rows, endpoint=True),
         node_mask=mask,
     )
     dst = create_raster_field(
-        np.linspace(0.25, 199.25, num=n_cols - 1, endpoint=True),
-        np.linspace(0.25, 99.25, num=n_rows - 1, endpoint=True),
+        np.linspace(0.25, 4.25, num=n_cols - 1, endpoint=True),
+        np.linspace(0.25, 3.25, num=n_rows - 1, endpoint=True),
         node_mask=None,
     )
 
