@@ -196,12 +196,6 @@ if [ ! -d "${ESMF_ESMXDIR}" ]; then
   usage; exit 1
 fi
 
-# check BUILD_FILE
-if [ ! -f "${BUILD_FILE}" ]; then
-  echo "ERROR: ESMX_BUILD_FILE is missing: ${BUILD_FILE}"
-  usage; exit 1
-fi
-
 # print settings
 if [ "${VERBOSE}" = true ] ; then
   settings
@@ -259,9 +253,10 @@ if [ "${VERBOSE}" = true ] ; then
   set -x
 fi
 cmake -S${ESMF_ESMXDIR} -B${BUILD_DIR} ${CMAKE_SETTINGS[@]}
+RC=$?
 { set +x; } 2>/dev/null
-if [ "$?" !=  "0" ]; then
-  echo "ESMX_Builder Failed: (cmake)"
+if [ $RC -ne 0 ]; then
+  echo "ESMX_Builder Failed: 'cmake -S${ESMF_ESMXDIR} -B${BUILD_DIR} ${CMAKE_SETTINGS[@]}'"
   exit -1
 fi
 echo
@@ -270,9 +265,10 @@ if [ "${VERBOSE}" = true ] ; then
   set -x
 fi
 cmake --build ${BUILD_DIR} ${BUILD_SETTINGS[@]}
+RC=$?
 { set +x; } 2>/dev/null
-if [ "$?" !=  "0" ]; then
-  echo "ESMX_Builder Failed: (cmake --build)"
+if [ $RC -ne 0 ]; then
+  echo "ESMX_Builder Failed: 'cmake --build ${BUILD_DIR} ${BUILD_SETTINGS[@]}'"
   exit -2
 fi
 echo
@@ -281,9 +277,10 @@ if [ "${VERBOSE}" = true ] ; then
   set -x
 fi
 cmake --install ${BUILD_DIR} ${INSTALL_SETTINGS[@]}
+RC=$?
 { set +x; } 2>/dev/null
-if [ "$?" !=  "0" ]; then
-  echo "ESMX_Builder Failed: (cmake --install)"
+if [ $RC -ne 0 ]; then
+  echo "ESMX_Builder Failed: 'cmake --install ${BUILD_DIR} ${INSTALL_SETTINGS[@]}'"
   exit -3
 fi
 echo
