@@ -162,7 +162,12 @@ module ESMX_Driver
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
       endif
       ! Ingest the generic component label list
-      isFlag = ESMF_HConfigIsSequence(hconfigNode, keyString="componentList", &
+      isFlag = ESMF_HConfigIsDefined(hconfigNode, keyString="componentList", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      isFlag = isFlag .and. &
+        .not.ESMF_HConfigIsNull(hconfigNode, keyString="componentList", &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
