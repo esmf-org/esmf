@@ -171,6 +171,11 @@ fi
 # read ESMX build file from positional arguments
 if [[ $# -ge 1 ]]; then
   BUILD_FILE="${1}"
+  # ensure the explicitly specified BUILD_FILE exists
+  if [ ! -f "${BUILD_FILE}" ]; then
+    echo "ERROR: ESMX_BUILD_FILE is missing: ${BUILD_FILE}"
+    usage; exit 1
+  fi
 else
   BUILD_FILE="esmxBuild.yaml"
 fi
