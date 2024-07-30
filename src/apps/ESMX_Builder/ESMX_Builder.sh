@@ -254,21 +254,39 @@ INSTALL_SETTINGS=("")
 
 # build and install
 set +e
+if [ "${VERBOSE}" = true ] ; then
+  echo --- CMake Configuring ---
+  set -x
+fi
 cmake -S${ESMF_ESMXDIR} -B${BUILD_DIR} ${CMAKE_SETTINGS[@]}
+{ set +x; } 2>/dev/null
 if [ "$?" !=  "0" ]; then
   echo "ESMX_Builder Failed: (cmake)"
   exit -1
 fi
+echo
+if [ "${VERBOSE}" = true ] ; then
+  echo --- CMake Building ---
+  set -x
+fi
 cmake --build ${BUILD_DIR} ${BUILD_SETTINGS[@]}
+{ set +x; } 2>/dev/null
 if [ "$?" !=  "0" ]; then
   echo "ESMX_Builder Failed: (cmake --build)"
   exit -2
 fi
+echo
+if [ "${VERBOSE}" = true ] ; then
+  echo --- CMake Installing ---
+  set -x
+fi
 cmake --install ${BUILD_DIR} ${INSTALL_SETTINGS[@]}
+{ set +x; } 2>/dev/null
 if [ "$?" !=  "0" ]; then
   echo "ESMX_Builder Failed: (cmake --install)"
   exit -3
 fi
+echo
 if [ "${TEST}" = true ]; then
   (cd ${BUILD_DIR}/Driver; ctest ${TEST_SETTINGS[@]})
   if [ "$?" !=  "0" ]; then
