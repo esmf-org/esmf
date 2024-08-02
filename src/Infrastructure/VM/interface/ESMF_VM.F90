@@ -1,10 +1,10 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
-! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-! Laboratory, University of Michigan, National Centers for Environmental 
-! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !
@@ -5832,19 +5832,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMLog()"
 !BOP
-! !IROUTINE: ESMF_VMLog - Log
+! !IROUTINE: ESMF_VMLog - Log VM information
 
 ! !INTERFACE:
-  subroutine ESMF_VMLog(vm, prefix, logMsgFlag, rc)
+  subroutine ESMF_VMLog(vm, keywordEnforcer, prefix, logMsgFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),          intent(in)              :: vm
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),       intent(in),   optional  :: prefix
     type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
     integer, intent(out),                 optional  :: rc
 !
 ! !DESCRIPTION:
-!   Log the VM.
+!   Write information about {\tt vm} to the ESMF default Log.
 !
 !   The arguments are:
 !   \begin{description}
@@ -5868,7 +5869,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! deal with optionl logMsgFlag
+    ! deal with optional logMsgFlag
     logMsg = ESMF_LOGMSG_INFO ! default
     if (present(logMsgFlag)) logMsg = logMsgFlag
 
@@ -5921,7 +5922,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! deal with optionl logMsgFlag
+    ! deal with optional logMsgFlag
     logMsg = ESMF_LOGMSG_INFO ! default
     if (present(logMsgFlag)) logMsg = logMsgFlag
 
@@ -5974,7 +5975,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! deal with optionl logMsgFlag
+    ! deal with optional logMsgFlag
     logMsg = ESMF_LOGMSG_INFO ! default
     if (present(logMsgFlag)) logMsg = logMsgFlag
 
@@ -6027,7 +6028,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! deal with optionl logMsgFlag
+    ! deal with optional logMsgFlag
     logMsg = ESMF_LOGMSG_INFO ! default
     if (present(logMsgFlag)) logMsg = logMsgFlag
 
@@ -6084,7 +6085,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! deal with optionl logMsgFlag
+    ! deal with optional logMsgFlag
     logMsg = ESMF_LOGMSG_INFO ! default
     if (present(logMsgFlag)) logMsg = logMsgFlag
 
@@ -6137,7 +6138,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! deal with optionl logMsgFlag
+    ! deal with optional logMsgFlag
     logMsg = ESMF_LOGMSG_INFO ! default
     if (present(logMsgFlag)) logMsg = logMsgFlag
 
@@ -10494,7 +10495,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! deal with optionl logMsgFlag
+    ! deal with optional logMsgFlag
     logMsg = ESMF_LOGMSG_INFO ! default
     if (present(logMsgFlag)) logMsg = logMsgFlag
 
@@ -11292,7 +11293,7 @@ subroutine ESMF_PointerLog(ptr, prefix, logMsgFlag, rc)
   integer,                intent(out), optional  :: rc
   type(ESMF_LogMsg_Flag)  :: logMsg
   if (present(rc)) rc = ESMF_RC_NOT_IMPL
-  ! deal with optionl logMsgFlag
+  ! deal with optional logMsgFlag
   logMsg = ESMF_LOGMSG_INFO ! default
   if (present(logMsgFlag)) logMsg = logMsgFlag
   call c_pointerlog(ptr, prefix, logMsg)

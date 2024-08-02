@@ -439,6 +439,8 @@ namespace ESMCI {
          const std::string &convention, const std::string &purpose,
          bool *overwrite, ESMC_FileStatus_Flag *status,
          int *timeslice, ESMC_IOFmt_Flag *iofmt);
+    void log(std::string prefix,
+      ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO, bool deepFlag=false)const;
     int print() const;
     int sync();
     int validate() const;

@@ -3533,7 +3533,7 @@ module NUOPC_Driver
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       call ESMF_ClockPrint(internalClock, options="currTime", &
         preString=">>>"//trim(name)//&
-        " entered Run (phase="//trim(adjustl(pLabel))// &
+        ": entered Run (phase="//trim(adjustl(pLabel))// &
         ") with current time: ", unit=msgString, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3641,8 +3641,9 @@ module NUOPC_Driver
     ! conditionally output info to Log file
     if (btest(verbosity,9)) then
       call ESMF_ClockPrint(internalClock, options="currTime", &
-        preString="<<<"//trim(name)//&
-        " - leaving Run with current time: ", unit=msgString, rc=rc)
+        preString=">>>"//trim(name)//&
+        ": leaving Run (phase="//trim(adjustl(pLabel))// &
+        ") with current time: ", unit=msgString, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
