@@ -17,6 +17,7 @@
 #include <Mesh/include/Legacy/ESMCI_Sintdnode.h>
 #include <Mesh/include/Regridding/ESMCI_Interp.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
+#include <Mesh/include/Regridding/ESMCI_Search.h>
 
 namespace ESMCI {
 
@@ -291,7 +292,7 @@ double gcdistance(double * v1, double * v2);
  void calc_wgts_from_side_mesh_to_xgrid(Mesh *src_side_mesh, Mesh *dst_xgrid_mesh, IWeights &wts);
  void calc_wgts_from_xgrid_to_side_mesh(Mesh *src_xgrid_mesh, Mesh *dst_side_mesh, IWeights &wts);
 
-
+void XGridGatherOverlappingElems(Mesh &srcMesh, Mesh &dstMesh, SearchResult &result);
 
 // Debugging apis
 void cart2sph(int num_p, const double *p, double *lonlat);

@@ -767,14 +767,14 @@ void calc_2nd_order_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, 
                                         struct Zoltan_Struct * zz, bool set_dst_status, WMat &dst_status) {
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
 
-
+  // See if we're doing an XGrid
+  bool xgrid_regrid=false;
   if ((srcmesh.side==3) || (dstmesh.side==3)) {
+    xgrid_regrid=true;
+    
     printf("src side=%d  src ind=%d\n",srcmesh.side,srcmesh.ind);
-    printf("dst side=%d  dst ind=%d\n",dstmesh.side,dstmesh.ind);
+    printf("dst side=%d  dst ind=%d\n",dstmesh.side,dstmesh.ind);    
   }
-
-
-  
 
   
   // Get src coord field
@@ -3020,7 +3020,17 @@ interp_method(imethod)
         if(freeze_src_) {
           OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
         } else {
-          OctSearchElems(grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
+          // If 2nd order see if it's an XGrid and then use that
+          if (interp_method == Interp::INTERP_CONSERVE_2ND) {
+            // If an XGrid is involved, then do a search using that
+            if ((grend.GetSrcRend().side==3) || (grend.GetSrcRend().side==3)) {
+              XGridGatherOverlappingElems(grend.GetSrcRend(), grend.GetDstRend(), sres); 
+            } else { // ...otherwise just use the regular search
+              OctSearchElems(grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
+            }
+          } else { // ...otherwise just use the regular search
+            OctSearchElems(grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
+          }
         }
       }
     }
@@ -3055,7 +3065,18 @@ interp_method(imethod)
           _check_mesh(*dest, "destination");
         }
 
-        OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, *dest, unmappedaction, 1e-8, sres);
+        // If 2nd order see if it's an XGrid and then use that
+        if (interp_method == Interp::INTERP_CONSERVE_2ND) {
+          
+          // If an XGrid is involved, then do a search using that
+          if ((src->side==3) || (dest->side==3)) {
+            XGridGatherOverlappingElems(*src, *dest, sres); 
+          } else { // ...otherwise just use the regular search
+            OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, *dest, unmappedaction, 1e-8, sres);
+          }
+        } else { // ...otherwise just use the regular search
+          OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, *dest, unmappedaction, 1e-8, sres);
+        }        
       }
     }
 

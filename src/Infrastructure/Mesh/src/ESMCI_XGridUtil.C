@@ -24,6 +24,8 @@
 #include <Mesh/include/ESMCI_XGridUtil.h>
 #include <Mesh/include/Regridding/ESMCI_MeshRegrid.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
+#include <Mesh/include/Regridding/ESMCI_Search.h>
+
 
 #include <cassert>
 #include <cmath>
@@ -2798,5 +2800,108 @@ void calc_wgts_from_xgrid_to_side_mesh(Mesh *src_xgrid_mesh, Mesh *dst_side_mesh
     }
 }
 
+  void srcXGridGatherOverlappingElems(Mesh &srcXGridMesh, Mesh &dstMesh, SearchResult &result) {
+
+    printf("sXGE src side=%d  src ind=%d\n",srcXGridMesh.side,srcXGridMesh.ind);
+    printf("sXGE dst side=%d  dst ind=%d\n",dstMesh.side,dstMesh.ind);
+
+    // Get dst side mesh info
+    int side=dstMesh.side;
+    int ind=dstMesh.ind;
+    
+    // Check side and ind info to make sure it's valid
+    if ((side != 1) && (side !=2)) Throw() << "side (for an xgrid side mesh) should be 1 or 2";
+    if (ind < 1) Throw() <<"ind (for an xgrid side mesh) should be >=1.";
+
+    // Get data fields corresponding to side
+    MEField<> *mesh_ind_field = NULL;
+    MEField<> *orig_elem_id_field = NULL;
+    if (side == 1) {
+      mesh_ind_field = srcXGridMesh.GetField("side1_mesh_ind");
+      orig_elem_id_field = srcXGridMesh.GetField("side1_orig_elem_id");
+    } else if (side ==2) {
+      mesh_ind_field = srcXGridMesh.GetField("side2_mesh_ind");
+      orig_elem_id_field = srcXGridMesh.GetField("side2_orig_elem_id");
+    } else {
+      Throw() << "Invalid mesh side: "<<side;
+    }
+
+    // Error check Mesh fields
+    if (mesh_ind_field == NULL) Throw() << "XGrid mesh doesn't contain mesh index information.";
+    if (orig_elem_id_field == NULL) Throw() << "XGrid mesh doesn't contain original element id information.";
+
+    
+    // Iterate through src XGrid Mesh
+    Mesh::iterator sxei = srcXGridMesh.elem_begin(), sxee = srcXGridMesh.elem_end();
+    for (; sxei != sxee; ++sxei) {
+      MeshObj &src_elem = *sxei;
+
+      // Skip non-local elements
+      if (!GetAttr(src_elem).is_locally_owned()) continue;
+
+      // Get XGrid element ind
+      // (Round to nearest to take care of possible representation issues)
+      double *elem_mesh_ind_dbl = mesh_ind_field->data(src_elem);
+      int elem_mesh_ind = (int)(*elem_mesh_ind_dbl + 0.5);
+
+      // if the ind matches, then attempt to add entry
+      if (elem_mesh_ind == ind) {
+
+        // Get orig elem id
+        // (Round to nearest to take care of possible representation issues)
+        double *dst_orig_elem_id_dbl = orig_elem_id_field->data(src_elem);  
+        int dst_orig_elem_id = (int)(*dst_orig_elem_id_dbl+0.5);  
+        
+        // If the orig dst id is in the side mesh, then add it
+        Mesh::MeshObjIDMap::iterator mi =  dstMesh.map_find(MeshObj::ELEMENT, dst_orig_elem_id);
+        if (mi != dstMesh.map_end(MeshObj::ELEMENT)) {
+          MeshObj *dst_elem=&*mi;
+        
+          // Create Search result
+          Search_result *sr=new Search_result();
+          sr->elem=&src_elem; // Add src elem
+          sr->elems.push_back(dst_elem); // Add dst elem
+                    
+          // Add it to results list
+          result.push_back(sr);
+        }             
+      }
+    }
+
+  }
+
+  void dstXGridGatherOverlappingElems(Mesh &srcMesh, Mesh &dstXGridMesh, SearchResult &result) {
+
+    printf("dXGE src side=%d  src ind=%d\n",srcMesh.side,srcMesh.ind);
+    printf("dXGE dst side=%d  dst ind=%d\n",dstXGridMesh.side,dstXGridMesh.ind);
+
+
+
+    // Iterate through dst Mesh
+    //MeshDB::const_iterator ei = dstMesh.elem_begin(), ee = dstMesh.elem_end();
+    //for (; ei != ee; ++ei) {
+      //    meshB_elist.push_back(&*ei);
+    //}
+
+}
+
+  
+
+  // Used when one of src or dst Mesh is an XGrid. Uses XGrid
+  // information to gather elements of dstMesh that overlap with srcMesh
+  void XGridGatherOverlappingElems(Mesh &srcMesh, Mesh &dstMesh, SearchResult &result) {
+    
+    // Error check
+    if (srcMesh.spatial_dim() != dstMesh.spatial_dim()) {
+      Throw() << "Meshes must have same spatial dim for search";
+    }    
+    
+    // Branch depending on which is the XGrid
+    if (srcMesh.side==3) srcXGridGatherOverlappingElems(srcMesh, dstMesh, result);
+    else if (dstMesh.side==3) dstXGridGatherOverlappingElems(srcMesh, dstMesh, result);
+    else Throw() << "Unexpectedly neither src or dst Mesh is an XGrid.";
+    
+  }
+  
 
 } //namespace
