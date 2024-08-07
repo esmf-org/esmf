@@ -133,3 +133,4 @@ Legacy/ESMCI_MeshRead.C -> call to WriteVTKMesh() in ESMCI_VTKMesh.C
 * Apr 3, 2024 - ISSUE: regridstore() garbles the SHP mesh
 It may be that the global element connectivity vectors are actually local.
 How to do this in distributed envirnonment?
+* Jun 5, 2024: ArraySMM -- regridding not working?

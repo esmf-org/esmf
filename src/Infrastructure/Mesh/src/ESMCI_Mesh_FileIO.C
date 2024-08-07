@@ -611,6 +611,12 @@ void ESMCI_mesh_create_from_ESMFMesh_file(char *filename,
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                       &localrc)) throw localrc;
 
+    int jj = 0;
+    for (int ii = 0; ii < num_nodes; ii++) {
+      printf("NC mesh node ID: %d of %d on pet %d, X= %.4f rad, Y= %.4f rad\n", node_ids[ii], num_nodes, local_pet, nodeCoords[jj], nodeCoords[jj+1]);
+      jj+=2;
+    }
+
     // Get rid of things used for adding nodes
     delete [] node_ids;
     delete [] nodeCoords;
@@ -671,6 +677,9 @@ void ESMCI_mesh_create_from_ESMFMesh_file(char *filename,
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                       &localrc)) throw localrc;
 
+    for (int ii = 0; ii < num_elems; ii++) {
+      printf("NC mesh elem ID: %d\n", elem_ids[ii]);
+    }
     // Free things used for element creation
     delete [] elementType;
     if (elementMask != NULL) delete [] elementMask;
@@ -1488,6 +1497,12 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 				      &localrc)) throw localrc;
       
+    int jj = 0;
+    for (int ii = 0; ii < num_nodes; ii++) {
+      printf("SHP mesh node ID: %d of %d on pet %d, X= %.4f rad, Y= %.4f rad\n", node_IDs[ii], num_nodes, local_pet, nodeCoords[jj], nodeCoords[jj+1]);
+      jj+=2;
+    }
+
     // Add elements
     // !!! None of the elements have shared edges.
     int areaPresent = 0;
@@ -1502,6 +1517,10 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
 			  &coord_sys_mesh, &orig_sdim, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 				      &localrc)) throw localrc;
+
+    for (int ii = 0; ii < num_elems; ii++) {
+      printf("SHP mesh elem ID: %d\n", feature_IDs[ii]);
+    }
 
     // Cleanup
     GDALClose( hDS );

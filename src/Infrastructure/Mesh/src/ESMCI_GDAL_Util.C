@@ -255,6 +255,7 @@ void ESMCI_GDAL_process_shapefile_serial(
 //>>>>
 //>>>>  return ;
 }
+
 void ESMCI_GDAL_process_shapefile_distributed(
 // inputs
 		       OGRDataSourceH hDS, 
@@ -313,6 +314,7 @@ void ESMCI_GDAL_process_shapefile_distributed(
     OGRGeometryH Cpoint = OGR_G_CreateGeometry(wkbPoint);
 
     hFeature = OGR_L_GetFeature(hLayer, globFeatureIDs[featureIDs[i]-1]); // Distributed
+    printf("Feature ID glob/local: %d/%d\n",globFeatureIDs[featureIDs[i]-1],featureIDs[i]-1);
 
     // Get geometry handles
     hGeom = OGR_F_GetGeometryRef(hFeature); // looks like this should be a polygon
@@ -350,6 +352,7 @@ void ESMCI_GDAL_process_shapefile_distributed(
   for (int i=0;i<totpoints;i++) {
     nodeCoords[j]   = XCoords[i];
     nodeCoords[j+1] = YCoords[i];
+//    printf("<<>> %d: %.2f, %.2f\n",nodeIDs[i],XCoords[i],YCoords[i]);
     j+=2;
   }
   *nNodes = totpoints;
