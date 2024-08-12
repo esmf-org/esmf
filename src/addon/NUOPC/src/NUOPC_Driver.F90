@@ -3641,7 +3641,7 @@ module NUOPC_Driver
     ! conditionally output info to Log file
     if (btest(verbosity,9)) then
       call ESMF_ClockPrint(internalClock, options="currTime", &
-        preString=">>>"//trim(name)//&
+        preString="<<<"//trim(name)//&
         ": leaving Run (phase="//trim(adjustl(pLabel))// &
         ") with current time: ", unit=msgString, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
