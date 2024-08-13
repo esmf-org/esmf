@@ -4006,8 +4006,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                    ESMF_CONTEXT, rcToReturn=rc)) return
            else 
               sideField=srcField
-              sideMeshSide=0
-              if (srcSide == ESMF_XGRIDSIDE_B) sideMeshSide=1
+              sideMeshSide=1  ! side A
+              if (srcSide == ESMF_XGRIDSIDE_B) sideMeshSide=2 ! side B
               sideMeshInd=srcIdx
            endif
 
@@ -4034,8 +4034,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                    ESMF_CONTEXT, rcToReturn=rc)) return
            else 
               sideField=dstField
-              sideMeshSide=0
-              if (dstSide == ESMF_XGRIDSIDE_B) sideMeshSide=1
+              sideMeshSide=1  ! side A
+              if (dstSide == ESMF_XGRIDSIDE_B) sideMeshSide=2 ! side B
               sideMeshInd=dstIdx
            endif
 
