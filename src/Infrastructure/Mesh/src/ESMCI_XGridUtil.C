@@ -41,6 +41,7 @@
 
 #include <algorithm>
 #include <set>
+#include <map>
 
 #include <ESMCI_VM.h>
 #include "ESMCI_Macros.h"
@@ -2876,14 +2877,89 @@ void calc_wgts_from_xgrid_to_side_mesh(Mesh *src_xgrid_mesh, Mesh *dst_side_mesh
     printf("dXGE dst side=%d  dst ind=%d\n",dstXGridMesh.side,dstXGridMesh.ind);
 
 
+    // Get dst side mesh info
+    int side=srcMesh.side;
+    int ind=srcMesh.ind;
+    
+    // Check side and ind info to make sure it's valid
+    if ((side != 1) && (side !=2)) Throw() << "side (for an xgrid side mesh) should be 1 or 2";
+    if (ind < 1) Throw() <<"ind (for an xgrid side mesh) should be >=1.";
 
-    // Iterate through dst Mesh
-    //MeshDB::const_iterator ei = dstMesh.elem_begin(), ee = dstMesh.elem_end();
-    //for (; ei != ee; ++ei) {
-      //    meshB_elist.push_back(&*ei);
-    //}
+    // Get data fields corresponding to side
+    MEField<> *mesh_ind_field = NULL;
+    MEField<> *orig_elem_id_field = NULL;
+    if (side == 1) {
+      mesh_ind_field = dstXGridMesh.GetField("side1_mesh_ind");
+      orig_elem_id_field = dstXGridMesh.GetField("side1_orig_elem_id");
+    } else if (side ==2) {
+      mesh_ind_field = dstXGridMesh.GetField("side2_mesh_ind");
+      orig_elem_id_field = dstXGridMesh.GetField("side2_orig_elem_id");
+    } else {
+      Throw() << "Invalid mesh side: "<<side;
+    }
 
-}
+    // Error check Mesh fields
+    if (mesh_ind_field == NULL) Throw() << "XGrid mesh doesn't contain mesh index information.";
+    if (orig_elem_id_field == NULL) Throw() << "XGrid mesh doesn't contain original element id information.";
+
+    // Set up map
+    std::map<int,Search_result *> id_to_sr_map;
+    
+    // Iterate through dst XGrid Mesh
+    Mesh::iterator dxei = dstXGridMesh.elem_begin(), dxee = dstXGridMesh.elem_end();
+    for (; dxei != dxee; ++dxei) {
+      MeshObj &dst_elem = *dxei;
+
+      // Skip non-local elements
+      if (!GetAttr(dst_elem).is_locally_owned()) continue;
+
+      // Get XGrid element ind
+      // (Round to nearest to take care of possible representation issues)
+      double *elem_mesh_ind_dbl = mesh_ind_field->data(dst_elem);
+      int elem_mesh_ind = (int)(*elem_mesh_ind_dbl + 0.5);
+
+      // if the ind matches, then attempt to add entry
+      if (elem_mesh_ind == ind) {
+
+        // Get orig elem id
+        // (Round to nearest to take care of possible representation issues)
+        double *src_orig_elem_id_dbl = orig_elem_id_field->data(dst_elem);  
+        int src_orig_elem_id = (int)(*src_orig_elem_id_dbl+0.5);  
+        
+        // If the orig dst id is in the side mesh, then add it
+        Mesh::MeshObjIDMap::iterator mi =  srcMesh.map_find(MeshObj::ELEMENT, src_orig_elem_id);
+        if (mi != srcMesh.map_end(MeshObj::ELEMENT)) {
+          MeshObj *src_elem=&*mi;
+
+          // Find search result to add to
+          std::map<int,Search_result *>::iterator itsr=id_to_sr_map.find(src_elem->get_id());
+
+          // Get search result based on whether it was found
+          Search_result *sr;
+          if (itsr == id_to_sr_map.end()) {
+            // Create new Search_result
+            sr=new Search_result();
+            sr->elem=src_elem; // Add src elem
+
+            // Add to map
+            id_to_sr_map[src_elem->get_id()]=sr;
+
+            // Add to result
+            result.push_back(sr);
+            
+          } else {
+            // Get from map
+            sr=itsr->second;
+          }
+          
+          // Add dst element to search result
+          sr->elems.push_back(&dst_elem);
+                    
+        }             
+      }
+    }
+         
+  }
 
   
 
