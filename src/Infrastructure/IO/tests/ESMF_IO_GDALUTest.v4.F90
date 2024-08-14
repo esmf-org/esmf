@@ -256,7 +256,7 @@ program ESMF_IO_GDALUTest
   ! 11. Initialize & create the NetCDF file mesh
   !------------------------------------------------------------------------
   write(name, *) "Creating a NetCDF Mesh to use in Field Tests"
-  mesh=ESMF_MeshCreate("data/test.nc", &
+  mesh=ESMF_MeshCreate("data/test_sph_3x3_fromshp.nc", &
        fileformat=ESMF_FILEFORMAT_ESMFMESH, &
        coordSys=ESMF_COORDSYS_SPH_RAD, &
        rc=rc)

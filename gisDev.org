@@ -134,3 +134,29 @@ Legacy/ESMCI_MeshRead.C -> call to WriteVTKMesh() in ESMCI_VTKMesh.C
 It may be that the global element connectivity vectors are actually local.
 How to do this in distributed envirnonment?
 * Jun 5, 2024: ArraySMM -- regridding not working?
+* Aug 14, 2024: Update
+** Unit test data file updates.
+added some new files for testing, into the Mesh/tests/data/ folder
+- esmf_3x3_mesh.shp and associated files: This is the 3x3 mesh described in the 
+  ref doc, and in test_sph_3x3_esmf.nc
+
+- test_sph_3x3_fromshp.nc is the 3x3 mesh but the nodes are sequential, 
+  i.e. there are no shared edges. This is how the ESMF/GDAL interface reads
+  the shapefile-equivalent from esmf_3x3_mesh.shp
+
+- esmf_3x3_multimesh.shp and associated files: the same as esmf_3x3_mesh.shp but the two
+  triangular elements are incorporated into one multipolygon element so that GDAL/ESMF
+  has to parse an multipolygon
+
+** Unit test updates:
+Several version of the ESMF_IO_GDALUTest.F90, each labeled 
+   ESMF_IO_GDALUTest.v_.F90, versions 1-5
+the most recent version, v5, is linked to the file ESMF_IO_GDALUTest.F90
+as a symlink.
+
+v4: runs a test of the shapefile and NetCDF mesh generation and regrid routines using
+    the same mesh. The shapefile is either esmf_3x3_mesh.shp or esmf_3x3_multimesh.shp
+    The NetCDF file is test_sph_3x3_fromshp.nc.
+
+v5: runs only a test of the shapefile mesh generation and regridding onto a cube grid.
+    user can select the desired test shapefile by commenting/uncommenting the file.
