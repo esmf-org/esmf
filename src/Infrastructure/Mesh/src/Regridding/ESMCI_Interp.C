@@ -767,13 +767,18 @@ void calc_2nd_order_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, 
                                         struct Zoltan_Struct * zz, bool set_dst_status, WMat &dst_status) {
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
 
-  // See if we're doing an XGrid
-  bool xgrid_regrid=false;
-  if ((srcmesh.side==3) || (dstmesh.side==3)) {
-    xgrid_regrid=true;
-    
-    printf("src side=%d  src ind=%d\n",srcmesh.side,srcmesh.ind);
-    printf("dst side=%d  dst ind=%d\n",dstmesh.side,dstmesh.ind);    
+  // See if we're using an XGrid
+  XGRID_USE xgrid_use=XGRID_USE_NONE;
+  if (srcmesh.side==3) {
+    // Extra check to ensure that it's actually a side mesh going to XGrid
+    if ((dstmesh.side == 1) || (dstmesh.side == 2)) {
+      xgrid_use=XGRID_USE_SRC;
+    }
+  } else if (dstmesh.side==3) {
+    // Extra check to ensure that it's actually a side mesh going to XGrid
+    if ((srcmesh.side == 1) || (srcmesh.side == 2)) {
+      xgrid_use=XGRID_USE_DST;
+    }
   }
 
   
@@ -891,9 +896,10 @@ void calc_2nd_order_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, 
 
     // Calculate weights
     calc_2nd_order_weights_2D_3D_sph(sr.elem,src_cfield,src_mask_field,
-                                      sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
-                                        &src_elem_area, &valid, &wgts, &areas, &dst_areas,
-                                        &tmp_valid, &tmp_areas, &tmp_dst_areas, &sm_cells, &nbrs);
+                                     sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
+                                     xgrid_use, 
+                                     &src_elem_area, &valid, &wgts, &areas, &dst_areas,
+                                     &tmp_valid, &tmp_areas, &tmp_dst_areas, &sm_cells, &nbrs);
 
 
     // Invalidate masked destination elements
@@ -1095,6 +1101,20 @@ void calc_2nd_order_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh,
                                         struct Zoltan_Struct * zz, bool set_dst_status, WMat &dst_status) {
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
 
+  // See if we're using an XGrid
+  XGRID_USE xgrid_use=XGRID_USE_NONE;
+  if (srcmesh.side==3) {
+    // Extra check to ensure that it's actually a side mesh going to XGrid
+    if ((dstmesh.side == 1) || (dstmesh.side == 2)) {
+      xgrid_use=XGRID_USE_SRC;
+    }
+  } else if (dstmesh.side==3) {
+    // Extra check to ensure that it's actually a side mesh going to XGrid
+    if ((srcmesh.side == 1) || (srcmesh.side == 2)) {
+      xgrid_use=XGRID_USE_DST;
+    }
+  }
+  
   // Get src coord field
   MEField<> *src_cfield = srcmesh.GetCoordField();
 
@@ -1209,7 +1229,7 @@ void calc_2nd_order_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh,
 
     // Calculate weights
     calc_2nd_order_weights_2D_2D_cart(sr.elem,src_cfield,src_mask_field,
-                                      sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
+                                      sr.elems,dst_cfield,dst_mask_field, dst_frac2_field, xgrid_use,
                                         &src_elem_area, &valid, &wgts, &areas, &dst_areas,
                                         &tmp_valid, &tmp_areas, &tmp_dst_areas, &sm_cells, &nbrs);
 

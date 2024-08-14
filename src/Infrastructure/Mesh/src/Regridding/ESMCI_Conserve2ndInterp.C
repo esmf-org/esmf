@@ -497,7 +497,7 @@ namespace ESMCI {
 
   // Main Call
   void calc_2nd_order_weights_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield, MEField<> *src_mask_field,
-                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
+                                         std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field, XGRID_USE xgrid_use, 
                                            double *src_elem_area,
                                            std::vector<int> *valid,
                                            std::vector<HC_WGHT> *wgts,
@@ -1236,7 +1236,7 @@ namespace ESMCI {
 
   // Main Call
   void calc_2nd_order_weights_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, MEField<> *src_mask_field,
-                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
+                                        std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field, XGRID_USE xgrid_use, 
                                            double *src_elem_area,
                                            std::vector<int> *valid,
                                            std::vector<HC_WGHT> *wgts,
@@ -1245,6 +1245,9 @@ namespace ESMCI {
                                            std::vector<SM_CELL> *sm_cells,
                                            std::vector<NBR_ELEM> *nbrs
                                         ) {
+
+    printf("xgrid_use=%d\n",xgrid_use);
+    
     // Create super mesh cells by intersecting src_elem and list of dst_elems
     create_SM_cells_2D_3D_sph(src_elem, src_cfield,
                               dst_elems, dst_cfield, dst_mask_field, dst_frac2_field,
