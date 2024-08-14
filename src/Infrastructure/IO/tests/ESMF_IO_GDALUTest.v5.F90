@@ -59,9 +59,9 @@ program ESMF_IO_GDALUTest
 
   integer, allocatable :: decomptile(:,:)
 
-  character(len=*), parameter :: shapefileName = "data/esmf_3x3_multimesh.shp"
+!  character(len=*), parameter :: shapefileName = "data/esmf_3x3_multimesh.shp"
 !  character(len=*), parameter :: shapefileName = "data/esmf_3x3_mesh.shp"
-!  character(len=*), parameter :: shapefileName = "data/cb_2018_us_region_20m.shp"
+  character(len=*), parameter :: shapefileName = "data/cb_2018_us_county_20m.shp"
 
   ! NetCDF stuff
   integer :: ncid, xdimid, ydimid, xvarid, yvarid, varid, dimids
@@ -156,6 +156,7 @@ program ESMF_IO_GDALUTest
   call ESMF_FieldGet( Meshfield, farrayPtr=mptr, rc=rc)
   mptr    = 0.0
   mptr(1) = 11.5
+  write(*,*) "pet: ", localpet, " mptr: ", shape(mptr)
   mptr => null()
 
   call ESMF_FieldGet( Gridfield, farrayPtr=gptr, rc=rc)
@@ -238,7 +239,7 @@ program ESMF_IO_GDALUTest
 
   !------------------------------------------------------------------------
   !------------------------------------------------------------------------
-  ! 10. Cleanup and rerun with NetCDF-based mesh
+  ! 10. Cleanup and end
   !------------------------------------------------------------------------
 
   call ESMF_MeshDestroy(mesh, noGarbage = .TRUE., rc=rc)
@@ -250,137 +251,6 @@ program ESMF_IO_GDALUTest
   call ESMF_FieldDestroy(Meshfield, noGarbage = .TRUE., rc=rc)
   write(failMsg, *) "ESMF_FieldDestroy of MeshField did not return ESMF_SUCCESS"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-  !------------------------------------------------------------------------
-  !------------------------------------------------------------------------
-  ! 11. Initialize & create the NetCDF file mesh
-  !------------------------------------------------------------------------
-  write(name, *) "Creating a NetCDF Mesh to use in Field Tests"
-  mesh=ESMF_MeshCreate("data/test.nc", &
-       fileformat=ESMF_FILEFORMAT_ESMFMESH, &
-       coordSys=ESMF_COORDSYS_SPH_RAD, &
-       rc=rc)
-  write(failMsg, *) "ESMF_MeshCreate from .nc did not return ESMF_SUCCESS"
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !------------------------------------------------------------------------
-  ! 12. Initialize & create the grid and mesh fields
-  !------------------------------------------------------------------------
-  ! -- Grid field
-  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
-  GridField = ESMF_FieldCreate( Grid, &
-                                arrayspec, &
-                                staggerloc=ESMF_STAGGERLOC_CENTER, &
-                                name="dest", &
-                                rc=rc)
-
-  if (rc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    write(*,*) 'Failed at grid FieldCreate'
-    return
-  endif
-
-  ! -- Mesh field
-  call ESMF_ArraySpecSet(arraySpec, 1, typekind=ESMF_TYPEKIND_R4, rc=rc)
-
-  Meshfield = ESMF_FieldCreate( Mesh, &
-                                arraySpec, &
-                                name="DistFld", &
-                                meshLoc=ESMF_MESHLOC_ELEMENT, &
-                                rc=rc)
-
-  if (rc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    write(*,*) 'Failed at Mesh FieldCreate'
-    return
-  endif
-
-  !------------------------------------------------------------------------
-  ! 12a. Access the field pointers and give them some data
-  call ESMF_FieldGet( Meshfield, farrayPtr=mptr, rc=rc)
-  mptr    = 0.0
-  mptr(1) = 11.5
-  mptr => null()
-
-  call ESMF_FieldGet( Gridfield, farrayPtr=gptr, rc=rc)
-  gptr = 0.0
-  gptr => null()
-
-  !------------------------------------------------------------------------
-  !------------------------------------------------------------------------
-  ! 13. Create the regrid route handle
-  !------------------------------------------------------------------------
-  ! Regrid store
-   call ESMF_FieldRegridStore( MeshField, &
-                               dstField=GridField, &
-                               routeHandle=routeHandle, &
-                               regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
-                               unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
-                               rc=rc)
-  write(failMsg, *) "RegridStore failed"
-  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-  !------------------------------------------------------------------------
-  !------------------------------------------------------------------------
-  ! 14. Read the mesh data
-  !------------------------------------------------------------------------
-!>>  call ESMF_FieldRead( MeshField, &
-!>>                       fileName=shapefileName, &
-!>>                       iofmt=ESMF_IOFMT_SHP, &
-!>>                       rc=rc)
-!>>  write(failMsg, *) "Mesh ESMF_FieldRead failed"
-!>>  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !------------------------------------------------------------------------
-  ! 15. Regrid the mesh onto the grid
-  !------------------------------------------------------------------------
-  call ESMF_FieldRegrid(MeshField,GridField,routeHandle,rc=rc)
-
-  !------------------------------------------------------------------------
-  !------------------------------------------------------------------------
-  ! 16. Write out the VTK files
-  !------------------------------------------------------------------------
-  call ESMF_MeshWrite(mesh,"netcdf_mesh",rc=rc)
-
-  !------------------------------------------------------------------------
-  !------------------------------------------------------------------------
-  ! 17. Write the gridded data from grid to NetCDF
-  !------------------------------------------------------------------------
-!>>  if (localpet == 0 ) then
-!>>     !------------------------------------------------------------------------
-!>>     ! Write the regridded field to file
-!>>     ! -- Create file
-!>>     rc = nf90_create("test.nc",NF90_CLOBBER, ncid)
-!>>     ! -- Define dims, etc
-!>>     rc = nf90_def_dim(ncid, "lon", 180,  xdimid)
-!>>     rc = nf90_def_dim(ncid, "lat", 1080, ydimid)
-!>>     ! -- Define coords
-!>>     rc = nf90_def_var(ncid, "lon", NF90_REAL, xdimid, xvarid)
-!>>     rc = nf90_def_var(ncid, "lat", NF90_REAL, ydimid, yvarid)
-!>>     ! -- Define variable
-!>>     rc = nf90_def_var(ncid, "DistFld", NF90_FLOAT, dimids, varid)
-!>>     ! -- Write coordinates
-!>>     ! -- Write data     
-!>>     ! -- Close file
-!>>     rc = nf90_close(ncid)
-!>>  endif
-
-!>>  call ESMF_FieldWrite(GridField, fileName="mesh#.nc",  &
-!>>       iofmt=ESMF_IOFMT_NETCDF,  &
-!>>       overwrite=.true.,  &
-!>>       status=ESMF_FILESTATUS_UNKNOWN, rc=rc)
-
-  ! X. Dump some data after regrid
-
-  call ESMF_FieldGet( Gridfield, farrayPtr=gptr, rc=rc)
-  call ESMF_FieldGet( Meshfield, farrayPtr=mptr, rc=rc)
-  write(*,*) 'NetCDF to Gridfield: ', maxval(gptr), maxval(mptr)
-  gptr => null()
-  mptr => null()
 
   ! Fin
   !------------------------------------------------------------------------

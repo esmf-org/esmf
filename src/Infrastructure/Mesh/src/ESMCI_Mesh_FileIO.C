@@ -551,7 +551,7 @@ void ESMCI_mesh_create_from_ESMFMesh_file(char *filename,
 //>>      printf("pet: %d numconn: %d/%d elementConn: %d\n",local_pet,totNumElementConn,*numElementConn,elementConn[i]);
 //>>    }
 //    for (int i = 0; i < totNumElementConn; i++) { 
-//      printf("pet: %d numconn: %d glob_elem_conn: %d local_elem_conn: %d\n",local_pet,totNumElementConn,elementConn[i],local_elem_conn[i]);
+//      printf("nc pet: %d numconn: %d glob_elem_conn: %d local_elem_conn: %d\n",local_pet,totNumElementConn,elementConn[i],local_elem_conn[i]);
 //    }
 //>>    for (int i = 0; i < totNumElementConn; i++) { 
 //>>      printf("pet: %d numconn: %d local_elem_conn: %d\n",local_pet,totNumElementConn,local_elem_conn[i]);
@@ -611,11 +611,11 @@ void ESMCI_mesh_create_from_ESMFMesh_file(char *filename,
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                       &localrc)) throw localrc;
 
-    int jj = 0;
-    for (int ii = 0; ii < num_nodes; ii++) {
-      printf("NC mesh node ID: %d of %d on pet %d, X= %.4f rad, Y= %.4f rad\n", node_ids[ii], num_nodes, local_pet, nodeCoords[jj], nodeCoords[jj+1]);
-      jj+=2;
-    }
+//    int jj = 0;
+//    for (int ii = 0; ii < num_nodes; ii++) {
+//      printf("aNC mesh node ID: %d of %d on pet %d, X= %.4f rad, Y= %.4f rad\n", node_ids[ii], num_nodes, local_pet, nodeCoords[jj], nodeCoords[jj+1]);
+//      jj+=2;
+//    }
 
     // Get rid of things used for adding nodes
     delete [] node_ids;
@@ -1410,26 +1410,71 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
 					     elemConn,elemCoords,numElemConn,
 					     &totNumElemConn, &num_nodes, &num_elems);
 
-//    printf("totNumElemConn: %d\n",totNumElemConn);
-
     node_IDs=&nodeIDs[0];
     elem_Conn=&elemConn[0];
     elem_Coords=&elemCoords[0];
     num_ElemConn=&numElemConn[0];
     num_elems = num_features;
 
+    // OK print out stuff for writing to netcdf file
+
+////    printf("nodeCoords = \n");
+////    int jj = 0;
+////    for (int ii = 0; ii < num_nodes; ii++) {
+////      printf("%0.5f, %0.5f, ", nodeCoords[jj], nodeCoords[jj+1]);
+////      jj+=2;
+////    }
+////    printf("\n");
+////
+////    printf("elementConn = \n");
+////    for (int ii = 0; ii < num_nodes; ii++) {
+////      printf("%d, ",elem_Conn[ii]);
+////    }
+////    printf("\n");
+////
+////    printf("numElementConn = \n");
+////    for (int ii = 0; ii < num_elems; ii++) {
+////      printf("%d, ",numElemConn[ii]);
+////    }
+////    printf("\n");
+////
+////    printf("centerCoords = \n");
+////    jj = 0;
+////    for (int ii = 0; ii < num_elems; ii++) {
+////      printf("%0.5f, %0.5f, ", elemCoords[jj],elemCoords[jj+1]);
+////      jj+=2;
+////    }
+////    printf("\n");
+
     // Convert global elem info into node info
 //    int num_nodes;
 //    int *node_ids=NULL;
+    int jj = 0;
+//    for (int ii = 0; ii < num_nodes; ii++) {
+//      printf("bSHP mesh node ID: %d of %d on pet %d, X= %.4f rad, Y= %.4f rad\n", node_IDs[ii], num_nodes, local_pet, nodeCoords[jj], nodeCoords[jj+1]);
+//      jj+=2;
+//    }
+
     int *local_elem_conn=NULL;
     convert_global_elem_conn_to_local_node_and_elem_info(num_elems, totNumElemConn, num_ElemConn, elem_Conn,
                                                           num_nodes, node_IDs, local_elem_conn);
 
-//    for (int i = 0; i < num_elems; i++) { 
-//      printf("pet: %d numelem: %d glob_elem_conn: %d local_elem_conn: %d\n",local_pet,num_elems,num_ElemConn[i]);
+//    jj = 0;
+//    for (int ii = 0; ii < num_nodes; ii++) {
+//      printf("aSHP mesh node ID: %d of %d on pet %d, X= %.4f rad, Y= %.4f rad\n", node_IDs[ii], num_nodes, local_pet, nodeCoords[jj], nodeCoords[jj+1]);
+//      jj+=2;
 //    }
+
+    jj = 0;
+    for (int i = 0; i < num_elems; i++) {
+      printf("pet: %d elem: %d\n",local_pet, i);
+      for (int j = 0; j < num_ElemConn[i]; j++) {
+	printf("     %d: elem_conn: %d \n", num_ElemConn[i], elem_Conn[jj]);
+	jj+=1;
+      }
+    }
 //    for (int i = 0; i < totNumElemConn; i++) { 
-//      printf("pet: %d numconn: %d glob_elem_conn: %d local_elem_conn: %d\n",local_pet,totNumElemConn,elem_Conn[i],local_elem_conn[i]);
+//      printf("shp pet: %d numconn: %d glob_elem_conn: %d local_elem_conn: %d\n",local_pet,totNumElemConn,elem_Conn[i],local_elem_conn[i]);
 //    }
 //    for (int i = 0; i < num_nodes; i++) { 
 //      printf("pet: %d nodeIDs: %d\n",local_pet,node_IDs[i]);
@@ -1497,16 +1542,11 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 				      &localrc)) throw localrc;
       
-    int jj = 0;
-    for (int ii = 0; ii < num_nodes; ii++) {
-      printf("SHP mesh node ID: %d of %d on pet %d, X= %.4f rad, Y= %.4f rad\n", node_IDs[ii], num_nodes, local_pet, nodeCoords[jj], nodeCoords[jj+1]);
-      jj+=2;
-    }
-
     // Add elements
     // !!! None of the elements have shared edges.
     int areaPresent = 0;
     int centerCoordsPresent=1; // Need to have center/element coords for regridding.
+//    printf("num_elems %d; num_ElemConn %d\n",num_elems,sizeof(num_ElemConn)/sizeof(num_ElemConn[0]));
     ESMCI_meshaddelements(out_mesh,
 			  &num_elems, feature_IDs, num_ElemConn, //elementType, <- using numElemConn in place of elementType assumes 2D!!
 			  NULL, // No mask
@@ -1518,9 +1558,9 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
 				      &localrc)) throw localrc;
 
-    for (int ii = 0; ii < num_elems; ii++) {
-      printf("SHP mesh elem ID: %d\n", feature_IDs[ii]);
-    }
+//    for (int ii = 0; ii < num_elems; ii++) {
+//      printf("SHP mesh elem ID: %d\n", feature_IDs[ii]);
+//    }
 
     // Cleanup
     GDALClose( hDS );
