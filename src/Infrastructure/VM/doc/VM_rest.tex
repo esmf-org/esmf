@@ -19,7 +19,7 @@
 
 \item {\bf Data arrays in VM comm calls are {\em assumed shape} with rank=1.} Currently all dummy arrays in VM comm calls are defined as {\em assumed shape} arrays of rank=1. The motivation for this choice is that the use of assumed shape dummy arrays guards against the Fortran copy in/out problem. However it may not be as flexible as desired from the user perspective. Alternatively all dummy arrays could be defined as {\em assumed size} arrays, as it is done in most MPI implementations, allowing arrays of various rank to be passed into the comm methods. Arrays of higher rank can be passed into the current interfaces using Fortran array syntax. This approach is explained in section \ref{vm_higherrank}.
 
-\item {\bf Limitations when using VMEpoch.} Using a blocking collective call (e.g. the MPI_Bcast() used by ESMF_InfoBroadcast(), ESMF_VMBroadcast(), etc.) within the region enclosed by {\tt ESMF\_VMEpochEnter()} and {\tt ESMF\_VMEpochExit()} will result in a deadlock. 
+\item {\bf Limitations when using VMEpoch.} Using a blocking collective call (e.g. {\tt ESMF\_VMBroadcast()}, the {\tt MPI\_Bcast()} used by {\tt ESMF_InfoBroadcast()}, etc.) within the region enclosed by {\tt ESMF\_VMEpochEnter()} and {\tt ESMF\_VMEpochExit()} will result in a deadlock. 
 
   
 \end{enumerate}
