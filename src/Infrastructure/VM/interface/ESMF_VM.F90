@@ -4275,7 +4275,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Enter a specific VM epoch. VM epochs change low level communication behavior
 !   which can have significant performance implications. It is an error to call
 !   {\tt ESMF\_VMEpochEnter()} again before exiting a previous epoch with 
-!   {\tt ESMF\_VMEpochExit()}.
+!   {\tt ESMF\_VMEpochExit()}. Also, blocking collective calls
+!   (e.g. {\tt ESMF\_VMBroadcast()) should not be used within a VMEpoch region.
+!   Doing so will result in a deadlock. 
 !
 !   The arguments are:
 !   \begin{description}
