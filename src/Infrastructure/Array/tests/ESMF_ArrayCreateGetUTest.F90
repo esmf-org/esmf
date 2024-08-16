@@ -203,7 +203,7 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   ! Testing ESMF_ArrayAssignment(=)()
   write(name, *) "Array assignment and equality Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Did not produce alias"
   arrayAlias = array
   arrayBool = (arrayAlias.eq.array)
   call ESMF_Test(arrayBool, name, failMsg, result, ESMF_SRCLINE)
@@ -296,6 +296,13 @@ program ESMF_ArrayCreateGetUTest
   write(name, *) "ArrayPrint 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayPrint(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayLog 2D ESMF_TYPEKIND_R8 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayLog(array, prefix="ArrayLog 2D ESMF_TYPEKIND_R8: ", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------

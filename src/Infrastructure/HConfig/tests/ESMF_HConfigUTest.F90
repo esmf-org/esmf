@@ -925,7 +925,14 @@ program ESMF_HConfigUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_HConfigAssignment(=)()
+  write(name, *) "HConfig assignment and equality Test"
+  write(failMsg, *) "Did not produce alias"
   hconfigAlias = hconfig  ! assignment
+  call ESMF_Test((hconfigAlias.eq.hconfig), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
