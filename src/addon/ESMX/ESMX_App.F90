@@ -19,7 +19,6 @@ program ESMX_App
 
   integer                   :: rc, urc
   type(ESMF_GridComp)       :: driver
-  type(ESMF_Config)         :: config
   type(ESMF_HConfig)        :: hconfig, hconfigNode
   character(:), allocatable :: configKey(:)
   character(:), allocatable :: valueString
@@ -32,13 +31,7 @@ program ESMX_App
   configKey = ["ESMX", "App "]
   call ESMF_Initialize(configFilenameFromArgNum=1, & ! arg 1 to spec alt. config
     configFileName="esmxRun.yaml", configKey=configKey, &
-    config=config, defaultDefaultCalKind=ESMF_CALKIND_GREGORIAN, rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, file=FILENAME)) &
-    call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  ! Access hconfig
-  call ESMF_ConfigGet(config, hconfig=hconfig, rc=rc)
+    hconfig=hconfig, defaultDefaultCalKind=ESMF_CALKIND_GREGORIAN, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -140,7 +133,7 @@ program ESMX_App
   endif
 
   ! Create esmx driver
-  driver = ESMF_GridCompCreate(name="ESMX_Driver", config=config, rc=rc)
+  driver = ESMF_GridCompCreate(name="ESMX_Driver", hconfig=hconfig, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)

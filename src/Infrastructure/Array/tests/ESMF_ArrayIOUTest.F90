@@ -18,7 +18,7 @@ program ESMF_ArrayIOUTest
 
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_PIOArrayUTest -  Tests ArrayWrite() and ArrayRead()
+! !PROGRAM: ESMF_ArrayIOUTest -  Tests ArrayWrite() and ArrayRead()
 !
 ! !DESCRIPTION:
 !

@@ -6,7 +6,8 @@ import yaml
 def esmx_read_config(file_path: str):
     # open yaml file and read it
     if not os.path.exists(file_path):
-        sys.exit('File not found: {}'.format(file_path))
+        print("File not found: {}, proceed with empty ESMX build configuration.".format(file_path))
+        return {} # return empty
     with open(file_path) as file:
         data = yaml.safe_load(file)
         if data is not None:
@@ -29,7 +30,10 @@ class ESMXAppCfg(dict):
     def __init__(self, args):
         if type(args) is dict:
             if "application" in args:
-                super().__init__(args["application"])
+                if args["application"] is not None:
+                    super().__init__(args["application"])
+                else:
+                    super().__init__({})
             else:
                 super().__init__({})
         elif type(args) is str:
@@ -43,7 +47,10 @@ class ESMXCmpCfg(dict):
     def __init__(self, args):
         if type(args) is dict:
             if "components" in args:
-                super().__init__(args["components"])
+                if args["components"] is not None:
+                    super().__init__(args["components"])
+                else:
+                    super().__init__({})
             else:
                 super().__init__({})
         elif type(args) is str:
@@ -80,7 +87,10 @@ class ESMXTstCfg(dict):
     def __init__(self, args):
         if type(args) is dict:
             if "tests" in args:
-                super().__init__(args["tests"])
+                if args["tests"] is not None:
+                    super().__init__(args["tests"])
+                else:
+                    super().__init__({})
             else:
                 super().__init__({})
         elif type(args) is str:

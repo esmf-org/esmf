@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <vector>
 #ifndef ESMF_NO_DLFCN
 #include <dlfcn.h>
 #endif
@@ -43,6 +44,7 @@
 #include "ESMCI_Info.h"
 
 using std::string;
+using std::vector;
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -246,7 +248,16 @@ extern "C" {
     if (llen>0){
       string sharedObj(sharedObjArg, llen);
       sharedObj.resize(sharedObj.find_last_not_of(" ")+1);
-      lib = dlopen(sharedObj.c_str(), RTLD_LAZY);
+      if (sharedObj.back()=='*'){
+        vector<string> suffixes{"so", "dylib", "dll"};
+        for (auto it=suffixes.begin(); it!=suffixes.end(); ++it){
+          string sharedObjTemp = sharedObj;
+          sharedObjTemp.replace(sharedObjTemp.end()-1,sharedObjTemp.end(), *it);
+          lib = dlopen(sharedObjTemp.c_str(), RTLD_LAZY);
+          if (lib) break;
+        }
+      }else
+        lib = dlopen(sharedObj.c_str(), RTLD_LAZY);
     }else
       lib = dlopen(NULL, RTLD_LAZY);  // search in executable
     if (lib == NULL){
@@ -298,7 +309,16 @@ extern "C" {
     if (llen>0){
       string sharedObj(sharedObjArg, llen);
       sharedObj.resize(sharedObj.find_last_not_of(" ")+1);
-      lib = dlopen(sharedObj.c_str(), RTLD_LAZY);
+      if (sharedObj.back()=='*'){
+        vector<string> suffixes{"so", "dylib", "dll"};
+        for (auto it=suffixes.begin(); it!=suffixes.end(); ++it){
+          string sharedObjTemp = sharedObj;
+          sharedObjTemp.replace(sharedObjTemp.end()-1,sharedObjTemp.end(), *it);
+          lib = dlopen(sharedObjTemp.c_str(), RTLD_LAZY);
+          if (lib) break;
+        }
+      }else
+        lib = dlopen(sharedObj.c_str(), RTLD_LAZY);
     }else
       lib = dlopen(NULL, RTLD_LAZY);  // search in executable
     if (lib == NULL){

@@ -738,7 +738,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
                            int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                            int *_areaPresent, double *elemArea,
                            int *_elemCoordsPresent, double *elemCoords,
-                           int *_num_elemConn, int *elemConn, 
+                           int *_elemConn_size, int *elemConn, 
                            ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                            int *rc)
 #undef  ESMC_METHOD
@@ -766,8 +766,6 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     Mesh &mesh = *meshp;
 
     int num_elems=*_num_elems;
-
-    int num_elemConn=*_num_elemConn;
 
     InterArray<int> *elemMaskII=_elemMaskII;
 
@@ -807,26 +805,28 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     }
 
 
-    //// Check size of connectivity list
-    int expected_conn_size=0;
+    //// Calc size of connectivity list
+    int num_elemConn=0;
     if (parametric_dim==2) {
       for (int i=0; i< num_elems; i++) {
-        expected_conn_size += elemType[i];
+        num_elemConn += elemType[i];
       }
     } else if (parametric_dim==3) {
       for (int i=0; i< num_elems; i++) {
-        if (elemType[i]==10) expected_conn_size += 4;
-        else if (elemType[i]==12) expected_conn_size += 8;
+        if (elemType[i]==10) num_elemConn += 4;
+        else if (elemType[i]==12) num_elemConn += 8;
        }
     }
 
-    if (expected_conn_size != num_elemConn) {
-      int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-        "- element connectivity list doesn't contain the right number of entries ",
-                                       ESMC_CONTEXT, &localrc)) throw localrc;
+    /// If size of array is available, make sure it matches
+    if (_elemConn_size != NULL) {
+      if (*_elemConn_size != num_elemConn) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                         "element connectivity list doesn't contain the right number of entries ",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
     }
-
 
     // Error check size of elements
     if (parametric_dim==2) {

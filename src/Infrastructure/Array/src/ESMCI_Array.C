@@ -4156,6 +4156,47 @@ int Array::write(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::log()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::log
+//
+// !INTERFACE:
+void Array::log(
+//
+// !DESCRIPTION:
+//    Log details of Array object
+//
+// !ARGUMENTS:
+//
+  std::string prefix,
+  ESMC_LogMsgType_Flag msgType,
+  bool deepFlag
+  )const{
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  std::stringstream msg;
+  msg << prefix << "--- Array::log() start -----------------------------------";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY){
+    msg.str("");  // clear
+    msg << prefix << "Array object is invalid! Not created or deleted!";
+    ESMC_LogDefault.Write(msg.str(), msgType);
+  }else{
+    msg.str("");  // clear
+    msg << prefix << " <name: " << getName() << ">";
+    ESMC_LogDefault.Write(msg.str(), msgType);
+    if (deepFlag) getDistGrid()->log(prefix+"! ", msgType, deepFlag);
+  }
+  msg.str("");  // clear
+  msg << prefix << "--- Array::log() end -------------------------------------";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::print()"
 //BOPI
 // !IROUTINE:  ESMCI::Array::print

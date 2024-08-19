@@ -111,7 +111,7 @@ namespace ESMCI {
       }
 
       srcmesh->CreateGhost();
-      srcmesh->GhostComm().SendFields(num_snd, snd, rcv);
+      srcmesh->GhostCommFields(num_snd, snd, rcv);
     }
 
     // Create a layer of ghost elements since the higher order conservative needs a
@@ -154,7 +154,7 @@ namespace ESMCI {
       }
 
       srcmesh->CreateGhost();
-      srcmesh->GhostComm().SendFields(num_snd, snd, rcv);
+      srcmesh->GhostCommFields(num_snd, snd, rcv);
 
 #if 0
       // DEBUG

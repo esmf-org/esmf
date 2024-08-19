@@ -3907,8 +3907,50 @@ int DistGrid::fillIndexListPDimPDe(
 
 //-----------------------------------------------------------------------------
 //
-// match, print and validation class methods
+// log, match, print and validation class methods
 //
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::log()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::log
+//
+// !INTERFACE:
+void DistGrid::log(
+//
+// !DESCRIPTION:
+//    Log details of DistGrid object
+//
+// !ARGUMENTS:
+//
+  std::string prefix,
+  ESMC_LogMsgType_Flag msgType,
+  bool deepFlag
+  )const{
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  std::stringstream msg;
+  msg << prefix << "--- DistGrid::log() start --------------------------------";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY){
+    msg.str("");  // clear
+    msg << prefix << "DistGrid object is invalid! Not created or deleted!";
+    ESMC_LogDefault.Write(msg.str(), msgType);
+  }else{
+    msg.str("");  // clear
+    msg << prefix << "DistGrid object is valid!"
+      << " <name: " << getName() << ">";
+    ESMC_LogDefault.Write(msg.str(), msgType);
+  }
+  msg.str("");  // clear
+  msg << prefix << "--- DistGrid::log() end ----------------------------------";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+}
 //-----------------------------------------------------------------------------
 
 

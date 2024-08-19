@@ -182,23 +182,18 @@
 !------------------------------------------------------------------------------
 ! Revised parameter table to fit Fortran 90 standard.
 
-       integer,   parameter :: LSZ = max (1024,ESMF_MAXPATHLEN)  ! Maximum line size
-                                          ! should be at least long enough
-                                          ! to read in a file name with full
-                                          ! path prepended.
-       integer,   parameter :: MSZ = 256  ! Used to size buffer; this is
-                                          ! usually *less* than the number
-                                          ! of non-blank/comment lines
-                                          ! (because most lines are shorter
-                                          ! then LSZ)
- 
-       integer,   parameter :: NBUF_MAX = MSZ*LSZ ! max size of buffer
+       integer,   parameter :: LSZ = 1024 ! Maximum label size
+       integer,   parameter :: NBUF_MAX = 256*1024 ! max size of buffer
        integer,   parameter :: NATT_MAX = NBUF_MAX/64 ! max # attributes;  
                                                   ! assumes an average line
                                                   ! size of 16, the code
                                                   ! will do a bound check
 
        character, parameter :: BLK = achar(32)   ! blank (space)
+       character, parameter :: QTD = achar(34)   ! double quotation "
+       character, parameter :: CMT = achar(35)   ! number sign #
+       character, parameter :: DSN = achar(36)   ! dollar sign $
+       character, parameter :: QTS = achar(39)   ! single quotation '
        character, parameter :: TAB = achar(09)   ! TAB
        character, parameter :: EOL = achar(10)   ! end of line mark (newline)
        character, parameter :: EOB = achar(00)   ! end of buffer mark (null)
@@ -223,10 +218,11 @@
 #endif
           !private
           character(len=NBUF_MAX),pointer :: buffer => null ()    ! hold the whole file
-          character(len=LSZ),     pointer :: this_line => null () ! the current line
           integer :: nbuf                              ! actual size of buffer 
           integer :: next_line                         ! index_ for next line on buffer
+          integer :: next_item                         ! index_ for beginning of line
           integer :: value_begin                       ! index of beginning of value
+          logical :: eolflag                           ! end of line reached
           type(ESMF_ConfigAttrUsed), dimension(:), &
                                   pointer :: attr_used => null () ! used attributes table
           integer :: nattr                             ! number of attributes
@@ -514,7 +510,6 @@
 !
 !EOPI
        nullify(s%buffer)
-       nullify(s%this_line)
        nullify(s%attr_used)
 
        ESMF_INIT_SET_DEFINED(s)
@@ -646,7 +641,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundAllocError(memstat, msg="Allocating config class", &
                                         ESMF_CONTEXT, rcToReturn=rc)) return
 
-      allocate(config_local%buffer, config_local%this_line, stat = memstat)
+      allocate(config_local%buffer, stat = memstat)
       if (ESMF_LogFoundAllocError(memstat, msg="Allocating local buffer 1", &
                                         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -660,6 +655,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       config_local%nbuf = 2
       config_local%buffer(1:1) = EOL
       config_local%buffer(2:2) = EOB
+      config_local%next_item = 1
+      config_local%eolflag = .false.
       config_local%next_line = 2
 
       config_local%attr_used => attr_used_local
@@ -785,8 +782,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_ConfigCreateFromSection % cptr % nbuf = ptr
       ESMF_ConfigCreateFromSection % cptr % buffer(ptr:ptr) = EOB
 
-      ESMF_ConfigCreateFromSection % cptr % this_line = ' '
-      ESMF_ConfigCreateFromSection % cptr % next_line = 1
+      ESMF_ConfigCreateFromSection % cptr % next_line = 2
+      ESMF_ConfigCreateFromSection % cptr % next_item = 1
+      ESMF_ConfigCreateFromSection % cptr % eolflag = .false.
       ESMF_ConfigCreateFromSection % cptr % value_begin = 1
 
       call ESMF_ConfigParseAttributes(ESMF_ConfigCreateFromSection, &
@@ -864,7 +862,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundDeallocError(memstat, msg="Deallocating local buffer 2", &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-      deallocate(config%cptr%buffer, config%cptr%this_line, stat = memstat)
+      deallocate(config%cptr%buffer, stat = memstat)
       if (ESMF_LogFoundDeallocError(memstat, msg="Deallocating local buffer 1", &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -957,7 +955,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       i = index_ ( config%cptr%buffer(1:config%cptr%nbuf), EOL//label ) + 1
       if ( i .eq. 1 ) then
-         config%cptr%this_line = BLK // EOL
          if (present (isPresent)) then
            if (present (rc)) rc = ESMF_SUCCESS
            return
@@ -984,12 +981,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Extract the line associated with this label
 !     -------------------------------------------
       i = i + len ( label )
-      j = i + index_(config%cptr%buffer(i:config%cptr%nbuf),EOL) - 2
-      config%cptr%this_line = config%cptr%buffer(i:j) // BLK // EOL
-      
-      config%cptr%next_line = j + 2
-      
+      j = verify(config%cptr%buffer(i:config%cptr%nbuf),":")
+      if (j .eq. 0) then
+        i = config%cptr%nbuf
+      else
+        i = i + j - 1
+      end if
       config%cptr%value_begin = i
+      config%cptr%next_item = i
+      config%cptr%eolflag = .false.
+
+      j = index_(config%cptr%buffer(i:config%cptr%nbuf),EOL)
+      if (j .eq. 0) then
+        config%cptr%next_line = config%cptr%nbuf
+      else
+        config%cptr%next_line = i + j
+      end if
 
       if ( present (rc )) rc = ESMF_SUCCESS
       
@@ -1053,7 +1060,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       i = index_ ( config%cptr%buffer(ptr:config%cptr%nbuf ), EOL//label) + 1
 
       if ( i .eq. 1 ) then
-         config%cptr%this_line = BLK // EOL
          if (present (isPresent)) then
            if (present (rc)) rc = ESMF_SUCCESS
            return
@@ -1079,12 +1085,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Extract the line associated with this label
 !     -------------------------------------------
       i = i + len ( label ) + ptr - 1
-      j = i + index_ ( config%cptr%buffer(i:config%cptr%nbuf),EOL ) - 2
-      config%cptr%this_line = config%cptr%buffer(ptr:j) // BLK // EOL
-
-      config%cptr%next_line = j + 2
-
+      j = verify(config%cptr%buffer(i:config%cptr%nbuf),":")
+      if (j .eq. 0) then
+        i = config%cptr%nbuf
+      else
+        i = i + j - 1
+      end if
       config%cptr%value_begin = i
+      config%cptr%next_item = i
+      config%cptr%eolflag = .false.
+
+      j = index_(config%cptr%buffer(i:config%cptr%nbuf),EOL)
+      if (j .eq. 0) then
+        config%cptr%next_line = config%cptr%nbuf
+      else
+        config%cptr%next_line = i + j
+      end if
 
       if ( present (rc )) rc = ESMF_SUCCESS
 
@@ -1287,7 +1303,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !EOPI ------------------------------------------------------------------
       character(len=1) :: ch
-      integer :: ib, ie, localrc
+      integer :: ib, ie, nb, localrc
       logical :: found
 
       ! Initialize return code; assume routine not implemented
@@ -1300,21 +1316,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! Default setting
       if( present( default ) ) then 
-         value = default
-      else
-         value = BLK
-      endif
-
-      if (present (eolFlag)) then
-        eolFlag = .false.
-      end if
-
-      if (present (default)) then
         if (len (value) < len (default)) then
           if (ESMF_LogFoundError (ESMF_RC_ARG_BAD,  &
             msg='default length too long for value string',  &
             ESMF_CONTEXT, rcToReturn=rc)) return
         end if
+        value = default
+      else
+        value = BLK
+      endif
+
+      if (present (eolFlag)) then
+        eolFlag = .false.
       end if
 
 ! Processing
@@ -1337,22 +1350,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          endif
       endif
 
-      call ESMF_Config_trim ( config%cptr%this_line )
-      
-      ch = config%cptr%this_line(1:1)
-      if ( ch .eq. '"' .or. ch .eq. "'" ) then
-         ib = 2
-         ie = index_ ( config%cptr%this_line(ib:), ch ) 
-      else
-         ib = 1
-         ie = min(index_(config%cptr%this_line,BLK), &
-              index_(config%cptr%this_line,EOL)) - 1
-      end if
-      
-      if ( ie .lt. ib ) then
-         value = BLK
+      ib = config%cptr%next_item
+      ie = config%cptr%next_line-2
+      if ( config%cptr%eolflag ) then
+         ! reached end of line
+         config%cptr%next_item = config%cptr%next_line-1
          if ( present ( default )) then
            value = default
+         else
+           value = BLK
          endif
          if (present (eolFlag)) then
            eolFlag = .true.
@@ -1365,21 +1371,65 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          endif
          return
       else
-         ! Get the string, and shift the rest of %this_line to
-         ! the left
-         value = config%cptr%this_line(ib:ie) 
-         config%cptr%this_line = config%cptr%this_line(ie+2:)
-         if (len (value) >= ie-ib+1) then
-           localrc = ESMF_SUCCESS
-         else
-           localrc = ESMF_RC_ARG_SIZE
-         end if
+        nb = verify(config%cptr%buffer(ib:ie),BLK//TAB)
+        if (nb .eq. 0) then
+          ! remainder of line is blank
+          value = BLK
+          config%cptr%eolflag = .true.
+          config%cptr%next_item = config%cptr%next_line-1
+          if (present (eolFlag)) then
+            eolFlag = .true.
+          end if
+          localrc = ESMF_SUCCESS
+        else
+          ! shift to first non blank
+          ib = ib + nb - 1
+          ch = config%cptr%buffer(ib:ib)
+          if ( ch .eq. '"' .or. ch .eq. "'" ) then
+            ! quotation separated list
+            ib = ib + 1
+            ie = index_(config%cptr%buffer(ib:ie),ch)
+            if (ie .eq. 0) then
+              ! missing end quotation
+              ib = ib - 1
+              ie = config%cptr%next_line - 2
+              config%cptr%eolflag = .true.
+              config%cptr%next_item = config%cptr%next_line-1
+            else
+              ie = ib + ie - 2
+              config%cptr%next_item = ie + 2
+              nb = verify(config%cptr%buffer(config%cptr%next_item:config%cptr%next_line-2),BLK//TAB)
+              if (nb .eq. 0) config%cptr%eolflag = .true.
+            end if
+          else
+            ! blank separated list
+            ie = index_(config%cptr%buffer(ib:ie),BLK)
+            if (ie .eq. 0) then
+              ! last item
+              ie = config%cptr%next_line - 2
+              config%cptr%eolflag = .true.
+              config%cptr%next_item = config%cptr%next_line-1
+            else
+              ie = ib + ie - 2
+              config%cptr%next_item = ie + 2
+              nb = verify(config%cptr%buffer(config%cptr%next_item:config%cptr%next_line-2),BLK//TAB)
+              if (nb .eq. 0) config%cptr%eolflag = .true.
+            end if
+          end if
+          value = config%cptr%buffer(ib:ie)
+          ! error if value truncated
+          if (len (value) >= ie-ib+1) then
+            localrc = ESMF_SUCCESS
+          else
+            localrc = ESMF_RC_ARG_SIZE
+          end if
+        end if
       end if
 
       if ( present (rc)) then
         rc = localrc
       endif
-      
+
     end subroutine ESMF_ConfigGetString
 
 !------------------------------------------------------------------------------
@@ -1536,7 +1586,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
       integer :: localrc
       integer :: iostat
-      character(len=LSZ) :: string
+      character(len=NBUF_MAX) :: string
       real(ESMF_KIND_R4) :: x
       
       ! Initialize return code; assume routine not implemented
@@ -1629,7 +1679,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
       integer :: localrc
       integer :: iostat
-      character(len=LSZ) :: string
+      character(len=NBUF_MAX) :: string
       real(ESMF_KIND_R8) :: x
       
       ! Initialize return code; assume routine not implemented
@@ -1926,7 +1976,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI -------------------------------------------------------------------
 
       integer :: localrc
-      character(len=LSZ) :: string
+      character(len=NBUF_MAX) :: string
       real(ESMF_KIND_R8) :: x
       integer(ESMF_KIND_I4) ::  n
       integer :: iostat
@@ -2026,7 +2076,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
       integer :: localrc
       integer :: iostat
-      character(len=LSZ) :: string
+      character(len=NBUF_MAX) :: string
       real(ESMF_KIND_R8) :: x
       integer(ESMF_KIND_I8) :: n
 
@@ -2331,7 +2381,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{description}
 !
 !EOPI -------------------------------------------------------------------
-      character(len=LSZ) :: string
+      character(len=NBUF_MAX) :: string
       integer :: localrc
 
       ! Initialize return code; assume routine not implemented
@@ -2543,7 +2593,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !
 !EOP -------------------------------------------------------------------
-      character(len=LSZ) :: string
+      character(len=NBUF_MAX) :: string
       integer :: localrc
 
       ! Initialize return code; assume routine not implemented
@@ -2725,7 +2775,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{description}
 !
 !EOP -------------------------------------------------------------------
-      character(len=LSZ) :: string
+      character(len=NBUF_MAX) :: string
       integer :: localrc
       integer :: count 
       logical :: eol, found
@@ -2954,12 +3004,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION: Resource file filename is loaded into memory
 !
 !EOPI -------------------------------------------------------------------
-      integer :: i, ls, ptr
+      integer :: i, j, lsz, lst, led, qst, qed, cst, ptr
       integer :: lu, nrecs
       integer :: iostat
-      character(len=LSZ) :: line
       integer :: localrc
-      character(LSZ), allocatable :: line_buffer(:)
+      character(NBUF_MAX) :: line_buffer
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2991,33 +3040,69 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       rewind (lu)
 
-      allocate (line_buffer(nrecs))
-      do, i = 1, nrecs
-        read (lu, '(a)') line_buffer(i)
-      end do
-
 !     Read to end of file
 !     -------------------
       config%cptr%buffer(1:1) = EOL
       ptr = 2                         ! next buffer position
       do, i = 1, nrecs
-
 !        Read next line
 !        --------------
-         line = line_buffer(i)            ! copy next line
-         call ESMF_Config_trim ( line )      ! remove trailing white space
-         call ESMF_Config_pad ( line )       ! Pad with # from end of line
-
-!        A non-empty line
-!        ----------------
-         ls = index_(line,'#' ) - 1    ! line length
-         if ( ls .gt. 0 ) then
-            if ( (ptr+ls) .gt. NBUF_MAX ) then
-               if (ESMF_LogFoundError(ESMF_RC_MEM, msg="exceeded NBUF_MAX size", &
-                   ESMF_CONTEXT, rcToReturn=rc)) return
-            end if
-            config%cptr%buffer(ptr:ptr+ls) = line(1:ls) // EOL
-            ptr = ptr + ls + 1
+         read (lu, '(a)', iostat=iostat) line_buffer
+         if (iostat /= 0) then
+           if (ESMF_LogFoundError(ESMF_RC_FILE_READ, &
+             msg="error reading file - "//trim(filename), &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+         end if
+         ! find comment start, skip quoted comments
+         ! lst = line start, led = line end
+         ! qst = next quote start, qed = last quote end
+         ! cst = comment start
+         led = verify(line_buffer,BLK//TAB//DSN,back=.true.)
+         if (led .gt. 0) then
+           ! replace TAB's with blanks for convenience
+           ! backwards compatibility after removing ESMF_Config_pad
+           do j = 1, led
+             if (line_buffer(j:j) .eq. TAB) line_buffer(j:j) = BLK
+           end do
+           lst = verify(line_buffer(:led),BLK)
+           qst = scan(line_buffer(:led),QTS//QTD)
+           cst = index(line_buffer(:led),CMT)
+           if (cst .eq. 0) cst = led + 1
+           qed = 0
+           do while ((qst .ne. qed) .and. (qst .lt. cst))
+             ! find end of quotation
+             if (qst .eq. led) then
+               qed = qst
+             else
+               qed = qst + index(line_buffer(qst+1:led),line_buffer(qst:qst))
+             end if
+             if (qed .eq. qst) then
+               if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                 msg="missing end quote - "//trim(filename), &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+             else
+               ! find next quotation start
+               qst = qed + scan(line_buffer(qed+1:led),QTS//QTD)
+               ! find next comment start
+               cst = index(line_buffer(qed+1:led),CMT)
+               if (cst .eq. 0) then
+                 cst = led + 1
+               else
+                 cst = qed + cst
+               end if
+             end if
+           end do
+           led = len_trim(line_buffer(1:cst-1))
+           lsz = led - lst + 1
+           ! append line to buffer
+           if ( lsz .gt. 0 ) then
+              if ( (ptr+lsz) .ge. NBUF_MAX ) then
+                 if (ESMF_LogFoundError(ESMF_RC_MEM, msg="exceeded NBUF_MAX size", &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+              end if
+              config%cptr%buffer(ptr:ptr+lsz) = line_buffer(lst:led) // EOL
+              ptr = ptr + lsz + 1
+           end if
          end if
 
       end do
@@ -3035,7 +3120,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       config%cptr%buffer(ptr:ptr) = EOB
       config%cptr%nbuf = ptr
-      config%cptr%this_line = ' '
+      config%cptr%next_item = 1
       config%cptr%next_line = 1
       config%cptr%value_begin = 1
 
@@ -3099,7 +3184,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! deal with optionl logMsgFlag
+    ! deal with optional logMsgFlag
     logMsg = ESMF_LOGMSG_INFO ! default
     if (present(logMsgFlag)) logMsg = logMsgFlag
 
@@ -3207,13 +3292,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end if
 
       i = config%cptr%next_line
-      j = i + index_(config%cptr%buffer(i:config%cptr%nbuf),EOL) - 2
-      config%cptr%this_line = config%cptr%buffer(i:j) // BLK // EOL
-      
-      if ( config%cptr%this_line(1:2) .eq. '::' ) then
+      j = i + index_(config%cptr%buffer(i:config%cptr%nbuf),EOL)
+
+      if ( config%cptr%buffer(i:i+1) .eq. '::' ) then
          localrc = ESMF_SUCCESS      ! end of table. We set rc = ESMF_SUCCESS
          local_tend = .true.         ! and end = .true. Used to be iret = 1  
          config%cptr%next_line = config%cptr%nbuf + 1
+         config%cptr%value_begin = config%cptr%nbuf + 1
+         config%cptr%next_item = config%cptr%nbuf + 1
+         config%cptr%eolflag = .true.
          if ( present (tableEnd )) then
            tableEnd = local_tend
          endif
@@ -3223,7 +3310,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          return
       end if
 
-      config%cptr%next_line = j + 2
+      config%cptr%value_begin = i
+      config%cptr%next_item = i
+      config%cptr%next_line = j
+      config%cptr%eolflag = .false.
       localrc = ESMF_SUCCESS
       if ( present (tableEnd )) then
         tableEnd = local_tend
@@ -3260,7 +3350,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI -------------------------------------------------------------------
       integer :: i, j, k, a, b, localrc
-      character(len=LSZ) :: this_line, label
+      character(len=LSZ) :: this_label, label
       character(len=ESMF_MAXSTR) :: logmsg
       logical :: duplicate
 
@@ -3283,15 +3373,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       do while ( i .lt. config%cptr%nbuf )
 
         ! get next line from buffer
-        j = i + index_(config%cptr%buffer(i:config%cptr%nbuf), EOL) - 1
-        this_line = config%cptr%buffer(i:j)
+        j = index_(config%cptr%buffer(i:config%cptr%nbuf), EOL)
+        if (j .eq. 0) then
+          j = config%cptr%nbuf - 1
+        else
+          j = i + j - 1
+        endif
+        this_label = config%cptr%buffer(i:j)
 
-        ! look for label in this_line; non-blank characters followed by a colon
-        if (this_line(1:2) .ne. '::' ) then  ! skip end-of-table mark
-          k = index_(this_line, ':') - 1     ! label sans colon
+        ! look for label in this_label; non-blank characters followed by a colon
+        if (this_label(1:2) .ne. '::' ) then  ! skip end-of-table mark
+          k = index_(this_label, ':') - 1     ! label sans colon
           if (k .ge. 1) then  ! non-blank match
             ! found a label, trim it, 
-            label = trim(adjustl(this_line(1:k)))
+            label = trim(adjustl(this_label(1:k)))
 
             ! ... check it for uniqueness if requested,
             duplicate = .false.
@@ -3491,7 +3586,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
       integer :: localrc
       character(len=ESMF_MAXSTR) :: logmsg
-      character(len=LSZ) :: curVal, newVal
+      character(len=ESMF_MAXSTR) :: newVal
       integer :: i, j, k, m, nchar, ninsert, ndelete, lenThisLine
 
       ! Initialize return code; assume routine not implemented
@@ -3501,116 +3596,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
-      ! Set config buffer at desired attribute
-      if ( present (label) ) then
-         call ESMF_ConfigGetString( config, curVal, label=label, rc=localrc)
-      else
-         call ESMF_ConfigGetString( config, curVal, rc = localrc )
-      endif
+      write(newVal, *) value
 
-      if ( localrc /= ESMF_SUCCESS ) then
-        if ( localrc == ESMF_RC_NOT_FOUND ) then
-          ! set config buffer at end for appending
-          i = config%cptr%nbuf
-        else
-          if ( present( rc ) ) then
-            rc = localrc
-          endif
-          return
-        endif
-      else ! attribute found
-        ! set config buffer for overwriting/inserting
-        i = config%cptr%value_begin
-        curVal = BLK // trim(curVal) // BLK // EOL ! like config%cptr%this_line
-      endif
-
-      ! for appending, create new attribute string with label and value
-      if ( i .eq. config%cptr%nbuf .and. present(label) ) then
-        write(newVal, *) label, BLK, value
-        newVal = trim(adjustl(newVal)) // EOL
-        j = i + len_trim(newVal)
-
-        ! check to ensure len of newVal doesn't exceed LSZ
-        if ( (j-i) .gt. LSZ) then
-           write(logmsg, *) ", attribute label, value & EOL are ", j-i, &
-               " characters long, only ", LSZ, " characters allowed per line"
-           if (ESMF_LogFoundError(ESMC_RC_LONG_STR, msg=logmsg, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
-        endif
-
-        ! check if enough space left in config buffer
-        if (j .ge. NBUF_MAX) then   ! room for EOB if necessary
-           write(logmsg, *) ", attribute label & value require ", j-i+1, &
-               " characters (including EOL & EOB), only ", NBUF_MAX-i, &
-               " characters left in config buffer"
-           if (ESMF_LogFoundError(ESMC_RC_LONG_STR, msg=logmsg, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
-        endif
-      endif
-
-      ! overwrite, with possible insertion or deletion of extra characters
-      if (i .eq. config%cptr%value_begin) then
-         write(newVal, *) value
-         newVal = BLK // trim(adjustl(newVal)) // EOL
-         j = i + len_trim(newVal) - 1
-
-         !  check if we need more space to insert new characters;
-         !  shift buffer down (linked-list redesign would be better!)
-         nchar = j-i+1
-         lenThisLine = len_trim(curVal) - 1
-         if ( nchar .gt. lenThisLine) then
-
-            ! check to ensure length of extended line doesn't exceed LSZ
-            do m = i, 1, -1
-              if (config%cptr%buffer(m:m) .eq. EOL) then
-                exit
-              endif
-            enddo
-            if (j-m+1 .gt. LSZ) then
-               write(logmsg, *) ", attribute label, value & EOL are ", j-m+1, &
-                  " characters long, only ", LSZ, " characters allowed per line"
-               if (ESMF_LogFoundError(ESMC_RC_LONG_STR, msg=logmsg, &
-                                         ESMF_CONTEXT, rcToReturn=rc)) return
-            endif
-
-            ! check if enough space left in config buffer to extend line
-            if (j+1 .ge. NBUF_MAX) then   ! room for EOB if necessary
-               write(logmsg, *) ", attribute label & value require ", j-m+1, &
-                   " characters (including EOL & EOB), only ", NBUF_MAX-i, &
-                   " characters left in config buffer"
-               if (ESMF_LogFoundError(ESMC_RC_LONG_STR, msg=logmsg, &
-                                         ESMF_CONTEXT, rcToReturn=rc)) return
-            endif
-
-            ninsert = nchar - lenThisLine
-            do k = config%cptr%nbuf, j, -1
-               config%cptr%buffer(k+ninsert:k+ninsert) = config%cptr%buffer(k:k)
-            enddo
-            config%cptr%nbuf = config%cptr%nbuf + ninsert
-
-         ! or if we need less space and remove characters;
-         ! shift buffer up
-         elseif ( nchar .lt. lenThisLine ) then
-           ndelete = lenThisLine - nchar
-            do k = j+1, config%cptr%nbuf
-               config%cptr%buffer(k-ndelete:k-ndelete) = config%cptr%buffer(k:k)
-            enddo
-            config%cptr%nbuf = config%cptr%nbuf - ndelete
-         endif
-      endif
-
-      ! write new attribute value into config
-      config%cptr%buffer(i:j) = newVal(1:len_trim(newVal))
-
-      ! if appended, reset EOB marker and nbuf
-      if (i .eq. config%cptr%nbuf) then
-        config%cptr%buffer(j:j) = EOB
-        config%cptr%nbuf = j
-      endif
-
-      if( present( rc )) then
-        rc = ESMF_SUCCESS
-      endif
+      call ESMF_ConfigSetAttribute(config, value=newVal, label=label, rc=rc)
 
       return
     end subroutine ESMF_ConfigSetIntI4
@@ -3620,7 +3608,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_ConfigSetString"
 !BOPI
 !
-! !IROUTINE: ESMF_ConfigSetAttribute - Set a 4-byte integer number
+! !IROUTINE: ESMF_ConfigSetAttribute - Set a string
 
 !
 ! !INTERFACE:
@@ -3655,7 +3643,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
       integer :: localrc
       character(len=ESMF_MAXSTR) :: logmsg
-      character(len=LSZ) :: curVal, newVal
+      character(len=NBUF_MAX) :: curVal, newVal
       integer :: i, j, k, m, nchar, ninsert, ndelete, lenThisLine
 
       ! Initialize return code; assume routine not implemented
@@ -3685,22 +3673,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else ! attribute found
         ! set config buffer for overwriting/inserting
         i = config%cptr%value_begin
-        curVal = BLK // trim(curVal) // BLK // EOL ! like config%cptr%this_line
       endif
 
       ! for appending, create new attribute string with label and value
-      if ( i .eq. config%cptr%nbuf .and. present(label) ) then
-        write(newVal, *) label, BLK, value
-        newVal = trim(adjustl(newVal)) // EOL
-        j = i + len_trim(newVal)
-
-        ! check to ensure len of newVal doesn't exceed LSZ
-        if ( (j-i) .gt. LSZ) then
-           write(logmsg, *) ", attribute label, value & EOL are ", j-i, &
-               " characters long, only ", LSZ, " characters allowed per line"
-           if (ESMF_LogFoundError(ESMC_RC_LONG_STR, msg=logmsg, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      if ( i .eq. config%cptr%nbuf ) then
+        if ( present(label) ) then
+          write(newVal, *) trim(label), BLK, value
+        else
+          write(newVal, *) "__MISSING__:", BLK, value
         endif
+        newVal = trim(adjustl(newVal)) // EOL
+        nchar = len_trim(newVal)
+        j = i + nchar
 
         ! check if enough space left in config buffer
         if (j .ge. NBUF_MAX) then   ! room for EOB if necessary
@@ -3716,29 +3700,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (i .eq. config%cptr%value_begin) then
          write(newVal, *) value
          newVal = BLK // trim(adjustl(newVal)) // EOL
-         j = i + len_trim(newVal) - 1
+
+         nchar = len_trim(newVal)
+
+         j = i + nchar - 1
 
          !  check if we need more space to insert new characters;
          !  shift buffer down (linked-list redesign would be better!)
-         nchar = j-i+1
-         lenThisLine = len_trim(curVal) - 1
-         if ( nchar .gt. lenThisLine) then
+         lenThisLine = index(config%cptr%buffer(i:config%cptr%next_line),EOL)
+         if (lenThisLine .eq. 0) lenThisLine = config%cptr%nbuf - i
 
-            ! check to ensure length of extended line doesn't exceed LSZ
-            do m = i, 1, -1
-              if (config%cptr%buffer(m:m) .eq. EOL) then
-                exit
-              endif
-            enddo
-            if (j-m+1 .gt. LSZ) then
-               write(logmsg, *) ", attribute label, value & EOL are ", j-m+1, &
-                  " characters long, only ", LSZ, " characters allowed per line"
-               if (ESMF_LogFoundError(ESMC_RC_LONG_STR, msg=logmsg, &
-                                         ESMF_CONTEXT, rcToReturn=rc)) return
-            endif
+         if ( nchar .gt. lenThisLine) then
+            ninsert = nchar - lenThisLine
 
             ! check if enough space left in config buffer to extend line
-            if (j+1 .ge. NBUF_MAX) then   ! room for EOB if necessary
+            ! leave room for EOB with .ge.
+            if (config%cptr%nbuf+ninsert .ge. NBUF_MAX) then
+               m = index(config%cptr%buffer(1:i), EOL, back=.true.)
+               if (m .lt. 1) m = 1
                write(logmsg, *) ", attribute label & value require ", j-m+1, &
                    " characters (including EOL & EOB), only ", NBUF_MAX-i, &
                    " characters left in config buffer"
@@ -3746,29 +3725,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                          ESMF_CONTEXT, rcToReturn=rc)) return
             endif
 
-            ninsert = nchar - lenThisLine
-            do k = config%cptr%nbuf, j, -1
-               config%cptr%buffer(k+ninsert:k+ninsert) = config%cptr%buffer(k:k)
-            enddo
             config%cptr%nbuf = config%cptr%nbuf + ninsert
+            config%cptr%buffer(i+lenThisLine+ninsert:config%cptr%nbuf+ninsert) = &
+               config%cptr%buffer(i+lenThisLine:config%cptr%nbuf)
 
          ! or if we need less space and remove characters;
          ! shift buffer up
          elseif ( nchar .lt. lenThisLine ) then
-           ndelete = lenThisLine - nchar
-            do k = j+1, config%cptr%nbuf
-               config%cptr%buffer(k-ndelete:k-ndelete) = config%cptr%buffer(k:k)
-            enddo
+            ndelete = lenThisLine - nchar
+            config%cptr%buffer(i+lenThisLine-ndelete:config%cptr%nbuf-ndelete) = &
+               config%cptr%buffer(i+lenThisLine:config%cptr%nbuf)
             config%cptr%nbuf = config%cptr%nbuf - ndelete
          endif
       endif
 
       ! write new attribute value into config
-      config%cptr%buffer(i:j) = newVal(1:len_trim(newVal))
+      config%cptr%buffer(i:j) = newVal(1:nchar)
+      config%cptr%next_line = j + 1
+      config%cptr%next_item = config%cptr%value_begin
 
       ! if appended, reset EOB marker and nbuf
       if (i .eq. config%cptr%nbuf) then
-        config%cptr%buffer(j:j) = EOB
+        config%cptr%buffer(j+1:j+1) = EOB
         config%cptr%nbuf = j
       endif
 
@@ -4076,58 +4054,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_Config_trim
 
-
-    subroutine ESMF_Config_pad ( string )
-
-!-------------------------------------------------------------------------!
-! !ROUTINE:  ESMF_CONFIG_Pad() --- Pad strings.
-! 
-! !DESCRIPTION: 
-!
-!     Pads from the right with the comment character (\#). It also
-!  replaces TAB's with blanks for convenience. This is a low level
-!  i90 routine.
-!
-! !CALLING SEQUENCE: 
-!
-!      call ESMF_Config_pad ( string )
-!
-! !INPUT PARAMETERS: 
-!
-       character(*), intent(inout) :: string       ! input string
-
-! !OUTPUT PARAMETERS:            ! modified string
-!
-!      character(*), intent(inout) :: string
-!
-! !BUGS:  
-!
-!      It alters TAB's even inside strings.
-!
-!
-! !REVISION HISTORY: 
-!
-!  19Jun96   da Silva   Original code.
-!-------------------------------------------------------------------------
-
-      integer :: i
-
-!     Pad end of string with #
-!     ------------------------
-      do i = len (string), 1, -1 
-         if ( string(i:i) .ne. ' ' .and. &
-            string(i:i) .ne. '$' ) exit
-         string(i:i) = '#'
-      end do
-
-!     Replace TAB's with blanks
-!     -------------------------
-      do i = 1, len (string)
-         if ( string(i:i) .eq. TAB ) string(i:i) = BLK
-         if ( string(i:i) .eq. '#' ) exit
-      end do
-
-    end subroutine ESMF_Config_pad
 
 !-----------------------------------------------------------------------
 ! !IROUTINE: opntext - portably open a text file
