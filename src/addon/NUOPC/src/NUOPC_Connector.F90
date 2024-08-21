@@ -612,7 +612,7 @@ module NUOPC_Connector
       call doMirror(importState, exportState, acceptorVM=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    elseif (trim(exportXferPolicy)=="transferAllNested") then
+    elseif (trim(exportXferPolicy)=="transferAllAsNests") then
       ! check name of provider component
       call NUOPC_GetAttribute(importState, name="CompName", &
         value=importProvider, rc=rc)
@@ -710,7 +710,7 @@ module NUOPC_Connector
       call doMirror(exportState, importState, acceptorVM=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    elseif (trim(importXferPolicy)=="transferAllNested") then
+    elseif (trim(importXferPolicy)=="transferAllAsNests") then
       ! check name of provider component
       call NUOPC_GetAttribute(exportState, name="CompName", &
         value=exportProvider, rc=rc)
