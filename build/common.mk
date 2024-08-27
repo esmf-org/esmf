@@ -552,6 +552,16 @@ else
 export ESMF_INSTALL_DOCDIR_ABSPATH = $(ESMF_INSTALL_DOCDIR)
 endif
 
+ifndef ESMF_INSTALL_CMAKEDIR
+ESMF_INSTALL_CMAKEDIR := cmake
+endif
+pathtype := $(shell $(ESMF_DIR)/scripts/pathtype $(ESMF_INSTALL_CMAKEDIR))
+ifeq ($(pathtype),rel)
+export ESMF_INSTALL_CMAKEDIR_ABSPATH = $(ESMF_INSTALL_PREFIX_ABSPATH)/$(ESMF_INSTALL_CMAKEDIR)
+else
+export ESMF_INSTALL_CMAKEDIR_ABSPATH = $(ESMF_INSTALL_CMAKEDIR)
+endif
+
 #-------------------------------------------------------------------------------
 # Set ESMFMKFILE here in order to be available for installcheck target
 #-------------------------------------------------------------------------------
@@ -653,6 +663,9 @@ ESMF_APPSDIR     = $(ESMF_BUILD)/apps/apps$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILE
 
 # unified nuopc executable directory
 ESMF_ESMXDIR     = $(ESMF_BUILD)/src/addon/ESMX
+
+# cmake modules directory
+ESMF_CMAKEDIR    = $(ESMF_DIR)/cmake
 
 # include file directory
 ESMF_INCDIR     = $(ESMF_BUILD)/src/include
