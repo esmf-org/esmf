@@ -32,6 +32,19 @@ execute_process(COMMAND ${Python_EXECUTABLE}
   ${CMAKE_CURRENT_LIST_DIR}/esmx_app_config.py --ifile ${ESMX_BUILD_FILE} --odir ${CMAKE_CURRENT_BINARY_DIR}
   RESULT_VARIABLE ret)
 esmx_check_ret(${ret} "esmx_app_config.py failed processing ${ESMX_BUILD_FILE}")
+
+include(${CMAKE_CURRENT_BINARY_DIR}/modConf.txt)
+
+# add module paths
+foreach(ESMX_CMAKE_MODULE_PATH IN ITEMS ${ESMX_LINK_MODULE_PATHS})
+  list(APPEND CMAKE_MODULE_PATH ${ESMX_CMAKE_MODULE_PATH})
+endforeach()
+
+# link packages
+foreach(ESMX_LINK_PACKAGE IN ITEMS ${ESMX_LINK_PACKAGES})
+  find_package(${ESMX_LINK_PACKAGE} REQUIRED)
+endforeach()
+
 include(${CMAKE_CURRENT_BINARY_DIR}/appConf.txt)
 
 # disabled components
@@ -121,24 +134,16 @@ add_library(esmx_driver ESMX_Driver.F90)
 target_include_directories(esmx_driver PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(esmx_driver PUBLIC ESMF)
 
-# add module paths
-foreach(ESMX_CMAKE_MODULE_PATH IN ITEMS ${ESMX_CMAKE_MODULE_PATHS})
-  list(APPEND CMAKE_MODULE_PATH ${ESMX_CMAKE_MODULE_PATH})
-endforeach()
-
-# link packages
-foreach(ESMX_LINK_PACKAGE IN ITEMS ${ESMX_LINK_PACKAGES})
-  find_package(${ESMX_LINK_PACKAGE} REQUIRED)
-endforeach()
-
 # link external libraries
 foreach(ESMX_LINK_LIBRARY IN ITEMS ${ESMX_LINK_LIBRARIES})
   if(TARGET ${ESMX_LINK_LIBRARY})
     target_link_libraries(esmx_driver PUBLIC ${ESMX_LINK_LIBRARY})
   else()
+    get_filename_component(FND_LIB_PATH ${ESMX_LINK_LIBRARY} DIRECTORY)
+    get_filename_component(FND_LIB_NAME ${ESMX_LINK_LIBRARY} NAME)
     find_library(FND_LINK_LIBRARY
-      NAMES ${ESMX_LINK_LIBRARY}
-      HINTS ${ESMX_LINK_PATHS}
+      NAMES ${FND_LIB_NAME}
+      HINTS ${ESMX_LINK_PATHS} ${FND_LIB_PATH}
       PATH_SUFFIXES "." "lib" "lib64"
       NO_CACHE
     )
@@ -147,6 +152,8 @@ foreach(ESMX_LINK_LIBRARY IN ITEMS ${ESMX_LINK_LIBRARIES})
     endif()
     target_link_libraries(esmx_driver PUBLIC ${FND_LINK_LIBRARY})
     unset(FND_LINK_LIBRARY)
+    unset(FND_LIB_PATH)
+    unset(FND_LIB_NAME)
   endif()
 endforeach()
 
