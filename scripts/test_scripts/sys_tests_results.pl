@@ -279,6 +279,9 @@ use File::Find
                         foreach $file ( @pass_tests) {
                                 push @pass_st_files, grep (/$file.F90/, @act_st_files);
                         }
+                        foreach $file ( @pass_tests) {
+                            push @pass_st_files, grep (/$file.C/, @act_st_files);
+                        }
 			if (!$SUMMARY) { # Print only if full output requested
                 		print "\n\n";
                         	if ($pass_count == 1) {
