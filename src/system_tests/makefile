@@ -23,7 +23,7 @@ DIRS      = ESMF_CompCreate \
             ESMF_ArrayRedistOpenMP \
             ESMF_ArrayRedistOpenACC \
             ESMF_ArraySharedDeSSI \
-            ESMF_CFieldRegrid \
+            ESMC_FieldRegrid \
             ESMF_ConcurrentComponent \
             ESMF_FieldConcurrentComp \
             ESMF_FieldBundleSMM \

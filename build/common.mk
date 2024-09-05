@@ -2806,6 +2806,10 @@ $(ESMF_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(addsuffix .$(E
 	$(ESMF_F90LINKER) $(ESMF_EXE_F90LINKOPTS) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) $(ESMF_EXEOUT_OPTION) $(SYSTEM_TESTS_OBJ) $< $(ESMF_F90ESMFLINKLIBS)
 	$(ESMF_RM) -f *.o *.mod
 
+$(ESMF_TESTDIR)/ESMC_%STest : ESMC_%STest.o $(SYSTEM_TESTS_OBJ) $(addsuffix .$(ESMF_SL_SUFFIX), $(SYSTEM_TESTS_SHOBJ)) $(ESMFLIB)
+	$(MAKE) chkdir_tests
+	$(ESMF_CLINKER) $(ESMF_EXE_CLINKOPTS) $(ESMF_CLINKOPTS) $(ESMF_CLINKPATHS) $(ESMF_CLINKRPATHS) $(ESMF_EXEOUT_OPTION) $(SYSTEM_TESTS_OBJ) $< $(ESMF_CESMFLINKLIBS)
+	$(ESMF_RM) -f *.o *.mod
 
 # debugging aid:  link the executable, standard output, and log file to
 # temporary names in the current directory (they are built in the test
@@ -2962,6 +2966,19 @@ stest:
 	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)STest 1> ./ESMF_$(TNAME)STest.stdout 2>&1 ; \
 	fi ; \
 	cat ./PET*$(TNAME)STest.Log> ./ESMF_$(TNAME)STest.Log ; \
+	$(ESMF_RM) ./PET*$(TNAME)STest.Log
+
+sctest:
+	-@cd $(ESMF_TESTDIR) ; \
+	$(ESMF_RM) ./PET*$(TNAME)STest.Log ; \
+	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMC_$(TNAME)STest ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMC_$(TNAME)STest ; \
+	else \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMC_$(TNAME)STest 1\> ./ESMC_$(TNAME)STest.stdout 2\>\&1 ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMC_$(TNAME)STest 1> ./ESMC_$(TNAME)STest.stdout 2>&1 ; \
+	fi ; \
+	cat ./PET*$(TNAME)STest.Log> ./ESMC_$(TNAME)STest.Log ; \
 	$(ESMF_RM) ./PET*$(TNAME)STest.Log
 
 #
