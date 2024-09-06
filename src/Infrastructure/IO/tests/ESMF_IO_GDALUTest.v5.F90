@@ -56,7 +56,8 @@ program ESMF_IO_GDALUTest
   type(ESMF_ArraySpec)   :: arraySpec
   type(ESMF_RouteHandle) :: routeHandle
   real(ESMF_KIND_R4), pointer :: mptr(:), gptr(:,:)
-
+  integer :: localDECount, lDE
+  real(ESMF_KIND_R4) :: gridMax,localGridMax
   integer, allocatable :: decomptile(:,:)
 
 !  character(len=*), parameter :: shapefileName = "data/esmf_3x3_multimesh.shp"
@@ -95,7 +96,7 @@ program ESMF_IO_GDALUTest
   Grid = ESMF_GridCreateCubedSphere(               &
                                      tileSize=180, &
                                      regDecompPTile=decomptile, &
-                                     staggerLocList=(/ESMF_STAGGERLOC_CORNER, ESMF_STAGGERLOC_CORNER/), &
+                                     staggerLocList=(/ESMF_STAGGERLOC_CORNER, ESMF_STAGGERLOC_CENTER/), &
                                      coordSys=ESMF_COORDSYS_SPH_RAD, &
                                      rc=rc)
   if (allocated(decomptile)) deallocate(decomptile)
@@ -155,12 +156,20 @@ program ESMF_IO_GDALUTest
   ! 4a. Access the field pointers and give them some data
   call ESMF_FieldGet( Meshfield, farrayPtr=mptr, rc=rc)
   mptr    = 0.0
-  mptr(1) = 11.5
+  !  mptr(1) = 11.5
+  mptr = 11.5
   write(*,*) "pet: ", localpet, " mptr: ", shape(mptr)
   mptr => null()
 
-  call ESMF_FieldGet( Gridfield, farrayPtr=gptr, rc=rc)
-  gptr = 0.0
+  ! Get localDECount for GridField
+  call ESMF_FieldGet(GridField, localDECount=localDECount, rc=rc)
+
+  ! Loop over DEs setting them to 0.0
+  do lDE=0,localDECount-1
+     call ESMF_FieldGet(GridField, localDE=lDE, farrayPtr=gptr, rc=rc)
+     gptr=0.0
+  enddo
+  
   gptr => null()
 
   !------------------------------------------------------------------------
@@ -231,9 +240,18 @@ program ESMF_IO_GDALUTest
 
   ! X. Dump some data after regrid
 
-  call ESMF_FieldGet( Gridfield, farrayPtr=gptr, rc=rc)
+  ! Loop over GridField getting max value
+  gridMax=-10000.00
+  do lDE=0,localDECount-1
+     call ESMF_FieldGet(GridField, localDE=lDE, farrayPtr=gptr, rc=rc)
+     localGridMax=maxval(gptr)
+     if (localGridMax>gridMax) gridMax=localGridMax
+  enddo
+
   call ESMF_FieldGet( Meshfield, farrayPtr=mptr, rc=rc)
-  write(*,*) 'SHP to Gridfield: ', maxval(gptr), maxval(mptr)
+  !  write(*,*) 'SHP to Gridfield: ', maxval(gptr), maxval(mptr)
+  write(*,*) 'Src (SHP) Mesh maxval=', maxval(mptr)
+  write(*,*) 'Dst Grid maxval=', gridMax
   gptr => null()
   mptr => null()
 
