@@ -6,7 +6,7 @@
 
 //-------------------------------------------------------------------------
 // //DESCRIPTION:
-// System test CFieldRegrid
+// System test ESMC_FieldRegrid
 // This system test is a basic check of the C-API when used for regridding.
 // It creates two Grids, two Field on the two Grids, and then does bilinear
 // regridding between the Fields. After the regridding, it does a simple check
@@ -27,7 +27,6 @@
 #include "ESMC_Test.h"
 
 int main(void) {
-#define ESMC_METHOD "CFieldRegridSTest"  
   char name[ESMF_MAXSTR];
   char failMsg[ESMF_MAXSTR];
   char msg[ESMF_MAXSTR];
@@ -39,11 +38,11 @@ int main(void) {
 
   //-------------------------------------------------------------------------
   //-------------------------------------------------------------------------
-  strcpy(name, "System Test ESMF_CFieldRegrid");
+  strcpy(name, "System Test ESMC_FieldRegridSTest");
   strcpy(failMsg, "System Test failure");
 
   // Initialize
-  localrc = ESMC_Initialize(NULL, ESMC_InitArgLogFilename("CFieldRegridSTest.Log"),
+  localrc = ESMC_Initialize(NULL, ESMC_InitArgLogFilename("ESMC_FieldRegridSTest.Log"),
                        ESMC_ArgLast);
   if (localrc != ESMF_SUCCESS) ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
