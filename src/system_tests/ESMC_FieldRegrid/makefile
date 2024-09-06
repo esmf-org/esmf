@@ -9,7 +9,7 @@ run_uni: tree_run_system_tests_uni
 LOCDIR	  = src/system_tests/ESMC_FieldRegrid
 
 
-SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/ESMC_FieldRegridSTest
+SYSTEM_TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_FieldRegridSTest
 
 # Object files other than SysTest%.o that the
 # system tests executable will depend on.

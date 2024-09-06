@@ -7,12 +7,12 @@ run_uni:  run_unit_tests_uni
 LOCDIR	  = src/Infrastructure/FieldBundle/tests
 
 .NOTPARALLEL:
-TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldBundleUTest \
-                $(ESMC_TESTDIR)/ESMF_FieldBundleCrGetUTest \
-                $(ESMC_TESTDIR)/ESMF_FieldBundleRedistUTest \
-                $(ESMC_TESTDIR)/ESMF_FieldBundleSMMUTest \
-                $(ESMC_TESTDIR)/ESMF_FieldBundleIOUTest \
-                $(ESMC_TESTDIR)/ESMF_FieldBundleRegridUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldBundleUTest \
+                $(ESMF_TESTDIR)/ESMF_FieldBundleCrGetUTest \
+                $(ESMF_TESTDIR)/ESMF_FieldBundleRedistUTest \
+                $(ESMF_TESTDIR)/ESMF_FieldBundleSMMUTest \
+                $(ESMF_TESTDIR)/ESMF_FieldBundleIOUTest \
+                $(ESMF_TESTDIR)/ESMF_FieldBundleRegridUTest
 
 TESTS_RUN     = RUN_ESMF_FieldBundleUTest \
                 RUN_ESMF_FieldBundleCrGetUTest \

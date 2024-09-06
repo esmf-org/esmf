@@ -7,7 +7,7 @@ run: tree_run_system_tests
 LOCDIR	  = src/system_tests/ESMF_FaultTolerance
 
 
-SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_FaultToleranceSTest $(ESMC_TESTDIR)/ESMF_FaultToleranceCompASTest
+SYSTEM_TESTS_BUILD    = $(ESMF_TESTDIR)/ESMF_FaultToleranceSTest $(ESMF_TESTDIR)/ESMF_FaultToleranceCompASTest
 
 # Object files other than STest%.o that the system tests executable will depend
 # on. List objects files in the order that they are to be compiled/created.
