@@ -715,6 +715,13 @@ default is {\tt O} (capital oh) which builds an optimized version of the
 library. If {\tt ESMF\_BOPT} is {\tt O}, {\tt ESMF\_OPTLEVEL} can also be set
 to a numeric value between 0 and 4 to select a specific optimization level.
 
+\item[ESMF\_C]
+Possible value: {\em executable}
+
+This variable can be used to override the default C compiler and linker
+front-end executables. The executable may be specified with absolute path
+overriding the location determined by default from the user's PATH variable.
+
 \item[ESMF\_COMM]
 Possible value: {\em system-dependent}
 
