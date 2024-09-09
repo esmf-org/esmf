@@ -484,8 +484,11 @@
 !          The {\tt ESMF\_Clock}'s reference time.  Provides reference point
 !          for simulation time (see currSimTime in ESMF\_ClockGet() below).
 !     \item[{[repeatDuration]}]
-!          If specified and not 0, then makes {\tt ESMF\_Clock} a repeating clock that runs for
-!          {\tt repeatDuration} and then resets back to {\tt statTime}.
+!          If specified and not 0, then makes {\tt ESMF\_Clock} a repeating clock that stays within
+!          the range of {\tt startTime} to {\tt startTime}+{\tt repeatDuration}. For example, when advancing
+!          if the current time goes past {\tt startTime}+{\tt repeatDuration}, then it resets
+!          back to {\tt startTime} to continue. Currently, the repeat functionality is not supported with clocks
+!          that run backwards (e.g. that have a negative timeStep). 
 !     \item[{[name]}]
 !          The name for the newly created clock.  If not specified, a
 !          default unique name will be generated: "ClockNNN" where NNN
