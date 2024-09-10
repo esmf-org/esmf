@@ -7422,6 +7422,8 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
               regridmethod = ESMF_REGRIDMETHOD_NEAREST_DTOS
             else if (trim(chopSubString(2))=="conserve") then
               regridmethod = ESMF_REGRIDMETHOD_CONSERVE
+            else if (trim(chopSubString(2))=="conserve_2nd") then
+              regridmethod = ESMF_REGRIDMETHOD_CONSERVE_2ND
             else
               write (msgString,*) "Specified option '", &
                 trim(chopStringList(j)), &
@@ -7509,6 +7511,8 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
               extrapMethod = ESMF_EXTRAPMETHOD_NEAREST_IDAVG
             else if (trim(chopSubString(2))=="nearest_stod") then
               extrapMethod = ESMF_EXTRAPMETHOD_NEAREST_STOD
+            else if (trim(chopSubString(2))=="nearest_d") then
+              extrapMethod = ESMF_EXTRAPMETHOD_NEAREST_D
             else if (trim(chopSubString(2))=="creep") then
               extrapMethod = ESMF_EXTRAPMETHOD_CREEP
             else if (trim(chopSubString(2))=="creep_nrst_d") then
