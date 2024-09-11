@@ -285,8 +285,8 @@ PIOc_closefile(int ncid)
 #endif
 	case PIO_IOTYPE_GDAL:
             if (ios->io_rank == 0) {
-	      ierr = GDALClose((void*)file->hDS);
-	      printf("GDALClose ierr: %d\n",ierr);
+	      GDALClose((void*)file->hDS);
+	      //printf("GDALClose ierr: %d\n",ierr);
 	    }
 	  break;
         default:

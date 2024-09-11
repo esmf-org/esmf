@@ -62,7 +62,7 @@ program ESMF_IO_GDALUTest
 
 !  character(len=*), parameter :: shapefileName = "data/esmf_3x3_multimesh.shp"
 !  character(len=*), parameter :: shapefileName = "data/esmf_3x3_mesh.shp"
-  character(len=*), parameter :: shapefileName = "data/cb_2018_us_county_20m.shp"
+  character(len=*), parameter :: shapefileName = "data/cb_2018_us_region_20m.shp"
 
   ! NetCDF stuff
   integer :: ncid, xdimid, ydimid, xvarid, yvarid, varid, dimids
@@ -182,6 +182,7 @@ program ESMF_IO_GDALUTest
                                routeHandle=routeHandle, &
                                regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
                                unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
+                               checkFlag = .true., &
                                rc=rc)
   write(failMsg, *) "RegridStore failed"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
