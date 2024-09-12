@@ -28,6 +28,7 @@ def create_appConf(appCfg: ESMXAppCfg, odir):
                ESMXOpt('disable_comps', None, str),
                ESMXOpt('link_paths', None, dir),
                ESMXOpt('link_libraries', None, str),
+               ESMXOpt('link_options', None, str),
                ESMXOpt('build_args', None, str),
                ESMXOpt('build_jobs', None, str),
                ESMXOpt('build_verbose', None, str),
