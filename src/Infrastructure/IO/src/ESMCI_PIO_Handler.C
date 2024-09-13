@@ -22,7 +22,8 @@
 // declared in the companion file {\tt ESMCI\_PIO_Handler.h}
 //
 //-------------------------------------------------------------------------
-#define PIO_DEBUG_LEVEL 0
+#define PIO_DEBUG_LEVEL 4
+#define ESMFIO_DEBUG 1
 // include associated header file
 #include "ESMCI_PIO_Handler.h"
 
@@ -738,7 +739,7 @@ void PIO_Handler::arrayReadOneTileFile(
 
 #endif // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
 #ifdef ESMFIO_DEBUG
-  PIOc_set_log_level(0);
+  PIOc_set_log_level(4);
 #endif // ESMFIO_DEBUG
 
   PRINTMSG("calling read_darray, pio type = " << basepiotype << ", address = " << baseAddress);
@@ -1189,7 +1190,7 @@ void PIO_Handler::arrayWriteOneTileFile(
 #endif // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
   PRINTMSG("calling write_darray, pio type = " << basepiotype << ", address = " << baseAddress);
 #ifdef ESMFIO_DEBUG
-  PIOc_set_log_level(0);
+  PIOc_set_log_level(4);
 #endif // ESMFIO_DEBUG
   // Write the array
   ESMCI_IOREGION_ENTER("PIOc_write_darray");
@@ -1384,7 +1385,7 @@ void PIO_Handler::openOneTileFile(
       PRINTMSG("call to PIOc_createfile: success for " << thisFilename << " iotype= "<< iotype << " Mode "<< mode << " ESMF FMT "<<getFormat() );
     }
 #ifdef ESMFIO_DEBUG
-    PIOc_set_log_level(0);
+    PIOc_set_log_level(4);
 #endif // ESMFIO_DEBUG
     piorc = PIOc_set_fill(pioFileDesc[tile-1], PIO_NOFILL, NULL);
     if (!CHECKPIOWARN(piorc, std::string("Unable to set fill on file: ") + thisFilename,
@@ -2158,7 +2159,7 @@ int PIO_IODescHandler::constructPioDecomp(
 
   PRINTMSG("after call to PIOc_initdecomp_dof");
 #ifdef ESMFIO_DEBUG
-  PIOc_set_log_level(0);
+  PIOc_set_log_level(4);
 #endif // ESMFIO_DEBUG
 
   // Add the handle into the master list

@@ -43,10 +43,12 @@
 #include "Mesh/include/ESMCI_MeshRedist.h"
 #include "Mesh/include/ESMCI_MeshDual.h"
 #include "Mesh/include/ESMCI_Mesh_Glue.h"
+#include "IO/include/ESMC_IOScrip2ESMF.h"
 #include "Mesh/include/ESMCI_FileIO_Util.h"
 #include "Mesh/include/ESMCI_ESMFMesh_Util.h"
 #include "Mesh/include/ESMCI_UGRID_Util.h"
-#include "IO/include/ESMC_IOScrip2ESMF.h"
+#include "Mesh/include/ESMCI_GDAL_Util.h"
+
 
 #ifdef ESMF_PNETCDF
 # define _PNETCDF
@@ -62,6 +64,9 @@
 #include "IO/include/ESMCI_PIO_Handler.h"
 #endif
 
+#ifdef ESMF_GDAL
+#include <ogr_api.h>
+#endif
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
@@ -69,19 +74,15 @@
 //-----------------------------------------------------------------------------
 using namespace ESMCI;
 
-// These internal functions will only be used if PIO is avaiable
-#ifdef ESMF_PIO
 
 // Prototypes of per format mesh creates from below
-void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
-                                          char *filename, 
+void ESMCI_mesh_create_from_ESMFMesh_file(char *filename, 
                                           bool add_user_area, 
                                           ESMC_CoordSys_Flag coord_sys, 
                                           ESMCI::DistGrid *elem_distgrid, 
                                           Mesh **out_mesh);
 
-void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
-                                       char *filename, 
+void ESMCI_mesh_create_from_UGRID_file(char *filename, 
                                        bool add_user_area, 
                                        ESMC_CoordSys_Flag coord_sys, 
                                        ESMC_MeshLoc_Flag maskFlag, 
@@ -89,21 +90,20 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
                                        ESMCI::DistGrid *elem_distgrid, 
                                        Mesh **out_mesh);
 
-void ESMCI_mesh_create_from_SCRIP_file(int pioSystemDesc,
-                                       char *filename, 
+void ESMCI_mesh_create_from_SCRIP_file(char *filename, 
                                        bool add_user_area, 
                                        ESMC_CoordSys_Flag coord_sys, 
                                        ESMCI::DistGrid *elem_distgrid, 
+                                       Mesh **out_mesh);
+
+void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename, 
+				       ESMC_CoordSys_Flag coord_sys, 
                                        Mesh **out_mesh);
 
 void ESMCI_mesh_create_redist_mesh(Mesh *in_mesh, 
                                    ESMCI::DistGrid *node_distgrid, 
                                    ESMCI::DistGrid *elem_distgrid, 
                                    Mesh **out_mesh);
-#endif // ifdef ESMF_PIO
-
-
-
 
 // INPUTS: 
 //  filename - file name in NULL delimited form
@@ -131,12 +131,6 @@ void ESMCI_mesh_create_from_file(char *filename,
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI_mesh_create_from_file()"
 
-// Will only work if PIO is available
-#ifdef ESMF_PIO
-  
-  //  printf("in new scalable mesh create from file filename=%s\n",filename);
-
-
   // Try-catch block around main part of method
   try {
     // local return code
@@ -157,30 +151,6 @@ void ESMCI_mesh_create_from_file(char *filename,
 
 
 
-    //// Set up PIO
-
-    // Get VM 
-    ESMCI::VM *vm=VM::getCurrent(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-                                      &localrc)) throw localrc;
-    
-    // Get VM info
-    int local_pet = vm->getLocalPet();  
-    MPI_Comm mpi_comm = vm->getMpi_c();  
-    int pet_count = vm->getPetCount();
-    int pets_per_Ssi = vm->getSsiMaxPetCount();
-
-    // Initialize IO system
-    int num_iotasks = pet_count/pets_per_Ssi;
-    int stride = pets_per_Ssi;
-    int pioSystemDesc;
-    int piorc;
-
-    piorc = PIOc_Init_Intracomm(mpi_comm, num_iotasks, stride, 0, PIO_REARR_SUBSET, &pioSystemDesc);
-    if (!CHECKPIOERROR(piorc, std::string("Unable to init PIO Intracomm for file: ") + filename,
-                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;
-
-
     // Since we are swapping nodes and elems in convert_to_dual, 
     // can't use elem_distgrid to read from file in that case. 
     ESMCI::DistGrid *elem_distgrid_for_file_read=NULL;
@@ -190,36 +160,34 @@ void ESMCI_mesh_create_from_file(char *filename,
     // Create Mesh based on the file format
     Mesh *tmp_mesh;
     if (fileformat == ESMC_FILEFORMAT_ESMFMESH) {
-      ESMCI_mesh_create_from_ESMFMesh_file(pioSystemDesc, filename, 
+      ESMCI_mesh_create_from_ESMFMesh_file(filename, 
                                            add_user_area, coord_sys, 
                                            elem_distgrid_for_file_read, 
                                            &tmp_mesh);
 
     } else if (fileformat == ESMC_FILEFORMAT_UGRID) {
-      ESMCI_mesh_create_from_UGRID_file(pioSystemDesc, filename, 
+      ESMCI_mesh_create_from_UGRID_file(filename, 
                                         add_user_area, coord_sys, 
                                         maskFlag, maskVarName,
                                         elem_distgrid_for_file_read, 
                                         &tmp_mesh);
 
     } else if (fileformat == ESMC_FILEFORMAT_SCRIP) {
-      ESMCI_mesh_create_from_SCRIP_file(pioSystemDesc, filename, 
+      ESMCI_mesh_create_from_SCRIP_file(filename, 
                                         add_user_area, coord_sys, 
                                         elem_distgrid_for_file_read, 
                                         &tmp_mesh);
+      
+    } else if (fileformat == ESMC_FILEFORMAT_SHAPEFILE) {
+      ESMCI_mesh_create_from_SHAPEFILE_file(filename,
+					    coord_sys,
+                                            &tmp_mesh);
+
     } else {
       if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
          " Unrecognized file format.",
            ESMC_CONTEXT, &localrc)) throw localrc;
     }    
-
-
-
-    // Free IO system
-    piorc = PIOc_free_iosystem(pioSystemDesc);
-    if (!CHECKPIOERROR(piorc, std::string("Error freeing pio file system description "),
-                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
-
 
 
     // If requested, create dual from read in file
@@ -292,15 +260,56 @@ void ESMCI_mesh_create_from_file(char *filename,
   // We've gotten to bottom successfully, so return success
   if(rc != NULL) *rc = ESMF_SUCCESS;
 
-#else
-     ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
-      "This functionality requires ESMF to be built with the PIO library enabled." ,
-      ESMC_CONTEXT, rc);
-#endif
 }
 
 // These internal functions will only be used if PIO is available
 #ifdef ESMF_PIO
+
+static void _init_pioSystem(int &pioSystemDesc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "_create_pioSystemDesc()"
+  
+  // Local return codes
+  int localrc;
+  int piorc;
+
+  
+  // Get VM 
+  ESMCI::VM *vm=VM::getCurrent(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                    &localrc)) throw localrc;
+  
+  // Get VM info
+  int local_pet = vm->getLocalPet();  
+  MPI_Comm mpi_comm = vm->getMpi_c();  
+  int pet_count = vm->getPetCount();
+  int pets_per_Ssi = vm->getSsiMaxPetCount();
+  
+  // Initialize IO system
+  int num_iotasks = pet_count/pets_per_Ssi;
+  int stride = pets_per_Ssi;
+  
+  piorc = PIOc_Init_Intracomm(mpi_comm, num_iotasks, stride, 0, PIO_REARR_SUBSET, &pioSystemDesc);
+  if (!CHECKPIOERROR(piorc, std::string("Unable to init PIO Intracomm"),
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+  
+}
+
+static void _free_pioSystem(int pioSystemDesc) {
+
+  // Return codes
+  int localrc;
+  int piorc;
+  
+  // Free IO system
+  piorc = PIOc_free_iosystem(pioSystemDesc);
+  if (!CHECKPIOERROR(piorc, std::string("Error freeing pio file system description "),
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
+}
+
+#endif // ifdef ESMF_PIO
+
 
 
 // This method checks to see if optional pole info is in the file, and
@@ -383,8 +392,7 @@ void ESMCI_mesh_mark_poles_from_ESMFMesh_file(int pioFileDesc, char *filename, M
 // OUTPUTS:
 //   out_mesh - the new mesh created from the file
 //
-void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
-                                          char *filename, 
+void ESMCI_mesh_create_from_ESMFMesh_file(char *filename, 
                                           bool add_user_area, 
                                           ESMC_CoordSys_Flag coord_sys, 
                                           ESMCI::DistGrid *elem_distgrid, 
@@ -392,18 +400,26 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI_mesh_create_from_ESMFMesh_file()"
 
+  // Init output
+  *out_mesh=NULL;
+  
+ // Will only work if PIO is available
+#ifdef ESMF_PIO
+ 
   // Declare some handy variables
   int localrc;
   int rc;
   int piorc;
 
-  // Init output
-  *out_mesh=NULL;
-
 
   // Try-catch block around main part of method
   try {
 
+    //// Set up PIO System
+    int pioSystemDesc;
+    _init_pioSystem(pioSystemDesc);
+
+    
     //// Open file via PIO
 
     // Set pio_type based on what's available
@@ -520,12 +536,33 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
     get_elemConn_info_from_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, elementCount, num_elems, elem_ids, 
                                          totNumElementConn, numElementConn, elementConn);
 
+//>>    for (int i = 0; i < num_elems; i++) { 
+//>>      printf("pet: %d num_elems: %d elem_id: %d\n",local_pet,num_elems,elem_ids[i]);
+//>>    }
+
     // Convert global elem info into node info
     int num_nodes;
     int *node_ids=NULL;
     int *local_elem_conn=NULL;
     convert_global_elem_conn_to_local_node_and_elem_info(num_elems, totNumElementConn, numElementConn, elementConn,
                                                           num_nodes, node_ids, local_elem_conn);
+
+//>>    for (int i = 0; i < *numElementConn; i++) { 
+//>>      printf("pet: %d numconn: %d/%d elementConn: %d\n",local_pet,totNumElementConn,*numElementConn,elementConn[i]);
+//>>    }
+//    for (int i = 0; i < totNumElementConn; i++) { 
+//      printf("nc pet: %d numconn: %d glob_elem_conn: %d local_elem_conn: %d\n",local_pet,totNumElementConn,elementConn[i],local_elem_conn[i]);
+//    }
+//>>    for (int i = 0; i < totNumElementConn; i++) { 
+//>>      printf("pet: %d numconn: %d local_elem_conn: %d\n",local_pet,totNumElementConn,local_elem_conn[i]);
+//>>    }
+//>>
+//>>    for (int i = 0; i < num_nodes; i++) { 
+//>>      printf("pet: %d num_nodes: %d node_id: %d\n",local_pet,num_nodes,node_ids[i]);
+//>>    }
+//    for (int i = 0; i < num_nodes; i++) { 
+//      printf("pet: %d node_ids: %d\n",local_pet,node_ids[i]);
+//    }
 
     // Convert numElementsConn to elementTypes
     int *elementType=NULL;
@@ -573,6 +610,12 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
                        &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                       &localrc)) throw localrc;
+
+//    int jj = 0;
+//    for (int ii = 0; ii < num_nodes; ii++) {
+//      printf("aNC mesh node ID: %d of %d on pet %d, X= %.4f rad, Y= %.4f rad\n", node_ids[ii], num_nodes, local_pet, nodeCoords[jj], nodeCoords[jj+1]);
+//      jj+=2;
+//    }
 
     // Get rid of things used for adding nodes
     delete [] node_ids;
@@ -634,6 +677,9 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                       &localrc)) throw localrc;
 
+    for (int ii = 0; ii < num_elems; ii++) {
+      printf("NC mesh elem ID: %d\n", elem_ids[ii]);
+    }
     // Free things used for element creation
     delete [] elementType;
     if (elementMask != NULL) delete [] elementMask;
@@ -652,6 +698,9 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
 
+    // Free PIO System
+    _free_pioSystem(pioSystemDesc);
+        
 
   } catch(std::exception &x) {
 
@@ -675,6 +724,15 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
       "Caught unknown exception", ESMC_CONTEXT, &rc);
     throw rc; // To be caught one level up so we know where the error came from
   }
+
+  
+#else
+  int localrc;
+  if (ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+                                "This functionality requires ESMF to be built with the PIO library enabled." ,
+                                    ESMC_CONTEXT, &localrc)) throw localrc;
+#endif
+  
 }
 
 //
@@ -692,8 +750,7 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
 // OUTPUTS:
 //   out_mesh - the new mesh created from the file
 //
-void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
-                                       char *filename, 
+void ESMCI_mesh_create_from_UGRID_file(char *filename, 
                                        bool add_user_area, 
                                        ESMC_CoordSys_Flag coord_sys, 
                                        ESMC_MeshLoc_Flag maskFlag, 
@@ -703,17 +760,25 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI_mesh_create_from_UGRID_file()"
 
+  // Init output
+  *out_mesh=NULL;
+  
+ // Will only work if PIO is available
+#ifdef ESMF_PIO
+  
   // Declare some handy variables
   int localrc;
   int rc;
   int piorc;
 
-  // Init output
-  *out_mesh=NULL;
-
   // Try-catch block around main part of method
   try {
 
+    //// Set up PIO System
+    int pioSystemDesc;
+    _init_pioSystem(pioSystemDesc);
+
+    
     //// Open file via PIO
 
     // Set pio_type based on what's available
@@ -983,9 +1048,10 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
     if (!CHECKPIOERROR(piorc, std::string("Error closing file ") + filename,
                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
-    //    Throw() << "Not finished with UGRID yet!";
 
-
+    // Free PIO System
+    _free_pioSystem(pioSystemDesc);
+           
   } catch(std::exception &x) {
 
     // catch Mesh exception return code
@@ -1008,6 +1074,14 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
       "Caught unknown exception", ESMC_CONTEXT, &rc);
     throw rc; // To be caught one level up so we know where the error came from
   }
+
+#else
+  int localrc;
+  if (ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+                                "This functionality requires ESMF to be built with the PIO library enabled." ,
+                                    ESMC_CONTEXT, &localrc)) throw localrc;
+#endif
+  
 }
 
 //
@@ -1023,12 +1097,11 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
 // OUTPUTS:
 //   out_mesh - the new mesh created from the file
 //
-void ESMCI_mesh_create_from_SCRIP_file(int pioSystemDesc,
-                                      char *filename, 
-                                      bool add_user_area, 
-                                      ESMC_CoordSys_Flag coord_sys, 
-                                      ESMCI::DistGrid *elem_distgrid, 
-                                      Mesh **out_mesh){
+void ESMCI_mesh_create_from_SCRIP_file(char *filename, 
+                                       bool add_user_area, 
+                                       ESMC_CoordSys_Flag coord_sys, 
+                                       ESMCI::DistGrid *elem_distgrid, 
+                                       Mesh **out_mesh){
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI_mesh_create_from_SCRIP_file()"
 
@@ -1073,8 +1146,7 @@ void ESMCI_mesh_create_from_SCRIP_file(int pioSystemDesc,
     vm->barrier();
 
     // Call into ESMFMesh format read to create mesh from converted file
-    ESMCI_mesh_create_from_ESMFMesh_file(pioSystemDesc,
-                                         esmfmesh_filename, 
+    ESMCI_mesh_create_from_ESMFMesh_file(esmfmesh_filename, 
                                          add_user_area, 
                                          coord_sys, 
                                          elem_distgrid, 
@@ -1235,4 +1307,297 @@ void ESMCI_mesh_create_redist_mesh(Mesh *in_mesh,
 
 }
 
-#endif // ifdef ESMF_PIO
+
+
+//
+// Create a Mesh from a SHAPEFILE format file
+//
+// INPUTS: 
+//  filename - file name in NULL delimited form
+//
+// OUTPUTS:
+//   out_mesh - the new mesh created from the file
+//
+void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename, 
+					   ESMC_CoordSys_Flag coord_sys, 
+                                           Mesh **out_mesh){
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI_mesh_create_from_SHAPEFILE_file()"
+
+  // Init output
+  *out_mesh=NULL;
+
+ // Will only work if SHAPEFILE is available
+#ifdef ESMF_GDAL
+  
+  // Declare some handy variables
+  int localrc;
+  int rc;
+
+  // Try-catch block around main part of method
+  try {
+
+    // Get VM 
+    ESMCI::VM *vm=VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &localrc)) throw localrc;
+    
+    // Get VM info
+    int local_pet = vm->getLocalPet();  
+    int pet_count = vm->getPetCount();
+
+    // Bound all of this by local_pet == 0 for now (MSL)
+    // if (local_pet == 0) {
+    //   // DEBUG OUTPUT filename
+    //   printf("In shapefile method filename=%s\n",filename);
+    // }
+
+  // Open file and create datasource (DS)
+    OGRDataSourceH hDS;
+    if (access(filename, F_OK) == 0) {
+      OGRRegisterAll(); // register all the drivers
+      hDS = OGROpen( filename, FALSE, NULL );
+      if( hDS == NULL )
+	{
+	  printf( "Open failed on pet %d: %s, %d\n", local_pet, CPLGetLastErrorMsg(), CPLGetLastErrorNo() );
+	  Throw();
+	}
+    } else if (local_pet == 0) {
+      printf("Cannot access shapefile\n");
+      Throw();
+    }
+
+    // Get DIM var - currently forced to 2D
+    int dim;
+    ESMCI_GDAL_SHP_get_dim_from_file(hDS, filename, dim);
+
+    // Get shapefile params
+    int num_nodes;
+    int num_elems=0;
+    int totNumElemConn=0;
+    double *nodeCoords=NULL;
+    std::vector<int> nodeIDs, elemIDs, elemConn, numElemConn;
+    std::vector<double> elemCoords;
+    int *num_ElemConn=NULL;
+    int *elem_Conn=NULL;
+    double *elem_Coords=NULL;
+    int *node_IDs=NULL; // Pointer. Will point to vector.
+    int *elem_IDs;
+
+    // Processes polygons in hDS. Polygons are flattened to 2D
+
+    // 1) Get DS global params: number of features & feature IDs
+
+    int nFeatures;
+    int *globalFeature_IDs=NULL;
+    ESMCI_GDAL_SHP_get_feature_info(hDS, &nFeatures, globalFeature_IDs);
+
+    // Get positions at which to read element information
+    std::vector<int> feature_ids_vec;
+    get_ids_divided_evenly_across_pets(nFeatures, local_pet, pet_count, feature_ids_vec);
+
+    // Assign vector info to pointer, because PIO and mesh calls don't accept vectors
+    int num_features=0; // local PET
+    int *feature_IDs=NULL; // local PET
+    if (!feature_ids_vec.empty()) {
+      num_features=feature_ids_vec.size(); // local to this pet
+      feature_IDs=&feature_ids_vec[0];
+    } 
+
+    // Processes polygons in hDS. Polygons are flattened to 2D
+    ESMCI_GDAL_process_shapefile_distributed(hDS,&num_features,feature_IDs,globalFeature_IDs,
+					     nodeCoords,nodeIDs,elemIDs,
+					     elemConn,elemCoords,numElemConn,
+					     &totNumElemConn, &num_nodes, &num_elems);
+
+    node_IDs=&nodeIDs[0];
+    elem_Conn=&elemConn[0];
+    elem_Coords=&elemCoords[0];
+    num_ElemConn=&numElemConn[0];
+    num_elems = num_features;
+
+    // OK print out stuff for writing to netcdf file
+
+////    printf("nodeCoords = \n");
+////    int jj = 0;
+////    for (int ii = 0; ii < num_nodes; ii++) {
+////      printf("%0.5f, %0.5f, ", nodeCoords[jj], nodeCoords[jj+1]);
+////      jj+=2;
+////    }
+////    printf("\n");
+////
+////    printf("elementConn = \n");
+////    for (int ii = 0; ii < num_nodes; ii++) {
+////      printf("%d, ",elem_Conn[ii]);
+////    }
+////    printf("\n");
+////
+////    printf("numElementConn = \n");
+////    for (int ii = 0; ii < num_elems; ii++) {
+////      printf("%d, ",numElemConn[ii]);
+////    }
+////    printf("\n");
+////
+////    printf("centerCoords = \n");
+////    jj = 0;
+////    for (int ii = 0; ii < num_elems; ii++) {
+////      printf("%0.5f, %0.5f, ", elemCoords[jj],elemCoords[jj+1]);
+////      jj+=2;
+////    }
+////    printf("\n");
+
+    // Convert global elem info into node info
+//    int num_nodes;
+//    int *node_ids=NULL;
+    int jj = 0;
+//    for (int ii = 0; ii < num_nodes; ii++) {
+//      printf("bSHP mesh node ID: %d of %d on pet %d, X= %.4f rad, Y= %.4f rad\n", node_IDs[ii], num_nodes, local_pet, nodeCoords[jj], nodeCoords[jj+1]);
+//      jj+=2;
+//    }
+
+    int *local_elem_conn=NULL;
+    convert_global_elem_conn_to_local_node_and_elem_info(num_elems, totNumElemConn, num_ElemConn, elem_Conn,
+                                                          num_nodes, node_IDs, local_elem_conn);
+
+//    jj = 0;
+//    for (int ii = 0; ii < num_nodes; ii++) {
+//      printf("aSHP mesh node ID: %d of %d on pet %d, X= %.4f rad, Y= %.4f rad\n", node_IDs[ii], num_nodes, local_pet, nodeCoords[jj], nodeCoords[jj+1]);
+//      jj+=2;
+//    }
+
+    jj = 0;
+    for (int i = 0; i < num_elems; i++) {
+      printf("pet: %d elem: %d\n",local_pet, i);
+      for (int j = 0; j < num_ElemConn[i]; j++) {
+	printf("     %d: elem_conn: %d \n", num_ElemConn[i], elem_Conn[jj]);
+	jj+=1;
+      }
+    }
+//    for (int i = 0; i < totNumElemConn; i++) { 
+//      printf("shp pet: %d numconn: %d glob_elem_conn: %d local_elem_conn: %d\n",local_pet,totNumElemConn,elem_Conn[i],local_elem_conn[i]);
+//    }
+//    for (int i = 0; i < num_nodes; i++) { 
+//      printf("pet: %d nodeIDs: %d\n",local_pet,node_IDs[i]);
+//    }
+
+    int sumElemConn=0;
+    for(std::vector<int>::iterator it = numElemConn.begin(); it != numElemConn.end(); ++it)
+      sumElemConn += *it;
+
+    // TBD: Coord system conversion
+
+    /* At this point, we've read the shapfile and defined
+       - num_nodes
+       - num_elems
+       - nodeCoords
+       - numElemConn
+       - node_IDs
+    */
+
+    // Convert mesh dim from file into pdim and orig_sdim to use in mesh create
+    int pdim, orig_sdim;
+    if (dim == 2) {
+      pdim=orig_sdim=2;
+    } else if (dim == 3) {
+      pdim=orig_sdim=3;
+    } else {
+      Throw() << "Meshes can only be created with dim=2 or 3.";
+    }
+      
+    // Get coordsys from file
+    ESMC_CoordSys_Flag coord_sys_file=ESMC_COORDSYS_SPH_DEG; // Assume "degrees" for now.
+//    ESMC_CoordSys_Flag coord_sys_mesh=ESMC_COORDSYS_CART; // Assume "degrees" for now.
+    // NOTE DEFINED YET      get_coordsys_from_SHP_file(pioFileDesc, filename, dim, nodeCoord_ids, coord_sys_file);
+
+    // Decide which coord_sys the mesh should be created with
+    ESMC_CoordSys_Flag coord_sys_mesh;
+    if (coord_sys == ESMC_COORDSYS_UNINIT) {
+      coord_sys_mesh = coord_sys_file;
+    } else {
+      coord_sys_mesh = coord_sys;
+    }
+
+    // If center coords exist and
+    //  file in different coordinate system than mesh, convert
+    if ((elem_Coords != NULL) && (coord_sys_file != coord_sys_mesh)) {
+      convert_coords_between_coord_sys(coord_sys_file, coord_sys_mesh, 
+                                       dim, num_elems, elem_Coords);
+    }
+    if ((nodeCoords != NULL) && (coord_sys_file != coord_sys_mesh)) {
+      convert_coords_between_coord_sys(coord_sys_file, coord_sys_mesh, 
+                                       dim, num_nodes, nodeCoords);
+    }
+
+    // Create Mesh
+    ESMCI_meshcreate(out_mesh, &pdim, &orig_sdim, &coord_sys_mesh, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+				      &localrc)) throw localrc;
+
+    // Add nodes
+    InterArray<int> nodeMaskIA(NULL, num_nodes);
+    ESMCI_meshaddnodes(out_mesh, &num_nodes, node_IDs,
+		       nodeCoords, NULL, &nodeMaskIA,
+		       &coord_sys_mesh, &orig_sdim,
+		       &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+				      &localrc)) throw localrc;
+      
+    // Add elements
+    // !!! None of the elements have shared edges.
+    int areaPresent = 0;
+    int centerCoordsPresent=1; // Need to have center/element coords for regridding.
+//    printf("num_elems %d; num_ElemConn %d\n",num_elems,sizeof(num_ElemConn)/sizeof(num_ElemConn[0]));
+    ESMCI_meshaddelements(out_mesh,
+			  &num_elems, feature_IDs, num_ElemConn, //elementType, <- using numElemConn in place of elementType assumes 2D!!
+			  NULL, // No mask
+			  &areaPresent, NULL, // No areas
+			  &centerCoordsPresent, elem_Coords,
+                          &totNumElemConn, local_elem_conn, 
+//			  &sumElemConn, elem_Conn, 
+			  &coord_sys_mesh, &orig_sdim, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+				      &localrc)) throw localrc;
+
+//    for (int ii = 0; ii < num_elems; ii++) {
+//      printf("SHP mesh elem ID: %d\n", feature_IDs[ii]);
+//    }
+
+    // Cleanup
+    GDALClose( hDS );
+
+  } catch(std::exception &x) {
+
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          x.what(), ESMC_CONTEXT,&rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "UNKNOWN", ESMC_CONTEXT,&rc);
+    }
+    throw rc; // To be caught one level up so we know where the error came from
+
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,&rc);
+    throw rc; // To be caught one level up so we know where the error came from
+
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught unknown exception", ESMC_CONTEXT, &rc);
+    throw rc; // To be caught one level up so we know where the error came from
+  }
+
+#else // ifdef ESMF_GDAL
+  int localrc;
+  if (ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+                                "This functionality requires ESMF to be built with a shapefile library." ,
+                                    ESMC_CONTEXT, &localrc)) throw localrc;
+#endif // ifdef ESMF_GDAL
+
+  
+}
+
+
+
+

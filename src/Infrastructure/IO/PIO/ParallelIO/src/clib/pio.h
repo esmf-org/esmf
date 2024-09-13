@@ -19,6 +19,8 @@
 #include <netcdf.h>
 #include <netcdf_meta.h>
 
+#include <gdal.h>
+
 #define NETCDF_VERSION_LE(Maj, Min, Pat) \
     (((NC_VERSION_MAJOR == Maj) && (NC_VERSION_MINOR == Min) && (NC_VERSION_PATCH <= Pat)) || \
      ((NC_VERSION_MAJOR == Maj) && (NC_VERSION_MINOR < Min)) || (NC_VERSION_MAJOR < Maj))
@@ -606,6 +608,13 @@ typedef struct file_desc_t
      * feature. One consequence is that PIO_IOTYPE_NETCDF4C files will
      * not have deflate automatically turned on for each var. */
     int ncint_file;
+
+    /** GDAL specific vars - M.Long */
+    GDALDatasetH *hDS;
+    int dateVarID;     // Index of field with type OFTDate
+    int timeVarID;     // Index of field with type OFTTime
+    int datetimeVarID; // Index of field with type OFTDatetime
+
 } file_desc_t;
 
 /**
@@ -624,7 +633,10 @@ enum PIO_IOTYPE
     PIO_IOTYPE_NETCDF4C = 3,
 
     /** NetCDF4 (HDF5) parallel */
-    PIO_IOTYPE_NETCDF4P = 4
+    PIO_IOTYPE_NETCDF4P = 4,
+
+    /** GDAL (serial only) */
+    PIO_IOTYPE_GDAL = 5
 };
 
 /**
@@ -1356,6 +1368,16 @@ extern "C" {
                              const long long *op);
     int nc_put_vard_ulonglong(int ncid, int varid, int decompid, const size_t recnum,
                               const unsigned long long *op);
+
+    /* These functions are for the GDAL integration layer. MSL - 9/7/2023 */
+    int GDALc_inq_fieldid(int fileid, const char *name, int *varidp);
+    int GDALc_inq_timeid(int fileid, int *timeid); // Is there a field of type OFTDate, OFTTime, or OFTDateTime?
+    int GDALc_openfile(int iosysid, int *fileIDp, GDALDatasetH *hDSp, int *iotype, const char *fname, bool mode);
+    int GDALc_sync(int fileid);
+    int GDALc_shp_get_int_field(int fileid);
+    int GDALc_shp_get_float_field(int fileid, int varid, const size_t *startp, const size_t *countp, float *ip);
+    int GDALc_shp_get_double_field(int fileid, int varid, const size_t *startp, const size_t *countp, double *ip);
+    int pio_read_darray_shp(file_desc_t *file, io_desc_t *iodesc, int vid, void *iobuf);
 
 #if defined(__cplusplus)
 }

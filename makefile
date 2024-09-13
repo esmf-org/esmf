@@ -256,6 +256,18 @@ endif
 	    echo "ESMF_PIO_LIBPATH:        $(ESMF_PIO_LIBPATH)" ; \
 	  fi; \
 	 fi
+	-@if [ -n "$(ESMF_GDAL)" ] ; then \
+	  echo "ESMF_GDAL:            $(ESMF_GDAL)" ; \
+	  if [ -n "$(ESMF_GDAL_INCLUDE)" ] ; then \
+	    echo "ESMF_GDAL_INCLUDE:    $(ESMF_GDAL_INCLUDE)" ; \
+	  fi; \
+	  if [ -n "$(ESMF_GDAL_LIBS)" ] ; then \
+	    echo "ESMF_GDAL_LIBS:       $(ESMF_GDAL_LIBS)" ; \
+	  fi; \
+	  if [ -n "$(ESMF_GDAL_LIBPATH)" ] ; then \
+	    echo "ESMF_GDAL_LIBPATH:    $(ESMF_GDAL_LIBPATH)" ; \
+	  fi; \
+	 fi
 	-@if [ -n "$(ESMF_XERCES)" ] ; then \
 	  echo "ESMF_XERCES:             $(ESMF_XERCES)" ; \
 	  if [ -n "$(ESMF_XERCES_INCLUDE)" ] ; then \
@@ -673,6 +685,18 @@ endif
 	  fi; \
 	  if [ -n "$(ESMF_PIO_LIBPATH)" ] ; then \
 	    echo "# ESMF_PIO_LIBPATH:       $(ESMF_PIO_LIBPATH)" >> $(MKINFO) ; \
+	  fi; \
+	 fi
+	-@if [ -n "$(ESMF_GDAL)" ] ; then \
+	  echo "# ESMF_GDAL:           $(ESMF_GDAL)" >> $(MKINFO) ; \
+	  if [ -n "$(ESMF_GDAL_INCLUDE)" ] ; then \
+	    echo "# ESMF_GDAL_INCLUDE:   $(ESMF_GDAL_INCLUDE)" >> $(MKINFO) ; \
+	  fi; \
+	  if [ -n "$(ESMF_GDAL_LIBS)" ] ; then \
+	    echo "# ESMF_GDAL_LIBS:      $(ESMF_GDAL_LIBS)" >> $(MKINFO) ; \
+	  fi; \
+	  if [ -n "$(ESMF_GDAL_LIBPATH)" ] ; then \
+	    echo "# ESMF_GDAL_LIBPATH:   $(ESMF_GDAL_LIBPATH)" >> $(MKINFO) ; \
 	  fi; \
 	 fi
 	-@if [ -n "$(ESMF_XERCES)" ] ; then \

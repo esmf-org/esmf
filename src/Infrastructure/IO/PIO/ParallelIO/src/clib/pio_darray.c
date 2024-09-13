@@ -181,7 +181,7 @@ PIOc_write_darray_multi(int ncid, const int *varids, int ioid, int nvars,
 
     /* Run these on all tasks if async is not in use, but only on
      * non-IO tasks if async is in use. */
-    if (!ios->async || !ios->ioproc)
+    if ((!ios->async || !ios->ioproc) && (file->iotype != PIO_IOTYPE_GDAL))
     {
         /* Get the number of dims for this var. */
         PLOG((3, "about to call PIOc_inq_varndims varids[0] = %d", varids[0]));
@@ -947,6 +947,10 @@ PIOc_read_darray(int ncid, int varid, int ioid, PIO_Offset arraylen,
     case PIO_IOTYPE_PNETCDF:
     case PIO_IOTYPE_NETCDF4P:
         if ((ierr = pio_read_darray_nc(file, iodesc, varid, iobuf)))
+            return pio_err(ios, file, ierr, __FILE__, __LINE__);
+        break;
+    case PIO_IOTYPE_GDAL:
+        if ((ierr = pio_read_darray_shp(file, iodesc, varid, iobuf)))
             return pio_err(ios, file, ierr, __FILE__, __LINE__);
         break;
     default:

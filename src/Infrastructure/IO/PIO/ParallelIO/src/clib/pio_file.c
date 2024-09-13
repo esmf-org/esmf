@@ -283,6 +283,12 @@ PIOc_closefile(int ncid)
             ierr = ncmpi_close(file->fh);
             break;
 #endif
+	case PIO_IOTYPE_GDAL:
+            if (ios->io_rank == 0) {
+	      GDALClose((void*)file->hDS);
+	      //printf("GDALClose ierr: %d\n",ierr);
+	    }
+	  break;
         default:
             return pio_err(ios, file, PIO_EBADIOTYPE, __FILE__, __LINE__);
         }

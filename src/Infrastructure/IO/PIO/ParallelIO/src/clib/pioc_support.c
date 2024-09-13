@@ -3122,6 +3122,9 @@ iotype_is_valid(int iotype)
         ret++;
 #endif /* _PNETCDF */
 
+    if (iotype == PIO_IOTYPE_GDAL)
+        ret++;
+
     return ret;
 }
 

@@ -15,6 +15,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IO_NetCDFUTest  \
 		$(ESMF_TESTDIR)/ESMF_IOUTest \
 		$(ESMF_TESTDIR)/ESMF_IO_MultitileUTest \
 		$(ESMF_TESTDIR)/ESMF_IO_FileTypeCheckUTest
+		$(ESMF_TESTDIR)/ESMF_IO_GDALUTest
 
 TESTS_RUN     = RUN_ESMCI_IO_NetCDFUTest \
 		RUN_ESMCI_IO_PIOUTest \
@@ -23,6 +24,7 @@ TESTS_RUN     = RUN_ESMCI_IO_NetCDFUTest \
 		RUN_ESMF_IOUTest \
 		RUN_ESMF_IO_MultitileUTest \
 		RUN_ESMF_IO_FileTypeCheckUTest
+		RUN_ESMF_IO_GDALTest
 
 TESTS_RUN_UNI = RUN_ESMCI_IO_NetCDFUTestUNI \
 		RUN_ESMCI_IO_PIOUTestUNI \
@@ -94,3 +96,8 @@ RUN_ESMF_IO_FileTypeCheckUTest:
 RUN_ESMF_IO_FileTypeCheckUTestUNI:
 	cp -f filetypecheck_data/*.nc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=IO_FileTypeCheck NP=1 ftest
+
+RUN_ESMF_IO_GDALUTest:
+	rm -f $(ESMF_TESTDIR)/ESMF_IO_GDALUTest*.nc
+	$(MAKE) TNAME=IO_GDAL NP=4 ftest
+
