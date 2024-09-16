@@ -53,7 +53,7 @@ namespace ESMCI {
 
   const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype);
 
-  void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind, 
+  void triangulate(int sdim, int elem_id, int num_p, double *p, double *td, int *ti, int *tri_ind, 
                    double *tri_frac);
   
   void get_num_elems_around_node(MeshObj *node, int *_num_ids);
@@ -691,7 +691,7 @@ namespace ESMCI {
           }
 
           // Triangulate polygon
-          triangulate(sdim, elemType[e], polyCoords, polyDblBuf, polyIntBuf, 
+          triangulate(sdim, elemId[e], elemType[e], polyCoords, polyDblBuf, polyIntBuf, 
                       triInd, triFrac); 
           
 
@@ -918,7 +918,7 @@ const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype) {
 // ti    = temporary integer buffer size = num_p
 // tri_ind = output array  size = 3*(nump-2)
 // tri_frac = fraction each triangle is of whole poly size=(num_p-2)
-void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind, 
+void triangulate(int sdim, int elem_id, int num_p, double *p, double *td, int *ti, int *tri_ind, 
                  double *tri_frac) {
           int localrc;
           
@@ -932,18 +932,29 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
             ret=triangulate_poly<GEOM_SPH2D3D>(num_p, p, td, 
                                                ti, tri_ind);
           } else {
-            Throw() <<" - triangulate can't be used for polygons with spatial dimension not equal to 2 or 3";
+            Throw() <<" triangulate can't be used for polygons with spatial dimension not equal to 2 or 3";
           }
           
 
           // Check return code
           if (ret != ESMCI_TP_SUCCESS) {
             if (ret == ESMCI_TP_DEGENERATE_POLY) {
-              Throw() << " - can't triangulate a polygon with less than 3 sides"; 
+              Throw() << " can't triangulate a polygon with less than 3 sides"; 
             } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
-              Throw() <<" - there was a problem with triangulation (e.g. repeated points, clockwise poly, etc.)";
+
+              // Write out bad poly
+              if (sdim==2) {
+                write_2D_poly_to_vtk("triangulate_bad_poly", elem_id, num_p, p);
+              } else if (sdim==3) {
+                write_3D_poly_to_vtk("triangulate_bad_poly", elem_id, num_p, p);
+              } else {
+                Throw() <<" triangulate can't be used for polygons with spatial dimension not equal to 2 or 3";
+              }
+              
+              // Throw error              
+              Throw() <<" there was a problem with triangulation (e.g. repeated points, clockwise poly, etc.)";
             } else {
-              Throw() <<" - unknown error in triangulation";
+              Throw() <<" unknown error in triangulation";
             }
           }
 
