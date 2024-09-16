@@ -371,7 +371,11 @@ void ESMCI_GDAL_process_shapefile_distributed(
     OGR_F_Destroy( hFeature );
   }
 
+  if (localpoints <= 0) { return; }
+
   nodeCoords= new double[2*totpoints];
+
+  printf("LP: %d; nodeCoords %d; XCoords %d; YCoords %d\n",localpoints,sizeof(nodeCoords)/sizeof(nodeCoords[0]),XCoords.size(),YCoords.size());
 
   // Pass data to output variables
   // Pass OGR Values to Mesh arrays

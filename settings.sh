@@ -1,5 +1,5 @@
 module load mpi/mpich-x86_64
-export ESMF_DIR=/home/ilcentro/Work/NASA/ALI/ESMF
+export ESMF_DIR=/home/ilcentro/Work/NASA/ALI/MERGE_ESMF/ESMF
 export ESMF_COMM=mpich
 export ESMF_PIO=internal
 export ESMF_NETCDF=nc-config
