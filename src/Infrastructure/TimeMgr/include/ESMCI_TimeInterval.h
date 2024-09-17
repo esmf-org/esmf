@@ -245,7 +245,7 @@ class TimeInterval : public BaseTime {
 //
   private:
     // return in string format (TMG 1.5.9)
-    int getString(char *timeString, const char *options=0) const;
+    int getString(char *timeString, int timeStringLen, const char *options=0) const;
 
     // common method for overloaded comparison operators
     bool compare(const TimeInterval &, ESMC_ComparisonType) const;
