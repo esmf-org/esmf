@@ -146,7 +146,7 @@ jobs:
       if: matrix.config.comm == 'openmpi'
       run: |
         if [[ "$CACHE_HIT" != 'true' ]]; then
-          OPENMPI_URL="https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-5.0.5.tar.gz"
+          OPENMPI_URL="https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.6.tar.gz"
           mkdir ${{runner.temp}}/openmpi
           cd ${{runner.temp}}/openmpi
           curl -L $OPENMPI_URL | tar --strip-components=1 -xz
