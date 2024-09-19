@@ -95,6 +95,7 @@ Will area (spatial extent) be conserved? e.g. if the GIS CRS is curvilinear, is 
 i.e. is ESMF mapping only planar?
 *** Solution: add a transformation routine from->to. e.g. from ESMF planar to GIS curvilear, or vice versa
 ** How to deal with time slices? Can we use '%' tags like in ExtData?
+** Sept 19, 2024: How to make the decomposition geographically coincident with the cube? Is that useful/more efficient?
 * Sept 21, 2023
 ** MeshCreate:
 *** Need to create an index that identifies which multipolygon feature ID

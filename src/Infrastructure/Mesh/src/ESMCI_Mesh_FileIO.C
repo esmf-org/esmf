@@ -1466,13 +1466,13 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
 //    }
 
     jj = 0;
-    for (int i = 0; i < num_elems; i++) {
-      printf("pet: %d elem: %d\n",local_pet, i);
-      for (int j = 0; j < num_ElemConn[i]; j++) {
-	printf("     %d: elem_conn: %d \n", num_ElemConn[i], elem_Conn[jj]);
-	jj+=1;
-      }
-    }
+//    for (int i = 0; i < num_elems; i++) {
+//      printf("pet: %d elem: %d\n",local_pet, i);
+//      for (int j = 0; j < num_ElemConn[i]; j++) {
+//	printf("     %d: elem_conn: %d \n", num_ElemConn[i], elem_Conn[jj]);
+//	jj+=1;
+//      }
+//    }
 //    for (int i = 0; i < totNumElemConn; i++) { 
 //      printf("shp pet: %d numconn: %d glob_elem_conn: %d local_elem_conn: %d\n",local_pet,totNumElemConn,elem_Conn[i],local_elem_conn[i]);
 //    }

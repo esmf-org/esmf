@@ -371,19 +371,20 @@ void ESMCI_GDAL_process_shapefile_distributed(
     OGR_F_Destroy( hFeature );
   }
 
-  if (localpoints <= 0) { return; }
+  if (localpoints <= 0 || nodeIDs.size() <=0) { return; }
 
   nodeCoords= new double[2*totpoints];
 
-  printf("LP: %d; nodeCoords %d; XCoords %d; YCoords %d\n",localpoints,sizeof(nodeCoords)/sizeof(nodeCoords[0]),XCoords.size(),YCoords.size());
+  printf("TP: %d; LP: %d; nFeatures %d; nodeCoords %d; XCoords %d; YCoords %d\n",totpoints,localpoints,*nFeatures,sizeof(nodeCoords)/sizeof(nodeCoords[0]),XCoords.size(),YCoords.size());
 
   // Pass data to output variables
   // Pass OGR Values to Mesh arrays
   int j = 0;
-  for (int i=0;i<totpoints;i++) {
+  for (int i=0;i<localpoints;i++) {
+//    printf("<<>> nFeatures %d numnodes %d ID %d: %.2f, %.2f\n",*nFeatures,nodeIDs.size(),nodeIDs[i],XCoords[i],YCoords[i]);
+//    printf("%.2f, %.2f\n",XCoords[i],YCoords[i]);
     nodeCoords[j]   = XCoords[i];
     nodeCoords[j+1] = YCoords[i];
-//    printf("<<>> %d: %.2f, %.2f\n",nodeIDs[i],XCoords[i],YCoords[i]);
     j+=2;
   }
   *nNodes = localpoints;
@@ -437,6 +438,7 @@ int processPolygon(
   //    Haven't found a way to test for this using GDAL, so this is
   //    a hardwire
   for (int i = *nPpoints-1; i >=0; i--) {
+//    printf("<<>> <<>> X,Y: %.2f %.2f\n",OGR_G_GetX(fGeom, i),OGR_G_GetY(fGeom, i));
     XCoords.push_back( OGR_G_GetX(fGeom, i) );
     YCoords.push_back( OGR_G_GetY(fGeom, i) );
   }

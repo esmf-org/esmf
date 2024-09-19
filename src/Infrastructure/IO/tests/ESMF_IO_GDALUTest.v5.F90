@@ -62,7 +62,9 @@ program ESMF_IO_GDALUTest
 
 !  character(len=*), parameter :: shapefileName = "data/esmf_3x3_multimesh.shp"
 !  character(len=*), parameter :: shapefileName = "data/esmf_3x3_mesh.shp"
-  character(len=*), parameter :: shapefileName = "data/cb_2018_us_region_20m.shp"
+!  character(len=*), parameter :: shapefileName = "data/cb_2018_us_region_20m.shp"
+!  character(len=*), parameter :: shapefileName = "data/cb_2018_us_county_20m.shp"
+  character(len=*), parameter :: shapefileName = "data/test2.shp"
 
   ! NetCDF stuff
   integer :: ncid, xdimid, ydimid, xvarid, yvarid, varid, dimids
@@ -142,7 +144,8 @@ program ESMF_IO_GDALUTest
 
   Meshfield = ESMF_FieldCreate( Mesh, &
                                 arraySpec, &
-                                name="DistFld", &
+                                name="GEOID", &
+!                                name="nhgis0003_", &
                                 meshLoc=ESMF_MESHLOC_ELEMENT, &
                                 rc=rc)
 
@@ -155,9 +158,9 @@ program ESMF_IO_GDALUTest
   !------------------------------------------------------------------------
   ! 4a. Access the field pointers and give them some data
   call ESMF_FieldGet( Meshfield, farrayPtr=mptr, rc=rc)
-  mptr    = 0.0
+!  mptr    = 0.0
   !  mptr(1) = 11.5
-  mptr = 11.5
+!  mptr = 11.5
   write(*,*) "pet: ", localpet, " mptr: ", shape(mptr)
   mptr => null()
 
