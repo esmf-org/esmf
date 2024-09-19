@@ -195,7 +195,7 @@
  // < declare the rest of the public interface methods here >
 
     // return in string format (TMG 2.4.7)
-    int getString(char *timeString, const char *options=0) const;
+    int getString(char *timeString, int timeStringLen, const char *options=0) const;
 
     int getDayOfWeek(int *dayOfWeek) const;    // (TMG 2.5.3)
     int getMidMonth(Time *midMonth) const;
