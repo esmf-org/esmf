@@ -157,6 +157,11 @@ foreach(ESMX_LINK_LIBRARY IN ITEMS ${ESMX_LINK_LIBRARIES})
   endif()
 endforeach()
 
+# link options
+if(DEFINED ESMX_LINK_OPTIONS)
+  target_link_options(esmx_driver PUBLIC ${ESMX_LINK_OPTIONS})
+endif()
+
 # add components
 set(CMP_OPTIONS BUILD_TYPE;
                 SOURCE_DIR;
