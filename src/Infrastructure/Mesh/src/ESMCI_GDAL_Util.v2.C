@@ -375,14 +375,10 @@ void ESMCI_GDAL_process_shapefile_distributed(
 
   nodeCoords= new double[2*totpoints];
 
-  printf("TP: %d; LP: %d; nFeatures %d; nodeCoords %d; XCoords %d; YCoords %d\n",totpoints,localpoints,*nFeatures,sizeof(nodeCoords)/sizeof(nodeCoords[0]),XCoords.size(),YCoords.size());
-
   // Pass data to output variables
   // Pass OGR Values to Mesh arrays
   int j = 0;
   for (int i=0;i<localpoints;i++) {
-//    printf("<<>> nFeatures %d numnodes %d ID %d: %.2f, %.2f\n",*nFeatures,nodeIDs.size(),nodeIDs[i],XCoords[i],YCoords[i]);
-//    printf("%.2f, %.2f\n",XCoords[i],YCoords[i]);
     nodeCoords[j]   = XCoords[i];
     nodeCoords[j+1] = YCoords[i];
     j+=2;
@@ -393,10 +389,6 @@ void ESMCI_GDAL_process_shapefile_distributed(
   for (int i=0; i<(int)numElemConn.size(); i++) {
     *totNumElemConn += numElemConn[i];
   }
-//  *totNumElemConn = numElemConn.size();
-
-  // Cleanup
-  //int rc = GDALClose( hDS );
 
   return ;
 }

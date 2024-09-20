@@ -64,7 +64,7 @@ program ESMF_IO_GDALUTest
 !  character(len=*), parameter :: shapefileName = "data/esmf_3x3_mesh.shp"
 !  character(len=*), parameter :: shapefileName = "data/cb_2018_us_region_20m.shp"
 !  character(len=*), parameter :: shapefileName = "data/cb_2018_us_county_20m.shp"
-  character(len=*), parameter :: shapefileName = "data/test2.shp"
+  character(len=*), parameter :: shapefileName = "data/test3_simple.shp"
 
   ! NetCDF stuff
   integer :: ncid, xdimid, ydimid, xvarid, yvarid, varid, dimids
@@ -194,12 +194,12 @@ program ESMF_IO_GDALUTest
   !------------------------------------------------------------------------
   ! 6. Read the mesh data
   !------------------------------------------------------------------------
-!>>  call ESMF_FieldRead( MeshField, &
-!>>                       fileName=shapefileName, &
-!>>                       iofmt=ESMF_IOFMT_SHP, &
-!>>                       rc=rc)
-!>>  write(failMsg, *) "Mesh ESMF_FieldRead failed"
-!>>  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_FieldRead( MeshField, &
+                       fileName=shapefileName, &
+                       iofmt=ESMF_IOFMT_SHP, &
+                       rc=rc)
+  write(failMsg, *) "Mesh ESMF_FieldRead failed"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
