@@ -369,6 +369,10 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate from Copy (ALLOC), 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
+  ! In most circumstances it is best to avoid using random_number in unit tests.
+  ! In this case farrayPtr2D will be compared to an uninitialized array, which
+  ! is already effectively random. Filling farrayPtr2D with random numbers
+  ! reduces the chance of a value collision to near zero.
   call random_number(farrayPtr2D) ! fill with data to check
   farrayPtr2D = farrayPtr2D * 1000.0_ESMF_KIND_R8
   arrayDup = ESMF_ArrayCreate(array, datacopyflag=ESMF_DATACOPY_ALLOC, rc=rc)
