@@ -176,7 +176,7 @@ contains
 
     type(ESMF_InfoDescribe) :: idesc
 
-    logical, parameter :: profile = .false.
+    logical, parameter :: profile = .true.
 
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -321,7 +321,7 @@ contains
     logical, parameter :: debug = .false.
     logical, parameter :: meminfo = .false.
     logical, parameter :: trace = .false.
-    logical, parameter :: profile = .false.
+    logical, parameter :: profile = .true.
 
     character(160)  :: prefixStr
     type(ESMF_VMId), allocatable, target :: vmIdMap(:)
@@ -1587,7 +1587,7 @@ contains
     type(ESMF_Info) :: base_info, base_temp_info
 
     logical, parameter :: debug = .false.
-    logical, parameter :: profile = .false.
+    logical, parameter :: profile = .true.
 
     rc = ESMF_RC_NOT_IMPL
 
@@ -2139,7 +2139,7 @@ contains
 
     logical, parameter :: debug = .false.
     logical, parameter :: meminfo = .false.
-    logical, parameter :: profile = .false.
+    logical, parameter :: profile = .true.
 
     character(len=ESMF_MAXSTR) :: logmsg
 
@@ -2383,7 +2383,7 @@ contains
     character(ESMF_MAXSTR) :: msgstring
 
     logical, parameter :: debug = .false.
-    logical, parameter :: profile = .false.
+    logical, parameter :: profile = .true.
 
     localrc = ESMF_RC_NOT_IMPL
 
@@ -2723,7 +2723,7 @@ contains
     integer :: nitems_local(1)
     integer :: mypet, npets
 
-    logical, parameter :: profile = .false.
+    logical, parameter :: profile = .true.
 
     localrc = ESMF_RC_NOT_IMPL
 
