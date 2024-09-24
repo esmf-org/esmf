@@ -1705,7 +1705,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Private name; call using ESMF_FieldBundleGet()   
     subroutine ESMF_FieldBundleGetListAll(fieldbundle, keywordEnforcer, &
       itemorderflag, geomtype, grid, locstream, mesh, xgrid, &
-      fieldCount, fieldList, fieldNameList, isPacked, name, rc)
+      fieldCount, fieldList, fieldNameList, isPacked, name, vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle),    intent(in)            :: fieldbundle
@@ -1721,6 +1721,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),          intent(out), optional :: fieldNameList(:)
     logical,                   intent(out), optional :: isPacked
     character(len=*),          intent(out), optional :: name
+    type(ESMF_VM),             intent(out), optional :: vm
     integer,                   intent(out), optional :: rc
 !
 ! !STATUS:
@@ -1733,6 +1734,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              the items are returned.
 ! \item[8.0.0] Added argument {\tt isPacked}.
 !              The new argument allows the user to query if this is a packed FieldBundle.
+! \item[8.8.0] Added argument {\tt vm} in order to offer information about the
+!              VM on which the FieldBundle was created.
 ! \end{description}
 ! \end{itemize}
 !
@@ -1771,7 +1774,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [{[isPacked]}]
 !         Upon return holds the information if this FieldBundle is packed.
 !   \item [{[name]}]
-!         Name of the fieldbundle object.
+!         Name of the FieldBundle object.
+!   \item [{[vm}]
+!         The VM on which the FieldBundle object was created.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1960,7 +1965,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
     endif
-    
+
+    if (present(vm)) then
+      call c_ESMC_GetVM(fieldbundle%this%base, vm, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   

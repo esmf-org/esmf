@@ -44,7 +44,8 @@ module ESMF_ArrayBundleMod
   use ESMF_IOUtilMod
   use ESMF_RHandleMod
   use ESMF_ArrayMod
-  
+  use ESMF_VMMod
+
   implicit none
 
 !------------------------------------------------------------------------------
@@ -883,9 +884,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_ArrayBundleGet - Get object-wide information from an ArrayBundle
 !
 ! !INTERFACE:
-    ! Private name; call using ESMF_ArrayBundleGet()   
+    ! Private name; call using ESMF_ArrayBundleGet()
     subroutine ESMF_ArrayBundleGetListAll(arraybundle, keywordEnforcer, &
-      itemorderflag, arrayCount, arrayList, arrayNameList, name, rc)
+      itemorderflag, arrayCount, arrayList, arrayNameList, name, vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle),    intent(in)            :: arraybundle
@@ -895,6 +896,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Array),          intent(out), optional :: arrayList(:)
     character(len=*),          intent(out), optional :: arrayNameList(:)
     character(len=*),          intent(out), optional :: name
+    type(ESMF_VM),             intent(out), optional :: vm
     integer,                   intent(out), optional :: rc
 !
 ! !STATUS:
@@ -905,6 +907,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[6.1.0] Added argument {\tt itemorderflag}.
 !              The new argument gives the user control over the order in which
 !              the items are returned.
+! \item[8.8.0] Added argument {\tt vm} in order to offer information about the
+!              VM on which the ArrayBundle was created.
 ! \end{description}
 ! \end{itemize}
 !
@@ -930,6 +934,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     size {\tt arrayCount}.
 !   \item [{[name]}]
 !     Name of the ArrayBundle object.
+!   \item [{[vm}]
+!     The VM on which the ArrayBundle object was created.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1013,6 +1019,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
+    endif
+
+    ! Special call to get vm out of Base class
+    if (present(vm)) then
+      call c_ESMC_GetVM(arraybundle, vm, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! Return successfully

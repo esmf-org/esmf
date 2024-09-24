@@ -1123,7 +1123,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
       ! Private name; call using ESMF_StateGet()
       subroutine ESMF_StateGetInfo(state,  &
             keywordEnforcer, itemSearch, itemorderflag, nestedFlag,  &
-            stateIntent, itemCount, itemNameList, itemTypeList, name, rc)
+            stateIntent, itemCount, itemNameList, itemTypeList, name, vm, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),          intent(in)            :: state
@@ -1136,6 +1136,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
       character (len=*),         intent(out), optional :: itemNameList(:)
       type(ESMF_StateItem_Flag), intent(out), optional :: itemTypeList(:)
       character (len=*),         intent(out), optional :: name
+      type(ESMF_VM),             intent(out), optional :: vm
       integer,                   intent(out), optional :: rc
 
 !
@@ -1147,6 +1148,8 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 ! \item[6.1.0] Added argument {\tt itemorderflag}.
 !              The new argument gives the user control over the order in which
 !              the items are returned.
+! \item[8.8.0] Added argument {\tt vm} in order to offer information about the
+!              VM on which the State was created.
 ! \end{description}
 ! \end{itemize}
 !
@@ -1205,6 +1208,8 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !       long.  Return values are listed in Section~\ref{const:stateitem}.
 !     \item[{[name]}]
 !       Returns the name of this {\tt ESMF\_State}.
+!     \item [{[vm}]
+!       The VM on which the State object was created.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1266,6 +1271,12 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
       if (present(itemtypeList)) then
         ilpos = 1
         call itemTypeWorker (stypep)
+      endif
+
+      if (present(vm)) then
+        call c_ESMC_GetVM(stypep%base, vm, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       ! return successfully
