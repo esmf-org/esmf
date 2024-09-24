@@ -178,6 +178,8 @@ contains
 
     logical, parameter :: profile = .true.
 
+    logical   :: isNoop
+
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
@@ -194,6 +196,28 @@ contains
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
     end if
+
+    ! Determine whether there is anything to be Reconciled at all.
+    ! If not then return as quickly as possible
+
+    if (profile) then
+      call ESMF_TraceRegionEnter("ESMF_StateReconcileIsNoop", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+
+    call ESMF_StateReconcileIsNoop(state, vm=localvm, isNoop=isNoop, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    if (profile) then
+      call ESMF_TraceRegionExit("ESMF_StateReconcileIsNoop", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
 
     ! Each PET broadcasts the object ID lists and compares them to what
     ! they get back.   Missing objects are sent so they can be recreated
@@ -265,6 +289,189 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_StateReconcile
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateReconcileIsNoop"
+!BOPI
+! !IROUTINE: ESMF_StateReconcileIsNoop
+!
+! !INTERFACE:
+    subroutine ESMF_StateReconcileIsNoop(state, vm, isNoop, rc)
+!
+! !ARGUMENTS:
+      type (ESMF_State), intent(inout) :: state
+      type (ESMF_VM),    intent(in)    :: vm
+      logical,           intent(out)   :: isNoop
+      integer,           intent(out)   :: rc
+!
+! !DESCRIPTION:
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[state]
+!       {\tt ESMF\_State} to be reconciled.
+!     \item[vm]
+!       The current {\tt ESMF\_VM} (virtual machine).
+!     \item[isNoop]
+!       Return {\tt .true.} if no reconcile is needed, {\tt .false.} otherwise.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOPI
+    integer                 :: localrc
+    type(ESMF_VMId)         :: vmId
+    logical                 :: isNoopLoc
+
+    localrc = ESMF_RC_NOT_IMPL
+
+    isNoop = .false.  ! assume reconcile is needed
+
+    call ESMF_VMGetVMId(vm, vmId=vmId, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+      rcToReturn=rc)) return
+
+    call ESMF_VMIdLog(vmId, prefix="ESMF_StateReconcileIsNoop(): ", &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+      rcToReturn=rc)) return
+
+    call StateReconcileIsNoopLoc(state, isNoopLoc=isNoopLoc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+      rcToReturn=rc)) return
+
+    ! return successfully
+    rc = ESMF_SUCCESS
+
+  contains
+
+    recursive subroutine StateReconcileIsNoopLoc(stateR, isNoopLoc, rc)
+      type(ESMF_State), intent(in)    :: stateR
+      logical,          intent(out)   :: isNoopLoc
+      integer,          intent(out)   :: rc
+      ! - local variables
+      integer                     :: localrc
+      integer                     :: itemCount, item
+      character(ESMF_MAXSTR), allocatable     :: itemNameList(:)
+      type(ESMF_StateItem_Flag), allocatable  :: itemTypeList(:)
+      type(ESMF_State)            :: nestedState
+      type(ESMF_Field)            :: field
+      type(ESMF_FieldBundle)      :: fieldbundle
+      type(ESMF_Array)            :: array
+      type(ESMF_ArrayBundle)      :: arraybundle
+      type(ESMF_RouteHandle)      :: routehandle
+      type(ESMF_VM)               :: vmItem
+      type(ESMF_VMId)             :: vmIdItem
+
+      localrc = ESMF_RC_NOT_IMPL
+
+      isNoopLoc = .false. ! assume reconcile needed until found otherwise
+
+      ! query
+      call ESMF_StateGet(stateR, itemCount=itemCount, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (itemCount > 0) then
+        allocate(itemNameList(itemCount))
+        allocate(itemTypeList(itemCount))
+        call ESMF_StateGet(stateR, itemNameList=itemNameList, &
+          itemtypeList=itemtypeList, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        do item=1, itemCount
+          ! access the VM of the item, using appropriate API
+          if ((itemtypeList(item) == ESMF_STATEITEM_STATE)) then
+            call ESMF_StateGet(stateR, vm=vmItem, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            ! recursion into nested state
+            call ESMF_StateGet(stateR, itemName=itemNameList(item), &
+              nestedState=nestedState, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            call StateReconcileIsNoopLoc(stateR=nestedState, &
+              isNoopLoc=isNoopLoc, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          else if (itemtypeList(item) == ESMF_STATEITEM_FIELD) then
+            call ESMF_StateGet(stateR, itemName=itemNameList(item), &
+              field=field, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_FieldGet(field, vm=vmItem, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          else if (itemtypeList(item) == ESMF_STATEITEM_FIELDBUNDLE) then
+            call ESMF_StateGet(stateR, itemName=itemNameList(item), &
+              fieldbundle=fieldbundle, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_FieldBundleGet(fieldbundle, vm=vmItem, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+!TODO: need to loop over fields in FB
+          else if (itemtypeList(item) == ESMF_STATEITEM_ARRAY) then
+            call ESMF_StateGet(stateR, itemName=itemNameList(item), &
+              array=array, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_ArrayGet(array, vm=vmItem, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          else if (itemtypeList(item) == ESMF_STATEITEM_ARRAYBUNDLE) then
+            call ESMF_StateGet(stateR, itemName=itemNameList(item), &
+              arraybundle=arraybundle, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_ArrayBundleGet(arraybundle, vm=vmItem, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+!TODO: need to loop over arrays in AB
+          else if (itemtypeList(item) == ESMF_STATEITEM_ROUTEHANDLE) then
+            call ESMF_StateGet(stateR, itemName=itemNameList(item), &
+              routehandle=routehandle, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_RouteHandleGet(routehandle, vm=vmItem, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+
+    call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+      rcToReturn=rc)) return
+
+    call ESMF_VMIdLog(vmIdItem, prefix="vmIdItem: ", &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+      rcToReturn=rc)) return
+
+        enddo
+
+        deallocate(itemNameList)
+        deallocate(itemTypeList)
+      endif
+
+    end subroutine StateReconcileIsNoopLoc
+
+  end subroutine ESMF_StateReconcileIsNoop
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
