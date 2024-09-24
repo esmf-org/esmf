@@ -10353,7 +10353,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMIdCompare - Compare two ESMF_VMId objects
 
 ! !INTERFACE:
-  function ESMF_VMIdCompare(vmId1, vmId2, rc)
+  function ESMF_VMIdCompare(vmId1, vmId2, keyOnly, rc)
 !
 ! !RETURN VALUE:
     logical :: ESMF_VMIdCompare
@@ -10361,6 +10361,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(in)            :: vmId1
     type(ESMF_VMId),   intent(in)            :: vmId2
+    logical,           intent(in),  optional :: keyOnly
     integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -10372,6 +10373,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        ESMF_VMId object 1
 !   \item[vmId2]
 !        ESMF_VMId object 2
+!   \item[{[keyOnly]}]
+!        For {\tt .true.} only compare the vmKey parts. Default is
+!        {\tt .false.}.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -10379,14 +10383,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    type(ESMF_Logical)      :: tf
+    type(ESMF_Logical)      :: tf, keyOnlyOpt
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    keyOnlyOpt = ESMF_FALSE
+    if (present(keyOnly)) then
+      if (keyOnly) keyOnlyOpt = ESMF_TRUE
+    endif
+
     ! Call into the C++ interface
-    call c_ESMC_VMIdCompare(vmId1, vmId2, tf, localrc)
+    call c_ESMC_VMIdCompare(vmId1, vmId2, keyOnly, tf, localrc)
     ESMF_VMIdCompare = tf == ESMF_TRUE
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

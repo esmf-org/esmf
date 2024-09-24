@@ -729,11 +729,13 @@ bool VMIdCompare(
 // !ARGUMENTS:
 //
   const VMId *vmID1,
-  const VMId *vmID2
+  const VMId *vmID2,
+  bool keyOnly
   ){
 //
 // !DESCRIPTION:
-//    Compare two {\tt ESMC\_VMId} objects.
+//    Compare two {\tt ESMC\_VMId} objects. If {\tt keyOnly==true} only compare
+//    vmKey part.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -742,8 +744,10 @@ bool VMIdCompare(
       "- Invalid vmIDs", ESMC_CONTEXT, NULL);
     return false;    // bail out
   }
-  if (vmID1->localID != vmID2->localID){
-    return false;
+  if (!keyOnly){
+    if (vmID1->localID != vmID2->localID){
+      return false;
+    }
   }
   return VMKeyCompare(vmID1->vmKey, vmID2->vmKey);
 }

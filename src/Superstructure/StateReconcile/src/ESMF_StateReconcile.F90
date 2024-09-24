@@ -219,6 +219,13 @@ contains
         rcToReturn=rc)) return
     endif
 
+    if (isNoop) then
+call ESMF_LogWrite("returning early with isNoop=.true.", ESMF_LOGMSG_DEBUG, rc=localrc)
+      ! successful early return because of NOOP condition
+      if (present(rc)) rc = ESMF_SUCCESS
+      return
+    endif
+
     ! Each PET broadcasts the object ID lists and compares them to what
     ! they get back.   Missing objects are sent so they can be recreated
     ! on the PETs without those objects as "proxy" objects.  Eventually
@@ -322,6 +329,7 @@ contains
     integer                 :: localrc
     type(ESMF_VMId)         :: vmId
     logical                 :: isNoopLoc
+    integer                 :: isNoopLocInt(1), isNoopInt(1)
 
     localrc = ESMF_RC_NOT_IMPL
 
@@ -331,14 +339,20 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
       rcToReturn=rc)) return
 
-    call ESMF_VMIdLog(vmId, prefix="ESMF_StateReconcileIsNoop(): ", &
+    call StateReconcileIsNoopLoc(state, isNoopLoc=isNoopLoc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+      rcToReturn=rc)) return
+
+    isNoopLocInt(1) = 0
+    if (isNoopLoc) isNoopLocInt(1) = 1
+
+    ! logical AND reduction, only 1 if all incoming 1
+    call ESMF_VMAllReduce(vm, isNoopLocInt, isNoopInt, 1, ESMF_REDUCE_MIN, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
       rcToReturn=rc)) return
 
-    call StateReconcileIsNoopLoc(state, isNoopLoc=isNoopLoc, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-      rcToReturn=rc)) return
+    if (isNoopInt(1)==1) isNoop = .true.  ! found that Reconcile is a NOOP
 
     ! return successfully
     rc = ESMF_SUCCESS
@@ -362,10 +376,11 @@ contains
       type(ESMF_RouteHandle)      :: routehandle
       type(ESMF_VM)               :: vmItem
       type(ESMF_VMId)             :: vmIdItem
+      type(ESMF_Pointer)          :: thisItem
 
       localrc = ESMF_RC_NOT_IMPL
 
-      isNoopLoc = .false. ! assume reconcile needed until found otherwise
+      isNoopLoc = .true.
 
       ! query
       call ESMF_StateGet(stateR, itemCount=itemCount, rc=localrc)
@@ -454,14 +469,24 @@ contains
               ESMF_CONTEXT, rcToReturn=rc)) return
           endif
 
-    call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-      rcToReturn=rc)) return
+          call ESMF_VMGetThis(vmItem, thisItem, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+            rcToReturn=rc)) return
 
-    call ESMF_VMIdLog(vmIdItem, prefix="vmIdItem: ", &
-      rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-      rcToReturn=rc)) return
+          if (thisItem == ESMF_NULL_POINTER) isNoopLoc = .false.  ! found proxy
+
+          if (.not.isNoopLoc) exit  ! exit for .false. already recurse or proxy
+
+          call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+            rcToReturn=rc)) return
+
+          isNoopLoc = ESMF_VMIdCompare(vmIdItem, vmId, keyOnly=.true., &
+            rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+            rcToReturn=rc)) return
+
+          if (.not.isNoopLoc) exit  ! exit for .false.
 
         enddo
 
