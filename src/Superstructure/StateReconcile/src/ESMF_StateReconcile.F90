@@ -335,6 +335,8 @@ call ESMF_LogWrite("continue with isNoop=.false.", ESMF_LOGMSG_DEBUG, rc=localrc
     logical                 :: isNoopLoc
     integer                 :: isNoopLocInt(1), isNoopInt(1)
 
+    logical, parameter      :: profile = .true.
+
     localrc = ESMF_RC_NOT_IMPL
 
     isNoop = .false.  ! assume reconcile is needed
@@ -345,18 +347,46 @@ call ESMF_LogWrite("continue with isNoop=.false.", ESMF_LOGMSG_DEBUG, rc=localrc
 
 !call ESMF_VMIdLog(vmId, prefix="vmId: ", rc=rc)
 
+    if (profile) then
+      call ESMF_TraceRegionEnter("StateReconcileIsNoopLoc", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+
     call StateReconcileIsNoopLoc(state, isNoopLoc=isNoopLoc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
       rcToReturn=rc)) return
 
+    if (profile) then
+      call ESMF_TraceRegionExit("StateReconcileIsNoopLoc", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+
     isNoopLocInt(1) = 0
     if (isNoopLoc) isNoopLocInt(1) = 1
+
+    if (profile) then
+      call ESMF_TraceRegionEnter("ESMF_VMAllReduce", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
 
     ! logical AND reduction, only 1 if all incoming 1
     call ESMF_VMAllReduce(vm, isNoopLocInt, isNoopInt, 1, ESMF_REDUCE_MIN, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
       rcToReturn=rc)) return
+
+    if (profile) then
+      call ESMF_TraceRegionExit("ESMF_VMAllReduce", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
 
     if (isNoopInt(1)==1) isNoop = .true.  ! found that Reconcile is a NOOP
 
