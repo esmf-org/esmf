@@ -83,6 +83,7 @@ module ESMF_StateReconcileMod
   ! to be called by ESMF users.
   ! public :: ESMF_ReconcileDeserialize, ESMF_ReconcileSerialize
   ! public :: ESMF_ReconcileSendItems
+  public :: ESMF_ReconcileExchgAttributes
 
 !EOPI
 
@@ -227,6 +228,14 @@ contains
 
     if (isNoop) then
 call ESMF_LogWrite("returning early with isNoop=.true.", ESMF_LOGMSG_DEBUG, rc=localrc)
+#if 0
+  !TODO: this is copied here for the old attribute reconciliation behavior
+  !TODO: remove now that we decided that's not what we want to happen
+      call ESMF_ReconcileExchgAttributes (state, vm, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+#endif
 #if 1
       ! successful early return because of NOOP condition
       if (present(rc)) rc = ESMF_SUCCESS
@@ -511,7 +520,7 @@ call ESMF_LogWrite("continue with isNoop=.false.", ESMF_LOGMSG_DEBUG, rc=localrc
               ESMF_CONTEXT, rcToReturn=rc)) return
           endif
 
-!call ESMF_LogWrite("processing "//trim(itemNameList(item)), ESMF_LOGMSG_DEBUG, rc=localrc)
+call ESMF_LogWrite("processing "//trim(itemNameList(item)), ESMF_LOGMSG_DEBUG, rc=localrc)
 
           call ESMF_VMGetThis(vmItem, thisItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
@@ -525,7 +534,7 @@ call ESMF_LogWrite("continue with isNoop=.false.", ESMF_LOGMSG_DEBUG, rc=localrc
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
 
-!call ESMF_VMIdLog(vmIdItem, prefix="vmIdItem: ", rc=rc)
+call ESMF_VMIdLog(vmIdItem, prefix="vmIdItem: ", rc=rc)
 
           isNoopLoc = ESMF_VMIdCompare(vmIdItem, vmId, keyOnly=.true., &
             rc=localrc)
@@ -1145,6 +1154,9 @@ end block
         rcToReturn=rc)) return
     endif
     ! -------------------------------------------------------------------------
+#if 1
+  !TODO: Turn this off, and probably remove completely from StateReconcile
+  !TODO: But first make sure the NUOPC protos still all work!!!!
     if (attreconflag == ESMF_ATTRECONCILE_ON) then
       if (trace) then
         call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
@@ -1156,6 +1168,7 @@ end block
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
     end if
+#endif
     state%statep%reconcileneededflag = .false.
     ! -------------------------------------------------------------------------
     if (profile) then
