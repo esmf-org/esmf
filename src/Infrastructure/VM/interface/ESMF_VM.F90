@@ -10395,7 +10395,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Call into the C++ interface
-    call c_ESMC_VMIdCompare(vmId1, vmId2, keyOnly, tf, localrc)
+    call c_ESMC_VMIdCompare(vmId1, vmId2, keyOnlyOpt, tf, localrc)
     ESMF_VMIdCompare = tf == ESMF_TRUE
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
