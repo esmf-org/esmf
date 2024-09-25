@@ -221,10 +221,14 @@ contains
 
     if (isNoop) then
 call ESMF_LogWrite("returning early with isNoop=.true.", ESMF_LOGMSG_DEBUG, rc=localrc)
+#if 1
       ! successful early return because of NOOP condition
       if (present(rc)) rc = ESMF_SUCCESS
       return
+#endif
     endif
+
+call ESMF_LogWrite("continue with isNoop=.false.", ESMF_LOGMSG_DEBUG, rc=localrc)
 
     ! Each PET broadcasts the object ID lists and compares them to what
     ! they get back.   Missing objects are sent so they can be recreated
