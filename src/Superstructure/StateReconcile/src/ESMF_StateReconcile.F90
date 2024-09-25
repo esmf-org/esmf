@@ -343,6 +343,8 @@ call ESMF_LogWrite("continue with isNoop=.false.", ESMF_LOGMSG_DEBUG, rc=localrc
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
       rcToReturn=rc)) return
 
+!call ESMF_VMIdLog(vmId, prefix="vmId: ", rc=rc)
+
     call StateReconcileIsNoopLoc(state, isNoopLoc=isNoopLoc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
       rcToReturn=rc)) return
@@ -473,7 +475,7 @@ call ESMF_LogWrite("continue with isNoop=.false.", ESMF_LOGMSG_DEBUG, rc=localrc
               ESMF_CONTEXT, rcToReturn=rc)) return
           endif
 
-call ESMF_LogWrite("processing "//trim(itemNameList(item)), ESMF_LOGMSG_DEBUG, rc=localrc)
+!call ESMF_LogWrite("processing "//trim(itemNameList(item)), ESMF_LOGMSG_DEBUG, rc=localrc)
 
           call ESMF_VMGetThis(vmItem, thisItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
@@ -487,11 +489,19 @@ call ESMF_LogWrite("processing "//trim(itemNameList(item)), ESMF_LOGMSG_DEBUG, r
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
 
+!call ESMF_VMIdLog(vmIdItem, prefix="vmIdItem: ", rc=rc)
+
           isNoopLoc = ESMF_VMIdCompare(vmIdItem, vmId, keyOnly=.true., &
             rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
-
+#if 0
+block
+  character(160) :: msgStr
+  write(msgStr,*) "isNoopLoc: ", isNoopLoc
+  call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
+end block
+#endif
           if (.not.isNoopLoc) exit  ! exit for .false.
 
         enddo
