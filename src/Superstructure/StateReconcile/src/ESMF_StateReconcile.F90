@@ -228,14 +228,6 @@ contains
 
     if (isNoop) then
 call ESMF_LogWrite("returning early with isNoop=.true.", ESMF_LOGMSG_DEBUG, rc=localrc)
-#if 0
-  !TODO: this is copied here for the old attribute reconciliation behavior
-  !TODO: remove now that we decided that's not what we want to happen
-      call ESMF_ReconcileExchgAttributes (state, vm, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT,  &
-          rcToReturn=rc)) return
-#endif
 #if 1
       ! successful early return because of NOOP condition
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1144,41 +1136,7 @@ end block
     ! -------------------------------------------------------------------------
     if (meminfo) call ESMF_VMLogMemInfo ("after 7.) Deserialize received objects and create proxies")
 
-    ! -------------------------------------------------------------------------
-    ! 8.) Attributes on the State itself
-    ! -------------------------------------------------------------------------
-    if (profile) then
-      call ESMF_TraceRegionEnter("8.) Attributes on the State itself", rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-    endif
-    ! -------------------------------------------------------------------------
-#if 1
-  !TODO: Turn this off, and probably remove completely from StateReconcile
-  !TODO: But first make sure the NUOPC protos still all work!!!!
-    if (attreconflag == ESMF_ATTRECONCILE_ON) then
-      if (trace) then
-        call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-            ': *** Step 8 - Exchange Base Attributes', ask=.false.)
-        call ESMF_VMBarrier (vm)
-      end if
-      call ESMF_ReconcileExchgAttributes (state, vm, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT,  &
-          rcToReturn=rc)) return
-    end if
-#endif
     state%statep%reconcileneededflag = .false.
-    ! -------------------------------------------------------------------------
-    if (profile) then
-      call ESMF_TraceRegionExit("8.) Attributes on the State itself", rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-    endif
-    ! -------------------------------------------------------------------------
-    if (meminfo) call ESMF_VMLogMemInfo ("after 8.) Attributes on the State itself")
 
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD // ': Complete!')
