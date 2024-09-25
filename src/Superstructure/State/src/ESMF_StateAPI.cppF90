@@ -1274,7 +1274,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
       endif
 
       if (present(vm)) then
-        call c_ESMC_GetVM(stypep%base, vm, localrc)
+        call ESMF_GetVM(stypep%base, vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
