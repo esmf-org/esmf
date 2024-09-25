@@ -623,13 +623,14 @@ module NUOPC_Base
 ! !INTERFACE:
   ! Private name; call using NUOPC_Advertise() 
   subroutine NUOPC_AdvertiseFields(state, StandardNames, &
-    TransferOfferGeomObject, SharePolicyField, SharePolicyGeomObject, rc)
+    TransferOfferGeomObject, SharePolicyField, SharePolicyGeomObject, vm, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)         :: state
     character(*),     intent(in)            :: StandardNames(:)
     character(*),     intent(in),  optional :: TransferOfferGeomObject
     character(*),     intent(in),  optional :: SharePolicyField
     character(*),     intent(in),  optional :: SharePolicyGeomObject
+    type(ESMF_VM),    intent(in),  optional :: vm
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   \label{NUOPC_AdvertiseFields}
@@ -668,6 +669,10 @@ module NUOPC_Base
 !     controls the vocabulary of this attribute. Valid options are 
 !     "share", and "not share".
 !     If omitted, the default is equal to {\tt SharePolicyField}.
+!   \item[{[vm]}]
+!     If present, the Field objects used during advertising are created on the
+!     specified {\tt ESMF\_VM} object. The default is to create the Field
+!     objects on the VM of the current component context.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -682,8 +687,9 @@ module NUOPC_Base
 
     do i=1, size(StandardNames)
       call NUOPC_AdvertiseField(state, StandardName=StandardNames(i), &
-        TransferOfferGeomObject=TransferOfferGeomObject, SharePolicyField=SharePolicyField, &
-        SharePolicyGeomObject=SharePolicyGeomObject, rc=localrc)
+        TransferOfferGeomObject=TransferOfferGeomObject, &
+        SharePolicyField=SharePolicyField, &
+        SharePolicyGeomObject=SharePolicyGeomObject, vm=vm, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME, &
