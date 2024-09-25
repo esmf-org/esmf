@@ -400,16 +400,16 @@ call ESMF_LogWrite("returning early with isNoop=.true.", ESMF_LOGMSG_DEBUG, rc=l
         do item=1, itemCount
           ! access the VM of the item, using appropriate API
           if ((itemtypeList(item) == ESMF_STATEITEM_STATE)) then
-            call ESMF_StateGet(stateR, vm=vmItem, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-            ! recursion into nested state
             call ESMF_StateGet(stateR, itemName=itemNameList(item), &
               nestedState=nestedState, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_StateGet(nestedState, vm=vmItem, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            ! recursion into nested state
             call StateReconcileIsNoopLoc(stateR=nestedState, &
               isNoopLoc=isNoopLoc, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
@@ -468,6 +468,8 @@ call ESMF_LogWrite("returning early with isNoop=.true.", ESMF_LOGMSG_DEBUG, rc=l
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           endif
+
+call ESMF_LogWrite("processing "//trim(itemNameList(item)), ESMF_LOGMSG_DEBUG, rc=localrc)
 
           call ESMF_VMGetThis(vmItem, thisItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
