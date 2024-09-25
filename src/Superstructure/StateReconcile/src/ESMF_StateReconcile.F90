@@ -197,6 +197,12 @@ contains
           rcToReturn=rc)) return
     end if
 
+#if 0
+    ! cleaner timings below, eliminating issue due to different times PETs enter
+    ! BUT: only enable this for testing purposes
+    call ESMF_VMBarrier(localvm, rc=localrc)
+#endif
+
     ! Determine whether there is anything to be Reconciled at all.
     ! If not then return as quickly as possible
 
@@ -533,6 +539,8 @@ block
 end block
 #endif
           if (.not.isNoopLoc) exit  ! exit for .false.
+
+          vmId = vmIdItem  ! more likely to hit pointer comparison this way
 
         enddo
 

@@ -140,6 +140,10 @@ static bool esmfFinalized = false;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VMKeyCompare()"
 static bool VMKeyCompare(unsigned char *vmKey1, unsigned char *vmKey2){
+  if (vmKey1==vmKey2) return true;  // quick return for identical pointers
+#if 1
+  return std::memcmp(vmKey1, vmKey2, vmKeyWidth) == 0;
+#else
   int i;
   for (i=0; i<vmKeyWidth; i++)
     if (vmKey1[i] != vmKey2[i]){
@@ -147,6 +151,7 @@ static bool VMKeyCompare(unsigned char *vmKey1, unsigned char *vmKey2){
     }
   if (i==vmKeyWidth) return true;
   return false;
+#endif
 }
 
 #undef  ESMC_METHOD
