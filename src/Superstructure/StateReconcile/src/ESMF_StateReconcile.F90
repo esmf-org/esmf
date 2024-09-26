@@ -1136,8 +1136,6 @@ end block
     ! -------------------------------------------------------------------------
     if (meminfo) call ESMF_VMLogMemInfo ("after 7.) Deserialize received objects and create proxies")
 
-    state%statep%reconcileneededflag = .false.
-
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD // ': Complete!')
       call ESMF_VMBarrier (vm)

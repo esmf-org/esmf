@@ -669,7 +669,6 @@ program ESMF_StateReconcileUTest
     character(4) :: localpet_str, temppet_str
     integer :: attr_val(1)
     integer :: i
-    logical :: reconcile_needed, recneeded_expected
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
@@ -717,31 +716,6 @@ program ESMF_StateReconcileUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a State"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    reconcile_needed = ESMF_StateIsReconcileNeeded (state1, rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Testing empty State for reconcile needed"
-    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    write(failMsg, *) "Did not return .false. for empty State"
-    call ESMF_Test(.not. reconcile_needed, name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    reconcile_needed = ESMF_StateIsReconcileNeeded (state1,  &
-        vm=vm, collectiveflag=.true., rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Testing empty State for reconcile needed (collective)"
-    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    write(failMsg, *) "Did not return .false. for empty State"
-    call ESMF_Test(.not. reconcile_needed, name, failMsg, result, ESMF_SRCLINE)
 
     ! In SetServices() the VM for each component is initialized.
     ! Normally you would call SetEntryPoint inside set services,
@@ -841,31 +815,6 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    reconcile_needed = ESMF_StateIsReconcileNeeded (state1, rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Testing modified State for reconcile needed"
-    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    write(failMsg, *) "Did not return .true. for modified State"
-    call ESMF_Test(reconcile_needed, name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    reconcile_needed = ESMF_StateIsReconcileNeeded (state1,  &
-        vm=vm, collectiveflag=.true., rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Testing modified State for reconcile needed (collective)"
-    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    write(failMsg, *) "Did not return .true. for modified State"
-    call ESMF_Test(reconcile_needed, name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
     call ESMF_StateReconcile(state1, vm=vm, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateReconcile in concurrent mode"
@@ -894,41 +843,6 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateValidate"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    reconcile_needed = ESMF_StateIsReconcileNeeded (state1, rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Testing reconciled State for reconcile needed"
-    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    ! Note that even though the top level State should have its reconcileneeded
-    ! flag cleared, the two nested States still should have their flags set.
-    recneeded_expected = localpet == 0 .or. localpet == 1
-    write(failMsg, *) "Did not return correct result for reconciled State",  &
-        localpet, reconcile_needed, recneeded_expected
-    call ESMF_Test(reconcile_needed .eqv. recneeded_expected,  &
-        name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    reconcile_needed = ESMF_StateIsReconcileNeeded (state1,  &
-        vm=vm, collectiveflag=.true., rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Testing reconciled State for reconcile needed (collective)"
-    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    ! Note that even though the top level State should have its reconcileneeded
-    ! flag cleared, two nested States still should have their flags set.  So the
-    ! collective ESMF_StateIsReconcileNeeded function should return .true..
-    write(failMsg, *) "Did not return correct collective result for reconciled State",  &
-        localpet, reconcile_needed, recneeded_expected
-    call ESMF_Test(reconcile_needed,  &
-        name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
@@ -1540,11 +1454,9 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     ! Test attribute reconcililiation
     !-------------------------------------------------------------------------
 
-!@@@
-
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    ! component on PET 0 -> needed for consistent VM
+    ! component on PET 0 -> needed to create Field below on PET 0
     comp1 = ESMF_GridCompCreate(petList=[0], rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Gridded Component"
@@ -1637,6 +1549,7 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     if (localPet == 0) then
       do, i=1, size (field_attr)
         write (fieldname, '(a,i4)') 'PET 0 Field', i
+        ! create on vm0 to not violate ESMF unison rule for Create() methods
         field_attr(i) = ESMF_FieldEmptyCreate(name=fieldname, vm=vm0, rc=rc)
         if (rc /= ESMF_SUCCESS) goto 50
 
