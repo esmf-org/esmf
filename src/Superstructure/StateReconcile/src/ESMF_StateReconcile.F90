@@ -745,15 +745,37 @@ end block
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
     endif
-    do i=lbound(vmintids_send,1),ubound(vmintids_send,1)
-      if (vmintids_send(i) <= 0) then
-        if (ESMF_LogFoundError(ESMF_FAILURE, &
-          msg="A <= zero VM integer id was encountered", &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      end if
-    enddo
+    if (any(vmintids_send(:) <= 0)) then
+      call ESMF_LogSetError(ESMF_RC_INTNRL_INCONS, &
+        msg="All integer VM ids must be greater than 0!", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
     if (profile) then
       call ESMF_TraceRegionExit("Check vmIntIds", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+
+    ! Use the translated VM ids information to make decision about the case
+    if (profile) then
+      call ESMF_TraceRegionEnter("Decide between cases", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! Decide between SingleComp and MultiComp case
+    singleCompCaseFlag = .false.
+    if (size(vmIdMap)==1) then
+      singleCompCaseFlag = all(vmintids_send(1:)==1)
+      vmIdSingleComp => vmIdMap(1)
+    else if (size(vmIdMap)==2) then
+      singleCompCaseFlag = all(vmintids_send(1:)==2) ! most likely case
+      vmIdSingleComp => vmIdMap(2)
+    endif
+    if (profile) then
+      call ESMF_TraceRegionExit("Decide between cases", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
@@ -784,16 +806,6 @@ end block
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
-    ! Decide between SingleComp case and MultiComp case
-    singleCompCaseFlag = .false.
-    if (size(vmIdMap)==1) then
-      singleCompCaseFlag = all(vmintids_send(1:)==1)
-      vmIdSingleComp => vmIdMap(1)
-    else if (size(vmIdMap)==2) then
-      singleCompCaseFlag = all(vmintids_send(1:)==2) ! most likely case
-      vmIdSingleComp => vmIdMap(2)
-    endif
-
 block
   character(160):: msgStr
   write(msgStr,*) "size(vmintids_send): ", size(vmintids_send)
@@ -808,7 +820,7 @@ end block
       ! CASE: a single component interacting with a state
       ! ------------------------------------------------------------------------
       if (profile) then
-        call ESMF_TraceRegionEnter("Single Comp Case", rc=localrc)
+        call ESMF_TraceRegionEnter("ESMF_ReconcileSingleCompCase", rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
@@ -825,7 +837,7 @@ end block
 #endif
       ! ------------------------------------------------------------------------
       if (profile) then
-        call ESMF_TraceRegionExit("Single Comp Case", rc=localrc)
+        call ESMF_TraceRegionExit("ESMF_ReconcileSingleCompCase", rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
@@ -835,7 +847,7 @@ end block
       ! CASE: multiple components interacting with a state
       ! ------------------------------------------------------------------------
       if (profile) then
-        call ESMF_TraceRegionEnter("Multi Comp Case", rc=localrc)
+        call ESMF_TraceRegionEnter("ESMF_ReconcileMultiCompCase", rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
@@ -844,7 +856,7 @@ end block
       call ESMF_ReconcileMultiCompCase()
       ! ------------------------------------------------------------------------
       if (profile) then
-        call ESMF_TraceRegionExit("Single Comp Case", rc=localrc)
+        call ESMF_TraceRegionExit("ESMF_ReconcileMultiCompCase", rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
