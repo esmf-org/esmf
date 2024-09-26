@@ -407,6 +407,50 @@ int VMId::get(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMId::getLeftmostOnBit()"
+//BOPI
+// !IROUTINE:  ESMCI::VMId::getLeftmostOnBit
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !INTERFACE:
+int VMId::getLeftmostOnBit(
+//
+// !RETURN VALUE:
+//    int return code
+//
+//
+// !ARGUMENTS:
+//
+  int  *leftmostOnBit
+  ){
+//
+// !DESCRIPTION:
+//   Gets the index of the leftmost on bit of the VMId. If there are on on bits, then
+//   returns -1.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // Initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;
+
+  // Get leftmost
+  unsigned unsigned_leftmost=VMKeyFirstBitFromLeft(this->vmKey);
+    
+  // a value returned of vmKeyWidth * 8 indicates that no bit was set
+  if (unsigned_leftmost == vmKeyWidth*8) *leftmostOnBit=-1;
+  else *leftmostOnBit=(signed int)unsigned_leftmost;
+ 
+  localrc = ESMF_SUCCESS;
+  return localrc;
+}
+//-----------------------------------------------------------------------------
+
+  
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VMId::set()"
 //BOPI
 // !IROUTINE:  ESMCI::VMId::set

@@ -61,6 +61,7 @@ class VMId {
   int create ();      // allocates memory for vmKey member
   int destroy ();     // frees memory for vmKey member
   int get(int *localID, char *key, int key_len);
+  int getLeftmostOnBit(int *leftmostOnBit);
   int set(int  localID, const char *key, int key_len);
   int serialize(const char *buffer, int *length, int *offset,
                 const ESMC_InquireFlag &inquireflag);

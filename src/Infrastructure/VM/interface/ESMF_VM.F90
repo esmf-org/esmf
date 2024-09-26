@@ -10468,6 +10468,59 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMIdGet()"
+!BOPI
+! !IROUTINE: ESMF_VMIdGet - Get information about a VMId object
+
+! !INTERFACE:
+  subroutine ESMF_VMIdGet(vmId, leftMostOnBit, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VMId),   intent(in)            :: vmId
+    integer,           intent(out), optional :: leftMostOnBit
+    integer,           intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Copy the contents of ESMF_VMId objects.  Note that the destination
+!   objects must have been (deeply) allocated prior to calling this
+!   copy.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vmId]
+!        VMId to get information from.
+!   \item[leftMostOnBit]
+!        The index (base 0) of the leftmost on bit in the VMId. If the index is -1,
+!        then there were no on bits
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: i
+    type(ESMF_Logical)      :: tf
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Call into the C++ interface
+    if (present(leftMostOnBit)) then
+       call c_ESMCI_VMIdGetLeftMostOnBit(vmId, leftMostOnBit, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMIdGet
+!------------------------------------------------------------------------------  
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMIdLog()"
 !BOPI
 ! !IROUTINE: ESMF_VMIdLog - Log an ESMF_VMId object
