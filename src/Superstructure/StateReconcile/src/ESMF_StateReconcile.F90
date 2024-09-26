@@ -612,13 +612,13 @@ end block
     character(160)  :: prefixStr
     type(ESMF_VMId), allocatable, target :: vmIdMap(:)
     type(ESMF_VMId), pointer             :: vmIdSingleComp
+    logical                              :: singleCompCaseFlag
+    integer                              :: singleCompIndex
 
     character(len=ESMF_MAXSTR) :: logmsg
 
     type(ESMF_InfoCache) :: info_cache
     type(ESMF_InfoDescribe) :: idesc
-
-    logical :: singleCompCaseFlag
 
     ! -------------------------------------------------------------------------
     localrc = ESMF_RC_NOT_IMPL
@@ -767,12 +767,23 @@ end block
     endif
     ! Decide between SingleComp and MultiComp case
     singleCompCaseFlag = .false.
+    nullify(vmIdSingleComp)
     if (size(vmIdMap)==1) then
       singleCompCaseFlag = all(vmintids_send(1:)==1)
-      vmIdSingleComp => vmIdMap(1)
+      if (singleCompCaseFlag) vmIdSingleComp => vmIdMap(1)
     else if (size(vmIdMap)==2) then
-      singleCompCaseFlag = all(vmintids_send(1:)==2) ! most likely case
-      vmIdSingleComp => vmIdMap(2)
+      singleCompCaseFlag = all(vmintids_send(1:)==1) &
+        .or.all(vmintids_send(1:)==2)
+      if (singleCompCaseFlag) then
+        ! singleCompIndex could be 1 or 2, however, cannot simply look this up
+        ! in vmintids_send(1), because on PETs that do not have objects it only
+        ! stores vmintids_send(1), which holds the index into vmIdMap of the
+        ! executing VM. Since there are only two possible values, the correct
+        ! singleCompIndex must be "the other one". Therefore, look at
+        ! vmintids_send(0), which is valid on all PETs, add 1 mod 2.
+        singleCompIndex = mod(vmintids_send(0)+1,2)
+        vmIdSingleComp => vmIdMap(singleCompIndex)
+      endif
     endif
     if (profile) then
       call ESMF_TraceRegionExit("Decide between cases", rc=localrc)
