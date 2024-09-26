@@ -611,11 +611,15 @@ end block
 
     character(160)  :: prefixStr
     type(ESMF_VMId), allocatable, target :: vmIdMap(:)
+    type(ESMF_VMId), pointer             :: vmIdSingleComp
+    integer                              :: rootPetSingleComp
 
     character(len=ESMF_MAXSTR) :: logmsg
 
     type(ESMF_InfoCache) :: info_cache
     type(ESMF_InfoDescribe) :: idesc
+
+    logical :: singleCompCaseFlag
 
     ! -------------------------------------------------------------------------
     localrc = ESMF_RC_NOT_IMPL
@@ -744,7 +748,8 @@ end block
     endif
     do i=lbound(vmintids_send,1),ubound(vmintids_send,1)
       if (vmintids_send(i) <= 0) then
-        if (ESMF_LogFoundError(ESMF_FAILURE, msg="A <= zero VM integer id was encountered", &
+        if (ESMF_LogFoundError(ESMF_FAILURE, &
+          msg="A <= zero VM integer id was encountered", &
           ESMF_CONTEXT, rcToReturn=rc)) return
       end if
     enddo
@@ -780,7 +785,74 @@ end block
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
-    call handle_case3()
+    ! Decide between SingleComp case and MultiComp case
+    singleCompCaseFlag = .false.
+    if (size(vmIdMap)==1) then
+      singleCompCaseFlag = all(vmintids_send(1:)==1)
+      vmIdSingleComp => vmIdMap(1)
+    else if (size(vmIdMap)==2) then
+      singleCompCaseFlag = all(vmintids_send(1:)==2) ! most likely case
+      vmIdSingleComp => vmIdMap(2)
+    endif
+
+block
+  character(1600):: msgStr
+  write(msgStr,*) "size(vmintids_send): ", size(vmintids_send)
+  call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=rc)
+  write(msgStr,*) "size(vmIdMap): ", size(vmIdMap)
+  call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=rc)
+  write(msgStr,*) "singleCompCaseFlag: ", singleCompCaseFlag
+  call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=rc)
+end block
+
+    if (singleCompCaseFlag) then
+      ! CASE: a single component interacting with a state
+      ! ------------------------------------------------------------------------
+      if (profile) then
+        call ESMF_TraceRegionEnter("Single Comp Case", rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+      endif
+      ! ------------------------------------------------------------------------
+#if 0
+!TODO: enable SingleComp case when implemented
+      call ESMF_ReconcileSingleCompCase(vmId=vmIdSingleComp, &
+        rootPet=rootPetSingleComp), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+#else
+      call ESMF_ReconcileMultiCompCase()
+#endif
+      ! ------------------------------------------------------------------------
+      if (profile) then
+        call ESMF_TraceRegionExit("Single Comp Case", rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+      endif
+      ! ------------------------------------------------------------------------
+    else
+      ! CASE: multiple components interacting with a state
+      ! ------------------------------------------------------------------------
+      if (profile) then
+        call ESMF_TraceRegionEnter("Multi Comp Case", rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+      endif
+      ! ------------------------------------------------------------------------
+      call ESMF_ReconcileMultiCompCase()
+      ! ------------------------------------------------------------------------
+      if (profile) then
+        call ESMF_TraceRegionExit("Single Comp Case", rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+      endif
+      ! ------------------------------------------------------------------------
+    endif
 
     ! Clean up
 
@@ -871,7 +943,7 @@ end block
 
   contains
 
-  subroutine handle_case3()
+  subroutine ESMF_ReconcileMultiCompCase()
 
     ! -------------------------------------------------------------------------
     if (profile) then
@@ -1203,9 +1275,44 @@ end block
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
-  end subroutine handle_case3
+  end subroutine ESMF_ReconcileMultiCompCase
 
   end subroutine ESMF_StateReconcile_driver
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ReconcileSingleCompCase"
+!BOPI
+! !IROUTINE: ESMF_ReconcileSingleCompCase
+!
+! !INTERFACE:
+  subroutine ESMF_ReconcileSingleCompCase(vmId, rootPet, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VMId), pointer        :: vmId
+    integer,         intent(in)     :: rootPet
+    integer,         intent(out)    :: rc
+!
+! !DESCRIPTION:
+!
+!   Handle the single component reconciliation case. This is the expected
+!   situation under NUOPC rules.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vmId]
+!     The ESMF\_VMId} of the single component who ownes all objects present
+!     in the state.
+!   \item[rootPet]
+!     The lowest PET that holds actual objects.
+!   \item[rc]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!EOPI
+
+    rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ReconcileSingleCompCase
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
