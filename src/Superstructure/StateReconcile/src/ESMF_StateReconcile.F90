@@ -67,7 +67,7 @@ module ESMF_StateReconcileMod
 
   use ESMF_TraceMod
 
-  use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoGetFromBase, ESMF_InfoUpdate
+  use ESMF_InfoMod
   use ESMF_InfoCacheMod
 
   implicit none
@@ -267,21 +267,6 @@ call ESMF_LogWrite("continue with isNoop=.false.", ESMF_LOGMSG_DEBUG, rc=localrc
         rcToReturn=rc)) return
     endif
 
-#if 0
-    ! Log a JSON State representation -----------------------------------------
-
-    call idesc%Initialize(createInfo=.true., addObjectInfo=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call idesc%Update(state, "", rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_LogWrite("InfoDescribe before InfoCacheReassembleFields=", rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_LogWrite("state_json_before_reassemble="//ESMF_InfoDump(idesc%info), rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call idesc%Destroy(rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-#endif
-
     if (profile) then
       call ESMF_TraceRegionEnter("ESMF_InfoCacheReassembleFields", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -296,6 +281,20 @@ call ESMF_LogWrite("continue with isNoop=.false.", ESMF_LOGMSG_DEBUG, rc=localrc
     ! Traverse the state hierarchy and remove reconcile-specific attributes
     call ESMF_InfoCacheReassembleFieldsFinalize(state, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+#if 0
+    ! Log a JSON State representation -----------------------------------------
+    call idesc%Initialize(createInfo=.true., addObjectInfo=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call idesc%Update(state, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_LogWrite("InfoDescribe before InfoCacheReassembleFields=", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_LogWrite("state_json_before_reassemble="//ESMF_InfoDump(idesc%info), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call idesc%Destroy(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
 
     if (profile) then
       call ESMF_TraceRegionExit("ESMF_InfoCacheReassembleFields", rc=localrc)
@@ -612,7 +611,6 @@ end block
 
     character(160)  :: prefixStr
     type(ESMF_VMId), allocatable, target :: vmIdMap(:)
-    type(ESMF_VMId), pointer :: vmIdMap_ptr(:)
 
     character(len=ESMF_MAXSTR) :: logmsg
 
@@ -621,7 +619,6 @@ end block
 
     ! -------------------------------------------------------------------------
     localrc = ESMF_RC_NOT_IMPL
-    nullify(vmIdMap_ptr)
 
     if (meminfo) call ESMF_VMLogMemInfo ("entering ESMF_StateReconcile_driver")
 
@@ -758,8 +755,6 @@ end block
         rcToReturn=rc)) return
     endif
 
-    vmIdMap_ptr => vmIdMap
-
     ! -------------------------------------------------------------------------
     if (profile) then
       call ESMF_TraceRegionExit("(1) Construct send arrays", rc=localrc)
@@ -772,9 +767,8 @@ end block
 
 #if 0
     ! Log a JSON State representation -----------------------------------------
-
-    call idesc%Initialize(createInfo=.true., addObjectInfo=.true., vmIdMap=vmIdMap_ptr, &
-      vmIdMapGeomExc=.true., rc=localrc)
+    call idesc%Initialize(createInfo=.true., addObjectInfo=.true., &
+      vmIdMap=vmIdMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     call idesc%Update(state, "", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -907,7 +901,7 @@ end block
     call info_cache%Initialize(localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call info_cache%UpdateFields(state, vmIdMap_ptr, localrc)
+    call info_cache%UpdateFields(state, vmIdMap, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     call info_cache%Destroy(localrc)
