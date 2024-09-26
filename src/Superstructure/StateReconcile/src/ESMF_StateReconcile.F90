@@ -786,6 +786,99 @@ end block
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
+    call handle_case3()
+
+    ! Clean up
+
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionEnter("(X) Clean-up", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
+    if (trace) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': *** Step X.0 - Clean-up')
+    end if
+
+    if (associated (ids_send)) then
+      deallocate (ids_send, vmids_send, stat=memstat)
+      if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+    end if
+
+    call ESMF_VMIdDestroy(vmIdMap, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    deallocate (vmIdMap, stat=memstat)
+    if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    if (associated (siwrap)) then
+      deallocate (siwrap, stat=memstat)
+      if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+    end if
+
+    deallocate (nitems_buf, stat=memstat)
+    if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionExit("(X) Clean-up", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
+    if (meminfo) call ESMF_VMLogMemInfo ("after (X) Clean-up")
+
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionEnter("(X+1) Reconcile Zapped Proxies", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
+    if (trace) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': *** Step X+1.0 - Reconcile Zapped Proxies')
+    end if
+    call ESMF_ReconcileZappedProxies(state, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionExit("(X+1) Reconcile Zapped Proxies", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
+    if (meminfo) call ESMF_VMLogMemInfo ("(X+1) Reconcile Zapped Proxies")
+
+    if (trace) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD // ': Complete!')
+      call ESMF_VMBarrier (vm)
+    end if
+    rc = ESMF_SUCCESS
+
+    if (meminfo) call ESMF_VMLogMemInfo ("exiting ESMF_StateReconcile_driver")
+
+  contains
+
+  subroutine handle_case3()
+
     ! -------------------------------------------------------------------------
     if (profile) then
       call ESMF_TraceRegionEnter("(2) Update Field metadata", rc=localrc)
@@ -1076,24 +1169,21 @@ end block
           ': *** Step 8 - Complete')
     end if
 
-! Clean up
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionExit("(8) Deserialize received objects and create proxies", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
+    if (meminfo) call ESMF_VMLogMemInfo ("after (8) Deserialize received objects and create proxies")
 
-    if (trace) then
-      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-          ': At clean up.', ask=.false.)
-      call ESMF_VMBarrier (vm)
-    end if
+    ! Clean up
 
     if (associated (buffer_recv)) then
       deallocate (buffer_recv, stat=memstat)
       if (ESMF_LogFoundDeallocError (memstat, ESMF_ERR_PASSTHRU,  &
-          ESMF_CONTEXT,  &
-          rcToReturn=rc)) return
-    end if
-
-    if (associated (ids_send)) then
-      deallocate (ids_send, vmids_send, stat=memstat)
-      if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
     end if
@@ -1114,53 +1204,12 @@ end block
             rcToReturn=rc)) return
       end if
     end do
-
-    call ESMF_VMIdDestroy(vmIdMap, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-    deallocate (vmIdMap, stat=memstat)
-    if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-
     deallocate (id_info, stat=memstat)
     if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
-    if (associated (siwrap)) then
-      deallocate (siwrap, stat=memstat)
-      if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT,  &
-          rcToReturn=rc)) return
-    end if
-
-    deallocate (nitems_buf, stat=memstat)
-    if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-
-    call ESMF_ReconcileZappedProxies (state, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-    ! -------------------------------------------------------------------------
-    if (profile) then
-      call ESMF_TraceRegionExit("(8) Deserialize received objects and create proxies", rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-    endif
-    ! -------------------------------------------------------------------------
-    if (meminfo) call ESMF_VMLogMemInfo ("after (8) Deserialize received objects and create proxies")
-
-    if (trace) then
-      call ESMF_ReconcileDebugPrint (ESMF_METHOD // ': Complete!')
-      call ESMF_VMBarrier (vm)
-    end if
-    rc = ESMF_SUCCESS
-
-    if (meminfo) call ESMF_VMLogMemInfo ("exiting ESMF_StateReconcile_driver")
+  end subroutine handle_case3
 
   end subroutine ESMF_StateReconcile_driver
 
