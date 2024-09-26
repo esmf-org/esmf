@@ -87,12 +87,6 @@ module ESMF_StateAPIMod
       public ESMF_StateIsReconcileNeeded
 
       public ESMF_StateLog
-
-      public ESMF_StateWriteRestart
-      public ESMF_StateReadRestart
-
-      public ESMF_StateRead
-      public ESMF_StateWrite
       public ESMF_StatePrint
       public ESMF_StateSet
 
@@ -100,6 +94,15 @@ module ESMF_StateAPIMod
 
       public ESMF_StateClassFindData
 
+      ! These methods are broken and create Arrays in a bad configuration.
+      ! We are taking them out so no one uses them. Eventually, new correct 
+      ! versions will be implemented.
+      !      public ESMF_StateRead
+      !      public ESMF_StateWrite
+      !      public ESMF_StateWriteRestart
+      !      public ESMF_StateReadRestart
+
+      
 !EOPI
 
 !------------------------------------------------------------------------------
@@ -2334,7 +2337,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_StateRead"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateRead -- Read data items from a file into a State
 !
 ! !INTERFACE:
@@ -2375,7 +2378,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       not present.
 !     \end{description}
 !
-!EOP
+!EOPI
 !       TODO: use item flag ESMF_STATEITEM_ARRAY<BUNDLE>
 
         integer :: localrc
