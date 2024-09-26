@@ -84,7 +84,6 @@ module ESMF_StateAPIMod
       public ESMF_StateAdd, ESMF_StateAddReplace
       public ESMF_StateGet
       public ESMF_StateIsCreated
-      public ESMF_StateIsReconcileNeeded
 
       public ESMF_StateLog
       public ESMF_StatePrint
@@ -1703,140 +1702,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 
-
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_StateIsReconcileNeeded"
-!BOPI
-! !IROUTINE: ESMF_StateIsReconcileNeeded -- Return logical true if reconciliation needed
-!
-! !INTERFACE:
-  function ESMF_StateIsReconcileNeeded(state, keywordEnforcer, collectiveflag, vm, rc)
-!
-! !RETURN VALUE:
-    logical :: ESMF_StateIsReconcileNeeded
-!
-! !ARGUMENTS:
-    type(ESMF_State), intent(in)            :: state
-    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    logical,          intent(in),  optional :: collectiveflag
-    type(ESMF_VM),    intent(in),  optional :: vm
-    integer,          intent(out), optional :: rc
-
-!
-! !DESCRIPTION:
-!   Returns true if the {\tt state} needs to be reconciled in order
-!   to be coherent across PETs.  By default, this is a local call.
-!   Optionally, the {\tt collectiveflag} may be set to collectively
-!   determine whether other PETs in the VM may need to be reconciled.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[state]
-!     {\tt ESMF\_State} to query.
-!   \item[{[collectiveflag]}]
-!     Perform a collective style call across all PETs in the VM.
-!   \item[vm]
-!     The current {\tt ESMF\_VM} (virtual machine).  All PETs in this
-!     {\tt ESMF\_VM} will exchange information about objects which might
-!     only be known to one or more PETs, and ensure all PETs in this VM
-!     have a consistent view of the object list in this {\tt ESMF\_State}.
-!     Required when {\tt collectiveflag} is set to {\tt .true.}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-
-    logical :: localrecflag
-    integer :: localrc
-    integer :: commsend, commrecv
-
-    ESMF_StateIsReconcileNeeded = .false.
-
-    ! check input variables
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
-
-    localrecflag = is_rec_needed_worker (state%statep)
-
-    if (present (collectiveflag)) then
-      if (collectiveflag) then
-
-        if (.not. present (vm)) then
-          localrc = ESMF_RC_ARG_INCOMP
-          if (ESMF_LogFoundError(localrc, &
-              msg="VM is required for collective inquiry", &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-        end if
-
-        commsend = merge (1, 0, localrecflag)
-        call ESMF_VMAllReduce (vm=vm,  &
-            sendData=commsend, recvData=commrecv, reduceflag=ESMF_REDUCE_SUM,  &
-            rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        localrecflag = commrecv /= 0
-      end if
-    end if
-
-    ESMF_StateIsReconcileNeeded = localrecflag
-    if (present (rc)) rc = ESMF_SUCCESS
-
-  contains
-
-    recursive function is_rec_needed_worker (sp1) result (is_rec_needed)
-      type(ESMF_StateClass), intent(in) :: sp1
-      logical :: is_rec_needed
-
-      type(ESMF_StateItem) , pointer :: nextitem1
-      integer :: i1
-
-      type(ESMF_StateItemWrap), pointer :: siwrap(:)
-      integer :: ptrcnt
-
-      integer :: localrc1
-      integer :: memstat1
-
-    ! Default return this levels flag
-
-      is_rec_needed = sp1%reconcileneededflag
-      if (is_rec_needed) return
-
-    ! Then search nested States
-
-      siwrap => null ()
-      call ESMF_ContainerGet (sp1%stateContainer,  &
-          itemCount=ptrcnt, itemList=siwrap, rc=localrc1)
-      if (ESMF_LogFoundError(localrc1, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-      do, i1 = 1, ptrcnt
-        nextitem1 => siwrap(i1)%si
-        if (nextitem1%otype == ESMF_STATEITEM_STATE) then
-          is_rec_needed =  &
-              is_rec_needed_worker (nextitem1%datap%spp)
-          if (is_rec_needed) then
-            deallocate (siwrap, stat=memstat1)
-            if (ESMF_LogFoundDeallocError(memstat1, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-            return
-          end if
-        end if
-      end do
-
-      if (associated (siwrap))  &
-          deallocate (siwrap, stat=memstat1)
-      if (ESMF_LogFoundDeallocError(memstat1, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-    end function is_rec_needed_worker
-
-  end function ESMF_StateIsReconcileNeeded
-
-
 ! -------------------------- ESMF-public method -----------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_StateLog()"
@@ -2277,8 +2142,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        write (ESMF_UtilIOStdout,'(1x,4a,i0)') nestr,  &
            "   status: ", trim(msgbuf),  &
            ", object count: ", ptrcnt
-       write (ESMF_UtilIOStdout,'(1x,2a,L1)') nestr,  &
-           "   reconcile needed: ", sp1%reconcileneededflag
 
        ! Prints Attributes associated with the State
        call ESMF_UtilIOUnitFlush (unit=ESMF_UtilIOstdout, rc=localrc1)

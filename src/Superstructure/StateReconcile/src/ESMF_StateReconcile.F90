@@ -83,6 +83,7 @@ module ESMF_StateReconcileMod
   ! to be called by ESMF users.
   ! public :: ESMF_ReconcileDeserialize, ESMF_ReconcileSerialize
   ! public :: ESMF_ReconcileSendItems
+  public :: ESMF_ReconcileExchgAttributes
 
 !EOPI
 
@@ -511,7 +512,7 @@ call ESMF_LogWrite("continue with isNoop=.false.", ESMF_LOGMSG_DEBUG, rc=localrc
               ESMF_CONTEXT, rcToReturn=rc)) return
           endif
 
-!call ESMF_LogWrite("processing "//trim(itemNameList(item)), ESMF_LOGMSG_DEBUG, rc=localrc)
+call ESMF_LogWrite("processing "//trim(itemNameList(item)), ESMF_LOGMSG_DEBUG, rc=localrc)
 
           call ESMF_VMGetThis(vmItem, thisItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
@@ -525,7 +526,7 @@ call ESMF_LogWrite("continue with isNoop=.false.", ESMF_LOGMSG_DEBUG, rc=localrc
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
 
-!call ESMF_VMIdLog(vmIdItem, prefix="vmIdItem: ", rc=rc)
+call ESMF_VMIdLog(vmIdItem, prefix="vmIdItem: ", rc=rc)
 
           isNoopLoc = ESMF_VMIdCompare(vmIdItem, vmId, keyOnly=.true., &
             rc=localrc)
@@ -1134,38 +1135,6 @@ end block
     endif
     ! -------------------------------------------------------------------------
     if (meminfo) call ESMF_VMLogMemInfo ("after 7.) Deserialize received objects and create proxies")
-
-    ! -------------------------------------------------------------------------
-    ! 8.) Attributes on the State itself
-    ! -------------------------------------------------------------------------
-    if (profile) then
-      call ESMF_TraceRegionEnter("8.) Attributes on the State itself", rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-    endif
-    ! -------------------------------------------------------------------------
-    if (attreconflag == ESMF_ATTRECONCILE_ON) then
-      if (trace) then
-        call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-            ': *** Step 8 - Exchange Base Attributes', ask=.false.)
-        call ESMF_VMBarrier (vm)
-      end if
-      call ESMF_ReconcileExchgAttributes (state, vm, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT,  &
-          rcToReturn=rc)) return
-    end if
-    state%statep%reconcileneededflag = .false.
-    ! -------------------------------------------------------------------------
-    if (profile) then
-      call ESMF_TraceRegionExit("8.) Attributes on the State itself", rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-    endif
-    ! -------------------------------------------------------------------------
-    if (meminfo) call ESMF_VMLogMemInfo ("after 8.) Attributes on the State itself")
 
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD // ': Complete!')

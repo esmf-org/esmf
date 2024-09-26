@@ -534,120 +534,93 @@ subroutine comp2_sg_final(gcomp, istate, ostate, clock, rc)
 
 end subroutine comp2_sg_final
 
+!------------------------------------------------------------------------------
 
-subroutine StateLog(state, rc)
-  type(ESMF_State)      :: state
-  integer, intent(out)  :: rc
-  
-  integer :: i, j
-  integer :: iCount, jCount
-  character(ESMF_MAXSTR), allocatable  :: itemNameList(:)
-  type(ESMF_FieldBundle)  :: fb
-  type(ESMF_Field), allocatable :: fieldList(:)
-  character(ESMF_MAXSTR)  :: stateName, fieldName, gridName
-  type(ESMF_Grid) :: grid
-  character(800)  :: msgString
-  type(ESMF_StateItem_Flag) :: itemType
-  type(ESMF_Field)          :: field
+! Array added to exportState
 
-  rc=ESMF_SUCCESS
+subroutine comp1_init_simple(gcomp, istate, ostate, clock, rc)
+    type(ESMF_GridComp)  :: gcomp
+    type(ESMF_State)     :: istate, ostate
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
 
-  call ESMF_StateGet(state, itemCount=iCount, name=stateName, rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, &
-    file=FILENAME)) &
-    return  ! bail out
+    type(ESMF_ArraySpec) :: arrayspec
+    type(ESMF_Distgrid)  :: distgrid
+    type(ESMF_Array)     :: array
 
-  allocate(itemNameList(iCount))
+    rc = ESMF_SUCCESS
 
-  call ESMF_StateGet(state, itemNameList=itemNameList, rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, &
-    file=FILENAME)) &
-    return  ! bail out
-
-  do i=1, iCount
-    call ESMF_StateGet(state, itemName=itemNameList(i), itemType=itemType, rc=rc)
+    call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
 
-    if (itemType == ESMF_STATEITEM_FIELDBUNDLE) then
-      call ESMF_StateGet(state, itemName=itemNameList(i), fieldBundle=fb, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-      call ESMF_FieldBundleGet(fb, fieldCount=jCount, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-      allocate(fieldList(jCount))
-      call ESMF_FieldBundleGet(fb, fieldList=fieldList, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-      do j=1, jCount
-        call ESMF_FieldGet(fieldList(j), name=fieldName, grid=grid, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
-        call ESMF_GridGet(grid, name=gridName, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
-        write(msgString,*) trim(stateName)//": "//trim(itemNameList(i))//": "//trim(fieldName)//&
-          ": "//trim(gridName)
-        call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
-      enddo
-      deallocate(fieldList)
-    elseif (itemType == ESMF_STATEITEM_FIELD) then
-      call ESMF_StateGet(state, itemName=itemNameList(i), field=field, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-#if 0
-      call ESMF_FieldGet(field, name=fieldName, grid=grid, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &FAIL
-        return  ! bail out
-      call ESMF_GridGet(grid, name=gridName, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-      write(msgString,*) trim(stateName)//": "//trim(itemNameList(i))//": "//trim(fieldName)//&
-        ": "//trim(gridName)
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-#else
-      write(msgString,*) trim(stateName)//": "//trim(itemNameList(i))
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-#endif
-    endif
-  enddo
-  deallocate(itemNameList)
+    distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/15,23/), &
+      regDecomp=(/2,2/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
 
-end subroutine
+    array = ESMF_ArrayCreate(arrayspec=arrayspec, &
+      name="Array_for_reconciling",  distgrid=distgrid, &
+      indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
 
+    call ESMF_StateAdd (ostate, [array], rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+end subroutine comp1_init_simple
+
+!------------------------------------------------------------------------------
+
+! Nested State with Field added to exportState
+
+subroutine comp1_init_nested(gcomp, istate, ostate, clock, rc)
+    type(ESMF_GridComp)  :: gcomp
+    type(ESMF_State)     :: istate, ostate
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
+
+    type(ESMF_State)     :: state_nested
+    type(ESMF_Field)     :: field_nested
+
+    rc = ESMF_SUCCESS
+
+    state_nested = ESMF_StateCreate(name='state_nested', rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    field_nested = ESMF_FieldEmptyCreate(name='nested Field', rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call ESMF_StateAdd(state_nested, fieldList=[field_nested], rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call ESMF_StateAdd(ostate, nestedStateList=[state_nested], rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+end subroutine comp1_init_nested
+
+!------------------------------------------------------------------------------
 
 end module ESMF_StateReconcileUTest_Mod
 
@@ -688,21 +661,19 @@ program ESMF_StateReconcileUTest
     type(ESMF_Field)     :: field_attr(5)
     type(ESMF_Field)     :: field_attr_new(size (field_attr))
     type(ESMF_Field)     :: field_sg1, field_sg2
-    type(ESMF_FieldBundle) :: fb_attr, fb_attr_new
     type(ESMF_Grid)      :: grid_shared, grid_sg1, grid_sg2
-    type(ESMF_VM) :: vm
+    type(ESMF_VM)        :: vm, vm0
     character(len=ESMF_MAXSTR) :: comp1name, comp2name, statename, fieldname
     character(len=ESMF_MAXSTR) :: array1name
     character(len=ESMF_MAXSTR) :: fb_name
     character(4) :: localpet_str, temppet_str
     integer :: attr_val(1)
     integer :: i
-    logical :: reconcile_needed, recneeded_expected
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
     character(ESMF_MAXSTR) :: name
-    integer :: result = 0, localPet, petCount
+    integer :: result = 0, localPet, petCount, testPet
 
     !-------------------------------------------------------------------------
 
@@ -745,31 +716,6 @@ program ESMF_StateReconcileUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a State"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    reconcile_needed = ESMF_StateIsReconcileNeeded (state1, rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Testing empty State for reconcile needed"
-    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    write(failMsg, *) "Did not return .false. for empty State"
-    call ESMF_Test(.not. reconcile_needed, name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    reconcile_needed = ESMF_StateIsReconcileNeeded (state1,  &
-        vm=vm, collectiveflag=.true., rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Testing empty State for reconcile needed (collective)"
-    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    write(failMsg, *) "Did not return .false. for empty State"
-    call ESMF_Test(.not. reconcile_needed, name, failMsg, result, ESMF_SRCLINE)
 
     ! In SetServices() the VM for each component is initialized.
     ! Normally you would call SetEntryPoint inside set services,
@@ -837,7 +783,7 @@ program ESMF_StateReconcileUTest
     write(name, *) "Calling GridCompSetEntryPoint"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-call StateLog(state1, rc=rc)
+call ESMF_StateLog(state1, rc=rc)
 if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !-------------------------------------------------------------------------
@@ -847,7 +793,7 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     write(name, *) "Calling GridCompInitialize"
     call ESMF_Test(((rc.eq.ESMF_SUCCESS).and.(urc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 
-call StateLog(state1, rc=rc)
+call ESMF_StateLog(state1, rc=rc)
 if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !-------------------------------------------------------------------------
@@ -857,7 +803,7 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     write(name, *) "Calling GridCompInitialize"
     call ESMF_Test(((rc.eq.ESMF_SUCCESS).and.(urc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 
-call StateLog(state1, rc=rc)
+call ESMF_StateLog(state1, rc=rc)
 if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !-------------------------------------------------------------------------
@@ -869,37 +815,12 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    reconcile_needed = ESMF_StateIsReconcileNeeded (state1, rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Testing modified State for reconcile needed"
-    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    write(failMsg, *) "Did not return .true. for modified State"
-    call ESMF_Test(reconcile_needed, name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    reconcile_needed = ESMF_StateIsReconcileNeeded (state1,  &
-        vm=vm, collectiveflag=.true., rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Testing modified State for reconcile needed (collective)"
-    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    write(failMsg, *) "Did not return .true. for modified State"
-    call ESMF_Test(reconcile_needed, name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
     call ESMF_StateReconcile(state1, vm=vm, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateReconcile in concurrent mode"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-call StateLog(state1, rc=rc)
+call ESMF_StateLog(state1, rc=rc)
 if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !-------------------------------------------------------------------------
@@ -925,48 +846,13 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    reconcile_needed = ESMF_StateIsReconcileNeeded (state1, rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Testing reconciled State for reconcile needed"
-    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    ! Note that even though the top level State should have its reconcileneeded
-    ! flag cleared, the two nested States still should have their flags set.
-    recneeded_expected = localpet == 0 .or. localpet == 1
-    write(failMsg, *) "Did not return correct result for reconciled State",  &
-        localpet, reconcile_needed, recneeded_expected
-    call ESMF_Test(reconcile_needed .eqv. recneeded_expected,  &
-        name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    reconcile_needed = ESMF_StateIsReconcileNeeded (state1,  &
-        vm=vm, collectiveflag=.true., rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Testing reconciled State for reconcile needed (collective)"
-    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    ! Note that even though the top level State should have its reconcileneeded
-    ! flag cleared, two nested States still should have their flags set.  So the
-    ! collective ESMF_StateIsReconcileNeeded function should return .true..
-    write(failMsg, *) "Did not return correct collective result for reconciled State",  &
-        localpet, reconcile_needed, recneeded_expected
-    call ESMF_Test(reconcile_needed,  &
-        name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
     ! Test redundant reconcile
     call ESMF_StateReconcile(state1, vm=vm, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling 2nd StateReconcile in concurrent mode"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-call StateLog(state1, rc=rc)
+call ESMF_StateLog(state1, rc=rc)
 if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !-------------------------------------------------------------------------
@@ -1056,7 +942,6 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a State"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
 
     ! In SetServices() the VM for each component is initialized.
     ! Normally you would call SetEntryPoint inside set services,
@@ -1375,43 +1260,58 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    state2 = ESMF_StateCreate ()
+    state2 = ESMF_StateCreate()
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateCreate for rereconcile tests"
     call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    rc = ESMF_SUCCESS
-    array1name = 'Array_for_reconciling'
-    if (localPet == 0) then
-      call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, &
-          rc=rc)
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/15,23/), &
-          regDecomp=(/2,2/), rc=rc)
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      array1 = ESMF_ArrayCreate(arrayspec=arrayspec, name=array1name,  &
-          distgrid=distgrid, &
-          indexflag=ESMF_INDEX_GLOBAL, rc=rc)
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_StateAdd (state2, (/array1/), rc=rc)
-    end if
+    ! component on PET 0
+    comp1 = ESMF_GridCompCreate(petList=[0], rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Creating PET 0 Array for rereconcile tests"
-    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    write(name, *) "Creating a Gridded Component"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    ! In SetServices() the VM for each component is initialized.
+    ! Normally you would call SetEntryPoint inside set services,
+    ! but to make this test very short, they are called inline below.
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_StateReconcile (state2, rc=rc)
+    call ESMF_GridCompSetServices(comp1, userRoutine=comp_dummy, userrc=urc, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompSetServices"
+    call ESMF_Test(((rc.eq.ESMF_SUCCESS).and.(urc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompSetEntryPoint(comp1, ESMF_METHOD_INITIALIZE, &
+      userRoutine=comp1_init_simple, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompSetEntryPoint"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    ! creating and adding array to the exportState on PET 0
+    call ESMF_GridCompInitialize(comp1, exportState=state2, userrc=urc, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompInitialize"
+    call ESMF_Test(((rc.eq.ESMF_SUCCESS).and.(urc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
+
+   !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_StateReconcile(state2, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling initial reconcile for rereconcile tests"
     call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_StateGet (state2, itemName=array1name,  &
-        array=array1_alternate, rc=rc)
+    array1name = "Array_for_reconciling"
+    call ESMF_StateGet(state2, itemName=array1name, array=array1_alternate, &
+      rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "PET", localpet, ": Calling StateGet to access proxies"
     call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1419,7 +1319,7 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     if (localPet == 0) then
-      call ESMF_StateRemove (state2, itemNameList=(/array1name/), rc=rc)
+      call ESMF_StateRemove(state2, itemNameList=[array1name], rc=rc)
     end if
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Removing non-proxy item test"
@@ -1427,18 +1327,31 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_StateReconcile (state2, rc=rc)
+    call ESMF_StateReconcile(state2, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Re-reconciling State test"
     call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_StateGet (state2, itemName=array1name,  &
-        array=array2, rc=rc)
+    call ESMF_StateGet(state2, itemName=array1name, array=array2, rc=rc)
     write(failMsg, *) "Returned ESMF_SUCCESS by mistake"
     write(name, *) "Checking for empty State tests"
     call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_StateDestroy(state2, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "StateDestroy test"
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompDestroy(comp1, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "GridCompDestroy test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
     !-------------------------------------------------------------------------
@@ -1454,63 +1367,58 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    state3 = ESMF_StateCreate (name='state3', rc=rc)
+    state3 = ESMF_StateCreate(name='state3', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling StateCreate for top-level State tests"
-    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    if (localPET /= 0) then
-      rc = ESMF_SUCCESS
-    end if
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    if (localPET == 0) then
-      state_nested = ESMF_StateCreate (name='state_nested', rc=rc)
-    end if
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling StateCreate for nested State tests"
+    write(name, *) "Calling StateCreate for rereconcile tests"
     call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    if (localPET == 0) then
-      field_nested = ESMF_FieldEmptyCreate (name='nested Field', rc=rc)
-    end if
+    ! component on PET 0
+    comp1 = ESMF_GridCompCreate(petList=[0], rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling FieldEmptyCreate for nested State test"
-    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    write(name, *) "Creating a Gridded Component"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    ! In SetServices() the VM for each component is initialized.
+    ! Normally you would call SetEntryPoint inside set services,
+    ! but to make this test very short, they are called inline below.
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    if (localPET == 0) then
-      call ESMF_StateAdd (state_nested, fieldList=(/ field_nested /), rc=rc)
-    end if
+    call ESMF_GridCompSetServices(comp1, userRoutine=comp_dummy, userrc=urc, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling StateAdd of nested Field test"
-    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    write(name, *) "Calling GridCompSetServices"
+    call ESMF_Test(((rc.eq.ESMF_SUCCESS).and.(urc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    if (localPET == 0) then
-      call ESMF_StateAdd (state3, nestedStateList=(/ state_nested /), rc=rc)
-      ! call ESMF_StatePrint (state3, nestedFlag=.true.)
-    end if
+    call ESMF_GridCompSetEntryPoint(comp1, ESMF_METHOD_INITIALIZE, &
+      userRoutine=comp1_init_nested, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling StateAdd of nested State test"
-    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    write(name, *) "Calling GridCompSetEntryPoint"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_StateReconcile (state=state3, rc=rc)
+    ! creating and adding nested state with field to the exportState on PET 0
+    call ESMF_GridCompInitialize(comp1, exportState=state3, userrc=urc, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompInitialize"
+    call ESMF_Test(((rc.eq.ESMF_SUCCESS).and.(urc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_StateReconcile(state=state3, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateReconcile of nested State test"
     call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-   ! PETs 1-n should now be able to access the nested Field proxy item
+    ! PETs 1-n should now be able to access the nested Field proxy item
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_StateGet (state=state3,  &
+    call ESMF_StateGet(state=state3,  &
         itemname='state_nested/nested Field',  &
         field=field_dummy,  &
         rc=rc)
@@ -1520,7 +1428,7 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_StateGet (state=state3,  &
+    call ESMF_StateGet(state=state3,  &
         itemname='state_nested/nested Field_badname',  &
         field=field_dummy,  &
         rc=rc)
@@ -1529,8 +1437,46 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    ! Test with attribute reconcile turned on
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_StateDestroy(state3, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "StateDestroy test"
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
     !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompDestroy(comp1, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "GridCompDestroy test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    ! Test attribute reconcililiation
+    !-------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    ! component on PET 0 -> needed to create Field below on PET 0
+    comp1 = ESMF_GridCompCreate(petList=[0], rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Gridded Component"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    ! In SetServices() the VM for each component is initialized.
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompSetServices(comp1, userRoutine=comp_dummy, userrc=urc, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompSetServices"
+    call ESMF_Test(((rc.eq.ESMF_SUCCESS).and.(urc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Access the VM that has one PET on 0"
+    call ESMF_GridCompGet(comp1, vm=vm0, rc=rc)
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
@@ -1543,8 +1489,8 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Reconciling state with Attribute reconciling turned on"
-    call ESMF_StateReconcile (state_attr, rc=rc)
+    write(name, *) "Reconciling state before adding Attributes"
+    call ESMF_StateReconcile(state_attr, rc=rc)
     call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
@@ -1568,13 +1514,31 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Verifying reconciled Base attributes test"
+    write(name, *) "Verifying StateReconcile does not mess with Base attributes"
     write (temppet_str, '(i4)') localPet
+    call ESMF_AttributeGet (state_attr,  &
+      name='Base PET ' // trim (adjustl (temppet_str)),  &
+      valueList=attr_val, rc=rc)
+    call ESMF_Test((attr_val(1)==localPet), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "ReconcileExchgAttributes to exchange State attributes test"
+    call ESMF_ReconcileExchgAttributes(state_attr, vm, rc=rc)
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Verifying exchange reconciled Base attributes test"
+    testPet = mod(localPet+1, petCount)
+    write (temppet_str, '(i4)') testPet
     call ESMF_AttributeGet (state_attr,  &
       name='Base PET ' // trim (adjustl (temppet_str)),  &
       valueList=attr_val,  &
       rc=rc)
-    if (attr_val(1) /= localPet) rc = ESMF_FAILURE
+    if (attr_val(1) /= testPet) rc = ESMF_FAILURE
     call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
@@ -1585,18 +1549,19 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     if (localPet == 0) then
       do, i=1, size (field_attr)
         write (fieldname, '(a,i4)') 'PET 0 Field', i
-        field_attr(i) = ESMF_FieldEmptyCreate (name=fieldname, rc=rc)
-        if (rc /= ESMF_SUCCESS) go to 50
+        ! create on vm0 to not violate ESMF unison rule for Create() methods
+        field_attr(i) = ESMF_FieldEmptyCreate(name=fieldname, vm=vm0, rc=rc)
+        if (rc /= ESMF_SUCCESS) goto 50
 
         call ESMF_AttributeSet (field_attr(i),  &
             name=trim (fieldname) // ' attribute',  &
             valueList=(/ i /),  &
             rc=rc)
-        if (rc /= ESMF_SUCCESS) go to 50
+        if (rc /= ESMF_SUCCESS) goto 50
       end do
 
       call ESMF_StateAdd (state_attr, field_attr, rc=rc)
-      if (rc /= ESMF_SUCCESS) go to 50
+      if (rc /= ESMF_SUCCESS) goto 50
     end if
 
 50 continue
@@ -1642,42 +1607,10 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompDestroy(comp1, rc=rc) ! also shuts down vm0
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Create a FieldBundle with Attributes on PET 0 test"
-    fb_name = 'my fields'
-    if (localPet == 0) then
-      fb_attr = ESMF_FieldBundleCreate (  &
-          fieldList=(/field_attr/),  &
-          name=fb_name,  &
-          rc=rc)
-      if (rc /= ESMF_SUCCESS) go to 55
-
-      call ESMF_StateAdd (state_attr, (/ fb_attr /), rc=rc)
-      if (rc /= ESMF_SUCCESS) go to 55
-    else
-      rc = ESMF_SUCCESS
-    end if
-
- 55 continue
-    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Reconciling state with FieldBundle and Attributes test"
-    call ESMF_StateReconcile (state_attr, rc=rc)
-    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Access reconciled FieldBundle test"
-    call ESMF_StateGet (state_attr,  &
-        itemName=fb_name,  &
-        fieldBundle=fb_attr_new,  &
-        rc=rc)
-    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
+    write(name, *) "GridCompDestroy test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   Fields with shared Grids

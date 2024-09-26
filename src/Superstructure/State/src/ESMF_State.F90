@@ -62,7 +62,6 @@ module ESMF_StateMod
 
       public ESMF_StateAdd, ESMF_StateAddReplace
       public ESMF_StateGet
-      public ESMF_StateIsReconcileNeeded
 
       public ESMF_StateLog
 
