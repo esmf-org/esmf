@@ -480,6 +480,7 @@ module ESMF_VMMod
   public ESMF_VMIdCopy
   public ESMF_VMIdCreate
   public ESMF_VMIdDestroy
+  public ESMF_VMIdGet
   public ESMF_VMIdLog
   public ESMF_VMIdPrint
   public ESMF_VMSendVMId

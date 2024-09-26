@@ -612,7 +612,6 @@ end block
     character(160)  :: prefixStr
     type(ESMF_VMId), allocatable, target :: vmIdMap(:)
     type(ESMF_VMId), pointer             :: vmIdSingleComp
-    integer                              :: rootPetSingleComp
 
     character(len=ESMF_MAXSTR) :: logmsg
 
@@ -796,7 +795,7 @@ end block
     endif
 
 block
-  character(1600):: msgStr
+  character(160):: msgStr
   write(msgStr,*) "size(vmintids_send): ", size(vmintids_send)
   call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=rc)
   write(msgStr,*) "size(vmIdMap): ", size(vmIdMap)
@@ -817,8 +816,7 @@ end block
       ! ------------------------------------------------------------------------
 #if 0
 !TODO: enable SingleComp case when implemented
-      call ESMF_ReconcileSingleCompCase(vmId=vmIdSingleComp, &
-        rootPet=rootPetSingleComp), rc=localrc)
+      call ESMF_ReconcileSingleCompCase(vm=vm, vmId=vmIdSingleComp, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
@@ -1286,11 +1284,11 @@ end block
 ! !IROUTINE: ESMF_ReconcileSingleCompCase
 !
 ! !INTERFACE:
-  subroutine ESMF_ReconcileSingleCompCase(vmId, rootPet, rc)
+  subroutine ESMF_ReconcileSingleCompCase(vm, vmId, rc)
 !
 ! !ARGUMENTS:
+    type(ESMF_VM),   intent(in)     :: vm
     type(ESMF_VMId), pointer        :: vmId
-    integer,         intent(in)     :: rootPet
     integer,         intent(out)    :: rc
 !
 ! !DESCRIPTION:
@@ -1300,6 +1298,8 @@ end block
 !
 !   The arguments are:
 !   \begin{description}
+!   \item[vm]
+!     The ESMF\_VM} object across which the state is reconciled.
 !   \item[vmId]
 !     The ESMF\_VMId} of the single component who ownes all objects present
 !     in the state.
@@ -1310,7 +1310,41 @@ end block
 !   \end{description}
 !EOPI
 
+    integer :: localrc
+    integer :: petCount, localPet, rootVas, rootPet, vas
+
     rc = ESMF_SUCCESS
+
+    call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT,  &
+      rcToReturn=rc)) return
+
+    call ESMF_VMIdGet(vmId, leftMostOnBit=rootVas, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT,  &
+      rcToReturn=rc)) return
+
+    ! search for PET in VM that executes on rootVas
+    do rootPet=0, petCount-1
+      call ESMF_VMGet(vm, pet=rootPet, vas=vas, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+      if (vas==rootVas) exit  ! found
+    enddo
+    if (rootPet==petCount) then
+      call ESMF_LogSetError(ESMF_RC_INTNRL_INCONS, &
+        msg="Could not find PET that executes on the identified VAS", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+block
+  character(160)  :: msgStr
+  write(msgStr,*) "SingleCompCase rootPet=", rootPet
+  call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
+end block
 
   end subroutine ESMF_ReconcileSingleCompCase
 
