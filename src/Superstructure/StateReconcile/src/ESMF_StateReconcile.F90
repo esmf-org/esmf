@@ -303,7 +303,7 @@ call ESMF_LogWrite("continue with isNoop=.false.", ESMF_LOGMSG_DEBUG, rc=localrc
         rcToReturn=rc)) return
     endif
 
-#if 1
+#if 0
     if (profile) then
       call ESMF_TraceRegionEnter("JSON cross PET check", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -320,7 +320,7 @@ call ESMF_LogWrite("continue with isNoop=.false.", ESMF_LOGMSG_DEBUG, rc=localrc
     call idesc%Update(state, "", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     jsonStr = "state_json_after_reassemble="//ESMF_InfoDump(idesc%info)
-#if 0
+#if 1
     call ESMF_LogWrite("InfoDescribe after InfoCacheReassembleFields=", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_LogWrite(jsonStr, rc=localrc)
@@ -675,8 +675,7 @@ end block
 
     type(ESMF_InfoCache) :: info_cache
     type(ESMF_InfoDescribe) :: idesc
-    character, pointer :: buffer(:)
-    
+
     ! -------------------------------------------------------------------------
     localrc = ESMF_RC_NOT_IMPL
 
@@ -875,19 +874,57 @@ end block
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
-#if 0
-    ! Test new serialize/deserialize calls
-    call ESMF_ReconcileSerializeAll(state, vm, siwrap, attreconflag, buffer, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    call ESMF_ReconcileDeserializeAll(state, vm, buffer, attreconflag, rc=localrc)
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionEnter("(2) Update Field metadata", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
+    if (trace) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': *** Step 2.0 - Update Field metadata for unique geometries')
+    end if
+
+    ! Update Field metadata for unique geometries. This will traverse the state
+    ! hierarchy adding reconcile-specific attributes that will find unique
+    ! geometry objects and maintain sufficient information to re-establish
+    ! references once the objects have been communicated and deserialized.
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionEnter("info_cache for unique geometries", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+
+    call info_cache%Initialize(localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Get rid of buffer
-    deallocate(buffer)
-#endif
+    call info_cache%UpdateFields(state, vmIdMap, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-    
+    call info_cache%Destroy(localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (profile) then
+      call ESMF_TraceRegionExit("info_cache for unique geometries", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionExit("(2) Update Field metadata", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
+    if (meminfo) call ESMF_VMLogMemInfo ("after (2) Update Field metadata")
+
 block
   character(160):: msgStr
   write(msgStr,*) "size(vmintids_send): ", size(vmintids_send)
@@ -908,9 +945,10 @@ end block
           rcToReturn=rc)) return
       endif
       ! ------------------------------------------------------------------------
-#if 0
+#if 1
 !TODO: enable SingleComp case when implemented
-      call ESMF_ReconcileSingleCompCase(vm=vm, vmId=vmIdSingleComp, rc=localrc)
+      call ESMF_ReconcileSingleCompCase(state, vm=vm, vmId=vmIdSingleComp, &
+        attreconflag=attreconflag, siwrap=siwrap, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
@@ -1036,57 +1074,6 @@ end block
   contains
 
   subroutine ESMF_ReconcileMultiCompCase()
-
-    ! -------------------------------------------------------------------------
-    if (profile) then
-      call ESMF_TraceRegionEnter("(2) Update Field metadata", rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-    endif
-    ! -------------------------------------------------------------------------
-    if (trace) then
-      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-          ': *** Step 2.0 - Update Field metadata for unique geometries')
-    end if
-
-    ! Update Field metadata for unique geometries. This will traverse the state
-    ! hierarchy adding reconcile-specific attributes that will find unique
-    ! geometry objects and maintain sufficient information to re-establish
-    ! references once the objects have been communicated and deserialized.
-    ! -------------------------------------------------------------------------
-    if (profile) then
-      call ESMF_TraceRegionEnter("info_cache for unique geometries", rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-    endif
-
-    call info_cache%Initialize(localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-    call info_cache%UpdateFields(state, vmIdMap, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-    call info_cache%Destroy(localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (profile) then
-      call ESMF_TraceRegionExit("info_cache for unique geometries", rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-    endif
-
-    ! -------------------------------------------------------------------------
-    if (profile) then
-      call ESMF_TraceRegionExit("(2) Update Field metadata", rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-    endif
-    ! -------------------------------------------------------------------------
-    if (meminfo) call ESMF_VMLogMemInfo ("after (2) Update Field metadata")
 
     ! -------------------------------------------------------------------------
     ! (3) All PETs send their items Ids and VMIds to all the other PETs,
@@ -1378,12 +1365,15 @@ end block
 ! !IROUTINE: ESMF_ReconcileSingleCompCase
 !
 ! !INTERFACE:
-  subroutine ESMF_ReconcileSingleCompCase(vm, vmId, rc)
+  subroutine ESMF_ReconcileSingleCompCase(state, vm, vmId, attreconflag, siwrap, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),   intent(in)     :: vm
-    type(ESMF_VMId), pointer        :: vmId
-    integer,         intent(out)    :: rc
+    type(ESMF_State),            intent(inout)  :: state
+    type(ESMF_VM),               intent(in)     :: vm
+    type(ESMF_VMId),             pointer        :: vmId         ! intent(in)
+    type(ESMF_AttReconcileFlag), intent(in)     :: attreconflag
+    type(ESMF_StateItemWrap),    pointer        :: siwrap(:)    ! intent(in)
+    integer,                     intent(out)    :: rc
 !
 ! !DESCRIPTION:
 !
@@ -1406,6 +1396,9 @@ end block
 
     integer :: localrc
     integer :: petCount, localPet, rootVas, rootPet, vas
+    integer :: sizeBuffer(1)
+    logical :: isFlag
+    character, pointer :: buffer(:)
 
     rc = ESMF_SUCCESS
 
@@ -1436,9 +1429,54 @@ end block
 
 block
   character(160)  :: msgStr
+  write(msgStr,*) "SingleCompCase rootVas=", rootVas
+  call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
   write(msgStr,*) "SingleCompCase rootPet=", rootPet
   call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
 end block
+
+    ! Serialize on rootPet
+    if (localPet==rootPet) then
+      call ESMF_ReconcileSerializeAll(state, vm, siwrap, attreconflag, &
+        buffer, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      sizeBuffer(1) = size(buffer)
+    endif
+
+    ! Broadcast buffer across all PETs
+    call ESMF_VMBroadcast(vm, sizeBuffer, count=1, rootPet=rootPet, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (localPet/=rootPet) allocate(buffer(sizeBuffer(1)))
+
+    call ESMF_VMBroadcast(vm, buffer, count=sizeBuffer(1), rootPet=rootPet, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! determine if local PET is active under the vmId
+    call ESMF_VMIdGet(vmId, isLocalPetActive=isFlag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+block
+  character(160)  :: msgStr
+  write(msgStr,*) "isFlag=", isFlag
+  call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
+end block
+
+    ! only inactive PETs deserialize the buffer received from rootPet
+    if (.not.isFlag) then
+      call ESMF_ReconcileDeserializeAll(state, vm, buffer, attreconflag, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Get rid of buffer
+    deallocate(buffer)
 
   end subroutine ESMF_ReconcileSingleCompCase
 
@@ -2166,8 +2204,6 @@ end block
         mold  = numNewItems)
     posBuffer = posbuffer + ESMF_SIZEOF_DEFINT
     
-    write(*,*) myPet,"# DA: numNewItems=",numNewItems
-
     ! Loop getting new items
     do item=1, numNewItems
 
@@ -2176,9 +2212,6 @@ end block
             source=buffer(posBuffer:posBuffer+ESMF_SIZEOF_DEFINT-1),  &
             mold  = itemType)
        posBuffer = posbuffer + ESMF_SIZEOF_DEFINT
-
-       ! Debug
-       write(*,*) myPet,"# DA:    ",item," type=",itemType
 
        ! Get items
        select case (itemType)
@@ -2215,22 +2248,17 @@ end block
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
 
-          write(*,*) myPet,"# ",item," name=",name
-          
           if (debug) then
             print *, "created field, ready to add to local state"
           end if
 
-          ! BOB: Take out StateAdd until we have a new State to add to
-#if 0
           call ESMF_StateAdd(state, field,      &
               addflag=.true., proxyflag=.true., &
               rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
-#endif
-          
+
         case (ESMF_STATEITEM_ARRAY%ot)
           if (debug) then
             print *, "    PET", mypet,  &
