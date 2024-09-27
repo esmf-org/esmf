@@ -777,11 +777,12 @@ end block
       if (singleCompCaseFlag) then
         ! singleCompIndex could be 1 or 2, however, cannot simply look this up
         ! in vmintids_send(1), because on PETs that do not have objects it only
-        ! stores vmintids_send(1), which holds the index into vmIdMap of the
+        ! stores vmintids_send(0), which holds the index into vmIdMap of the
         ! executing VM. Since there are only two possible values, the correct
         ! singleCompIndex must be "the other one". Therefore, look at
-        ! vmintids_send(0), which is valid on all PETs, add 1 mod 2.
-        singleCompIndex = mod(vmintids_send(0)+1,2)
+        ! vmintids_send(0), which is valid on all PETs, add 1 mod 2. But since
+        ! indexing into vmIdMap starts at 1 the add 1 happens _after_ the mod 2.
+        singleCompIndex = mod(vmintids_send(0),2)+1
         vmIdSingleComp => vmIdMap(singleCompIndex)
       endif
     endif
