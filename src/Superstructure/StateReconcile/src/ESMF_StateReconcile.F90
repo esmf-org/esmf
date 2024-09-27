@@ -67,7 +67,7 @@ module ESMF_StateReconcileMod
 
   use ESMF_TraceMod
 
-  use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoGetFromBase, ESMF_InfoUpdate
+  use ESMF_InfoMod
   use ESMF_InfoCacheMod
 
   implicit none
@@ -267,21 +267,6 @@ call ESMF_LogWrite("continue with isNoop=.false.", ESMF_LOGMSG_DEBUG, rc=localrc
         rcToReturn=rc)) return
     endif
 
-#if 0
-    ! Log a JSON State representation -----------------------------------------
-
-    call idesc%Initialize(createInfo=.true., addObjectInfo=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call idesc%Update(state, "", rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_LogWrite("InfoDescribe before InfoCacheReassembleFields=", rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_LogWrite("state_json_before_reassemble="//ESMF_InfoDump(idesc%info), rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call idesc%Destroy(rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-#endif
-
     if (profile) then
       call ESMF_TraceRegionEnter("ESMF_InfoCacheReassembleFields", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -296,6 +281,20 @@ call ESMF_LogWrite("continue with isNoop=.false.", ESMF_LOGMSG_DEBUG, rc=localrc
     ! Traverse the state hierarchy and remove reconcile-specific attributes
     call ESMF_InfoCacheReassembleFieldsFinalize(state, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+#if 0
+    ! Log a JSON State representation -----------------------------------------
+    call idesc%Initialize(createInfo=.true., addObjectInfo=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call idesc%Update(state, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_LogWrite("InfoDescribe before InfoCacheReassembleFields=", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_LogWrite("state_json_before_reassemble="//ESMF_InfoDump(idesc%info), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call idesc%Destroy(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
 
     if (profile) then
       call ESMF_TraceRegionExit("ESMF_InfoCacheReassembleFields", rc=localrc)
@@ -612,7 +611,9 @@ end block
 
     character(160)  :: prefixStr
     type(ESMF_VMId), allocatable, target :: vmIdMap(:)
-    type(ESMF_VMId), pointer :: vmIdMap_ptr(:)
+    type(ESMF_VMId), pointer             :: vmIdSingleComp
+    logical                              :: singleCompCaseFlag
+    integer                              :: singleCompIndex
 
     character(len=ESMF_MAXSTR) :: logmsg
 
@@ -622,7 +623,6 @@ end block
     
     ! -------------------------------------------------------------------------
     localrc = ESMF_RC_NOT_IMPL
-    nullify(vmIdMap_ptr)
 
     if (meminfo) call ESMF_VMLogMemInfo ("entering ESMF_StateReconcile_driver")
 
@@ -746,12 +746,12 @@ end block
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
     endif
-    do i=lbound(vmintids_send,1),ubound(vmintids_send,1)
-      if (vmintids_send(i) <= 0) then
-        if (ESMF_LogFoundError(ESMF_FAILURE, msg="A <= zero VM integer id was encountered", &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      end if
-    enddo
+    if (any(vmintids_send(:) <= 0)) then
+      call ESMF_LogSetError(ESMF_RC_INTNRL_INCONS, &
+        msg="All integer VM ids must be greater than 0!", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
     if (profile) then
       call ESMF_TraceRegionExit("Check vmIntIds", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -759,7 +759,39 @@ end block
         rcToReturn=rc)) return
     endif
 
-    vmIdMap_ptr => vmIdMap
+    ! Use the translated VM ids information to make decision about the case
+    if (profile) then
+      call ESMF_TraceRegionEnter("Decide between cases", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! Decide between SingleComp and MultiComp case
+    singleCompCaseFlag = .false.
+    nullify(vmIdSingleComp)
+    if (size(vmIdMap)==1) then
+      singleCompCaseFlag = all(vmintids_send(1:)==1)
+      if (singleCompCaseFlag) vmIdSingleComp => vmIdMap(1)
+    else if (size(vmIdMap)==2) then
+      singleCompCaseFlag = all(vmintids_send(1:)==1) &
+        .or.all(vmintids_send(1:)==2)
+      if (singleCompCaseFlag) then
+        ! singleCompIndex could be 1 or 2, however, cannot simply look this up
+        ! in vmintids_send(1), because on PETs that do not have objects it only
+        ! stores vmintids_send(1), which holds the index into vmIdMap of the
+        ! executing VM. Since there are only two possible values, the correct
+        ! singleCompIndex must be "the other one". Therefore, look at
+        ! vmintids_send(0), which is valid on all PETs, add 1 mod 2.
+        singleCompIndex = mod(vmintids_send(0)+1,2)
+        vmIdSingleComp => vmIdMap(singleCompIndex)
+      endif
+    endif
+    if (profile) then
+      call ESMF_TraceRegionExit("Decide between cases", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
 
     ! -------------------------------------------------------------------------
     if (profile) then
@@ -773,9 +805,8 @@ end block
 
 #if 0
     ! Log a JSON State representation -----------------------------------------
-
-    call idesc%Initialize(createInfo=.true., addObjectInfo=.true., vmIdMap=vmIdMap_ptr, &
-      vmIdMapGeomExc=.true., rc=localrc)
+    call idesc%Initialize(createInfo=.true., addObjectInfo=.true., &
+      vmIdMap=vmIdMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     call idesc%Update(state, "", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -798,8 +829,65 @@ end block
     ! Get rid of buffer
     deallocate(buffer)
 #endif
+
     
-    call handle_case3()
+block
+  character(160):: msgStr
+  write(msgStr,*) "size(vmintids_send): ", size(vmintids_send)
+  call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=rc)
+  write(msgStr,*) "size(vmIdMap): ", size(vmIdMap)
+  call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=rc)
+  write(msgStr,*) "singleCompCaseFlag: ", singleCompCaseFlag
+  call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=rc)
+end block
+
+    if (singleCompCaseFlag) then
+      ! CASE: a single component interacting with a state
+      ! ------------------------------------------------------------------------
+      if (profile) then
+        call ESMF_TraceRegionEnter("ESMF_ReconcileSingleCompCase", rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+      endif
+      ! ------------------------------------------------------------------------
+#if 0
+!TODO: enable SingleComp case when implemented
+      call ESMF_ReconcileSingleCompCase(vm=vm, vmId=vmIdSingleComp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+#else
+      call ESMF_ReconcileMultiCompCase()
+#endif
+      ! ------------------------------------------------------------------------
+      if (profile) then
+        call ESMF_TraceRegionExit("ESMF_ReconcileSingleCompCase", rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+      endif
+      ! ------------------------------------------------------------------------
+    else
+      ! CASE: multiple components interacting with a state
+      ! ------------------------------------------------------------------------
+      if (profile) then
+        call ESMF_TraceRegionEnter("ESMF_ReconcileMultiCompCase", rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+      endif
+      ! ------------------------------------------------------------------------
+      call ESMF_ReconcileMultiCompCase()
+      ! ------------------------------------------------------------------------
+      if (profile) then
+        call ESMF_TraceRegionExit("ESMF_ReconcileMultiCompCase", rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+      endif
+      ! ------------------------------------------------------------------------
+    endif
 
     ! Clean up
 
@@ -890,7 +978,7 @@ end block
 
   contains
 
-  subroutine handle_case3()
+  subroutine ESMF_ReconcileMultiCompCase()
 
     ! -------------------------------------------------------------------------
     if (profile) then
@@ -920,7 +1008,7 @@ end block
     call info_cache%Initialize(localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call info_cache%UpdateFields(state, vmIdMap_ptr, localrc)
+    call info_cache%UpdateFields(state, vmIdMap, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     call info_cache%Destroy(localrc)
@@ -1222,9 +1310,80 @@ end block
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
-  end subroutine handle_case3
+  end subroutine ESMF_ReconcileMultiCompCase
 
   end subroutine ESMF_StateReconcile_driver
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ReconcileSingleCompCase"
+!BOPI
+! !IROUTINE: ESMF_ReconcileSingleCompCase
+!
+! !INTERFACE:
+  subroutine ESMF_ReconcileSingleCompCase(vm, vmId, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),   intent(in)     :: vm
+    type(ESMF_VMId), pointer        :: vmId
+    integer,         intent(out)    :: rc
+!
+! !DESCRIPTION:
+!
+!   Handle the single component reconciliation case. This is the expected
+!   situation under NUOPC rules.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm]
+!     The ESMF\_VM} object across which the state is reconciled.
+!   \item[vmId]
+!     The ESMF\_VMId} of the single component who ownes all objects present
+!     in the state.
+!   \item[rootPet]
+!     The lowest PET that holds actual objects.
+!   \item[rc]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!EOPI
+
+    integer :: localrc
+    integer :: petCount, localPet, rootVas, rootPet, vas
+
+    rc = ESMF_SUCCESS
+
+    call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT,  &
+      rcToReturn=rc)) return
+
+    call ESMF_VMIdGet(vmId, leftMostOnBit=rootVas, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT,  &
+      rcToReturn=rc)) return
+
+    ! search for PET in VM that executes on rootVas
+    do rootPet=0, petCount-1
+      call ESMF_VMGet(vm, pet=rootPet, vas=vas, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+      if (vas==rootVas) exit  ! found
+    enddo
+    if (rootPet==petCount) then
+      call ESMF_LogSetError(ESMF_RC_INTNRL_INCONS, &
+        msg="Could not find PET that executes on the identified VAS", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+block
+  character(160)  :: msgStr
+  write(msgStr,*) "SingleCompCase rootPet=", rootPet
+  call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
+end block
+
+  end subroutine ESMF_ReconcileSingleCompCase
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
