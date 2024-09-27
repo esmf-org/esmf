@@ -171,15 +171,12 @@ contains
 !
 !EOP
 
-    integer :: localrc
-    type(ESMF_VM) :: localvm
+    integer                     :: localrc
+    type(ESMF_VM)               :: localvm
     type(ESMF_AttReconcileFlag) :: lattreconflag
-
-    type(ESMF_InfoDescribe) :: idesc
+    logical                     :: isNoop
 
     logical, parameter :: profile = .true.
-
-    logical   :: isNoop
 
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -197,6 +194,23 @@ contains
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
     end if
+
+#if 0
+  block
+    type(ESMF_InfoDescribe)   :: idesc
+    ! Log a JSON State representation -----------------------------------------
+    call idesc%Initialize(createInfo=.true., addObjectInfo=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call idesc%Update(state, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_LogWrite("InfoDescribe before Reconcile=", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_LogWrite("state_json_before_reconcile="//ESMF_InfoDump(idesc%info), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call idesc%Destroy(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end block
+#endif
 
 #if 0
     ! cleaner timings below, eliminating issue due to different times PETs enter
@@ -282,26 +296,68 @@ call ESMF_LogWrite("continue with isNoop=.false.", ESMF_LOGMSG_DEBUG, rc=localrc
     call ESMF_InfoCacheReassembleFieldsFinalize(state, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-#if 0
-    ! Log a JSON State representation -----------------------------------------
-    call idesc%Initialize(createInfo=.true., addObjectInfo=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call idesc%Update(state, "", rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_LogWrite("InfoDescribe before InfoCacheReassembleFields=", rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_LogWrite("state_json_before_reassemble="//ESMF_InfoDump(idesc%info), rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call idesc%Destroy(rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-#endif
-
     if (profile) then
       call ESMF_TraceRegionExit("ESMF_InfoCacheReassembleFields", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
     endif
+
+#if 1
+    if (profile) then
+      call ESMF_TraceRegionEnter("JSON cross PET check", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+  block
+    type(ESMF_InfoDescribe)   :: idesc
+    character(:), allocatable :: jsonStr, testStr
+    integer                   :: size(1), localPet
+    ! Log a JSON State representation -----------------------------------------
+    call idesc%Initialize(createInfo=.true., addObjectInfo=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call idesc%Update(state, "", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    jsonStr = "state_json_after_reassemble="//ESMF_InfoDump(idesc%info)
+#if 0
+    call ESMF_LogWrite("InfoDescribe after InfoCacheReassembleFields=", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_LogWrite(jsonStr, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
+    call idesc%Destroy(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+#if 1
+    ! check match across all PETs of VM
+    size(1) = len(jsonStr)
+    call ESMF_VMBroadcast(localvm, size, count=1, rootPet=0, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_VMGet(localvm, localPet=localPet, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (localPet==0) then
+      call ESMF_VMBroadcast(localvm, jsonStr, count=size(1), rootPet=0, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      allocate(character(len=size(1))::testStr)
+      call ESMF_VMBroadcast(localvm, testStr, count=size(1), rootPet=0, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+      if (testStr/=jsonStr) then
+        call ESMF_LogSetError(ESMF_RC_INTNRL_INCONS, &
+          msg="StateReconcile() failed!! Not all PETs hold same content!!", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+#endif
+  end block
+    if (profile) then
+      call ESMF_TraceRegionExit("JSON cross PET check", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+#endif
 
     if (present(rc)) rc = ESMF_SUCCESS
 
