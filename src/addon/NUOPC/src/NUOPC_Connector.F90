@@ -436,6 +436,7 @@ module NUOPC_Connector
     integer                   :: i, j
     character(ESMF_MAXSTR)    :: importCplSet, exportCplSet
     character(len=240)        :: msgString
+    character(ESMF_MAXSTR)    :: importProvider, exportProvider
 
     rc = ESMF_SUCCESS
 
@@ -607,6 +608,29 @@ module NUOPC_Connector
       call doMirror(importState, exportState, acceptorVM=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    elseif (trim(exportXferPolicy)=="transferAllAsNests") then
+      ! check name of provider component
+      call NUOPC_GetAttribute(importState, name="CompName", &
+        value=importProvider, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! create nested state
+      exportNestedState = ESMF_StateCreate(name=trim(importProvider)//"-NestedState", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! set FieldTransferPolicy metadata for nested state
+      call NUOPC_SetAttribute(exportNestedState, "FieldTransferPolicy", "transferAll", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! define namespace and nested state
+      call NUOPC_AddNamespace(exportState, namespace=trim(importProvider), &
+        nestedState=exportNestedState, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! top level mirroring into exportState
+      call doMirror(importState, exportNestedState, acceptorVM=vm, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     elseif (importHasNested .and. exportHasNested) then
       ! loop through the nested states inside of the exportState and see if 
       ! any of them request mirroring
@@ -680,6 +704,29 @@ module NUOPC_Connector
     if (trim(importXferPolicy)=="transferAll") then
       ! top level mirroring into importState
       call doMirror(exportState, importState, acceptorVM=vm, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    elseif (trim(importXferPolicy)=="transferAllAsNests") then
+      ! check name of provider component
+      call NUOPC_GetAttribute(exportState, name="CompName", &
+        value=exportProvider, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! create nested state
+      importNestedState = ESMF_StateCreate(name=trim(exportProvider)//"-NestedState", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! set FieldTransferPolicy metadata for nested state
+      call NUOPC_SetAttribute(importNestedState, "FieldTransferPolicy", "transferAll", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! define namespace and nested state
+      call NUOPC_AddNamespace(importState, namespace=trim(exportProvider), &
+        nestedState=importNestedState, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! top level mirroring into exportState
+      call doMirror(exportState, importNestedState, acceptorVM=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     elseif (importHasNested .and. exportHasNested) then
@@ -798,6 +845,7 @@ module NUOPC_Connector
       integer                :: item, itemCount
       character(ESMF_MAXSTR) :: providerTransferOffer, acceptorTransferOffer
       character(ESMF_MAXSTR) :: acceptorStateName
+      character(ESMF_MAXSTR) :: providerCompName
       type(ESMF_State)       :: providerNestedState
       type(ESMF_State)       :: acceptorNestedState
       character(ESMF_MAXSTR) :: nestedStateName
@@ -832,6 +880,11 @@ module NUOPC_Connector
       if (vmThis == ESMF_NULL_POINTER) then
         actualFlag = .false.  ! local PET is not for an actual member
       endif
+
+      call NUOPC_GetAttribute(providerState, name="CompName", &
+        value=providerCompName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
       call ESMF_StateGet(acceptorState, name=acceptorStateName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1008,6 +1061,12 @@ module NUOPC_Connector
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
+
+          ! Add extra metadata to the field in acceptor side about provider
+          call NUOPC_SetAttribute(fieldAdv, name="ProviderCompName", &
+            value=trim(providerCompName), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         end do
       endif
       
