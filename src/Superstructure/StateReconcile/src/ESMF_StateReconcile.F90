@@ -675,7 +675,8 @@ end block
 
     type(ESMF_InfoCache) :: info_cache
     type(ESMF_InfoDescribe) :: idesc
-
+    character, pointer :: buffer(:)
+    
     ! -------------------------------------------------------------------------
     localrc = ESMF_RC_NOT_IMPL
 
@@ -874,6 +875,19 @@ end block
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
+#if 0
+    ! Test new serialize/deserialize calls
+    call ESMF_ReconcileSerializeAll(state, vm, siwrap, attreconflag, buffer, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    call ESMF_ReconcileDeserializeAll(state, vm, buffer, attreconflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Get rid of buffer
+    deallocate(buffer)
+#endif
+
+    
 block
   character(160):: msgStr
   write(msgStr,*) "size(vmintids_send): ", size(vmintids_send)
@@ -2080,6 +2094,229 @@ end block
 
   end subroutine ESMF_ReconcileDeserialize
 
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ReconcileDeserializeAll"
+!BOPI
+! !IROUTINE: ESMF_ReconcileDeserializeAll
+
+! !INTERFACE:
+  subroutine ESMF_ReconcileDeserializeAll(state, vm, buffer, attreconflag, rc)
+!
+! !ARGUMENTS:
+    type (ESMF_State), intent(inout):: state
+    type (ESMF_VM),    intent(in)   :: vm
+    character, pointer              :: buffer(:)    ! intent(in)
+    type(ESMF_AttReconcileFlag),intent(in)   :: attreconflag
+    integer,           intent(out)  :: rc
+!
+! !DESCRIPTION:
+!   Builds proxy items for each of the items in the buffer.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     {\tt ESMF\_State} to add proxy objects to.
+!   \item[vm]
+!     {\tt ESMF\_VM} to use.
+!   \item[buffer]
+!     Buffer of serialized State objects (intent(in))
+!   \item[attreconflag]
+!     Flag to indicate attribute reconciliation.
+!   \item[rc]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!EOPI
+
+    integer :: localrc
+    integer :: memstat
+
+    type(ESMF_FieldBundle) :: fieldbundle
+    type(ESMF_Field) :: field
+    type(ESMF_Array) :: array
+    type(ESMF_ArrayBundle) :: arraybundle
+    type(ESMF_State) :: substate
+
+    integer :: stateitem_type
+    character(ESMF_MAXSTR) :: errstring
+    character(ESMF_MAXSTR) :: name
+    integer :: mypet
+    logical, parameter :: debug = .false.
+    logical, parameter :: trace = .false.
+
+    integer :: item, numNewItems
+    integer :: itemType
+    integer :: sizeBuffer, posBuffer  
+
+! XMRKX !
+    
+    ! VM information for debug output
+    call ESMF_VMGet (vm, localPet=mypet, rc=localrc)
+    if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    
+    ! Set start position of buffer
+    posBuffer = 1
+
+    ! Get the number of items to add
+    numNewItems = transfer (  &
+        source=buffer(posBuffer:posBuffer+ESMF_SIZEOF_DEFINT-1),  &
+        mold  = numNewItems)
+    posBuffer = posbuffer + ESMF_SIZEOF_DEFINT
+    
+    write(*,*) myPet,"# DA: numNewItems=",numNewItems
+
+    ! Loop getting new items
+    do item=1, numNewItems
+
+       ! Get item type
+       itemType = transfer (  &
+            source=buffer(posBuffer:posBuffer+ESMF_SIZEOF_DEFINT-1),  &
+            mold  = itemType)
+       posBuffer = posbuffer + ESMF_SIZEOF_DEFINT
+
+       ! Debug
+       write(*,*) myPet,"# DA:    ",item," type=",itemType
+
+       ! Get items
+       select case (itemType)
+        case (ESMF_STATEITEM_FIELDBUNDLE%ot)
+          if (debug) then
+            print *, "deserializing FieldBundle, pos =",posBuffer
+          end if
+          fieldbundle = ESMF_FieldBundleDeserialize(buffer, posBuffer, &
+              attreconflag=attreconflag, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
+
+          call ESMF_StateAdd(state, fieldbundle, &
+              addflag=.true., proxyflag=.true.,  &
+              rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
+
+        case (ESMF_STATEITEM_FIELD%ot)
+          if (debug) then
+            print *, "deserializing Field, pos =", posBuffer
+          end if
+          field = ESMF_FieldDeserialize(buffer, posBuffer, &
+              attreconflag=attreconflag, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
+
+          ! Debug
+          call ESMF_FieldGet(field, name=name, rc=localrc) 
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
+
+          write(*,*) myPet,"# ",item," name=",name
+          
+          if (debug) then
+            print *, "created field, ready to add to local state"
+          end if
+
+          ! BOB: Take out StateAdd until we have a new State to add to
+#if 0
+          call ESMF_StateAdd(state, field,      &
+              addflag=.true., proxyflag=.true., &
+              rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
+#endif
+          
+        case (ESMF_STATEITEM_ARRAY%ot)
+          if (debug) then
+            print *, "    PET", mypet,  &
+                ": deserializing Array pos =",posBuffer
+          end if
+          call c_ESMC_ArrayDeserialize(array, buffer, posBuffer, &
+              attreconflag, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
+
+          ! Set init code
+          call ESMF_ArraySetInitCreated(array, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
+
+          call ESMF_StateAdd(state, array,      &
+              addflag=.true., proxyflag=.true., &
+              rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
+
+        case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
+          if (debug) then
+            print *, "deserializing ArrayBundle pos =",posBuffer
+          end if
+          call c_ESMC_ArrayBundleDeserialize(arraybundle, buffer, posBuffer, &
+              attreconflag, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
+
+          ! Set init code
+          call ESMF_ArrayBundleSetInitCreated(arraybundle, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
+
+          call ESMF_StateAdd(state, arraybundle, &
+              addflag=.true., proxyflag=.true.,  &
+              rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
+
+        case (ESMF_STATEITEM_STATE%ot)
+          if (debug) then
+            print *, "deserializing nested State pos =",posBuffer
+          end if
+          substate = ESMF_StateDeserialize(vm,  buffer, posBuffer, &
+              attreconflag=attreconflag, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
+
+          call ESMF_StateAdd(state, substate,   &
+              addflag=.true., proxyflag=.true., &
+              rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
+
+        case (ESMF_STATEITEM_UNKNOWN%ot)
+          write (errstring, '(a,i0)') 'can''t deserialize unknown type: ', itemType
+          if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, msg=errstring, &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
+
+        case default
+          write (errstring, '(a,i0)') 'can''t deserialize unsupported type: ', itemType
+          if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, msg=errstring, &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
+      end select
+       
+    enddo
+
+
+    ! Return success
+    rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ReconcileDeserializeAll
+
+  
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ReconcileExchgAttributes"
@@ -3753,6 +3990,339 @@ end block
 
   end subroutine ESMF_ReconcileSerialize
 
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ReconcileSerializeAll"
+!BOPI
+! !IROUTINE: ESMF_ReconcileSerializeAll
+!
+! !INTERFACE:
+  subroutine ESMF_ReconcileSerializeAll(state, vm, siwrap,  &
+      attreconflag, buffer, rc)
+!
+! !ARGUMENTS:
+    type (ESMF_State),          intent(in)  :: state
+    type (ESMF_VM),             intent(in)  :: vm
+    type (ESMF_StateItemWrap),  intent(in)  :: siwrap(:)
+    type(ESMF_AttReconcileFlag),intent(in)  :: attreconflag
+    character, pointer                      :: buffer(:)
+    integer,                    intent(out) :: rc
+!
+! !DESCRIPTION:
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     {\tt ESMF\_State} to collect information from.
+!   \item[siwrap]
+!     State items in the state.
+!   \item[needs\_list]
+!     List of State items that need to be sent to other PETs
+!   \item[attreconflag]
+!     Flag to indicate attribute reconciliation.
+!   \item[rc]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!EOPI
+
+    integer :: localrc
+    integer :: memstat
+    integer :: item,numStateItems
+    type(ESMF_StateItem), pointer :: stateItem
+    type(ESMF_State) :: wrapper
+    integer :: itemType
+    integer :: sizeBuffer, posBuffer
+    character, pointer :: fakeBuffer(:) ! Fake buffer for passing when getting sizes
+    integer :: sizeFakeBuffer
+    integer :: itemSize
+    type(ESMF_InquireFlag) :: inqflag
+    integer :: mypet, npets, pet
+
+    ! XMRKX !
+       
+    ! Init to not implemented
+    localrc = ESMF_RC_NOT_IMPL
+
+    ! Get vm info
+    call ESMF_VMGet(vm, localPet=mypet, petCount=npets, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    
+   ! Get the number of items
+   numStateItems = size (siwrap)
+
+   
+   !!!!! Calculate buffer size !!!!!
+    
+   ! Start with number of items
+   sizeBuffer=ESMF_SIZEOF_DEFINT
+
+   ! Allocate a fake buffer for passing in when asking for size
+   allocate(fakeBuffer(ESMF_SIZEOF_DEFINT))
+   
+   ! Fake buffer size
+   sizeFakeBuffer=size(fakeBuffer)
+   
+   ! Set flag to only check size
+   inqflag = ESMF_INQUIREONLY
+   
+   ! Loop State items computing size
+   do item=1,numStateItems
+
+      ! Get one State Item
+      stateItem => siwrap(item)%si
+
+      ! Get item type
+      itemType = stateitem%otype%ot
+
+      ! Add item type's size
+      sizeBuffer = sizeBuffer + ESMF_SIZEOF_DEFINT
+
+      ! Init itemSize to 0, so when we ask for the offset,
+      ! we are also getting the size
+      itemSize=0
+
+      ! Get size of item to serialize
+      select case (itemType)
+          case (ESMF_STATEITEM_FIELDBUNDLE%ot)
+            call ESMF_FieldBundleSerialize(stateItem%datap%fbp,  &
+                fakeBuffer, sizeFakeBuffer, itemSize,  &
+                attreconflag=attreconflag, inquireflag=inqflag,  &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT,  &
+                rcToReturn=rc)) return
+            if (debug) then
+               print *, '    PET', mypet,  &
+                    ' Getting FieldBundle size=',itemSize
+            end if
+            
+          case (ESMF_STATEITEM_FIELD%ot)
+            call ESMF_FieldSerialize(stateItem%datap%fp,  &
+                fakeBuffer, sizeFakeBuffer, itemSize,  &
+                attreconflag=attreconflag, inquireflag=inqflag,  &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT,  &
+                rcToReturn=rc)) return
+            if (debug) then
+               print *, '    PET', mypet,  &
+                    ' Getting Field size=',itemSize
+            end if
+    
+          case (ESMF_STATEITEM_ARRAY%ot)
+            call c_ESMC_ArraySerialize(stateitem%datap%ap,  &
+                fakeBuffer, sizeFakeBuffer, itemSize,  &
+                attreconflag, inqflag,  &
+                localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT,  &
+                rcToReturn=rc)) return
+            if (debug) then
+               print *, '    PET', mypet,  &
+                    ' Getting Array size=',itemSize
+            end if
+            
+          case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
+            call c_ESMC_ArrayBundleSerialize(stateitem%datap%abp,  &
+                 fakeBuffer, sizeFakeBuffer, itemSize,  &
+                 attreconflag, inqflag,  &
+                 localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT,  &
+                rcToReturn=rc)) return
+            if (debug) then
+               print *, '    PET', mypet,  &
+                    ' Getting ArrayBundle size=',itemSize
+            end if
+            
+          case (ESMF_STATEITEM_STATE%ot)
+            wrapper%statep => stateitem%datap%spp
+            ESMF_INIT_SET_CREATED(wrapper)
+            call ESMF_StateSerialize(wrapper,  &
+                 fakeBuffer, sizeFakeBuffer, itemSize,  &
+                attreconflag=attreconflag, inquireflag=inqflag,  &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT,  &
+                rcToReturn=rc)) return
+                        if (debug) then
+               print *, '    PET', mypet,  &
+                    ' Getting State size=',itemSize
+            end if
+
+          case (ESMF_STATEITEM_ROUTEHANDLE%ot)
+             ! Do nothing for RouteHandles.  There is no need to reconcile them.
+             
+          case (ESMF_STATEITEM_UNKNOWN%ot)
+            call c_ESMC_StringSerialize(stateitem%namep,  &
+                 fakeBuffer, sizeFakeBuffer, itemSize,  &
+                 inqflag, localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT,  &
+                 rcToReturn=rc)) return
+            if (debug) then
+               print *, '    PET', mypet,  &
+                    ' Getting Unknown size=',itemSize
+            end if
+            
+          case default
+             if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, &
+                  msg="Unrecognized item type.", &
+                  ESMF_CONTEXT,  &
+                  rcToReturn=rc)) return
+        end select
+
+        ! Update buffer size by itemSize
+        sizeBuffer = sizeBuffer + itemSize        
+   enddo
+
+   ! Get rid of fakeBuffer
+   deallocate(fakeBuffer)
+
+
+   
+   !!!!! Allocate buffer to serialize into !!!!!
+   allocate(buffer(sizeBuffer), stat=memstat)
+   if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+
+   
+   !!!!! Serialize information into buffer !!!!!
+
+   ! Start position of buffer
+   posBuffer = 1
+
+   ! Put item count in buffer
+   buffer(posBuffer:posBuffer+ESMF_SIZEOF_DEFINT-1) = transfer (  &
+          source=numStateItems,  &
+          mold=buffer(1:ESMF_SIZEOF_DEFINT))
+   posBuffer = posbuffer + ESMF_SIZEOF_DEFINT
+
+   ! Set flag to actually serialize
+   inqflag = ESMF_NOINQUIRE
+   
+   ! Loop State items adding to buffer
+   do item=1,numStateItems
+
+      ! Get one State Item
+      stateItem => siwrap(item)%si
+
+      ! Get item type
+      itemType = stateitem%otype%ot
+
+      ! Add item type to buffer
+      buffer(posBuffer:posBuffer+ESMF_SIZEOF_DEFINT-1) = transfer (&
+          source=itemType,  &
+          mold  =buffer(1:ESMF_SIZEOF_DEFINT))
+      posBuffer = posbuffer + ESMF_SIZEOF_DEFINT
+
+      ! Add serialized items
+      select case (itemType)
+         case (ESMF_STATEITEM_FIELDBUNDLE%ot)
+         if (debug) then
+            print *, '    PET', mypet,  &
+                 ' Getting FieldBundle pos=',posBuffer
+         end if
+         call ESMF_FieldBundleSerialize(stateItem%datap%fbp,  &
+                buffer, sizeBuffer, posBuffer,  &
+                attreconflag=attreconflag, inquireflag=inqflag,  &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT,  &
+                rcToReturn=rc)) return
+            
+         case (ESMF_STATEITEM_FIELD%ot)
+            if (debug) then
+               print *, '    PET', mypet,  &
+                    ' Getting Field pos=',posBuffer
+            end if            
+            call ESMF_FieldSerialize(stateItem%datap%fp,  &
+                  buffer, sizeBuffer, posBuffer,  &
+                attreconflag=attreconflag, inquireflag=inqflag,  &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT,  &
+                rcToReturn=rc)) return
+         
+         case (ESMF_STATEITEM_ARRAY%ot)
+            if (debug) then
+               print *, '    PET', mypet,  &
+                    ' Getting Array pos=',posBuffer
+            end if
+            call c_ESMC_ArraySerialize(stateitem%datap%ap,  &
+                  buffer, sizeBuffer, posBuffer,  &
+                attreconflag, inqflag,  &
+                localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT,  &
+                rcToReturn=rc)) return
+            
+         case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
+            if (debug) then
+               print *, '    PET', mypet,  &
+                    ' Getting ArrayBundle pos=',posBuffer
+            end if
+            call c_ESMC_ArrayBundleSerialize(stateitem%datap%abp,  &
+                  buffer, sizeBuffer, posBuffer,  &
+                 attreconflag, inqflag,  &
+                 localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT,  &
+                rcToReturn=rc)) return
+            
+         case (ESMF_STATEITEM_STATE%ot)
+            if (debug) then
+               print *, '    PET', mypet,  &
+                    ' Getting State pos=',posBuffer
+            end if
+            wrapper%statep => stateitem%datap%spp
+            ESMF_INIT_SET_CREATED(wrapper)
+            call ESMF_StateSerialize(wrapper,  &
+                  buffer, sizeBuffer, posBuffer,  &
+                attreconflag=attreconflag, inquireflag=inqflag,  &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT,  &
+                rcToReturn=rc)) return
+            
+
+          case (ESMF_STATEITEM_ROUTEHANDLE%ot)
+             ! Do nothing for RouteHandles.  There is no need to reconcile them.
+             
+          case (ESMF_STATEITEM_UNKNOWN%ot)
+             if (debug) then
+                print *, '    PET', mypet,  &
+                     ' Getting Unknown pos=',posBuffer
+             end if
+             call c_ESMC_StringSerialize(stateitem%namep,  &
+                  buffer, sizeBuffer, posBuffer,  &
+                 inqflag, localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT,  &
+                 rcToReturn=rc)) return
+
+            
+          case default
+             if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, &
+                  msg="Unrecognized item type.", &
+                  ESMF_CONTEXT,  &
+                  rcToReturn=rc)) return
+        end select      
+   enddo
+   
+    ! Return success
+    rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ReconcileSerializeAll
+
+
+   
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ReconcileZapProxies"
