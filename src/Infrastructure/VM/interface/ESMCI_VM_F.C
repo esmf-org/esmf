@@ -1746,7 +1746,6 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
   }
 
-
   void FTN_X(c_esmci_vmidgetleftmostonbit)(ESMCI::VMId **vmid, int *leftmostOnBit,
                               int *rc) {
 #undef  ESMC_METHOD
@@ -1763,7 +1762,21 @@ extern "C" {
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
   }  
-  
+
+  void FTN_X(c_esmci_vmidgetislocalpetactive)(ESMCI::VMId **vmid,
+    ESMC_Logical *isLocalPetActive, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_ESMCI_VMIdGetIsLocalPetActive()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vmid, rc)
+    bool resultBool = ESMCI::VMIdIsLocalPetActive(*vmid);
+    *isLocalPetActive = resultBool ? ESMF_TRUE : ESMF_FALSE;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
   void FTN_X(c_esmc_vmidlog)(ESMCI::VMId **vmid, char *prefix, 
     ESMC_LogMsgType_Flag *logMsgFlag, int *rc, ESMCI_FortranStrLenArg prefix_l){
 #undef  ESMC_METHOD

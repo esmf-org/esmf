@@ -10474,11 +10474,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMIdGet - Get information about a VMId object
 
 ! !INTERFACE:
-  subroutine ESMF_VMIdGet(vmId, leftMostOnBit, rc)
+  subroutine ESMF_VMIdGet(vmId, leftMostOnBit, isLocalPetActive, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(in)            :: vmId
     integer,           intent(out), optional :: leftMostOnBit
+    logical,           intent(out), optional :: isLocalPetActive
     integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -10490,17 +10491,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item[vmId]
 !        VMId to get information from.
-!   \item[leftMostOnBit]
-!        The index (base 0) of the leftmost on bit in the VMId. If the index is -1,
-!        then there were no on bits
-!   \item[{[rc]}] 
+!   \item[{[leftMostOnBit]}]
+!        The index (base 0) of the leftmost on bit in {\tt vmId}. If the index
+!        is -1, then there were no on bits.
+!   \item[{[isLocalPetActive]}]
+!        Set to {\tt .true.} if the local PET is indicated as active in
+!        {\tt vmId}.
+!   \item[{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    integer                 :: i
     type(ESMF_Logical)      :: tf
 
     ! initialize return code; assume routine not implemented
@@ -10513,7 +10516,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-    
+    if (present(isLocalPetActive)) then
+       call c_ESMCI_VMIdGetIsLocalPetActive(vmId, tf, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       isLocalPetActive = tf == ESMF_TRUE
+    endif
+
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 

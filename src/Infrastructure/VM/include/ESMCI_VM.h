@@ -83,6 +83,7 @@ namespace ESMCI {
 
 // ESMCI::VMId methods:
 bool VMIdCompare(const VMId *vmID1, const VMId *vmID2, bool keyOnly=false);
+bool VMIdIsLocalPetActive(const VMId *vmID);
 bool VMIdLessThan(const VMId *vmID1, const VMId *vmID2);
 int VMIdCopy(VMId *vmIDdst, VMId *vmIDsrc);
 } // namespace ESMCI

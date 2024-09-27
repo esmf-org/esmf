@@ -439,7 +439,7 @@ int VMId::getLeftmostOnBit(
   unsigned unsigned_leftmost=VMKeyFirstBitFromLeft(this->vmKey);
     
   // a value returned of vmKeyWidth * 8 indicates that no bit was set
-  if (unsigned_leftmost == vmKeyWidth*8) *leftmostOnBit=-1;
+  if (unsigned_leftmost == (unsigned)vmKeyWidth*8) *leftmostOnBit=-1;
   else *leftmostOnBit=(signed int)unsigned_leftmost;
  
   localrc = ESMF_SUCCESS;
@@ -799,6 +799,42 @@ bool VMIdCompare(
     }
   }
   return VMKeyCompare(vmID1->vmKey, vmID2->vmKey);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMIdIsLocalPetActive()"
+//BOPI
+// !IROUTINE:  ESMCI::VMIdIsLocalPetActive
+//
+// !INTERFACE:
+bool VMIdIsLocalPetActive(
+//
+// !RETURN VALUE:
+//    bool indicating whether localPet is marked active in {\tt vmID}.
+//
+// !ARGUMENTS:
+//
+  const VMId *vmID
+  ){
+//
+// !DESCRIPTION:
+//    Return {\tt true} if the bit corresponding to the local PET is set in
+//    {\tt vmID}. Return {\tt false} otherwise.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  if (vmID==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "- Invalid vmID", ESMC_CONTEXT, NULL);
+    return false;    // bail out
+  }
+  int localPet = VM::getGlobal()->getLocalPet();
+  int index = localPet/8;
+  int bitIndex = localPet%8;
+  return (vmID->vmKey[index]&0x01<<(7-bitIndex));
 }
 //-----------------------------------------------------------------------------
 
