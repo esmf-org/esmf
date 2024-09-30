@@ -407,8 +407,6 @@ call ESMF_LogWrite("continue with isNoop=.false.", ESMF_LOGMSG_DEBUG, rc=localrc
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
       rcToReturn=rc)) return
 
-!call ESMF_VMIdLog(vmId, prefix="vmId: ", rc=rc)
-
     if (profile) then
       call ESMF_TraceRegionEnter("StateReconcileIsNoopLoc", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -580,8 +578,6 @@ call ESMF_LogWrite("processing "//trim(itemNameList(item)), ESMF_LOGMSG_DEBUG, r
           call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
-
-call ESMF_VMIdLog(vmIdItem, prefix="vmIdItem: ", rc=rc)
 
           isNoopLoc = ESMF_VMIdCompare(vmIdItem, vmId, keyOnly=.true., &
             rc=localrc)
@@ -925,6 +921,11 @@ end block
     ! -------------------------------------------------------------------------
     if (meminfo) call ESMF_VMLogMemInfo ("after (2) Update Field metadata")
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!TODO: Remove this once done with performance testing!
+!singleCompCaseFlag = .false.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 block
   character(160):: msgStr
   write(msgStr,*) "size(vmintids_send): ", size(vmintids_send)
@@ -945,16 +946,11 @@ end block
           rcToReturn=rc)) return
       endif
       ! ------------------------------------------------------------------------
-#if 1
-!TODO: enable SingleComp case when implemented
       call ESMF_ReconcileSingleCompCase(state, vm=vm, vmId=vmIdSingleComp, &
         attreconflag=attreconflag, siwrap=siwrap, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-#else
-      call ESMF_ReconcileMultiCompCase()
-#endif
       ! ------------------------------------------------------------------------
       if (profile) then
         call ESMF_TraceRegionExit("ESMF_ReconcileSingleCompCase", rc=localrc)
