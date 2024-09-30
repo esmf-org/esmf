@@ -516,14 +516,12 @@ void VMId::log(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   char digits[64];
-  char msg[800];
   std::stringstream info;
-  info << "  vmKeyWidth (bytes) = " << vmKeyWidth
+  info << prefix << " - VMId:  vmKeyWidth (bytes) = " << vmKeyWidth
     <<" vmKeyOff (invalid bits end of last byte) = " << vmKeyOff;
-  sprintf(msg, "%s - VMId: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, msgType);
+  ESMC_LogDefault.Write(info.str(), msgType);
   info.str(""); // clear info
-  info << "  vmKey=0x";
+  info << prefix << " - VMId:  vmKey=0x";
   int bitmap=0;
   int k=0;
   for (int i=0; i<vmKeyWidth; i++){
@@ -543,12 +541,10 @@ void VMId::log(
     sprintf(digits, "%08X", bitmap);
     info << digits;
   }
-  sprintf(msg, "%s - VMId: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, msgType);
+  ESMC_LogDefault.Write(info.str(), msgType);
   info.str(""); // clear info
-  info << "  localID = " << localID;
-  sprintf(msg, "%s - VMId: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, msgType);
+  info << prefix << " - VMId:  localID = " << localID;
+  ESMC_LogDefault.Write(info.str(), msgType);
 }
 //-----------------------------------------------------------------------------
 
