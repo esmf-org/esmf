@@ -4581,7 +4581,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
 
     ! set RC
     rc = ESMF_SUCCESS
-    
+
     ! queries
     call ESMF_FieldGet(acceptorField, grid=grid, name=fieldName, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4648,7 +4648,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     if (localPet>-1) then
       ! this is an active PET -> create the acceptorField
-      
+
       !TODO: make sure that this FieldCreate() sets total widths correctly
       !TODO: difficult to do with current FieldCreate() for multiple DEs/PET
       if (fieldDimCount - gridDimCount > 0) then
@@ -4670,7 +4670,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return
     endif
-  
+
     ! reconcile across the entire Connector VM
     call ESMF_StateReconcile(state, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4678,7 +4678,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     call ESMF_StateGet(state, itemName=fieldName, field=acceptorField, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
-    
+
     ! done with the helper state
     call ESMF_StateDestroy(state, noGarbage=.true., rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4703,7 +4703,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
         msg="Deallocating ungriddedUBound", &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
-    
+
   end subroutine
 
   !-----------------------------------------------------------------------------
@@ -4729,7 +4729,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
 
     ! set RC
     rc = ESMF_SUCCESS
-    
+
     ! queries
     call ESMF_FieldGet(acceptorField, mesh=mesh, name=fieldName, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4814,7 +4814,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return
     endif
-      
+
     ! reconcile across the entire Connector VM
     call ESMF_StateReconcile(state, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4827,7 +4827,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     call ESMF_StateDestroy(state, noGarbage=.true., rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
-      
+
     ! clean-up
     deallocate(gridToFieldMap, stat=rc)
     if (ESMF_LogFoundDeallocError(rc, &
@@ -4843,7 +4843,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
         msg="Deallocating ungriddedUBound", &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
-    
+
   end subroutine
 
   !-----------------------------------------------------------------------------
