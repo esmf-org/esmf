@@ -49,6 +49,7 @@ module ESMF_StateReconcileMod
   use ESMF_BaseMod
   use ESMF_InitMacrosMod
   use ESMF_IOUtilMod
+  use ESMF_UtilMod
   use ESMF_LogErrMod
   use ESMF_StateMod
   use ESMF_StateContainerMod
@@ -164,7 +165,8 @@ contains
 !     \item[state]
 !       {\tt ESMF\_State} to reconcile.
 !     \item[{[vm]}]
-!       {\tt ESMF\_VM} for this {\tt ESMF\_Component}.  By default, it is set to the current vm.
+!       {\tt ESMF\_VM} across which to reconcile. The default is the
+!       current VM.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -174,7 +176,7 @@ contains
     integer                     :: localrc
     type(ESMF_VM)               :: localvm
     type(ESMF_AttReconcileFlag) :: lattreconflag
-    logical                     :: isNoop
+    logical                     :: isNoop, isFlag
 
     logical, parameter :: profile = .true.
 
@@ -302,11 +304,11 @@ contains
     endif
 
     ! Traverse the State hierarchy and fix Field references to a shared geometry
-    call ESMF_InfoCacheReassembleFields(state, state, localrc)
+    call ESMF_InfoCacheReassembleFields(state, state, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Traverse the state hierarchy and remove reconcile-specific attributes
-    call ESMF_InfoCacheReassembleFieldsFinalize(state, localrc)
+    call ESMF_InfoCacheReassembleFieldsFinalize(state, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (profile) then
@@ -316,7 +318,7 @@ contains
         rcToReturn=rc)) return
     endif
 
-#if 0
+#if 1
     if (profile) then
       call ESMF_TraceRegionEnter("JSON cross PET check", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -356,10 +358,41 @@ contains
       call ESMF_VMBroadcast(localvm, testStr, count=size(1), rootPet=0, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
       if (testStr/=jsonStr) then
-        call ESMF_LogSetError(ESMF_RC_INTNRL_INCONS, &
-          msg="StateReconcile() failed!! Not all PETs hold same content!!", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
+        ! not a perfect match -> see if the differences are acceptable
+        isFlag = ESMF_UtilStringDiffMatch(jsonStr, testStr, &
+          minusStringList = ["None        ", &
+                             "All         ", &
+                             "1           ", &
+                             "2           ", &
+                             "            ", &
+                             "            ", &
+                             "M           ", &
+                             "DEF         ", &
+                             "UL          ", &
+                             "            ", &
+                             "driverChild "  &
+                             ], &
+          plusStringList  = ["All    ", &
+                             "None   ", &
+                             "2      ", &
+                             "1      ", &
+                             "DEF    ", &
+                             "UL     ", &
+                             "       ", &
+                             "       ", &
+                             "       ", &
+                             "M      ", &
+                             "DEFAULT"  &
+                             ], rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+          rcToReturn=rc)) return
+        if (.not.isFlag) then
+          ! found unexpected/unacceptable differences
+          call ESMF_LogSetError(ESMF_RC_INTNRL_INCONS, &
+            msg="StateReconcile() failed!! Not all PETs hold same content!!", &
+            ESMF_CONTEXT, rcToReturn=rc)
+          return
+        endif
       endif
     endif
 #endif
@@ -599,6 +632,7 @@ contains
 #if 0
 block
   character(160) :: msgStr
+  call ESMF_VMIdLog(vmIdItem, prefix="vmIdItem: ", rc=localrc)
   write(msgStr,*) "isNoopLoc: ", isNoopLoc
   call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
 end block
@@ -924,7 +958,7 @@ end block
     call info_cache%Initialize(localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call info_cache%UpdateFields(state, vmIdMap, localrc)
+    call info_cache%UpdateFields(state, vmIdMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     call info_cache%Destroy(localrc)
