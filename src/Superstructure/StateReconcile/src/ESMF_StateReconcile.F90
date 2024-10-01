@@ -140,11 +140,13 @@ contains
 ! !IROUTINE: ESMF_StateReconcile -- Reconcile State data across all PETs in a VM
 !
 ! !INTERFACE:
-  subroutine ESMF_StateReconcile(state, vm, rc)
+  subroutine ESMF_StateReconcile(state, keywordEnforcer, vm, checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State),            intent(inout)         :: state
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM),               intent(in),  optional :: vm
+    logical,                     intent(in),  optional :: checkflag
     integer,                     intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -167,6 +169,11 @@ contains
 !     \item[{[vm]}]
 !       {\tt ESMF\_VM} across which to reconcile. The default is the
 !       current VM.
+!     \item [{[checkflag]}]
+!       If set to {\tt .TRUE.} the reconciled State object will be checked
+!       for consistency across PETs before returning. Any detected issues will
+!       be indicated in {\tt rc}. Set {\tt checkflag} to {\tt .FALSE.} in order
+!       to achieve highest performance. The default is {\tt .FALSE.}.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -176,7 +183,7 @@ contains
     integer                     :: localrc
     type(ESMF_VM)               :: localvm
     type(ESMF_AttReconcileFlag) :: lattreconflag
-    logical                     :: isNoop, isFlag
+    logical                     :: isNoop, isFlag, localCheckFlag
 
     logical, parameter :: profile = .true.
 
@@ -187,6 +194,12 @@ contains
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
+
+    localCheckFlag = .false.  ! default
+    if (present(checkFlag)) localCheckFlag = checkFlag
+
+!TODO: turn this .true. when working on StateReoncile, so all tests validate!
+!localCheckFlag = .true. ! force checking
 
     if (present (vm)) then
       localvm = vm
@@ -318,7 +331,7 @@ contains
         rcToReturn=rc)) return
     endif
 
-#if 1
+  if (localCheckFlag) then
     if (profile) then
       call ESMF_TraceRegionEnter("JSON cross PET check", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -359,6 +372,8 @@ contains
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
       if (testStr/=jsonStr) then
         ! not a perfect match -> see if the differences are acceptable
+        ! these are differences in the values of attributes, which show up in
+        ! the bundled esmf and nuopc test cases... these diffs are begnin.
         isFlag = ESMF_UtilStringDiffMatch(jsonStr, testStr, &
           minusStringList = ["None        ", &
                              "All         ", &
@@ -403,7 +418,7 @@ contains
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
     endif
-#endif
+  endif
 
     if (present(rc)) rc = ESMF_SUCCESS
 
