@@ -777,7 +777,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
   !-----------------------------------------------------------------------------
     ! local variables
     integer                 :: ioerr
@@ -857,7 +857,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
   !-----------------------------------------------------------------------------
     ! local variables
     logical                   :: ssL, svL
@@ -958,7 +958,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
   !-----------------------------------------------------------------------------
     ! local variables
     integer                   :: ioerr
