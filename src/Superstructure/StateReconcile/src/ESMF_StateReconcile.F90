@@ -182,7 +182,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     integer                     :: localrc
     type(ESMF_VM)               :: localvm
-    type(ESMF_AttReconcileFlag) :: lattreconflag
     logical                     :: isNoop, isFlag, localCheckFlag
 
     logical, parameter :: profile = .true.
@@ -286,9 +285,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! (or short list of numbers) instead of having to build and send the
     ! list each time.
 
-    ! Attributes must be reconciled to de-deduplicate Field geometries
-    lattreconflag = ESMF_ATTRECONCILE_ON
-
     if (profile) then
       call ESMF_TraceRegionEnter("ESMF_StateReconcile_driver", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -296,8 +292,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         rcToReturn=rc)) return
     endif
 
-    call ESMF_StateReconcile_driver (state, vm=localvm, &
-        attreconflag=lattreconflag, rc=localrc)
+    call ESMF_StateReconcile_driver(state, vm=localvm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
@@ -673,12 +668,11 @@ end block
 ! !IROUTINE: ESMF_StateReconcile_driver
 !
 ! !INTERFACE:
-    subroutine ESMF_StateReconcile_driver (state, vm, attreconflag, rc)
+    subroutine ESMF_StateReconcile_driver(state, vm, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_State), intent(inout) :: state
       type (ESMF_VM),    intent(in)    :: vm
-      type(ESMF_AttReconcileFlag), intent(in)  :: attreconflag
       integer,           intent(out)   :: rc
 !
 ! !DESCRIPTION:
@@ -731,6 +725,8 @@ end block
     integer                              :: singleCompCaseInt(1)
     integer                              :: singleCompIndex
 
+    type(ESMF_AttReconcileFlag)          :: attreconflag
+
     character(len=ESMF_MAXSTR) :: logmsg
 
     type(ESMF_InfoCache) :: info_cache
@@ -738,6 +734,9 @@ end block
 
     ! -------------------------------------------------------------------------
     localrc = ESMF_RC_NOT_IMPL
+
+    ! Attributes must be reconciled to de-duplicate Field geometry proxies
+    attreconflag = ESMF_ATTRECONCILE_ON
 
     if (meminfo) call ESMF_VMLogMemInfo ("entering ESMF_StateReconcile_driver")
 
