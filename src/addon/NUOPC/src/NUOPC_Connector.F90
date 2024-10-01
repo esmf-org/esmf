@@ -4487,8 +4487,10 @@ module NUOPC_Connector
       gridList=>gridList%prev
 #define CLEAN_OUT_OLD_ACCEPTOR_GRID
 #ifdef CLEAN_OUT_OLD_ACCEPTOR_GRID
+#if 0
 call ESMF_PointerLog(gridListE%keyGrid%this, prefix="about to destroy Grid: ", &
   logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
       call ESMF_GridDestroy(gridListE%keyGrid, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -4501,8 +4503,10 @@ call ESMF_PointerLog(gridListE%keyGrid%this, prefix="about to destroy Grid: ", &
       meshList=>meshList%prev
 #define CLEAN_OUT_OLD_ACCEPTOR_MESH
 #ifdef CLEAN_OUT_OLD_ACCEPTOR_MESH
+#if 0
 call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
   logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
       call ESMF_MeshDestroy(meshListE%keyMesh, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
