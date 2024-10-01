@@ -197,6 +197,21 @@ contains
 
 #if 0
   block
+    character(ESMF_MAXSTR)  :: stateName
+    call ESMF_StateGet(state, name=stateName, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    call ESMF_LogWrite("StateReconcile() for State: "//trim(stateName), &
+      ESMF_LOGMSG_DEBUG, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+  end block
+#endif
+
+#if 0
+  block
     type(ESMF_InfoDescribe)   :: idesc
     ! Log a JSON State representation -----------------------------------------
     call idesc%Initialize(createInfo=.true., addObjectInfo=.true., rc=localrc)
@@ -241,15 +256,13 @@ contains
     endif
 
     if (isNoop) then
-call ESMF_LogWrite("returning early with isNoop=.true.", ESMF_LOGMSG_DEBUG, rc=localrc)
-#if 1
+!call ESMF_LogWrite("returning early with isNoop=.true.", ESMF_LOGMSG_DEBUG, rc=localrc)
       ! successful early return because of NOOP condition
       if (present(rc)) rc = ESMF_SUCCESS
       return
-#endif
     endif
 
-call ESMF_LogWrite("continue with isNoop=.false.", ESMF_LOGMSG_DEBUG, rc=localrc)
+!call ESMF_LogWrite("continue with isNoop=.false.", ESMF_LOGMSG_DEBUG, rc=localrc)
 
     ! Each PET broadcasts the object ID lists and compares them to what
     ! they get back.   Missing objects are sent so they can be recreated
@@ -448,7 +461,7 @@ call ESMF_LogWrite("continue with isNoop=.false.", ESMF_LOGMSG_DEBUG, rc=localrc
         rcToReturn=rc)) return
     endif
 
-    if (isNoopInt(1)==1) isNoop = .true.  ! found that Reconcile is a NOOP
+    isNoop = (isNoopInt(1)==1)  ! globally consistent result
 
     ! return successfully
     rc = ESMF_SUCCESS
@@ -565,7 +578,7 @@ call ESMF_LogWrite("continue with isNoop=.false.", ESMF_LOGMSG_DEBUG, rc=localrc
               ESMF_CONTEXT, rcToReturn=rc)) return
           endif
 
-call ESMF_LogWrite("processing "//trim(itemNameList(item)), ESMF_LOGMSG_DEBUG, rc=localrc)
+!call ESMF_LogWrite("processing "//trim(itemNameList(item)), ESMF_LOGMSG_DEBUG, rc=localrc)
 
           call ESMF_VMGetThis(vmItem, thisItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
@@ -665,6 +678,8 @@ end block
     type(ESMF_VMId), allocatable, target :: vmIdMap(:)
     type(ESMF_VMId), pointer             :: vmIdSingleComp
     logical                              :: singleCompCaseFlag
+    integer                              :: singleCompCaseFlagInt(1)
+    integer                              :: singleCompCaseInt(1)
     integer                              :: singleCompIndex
 
     character(len=ESMF_MAXSTR) :: logmsg
@@ -838,6 +853,17 @@ end block
         vmIdSingleComp => vmIdMap(singleCompIndex)
       endif
     endif
+
+    ! ensure global consistency of the final result
+    singleCompCaseFlagInt(1) = 0
+    if (singleCompCaseFlag) singleCompCaseFlagInt(1) = 1
+    ! logical AND reduction, only 1 if all incoming 1
+    call ESMF_VMAllReduce(vm, singleCompCaseFlagInt, singleCompCaseInt, 1, &
+      ESMF_REDUCE_MIN, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+      rcToReturn=rc)) return
+    singleCompCaseFlag = (singleCompCaseInt(1)==1)  ! globally consistent result
+
     if (profile) then
       call ESMF_TraceRegionExit("Decide between cases", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -926,6 +952,7 @@ end block
 !singleCompCaseFlag = .false.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+#if 0
 block
   character(160):: msgStr
   write(msgStr,*) "size(vmintids_send): ", size(vmintids_send)
@@ -935,6 +962,7 @@ block
   write(msgStr,*) "singleCompCaseFlag: ", singleCompCaseFlag
   call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=rc)
 end block
+#endif
 
     if (singleCompCaseFlag) then
       ! CASE: a single component interacting with a state
@@ -1423,6 +1451,7 @@ end block
       return
     endif
 
+#if 0
 block
   character(160)  :: msgStr
   write(msgStr,*) "SingleCompCase rootVas=", rootVas
@@ -1430,6 +1459,7 @@ block
   write(msgStr,*) "SingleCompCase rootPet=", rootPet
   call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
 end block
+#endif
 
     ! Serialize on rootPet
     if (localPet==rootPet) then
@@ -1457,11 +1487,13 @@ end block
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+#if 0
 block
   character(160)  :: msgStr
   write(msgStr,*) "isFlag=", isFlag
   call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
 end block
+#endif
 
     ! only inactive PETs deserialize the buffer received from rootPet
     if (.not.isFlag) then
