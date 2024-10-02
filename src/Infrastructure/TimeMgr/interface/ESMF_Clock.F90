@@ -455,8 +455,6 @@
 !              interval of time.
 ! \end{description}
 ! \end{itemize}
-
-! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Creates and sets the initial values in a new {\tt ESMF\_Clock}.
@@ -727,11 +725,13 @@
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
 ! \item[8.7.0] Added arguments {\tt repeatDuration} and {\tt repeatCount}.
 !              The argument {\tt repeatDuration} allows the user to get information
 !              about how far the clock will advance before repeating. The argument
 !              {\tt repeatCount} tells how many times the clock has repeated.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
