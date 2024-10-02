@@ -776,6 +776,7 @@ end block
 
     character(160)  :: prefixStr
     type(ESMF_VMId), allocatable, target :: vmIdMap(:)
+    type(ESMF_VMId), pointer             :: vmIdMap_ptr(:)
     type(ESMF_VMId), pointer             :: vmIdSingleComp
     logical                              :: singleCompCaseFlag
     integer                              :: singleCompCaseFlagInt(1)
@@ -903,6 +904,7 @@ end block
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT,  &
       rcToReturn=rc)) return
+    vmIdMap_ptr => vmIdMap
     if (profile) then
       call ESMF_TraceRegionExit("ESMF_VMTranslateVMId", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -989,7 +991,7 @@ end block
 #if 0
     ! Log a JSON State representation -----------------------------------------
     call idesc%Initialize(createInfo=.true., addObjectInfo=.true., &
-      vmIdMap=vmIdMap, rc=localrc)
+      vmIdMap=vmIdMap_ptr, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     call idesc%Update(state, "", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1029,7 +1031,7 @@ end block
     call info_cache%Initialize(localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call info_cache%UpdateFields(state, vmIdMap, rc=localrc)
+    call info_cache%UpdateFields(state, vmIdMap=vmIdMap_ptr, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
     call info_cache%Destroy(localrc)
