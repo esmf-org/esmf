@@ -3151,7 +3151,7 @@ end subroutine ESMF_ParseDurString
 !
 !
 ! !DESCRIPTION:
-!     Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
+!     Sets the value of an {\tt ESMF\_TimeInterval} using a
 !     string in ISO 8601 duration format P[y]Y[mm]M[d]DT[h]H[m]M[s]S. See ~\cite{ISO} and ~\cite{ISOnotes} for information about the format. In ESMF's implementation the time values can have the following types: 
 !     \begin{description}
 !      \item[y] - the number of years expressed in up to a 64-bit integer
@@ -3245,7 +3245,7 @@ end subroutine ESMF_ParseDurString
 !
 !
 ! !DESCRIPTION:
-!  Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
+!  Sets the value of an {\tt ESMF\_TimeInterval} using a
 !  string in ISO 8601 duration format P[y]Y[mm]M[d]DT[h]H[m]M[s]S. See ~\cite{ISO} and ~\cite{ISOnotes} for
 !  information about the format. Also, see the description for the method
 ! {\tt ESMF\_TimeIntervalSetStr()}~\ref{API:TimeIntervalSetStr}
@@ -3341,7 +3341,7 @@ end subroutine ESMF_ParseDurString
 !
 !
 ! !DESCRIPTION:
-!  Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
+!  Sets the value of an {\tt ESMF\_TimeInterval} using a
 !  string in ISO 8601 duration format P[y]Y[mm]M[d]DT[h]H[m]M[s]S. See ~\cite{ISO} and ~\cite{ISOnotes} for
 !  information about the format. Also, see the description for the method
 ! {\tt ESMF\_TimeIntervalSetStr()}~\ref{API:TimeIntervalSetStr}
@@ -3430,7 +3430,7 @@ end subroutine ESMF_ParseDurString
 !
 !
 ! !DESCRIPTION:
-!  Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
+!  Sets the value of an {\tt ESMF\_TimeInterval} using a
 !  string in ISO 8601 duration format P[y]Y[mm]M[d]DT[h]H[m]M[s]S. See ~\cite{ISO} and ~\cite{ISOnotes} for
 !  information about the format. Also, see the description for the method
 ! {\tt ESMF\_TimeIntervalSetStr()}~\ref{API:TimeIntervalSetStr}
