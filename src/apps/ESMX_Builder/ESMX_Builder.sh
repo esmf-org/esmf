@@ -171,6 +171,11 @@ fi
 # read ESMX build file from positional arguments
 if [[ $# -ge 1 ]]; then
   BUILD_FILE="${1}"
+  # ensure the explicitly specified BUILD_FILE exists
+  if [ ! -f "${BUILD_FILE}" ]; then
+    echo "ERROR: ESMX_BUILD_FILE is missing: ${BUILD_FILE}"
+    usage; exit 1
+  fi
 else
   BUILD_FILE="esmxBuild.yaml"
 fi
@@ -193,12 +198,6 @@ fi
 # check ESMF_ESMXDIR
 if [ ! -d "${ESMF_ESMXDIR}" ]; then
   echo "ERROR: ESMF_ESMXDIR directory is missing: ${ESMF_ESMXDIR}"
-  usage; exit 1
-fi
-
-# check BUILD_FILE
-if [ ! -f "${BUILD_FILE}" ]; then
-  echo "ERROR: ESMX_BUILD_FILE is missing: ${BUILD_FILE}"
   usage; exit 1
 fi
 
@@ -254,21 +253,42 @@ INSTALL_SETTINGS=("")
 
 # build and install
 set +e
+if [ "${VERBOSE}" = true ] ; then
+  echo --- CMake Configuring ---
+  set -x
+fi
 cmake -S${ESMF_ESMXDIR} -B${BUILD_DIR} ${CMAKE_SETTINGS[@]}
-if [ "$?" !=  "0" ]; then
-  echo "ESMX_Builder Failed: (cmake)"
+RC=$?
+{ set +x; } 2>/dev/null
+if [ $RC -ne 0 ]; then
+  echo "ESMX_Builder Failed: 'cmake -S${ESMF_ESMXDIR} -B${BUILD_DIR} ${CMAKE_SETTINGS[@]}'"
   exit -1
 fi
+echo
+if [ "${VERBOSE}" = true ] ; then
+  echo --- CMake Building ---
+  set -x
+fi
 cmake --build ${BUILD_DIR} ${BUILD_SETTINGS[@]}
-if [ "$?" !=  "0" ]; then
-  echo "ESMX_Builder Failed: (cmake --build)"
+RC=$?
+{ set +x; } 2>/dev/null
+if [ $RC -ne 0 ]; then
+  echo "ESMX_Builder Failed: 'cmake --build ${BUILD_DIR} ${BUILD_SETTINGS[@]}'"
   exit -2
 fi
+echo
+if [ "${VERBOSE}" = true ] ; then
+  echo --- CMake Installing ---
+  set -x
+fi
 cmake --install ${BUILD_DIR} ${INSTALL_SETTINGS[@]}
-if [ "$?" !=  "0" ]; then
-  echo "ESMX_Builder Failed: (cmake --install)"
+RC=$?
+{ set +x; } 2>/dev/null
+if [ $RC -ne 0 ]; then
+  echo "ESMX_Builder Failed: 'cmake --install ${BUILD_DIR} ${INSTALL_SETTINGS[@]}'"
   exit -3
 fi
+echo
 if [ "${TEST}" = true ]; then
   (cd ${BUILD_DIR}/Driver; ctest ${TEST_SETTINGS[@]})
   if [ "$?" !=  "0" ]; then

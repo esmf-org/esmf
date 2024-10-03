@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -48,6 +48,11 @@ namespace ESMCI {
 
 namespace ESMCI {
 
+  // constants and enums
+
+  enum HConfigMatch_Flag {HCONFIGMATCH_INVALID=0, HCONFIGMATCH_NONE,
+    HCONFIGMATCH_EXACT, HCONFIGMATCH_ALIAS};
+
   // classes and structs
 
   class HConfig{
@@ -64,6 +69,7 @@ namespace ESMCI {
       static HConfig create(int *rc=NULL);
       template <typename T> static HConfig create(T content, int *rc=NULL);
       template <typename T> static HConfig create(T *content, int count, int *rc=NULL);
+      static bool equal(HConfig *hconfig1, HConfig *hconfig2);
       static int destroy(HConfig *hconfig);
 
       template <typename T> inline static YAML::Node find(T self, HConfig *key);
@@ -128,6 +134,11 @@ namespace ESMCI {
       HConfig iterBeginMapVal(int *rc=NULL);
       HConfig iterEndMapVal(int *rc=NULL);
       int iterNext();
+
+      void log(std::string prefix,
+        ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO, int *docIndex=NULL)const;
+      static HConfigMatch_Flag match(HConfig *hconfig1, HConfig *hconfig2,
+        int *rc=NULL);
 
       template<typename T> T as(bool *asOkay, int *rc=NULL);
       template<typename T> T asMapKey(bool *asOkay, int *rc=NULL);

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -28,6 +28,7 @@
 // !USES:
 #include "ESMCI_Macros.h"
 #include "ESMCI_Calendar.h"
+#include "ESMCI_Util.h"
 
 // public globals, filled in by ESMC_Initialize()
 //  and used by MPI_Init().   set once, treat as read-only!
@@ -53,6 +54,8 @@ int ESMCI_Initialize(int argc, char **argv,
 
 int ESMCI_Finalize(void);
 
+int ESMCI_Finalize(ESMC_End_Flag endFlag);
+
 
 // prototypes for fortran interface routines
 extern "C" {
@@ -63,7 +66,7 @@ extern "C" {
                                         ESMC_LogKind_Flag *defaultLogType,
                                         int *rc, ESMCI_FortranStrLenArg count1,
                                         ESMCI_FortranStrLenArg count2);
-   void FTN_X(f_esmf_frameworkfinalize)(int *rc);
+   void FTN_X(f_esmf_frameworkfinalize)(int *rc, ESMC_End_Flag *endFlag);
 };
 
 

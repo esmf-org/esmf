@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -60,8 +60,6 @@ module NUOPC_Connector
     type(ESMF_FieldBundle)              :: dstFields
     type(ESMF_Field), pointer           :: srcFieldList(:)
     type(ESMF_Field), pointer           :: dstFieldList(:)
-    integer                             :: srcFieldCount
-    integer                             :: dstFieldCount
     type(ESMF_RouteHandle)              :: rh
     type(ESMF_State)                    :: state
     type(ESMF_Region_Flag), pointer     :: zeroRegions(:)
@@ -73,8 +71,6 @@ module NUOPC_Connector
     type(ESMF_FieldBundle)              :: dstFields
     type(ESMF_Field), pointer           :: srcFieldList(:)
     type(ESMF_Field), pointer           :: dstFieldList(:)
-    integer                             :: srcFieldCount
-    integer                             :: dstFieldCount    
     logical                             :: srcDstOverlap
     logical                             :: srcFlag
     logical                             :: dstFlag
@@ -315,7 +311,7 @@ module NUOPC_Connector
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -400,7 +396,7 @@ module NUOPC_Connector
     endif
     
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -472,7 +468,7 @@ module NUOPC_Connector
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -779,7 +775,7 @@ module NUOPC_Connector
     endif
     
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1093,7 +1089,7 @@ module NUOPC_Connector
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1318,7 +1314,7 @@ module NUOPC_Connector
     endif
     
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1396,7 +1392,7 @@ module NUOPC_Connector
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
@@ -1692,7 +1688,7 @@ module NUOPC_Connector
     endif
     
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1753,7 +1749,7 @@ module NUOPC_Connector
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1831,7 +1827,7 @@ module NUOPC_Connector
     endif
     
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1919,7 +1915,7 @@ module NUOPC_Connector
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2584,7 +2580,7 @@ module NUOPC_Connector
     endif
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2699,7 +2695,7 @@ module NUOPC_Connector
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -3701,7 +3697,7 @@ module NUOPC_Connector
     endif
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -3809,7 +3805,7 @@ module NUOPC_Connector
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -4548,7 +4544,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -4896,7 +4892,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -4985,7 +4981,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
     
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -5080,7 +5076,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -5537,7 +5533,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
     
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -6092,7 +6088,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -6105,7 +6101,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -6164,7 +6160,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -6174,7 +6170,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -6243,7 +6239,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -6464,7 +6460,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
     
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -6545,7 +6541,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -6780,7 +6776,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
     
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -7094,46 +7090,7 @@ print *, "found match:"// &
     integer                         :: fieldDimCount, gridDimCount
     logical                         :: gridPair, verbosityFlag
 
-    type RHL
-      type(ESMF_Grid)                   :: srcGrid, dstGrid
-      ! field specific items, TODO: push into a FieldMatch() method
-      type(ESMF_ArraySpec)              :: srcArraySpec, dstArraySpec
-      type(ESMF_StaggerLoc)             :: srcStaggerLoc, dstStaggerLoc
-      integer, pointer                  :: srcGridToFieldMap(:)
-      integer, pointer                  :: dstGridToFieldMap(:)
-      integer, pointer                  :: srcUngriddedLBound(:)
-      integer, pointer                  :: srcUngriddedUBound(:)
-      integer, pointer                  :: dstUngriddedLBound(:)
-      integer, pointer                  :: dstUngriddedUBound(:)
-      ! remap specific items
-      logical                           :: redistflag 
-      type(ESMF_RegridMethod_Flag)      :: regridmethod
-      type(ESMF_ExtrapMethod_Flag)      :: extrapMethod
-      integer                           :: extrapNumSrcPnts
-      real                              :: extrapDistExponent
-      integer                           :: extrapNumLevels
-      logical                           :: ignoreDegenerate
-      type(ESMF_RouteHandle)            :: rh
-      integer(ESMF_KIND_I4), pointer    :: factorIndexList(:,:)
-      real(ESMF_KIND_R8), pointer       :: factorList(:)
-      integer(ESMF_KIND_I4), pointer    :: srcMaskValues(:)
-      integer(ESMF_KIND_I4), pointer    :: dstMaskValues(:)
-      type(ESMF_PoleMethod_Flag)        :: polemethod
-      integer                           :: regridPoleNPnts
-      type(ESMF_UnmappedAction_Flag)    :: unmappedaction
-      type(RHL), pointer                :: prev
-    end type
-
-#define USE_ESMF_RHL
-!TODO: Remove code that is under all the USE_ESMF_RHL-else branches after
-!TODO: plenty of testing across systems, and no issues with the ESMF level
-!TODO: implementation have been found or reported. I estimate this should happen
-!TODO: right before the ESMF 8.6.0 release.
-#ifdef USE_ESMF_RHL
     type(ESMF_RHL), pointer         :: rhList, rhListE
-#else
-    type(RHL), pointer              :: rhList, rhListE
-#endif
     logical                         :: rhListMatch
 
     verbosityFlag = btest(verbosity,12)
@@ -7422,6 +7379,8 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
               regridmethod = ESMF_REGRIDMETHOD_NEAREST_DTOS
             else if (trim(chopSubString(2))=="conserve") then
               regridmethod = ESMF_REGRIDMETHOD_CONSERVE
+            else if (trim(chopSubString(2))=="conserve_2nd") then
+              regridmethod = ESMF_REGRIDMETHOD_CONSERVE_2ND
             else
               write (msgString,*) "Specified option '", &
                 trim(chopStringList(j)), &
@@ -7509,6 +7468,8 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
               extrapMethod = ESMF_EXTRAPMETHOD_NEAREST_IDAVG
             else if (trim(chopSubString(2))=="nearest_stod") then
               extrapMethod = ESMF_EXTRAPMETHOD_NEAREST_STOD
+            else if (trim(chopSubString(2))=="nearest_d") then
+              extrapMethod = ESMF_EXTRAPMETHOD_NEAREST_D
             else if (trim(chopSubString(2))=="creep") then
               extrapMethod = ESMF_EXTRAPMETHOD_CREEP
             else if (trim(chopSubString(2))=="creep_nrst_d") then
@@ -7758,7 +7719,6 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
         endif
       enddo
 
-#ifdef USE_ESMF_RHL
       call ESMF_FieldBundleRegridStorePair(srcFields(i), dstFields(i), &
         srcMaskValues, dstMaskValues, regridmethod, polemethod, &
         regridPoleNPnts, &
@@ -7772,325 +7732,6 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
-#else
-
-      ! for now reuse of Regrid RouteHandle is only implemented for Grids
-      
-      call ESMF_FieldGet(srcFields(i), geomtype=srcGeomtype, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-      call ESMF_FieldGet(dstFields(i), geomtype=dstGeomtype, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-
-      gridPair = (srcGeomtype==ESMF_GEOMTYPE_GRID)
-      gridPair = gridPair .and. (dstGeomtype==ESMF_GEOMTYPE_GRID)
-
-      rhListMatch = .false.
-
-      if (gridPair) then
-        ! access the src and dst grid objects
-        call ESMF_FieldGet(srcFields(i), arrayspec=srcArraySpec, grid=srcGrid, &
-          staggerLoc=srcStaggerLoc, dimCount=fieldDimCount, rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-        call ESMF_GridGet(srcGrid, dimCount=gridDimCount, rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-        allocate(srcGridToFieldMap(gridDimCount))
-        allocate(srcUngriddedLBound(fieldDimCount-gridDimCount), &
-          srcUngriddedUBound(fieldDimCount-gridDimCount))
-        call ESMF_FieldGet(srcFields(i), gridToFieldMap=srcGridToFieldMap, &
-          ungriddedLBound=srcUngriddedLBound, &
-          ungriddedUBound=srcUngriddedUBound,rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-        
-        call ESMF_FieldGet(dstFields(i), arrayspec=dstArraySpec, grid=dstGrid, &
-          staggerLoc=dstStaggerLoc, rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-        call ESMF_GridGet(dstGrid, dimCount=gridDimCount, rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-        allocate(dstGridToFieldMap(gridDimCount))
-        allocate(dstUngriddedLBound(fieldDimCount-gridDimCount), &
-          dstUngriddedUBound(fieldDimCount-gridDimCount))
-        call ESMF_FieldGet(dstFields(i), gridToFieldMap=dstGridToFieldMap, &
-          ungriddedLBound=dstUngriddedLBound, &
-          ungriddedUBound=dstUngriddedUBound,rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-
-        ! search for a match
-        rhListE=>rhList
-        do while (associated(rhListE))
-          ! test src grid match
-          rhListMatch = &
-            ESMF_GridMatch(rhListE%srcGrid, srcGrid, globalflag=.true., rc=localrc) &
-            >= ESMF_GRIDMATCH_EXACT
-          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-#if 0
-write (msgString,*) trim(name)//": srcGrid Match for i=", i, " is: ", &
-  rhListMatch
-call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG)
-#endif
-          if (.not.rhListMatch) goto 123
-          ! test dst grid match
-          rhListMatch = &
-            ESMF_GridMatch(rhListE%dstGrid, dstGrid, globalflag=.true., rc=localrc) &
-            >= ESMF_GRIDMATCH_EXACT
-          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-#if 0
-write (msgString,*) trim(name)//": dstGrid Match for i=", i, " is: ", &
-  rhListMatch
-call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG)
-#endif
-          if (.not.rhListMatch) goto 123
-          ! test src arrayspec match
-          rhListMatch = (rhListE%srcArraySpec==srcArraySpec)
-          if (.not.rhListMatch) goto 123
-          ! test dst arrayspec match
-          rhListMatch = (rhListE%dstArraySpec==dstArraySpec)
-          if (.not.rhListMatch) goto 123
-          ! test src staggerLoc match
-          rhListMatch = (rhListE%srcStaggerLoc==srcStaggerLoc)
-          if (.not.rhListMatch) goto 123
-          ! test dst staggerLoc match
-          rhListMatch = (rhListE%dstStaggerLoc==dstStaggerLoc)
-          if (.not.rhListMatch) goto 123
-          ! test srcGridToFieldMap
-          rhListMatch = &
-            (size(rhListE%srcGridToFieldMap)==size(srcGridToFieldMap))
-          if (.not.rhListMatch) goto 123
-          do j=1, size(srcGridToFieldMap)
-            rhListMatch = (rhListE%srcGridToFieldMap(j)==srcGridToFieldMap(j))
-            if (.not.rhListMatch) goto 123
-          enddo
-          ! test dstGridToFieldMap
-          rhListMatch = &
-            (size(rhListE%dstGridToFieldMap)==size(dstGridToFieldMap))
-          if (.not.rhListMatch) goto 123
-          do j=1, size(dstGridToFieldMap)
-            rhListMatch = (rhListE%dstGridToFieldMap(j)==dstGridToFieldMap(j))
-            if (.not.rhListMatch) goto 123
-          enddo
-          ! test srcUngriddedLBound
-          rhListMatch = &
-            (size(rhListE%srcUngriddedLBound)==size(srcUngriddedLBound))
-          if (.not.rhListMatch) goto 123
-          do j=1, size(srcUngriddedLBound)
-            rhListMatch = (rhListE%srcUngriddedLBound(j)==srcUngriddedLBound(j))
-            if (.not.rhListMatch) goto 123
-          enddo
-          ! test srcUngriddedUBound
-          rhListMatch = &
-            (size(rhListE%srcUngriddedUBound)==size(srcUngriddedUBound))
-          if (.not.rhListMatch) goto 123
-          do j=1, size(srcUngriddedUBound)
-            rhListMatch = (rhListE%srcUngriddedUBound(j)==srcUngriddedUBound(j))
-            if (.not.rhListMatch) goto 123
-          enddo
-          ! test dstUngriddedLBound
-          rhListMatch = &
-            (size(rhListE%dstUngriddedLBound)==size(dstUngriddedLBound))
-          if (.not.rhListMatch) goto 123
-          do j=1, size(dstUngriddedLBound)
-            rhListMatch = (rhListE%dstUngriddedLBound(j)==dstUngriddedLBound(j))
-            if (.not.rhListMatch) goto 123
-          enddo
-          ! test dstUngriddedUBound
-          rhListMatch = &
-            (size(rhListE%dstUngriddedUBound)==size(dstUngriddedUBound))
-          if (.not.rhListMatch) goto 123
-          do j=1, size(dstUngriddedUBound)
-            rhListMatch = (rhListE%dstUngriddedUBound(j)==dstUngriddedUBound(j))
-            if (.not.rhListMatch) goto 123
-          enddo
-          ! test redistflag
-          rhListMatch = (rhListE%redistflag .eqv. redistflag)
-          if (.not.rhListMatch) goto 123
-          ! test regridmethod
-          rhListMatch = (rhListE%regridmethod==regridmethod)
-          if (.not.rhListMatch) goto 123
-          ! test extrapMethod
-          rhListMatch = (rhListE%extrapMethod==extrapMethod)
-          if (.not.rhListMatch) goto 123
-          ! test extrapNumSrcPnts
-          rhListMatch = (rhListE%extrapNumSrcPnts==extrapNumSrcPnts)
-          if (.not.rhListMatch) goto 123
-          ! test extrapDistExponent
-          rhListMatch = (rhListE%extrapDistExponent==extrapDistExponent)
-          if (.not.rhListMatch) goto 123
-          ! test extrapNumLevels
-          rhListMatch = (rhListE%extrapNumLevels==extrapNumLevels)
-          if (.not.rhListMatch) goto 123
-          ! test ignoreDegenerate
-          rhListMatch = (rhListE%ignoreDegenerate.eqv.ignoreDegenerate)
-          if (.not.rhListMatch) goto 123
-          ! test srcMaskValues
-          rhListMatch = &
-            (size(rhListE%srcMaskValues)==size(srcMaskValues))
-          if (.not.rhListMatch) goto 123
-          do j=1, size(srcMaskValues)
-            rhListMatch = (rhListE%srcMaskValues(j)==srcMaskValues(j))
-            if (.not.rhListMatch) goto 123
-          enddo
-          ! test dstMaskValues
-          rhListMatch = &
-            (size(rhListE%dstMaskValues)==size(dstMaskValues))
-          if (.not.rhListMatch) goto 123
-          do j=1, size(dstMaskValues)
-            rhListMatch = (rhListE%dstMaskValues(j)==dstMaskValues(j))
-            if (.not.rhListMatch) goto 123
-          enddo
-          ! test polemethod
-          rhListMatch = (rhListE%polemethod==polemethod)
-          if (.not.rhListMatch) goto 123
-          ! test regridPoleNPnts
-          rhListMatch = (rhListE%regridPoleNPnts==regridPoleNPnts)
-          if (.not.rhListMatch) goto 123
-          ! test unmappedaction
-          rhListMatch = (rhListE%unmappedaction==unmappedaction)
-          if (.not.rhListMatch) goto 123
-          ! completed search 
-          exit ! break out
-123       continue
-          rhListE=>rhListE%prev   ! previous element
-        enddo
-        
-      endif
-
-      if (.not.rhListMatch) then
-#if 0
-call ESMF_LogWrite(trim(name)//&
-  ": no rhListMatch -> pre-compute new remapping: "// &
-  trim(cplList(i)), ESMF_LOGMSG_DEBUG)
-#endif
-        if (gridPair) then
-          ! add a new rhList element
-          allocate(rhListE)
-          rhListE%prev=>rhList  ! link new element to previous list head
-          rhList=>rhListE       ! list head now pointing to new element
-        endif
-        ! precompute remapping
-        if (redistflag) then
-          ! redist handled via ESMF_FieldBundleRedistStore() outside pair loop
-          ! finding it here indicates that something went wrong
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="Bad internal error - should never get here!",&
-            line=__LINE__, file=trim(name)//":"//FILENAME, &
-            rcToReturn=rc)
-          return  ! bail out
-        else      
-          ! regrid store call
-          !TODO: leverage ESMF_FieldBundleRegridStore(), like for the Redist
-          !TODO: case, once ESMF_FieldBundleRegridStore() supports passing
-          !TODO: field pair specific arguments e.g. for polemethod,
-          !TODO: srcTermProcessing, etc. Until then must do each field
-          !TODO: individually here. Notice that most of the RH reuse
-          !TODO: optimization is already available on the ESMF side, too.
-          call ESMF_FieldRegridStore(srcField=srcFields(i), &
-            dstField=dstFields(i), &
-            srcMaskValues=srcMaskValues, dstMaskValues=dstMaskValues, &
-            regridmethod=regridmethod, &
-            polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
-            extrapMethod=extrapMethod, extrapNumSrcPnts=extrapNumSrcPnts, &
-            extrapDistExponent=extrapDistExponent, &
-            extrapNumLevels=extrapNumLevels, &
-            unmappedaction=unmappedaction, ignoreDegenerate=ignoreDegenerate, &
-            srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
-            routehandle=rhh, &
-            factorIndexList=factorIndexList, factorList=factorList, &
-            rc=localrc)
-          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-        endif
-        if (gridPair) then
-          ! store info in the new rhList element
-          rhListE%srcGrid=srcGrid
-          rhListE%dstGrid=dstGrid
-          rhListE%srcArraySpec=srcArraySpec
-          rhListE%dstArraySpec=dstArraySpec
-          rhListE%srcStaggerLoc=srcStaggerLoc
-          rhListE%dstStaggerLoc=dstStaggerLoc
-          rhListE%srcGridToFieldMap=>srcGridToFieldMap
-          rhListE%dstGridToFieldMap=>dstGridToFieldMap
-          rhListE%srcUngriddedLBound=>srcUngriddedLBound
-          rhListE%srcUngriddedUBound=>srcUngriddedUBound
-          rhListE%dstUngriddedLBound=>dstUngriddedLBound
-          rhListE%dstUngriddedUBound=>dstUngriddedUBound
-          rhListE%redistflag=redistflag
-          rhListE%regridmethod=regridmethod
-          rhListE%extrapMethod=extrapMethod
-          rhListE%extrapNumSrcPnts=extrapNumSrcPnts
-          rhListE%extrapDistExponent=extrapDistExponent
-          rhListE%extrapNumLevels=extrapNumLevels
-          rhListE%ignoreDegenerate=ignoreDegenerate
-          rhListE%rh=rhh
-          rhListE%factorIndexList=>factorIndexList
-          rhListE%factorList=>factorList
-          rhListE%srcMaskValues=>srcMaskValues
-          rhListE%dstMaskValues=>dstMaskValues
-          rhListE%polemethod=polemethod
-          rhListE%regridPoleNPnts=regridPoleNPnts
-          rhListE%unmappedaction=unmappedaction
-        endif
-      else
-#if 0
-call ESMF_LogWrite(trim(name)//&
-  ": found rhListMatch -> reuse routehandle: "// &
-  trim(cplList(i)), ESMF_LOGMSG_DEBUG)
-#endif
-        ! pull out the routehandle from the matching rhList element
-        rhh = rhListE%rh
-        factorIndexList => rhListE%factorIndexList
-        factorList => rhListE%factorList
-        ! deallocate temporary grid/field info
-        deallocate(srcGridToFieldMap, dstGridToFieldMap)
-        deallocate(srcUngriddedLBound, srcUngriddedUBound)
-        deallocate(dstUngriddedLBound, dstUngriddedUBound)
-        deallocate(srcMaskValues,      dstMaskValues)
-      endif
-      
-      ! append rhh to rh and clear rhh
-      call ESMF_RouteHandleAppend(rh, appendRoutehandle=rhh, &
-        rraShift=rraShift, vectorLengthShift=vectorLengthShift, &
-        transferflag=.not.rhListMatch, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-      
-      ! adjust rraShift and vectorLengthShift
-      call ESMF_FieldGet(srcFields(i), localDeCount=localDeCount, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-      rraShift = rraShift + localDeCount
-      call ESMF_FieldGet(dstFields(i), localDeCount=localDeCount, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-      rraShift = rraShift + localDeCount
-      vectorLengthShift = vectorLengthShift + 1
-      
-      ! weight dumping
-      if (dumpWeightsFlag .and. .not.redistflag) then
-        call NUOPC_Write(factorList=factorList, &
-          factorIndexList=factorIndexList, &
-          fileName="weightmatrix_"//trim(name)//"_"//trim(chopStringList(1))//".nc",&
-          rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-      endif
-      
-      ! local garbage collection
-      if (.not.gridPair) then
-        ! grid pairs transfer ownership of lists into rhList struct
-        if (associated(factorIndexList)) deallocate(factorIndexList)
-        if (associated(factorList)) deallocate(factorList)
-      endif
-#endif
-
       if (associated(chopStringList)) deallocate(chopStringList)
 
     enddo ! loop over all field pairs
@@ -8102,15 +7743,10 @@ call ESMF_LogWrite(trim(name)//&
       call ESMF_RouteHandleDestroy(rhListE%rh, noGarbage=.true., rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-#ifdef USE_ESMF_RHL
       if (rhListE%factorAllocFlag) then
         deallocate(rhListE%factorIndexList)
         deallocate(rhListE%factorList)
       endif
-#else
-      if (associated(rhListE%factorIndexList)) deallocate(rhListE%factorIndexList)
-      if (associated(rhListE%factorList)) deallocate(rhListE%factorList)
-#endif
       deallocate(rhListE%srcGridToFieldMap, rhListE%dstGridToFieldMap)
       deallocate(rhListE%srcUngriddedLBound, rhListE%srcUngriddedUBound)
       deallocate(rhListE%dstUngriddedLBound, rhListE%dstUngriddedUBound)

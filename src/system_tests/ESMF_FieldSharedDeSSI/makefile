@@ -6,7 +6,7 @@ run_uni:  tree_run_system_tests_uni
 
 LOCDIR	  = src/system_tests/ESMF_FieldSharedDeSSI
 
-SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_FieldSharedDeSSISTest
+SYSTEM_TESTS_BUILD    = $(ESMF_TESTDIR)/ESMF_FieldSharedDeSSISTest
 
 # Object files other than SysTest%.o that the
 # system tests executable will depend on.

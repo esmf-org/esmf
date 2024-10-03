@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -224,7 +224,7 @@
       !NEX_UTest_Multi_Proc_Only
       ! Testing ESMF_FieldAssignment(=)()
       write(name, *) "Field assignment and equality Test"
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not produce alias"
       fieldAlias = f1
       fieldBool = (fieldAlias.eq.f1)
       call ESMF_Test(fieldBool, name, failMsg, result, ESMF_SRCLINE)
@@ -472,6 +472,13 @@
 
       fS = f2 ! assignment will lead to shallow copy, use later down
       
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      write(name, *) "FieldLog Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_FieldLog(f2, prefix="FieldLog for f2: ", rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       ! Verifying that a Field with no data can be destroyed

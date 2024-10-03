@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -171,7 +171,7 @@ contains
   ! types either contain F95 component initialization, or do not have a
   ! SEQUENCE statement.  This prevents them from being placed into
   ! COMMON blocks.  Note that the Standard does not even allow a pointer to
-  ! such types to reside in COMMON.  (See Constraint 589 in §5.5.2 of F2003.)
+  ! such types to reside in COMMON.  (See Constraint 589 in Section 5.5.2 of F2003.)
 
   !-----------------------------------------------------------------------------
   !NEX_disabled_UTest

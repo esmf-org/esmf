@@ -1,0 +1,4 @@
+Collections:
+   fstream1: 
+      template: foo
+      range: bar

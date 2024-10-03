@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -89,6 +89,7 @@ module ESMF_ArrayBundleMod
   public ESMF_ArrayBundleHaloRelease
   public ESMF_ArrayBundleHaloStore
   public ESMF_ArrayBundleIsCreated
+  public ESMF_ArrayBundleLog
   public ESMF_ArrayBundlePrint
   public ESMF_ArrayBundleRead
   public ESMF_ArrayBundleRedist
@@ -1586,6 +1587,75 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end function
 !------------------------------------------------------------------------------
 
+
+! -------------------------- ESMF-public method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleLog()"
+!BOP
+! !IROUTINE: ESMF_ArrayBundleLog - Log ArrayBundle information
+
+! !INTERFACE:
+  subroutine ESMF_ArrayBundleLog(arraybundle, keywordEnforcer, prefix, logMsgFlag, deepFlag, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle), intent(in)              :: arraybundle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(len=*),       intent(in),   optional  :: prefix
+    type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
+    logical,                intent(in),   optional  :: deepFlag
+    integer, intent(out),                 optional  :: rc
+!
+! !DESCRIPTION:
+!   Write information about {\tt arraybundle} to the ESMF default Log.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[arraybundle]
+!     {\tt ESMF\_ArrayBundle} object logged.
+!   \item [{[prefix]}]
+!     String to prefix the log message. Default is no prefix.
+!   \item [{[logMsgFlag]}]
+!     Type of log message generated. See section \ref{const:logmsgflag} for
+!     a list of valid message types. Default is {\tt ESMF\_LOGMSG\_INFO}.
+!   \item[{[deepFlag]}]
+!     When set to {\tt .false.} (default), only log top level information for
+!     each item contained in the ArrayBundle.
+!     When set to {\tt .true.}, additionally log information for each item.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_LogMsg_Flag)  :: logMsg
+    type(ESMF_Logical)      :: deep
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
+
+    ! deal with optional logMsgFlag
+    logMsg = ESMF_LOGMSG_INFO ! default
+    if (present(logMsgFlag)) logMsg = logMsgFlag
+
+    ! deal with optional deepFlag
+    deep = ESMF_FALSE ! default
+    if (present(deepFlag)) deep = deepFlag
+
+    ! Call into the C++ interface.
+    call c_esmc_arraybundlelog(arraybundle, prefix, logMsg, deep, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayBundleLog
+!------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------

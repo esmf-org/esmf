@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -248,6 +248,72 @@ HConfig HConfig::create(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::equal()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::equal - check if two hconfigs are equal
+//
+// !INTERFACE:
+bool HConfig::equal(
+//
+// !RETURN VALUE:
+//  bool
+//
+// !ARGUMENTS:
+    HConfig *hconfig1,
+    HConfig *hconfig2) {
+//
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+#ifdef ESMF_YAMLCPP
+
+  // Check for error condition of NULL inputs, since this is used as an equality
+  // operator above, there isn't really a way to pass an error code, so return
+  // false instead (which seems to be the way this is handled in other equality
+  // operators in the framework).
+  if (hconfig1 == NULL) return false;
+  if (hconfig2 == NULL) return false;
+
+  // TODO: Move this into an equality operator for HConfig and call that instead
+
+  // See if the docs are equal
+  if (hconfig1->doc == hconfig2->doc) {
+
+    // They are both NULL, so this is an iterator
+    if (hconfig1->doc == NULL) {
+
+      // See if they are the same type
+      if (hconfig1->type == hconfig2->type) {
+
+        // Compare iterators to determine final equality
+        if (hconfig1->iter == hconfig2->iter) return true;
+        else return false;
+
+      } else {
+        return false; // Not the same type so not the same
+      }
+
+    } else { // Not NULL -> aren't iterators, but have the same docs -> equal
+      return true;
+    }
+
+  } else { // Not the same docs -> not equal
+    return false;
+  }
+
+#else
+  return false;
+#endif
+
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::HConfig::destroy()"
 //BOP
 // !IROUTINE:  ESMCI::HConfig::destroy - free a HConfig
@@ -316,9 +382,14 @@ int HConfig::load(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if (doc)
-      (*doc)[0] = YAML::Load(content);
-    else{
+    string contentTemp;
+    if (content.front()=='\'' || content.front()=='"')
+      contentTemp = "!!str " + content; // identified as quoted string, preserve
+    else
+      contentTemp = content;
+    if (doc){
+      (*doc)[0] = YAML::Load(contentTemp);
+    }else{
       // iterator cannot be used here
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "HConfig object must NOT be iterator", ESMC_CONTEXT, &rc);
@@ -1572,8 +1643,11 @@ int HConfig::getSizeMapVal(
 
 //-----------------------------------------------------------------------------
 inline string HConfig::tagRef(YAML::Node &self){
-  string value = self.Tag();
+  string valueOrig = self.Tag();
+  string value = valueOrig;
+  bool mustReset = false;
   if ((value == "?") || (value == "")){
+     mustReset = true;
     // not a valid tag found -> implement implicit tag resolution
     switch (self.Type()){
       case YAML::NodeType::Null:
@@ -1602,16 +1676,21 @@ inline string HConfig::tagRef(YAML::Node &self){
     }
     value = self.Tag();  // determine final outcome
   }else if (value == "!"){
+     mustReset = true;
     // yaml-cpp seems to do this for a quoted string
     self.SetTag("tag:yaml.org,2002:str");
     value = self.Tag();  // determine final outcome
   }
+  if (mustReset) self.SetTag(valueOrig);
   return value;
 }
 //-----------------------------------------------------------------------------
 inline string HConfig::tag(YAML::Node self){
-  string value = self.Tag();
+  string valueOrig = self.Tag();
+  string value = valueOrig;
+  bool mustReset = false;
   if ((value == "?") || (value == "")){
+     mustReset = true;
     // not a valid tag found -> implement implicit tag resolution
     switch (self.Type()){
       case YAML::NodeType::Null:
@@ -1640,10 +1719,12 @@ inline string HConfig::tag(YAML::Node self){
     }
     value = self.Tag();  // determine final outcome
   }else if (value == "!"){
+     mustReset = true;
     // yaml-cpp seems to do this for a quoted string
     self.SetTag("tag:yaml.org,2002:str");
     value = self.Tag();  // determine final outcome
   }
+  if (mustReset) self.SetTag(valueOrig);
   return value;
 }
 //-----------------------------------------------------------------------------
@@ -3073,6 +3154,208 @@ int HConfig::iterNext(
 #endif
 
   return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::log()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::log
+//
+// !INTERFACE:
+void HConfig::log(
+//
+// !DESCRIPTION:
+//    Log HConfig contents
+//
+// !ARGUMENTS:
+//
+  std::string prefix,
+  ESMC_LogMsgType_Flag msgType,
+  int *docIndex
+  )const{
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;
+
+  std::stringstream msg;
+  msg << prefix << "--- HConfig::log() start ---------------------------------";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+
+#ifdef ESMF_YAMLCPP
+  int docI = 0; // default
+  if (docIndex) docI = *docIndex - 1;
+
+  try{
+    std::stringstream hconfigstream;
+    if (doc){
+      // node
+      if (doc->size() == 1){
+        // a single document
+        hconfigstream << (*doc)[0];
+      }else{
+        // multiple documents
+        if (docIndex){
+          // only save the specified doc
+          hconfigstream << (*doc)[docI];
+        }else{
+          // save all of the docs
+          for (auto it=doc->begin(); it!=doc->end(); ++it){
+            hconfigstream << "---\n";
+            hconfigstream << *it;
+            hconfigstream << "\n...\n";
+          }
+        }
+      }
+    }else{
+      // iterator
+      if (type==YAML::NodeType::Map){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object must NOT be map iterator", ESMC_CONTEXT, &rc);
+        throw rc;
+      }else
+        hconfigstream << (YAML::Node)(*iter);
+    }
+    for (std::string line; std::getline(hconfigstream, line);)
+      ESMC_LogDefault.Write(prefix + line, msgType);
+  }catch(int catchrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc);
+    throw rc;
+  }catch(...){
+    std::stringstream msg;
+    msg << "Caught exception writing HConfig content to log.";
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg, ESMC_CONTEXT, &rc);
+    throw rc;
+  }
+#else
+  msg.str("");  // clear
+  msg << prefix << "!!! ESMF_YAMLCPP not enabled !!!";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+#endif
+
+  msg.str("");  // clear
+  msg << prefix << "--- HConfig::log() end -----------------------------------";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::match()"
+//BOPI
+// !IROUTINE:  ESMCI::HConfig::match
+//
+// !INTERFACE:
+HConfigMatch_Flag HConfig::match(
+//
+// !RETURN VALUE:
+//    HConfigMatch_Flag match level
+//
+// !ARGUMENTS:
+//
+  HConfig *hconfig1,                      // in
+  HConfig *hconfig2,                      // in
+  int *rc                                 // (out) return code
+  ){
+//
+// !DESCRIPTION:
+//    Determine to what level hconfig1 and hconfig2 match.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  // initialize return value
+  HConfigMatch_Flag matchResult = HCONFIGMATCH_INVALID;
+
+  // return with errors for NULL pointer
+  if (hconfig1 == NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "Not a valid pointer to HConfig", ESMC_CONTEXT, rc);
+    return matchResult;
+  }
+  if (hconfig2 == NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "Not a valid pointer to HConfig", ESMC_CONTEXT, rc);
+    return matchResult;
+  }
+
+  // ALIAS:
+  if (equal(hconfig1, hconfig2)){
+    // alias match
+    matchResult = HCONFIGMATCH_ALIAS;
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
+
+  // NONE:
+  matchResult = HCONFIGMATCH_NONE;
+
+  // EXACT:
+  std::stringstream hconfigstream1;
+  if (hconfig1->doc){
+    // node
+    if (hconfig1->doc->size() == 1){
+      // a single document
+      hconfigstream1 << (*(hconfig1->doc))[0];
+    }else{
+      // multiple documents
+      // save all of the docs
+      for (auto it=hconfig1->doc->begin(); it!=hconfig1->doc->end(); ++it){
+        hconfigstream1 << "---\n";
+        hconfigstream1 << *it;
+        hconfigstream1 << "\n...\n";
+      }
+    }
+  }else{
+    // iterator
+    if (hconfig1->type==YAML::NodeType::Map){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must NOT be map iterator", ESMC_CONTEXT, rc);
+      return matchResult;
+    }else
+      hconfigstream1 << (YAML::Node)(*(hconfig1->iter));
+  }
+  std::stringstream hconfigstream2;
+  if (hconfig2->doc){
+    // node
+    if (hconfig2->doc->size() == 1){
+      // a single document
+      hconfigstream2 << (*(hconfig2->doc))[0];
+    }else{
+      // multiple documents
+      // save all of the docs
+      for (auto it=hconfig2->doc->begin(); it!=hconfig2->doc->end(); ++it){
+        hconfigstream2 << "---\n";
+        hconfigstream2 << *it;
+        hconfigstream2 << "\n...\n";
+      }
+    }
+  }else{
+    // iterator
+    if (hconfig2->type==YAML::NodeType::Map){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must NOT be map iterator", ESMC_CONTEXT, rc);
+      return matchResult;
+    }else
+      hconfigstream2 << (YAML::Node)(*(hconfig2->iter));
+  }
+  if (hconfigstream1.str() == hconfigstream2.str())
+    matchResult = HCONFIGMATCH_EXACT;
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+  return matchResult;
 }
 //-----------------------------------------------------------------------------
 

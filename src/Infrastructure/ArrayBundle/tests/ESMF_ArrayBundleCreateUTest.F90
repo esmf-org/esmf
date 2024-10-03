@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -155,9 +155,16 @@ program ESMF_ArrayBundleCreateUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "ArrayBundlePrint Test"
+  write(name, *) "ArrayBundlePrint #1 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayBundlePrint(arraybundle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ArrayBundleLog #1 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayBundleLog(arraybundle, prefix="log-#1: ", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
@@ -257,9 +264,16 @@ program ESMF_ArrayBundleCreateUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "ArrayBundlePrint Test"
+  write(name, *) "ArrayBundlePrint #2 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayBundlePrint(arraybundle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ArrayBundleLog #2 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayBundleLog(arraybundle, prefix="log-#2: ", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
@@ -450,7 +464,15 @@ program ESMF_ArrayBundleCreateUTest
   !------------------------------------------------------------------------
   call ESMF_ArrayBundlePrint(arraybundle, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ArrayBundleLog #3 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayBundleLog(arraybundle, prefix="log-#3: ", deepFlag=.true., &
+    rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "ArrayBundleGet with arrayName to get count Test"

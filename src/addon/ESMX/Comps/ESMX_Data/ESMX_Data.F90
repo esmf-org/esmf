@@ -85,7 +85,6 @@ module esmx_data
     type(xstate_wrap)          :: is
     type(xdata_state), pointer :: xstate
     character(len=64)          :: value
-    type(ESMF_Config)          :: config
     type(ESMF_HConfig)         :: hconfig, hconfigNode
     character(80)              :: compLabel
     character(:), allocatable  :: badKey
@@ -160,12 +159,9 @@ module esmx_data
       line=__LINE__, file=__FILE__)) return  ! bail out
     if (isFlag) then
       ! Config present, assert it is in the ESMX YAML format
-      call ESMF_GridCompGet(xdata, config=config, rc=rc)
+      call ESMF_GridCompGet(xdata, hconfig=hconfig, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__,    file=__FILE__)) return  ! bail out
-      call ESMF_ConfigGet(config, hconfig=hconfig, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
       hconfigNode = ESMF_HConfigCreateAt(hconfig, keyString=compLabel, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
@@ -743,7 +739,6 @@ module esmx_data
     logical            :: isPresent
     integer            :: stat
     logical            :: check
-    type(ESMF_Config)  :: config
     type(ESMF_HConfig) :: hconfig
     type(ESMF_HConfig) :: xdatacfg
 
@@ -760,12 +755,8 @@ module esmx_data
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
     if (isPresent) then
-      ! get config from component
-      call ESMF_GridCompGet(xdata, config=config, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return
-      ! access hconfig
-      call ESMF_ConfigGet(config, hconfig=hconfig, rc=rc)
+      ! get hconfig from component
+      call ESMF_GridCompGet(xdata, hconfig=hconfig, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
       isPresent = ESMF_HConfigIsDefined(hconfig, &

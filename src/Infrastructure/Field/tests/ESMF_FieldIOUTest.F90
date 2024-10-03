@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1681,6 +1681,7 @@ program ESMF_FieldIOUTest
 ! Tests with both (a) multiple DEs per PET and (b) ungridded dimensions
 ! (Note that these are exhaustive-only unit tests.)
 !------------------------------------------------------------------------
+#ifdef ESMF_TESTEXHAUSTIVE
 
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -1813,6 +1814,7 @@ program ESMF_FieldIOUTest
   write(name, *) "Comparison of read-in Field from 2DE grid with 1 ungridded dim vs original, DE 1"
   call ESMF_Test(allEqual, name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
+#endif
 
 !------------------------------------------------------------------------
 ! Destroy all Fields and cleanup
@@ -1863,10 +1865,12 @@ program ESMF_FieldIOUTest
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_FieldDestroy(field_ug2, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
+#ifdef ESMF_TESTEXHAUSTIVE
   call ESMF_FieldDestroy(field_ug_w2DE, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_FieldDestroy(field_ug_r2DE, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
+#endif
   call ESMF_FieldDestroy(elem_field, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_FieldDestroy(field_debl, rc=rc)

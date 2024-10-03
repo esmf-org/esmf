@@ -45,7 +45,7 @@ test_unit:
 		python3 -m pytest -vs
 
 test_unit_parallel:
-		$(ESMF_INTERNAL_MPIRUN) -np 4 python3 -vs
+		$(ESMF_INTERNAL_MPIRUN) -np 4 python3 -m pytest -vs
 
 test_examples:
 		python3 -m pytest -vs examples/test_examples.py

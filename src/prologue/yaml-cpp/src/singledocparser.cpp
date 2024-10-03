@@ -91,8 +91,11 @@ void SingleDocParser::HandleNode(EventHandler& eventHandler) {
   const Token& token = m_scanner.peek();
 
   // add non-specific tags
-  if (tag.empty())
+  if (tag.empty()){
     tag = (token.type == Token::NON_PLAIN_SCALAR ? "!" : "?");
+    if (tag == "!")
+      tag = "tag:yaml.org,2002:str"; // explicitly indicate string by tag
+  }
   
   if (token.type == Token::PLAIN_SCALAR 
       && tag.compare("?") == 0 && IsNullString(token.value)) {

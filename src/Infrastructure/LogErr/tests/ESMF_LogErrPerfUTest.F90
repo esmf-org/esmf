@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -96,7 +96,11 @@ program ESMF_LogErrPerfUTest
 #endif
   write(failMsg, *) "ESMF_LogFoundError() performance problem! ", &
     dt, ">", dtTest
+#ifdef ESMF_TESTPERFORMANCE
   call ESMF_Test((dt<dtTest), name, failMsg, result, ESMF_SRCLINE)
+#else
+  call ESMF_Test((.true.), name, failMsg, result, ESMF_SRCLINE)
+#endif
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------

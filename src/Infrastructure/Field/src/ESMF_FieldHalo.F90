@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -43,7 +43,8 @@ module ESMF_FieldHaloMod
   use ESMF_VMMod
   use ESMF_DELayoutMod
   use ESMF_RHandleMod
-  
+  use ESMF_UtilMod
+
   implicit none
 
 !------------------------------------------------------------------------------
@@ -64,6 +65,7 @@ module ESMF_FieldHaloMod
   public ESMF_FieldHaloRelease
   public ESMF_FieldHaloStore
   public ESMF_FieldIsCreated          ! Check if a Field object is created
+  public ESMF_FieldLog
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -423,12 +425,152 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{description}
 !
 !EOP
-  !-----------------------------------------------------------------------------    
+!------------------------------------------------------------------------------
     ESMF_FieldIsCreated = .false.   ! initialize
     if (present(rc)) rc = ESMF_SUCCESS
     if (ESMF_FieldGetInit(field)==ESMF_INIT_CREATED) &
       ESMF_FieldIsCreated = .true.
   end function
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldLog()"
+!BOP
+! !IROUTINE: ESMF_FieldLog - Log Field information
+
+! !INTERFACE:
+  subroutine ESMF_FieldLog(field, keywordEnforcer, prefix, logMsgFlag, deepFlag, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Field),       intent(in)              :: field
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(len=*),       intent(in),   optional  :: prefix
+    type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
+    logical,                intent(in),   optional  :: deepFlag
+    integer, intent(out),                 optional  :: rc
+!
+! !DESCRIPTION:
+!   Write information about {\tt field} to the ESMF default Log.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[field]
+!     The {\tt ESMF\_Field} object logged.
+!   \item [{[prefix]}]
+!     String to prefix the log message. Default is no prefix.
+!   \item [{[logMsgFlag]}]
+!     Type of log message generated. See section \ref{const:logmsgflag} for
+!     a list of valid message types. Default is {\tt ESMF\_LOGMSG\_INFO}.
+!   \item[{[deepFlag]}]
+!     When set to {\tt .false.} (default), only log top level information about
+!     the Field.
+!     When set to {\tt .true.}, additionally log deep information.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                       :: localrc      ! local return code
+    type(ESMF_LogMsg_Flag)        :: logMsg
+    character(len=:), allocatable :: prefixStr
+    logical                       :: deepLog
+    type(ESMF_FieldStatus_Flag)   :: fieldStatus
+    type(ESMF_TypeKind_Flag)      :: typekind
+    integer                       :: rank, dimCount
+    character(ESMF_MAXSTR)        :: name, tempString
+    character(800)                :: msgString
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! optional prefix
+    if (present(prefix)) then
+      prefixStr = trim(prefix)
+    else
+      prefixStr = ""
+    endif
+
+    ! deal with optional logMsgFlag
+    logMsg = ESMF_LOGMSG_INFO ! default
+    if (present(logMsgFlag)) logMsg = logMsgFlag
+
+    ! deal with optional deepFlag
+    deepLog = .false. ! default
+    if (present(deepFlag)) deepLog = deepFlag
+
+    call ESMF_LogWrite(ESMF_StringConcat(trim(prefixStr), &
+      "--- FieldLog() start -----------------"), logMsg, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (.not. ESMF_FieldIsCreated(field)) then
+      call ESMF_LogWrite(ESMF_StringConcat(prefix, &
+        "Field object is invalid! Not created or deleted!"), &
+        logMsg, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! query
+      call ESMF_FieldGet(field, name=name, status=fieldStatus, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (fieldStatus==ESMF_FIELDSTATUS_EMPTY) then
+        tempString = "ESMF_FIELDSTATUS_EMPTY"
+      else if (fieldStatus==ESMF_FIELDSTATUS_GRIDSET) then
+        tempString = "ESMF_FIELDSTATUS_GRIDSET"
+      else if (fieldStatus==ESMF_FIELDSTATUS_COMPLETE) then
+        tempString = "ESMF_FIELDSTATUS_COMPLETE"
+      else
+        tempString = "Out or range FIELDSTATUS!!!"
+      endif
+
+      write (msgString,'(A,A,A,A,A,A)') &
+        prefix, "<name: ", trim(name), "> <fieldStatus: ", trim(tempString), ">"
+      call ESMF_LogWrite(trim(msgString), logMsg, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (fieldStatus == ESMF_FIELDSTATUS_COMPLETE) then
+        call ESMF_FieldGet(field, typekind=typekind, rank=rank, &
+          dimCount=dimCount, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_TypeKindString(typekind, string=tempString, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        write (msgString,'(A,A,A,A,A,I4,A,A,I4,A)') &
+          prefix, "<typekind: ", trim(tempString), ">", &
+          " <rank: ", rank, ">", " <dimCount: ", dimCount, ">"
+        call ESMF_LogWrite(trim(msgString), logMsg, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+    endif
+
+    call ESMF_LogWrite(ESMF_StringConcat(trim(prefixStr), &
+      "--- FieldLog() end -------------------"), logMsg, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_FieldLog
 !------------------------------------------------------------------------------
 
 end module ESMF_FieldHaloMod

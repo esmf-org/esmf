@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -121,6 +121,8 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
               bool *overwrite, ESMC_FileStatus_Flag *status,
               int *timeslice, ESMC_IOFmt_Flag *iofmt);
     // misc.
+    void log(std::string prefix,
+      ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO, bool deepFlag=false)const;
     int print() const;
     // serialize() and deserialize()
     int serialize(char *buffer,int *length,int *offset,

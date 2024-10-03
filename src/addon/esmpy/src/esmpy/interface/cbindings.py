@@ -218,16 +218,22 @@ def ESMP_Initialize(logkind = constants.LogKind.MULTI):
 _ESMF.ESMC_Finalize.restype = ct.c_int
 _ESMF.ESMC_Finalize.argtypes = []
 
-def ESMP_Finalize():
+def ESMP_Finalize(endFlag = constants.EndAction.NORMAL):
     """
     Preconditions: ESMF has been initialized.
     Postconditions: ESMF has been finalized, all heap memory has been
-                    released, and all MPI states have been cleaned up.
-                    This method can only be called once per execution,
-                    and must be preceded by one and only one call to
-                    ESMP_Initialize(). \n
+                    released, and, if 'endFlag' is set to NORMAL, all MPI states
+                    have been cleaned up. This method can only be called
+                    once per execution, and must be preceded by one and
+                    only one call to ESMP_Initialize(). \n
+    Arguments:\n
+        EndAction (optional) :: endFlag\n
+            Argument Values:\n
+                (default) NORMAL\n
+                KEEP_MPI\n
+                ABORT\n
     """
-    rc = _ESMF.ESMC_Finalize()
+    rc = _ESMF.ESMC_FinalizeWithFlag(endFlag)
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_Finalize() failed with rc = '+str(rc)+'.    '+
                         constants._errmsg)
@@ -1135,13 +1141,16 @@ def ESMP_MeshAddElements(mesh, elementCount,
                         '.    '+constants._errmsg)
 
 _ESMF.ESMC_MeshAddNodes.restype = ct.c_int
-_ESMF.ESMC_MeshAddNodes.argtypes = [ct.c_void_p, ct.c_int,
-                                    np.ctypeslib.ndpointer(dtype=np.int32),
-                                    np.ctypeslib.ndpointer(dtype=np.float64),
-                                    np.ctypeslib.ndpointer(dtype=np.int32)]
+_ESMF.ESMC_MeshAddNodes.argtypes = [
+    ct.c_void_p,  # mesh
+    ct.c_int,  # nodeCount
+    np.ctypeslib.ndpointer(dtype=np.int32),  # nodeIds
+    np.ctypeslib.ndpointer(dtype=np.float64),  # nodeCoords
+    np.ctypeslib.ndpointer(dtype=np.int32),  # nodeOwners
+    OptionalNumpyArrayInt32,  # nodeMask
+]
 
-def ESMP_MeshAddNodes(mesh, nodeCount,
-                      nodeIds, nodeCoords, nodeOwners):
+def ESMP_MeshAddNodes(mesh, nodeCount, nodeIds, nodeCoords, nodeOwners, nodeMask=None):
     """
     Preconditions: An ESMP_Mesh has been created.  'nodeIds' holds the
                    IDs of the nodes, 'nodeCoords' holds the coordinates
@@ -1163,9 +1172,9 @@ def ESMP_MeshAddNodes(mesh, nodeCount,
     nodeCoordsD = np.array(nodeCoords, dtype=np.float64)
     # this variant uses the ndarray.astype casting function
     nodeOwnersD = np.ndarray.astype(nodeOwners, np.int32)
-
-    rc = _ESMF.ESMC_MeshAddNodes(mesh.struct.ptr, lnc,
-                                 nodeIdsD, nodeCoordsD, nodeOwnersD)
+    rc = _ESMF.ESMC_MeshAddNodes(
+        mesh.struct.ptr, lnc, nodeIdsD, nodeCoordsD, nodeOwnersD, nodeMask
+    )
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_MeshAddNodes() failed with rc = '+str(rc)+'.    '+
                         constants._errmsg)
