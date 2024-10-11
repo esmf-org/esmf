@@ -225,11 +225,207 @@ end interface
 
 !==============================================================================
 
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_GeomAssignment(=) - Geom assignment
+!
+! !INTERFACE:
+!   interface assignment(=)
+!   geom1 = geom2
+!
+! !ARGUMENTS:
+!   type(ESMF_Geom) :: geom1
+!   type(ESMF_Geom) :: geom2
+!
+! !DESCRIPTION:
+!   Assign geom1 as an alias to the same ESMF Geom object in memory
+!   as geom2. If geom2 is invalid, then geom1 will be equally invalid after
+!   the assignment.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[geom1]
+!     The {\tt ESMF\_Geom} object on the left hand side of the assignment.
+!   \item[geom2]
+!     The {\tt ESMF\_Geom} object on the right hand side of the assignment.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------      
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_GeomOperator(==) - Geom equality operator
+!
+! !INTERFACE:
+  interface operator(==)
+!   if (geom1 == geom2) then ... endif
+!             OR
+!   result = (geom1 == geom2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_Geom), intent(in) :: geom1
+!   type(ESMF_Geom), intent(in) :: geom2
+!!
+! !DESCRIPTION:
+!   Test whether geom1 and geom2 are valid aliases to the same ESMF
+!   Geom object in memory. For a more general comparison of two ESMF Geoms,
+!   going beyond the simple alias test, the ESMF\_GeomMatch() function
+!   must be used.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[geom1]
+!     The {\tt ESMF\_Geom} object on the left hand side of the equality
+!     operation.
+!   \item[geom2]
+!     The {\tt ESMF\_Geom} object on the right hand side of the equality
+!     operation.
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_GeomEQ
+
+  end interface
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_GeomOperator(/=) - Geom not equal operator
+!
+! !INTERFACE:
+  interface operator(/=)
+!   if (geom1 /= geom2) then ... endif
+!             OR
+!   result = (geom1 /= geom2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_Geom), intent(in) :: geom1
+!   type(ESMF_Geom), intent(in) :: geom2
+!
+! !DESCRIPTION:
+!   Test whether geom1 and geom2 are {\it not} valid aliases to the
+!   same ESMF Geom object in memory. For a more general comparison of two ESMF
+!   Geoms, going beyond the simple alias test, the ESMF\_GeomMatch() function
+!   (not yet fully implemented) must be used.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[geom1]
+!     The {\tt ESMF\_Geom} object on the left hand side of the non-equality
+!     operation.
+!   \item[geom2]
+!     The {\tt ESMF\_Geom} object on the right hand side of the non-equality
+!     operation.
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_GeomNE
+
+  end interface
+!------------------------------------------------------------------------------
+      
       contains
 
 !==============================================================================
 
 
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GeomEQ()"
+!BOPI
+! !IROUTINE:  ESMF_GeomEQ - Compare two Geoms for equality
+!
+! !INTERFACE:
+  impure elemental function ESMF_GeomEQ(geom1, geom2)
+!
+! !RETURN VALUE:
+    logical :: ESMF_GeomEQ
+
+! !ARGUMENTS:
+    type(ESMF_Geom), intent(in) :: geom1
+    type(ESMF_Geom), intent(in) :: geom2
+
+! !DESCRIPTION:
+!   Test if both {\tt geom1} and {\tt geom2} alias the same ESMF Geom
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE ginit1, ginit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+
+    ! TODO: Consider moving this logic to C++: use Base class? status?
+    !       Or replicate logic for C interface also.
+
+    ! check inputs
+    ginit1 = ESMF_GeomGetInit(geom1)
+    ginit2 = ESMF_GeomGetInit(geom2)
+
+    ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
+    if (ginit1 == ESMF_INIT_CREATED .and. &
+      ginit2 == ESMF_INIT_CREATED) then
+      ESMF_GeomEQ = associated(geom1%gbcp, geom2%gbcp)
+    else
+      ESMF_GeomEQ = .false.
+    endif
+
+  end function ESMF_GeomEQ
+!-------------------------------------------------------------------------------
+
+
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GeomNE()"
+!BOPI
+! !IROUTINE:  ESMF_GeomNE - Compare two Geoms for non-equality
+!
+! !INTERFACE:
+  impure elemental function ESMF_GeomNE(geom1, geom2)
+!
+! !RETURN VALUE:
+    logical :: ESMF_GeomNE
+
+! !ARGUMENTS:
+    type(ESMF_Geom), intent(in) :: geom1
+    type(ESMF_Geom), intent(in) :: geom2
+
+! !DESCRIPTION:
+!   Test if both {\tt geom1} and {\tt geom2} alias the same ESMF Geom
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE ginit1, ginit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+
+    ESMF_GeomNE = .not.ESMF_GeomEQ(geom1, geom2)
+
+  end function ESMF_GeomNE
+!-------------------------------------------------------------------------------
+
+
+        
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GeomGetArrayInfo"
