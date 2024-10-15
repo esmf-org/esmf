@@ -2854,6 +2854,7 @@ end subroutine CreateTestMesh2x2_2
    
   integer :: numOwnedElems
   real(ESMF_KIND_R8), pointer :: ownedElemCoords(:)
+  character(len=255) :: filename
 
   ! result code
   integer :: finalrc
@@ -3096,7 +3097,7 @@ end subroutine CreateTestMesh2x2_2
    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-   
+
    ! Field on XGrid
    xField = ESMF_FieldCreate(xgrid, arrayspec, &
         name="xfield", rc=localrc)
@@ -3139,6 +3140,21 @@ end subroutine CreateTestMesh2x2_2
 
   call ESMF_FieldRegrid(xField, dstField, XToDrouteHandle, &
        rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Write fields
+  write(filename, fmt='(a,i1,a)') 'xField', petCount, '.nc'
+  call ESMF_FieldWrite(xField, trim(filename), &
+       overwrite=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  write(filename, fmt='(a,i1,a)') 'dstField', petCount, '.nc'
+  call ESMF_FieldWrite(dstField, trim(filename), &
+       overwrite=.true., rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
