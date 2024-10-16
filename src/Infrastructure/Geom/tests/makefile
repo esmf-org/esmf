@@ -11,7 +11,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_GeomUTest
 
 TESTS_RUN     = RUN_ESMF_GeomUTest 
 
-TESTS_RUN_UNI = RUN_ESMF_GeomUTest
+TESTS_RUN_UNI = RUN_ESMF_GeomUTestUNI
 
 include ${ESMF_DIR}/makefile
 
