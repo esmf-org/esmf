@@ -83,8 +83,10 @@ namespace ESMCI {
   void get_unique_elems_around_node(MeshObj *node, Mesh *mesh, MDSS *tmp_mdss,
                                 int *_num_ids, UInt *ids);
 
+
   void _fill_elem_fields(Mesh *dual_mesh, int sdim, int orig_sdim,
-                         double *elemCoords,  double *elemOrigCoords);
+                          double *elemCoords,  double *elemOrigCoords,
+                          double *elemMaskVal, double *elemMask);
 
   
   void _change_owners_from_src_to_curr_comm(Mesh *dual_mesh, MPI_Comm src_comm);
@@ -93,7 +95,7 @@ namespace ESMCI {
   // Create a dual of the input Mesh 
   // This adds ghostcells to the input mesh, 
   // it also creates ghostcells for the dual mesh
-  void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
+void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
 
   Trace __trace("MeshDual(Mesh *src_mesh, Mesh **dual_mesh)");
 
@@ -198,6 +200,7 @@ namespace ESMCI {
   dual_mesh->orig_spatial_dim=orig_sdim;
   dual_mesh->coordsys=src_mesh->coordsys;
 
+
   // Get element coordinates
   MEField<> *src_elem_coords=src_mesh->GetField("elem_coordinates"); 
   if (!src_elem_coords) {
@@ -215,7 +218,11 @@ namespace ESMCI {
 
   // Get original node coordinates
   MEField<> *src_node_orig_coords=src_mesh->GetField("orig_coordinates");
-  
+
+  // Get node mask info
+  MEField<> *src_node_mask_val=src_mesh->GetField("node_mask_val");
+  MEField<> *src_node_mask=src_mesh->GetField("mask"); 
+
 
   // Iterate through all src elements counting the number and creating a map
   std::map<UInt,UInt> id_to_index;
@@ -306,12 +313,16 @@ namespace ESMCI {
   UInt *elemOwner=NULL;
   double *elemCoords=NULL;
   double *elemOrigCoords=NULL;
+  double *elemMaskVal=NULL;
+  double *elemMask=NULL;
   if (max_num_elems>0) {
     elemType=new int[max_num_elems];
     elemId=new UInt[max_num_elems];
     elemOwner=new UInt[max_num_elems];
     elemCoords=new double[sdim*max_num_elems];
-    elemOrigCoords=new double[orig_sdim*max_num_elems];
+    if (src_node_orig_coords) elemOrigCoords=new double[orig_sdim*max_num_elems];
+    if (src_node_mask_val) elemMaskVal=new double[max_num_elems];
+    if (src_node_mask) elemMask=new double[max_num_elems];
   }
   int *elemConn=NULL;
   if (max_num_elemConn >0) {
@@ -375,12 +386,24 @@ namespace ESMCI {
     }
 
     // If present, save original coordinates
-    if (src_node_orig_coords) {
+    if (elemOrigCoords && src_node_orig_coords) {
       double *orig_coords=src_node_orig_coords->data(node);
       for (auto od=0; od<orig_sdim; od++) {
         elemOrigCoords[eoc_pos]=orig_coords[od];
         eoc_pos++;
       }
+    }
+
+    // If present, save element mask value
+    if (elemMaskVal && src_node_mask_val) {
+      double *nmv=src_node_mask_val->data(node);
+      elemMaskVal[num_elems]=*nmv;
+    }
+
+    // If present, save element mask value
+    if (elemMask && src_node_mask) {
+      double *nm=src_node_mask->data(node);
+      elemMask[num_elems]=*nm;
     }
     
     // Next elem
@@ -626,6 +649,8 @@ namespace ESMCI {
   UInt *elemOwner_wsplit=NULL;
   double *elemCoords_wsplit=NULL;
   double *elemOrigCoords_wsplit=NULL;
+  double *elemMaskVal_wsplit=NULL;
+  double *elemMask_wsplit=NULL;
   
   //  int *elemMaskIIArray_wsplit=NULL;
   //InterArray *elemMaskII_wsplit=NULL;
@@ -640,8 +665,10 @@ namespace ESMCI {
     elemId_wsplit=new UInt[num_elems_wsplit];
     elemOwner_wsplit=new UInt[num_elems_wsplit];
     elemCoords_wsplit=new double[sdim*num_elems_wsplit];
-    elemOrigCoords_wsplit=new double[orig_sdim*num_elems_wsplit];
-
+    if (elemOrigCoords) elemOrigCoords_wsplit=new double[orig_sdim*num_elems_wsplit];
+    if (elemMaskVal) elemMaskVal_wsplit=new double[num_elems_wsplit];
+    if (elemMask) elemMask_wsplit=new double[num_elems_wsplit];
+    
 #if 0
       //// Setup for split mask
       int *elemMaskIIArray=NULL;
@@ -744,6 +771,16 @@ namespace ESMCI {
                 elem_orig_pnt_wsplit[od]=elem_orig_pnt[od];
               }
             }
+
+            // Set elem mask val
+            if (elemMaskVal) {
+              elemMaskVal_wsplit[split_elem_pos]=elemMaskVal[e];
+            }
+
+            // Set elem mask
+            if (elemMask) {
+              elemMask_wsplit[split_elem_pos]=elemMask[e];
+            }
             
             // Next split element
             split_elem_pos++;
@@ -792,7 +829,9 @@ namespace ESMCI {
       if (elemConn !=NULL) delete [] elemConn;
       if (elemCoords !=NULL) delete [] elemCoords;
       if (elemOrigCoords !=NULL) delete [] elemOrigCoords;
-
+      if (elemMaskVal !=NULL) delete [] elemMaskVal;
+      if (elemMask !=NULL) delete [] elemMask;
+      
       // Use the new split list for the connection lists below
       num_elems=num_elems_wsplit;
       elemConn=elemConn_wsplit;
@@ -801,6 +840,8 @@ namespace ESMCI {
       elemOwner=elemOwner_wsplit;
       elemCoords=elemCoords_wsplit;
       elemOrigCoords=elemOrigCoords_wsplit;
+      elemMaskVal=elemMaskVal_wsplit;
+      elemMask=elemMask_wsplit;
 
 #if 0
       if (elemMaskII != NULL) { 
@@ -866,8 +907,21 @@ namespace ESMCI {
     if (elemOrigCoords) {
       dual_mesh->RegisterField("elem_orig_coordinates",
                                MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, orig_sdim, true);
-      
+
     }
+
+    if (elemMaskVal) {
+      dual_mesh->RegisterField("elem_mask_val",
+                               MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+    }
+
+    if (elemMask) {
+      dual_mesh->RegisterField("elem_mask",
+                               MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+    }
+
     
     // Change owners to be on the current communicator rather than the source mesh's communicator
     _change_owners_from_src_to_curr_comm(dual_mesh, src_mesh->orig_comm);
@@ -876,11 +930,14 @@ namespace ESMCI {
     dual_mesh->build_sym_comm_rel(MeshObj::NODE);
     dual_mesh->Commit();
 
-    //// Fill Elem Fields
-    _fill_elem_fields(dual_mesh, sdim, orig_sdim, elemCoords, elemOrigCoords);
+    // Fill Elem Fields
+    _fill_elem_fields(dual_mesh, sdim, orig_sdim, elemCoords, elemOrigCoords, elemMaskVal, elemMask);
     
     // Clean up remaining element info
     if (elemCoords !=NULL) delete [] elemCoords;
+    if (elemOrigCoords !=NULL) delete [] elemOrigCoords;
+    if (elemMaskVal !=NULL) delete [] elemMaskVal;
+    if (elemMask !=NULL) delete [] elemMask;
 
     // Output 
     *_dual_mesh=dual_mesh;
@@ -1433,7 +1490,8 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
 
 
 void _fill_elem_fields(Mesh *dual_mesh, int sdim, int orig_sdim,
-                       double *elemCoords,  double *elemOrigCoords) {
+                       double *elemCoords,  double *elemOrigCoords,
+                       double *elemMaskVal, double *elemMask) {
 
   
   // Get end iterator
@@ -1494,6 +1552,34 @@ void _fill_elem_fields(Mesh *dual_mesh, int sdim, int orig_sdim,
       for (int od=0; od<orig_sdim; od++) {
         eocd[od]=iocd[od];
       }      
+    }
+  }
+
+  // Set elem mask val
+  MEField<> *elem_mask_val=dual_mesh->GetField("elem_mask_val");
+  if (elem_mask_val && elemMaskVal) {
+    for (Mesh::const_iterator ei = dual_mesh->elem_begin(); ei != ee; ++ei) {
+      const MeshObj &elem = *ei;
+      
+      // Get data pointer to elem data
+      double *emv = elem_mask_val->data(elem);
+      
+      // Set data from input
+      *emv=elemMaskVal[elem.get_data_index()];
+    }
+  }
+
+  // Set elem mask val
+  MEField<> *elem_mask=dual_mesh->GetField("elem_mask");
+  if (elem_mask && elemMask) {
+    for (Mesh::const_iterator ei = dual_mesh->elem_begin(); ei != ee; ++ei) {
+      const MeshObj &elem = *ei;
+      
+      // Get data pointer to elem data
+      double *em = elem_mask->data(elem);
+      
+      // Set data from input
+      *em = elemMask[elem.get_data_index()];
     }
   }
   
