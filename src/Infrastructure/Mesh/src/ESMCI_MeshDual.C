@@ -1,4 +1,3 @@
-
 // $Id: ESMCI_MeshRedist.C,v 1.23 2012/01/06 20:17:51 svasquez Exp $
 //
 // Earth System Modeling Framework
@@ -81,11 +80,13 @@ namespace ESMCI {
 
   };
 
-  void _fill_elem_fields(Mesh *dual_mesh, int sdim,  double *elemCoords);
-  
   void get_unique_elems_around_node(MeshObj *node, Mesh *mesh, MDSS *tmp_mdss,
                                 int *_num_ids, UInt *ids);
 
+  void _fill_elem_fields(Mesh *dual_mesh, int sdim, int orig_sdim,
+                         double *elemCoords,  double *elemOrigCoords);
+
+  
   void _change_owners_from_src_to_curr_comm(Mesh *dual_mesh, MPI_Comm src_comm);
 
 
@@ -185,6 +186,7 @@ namespace ESMCI {
 
   // Get some useful info
   int sdim=src_mesh->spatial_dim();
+  int orig_sdim=src_mesh->orig_spatial_dim;
   int pdim=src_mesh->parametric_dim();
 
   // Create Mesh
@@ -193,19 +195,26 @@ namespace ESMCI {
   // Set Mesh dimensions
   dual_mesh->set_spatial_dimension(sdim);
   dual_mesh->set_parametric_dimension(pdim);
-  dual_mesh->orig_spatial_dim=src_mesh->orig_spatial_dim;
+  dual_mesh->orig_spatial_dim=orig_sdim;
   dual_mesh->coordsys=src_mesh->coordsys;
 
   // Get element coordinates
-  MEField<> *elem_coords=src_mesh->GetField("elem_coordinates"); 
-  if (!elem_coords) {
+  MEField<> *src_elem_coords=src_mesh->GetField("elem_coordinates"); 
+  if (!src_elem_coords) {
     Throw() <<" Creation of a dual mesh requires element coordinates. \n";
   }
 
+  // Get original elem coordinates
+  MEField<> *src_elem_orig_coords=src_mesh->GetField("elem_orig_coordinates");
+
+  // Get node coordinates
   MEField<> *src_node_coords=src_mesh->GetCoordField();
   if (!src_node_coords) {
     Throw() <<" Creation of a dual mesh requires node coordinates. \n";
   }
+
+  // Get original node coordinates
+  MEField<> *src_node_orig_coords=src_mesh->GetField("orig_coordinates");
   
 
   // Iterate through all src elements counting the number and creating a map
@@ -296,11 +305,13 @@ namespace ESMCI {
   UInt *elemId=NULL;
   UInt *elemOwner=NULL;
   double *elemCoords=NULL;
+  double *elemOrigCoords=NULL;
   if (max_num_elems>0) {
     elemType=new int[max_num_elems];
     elemId=new UInt[max_num_elems];
     elemOwner=new UInt[max_num_elems];
     elemCoords=new double[sdim*max_num_elems];
+    elemOrigCoords=new double[orig_sdim*max_num_elems];
   }
   int *elemConn=NULL;
   if (max_num_elemConn >0) {
@@ -311,6 +322,7 @@ namespace ESMCI {
   int num_elems=0;
   int conn_pos=0;
   int ec_pos=0;
+  int eoc_pos=0;
   ni = src_mesh->node_begin();
   for (; ni != ne; ++ni) {
     MeshObj &node=*ni;
@@ -360,6 +372,15 @@ namespace ESMCI {
     for (auto d=0; d<sdim; d++) {
       elemCoords[ec_pos]=coords[d];
       ec_pos++;
+    }
+
+    // If present, save original coordinates
+    if (src_node_orig_coords) {
+      double *orig_coords=src_node_orig_coords->data(node);
+      for (auto od=0; od<orig_sdim; od++) {
+        elemOrigCoords[eoc_pos]=orig_coords[od];
+        eoc_pos++;
+      }
     }
     
     // Next elem
@@ -460,6 +481,11 @@ namespace ESMCI {
 
     // Register Node fields
     IOField<NodalField> *dm_node_coord = dual_mesh->RegisterNodalField(*dual_mesh, "coordinates", sdim);
+    
+    IOField<NodalField> *dm_node_orig_coord=NULL;
+    if (src_elem_orig_coords) {      
+      dm_node_orig_coord = dual_mesh->RegisterNodalField(*dual_mesh, "orig_coordinates", orig_sdim);
+    }
 
     IOField<NodalField> *dm_node_mask_val=NULL;
     MEField<> *elem_mask_val=src_mesh->GetField("elem_mask_val"); 
@@ -489,7 +515,7 @@ namespace ESMCI {
         MeshObj &node=*(nodes[pos]);
 
         // Get elem coord pointer
-        double *ec=elem_coords->data(elem);
+        double *ec=src_elem_coords->data(elem);
 
         // Get node coord pointer
         double *nc=dm_node_coord->data(node);
@@ -500,6 +526,21 @@ namespace ESMCI {
         }
         // printf("%d# H1 id=%d pos=%d nc=%f %f ec=%f %f\n",Par::Rank(),node->get_id(),pos,nc[0],nc[1],ec[0],ec[1]);
 
+
+        // Copy original coords
+        if (src_elem_orig_coords && dm_node_orig_coord) {
+
+          // Get data pointers
+          double *eoc=src_elem_orig_coords->data(elem);
+          double *noc=dm_node_orig_coord->data(node);
+
+          // Copy coords from elem to node
+          for (int od=0; od<orig_sdim; od++) {
+            noc[od]=eoc[od];
+          }
+        }
+
+        
         // Copy mask 
         if ((elem_mask_val != NULL) && (dm_node_mask_val != NULL)) {
           double *emv=elem_mask_val->data(elem);
@@ -584,6 +625,7 @@ namespace ESMCI {
   UInt *elemId_wsplit=NULL;
   UInt *elemOwner_wsplit=NULL;
   double *elemCoords_wsplit=NULL;
+  double *elemOrigCoords_wsplit=NULL;
   
   //  int *elemMaskIIArray_wsplit=NULL;
   //InterArray *elemMaskII_wsplit=NULL;
@@ -598,6 +640,7 @@ namespace ESMCI {
     elemId_wsplit=new UInt[num_elems_wsplit];
     elemOwner_wsplit=new UInt[num_elems_wsplit];
     elemCoords_wsplit=new double[sdim*num_elems_wsplit];
+    elemOrigCoords_wsplit=new double[orig_sdim*num_elems_wsplit];
 
 #if 0
       //// Setup for split mask
@@ -692,6 +735,15 @@ namespace ESMCI {
             for (int d=0; d<sdim; d++) {
               elem_pnt_wsplit[d]=elem_pnt[d];
             }
+
+            // Set orig element coords.
+            if (elemOrigCoords) {
+              double *elem_orig_pnt=elemOrigCoords+orig_sdim*e;
+              double *elem_orig_pnt_wsplit=elemOrigCoords_wsplit+orig_sdim*split_elem_pos;
+              for (int od=0; od<orig_sdim; od++) {
+                elem_orig_pnt_wsplit[od]=elem_orig_pnt[od];
+              }
+            }
             
             // Next split element
             split_elem_pos++;
@@ -739,6 +791,7 @@ namespace ESMCI {
       if (elemOwner !=NULL) delete [] elemOwner;
       if (elemConn !=NULL) delete [] elemConn;
       if (elemCoords !=NULL) delete [] elemCoords;
+      if (elemOrigCoords !=NULL) delete [] elemOrigCoords;
 
       // Use the new split list for the connection lists below
       num_elems=num_elems_wsplit;
@@ -747,6 +800,7 @@ namespace ESMCI {
       elemId=elemId_wsplit;
       elemOwner=elemOwner_wsplit;
       elemCoords=elemCoords_wsplit;
+      elemOrigCoords=elemOrigCoords_wsplit;
 
 #if 0
       if (elemMaskII != NULL) { 
@@ -808,8 +862,12 @@ namespace ESMCI {
 
     dual_mesh->RegisterField("elem_coordinates",
                              MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, sdim, true);
-    
-    
+
+    if (elemOrigCoords) {
+      dual_mesh->RegisterField("elem_orig_coordinates",
+                               MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, orig_sdim, true);
+      
+    }
     
     // Change owners to be on the current communicator rather than the source mesh's communicator
     _change_owners_from_src_to_curr_comm(dual_mesh, src_mesh->orig_comm);
@@ -819,7 +877,7 @@ namespace ESMCI {
     dual_mesh->Commit();
 
     //// Fill Elem Fields
-    _fill_elem_fields(dual_mesh, sdim, elemCoords);
+    _fill_elem_fields(dual_mesh, sdim, orig_sdim, elemCoords, elemOrigCoords);
     
     // Clean up remaining element info
     if (elemCoords !=NULL) delete [] elemCoords;
@@ -1374,7 +1432,8 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
   }
 
 
-void _fill_elem_fields(Mesh *dual_mesh, int sdim,  double *elemCoords) {
+void _fill_elem_fields(Mesh *dual_mesh, int sdim, int orig_sdim,
+                       double *elemCoords,  double *elemOrigCoords) {
 
   
   // Get end iterator
@@ -1402,7 +1461,7 @@ void _fill_elem_fields(Mesh *dual_mesh, int sdim,  double *elemCoords) {
   
   // Set element coordinates
   MEField<> *elem_coords=dual_mesh->GetField("elem_coordinates");
-  if (elem_coords) {
+  if (elem_coords && elemCoords) {
     for (Mesh::const_iterator ei = dual_mesh->elem_begin(); ei != ee; ++ei) {
       const MeshObj &elem = *ei;
       
@@ -1418,6 +1477,26 @@ void _fill_elem_fields(Mesh *dual_mesh, int sdim,  double *elemCoords) {
       }      
     }
   }
+
+  // Set element original coordinates
+  MEField<> *elem_orig_coords=dual_mesh->GetField("elem_orig_coordinates");
+  if (elem_orig_coords && elemOrigCoords) {
+    for (Mesh::const_iterator ei = dual_mesh->elem_begin(); ei != ee; ++ei) {
+      const MeshObj &elem = *ei;
+      
+      // Get data pointer to elem data
+      double *eocd =elem_orig_coords->data(elem);
+      
+      // Get memory for input coord data
+      double *iocd = elemOrigCoords+orig_sdim*elem.get_data_index();
+      
+      // Copy
+      for (int od=0; od<orig_sdim; od++) {
+        eocd[od]=iocd[od];
+      }      
+    }
+  }
+  
 }
 
 
