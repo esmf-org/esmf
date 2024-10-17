@@ -81,6 +81,8 @@ namespace ESMCI {
 
   };
 
+  void _fill_elem_fields(Mesh *dual_mesh, int sdim,  double *elemCoords);
+  
   void get_unique_elems_around_node(MeshObj *node, Mesh *mesh, MDSS *tmp_mdss,
                                 int *_num_ids, UInt *ids);
 
@@ -103,55 +105,6 @@ namespace ESMCI {
   if (!src_mesh->GetField("elem_coordinates")) {
     Throw() <<" Creation of a dual mesh requires element coordinates. \n";
   }
-
-
-  // Add ghostcells to source mesh, because we need the surrounding 
-  // cells
-   {
-
-  // BOB: Use convenience function to comm. all fields
-#if 0
-    int num_snd=0;
-    MEField<> *snd[10],*rcv[10];
-    
-    // Load coord field
-    MEField<> *psc = src_mesh->GetCoordField();
-    snd[num_snd]=psc;
-    rcv[num_snd]=psc;
-    num_snd++;
-
-    // Load element mask value field
-    MEField<> *psm = src_mesh->GetField("elem_mask_val");
-    if (psm != NULL) {
-      snd[num_snd]=psm;
-      rcv[num_snd]=psm;
-      num_snd++;
-    }
-
-    // Load element mask field
-    MEField<> *psem = src_mesh->GetField("elem_mask");
-    if (psem != NULL) {
-      snd[num_snd]=psem;
-      rcv[num_snd]=psem;
-      num_snd++;
-    }
-
-    // Load element coordinate field
-    MEField<> *psec = src_mesh->GetField("elem_coordinates");
-    if (psec != NULL) {
-      snd[num_snd]=psec;
-      rcv[num_snd]=psec;
-      num_snd++;
-    }
-
-    // Load frac2 field
-    MEField<> *psf = src_mesh->GetField("elem_frac2");
-    if (psf != NULL) {
-      snd[num_snd]=psf;
-      rcv[num_snd]=psf;
-      num_snd++;
-    }
-#endif
 
 
 #ifdef DEBUG_TRI
@@ -186,12 +139,18 @@ namespace ESMCI {
   ESMCI_meshwrite(&src_mesh, fname, rc, len);}
 #endif
 
-    // Create ghost cells
-    src_mesh->CreateGhost();
+  //// Add ghostcells to source mesh, because we need the surrounding cells
+  
+  // Create ghost cells
+  src_mesh->CreateGhost();
+  
+  // Communicate values to ghost cells
+  src_mesh->GhostCommAllFields();
 
-    // Communicate values to ghost cells
-    src_mesh->GhostCommAllFields();
+  // If src_mesh is split, add newly created ghost elements to split_to_orig map
+  if (src_mesh->is_split) add_ghost_elems_to_split_orig_id_map(src_mesh);
 
+  
 #ifdef DEBUG_WRITE_MESH
   {int *rc;
   int len = 18; char fname[len];
@@ -224,11 +183,6 @@ namespace ESMCI {
 #endif
 
 
-    // If src_mesh is split, add newly created ghost elements to split_to_orig map
-    if (src_mesh->is_split) add_ghost_elems_to_split_orig_id_map(src_mesh);
-  }
-
- 
   // Get some useful info
   int sdim=src_mesh->spatial_dim();
   int pdim=src_mesh->parametric_dim();
@@ -248,6 +202,11 @@ namespace ESMCI {
     Throw() <<" Creation of a dual mesh requires element coordinates. \n";
   }
 
+  MEField<> *src_node_coords=src_mesh->GetCoordField();
+  if (!src_node_coords) {
+    Throw() <<" Creation of a dual mesh requires node coordinates. \n";
+  }
+  
 
   // Iterate through all src elements counting the number and creating a map
   std::map<UInt,UInt> id_to_index;
@@ -336,10 +295,12 @@ namespace ESMCI {
   int *elemType=NULL;
   UInt *elemId=NULL;
   UInt *elemOwner=NULL;
+  double *elemCoords=NULL;
   if (max_num_elems>0) {
     elemType=new int[max_num_elems];
     elemId=new UInt[max_num_elems];
     elemOwner=new UInt[max_num_elems];
+    elemCoords=new double[sdim*max_num_elems];
   }
   int *elemConn=NULL;
   if (max_num_elemConn >0) {
@@ -349,6 +310,7 @@ namespace ESMCI {
   // Iterate through src nodes creating elements
   int num_elems=0;
   int conn_pos=0;
+  int ec_pos=0;
   ni = src_mesh->node_begin();
   for (; ni != ne; ++ni) {
     MeshObj &node=*ni;
@@ -392,11 +354,16 @@ namespace ESMCI {
     elemOwner[num_elems]=node.get_owner();
 
     // printf("%d# eId=%d eT=%d ::",Par::Rank(),elemId[num_elems],elemType[num_elems]);
+
+    // Save coordinates
+    double *coords=src_node_coords->data(node);
+    for (auto d=0; d<sdim; d++) {
+      elemCoords[ec_pos]=coords[d];
+      ec_pos++;
+    }
     
     // Next elem
     num_elems++;
-
-    //    printf("Elem id=%d max=%d num=%d :: ",node.get_id(),max_num_node_elems,num_elems_around_node_ids);
 
     // Loop elements attached to node and build connection list
     for (int i=0; i<num_elems_around_node_ids; i++) {
@@ -616,7 +583,8 @@ namespace ESMCI {
   int *elemType_wsplit=NULL;
   UInt *elemId_wsplit=NULL;
   UInt *elemOwner_wsplit=NULL;
-
+  double *elemCoords_wsplit=NULL;
+  
   //  int *elemMaskIIArray_wsplit=NULL;
   //InterArray *elemMaskII_wsplit=NULL;
 
@@ -629,6 +597,7 @@ namespace ESMCI {
     elemType_wsplit=new int[num_elems_wsplit];
     elemId_wsplit=new UInt[num_elems_wsplit];
     elemOwner_wsplit=new UInt[num_elems_wsplit];
+    elemCoords_wsplit=new double[sdim*num_elems_wsplit];
 
 #if 0
       //// Setup for split mask
@@ -687,7 +656,6 @@ namespace ESMCI {
             }
 
             //printf("%d# id=%d c=%d coord=%f %f \n",Par::Rank(),elemId[e],elemConn[conn_pos+i],polyCoords[crd_pos-2],polyCoords[crd_pos-1]);
-
           }
 
           // Triangulate polygon
@@ -718,6 +686,13 @@ namespace ESMCI {
             // Set mask (if it exists)
             //  if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
 
+            // Set element coords.
+            double *elem_pnt=elemCoords+sdim*e;
+            double *elem_pnt_wsplit=elemCoords_wsplit+sdim*split_elem_pos;
+            for (int d=0; d<sdim; d++) {
+              elem_pnt_wsplit[d]=elem_pnt[d];
+            }
+            
             // Next split element
             split_elem_pos++;
 
@@ -759,10 +734,11 @@ namespace ESMCI {
 
 
       // Delete original element information
-    if (elemType !=NULL) delete [] elemType;
-    if (elemId !=NULL) delete [] elemId;
-    if (elemOwner !=NULL) delete [] elemOwner;
-    if (elemConn !=NULL) delete [] elemConn;
+      if (elemType !=NULL) delete [] elemType;
+      if (elemId !=NULL) delete [] elemId;
+      if (elemOwner !=NULL) delete [] elemOwner;
+      if (elemConn !=NULL) delete [] elemConn;
+      if (elemCoords !=NULL) delete [] elemCoords;
 
       // Use the new split list for the connection lists below
       num_elems=num_elems_wsplit;
@@ -770,6 +746,7 @@ namespace ESMCI {
       elemType=elemType_wsplit;
       elemId=elemId_wsplit;
       elemOwner=elemOwner_wsplit;
+      elemCoords=elemCoords_wsplit;
 
 #if 0
       if (elemMaskII != NULL) { 
@@ -813,7 +790,7 @@ namespace ESMCI {
 
     } // for e
 
-    // Clean up
+    // Clean up stuff we're finished with
     if (nodes_used !=NULL) delete [] nodes_used;
     if (elemType !=NULL) delete [] elemType;
     if (elemId !=NULL) delete [] elemId;
@@ -821,17 +798,19 @@ namespace ESMCI {
     if (elemConn !=NULL) delete [] elemConn;
     if (nodes !=NULL) delete [] nodes;
 
-    // The main goal for this is to use it for non-conserve on centers, so
-    // I'm not moving some of the node information to elem (e.g. masking)
-    // do that eventually for full generality. 
-    // However, I am registering thw elem frac field, because that's the one
-    // that should always be there. 
-    {
-      Context ctxt; ctxt.flip();
-      MEField<> *elem_frac = dual_mesh->RegisterField("elem_frac",
-                  MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
-    }
+    // Register the elem Fields
+    Context ctxt; ctxt.flip();
+    dual_mesh->RegisterField("elem_frac",
+                             MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+    
+    dual_mesh->RegisterField("elem_frac2",
+                             MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
 
+    dual_mesh->RegisterField("elem_coordinates",
+                             MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, sdim, true);
+    
+    
+    
     // Change owners to be on the current communicator rather than the source mesh's communicator
     _change_owners_from_src_to_curr_comm(dual_mesh, src_mesh->orig_comm);
 
@@ -839,8 +818,12 @@ namespace ESMCI {
     dual_mesh->build_sym_comm_rel(MeshObj::NODE);
     dual_mesh->Commit();
 
-
+    //// Fill Elem Fields
+    _fill_elem_fields(dual_mesh, sdim, elemCoords);
     
+    // Clean up remaining element info
+    if (elemCoords !=NULL) delete [] elemCoords;
+
     // Output 
     *_dual_mesh=dual_mesh;
 }
@@ -1389,6 +1372,54 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
   }
   
   }
+
+
+void _fill_elem_fields(Mesh *dual_mesh, int sdim,  double *elemCoords) {
+
+  
+  // Get end iterator
+  Mesh::const_iterator ee = dual_mesh->elem_end();
+  
+  // Init frac to 1.0
+  MEField<> *elem_frac=dual_mesh->GetField("elem_frac");
+  if (elem_frac) {
+    for (Mesh::const_iterator ei = dual_mesh->elem_begin(); ei != ee; ++ei) {
+      const MeshObj &elem = *ei;
+      double *f=elem_frac->data(elem);
+      *f=1.0;
+    }
+  }
+  
+  // Init frac2 to 1.0
+  MEField<> *elem_frac2=dual_mesh->GetField("elem_frac2");
+  if (elem_frac2) {
+    for (Mesh::const_iterator ei = dual_mesh->elem_begin(); ei != ee; ++ei) {
+      const MeshObj &elem = *ei;
+      double *f=elem_frac2->data(elem);
+      *f=1.0;
+    }
+  }
+  
+  // Set element coordinates
+  MEField<> *elem_coords=dual_mesh->GetField("elem_coordinates");
+  if (elem_coords) {
+    for (Mesh::const_iterator ei = dual_mesh->elem_begin(); ei != ee; ++ei) {
+      const MeshObj &elem = *ei;
+      
+      // Get data pointer to elem data
+      double *ecd =elem_coords->data(elem);
+      
+      // Get memory for input coord data
+      double *icd = elemCoords+sdim*elem.get_data_index();
+      
+      // Copy
+      for (int d=0; d<sdim; d++) {
+        ecd[d]=icd[d];
+      }      
+    }
+  }
+}
+
 
 
   } // namespace
