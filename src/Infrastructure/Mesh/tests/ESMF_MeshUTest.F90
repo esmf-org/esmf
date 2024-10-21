@@ -118,7 +118,7 @@ program ESMF_MeshUTest
 
 
  ! This surrounds all the tests to make turning off everything but one test easier
-#if 0
+#if 1
 
   !------------------------------------------------------------------------
 
@@ -2053,7 +2053,7 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
-#if 0  
+#if 1
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Mesh Create and then Redist with a pentagon and hexagon element"
@@ -8364,6 +8364,7 @@ subroutine exhaustiveMeshDualTest(correct, rc)
                9,10,11,12,13,14,&
                 15,16/)
 
+     
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.0,0.0, & ! 1
@@ -8391,7 +8392,7 @@ subroutine exhaustiveMeshDualTest(correct, rc)
 
       ! Fill in elem data
       numTriElems=0
-       numQuadElems=9
+      numQuadElems=9
       numElems=numTriElems+numQuadElems
       numElemConns=3*numTriElems+4*numQuadElems
 
@@ -8880,8 +8881,20 @@ subroutine exhaustiveMeshDualTest(correct, rc)
       rc=ESMF_FAILURE
       return
    endif
-   
 
+   ! Deallocate
+   deallocate(nodeIds)
+   deallocate(nodeIdsTst)
+   deallocate(nodeCoords)
+   deallocate(nodeCoordsTst)
+   deallocate(nodeMask)
+   deallocate(elemIds)
+   deallocate(elemIdsTst)
+   deallocate(elemMask)
+   deallocate(elemCoords)
+   deallocate(elemCoordsTst)
+
+  
    ! Destroy meshes
    call ESMF_MeshDestroy(dualMesh, rc=rc)
    if (rc /= ESMF_SUCCESS) return
