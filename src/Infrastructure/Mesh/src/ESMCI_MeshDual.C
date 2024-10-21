@@ -91,7 +91,11 @@ namespace ESMCI {
   
   void _change_owners_from_src_to_curr_comm(Mesh *dual_mesh, MPI_Comm src_comm);
 
+  void _set_elem_ownership_context_based_on_owned_pet(Mesh *dual_mesh);
 
+  void _set_node_ownership_context_based_on_owned_pet(Mesh *dual_mesh);
+  
+  
   // Create a dual of the input Mesh 
   // This adds ghostcells to the input mesh, 
   // it also creates ghostcells for the dual mesh
@@ -926,6 +930,13 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
     // Change owners to be on the current communicator rather than the source mesh's communicator
     _change_owners_from_src_to_curr_comm(dual_mesh, src_mesh->orig_comm);
 
+    // Change context to match node PET ownership
+    _set_node_ownership_context_based_on_owned_pet(dual_mesh);
+
+    // Change context to match elem PET ownership
+    _set_elem_ownership_context_based_on_owned_pet(dual_mesh);
+    
+
     // Commit Mesh
     dual_mesh->build_sym_comm_rel(MeshObj::NODE);
     dual_mesh->Commit();
@@ -943,6 +954,83 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
     *_dual_mesh=dual_mesh;
 }
 
+   void _set_node_ownership_context_based_on_owned_pet(Mesh *dual_mesh) {
+
+     //// Need to keep list of nodes because order may change
+     
+     // Reserve memory for list
+     std::vector<MeshObj *> node_list;
+     node_list.reserve(dual_mesh->num_nodes());
+
+     // Copy into list
+     MeshDB::iterator ei = dual_mesh->node_begin(), ee = dual_mesh->node_end();
+     for (; ei != ee; ++ei) {
+       MeshObj &node=*ei;
+       
+       node_list.push_back(&node);
+     }
+
+     // Loop setting owner and OWNER_ID
+     for (MeshObj *node : node_list) {
+       
+       // Setup for changing attribute
+       const Context &ctxt = GetMeshObjContext(*node);
+       Context newctxt(ctxt);
+       
+       // Set OWNED_ID appropriately
+       if (node->get_owner() == Par::Rank()) {
+         newctxt.set(Attr::OWNED_ID);
+       } else {
+         newctxt.clear(Attr::OWNED_ID);
+       }
+       
+       // If attribute has changed change in node
+       if (newctxt != ctxt) {
+         Attr attr(GetAttr(*node), newctxt);
+         dual_mesh->update_obj(node, attr);
+       }
+     }     
+   }
+
+
+   void _set_elem_ownership_context_based_on_owned_pet(Mesh *dual_mesh) {
+
+     //// Need to keep list of elems because order may change
+     
+     // Reserve memory for list
+     std::vector<MeshObj *> elem_list;
+     elem_list.reserve(dual_mesh->num_elems());
+
+     // Copy into list
+     MeshDB::iterator ei = dual_mesh->elem_begin(), ee = dual_mesh->elem_end();
+     for (; ei != ee; ++ei) {
+       MeshObj &elem=*ei;
+       
+       elem_list.push_back(&elem);
+     }
+
+     // Loop setting owner and OWNER_ID
+     for (MeshObj *elem : elem_list) {
+       
+       // Setup for changing attribute
+       const Context &ctxt = GetMeshObjContext(*elem);
+       Context newctxt(ctxt);
+       
+       // Set OWNED_ID appropriately
+       if (elem->get_owner() == Par::Rank()) {
+         newctxt.set(Attr::OWNED_ID);
+       } else {
+         newctxt.clear(Attr::OWNED_ID);
+       }
+       
+       // If attribute has changed change in elem
+       if (newctxt != ctxt) {
+         Attr attr(GetAttr(*elem), newctxt);
+         dual_mesh->update_obj(elem, attr);
+       }
+     }     
+   }
+  
 
   void _change_owners_from_src_to_curr_comm(Mesh *dual_mesh, MPI_Comm src_comm) {
     
