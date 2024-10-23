@@ -747,13 +747,10 @@ void dump_debug_info(char *phase, Mesh **_src_mesh, Array **_src_array,
   ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
 
   if (_src_mesh && *_src_mesh) {
-    printf("H1 _s_m=%p\n",_src_mesh);
 
     Mesh *src_mesh=*_src_mesh;
-    printf("H2 s_m=%p\n",src_mesh);
     
     MEField<> *elem_frac2 = src_mesh->GetField("elem_frac2");
-    printf("H3 e_f2=%p\n",elem_frac2);
     if (elem_frac2) {
       int elem_fracs_0s=0;
       int elem_fracs_1s=0;
@@ -774,20 +771,14 @@ void dump_debug_info(char *phase, Mesh **_src_mesh, Array **_src_array,
         else if (*ef2 == 1.0) elem_fracs_1s=1;
         else elem_fracs_others=1;                   
       }
-      printf("H4 e_f2=%p\n",elem_frac2);
       sprintf(buff,"BOB: %s src elem_frac2 0s=%d 1s=%d others=%d",phase,elem_fracs_0s,elem_fracs_1s,elem_fracs_others);
       ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);      
     }
-
-    printf("H5 \n");    
   }
 
   if (_dst_mesh && *_dst_mesh) {
-    printf("Hd.1 _d_m=%p\n",_dst_mesh);
     Mesh *dst_mesh=*_dst_mesh;
-    printf("Hd.2 d_m=%p\n",dst_mesh);
     MEField<> *elem_frac2 =dst_mesh->GetField("elem_frac2");
-    printf("Hd.3 ef2=%p\n",elem_frac2);
     if (elem_frac2) {
       int elem_fracs_0s=0;
       int elem_fracs_1s=0;
@@ -812,8 +803,6 @@ void dump_debug_info(char *phase, Mesh **_src_mesh, Array **_src_array,
       sprintf(buff,"BOB: %s dst elem_frac2 0s=%d 1s=%d others=%d",phase,elem_fracs_0s,elem_fracs_1s,elem_fracs_others);
       ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);      
     }
-
-    printf("Hd.5 \n");    
   }  
 }
 
