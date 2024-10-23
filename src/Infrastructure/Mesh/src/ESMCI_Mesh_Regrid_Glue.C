@@ -58,6 +58,8 @@
 
 using namespace ESMCI;
 
+void dump_debug_info(char *phase, Mesh **_src_mesh, Array **_src_array,
+                     Mesh **_dst_mesh, Array **_dst_array, int *regridMethod);
 
 // prototypes from below
 static bool all_mesh_node_ids_in_wmat(PointList *pointlist, WMat &wts, int *missing_id);
@@ -109,6 +111,10 @@ void ESMCI_regrid_create(
 #define ESMC_METHOD "ESMCI_regrid_create()"
   Trace __trace(" FTN_X(regrid_test)(ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
 
+
+  dump_debug_info("Begin", meshsrcpp, arraysrcpp,
+                  meshdstpp, arraydstpp, regridMethod);
+  
 
   ESMCI::Array &srcarray = **arraysrcpp;
   ESMCI::Array &dstarray = **arraydstpp;
@@ -693,6 +699,10 @@ void ESMCI_regrid_create(
       *_tudl=tudl;
     }
 
+
+    dump_debug_info("End", meshsrcpp, arraysrcpp,
+                  meshdstpp, arraydstpp, regridMethod); 
+
   } catch(std::exception &x) {
     // catch Mesh exception return code
     if (x.what()) {
@@ -722,6 +732,93 @@ void ESMCI_regrid_create(
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
+
+
+/* XMRKX */
+void dump_debug_info(char *phase, Mesh **_src_mesh, Array **_src_array,
+                     Mesh **_dst_mesh, Array **_dst_array, int *regridMethod) {
+
+  char buff[1024];
+
+  Array *src_array=*_src_array;
+  Array *dst_array=*_dst_array;
+
+  sprintf(buff,"BOB: %s regrid(%d) from %s to %s",phase,*regridMethod,src_array->getName(),dst_array->getName());
+  ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+
+  if (_src_mesh && *_src_mesh) {
+    printf("H1 _s_m=%p\n",_src_mesh);
+
+    Mesh *src_mesh=*_src_mesh;
+    printf("H2 s_m=%p\n",src_mesh);
+    
+    MEField<> *elem_frac2 = src_mesh->GetField("elem_frac2");
+    printf("H3 e_f2=%p\n",elem_frac2);
+    if (elem_frac2) {
+      int elem_fracs_0s=0;
+      int elem_fracs_1s=0;
+      int elem_fracs_others=0;    
+      Mesh::iterator ei = src_mesh->elem_begin(), ee = src_mesh->elem_end();
+      for (; ei != ee; ++ei) {
+        MeshObj &elem = *ei;
+        
+        // Don't do non-local elements
+        if (!GetAttr(elem).is_locally_owned()) continue;
+        
+        // Get frac data
+        double *ef2=elem_frac2->data(elem);
+
+
+        // Set indicators
+        if (*ef2 == 0.0) elem_fracs_0s=1;
+        else if (*ef2 == 1.0) elem_fracs_1s=1;
+        else elem_fracs_others=1;                   
+      }
+      printf("H4 e_f2=%p\n",elem_frac2);
+      sprintf(buff,"BOB: %s src elem_frac2 0s=%d 1s=%d others=%d",phase,elem_fracs_0s,elem_fracs_1s,elem_fracs_others);
+      ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);      
+    }
+
+    printf("H5 \n");    
+  }
+
+  if (_dst_mesh && *_dst_mesh) {
+    printf("Hd.1 _d_m=%p\n",_dst_mesh);
+    Mesh *dst_mesh=*_dst_mesh;
+    printf("Hd.2 d_m=%p\n",dst_mesh);
+    MEField<> *elem_frac2 =dst_mesh->GetField("elem_frac2");
+    printf("Hd.3 ef2=%p\n",elem_frac2);
+    if (elem_frac2) {
+      int elem_fracs_0s=0;
+      int elem_fracs_1s=0;
+      int elem_fracs_others=0;    
+      Mesh::iterator ei = dst_mesh->elem_begin(), ee = dst_mesh->elem_end();
+      for (; ei != ee; ++ei) {
+        MeshObj &elem = *ei;
+        
+        // Don't do non-local elements
+        if (!GetAttr(elem).is_locally_owned()) continue;
+        
+        // Get frac data
+        double *ef2=elem_frac2->data(elem);
+
+
+        // Set indicators
+        if (*ef2 == 0.0) elem_fracs_0s=1;
+        else if (*ef2 == 1.0) elem_fracs_1s=1;
+        else elem_fracs_others=1;                   
+      }
+
+      sprintf(buff,"BOB: %s dst elem_frac2 0s=%d 1s=%d others=%d",phase,elem_fracs_0s,elem_fracs_1s,elem_fracs_others);
+      ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);      
+    }
+
+    printf("Hd.5 \n");    
+  }  
+}
+
+
+
 
 
 void ESMCI_regrid_getiwts(Grid **gridpp,
