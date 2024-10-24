@@ -148,7 +148,7 @@ ESMF_F90LINKOPTS    += -thread_safe
 endif
 
 ############################################################
-# Need this until the file convention is fixed (then remove these two lines)
+# Explicit flags for handling specific format and cpp combos
 #
 ESMF_F90COMPILEFREECPP   = -free -fpp
 ESMF_F90COMPILEFREENOCPP = -free
