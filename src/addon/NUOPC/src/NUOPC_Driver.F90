@@ -2427,7 +2427,7 @@ module NUOPC_Driver
         return  ! bail out
       ! optionally log info
       if (btest(verbosity,11)) then
-        write(msgString, "(A,l,A,I4)") trim(name)//&
+        write(msgString, "(A,L2,A,I4)") trim(name)//&
           ": InitializeDataComplete='"//trim(oldDataComplete)//&
           "', allUpdated=", allUpdated, ", updatedCount=", oldUpdatedCount
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -2503,7 +2503,7 @@ module NUOPC_Driver
 
       ! optionally log info
       if (btest(verbosity,11)) then
-        write(msgString, "(A,l,A,I4)") trim(name)//&
+        write(msgString, "(A,L2,A,I4)") trim(name)//&
           ": InitializeDataComplete='"//trim(newDataComplete)//&
           "', allUpdated=", allUpdated, ", updatedCount=", newUpdatedCount
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -2775,7 +2775,7 @@ module NUOPC_Driver
           return  ! bail out
 
         if (btest(verbosity,11)) then
-          write(msgString, "(A,l)") trim(name)//&
+          write(msgString, "(A,L2)") trim(name)//&
             ": loopDataDependentInitialize() returned with dataDepAllComplete: ",&
             is%wrap%dataDepAllComplete
           call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -3266,7 +3266,7 @@ module NUOPC_Driver
             return  ! bail out
 
           if (btest(verbosity,11)) then
-            write(msgString, "(A,I4,A,L)") &
+            write(msgString, "(A,I4,A,L2)") &
               trim(name)//": component ", i, "="//trim(compName)//&
               ", dataComplete (global): ", (helperOut==petCount)
             call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -3377,7 +3377,7 @@ module NUOPC_Driver
           if (helperOut > 0) someProgress=.true. ! toggle flag
 
           if (btest(verbosity,11)) then
-            write(msgString, "(A,I4,A,L)") &
+            write(msgString, "(A,I4,A,L2)") &
               trim(name)//": component ", i, "="//trim(compName)//&
               ", someProgress (global): ", someProgress
             call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -3391,7 +3391,7 @@ module NUOPC_Driver
       if (present(dataDepAllComplete)) dataDepAllComplete=allComplete
 
       if (btest(verbosity,11)) then
-        write(msgString, "(A,l,A,l,A,l)") &
+        write(msgString, "(A,L2,A,L2,A,L2)") &
           trim(name)//": someProgress=", someProgress, ", allComplete=", &
           allComplete, ", present(dataDepAllComplete)=", &
           present(dataDepAllComplete)
