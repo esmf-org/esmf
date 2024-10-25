@@ -852,7 +852,7 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
         elemMaskII=elemMaskII_wsplit;
       }
 #endif
-    }   
+  }  
 
 
     // Build elements
@@ -910,8 +910,11 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
 
     dual_mesh->RegisterField("elem_coordinates",
                              MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, sdim, true);
-
-    if (elemOrigCoords) {
+//    if (elemOrigCoords) {    
+    if (src_node_orig_coords) {
+      char buff[1024];
+      sprintf(buff,"BOB: MeshDual: adding elem_orig_coordinates");
+      ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
       dual_mesh->RegisterField("elem_orig_coordinates",
                                MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, orig_sdim, true);
 
