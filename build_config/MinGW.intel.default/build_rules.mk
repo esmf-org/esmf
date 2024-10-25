@@ -141,7 +141,7 @@ ESMF_CXXLINKOPTS        += -mcmodel=medium
 endif
 
 ############################################################
-# Need this until the file convention is fixed (then remove these two lines)
+# Explicit flags for handling specific format and cpp combos
 #
 ESMF_F90COMPILEFREENOCPP = -fpp0 -FR
 ESMF_F90COMPILEFIXCPP    = -fpp

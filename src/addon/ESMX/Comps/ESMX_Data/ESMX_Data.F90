@@ -514,7 +514,7 @@ module esmx_data
 
     ! write to standard out
     if (xstate%myid .eq. xstate%outid) then
-      write(*,'(A,X,A)') trim(xstate%cname)//": Model Advance",trim(clockString)
+      write(*,'(A,1X,A)') trim(xstate%cname)//": Model Advance",trim(clockString)
     endif
 
     ! sum import data from all PETs
@@ -522,7 +522,7 @@ module esmx_data
     errCount = 0
     if (xstate%myid .eq. xstate%outid) then
       write(*,'(A)') trim(xstate%cname)//": Import Fields"
-      write(*,'(A,X,A25,X,A9,3(X,A9),X,A4)') &
+      write(*,'(A,1X,A25,1X,A9,3(1X,A9),1X,A4)') &
         trim(xstate%cname)//":", "FIELD", &
         "COUNT", "MEAN", &
         "MIN", "MAX", &
@@ -533,7 +533,7 @@ module esmx_data
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
       if (xstate%myid .eq. xstate%outid) then
-        write(*,'(A,X,A25,X,I9,3(X,E9.2),X,L4)') &
+        write(*,'(A,1X,A25,1X,I9,3(1X,E9.2),1X,L4)') &
           trim(xstate%cname)//":", trim(xfield%stdn), &
           int(xfield%gsum(2)), xfield%gavg, &
           xfield%gmin(1), xfield%gmax(1), &
@@ -547,7 +547,7 @@ module esmx_data
     xfield => xstate%exp_flds_head
     if (xstate%myid .eq. xstate%outid) then
       write(*,'(A)') trim(xstate%cname)//": Export Fields"
-      write(*,'(A,X,A25,X,A9,3(X,A9))') &
+      write(*,'(A,1X,A25,1X,A9,3(1X,A9))') &
         trim(xstate%cname)//":", "FIELD", &
         "COUNT", "MEAN", &
         "MIN", "MAX"
@@ -557,7 +557,7 @@ module esmx_data
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
       if (xstate%myid .eq. xstate%outid) then
-        write(*,'(A,X,A25,X,I9,3(X,E9.2))') &
+        write(*,'(A,1X,A25,1X,I9,3(1X,E9.2))') &
           trim(xstate%cname)//":", trim(xfield%stdn), &
           int(xfield%gsum(2)), xfield%gavg, &
           xfield%gmin(1), xfield%gmax(1)

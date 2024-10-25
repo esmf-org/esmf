@@ -232,7 +232,7 @@ ESMF_OPENACC_F90LINKOPTS    += -fopenacc
 ESMF_OPENACC_CXXLINKOPTS    += -fopenacc
 
 ############################################################
-# Need this until the file convention is fixed (then remove these two lines)
+# Explicit flags for handling specific format and cpp combos
 #
 ESMF_F90COMPILEFREENOCPP = -ffree-form
 ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
