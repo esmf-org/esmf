@@ -12,9 +12,12 @@
 #include <Mesh/include/Legacy/ESMCI_FieldReg.h>
 #include <Mesh/include/Legacy/ESMCI_MEImprint.h>
 #include <Mesh/include/Legacy/ESMCI_ParEnv.h>
+#include "ESMCI_LogErr.h"
 
 #include <algorithm>
 #include <cstdio>
+
+
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -337,7 +340,12 @@ void FieldReg::Commit(MeshDB &mesh) {
       std::vector<UInt> nvalSet; // keep track of sizes of _fields
       std::vector<UInt> nvalSetObj; // keep track of sizes of _fields
       MEField<> &f = *fi->second;
-//std::cout << "Imprinting MEField:" << f.name() << std::endl;
+      //std::cout << "Imprinting MEField:" << f.name() << std::endl;
+
+      char buff[1024];
+      sprintf(buff,"BOB: ord=%d MEField=%s",ord,f.name().c_str());
+      ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+      
       f.ordinal = ord++;
       // Loop obj type
       KernelList::iterator ki = mesh.set_begin(), ke = mesh.set_end(), kn;
