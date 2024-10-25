@@ -746,62 +746,30 @@ void dump_debug_info(char *phase, Mesh **_src_mesh, Array **_src_array,
   sprintf(buff,"BOB: %s regrid(%d) from %s to %s",phase,*regridMethod,src_array->getName(),dst_array->getName());
   ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
 
-  if (_src_mesh && *_src_mesh) {
-
-    Mesh *src_mesh=*_src_mesh;
-    
-    MEField<> *elem_frac2 = src_mesh->GetField("elem_frac2");
-    if (elem_frac2) {
-      int elem_fracs_0s=0;
-      int elem_fracs_1s=0;
-      int elem_fracs_others=0;    
-      Mesh::iterator ei = src_mesh->elem_begin(), ee = src_mesh->elem_end();
-      for (; ei != ee; ++ei) {
-        MeshObj &elem = *ei;
-        
-        // Don't do non-local elements
-        if (!GetAttr(elem).is_locally_owned()) continue;
-        
-        // Get frac data
-        double *ef2=elem_frac2->data(elem);
-
-
-        // Set indicators
-        if (*ef2 == 0.0) elem_fracs_0s=1;
-        else if (*ef2 == 1.0) elem_fracs_1s=1;
-        else elem_fracs_others=1;                   
-      }
-      sprintf(buff,"BOB: %s src elem_frac2 0s=%d 1s=%d others=%d",phase,elem_fracs_0s,elem_fracs_1s,elem_fracs_others);
-      ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);      
-    }
-  }
-
   if (_dst_mesh && *_dst_mesh) {
     Mesh *dst_mesh=*_dst_mesh;
-    MEField<> *elem_frac2 =dst_mesh->GetField("elem_frac2");
-    if (elem_frac2) {
-      int elem_fracs_0s=0;
-      int elem_fracs_1s=0;
-      int elem_fracs_others=0;    
-      Mesh::iterator ei = dst_mesh->elem_begin(), ee = dst_mesh->elem_end();
-      for (; ei != ee; ++ei) {
-        MeshObj &elem = *ei;
-        
-        // Don't do non-local elements
-        if (!GetAttr(elem).is_locally_owned()) continue;
-        
+    MEField<> *elem_frac =dst_mesh->GetField("elem_frac");
+    if (elem_frac) {
+
+      UInt tst_id=7788;
+      
+      //  Find the corresponding Mesh element
+      Mesh::MeshObjIDMap::iterator mi =  dst_mesh->map_find(MeshObj::ELEMENT, tst_id);
+      if (mi !=dst_mesh->map_end(MeshObj::ELEMENT)) {
+
+        // Get the element
+        const MeshObj &elem = *mi;
+
         // Get frac data
-        double *ef2=elem_frac2->data(elem);
-
-
-        // Set indicators
-        if (*ef2 == 0.0) elem_fracs_0s=1;
-        else if (*ef2 == 1.0) elem_fracs_1s=1;
-        else elem_fracs_others=1;                   
-      }
-
-      sprintf(buff,"BOB: %s dst elem_frac2 0s=%d 1s=%d others=%d",phase,elem_fracs_0s,elem_fracs_1s,elem_fracs_others);
-      ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);      
+        double *f=elem_frac->data(elem);
+        double frac=*f;
+        
+        sprintf(buff,"BOB: %s Dst found elem=%d frac=%f",phase,tst_id,frac);
+        ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+        
+        sprintf(buff,"BOB: %s Dst found elem=%d owner=%d is_local=%d is_active=%d is_shared=%d data_index=%d\n",phase,tst_id,elem.get_owner(),GetAttr(elem).is_locally_owned(),GetAttr(elem).GetContext().is_set(Attr::ACTIVE_ID), GetAttr(elem).is_shared(),elem.get_data_index());
+        ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);              
+      }      
     }
   }  
 }
