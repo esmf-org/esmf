@@ -897,6 +897,9 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
     if (elemConn !=NULL) delete [] elemConn;
     if (nodes !=NULL) delete [] nodes;
 
+    // Assume Contexts
+    dual_mesh->AssumeContexts(*src_mesh);
+
     // Register the elem Fields
     Context ctxt; ctxt.flip();
     dual_mesh->RegisterField("elem_frac",
