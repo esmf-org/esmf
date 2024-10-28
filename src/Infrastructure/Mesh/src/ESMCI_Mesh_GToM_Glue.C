@@ -1784,7 +1784,7 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
           // Init fracs
           if (efields[GTOM_EFIELD_FRAC]) {
             double *d=efields[GTOM_EFIELD_FRAC]->data(elem);
-            *d=1.0;
+            *d=0.0;
           }
 
           if (efields[GTOM_EFIELD_FRAC2]) {
