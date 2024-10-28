@@ -109,7 +109,7 @@ void ESMCI_GDAL_SHP_get_feature_info(OGRDataSourceH hDS, int *nFeatures, int *&F
   for (int i=0;i<*nFeatures;i++) {
 //    hFeature = OGR_L_GetNextFeature(hLayer);
     hFeature = OGR_L_GetFeature(hLayer,i);
-    FeatureIDs[i] = OGR_F_GetFID(hFeature);
+    FeatureIDs[i] = OGR_F_GetFID(hFeature)+1; // IDs can't be zero in meshes
     OGR_F_Destroy( hFeature );
   }
 
@@ -192,7 +192,7 @@ void ESMCI_GDAL_process_shapefile_distributed(
     // Current feature ID
 
     hFeature = OGR_L_GetFeature(hLayer, i); // Distributed
-    int FID = OGR_F_GetFID(hFeature);
+    int FID = OGR_F_GetFID(hFeature)+1;
 
     // Get geometry handles
     hGeom = OGR_F_GetGeometryRef(hFeature);

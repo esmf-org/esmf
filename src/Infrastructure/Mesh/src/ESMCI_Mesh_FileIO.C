@@ -1371,6 +1371,8 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     int *globalFeature_IDs=NULL;
     ESMCI_GDAL_SHP_get_feature_info(hDS, &nFeatures, globalFeature_IDs);
 
+
+
     // Get positions at which to read element information
     std::vector<int> feature_ids_vec;
     get_ids_divided_evenly_across_pets(nFeatures, local_pet, pet_count, feature_ids_vec);
@@ -1380,8 +1382,9 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     int *feature_IDs=NULL; // local PET
     if (!feature_ids_vec.empty()) {
       num_features=feature_ids_vec.size(); // local to this pet
+      feature_IDs   = (int *)malloc(num_features*sizeof(int));
       for (int i=0; i<num_features; i++) {
-	feature_IDs[i] = globalFeature_IDs[feature_ids_vec[i]];
+	feature_IDs[i] = globalFeature_IDs[feature_ids_vec[i]-1];
       }
 //      feature_IDs=&feature_ids_vec[0];
     } 
@@ -1391,6 +1394,7 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
 					     nodeCoords,nodeIDs,elemIDs,
 					     elemConn,elemCoords,numElemConn,
 					     &totNumElemConn, &num_nodes, &num_elems);
+
 
     node_IDs=&nodeIDs[0];
     elem_Conn=&elemConn[0];

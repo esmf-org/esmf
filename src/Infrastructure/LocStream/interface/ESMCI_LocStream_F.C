@@ -111,7 +111,7 @@ void FTN_X(c_esmc_gdal_shpinquire)(
       // Get the total points in features on local PET (I don't wanna do this here, but I will and then will add it to things to fix)
       *localpoints = 0;
       for (int i=0;i<*num_features;i++) {
-	OGRFeatureH hFeature = OGR_L_GetFeature(hLayer,feature_IDs[i]);
+	OGRFeatureH hFeature = OGR_L_GetFeature(hLayer,feature_IDs[i]-1);
 	OGRGeometryH hGeom = OGR_F_GetGeometryRef(hFeature);
 	*localpoints += OGR_G_GetPointCount(hGeom);
 	OGR_F_Destroy( hFeature );
