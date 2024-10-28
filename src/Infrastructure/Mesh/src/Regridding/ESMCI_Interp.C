@@ -3244,7 +3244,7 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
       int tst_id=7788;
       if (elem.get_id() == tst_id) {
         char buff[1024];
-        sprintf(buff,"BOB: elem_id=%d being set to 0.0",tst_id);
+        sprintf(buff,"BOB: Interp - elem_id=%d being init to 0.0",tst_id);
         ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
       }
         
@@ -3298,7 +3298,7 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
       int tst_id=7788;
       if (dst_elem.get_id() == tst_id) {
         char buff[1024];
-        sprintf(buff,"BOB: elem_id=%d being set in Interp to %f",tst_id,tot);
+        sprintf(buff,"BOB: Interp - elem_id=%d being set to %f",tst_id,tot);
         ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
       }
       
