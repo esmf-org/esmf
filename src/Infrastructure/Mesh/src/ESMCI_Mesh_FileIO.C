@@ -1380,7 +1380,10 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
     int *feature_IDs=NULL; // local PET
     if (!feature_ids_vec.empty()) {
       num_features=feature_ids_vec.size(); // local to this pet
-      feature_IDs=&feature_ids_vec[0];
+      for (int i=0; i<num_features; i++) {
+	feature_IDs[i] = globalFeature_IDs[feature_ids_vec[i]];
+      }
+//      feature_IDs=&feature_ids_vec[0];
     } 
 
     // Processes polygons in hDS. Polygons are flattened to 2D

@@ -45,6 +45,7 @@
 #include "Mesh/include/ESMCI_MeshDual.h"
 #include "Mesh/include/ESMCI_Mesh_Glue.h"
 #include "Mesh/include/ESMCI_FileIO_Util.h"
+#include "Mesh/include/ESMCI_GDAL_Util.h"
 
 // These internal functions can only be used if GDAL is available
 #ifdef ESMF_GDAL
@@ -72,7 +73,8 @@ int processPolygon(OGRGeometryH fGeom, std::vector<double> &XCoords, std::vector
 		   &elemConn, std::vector<int> &numelemConn, std::vector<int> &elemNodeIDs, int totpoints, int *nPpoints);
 int processMultiPolygon(OGRGeometryH hGeom, std::vector<double> &mXCoords, std::vector<double> &mYCoords, std::vector<int> &melemConn, 
 			std::vector<int> &nelemConn, std::vector<int> &elemNodeIDs, int totpoints, int *nMPpoints);
-int getLayerInfo( OGRLayerH hL, int *nPoints, int *nGeom);
+int processLineString(OGRGeometryH fGeom, std::vector<double> &XCoords, std::vector<double> &YCoords, std::vector<int> &elemNodeIDs, int *nPpoints);
+int processMultiLineString(OGRGeometryH hGeom, std::vector<double> &mXCoords, std::vector<double> &mYCoords, std::vector<int> &elemNodeIDs, int *nMPpoints);
 bool valueinarray(int val, int *arr, int n);
 int countMultiPolygon(OGRGeometryH hGeom, int *nMPoints);
 
@@ -105,7 +107,8 @@ void ESMCI_GDAL_SHP_get_feature_info(OGRDataSourceH hDS, int *nFeatures, int *&F
   FeatureIDs   = (int *)malloc(*nFeatures*sizeof(int));
 
   for (int i=0;i<*nFeatures;i++) {
-    hFeature = OGR_L_GetNextFeature(hLayer);
+//    hFeature = OGR_L_GetNextFeature(hLayer);
+    hFeature = OGR_L_GetFeature(hLayer,i);
     FeatureIDs[i] = OGR_F_GetFID(hFeature);
     OGR_F_Destroy( hFeature );
   }
@@ -126,135 +129,6 @@ void ESMCI_GDAL_process_shapefile_serial(
 		       int *totNumElemConn, 
 		       int *numNodes, 
 		       int *numElems) {
-//>>>>  int nElements;
-//>>>>//  int *nodeIDs;
-//>>>>//  int *elemConn;//,*numElemConn;
-//>>>>  double *nodeXCoords,*nodeYCoords;
-//>>>>
-//>>>>//  OGRRegisterAll(); // register all the drivers
-//>>>>
-//>>>>//  OGRDataSourceH hDS;
-//>>>>  OGRLayerH hLayer;
-//>>>>  OGRFeatureH hFeature;
-//>>>>
-//>>>>  char filename[200];
-//>>>>
-//>>>>  // Step 1
-//>>>>
-//>>>>  // Access the layer (associate the handle)
-//>>>>  // Assume that index 0 is the layer we want.
-//>>>>  hLayer = OGR_DS_GetLayer( hDS, 0 );
-//>>>>
-//>>>>  // Get the number of elements
-//>>>>  nElements = OGR_L_GetFeatureCount(hLayer,1);
-//>>>>
-//>>>>  printf("Number of shapefile elements: %d\n\n",nElements);
-//>>>>
-//>>>>  // Step 2:
-//>>>>
-//>>>>  // Rewind to the beginning, just in case
-//>>>>  OGR_L_ResetReading(hLayer);
-//>>>>
-//>>>>  // Loop through features in layer and establish extents for allocation
-//>>>>  while( (hFeature = OGR_L_GetNextFeature(hLayer)) != NULL ) {
-//>>>>    OGRGeometryH hGeom,fGeom;
-//>>>>    
-//>>>>    // Get geometry handles
-//>>>>    hGeom = OGR_F_GetGeometryRef(hFeature); // looks like this should be a polygon
-//>>>>    fGeom = OGR_G_GetGeometryRef(hGeom,0);  // and this should be linestring
-//>>>>    
-//>>>>    printf("Feature %d geom: %d (Polygon is %d)\n",elm+1,wkbFlatten(OGR_G_GetGeometryType(hGeom)),wkbPolygon);
-//>>>>    
-//>>>>    // ADD POLYGON
-//>>>>    if (wkbFlatten(OGR_G_GetGeometryType(hGeom)) == wkbPolygon) {
-//>>>>      processPolygon(fGeom,0, NULL, NULL, NULL, NULL, NULL, NULL);
-//>>>>    }
-//>>>>    // BREAK DOWN MULTIPOLYGON AND ADD SUB-POLYGONS
-//>>>>    else if (wkbFlatten(OGR_G_GetGeometryType(hGeom)) == wkbMultiPolygon){
-//>>>>      processMultiPolygon(hGeom,0, NULL, NULL, NULL, NULL, NULL, NULL);
-//>>>>    }
-//>>>>
-//>>>>    // Cleanup
-//>>>>    OGR_F_Destroy( hFeature );
-//>>>>  }
-//>>>>
-//>>>>  // Step 3:
-//>>>>  // Allocate vars
-//>>>>  // -- numNodes - there are as many connections as nodes
-//>>>>  *numNodes   = totpoints; // At this point, un-trimmed. Points will repeat
-//>>>>  *totNumElemConn = totpoints;
-//>>>>  // -- numElems
-//>>>>  *numElems   = elm; // This is an assumption!
-//>>>>  // -- nodeIDs
-//>>>>  nodeIDs = new int[totpoints];
-//>>>>//  nodeIDs    = (int *)malloc(totpoints*sizeof(int));
-//>>>>  // -- node[X,Y]Coords
-//>>>>  nodeXCoords = (double *)malloc(*numNodes*sizeof(double));
-//>>>>  nodeYCoords = (double *)malloc(*numNodes*sizeof(double));
-//>>>>  // -- elemConn
-//>>>>  elemConn    = (int *)malloc(*numNodes*sizeof(int)); //<- nodeIDs is already this, right?
-//>>>>  // -- elemIDs
-//>>>>  elemIDs   = (int *)malloc(*numElems*sizeof(int));
-//>>>>  // -- numElemConn
-//>>>>  numElemConn   = (int *)malloc(*numElems*sizeof(int));
-//>>>>
-//>>>>  // Reset counters
-//>>>>  elm       = 0; // Zero features
-//>>>>  totpoints = 0; // Zero number of points
-//>>>>
-//>>>>  // Rewind to the beginning, just in case
-//>>>>  OGR_L_ResetReading(hLayer);
-//>>>>
-//>>>>  // Loop through features in layer and establish extents for allocation
-//>>>>  while( (hFeature = OGR_L_GetNextFeature(hLayer)) != NULL ) {
-//>>>>    OGRGeometryH hGeom,fGeom;
-//>>>>    
-//>>>>    // Get geometry handles
-//>>>>    hGeom = OGR_F_GetGeometryRef(hFeature); // looks like this should be a polygon
-//>>>>    fGeom = OGR_G_GetGeometryRef(hGeom,0);  // and this should be linestring
-//>>>>    
-//>>>>    // ADD POLYGON
-//>>>>    if (wkbFlatten(OGR_G_GetGeometryType(hGeom)) == wkbPolygon) {
-//>>>>      processPolygon(fGeom,1, nodeXCoords, nodeYCoords, nodeIDs, elemIDs, numElemConn, elemConn);
-//>>>>    }
-//>>>>    // BREAK DOWN MULTIPOLYGON AND ADD SUB-POLYGONS
-//>>>>    else if (wkbFlatten(OGR_G_GetGeometryType(hGeom)) == wkbMultiPolygon){
-//>>>>      processMultiPolygon(hGeom,1, nodeXCoords, nodeYCoords, nodeIDs, elemIDs, numElemConn, elemConn);
-//>>>>    }
-//>>>>
-//>>>>    // Cleanup
-//>>>>    OGR_F_Destroy( hFeature );
-//>>>>  }
-//>>>>
-//>>>>//  printf("\n");
-//>>>>//  printf("N Features: %d\n",elm);
-//>>>>//  printf("N Points:   %d\n",totpoints);
-//>>>>//  printf("numNodes:   %d\n",numNodes);
-//>>>>
-//>>>>  nodeCoords= new double[2*totpoints];
-//>>>>
-//>>>>  // Pass OGR Values to Mesh arrays
-//>>>>  printf("Coords: \n");
-//>>>>  int j = 0;
-//>>>>  for (int i=0;i<totpoints;i++) {
-//>>>>//    printf("%d: %.2f, %.2f\n",nodeIDs[i],nodeXCoords[i],nodeYCoords[i]);
-//>>>>    nodeCoords[j]   = nodeXCoords[i];
-//>>>>    nodeCoords[j+1] = nodeYCoords[i];
-//>>>>    j+=2;
-//>>>>  }
-//>>>>
-//>>>>//  printf("--\n");
-//>>>>//  printf("elemID: numElemConn\n");
-//>>>>//
-//>>>>//  for (i=0;i<elm;i++) {
-//>>>>//    printf("%d: %d\n", elemIDs[i],numElemConn[i]);
-//>>>>//  }
-//>>>>//  printf("--\n");
-//>>>>
-//>>>>  free(nodeXCoords);
-//>>>>  free(nodeYCoords);
-//>>>>
-//>>>>  return ;
 }
 
 void ESMCI_GDAL_process_shapefile_distributed(
@@ -321,8 +195,11 @@ void ESMCI_GDAL_process_shapefile_distributed(
     int FID = OGR_F_GetFID(hFeature);
 
     // Get geometry handles
-    hGeom = OGR_F_GetGeometryRef(hFeature); // looks like this should be a polygon
-    fGeom = OGR_G_GetGeometryRef(hGeom,0);  // and this should be linestring
+    hGeom = OGR_F_GetGeometryRef(hFeature);
+
+    if (wkbFlatten(OGR_G_GetGeometryType(hGeom)) == wkbPolygon) { // If it's a polygon
+      fGeom = OGR_G_GetGeometryRef(hGeom,0);
+    }
 
     // Get number of points in polygon
     if (wkbFlatten(OGR_G_GetGeometryType(hGeom)) == wkbPolygon) { // If it's a polygon
@@ -334,20 +211,18 @@ void ESMCI_GDAL_process_shapefile_distributed(
       nFTRpoints = 0;
       countMultiPolygon(hGeom, &nFTRpoints);
     }
+    else if (wkbFlatten(OGR_G_GetGeometryType(hGeom)) == wkbLineString){
+      nFTRpoints  = OGR_G_GetPointCount(hGeom);
+    }
 
     // Rewind to the beginning, just in case
     OGR_L_ResetReading(hLayer);
 
     // is FID in the list of featureIDs passed to the method?
     // if FID is in featureIDs, then process this feature
-    if (valueinarray(FID+1,featureIDs,*nFeatures)) {
+    if (valueinarray(FID,featureIDs,*nFeatures)) {
 
       localpoints += nFTRpoints;
-
-//      for (int ii = 0; ii < nFTRpoints; ii++) {
-//	elemConn.push_back(totpoints+ii+1);
-//	nodeIDs.push_back(totpoints+ii+1);
-//      }
 
       // Get element coordinates
       // ASSUME: 2D
@@ -363,6 +238,15 @@ void ESMCI_GDAL_process_shapefile_distributed(
       else if (wkbFlatten(OGR_G_GetGeometryType(hGeom)) == wkbMultiPolygon){
 	processMultiPolygon(hGeom, XCoords, YCoords, elemConn, numElemConn, nodeIDs, totpoints, &nFTRpoints);
       }
+      // ADD LineString
+      if (wkbFlatten(OGR_G_GetGeometryType(hGeom)) == wkbLineString) {
+	processLineString(hGeom, XCoords, YCoords, nodeIDs, &nFTRpoints);
+      }
+      // BREAK DOWN MULTILineStrong AND ADD SUB-LineStrings
+      else if (wkbFlatten(OGR_G_GetGeometryType(hGeom)) == wkbMultiLineString){
+	processMultiLineString(hGeom, XCoords, YCoords, nodeIDs, &nFTRpoints);
+    }
+
     }
 
     totpoints  += nFTRpoints;
@@ -383,6 +267,7 @@ void ESMCI_GDAL_process_shapefile_distributed(
     nodeCoords[j+1] = YCoords[i];
     j+=2;
   }
+
   *nNodes = localpoints;
   // Get total number of connections on this PET
   *totNumElemConn=0;
@@ -506,6 +391,82 @@ int processMultiPolygon(
   return 0;
 }
 
+int processLineString(
+  // Just return specs of a given geometry handle. Should be a linestring or polygon.
+  // We don't add to the global spec arrays here because we may need to wedge in
+  // polybreaks for ESMF in the case we're in a multipolygon loop.
+   OGRGeometryH fGeom,  // Geometry handle for this polygon/linestring
+   std::vector<double> &polyXCoords, // X coords in this polygon/linestring.
+   std::vector<double> &polyYCoords, // X coords in this polygon/linestring.
+   std::vector<int> &elemNodeIDs,
+   int    *nPpoints)   // Number of points in this polygon/linestring
+{
+
+  *nPpoints    = OGR_G_GetPointCount(fGeom);
+
+  // -- Set coords: 
+  //    this is done this way because it appears GDAL reads these clockwise
+  //    and we need it to be counterclockwise. So the loop is reversed.
+  //    Haven't found a way to test for this using GDAL, so this is
+  //    a hardwire
+  for (int i = *nPpoints-1; i >=0; i--) {
+    polyXCoords.push_back( OGR_G_GetX(fGeom, i) );
+    polyYCoords.push_back( OGR_G_GetY(fGeom, i) );
+    elemNodeIDs.push_back(totpoints+i+1);
+  }
+
+// Success (currently, there's no error checking)
+  return 0;
+}
+
+int processMultiLineString(
+  OGRGeometryH hGeom, 
+  std::vector<double> &mXCoords, 
+  std::vector<double> &mYCoords, 
+  std::vector<int> &elemNodeIDs,
+  int    *nMPpoints)
+{ 
+  int j;
+  int nGeom;
+  int nPpoints, nPconn;
+  int nMPp = 0;
+
+//  double *XCoords, *YCoords;
+  std::vector<double> XCoords;
+  std::vector<double> YCoords;
+
+  OGRGeometryH fGeom,mGeom;
+
+//  nMPpoints = 0;
+
+  // get number of geometries in MP
+  nGeom = OGR_G_GetGeometryCount(hGeom);
+  
+  // Loop over nGeom in the multilinestring
+  for (j = 0; j < nGeom; j++) {
+    fGeom = OGR_G_GetGeometryRef(hGeom,j);
+    
+    // ADD LINESTRING
+    if (wkbFlatten(OGR_G_GetGeometryType(fGeom)) == wkbLineString) {
+      processLineString(fGeom, mXCoords, mYCoords, elemNodeIDs, &nPpoints);
+      nMPp += nPpoints; // Updated number of total points in MP
+    } // Or RECURSE INTO SUB MULTILINESTRING
+    else if(wkbFlatten(OGR_G_GetGeometryType(fGeom)) == wkbMultiLineString) {
+      // To be done. For multiLineStrings made of multiLineStrings.
+      printf("MPMP!!");
+      exit(1);
+      // processMultiLineString(fGeom,runtyp, mpolyXCoords, mpolyYCoords);
+    }
+
+    XCoords.clear();
+    YCoords.clear();
+
+  }
+  *nMPpoints = nMPp;
+
+  return 0;
+}
+
 int getLayerInfo( OGRLayerH hL, int *nPoints, int *nGeom) 
 {
   int nGeom_tmp = 0;
@@ -545,6 +506,31 @@ int getLayerInfo( OGRLayerH hL, int *nPoints, int *nGeom)
 	else if(wkbFlatten(OGR_G_GetGeometryType(hGeom2)) == wkbMultiPolygon) {
 	  // To be done. For multiPolygons made of multiPolygons.
 	  printf("Multipolygon of multipolygons!!");
+	  exit(1);
+	}
+      }
+    }
+    // Process Linestring
+    if (wkbFlatten(OGR_G_GetGeometryType(hGeom1)) == wkbLineString) {
+      nGeom_tmp++;
+      *nGeom=nGeom_tmp;
+      nPnts_tmp = OGR_G_GetPointCount(hGeom1);
+      *nPoints += nPnts_tmp;
+    } // or process a MULTILINESTRING
+    else if(wkbFlatten(OGR_G_GetGeometryType(hGeom1)) == wkbMultiLineString) {
+      int nGeomMP = OGR_G_GetGeometryCount(hGeom1);
+      for (int j = 0; j < nGeomMP; j++) {
+	hGeom2 = OGR_G_GetGeometryRef(hGeom1,j); // this should be a linestring
+	// Process sub-string
+	if (wkbFlatten(OGR_G_GetGeometryType(hGeom2)) == wkbLineString) {
+	  nGeom_tmp++;
+	  *nGeom=nGeom_tmp;
+	  nPnts_tmp = OGR_G_GetPointCount(hGeom2);
+	  *nPoints += nPnts_tmp;
+	} // Or RECURSE INTO SUB MULTISTRING
+	else if(wkbFlatten(OGR_G_GetGeometryType(hGeom2)) == wkbMultiLineString) {
+	  // To be done. For multiLineStrings made of multiLineStrings.
+	  printf("MSMS!!");
 	  exit(1);
 	}
       }

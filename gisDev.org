@@ -161,3 +161,11 @@ v4: runs a test of the shapefile and NetCDF mesh generation and regrid routines 
 
 v5: runs only a test of the shapefile mesh generation and regridding onto a cube grid.
     user can select the desired test shapefile by commenting/uncommenting the file.
+* Oct 16, 2024: Status
+** Shapefile read & regrid is working. Issues...
+Holes: How to deal with holes? According to Oehmke, this is an ESMF issue. ESMF wants the 
+same winding for all polygons. Shapefiles control whether hole or doughnut based on winding.
+** Time to read points into LocStream
+Start with manufacturing locations.
+* Big Remaining Items
+Mesh write. Write Shapefile.

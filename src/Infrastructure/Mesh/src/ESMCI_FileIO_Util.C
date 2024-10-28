@@ -134,7 +134,6 @@ void convert_global_elem_conn_to_local_node_and_elem_info(int num_local_elem, in
 
     // Add an entry for this in local_elem_conn
     local_elem_conn[convert_list[i].local_elem_conn_pos]=node_ids_pos+1; // +1 to make base-1
-//<<MSL debugging>>    printf("<<>> num_node_con %d: node_ids_pos: %d local_elem_conn_pos: %d local_elem_conn %d\n",num_node_conn,node_ids_pos,convert_list[i].local_elem_conn_pos,local_elem_conn[convert_list[i].local_elem_conn_pos]);
   }
 
 
@@ -204,7 +203,7 @@ void get_ids_divided_evenly_across_pets(int num_ids, int local_pet, int pet_coun
   int min_id, max_id;
   divide_ids_evenly_as_possible(num_ids, local_pet, pet_count, min_id, max_id);
   
-//  printf("%d# min,max ids=%d %d num=%d\n",local_pet,min_id,max_id,max_id-min_id+1);
+  //printf("%d# min,max ids=%d %d num=%d\n",local_pet,min_id,max_id,max_id-min_id+1);
   
   // Reserve space for ids
   ids.reserve(max_id-min_id+1);

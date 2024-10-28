@@ -27,6 +27,11 @@ using namespace std;
 #include "ESMCI_DistGrid.h"
 #include "ESMCI_Array.h"
 
+#ifdef ESMF_GDAL
+#include <ogr_api.h>
+#include "ESMCI_GDAL_Util.h"
+#include "ESMCI_FileIO_Util.h"
+#endif
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
@@ -44,6 +49,160 @@ extern "C" {
 //
 //
 
+void FTN_X(c_esmc_gdal_shpinquire)(
+                                         char *filename,
+					 int *toggle,
+                                         int *local_pet,
+                                         int *pet_count,
+                                         int *localpoints,
+                                         int *totaldims,
+					 int *feature_IDs,
+					 int *num_features,
+                                         int *rc,
+                                         ESMCI_FortranStrLenArg filename_l) {
+
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gdal_shpinquire()"
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  *totaldims = 2; // This is fixed for now!!!
+
+#ifdef ESMF_GDAL
+  // Open file and create datasource (DS)
+  OGRDataSourceH hDS;
+  if (access(filename, F_OK) == 0) {
+    OGRRegisterAll(); // register all the drivers
+    hDS = OGROpen( filename, FALSE, NULL );
+    if( hDS == NULL )
+      {
+	printf( "Open failed on pet %d: %s, %d\n", *local_pet, CPLGetLastErrorMsg(), CPLGetLastErrorNo() );
+      }
+    } else if (*local_pet == 0) {
+    printf("Cannot access shapefile %s\n",filename);
+    return;
+  }
+  
+  // GET DA DEETS!
+  int ngeom = 0;
+  int npoints = 0;
+  OGRLayerH hLayer = OGR_DS_GetLayer( hDS, 0 );
+  int ierr         = getLayerInfo(hLayer, &npoints, &ngeom);
+  //*totalpoints = npoints;
+
+  int nFeatures;
+  int *globalFeature_IDs=NULL;
+  ESMCI_GDAL_SHP_get_feature_info(hDS, &nFeatures, globalFeature_IDs);
+  
+  // Get positions at which to read element information
+  std::vector<int> feature_ids_vec;
+  get_ids_divided_evenly_across_pets(nFeatures, *local_pet, *pet_count, feature_ids_vec);
+  
+  // Assign vector info to pointer
+  *num_features = 0;
+  if (!feature_ids_vec.empty()) {
+    *num_features=feature_ids_vec.size(); // local to this pet
+    if (*toggle == 1) {
+      for (int i=0; i<*num_features; i++) {
+	feature_IDs[i] = globalFeature_IDs[feature_ids_vec[i]-1];
+      }
+      // Get the total points in features on local PET (I don't wanna do this here, but I will and then will add it to things to fix)
+      *localpoints = 0;
+      for (int i=0;i<*num_features;i++) {
+	OGRFeatureH hFeature = OGR_L_GetFeature(hLayer,feature_IDs[i]);
+	OGRGeometryH hGeom = OGR_F_GetGeometryRef(hFeature);
+	*localpoints += OGR_G_GetPointCount(hGeom);
+	OGR_F_Destroy( hFeature );
+      }
+    }
+  }
+
+  // Cleanup
+  GDALClose( hDS );
+#endif
+
+  // return success
+  if (rc) *rc = ESMF_SUCCESS;
+
+  return;
+}
+
+void FTN_X(c_esmc_gdal_shpgetcoords)(
+                                         char *filename,
+                                         int *local_pet,
+                                         int *numFeatures,
+					 int *feature_IDs,
+                                         int *localcount,
+					 double *coordX,
+					 double *coordY,
+                                         int *rc,
+                                         ESMCI_FortranStrLenArg filename_l) {
+
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gdal_shpgetcoords()"
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_GDAL
+  // Open file and create datasource (DS)
+  OGRDataSourceH hDS;
+  if (access(filename, F_OK) == 0) {
+    OGRRegisterAll(); // register all the drivers
+    hDS = OGROpen( filename, FALSE, NULL );
+    if( hDS == NULL )
+      {
+	printf( "Open failed on pet %d: %s, %d\n", *local_pet, CPLGetLastErrorMsg(), CPLGetLastErrorNo() );
+      }
+    } else if (*local_pet == 0) {
+    printf("Cannot access shapefile %s\n",filename);
+    return;
+  }
+  
+  // GET DA DEETS!
+  int num_nodes;
+  int num_elems=0;
+  int totNumElemConn=0;
+//  int *feature_IDs=NULL; // local PET
+  int *globalFeature_IDs=NULL;
+  double *nodeCoords=NULL;
+  std::vector<int> nodeIDs, elemIDs, elemConn, numElemConn;
+  std::vector<double> elemCoords;
+  int *num_ElemConn=NULL;
+  int *elem_Conn=NULL;
+  int *node_IDs=NULL; // Pointer. Will point to vector.
+  int *elem_IDs;
+
+  if (*numFeatures == 0) {
+    return;
+  }
+
+  ESMCI_GDAL_process_shapefile_distributed(hDS,numFeatures,feature_IDs,globalFeature_IDs,
+					   nodeCoords,nodeIDs,elemIDs,
+					   elemConn,elemCoords,numElemConn,
+					   &totNumElemConn, localcount, &num_elems);
+
+  printf("<<>> Pet/localcounts: %d/%d\n", *local_pet, *localcount);
+
+  int j = 0;
+  for (int i=0;i<*localcount;i++) {
+    coordX[i]=nodeCoords[j];
+    coordY[i]=nodeCoords[j+1];
+    j+=2;
+  }
+
+  // Cleanup
+  GDALClose( hDS );
+#endif
+
+  // return success
+  if (rc) *rc = ESMF_SUCCESS;
+
+  return;
+}
 
 // non-method functions
 void FTN_X(c_esmc_locstreamgetkeybnds)(ESMCI::Array **_array,
@@ -507,7 +666,7 @@ void FTN_X(c_esmc_locstreamkeydeserialize)(
   return;
 }
 
-
 #endif
+  
 
 }

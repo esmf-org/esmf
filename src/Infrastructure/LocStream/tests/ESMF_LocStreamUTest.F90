@@ -1718,6 +1718,21 @@ program ESMF_LocStreamCreateUTest
  !-----------------------------------------------------------------------------
 
 
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test ESMF_LocStream Create From Shapefile"
+  write(failMsg, *) "Test unsuccessful"
+  
+  ! initialize 
+  rc=ESMF_SUCCESS
+  
+  ! do test
+  call test_locstreamshapefile(rc)
+  
+  ! return result
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
   ! Destroy distgrid
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -2541,5 +2556,32 @@ contains
 
  end subroutine test_locstreambkgsph
 
+
+ subroutine test_locstreamshapefile(rc)
+   integer, intent(out)  :: rc
+
+!   character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/infrastructure/subset.shp"
+   character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/infrastructure/tl_2019_us_rails.shp"
+   type(ESMF_LocStream) :: locstream
+   type(ESMF_Field)     :: field
+   integer(ESMF_KIND_I4), pointer :: mptr(:)
+   type(ESMF_ArraySpec)   :: arraySpec
+   
+   locstream = ESMF_LocStreamCreate(filename=trim(filename),fileformat=ESMF_FILEFORMAT_SHAPEFILE, name='shp_test',rc=rc)
+!!   call ESMF_ArraySpecSet(arraySpec, 1, typekind=ESMF_TYPEKIND_I4, rc=rc)
+!!   field = ESMF_FieldCreate(locstream, arrayspec, rc=rc)
+!!   call ESMF_FieldGet( field, farrayPtr=mptr, rc=rc)
+!!   mptr = 111
+!!   mptr => null()
+!!
+!!   call ESMF_FieldWrite(field, fileName="locstream#.nc",  &
+!!       iofmt=ESMF_IOFMT_NETCDF,  &
+!!       overwrite=.true.,  &
+!!       status=ESMF_FILESTATUS_UNKNOWN, rc=rc)
+
+   return
+
+ end subroutine test_locstreamshapefile
+ 
 
 end program ESMF_LocStreamCreateUTest

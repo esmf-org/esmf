@@ -23,7 +23,6 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! INCLUDES
 #include "ESMF.h"
-
 !------------------------------------------------------------------------------
 !
 !BOPI
@@ -63,6 +62,9 @@ module ESMF_LocStreamMod
   use ESMF_IOScripMod
   use ESMF_IOUGridMod
 
+#ifdef ESMF_GDAL
+  use iso_c_binding
+#endif
   implicit none
 
 !------------------------------------------------------------------------------
@@ -2251,6 +2253,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_FileFormat_Flag) :: localfileformat
     logical :: localcenterflag, haveface
     character(len=16) :: units, location
+#ifdef ESMF_GDAL
+    integer :: numFeatures, localpoints
+    integer(c_int), pointer :: featureIDs(:)
+    type(c_ptr) :: fids
+#endif
 
     if (present(indexflag)) then
        indexflagLocal=indexflag
@@ -2387,6 +2394,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                   ESMF_CONTEXT, rcToReturn=rc)) return
        endif
        coordSys = ESMF_COORDSYS_SPH_DEG
+    elseif (localfileformat == ESMF_FILEFORMAT_SHAPEFILE) then
+       ! Inquire totalpoints and total dims
+       ! -- this is a C routine using GDAL
+       ! -- -- this is also SLOPPY (<<>> MSL)
+       featureIDs => NULL()
+       ! Godda run it once to get the numFeatures so we can allocate featureIDs
+       call c_ESMC_GDAL_ShpInquire(trim(filename)//c_null_char, 0, petNo, petCnt, localpoints, totaldims, featureIDs, numFeatures, localrc)
+       if (numFeatures .gt. 0) then
+          allocate(featureIDs(numFeatures)) ! This is local to this PET
+          call c_ESMC_GDAL_ShpInquire(trim(filename)//c_null_char, 1, petNo, petCnt, localpoints, totaldims, featureIDs, numFeatures, localrc)
+       endif
+       coordSys = ESMF_COORDSYS_SPH_DEG ! Fixed for now!
     endif             
 
     localcount = totalpoints/PetCnt
@@ -2402,17 +2421,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (localcount > 0) then 
        if (localfileformat == ESMF_FILEFORMAT_SCRIP) then 
           call ESMF_ScripGetVar(filename, grid_center_lon=coordX, grid_center_lat=coordY, &
-                          grid_imask=imask, start=starti, count=localcount, rc=localrc)
+               grid_imask=imask, start=starti, count=localcount, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return
-#if 0
-       elseif (localfileformat == ESMF_FILEFORMAT_GRIDSPEC) then 
-          if (totaldims == 1) then
-             call ESMF_GridspecGetVar1D(filename, varids, coordX, coordY, rc=localrc)
-             !construct 2D arrays and do the distribution
-             xdim=size(coordX)
-             ydim=size(coordY)
-#endif
+               ESMF_CONTEXT, rcToReturn=rc)) return
+!!!#if 0
+!!!       elseif (localfileformat == ESMF_FILEFORMAT_GRIDSPEC) then 
+!!!          if (totaldims == 1) then
+!!!             call ESMF_GridspecGetVar1D(filename, varids, coordX, coordY, rc=localrc)
+!!!             !construct 2D arrays and do the distribution
+!!!             xdim=size(coordX)
+!!!             ydim=size(coordY)
+!!!#endif
        elseif (localfileformat == ESMF_FILEFORMAT_ESMFMESH) then
           allocate(coord2D(totaldims,localcount))
           call ESMF_EsmfGetCoords(filename, coord2D, imask, &
@@ -2458,6 +2477,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              enddo
              deallocate(varbuffer)
           endif
+       elseif (localfileformat == ESMF_FILEFORMAT_SHAPEFILE) then
+          ! Get X,Y coords
+          ! -- this is a C routine using GDAL
+
+          ! coords aren't governed by total points, rather GIS 'features'
+          ! 'features' are distributed, and then the points determined
+          if (associated(coordX)) deallocate(coordX)
+          if (associated(coordY)) deallocate(coordY)
+
+          ! localpoints is the number of points associated with this pet's features
+          allocate(coordX(localpoints),coordY(localpoints))
+
+          ! Here we get the coordinates from the features specified by numFeatures and featureIDs
+          call c_ESMC_GDAL_ShpGetCoords(trim(filename)//c_null_char, petNo, numFeatures, featureIDs, localpoints, coordX, coordY, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+          localcount = localpoints
        endif
     endif
     ! create Location Stream
@@ -2466,7 +2502,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-    !print *, PetNo, starti, localcount, coordX(1), coordY(1)
+    !print *, "here ", PetNo, starti, localcount, coordX(1), coordY(1)
     
     ! Add coordinate keys based on coordSys
     if ((coordSys == ESMF_COORDSYS_SPH_DEG) .or. (coordSys == ESMF_COORDSYS_SPH_RAD)) then 
@@ -2482,7 +2518,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-       
+
        !If 3D grid, add the height coordinates
        if (totaldims == 3) then
           if (localcount == 0) allocate(coordZ(localcount))
@@ -2524,11 +2560,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
        
     !Add mask key
-    call ESMF_LocStreamAddKey(locStream, 'ESMF:Mask',imask,  &
+    if (localfileformat .ne. ESMF_FILEFORMAT_SHAPEFILE) then
+       call ESMF_LocStreamAddKey(locStream, 'ESMF:Mask',imask,  &
                               keyLongName='Mask', &
                               datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
    
     ! local garbage collection
     deallocate(coordX, coordY, imask)
