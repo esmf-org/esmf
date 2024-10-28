@@ -3240,10 +3240,21 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
     Mesh::iterator ei=dstmesh->elem_begin(),ee=dstmesh->elem_end();
     for (;ei!=ee; ei++) {
       MeshObj &elem = *ei;
+
+      int tst_id=7788;
+      if (elem.get_id() == tst_id) {
+        char buff[1024];
+        sprintf(buff,"BOB: elem_id=%d being set to 0.0",tst_id);
+        ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+      }
+        
       double *f=elem_frac->data(elem);
       *f=0.0;
     }
 
+
+
+    
     // Go through weights calculating and setting dst frac
     WMat::WeightMap::iterator wi, we;
     if (use_dst_frac) {
@@ -3284,6 +3295,13 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
       // Only put it in if it's locally owned
       if (!GetAttr(dst_elem).is_locally_owned()) continue;
 
+      int tst_id=7788;
+      if (dst_elem.get_id() == tst_id) {
+        char buff[1024];
+        sprintf(buff,"BOB: elem_id=%d being set in Interp to %f",tst_id,tot);
+        ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+      }
+      
       // Since weights with no mask should add up to 1.0
       // fraction is tot
       *frac=tot;
