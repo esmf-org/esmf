@@ -169,3 +169,4 @@ same winding for all polygons. Shapefiles control whether hole or doughnut based
 Start with manufacturing locations.
 * Big Remaining Items
 Mesh write. Write Shapefile.
+* LocStream

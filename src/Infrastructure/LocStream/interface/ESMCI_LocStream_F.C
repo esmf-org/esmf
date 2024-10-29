@@ -26,6 +26,7 @@ using namespace std;
 #include "ESMCI_LogErr.h"
 #include "ESMCI_DistGrid.h"
 #include "ESMCI_Array.h"
+#include "ESMCI_CoordSys.h"
 
 #ifdef ESMF_GDAL
 #include <ogr_api.h>
@@ -100,6 +101,8 @@ void FTN_X(c_esmc_gdal_shpinquire)(
   std::vector<int> feature_ids_vec;
   get_ids_divided_evenly_across_pets(nFeatures, *local_pet, *pet_count, feature_ids_vec);
   
+  printf("--- info: %d\n", feature_ids_vec.size());
+
   // Assign vector info to pointer
   *num_features = 0;
   if (!feature_ids_vec.empty()) {
@@ -188,10 +191,12 @@ void FTN_X(c_esmc_gdal_shpgetcoords)(
   printf("<<>> Pet/localcounts: %d/%d\n", *local_pet, *localcount);
 
   int j = 0;
+  printf("NOTE: ASSUMING DEG. CONVERTING TO RADIANS!!!");
   for (int i=0;i<*localcount;i++) {
-    coordX[i]=nodeCoords[j];
-    coordY[i]=nodeCoords[j+1];
+    coordX[i]=nodeCoords[j]*ESMC_CoordSys_Deg2Rad;
+    coordY[i]=nodeCoords[j+1]*ESMC_CoordSys_Deg2Rad;
     j+=2;
+//    printf("coord check: ind %d X %f Y %f\n",i,coordX[i],coordY[i]);
   }
 
   // Cleanup

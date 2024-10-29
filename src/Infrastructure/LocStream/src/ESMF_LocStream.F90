@@ -2405,7 +2405,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           allocate(featureIDs(numFeatures)) ! This is local to this PET
           call c_ESMC_GDAL_ShpInquire(trim(filename)//c_null_char, 1, petNo, petCnt, localpoints, totaldims, featureIDs, numFeatures, localrc)
        endif
-       coordSys = ESMF_COORDSYS_SPH_DEG ! Fixed for now!
+       coordSys = ESMF_COORDSYS_SPH_RAD ! Fixed for now!
     endif             
 
     localcount = totalpoints/PetCnt
@@ -2507,13 +2507,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Add coordinate keys based on coordSys
     if ((coordSys == ESMF_COORDSYS_SPH_DEG) .or. (coordSys == ESMF_COORDSYS_SPH_RAD)) then 
 
-       call ESMF_LocStreamAddKey(locStream, 'ESMF:Lon',coordX, keyUnits=units, &
+       call ESMF_LocStreamAddKey(locStream, 'Lon',coordX, keyUnits=units, &
             keyLongName='Longitude', &
             datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
        
-       call ESMF_LocStreamAddKey(locStream, 'ESMF:Lat',coordY, keyUnits=units, &
+       call ESMF_LocStreamAddKey(locStream, 'Lat',coordY, keyUnits=units, &
             keyLongName='Latitude', &
             datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

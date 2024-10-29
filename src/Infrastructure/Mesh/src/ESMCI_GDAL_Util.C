@@ -214,6 +214,9 @@ void ESMCI_GDAL_process_shapefile_distributed(
     else if (wkbFlatten(OGR_G_GetGeometryType(hGeom)) == wkbLineString){
       nFTRpoints  = OGR_G_GetPointCount(hGeom);
     }
+    else if (wkbFlatten(OGR_G_GetGeometryType(hGeom)) == wkbPoint){
+      nFTRpoints  = OGR_G_GetPointCount(hGeom);
+    }
 
     // Rewind to the beginning, just in case
     OGR_L_ResetReading(hLayer);
@@ -245,7 +248,16 @@ void ESMCI_GDAL_process_shapefile_distributed(
       // BREAK DOWN MULTILineStrong AND ADD SUB-LineStrings
       else if (wkbFlatten(OGR_G_GetGeometryType(hGeom)) == wkbMultiLineString){
 	processMultiLineString(hGeom, XCoords, YCoords, nodeIDs, &nFTRpoints);
-    }
+      }
+      else if (wkbFlatten(OGR_G_GetGeometryType(hGeom)) == wkbPoint){
+	nFTRpoints    = OGR_G_GetPointCount(hGeom);
+	
+	for (int i = nFTRpoints-1; i >=0; i--) {
+	  XCoords.push_back( OGR_G_GetX(hGeom, i) );
+	  YCoords.push_back( OGR_G_GetY(hGeom, i) );
+	  nodeIDs.push_back(totpoints+i+1);
+	}
+      }
 
     }
 
@@ -255,6 +267,7 @@ void ESMCI_GDAL_process_shapefile_distributed(
     OGR_F_Destroy( hFeature );
   }
 
+  printf("--- wtf %d %d\n", localpoints,nodeIDs.size());
   if (localpoints <= 0 || nodeIDs.size() <=0) { return; }
 
   nodeCoords= new double[2*totpoints];

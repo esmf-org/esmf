@@ -2561,19 +2561,27 @@ contains
    integer, intent(out)  :: rc
 
 !   character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/infrastructure/subset.shp"
-   character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/infrastructure/tl_2019_us_rails.shp"
+!   character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/infrastructure/tl_2019_us_rails.shp"
+   character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/Manufacturing/General_Manufacturing_Facilities_NAD83.shp"
    type(ESMF_LocStream) :: locstream
    type(ESMF_Field)     :: field
-   integer(ESMF_KIND_I4), pointer :: mptr(:)
+!   integer(ESMF_KIND_I4), pointer :: mptr(:)
+   real(ESMF_KIND_R4), pointer :: mptr(:)
    type(ESMF_ArraySpec)   :: arraySpec
    
-   locstream = ESMF_LocStreamCreate(filename=trim(filename),fileformat=ESMF_FILEFORMAT_SHAPEFILE, name='shp_test',rc=rc)
-!!   call ESMF_ArraySpecSet(arraySpec, 1, typekind=ESMF_TYPEKIND_I4, rc=rc)
-!!   field = ESMF_FieldCreate(locstream, arrayspec, rc=rc)
-!!   call ESMF_FieldGet( field, farrayPtr=mptr, rc=rc)
+   locstream = ESMF_LocStreamCreate(filename=trim(filename),fileformat=ESMF_FILEFORMAT_SHAPEFILE, name='NAICS',rc=rc)
+   call ESMF_ArraySpecSet(arraySpec, 1, typekind=ESMF_TYPEKIND_R4, rc=rc)
+   field = ESMF_FieldCreate(locstream, arrayspec, name='NAICS', rc=rc)
+   call ESMF_FieldRead( Field, &
+                        fileName=fileName, &
+                        iofmt=ESMF_IOFMT_SHP, &
+                        rc=rc)
+   
+   call ESMF_FieldGet( field, farrayPtr=mptr, rc=rc)
 !!   mptr = 111
-!!   mptr => null()
-!!
+!!   write(*,*) 'NAICS: ', mptr
+   mptr => null()
+
 !!   call ESMF_FieldWrite(field, fileName="locstream#.nc",  &
 !!       iofmt=ESMF_IOFMT_NETCDF,  &
 !!       overwrite=.true.,  &
