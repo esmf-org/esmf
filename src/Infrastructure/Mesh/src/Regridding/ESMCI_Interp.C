@@ -1866,6 +1866,131 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
   areas.resize(max_num_dst_elems,0.0);
   dst_areas.resize(max_num_dst_elems,0.0);
 
+  // Look at dest mesh
+  {
+    char buff[1024];
+
+     UInt tst_id;
+
+      tst_id=7787;
+      
+      //  Find the corresponding Mesh element
+      Mesh::MeshObjIDMap::iterator mi =  dstmesh.map_find(MeshObj::ELEMENT, tst_id);
+      if (mi !=dstmesh.map_end(MeshObj::ELEMENT)) {
+
+        // Get the element
+        const MeshObj &elem = *mi;
+
+        sprintf(buff,"BOB: Interp Csrv found elem=%d owner=%d is_local=%d is_active=%d is_shared=%d data_index=%d use_dst_frac=%d",tst_id,elem.get_owner(),GetAttr(elem).is_locally_owned(),GetAttr(elem).GetContext().is_set(Attr::ACTIVE_ID), GetAttr(elem).is_shared(),elem.get_data_index(),use_dst_frac);       
+        ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);              
+
+        // Frac data
+        MEField<> *elem_frac = dstmesh.GetField("elem_frac");
+        if (elem_frac) {
+          double *f=elem_frac->data(elem);
+        
+          sprintf(buff,"BOB: Interp Csrv Dst elem=%d frac=%f",tst_id,*f);
+          ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+        }
+
+        // Frac2 data
+        MEField<> *elem_frac2 = dstmesh.GetField("elem_frac2");
+        if (elem_frac2) {
+          double *f=elem_frac2->data(elem);
+        
+          sprintf(buff,"BOB: Interp Csrv Dst elem=%d frac2=%f",tst_id,*f);
+          ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+        }
+
+        // Mask data
+        MEField<> *elem_mask = dstmesh.GetField("elem_mask");
+        if (elem_mask) {
+          double *m=elem_mask->data(elem);
+        
+          sprintf(buff,"BOB: Interp Csrv Dst elem=%d mask=%f",tst_id,*m);
+          ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+        }
+
+        // Mask val data
+        MEField<> *elem_mask_val = dstmesh.GetField("elem_mask_val");
+        if (elem_mask_val) {
+          double *m=elem_mask_val->data(elem);
+          
+          sprintf(buff,"BOB: Interp Csrv Dst elem=%d mask_val=%f",tst_id,*m);
+          ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+        }
+
+        // Area data
+        MEField<> *elem_area = dstmesh.GetField("elem_area");
+        if (elem_area) {
+          double *a=elem_area->data(elem);
+        
+          sprintf(buff,"BOB: Interp Csrv Dst elem=%d area=%f",tst_id,*a);
+          ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+        }
+
+      }
+
+      tst_id=7788;
+      
+      //  Find the corresponding Mesh element
+      mi =  dstmesh.map_find(MeshObj::ELEMENT, tst_id);
+      if (mi !=dstmesh.map_end(MeshObj::ELEMENT)) {
+
+        // Get the element
+        const MeshObj &elem = *mi;
+
+        sprintf(buff,"BOB: Interp Csrv elem=%d owner=%d is_local=%d is_active=%d is_shared=%d data_index=%d use_dst_frac=%d",tst_id,elem.get_owner(),GetAttr(elem).is_locally_owned(),GetAttr(elem).GetContext().is_set(Attr::ACTIVE_ID), GetAttr(elem).is_shared(),elem.get_data_index(),use_dst_frac);       
+        ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);              
+
+        // Frac data
+        MEField<> *elem_frac = dstmesh.GetField("elem_frac");
+        if (elem_frac) {
+          double *f=elem_frac->data(elem);
+        
+          sprintf(buff,"BOB: Interp Csrv Dst elem=%d frac=%f",tst_id,*f);
+          ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+        }
+
+        // Frac2 data
+        MEField<> *elem_frac2 = dstmesh.GetField("elem_frac2");
+        if (elem_frac2) {
+          double *f=elem_frac2->data(elem);
+        
+          sprintf(buff,"BOB: Interp Csrv Dst elem=%d frac2=%f",tst_id,*f);
+          ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+        }
+
+        // Mask data
+        MEField<> *elem_mask = dstmesh.GetField("elem_mask");
+        if (elem_mask) {
+          double *m=elem_mask->data(elem);
+        
+          sprintf(buff,"BOB: Interp Csrv Dst elem=%d mask=%f",tst_id,*m);
+          ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+        }
+
+        // Mask val data
+        MEField<> *elem_mask_val = dstmesh.GetField("elem_mask_val");
+        if (elem_mask_val) {
+          double *m=elem_mask_val->data(elem);
+          
+          sprintf(buff,"BOB: Interp Csrv Dst elem=%d mask_val=%f",tst_id,*m);
+          ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+        }
+
+        // Area data
+        MEField<> *elem_area = dstmesh.GetField("elem_area");
+        if (elem_area) {
+          double *a=elem_area->data(elem);
+        
+          sprintf(buff,"BOB: Interp Csrv Dst elem=%d area=%f",tst_id,*a);
+          ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+        }        
+      }
+  }
+
+  
   // Loop through search results
   for (sb = sres.begin(); sb != se; sb++) {
 
@@ -3251,9 +3376,6 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
       double *f=elem_frac->data(elem);
       *f=0.0;
     }
-
-
-
     
     // Go through weights calculating and setting dst frac
     WMat::WeightMap::iterator wi, we;

@@ -748,10 +748,12 @@ void dump_debug_info(char *phase, Mesh **_src_mesh, Array **_src_array,
 
   if (_dst_mesh && *_dst_mesh) {
     Mesh *dst_mesh=*_dst_mesh;
-    MEField<> *elem_frac =dst_mesh->GetField("elem_frac");
-    if (elem_frac) {
 
-      UInt tst_id=7788;
+        char buff[1024];
+
+     UInt tst_id;
+
+      tst_id=7787;
       
       //  Find the corresponding Mesh element
       Mesh::MeshObjIDMap::iterator mi =  dst_mesh->map_find(MeshObj::ELEMENT, tst_id);
@@ -760,17 +762,117 @@ void dump_debug_info(char *phase, Mesh **_src_mesh, Array **_src_array,
         // Get the element
         const MeshObj &elem = *mi;
 
-        // Get frac data
-        double *f=elem_frac->data(elem);
-        double frac=*f;
-        
-        sprintf(buff,"BOB: %s Dst found elem=%d frac=%f",phase,tst_id,frac);
-        ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
-        
-        sprintf(buff,"BOB: %s Dst found elem=%d owner=%d is_local=%d is_active=%d is_shared=%d data_index=%d\n",phase,tst_id,elem.get_owner(),GetAttr(elem).is_locally_owned(),GetAttr(elem).GetContext().is_set(Attr::ACTIVE_ID), GetAttr(elem).is_shared(),elem.get_data_index());
+        sprintf(buff,"BOB: %s Dst found elem=%d owner=%d is_local=%d is_active=%d is_shared=%d data_index=%d",phase,tst_id,elem.get_owner(),GetAttr(elem).is_locally_owned(),GetAttr(elem).GetContext().is_set(Attr::ACTIVE_ID), GetAttr(elem).is_shared(),elem.get_data_index());       
         ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);              
-      }      
-    }
+
+        // Frac data
+        MEField<> *elem_frac = dst_mesh->GetField("elem_frac");
+        if (elem_frac) {
+          double *f=elem_frac->data(elem);
+        
+          sprintf(buff,"BOB: %s Dst elem=%d frac=%f",phase, tst_id,*f);
+          ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+        }
+
+        // Frac2 data
+        MEField<> *elem_frac2 = dst_mesh->GetField("elem_frac2");
+        if (elem_frac2) {
+          double *f=elem_frac2->data(elem);
+        
+          sprintf(buff,"BOB: %s Dst elem=%d frac2=%f",phase, tst_id,*f);
+          ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+        }
+
+        // Mask data
+        MEField<> *elem_mask = dst_mesh->GetField("elem_mask");
+        if (elem_mask) {
+          double *m=elem_mask->data(elem);
+        
+          sprintf(buff,"BOB: %s Dst elem=%d mask=%f",phase, tst_id,*m);
+          ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+        }
+
+        // Mask val data
+        MEField<> *elem_mask_val = dst_mesh->GetField("elem_mask_val");
+        if (elem_mask_val) {
+          double *m=elem_mask_val->data(elem);
+          
+          sprintf(buff,"BOB: %s Dst elem=%d mask_val=%f",phase, tst_id,*m);
+          ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+        }
+
+        // Area data
+        MEField<> *elem_area = dst_mesh->GetField("elem_area");
+        if (elem_area) {
+          double *a=elem_area->data(elem);
+        
+          sprintf(buff,"BOB: %s Dst elem=%d area=%f",phase, tst_id,*a);
+          ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+        }
+        
+      }
+
+      tst_id=7788;
+      
+      //  Find the corresponding Mesh element
+      mi =  dst_mesh->map_find(MeshObj::ELEMENT, tst_id);
+      if (mi !=dst_mesh->map_end(MeshObj::ELEMENT)) {
+
+        // Get the element
+        const MeshObj &elem = *mi;
+
+        sprintf(buff,"BOB: %s Dst found elem=%d owner=%d is_local=%d is_active=%d is_shared=%d data_index=%d",phase, tst_id,elem.get_owner(),GetAttr(elem).is_locally_owned(),GetAttr(elem).GetContext().is_set(Attr::ACTIVE_ID), GetAttr(elem).is_shared(),elem.get_data_index());       
+        ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);              
+
+        // Frac data
+        MEField<> *elem_frac = dst_mesh->GetField("elem_frac");
+        if (elem_frac) {
+          double *f=elem_frac->data(elem);
+        
+          sprintf(buff,"BOB: %s Dst elem=%d frac=%f",phase, tst_id,*f);
+          ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+        }
+
+        // Frac2 data
+        MEField<> *elem_frac2 = dst_mesh->GetField("elem_frac2");
+        if (elem_frac2) {
+          double *f=elem_frac2->data(elem);
+        
+          sprintf(buff,"BOB: %s Dst elem=%d frac2=%f",phase, tst_id,*f);
+          ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+        }
+
+        // Mask data
+        MEField<> *elem_mask = dst_mesh->GetField("elem_mask");
+        if (elem_mask) {
+          double *m=elem_mask->data(elem);
+        
+          sprintf(buff,"BOB: %s Dst elem=%d mask=%f",phase, tst_id,*m);
+          ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+        }
+
+        // Mask val data
+        MEField<> *elem_mask_val = dst_mesh->GetField("elem_mask_val");
+        if (elem_mask_val) {
+          double *m=elem_mask_val->data(elem);
+          
+          sprintf(buff,"BOB: %s Dst elem=%d mask_val=%f",phase, tst_id,*m);
+          ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+        }
+
+        // Area data
+        MEField<> *elem_area = dst_mesh->GetField("elem_area");
+        if (elem_area) {
+          double *a=elem_area->data(elem);
+        
+          sprintf(buff,"BOB: %s Dst elem=%d area=%f",phase, tst_id,*a);
+          ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+        }
+
+        
+      }
+
+    
   }  
 }
 
