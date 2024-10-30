@@ -228,6 +228,17 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
   MEField<> *src_node_mask=src_mesh->GetField("mask"); 
 
 
+  // Detect what optional fields should be present in the dual
+  bool dual_has_elemOrigCoords=false;
+  if (src_node_orig_coords) dual_has_elemOrigCoords=true;
+
+  bool dual_has_elemMaskVal=false;
+  if (src_node_mask_val) dual_has_elemMaskVal=true;
+
+  bool dual_has_elemMask=false;
+  if (src_node_mask) dual_has_elemMask=true;
+
+  
   // Iterate through all src elements counting the number and creating a map
   std::map<UInt,UInt> id_to_index;
    int pos=0;
@@ -324,9 +335,9 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
     elemId=new UInt[max_num_elems];
     elemOwner=new UInt[max_num_elems];
     elemCoords=new double[sdim*max_num_elems];
-    if (src_node_orig_coords) elemOrigCoords=new double[orig_sdim*max_num_elems];
-    if (src_node_mask_val) elemMaskVal=new double[max_num_elems];
-    if (src_node_mask) elemMask=new double[max_num_elems];
+    if (dual_has_elemOrigCoords) elemOrigCoords=new double[orig_sdim*max_num_elems];
+    if (dual_has_elemMaskVal) elemMaskVal=new double[max_num_elems];
+    if (dual_has_elemMask) elemMask=new double[max_num_elems];
   }
   int *elemConn=NULL;
   if (max_num_elemConn >0) {
@@ -669,9 +680,9 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
     elemId_wsplit=new UInt[num_elems_wsplit];
     elemOwner_wsplit=new UInt[num_elems_wsplit];
     elemCoords_wsplit=new double[sdim*num_elems_wsplit];
-    if (elemOrigCoords) elemOrigCoords_wsplit=new double[orig_sdim*num_elems_wsplit];
-    if (elemMaskVal) elemMaskVal_wsplit=new double[num_elems_wsplit];
-    if (elemMask) elemMask_wsplit=new double[num_elems_wsplit];
+    if (dual_has_elemOrigCoords) elemOrigCoords_wsplit=new double[orig_sdim*num_elems_wsplit];
+    if (dual_has_elemMaskVal) elemMaskVal_wsplit=new double[num_elems_wsplit];
+    if (dual_has_elemMask) elemMask_wsplit=new double[num_elems_wsplit];
     
 #if 0
       //// Setup for split mask
@@ -768,7 +779,7 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
             }
 
             // Set orig element coords.
-            if (elemOrigCoords) {
+            if (elemOrigCoords && elemOrigCoords_wsplit) {
               double *elem_orig_pnt=elemOrigCoords+orig_sdim*e;
               double *elem_orig_pnt_wsplit=elemOrigCoords_wsplit+orig_sdim*split_elem_pos;
               for (int od=0; od<orig_sdim; od++) {
@@ -777,12 +788,12 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
             }
 
             // Set elem mask val
-            if (elemMaskVal) {
+            if (elemMaskVal && elemMaskVal_wsplit) {
               elemMaskVal_wsplit[split_elem_pos]=elemMaskVal[e];
             }
 
             // Set elem mask
-            if (elemMask) {
+            if (elemMask && elemMask_wsplit) {
               elemMask_wsplit[split_elem_pos]=elemMask[e];
             }
             
@@ -910,23 +921,19 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
 
     dual_mesh->RegisterField("elem_coordinates",
                              MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, sdim, true);
-//    if (elemOrigCoords) {    
-    if (src_node_orig_coords) {
-      char buff[1024];
-      sprintf(buff,"BOB: MeshDual: adding elem_orig_coordinates");
-      ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+
+    if (dual_has_elemOrigCoords) {
       dual_mesh->RegisterField("elem_orig_coordinates",
                                MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, orig_sdim, true);
-
     }
 
-    if (elemMaskVal) {
+    if (dual_has_elemMaskVal) {
       dual_mesh->RegisterField("elem_mask_val",
                                MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
 
     }
 
-    if (elemMask) {
+    if (dual_has_elemMask) {
       dual_mesh->RegisterField("elem_mask",
                                MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
 

@@ -2039,7 +2039,7 @@ endif
 #endif
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Mesh Create Dual with checking of element coords and masking"
+  write(name, *) "Mesh create dual with element coords and masking"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! initialize check variables

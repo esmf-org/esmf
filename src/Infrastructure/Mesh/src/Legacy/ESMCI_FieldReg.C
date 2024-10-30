@@ -341,10 +341,6 @@ void FieldReg::Commit(MeshDB &mesh) {
       std::vector<UInt> nvalSetObj; // keep track of sizes of _fields
       MEField<> &f = *fi->second;
       //std::cout << "Imprinting MEField:" << f.name() << std::endl;
-
-      char buff[1024];
-      sprintf(buff,"BOB: ord=%d MEField=%s",ord,f.name().c_str());
-      ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
       
       f.ordinal = ord++;
       // Loop obj type

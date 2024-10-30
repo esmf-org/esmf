@@ -3367,12 +3367,6 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
     meshp->max_non_split_id=max_non_split_id;
 
     //  printf(" is_split=%d mnsi=%d\n",meshp->is_split,meshp->max_non_split_id);
-
-    for (int i=0; i<ESMF_RECONCILE_MESH_NUM_FIELDS; i++) {
-      char buff[1024];
-      sprintf(buff,"BOB: deserialize field %d present=%d",i,fields_present[i]);
-      ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
-    }
     
     // Register fields
     Context ctxt; ctxt.flip(); // Needed below for element registration
