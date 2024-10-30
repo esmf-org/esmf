@@ -8364,6 +8364,14 @@ subroutine exhaustiveMeshDualTest(correct, rc)
                9,10,11,12,13,14,&
                 15,16/)
 
+     !! node mask
+     !! (Ids + 10) 
+     allocate(nodeMask(numNodes))
+     nodeMask=(/11,12,13,14,15,16,17,18, &
+               19,20,21,22,23,24,&
+                25,26/)
+
+     
      
      !! node Coords
      allocate(nodeCoords(numNodes*2))
@@ -8400,6 +8408,12 @@ subroutine exhaustiveMeshDualTest(correct, rc)
       allocate(elemIds(numElems))
       elemIds=(/1,2,3,4,5,6,7,8,9/)
 
+      !! elem mask
+      !! (Ids+100)
+      allocate(elemMask(numElems))
+      elemMask=(/101,102,103,104,105,106,107,108,109/)
+
+      
       !! elem types
       allocate(elemTypes(numElems))
       elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! 1
@@ -8447,6 +8461,12 @@ subroutine exhaustiveMeshDualTest(correct, rc)
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,5,6/)
 
+     !! node mask
+     !! (ids+10)
+     allocate(nodeMask(numNodes))
+     nodeMask=(/11,12,15,16/)
+
+     
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/0.0,0.0, & ! 1
@@ -8468,6 +8488,11 @@ subroutine exhaustiveMeshDualTest(correct, rc)
       allocate(elemIds(numElems))
       elemIds=(/1/)
 
+      !! elem mask
+      !! (ids+100)
+      allocate(elemMask(numElems))
+      elemMask=(/101/)
+      
       !! elem types
       allocate(elemTypes(numElems))
       elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! 1
@@ -8489,6 +8514,11 @@ subroutine exhaustiveMeshDualTest(correct, rc)
      allocate(nodeIds(numNodes))
      nodeIds=(/2,3,4,6,7,8/)
 
+     !! node mask
+     !! (ids+10)
+     allocate(nodeMask(numNodes))
+     nodeMask=(/12,13,14,16,17,18/)
+     
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/1.0,0.0, &  ! 2
@@ -8519,6 +8549,12 @@ subroutine exhaustiveMeshDualTest(correct, rc)
       allocate(elemIds(numElems))
       elemIds=(/2,3/)
 
+      !! elem mask
+      !! (ids+100)
+      allocate(elemMask(numElems))
+      elemMask=(/102,103/)
+
+      
       !! elem types
       allocate(elemTypes(numElems))
        elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! 2
@@ -8545,7 +8581,14 @@ subroutine exhaustiveMeshDualTest(correct, rc)
      nodeIds=(/5,6,7,   &
                9,10,11, &
                13,14,15/)
-
+     
+     !! node mask
+     !! (ids+10)
+     allocate(nodeMask(numNodes))
+     nodeMask=(/15,16,17,   &
+               19,20,21, &
+               23,24,25/)
+     
 
      !! node Coords
      allocate(nodeCoords(numNodes*2))
@@ -8583,6 +8626,11 @@ subroutine exhaustiveMeshDualTest(correct, rc)
       allocate(elemIds(numElems))
       elemIds=(/4,5,7,8/)
 
+      !! elem mask
+      !! (ids+100)
+      allocate(elemMask(numElems))
+      elemMask=(/104,105,107,108/)
+      
       !! elem types
       allocate(elemTypes(numElems))
       elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! 4
@@ -8613,6 +8661,11 @@ subroutine exhaustiveMeshDualTest(correct, rc)
      allocate(nodeIds(numNodes))
      nodeIds=(/7,8,11,12,15,16/)
 
+     !! node mask
+     !! (ids+10)
+     allocate(nodeMask(numNodes))
+     nodeMask=(/17,18,21,22,25,26/)
+     
      !! node Coords
      allocate(nodeCoords(numNodes*2))
      nodeCoords=(/2.0,1.0, &  ! 7
@@ -8642,6 +8695,11 @@ subroutine exhaustiveMeshDualTest(correct, rc)
       allocate(elemIds(numElems))
       elemIds=(/6,9/)
 
+      !! elem mask
+      !! (ids+100)
+      allocate(elemMask(numElems))
+      elemMask=(/106,109/)
+
       !! elem types
       allocate(elemTypes(numElems))
       elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! 6
@@ -8664,9 +8722,9 @@ subroutine exhaustiveMeshDualTest(correct, rc)
    mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
         coordSys=ESMF_COORDSYS_SPH_DEG, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
-        nodeOwners=nodeOwners, elementIds=elemIds,&
-        elementTypes=elemTypes, elementConn=elemConn, &
-        elementCoords=elemCoords, &
+         nodeOwners=nodeOwners, nodeMask=nodeMask, &
+         elementIds=elemIds, elementTypes=elemTypes, elementConn=elemConn, &
+        elementCoords=elemCoords, elementMask=elemMask, &
         rc=rc)
    if (rc /= ESMF_SUCCESS) return
 
@@ -8674,12 +8732,14 @@ subroutine exhaustiveMeshDualTest(correct, rc)
    deallocate(nodeIds)
    deallocate(nodeCoords)
    deallocate(nodeOwners)
+   deallocate(nodeMask)
 
    ! deallocate elem data
    deallocate(elemIds)
    deallocate(elemTypes)
    deallocate(elemCoords)
    deallocate(elemConn)
+   deallocate(elemMask)
   
    ! Create Dual Mesh
    dualMesh=ESMF_MeshCreateDual(mesh, rc=rc) 
@@ -8725,9 +8785,9 @@ subroutine exhaustiveMeshDualTest(correct, rc)
    call ESMF_MeshGet(dualMesh, &
         nodeIds=nodeIds, &
         nodeCoords=nodeCoords, &
-!        nodeMask=nodeMask, & 
+        nodeMask=nodeMask, & 
         elementIds=elemIds, &
-!        elementMask=elemMask, & 
+        elementMask=elemMask, & 
         elementCoords=elemCoords, &
         rc=rc)
    if (rc /= ESMF_SUCCESS) return
@@ -8754,6 +8814,7 @@ subroutine exhaustiveMeshDualTest(correct, rc)
       nodeCoordsTst=(/0.50, 0.50,  1.5, 0.50, 2.5, 0.50, 0.50, 1.5, 1.5, 1.5, 2.5, 1.5, 0.50, 2.5, 1.5, 2.5, 2.5, 2.5/)
       do i=1,numNodes
          if (nodeIdsTst(i) /= nodeIds(i)) correct=.false.
+         if (nodeMask(i) /= nodeIds(i)+100) correct=.false.
          if (nodeCoordsTst(2*i-1) /= nodeCoords(2*i-1)) correct=.false.
          if (nodeCoordsTst(2*i) /= nodeCoords(2*i)) correct=.false.
       enddo
@@ -8763,6 +8824,7 @@ subroutine exhaustiveMeshDualTest(correct, rc)
       elemCoordsTst=(/1.0, 1.0, 2.0, 1.0, 1.0, 2.0, 2.0, 2.0/)      
       do i=1,numElems
          if (elemIdsTst(i) /= elemIds(i)) correct=.false.
+         if (elemMask(i) /= elemIds(i)+10) correct=.false.
          if (elemCoordsTst(2*i-1) /= elemCoords(2*i-1)) correct=.false.
          if (elemCoordsTst(2*i) /= elemCoords(2*i)) correct=.false.
       enddo
