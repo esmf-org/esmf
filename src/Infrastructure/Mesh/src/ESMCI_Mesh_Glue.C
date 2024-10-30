@@ -3367,8 +3367,7 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
     meshp->max_non_split_id=max_non_split_id;
 
     //  printf(" is_split=%d mnsi=%d\n",meshp->is_split,meshp->max_non_split_id);
-
-
+    
     // Register fields
     Context ctxt; ctxt.flip(); // Needed below for element registration
     if (fields_present[0]) meshp->RegisterNodalField(*meshp, "coordinates", spatial_dim);
