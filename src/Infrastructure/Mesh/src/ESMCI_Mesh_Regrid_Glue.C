@@ -42,6 +42,7 @@
 #include "Mesh/include/Legacy/ESMCI_MeshMerge.h"
 #include "Mesh/include/ESMCI_Mesh_GToM_Glue.h"
 
+#include <string.h>
 
 #include <iostream>
 #include <vector>
@@ -746,11 +747,18 @@ void dump_debug_info(char *phase, Mesh **_src_mesh, Array **_src_array,
   sprintf(buff,"BOB: %s regrid(%d) from %s to %s",phase,*regridMethod,src_array->getName(),dst_array->getName());
   ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
 
+  
   if (_dst_mesh && *_dst_mesh) {
     Mesh *dst_mesh=*_dst_mesh;
 
-        char buff[1024];
+    if (strcmp(dst_array->getName(),"Fall_evap") == 0) {
+      char fname[1024];
+      sprintf(fname,"%s_regrid%d_%s_to_%s",phase,*regridMethod,src_array->getName(),dst_array->getName());
+      WriteMesh(*dst_mesh, fname);
+    }
 
+    
+    char buff[1024];
      UInt tst_id;
 
       tst_id=7787;
