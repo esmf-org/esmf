@@ -1649,8 +1649,10 @@ module NUOPC_Comp
     character(ESMF_MAXSTR)                          :: name
     integer                                         :: localrc
     integer                                         :: stat
-    integer                                         :: i, lineCount, tokenCount
+    integer                                         :: i, j
+    integer                                         :: lineCount, tokenCount
     character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
+    character(len=NUOPC_FreeFormatLen)              :: value
     logical                                         :: addFlagOpt
     logical                                         :: isPresent
 
@@ -1687,7 +1689,7 @@ module NUOPC_Comp
         return  ! bail out
       
       ! process the configuration line
-      if (tokenCount == 3) then
+      if (tokenCount >= 3) then
         if (trim(tokenList(2)) /= "=") then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
             msg="Free format Attribute line incorrectly formatted.", &
@@ -1715,8 +1717,12 @@ module NUOPC_Comp
               return  ! bail out
           endif
         endif
+        value=tokenList(3)
+        do j=4, tokenCount
+          value=trim(value)//" "//tokenList(j)
+        enddo
         call NUOPC_CompAttributeSet(comp, name=trim(tokenList(1)), &
-          value=trim(tokenList(3)), rc=localrc)
+          value=trim(value), rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
@@ -1800,8 +1806,10 @@ module NUOPC_Comp
     character(ESMF_MAXSTR)                          :: name
     integer                                         :: localrc
     integer                                         :: stat
-    integer                                         :: i, lineCount, tokenCount
+    integer                                         :: i, j
+    integer                                         :: lineCount, tokenCount
     character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
+    character(len=NUOPC_FreeFormatLen)              :: value
     logical                                         :: addFlagOpt
     logical                                         :: isPresent
 
@@ -1838,7 +1846,7 @@ module NUOPC_Comp
         return  ! bail out
       
       ! process the configuration line
-      if (tokenCount == 3) then
+      if (tokenCount >= 3) then
         if (trim(tokenList(2)) /= "=") then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
             msg="Free format Attribute line incorrectly formatted.", &
@@ -1866,8 +1874,12 @@ module NUOPC_Comp
               return  ! bail out
           endif
         endif
+        value=tokenList(3)
+        do j=4, tokenCount
+          value=trim(value)//" "//tokenList(j)
+        enddo
         call NUOPC_CompAttributeSet(comp, name=trim(tokenList(1)), &
-          value=trim(tokenList(3)), rc=localrc)
+          value=trim(value), rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
