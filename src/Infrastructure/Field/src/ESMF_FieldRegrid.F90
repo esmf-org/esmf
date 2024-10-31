@@ -667,8 +667,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           \apiDeprecatedArgWithReplacement{factorList}
 !     \item [{[indices]}]
 !           \apiDeprecatedArgWithReplacement{factorIndexList}
-! \item [transposeRoutehandle]
-!           A routeHandle to the transpose of the regrid sparse matrix. The
+!     \item [transposeRoutehandle]
+!           A routeHandle for the transpose of the regrid sparse matrix. The
 !           transposed operation goes from {\tt dstField} to {\tt srcField}.
 !     \item [{[srcFracField]}] 
 !           The fraction of each source cell participating in the regridding. Only 

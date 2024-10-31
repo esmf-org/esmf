@@ -1549,6 +1549,22 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test regrid matrix
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "Test regrid transpose."
+
+      ! initialize
+      rc=ESMF_SUCCESS
+      
+      ! do test
+      call test_regrid_transpose(rc)
+      
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------      
 #endif 
       
 #endif
@@ -46924,8 +46940,550 @@ end subroutine test_regridSMMArbGrid
  
 
 
+ subroutine test_regrid_transpose(rc)
+  integer, intent(out)  :: rc
+  logical :: correct
+  integer :: localrc
+  type(ESMF_Grid) :: srcGrid
+  type(ESMF_Grid) :: dstGrid
+  type(ESMF_Field) :: srcField
+  type(ESMF_Field) :: dstField
+  type(ESMF_Field) :: tmpField
+  type(ESMF_Field) :: xdstField
+  type(ESMF_Field) :: xsrcField
+  type(ESMF_Array) :: dstArray
+  type(ESMF_Array) :: srcArray
+  type(ESMF_Array) :: tmpArray
+  type(ESMF_RouteHandle) :: routeHandle
+  type(ESMF_RouteHandle) :: transposeRouteHandle
+  type(ESMF_ArraySpec) :: arrayspec
+  type(ESMF_VM) :: vm
+  real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr1DXC(:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr1DYC(:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:,:), farrayPtr2(:,:)
+  real(ESMF_KIND_R8), pointer :: xfarrayPtr(:,:,:)
+  real(ESMF_KIND_R8), pointer :: tmpfarrayPtr(:,:)
+  integer :: clbnd(2),cubnd(2)
+  integer :: fclbnd(3),fcubnd(3)
+  integer :: i1,i2,i3, index(2)
+  integer :: lDE, srclocalDECount, dstlocalDECount
+  real(ESMF_KIND_R8) :: coord(2)
+  character(len=ESMF_MAXSTR) :: string
+  integer src_nx, src_ny, dst_nx, dst_ny
+  integer num_arrays
+  real(ESMF_KIND_R8) :: dx,dy
 
- 
- 
+  real(ESMF_KIND_R8) :: src_dx, src_dy
+  real(ESMF_KIND_R8) :: dst_dx, dst_dy
+
+  real(ESMF_KIND_R8) :: lon, lat, theta, phi
+  real(ESMF_KIND_R8), parameter :: DEG2RAD = 3.141592653589793/180.0_ESMF_KIND_R8
+
+  integer :: localPet, petCount
+
+  ! result code
+  integer :: finalrc
+
+  ! init success flag
+  correct=.true.
+
+  rc=ESMF_SUCCESS
+
+  ! get pet info
+  call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+        
+  ! Src Grid 
+  srcGrid=ESMF_GridCreate1PeriDimUfrm(maxIndex=(/180,180/),& 
+       minCornerCoord=(/0.0_ESMF_KIND_R8,-90.0_ESMF_KIND_R8/), &
+       maxCornerCoord=(/360.0_ESMF_KIND_R8,90.0_ESMF_KIND_R8/), &
+       regDecomp=(/1,petCount/), &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER/), &
+       rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  
+  ! Src Field
+  srcField = ESMF_FieldCreate(srcGrid, typekind=ESMF_TYPEKIND_R8, &
+       ungriddedLBound=(/1/), ungriddedUBound=(/2/), & ! 2D vector
+       staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+  endif
+
+
+  ! Exact src Field
+  xsrcField = ESMF_FieldCreate(srcGrid, typekind=ESMF_TYPEKIND_R8, &
+       ungriddedLBound=(/1/), ungriddedUBound=(/2/), & ! 2D vector
+       staggerloc=ESMF_STAGGERLOC_CENTER, name="source exact", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+  endif
+
+  
+  ! Get srcArray from Field
+  call ESMF_FieldGet(srcField, array=srcArray, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Get number of local DEs
+  call ESMF_GridGet(srcGrid, localDECount=srclocalDECount, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! Destination grid
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+  ! Setup dest. grid
+  ! Make a grid that still matches up with identical points, but is
+  ! only the center, so that matrix is identity, but the src/dst indices aren't
+  ! the same, this'll let us test the trasponse where the indices will change.
+  dstGrid=ESMF_GridCreate1PeriDimUfrm(maxIndex=(/180,90/),& 
+       minCornerCoord=(/0.0_ESMF_KIND_R8,-45.0_ESMF_KIND_R8/), &
+       maxCornerCoord=(/360.0_ESMF_KIND_R8,45.0_ESMF_KIND_R8/), &
+       regDecomp=(/1,petCount/), &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER/), &
+       rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Create Fields
+  dstField = ESMF_FieldCreate(dstGrid,  typekind=ESMF_TYPEKIND_R8, &
+       ungriddedLBound=(/1/), ungriddedUBound=(/2/), & ! 2D vector
+       staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  xdstField = ESMF_FieldCreate(dstGrid,  typekind=ESMF_TYPEKIND_R8, &
+       ungriddedLBound=(/1/), ungriddedUBound=(/2/), & ! 2D vector
+       staggerloc=ESMF_STAGGERLOC_CENTER, name="xdest", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+  endif
+
+  
+  ! Get dstArray from Field
+  call ESMF_FieldGet(dstField, array=dstArray, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  
+  ! Get number of local DEs
+  call ESMF_GridGet(dstGrid, localDECount=dstlocalDECount, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+  
+
+#if 0
+  call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
+       filename="srcGrid", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+  endif
+#endif
+
+  !! Create routehandles
+  call ESMF_FieldRegridStore( &
+          srcField, &
+          dstField=dstField, &
+          routeHandle=routeHandle, &
+          transposeRouteHandle=transposeRouteHandle, &
+          regridmethod=ESMF_REGRIDMETHOD_NEAREST_STOD, & ! Gives a nice matrix full of just 1.0
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+
+  !!!!! Forward direction fill Src and init Dst and check results !!!!
+
+
+  ! Fill src data
+  do lDE=0,srclocalDECount-1
+
+     !! get coord 1
+     call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+          farrayPtr=farrayPtr1DXC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+          farrayPtr=farrayPtr1DYC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     ! get src pointer
+     call ESMF_FieldGet(srcField, lDE, farrayPtr, &
+          computationalLBound=fclbnd, computationalUBound=fcubnd, &
+          rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     !! Set Field value
+     do i1=fclbnd(1),fcubnd(1)
+
+        ! Get X coord from Grid
+        lon = farrayPtr1DXC(i1)
+        theta = DEG2RAD*(lon)
+
+     do i2=fclbnd(2),fcubnd(2)
+
+        ! Get Y coord from Grid
+        lat = farrayPtr1DYC(i2)
+        phi = DEG2RAD*(90.-lat)
+           
+        ! initialize source field to lon and lat
+        farrayPtr(i1,i2,1)=lon
+        farrayPtr(i1,i2,2)=lat
+     enddo
+     enddo     
+     
+  enddo    ! lDE
+
+  ! Init Dst and set exact answers
+  do lDE=0,dstlocalDECount-1
+
+     !! get coords
+     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+          farrayPtr=farrayPtr1DXC,rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+          farrayPtr=farrayPtr1DYC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     call ESMF_FieldGet(dstField, lDE, farrayPtr, &
+          computationalLBound=fclbnd, computationalUBound=fcubnd, &
+          rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+     
+
+     call ESMF_FieldGet(xdstField, lDE, xfarrayPtr,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     !! Set Field value
+     do i1=fclbnd(1),fcubnd(1)
+
+        ! Get X coord from Grid
+        lon = farrayPtr1DXC(i1)
+        theta = DEG2RAD*(lon)
+
+     do i2=fclbnd(2),fcubnd(2)
+
+        ! Get Y coord from Grid
+        lat = farrayPtr1DYC(i2)
+        phi = DEG2RAD*(90.-lat)
+
+        ! Init exact field to lon and lat
+        xfarrayPtr(i1,i2,1) = lon
+        xfarrayPtr(i1,i2,2) = lat
+        
+        ! initialize destination field
+        farrayPtr(i1,i2,1)=1000.0
+        farrayPtr(i1,i2,2)=1000.0
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+  ! Do regrid
+  call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+  endif
+
+   
+  ! Check results
+  do lDE=0,dstlocalDECount-1
+
+     call ESMF_FieldGet(dstField, lDE, farrayPtr, &
+          computationalLBound=fclbnd, computationalUBound=fcubnd, &
+          rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_FieldGet(xdstField, lDE, xfarrayPtr, &
+          rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+    
+     !! Make sure things look ok
+     do i1=fclbnd(1),fcubnd(1)
+     do i2=fclbnd(2),fcubnd(2)
+        do i3=fclbnd(3),fcubnd(3)
+           ! if working everything should be close to exact answer
+           if (abs(farrayPtr(i1,i2,i3)-xfarrayPtr(i1,i2,i3)) .gt. 1.0E-10) then
+     !       write(*,*) i1,i2,i3,"  ",farrayPtr(i1,i2,i3),xfarrayPtr(i1,i2,i3)
+            correct=.false.
+           endif
+        enddo
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+#if 0
+  call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
+       filename="srcGrid", array1=srcArray, &
+       rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+  endif
+
+  call ESMF_GridWriteVTK(dstGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
+       filename="dstGrid", array1=dstArray, &
+       rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+  endif
+#endif
+
+  ! Get rid of forward routehandle
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+   
+  !!!!! Backward direction fill Dst and init Src and check results !!!!
+
+
+  ! Fill dst data
+  do lDE=0,dstlocalDECount-1
+
+     !! get coords
+     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+          farrayPtr=farrayPtr1DXC,rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+          farrayPtr=farrayPtr1DYC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     call ESMF_FieldGet(dstField, lDE, farrayPtr, &
+          computationalLBound=fclbnd, computationalUBound=fcubnd, &
+          rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+     
+
+     !! Set Field value
+     do i1=fclbnd(1),fcubnd(1)
+
+        ! Get X coord from Grid
+        lon = farrayPtr1DXC(i1)
+        theta = DEG2RAD*(lon)
+
+     do i2=fclbnd(2),fcubnd(2)
+
+        ! Get Y coord from Grid
+        lat = farrayPtr1DYC(i2)
+        phi = DEG2RAD*(90.-lat)
+        
+        ! initialize destination field
+        farrayPtr(i1,i2,1)=lon
+        farrayPtr(i1,i2,2)=lat
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+
+  ! Init Src and set exact answers
+  do lDE=0,srclocalDECount-1
+
+     !! get coord 1
+     call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+          farrayPtr=farrayPtr1DXC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+          farrayPtr=farrayPtr1DYC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     ! get src pointer
+     call ESMF_FieldGet(srcField, lDE, farrayPtr, &
+          computationalLBound=fclbnd, computationalUBound=fcubnd, &
+          rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     ! Get exact src pointer
+     call ESMF_FieldGet(xsrcField, lDE, xfarrayPtr, &
+          rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     !! Set Field value
+     do i1=fclbnd(1),fcubnd(1)
+
+        ! Get X coord from Grid
+        lon = farrayPtr1DXC(i1)
+        theta = DEG2RAD*(lon)
+
+     do i2=fclbnd(2),fcubnd(2)
+
+        ! Get Y coord from Grid
+        lat = farrayPtr1DYC(i2)
+        phi = DEG2RAD*(90.-lat)
+           
+        ! initialize source field to bad value
+        farrayPtr(i1,i2,1)=1000.00
+        farrayPtr(i1,i2,2)=1000.00
+
+        ! initialize exact source field to lon,lat
+        xfarrayPtr(i1,i2,1)=lon
+        xfarrayPtr(i1,i2,2)=lat
+        
+     enddo
+     enddo     
+     
+  enddo    ! lDE
+
+
+  ! Do traspose regrid
+  call ESMF_FieldRegrid(dstField, srcField, transposeRouteHandle, &
+       zeroregion=ESMF_REGION_SELECT, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+  endif
+
+
+  ! TODO: Check results
+
+  
+  ! Get rid of transpose routehandle
+  call ESMF_FieldRegridRelease(transposeRouteHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+    
+  ! Destroy the Fields
+   call ESMF_FieldDestroy(srcField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(dstField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+
+  ! Free the grids
+  call ESMF_GridDestroy(srcGrid, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_GridDestroy(dstGrid, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! return answer based on correct flag
+  if (correct) then
+    rc=ESMF_SUCCESS
+  else
+    rc=ESMF_FAILURE
+  endif
+
+ end subroutine test_regrid_transpose
 
 end program ESMF_FieldRegridUTest
