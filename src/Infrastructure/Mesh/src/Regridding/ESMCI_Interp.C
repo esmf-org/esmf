@@ -1872,7 +1872,7 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
 
      UInt tst_id;
 
-      tst_id=7787;
+      tst_id=3659;
       
       //  Find the corresponding Mesh element
       Mesh::MeshObjIDMap::iterator mi =  dstmesh.map_find(MeshObj::ELEMENT, tst_id);
@@ -1931,7 +1931,7 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
 
       }
 
-      tst_id=7788;
+      tst_id=3660;
       
       //  Find the corresponding Mesh element
       mi =  dstmesh.map_find(MeshObj::ELEMENT, tst_id);
@@ -3366,14 +3366,14 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
     for (;ei!=ee; ei++) {
       MeshObj &elem = *ei;
 
-      int tst_id=7787;
+      int tst_id=3659;
       if (elem.get_id() == tst_id) {
         char buff[1024];
         sprintf(buff,"BOB: Interp - elem_id=%d being init to 0.0",tst_id);
         ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
       }
 
-      tst_id=7788;
+      tst_id=3660;
       if (elem.get_id() == tst_id) {
         char buff[1024];
         sprintf(buff,"BOB: Interp - elem_id=%d being init to 0.0",tst_id);
@@ -3425,14 +3425,14 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
       // Only put it in if it's locally owned
       if (!GetAttr(dst_elem).is_locally_owned()) continue;
 
-      int tst_id=7787;
+      int tst_id=3659;
       if (dst_elem.get_id() == tst_id) {
         char buff[1024];
         sprintf(buff,"BOB: Interp - elem_id=%d being set to %f",tst_id,tot);
         ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
       }
 
-      tst_id=7788;
+      tst_id=3660;
       if (dst_elem.get_id() == tst_id) {
         char buff[1024];
         sprintf(buff,"BOB: Interp - elem_id=%d being set to %f",tst_id,tot);

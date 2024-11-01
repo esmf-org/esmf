@@ -761,7 +761,7 @@ void dump_debug_info(char *phase, Mesh **_src_mesh, Array **_src_array,
     char buff[1024];
      UInt tst_id;
 
-      tst_id=7787;
+      tst_id=3659;
       
       //  Find the corresponding Mesh element
       Mesh::MeshObjIDMap::iterator mi =  dst_mesh->map_find(MeshObj::ELEMENT, tst_id);
@@ -820,7 +820,7 @@ void dump_debug_info(char *phase, Mesh **_src_mesh, Array **_src_array,
         
       }
 
-      tst_id=7788;
+      tst_id=3660;
       
       //  Find the corresponding Mesh element
       mi =  dst_mesh->map_find(MeshObj::ELEMENT, tst_id);
