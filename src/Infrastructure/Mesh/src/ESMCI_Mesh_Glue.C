@@ -3367,7 +3367,8 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
     meshp->max_non_split_id=max_non_split_id;
 
     //  printf(" is_split=%d mnsi=%d\n",meshp->is_split,meshp->max_non_split_id);
-    
+
+
     // Register fields
     Context ctxt; ctxt.flip(); // Needed below for element registration
     if (fields_present[0]) meshp->RegisterNodalField(*meshp, "coordinates", spatial_dim);
@@ -4925,10 +4926,8 @@ void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesA
     if ((elem_mask_val!=NULL) &&
         (elem_mask    !=NULL)) {
 
-      // Loop through elements setting values
-      // Here we depend on the fact that data index for elements
-      // is set as the position in the local array above
-      Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      // Loop through all elements setting values
+      Mesh::iterator ei = mesh.elem_begin_all(), ee = mesh.elem_end_all();
       for (; ei != ee; ++ei) {
         MeshObj &elem = *ei;
 
@@ -5024,10 +5023,8 @@ void ESMCI_meshturnoffcellmask(Mesh **meshpp, int *rc) {
     if ((elem_mask_val!=NULL) &&
         (elem_mask    !=NULL)) {
 
-      // Loop through elements setting values
-      // Here we depend on the fact that data index for elements
-      // is set as the position in the local array above
-      Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      // Loop through all elements setting values
+      Mesh::iterator ei = mesh.elem_begin_all(), ee = mesh.elem_end_all();
       for (; ei != ee; ++ei) {
         MeshObj &elem = *ei;
 
@@ -5124,8 +5121,8 @@ void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesA
     if ((node_mask_val!=NULL) &&
         (node_mask    !=NULL)) {
 
-      // Loop through nodes setting values
-      Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+      // Loop through all nodes setting values
+      Mesh::iterator ni = mesh.node_begin_all(), ne = mesh.node_end_all();
       for (; ni != ne; ++ni) {
         MeshObj &node = *ni;
 
@@ -5219,10 +5216,8 @@ void ESMCI_meshturnoffnodemask(Mesh **meshpp, int *rc) {
     if ((node_mask_val!=NULL) &&
         (node_mask    !=NULL)) {
 
-      // Loop through elements setting values
-      // Here we depend on the fact that data index for elements
-      // is set as the position in the local array above
-      Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+      // Loop through all nodes setting values
+      Mesh::iterator ni = mesh.node_begin_all(), ne = mesh.node_end_all();
       for (; ni != ne; ++ni) {
         MeshObj &node = *ni;
 
