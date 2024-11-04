@@ -49,6 +49,7 @@ module ESMF_ArrayMod
   use ESMF_F90InterfaceMod  ! ESMF Fortran-C++ interface helper
   use ESMF_FactorReadMod    ! ESMF helpers for reading from netCDF file
   use ESMF_DynamicMaskMod
+  use ESMF_UtilPredefinedDynamicMaskMod
   
   ! class sub modules
   use ESMF_ArrayCreateMod   ! contains the ESMF_Array derived type definition
@@ -567,7 +568,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   subroutine ESMF_ArraySMM(srcArray, dstArray, routehandle, keywordEnforcer, &
     routesyncflag, finishedflag, cancelledflag, zeroregion, termorderflag, &
-    checkflag, dynamicMask, rc)
+    checkflag, dynamicMask, preDefinedDynamicMask, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),               intent(in),    optional :: srcArray
@@ -581,6 +582,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_TermOrder_Flag),      intent(in),    optional :: termorderflag
     logical,                        intent(in),    optional :: checkflag
     type(ESMF_DynamicMask), target, intent(in),    optional :: dynamicMask
+    type(ESMF_PredefinedDynamicMask), intent(in),  optional :: preDefinedDynamicMask
     integer,                        intent(out),   optional :: rc
 !
 ! !STATUS:
@@ -714,10 +716,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
     type(ESMF_Logical)          :: handleAllElements
     type(ESMF_Pointer)          :: this
+    type(ESMF_TypeKind_Flag)    :: type_src, type_dst
 
+    write(*,*)"bmaa ",__FILE__,__LINE__
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    if (present(dynamicMask) .and. present(preDefinedDynamicMask)) then
+      rc = ESMF_RC_NOT_IMPL
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
 
     ! Check init status of arguments, deal with optional Array args
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)

@@ -28,6 +28,7 @@ module ESMF_FieldRegridMod
   use ESMF_UtilTypesMod
   use ESMF_VMMod
   use ESMF_LogErrMod
+  use ESMF_UtilPredefinedDynamicMaskMod
   use ESMF_DynamicMaskMod
   use ESMF_ArrayMod
   use ESMF_DistGridMod
@@ -110,7 +111,7 @@ contains
 !
 ! !INTERFACE:
   subroutine ESMF_FieldRegrid(srcField, dstField, routehandle, keywordEnforcer, &
-    zeroregion, termorderflag, checkflag, dynamicMask, rc)
+    zeroregion, termorderflag, checkflag, dynamicMask, preDefinedDynamicMask, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field),               intent(in),    optional :: srcField
@@ -121,6 +122,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_TermOrder_Flag),      intent(in),    optional :: termorderflag
       logical,                        intent(in),    optional :: checkflag
       type(ESMF_DynamicMask), target, intent(in),    optional :: dynamicMask
+      type(ESMF_PredefinedDynamicMask), intent(in),  optional :: preDefinedDynamicMask
       integer,                        intent(out),   optional :: rc 
 !
 ! !STATUS:
@@ -214,10 +216,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_Array)     :: srcArray
         type(ESMF_Array)     :: dstArray
 
+        write(*,*)"bmaa ",__FILE__,__LINE__ 
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+        if (present(dynamicMask) .and. present(preDefinedDynamicMask)) then
+          rc = ESMF_RC_NOT_IMPL
+          if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        end if
+        
         ! Now we go through the painful process of extracting the data members
         ! that we need, if present.
         if (present(srcField)) then

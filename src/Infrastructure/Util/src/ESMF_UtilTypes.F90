@@ -780,7 +780,6 @@
            ESMF_EXTRAPMETHOD_CREEP = ESMF_ExtrapMethod_Flag(4), &
            ESMF_EXTRAPMETHOD_CREEP_NRST_D = ESMF_ExtrapMethod_Flag(5)
 
-
 !------------------------------------------------------------------------------
       type ESMF_LineType_Flag
 #ifndef ESMF_NO_SEQUENCE
@@ -857,6 +856,19 @@
                             ESMF_REGRID_SCHEME_DCON3D=5, &
                             ESMF_REGRID_SCHEME_DCON3DWPOLE=6
 
+
+      type ESMF_PredefinedDynamicMask_Flag
+#ifndef ESMF_NO_SEQUENCE
+      sequence
+#endif
+!  private
+         integer :: PredefinedDynamicMask
+      end type
+
+
+      type(ESMF_PredefinedDynamicMask_Flag), parameter :: &
+           ESMF_PREDEFINEDDYNAMICMASK_MASKDEST  =  ESMF_PredefinedDynamicMask_Flag(0), &
+           ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE  =  ESMF_PredefinedDynamicMask_Flag(1)
 
 
 !------------------------------------------------------------------------------
@@ -1154,6 +1166,10 @@
              ESMF_EXTRAPMETHOD_NEAREST_D, &
              ESMF_EXTRAPMETHOD_CREEP, &
              ESMF_EXTRAPMETHOD_CREEP_NRST_D
+
+      public ESMF_PredefinedDynamicMask_Flag, &
+             ESMF_PREDEFINEDDYNAMICMASK_MASKDEST, &
+             ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE
 
       public ESMF_LineType_Flag, &
              ESMF_LINETYPE_CART, &

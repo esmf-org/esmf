@@ -1643,6 +1643,7 @@ namespace ESMCI {
     if (zeroRegion != NULL)
       zr_present = 1;
 
+    printf("bmaa %s, %d\n",__FILE__,__LINE__);
     // TODO: why are fields.ptr and routehandle by reference??  from create.. 
     FTN_X(f_esmf_regrid)(fieldpsrc, fieldpdst, &routehandlep, 
                          zeroRegion, &zr_present, &localrc);
