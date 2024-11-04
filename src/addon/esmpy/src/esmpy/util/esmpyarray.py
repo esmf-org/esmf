@@ -29,7 +29,7 @@ def ndarray_from_esmf(data, dtype, shape):
     if sys.version_info[0] >= 3:
         buffer = ct.pythonapi.PyMemoryView_FromMemory
         buffer.restype = ct.py_object
-        buffer = buffer(data, ct.c_int(size), 0x200)
+        buffer = buffer(data, ct.c_ssize_t(size), 0x200)
     else:
         buffer = np.core.multiarray.int_asbuffer(
             ct.addressof(data.contents), size)
@@ -65,7 +65,7 @@ class MaskedArray(ma.MaskedArray):
         if sys.version_info[0] >= 3:
             buffer = ct.pythonapi.PyMemoryView_FromMemory
             buffer.restype = ct.py_object
-            buffer = buffer(data, ct.c_int(size), 0x200)
+            buffer = buffer(data, ct.c_ssize_t(size), 0x200)
         else:
             buffer = np.core.multiarray.int_asbuffer(
                 ct.addressof(data.contents), size)
@@ -108,7 +108,7 @@ class Array(np.ndarray):
         if sys.version_info[0] >= 3:
             buffer = ct.pythonapi.PyMemoryView_FromMemory
             buffer.restype = ct.py_object
-            buffer = buffer(data, ct.c_int(size), 0x200)
+            buffer = buffer(data, ct.c_ssize_t(size), 0x200)
         else:
             buffer = np.core.multiarray.int_asbuffer(
                 ct.addressof(data.contents), size)

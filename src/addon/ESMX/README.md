@@ -9,6 +9,7 @@ The ESMX layer is built on top of the ESMF and NUOPC APIs.
 The idea behind ESMX is to make it as simple as possible for a user to build, run, and test NUOPC based systems. The approach implemented is the same whether applied to a single component, or a fully coupled system of NUOPC-compliant components. ESMX user interfaces are implemented through [YAML](https://yaml.org/) based configuration files.
 
 Major objectives of ESMX are:
+
  - **Simplification** of standing up new NUOPC-based systems.
  - **Promotion** of hierarchical model component testing.
  - **Reduction** of maintenance cost for established NUOPC-based systems.
@@ -40,6 +41,7 @@ options:
   [--disable-comps=DISABLE_COMPS]
   [--build-type=BUILD_TYPE] or [-g]
   [--build-args=BUILD_ARGS]
+  [--cmake-args=CMAKE_ARGS]
   [--build-jobs=JOBS]
   [--load-modulefile=MODULEFILE]
   [--load-bashenv=BASHENV]
@@ -67,7 +69,10 @@ where:
   --build-type=BUILD_TYPE  build type; valid options are 'debug', 'release', 'relWithDebInfo'
   -g                       (default: release) (-g sets BUILD_TYPE to debug)
 
-  --build-args=BUILD_ARGS  global cmake arguments (e.g. -DVAR=val)
+  --build-args=BUILD_ARGS  build arguments passed to every component (e.g. -DVAR=val)
+
+  --cmake-args=CMAKE_ARGS  cmake arguments are used to configure cmake while building ESMX
+                           (e.g. -DVAR=val)
 
   --build-jobs=BUILD_JOBS  number of jobs used for building esmx and components
 
@@ -120,27 +125,28 @@ There are *three* top level sections recognized in the ESMX build file. Each is 
 
 These options affect the ESMX application layer. If no key/value pair is provided then the default will be used.
 
-| Option key            | Description / Value options                           | Default                |
-| --------------------- | ----------------------------------------------------- | ---------------------- |
-| `exe_name`            | executable name for application                       | `esmx_app`             |
-| `disable_comps`       | scalar or list of components to disable               | *None*                 |
-| `link_module_paths`   | scalar or list of search paths for CMake modules      | *None*                 |
-| `link_packages`       | scalar or list of cmake packages, linked to esmx      | *None*                 |
-| `link_paths`          | scalar or list of search path for external libraries  | *None*                 |
-| `link_libraries`      | scalar or list of external libraries, linked to esmx  | *None*                 |
-| `build_args`          | scalar or list of arguments passed to all build_types | *None*                 |
-| `build_jobs`          | job number used for all build_types                   | *None*                 |
-| `build_verbose`       | verbosity setting used for all build_types            | *None*                 |
-| `cmake_build_args`    | scalar or list of argumens passed to all cmake builds | *None*                 |
-| `cmake_build_jobs`    | job number used for all cmake builds                  | *None*                 |
-| `cmake_build_verbose` | verbosity setting used for all cmake builds           | *None*                 |
-| `make_build_args`     | scalar or list of argumens passed to all make builds  | *None*                 |
-| `make_build_jobs`     | job number used for all make builds                   | *None*                 |
-| `script_build_args`   | scalar or list of argumens passed to all script builds| *None*                 |
-| `test`                | (beta) add test cases: `on` or `off`                  | `off`                  |
-| `test_exe`            | (beta) executable used to launch test cases           | ESMF_INTERNAL_MPIRUN   |
-| `test_dir`            | (beta) output directory for test cases                | CMAKE_BINARY_DIR-tests |
-| `test_tasks`          | (beta) number of tasks used to run test cases         | `4`                    |
+| Option key            | Description / Value options                                          | Default                |
+| --------------------- | -------------------------------------------------------------------- | ---------------------- |
+| `exe_name`            | executable name for application                                      | `esmx_app`             |
+| `disable_comps`       | scalar or list of components to disable                              | *None*                 |
+| `link_module_paths`   | scalar or list of search paths for CMake modules                     | *None*                 |
+| `link_libraries`      | scalar or list of external libraries, linked to esmx                 | *None*                 |
+| `link_options`        | scalar or list of options used during linking of esmx                | *None*                 |
+| `link_packages`       | scalar or list of cmake packages, use link_libraries to link to esmx | *None*                 |
+| `link_paths`          | scalar or list of search path for external libraries                 | *None*                 |
+| `build_args`          | scalar or list of arguments passed to all build_types                | *None*                 |
+| `build_jobs`          | job number used for all build_types                                  | *None*                 |
+| `build_verbose`       | verbosity setting used for all build_types                           | *None*                 |
+| `cmake_build_args`    | scalar or list of argumens passed to all cmake builds                | *None*                 |
+| `cmake_build_jobs`    | job number used for all cmake builds                                 | *None*                 |
+| `cmake_build_verbose` | verbosity setting used for all cmake builds                          | *None*                 |
+| `make_build_args`     | scalar or list of argumens passed to all make builds                 | *None*                 |
+| `make_build_jobs`     | job number used for all make builds                                  | *None*                 |
+| `script_build_args`   | scalar or list of argumens passed to all script builds               | *None*                 |
+| `test`                | (beta) add test cases: `on` or `off`                                 | `off`                  |
+| `test_exe`            | (beta) executable used to launch test cases                          | ESMF_INTERNAL_MPIRUN   |
+| `test_dir`            | (beta) output directory for test cases                               | CMAKE_BINARY_DIR-tests |
+| `test_tasks`          | (beta) number of tasks used to run test cases                        | `4`                    |
 
 #### Component Options (`components` key)
 
@@ -160,6 +166,7 @@ This section contains a key for for each *component-name*, specifying component 
 | `library_dir`    | subdirectory for library file                 | `lib`                  |
 | `include_dir`    | subdirectory for fortran module file          | `include`              |
 | `link_paths`     | search path for external libraries            | *None*                 |
+| `link_into_app`  | whether to link component into the app        | `True`                 |
 | `link_libraries` | external libraries, linked to esmx            | *None*                 |
 | `git_repository` | URL for downloading git repository            | *None*                 |
 | `git_tag`        | tag for downloading git repository            | *None*                 |
@@ -279,7 +286,7 @@ This section affects the driver level.
 
 | Option key      | Description / Value options                                          | Default         |
 | --------------- | -------------------------------------------------------------------- | --------------- |
-| `componentList` | list of component labels, each matching a top level key in this file | *non-optional*  |
+| `componentList` | list of component labels, each matching a top level key in this file | *Empty*         |
 | `runSequence`   | block literal string defining the run sequence                       | *NUOPC default* |
 | `attributes`    | map of key value pairs, each defining a driver attribute             | *None*          |
 
@@ -299,8 +306,9 @@ This section affects the specific component instance.
 ### Dynamically loading components from shared objects at run-time
 
 There are two options recognized when specifying the value of the `model` field for a component in the `esmxRun.yaml` file:
-- First, if the value specified is recognized as a *component-name* provided by any of the components built into `esmx` during build-time, as specified by `esmxBuild.yaml`, the respective component is accessed via its Fortran module.
-- Second, if the value does not match a build-time dependency, it is assumed to correspond to a shared object instead. In that case the attempt is made to load the specified shared object at run-time, and to associate with the generic component label.
+
+- First, if the value specified is recognized as a *component-name* provided by any of the components built into the `esmx_app` during build-time, as specified by `esmxBuild.yaml`, the respective component is accessed via its Fortran module.
+- Second, if the value does *not* match a build-time dependency, it is assumed to correspond to a shared object file instead. In that case the attempt is made to load the specified shared object file at run-time, and, if successful, is associated with the generic component label. The search order details of the OS dependent dynamic linker apply when looking for the specified shared object file on the system. A convenient way to target a shared object file at a specific location is to use absolute or relative paths, i.e. the value specified in the `model` field contains at least one slash ("/") character. The asterisk character ("*") is supported as a wildcard for the file name suffix of the specified shared object. This allows portability across systems that differ in shared object suffix. The implemented search order is "so", followed by "dylib", and finally "dll", where the first successfully loaded shared object file is used.
 
 ## The Unfied ESMX_Driver
 
@@ -383,6 +391,7 @@ ESMX includes a data component, which can be used for testing NUOPC caps. This c
 ## ESMX Software Dependencies
 
 The ESMX layer has the following dependencies:
+
 - **ESMF Library**: The ESMX layer is part of the ESMF repository. In order to use ESMX as described above, the ESMF library first needs to be built following the instructions for [Building ESMF](https://github.com/esmf-org/esmf#building-esmf).
 - **CMake**: v3.22 or greater.
 - **Python**: v3.5 or greater.

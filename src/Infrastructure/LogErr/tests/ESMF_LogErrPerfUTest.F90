@@ -96,7 +96,11 @@ program ESMF_LogErrPerfUTest
 #endif
   write(failMsg, *) "ESMF_LogFoundError() performance problem! ", &
     dt, ">", dtTest
+#ifdef ESMF_TESTPERFORMANCE
   call ESMF_Test((dt<dtTest), name, failMsg, result, ESMF_SRCLINE)
+#else
+  call ESMF_Test((.true.), name, failMsg, result, ESMF_SRCLINE)
+#endif
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------

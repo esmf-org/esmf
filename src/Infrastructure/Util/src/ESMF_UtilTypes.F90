@@ -82,13 +82,13 @@
 !EOPI
 
       integer, parameter :: ESMF_VERSION_MAJOR        = 8
-      integer, parameter :: ESMF_VERSION_MINOR        = 6
-      integer, parameter :: ESMF_VERSION_REVISION     = 1
-      integer, parameter :: ESMF_VERSION_PATCHLEVEL   = 1
-      logical, parameter :: ESMF_VERSION_PUBLIC       = .true.
-      logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .false.
+      integer, parameter :: ESMF_VERSION_MINOR        = 8
+      integer, parameter :: ESMF_VERSION_REVISION     = 0
+      integer, parameter :: ESMF_VERSION_PATCHLEVEL   = 0
+      logical, parameter :: ESMF_VERSION_PUBLIC       = .false.
+      logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .true.
 
-      character(*), parameter :: ESMF_VERSION_STRING  = "8.6.1"
+      character(*), parameter :: ESMF_VERSION_STRING  = "8.8.0 beta snapshot"
 
 #if defined (ESMF_NETCDF)
       logical, parameter :: ESMF_IO_NETCDF_PRESENT = .true.
@@ -781,6 +781,20 @@
            ESMF_EXTRAPMETHOD_CREEP_NRST_D = ESMF_ExtrapMethod_Flag(5)
 
 !------------------------------------------------------------------------------
+      type ESMF_CubedSphereCalc_Flag
+#ifndef ESMF_NO_SEQUENCE
+      sequence
+#endif
+!  private
+         integer :: cubedspherecalc
+      end type
+
+      
+      type(ESMF_CubedSphereCalc_Flag), parameter :: &
+           ESMF_CUBEDSPHERECALC_1TILE = ESMF_CubedSphereCalc_Flag(1), &
+           ESMF_CUBEDSPHERECALC_LOCAL = ESMF_CubedSphereCalc_Flag(2)
+      
+!------------------------------------------------------------------------------
       type ESMF_LineType_Flag
 #ifndef ESMF_NO_SEQUENCE
       sequence
@@ -1171,6 +1185,10 @@
              ESMF_PREDEFINEDDYNAMICMASK_MASKDEST, &
              ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE
 
+      public ESMF_CubedSphereCalc_Flag, &
+             ESMF_CUBEDSPHERECALC_1TILE, &
+             ESMF_CUBEDSPHERECALC_LOCAL 
+      
       public ESMF_LineType_Flag, &
              ESMF_LINETYPE_CART, &
              ESMF_LINETYPE_GREAT_CIRCLE
@@ -1311,6 +1329,7 @@ interface operator (==)
   module procedure ESMF_FileStatusEq
   module procedure ESMF_RegridMethodEq
   module procedure ESMF_ExtrapMethodEq
+  module procedure ESMF_CubedSphereCalcEq
   module procedure ESMF_CoordSysEqual
   module procedure ESMF_LineTypeEqual
   module procedure ESMF_NormTypeEqual
@@ -1336,6 +1355,7 @@ interface operator (/=)
   module procedure ESMF_FileStatusNe
   module procedure ESMF_RegridMethodNe
   module procedure ESMF_ExtrapMethodNe
+  module procedure ESMF_CubedSphereCalcNe
   module procedure ESMF_CoordSysNotEqual
   module procedure ESMF_LineTypeNotEqual
   module procedure ESMF_NormTypeNotEqual
@@ -2043,6 +2063,23 @@ impure elemental function ESMF_RegridMethodNe(rp1, rp2)
  type(ESMF_RegridMethod_Flag), intent(in) :: rp1, rp2
 
  ESMF_RegridMethodNe = (rp1%regridmethod /= rp2%regridmethod)
+end function
+
+!------------------------------------------------------------------------------
+! function to compare two ESMF_CubedSphereCalc types
+
+impure elemental function ESMF_CubedSphereCalcEq(csc1, csc2)
+ logical ESMF_CubedSphereCalcEq
+ type(ESMF_CubedSphereCalc_Flag), intent(in) :: csc1, csc2
+
+ ESMF_CubedSphereCalcEq = (csc1%cubedspherecalc == csc2%cubedspherecalc)
+end function
+
+impure elemental function ESMF_CubedSphereCalcNe(csc1, csc2)
+ logical ESMF_CubedSphereCalcNe
+ type(ESMF_CubedSphereCalc_Flag), intent(in) :: csc1, csc2
+
+ ESMF_CubedSphereCalcNe = (csc1%cubedspherecalc /= csc2%cubedspherecalc)
 end function
 
 !------------------------------------------------------------------------------

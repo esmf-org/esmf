@@ -68,7 +68,13 @@
       logical :: bool
 
       ! to retrieve time in string format
-      character(ESMF_MAXSTR) :: timeString
+      !
+      ! note that this string is just barely long enough to hold the result string (to
+      ! ensure we don't have off-by-one errors in the string building and going back and
+      ! forth between Fortran and C strings)
+      character(15) :: timeString15
+      ! and this one is just barely too short:
+      character(14) :: timeString14
 
       ! instantiate timestep, start and stop times
       type(ESMF_Time) :: time1, time2
@@ -79,9 +85,12 @@
                             ms_out_r8, ms_in_r8, min_out_r8, hr_in_r8, &
                             sec_out_r8
       integer(ESMF_KIND_I8) :: days2
+      integer(ESMF_KIND_I8) :: yy_i8, mm_i8, d_i8, s_i8
       type(ESMF_TimeInterval) :: timeInterval1, timeInterval2, timeInterval3, &
                                  timeInterval4, timeInterval5, timeInterval6
       type(ESMF_TimeInterval) :: diffTime, absoluteTime
+      type(ESMF_CalKind_Flag) :: calkindflag
+      logical :: correct
 
 #endif
 
@@ -500,12 +509,19 @@
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet(timeStep, d=60, rc=rc)
       call ESMF_TimeIntervalGet(timeStep, mm=months, startTimeIn=startTime, &
-                                timeString=timeString, rc=rc)
-      call ESMF_Test((months==2 .and. timeString=="P0Y0M60DT0H0M0S" .and. &
+                                timeString=timeString15, rc=rc)
+      call ESMF_Test((months==2 .and. timeString15=="P0Y0M60DT0H0M0S" .and. &
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !print *, "months = ", months
-      !print *, "timeStep = ", timeString
+      !print *, "timeStep = ", timeString15
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Get TimeInterval Test - too short string"
+      write(failMsg, *) " Did not return ESMC_RC_ARG_SIZE"
+      call ESMF_TimeIntervalGet(timeStep, startTimeIn=startTime, timeString=timeString14, rc=rc)
+      call ESMF_Test((rc==ESMC_RC_ARG_SIZE), name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -1763,12 +1779,12 @@
                         calendar=julianCalendar, rc=rc)
       call ESMF_TimeIntervalSet(timeStep, d=60, rc=rc)
       call ESMF_TimeIntervalGet(timeStep, mm=months, startTimeIn=startTime, &
-                                timeString=timeString, rc=rc)
-      call ESMF_Test((months==2 .and. timeString=="P0Y0M60DT0H0M0S" .and. &
+                                timeString=timeString15, rc=rc)
+      call ESMF_Test((months==2 .and. timeString15=="P0Y0M60DT0H0M0S" .and. &
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !print *, "months = ", months
-      !print *, "timeStep = ", timeString
+      !print *, "timeStep = ", timeString15
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -2957,6 +2973,34 @@
 
       !print *, "yy=", YY, "mm=", MM, "d=", D, "h=", H, "m=", M, "s=", S
 
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Test ISO String and Calendar set interface."
+      write(failMsg, *) " Did not return 24 months or ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, timeIntervalString="P2Y", calendar=gregorianCalendar, &
+                                rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, mm=months, rc=rc)
+
+      call ESMF_Test((months==24 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Test ISO String and startTime set interface."
+      write(failMsg, *) " Did not return 24 months or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, d=1200, h=12, m=17, s=58, &
+           calendar=julianDayCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, startTime, timeIntervalString="P2Y", &
+                                rc=rc)
+
+      call ESMF_Test((rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      
+      
       call ESMF_CalendarDestroy(julianDayCalendar)
       call ESMF_CalendarDestroy(day360Calendar)
       call ESMF_CalendarDestroy(noLeapCalendar)
@@ -3894,6 +3938,171 @@
                       name, failMsg, result, ESMF_SRCLINE)
       !print *, "S, sN, sD_i8 = ", S, sN, sD_i8
 
+! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing ESMF_TimeIntervalSet from an ISO duration string
+      write(name, *) "Set an ESMF_TimeInterval using an ISO duration string with just I4."
+      write(failMsg, *) "Output did not match duration set in string."
+      call ESMF_TimeIntervalSet(timeInterval1, timeIntervalString="P1Y2M3DT4H5M6S", rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, yy=YY, mm=months, d=days, &
+           h=h,m=m, s=s, rc=rc)
+
+      ! Check answers
+      correct=.true.
+      if (yy /= 1) correct=.false.
+      if (months /= 2) correct=.false.
+      if (days /= 3) correct=.false.
+      if (h /= 4) correct=.false.
+      if (m /= 5) correct=.false.
+      if (s /= 6) correct=.false.
+
+!      Debug output      
+!      write(*,*) "yy=",yy
+!      write(*,*) "mm=",months
+!      write(*,*) "dd=",days
+!      write(*,*) "h=",h
+!      write(*,*) "m=",m
+!      write(*,*) "s=",s
+
+      
+      call ESMF_Test((rc .eq. ESMF_SUCCESS) .and. correct, &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+ ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing ESMF_TimeIntervalSet from an ISO duration string
+      write(name, *) "Set an ESMF_TimeInterval using an ISO duration string without date."
+      write(failMsg, *) "Output did not match duration set in string."
+      call ESMF_TimeIntervalSet(timeInterval1, timeIntervalString="PT4H5M6S", rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, &
+          ! yy=YY, mm=months, d_r8=days_r8,  d=days, &
+           h=h,m=m, s=s, rc=rc)
+
+      ! Check answers
+      correct=.true.
+      if (h /= 4) correct=.false.
+      if (m /= 5) correct=.false.
+      if (s /= 6) correct=.false.
+
+      
+      call ESMF_Test((rc .eq. ESMF_SUCCESS) .and. correct, &
+                      name, failMsg, result, ESMF_SRCLINE)
+     
+! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing ESMF_TimeIntervalSet from an ISO duration string
+      write(name, *) "Set an ESMF_TimeInterval using an ISO duration string without time."
+      write(failMsg, *) "Output did not match duration set in string."
+      call ESMF_TimeIntervalSet(timeInterval1, timeIntervalString="P1Y2M3D", rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, yy=YY, mm=months, d=days, &
+           rc=rc)
+
+      ! Check answers
+      correct=.true.
+      if (yy /= 1) correct=.false.
+      if (months /= 2) correct=.false.
+      if (days /= 3) correct=.false.
+
+!      Debug output      
+!      write(*,*) "yy=",yy
+!      write(*,*) "mm=",months
+!      write(*,*) "dd=",days
+!      write(*,*) "h=",h
+!      write(*,*) "m=",m
+!      write(*,*) "s=",s
+
+      
+      call ESMF_Test((rc .eq. ESMF_SUCCESS) .and. correct, &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+
+ ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing ESMF_TimeIntervalSet from an ISO duration string
+      write(name, *) "Set an ESMF_TimeInterval using an ISO duration string with R8 seconds."
+      write(failMsg, *) "Output did not match duration set in string."
+      call ESMF_TimeIntervalSet(timeInterval1, timeIntervalString="PT6.6S", rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, &
+           s_r8=sec_in_r8, rc=rc)
+
+      ! Check answers
+      correct=.true.
+      if (abs(sec_in_r8 - 6.6) < 1.0E-14) correct=.false.
+
+      call ESMF_Test((rc .eq. ESMF_SUCCESS) .and. correct, &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+ ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing ESMF_TimeIntervalSet from an ISO duration string
+      write(name, *) "Set an ESMF_TimeInterval using an ISO duration string with R8 time values."
+      write(failMsg, *) "Output did not match duration set in string."
+      call ESMF_TimeIntervalSet(timeInterval1, timeIntervalString="PT4.1H5.2M6.3S", rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, &
+           h_r8=hr_out_r8,m_r8=min_in_r8, s_r8=sec_out_r8, rc=rc)
+
+      ! Check answers
+      correct=.true.
+      if (abs(hr_out_r8-4.1) < 1.0E-14) correct=.false.
+      if (abs(min_in_r8-5.2) < 1.0E-14) correct=.false.
+      if (abs(sec_out_r8-6.3) < 1.0E-14) correct=.false.
+      
+      call ESMF_Test((rc .eq. ESMF_SUCCESS) .and. correct, &
+                      name, failMsg, result, ESMF_SRCLINE)
+     
+                
+! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing ESMF_TimeIntervalSet from an ISO duration string
+      write(name, *) "Set an ESMF_TimeInterval using an ISO duration string with I8 (where available)."
+      write(failMsg, *) "Output did not match duration set in string."
+      call ESMF_TimeIntervalSet(timeInterval1, &
+           timeIntervalString="P10000000000Y20000000000M30000000000DT60000000000S", &
+           rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, yy_i8=yy_i8, mm_i8=mm_i8, d_i8=d_i8, &
+           s_i8=s_i8, rc=rc)
+
+      ! Check answers
+      correct=.true.
+      if (yy_i8 /= 10000000000_ESMF_KIND_I8) correct=.false.
+      if (mm_i8 /= 20000000000_ESMF_KIND_I8) correct=.false.
+      if (d_i8 /= 30000000000_ESMF_KIND_I8) correct=.false.
+      if (s_i8 /= 60000000000_ESMF_KIND_I8) correct=.false.
+
+      call ESMF_Test((rc .eq. ESMF_SUCCESS) .and. correct, &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      
+! ----------------------------------------------------------------------------
+      
+      !EX_UTest
+      ! Testing ESMF_TimeIntervalSet from an ISO duration string
+      write(name, *) "Set an ESMF_TimeInterval using an ISO duration string and caltype"
+      write(failMsg, *) "Output did not match duration set in string."
+      call ESMF_TimeIntervalSet(timeInterval1, timeIntervalString="P1Y", &
+           calkindflag=ESMF_CALKIND_GREGORIAN, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, yy=YY, calkindflag=calkindflag, &
+           rc=rc)
+
+      ! Check answers
+      correct=.true.
+      if (yy /= 1) correct=.false.
+      if (calkindflag /= ESMF_CALKIND_GREGORIAN) correct=.false.
+
+      !      Debug output      
+!      write(*,*) "yy=",yy
+!      write(*,*) "mm=",months
+!      write(*,*) "dd=",days
+!      write(*,*) "h=",h
+!      write(*,*) "m=",m
+!      write(*,*) "s=",s
+
+      
+      call ESMF_Test((rc .eq. ESMF_SUCCESS) .and. correct, &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      
       ! ----------------------------------------------------------------------------
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?

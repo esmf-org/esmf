@@ -66,6 +66,13 @@
 \input{../Infrastructure/HConfig/doc/HConfig_desc}
 #endif
 
+\subsection{Constants}
+#ifdef STANDALONE
+\input{HConfig_options}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/HConfig/doc/HConfig_options}
+#endif
+
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{HConfig_usage}

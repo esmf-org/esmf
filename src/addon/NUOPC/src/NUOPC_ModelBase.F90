@@ -388,7 +388,7 @@ module NUOPC_ModelBase
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -577,7 +577,7 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -640,7 +640,7 @@ module NUOPC_ModelBase
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -720,7 +720,7 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -783,7 +783,7 @@ module NUOPC_ModelBase
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -863,7 +863,7 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -926,7 +926,7 @@ module NUOPC_ModelBase
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1006,7 +1006,7 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1069,7 +1069,7 @@ module NUOPC_ModelBase
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1149,7 +1149,7 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1212,7 +1212,7 @@ module NUOPC_ModelBase
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1292,7 +1292,7 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1366,7 +1366,7 @@ module NUOPC_ModelBase
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1494,7 +1494,7 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1562,7 +1562,7 @@ module NUOPC_ModelBase
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1758,7 +1758,7 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1824,7 +1824,7 @@ module NUOPC_ModelBase
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1960,7 +1960,7 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2028,7 +2028,7 @@ module NUOPC_ModelBase
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -2349,7 +2349,7 @@ module NUOPC_ModelBase
     endif
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2529,7 +2529,7 @@ module NUOPC_ModelBase
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 

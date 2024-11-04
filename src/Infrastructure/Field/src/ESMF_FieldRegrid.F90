@@ -563,7 +563,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           second as the north component.
 !           In addition, this functionality presently only
 !           works when both the source and destination Fields are build on a geometry (e.g. an ESMF Grid) with
-!           a spherical coordinate system (e.g. ESMF\_COORDSYS\_SPH\_DEG). We expect these restrictions to be loosened over
+!           a spherical coordinate system (e.g. ESMF\_COORDSYS\_SPH\_DEG). Also, this functionality is not currently supported with conservative
+!           regrid methods (e.g. {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}). We expect these restrictions to be loosened over
 !           time as new requirements come in from users. See section~\ref{sec::vectorRegrid} for further
 !           information on this functionality. If not specified, this argument defaults to false.
 !     \item [{[extrapMethod]}]
@@ -979,10 +980,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            endif
         endif
 
-
-
-
-
+        ! Can't use vectorRegrid with conservative right now
+        if (localVectorRegrid) then
+           if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) .or. &
+                (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                   msg=" vector regridding currently not supported with conservative "// &
+                       "regrid methods.", ESMF_CONTEXT, rcToReturn=rc) 
+              return
+           endif
+        endif
 
         
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

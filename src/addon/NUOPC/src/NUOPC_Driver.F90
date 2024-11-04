@@ -116,7 +116,7 @@ module NUOPC_Driver
 
   ! Generic methods
   public NUOPC_DriverAddComp
-#if defined (__INTEL_LLVM_COMPILER) || (__NVCOMPILER)
+#if defined (__INTEL_LLVM_COMPILER) || defined (__NVCOMPILER) || defined (NAGFOR)
   public NUOPC_DriverAddGridCompPtr !TODO: remove once compliers are fixed
 #endif
   public NUOPC_DriverAddRunElement
@@ -380,7 +380,7 @@ module NUOPC_Driver
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -399,7 +399,7 @@ module NUOPC_Driver
     ! -> No explicit filtering of phaseLabels needed here.
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -459,7 +459,7 @@ module NUOPC_Driver
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -513,7 +513,7 @@ module NUOPC_Driver
     endif
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -574,7 +574,7 @@ module NUOPC_Driver
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -601,7 +601,7 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -688,7 +688,7 @@ module NUOPC_Driver
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1578,7 +1578,7 @@ module NUOPC_Driver
     endif
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1892,7 +1892,7 @@ module NUOPC_Driver
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2261,7 +2261,7 @@ module NUOPC_Driver
     endif
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2332,7 +2332,7 @@ module NUOPC_Driver
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2427,7 +2427,7 @@ module NUOPC_Driver
         return  ! bail out
       ! optionally log info
       if (btest(verbosity,11)) then
-        write(msgString, "(A,l,A,I4)") trim(name)//&
+        write(msgString, "(A,L2,A,I4)") trim(name)//&
           ": InitializeDataComplete='"//trim(oldDataComplete)//&
           "', allUpdated=", allUpdated, ", updatedCount=", oldUpdatedCount
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -2503,7 +2503,7 @@ module NUOPC_Driver
 
       ! optionally log info
       if (btest(verbosity,11)) then
-        write(msgString, "(A,l,A,I4)") trim(name)//&
+        write(msgString, "(A,L2,A,I4)") trim(name)//&
           ": InitializeDataComplete='"//trim(newDataComplete)//&
           "', allUpdated=", allUpdated, ", updatedCount=", newUpdatedCount
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -2579,7 +2579,7 @@ module NUOPC_Driver
     endif
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2644,7 +2644,7 @@ module NUOPC_Driver
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2768,13 +2768,14 @@ module NUOPC_Driver
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         endif
 
-        call loopDataDependentInitialize(driver, is%wrap%dataDepAllComplete, rc=rc)
+        call loopDataDependentInitialize(driver, importState, exportState, &
+          dataDepAllComplete=is%wrap%dataDepAllComplete, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) &
           return  ! bail out
 
         if (btest(verbosity,11)) then
-          write(msgString, "(A,l)") trim(name)//&
+          write(msgString, "(A,L2)") trim(name)//&
             ": loopDataDependentInitialize() returned with dataDepAllComplete: ",&
             is%wrap%dataDepAllComplete
           call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -2799,7 +2800,7 @@ module NUOPC_Driver
       return  ! bail out
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -3106,9 +3107,11 @@ module NUOPC_Driver
 
   !-----------------------------------------------------------------------------
 
-  recursive subroutine loopDataDependentInitialize(driver, dataDepAllComplete, rc)
+  recursive subroutine loopDataDependentInitialize(driver, &
+    importState, exportState, dataDepAllComplete, rc)
     ! resolve data dependencies
     type(ESMF_GridComp)             :: driver
+    type(ESMF_State)                :: importState, exportState
     logical, optional, intent(out)  :: dataDepAllComplete
     integer, intent(out)            :: rc
 
@@ -3163,7 +3166,7 @@ module NUOPC_Driver
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -3263,7 +3266,7 @@ module NUOPC_Driver
             return  ! bail out
 
           if (btest(verbosity,11)) then
-            write(msgString, "(A,I4,A,L)") &
+            write(msgString, "(A,I4,A,L2)") &
               trim(name)//": component ", i, "="//trim(compName)//&
               ", dataComplete (global): ", (helperOut==petCount)
             call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -3374,7 +3377,7 @@ module NUOPC_Driver
           if (helperOut > 0) someProgress=.true. ! toggle flag
 
           if (btest(verbosity,11)) then
-            write(msgString, "(A,I4,A,L)") &
+            write(msgString, "(A,I4,A,L2)") &
               trim(name)//": component ", i, "="//trim(compName)//&
               ", someProgress (global): ", someProgress
             call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -3388,7 +3391,7 @@ module NUOPC_Driver
       if (present(dataDepAllComplete)) dataDepAllComplete=allComplete
 
       if (btest(verbosity,11)) then
-        write(msgString, "(A,l,A,l,A,l)") &
+        write(msgString, "(A,L2,A,L2,A,L2)") &
           trim(name)//": someProgress=", someProgress, ", allComplete=", &
           allComplete, ", present(dataDepAllComplete)=", &
           present(dataDepAllComplete)
@@ -3432,7 +3435,7 @@ module NUOPC_Driver
     enddo
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -3500,7 +3503,7 @@ module NUOPC_Driver
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -3530,7 +3533,7 @@ module NUOPC_Driver
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       call ESMF_ClockPrint(internalClock, options="currTime", &
         preString=">>>"//trim(name)//&
-        " entered Run (phase="//trim(adjustl(pLabel))// &
+        ": entered Run (phase="//trim(adjustl(pLabel))// &
         ") with current time: ", unit=msgString, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3639,7 +3642,8 @@ module NUOPC_Driver
     if (btest(verbosity,9)) then
       call ESMF_ClockPrint(internalClock, options="currTime", &
         preString="<<<"//trim(name)//&
-        " - leaving Run with current time: ", unit=msgString, rc=rc)
+        ": leaving Run (phase="//trim(adjustl(pLabel))// &
+        ") with current time: ", unit=msgString, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -3649,7 +3653,7 @@ module NUOPC_Driver
     endif
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -4036,7 +4040,7 @@ module NUOPC_Driver
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -4396,7 +4400,7 @@ module NUOPC_Driver
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -4504,7 +4508,7 @@ module NUOPC_Driver
       return  ! bail out
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -4522,7 +4526,7 @@ module NUOPC_Driver
   !-----------------------------------------------------------------------------
   !-----------------------------------------------------------------------------
 
-#if defined (__INTEL_LLVM_COMPILER) || defined (__NVCOMPILER)
+#if defined (__INTEL_LLVM_COMPILER) || defined (__NVCOMPILER) || defined (NAGFOR)
   !-----------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: NUOPC_DriverAddComp - Add a GridComp child to a Driver using procedure pointers
@@ -4531,7 +4535,7 @@ module NUOPC_Driver
   ! Private name; call using NUOPC_DriverAddComp()
   recursive subroutine NUOPC_DriverAddGridCompPtr(driver, compLabel, &
     compSetServicesRoutine, compSetVMRoutine, petList, devList, info, config, &
-    comp, rc)
+    hconfig, comp, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                               :: driver
     character(len=*),    intent(in)                   :: compLabel
@@ -4555,6 +4559,7 @@ module NUOPC_Driver
     integer,             intent(in),         optional :: devList(:)
     type(ESMF_Info),     intent(in),         optional :: info
     type(ESMF_Config),   intent(in),         optional :: config
+    type(ESMF_HConfig),  intent(in),         optional :: hconfig
     type(ESMF_GridComp), intent(out),        optional :: comp
     integer,             intent(out),        optional :: rc
 !
@@ -4575,7 +4580,7 @@ module NUOPC_Driver
 
     call NUOPC_DriverAddGridComp(driver, compLabel, &
       compSetServicesRoutine, compSetVMRoutine, petList, devList, info, &
-      config, comp, rc=localrc)
+      config, hconfig, comp, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -4592,7 +4597,7 @@ module NUOPC_Driver
   ! Private name; call using NUOPC_DriverAddComp()
   recursive subroutine NUOPC_DriverAddGridComp(driver, compLabel, &
     compSetServicesRoutine, compSetVMRoutine, petList, devList, info, config, &
-    comp, rc)
+    hconfig, comp, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                               :: driver
     character(len=*),    intent(in)                   :: compLabel
@@ -4636,6 +4641,7 @@ module NUOPC_Driver
     integer,             intent(in),         optional :: devList(:)
     type(ESMF_Info),     intent(in),         optional :: info
     type(ESMF_Config),   intent(in),         optional :: config
+    type(ESMF_HConfig),  intent(in),         optional :: hconfig
     type(ESMF_GridComp), intent(out),        optional :: comp
     integer,             intent(out),        optional :: rc
 !
@@ -4645,11 +4651,12 @@ module NUOPC_Driver
 ! or by default across all of the Driver PETs.
 !
 ! The specified {\tt compSetServicesRoutine()} is called back immediately after
-! the new child component has been created internally. Very little around the
-! component is set up at that time (e.g. NUOPC component attributes will not be
-! available). The routine should therefore be very light weight, with the sole
-! purpose of setting the entry points of the component -- typically by deriving
-! from a generic component followed by the appropriate specilizations.
+! the new child component has been created internally.
+! Very little around the component is set up at that time (e.g. NUOPC component
+! attributes are not yet available at this stage). The routine should therefore
+! be very light weight, with the sole purpose of setting the entry points of
+! the component -- typically by deriving from a generic component followed by
+! the appropriate specilizations.
 !
 ! If provided, the {\tt compSetVMRoutine()} is called back before the
 ! {\tt compSetServicesRoutine()}. This allows the child component to set
@@ -4708,7 +4715,8 @@ module NUOPC_Driver
     i = is%wrap%modelCount
     cmEntry%wrap%label = trim(compLabel)
     cmEntry%wrap%component = ESMF_GridCompCreate(name=trim(compLabel), &
-      config=config, petList=petList, devList=devList, rc=localrc)
+      config=config, hconfig=hconfig, petList=petList, devList=devList, &
+      rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -4806,7 +4814,7 @@ module NUOPC_Driver
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddComp()
   recursive subroutine NUOPC_DriverAddGridCompSO(driver, compLabel, &
-    sharedObj, petList, devList, info, config, comp, rc)
+    sharedObj, petList, devList, info, config, hconfig, comp, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     character(len=*),    intent(in)            :: compLabel
@@ -4815,6 +4823,7 @@ module NUOPC_Driver
     integer,             intent(in),  optional :: devList(:)
     type(ESMF_Info),     intent(in),  optional :: info
     type(ESMF_Config),   intent(in),  optional :: config
+    type(ESMF_HConfig),  intent(in),  optional :: hconfig
     type(ESMF_GridComp), intent(out), optional :: comp
     integer,             intent(out), optional :: rc
 !
@@ -4823,13 +4832,21 @@ module NUOPC_Driver
 ! component to a Driver. The component is created on the provided {\tt petList},
 ! or by default across all of the Driver PETs.
 !
-! The {\tt SetServices()} routine in the {\tt sharedObj} is called back
-! immediately after the
-! new child component has been created internally. Very little around the
-! component is set up at that time (e.g. NUOPC component attributes will not be
-! available). The routine should therefore be very light weight, with the sole
-! purpose of setting the entry points of the component -- typically by deriving
-! from a generic component followed by the appropriate specilizations.
+! The {\tt SetVM()} and {\tt SetServices()} routines in {\tt sharedObj}
+! are called back immediately after the new child component has been created
+! internally. 
+! Very little around the component is set up at that time (e.g. NUOPC component
+! attributes are not yet available at this stage). The routine should therefore
+! be very light weight, with the sole purpose of setting the entry points of
+! the component -- typically by deriving from a generic component followed by
+! the appropriate specilizations.
+!
+! The asterisk character {\tt (*)} is supported as a wildcard for the
+! file name suffix in {\tt sharedObj}. When present, the asterisk is replaced
+! by "so", "dylib", and "dll", in this order, and the first successfully
+! loaded object is used. If the {\tt sharedObj} argument is not provided, the
+! executable itself is searched for the "{\tt SetVM}" and "{\tt SetServices}"
+! symbols.
 !
 ! The {\tt info} argument can be used to pass custom attributes to the child
 ! component. These attributes are available on the component when
@@ -4884,7 +4901,8 @@ module NUOPC_Driver
     i = is%wrap%modelCount
     cmEntry%wrap%label = trim(compLabel)
     cmEntry%wrap%component = ESMF_GridCompCreate(name=trim(compLabel), &
-      config=config, petList=petList, devList=devList, rc=localrc)
+      config=config, hconfig=hconfig, petList=petList, devList=devList, &
+      rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -4981,7 +4999,7 @@ module NUOPC_Driver
   ! Private name; call using NUOPC_DriverAddComp()
   recursive subroutine NUOPC_DriverAddCplComp(driver, srcCompLabel, &
     dstCompLabel, compSetServicesRoutine, compSetVMRoutine, petList, devList, &
-    info, config, comp, rc)
+    info, config, hconfig, comp, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                               :: driver
     character(len=*),    intent(in)                   :: srcCompLabel
@@ -5026,6 +5044,7 @@ module NUOPC_Driver
     integer, target,     intent(in),         optional :: devList(:)
     type(ESMF_Info),     intent(in),         optional :: info
     type(ESMF_Config),   intent(in),         optional :: config
+    type(ESMF_HConfig),  intent(in),         optional :: hconfig
     type(ESMF_CplComp),  intent(out),        optional :: comp
     integer,             intent(out),        optional :: rc
 !
@@ -5036,11 +5055,12 @@ module NUOPC_Driver
 ! and {\tt dstCompLabel}.
 !
 ! The specified {\tt SetServices()} routine is called back immediately after the
-! new child component has been created internally. Very little around the
-! component is set up at that time (e.g. NUOPC component attributes will not be
-! available). The routine should therefore be very light weight, with the sole
-! purpose of setting the entry points of the component -- typically by deriving
-! from a generic component followed by the appropriate specilizations.
+! new child component has been created internally.
+! Very little around the component is set up at that time (e.g. NUOPC component
+! attributes are not yet available at this stage). The routine should therefore
+! be very light weight, with the sole purpose of setting the entry points of
+! the component -- typically by deriving from a generic component followed by
+! the appropriate specilizations.
 !
 ! The {\tt info} argument can be used to pass custom attributes to the child
 ! component. These attributes are available on the component when
@@ -5164,7 +5184,7 @@ module NUOPC_Driver
       endif
       cmEntry%wrap%connector = ESMF_CplCompCreate(&
         name=trim(cmEntry%wrap%label), petList=connectorPetList, &
-        devList=devList, config=config, rc=localrc)
+        devList=devList, config=config, hconfig=hconfig, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -5181,7 +5201,7 @@ module NUOPC_Driver
       endif
       cmEntry%wrap%connector = ESMF_CplCompCreate(&
         name=trim(cmEntry%wrap%label), devList=devList, config=config, &
-        rc=localrc)
+        hconfig=hconfig, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -7508,7 +7528,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -7555,7 +7575,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -7617,7 +7637,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -7675,7 +7695,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -7785,7 +7805,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -7829,7 +7849,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       if (areServicesSet) then
-        if (btest(verbosity,4)) then
+        if (btest(verbosity,6)) then
           call ESMF_CplCompGet(connector, name=connectorName, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -7857,7 +7877,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       if (areServicesSet) then
-        if (btest(verbosity,4)) then
+        if (btest(verbosity,6)) then
           call ESMF_CplCompGet(connector, name=connectorName, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -7914,7 +7934,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -8031,7 +8051,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 producerConnected, consumerConnected, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              if (btest(verbosity,4)) then
+              if (btest(verbosity,6)) then
                 write(msgString,*) trim(cplName)//&
                   " connected:", connected, &
                   " producerConnected:", producerConnected, &
@@ -8149,7 +8169,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -8175,7 +8195,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       if (areServicesSet) then
-        if (btest(verbosity,4)) then
+        if (btest(verbosity,6)) then
           call ESMF_CplCompGet(connector, name=connectorName, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -8202,7 +8222,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       if (areServicesSet) then
-        if (btest(verbosity,4)) then
+        if (btest(verbosity,6)) then
           call ESMF_CplCompGet(connector, name=connectorName, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -8266,7 +8286,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -8374,7 +8394,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 producerConnected, consumerConnected, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              if (btest(verbosity,4)) then
+              if (btest(verbosity,6)) then
                 write(msgString,*) trim(cplName)// &
                   " in CplSet: ", trim(cplSetList(j)), &
                   " connected:", connected, &
@@ -8391,7 +8411,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                   return  ! bail out
-                if (btest(verbosity,4)) then
+                if (btest(verbosity,6)) then
                   write(msgString,*) "- removing field: ", trim(fieldName), &
                     " in CplSet: ", trim(cplSetList(j))
                   call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -8476,7 +8496,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             consumerConnected, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (btest(verbosity,4)) then
+          if (btest(verbosity,6)) then
             write(msgString,*) trim(itemNameList(j))//&
               " connected:", connected, &
               " producerConnected:", producerConnected, &
@@ -8636,7 +8656,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -8646,7 +8666,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (stateIsCreated) then
       ! - complete all the fields in the importState
-      if (btest(verbosity,4)) then
+      if (btest(verbosity,6)) then
         call ESMF_LogWrite("Calling into completeAllFields() for importState", &
           ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -8664,7 +8684,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (stateIsCreated) then
       ! - complete all the fields in the exportState
-      if (btest(verbosity,4)) then
+      if (btest(verbosity,6)) then
         call ESMF_LogWrite("Calling into completeAllFields() for exportState", &
           ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -8677,7 +8697,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -8734,7 +8754,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           if (trim(value)=="shared") then
             ! shared -> must complete the field here
-            if (btest(verbosity,4)) then
+            if (btest(verbosity,6)) then
               call ESMF_LogWrite("- "//trim(itemNameList(i))// &
                 ": shared --> don't know what to do!!!!!.", ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -8743,7 +8763,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             endif
           else
             ! not shared -> must complete the field here
-            if (btest(verbosity,4)) then
+            if (btest(verbosity,6)) then
               call ESMF_LogWrite("- "//trim(itemNameList(i))// &
                 ": not shared --> complete here.", ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -8819,7 +8839,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! intro
-    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -8897,7 +8917,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! extro
-    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    call NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 

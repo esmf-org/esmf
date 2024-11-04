@@ -314,6 +314,8 @@ namespace ESMCI {
     int fillIndexListPDimPDe(int *indexList, int de, int dim,
       VMK::commhandle **commh, int rootPet, VM *vm=NULL) const;
     // misc.
+    void log(std::string prefix,
+      ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO, bool deepFlag=false)const;
     static DistGridMatch_Flag match(DistGrid *distgrid1, DistGrid *distgrid2,
       int *rc=NULL);
     int print() const;

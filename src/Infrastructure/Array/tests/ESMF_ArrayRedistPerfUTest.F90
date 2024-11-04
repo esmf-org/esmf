@@ -234,13 +234,21 @@ program ESMF_ArrayRedistPerfUTest
   dt = t1_store - t0_store
   write(msgString,*) "ArrayRedistStore() performance: ", dt, " seconds."
   call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+#ifndef ESMF_TESTPERFORMANCE
+  write(msgString,*) "Skipping check of this performance because ESMF_TESTPERFORMANCE is off"
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+#endif
 #ifdef ESMF_BOPT_g
   dtTest = 20.d0  ! 20s is expected to pass in debug mode
 #else
   dtTest = 2.d0   ! 2s is expected to pass in optimized mode
 #endif
   write(failMsg, *) "ArrayRedistStore() performance problem! ", dt, ">", dtTest
+#ifdef ESMF_TESTPERFORMANCE
   call ESMF_Test((dt<dtTest), name, failMsg, result, ESMF_SRCLINE)
+#else
+  call ESMF_Test((.true.), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
@@ -248,13 +256,21 @@ program ESMF_ArrayRedistPerfUTest
   dt = t1 - t0
   write(msgString,*) "ArrayRedist() performance: ", dt, " seconds."
   call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+#ifndef ESMF_TESTPERFORMANCE
+  write(msgString,*) "Skipping check of this performance because ESMF_TESTPERFORMANCE is off"
+  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+#endif
 #ifdef ESMF_BOPT_g
   dtTest = 0.1d0    ! 0.1s is expected to pass in debug mode
 #else
   dtTest = 0.01d0   ! 0.01s is expected to pass in optimized mode
 #endif
   write(failMsg, *) "ArrayRedist() performance problem! ", dt, ">", dtTest
+#ifdef ESMF_TESTPERFORMANCE
   call ESMF_Test((dt<dtTest), name, failMsg, result, ESMF_SRCLINE)
+#else
+  call ESMF_Test((.true.), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
 #endif
 

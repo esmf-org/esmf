@@ -2184,7 +2184,7 @@ msg="This call does not work with packed FieldBundle.",&
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldBundleGetIndex()"
 !BOPI
-! !IROUTINE: ESMF_FieldBundleGet - Access the fieldIndex-th Field in FieldBundle
+! !IROUTINE: ESMF_FieldBundleGet - Access the Field at a specific index in a FieldBundle
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_FieldBundleGet()   
@@ -2198,21 +2198,16 @@ msg="This call does not work with packed FieldBundle.",&
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !
-! TODO: This method is DEPRECATED starting at 5.2.0r (was not part of the 5.2.0r
-!       reference manual.
-! TODO: We should put a deprecation message into the Log file when this message
-!       is being called!
-!
 ! !DESCRIPTION:
-!   Get the fieldIndex-th Field in FieldBundle. The order of the Field in FieldBundle
-!   is not guranteed. If this call is used iteratively, then any Add, Replace, Remove
-!   call on the FieldBundle will invalidate the order of the Field in the FieldBundle.
+!   Get the fieldIndex-th Field from a FieldBundle. The order of the Fields in FieldBundle
+!   is not guranteed. If this call is used iteratively, then any Add, Replace, or Remove
+!   call on the FieldBundle can change the order and/or number of Fields in that FieldBundle.
 !
 !   \begin{description}
 !   \item [fieldbundle]
 !         {\tt ESMF\_FieldBundle} to be queried.
 !   \item [fieldIndex]
-!         The fieldIndex-th Field to be returned.
+!         The index of the Field to be returned.
 !   \item [field]
 !         The fieldIndex-th Field to be returned.
 !   \item [{[rc]}]

@@ -80,7 +80,7 @@
 #endif
         ESMF_STATEITEM_NOTFOUND
       public ESMF_StateItemWrap
-      public ESMF_StateItemConstruct
+      public ESMF_StateItemConstruct, ESMF_StateItemString
       public ESMF_StateIntent_Flag, ESMF_STATEINTENT_IMPORT, ESMF_STATEINTENT_EXPORT, &
                                    ESMF_STATEINTENT_INTERNAL, &
                                    ESMF_STATEINTENT_UNSPECIFIED

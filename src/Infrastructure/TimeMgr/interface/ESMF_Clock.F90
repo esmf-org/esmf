@@ -426,7 +426,7 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_ClockCreate()
       function ESMF_ClockCreateNew(timeStep, startTime, keywordEnforcer, &
-        stopTime, runDuration, runTimeStepCount, refTime, name, rc)
+        stopTime, runDuration, runTimeStepCount, refTime, repeatDuration, name, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Clock) :: ESMF_ClockCreateNew
@@ -439,6 +439,7 @@
       type(ESMF_TimeInterval), intent(in),  optional :: runDuration
       integer,                 intent(in),  optional :: runTimeStepCount
       type(ESMF_Time),         intent(in),  optional :: refTime
+      type(ESMF_TimeInterval), intent(in),  optional :: repeatDuration
       character (len=*),       intent(in),  optional :: name
       integer,                 intent(out), optional :: rc
 
@@ -446,6 +447,13 @@
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.7.0] Added argument {\tt repeatDuration}.
+!              The new argument allows the user to specify that they want the
+!              clock to be a repeat clock and repeatedly go through the same
+!              interval of time.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -482,6 +490,12 @@
 !     \item[{[refTime]}]
 !          The {\tt ESMF\_Clock}'s reference time.  Provides reference point
 !          for simulation time (see currSimTime in ESMF\_ClockGet() below).
+!     \item[{[repeatDuration]}]
+!          If specified and not 0, then makes {\tt ESMF\_Clock} a repeating clock that stays within
+!          the range of {\tt startTime} to {\tt startTime}+{\tt repeatDuration}. For example, when advancing
+!          if the current time goes past {\tt startTime}+{\tt repeatDuration}, then it resets
+!          back to {\tt startTime} to continue. Currently, the repeat functionality is not supported with clocks
+!          that run backwards (e.g. that have a negative timeStep). 
 !     \item[{[name]}]
 !          The name for the newly created clock.  If not specified, a
 !          default unique name will be generated: "ClockNNN" where NNN
@@ -518,7 +532,7 @@
       ! invoke C to C++ entry point to allocate and initialize new clock
       call c_ESMC_ClockCreateNew(ESMF_ClockCreateNew, nameLen, name, &
                                  timeStep, startTime, stopTime, runDuration, &
-                                 runTimeStepCount, refTime, localrc)
+                                 runTimeStepCount, refTime, repeatDuration, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -680,7 +694,8 @@
         timeStep, startTime, stopTime, &
         runDuration, runTimeStepCount, refTime, currTime, prevTime, &
         currSimTime, prevSimTime, calendar, calkindflag, timeZone, &
-        advanceCount, alarmCount, direction, name, rc)
+        advanceCount, alarmCount, direction, repeatDuration, repeatCount, &
+        name, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),        intent(in)            :: clock
@@ -701,6 +716,8 @@
       integer(ESMF_KIND_I8),   intent(out), optional :: advanceCount
       integer,                 intent(out), optional :: alarmCount
       type(ESMF_Direction_Flag),    intent(out), optional :: direction
+      type(ESMF_TimeInterval), intent(out), optional :: repeatDuration
+      integer(ESMF_KIND_I8),   intent(out), optional :: repeatCount
       character (len=*),       intent(out), optional :: name
       integer,                 intent(out), optional :: rc
 
@@ -708,6 +725,13 @@
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.7.0] Added arguments {\tt repeatDuration} and {\tt repeatCount}.
+!              The argument {\tt repeatDuration} allows the user to get information
+!              about how far the clock will advance before repeating. The argument
+!              {\tt repeatCount} tells how many times the clock has repeated.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -762,6 +786,12 @@
 !          The {\tt ESMF\_Clock}'s time stepping direction.  See also
 !          {\tt ESMF\_ClockIsReverse()}, an alternative for convenient use in
 !          "if" and "do while" constructs.
+!     \item[{[repeatDuration]}]
+!          If not 0, then tells how long the clock will advance before going back to
+!          startTime. If 0, then the clock is not a repeat clock. 
+!     \item[{[repeatCount]}]
+!          If this clock is a repeat clock, then gives the number of times this
+!          clock has gone back to startTime.     
 !     \item[{[name]}]
 !          The name of this clock.
 !     \item[{[rc]}]
@@ -800,7 +830,8 @@
                            runDuration, runTimeStepCount, refTime, &
                            currTime, prevTime, currSimTime, prevSimTime, &
                            calendar, calkindflag, timeZone, advanceCount, &
-                           alarmCount, direction, localrc)
+                           alarmCount, direction, repeatDuration, repeatCount, &
+                           localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -821,7 +852,8 @@
       call ESMF_TimeIntervalInit(currSimTime)
       call ESMF_TimeIntervalInit(prevSimTime)
       call ESMF_CalendarSetInitCreated(calendar)
-
+      call ESMF_TimeIntervalInit(repeatDuration)
+      
       ! Return success
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_ClockGet

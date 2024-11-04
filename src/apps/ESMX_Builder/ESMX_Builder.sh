@@ -29,7 +29,14 @@ usage () {
   printf "  -g\n"
   printf "      set --build-type=debug\n"
   printf "  --build-args=BUILD_ARGS\n"
-  printf "      cmake arguments (e.g. -DARG=VAL)\n"
+  printf "      build args are passed to each component\n"
+  printf "      arguments are not used to configure ESMX (see --cmake-args)\n"
+  printf "      (e.g. --build-args=\"-DFOO=BAR\")\n"
+  printf "      note: build_args in ESMX_BUILD_FILE supersedes --build-args\n"
+  printf "  --cmake-args=CMAKE_ARGS\n"
+  printf "      cmake args are used to configure cmake while building ESMX\n"
+  printf "      arguments are not passed to components (see --build-args)\n"
+  printf "      (e.g. --cmake-args=\"-DFOO=BAR\")\n"
   printf "  --disable-comps=DISABLE_COMPS\n"
   printf "      disable components\n"
   printf "  --build-jobs=BUILD_JOBS\n"
@@ -63,6 +70,12 @@ settings () {
   printf "  INSTALL_PREFIX=${INSTALL_PREFIX}\n"
   printf "  BUILD_TYPE=${BUILD_TYPE}\n"
   printf "  BUILD_ARGS=${BUILD_ARGS}\n"
+  printf "  CMAKE_ARGS=\n"
+  if [ ${#CMAKE_ARGS[@]} -gt 0 ]; then
+    for arg in "${CMAKE_ARGS[@]}"; do
+      printf "    ${arg}\n"
+    done
+  fi
   printf "  DISABLE_COMPS=${DISABLE_COMPS}\n"
   printf "  BUILD_JOBS=${BUILD_JOBS}\n"
   printf "  MODULEFILE=${MODULEFILE}\n"
@@ -80,6 +93,7 @@ BUILD_FILE="esmxBuild.yaml"
 ESMF_ESMXDIR=""
 BUILD_TYPE="release"
 BUILD_ARGS=""
+CMAKE_ARGS=()
 DISABLE_COMPS=""
 BUILD_JOBS=""
 BUILD_DIR="${CWD}/build"
@@ -125,6 +139,9 @@ while [[ $# -gt 0 ]]; do
     --build-jobs=?*) BUILD_JOBS=${1#*=} ;;
     --build-jobs)  usage_error "$1" "requires an argument" ;;
     --build-jobs=) usage_error "$1" "requires an argument" ;;
+    --cmake-args=?*) CMAKE_ARGS+=(${1#*=}) ;;
+    --cmake-args)  usage_error "$1" "requires an argument" ;;
+    --cmake-args=) usage_error "$1" "requires an argument" ;;
     --disable-comps=?*) DISABLE_COMPS=${1#*=} 
       DISABLE_COMPS=${DISABLE_COMPS/' '/','} 
       DISABLE_COMPS=${DISABLE_COMPS/';'/','} ;;
@@ -171,6 +188,11 @@ fi
 # read ESMX build file from positional arguments
 if [[ $# -ge 1 ]]; then
   BUILD_FILE="${1}"
+  # ensure the explicitly specified BUILD_FILE exists
+  if [ ! -f "${BUILD_FILE}" ]; then
+    echo "ERROR: ESMX_BUILD_FILE is missing: ${BUILD_FILE}"
+    usage; exit 1
+  fi
 else
   BUILD_FILE="esmxBuild.yaml"
 fi
@@ -193,12 +215,6 @@ fi
 # check ESMF_ESMXDIR
 if [ ! -d "${ESMF_ESMXDIR}" ]; then
   echo "ERROR: ESMF_ESMXDIR directory is missing: ${ESMF_ESMXDIR}"
-  usage; exit 1
-fi
-
-# check BUILD_FILE
-if [ ! -f "${BUILD_FILE}" ]; then
-  echo "ERROR: ESMX_BUILD_FILE is missing: ${BUILD_FILE}"
   usage; exit 1
 fi
 
@@ -233,6 +249,11 @@ fi
 if [ ! -z "${BUILD_ARGS}" ]; then
   CMAKE_SETTINGS+=("-DESMX_BUILD_ARGS=${BUILD_ARGS}")
 fi
+if [ ${#CMAKE_ARGS[@]} -gt 0 ]; then
+  for arg in "${CMAKE_ARGS[@]}"; do
+    CMAKE_SETTINGS+=("${arg}")
+  done
+fi
 
 # make settings
 BUILD_SETTINGS=("")
@@ -254,21 +275,42 @@ INSTALL_SETTINGS=("")
 
 # build and install
 set +e
+if [ "${VERBOSE}" = true ] ; then
+  echo --- CMake Configuring ---
+  set -x
+fi
 cmake -S${ESMF_ESMXDIR} -B${BUILD_DIR} ${CMAKE_SETTINGS[@]}
-if [ "$?" !=  "0" ]; then
-  echo "ESMX_Builder Failed: (cmake)"
+RC=$?
+{ set +x; } 2>/dev/null
+if [ $RC -ne 0 ]; then
+  echo "ESMX_Builder Failed: 'cmake -S${ESMF_ESMXDIR} -B${BUILD_DIR} ${CMAKE_SETTINGS[@]}'"
   exit -1
 fi
+echo
+if [ "${VERBOSE}" = true ] ; then
+  echo --- CMake Building ---
+  set -x
+fi
 cmake --build ${BUILD_DIR} ${BUILD_SETTINGS[@]}
-if [ "$?" !=  "0" ]; then
-  echo "ESMX_Builder Failed: (cmake --build)"
+RC=$?
+{ set +x; } 2>/dev/null
+if [ $RC -ne 0 ]; then
+  echo "ESMX_Builder Failed: 'cmake --build ${BUILD_DIR} ${BUILD_SETTINGS[@]}'"
   exit -2
 fi
+echo
+if [ "${VERBOSE}" = true ] ; then
+  echo --- CMake Installing ---
+  set -x
+fi
 cmake --install ${BUILD_DIR} ${INSTALL_SETTINGS[@]}
-if [ "$?" !=  "0" ]; then
-  echo "ESMX_Builder Failed: (cmake --install)"
+RC=$?
+{ set +x; } 2>/dev/null
+if [ $RC -ne 0 ]; then
+  echo "ESMX_Builder Failed: 'cmake --install ${BUILD_DIR} ${INSTALL_SETTINGS[@]}'"
   exit -3
 fi
+echo
 if [ "${TEST}" = true ]; then
   (cd ${BUILD_DIR}/Driver; ctest ${TEST_SETTINGS[@]})
   if [ "$?" !=  "0" ]; then

@@ -73,7 +73,7 @@ ESMC_Clock ESMC_ClockCreate(
                               (ESMCI::Time *)&startTime,
                               (ESMCI::Time *)&stopTime,
                               (ESMCI::TimeInterval *)NULL, (int *)NULL,
-                              (ESMCI::Time *)NULL, &localrc);
+                              (ESMCI::Time *)NULL, (ESMCI::TimeInterval *)NULL, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,                                       rc)) {
     clock.ptr = NULL;  // defensive; should already be set in ClockCreate()
     return clock;  // bail out
@@ -156,9 +156,12 @@ int ESMC_ClockGet(ESMC_Clock clock, ESMC_TimeInterval *currSimTime,
                              (ESMCI::Calendar **)NULL,
                              (ESMC_CalKind_Flag *)NULL,
                              (int *)NULL,
-                                                    advanceCount,
+                             advanceCount,
                              (int *)NULL,
-                             (ESMC_Direction *)NULL);
+                             (ESMC_Direction *)NULL,
+                             (ESMCI::TimeInterval *)NULL,
+                             (ESMC_I8 *)NULL                                              
+                                               );
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                     &rc)) return rc;  // bail out
   // return successfully

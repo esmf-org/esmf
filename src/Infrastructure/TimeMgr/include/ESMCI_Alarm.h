@@ -264,16 +264,18 @@ class Alarm {
 //
   private:
 //
- // < declare private interface methods here >
+  // < declare private interface methods here >
 
-    // check if time to turn on alarm
-    bool checkTurnOn(bool timeStepPositive);
-
-    // reconstruct ringBegin during ESMF_DIRECTION_REVERSE
-    int resetRingBegin(bool timeStepPositive);
-
-    // friend class alarm
-    friend class Clock;
+  int checkRingingDueToRepeatClockTimeStep(Time &prevTime, Time &currTime, TimeInterval &timeStep, bool &ringForTimeStep) const;
+  
+  // check if time to turn on alarm
+  bool checkTurnOn(bool timeStepPositive);
+  
+  // reconstruct ringBegin during ESMF_DIRECTION_REVERSE
+  int resetRingBegin(bool timeStepPositive);
+  
+  // friend class alarm
+  friend class Clock;
 
 //
 //EOP
