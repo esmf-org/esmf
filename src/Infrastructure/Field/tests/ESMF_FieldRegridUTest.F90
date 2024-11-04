@@ -1554,7 +1554,7 @@
       !EX_UTest
       ! Test regrid matrix
       write(failMsg, *) "Test unsuccessful"
-      write(name, *) "Test regrid transpose."
+      write(name, *) "Test transpose regrid routeHandle."
 
       ! initialize
       rc=ESMF_SUCCESS
@@ -47061,7 +47061,7 @@ end subroutine test_regridSMMArbGrid
   ! Setup dest. grid
   ! Make a grid that still matches up with identical points, but is
   ! only the center, so that matrix is identity, but the src/dst indices aren't
-  ! the same, this'll let us test the trasponse where the indices will change.
+  ! the same, this'll let us test the transponse where the indices will change.
   dstGrid=ESMF_GridCreate1PeriDimUfrm(maxIndex=(/180,90/),& 
        minCornerCoord=(/0.0_ESMF_KIND_R8,-45.0_ESMF_KIND_R8/), &
        maxCornerCoord=(/360.0_ESMF_KIND_R8,45.0_ESMF_KIND_R8/), &
@@ -47439,8 +47439,47 @@ end subroutine test_regridSMMArbGrid
   endif
 
 
-  ! TODO: Check results
+  
+  ! Check results
+  do lDE=0,srclocalDECount-1
 
+     call ESMF_FieldGet(srcField, lDE, farrayPtr, &
+          computationalLBound=fclbnd, computationalUBound=fcubnd, &
+          rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_FieldGet(xsrcField, lDE, xfarrayPtr, &
+          rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+    
+     !! Make sure things look ok
+     do i1=fclbnd(1),fcubnd(1)
+     do i2=fclbnd(2),fcubnd(2)
+        do i3=fclbnd(3),fcubnd(3)
+
+           ! Skip values close to 1000.0 because those are the ones that
+           ! won't have been regridded to. 
+           if (abs(farrayPtr(i1,i2,i3) - 1000.0) .lt. 1.0E-10) cycle
+
+           ! if working everything should be close to exact answer 
+           if (abs(farrayPtr(i1,i2,i3)-xfarrayPtr(i1,i2,i3)) .gt. 1.0E-10) then
+!            write(*,*) "T:",i1,i2,i3,"  ",farrayPtr(i1,i2,i3),xfarrayPtr(i1,i2,i3)
+            correct=.false.
+           endif
+        enddo
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+  
   
   ! Get rid of transpose routehandle
   call ESMF_FieldRegridRelease(transposeRouteHandle, rc=localrc)
