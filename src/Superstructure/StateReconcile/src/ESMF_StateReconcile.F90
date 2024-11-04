@@ -1489,12 +1489,12 @@ end block
   subroutine ESMF_ReconcileSingleCompCase(state, vm, vmId, attreconflag, siwrap, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_State),            intent(inout)  :: state
-    type(ESMF_VM),               intent(in)     :: vm
-    type(ESMF_VMId),             pointer        :: vmId         ! intent(in)
-    type(ESMF_AttReconcileFlag), intent(in)     :: attreconflag
-    type(ESMF_StateItemWrap),    pointer        :: siwrap(:)    ! intent(in)
-    integer,                     intent(out)    :: rc
+    type(ESMF_State),                     intent(inout)  :: state
+    type(ESMF_VM),                        intent(in)     :: vm
+    type(ESMF_VMId),             pointer, intent(in)     :: vmId
+    type(ESMF_AttReconcileFlag),          intent(in)     :: attreconflag
+    type(ESMF_StateItemWrap),    pointer, intent(in)     :: siwrap(:)
+    integer,                              intent(out)    :: rc
 !
 ! !DESCRIPTION:
 !
@@ -1503,13 +1503,17 @@ end block
 !
 !   The arguments are:
 !   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} to reconcile.
 !   \item[vm]
-!     The ESMF\_VM} object across which the state is reconciled.
+!     The {\tt ESMF\_VM} object across which the state is reconciled.
 !   \item[vmId]
-!     The ESMF\_VMId} of the single component who ownes all objects present
+!     The {\tt ESMF\_VMId} of the single component who ownes all objects present
 !     in the state.
-!   \item[rootPet]
-!     The lowest PET that holds actual objects.
+!   \item[attreconflag]
+!     Flag indicating whether attributes need to be reconciled.
+!   \item[siwrap]
+!     List of local state items.
 !   \item[rc]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
