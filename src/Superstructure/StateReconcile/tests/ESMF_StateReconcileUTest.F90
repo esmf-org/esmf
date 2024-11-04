@@ -815,7 +815,7 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_StateReconcile(state1, vm=vm, rc=rc)
+    call ESMF_StateReconcile(state1, vm=vm, checkflag=.true., rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateReconcile in concurrent mode"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -847,7 +847,7 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     ! Test redundant reconcile
-    call ESMF_StateReconcile(state1, vm=vm, rc=rc)
+    call ESMF_StateReconcile(state1, vm=vm, checkflag=.true., rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling 2nd StateReconcile in concurrent mode"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1016,7 +1016,7 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_StateReconcile(state1, vm=vm, rc=rc)
+    call ESMF_StateReconcile(state1, vm=vm, checkflag=.true., rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateReconcile in sequential mode"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1031,7 +1031,7 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     ! Test redundant reconcile
-    call ESMF_StateReconcile(state1, vm=vm, rc=rc)
+    call ESMF_StateReconcile(state1, vm=vm, checkflag=.true., rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling 2nd StateReconcile in sequential mode"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1187,7 +1187,7 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_StateReconcile(state1, vm=vm, rc=rc)
+    call ESMF_StateReconcile(state1, vm=vm, checkflag=.true., rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateReconcile in run-in-parent mode"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1202,7 +1202,7 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     ! Test redundant reconcile
-    call ESMF_StateReconcile(state1, vm=vm, rc=rc)
+    call ESMF_StateReconcile(state1, vm=vm, checkflag=.true., rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling 2nd StateReconcile in run-in-parent mode"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1302,7 +1302,7 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
    !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_StateReconcile(state2, rc=rc)
+    call ESMF_StateReconcile(state2, checkflag=.true., rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling initial reconcile for rereconcile tests"
     call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1327,7 +1327,7 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_StateReconcile(state2, rc=rc)
+    call ESMF_StateReconcile(state2, checkflag=.true., rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Re-reconciling State test"
     call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1409,7 +1409,7 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_StateReconcile(state=state3, rc=rc)
+    call ESMF_StateReconcile(state=state3, checkflag=.true., rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateReconcile of nested State test"
     call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1490,7 +1490,7 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     !NEX_UTest_Multi_Proc_Only
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Reconciling state before adding Attributes"
-    call ESMF_StateReconcile(state_attr, rc=rc)
+    call ESMF_StateReconcile(state_attr, checkflag=.true., rc=rc)
     call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
@@ -1508,7 +1508,7 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     !NEX_UTest_Multi_Proc_Only
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Reconciling state with Base attribute test"
-    call ESMF_StateReconcile (state_attr, rc=rc)
+    call ESMF_StateReconcile (state_attr, checkflag=.true., rc=rc)
     call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
@@ -1571,7 +1571,7 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     !NEX_UTest_Multi_Proc_Only
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Reconciling state with Field and Attribute test"
-    call ESMF_StateReconcile (state_attr, rc=rc)
+    call ESMF_StateReconcile (state_attr, checkflag=.true., rc=rc)
     call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
@@ -1708,7 +1708,7 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     !NEX_UTest_Multi_Proc_Only
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Reconcile State for shared Grid test"
-    call ESMF_StateReconcile (state_sgrid, rc=rc)
+    call ESMF_StateReconcile (state_sgrid, checkflag=.true., rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
@@ -1758,7 +1758,7 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     !NEX_UTest_Multi_Proc_Only
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Re-reconcile State for shared Grid test"
-    call ESMF_StateReconcile (state_sgrid, rc=rc)
+    call ESMF_StateReconcile (state_sgrid, checkflag=.true., rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
