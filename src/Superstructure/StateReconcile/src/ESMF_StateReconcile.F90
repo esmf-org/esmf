@@ -770,7 +770,6 @@ end block
     logical, parameter :: trace = .false.
     logical, parameter :: profile = .true.
 
-    character(160)  :: prefixStr
     type(ESMF_VMId), allocatable, target :: vmIdMap(:)
     type(ESMF_VMId), pointer             :: vmIdMap_ptr(:)
     type(ESMF_VMId), pointer             :: vmIdSingleComp
@@ -781,10 +780,7 @@ end block
 
     type(ESMF_AttReconcileFlag)          :: attreconflag
 
-    character(len=ESMF_MAXSTR) :: logmsg
-
     type(ESMF_InfoCache) :: info_cache
-    type(ESMF_InfoDescribe) :: idesc
 
     ! -------------------------------------------------------------------------
     localrc = ESMF_RC_NOT_IMPL
@@ -985,16 +981,19 @@ end block
     if (meminfo) call ESMF_VMLogMemInfo ("after (1) Construct send arrays")
 
 #if 0
-    ! Log a JSON State representation -----------------------------------------
-    call idesc%Initialize(createInfo=.true., addObjectInfo=.true., &
-      vmIdMap=vmIdMap_ptr, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call idesc%Update(state, "", rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_LogWrite("state_json_after_vmid="//ESMF_InfoDump(idesc%info), rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    call idesc%Destroy(rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    block
+      type(ESMF_InfoDescribe)   :: idesc
+      ! Log a JSON State representation -----------------------------------------
+      call idesc%Initialize(createInfo=.true., addObjectInfo=.true., &
+        vmIdMap=vmIdMap_ptr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+      call idesc%Update(state, "", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_LogWrite("state_json_after_vmid="//ESMF_InfoDump(idesc%info), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+      call idesc%Destroy(rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    end block
 #endif
 
     ! -------------------------------------------------------------------------
@@ -2037,7 +2036,6 @@ end block
     integer :: i, idx
     integer :: stateitem_type
     character(ESMF_MAXSTR) :: errstring
-    logical :: found
 
     integer :: mypet
 
@@ -4677,7 +4675,6 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     type(ESMF_FieldType)              :: tempFieldType
     type(ESMF_FieldBundle)            :: tempFB
     type(ESMF_FieldBundleType)        :: tempFBType
-    character(len=80)                 :: msgString
 
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
