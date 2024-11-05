@@ -4582,6 +4582,8 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     integer                         :: stat
     integer                         :: localPet
     type(ESMF_State)                :: state
+    type(ESMF_DistGrid)             :: gridDG, arrayDG
+    type(ESMF_DistGridMatch_Flag)   :: dgMatch
 
     ! set RC
     rc = ESMF_SUCCESS
@@ -4629,10 +4631,32 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
-    ! obtain the array from provider to be shared with acceptor
+
+    ! obtain the array from provider to be shared with acceptor, effectively
+    ! sharing the provider data allocation with the acceptor field
     call ESMF_FieldGet(providerField, array=array, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
+
+    ! access grid and array DistGrids to ensure match level is high enough
+    ! to support field sharing
+    call ESMF_GridGet(grid, staggerloc=staggerloc, distgrid=gridDG, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    call ESMF_ArrayGet(array, distgrid=arrayDG, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    dgMatch = ESMF_DistGridMatch(gridDG, arrayDG, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    if (dgMatch < ESMF_DISTGRIDMATCH_EXACT) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="The available Grid does not support Field sharing!",&
+        line=__LINE__, file=trim(name)//":"//FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+
     ! obtain the vm from provider to create the new field on the provider vm
     ! This way shared fields will only be send/receive during Timestamp
     ! propagation on actvive PETs. This is what you expect for a shared field.
@@ -4730,6 +4754,8 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     integer                         :: stat
     integer                         :: localPet
     type(ESMF_State)                :: state
+    type(ESMF_DistGrid)             :: meshDG, arrayDG
+    type(ESMF_DistGridMatch_Flag)   :: dgMatch
 
     ! set RC
     rc = ESMF_SUCCESS
@@ -4773,10 +4799,38 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
-    ! obtain the array from provider to be shared with acceptor
+
+    ! obtain the array from provider to be shared with acceptor, effectively
+    ! sharing the provider data allocation with the acceptor field
     call ESMF_FieldGet(providerField, array=array, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
+
+    ! access mesh and array DistGrids to ensure match level is high enough
+    ! to support field sharing
+    if (meshloc == ESMF_MESHLOC_NODE) then
+      call ESMF_MeshGet(mesh, nodalDistgrid=meshDG, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    else
+      call ESMF_MeshGet(mesh, elementDistgrid=meshDG, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    endif
+    call ESMF_ArrayGet(array, distgrid=arrayDG, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    dgMatch = ESMF_DistGridMatch(meshDG, arrayDG, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    if (dgMatch < ESMF_DISTGRIDMATCH_EXACT) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="The available Mesh does not support Field sharing!",&
+        line=__LINE__, file=trim(name)//":"//FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+
     ! obtain the vm from provider to create the new field on the provider vm
     ! This way shared fields will only be send/receive during Timestamp
     ! propagation on actvive PETs. This is what you expect for a shared field.
