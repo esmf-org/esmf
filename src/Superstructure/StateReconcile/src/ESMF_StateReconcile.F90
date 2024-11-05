@@ -11,6 +11,7 @@
 !
 #define ESMF_FILENAME "ESMF_StateReconcile.F90"
 !
+#define RECONCILE_LOG_on
 #define RECONCILE_ZAP_LOG_off
 !
 ! ESMF StateReconcile module
@@ -209,18 +210,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           rcToReturn=rc)) return
     end if
 
-#if 0
+#ifdef RECONCILE_LOG_on
     block
       character(ESMF_MAXSTR)  :: stateName
       call ESMF_StateGet(state, name=stateName, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT,  &
-          rcToReturn=rc)) return
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
       call ESMF_LogWrite("StateReconcile() for State: "//trim(stateName), &
         ESMF_LOGMSG_DEBUG, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT,  &
-          rcToReturn=rc)) return
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
     end block
 #endif
 
@@ -267,14 +268,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         rcToReturn=rc)) return
     endif
 
+#ifdef RECONCILE_LOG_on
+    block
+      character(160):: msgStr
+      write(msgStr,*) "StateReconcile() isNoop: ", isNoop
+      call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    end block
+#endif
+
     if (isNoop) then
-!call ESMF_LogWrite("returning early with isNoop=.true.", ESMF_LOGMSG_DEBUG, rc=localrc)
       ! successful early return because of NOOP condition
       if (present(rc)) rc = ESMF_SUCCESS
       return
     endif
-
-!call ESMF_LogWrite("continue with isNoop=.false.", ESMF_LOGMSG_DEBUG, rc=localrc)
 
     ! Each PET broadcasts the object ID lists and compares them to what
     ! they get back.   Missing objects are sent so they can be recreated
@@ -950,6 +959,36 @@ end block
       endif
     endif
 
+#ifdef RECONCILE_LOG_on
+    block
+      character(160):: msgStr
+      write(msgStr,*) "ESMF_StateReconcile_driver() size(vmids_send): ", &
+        size(vmids_send)
+      call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+      write(msgStr,*) "ESMF_StateReconcile_driver() size(vmIdMap): ", &
+        size(vmIdMap)
+      call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+      write(msgStr,*) "ESMF_StateReconcile_driver() size(vmintids_send): ", &
+        size(vmintids_send)
+      call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+      write(msgStr,*) "ESMF_StateReconcile_driver() local-singleCompCaseFlag: ", &
+        singleCompCaseFlag
+      call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    end block
+#endif
+
     ! ensure global consistency of the final result
     singleCompCaseFlagInt(1) = 0
     if (singleCompCaseFlag) singleCompCaseFlagInt(1) = 1
@@ -959,6 +998,18 @@ end block
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
       rcToReturn=rc)) return
     singleCompCaseFlag = (singleCompCaseInt(1)==1)  ! globally consistent result
+
+#ifdef RECONCILE_LOG_on
+    block
+      character(160):: msgStr
+      write(msgStr,*) "ESMF_StateReconcile_driver() global-singleCompCaseFlag: ", &
+        singleCompCaseFlag
+      call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    end block
+#endif
 
     if (profile) then
       call ESMF_TraceRegionExit("Decide between cases", rc=localrc)
@@ -1049,23 +1100,11 @@ end block
 !singleCompCaseFlag = .false.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#if 0
-block
-  character(160):: msgStr
-  write(msgStr,*) "size(vmintids_send): ", size(vmintids_send)
-  call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=rc)
-  write(msgStr,*) "size(vmIdMap): ", size(vmIdMap)
-  call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=rc)
-  write(msgStr,*) "singleCompCaseFlag: ", singleCompCaseFlag
-  call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=rc)
-end block
-#endif
-
     if (singleCompCaseFlag) then
       ! CASE: a single component interacting with a state
       ! ------------------------------------------------------------------------
       if (profile) then
-        call ESMF_TraceRegionEnter("ESMF_ReconcileSingleCompCase", rc=localrc)
+        call ESMF_TraceRegionEnter("(2<) ESMF_ReconcileSingleCompCase", rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
@@ -1078,7 +1117,7 @@ end block
         rcToReturn=rc)) return
       ! ------------------------------------------------------------------------
       if (profile) then
-        call ESMF_TraceRegionExit("ESMF_ReconcileSingleCompCase", rc=localrc)
+        call ESMF_TraceRegionExit("(2<) ESMF_ReconcileSingleCompCase", rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
@@ -1088,7 +1127,7 @@ end block
       ! CASE: multiple components interacting with a state
       ! ------------------------------------------------------------------------
       if (profile) then
-        call ESMF_TraceRegionEnter("ESMF_ReconcileMultiCompCase", rc=localrc)
+        call ESMF_TraceRegionEnter("(2<) ESMF_ReconcileMultiCompCase", rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
@@ -1097,7 +1136,7 @@ end block
       call ESMF_ReconcileMultiCompCase()
       ! ------------------------------------------------------------------------
       if (profile) then
-        call ESMF_TraceRegionExit("ESMF_ReconcileMultiCompCase", rc=localrc)
+        call ESMF_TraceRegionExit("(2<) ESMF_ReconcileMultiCompCase", rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
@@ -1552,14 +1591,20 @@ end block
       return
     endif
 
-#if 0
-block
-  character(160)  :: msgStr
-  write(msgStr,*) "SingleCompCase rootVas=", rootVas
-  call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
-  write(msgStr,*) "SingleCompCase rootPet=", rootPet
-  call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
-end block
+#ifdef RECONCILE_LOG_on
+    block
+      character(160)  :: msgStr
+      write(msgStr,*) "SingleCompCase rootVas=", rootVas
+      call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+      write(msgStr,*) "SingleCompCase rootPet=", rootPet
+      call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    end block
 #endif
 
     ! Serialize on rootPet
@@ -1588,12 +1633,15 @@ end block
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-#if 0
-block
-  character(160)  :: msgStr
-  write(msgStr,*) "isFlag=", isFlag
-  call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
-end block
+#ifdef RECONCILE_LOG_on
+    block
+      character(160)  :: msgStr
+      write(msgStr,*) "SingleCompCase PET active isFlag=", isFlag
+      call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    end block
 #endif
 
     ! only inactive PETs deserialize the buffer received from rootPet
@@ -4512,7 +4560,9 @@ end block
       character(len=ESMF_MAXSTR)          :: thisname
       type(ESMF_FieldType),       pointer :: fieldp
       type(ESMF_FieldBundleType), pointer :: fbpthis
-      character(len=80)                   :: msgString
+#ifdef RECONCILE_ZAP_LOG_on
+      character(len=160)                  :: msgString
+#endif
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -4558,8 +4608,8 @@ end block
               ESMF_CONTEXT, rcToReturn=rc)) return
 
 #ifdef RECONCILE_ZAP_LOG_on
-write(msgString,*) "ESMF_ReconcileZapProxies Field: "//trim(thisname), &
-  itemList(i)%si%proxyFlag
+write(msgString,*) "ESMF_ReconcileZapProxies Field proxyFlag(old): "//&
+  trim(thisname), itemList(i)%si%proxyFlag
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
 
@@ -4570,8 +4620,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
               rcToReturn=rc)) return
 
 #ifdef RECONCILE_ZAP_LOG_on
-write(msgString,*) "ESMF_ReconcileZapProxies Field: "//trim(thisname), &
-  itemList(i)%si%proxyFlag
+write(msgString,*) "ESMF_ReconcileZapProxies Field proxyFlag(new): "//&
+  trim(thisname), itemList(i)%si%proxyFlag
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
 
@@ -4583,8 +4633,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
               ESMF_CONTEXT, rcToReturn=rc)) return
 
 #ifdef RECONCILE_ZAP_LOG_on
-write(msgString,*) "ESMF_ReconcileZapProxies Field: "//trim(thisname), &
-  itemList(i)%si%proxyFlag
+write(msgString,*) "ESMF_ReconcileZapProxies FieldBundle proxyFlag(old): "//&
+  trim(thisname), itemList(i)%si%proxyFlag
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
 
@@ -4595,8 +4645,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
               rcToReturn=rc)) return
 
 #ifdef RECONCILE_ZAP_LOG_on
-write(msgString,*) "ESMF_ReconcileZapProxies Field: "//trim(thisname), &
-  itemList(i)%si%proxyFlag
+write(msgString,*) "ESMF_ReconcileZapProxies FieldBundle proxyFlag(new): "//&
+  trim(thisname), itemList(i)%si%proxyFlag
 call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
 
