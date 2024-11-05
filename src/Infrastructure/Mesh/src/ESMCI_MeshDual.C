@@ -105,7 +105,7 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
 
   // Don't currently support duals of 3D Meshes
   if (src_mesh->parametric_dim()>2) {
-    Throw() <<" Creation of a dual mesh isn't supported for Meshes of parametric dim greater than 3.\n";
+    Throw() <<" Creation of a dual mesh isn't supported for Meshes of parametric dim greater than 2.\n";
   }
 
   // Need element coordinates
