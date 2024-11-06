@@ -12,7 +12,7 @@
 #define ESMF_FILENAME "ESMF_StateReconcile.F90"
 !
 #define RECONCILE_LOG_on
-#define RECONCILE_ZAP_LOG_off
+#define RECONCILE_ZAP_LOG_on
 !
 ! ESMF StateReconcile module
 module ESMF_StateReconcileMod
@@ -199,7 +199,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(checkFlag)) localCheckFlag = checkFlag
 
 !TODO: turn this .true. when working on StateReoncile, so all tests validate!
-!localCheckFlag = .true. ! force checking
+localCheckFlag = .true. ! force checking
 
     if (present (vm)) then
       localvm = vm
@@ -1059,6 +1059,22 @@ end block
     endif
     ! -------------------------------------------------------------------------
     if (meminfo) call ESMF_VMLogMemInfo ("after (2) Update Field metadata")
+
+#if 1
+    block
+      type(ESMF_InfoDescribe)   :: idesc
+      ! Log a JSON State representation -----------------------------------------
+      call idesc%Initialize(createInfo=.true., addObjectInfo=.true., &
+        vmIdMap=vmIdMap_ptr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+      call idesc%Update(state, "", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_LogWrite("state_json_after_set_field_meta="//ESMF_InfoDump(idesc%info), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+      call idesc%Destroy(rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    end block
+#endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !TODO: Remove this once done with testing!
@@ -4654,6 +4670,11 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
+#ifdef RECONCILE_ZAP_LOG_on
+write(msgString,*) "ESMF_ReconcileZapProxies zapping from State: "//&
+  trim(thisname)
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
+#endif
           end if
         end do
       endif
@@ -4761,7 +4782,7 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): scanning zapList", &
 #endif
             if (associated (zapList(k)%si)) then
 #ifdef RECONCILE_ZAP_LOG_on
-call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found associated zapList object", &
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found valid zapList object", &
   ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
               ! Note that only Fields and FieldBundles receive the restoration
@@ -4781,13 +4802,13 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found associated zapList obje
                   ESMF_CONTEXT, rcToReturn=rc)) &
                   return
 #ifdef RECONCILE_ZAP_LOG_on
-call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): checking Field: "//trim(name), &
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): checking for name match Field: "//trim(name), &
   ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
                 if (name == thisname) then
                   zapFlag(k) = .false.  ! indicate that proxy has been restored
 #ifdef RECONCILE_ZAP_LOG_on
-call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found Field: "//trim(name), &
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): restore persistent proxy for Field: "//trim(name), &
   ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
                   ! Bend pointers and copy contents to result in the desired
@@ -4817,13 +4838,13 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found Field: "//trim(name), &
                   ESMF_CONTEXT, rcToReturn=rc)) &
                   return
 #ifdef RECONCILE_ZAP_LOG_on
-call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): checking FieldBundle: "//trim(name), &
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): checking for name match FieldBundle: "//trim(name), &
   ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
                 if (name == thisname) then
                   zapFlag(k) = .false.  ! indicate that proxy has been restored
 #ifdef RECONCILE_ZAP_LOG_on
-call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found FieldBundle: "//trim(name), &
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): restore persistent proxy for FieldBundle: "//trim(name), &
   ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
                   ! Bend pointers and copy contents to result in the desired
@@ -4861,6 +4882,15 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found FieldBundle: "//trim(na
       do k=1, size(zapFlag)
         if (zapFlag(k)) then
           if (zapList(k)%si%otype==ESMF_STATEITEM_FIELD) then
+#ifdef RECONCILE_ZAP_LOG_on
+call ESMF_FieldGet(zapList(k)%si%datap%fp, name=name, rc=localrc)
+if (ESMF_LogFoundError(localrc, &
+  ESMF_ERR_PASSTHRU, &
+  ESMF_CONTEXT, rcToReturn=rc)) &
+  return
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): destroy with noGarbage unrestored Field: "//trim(name), &
+  ESMF_LOGMSG_DEBUG, rc=localrc)
+#endif
             call ESMF_FieldDestroy(zapList(k)%si%datap%fp, &
               noGarbage=.true., rc=localrc)
             if (ESMF_LogFoundError(localrc, &
@@ -4868,6 +4898,15 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found FieldBundle: "//trim(na
               ESMF_CONTEXT, rcToReturn=rc)) &
               return
           else if (zapList(k)%si%otype==ESMF_STATEITEM_FIELDBUNDLE) then
+#ifdef RECONCILE_ZAP_LOG_on
+call ESMF_FieldBundleGet(zapList(k)%si%datap%fbp, name=name, rc=localrc)
+if (ESMF_LogFoundError(localrc, &
+  ESMF_ERR_PASSTHRU, &
+  ESMF_CONTEXT, rcToReturn=rc)) &
+  return
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): destroy with noGarbage unrestored FieldBundle: "//trim(name), &
+  ESMF_LOGMSG_DEBUG, rc=localrc)
+#endif
             call ESMF_FieldBundleDestroy(zapList(k)%si%datap%fbp, &
               noGarbage=.true., rc=localrc)
             if (ESMF_LogFoundError(localrc, &
