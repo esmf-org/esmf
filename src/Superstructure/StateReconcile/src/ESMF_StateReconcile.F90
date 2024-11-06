@@ -311,28 +311,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         rcToReturn=rc)) return
     endif
 
-    if (profile) then
-      call ESMF_TraceRegionEnter("ESMF_InfoCacheReassembleFields", rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-    endif
-
-    ! Traverse the State hierarchy and fix Field references to a shared geometry
-    call ESMF_InfoCacheReassembleFields(state, state, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Traverse the state hierarchy and remove reconcile-specific attributes
-    call ESMF_InfoCacheReassembleFieldsFinalize(state, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (profile) then
-      call ESMF_TraceRegionExit("ESMF_InfoCacheReassembleFields", rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-    endif
-
     if (localCheckFlag) then
       if (profile) then
         call ESMF_TraceRegionEnter("JSON cross PET check", rc=localrc)
@@ -1046,7 +1024,7 @@ end block
 
     ! -------------------------------------------------------------------------
     if (profile) then
-      call ESMF_TraceRegionEnter("(2) Update Field metadata", rc=localrc)
+      call ESMF_TraceRegionEnter("(2) Set Field metadata for unique geometries", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
@@ -1062,12 +1040,6 @@ end block
     ! geometry objects and maintain sufficient information to re-establish
     ! references once the objects have been communicated and deserialized.
     ! -------------------------------------------------------------------------
-    if (profile) then
-      call ESMF_TraceRegionEnter("info_cache for unique geometries", rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-    endif
 
     call info_cache%Initialize(localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1078,16 +1050,9 @@ end block
     call info_cache%Destroy(localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if (profile) then
-      call ESMF_TraceRegionExit("info_cache for unique geometries", rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-    endif
-
     ! -------------------------------------------------------------------------
     if (profile) then
-      call ESMF_TraceRegionExit("(2) Update Field metadata", rc=localrc)
+      call ESMF_TraceRegionExit("(2) Set Field metadata for unique geometries", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
@@ -1222,6 +1187,30 @@ end block
     endif
     ! -------------------------------------------------------------------------
     if (meminfo) call ESMF_VMLogMemInfo ("(X+1) Reconcile Zapped Proxies")
+
+    if (profile) then
+      call ESMF_TraceRegionEnter("(X+2) Use Field metadata for unique geometries", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+
+    ! Traverse the State hierarchy and fix Field references to a shared geometry
+    call ESMF_InfoCacheReassembleFields(state, state, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Traverse the state hierarchy and remove reconcile-specific attributes
+    call ESMF_InfoCacheReassembleFieldsFinalize(state, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (profile) then
+      call ESMF_TraceRegionExit("(X+2) Use Field metadata for unique geometries", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
+    if (meminfo) call ESMF_VMLogMemInfo ("(X+2) Use Field metadata for unique geometries")
 
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD // ': Complete!')
