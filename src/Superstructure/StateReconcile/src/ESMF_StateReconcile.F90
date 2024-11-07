@@ -11,6 +11,8 @@
 !
 #define ESMF_FILENAME "ESMF_StateReconcile.F90"
 !
+#define UNIQUE_GEOM_INFO_TREAT_on
+!
 #define RECONCILE_LOG_on
 #define RECONCILE_ZAP_LOG_on
 !
@@ -1022,6 +1024,7 @@ end block
     end block
 #endif
 
+#ifdef UNIQUE_GEOM_INFO_TREAT_on
     ! -------------------------------------------------------------------------
     if (profile) then
       call ESMF_TraceRegionEnter("(2) Set Field metadata for unique geometries", rc=localrc)
@@ -1059,6 +1062,7 @@ end block
     endif
     ! -------------------------------------------------------------------------
     if (meminfo) call ESMF_VMLogMemInfo ("after (2) Update Field metadata")
+#endif
 
 #if 1
     block
@@ -1204,6 +1208,7 @@ end block
     ! -------------------------------------------------------------------------
     if (meminfo) call ESMF_VMLogMemInfo ("(X+1) Reconcile Zapped Proxies")
 
+#ifdef UNIQUE_GEOM_INFO_TREAT_on
     if (profile) then
       call ESMF_TraceRegionEnter("(X+2) Use Field metadata for unique geometries", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1227,6 +1232,7 @@ end block
     endif
     ! -------------------------------------------------------------------------
     if (meminfo) call ESMF_VMLogMemInfo ("(X+2) Use Field metadata for unique geometries")
+#endif
 
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD // ': Complete!')
