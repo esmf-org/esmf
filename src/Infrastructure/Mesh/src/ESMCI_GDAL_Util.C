@@ -267,7 +267,7 @@ void ESMCI_GDAL_process_shapefile_distributed(
     OGR_F_Destroy( hFeature );
   }
 
-  printf("--- wtf %d %d\n", localpoints,nodeIDs.size());
+//  printf("--- wtf %d %d\n", localpoints,nodeIDs.size());
   if (localpoints <= 0 || nodeIDs.size() <=0) { return; }
 
   nodeCoords= new double[2*totpoints];

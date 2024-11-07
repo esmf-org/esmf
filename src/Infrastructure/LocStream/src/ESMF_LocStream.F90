@@ -534,6 +534,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          ESMF_CONTEXT, rcToReturn=rc)) return
 
    ! Add key to structure
+   write(*,*) '<<>> adding key: ', trim(keyName),localkeytypekind,keytypekind
    call ESMF_LocStreamAddKeyArray(locstream, keyName, keyArray=array, destroyKey=.true., &
                keyUnits=keyUnits, keyLongName=keyLongName, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
@@ -562,7 +563,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Locstream), intent(in)             :: locstream
     character (len=*),    intent(in)             :: keyName
     type(ESMF_Array),     intent(in)             :: keyArray
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,              intent(in),  optional  :: destroyKey
     character (len=*),    intent(in),  optional  :: keyUnits 
     character (len=*),    intent(in),  optional  :: keyLongName 
@@ -649,7 +650,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    ! (Should we eventually make this a linked list???)   
    !! hold old data
    if (keyCount .gt. 0) then
-       tmpKeyNames=>lstypep%keyNames
+      tmpKeyNames=>lstypep%keyNames
       tmpKeyUnits =>lstypep%keyUnits 
       tmpKeyLongNames=>lstypep%keyLongNames
       tmpDestroyKeys=>lstypep%destroyKeys
@@ -964,7 +965,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Locstream), intent(in)                   :: locstream
     character (len=*),   intent(in)                    :: keyName
     real(ESMF_KIND_R8),  dimension(:), intent(in)      :: farray
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DataCopy_Flag), intent(in), optional     :: datacopyflag
     character (len=*),    intent(in), optional         :: keyUnits 
     character (len=*),    intent(in), optional         :: keyLongName 
@@ -2494,6 +2495,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
           localcount = localpoints
+          print *, "Got coords on pet ", petNo
        endif
     endif
     ! create Location Stream
@@ -2507,13 +2509,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Add coordinate keys based on coordSys
     if ((coordSys == ESMF_COORDSYS_SPH_DEG) .or. (coordSys == ESMF_COORDSYS_SPH_RAD)) then 
 
-       call ESMF_LocStreamAddKey(locStream, 'Lon',coordX, keyUnits=units, &
+       call ESMF_LocStreamAddKey(locStream, 'ESMF:Lon',coordX, keyUnits=units, &
             keyLongName='Longitude', &
             datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
        
-       call ESMF_LocStreamAddKey(locStream, 'Lat',coordY, keyUnits=units, &
+       call ESMF_LocStreamAddKey(locStream, 'ESMF:Lat',coordY, keyUnits=units, &
             keyLongName='Latitude', &
             datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3192,6 +3194,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! get the pointer to the locstream
     lstypep => locstream%lstypep
 
+    write(*,*) '<<>> keyName: ', keyName, keyIndex
     ! find the index of the key
     keyIndex=0
     do i=1,lstypep%keyCount

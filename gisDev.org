@@ -80,8 +80,8 @@ ESMF_FieldRead() <ESMF_FieldPr.F90>
 -- -- -- -- -- IO_Handler::arrayRead() <ESMCI_IO_Handler.C>
 -- -- -- -- -- -- PIO_Handler::arrayReadOneTileFile() <ESMCI_PIO_Handler.C>
 -- -- -- -- -- -- -- PIOc_Read_Array() <pio_darray.c>
-* Field Write
-ESMF_FieldWrite()
+* BETA Field Write
+** ESMF_FieldWrite()
 -- ESMF_IOWrite() <ESMF_IO.F90>
 -- -- c_ESMC_IOWrite() <ESMCI_IO_F.C>
 -- -- -- (*ptr)->write() <ESMCI_IO.C>
@@ -89,6 +89,14 @@ ESMF_FieldWrite()
 -- -- -- -- -- IO_Handler::arrayWrite() <ESMCI_IO_Handler.C>
 -- -- -- -- -- -- PIO_Handler::arrayWriteOneTileFile() <ESMCI_PIO_Handler.C>
 -- -- -- -- -- -- -- PIOc_write_darray() <pio_darray.c>
+-- -- -- -- -- -- -- -- flush_buffer() <pio_darray_int.c>
+-- -- -- -- -- -- -- -- -- PIOc_write_darray_multi() <pio_darray.c>
+-- -- -- -- -- -- -- -- -- -- write_darray_multi_serial() <pio_darray_int.c>
+-- -- -- -- -- -- -- -- -- -- -- recv_and_write_data() <pio_darray_int.c>
+
+Will write a field to an existing shapefile as a 'double'
+Lots to do!
+
 * Questions:
 ** What about CRS and projection to/from GEOS? 
 Will area (spatial extent) be conserved? e.g. if the GIS CRS is curvilinear, is the mapping in ESMF able to handle that?
@@ -123,7 +131,7 @@ Proposed workflow:
 - Use file->iodesc & file->hDS to determine if its GDAL
 - If GDAL, call GDAL specific write routine (in pioc_gdal.c)
 
-* Oct 26, 2023 - filw write, cont'd
+* Oct 26, 2023 - file write, cont'd
 1) Determine file type
 2) Get driver
 3) Define spatial reference w/ CRS
@@ -167,6 +175,14 @@ Holes: How to deal with holes? According to Oehmke, this is an ESMF issue. ESMF 
 same winding for all polygons. Shapefiles control whether hole or doughnut based on winding.
 ** Time to read points into LocStream
 Start with manufacturing locations.
-* Big Remaining Items
-Mesh write. Write Shapefile.
 * LocStream
+* NEED!
+** Mesh write
+maybe just write to existing shapefile
+** LocStream bkg, unmappedaction_ignore
+
+* GDAL Implementation issues
+** SHAPEFILE READS are inefficient
+The whole file has to be queried TWICE on each PET. This is because nodes need distributed IDs and they can't repeat, or regridding 
+is messed up. And you can't query a polygon's nodes and know to give them ID X on Pet Y in a way that doesn't give X to a node on 
+Pet Z without knowing in advance something about all the nodes in the shapfile.

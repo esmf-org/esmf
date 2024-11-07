@@ -186,7 +186,7 @@ GDALc_inq_fieldid(int fileid, const char *name, int *fieldidp)
 	  }
 	  *fieldidp = OGR_L_FindFieldIndex(hLayer,name,1);
 
-	  pioassert(*fieldidp > 0, "variable not found", __FILE__, __LINE__);
+//	  pioassert(*fieldidp > 0, "variable not found", __FILE__, __LINE__);
 
 	}
     }
@@ -202,7 +202,7 @@ GDALc_inq_fieldid(int fileid, const char *name, int *fieldidp)
         if ((mpierr = MPI_Bcast(fieldidp, 1, MPI_INT, ios->ioroot, ios->my_comm)))
             check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
 
-    return PIO_NOERR;
+    return fieldidp;
 }
 
 int
@@ -295,9 +295,8 @@ GDALc_openfile(int iosysid, int *fileIDp, GDALDatasetH *hDSp,int *iotype, const 
         case PIO_IOTYPE_GDAL:
             if (ios->io_rank == 0)
             {
-	      *hDSp = OGROpen( filename, FALSE, NULL );
+	      *hDSp = OGROpen( filename, mode, NULL );
 	      if( hDSp != NULL )
-
                 ierr = GDALc_inq_file_metadata(file, *hDSp, PIO_IOTYPE_GDAL,
                                          &nvars, &rec_var, &pio_type,
                                          &pio_type_size, &mpi_type,
@@ -384,6 +383,7 @@ GDALc_openfile(int iosysid, int *fileIDp, GDALDatasetH *hDSp,int *iotype, const 
     *fileIDp=file->pio_ncid;
 
     /* Add this file to the list of currently open files. */
+    PLOG((2, "call pio_add_to_file_list()"));
     pio_add_to_file_list(file);
 
     /* Add info about the variables to the file_desc_t struct. */
@@ -812,6 +812,200 @@ GDALc_shp_get_float_field(int fileid, int varid, const size_t *startp,
   }
 
   return PIO_NOERR;
+}
+GDALc_shp_write_float_field(int fileid, int varid, const size_t *startp,
+                           const size_t *countp, float *ip)
+{
+  OGRFeatureH hF;
+  file_desc_t *file;         /* Pointer to file information. */
+  int ierr;
+
+  /* Get file info based on fileid. */
+  if ((ierr = pio_get_file(fileid, &file)))
+    return pio_err(NULL, NULL, ierr, __FILE__, __LINE__);
+  if (file->hDS == NULL)
+    return pio_err(NULL, NULL, ierr, __FILE__, __LINE__);
+
+//>>>  // -- 1 & 2 skip for now. We have to assume the shpfile 
+//>>>  //    exists since we can't write mesh yet.
+//>>>  // 1. Set CRS/spatial reference
+//>>>  // 2. Get/set driver
+//>>>  // 3. Get to Dataset
+//>>>  // 4. Get to layer
+  OGRLayerH hL = OGR_DS_GetLayer( file->hDS, 0 );
+  // 5. Query &/or add field
+  // 6. Loop over features and add data
+  
+  // here, we have to assume start and count are only one dimension, and have
+  // only one assigned value.
+  for (size_t i = startp[0]; i<countp[0]; i++) {
+    
+    hF = OGR_L_GetFeature(hL,i);
+    OGR_F_SetFieldDouble(hF,varid,(float)ip[i]);
+    OGR_L_SetFeature(hL,hF);
+    OGR_F_Destroy( hF );
+    //printf("<<>> ip[%d]=%f\n",i,ip[i]);
+  }
+
+  return PIO_NOERR;
+}
+
+/**
+ * The PIO-C interface for the NetCDF function nc_def_var
+ *
+ * This routine is called collectively by all tasks in the communicator
+ * ios.union_comm. For more information on the underlying NetCDF commmand
+ * please read about this function in the NetCDF documentation at:
+ * http://www.unidata.ucar.edu/software/netcdf/docs/group__variables.html
+ *
+ * @param ncid the ncid of the open file, obtained from
+ * PIOc_openfile() or PIOc_createfile().
+ * @param name the variable name.
+ * @param xtype the PIO_TYPE of the variable.
+ * @param ndims the number of dimensions.
+ * @return PIO_NOERR for success, error code otherwise.
+ * @ingroup PIO_def_var_c
+ * @author Jim Edwards, Ed Hartnett
+ */
+int
+GDALc_def_field(int ncid, const char *name, nc_type xtype, int ndims, int *varidp)
+{
+    iosystem_desc_t *ios;      /* Pointer to io system information. */
+    file_desc_t *file;         /* Pointer to file information. */
+    int invalid_unlim_dim = 0; /* True invalid dims are used. */
+    int varid;                 /* The varid of the created var. */
+    int rec_var = 0;           /* Non-zero if this var uses unlimited dim. */
+    PIO_Offset pio_type_size;  /* Size of pio type in bytes. */
+    MPI_Datatype mpi_type;     /* The correspoding MPI type. */
+    int mpi_type_size;         /* Size of mpi type. */
+    int mpierr = MPI_SUCCESS, mpierr2;  /* Return code from MPI function codes. */
+    int ierr;                  /* Return code from function calls. */
+
+    /* Get the file information. */
+    if ((ierr = pio_get_file(ncid, &file)))
+        return pio_err(NULL, NULL, ierr, __FILE__, __LINE__);
+    ios = file->iosystem;
+
+    /* User must provide name. */
+    if (!name || strlen(name) > NC_MAX_NAME)
+        return pio_err(ios, file, PIO_EINVAL, __FILE__, __LINE__);
+
+    PLOG((1, "GDALc_def_var ncid = %d name = %s xtype = %d ndims = %d", ncid, name,
+          xtype, ndims));
+
+    /* Run this on all tasks if async is not in use, but only on
+     * non-IO tasks if async is in use. Learn whether each dimension
+     * is unlimited. */
+    if (!ios->async || !ios->ioproc)
+    {
+        int nunlimdims;
+
+//>>>        /* Get size of type. */
+//>>>        if ((ierr = PIOc_inq_type(ncid, xtype, NULL, &pio_type_size)))
+//>>>            return check_netcdf(file, ierr, __FILE__, __LINE__);
+
+        /* Get the MPI type corresponding with the PIO type. */
+        if ((ierr = find_mpi_type(xtype, &mpi_type, NULL)))
+            return pio_err(ios, NULL, ierr, __FILE__, __LINE__);
+
+        /* Get the size of the MPI type. */
+        if(mpi_type == MPI_DATATYPE_NULL)
+            mpi_type_size = 0;
+        else
+            if ((mpierr = MPI_Type_size(mpi_type, &mpi_type_size)))
+                return check_mpi(ios, NULL, mpierr, __FILE__, __LINE__);
+
+//>>>        /* How many unlimited dims are present in the file? */
+//>>>        if ((ierr = PIOc_inq_unlimdims(ncid, &nunlimdims, NULL)))
+//>>>            return check_netcdf(file, ierr, __FILE__, __LINE__);
+
+    }
+
+    /* If using async, and not an IO task, then send parameters. */
+    if (ios->async)
+    {
+        if (!ios->ioproc)
+        {
+            int msg = PIO_MSG_DEF_VAR;
+            int namelen = strlen(name);
+
+            if (ios->compmain == MPI_ROOT)
+                mpierr = MPI_Send(&msg, 1, MPI_INT, ios->ioroot, 1, ios->union_comm);
+
+            if (!mpierr)
+                mpierr = MPI_Bcast(&(ncid), 1, MPI_INT, ios->compmain, ios->intercomm);
+            if (!mpierr)
+                mpierr = MPI_Bcast(&namelen, 1, MPI_INT,  ios->compmain, ios->intercomm);
+            if (!mpierr)
+                mpierr = MPI_Bcast((void *)name, namelen + 1, MPI_CHAR, ios->compmain, ios->intercomm);
+            if (!mpierr)
+                mpierr = MPI_Bcast(&xtype, 1, MPI_INT, ios->compmain, ios->intercomm);
+            if (!mpierr)
+                mpierr = MPI_Bcast(&ndims, 1, MPI_INT, ios->compmain, ios->intercomm);
+        }
+
+        /* Handle MPI errors. */
+        if ((mpierr2 = MPI_Bcast(&mpierr, 1, MPI_INT, ios->comproot, ios->my_comm)))
+            check_mpi(NULL, file, mpierr2, __FILE__, __LINE__);
+        if (mpierr)
+            return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
+
+        /* Broadcast values currently only known on computation tasks to IO tasks. */
+        if ((mpierr = MPI_Bcast(&rec_var, 1, MPI_INT, ios->comproot, ios->my_comm)))
+            check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
+        if ((mpierr = MPI_Bcast(&invalid_unlim_dim, 1, MPI_INT, ios->comproot, ios->my_comm)))
+            check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
+        if ((mpierr = MPI_Bcast(&pio_type_size, 1, MPI_OFFSET, ios->comproot, ios->my_comm)))
+            check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
+        if ((mpierr = MPI_Bcast(&mpi_type, 1, MPI_INT, ios->comproot, ios->my_comm)))
+            check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
+        if ((mpierr = MPI_Bcast(&mpi_type_size, 1, MPI_INT, ios->comproot, ios->my_comm)))
+            check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
+    }
+
+    /* Check that only one unlimited dim is specified, and that it is
+     * first. */
+    if (invalid_unlim_dim)
+        return PIO_EINVAL;
+
+    /* If this is an IO task, then call the GDAL/OGR function. */
+    if (ios->ioproc)
+    {
+        if (file->iotype == PIO_IOTYPE_GDAL && file->do_io) {
+	  OGRLayerH hL = OGR_DS_GetLayer( file->hDS, 0 );
+	  // 5. Create & add field
+	  OGRFieldDefnH hFieldDefn = OGR_Fld_Create( name, OFTReal );
+	  OGR_Fld_SetWidth( hFieldDefn, 32);
+	  if( OGR_L_CreateField( hL, hFieldDefn, TRUE ) != OGRERR_NONE )
+	    {
+	      printf( "Creating Name field failed.\n" );
+	      exit( 1 );
+	    }
+	  OGR_Fld_Destroy(hFieldDefn);
+	  varid = OGR_L_FindFieldIndex(hL,name,1);
+	  PLOG((3, "defined var ierr %d file->iotype %d", ierr, file->iotype));
+	}
+    }
+
+    /* Broadcast and check the return code. */
+    if ((mpierr = MPI_Bcast(&ierr, 1, MPI_INT, ios->ioroot, ios->my_comm)))
+        return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
+//>>>    if (ierr)
+//>>>        return check_netcdf(file, ierr, __FILE__, __LINE__);
+
+    /* Broadcast results. */
+    if ((mpierr = MPI_Bcast(&varid, 1, MPI_INT, ios->ioroot, ios->my_comm)))
+        check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
+    if (varidp)
+        *varidp = varid;
+
+    /* Add to the list of var_desc_t structs for this file. */
+    if ((ierr = add_to_varlist(varid, rec_var, xtype, (int)pio_type_size, mpi_type,
+                               mpi_type_size, ndims, &file->varlist)))
+        return pio_err(ios, NULL, ierr, __FILE__, __LINE__);
+    file->nvars++;
+
+    return PIO_NOERR;
 }
 /**
  * @}

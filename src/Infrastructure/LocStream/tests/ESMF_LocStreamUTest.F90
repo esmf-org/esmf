@@ -91,1634 +91,1634 @@ program ESMF_LocStreamCreateUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Testing LocStream IsCreated for uncreated object"
-  write(failMsg, *) "Did not return .false."
-  isCreated = ESMF_LocStreamIsCreated(locstream)
-  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Testing LocStream IsCreated for uncreated object"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  isCreated = ESMF_LocStreamIsCreated(locstream, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Create test LocStream for IsCreated"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  locstream=ESMF_LocStreamCreate(name="test",distgrid=distgrid, rc=localrc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Testing LocStream IsCreated for created object"
-  write(failMsg, *) "Did not return .true."
-  isCreated = ESMF_LocStreamIsCreated(locstream)
-  call ESMF_Test((isCreated .eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Testing LocStream IsCreated for created object"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  isCreated = ESMF_LocStreamIsCreated(locstream, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Destroy test LocStream for IsCreated"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_LocStreamDestroy(locstream, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Testing LocStream IsCreated for destroyed object"
-  write(failMsg, *) "Did not return .false."
-  isCreated = ESMF_LocStreamIsCreated(locstream)
-  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Testing LocStream IsCreated for destroyed object"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  isCreated = ESMF_LocStreamIsCreated(locstream, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Testing LocStream Validate"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-
-  ! initialize check variables
-  correct=.true.
-  rc=ESMF_SUCCESS
-
-  ! First make sure validate fails for an uncreated Grid
-  call ESMF_LocStreamValidate(locstream,rc=localrc)
-  if (localrc .eq. ESMF_SUCCESS) correct=.false.
-
-  ! Now make sure that a created grid validates successfully
-  !! Create Grid
-  locstream=ESMF_LocStreamCreate(name="ted",distgrid=distgrid, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-     
-  !! Check that validate returns true
-  call ESMF_LocStreamValidate(locstream, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) correct=.false.
-  
-  call ESMF_LocStreamDestroy(locstream,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  !! Check that validate returns false
-  call ESMF_LocStreamValidate(locstream, rc=localrc)
-  if (localrc .eq. ESMF_SUCCESS) correct=.false.
-
-  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
-
-
-
-  !-----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Test ESMF_LocStreamCreate from Regular distribution"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-
-  ! initialize check variables
-  correct=.true.
-  rc=ESMF_SUCCESS
-
-  ! Create Grid
-  locstream=ESMF_LocStreamCreate(minIndex=2, maxIndex=20, regDecomp=4, indexflag=ESMF_INDEX_GLOBAL, &
-             rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  if (petCount .eq. 1) then
-     ! Check non-key bounds
-     call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
-             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-             rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     ! Bounds
-     if (el .ne. 2) correct=.false.
-     if (eu .ne. 6) correct=.false.
-     if (ec .ne. 5) correct=.false.
-     if (cl .ne. 2) correct=.false.
-     if (cu .ne. 6) correct=.false.
-     if (cc .ne. 5) correct=.false.
-
-     ! Check non-key bounds
-     call  ESMF_LocStreamGetBounds(locstream, localDE=1, &
-             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-             rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     ! Bounds
-     if (el .ne. 7) correct=.false.
-     if (eu .ne. 11) correct=.false.
-     if (ec .ne. 5) correct=.false.
-     if (cl .ne. 7) correct=.false.
-     if (cu .ne. 11) correct=.false.
-     if (cc .ne. 5) correct=.false.
-
-     ! Check non-key bounds
-     call  ESMF_LocStreamGetBounds(locstream, localDE=2, &
-             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-             rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     ! Bounds
-     if (el .ne. 12) correct=.false.
-     if (eu .ne. 16) correct=.false.
-     if (ec .ne. 5) correct=.false.
-     if (cl .ne. 12) correct=.false.
-     if (cu .ne. 16) correct=.false.
-     if (cc .ne. 5) correct=.false.
-
-!write(*,*) "2", correct, el, eu, ec
-     ! Check non-key bounds
-     call  ESMF_LocStreamGetBounds(locstream, localDE=3, &
-             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-             rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     ! Bounds
-     if (el .ne. 17) correct=.false.
-     if (eu .ne. 20) correct=.false.
-     if (ec .ne. 4) correct=.false.
-     if (cl .ne. 17) correct=.false.
-     if (cu .ne. 20) correct=.false.
-     if (cc .ne. 4) correct=.false.
-
-!write(*,*) "3", correct, el, eu, ec
-  else   if (petCount .eq. 4) then
-     if (localPet .eq. 0) then
-        ! Check non-key bounds
-        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
-                exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-                computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-                rc=localrc)
-        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-        ! Bounds
-        if (el .ne. 2) correct=.false.
-        if (eu .ne. 6) correct=.false.
-        if (ec .ne. 5) correct=.false.
-        if (cl .ne. 2) correct=.false.
-        if (cu .ne. 6) correct=.false.
-        if (cc .ne. 5) correct=.false.
-     else if (localPet .eq. 1) then
-        ! Check non-key bounds
-        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
-                exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-                computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-                rc=localrc)
-        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-        ! Bounds
-        if (el .ne. 7) correct=.false.
-        if (eu .ne. 11) correct=.false.
-        if (ec .ne. 5) correct=.false.
-        if (cl .ne. 7) correct=.false.
-        if (cu .ne. 11) correct=.false.
-        if (cc .ne. 5) correct=.false.
-
-     else if (localPet .eq. 2) then
-        ! Check non-key bounds
-        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
-               exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-               computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-               rc=localrc)
-        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-        ! Bounds
-        if (el .ne. 12) correct=.false.
-        if (eu .ne. 16) correct=.false.
-        if (ec .ne. 5) correct=.false.
-        if (cl .ne. 12) correct=.false.
-        if (cu .ne. 16) correct=.false.
-        if (cc .ne. 5) correct=.false.
-
-     else if (localPet .eq. 3) then
-        ! Check non-key bounds
-        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
-               exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-               computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-               rc=localrc)
-        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-        ! Bounds
-        if (el .ne. 17) correct=.false.
-        if (eu .ne. 20) correct=.false.
-        if (ec .ne. 4) correct=.false.
-        if (cl .ne. 17) correct=.false.
-        if (cu .ne. 20) correct=.false.
-        if (cc .ne. 4) correct=.false.
-    endif
-  endif
-
-  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "LocStream equality before assignment Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  locstreamBool = (locstreamAlias.eq.locstream)
-  call ESMF_Test(.not.locstreamBool, name, failMsg, result, ESMF_SRCLINE)
-  
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  ! Testing ESMF_LocStreamAssignment(=)()
-  write(name, *) "LocStream assignment and equality Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  locstreamAlias = locstream
-  locstreamBool = (locstreamAlias.eq.locstream)
-  call ESMF_Test(locstreamBool, name, failMsg, result, ESMF_SRCLINE)
-  
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "LocStreamDestroy Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_LocStreamDestroy(locstream, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  ! Testing ESMF_LocStreamOperator(==)()
-  write(name, *) "LocStream equality after destroy Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  locstreamBool = (locstreamAlias==locstream)
-  call ESMF_Test(.not.locstreamBool, name, failMsg, result, ESMF_SRCLINE)
-  
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  ! Testing ESMF_LocStreamOperator(/=)()
-  write(name, *) "LocStream non-equality after destroy Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  locstreamBool = (locstreamAlias/=locstream)
-  call ESMF_Test(locstreamBool, name, failMsg, result, ESMF_SRCLINE)
-  
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Double LocStreamDestroy through alias Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_LocStreamDestroy(locstreamAlias, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
-
-
-  !-----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Test ESMF_LocStreamCreate from Irregular distribution"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-
-  ! initialize check variables
-  correct=.true.
-  rc=ESMF_SUCCESS
-
-  ! Create Grid
-  locstream=ESMF_LocStreamCreate(minIndex=2, countsPerDE=(/5,5,5,4/), indexflag=ESMF_INDEX_GLOBAL, &
-             rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  if (petCount .eq. 1) then
-     ! Check non-key bounds
-     call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
-             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-             rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     ! Bounds
-     if (el .ne. 2) correct=.false.
-     if (eu .ne. 6) correct=.false.
-     if (ec .ne. 5) correct=.false.
-     if (cl .ne. 2) correct=.false.
-     if (cu .ne. 6) correct=.false.
-     if (cc .ne. 5) correct=.false.
-
-!write(*,*) "0", correct, el, eu, ec
-     ! Check non-key bounds
-     call  ESMF_LocStreamGetBounds(locstream, localDE=1, &
-             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-             rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     ! Bounds
-     if (el .ne. 7) correct=.false.
-     if (eu .ne. 11) correct=.false.
-     if (ec .ne. 5) correct=.false.
-     if (cl .ne. 7) correct=.false.
-     if (cu .ne. 11) correct=.false.
-     if (cc .ne. 5) correct=.false.
-
-!write(*,*) "1", correct, el, eu, ec
-     ! Check non-key bounds
-     call  ESMF_LocStreamGetBounds(locstream, localDE=2, &
-             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-             rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     ! Bounds
-     if (el .ne. 12) correct=.false.
-     if (eu .ne. 16) correct=.false.
-     if (ec .ne. 5) correct=.false.
-     if (cl .ne. 12) correct=.false.
-     if (cu .ne. 16) correct=.false.
-     if (cc .ne. 5) correct=.false.
-
-!write(*,*) "2", correct, el, eu, ec
-     ! Check non-key bounds
-     call  ESMF_LocStreamGetBounds(locstream, localDE=3, &
-             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-             rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     ! Bounds
-     if (el .ne. 17) correct=.false.
-     if (eu .ne. 20) correct=.false.
-     if (ec .ne. 4) correct=.false.
-     if (cl .ne. 17) correct=.false.
-     if (cu .ne. 20) correct=.false.
-     if (cc .ne. 4) correct=.false.
-
-!write(*,*) "3", correct, el, eu, ec
-  else   if (petCount .eq. 4) then
-     if (localPet .eq. 0) then
-        ! Check non-key bounds
-        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
-                exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-                computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-                rc=localrc)
-        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-        ! Bounds
-        if (el .ne. 2) correct=.false.
-        if (eu .ne. 6) correct=.false.
-        if (ec .ne. 5) correct=.false.
-        if (cl .ne. 2) correct=.false.
-        if (cu .ne. 6) correct=.false.
-        if (cc .ne. 5) correct=.false.
-     else if (localPet .eq. 1) then
-        ! Check non-key bounds
-        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
-                exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-                computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-                rc=localrc)
-        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-        ! Bounds
-        if (el .ne. 7) correct=.false.
-        if (eu .ne. 11) correct=.false.
-        if (ec .ne. 5) correct=.false.
-        if (cl .ne. 7) correct=.false.
-        if (cu .ne. 11) correct=.false.
-        if (cc .ne. 5) correct=.false.
-
-     else if (localPet .eq. 2) then
-        ! Check non-key bounds
-        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
-               exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-               computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-               rc=localrc)
-        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-        ! Bounds
-        if (el .ne. 12) correct=.false.
-        if (eu .ne. 16) correct=.false.
-        if (ec .ne. 5) correct=.false.
-        if (cl .ne. 12) correct=.false.
-        if (cu .ne. 16) correct=.false.
-        if (cc .ne. 5) correct=.false.
-
-     else if (localPet .eq. 3) then
-        ! Check non-key bounds
-        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
-               exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-               computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-               rc=localrc)
-        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-        ! Bounds
-        if (el .ne. 17) correct=.false.
-        if (eu .ne. 20) correct=.false.
-        if (ec .ne. 4) correct=.false.
-        if (cl .ne. 17) correct=.false.
-        if (cu .ne. 20) correct=.false.
-        if (cc .ne. 4) correct=.false.
-    endif
-  endif
-
-  call ESMF_LocStreamDestroy(locstream,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
-
-
-  !-----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Testing LocStream Create from localCount and indexflag=ESMF_INDEX_DELOCAL"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-
-  ! initialize check variables
-  correct=.true.
-  rc=ESMF_SUCCESS
-
-  ! Now make sure that a created grid validates successfully
-  !! Create Grid
-  locstream=ESMF_LocStreamCreate(localCount=10, indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-     
-  ! Get Bounds
-  call ESMF_LocStreamGetBounds(locstream, localDE=0, &
-         exclusiveCount=ec, exclusiveLBound=el, exclusiveUBound=eu, &
-         computationalCount=cc, computationalLBound=cl, computationalUBound=cu, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! Check Bounds
-  if (ec .ne. 10) correct=.false.
-  if (el .ne. 1) correct=.false.
-  if (eu .ne. 10) correct=.false.
-
-  if (cc .ne. 10) correct=.false.
-  if (cl .ne. 1) correct=.false.
-  if (cu .ne. 10) correct=.false.
-
-  
-  call ESMF_LocStreamDestroy(locstream,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
-
-
-  !-----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Testing LocStream Create from localCount and indexflag=ESMF_INDEX_GLOBAL"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-
-  ! initialize check variables
-  correct=.true.
-  rc=ESMF_SUCCESS
-
-  ! Now make sure that a created grid validates successfully
-  !! Create Grid
-  locstream=ESMF_LocStreamCreate(localCount=10, indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-     
-  ! Get Bounds
-  call ESMF_LocStreamGetBounds(locstream, localDE=0, &
-         exclusiveCount=ec, exclusiveLBound=el, exclusiveUBound=eu, &
-         computationalCount=cc, computationalLBound=cl, computationalUBound=cu, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! Check Bounds
-  if (ec .ne. 10) correct=.false.
-  if (el .ne. (localPet*10)+1) correct=.false.
-  if (eu .ne. (localPet+1)*10) correct=.false.
-
-  if (cc .ne. 10) correct=.false.
-  if (cl .ne. (localPet*10)+1) correct=.false.
-  if (cu .ne. (localPet+1)*10) correct=.false.
-
-  call ESMF_LocStreamDestroy(locstream,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Testing LocStream Create defaults and LocStream Get"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-
-  ! initialize check variables
-  correct=.true.
-  rc=ESMF_SUCCESS
-
-  ! Create Grid
-  locstream=ESMF_LocStreamCreate(name="LOCSTREAMXYZ", maxIndex=20, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-     
-  ! Get Info about LocStream
-  call ESMF_LocStreamGet(locstream, distgrid=distgridOut, &
-       keyCount=keyCount, localDECount=localDECount, indexflag=indexflag, name=locstream_name, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! check info
-  !! Make sure we start with keyCount = 0
-  if (keyCount .ne. 0) correct=.false.
-
-  !! make sure localDECount matches
-  call ESMF_DistGridGet(distgridOut,delayout=delayout, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_DELayoutGet(delayout,localDECount=localDECountOut, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  if (localDECount .ne. localDECountOut) correct=.false.
-
-  !! Check indexflag 
-  if (.not. (indexflag .eq. ESMF_INDEX_DELOCAL)) correct=.false.
-
-  !! Check name
-  if (trim(locstream_name) .ne. "LOCSTREAMXYZ") correct=.false.
-  
-  call ESMF_LocStreamDestroy(locstream,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
-
-
-
-
-  !-----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Test keyCount and keyNames response to ESMF_LocStreamAddKey"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-
-  ! initialize check variables
-  correct=.true.
-  rc=ESMF_SUCCESS
-
-  ! Create Grid
-  locstream=ESMF_LocStreamCreate(maxIndex=20, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-     
-  ! Get keyCount
-  call ESMF_LocStreamGet(locstream, keyCount=keyCount, keyNames=keyNames, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! check info
-  !! Make sure we start with keyCount = 0
-  if (keyCount .ne. 0) correct=.false.
-
-  ! Add key
-  call ESMF_LocStreamAddKey(locstream, keyName="A1", rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! Get keyCount
-  call ESMF_LocStreamGet(locstream, keyCount=keyCount, keyNames=keyNames, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! check info
-  if (keyCount .ne. 1) correct=.false.
-  if (trim(keyNames(1)) .ne. "A1") correct=.false.
-
-  ! Add key
-  call ESMF_LocStreamAddKey(locstream, keyName="A2", rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! Get keyCount
-  call ESMF_LocStreamGet(locstream, keyCount=keyCount, keyNames=keyNames, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-
-  ! check info
-  if (keyCount .ne. 2) correct=.false.
-  if (trim(keyNames(1)) .ne. "A1") correct=.false.
-  if (trim(keyNames(2)) .ne. "A2") correct=.false.
-
-  call ESMF_LocStreamDestroy(locstream,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Test ESMF_LocStreamGetKey getting an I4 pointer and bounds"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-
-  ! initialize check variables
-  correct=.true.
-  rc=ESMF_SUCCESS
-
-  ! Create Grid
-  locstream=ESMF_LocStreamCreate(localCount=10,  rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-     
-  ! allocate array
-  allocate(keyDataI4(10))
-
-  ! Add key
-  call ESMF_LocStreamAddKey(locstream, keyName="A1", farray=keyDataI4,  rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! Fill key
-  do i=1,10
-     keyDataI4(i)=REAL(i,ESMF_KIND_I4)
-  enddo
-
-  ! Get key and bounds
-  call  ESMF_LocStreamGetKey(locstream, keyName="A1", &
-          exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-          computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-          totalLBound=tl, totalUBound=tu, totalCount=tc, & 
-          farray=tmpI4, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! check info
-  !! data pointer
-  do i=1,10
-     if (tmpI4(i) .ne. REAL(i,ESMF_KIND_I4)) correct=.false.
-  enddo
-
-  !! Bounds
-  if (el .ne. 1) correct=.false.
-  if (eu .ne. 10) correct=.false.
-  if (ec .ne. 10) correct=.false.
-  if (cl .ne. 1) correct=.false.
-  if (cu .ne. 10) correct=.false.
-  if (cc .ne. 10) correct=.false.
-  if (tl .ne. 1) correct=.false.
-  if (tu .ne. 10) correct=.false.
-  if (tc .ne. 10) correct=.false.
-
-
-  call ESMF_LocStreamDestroy(locstream,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! deallocate array
-  deallocate(keyDataI4)
-
-
-  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Test ESMF_LocStreamGetKey getting an R4 pointer and bounds"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-
-  ! initialize check variables
-  correct=.true.
-  rc=ESMF_SUCCESS
-
-  ! Create Grid
-  locstream=ESMF_LocStreamCreate(localCount=10,  rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-     
-  ! allocate array
-  allocate(keyDataR4(10))
-
-  ! Add key
-  call ESMF_LocStreamAddKey(locstream, keyName="A1", farray=keyDataR4,  rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! Fill key
-  do i=1,10
-     keyDataR4(i)=REAL(i,ESMF_KIND_R4)
-  enddo
-
-  ! Get key and bounds
-  call  ESMF_LocStreamGetKey(locstream, keyName="A1", &
-          exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-          computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-          totalLBound=tl, totalUBound=tu, totalCount=tc, & 
-          farray=tmpR4, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! check info
-  !! data pointer
-  do i=1,10
-     if (tmpR4(i) .ne. REAL(i,ESMF_KIND_R4)) correct=.false.
-  enddo
-
-  !! Bounds
-  if (el .ne. 1) correct=.false.
-  if (eu .ne. 10) correct=.false.
-  if (ec .ne. 10) correct=.false.
-  if (cl .ne. 1) correct=.false.
-  if (cu .ne. 10) correct=.false.
-  if (cc .ne. 10) correct=.false.
-  if (tl .ne. 1) correct=.false.
-  if (tu .ne. 10) correct=.false.
-  if (tc .ne. 10) correct=.false.
-
-
-  call ESMF_LocStreamDestroy(locstream,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! deallocate array
-  deallocate(keyDataR4)
-
-
-  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
-
-
-  !-----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Test ESMF_LocStreamGetKey getting an R8 pointer and bounds"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-
-  ! initialize check variables
-  correct=.true.
-  rc=ESMF_SUCCESS
-
-  ! Create Grid
-  locstream=ESMF_LocStreamCreate(localCount=10,  rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-     
-  ! allocate array
-  allocate(keyDataR8(10))
-
-  ! Add key
-  call ESMF_LocStreamAddKey(locstream, keyName="A1", farray=keyDataR8,  rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! Fill key
-  do i=1,10
-     keyDataR8(i)=REAL(i,ESMF_KIND_R8)
-  enddo
-
-  ! Get key and bounds
-  call  ESMF_LocStreamGetKey(locstream, keyName="A1", &
-          exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-          computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-          totalLBound=tl, totalUBound=tu, totalCount=tc, & 
-          farray=tmpR8, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! check info
-  !! data pointer
-  do i=1,10
-     if (tmpR8(i) .ne. REAL(i,ESMF_KIND_R8)) correct=.false.
-  enddo
-
-  !! Bounds
-  if (el .ne. 1) correct=.false.
-  if (eu .ne. 10) correct=.false.
-  if (ec .ne. 10) correct=.false.
-  if (cl .ne. 1) correct=.false.
-  if (cu .ne. 10) correct=.false.
-  if (cc .ne. 10) correct=.false.
-  if (tl .ne. 1) correct=.false.
-  if (tu .ne. 10) correct=.false.
-  if (tc .ne. 10) correct=.false.
-
-
-  call ESMF_LocStreamDestroy(locstream,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! deallocate array
-  deallocate(keyDataR8)
-
-
-  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Test getting keyUnits and keyLongName"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-
-  ! initialize check variables
-  correct=.true.
-  rc=ESMF_SUCCESS
-
-  ! Create Grid
-  locstream=ESMF_LocStreamCreate(maxIndex=20, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-     
-  ! Add key A1
-  call ESMF_LocStreamAddKey(locstream, keyName="A1", keyUnits="U1", keyLongName="LN1", rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! Add key A2
-  call ESMF_LocStreamAddKey(locstream, keyName="A2", keyUnits="U2", keyLongName="LN2", rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! Get info for A1
-  call ESMF_LocStreamGetKey(locstream, keyName="A1", keyUnits=keyUnits, keyLongName=keyLongName, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! check info
-  if (trim(keyUnits) .ne. "U1") correct=.false.
-  if (trim(keyLongName) .ne. "LN1") correct=.false.
-
-
-  ! Get info for A2
-  call ESMF_LocStreamGetKey(locstream, keyName="A2", keyUnits=keyUnits, keyLongName=keyLongName, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! check info
-  if (trim(keyUnits) .ne. "U2") correct=.false.
-  if (trim(keyLongName) .ne. "LN2") correct=.false.
-
-  call ESMF_LocStreamDestroy(locstream,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-  ! NOTE THAT SERIALIZE/DESERIALIZE IS AN INTERNAL INTERFACE AND NOT INTENDED FOR PUBLIC USE
-  !NEX_UTest
-  write(name, *) "Test LocStream Serialize/Deserialize"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-
-  ! initialize check variables
-  correct=.true.
-  rc=ESMF_SUCCESS
-
-  ! Create Grid
-  locstream=ESMF_LocStreamCreate(maxIndex=20, indexflag=ESMF_INDEX_GLOBAL, coordSys=ESMF_COORDSYS_SPH_DEG, &
-       rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-     
-  ! Add key A1
-  call ESMF_LocStreamAddKey(locstream, keyName="A1", keyUnits="U1", keyLongName="LN1", rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! Add key A2
-  call ESMF_LocStreamAddKey(locstream, keyName="A2", keyUnits="U2", keyLongName="LN2", rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-
-  ! Create a buffer to put the locstream in
-  offset=0
-  bufCount = 1
-  allocate (buf(bufCount))
-  call ESMF_LocStreamSerialize(locstream, buf, bufCount, offset,  &
-    inquireflag=ESMF_INQUIREONLY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE                            
-  deallocate (buf)
-
-  bufCount=offset
-  print *, 'ESMF_LocStreamUTest: serialization buffer size =', bufCount
-  allocate(buf(bufCount))
-
-  ! Serialize
-  offset=0
-  call ESMF_LocStreamSerialize(locstream, buf, bufCount, offset, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! Deserialize
-  offset=0
-  locstream2=ESMF_LocStreamDeserialize(buf, offset, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-
-  ! Check loc stream info
-  call ESMF_LocStreamGet(locstream2, keyCount=keyCount, indexflag=indexflag, coordSys=coordSys, &
-       rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! check info
-  if (keyCount .ne. 2) correct=.false.
-  if (.not. (indexflag .eq. ESMF_INDEX_GLOBAL)) correct=.false.
-  if (.not. (coordSys .eq. ESMF_COORDSYS_SPH_DEG)) correct=.false.
-
-  ! Get info for A1
-  call ESMF_LocStreamGetKey(locstream2, keyName="A1", keyUnits=keyUnits, keyLongName=keyLongName, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! check info
-  if (trim(keyUnits) .ne. "U1") correct=.false.
-  if (trim(keyLongName) .ne. "LN1") correct=.false.
-
-  ! Get info for A2
-  call ESMF_LocStreamGetKey(locstream2, keyName="A2", keyUnits=keyUnits, keyLongName=keyLongName, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! check info
-  if (trim(keyUnits) .ne. "U2") correct=.false.
-  if (trim(keyLongName) .ne. "LN2") correct=.false.
-
-  call ESMF_LocStreamDestroy(locstream,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_LocStreamDestroy(locstream2,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! Get rid of buffer
-  deallocate(buf)
-
-  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
-
-
-
-  !-----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Test Print"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-
-  ! initialize check variables
-  correct=.true.
-  rc=ESMF_SUCCESS
-
-  ! Create Grid
-  locstream=ESMF_LocStreamCreate(maxIndex=20, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-     
-  ! Add key A1
-  call ESMF_LocStreamAddKey(locstream, keyName="A1", keyUnits="U1", keyLongName="LN1", rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! Add key A2
-  call ESMF_LocStreamAddKey(locstream, keyName="A2", keyUnits="U2", keyLongName="LN2", rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! Test Print
-  call ESMF_LocStreamPrint(locstream, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_LocStreamDestroy(locstream,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
-
-
-  !-----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Test ESMF_LocStreamCreate from Regular distribution"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-
-  ! initialize check variables
-  correct=.true.
-  rc=ESMF_SUCCESS
-
-  ! Create Grid
-  locstream=ESMF_LocStreamCreate(minIndex=2, maxIndex=20, regDecomp=4, indexflag=ESMF_INDEX_GLOBAL, &
-             rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  if (petCount .eq. 1) then
-     ! Check non-key bounds
-     call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
-             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-             rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     ! Bounds
-     if (el .ne. 2) correct=.false.
-     if (eu .ne. 6) correct=.false.
-     if (ec .ne. 5) correct=.false.
-     if (cl .ne. 2) correct=.false.
-     if (cu .ne. 6) correct=.false.
-     if (cc .ne. 5) correct=.false.
-
-!write(*,*) "0", correct, el, eu, ec
-     ! Check non-key bounds
-     call  ESMF_LocStreamGetBounds(locstream, localDE=1, &
-             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-             rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     ! Bounds
-     if (el .ne. 7) correct=.false.
-     if (eu .ne. 11) correct=.false.
-     if (ec .ne. 5) correct=.false.
-     if (cl .ne. 7) correct=.false.
-     if (cu .ne. 11) correct=.false.
-     if (cc .ne. 5) correct=.false.
-
-!write(*,*) "1", correct, el, eu, ec
-     ! Check non-key bounds
-     call  ESMF_LocStreamGetBounds(locstream, localDE=2, &
-             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-             rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     ! Bounds
-     if (el .ne. 12) correct=.false.
-     if (eu .ne. 16) correct=.false.
-     if (ec .ne. 5) correct=.false.
-     if (cl .ne. 12) correct=.false.
-     if (cu .ne. 16) correct=.false.
-     if (cc .ne. 5) correct=.false.
-
-!write(*,*) "2", correct, el, eu, ec
-     ! Check non-key bounds
-     call  ESMF_LocStreamGetBounds(locstream, localDE=3, &
-             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-             rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     ! Bounds
-     if (el .ne. 17) correct=.false.
-     if (eu .ne. 20) correct=.false.
-     if (ec .ne. 4) correct=.false.
-     if (cl .ne. 17) correct=.false.
-     if (cu .ne. 20) correct=.false.
-     if (cc .ne. 4) correct=.false.
-
-!write(*,*) "3", correct, el, eu, ec
-  else   if (petCount .eq. 4) then
-     if (localPet .eq. 0) then
-        ! Check non-key bounds
-        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
-                exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-                computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-                rc=localrc)
-        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-        ! Bounds
-        if (el .ne. 2) correct=.false.
-        if (eu .ne. 6) correct=.false.
-        if (ec .ne. 5) correct=.false.
-        if (cl .ne. 2) correct=.false.
-        if (cu .ne. 6) correct=.false.
-        if (cc .ne. 5) correct=.false.
-     else if (localPet .eq. 1) then
-        ! Check non-key bounds
-        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
-                exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-                computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-                rc=localrc)
-        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-        ! Bounds
-        if (el .ne. 7) correct=.false.
-        if (eu .ne. 11) correct=.false.
-        if (ec .ne. 5) correct=.false.
-        if (cl .ne. 7) correct=.false.
-        if (cu .ne. 11) correct=.false.
-        if (cc .ne. 5) correct=.false.
-
-     else if (localPet .eq. 2) then
-        ! Check non-key bounds
-        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
-               exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-               computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-               rc=localrc)
-        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-        ! Bounds
-        if (el .ne. 12) correct=.false.
-        if (eu .ne. 16) correct=.false.
-        if (ec .ne. 5) correct=.false.
-        if (cl .ne. 12) correct=.false.
-        if (cu .ne. 16) correct=.false.
-        if (cc .ne. 5) correct=.false.
-
-     else if (localPet .eq. 3) then
-        ! Check non-key bounds
-        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
-               exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-               computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-               rc=localrc)
-        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-        ! Bounds
-        if (el .ne. 17) correct=.false.
-        if (eu .ne. 20) correct=.false.
-        if (ec .ne. 4) correct=.false.
-        if (cl .ne. 17) correct=.false.
-        if (cu .ne. 20) correct=.false.
-        if (cc .ne. 4) correct=.false.
-    endif
-  endif
-
-  call ESMF_LocStreamDestroy(locstream,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
-
-
-
-  !-----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Test ESMF_LocStreamCreate from Irregular distribution"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-
-  ! initialize check variables
-  correct=.true.
-  rc=ESMF_SUCCESS
-
-  ! Create Grid
-  locstream=ESMF_LocStreamCreate(minIndex=2, countsPerDE=(/5,5,5,4/), indexflag=ESMF_INDEX_GLOBAL, &
-             rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  if (petCount .eq. 1) then
-     ! Check non-key bounds
-     call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
-             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-             rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     ! Bounds
-     if (el .ne. 2) correct=.false.
-     if (eu .ne. 6) correct=.false.
-     if (ec .ne. 5) correct=.false.
-     if (cl .ne. 2) correct=.false.
-     if (cu .ne. 6) correct=.false.
-     if (cc .ne. 5) correct=.false.
-
-!write(*,*) "0", correct, el, eu, ec
-     ! Check non-key bounds
-     call  ESMF_LocStreamGetBounds(locstream, localDE=1, &
-             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-             rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     ! Bounds
-     if (el .ne. 7) correct=.false.
-     if (eu .ne. 11) correct=.false.
-     if (ec .ne. 5) correct=.false.
-     if (cl .ne. 7) correct=.false.
-     if (cu .ne. 11) correct=.false.
-     if (cc .ne. 5) correct=.false.
-
-!write(*,*) "1", correct, el, eu, ec
-     ! Check non-key bounds
-     call  ESMF_LocStreamGetBounds(locstream, localDE=2, &
-             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-             rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     ! Bounds
-     if (el .ne. 12) correct=.false.
-     if (eu .ne. 16) correct=.false.
-     if (ec .ne. 5) correct=.false.
-     if (cl .ne. 12) correct=.false.
-     if (cu .ne. 16) correct=.false.
-     if (cc .ne. 5) correct=.false.
-
-!write(*,*) "2", correct, el, eu, ec
-     ! Check non-key bounds
-     call  ESMF_LocStreamGetBounds(locstream, localDE=3, &
-             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-             rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-     ! Bounds
-     if (el .ne. 17) correct=.false.
-     if (eu .ne. 20) correct=.false.
-     if (ec .ne. 4) correct=.false.
-     if (cl .ne. 17) correct=.false.
-     if (cu .ne. 20) correct=.false.
-     if (cc .ne. 4) correct=.false.
-
-!write(*,*) "3", correct, el, eu, ec
-  else   if (petCount .eq. 4) then
-     if (localPet .eq. 0) then
-        ! Check non-key bounds
-        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
-                exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-                computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-                rc=localrc)
-        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-        ! Bounds
-        if (el .ne. 2) correct=.false.
-        if (eu .ne. 6) correct=.false.
-        if (ec .ne. 5) correct=.false.
-        if (cl .ne. 2) correct=.false.
-        if (cu .ne. 6) correct=.false.
-        if (cc .ne. 5) correct=.false.
-     else if (localPet .eq. 1) then
-        ! Check non-key bounds
-        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
-                exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-                computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-                rc=localrc)
-        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-        ! Bounds
-        if (el .ne. 7) correct=.false.
-        if (eu .ne. 11) correct=.false.
-        if (ec .ne. 5) correct=.false.
-        if (cl .ne. 7) correct=.false.
-        if (cu .ne. 11) correct=.false.
-        if (cc .ne. 5) correct=.false.
-
-     else if (localPet .eq. 2) then
-        ! Check non-key bounds
-        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
-               exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-               computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-               rc=localrc)
-        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-        ! Bounds
-        if (el .ne. 12) correct=.false.
-        if (eu .ne. 16) correct=.false.
-        if (ec .ne. 5) correct=.false.
-        if (cl .ne. 12) correct=.false.
-        if (cu .ne. 16) correct=.false.
-        if (cc .ne. 5) correct=.false.
-
-     else if (localPet .eq. 3) then
-        ! Check non-key bounds
-        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
-               exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
-               computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
-               rc=localrc)
-        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-        ! Bounds
-        if (el .ne. 17) correct=.false.
-        if (eu .ne. 20) correct=.false.
-        if (ec .ne. 4) correct=.false.
-        if (cl .ne. 17) correct=.false.
-        if (cu .ne. 20) correct=.false.
-        if (cc .ne. 4) correct=.false.
-    endif
-  endif
-
-  call ESMF_LocStreamDestroy(locstream,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
-
-
-  !-----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Test ESMF_LocStream Create From Background Mesh"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-
-  ! initialize check variables
-  correct=.true.
-  rc=ESMF_SUCCESS
-
-  !!!!!!!! Create Mesh !!!!!!!!!!!
-  ! Create Mesh
-  ! Only do this if we have 4 PETs
- if (petCount .eq. 4) then
-     ! Setup mesh data depending on PET
-     if (localPet .eq. 0) then
-        ! Fill in node data
-        numNodes=4
-
-       !! node ids
-       allocate(nodeIds(numNodes))
-       nodeIds=(/1,2,4,5/) 
-
-       !! node Coords
-       allocate(nodeCoords(numNodes*2))
-       nodeCoords=(/0.0,0.0, &
-                    1.0,0.0, &
-                    0.0,1.0, &
-                    1.0,1.0/)
-
-       !! node owners
-       allocate(nodeOwners(numNodes))
-       nodeOwners=(/0,0,0,0/) ! everything on proc 0
-
-       ! Fill in elem data
-       numElems=1
-
-       !! elem ids
-       allocate(elemIds(numElems))
-       elemIds=(/1/) 
-
-       !! elem type
-       allocate(elemTypes(numElems))
-       elemTypes=ESMF_MESHELEMTYPE_QUAD
-
-       !! elem conn
-       allocate(elemConn(numElems*4))
-       elemConn=(/1,2,4,3/)
-     else if (localPet .eq. 1) then
-        ! Fill in node data
-        numNodes=4
-
-       !! node ids
-       allocate(nodeIds(numNodes))
-       nodeIds=(/2,3,5,6/) 
-
-       !! node Coords
-       allocate(nodeCoords(numNodes*2))
-       nodeCoords=(/1.0,0.0, &
-                    2.0,0.0, &
-                    1.0,1.0, &
-                    2.0,1.0/)
-
-       !! node owners
-       allocate(nodeOwners(numNodes))
-       nodeOwners=(/0,1,0,1/) 
-
-       ! Fill in elem data
-       numElems=1
-
-       !! elem ids
-       allocate(elemIds(numElems))
-       elemIds=(/2/) 
-
-       !! elem type
-       allocate(elemTypes(numElems))
-       elemTypes=ESMF_MESHELEMTYPE_QUAD
-
-       !! elem conn
-       allocate(elemConn(numElems*4))
-       elemConn=(/1,2,4,3/)
-     else if (localPet .eq. 2) then
-        ! Fill in node data
-        numNodes=4
-
-       !! node ids
-       allocate(nodeIds(numNodes))
-       nodeIds=(/4,5,7,8/) 
-
-       !! node Coords
-       allocate(nodeCoords(numNodes*2))
-       nodeCoords=(/0.0,1.0, &
-                    1.0,1.0, &
-                    0.0,2.0, &
-                    1.0,2.0/)
-
-       !! node owners
-       allocate(nodeOwners(numNodes))
-       nodeOwners=(/0,0,2,2/) 
-
-       ! Fill in elem data
-       numElems=1
-
-       !! elem ids
-       allocate(elemIds(numElems))
-       elemIds=(/3/) 
-
-       !! elem type
-       allocate(elemTypes(numElems))
-       elemTypes=ESMF_MESHELEMTYPE_QUAD
-
-       !! elem conn
-       allocate(elemConn(numElems*4))
-       elemConn=(/1,2,4,3/)  
-     else 
-        ! Fill in node data
-        numNodes=4
-
-       !! node ids
-       allocate(nodeIds(numNodes))
-       nodeIds=(/5,6,8,9/) 
-
-       !! node Coords
-       allocate(nodeCoords(numNodes*2))
-       nodeCoords=(/1.0,1.0, &
-                    2.0,1.0, &
-                    1.0,2.0, &
-                    2.0,2.0/)
-
-       !! node owners
-       allocate(nodeOwners(numNodes))
-       nodeOwners=(/0,1,2,3/) 
-
-       ! Fill in elem data
-       numElems=1
-
-       !! elem ids
-       allocate(elemIds(numElems))
-       elemIds=(/4/) 
-
-       !! elem type
-       allocate(elemTypes(numElems))
-       elemTypes=ESMF_MESHELEMTYPE_QUAD
-
-       !! elem conn
-       allocate(elemConn(numElems*4))
-       elemConn=(/1,2,4,3/)  
-     endif
-
-  ! Create Mesh structure in 1 step
-  mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
-         nodeIds=nodeIds, nodeCoords=nodeCoords, &
-         coordSys=ESMF_COORDSYS_SPH_DEG, &
-         nodeOwners=nodeOwners, elementIds=elemIds,&
-         elementTypes=elemTypes, elementConn=elemConn, &
-         rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-
-  ! deallocate node data
-  deallocate(nodeIds)
-  deallocate(nodeCoords)
-  deallocate(nodeOwners)
-
-  ! deallocate elem data
-  deallocate(elemIds)
-  deallocate(elemTypes)
-  deallocate(elemConn)
-
-
-  !!!!!!!! Create LocStream !!!!!!!!!!!
-  ! Set number of points
-  if (localPet .eq. 0) then  
-      pntCount=2
-  else if (localPet .eq. 1) then  
-      pntCount=3
-  else if (localPet .eq. 2) then  
-      pntCount=1
-  else if (localPet .eq. 3) then  
-      pntCount=1
-  endif
-
-
-  ! Create LocStream
-  locstream=ESMF_LocStreamCreate(localCount=pntCount,  rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    goto 100
-  endif
-     
-  ! Allocate X array
-  allocate(X(pntCount))
-
-  ! allocate Y array
-  allocate(Y(pntCount))
-
-
- ! Fill in points
-  if (localPet .eq. 0) then  
-      X(1)=1.0
-      Y(1)=1.0
-      X(2)=0.5
-      Y(2)=1.5
-  else if (localPet .eq. 1) then  
-      X(1)=1.5
-      Y(1)=0.5
-      X(2)=1.5
-      Y(2)=1.5
-      X(3)=1.9
-      Y(3)=1.75
-  else if (localPet .eq. 2) then  
-      X(1)=0.5
-      Y(1)=0.5
-  else if (localPet .eq. 3) then  
-      X(1)=1.9
-      Y(1)=0.1
-  endif
-
-
-  ! Add key X
-  call ESMF_LocStreamAddKey(locstream, keyName="ESMF:Lon", farray=X,  rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    goto 100
-  endif
-
-  ! Add key Y
-  call ESMF_LocStreamAddKey(locstream, keyName="ESMF:Lat", farray=Y,  rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    goto 100
-  endif
-
-  ! Do locStream create from background mesh
-  newLocstream=ESMF_LocStreamCreate(locstream, &
-                 background=mesh, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) then
-     rc=ESMF_FAILURE
-     goto 100
-  endif
-
-  call ESMF_LocStreamDestroy(locstream,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    goto 100
-  endif
-
-  ! deallocate array
-  deallocate(X)
-  deallocate(Y)
-
-
-  ! Get rid of Mesh
-  call ESMF_MeshDestroy(mesh, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    goto 100
-  endif
-
-  !!!!!!!!! Check results !!!!!!!!!!!!!!!!!
-  call ESMF_LocStreamGetKey(newLocStream,keyName="ESMF:Lon", &
-         farray=tstX, &
-         exclusiveLBound=el, exclusiveUBound=eu, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    goto 100
-  endif
-
-  call ESMF_LocStreamGetKey(newLocStream,keyName="ESMF:Lat", &
-         farray=tstY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    goto 100
-  endif
-
-  ! Test points
-  if (localPet .eq. 0) then  
-      do i=el,eu
-         if ((tstX(i) <  0.0) .or. tstX(i) >  1.0) correct=.false.
-         if ((tstY(i) <  0.0) .or. tstY(i) >  1.0) correct=.false.
-      enddo
-  else if (localPet .eq. 1) then  
-      do i=el,eu
-         if ((tstX(i) <= 1.0) .or. tstX(i) > 2.0) correct=.false.
-         if ((tstY(i) <  0.0) .or. tstY(i) > 1.0) correct=.false.
-      enddo
-  else if (localPet .eq. 2) then  
-      do i=el,eu
-         if ((tstX(i) <  0.0) .or. tstX(i) >  1.0) correct=.false.
-         if ((tstY(i) <= 1.0) .or. tstY(i) >  2.0) correct=.false.
-      enddo 
-  else if (localPet .eq. 3) then  
-      do i=el,eu
-         if ((tstX(i) <= 1.0) .or. tstX(i) >  2.0) correct=.false.
-         if ((tstY(i) <= 1.0) .or. tstY(i) >  2.0) correct=.false.
-      enddo 
-  endif  
-
-
-  call ESMF_LocStreamDestroy(newLocstream,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    goto 100
-  endif
-
-  ! endif for skip for ==4 proc
-  endif 
-
-100 continue
-  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
-
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Test ESMF_LocStream Create From Background Grid"
-  write(failMsg, *) "Test unsuccessful"
- 
-  ! initialize 
-  rc=ESMF_SUCCESS
-      
-  ! do test
-  call test_locstreambkg(rc)
- 
-  ! return result
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
- !-----------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Test ESMF_LocStream Create From Background Grid non-default Align"
-  write(failMsg, *) "Test unsuccessful"
- 
-  ! initialize 
-  rc=ESMF_SUCCESS
-      
-  ! do test
-  call test_locstreambkgnda(rc)
-
-  ! return result
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
- !-----------------------------------------------------------------------------
-
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Test ESMF_LocStream Create From Background Grid on Sphere"
-  write(failMsg, *) "Test unsuccessful"
- 
-  ! initialize 
-  rc=ESMF_SUCCESS
-      
-  ! do test
-  call test_locstreambkgSph(rc)
-
-  ! return result
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
- !-----------------------------------------------------------------------------
-
-
-  !------------------------------------------------------------------------
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Testing LocStream IsCreated for uncreated object"
+!!!XXX  write(failMsg, *) "Did not return .false."
+!!!XXX  isCreated = ESMF_LocStreamIsCreated(locstream)
+!!!XXX  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Testing LocStream IsCreated for uncreated object"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX  isCreated = ESMF_LocStreamIsCreated(locstream, rc=rc)
+!!!XXX  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Create test LocStream for IsCreated"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX  locstream=ESMF_LocStreamCreate(name="test",distgrid=distgrid, rc=localrc)
+!!!XXX  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Testing LocStream IsCreated for created object"
+!!!XXX  write(failMsg, *) "Did not return .true."
+!!!XXX  isCreated = ESMF_LocStreamIsCreated(locstream)
+!!!XXX  call ESMF_Test((isCreated .eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Testing LocStream IsCreated for created object"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX  isCreated = ESMF_LocStreamIsCreated(locstream, rc=rc)
+!!!XXX  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Destroy test LocStream for IsCreated"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX  call ESMF_LocStreamDestroy(locstream, rc=rc)
+!!!XXX  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Testing LocStream IsCreated for destroyed object"
+!!!XXX  write(failMsg, *) "Did not return .false."
+!!!XXX  isCreated = ESMF_LocStreamIsCreated(locstream)
+!!!XXX  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Testing LocStream IsCreated for destroyed object"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX  isCreated = ESMF_LocStreamIsCreated(locstream, rc=rc)
+!!!XXX  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Testing LocStream Validate"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX
+!!!XXX  ! initialize check variables
+!!!XXX  correct=.true.
+!!!XXX  rc=ESMF_SUCCESS
+!!!XXX
+!!!XXX  ! First make sure validate fails for an uncreated Grid
+!!!XXX  call ESMF_LocStreamValidate(locstream,rc=localrc)
+!!!XXX  if (localrc .eq. ESMF_SUCCESS) correct=.false.
+!!!XXX
+!!!XXX  ! Now make sure that a created grid validates successfully
+!!!XXX  !! Create Grid
+!!!XXX  locstream=ESMF_LocStreamCreate(name="ted",distgrid=distgrid, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX     
+!!!XXX  !! Check that validate returns true
+!!!XXX  call ESMF_LocStreamValidate(locstream, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) correct=.false.
+!!!XXX  
+!!!XXX  call ESMF_LocStreamDestroy(locstream,rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  !! Check that validate returns false
+!!!XXX  call ESMF_LocStreamValidate(locstream, rc=localrc)
+!!!XXX  if (localrc .eq. ESMF_SUCCESS) correct=.false.
+!!!XXX
+!!!XXX  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX
+!!!XXX
+!!!XXX
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Test ESMF_LocStreamCreate from Regular distribution"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX
+!!!XXX  ! initialize check variables
+!!!XXX  correct=.true.
+!!!XXX  rc=ESMF_SUCCESS
+!!!XXX
+!!!XXX  ! Create Grid
+!!!XXX  locstream=ESMF_LocStreamCreate(minIndex=2, maxIndex=20, regDecomp=4, indexflag=ESMF_INDEX_GLOBAL, &
+!!!XXX             rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  if (petCount .eq. 1) then
+!!!XXX     ! Check non-key bounds
+!!!XXX     call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
+!!!XXX             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX             rc=localrc)
+!!!XXX     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX     ! Bounds
+!!!XXX     if (el .ne. 2) correct=.false.
+!!!XXX     if (eu .ne. 6) correct=.false.
+!!!XXX     if (ec .ne. 5) correct=.false.
+!!!XXX     if (cl .ne. 2) correct=.false.
+!!!XXX     if (cu .ne. 6) correct=.false.
+!!!XXX     if (cc .ne. 5) correct=.false.
+!!!XXX
+!!!XXX     ! Check non-key bounds
+!!!XXX     call  ESMF_LocStreamGetBounds(locstream, localDE=1, &
+!!!XXX             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX             rc=localrc)
+!!!XXX     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX     ! Bounds
+!!!XXX     if (el .ne. 7) correct=.false.
+!!!XXX     if (eu .ne. 11) correct=.false.
+!!!XXX     if (ec .ne. 5) correct=.false.
+!!!XXX     if (cl .ne. 7) correct=.false.
+!!!XXX     if (cu .ne. 11) correct=.false.
+!!!XXX     if (cc .ne. 5) correct=.false.
+!!!XXX
+!!!XXX     ! Check non-key bounds
+!!!XXX     call  ESMF_LocStreamGetBounds(locstream, localDE=2, &
+!!!XXX             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX             rc=localrc)
+!!!XXX     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX     ! Bounds
+!!!XXX     if (el .ne. 12) correct=.false.
+!!!XXX     if (eu .ne. 16) correct=.false.
+!!!XXX     if (ec .ne. 5) correct=.false.
+!!!XXX     if (cl .ne. 12) correct=.false.
+!!!XXX     if (cu .ne. 16) correct=.false.
+!!!XXX     if (cc .ne. 5) correct=.false.
+!!!XXX
+!!!XXX!write(*,*) "2", correct, el, eu, ec
+!!!XXX     ! Check non-key bounds
+!!!XXX     call  ESMF_LocStreamGetBounds(locstream, localDE=3, &
+!!!XXX             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX             rc=localrc)
+!!!XXX     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX     ! Bounds
+!!!XXX     if (el .ne. 17) correct=.false.
+!!!XXX     if (eu .ne. 20) correct=.false.
+!!!XXX     if (ec .ne. 4) correct=.false.
+!!!XXX     if (cl .ne. 17) correct=.false.
+!!!XXX     if (cu .ne. 20) correct=.false.
+!!!XXX     if (cc .ne. 4) correct=.false.
+!!!XXX
+!!!XXX!write(*,*) "3", correct, el, eu, ec
+!!!XXX  else   if (petCount .eq. 4) then
+!!!XXX     if (localPet .eq. 0) then
+!!!XXX        ! Check non-key bounds
+!!!XXX        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
+!!!XXX                exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX                computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX                rc=localrc)
+!!!XXX        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX        ! Bounds
+!!!XXX        if (el .ne. 2) correct=.false.
+!!!XXX        if (eu .ne. 6) correct=.false.
+!!!XXX        if (ec .ne. 5) correct=.false.
+!!!XXX        if (cl .ne. 2) correct=.false.
+!!!XXX        if (cu .ne. 6) correct=.false.
+!!!XXX        if (cc .ne. 5) correct=.false.
+!!!XXX     else if (localPet .eq. 1) then
+!!!XXX        ! Check non-key bounds
+!!!XXX        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
+!!!XXX                exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX                computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX                rc=localrc)
+!!!XXX        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX        ! Bounds
+!!!XXX        if (el .ne. 7) correct=.false.
+!!!XXX        if (eu .ne. 11) correct=.false.
+!!!XXX        if (ec .ne. 5) correct=.false.
+!!!XXX        if (cl .ne. 7) correct=.false.
+!!!XXX        if (cu .ne. 11) correct=.false.
+!!!XXX        if (cc .ne. 5) correct=.false.
+!!!XXX
+!!!XXX     else if (localPet .eq. 2) then
+!!!XXX        ! Check non-key bounds
+!!!XXX        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
+!!!XXX               exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX               computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX               rc=localrc)
+!!!XXX        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX        ! Bounds
+!!!XXX        if (el .ne. 12) correct=.false.
+!!!XXX        if (eu .ne. 16) correct=.false.
+!!!XXX        if (ec .ne. 5) correct=.false.
+!!!XXX        if (cl .ne. 12) correct=.false.
+!!!XXX        if (cu .ne. 16) correct=.false.
+!!!XXX        if (cc .ne. 5) correct=.false.
+!!!XXX
+!!!XXX     else if (localPet .eq. 3) then
+!!!XXX        ! Check non-key bounds
+!!!XXX        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
+!!!XXX               exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX               computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX               rc=localrc)
+!!!XXX        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX        ! Bounds
+!!!XXX        if (el .ne. 17) correct=.false.
+!!!XXX        if (eu .ne. 20) correct=.false.
+!!!XXX        if (ec .ne. 4) correct=.false.
+!!!XXX        if (cl .ne. 17) correct=.false.
+!!!XXX        if (cu .ne. 20) correct=.false.
+!!!XXX        if (cc .ne. 4) correct=.false.
+!!!XXX    endif
+!!!XXX  endif
+!!!XXX
+!!!XXX  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "LocStream equality before assignment Test"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX  locstreamBool = (locstreamAlias.eq.locstream)
+!!!XXX  call ESMF_Test(.not.locstreamBool, name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  ! Testing ESMF_LocStreamAssignment(=)()
+!!!XXX  write(name, *) "LocStream assignment and equality Test"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX  locstreamAlias = locstream
+!!!XXX  locstreamBool = (locstreamAlias.eq.locstream)
+!!!XXX  call ESMF_Test(locstreamBool, name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "LocStreamDestroy Test"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX  call ESMF_LocStreamDestroy(locstream, rc=rc)
+!!!XXX  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  ! Testing ESMF_LocStreamOperator(==)()
+!!!XXX  write(name, *) "LocStream equality after destroy Test"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX  locstreamBool = (locstreamAlias==locstream)
+!!!XXX  call ESMF_Test(.not.locstreamBool, name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  ! Testing ESMF_LocStreamOperator(/=)()
+!!!XXX  write(name, *) "LocStream non-equality after destroy Test"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX  locstreamBool = (locstreamAlias/=locstream)
+!!!XXX  call ESMF_Test(locstreamBool, name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Double LocStreamDestroy through alias Test"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX  call ESMF_LocStreamDestroy(locstreamAlias, rc=rc)
+!!!XXX  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  
+!!!XXX
+!!!XXX
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Test ESMF_LocStreamCreate from Irregular distribution"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX
+!!!XXX  ! initialize check variables
+!!!XXX  correct=.true.
+!!!XXX  rc=ESMF_SUCCESS
+!!!XXX
+!!!XXX  ! Create Grid
+!!!XXX  locstream=ESMF_LocStreamCreate(minIndex=2, countsPerDE=(/5,5,5,4/), indexflag=ESMF_INDEX_GLOBAL, &
+!!!XXX             rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  if (petCount .eq. 1) then
+!!!XXX     ! Check non-key bounds
+!!!XXX     call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
+!!!XXX             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX             rc=localrc)
+!!!XXX     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX     ! Bounds
+!!!XXX     if (el .ne. 2) correct=.false.
+!!!XXX     if (eu .ne. 6) correct=.false.
+!!!XXX     if (ec .ne. 5) correct=.false.
+!!!XXX     if (cl .ne. 2) correct=.false.
+!!!XXX     if (cu .ne. 6) correct=.false.
+!!!XXX     if (cc .ne. 5) correct=.false.
+!!!XXX
+!!!XXX!write(*,*) "0", correct, el, eu, ec
+!!!XXX     ! Check non-key bounds
+!!!XXX     call  ESMF_LocStreamGetBounds(locstream, localDE=1, &
+!!!XXX             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX             rc=localrc)
+!!!XXX     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX     ! Bounds
+!!!XXX     if (el .ne. 7) correct=.false.
+!!!XXX     if (eu .ne. 11) correct=.false.
+!!!XXX     if (ec .ne. 5) correct=.false.
+!!!XXX     if (cl .ne. 7) correct=.false.
+!!!XXX     if (cu .ne. 11) correct=.false.
+!!!XXX     if (cc .ne. 5) correct=.false.
+!!!XXX
+!!!XXX!write(*,*) "1", correct, el, eu, ec
+!!!XXX     ! Check non-key bounds
+!!!XXX     call  ESMF_LocStreamGetBounds(locstream, localDE=2, &
+!!!XXX             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX             rc=localrc)
+!!!XXX     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX     ! Bounds
+!!!XXX     if (el .ne. 12) correct=.false.
+!!!XXX     if (eu .ne. 16) correct=.false.
+!!!XXX     if (ec .ne. 5) correct=.false.
+!!!XXX     if (cl .ne. 12) correct=.false.
+!!!XXX     if (cu .ne. 16) correct=.false.
+!!!XXX     if (cc .ne. 5) correct=.false.
+!!!XXX
+!!!XXX!write(*,*) "2", correct, el, eu, ec
+!!!XXX     ! Check non-key bounds
+!!!XXX     call  ESMF_LocStreamGetBounds(locstream, localDE=3, &
+!!!XXX             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX             rc=localrc)
+!!!XXX     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX     ! Bounds
+!!!XXX     if (el .ne. 17) correct=.false.
+!!!XXX     if (eu .ne. 20) correct=.false.
+!!!XXX     if (ec .ne. 4) correct=.false.
+!!!XXX     if (cl .ne. 17) correct=.false.
+!!!XXX     if (cu .ne. 20) correct=.false.
+!!!XXX     if (cc .ne. 4) correct=.false.
+!!!XXX
+!!!XXX!write(*,*) "3", correct, el, eu, ec
+!!!XXX  else   if (petCount .eq. 4) then
+!!!XXX     if (localPet .eq. 0) then
+!!!XXX        ! Check non-key bounds
+!!!XXX        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
+!!!XXX                exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX                computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX                rc=localrc)
+!!!XXX        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX        ! Bounds
+!!!XXX        if (el .ne. 2) correct=.false.
+!!!XXX        if (eu .ne. 6) correct=.false.
+!!!XXX        if (ec .ne. 5) correct=.false.
+!!!XXX        if (cl .ne. 2) correct=.false.
+!!!XXX        if (cu .ne. 6) correct=.false.
+!!!XXX        if (cc .ne. 5) correct=.false.
+!!!XXX     else if (localPet .eq. 1) then
+!!!XXX        ! Check non-key bounds
+!!!XXX        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
+!!!XXX                exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX                computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX                rc=localrc)
+!!!XXX        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX        ! Bounds
+!!!XXX        if (el .ne. 7) correct=.false.
+!!!XXX        if (eu .ne. 11) correct=.false.
+!!!XXX        if (ec .ne. 5) correct=.false.
+!!!XXX        if (cl .ne. 7) correct=.false.
+!!!XXX        if (cu .ne. 11) correct=.false.
+!!!XXX        if (cc .ne. 5) correct=.false.
+!!!XXX
+!!!XXX     else if (localPet .eq. 2) then
+!!!XXX        ! Check non-key bounds
+!!!XXX        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
+!!!XXX               exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX               computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX               rc=localrc)
+!!!XXX        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX        ! Bounds
+!!!XXX        if (el .ne. 12) correct=.false.
+!!!XXX        if (eu .ne. 16) correct=.false.
+!!!XXX        if (ec .ne. 5) correct=.false.
+!!!XXX        if (cl .ne. 12) correct=.false.
+!!!XXX        if (cu .ne. 16) correct=.false.
+!!!XXX        if (cc .ne. 5) correct=.false.
+!!!XXX
+!!!XXX     else if (localPet .eq. 3) then
+!!!XXX        ! Check non-key bounds
+!!!XXX        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
+!!!XXX               exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX               computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX               rc=localrc)
+!!!XXX        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX        ! Bounds
+!!!XXX        if (el .ne. 17) correct=.false.
+!!!XXX        if (eu .ne. 20) correct=.false.
+!!!XXX        if (ec .ne. 4) correct=.false.
+!!!XXX        if (cl .ne. 17) correct=.false.
+!!!XXX        if (cu .ne. 20) correct=.false.
+!!!XXX        if (cc .ne. 4) correct=.false.
+!!!XXX    endif
+!!!XXX  endif
+!!!XXX
+!!!XXX  call ESMF_LocStreamDestroy(locstream,rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX
+!!!XXX
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Testing LocStream Create from localCount and indexflag=ESMF_INDEX_DELOCAL"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX
+!!!XXX  ! initialize check variables
+!!!XXX  correct=.true.
+!!!XXX  rc=ESMF_SUCCESS
+!!!XXX
+!!!XXX  ! Now make sure that a created grid validates successfully
+!!!XXX  !! Create Grid
+!!!XXX  locstream=ESMF_LocStreamCreate(localCount=10, indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX     
+!!!XXX  ! Get Bounds
+!!!XXX  call ESMF_LocStreamGetBounds(locstream, localDE=0, &
+!!!XXX         exclusiveCount=ec, exclusiveLBound=el, exclusiveUBound=eu, &
+!!!XXX         computationalCount=cc, computationalLBound=cl, computationalUBound=cu, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! Check Bounds
+!!!XXX  if (ec .ne. 10) correct=.false.
+!!!XXX  if (el .ne. 1) correct=.false.
+!!!XXX  if (eu .ne. 10) correct=.false.
+!!!XXX
+!!!XXX  if (cc .ne. 10) correct=.false.
+!!!XXX  if (cl .ne. 1) correct=.false.
+!!!XXX  if (cu .ne. 10) correct=.false.
+!!!XXX
+!!!XXX  
+!!!XXX  call ESMF_LocStreamDestroy(locstream,rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX
+!!!XXX
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Testing LocStream Create from localCount and indexflag=ESMF_INDEX_GLOBAL"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX
+!!!XXX  ! initialize check variables
+!!!XXX  correct=.true.
+!!!XXX  rc=ESMF_SUCCESS
+!!!XXX
+!!!XXX  ! Now make sure that a created grid validates successfully
+!!!XXX  !! Create Grid
+!!!XXX  locstream=ESMF_LocStreamCreate(localCount=10, indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX     
+!!!XXX  ! Get Bounds
+!!!XXX  call ESMF_LocStreamGetBounds(locstream, localDE=0, &
+!!!XXX         exclusiveCount=ec, exclusiveLBound=el, exclusiveUBound=eu, &
+!!!XXX         computationalCount=cc, computationalLBound=cl, computationalUBound=cu, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! Check Bounds
+!!!XXX  if (ec .ne. 10) correct=.false.
+!!!XXX  if (el .ne. (localPet*10)+1) correct=.false.
+!!!XXX  if (eu .ne. (localPet+1)*10) correct=.false.
+!!!XXX
+!!!XXX  if (cc .ne. 10) correct=.false.
+!!!XXX  if (cl .ne. (localPet*10)+1) correct=.false.
+!!!XXX  if (cu .ne. (localPet+1)*10) correct=.false.
+!!!XXX
+!!!XXX  call ESMF_LocStreamDestroy(locstream,rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Testing LocStream Create defaults and LocStream Get"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX
+!!!XXX  ! initialize check variables
+!!!XXX  correct=.true.
+!!!XXX  rc=ESMF_SUCCESS
+!!!XXX
+!!!XXX  ! Create Grid
+!!!XXX  locstream=ESMF_LocStreamCreate(name="LOCSTREAMXYZ", maxIndex=20, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX     
+!!!XXX  ! Get Info about LocStream
+!!!XXX  call ESMF_LocStreamGet(locstream, distgrid=distgridOut, &
+!!!XXX       keyCount=keyCount, localDECount=localDECount, indexflag=indexflag, name=locstream_name, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! check info
+!!!XXX  !! Make sure we start with keyCount = 0
+!!!XXX  if (keyCount .ne. 0) correct=.false.
+!!!XXX
+!!!XXX  !! make sure localDECount matches
+!!!XXX  call ESMF_DistGridGet(distgridOut,delayout=delayout, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  call ESMF_DELayoutGet(delayout,localDECount=localDECountOut, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  if (localDECount .ne. localDECountOut) correct=.false.
+!!!XXX
+!!!XXX  !! Check indexflag 
+!!!XXX  if (.not. (indexflag .eq. ESMF_INDEX_DELOCAL)) correct=.false.
+!!!XXX
+!!!XXX  !! Check name
+!!!XXX  if (trim(locstream_name) .ne. "LOCSTREAMXYZ") correct=.false.
+!!!XXX  
+!!!XXX  call ESMF_LocStreamDestroy(locstream,rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX
+!!!XXX
+!!!XXX
+!!!XXX
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Test keyCount and keyNames response to ESMF_LocStreamAddKey"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX
+!!!XXX  ! initialize check variables
+!!!XXX  correct=.true.
+!!!XXX  rc=ESMF_SUCCESS
+!!!XXX
+!!!XXX  ! Create Grid
+!!!XXX  locstream=ESMF_LocStreamCreate(maxIndex=20, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX     
+!!!XXX  ! Get keyCount
+!!!XXX  call ESMF_LocStreamGet(locstream, keyCount=keyCount, keyNames=keyNames, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! check info
+!!!XXX  !! Make sure we start with keyCount = 0
+!!!XXX  if (keyCount .ne. 0) correct=.false.
+!!!XXX
+!!!XXX  ! Add key
+!!!XXX  call ESMF_LocStreamAddKey(locstream, keyName="A1", rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! Get keyCount
+!!!XXX  call ESMF_LocStreamGet(locstream, keyCount=keyCount, keyNames=keyNames, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! check info
+!!!XXX  if (keyCount .ne. 1) correct=.false.
+!!!XXX  if (trim(keyNames(1)) .ne. "A1") correct=.false.
+!!!XXX
+!!!XXX  ! Add key
+!!!XXX  call ESMF_LocStreamAddKey(locstream, keyName="A2", rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! Get keyCount
+!!!XXX  call ESMF_LocStreamGet(locstream, keyCount=keyCount, keyNames=keyNames, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX
+!!!XXX  ! check info
+!!!XXX  if (keyCount .ne. 2) correct=.false.
+!!!XXX  if (trim(keyNames(1)) .ne. "A1") correct=.false.
+!!!XXX  if (trim(keyNames(2)) .ne. "A2") correct=.false.
+!!!XXX
+!!!XXX  call ESMF_LocStreamDestroy(locstream,rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Test ESMF_LocStreamGetKey getting an I4 pointer and bounds"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX
+!!!XXX  ! initialize check variables
+!!!XXX  correct=.true.
+!!!XXX  rc=ESMF_SUCCESS
+!!!XXX
+!!!XXX  ! Create Grid
+!!!XXX  locstream=ESMF_LocStreamCreate(localCount=10,  rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX     
+!!!XXX  ! allocate array
+!!!XXX  allocate(keyDataI4(10))
+!!!XXX
+!!!XXX  ! Add key
+!!!XXX  call ESMF_LocStreamAddKey(locstream, keyName="A1", farray=keyDataI4,  rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! Fill key
+!!!XXX  do i=1,10
+!!!XXX     keyDataI4(i)=REAL(i,ESMF_KIND_I4)
+!!!XXX  enddo
+!!!XXX
+!!!XXX  ! Get key and bounds
+!!!XXX  call  ESMF_LocStreamGetKey(locstream, keyName="A1", &
+!!!XXX          exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX          computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX          totalLBound=tl, totalUBound=tu, totalCount=tc, & 
+!!!XXX          farray=tmpI4, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! check info
+!!!XXX  !! data pointer
+!!!XXX  do i=1,10
+!!!XXX     if (tmpI4(i) .ne. REAL(i,ESMF_KIND_I4)) correct=.false.
+!!!XXX  enddo
+!!!XXX
+!!!XXX  !! Bounds
+!!!XXX  if (el .ne. 1) correct=.false.
+!!!XXX  if (eu .ne. 10) correct=.false.
+!!!XXX  if (ec .ne. 10) correct=.false.
+!!!XXX  if (cl .ne. 1) correct=.false.
+!!!XXX  if (cu .ne. 10) correct=.false.
+!!!XXX  if (cc .ne. 10) correct=.false.
+!!!XXX  if (tl .ne. 1) correct=.false.
+!!!XXX  if (tu .ne. 10) correct=.false.
+!!!XXX  if (tc .ne. 10) correct=.false.
+!!!XXX
+!!!XXX
+!!!XXX  call ESMF_LocStreamDestroy(locstream,rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! deallocate array
+!!!XXX  deallocate(keyDataI4)
+!!!XXX
+!!!XXX
+!!!XXX  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Test ESMF_LocStreamGetKey getting an R4 pointer and bounds"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX
+!!!XXX  ! initialize check variables
+!!!XXX  correct=.true.
+!!!XXX  rc=ESMF_SUCCESS
+!!!XXX
+!!!XXX  ! Create Grid
+!!!XXX  locstream=ESMF_LocStreamCreate(localCount=10,  rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX     
+!!!XXX  ! allocate array
+!!!XXX  allocate(keyDataR4(10))
+!!!XXX
+!!!XXX  ! Add key
+!!!XXX  call ESMF_LocStreamAddKey(locstream, keyName="A1", farray=keyDataR4,  rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! Fill key
+!!!XXX  do i=1,10
+!!!XXX     keyDataR4(i)=REAL(i,ESMF_KIND_R4)
+!!!XXX  enddo
+!!!XXX
+!!!XXX  ! Get key and bounds
+!!!XXX  call  ESMF_LocStreamGetKey(locstream, keyName="A1", &
+!!!XXX          exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX          computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX          totalLBound=tl, totalUBound=tu, totalCount=tc, & 
+!!!XXX          farray=tmpR4, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! check info
+!!!XXX  !! data pointer
+!!!XXX  do i=1,10
+!!!XXX     if (tmpR4(i) .ne. REAL(i,ESMF_KIND_R4)) correct=.false.
+!!!XXX  enddo
+!!!XXX
+!!!XXX  !! Bounds
+!!!XXX  if (el .ne. 1) correct=.false.
+!!!XXX  if (eu .ne. 10) correct=.false.
+!!!XXX  if (ec .ne. 10) correct=.false.
+!!!XXX  if (cl .ne. 1) correct=.false.
+!!!XXX  if (cu .ne. 10) correct=.false.
+!!!XXX  if (cc .ne. 10) correct=.false.
+!!!XXX  if (tl .ne. 1) correct=.false.
+!!!XXX  if (tu .ne. 10) correct=.false.
+!!!XXX  if (tc .ne. 10) correct=.false.
+!!!XXX
+!!!XXX
+!!!XXX  call ESMF_LocStreamDestroy(locstream,rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! deallocate array
+!!!XXX  deallocate(keyDataR4)
+!!!XXX
+!!!XXX
+!!!XXX  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX
+!!!XXX
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Test ESMF_LocStreamGetKey getting an R8 pointer and bounds"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX
+!!!XXX  ! initialize check variables
+!!!XXX  correct=.true.
+!!!XXX  rc=ESMF_SUCCESS
+!!!XXX
+!!!XXX  ! Create Grid
+!!!XXX  locstream=ESMF_LocStreamCreate(localCount=10,  rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX     
+!!!XXX  ! allocate array
+!!!XXX  allocate(keyDataR8(10))
+!!!XXX
+!!!XXX  ! Add key
+!!!XXX  call ESMF_LocStreamAddKey(locstream, keyName="A1", farray=keyDataR8,  rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! Fill key
+!!!XXX  do i=1,10
+!!!XXX     keyDataR8(i)=REAL(i,ESMF_KIND_R8)
+!!!XXX  enddo
+!!!XXX
+!!!XXX  ! Get key and bounds
+!!!XXX  call  ESMF_LocStreamGetKey(locstream, keyName="A1", &
+!!!XXX          exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX          computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX          totalLBound=tl, totalUBound=tu, totalCount=tc, & 
+!!!XXX          farray=tmpR8, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! check info
+!!!XXX  !! data pointer
+!!!XXX  do i=1,10
+!!!XXX     if (tmpR8(i) .ne. REAL(i,ESMF_KIND_R8)) correct=.false.
+!!!XXX  enddo
+!!!XXX
+!!!XXX  !! Bounds
+!!!XXX  if (el .ne. 1) correct=.false.
+!!!XXX  if (eu .ne. 10) correct=.false.
+!!!XXX  if (ec .ne. 10) correct=.false.
+!!!XXX  if (cl .ne. 1) correct=.false.
+!!!XXX  if (cu .ne. 10) correct=.false.
+!!!XXX  if (cc .ne. 10) correct=.false.
+!!!XXX  if (tl .ne. 1) correct=.false.
+!!!XXX  if (tu .ne. 10) correct=.false.
+!!!XXX  if (tc .ne. 10) correct=.false.
+!!!XXX
+!!!XXX
+!!!XXX  call ESMF_LocStreamDestroy(locstream,rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! deallocate array
+!!!XXX  deallocate(keyDataR8)
+!!!XXX
+!!!XXX
+!!!XXX  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Test getting keyUnits and keyLongName"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX
+!!!XXX  ! initialize check variables
+!!!XXX  correct=.true.
+!!!XXX  rc=ESMF_SUCCESS
+!!!XXX
+!!!XXX  ! Create Grid
+!!!XXX  locstream=ESMF_LocStreamCreate(maxIndex=20, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX     
+!!!XXX  ! Add key A1
+!!!XXX  call ESMF_LocStreamAddKey(locstream, keyName="A1", keyUnits="U1", keyLongName="LN1", rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! Add key A2
+!!!XXX  call ESMF_LocStreamAddKey(locstream, keyName="A2", keyUnits="U2", keyLongName="LN2", rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! Get info for A1
+!!!XXX  call ESMF_LocStreamGetKey(locstream, keyName="A1", keyUnits=keyUnits, keyLongName=keyLongName, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! check info
+!!!XXX  if (trim(keyUnits) .ne. "U1") correct=.false.
+!!!XXX  if (trim(keyLongName) .ne. "LN1") correct=.false.
+!!!XXX
+!!!XXX
+!!!XXX  ! Get info for A2
+!!!XXX  call ESMF_LocStreamGetKey(locstream, keyName="A2", keyUnits=keyUnits, keyLongName=keyLongName, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! check info
+!!!XXX  if (trim(keyUnits) .ne. "U2") correct=.false.
+!!!XXX  if (trim(keyLongName) .ne. "LN2") correct=.false.
+!!!XXX
+!!!XXX  call ESMF_LocStreamDestroy(locstream,rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX  ! NOTE THAT SERIALIZE/DESERIALIZE IS AN INTERNAL INTERFACE AND NOT INTENDED FOR PUBLIC USE
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Test LocStream Serialize/Deserialize"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX
+!!!XXX  ! initialize check variables
+!!!XXX  correct=.true.
+!!!XXX  rc=ESMF_SUCCESS
+!!!XXX
+!!!XXX  ! Create Grid
+!!!XXX  locstream=ESMF_LocStreamCreate(maxIndex=20, indexflag=ESMF_INDEX_GLOBAL, coordSys=ESMF_COORDSYS_SPH_DEG, &
+!!!XXX       rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX     
+!!!XXX  ! Add key A1
+!!!XXX  call ESMF_LocStreamAddKey(locstream, keyName="A1", keyUnits="U1", keyLongName="LN1", rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! Add key A2
+!!!XXX  call ESMF_LocStreamAddKey(locstream, keyName="A2", keyUnits="U2", keyLongName="LN2", rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX
+!!!XXX  ! Create a buffer to put the locstream in
+!!!XXX  offset=0
+!!!XXX  bufCount = 1
+!!!XXX  allocate (buf(bufCount))
+!!!XXX  call ESMF_LocStreamSerialize(locstream, buf, bufCount, offset,  &
+!!!XXX    inquireflag=ESMF_INQUIREONLY, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE                            
+!!!XXX  deallocate (buf)
+!!!XXX
+!!!XXX  bufCount=offset
+!!!XXX  print *, 'ESMF_LocStreamUTest: serialization buffer size =', bufCount
+!!!XXX  allocate(buf(bufCount))
+!!!XXX
+!!!XXX  ! Serialize
+!!!XXX  offset=0
+!!!XXX  call ESMF_LocStreamSerialize(locstream, buf, bufCount, offset, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! Deserialize
+!!!XXX  offset=0
+!!!XXX  locstream2=ESMF_LocStreamDeserialize(buf, offset, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX
+!!!XXX  ! Check loc stream info
+!!!XXX  call ESMF_LocStreamGet(locstream2, keyCount=keyCount, indexflag=indexflag, coordSys=coordSys, &
+!!!XXX       rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! check info
+!!!XXX  if (keyCount .ne. 2) correct=.false.
+!!!XXX  if (.not. (indexflag .eq. ESMF_INDEX_GLOBAL)) correct=.false.
+!!!XXX  if (.not. (coordSys .eq. ESMF_COORDSYS_SPH_DEG)) correct=.false.
+!!!XXX
+!!!XXX  ! Get info for A1
+!!!XXX  call ESMF_LocStreamGetKey(locstream2, keyName="A1", keyUnits=keyUnits, keyLongName=keyLongName, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! check info
+!!!XXX  if (trim(keyUnits) .ne. "U1") correct=.false.
+!!!XXX  if (trim(keyLongName) .ne. "LN1") correct=.false.
+!!!XXX
+!!!XXX  ! Get info for A2
+!!!XXX  call ESMF_LocStreamGetKey(locstream2, keyName="A2", keyUnits=keyUnits, keyLongName=keyLongName, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! check info
+!!!XXX  if (trim(keyUnits) .ne. "U2") correct=.false.
+!!!XXX  if (trim(keyLongName) .ne. "LN2") correct=.false.
+!!!XXX
+!!!XXX  call ESMF_LocStreamDestroy(locstream,rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  call ESMF_LocStreamDestroy(locstream2,rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! Get rid of buffer
+!!!XXX  deallocate(buf)
+!!!XXX
+!!!XXX  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX
+!!!XXX
+!!!XXX
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Test Print"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX
+!!!XXX  ! initialize check variables
+!!!XXX  correct=.true.
+!!!XXX  rc=ESMF_SUCCESS
+!!!XXX
+!!!XXX  ! Create Grid
+!!!XXX  locstream=ESMF_LocStreamCreate(maxIndex=20, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX     
+!!!XXX  ! Add key A1
+!!!XXX  call ESMF_LocStreamAddKey(locstream, keyName="A1", keyUnits="U1", keyLongName="LN1", rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! Add key A2
+!!!XXX  call ESMF_LocStreamAddKey(locstream, keyName="A2", keyUnits="U2", keyLongName="LN2", rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  ! Test Print
+!!!XXX  call ESMF_LocStreamPrint(locstream, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  call ESMF_LocStreamDestroy(locstream,rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX
+!!!XXX
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Test ESMF_LocStreamCreate from Regular distribution"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX
+!!!XXX  ! initialize check variables
+!!!XXX  correct=.true.
+!!!XXX  rc=ESMF_SUCCESS
+!!!XXX
+!!!XXX  ! Create Grid
+!!!XXX  locstream=ESMF_LocStreamCreate(minIndex=2, maxIndex=20, regDecomp=4, indexflag=ESMF_INDEX_GLOBAL, &
+!!!XXX             rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  if (petCount .eq. 1) then
+!!!XXX     ! Check non-key bounds
+!!!XXX     call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
+!!!XXX             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX             rc=localrc)
+!!!XXX     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX     ! Bounds
+!!!XXX     if (el .ne. 2) correct=.false.
+!!!XXX     if (eu .ne. 6) correct=.false.
+!!!XXX     if (ec .ne. 5) correct=.false.
+!!!XXX     if (cl .ne. 2) correct=.false.
+!!!XXX     if (cu .ne. 6) correct=.false.
+!!!XXX     if (cc .ne. 5) correct=.false.
+!!!XXX
+!!!XXX!write(*,*) "0", correct, el, eu, ec
+!!!XXX     ! Check non-key bounds
+!!!XXX     call  ESMF_LocStreamGetBounds(locstream, localDE=1, &
+!!!XXX             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX             rc=localrc)
+!!!XXX     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX     ! Bounds
+!!!XXX     if (el .ne. 7) correct=.false.
+!!!XXX     if (eu .ne. 11) correct=.false.
+!!!XXX     if (ec .ne. 5) correct=.false.
+!!!XXX     if (cl .ne. 7) correct=.false.
+!!!XXX     if (cu .ne. 11) correct=.false.
+!!!XXX     if (cc .ne. 5) correct=.false.
+!!!XXX
+!!!XXX!write(*,*) "1", correct, el, eu, ec
+!!!XXX     ! Check non-key bounds
+!!!XXX     call  ESMF_LocStreamGetBounds(locstream, localDE=2, &
+!!!XXX             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX             rc=localrc)
+!!!XXX     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX     ! Bounds
+!!!XXX     if (el .ne. 12) correct=.false.
+!!!XXX     if (eu .ne. 16) correct=.false.
+!!!XXX     if (ec .ne. 5) correct=.false.
+!!!XXX     if (cl .ne. 12) correct=.false.
+!!!XXX     if (cu .ne. 16) correct=.false.
+!!!XXX     if (cc .ne. 5) correct=.false.
+!!!XXX
+!!!XXX!write(*,*) "2", correct, el, eu, ec
+!!!XXX     ! Check non-key bounds
+!!!XXX     call  ESMF_LocStreamGetBounds(locstream, localDE=3, &
+!!!XXX             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX             rc=localrc)
+!!!XXX     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX     ! Bounds
+!!!XXX     if (el .ne. 17) correct=.false.
+!!!XXX     if (eu .ne. 20) correct=.false.
+!!!XXX     if (ec .ne. 4) correct=.false.
+!!!XXX     if (cl .ne. 17) correct=.false.
+!!!XXX     if (cu .ne. 20) correct=.false.
+!!!XXX     if (cc .ne. 4) correct=.false.
+!!!XXX
+!!!XXX!write(*,*) "3", correct, el, eu, ec
+!!!XXX  else   if (petCount .eq. 4) then
+!!!XXX     if (localPet .eq. 0) then
+!!!XXX        ! Check non-key bounds
+!!!XXX        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
+!!!XXX                exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX                computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX                rc=localrc)
+!!!XXX        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX        ! Bounds
+!!!XXX        if (el .ne. 2) correct=.false.
+!!!XXX        if (eu .ne. 6) correct=.false.
+!!!XXX        if (ec .ne. 5) correct=.false.
+!!!XXX        if (cl .ne. 2) correct=.false.
+!!!XXX        if (cu .ne. 6) correct=.false.
+!!!XXX        if (cc .ne. 5) correct=.false.
+!!!XXX     else if (localPet .eq. 1) then
+!!!XXX        ! Check non-key bounds
+!!!XXX        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
+!!!XXX                exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX                computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX                rc=localrc)
+!!!XXX        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX        ! Bounds
+!!!XXX        if (el .ne. 7) correct=.false.
+!!!XXX        if (eu .ne. 11) correct=.false.
+!!!XXX        if (ec .ne. 5) correct=.false.
+!!!XXX        if (cl .ne. 7) correct=.false.
+!!!XXX        if (cu .ne. 11) correct=.false.
+!!!XXX        if (cc .ne. 5) correct=.false.
+!!!XXX
+!!!XXX     else if (localPet .eq. 2) then
+!!!XXX        ! Check non-key bounds
+!!!XXX        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
+!!!XXX               exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX               computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX               rc=localrc)
+!!!XXX        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX        ! Bounds
+!!!XXX        if (el .ne. 12) correct=.false.
+!!!XXX        if (eu .ne. 16) correct=.false.
+!!!XXX        if (ec .ne. 5) correct=.false.
+!!!XXX        if (cl .ne. 12) correct=.false.
+!!!XXX        if (cu .ne. 16) correct=.false.
+!!!XXX        if (cc .ne. 5) correct=.false.
+!!!XXX
+!!!XXX     else if (localPet .eq. 3) then
+!!!XXX        ! Check non-key bounds
+!!!XXX        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
+!!!XXX               exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX               computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX               rc=localrc)
+!!!XXX        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX        ! Bounds
+!!!XXX        if (el .ne. 17) correct=.false.
+!!!XXX        if (eu .ne. 20) correct=.false.
+!!!XXX        if (ec .ne. 4) correct=.false.
+!!!XXX        if (cl .ne. 17) correct=.false.
+!!!XXX        if (cu .ne. 20) correct=.false.
+!!!XXX        if (cc .ne. 4) correct=.false.
+!!!XXX    endif
+!!!XXX  endif
+!!!XXX
+!!!XXX  call ESMF_LocStreamDestroy(locstream,rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX
+!!!XXX
+!!!XXX
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Test ESMF_LocStreamCreate from Irregular distribution"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX
+!!!XXX  ! initialize check variables
+!!!XXX  correct=.true.
+!!!XXX  rc=ESMF_SUCCESS
+!!!XXX
+!!!XXX  ! Create Grid
+!!!XXX  locstream=ESMF_LocStreamCreate(minIndex=2, countsPerDE=(/5,5,5,4/), indexflag=ESMF_INDEX_GLOBAL, &
+!!!XXX             rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  if (petCount .eq. 1) then
+!!!XXX     ! Check non-key bounds
+!!!XXX     call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
+!!!XXX             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX             rc=localrc)
+!!!XXX     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX     ! Bounds
+!!!XXX     if (el .ne. 2) correct=.false.
+!!!XXX     if (eu .ne. 6) correct=.false.
+!!!XXX     if (ec .ne. 5) correct=.false.
+!!!XXX     if (cl .ne. 2) correct=.false.
+!!!XXX     if (cu .ne. 6) correct=.false.
+!!!XXX     if (cc .ne. 5) correct=.false.
+!!!XXX
+!!!XXX!write(*,*) "0", correct, el, eu, ec
+!!!XXX     ! Check non-key bounds
+!!!XXX     call  ESMF_LocStreamGetBounds(locstream, localDE=1, &
+!!!XXX             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX             rc=localrc)
+!!!XXX     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX     ! Bounds
+!!!XXX     if (el .ne. 7) correct=.false.
+!!!XXX     if (eu .ne. 11) correct=.false.
+!!!XXX     if (ec .ne. 5) correct=.false.
+!!!XXX     if (cl .ne. 7) correct=.false.
+!!!XXX     if (cu .ne. 11) correct=.false.
+!!!XXX     if (cc .ne. 5) correct=.false.
+!!!XXX
+!!!XXX!write(*,*) "1", correct, el, eu, ec
+!!!XXX     ! Check non-key bounds
+!!!XXX     call  ESMF_LocStreamGetBounds(locstream, localDE=2, &
+!!!XXX             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX             rc=localrc)
+!!!XXX     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX     ! Bounds
+!!!XXX     if (el .ne. 12) correct=.false.
+!!!XXX     if (eu .ne. 16) correct=.false.
+!!!XXX     if (ec .ne. 5) correct=.false.
+!!!XXX     if (cl .ne. 12) correct=.false.
+!!!XXX     if (cu .ne. 16) correct=.false.
+!!!XXX     if (cc .ne. 5) correct=.false.
+!!!XXX
+!!!XXX!write(*,*) "2", correct, el, eu, ec
+!!!XXX     ! Check non-key bounds
+!!!XXX     call  ESMF_LocStreamGetBounds(locstream, localDE=3, &
+!!!XXX             exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX             computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX             rc=localrc)
+!!!XXX     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX     ! Bounds
+!!!XXX     if (el .ne. 17) correct=.false.
+!!!XXX     if (eu .ne. 20) correct=.false.
+!!!XXX     if (ec .ne. 4) correct=.false.
+!!!XXX     if (cl .ne. 17) correct=.false.
+!!!XXX     if (cu .ne. 20) correct=.false.
+!!!XXX     if (cc .ne. 4) correct=.false.
+!!!XXX
+!!!XXX!write(*,*) "3", correct, el, eu, ec
+!!!XXX  else   if (petCount .eq. 4) then
+!!!XXX     if (localPet .eq. 0) then
+!!!XXX        ! Check non-key bounds
+!!!XXX        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
+!!!XXX                exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX                computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX                rc=localrc)
+!!!XXX        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX        ! Bounds
+!!!XXX        if (el .ne. 2) correct=.false.
+!!!XXX        if (eu .ne. 6) correct=.false.
+!!!XXX        if (ec .ne. 5) correct=.false.
+!!!XXX        if (cl .ne. 2) correct=.false.
+!!!XXX        if (cu .ne. 6) correct=.false.
+!!!XXX        if (cc .ne. 5) correct=.false.
+!!!XXX     else if (localPet .eq. 1) then
+!!!XXX        ! Check non-key bounds
+!!!XXX        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
+!!!XXX                exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX                computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX                rc=localrc)
+!!!XXX        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX        ! Bounds
+!!!XXX        if (el .ne. 7) correct=.false.
+!!!XXX        if (eu .ne. 11) correct=.false.
+!!!XXX        if (ec .ne. 5) correct=.false.
+!!!XXX        if (cl .ne. 7) correct=.false.
+!!!XXX        if (cu .ne. 11) correct=.false.
+!!!XXX        if (cc .ne. 5) correct=.false.
+!!!XXX
+!!!XXX     else if (localPet .eq. 2) then
+!!!XXX        ! Check non-key bounds
+!!!XXX        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
+!!!XXX               exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX               computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX               rc=localrc)
+!!!XXX        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX        ! Bounds
+!!!XXX        if (el .ne. 12) correct=.false.
+!!!XXX        if (eu .ne. 16) correct=.false.
+!!!XXX        if (ec .ne. 5) correct=.false.
+!!!XXX        if (cl .ne. 12) correct=.false.
+!!!XXX        if (cu .ne. 16) correct=.false.
+!!!XXX        if (cc .ne. 5) correct=.false.
+!!!XXX
+!!!XXX     else if (localPet .eq. 3) then
+!!!XXX        ! Check non-key bounds
+!!!XXX        call  ESMF_LocStreamGetBounds(locstream, localDE=0, &
+!!!XXX               exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
+!!!XXX               computationalLBound=cl, computationalUBound=cu, computationalCount=cc, & 
+!!!XXX               rc=localrc)
+!!!XXX        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX        ! Bounds
+!!!XXX        if (el .ne. 17) correct=.false.
+!!!XXX        if (eu .ne. 20) correct=.false.
+!!!XXX        if (ec .ne. 4) correct=.false.
+!!!XXX        if (cl .ne. 17) correct=.false.
+!!!XXX        if (cu .ne. 20) correct=.false.
+!!!XXX        if (cc .ne. 4) correct=.false.
+!!!XXX    endif
+!!!XXX  endif
+!!!XXX
+!!!XXX  call ESMF_LocStreamDestroy(locstream,rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX
+!!!XXX
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Test ESMF_LocStream Create From Background Mesh"
+!!!XXX  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!!!XXX
+!!!XXX  ! initialize check variables
+!!!XXX  correct=.true.
+!!!XXX  rc=ESMF_SUCCESS
+!!!XXX
+!!!XXX  !!!!!!!! Create Mesh !!!!!!!!!!!
+!!!XXX  ! Create Mesh
+!!!XXX  ! Only do this if we have 4 PETs
+!!!XXX if (petCount .eq. 4) then
+!!!XXX     ! Setup mesh data depending on PET
+!!!XXX     if (localPet .eq. 0) then
+!!!XXX        ! Fill in node data
+!!!XXX        numNodes=4
+!!!XXX
+!!!XXX       !! node ids
+!!!XXX       allocate(nodeIds(numNodes))
+!!!XXX       nodeIds=(/1,2,4,5/) 
+!!!XXX
+!!!XXX       !! node Coords
+!!!XXX       allocate(nodeCoords(numNodes*2))
+!!!XXX       nodeCoords=(/0.0,0.0, &
+!!!XXX                    1.0,0.0, &
+!!!XXX                    0.0,1.0, &
+!!!XXX                    1.0,1.0/)
+!!!XXX
+!!!XXX       !! node owners
+!!!XXX       allocate(nodeOwners(numNodes))
+!!!XXX       nodeOwners=(/0,0,0,0/) ! everything on proc 0
+!!!XXX
+!!!XXX       ! Fill in elem data
+!!!XXX       numElems=1
+!!!XXX
+!!!XXX       !! elem ids
+!!!XXX       allocate(elemIds(numElems))
+!!!XXX       elemIds=(/1/) 
+!!!XXX
+!!!XXX       !! elem type
+!!!XXX       allocate(elemTypes(numElems))
+!!!XXX       elemTypes=ESMF_MESHELEMTYPE_QUAD
+!!!XXX
+!!!XXX       !! elem conn
+!!!XXX       allocate(elemConn(numElems*4))
+!!!XXX       elemConn=(/1,2,4,3/)
+!!!XXX     else if (localPet .eq. 1) then
+!!!XXX        ! Fill in node data
+!!!XXX        numNodes=4
+!!!XXX
+!!!XXX       !! node ids
+!!!XXX       allocate(nodeIds(numNodes))
+!!!XXX       nodeIds=(/2,3,5,6/) 
+!!!XXX
+!!!XXX       !! node Coords
+!!!XXX       allocate(nodeCoords(numNodes*2))
+!!!XXX       nodeCoords=(/1.0,0.0, &
+!!!XXX                    2.0,0.0, &
+!!!XXX                    1.0,1.0, &
+!!!XXX                    2.0,1.0/)
+!!!XXX
+!!!XXX       !! node owners
+!!!XXX       allocate(nodeOwners(numNodes))
+!!!XXX       nodeOwners=(/0,1,0,1/) 
+!!!XXX
+!!!XXX       ! Fill in elem data
+!!!XXX       numElems=1
+!!!XXX
+!!!XXX       !! elem ids
+!!!XXX       allocate(elemIds(numElems))
+!!!XXX       elemIds=(/2/) 
+!!!XXX
+!!!XXX       !! elem type
+!!!XXX       allocate(elemTypes(numElems))
+!!!XXX       elemTypes=ESMF_MESHELEMTYPE_QUAD
+!!!XXX
+!!!XXX       !! elem conn
+!!!XXX       allocate(elemConn(numElems*4))
+!!!XXX       elemConn=(/1,2,4,3/)
+!!!XXX     else if (localPet .eq. 2) then
+!!!XXX        ! Fill in node data
+!!!XXX        numNodes=4
+!!!XXX
+!!!XXX       !! node ids
+!!!XXX       allocate(nodeIds(numNodes))
+!!!XXX       nodeIds=(/4,5,7,8/) 
+!!!XXX
+!!!XXX       !! node Coords
+!!!XXX       allocate(nodeCoords(numNodes*2))
+!!!XXX       nodeCoords=(/0.0,1.0, &
+!!!XXX                    1.0,1.0, &
+!!!XXX                    0.0,2.0, &
+!!!XXX                    1.0,2.0/)
+!!!XXX
+!!!XXX       !! node owners
+!!!XXX       allocate(nodeOwners(numNodes))
+!!!XXX       nodeOwners=(/0,0,2,2/) 
+!!!XXX
+!!!XXX       ! Fill in elem data
+!!!XXX       numElems=1
+!!!XXX
+!!!XXX       !! elem ids
+!!!XXX       allocate(elemIds(numElems))
+!!!XXX       elemIds=(/3/) 
+!!!XXX
+!!!XXX       !! elem type
+!!!XXX       allocate(elemTypes(numElems))
+!!!XXX       elemTypes=ESMF_MESHELEMTYPE_QUAD
+!!!XXX
+!!!XXX       !! elem conn
+!!!XXX       allocate(elemConn(numElems*4))
+!!!XXX       elemConn=(/1,2,4,3/)  
+!!!XXX     else 
+!!!XXX        ! Fill in node data
+!!!XXX        numNodes=4
+!!!XXX
+!!!XXX       !! node ids
+!!!XXX       allocate(nodeIds(numNodes))
+!!!XXX       nodeIds=(/5,6,8,9/) 
+!!!XXX
+!!!XXX       !! node Coords
+!!!XXX       allocate(nodeCoords(numNodes*2))
+!!!XXX       nodeCoords=(/1.0,1.0, &
+!!!XXX                    2.0,1.0, &
+!!!XXX                    1.0,2.0, &
+!!!XXX                    2.0,2.0/)
+!!!XXX
+!!!XXX       !! node owners
+!!!XXX       allocate(nodeOwners(numNodes))
+!!!XXX       nodeOwners=(/0,1,2,3/) 
+!!!XXX
+!!!XXX       ! Fill in elem data
+!!!XXX       numElems=1
+!!!XXX
+!!!XXX       !! elem ids
+!!!XXX       allocate(elemIds(numElems))
+!!!XXX       elemIds=(/4/) 
+!!!XXX
+!!!XXX       !! elem type
+!!!XXX       allocate(elemTypes(numElems))
+!!!XXX       elemTypes=ESMF_MESHELEMTYPE_QUAD
+!!!XXX
+!!!XXX       !! elem conn
+!!!XXX       allocate(elemConn(numElems*4))
+!!!XXX       elemConn=(/1,2,4,3/)  
+!!!XXX     endif
+!!!XXX
+!!!XXX  ! Create Mesh structure in 1 step
+!!!XXX  mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+!!!XXX         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+!!!XXX         coordSys=ESMF_COORDSYS_SPH_DEG, &
+!!!XXX         nodeOwners=nodeOwners, elementIds=elemIds,&
+!!!XXX         elementTypes=elemTypes, elementConn=elemConn, &
+!!!XXX         rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+!!!XXX
+!!!XXX
+!!!XXX  ! deallocate node data
+!!!XXX  deallocate(nodeIds)
+!!!XXX  deallocate(nodeCoords)
+!!!XXX  deallocate(nodeOwners)
+!!!XXX
+!!!XXX  ! deallocate elem data
+!!!XXX  deallocate(elemIds)
+!!!XXX  deallocate(elemTypes)
+!!!XXX  deallocate(elemConn)
+!!!XXX
+!!!XXX
+!!!XXX  !!!!!!!! Create LocStream !!!!!!!!!!!
+!!!XXX  ! Set number of points
+!!!XXX  if (localPet .eq. 0) then  
+!!!XXX      pntCount=2
+!!!XXX  else if (localPet .eq. 1) then  
+!!!XXX      pntCount=3
+!!!XXX  else if (localPet .eq. 2) then  
+!!!XXX      pntCount=1
+!!!XXX  else if (localPet .eq. 3) then  
+!!!XXX      pntCount=1
+!!!XXX  endif
+!!!XXX
+!!!XXX
+!!!XXX  ! Create LocStream
+!!!XXX  locstream=ESMF_LocStreamCreate(localCount=pntCount,  rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) then
+!!!XXX    rc=ESMF_FAILURE
+!!!XXX    goto 100
+!!!XXX  endif
+!!!XXX     
+!!!XXX  ! Allocate X array
+!!!XXX  allocate(X(pntCount))
+!!!XXX
+!!!XXX  ! allocate Y array
+!!!XXX  allocate(Y(pntCount))
+!!!XXX
+!!!XXX
+!!!XXX ! Fill in points
+!!!XXX  if (localPet .eq. 0) then  
+!!!XXX      X(1)=1.0
+!!!XXX      Y(1)=1.0
+!!!XXX      X(2)=0.5
+!!!XXX      Y(2)=1.5
+!!!XXX  else if (localPet .eq. 1) then  
+!!!XXX      X(1)=1.5
+!!!XXX      Y(1)=0.5
+!!!XXX      X(2)=1.5
+!!!XXX      Y(2)=1.5
+!!!XXX      X(3)=1.9
+!!!XXX      Y(3)=1.75
+!!!XXX  else if (localPet .eq. 2) then  
+!!!XXX      X(1)=0.5
+!!!XXX      Y(1)=0.5
+!!!XXX  else if (localPet .eq. 3) then  
+!!!XXX      X(1)=1.9
+!!!XXX      Y(1)=0.1
+!!!XXX  endif
+!!!XXX
+!!!XXX
+!!!XXX  ! Add key X
+!!!XXX  call ESMF_LocStreamAddKey(locstream, keyName="ESMF:Lon", farray=X,  rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) then
+!!!XXX    rc=ESMF_FAILURE
+!!!XXX    goto 100
+!!!XXX  endif
+!!!XXX
+!!!XXX  ! Add key Y
+!!!XXX  call ESMF_LocStreamAddKey(locstream, keyName="ESMF:Lat", farray=Y,  rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) then
+!!!XXX    rc=ESMF_FAILURE
+!!!XXX    goto 100
+!!!XXX  endif
+!!!XXX
+!!!XXX  ! Do locStream create from background mesh
+!!!XXX  newLocstream=ESMF_LocStreamCreate(locstream, &
+!!!XXX                 background=mesh, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) then
+!!!XXX     rc=ESMF_FAILURE
+!!!XXX     goto 100
+!!!XXX  endif
+!!!XXX
+!!!XXX  call ESMF_LocStreamDestroy(locstream,rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) then
+!!!XXX    rc=ESMF_FAILURE
+!!!XXX    goto 100
+!!!XXX  endif
+!!!XXX
+!!!XXX  ! deallocate array
+!!!XXX  deallocate(X)
+!!!XXX  deallocate(Y)
+!!!XXX
+!!!XXX
+!!!XXX  ! Get rid of Mesh
+!!!XXX  call ESMF_MeshDestroy(mesh, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) then
+!!!XXX    rc=ESMF_FAILURE
+!!!XXX    goto 100
+!!!XXX  endif
+!!!XXX
+!!!XXX  !!!!!!!!! Check results !!!!!!!!!!!!!!!!!
+!!!XXX  call ESMF_LocStreamGetKey(newLocStream,keyName="ESMF:Lon", &
+!!!XXX         farray=tstX, &
+!!!XXX         exclusiveLBound=el, exclusiveUBound=eu, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) then
+!!!XXX    rc=ESMF_FAILURE
+!!!XXX    goto 100
+!!!XXX  endif
+!!!XXX
+!!!XXX  call ESMF_LocStreamGetKey(newLocStream,keyName="ESMF:Lat", &
+!!!XXX         farray=tstY, rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) then
+!!!XXX    rc=ESMF_FAILURE
+!!!XXX    goto 100
+!!!XXX  endif
+!!!XXX
+!!!XXX  ! Test points
+!!!XXX  if (localPet .eq. 0) then  
+!!!XXX      do i=el,eu
+!!!XXX         if ((tstX(i) <  0.0) .or. tstX(i) >  1.0) correct=.false.
+!!!XXX         if ((tstY(i) <  0.0) .or. tstY(i) >  1.0) correct=.false.
+!!!XXX      enddo
+!!!XXX  else if (localPet .eq. 1) then  
+!!!XXX      do i=el,eu
+!!!XXX         if ((tstX(i) <= 1.0) .or. tstX(i) > 2.0) correct=.false.
+!!!XXX         if ((tstY(i) <  0.0) .or. tstY(i) > 1.0) correct=.false.
+!!!XXX      enddo
+!!!XXX  else if (localPet .eq. 2) then  
+!!!XXX      do i=el,eu
+!!!XXX         if ((tstX(i) <  0.0) .or. tstX(i) >  1.0) correct=.false.
+!!!XXX         if ((tstY(i) <= 1.0) .or. tstY(i) >  2.0) correct=.false.
+!!!XXX      enddo 
+!!!XXX  else if (localPet .eq. 3) then  
+!!!XXX      do i=el,eu
+!!!XXX         if ((tstX(i) <= 1.0) .or. tstX(i) >  2.0) correct=.false.
+!!!XXX         if ((tstY(i) <= 1.0) .or. tstY(i) >  2.0) correct=.false.
+!!!XXX      enddo 
+!!!XXX  endif  
+!!!XXX
+!!!XXX
+!!!XXX  call ESMF_LocStreamDestroy(newLocstream,rc=localrc)
+!!!XXX  if (localrc .ne. ESMF_SUCCESS) then
+!!!XXX    rc=ESMF_FAILURE
+!!!XXX    goto 100
+!!!XXX  endif
+!!!XXX
+!!!XXX  ! endif for skip for ==4 proc
+!!!XXX  endif 
+!!!XXX
+!!!XXX100 continue
+!!!XXX  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX  !-----------------------------------------------------------------------------
+!!!XXX
+!!!XXX
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Test ESMF_LocStream Create From Background Grid"
+!!!XXX  write(failMsg, *) "Test unsuccessful"
+!!!XXX 
+!!!XXX  ! initialize 
+!!!XXX  rc=ESMF_SUCCESS
+!!!XXX      
+!!!XXX  ! do test
+!!!XXX  call test_locstreambkg(rc)
+!!!XXX 
+!!!XXX  ! return result
+!!!XXX  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX !-----------------------------------------------------------------------------
+!!!XXX
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Test ESMF_LocStream Create From Background Grid non-default Align"
+!!!XXX  write(failMsg, *) "Test unsuccessful"
+!!!XXX 
+!!!XXX  ! initialize 
+!!!XXX  rc=ESMF_SUCCESS
+!!!XXX      
+!!!XXX  ! do test
+!!!XXX  call test_locstreambkgnda(rc)
+!!!XXX
+!!!XXX  ! return result
+!!!XXX  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX !-----------------------------------------------------------------------------
+!!!XXX
+!!!XXX
+!!!XXX  !------------------------------------------------------------------------
+!!!XXX  !NEX_UTest
+!!!XXX  write(name, *) "Test ESMF_LocStream Create From Background Grid on Sphere"
+!!!XXX  write(failMsg, *) "Test unsuccessful"
+!!!XXX 
+!!!XXX  ! initialize 
+!!!XXX  rc=ESMF_SUCCESS
+!!!XXX      
+!!!XXX  ! do test
+!!!XXX  call test_locstreambkgSph(rc)
+!!!XXX
+!!!XXX  ! return result
+!!!XXX  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!!!XXX !-----------------------------------------------------------------------------
+!!!XXX
+!!!XXX
+!!!XXX  !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test ESMF_LocStream Create From Shapefile"
   write(failMsg, *) "Test unsuccessful"
@@ -2562,30 +2562,75 @@ contains
 
 !   character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/infrastructure/subset.shp"
 !   character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/infrastructure/tl_2019_us_rails.shp"
-   character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/Manufacturing/General_Manufacturing_Facilities_NAD83.shp"
-   type(ESMF_LocStream) :: locstream
-   type(ESMF_Field)     :: field
+!   character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/Manufacturing/General_Manufacturing_Facilities_NAD83.shp"
+   character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/utilities/PowerPlants_US_EIA_NAD83.shp"
+   type(ESMF_LocStream) :: locstream, locstream2
+   type(ESMF_Field)     :: field, field2
 !   integer(ESMF_KIND_I4), pointer :: mptr(:)
-   real(ESMF_KIND_R4), pointer :: mptr(:)
+   real(ESMF_KIND_R4), pointer :: mptr(:), mptr2(:)
    type(ESMF_ArraySpec)   :: arraySpec
+   type(ESMF_Mesh)        :: Mesh
+   type(ESMF_Grid)        :: Grid
+   character(len=*), parameter :: shapefileName = "data/test3_simple.shp"
+   integer, allocatable   :: decomptile(:,:)
    
-   locstream = ESMF_LocStreamCreate(filename=trim(filename),fileformat=ESMF_FILEFORMAT_SHAPEFILE, name='NAICS',rc=rc)
+   locstream = ESMF_LocStreamCreate(filename=trim(filename),fileformat=ESMF_FILEFORMAT_SHAPEFILE, name='Coal_MW',rc=rc)
    call ESMF_ArraySpecSet(arraySpec, 1, typekind=ESMF_TYPEKIND_R4, rc=rc)
-   field = ESMF_FieldCreate(locstream, arrayspec, name='NAICS', rc=rc)
+
+   field  = ESMF_FieldCreate(locstream, arrayspec, name='Coal_MW', rc=rc)
+   field2 = ESMF_FieldCreate(locstream, arrayspec, name='Coal_EMIS', rc=rc)
    call ESMF_FieldRead( Field, &
                         fileName=fileName, &
                         iofmt=ESMF_IOFMT_SHP, &
                         rc=rc)
    
-   call ESMF_FieldGet( field, farrayPtr=mptr, rc=rc)
-!!   mptr = 111
-!!   write(*,*) 'NAICS: ', mptr
-   mptr => null()
+   call ESMF_FieldGet( field,  farrayPtr=mptr,  rc=rc)
+   call ESMF_FieldGet( field2, farrayPtr=mptr2, rc=rc)
+   mptr2 = mptr*2180.
+   mptr  => null()
+   mptr2 => null()
 
-!!   call ESMF_FieldWrite(field, fileName="locstream#.nc",  &
-!!       iofmt=ESMF_IOFMT_NETCDF,  &
-!!       overwrite=.true.,  &
-!!       status=ESMF_FILESTATUS_UNKNOWN, rc=rc)
+   call ESMF_FieldWrite(field2, fileName="PowerPlants_US_EIA_NAD83.shp",  &
+       iofmt=ESMF_IOFMT_SHP,  &
+       overwrite=.true.,  &
+       status=ESMF_FILESTATUS_UNKNOWN, rc=rc)
+
+!   call ESMF_FieldWrite(field, fileName="locstream.nc",  &
+!!       iofmt=ESMF_IOFMT_SHP,  &
+!       overwrite=.true.,  &
+!       status=ESMF_FILESTATUS_UNKNOWN, rc=rc)
+
+!!>>   mesh=ESMF_MeshCreate( shapefileName, &
+!!>>                         fileformat=ESMF_FILEFORMAT_SHAPEFILE, &
+!!>>                         coordSys=ESMF_COORDSYS_SPH_RAD, &
+!!>>                         rc=rc)
+!!>>   write(failMsg, *) "ESMF_MeshCreate did not return ESMF_SUCCESS"
+!!>>   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!!>>
+!!>>   allocate(decomptile(2,6))
+!!>>   decomptile(:,1)=(/2,2/) ! Tile 1
+!!>>   decomptile(:,2)=(/2,2/) ! Tile 2
+!!>>   decomptile(:,3)=(/1,2/) ! Tile 3
+!!>>   decomptile(:,4)=(/1,2/) ! Tile 4
+!!>>   decomptile(:,5)=(/1,2/) ! Tile 5
+!!>>   decomptile(:,6)=(/1,2/) ! Tile 6
+!!>>   ! Create cubed sphere grid
+!!>>   write(name, *) "Creating a cubed-sphere grid"
+!!>>   Grid = ESMF_GridCreateCubedSphere(               &
+!!>>        tileSize=180, &
+!!>>        regDecompPTile=decomptile, &
+!!>>        staggerLocList=(/ESMF_STAGGERLOC_CORNER, ESMF_STAGGERLOC_CENTER/), &
+!!>>        coordSys=ESMF_COORDSYS_SPH_RAD, &
+!!>>        rc=rc)
+!!>>   if (allocated(decomptile)) deallocate(decomptile)
+!!>>
+!!>>   write(failMsg, *) "ESMF_GridCreateCubedSphere did not return ESMF_SUCCESS"
+!!>>   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!!>>
+!!>>   write(name, *) "Redistributing LocStream to grid"
+!!>>   locstream2 = ESMF_LocStreamCreate(locstream, background=grid, rc=rc)
+!!>>   write(failMsg, *) "Locstream redist did not return ESMF_SUCCESS"
+!!>>   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
    return
 

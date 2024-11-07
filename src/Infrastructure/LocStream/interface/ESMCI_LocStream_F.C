@@ -101,7 +101,7 @@ void FTN_X(c_esmc_gdal_shpinquire)(
   std::vector<int> feature_ids_vec;
   get_ids_divided_evenly_across_pets(nFeatures, *local_pet, *pet_count, feature_ids_vec);
   
-  printf("--- info: %d\n", feature_ids_vec.size());
+//  printf("--- info: %d\n", feature_ids_vec.size());
 
   // Assign vector info to pointer
   *num_features = 0;
@@ -191,7 +191,7 @@ void FTN_X(c_esmc_gdal_shpgetcoords)(
   printf("<<>> Pet/localcounts: %d/%d\n", *local_pet, *localcount);
 
   int j = 0;
-  printf("NOTE: ASSUMING DEG. CONVERTING TO RADIANS!!!");
+  printf("NOTE: ASSUMING DEG. CONVERTING TO RADIANS!!!\n");
   for (int i=0;i<*localcount;i++) {
     coordX[i]=nodeCoords[j]*ESMC_CoordSys_Deg2Rad;
     coordY[i]=nodeCoords[j+1]*ESMC_CoordSys_Deg2Rad;
