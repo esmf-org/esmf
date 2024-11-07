@@ -3937,6 +3937,10 @@ void DistGrid::log(
   msg << prefix << "--- DistGrid::log() start --------------------------------";
   ESMC_LogDefault.Write(msg.str(), msgType);
 
+  msg.str("");  // clear
+  msg << prefix << this;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+
   if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY){
     msg.str("");  // clear
     msg << prefix << "DistGrid object is invalid! Not created or deleted!";
@@ -3944,7 +3948,7 @@ void DistGrid::log(
   }else{
     msg.str("");  // clear
     msg << prefix << "DistGrid object is valid!"
-      << " <name: " << getName() << ">";
+      << "<name: " << getName() << ">";
     ESMC_LogDefault.Write(msg.str(), msgType);
   }
   msg.str("");  // clear

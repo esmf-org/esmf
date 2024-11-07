@@ -1980,7 +1980,10 @@ extern "C" {
     std::string prefixStr(prefix, prefix_l);
     std::stringstream msg;
     msg << prefixStr << ptr;
-    if (ptr) msg << " => " << *(void **)ptr;
+    if (ptr){
+      msg << " => " << *(void **)ptr;
+      if (*(void **)ptr) msg << " => " << **(void ***)ptr;
+    }
     ESMC_LogDefault.Write(msg.str(), *logMsgFlag);
   }
   

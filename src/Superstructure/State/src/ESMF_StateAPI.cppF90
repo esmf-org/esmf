@@ -1896,7 +1896,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                   ESMF_CONTEXT, rcToReturn=rc)) return
                 call ESMF_FieldLog(field, &
                   prefix=ESMF_StringConcat(prefix, "! "), &
-                  logMsgFlag=logMsg, rc=localrc)
+                  logMsgFlag=logMsg, deepFlag=deepLog, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                   ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
