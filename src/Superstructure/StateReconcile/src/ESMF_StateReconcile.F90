@@ -1109,7 +1109,7 @@ end block
           rcToReturn=rc)) return
       endif
       ! ------------------------------------------------------------------------
-      call ESMF_ReconcileMultiCompCase(state, vm=vm, vmId=vmIdSingleComp, &
+      call ESMF_ReconcileMultiCompCaseNEW(state, vm=vm, &
         attreconflag=attreconflag, siwrap=siwrap, ids_send=ids_send, &
         vmids_send=vmids_send, vmintids_send=vmintids_send, &
         nitems_buf=nitems_buf, rc=localrc)
@@ -1243,18 +1243,17 @@ end block
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ReconcileSingleCompCase"
+#define ESMF_METHOD "ESMF_ReconcileMultiCompCaseNEW"
 !BOPI
-! !IROUTINE: ESMF_ReconcileSingleCompCase
+! !IROUTINE: ESMF_ReconcileMultiCompCaseNEW
 !
 ! !INTERFACE:
-  subroutine ESMF_ReconcileMultiCompCase(state, vm, vmId, attreconflag, siwrap, &
+  subroutine ESMF_ReconcileMultiCompCaseNEW(state, vm, attreconflag, siwrap, &
     ids_send, vmids_send, vmintids_send, nitems_buf, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State),                     intent(inout) :: state
     type(ESMF_VM),                        intent(in)    :: vm
-    type(ESMF_VMId),             pointer, intent(in)    :: vmId
     type(ESMF_AttReconcileFlag),          intent(in)    :: attreconflag
     type(ESMF_StateItemWrap),    pointer, intent(in)    :: siwrap(:)
     integer,                     pointer, intent(in)    :: ids_send(:)
@@ -1274,9 +1273,76 @@ end block
 !     The {\tt ESMF\_State} to reconcile.
 !   \item[vm]
 !     The {\tt ESMF\_VM} object across which the state is reconciled.
-!   \item[vmId]
-!     The {\tt ESMF\_VMId} of the single component who ownes all objects present
-!     in the state.
+!   \item[attreconflag]
+!     Flag indicating whether attributes need to be reconciled.
+!   \item[siwrap]
+!     List of local state items.
+!   \item[rc]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!EOPI
+
+    integer :: localrc
+
+    rc = ESMF_SUCCESS
+
+#ifdef RECONCILE_LOG_on
+    block
+      character(ESMF_MAXSTR)  :: stateName
+      call ESMF_StateGet(state, name=stateName, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+      call ESMF_LogWrite("ESMF_ReconcileMultiCompCaseNEW() for State: "//trim(stateName), &
+        ESMF_LOGMSG_DEBUG, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    end block
+#endif
+
+    call ESMF_ReconcileMultiCompCase(state, vm=vm, &
+      attreconflag=attreconflag, siwrap=siwrap, ids_send=ids_send, &
+      vmids_send=vmids_send, vmintids_send=vmintids_send, &
+      nitems_buf=nitems_buf, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT,  &
+      rcToReturn=rc)) return
+
+  end subroutine ESMF_ReconcileMultiCompCaseNEW
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ReconcileMultiCompCase"
+!BOPI
+! !IROUTINE: ESMF_ReconcileMultiCompCase
+!
+! !INTERFACE:
+  subroutine ESMF_ReconcileMultiCompCase(state, vm, attreconflag, siwrap, &
+    ids_send, vmids_send, vmintids_send, nitems_buf, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_State),                     intent(inout) :: state
+    type(ESMF_VM),                        intent(in)    :: vm
+    type(ESMF_AttReconcileFlag),          intent(in)    :: attreconflag
+    type(ESMF_StateItemWrap),    pointer, intent(in)    :: siwrap(:)
+    integer,                     pointer, intent(in)    :: ids_send(:)
+    type(ESMF_VMId),             pointer, intent(in)    :: vmids_send(:)
+    integer,                     pointer, intent(in)    :: vmintids_send(:)
+    integer,                     pointer, intent(in)    :: nitems_buf(:)
+    integer,                              intent(out)   :: rc
+!
+! !DESCRIPTION:
+!
+!   Handle the multi component reconciliation case. This is the expected
+!   situation under NUOPC rules.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} to reconcile.
+!   \item[vm]
+!     The {\tt ESMF\_VM} object across which the state is reconciled.
 !   \item[attreconflag]
 !     Flag indicating whether attributes need to be reconciled.
 !   \item[siwrap]
