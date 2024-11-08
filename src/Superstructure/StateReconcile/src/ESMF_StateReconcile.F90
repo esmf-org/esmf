@@ -1081,21 +1081,18 @@ end block
       ! ------------------------------------------------------------------------
       if (profile) then
         call ESMF_TraceRegionEnter("(2<) ESMF_ReconcileSingleCompCase", rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT,  &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
           rcToReturn=rc)) return
       endif
       ! ------------------------------------------------------------------------
       call ESMF_ReconcileSingleCompCase(state, vm=vm, vmId=vmIdSingleComp, &
         attreconflag=attreconflag, siwrap=siwrap, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT,  &
         rcToReturn=rc)) return
       ! ------------------------------------------------------------------------
       if (profile) then
         call ESMF_TraceRegionExit("(2<) ESMF_ReconcileSingleCompCase", rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT,  &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
           rcToReturn=rc)) return
       endif
       ! ------------------------------------------------------------------------
@@ -1104,18 +1101,24 @@ end block
       ! ------------------------------------------------------------------------
       if (profile) then
         call ESMF_TraceRegionEnter("(2<) ESMF_ReconcileMultiCompCase", rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT,  &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
           rcToReturn=rc)) return
       endif
       ! ------------------------------------------------------------------------
-      call ESMF_ReconcileMultiCompCaseNEW(state, vm=vm, &
+      call ESMF_ReconcileMultiCompCase(state, vm=vm, vmIdMap=vmIdMap_ptr, &
         attreconflag=attreconflag, siwrap=siwrap, ids_send=ids_send, &
         vmids_send=vmids_send, vmintids_send=vmintids_send, &
         nitems_buf=nitems_buf, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+#if 1
+      call ESMF_ReconcileBruteForce(state, vm=vm, &
+        attreconflag=attreconflag, siwrap=siwrap, ids_send=ids_send, &
+        vmids_send=vmids_send, vmintids_send=vmintids_send, &
+        nitems_buf=nitems_buf, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
         rcToReturn=rc)) return
+#endif
       ! ------------------------------------------------------------------------
       if (profile) then
         call ESMF_TraceRegionExit("(2<) ESMF_ReconcileMultiCompCase", rc=localrc)
@@ -1243,17 +1246,18 @@ end block
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ReconcileMultiCompCaseNEW"
+#define ESMF_METHOD "ESMF_ReconcileMultiCompCase"
 !BOPI
-! !IROUTINE: ESMF_ReconcileMultiCompCaseNEW
+! !IROUTINE: ESMF_ReconcileMultiCompCase
 !
 ! !INTERFACE:
-  subroutine ESMF_ReconcileMultiCompCaseNEW(state, vm, attreconflag, siwrap, &
-    ids_send, vmids_send, vmintids_send, nitems_buf, rc)
+  subroutine ESMF_ReconcileMultiCompCase(state, vm, vmIdMap, attreconflag, &
+    siwrap, ids_send, vmids_send, vmintids_send, nitems_buf, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State),                     intent(inout) :: state
     type(ESMF_VM),                        intent(in)    :: vm
+    type(ESMF_VMId),             pointer, intent(in)    :: vmIdMap(:)
     type(ESMF_AttReconcileFlag),          intent(in)    :: attreconflag
     type(ESMF_StateItemWrap),    pointer, intent(in)    :: siwrap(:)
     integer,                     pointer, intent(in)    :: ids_send(:)
@@ -1283,6 +1287,11 @@ end block
 !EOPI
 
     integer :: localrc
+    integer :: i, todoCount
+    logical :: isFlag
+    type(ESMF_VMId)       :: vmId
+
+    integer, allocatable  :: todoList(:)  ! holds integer vmIds to do
 
     rc = ESMF_SUCCESS
 
@@ -1290,35 +1299,53 @@ end block
     block
       character(ESMF_MAXSTR)  :: stateName
       call ESMF_StateGet(state, name=stateName, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-      call ESMF_LogWrite("ESMF_ReconcileMultiCompCaseNEW() for State: "//trim(stateName), &
+      call ESMF_LogWrite("ESMF_ReconcileMultiCompCase() for State: "//trim(stateName), &
         ESMF_LOGMSG_DEBUG, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT,  &
         rcToReturn=rc)) return
     end block
 #endif
 
-    call ESMF_ReconcileMultiCompCase(state, vm=vm, &
-      attreconflag=attreconflag, siwrap=siwrap, ids_send=ids_send, &
-      vmids_send=vmids_send, vmintids_send=vmintids_send, &
-      nitems_buf=nitems_buf, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT,  &
+    call ESMF_VMGetVMId(vm, vmId=vmId, rc=localrc)  ! vmId of current VM context
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
       rcToReturn=rc)) return
 
-  end subroutine ESMF_ReconcileMultiCompCaseNEW
+    allocate(todoList(size(vmidMap)))
+    todoCount=0
+    do i=1, size(vmidMap)
+      ! see if vmIdMap(i) has the same vmKey as the current VM context
+      isFlag = ESMF_VMIdCompare(vmIdMap(i), vmId, keyOnly=.true., rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+      if (.not.isFlag) then
+        ! vmIdMap(i) is from a component that needs to be handled here
+        todoCount = todoCount + 1
+        todoList(todoCount) = i ! add "i" to the todo list
+      endif
+    enddo
+
+#ifdef RECONCILE_LOG_on
+    block
+      character(160)  :: msgStr
+      write(msgStr,*) "ESMF_ReconcileMultiCompCase todoCount=", todoCount
+      call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+    end block
+#endif
+
+  end subroutine ESMF_ReconcileMultiCompCase
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ReconcileMultiCompCase"
+#define ESMF_METHOD "ESMF_ReconcileBruteForce"
 !BOPI
-! !IROUTINE: ESMF_ReconcileMultiCompCase
+! !IROUTINE: ESMF_ReconcileBruteForce
 !
 ! !INTERFACE:
-  subroutine ESMF_ReconcileMultiCompCase(state, vm, attreconflag, siwrap, &
+  subroutine ESMF_ReconcileBruteForce(state, vm, attreconflag, siwrap, &
     ids_send, vmids_send, vmintids_send, nitems_buf, rc)
 !
 ! !ARGUMENTS:
@@ -1374,7 +1401,7 @@ end block
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-      call ESMF_LogWrite("ESMF_ReconcileMultiCompCase() for State: "//trim(stateName), &
+      call ESMF_LogWrite("ESMF_ReconcileBruteForce() for State: "//trim(stateName), &
         ESMF_LOGMSG_DEBUG, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
@@ -1666,7 +1693,7 @@ end block
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
-  end subroutine ESMF_ReconcileMultiCompCase
+  end subroutine ESMF_ReconcileBruteForce
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
