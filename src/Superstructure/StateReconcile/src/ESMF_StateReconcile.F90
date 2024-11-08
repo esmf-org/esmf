@@ -14,7 +14,7 @@
 #define UNIQUE_GEOM_INFO_TREAT_on
 !
 #define RECONCILE_LOG_on
-#define RECONCILE_ZAP_LOG_on
+#define RECONCILE_ZAP_LOG_off
 !
 ! ESMF StateReconcile module
 module ESMF_StateReconcileMod
@@ -745,18 +745,9 @@ end block
     type(ESMF_VMId), pointer :: vmids_send(:)
     integer, allocatable, target :: vmintids_send(:)
 
-    type(ESMF_ReconcileIDInfo), allocatable :: id_info(:)
-
-    logical, pointer :: recvd_needs_matrix(:,:)
-
-    type(ESMF_CharPtr), allocatable :: items_recv(:)
-    character, pointer :: buffer_recv(:)
-
-    integer :: i
-
-    logical, parameter :: debug = .false.
+    logical, parameter :: debug   = .false.
     logical, parameter :: meminfo = .false.
-    logical, parameter :: trace = .false.
+    logical, parameter :: trace   = .false.
     logical, parameter :: profile = .true.
 
     type(ESMF_VMId), allocatable, target :: vmIdMap(:)
@@ -1118,7 +1109,13 @@ end block
           rcToReturn=rc)) return
       endif
       ! ------------------------------------------------------------------------
-      call ESMF_ReconcileMultiCompCase()
+      call ESMF_ReconcileMultiCompCase(state, vm=vm, vmId=vmIdSingleComp, &
+        attreconflag=attreconflag, siwrap=siwrap, ids_send=ids_send, &
+        vmids_send=vmids_send, vmintids_send=vmintids_send, &
+        nitems_buf=nitems_buf, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
       ! ------------------------------------------------------------------------
       if (profile) then
         call ESMF_TraceRegionExit("(2<) ESMF_ReconcileMultiCompCase", rc=localrc)
@@ -1242,9 +1239,87 @@ end block
 
     if (meminfo) call ESMF_VMLogMemInfo ("exiting ESMF_StateReconcile_driver")
 
-  contains
+  end subroutine ESMF_StateReconcile_driver
 
-  subroutine ESMF_ReconcileMultiCompCase()
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ReconcileSingleCompCase"
+!BOPI
+! !IROUTINE: ESMF_ReconcileSingleCompCase
+!
+! !INTERFACE:
+  subroutine ESMF_ReconcileMultiCompCase(state, vm, vmId, attreconflag, siwrap, &
+    ids_send, vmids_send, vmintids_send, nitems_buf, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_State),                     intent(inout) :: state
+    type(ESMF_VM),                        intent(in)    :: vm
+    type(ESMF_VMId),             pointer, intent(in)    :: vmId
+    type(ESMF_AttReconcileFlag),          intent(in)    :: attreconflag
+    type(ESMF_StateItemWrap),    pointer, intent(in)    :: siwrap(:)
+    integer,                     pointer, intent(in)    :: ids_send(:)
+    type(ESMF_VMId),             pointer, intent(in)    :: vmids_send(:)
+    integer,                     pointer, intent(in)    :: vmintids_send(:)
+    integer,                     pointer, intent(in)    :: nitems_buf(:)
+    integer,                              intent(out)   :: rc
+!
+! !DESCRIPTION:
+!
+!   Handle the multi component reconciliation case. This is the expected
+!   situation under NUOPC rules.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} to reconcile.
+!   \item[vm]
+!     The {\tt ESMF\_VM} object across which the state is reconciled.
+!   \item[vmId]
+!     The {\tt ESMF\_VMId} of the single component who ownes all objects present
+!     in the state.
+!   \item[attreconflag]
+!     Flag indicating whether attributes need to be reconciled.
+!   \item[siwrap]
+!     List of local state items.
+!   \item[rc]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!EOPI
+
+    integer :: localrc
+    integer :: memstat
+    integer :: localPet, petCount
+    integer :: i
+
+    type(ESMF_ReconcileIDInfo), allocatable :: id_info(:)
+    type(ESMF_CharPtr),         allocatable :: items_recv(:)
+    logical,                    pointer     :: recvd_needs_matrix(:,:)
+    character,                  pointer     :: buffer_recv(:)
+
+    logical, parameter :: meminfo = .false.
+    logical, parameter :: profile = .true.
+
+    rc = ESMF_SUCCESS
+
+#ifdef RECONCILE_LOG_on
+    block
+      character(ESMF_MAXSTR)  :: stateName
+      call ESMF_StateGet(state, name=stateName, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+      call ESMF_LogWrite("ESMF_ReconcileMultiCompCase() for State: "//trim(stateName), &
+        ESMF_LOGMSG_DEBUG, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    end block
+#endif
+
+    call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT,  &
+      rcToReturn=rc)) return
 
     ! -------------------------------------------------------------------------
     ! (3) All PETs send their items Ids and VMIds to all the other PETs,
@@ -1527,8 +1602,6 @@ end block
 
   end subroutine ESMF_ReconcileMultiCompCase
 
-  end subroutine ESMF_StateReconcile_driver
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ReconcileSingleCompCase"
@@ -1576,6 +1649,21 @@ end block
     character, pointer :: buffer(:)
 
     rc = ESMF_SUCCESS
+
+#ifdef RECONCILE_LOG_on
+    block
+      character(ESMF_MAXSTR)  :: stateName
+      call ESMF_StateGet(state, name=stateName, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+      call ESMF_LogWrite("ESMF_ReconcileSingleCompCase() for State: "//trim(stateName), &
+        ESMF_LOGMSG_DEBUG, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    end block
+#endif
 
     call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
