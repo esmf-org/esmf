@@ -1847,7 +1847,7 @@ end block
     end block
 #endif
 
-    if (localPet/=rootPet) allocate(buffer(sizeBuffer(1)))
+    if (localPet/=rootPet) allocate(buffer(0:sizeBuffer(1)-1))
 
     call ESMF_VMBroadcast(vm, buffer, count=sizeBuffer(1), rootPet=rootPet, &
       rc=localrc)
@@ -2605,7 +2605,7 @@ end block
         rcToReturn=rc)) return
     
     ! Set start position of buffer
-    posBuffer = 1
+    posBuffer = 0
 
     ! Get the number of items to add
     numNewItems = transfer (  &
@@ -4507,7 +4507,7 @@ end block
    sizeBuffer=ESMF_SIZEOF_DEFINT
 
    ! Allocate a fake buffer for passing in when asking for size
-   allocate(fakeBuffer(ESMF_SIZEOF_DEFINT))
+   allocate(fakeBuffer(0:ESMF_SIZEOF_DEFINT-1))
    
    ! Fake buffer size
    sizeFakeBuffer=size(fakeBuffer)
@@ -4765,7 +4765,7 @@ end block
    deallocate(fakeBuffer)
 
    !!!!! Allocate buffer to serialize into !!!!!
-   allocate(buffer(sizeBuffer), stat=memstat)
+   allocate(buffer(0:sizeBuffer-1), stat=memstat)
    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
@@ -4774,12 +4774,12 @@ end block
    !!!!! Serialize information into buffer !!!!!
 
    ! Start position of buffer
-   posBuffer = 1
+   posBuffer = 0
 
    ! Put item count in buffer
    buffer(posBuffer:posBuffer+ESMF_SIZEOF_DEFINT-1) = transfer (  &
           source=numStateItems,  &
-          mold=buffer(1:ESMF_SIZEOF_DEFINT))
+          mold=buffer(0:ESMF_SIZEOF_DEFINT-1))
    posBuffer = posbuffer + ESMF_SIZEOF_DEFINT
 
    ! Set flag to actually serialize
@@ -4797,7 +4797,7 @@ end block
       ! Add item type to buffer
       buffer(posBuffer:posBuffer+ESMF_SIZEOF_DEFINT-1) = transfer (&
           source=itemType,  &
-          mold  =buffer(1:ESMF_SIZEOF_DEFINT))
+          mold  =buffer(0:ESMF_SIZEOF_DEFINT-1))
       posBuffer = posbuffer + ESMF_SIZEOF_DEFINT
 
       ! Add serialized items
