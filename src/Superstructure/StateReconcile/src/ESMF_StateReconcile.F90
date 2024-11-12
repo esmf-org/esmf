@@ -936,26 +936,22 @@ end block
       write(msgStr,*) "ESMF_StateReconcile_driver() size(vmids_send): ", &
         size(vmids_send)
       call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
         rcToReturn=rc)) return
       write(msgStr,*) "ESMF_StateReconcile_driver() size(vmIdMap): ", &
         size(vmIdMap)
       call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
         rcToReturn=rc)) return
       write(msgStr,*) "ESMF_StateReconcile_driver() size(vmintids_send): ", &
         size(vmintids_send)
       call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
         rcToReturn=rc)) return
       write(msgStr,*) "ESMF_StateReconcile_driver() local-singleCompCaseFlag: ", &
         singleCompCaseFlag
       call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
         rcToReturn=rc)) return
     end block
 #endif
@@ -1324,15 +1320,39 @@ end block
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
       rcToReturn=rc)) return
 
+#ifdef RECONCILE_LOG_on
+    call ESMF_VMIdLog(vmId, prefix="ESMF_ReconcileMultiCompCase() context: ", &
+      logMsgFlag=ESMF_LOGMSG_DEBUG, rc=localrc)  ! vmId of current VM context
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+      rcToReturn=rc)) return
+#endif
+
     allocate(todoList(size(vmidMap)))
     todoCount=0
     do i=1, size(vmidMap)
-      ! see if vmIdMap(i) has the same vmKey as the current VM context
-      isFlag = ESMF_VMIdCompare(vmIdMap(i), vmId, keyOnly=.true., rc=localrc)
+      ! see if vmIdMap(i) vmKey is a superset of the current context vmKey
+      isFlag = ESMF_VMIdCompare(vmIdMap(i), vmId, keyOnly=.true., &
+        keySuper=.true., rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
         rcToReturn=rc)) return
+#ifdef RECONCILE_LOG_on
+      block
+        character(160)  :: msgStr
+        write(msgStr,*) "ESMF_ReconcileMultiCompCase vmIdMap(", i, "): "
+        call ESMF_VMIdLog(vmIdMap(i), prefix=trim(msgStr), &
+          logMsgFlag=ESMF_LOGMSG_DEBUG, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+          rcToReturn=rc)) return
+        write(msgStr,*) "ESMF_ReconcileMultiCompCase vmIdMap(", i, "): "// &
+          " is superset: ", isFlag
+        call ESMF_LogWrite(trim(msgStr), ESMF_LOGMSG_DEBUG, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+          rcToReturn=rc)) return
+      end block
+#endif
       if (.not.isFlag) then
-        ! vmIdMap(i) is from a component that needs to be handled here
+        ! objects on vmIdMap(i) are not defined on a superset of PETs of the
+        ! reconciling context -> needs to be done
         todoCount = todoCount + 1
         todoList(todoCount) = i ! add "i" to the todo list
       endif
