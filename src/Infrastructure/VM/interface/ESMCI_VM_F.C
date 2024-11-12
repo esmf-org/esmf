@@ -1660,7 +1660,8 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_vmidcompare)(ESMCI::VMId **vmid1, ESMCI::VMId **vmid2,
-    ESMC_Logical *keyOnly, ESMC_Logical *result, int *rc){
+    ESMC_Logical *keyOnly, ESMC_Logical *keySuper, ESMC_Logical *result,
+    int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmidcompare()"
     // Initialize return code; assume routine not implemented
@@ -1670,9 +1671,12 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(vmid2, rc)
     ESMCI_NULL_CHECK_PRC(result, rc)
     bool keyOnlyOpt = false; // default
+    bool keySuperOpt = false; // default
     if (ESMC_NOT_PRESENT_FILTER(keyOnly) != ESMC_NULL_POINTER)
       if (*keyOnly == ESMF_TRUE) keyOnlyOpt = true;
-    bool resultBool = ESMCI::VMIdCompare(*vmid1, *vmid2, keyOnlyOpt);
+    if (ESMC_NOT_PRESENT_FILTER(keySuper) != ESMC_NULL_POINTER)
+      if (*keySuper == ESMF_TRUE) keySuperOpt = true;
+    bool resultBool = ESMCI::VMIdCompare(*vmid1, *vmid2, keyOnlyOpt, keySuperOpt);
     *result = resultBool ? ESMF_TRUE : ESMF_FALSE;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;

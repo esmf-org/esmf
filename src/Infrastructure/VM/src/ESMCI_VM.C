@@ -139,19 +139,19 @@ static bool esmfFinalized = false;
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VMKeyCompare()"
-static bool VMKeyCompare(unsigned char *vmKey1, unsigned char *vmKey2){
+static bool VMKeyCompare(unsigned char *vmKey1, unsigned char *vmKey2,
+  bool super=false){
   if (vmKey1==vmKey2) return true;  // quick return for identical pointers
-#if 1
-  return std::memcmp(vmKey1, vmKey2, vmKeyWidth) == 0;
-#else
-  int i;
-  for (i=0; i<vmKeyWidth; i++)
-    if (vmKey1[i] != vmKey2[i]){
-      break;
-    }
-  if (i==vmKeyWidth) return true;
-  return false;
-#endif
+  if (super){
+    // ensure each bit that is set in vmKey2 is also set in vmKey1,
+    // making vmKey1 a superset of vmKey2
+    for (int i=0; i<vmKeyWidth; i++)
+      if (vmKey2[i] & (~vmKey1[i])) return false; // return at first violation
+    return true;
+  }else{
+    // compare for identity
+    return std::memcmp(vmKey1, vmKey2, vmKeyWidth) == 0;
+  }
 }
 
 #undef  ESMC_METHOD
@@ -775,12 +775,14 @@ bool VMIdCompare(
 //
   const VMId *vmID1,
   const VMId *vmID2,
-  bool keyOnly
+  bool keyOnly,
+  bool keySuper
   ){
 //
 // !DESCRIPTION:
 //    Compare two {\tt ESMC\_VMId} objects. If {\tt keyOnly==true} only compare
-//    vmKey part.
+//    vmKey part. If {\tt keySuper==true}, allow vmID1 key to be superset of
+//    vmID2.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -794,7 +796,7 @@ bool VMIdCompare(
       return false;
     }
   }
-  return VMKeyCompare(vmID1->vmKey, vmID2->vmKey);
+  return VMKeyCompare(vmID1->vmKey, vmID2->vmKey, keySuper);
 }
 //-----------------------------------------------------------------------------
 
