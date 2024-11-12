@@ -4477,6 +4477,7 @@ end block
     type(ESMF_VMId)             :: vmIdItem
     type(ESMF_Pointer)          :: thisItem
     logical                     :: isFlag
+    integer                     :: numActualItems
 
     ! XMRKX !
 
@@ -4515,6 +4516,9 @@ end block
    ! Set flag to only check size
    inqflag = ESMF_INQUIREONLY
    
+
+   numActualItems = 0
+
    ! Loop State items computing size
    do item=1,numStateItems
 
@@ -4523,9 +4527,6 @@ end block
 
       ! Get item type
       itemType = stateitem%otype%ot
-
-      ! Add item type's size
-      sizeBuffer = sizeBuffer + ESMF_SIZEOF_DEFINT
 
       ! Init itemSize to 0, so when we ask for the offset,
       ! we are also getting the size
@@ -4572,6 +4573,8 @@ end block
                 rcToReturn=rc)) return
             end block
 #endif
+          else
+            cycle
           endif
         case (ESMF_STATEITEM_FIELD%ot)
           call ESMF_FieldGet(stateItem%datap%fp, vm=vmItem, rc=localrc)
@@ -4612,6 +4615,8 @@ end block
                 rcToReturn=rc)) return
             end block
 #endif
+          else
+            cycle
           endif
         case (ESMF_STATEITEM_ARRAY%ot)
           call ESMF_ArrayGet(stateItem%datap%ap, vm=vmItem, rc=localrc)
@@ -4652,6 +4657,8 @@ end block
                 rcToReturn=rc)) return
             end block
 #endif
+          else
+            cycle
           endif
         case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
           call ESMF_ArrayBundleGet(stateItem%datap%abp, vm=vmItem, rc=localrc)
@@ -4692,6 +4699,8 @@ end block
                 rcToReturn=rc)) return
             end block
 #endif
+          else
+            cycle
           endif
         case (ESMF_STATEITEM_STATE%ot)
           wrapper%statep => stateitem%datap%spp
@@ -4734,6 +4743,8 @@ end block
                 rcToReturn=rc)) return
             end block
 #endif
+          else
+            cycle
           endif
         case (ESMF_STATEITEM_ROUTEHANDLE%ot)
            ! Do nothing for RouteHandles.  There is no need to reconcile them.
@@ -4757,6 +4768,11 @@ end block
                 rcToReturn=rc)) return
       end select
 
+      numActualItems = numActualItems + 1
+
+      ! Add item type's size
+      sizeBuffer = sizeBuffer + ESMF_SIZEOF_DEFINT
+
       ! Update buffer size by itemSize
       sizeBuffer = sizeBuffer + itemSize
    enddo
@@ -4778,7 +4794,7 @@ end block
 
    ! Put item count in buffer
    buffer(posBuffer:posBuffer+ESMF_SIZEOF_DEFINT-1) = transfer (  &
-          source=numStateItems,  &
+          source=numActualItems,  &
           mold=buffer(0:ESMF_SIZEOF_DEFINT-1))
    posBuffer = posbuffer + ESMF_SIZEOF_DEFINT
 
@@ -4793,12 +4809,6 @@ end block
 
       ! Get item type
       itemType = stateitem%otype%ot
-
-      ! Add item type to buffer
-      buffer(posBuffer:posBuffer+ESMF_SIZEOF_DEFINT-1) = transfer (&
-          source=itemType,  &
-          mold  =buffer(0:ESMF_SIZEOF_DEFINT-1))
-      posBuffer = posbuffer + ESMF_SIZEOF_DEFINT
 
       ! Add serialized items
       select case (itemType)
@@ -4820,6 +4830,12 @@ end block
           endif
           if (isFlag) then
             ! object has the correct VMId -> serialize
+      ! Add item type to buffer
+      buffer(posBuffer:posBuffer+ESMF_SIZEOF_DEFINT-1) = transfer (&
+          source=itemType,  &
+          mold  =buffer(0:ESMF_SIZEOF_DEFINT-1))
+      posBuffer = posbuffer + ESMF_SIZEOF_DEFINT
+
             if (debug) then
               print *, '    PET', localPet,  &
                  ' Getting FieldBundle pos=',posBuffer
@@ -4830,6 +4846,8 @@ end block
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
                 rcToReturn=rc)) return
+          else
+            cycle
           endif
         case (ESMF_STATEITEM_FIELD%ot)
           call ESMF_FieldGet(stateItem%datap%fp, vm=vmItem, rc=localrc)
@@ -4849,6 +4867,12 @@ end block
           endif
           if (isFlag) then
             ! object has the correct VMId -> serialize
+      ! Add item type to buffer
+      buffer(posBuffer:posBuffer+ESMF_SIZEOF_DEFINT-1) = transfer (&
+          source=itemType,  &
+          mold  =buffer(0:ESMF_SIZEOF_DEFINT-1))
+      posBuffer = posbuffer + ESMF_SIZEOF_DEFINT
+
             if (debug) then
                print *, '    PET', localPet,  &
                     ' Getting Field pos=',posBuffer
@@ -4859,6 +4883,8 @@ end block
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
                 rcToReturn=rc)) return
+          else
+            cycle
           endif
         case (ESMF_STATEITEM_ARRAY%ot)
           call ESMF_ArrayGet(stateItem%datap%ap, vm=vmItem, rc=localrc)
@@ -4878,6 +4904,12 @@ end block
           endif
           if (isFlag) then
             ! object has the correct VMId -> serialize
+      ! Add item type to buffer
+      buffer(posBuffer:posBuffer+ESMF_SIZEOF_DEFINT-1) = transfer (&
+          source=itemType,  &
+          mold  =buffer(0:ESMF_SIZEOF_DEFINT-1))
+      posBuffer = posbuffer + ESMF_SIZEOF_DEFINT
+
             if (debug) then
                print *, '    PET', localPet,  &
                     ' Getting Array pos=',posBuffer
@@ -4888,6 +4920,8 @@ end block
                 localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
                 rcToReturn=rc)) return
+          else
+            cycle
           endif
         case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
           call ESMF_ArrayBundleGet(stateItem%datap%abp, vm=vmItem, rc=localrc)
@@ -4907,6 +4941,12 @@ end block
           endif
           if (isFlag) then
             ! object has the correct VMId -> serialize
+      ! Add item type to buffer
+      buffer(posBuffer:posBuffer+ESMF_SIZEOF_DEFINT-1) = transfer (&
+          source=itemType,  &
+          mold  =buffer(0:ESMF_SIZEOF_DEFINT-1))
+      posBuffer = posbuffer + ESMF_SIZEOF_DEFINT
+
             if (debug) then
                print *, '    PET', localPet,  &
                     ' Getting ArrayBundle pos=',posBuffer
@@ -4917,6 +4957,8 @@ end block
                  localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
                 rcToReturn=rc)) return
+          else
+            cycle
           endif
         case (ESMF_STATEITEM_STATE%ot)
           wrapper%statep => stateitem%datap%spp
@@ -4938,6 +4980,12 @@ end block
           endif
           if (isFlag) then
             ! object has the correct VMId -> serialize
+      ! Add item type to buffer
+      buffer(posBuffer:posBuffer+ESMF_SIZEOF_DEFINT-1) = transfer (&
+          source=itemType,  &
+          mold  =buffer(0:ESMF_SIZEOF_DEFINT-1))
+      posBuffer = posbuffer + ESMF_SIZEOF_DEFINT
+
             if (debug) then
                print *, '    PET', localPet,  &
                     ' Getting State pos=',posBuffer
@@ -4948,6 +4996,8 @@ end block
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
                 rcToReturn=rc)) return
+          else
+            cycle
           endif
         case (ESMF_STATEITEM_ROUTEHANDLE%ot)
              ! Do nothing for RouteHandles.  There is no need to reconcile them.
