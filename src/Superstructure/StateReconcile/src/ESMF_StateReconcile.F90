@@ -1088,9 +1088,7 @@ end block
         rcToReturn=rc)) return
 #else
       call ESMF_ReconcileMultiCompCase(state, vm=vm, vmIdMap=vmIdMap_ptr, &
-        attreconflag=attreconflag, siwrap=siwrap, ids_send=ids_send, &
-        vmids_send=vmids_send, vmintids_send=vmintids_send, &
-        nitems_buf=nitems_buf, rc=localrc)
+        attreconflag=attreconflag, siwrap=siwrap, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
@@ -1112,9 +1110,7 @@ end block
       ! ------------------------------------------------------------------------
 #if 1
       call ESMF_ReconcileMultiCompCase(state, vm=vm, vmIdMap=vmIdMap_ptr, &
-        attreconflag=attreconflag, siwrap=siwrap, ids_send=ids_send, &
-        vmids_send=vmids_send, vmintids_send=vmintids_send, &
-        nitems_buf=nitems_buf, rc=localrc)
+        attreconflag=attreconflag, siwrap=siwrap, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 #else
@@ -1258,8 +1254,7 @@ end block
 !
 ! !INTERFACE:
   subroutine ESMF_ReconcileMultiCompCase(state, vm, vmIdMap, attreconflag, &
-    siwrap, ids_send, vmids_send, vmintids_send, nitems_buf, rc)
-!!!TODO: clean out any dummy arguments not actually needed!!!!
+    siwrap, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State),                     intent(inout) :: state
@@ -1267,23 +1262,21 @@ end block
     type(ESMF_VMId),             pointer, intent(in)    :: vmIdMap(:)
     type(ESMF_AttReconcileFlag),          intent(in)    :: attreconflag
     type(ESMF_StateItemWrap),    pointer, intent(in)    :: siwrap(:)
-    integer,                     pointer, intent(in)    :: ids_send(:)
-    type(ESMF_VMId),             pointer, intent(in)    :: vmids_send(:)
-    integer,                     pointer, intent(in)    :: vmintids_send(:)
-    integer,                     pointer, intent(in)    :: nitems_buf(:)
     integer,                              intent(out)   :: rc
 !
 ! !DESCRIPTION:
 !
-!   Handle the multi component reconciliation case. This is the expected
-!   situation under NUOPC rules.
+!   Handle the multi component reconciliation case. This is the general case
+!   supported by ESMF, where multiple components interact with the same State.
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[state]
 !     The {\tt ESMF\_State} to reconcile.
 !   \item[vm]
-!     The {\tt ESMF\_VM} object across which the state is reconciled.
+!     The {\tt ESMF\_VM} object across which to reconcile {\tt state}.
+!   \item[vmIdMap]
+!     List of {\tt ESMF\_VMId} objects present in {\tt state}.
 !   \item[attreconflag]
 !     Flag indicating whether attributes need to be reconciled.
 !   \item[siwrap]
@@ -1293,13 +1286,10 @@ end block
 !   \end{description}
 !EOPI
 
-    integer :: localrc
-    integer :: i, todoCount
-    logical :: isFlag
-    type(ESMF_VMId)       :: vmId
-
-    integer,          allocatable :: todoList(:)  ! holds integer vmIds to do
-    type(ESMF_VMId),  pointer     :: vmIdSingleComp
+    integer                   :: localrc, i
+    logical                   :: isFlag
+    type(ESMF_VMId)           :: vmId
+    type(ESMF_VMId),  pointer :: vmIdSingleComp
 
     rc = ESMF_SUCCESS
 
@@ -1327,8 +1317,6 @@ end block
       rcToReturn=rc)) return
 #endif
 
-    allocate(todoList(size(vmidMap)))
-    todoCount=0
     do i=1, size(vmidMap)
       ! see if vmIdMap(i) vmKey is a superset of the current context vmKey
       isFlag = ESMF_VMIdCompare(vmIdMap(i), vmId, keyOnly=.true., &
@@ -1353,29 +1341,12 @@ end block
       if (.not.isFlag) then
         ! objects on vmIdMap(i) are not defined on a superset of PETs of the
         ! reconciling context -> needs to be done
-        todoCount = todoCount + 1
-        todoList(todoCount) = i ! add "i" to the todo list
+        vmIdSingleComp => vmIdMap(i)
+        call ESMF_ReconcileSingleCompCase(state, vm=vm, vmId=vmIdSingleComp, &
+          attreconflag=attreconflag, siwrap=siwrap, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+          rcToReturn=rc)) return
       endif
-    enddo
-
-#ifdef RECONCILE_LOG_on
-    block
-      character(160)  :: msgStr
-      write(msgStr,*) "ESMF_ReconcileMultiCompCase todoCount=", todoCount
-      call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-        rcToReturn=rc)) return
-    end block
-#endif
-
-    !TODO: Don't actually need these two separate loops first one will be
-    !TODO: enough, just directly call into the SingleCompCase from there!
-    do i=1, todoCount
-      vmIdSingleComp => vmIdMap(todoList(i))
-      call ESMF_ReconcileSingleCompCase(state, vm=vm, vmId=vmIdSingleComp, &
-        attreconflag=attreconflag, siwrap=siwrap, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-        rcToReturn=rc)) return
     enddo
 
   end subroutine ESMF_ReconcileMultiCompCase
