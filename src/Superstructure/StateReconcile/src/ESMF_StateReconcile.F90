@@ -1374,8 +1374,8 @@ end block
 !
 ! !DESCRIPTION:
 !
-!   Handle the multi component reconciliation case. This is the expected
-!   situation under NUOPC rules.
+!   Brute force reconciliation across all of the PETs using Alltoall
+!   communications. This should be able to reconcile any conceivable situation.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1735,10 +1735,9 @@ end block
 !   \item[state]
 !     The {\tt ESMF\_State} to reconcile.
 !   \item[vm]
-!     The {\tt ESMF\_VM} object across which the state is reconciled.
+!     The {\tt ESMF\_VM} object across which to reconcile {\tt state}.
 !   \item[vmId]
-!     The {\tt ESMF\_VMId} of the single component who ownes all objects present
-!     in the state.
+!     The {\tt ESMF\_VMId} of the objects in {\tt state} to reconcile.
 !   \item[attreconflag]
 !     Flag indicating whether attributes need to be reconciled.
 !   \item[siwrap]
@@ -1760,32 +1759,27 @@ end block
     block
       character(ESMF_MAXSTR)  :: stateName
       call ESMF_StateGet(state, name=stateName, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
         rcToReturn=rc)) return
       call ESMF_LogWrite("ESMF_ReconcileSingleCompCase() for State: "//trim(stateName), &
         ESMF_LOGMSG_DEBUG, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
         rcToReturn=rc)) return
     end block
 #endif
 
     call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT,  &
-      rcToReturn=rc)) return
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
 
     call ESMF_VMIdGet(vmId, leftMostOnBit=rootVas, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT,  &
-      rcToReturn=rc)) return
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
 
-    ! search for PET in VM that executes on rootVas
+    ! search for PET in VM that executes on rootVas -> use as rootPet
     do rootPet=0, petCount-1
       call ESMF_VMGet(vm, pet=rootPet, vas=vas, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
         rcToReturn=rc)) return
       if (vas==rootVas) exit  ! found
     enddo
@@ -1816,17 +1810,17 @@ end block
 
     ! Serialize on rootPet
     if (localPet==rootPet) then
-      call ESMF_ReconcileSerializeAll(state, vm, vmId, siwrap, attreconflag, &
+      call ESMF_ReconcileSerializeAll(state, vm, vmId, attreconflag, siwrap, &
         buffer, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
       sizeBuffer(1) = size(buffer)
     endif
 
     ! Broadcast buffer across all PETs
     call ESMF_VMBroadcast(vm, sizeBuffer, count=1, rootPet=rootPet, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+      rcToReturn=rc)) return
 
 #ifdef RECONCILE_LOG_on
     block
@@ -1842,31 +1836,30 @@ end block
 
     call ESMF_VMBroadcast(vm, buffer, count=sizeBuffer(1), rootPet=rootPet, &
       rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+      rcToReturn=rc)) return
 
     ! determine if local PET is active under the vmId
     call ESMF_VMIdGet(vmId, isLocalPetActive=isFlag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+      rcToReturn=rc)) return
 
 #ifdef RECONCILE_LOG_on
     block
       character(160)  :: msgStr
       write(msgStr,*) "SingleCompCase PET active isFlag=", isFlag
       call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
         rcToReturn=rc)) return
     end block
 #endif
 
     ! only inactive PETs deserialize the buffer received from rootPet
     if (.not.isFlag) then
-      call ESMF_ReconcileDeserializeAll(state, vm, buffer, attreconflag, &
+      call ESMF_ReconcileDeserializeAll(state, vm, attreconflag, buffer, &
         rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
     endif
 
     ! Get rid of buffer
@@ -2533,14 +2526,14 @@ end block
 ! !IROUTINE: ESMF_ReconcileDeserializeAll
 
 ! !INTERFACE:
-  subroutine ESMF_ReconcileDeserializeAll(state, vm, buffer, attreconflag, rc)
+  subroutine ESMF_ReconcileDeserializeAll(state, vm, attreconflag, buffer, rc)
 !
 ! !ARGUMENTS:
-    type (ESMF_State), intent(inout):: state
-    type (ESMF_VM),    intent(in)   :: vm
-    character, pointer              :: buffer(:)    ! intent(in)
-    type(ESMF_AttReconcileFlag),intent(in)   :: attreconflag
-    integer,           intent(out)  :: rc
+    type (ESMF_State), intent(inout)      :: state
+    type (ESMF_VM),    intent(in)         :: vm
+    type(ESMF_AttReconcileFlag),intent(in):: attreconflag
+    character, pointer,intent(in)         :: buffer(:)
+    integer,           intent(out)        :: rc
 !
 ! !DESCRIPTION:
 !   Builds proxy items for each of the items in the buffer.
@@ -2551,10 +2544,10 @@ end block
 !     {\tt ESMF\_State} to add proxy objects to.
 !   \item[vm]
 !     {\tt ESMF\_VM} to use.
-!   \item[buffer]
-!     Buffer of serialized State objects (intent(in))
 !   \item[attreconflag]
 !     Flag to indicate attribute reconciliation.
+!   \item[buffer]
+!     Buffer of serialized State objects (intent(in))
 !   \item[rc]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4423,16 +4416,16 @@ end block
 ! !IROUTINE: ESMF_ReconcileSerializeAll
 !
 ! !INTERFACE:
-  subroutine ESMF_ReconcileSerializeAll(state, vm, vmid, siwrap, &
-      attreconflag, buffer, rc)
+  subroutine ESMF_ReconcileSerializeAll(state, vm, vmid, attreconflag, siwrap, &
+    buffer, rc)
 !
 ! !ARGUMENTS:
     type (ESMF_State),          intent(in)  :: state
     type (ESMF_VM),             intent(in)  :: vm
-    type (ESMF_VMId),  pointer, intent(in)  :: vmId ! vmId for which to serialize
-    type (ESMF_StateItemWrap),  intent(in)  :: siwrap(:)
+    type (ESMF_VMId),  pointer, intent(in)  :: vmId
     type(ESMF_AttReconcileFlag),intent(in)  :: attreconflag
-    character, pointer                      :: buffer(:)
+    type (ESMF_StateItemWrap),  intent(in)  :: siwrap(:)
+    character,         pointer              :: buffer(:)
     integer,                    intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -4440,13 +4433,17 @@ end block
 !   The arguments are:
 !   \begin{description}
 !   \item[state]
-!     {\tt ESMF\_State} to collect information from.
+!     The {\tt ESMF\_State} to collect information from.
+!   \item[vm]
+!     The {\tt ESMF\_VM} object across which to reconcile {\tt state}.
+!   \item[vmId]
+!     The {\tt ESMF\_VMId} of the objects in {\tt state} to reconcile.
 !   \item[siwrap]
-!     State items in the state.
-!   \item[needs\_list]
-!     List of State items that need to be sent to other PETs
+!     List of local state items.
 !   \item[attreconflag]
 !     Flag to indicate attribute reconciliation.
+!   \item[buffer]
+!     Buffer
 !   \item[rc]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
