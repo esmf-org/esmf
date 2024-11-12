@@ -4487,21 +4487,8 @@ int Array::serialize(
       *ip++ = distgridToPackedArrayMap[i];
     *ip++ = tensorElementCount;
     *ip++ = replicatedDimCount;
-//    *ip++ = replicatedDimCount;
   } else
     ip += 3 + 2*tensorCount + 2*distgrid->getDimCount () + rank;
-//    ip += 4 + 2*tensorCount + 2*distgrid->getDimCount () + rank;
-
-if (inquireflag != ESMF_INQUIREONLY){
-  std::stringstream msg;
-  msg << "Array::serialize():" << __LINE__ << " name: " << getName()
-    << " rank=" << rank
-    << " tensorCount=" << tensorCount
-    << " distgrid->getDimCount()=" << distgrid->getDimCount()
-    << " tensorElementCount=" << tensorElementCount
-    << " replicatedDimCount=" << *(ip-1);
-  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
-}
 
   // fix offset
   cp = (char *)ip;
@@ -4593,17 +4580,6 @@ int Array::deserialize(
     distgridToPackedArrayMap[i] = *ip++;
   tensorElementCount = *ip++;
   replicatedDimCount = *ip++;
-//  ip++;
-{
-  std::stringstream msg;
-  msg << "Array::deserialize():" << __LINE__ << " name: " << getName()
-    << " rank=" << rank
-    << " tensorCount=" << tensorCount
-    << " distgrid->getDimCount()=" << distgrid->getDimCount()
-    << " tensorElementCount=" << tensorElementCount
-    << " replicatedDimCount=" << replicatedDimCount;
-  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
-}
 
   // fix offset
   cp = (char *)ip;
