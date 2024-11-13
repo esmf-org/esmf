@@ -3892,8 +3892,7 @@ end block
 ! !IROUTINE: ESMF_ReconcileInitialize
 !
 ! !INTERFACE:
-  subroutine ESMF_ReconcileInitialize (state, vm,  &
-      siwrap, nitems_all, rc)
+  subroutine ESMF_ReconcileInitialize(state, vm, siwrap, nitems_all, rc)
 !
 ! !ARGUMENTS:
     type (ESMF_State), intent(inout)   :: state
@@ -5030,17 +5029,17 @@ end block
       integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Proxy objects are identified and removed from the State. Information about
-!   the zapped proxies is kept in the State for later handling during the
-!   companion method ESMF_ReconcileZappedProxies().
+!   All top-level proxy objects (regardless of type) are identified and removed
+!   from {\tt state}. Information about the zapped proxies is kept in the State
+!   for later handling during the companion method ESMF_ReconcileZappedProxies().
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[state]
-!       The State from which to zap proxies.
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The State from which to zap proxies.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOPI
       integer                             :: localrc, i
@@ -5187,25 +5186,26 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
       integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Proxy objects that have been zapped from the State during a previous
-!   call to the companion method ESMF_ReconcileZapProxies() must now be handled
-!   after the reconcile work is done. Potentially new proxies have been
-!   created, and the internal information of those new proxies must be copied
-!   under the old proxy wrappers, then old wrappers must replace the new ones
+!   Top-level proxy objects that have been zapped from the State during a
+!   previous call to the companion method ESMF_ReconcileZapProxies() must now be
+!   handled after the reconcile work is done. There is special handling for
+!   Field and FieldBundle objects for which new proxies have been
+!   created. The internal information of those new proxies must be copied
+!   under the old proxy wrappers. Old wrappers must replace the new ones
 !   inside the State. Finally the old inside members must be cleaned up.
 !   There is also a chance that zapped proxy are not associated with new proxy
 !   counter parts (e.g. if the actual objects have been removed from the State).
 !   In that case the old proxy object must be cleaned up for good by removing
 !   it from the garbage collection.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[state]
-!       The State from which proxies have been zapped and must either be
-!       restored or completely removed from the garbage collection.
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The State from which proxies have been zapped and must either be
+!     restored or completely removed from the garbage collection.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOPI
     integer                           :: localrc, i, k
@@ -5220,6 +5220,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     type(ESMF_FieldType)              :: tempFieldType
     type(ESMF_FieldBundle)            :: tempFB
     type(ESMF_FieldBundleType)        :: tempFBType
+    type(ESMF_State)                  :: wrapper
 
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -5392,6 +5393,56 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): destroy with noGarbage unrest
   ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
             call ESMF_FieldBundleDestroy(zapList(k)%si%datap%fbp, &
+              noGarbage=.true., rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) &
+              return
+          else if (zapList(k)%si%otype==ESMF_STATEITEM_ARRAY) then
+#ifdef RECONCILE_ZAP_LOG_on
+call ESMF_ArrayGet(zapList(k)%si%datap%ap, name=name, rc=localrc)
+if (ESMF_LogFoundError(localrc, &
+  ESMF_ERR_PASSTHRU, &
+  ESMF_CONTEXT, rcToReturn=rc)) &
+  return
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): destroy with noGarbage unrestored Array: "//trim(name), &
+  ESMF_LOGMSG_DEBUG, rc=localrc)
+#endif
+            call ESMF_ArrayDestroy(zapList(k)%si%datap%ap, &
+              noGarbage=.true., rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) &
+              return
+          else if (zapList(k)%si%otype==ESMF_STATEITEM_ARRAYBUNDLE) then
+#ifdef RECONCILE_ZAP_LOG_on
+call ESMF_ArrayBundleGet(zapList(k)%si%datap%abp, name=name, rc=localrc)
+if (ESMF_LogFoundError(localrc, &
+  ESMF_ERR_PASSTHRU, &
+  ESMF_CONTEXT, rcToReturn=rc)) &
+  return
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): destroy with noGarbage unrestored ArrayBundle: "//trim(name), &
+  ESMF_LOGMSG_DEBUG, rc=localrc)
+#endif
+            call ESMF_ArrayBundleDestroy(zapList(k)%si%datap%abp, &
+              noGarbage=.true., rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) &
+              return
+          else if (zapList(k)%si%otype==ESMF_STATEITEM_STATE) then
+            wrapper%statep => zapList(k)%si%datap%spp
+            ESMF_INIT_SET_CREATED(wrapper)
+#ifdef RECONCILE_ZAP_LOG_on
+call ESMF_StateGet(wrapper, name=name, rc=localrc)
+if (ESMF_LogFoundError(localrc, &
+  ESMF_ERR_PASSTHRU, &
+  ESMF_CONTEXT, rcToReturn=rc)) &
+  return
+call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): destroy with noGarbage unrestored State: "//trim(name), &
+  ESMF_LOGMSG_DEBUG, rc=localrc)
+#endif
+            call ESMF_StateDestroy(wrapper, &
               noGarbage=.true., rc=localrc)
             if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
