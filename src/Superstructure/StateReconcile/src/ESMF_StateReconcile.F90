@@ -4462,7 +4462,6 @@ end block
     integer :: localPet, petCount, pet
     type(ESMF_VM)               :: vmItem
     type(ESMF_VMId)             :: vmIdItem
-    type(ESMF_Pointer)          :: thisItem
     logical                     :: isFlag
     integer                     :: numActualItems
 
@@ -4502,7 +4501,6 @@ end block
    
    ! Set flag to only check size
    inqflag = ESMF_INQUIREONLY
-   
 
    numActualItems = 0
 
@@ -4525,18 +4523,12 @@ end block
           call ESMF_FieldBundleGet(stateItem%datap%fbp, vm=vmItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
-          call ESMF_VMGetThis(vmItem, thisItem, rc=localrc)
+          call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
-          isFlag = (thisItem /= ESMF_NULL_POINTER)  ! not a proxy
-          if (isFlag) then
-            call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-            isFlag = ESMF_VMIdCompare(vmIdItem, vmId, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-          endif
+          isFlag = ESMF_VMIdCompare(vmIdItem, vmId, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+            rcToReturn=rc)) return
           if (isFlag) then
             ! object has the correct VMId -> serialize
             call ESMF_FieldBundleSerialize(stateItem%datap%fbp,  &
@@ -4567,18 +4559,12 @@ end block
           call ESMF_FieldGet(stateItem%datap%fp, vm=vmItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
-          call ESMF_VMGetThis(vmItem, thisItem, rc=localrc)
+          call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
-          isFlag = (thisItem /= ESMF_NULL_POINTER)  ! not a proxy
-          if (isFlag) then
-            call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-            isFlag = ESMF_VMIdCompare(vmIdItem, vmId, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-          endif
+          isFlag = ESMF_VMIdCompare(vmIdItem, vmId, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+            rcToReturn=rc)) return
           if (isFlag) then
             ! object has the correct VMId -> serialize
             call ESMF_FieldSerialize(stateItem%datap%fp,  &
@@ -4609,18 +4595,12 @@ end block
           call ESMF_ArrayGet(stateItem%datap%ap, vm=vmItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
-          call ESMF_VMGetThis(vmItem, thisItem, rc=localrc)
+          call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
-          isFlag = (thisItem /= ESMF_NULL_POINTER)  ! not a proxy
-          if (isFlag) then
-            call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-            isFlag = ESMF_VMIdCompare(vmIdItem, vmId, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-          endif
+          isFlag = ESMF_VMIdCompare(vmIdItem, vmId, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+            rcToReturn=rc)) return
           if (isFlag) then
             ! object has the correct VMId -> serialize
             call c_ESMC_ArraySerialize(stateitem%datap%ap,  &
@@ -4651,18 +4631,12 @@ end block
           call ESMF_ArrayBundleGet(stateItem%datap%abp, vm=vmItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
-          call ESMF_VMGetThis(vmItem, thisItem, rc=localrc)
+          call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
-          isFlag = (thisItem /= ESMF_NULL_POINTER)  ! not a proxy
-          if (isFlag) then
-            call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-            isFlag = ESMF_VMIdCompare(vmIdItem, vmId, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-          endif
+          isFlag = ESMF_VMIdCompare(vmIdItem, vmId, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+            rcToReturn=rc)) return
           if (isFlag) then
             ! object has the correct VMId -> serialize
             call c_ESMC_ArrayBundleSerialize(stateitem%datap%abp,  &
@@ -4695,18 +4669,12 @@ end block
           call ESMF_StateGet(wrapper, vm=vmItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
-          call ESMF_VMGetThis(vmItem, thisItem, rc=localrc)
+          call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
-          isFlag = (thisItem /= ESMF_NULL_POINTER)  ! not a proxy
-          if (isFlag) then
-            call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-            isFlag = ESMF_VMIdCompare(vmIdItem, vmId, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-          endif
+          isFlag = ESMF_VMIdCompare(vmIdItem, vmId, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+            rcToReturn=rc)) return
           if (isFlag) then
             ! object has the correct VMId -> serialize
             call ESMF_StateSerialize(wrapper,  &
@@ -4803,18 +4771,12 @@ end block
           call ESMF_FieldBundleGet(stateItem%datap%fbp, vm=vmItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
-          call ESMF_VMGetThis(vmItem, thisItem, rc=localrc)
+          call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
-          isFlag = (thisItem /= ESMF_NULL_POINTER)  ! not a proxy
-          if (isFlag) then
-            call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-            isFlag = ESMF_VMIdCompare(vmIdItem, vmId, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-          endif
+          isFlag = ESMF_VMIdCompare(vmIdItem, vmId, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+            rcToReturn=rc)) return
           if (isFlag) then
             ! object has the correct VMId -> serialize
       ! Add item type to buffer
@@ -4840,18 +4802,12 @@ end block
           call ESMF_FieldGet(stateItem%datap%fp, vm=vmItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
-          call ESMF_VMGetThis(vmItem, thisItem, rc=localrc)
+          call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
-          isFlag = (thisItem /= ESMF_NULL_POINTER)  ! not a proxy
-          if (isFlag) then
-            call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-            isFlag = ESMF_VMIdCompare(vmIdItem, vmId, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-          endif
+          isFlag = ESMF_VMIdCompare(vmIdItem, vmId, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+            rcToReturn=rc)) return
           if (isFlag) then
             ! object has the correct VMId -> serialize
       ! Add item type to buffer
@@ -4877,18 +4833,12 @@ end block
           call ESMF_ArrayGet(stateItem%datap%ap, vm=vmItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
-          call ESMF_VMGetThis(vmItem, thisItem, rc=localrc)
+          call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
-          isFlag = (thisItem /= ESMF_NULL_POINTER)  ! not a proxy
-          if (isFlag) then
-            call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-            isFlag = ESMF_VMIdCompare(vmIdItem, vmId, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-          endif
+          isFlag = ESMF_VMIdCompare(vmIdItem, vmId, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+            rcToReturn=rc)) return
           if (isFlag) then
             ! object has the correct VMId -> serialize
       ! Add item type to buffer
@@ -4914,18 +4864,12 @@ end block
           call ESMF_ArrayBundleGet(stateItem%datap%abp, vm=vmItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
-          call ESMF_VMGetThis(vmItem, thisItem, rc=localrc)
+          call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
-          isFlag = (thisItem /= ESMF_NULL_POINTER)  ! not a proxy
-          if (isFlag) then
-            call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-            isFlag = ESMF_VMIdCompare(vmIdItem, vmId, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-          endif
+          isFlag = ESMF_VMIdCompare(vmIdItem, vmId, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+            rcToReturn=rc)) return
           if (isFlag) then
             ! object has the correct VMId -> serialize
       ! Add item type to buffer
@@ -4953,18 +4897,12 @@ end block
           call ESMF_StateGet(wrapper, vm=vmItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
-          call ESMF_VMGetThis(vmItem, thisItem, rc=localrc)
+          call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
             rcToReturn=rc)) return
-          isFlag = (thisItem /= ESMF_NULL_POINTER)  ! not a proxy
-          if (isFlag) then
-            call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-            isFlag = ESMF_VMIdCompare(vmIdItem, vmId, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-          endif
+          isFlag = ESMF_VMIdCompare(vmIdItem, vmId, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+            rcToReturn=rc)) return
           if (isFlag) then
             ! object has the correct VMId -> serialize
       ! Add item type to buffer
