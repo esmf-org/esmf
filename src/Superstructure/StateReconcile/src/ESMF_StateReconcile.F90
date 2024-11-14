@@ -137,7 +137,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateReconcile"
 !BOP
-! !IROUTINE: ESMF_StateReconcile -- Reconcile State data across all PETs in a VM
+! !IROUTINE: ESMF_StateReconcile -- Reconcile State across PETs
 !
 ! !INTERFACE:
   subroutine ESMF_StateReconcile(state, keywordEnforcer, vm, checkflag, rc)
@@ -169,9 +169,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[vm]}]
 !     {\tt ESMF\_VM} across which to reconcile. The default is the current VM.
 !   \item [{[checkflag]}]
-!     If set to {\tt .TRUE.} the reconciled State object will be checked
-!     for consistency across PETs before returning. Any detected issues will
-!     be indicated in {\tt rc}. Set {\tt checkflag} to {\tt .FALSE.} in order
+!     If set to {\tt .TRUE.} the reconciled State object is checked for
+!     consistency across PETs before returning. Any detected issues are
+!     indicated in {\tt rc}. Set {\tt checkflag} to {\tt .FALSE.} in order
 !     to achieve highest performance. The default is {\tt .FALSE.}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -195,8 +195,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localCheckFlag = .false.  ! default
     if (present(checkFlag)) localCheckFlag = checkFlag
 
-!TODO: turn this .true. when working on StateReoncile, so all tests validate!
-localCheckFlag = .true. ! force checking
+#if 0
+  ! Activate this when working on StateReoncile, so all tests validate!
+  localCheckFlag = .true. ! force checking
+#endif
 
     if (present (vm)) then
       localvm = vm
