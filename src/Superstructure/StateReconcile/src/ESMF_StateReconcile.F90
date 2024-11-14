@@ -227,7 +227,7 @@ localCheckFlag = .true. ! force checking
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
       call idesc%Update(state, "", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_LogWrite("state_json_before_reconcile="//ESMF_InfoDump(idesc%info), rc=localrc)
+      call ESMF_LogWrite("state_json_before_reconcile="//ESMF_InfoDump(idesc%info), ESMF_LOGMSG_DEBUG, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
       call idesc%Destroy(rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -318,7 +318,7 @@ localCheckFlag = .true. ! force checking
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
         jsonStr = "state_json_after_reassemble="//ESMF_InfoDump(idesc%info)
 #ifdef RECONCILE_LOG_on
-        call ESMF_LogWrite(jsonStr, rc=localrc)
+        call ESMF_LogWrite(jsonStr, ESMF_LOGMSG_DEBUG, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
         call idesc%Destroy(rc=localrc)
@@ -722,11 +722,6 @@ end block
 
     type(ESMF_VMId), allocatable, target :: vmIdMap(:)
     type(ESMF_VMId), pointer             :: vmIdMap_ptr(:)
-    type(ESMF_VMId), pointer             :: vmIdSingleComp
-    logical                              :: singleCompCaseFlag
-    integer                              :: singleCompCaseFlagInt(1)
-    integer                              :: singleCompCaseInt(1)
-    integer                              :: singleCompIndex
 
     type(ESMF_AttReconcileFlag)          :: attreconflag
 
@@ -761,8 +756,8 @@ end block
     ! -------------------------------------------------------------------------
     siwrap     => null ()
     nitems_buf => null ()
-    call ESMF_ReconcileInitialize (state, vm,  &
-        siwrap=siwrap, nitems_all=nitems_buf, rc=localrc)
+    call ESMF_ReconcileInitialize (state, vm, siwrap=siwrap, &
+      nitems_all=nitems_buf, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
       rcToReturn=rc)) return
     ! -------------------------------------------------------------------------
@@ -792,9 +787,9 @@ end block
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
         rcToReturn=rc)) return
     endif
-    call ESMF_ReconcileGetStateIDInfo (state, siwrap,  &
-          id=  ids_send,  &
-        vmid=vmids_send,  &
+    call ESMF_ReconcileGetStateIDInfo (state, siwrap, &
+          id=  ids_send, &
+        vmid=vmids_send, &
         rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
       rcToReturn=rc)) return
@@ -813,8 +808,7 @@ end block
     endif
     call ESMF_VMTranslateVMId(vm, vmIds=vmids_send, ids=vmintids_send, &
       vmIdMap=vmIdMap, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT,  &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
       rcToReturn=rc)) return
     vmIdMap_ptr => vmIdMap
     if (profile) then
@@ -841,37 +835,6 @@ end block
         rcToReturn=rc)) return
     endif
 
-    ! Use the translated VM ids information to make decision about the case
-    if (profile) then
-      call ESMF_TraceRegionEnter("Decide between cases", rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-        rcToReturn=rc)) return
-    endif
-    ! Decide between SingleComp and MultiComp case
-    singleCompCaseFlag = .false.
-    nullify(vmIdSingleComp)
-    if (size(vmIdMap)==1) then
-      singleCompCaseFlag = all(vmintids_send(1:)==1)
-      if (singleCompCaseFlag) then
-        singleCompIndex = 1
-        vmIdSingleComp => vmIdMap(singleCompIndex)
-      endif
-    else if (size(vmIdMap)==2) then
-      singleCompCaseFlag = all(vmintids_send(1:)==1) &
-        .or.all(vmintids_send(1:)==2)
-      if (singleCompCaseFlag) then
-        ! singleCompIndex could be 1 or 2, however, cannot simply look this up
-        ! in vmintids_send(1), because on PETs that do not have objects it only
-        ! stores vmintids_send(0), which holds the index into vmIdMap of the
-        ! executing VM. Since there are only two possible values, the correct
-        ! singleCompIndex must be "the other one". Therefore, look at
-        ! vmintids_send(0), which is valid on all PETs, add 1 mod 2. But since
-        ! indexing into vmIdMap starts at 1 the add 1 happens _after_ the mod 2.
-        singleCompIndex = mod(vmintids_send(0),2)+1
-        vmIdSingleComp => vmIdMap(singleCompIndex)
-      endif
-    endif
-
 #ifdef RECONCILE_LOG_on
     block
       character(160):: msgStr
@@ -890,40 +853,8 @@ end block
       call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
         rcToReturn=rc)) return
-      write(msgStr,*) "ESMF_StateReconcile_driver() local-singleCompCaseFlag: ", &
-        singleCompCaseFlag
-      call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-        rcToReturn=rc)) return
     end block
 #endif
-
-    ! ensure global consistency of the final result
-    singleCompCaseFlagInt(1) = 0
-    if (singleCompCaseFlag) singleCompCaseFlagInt(1) = 1
-    ! logical AND reduction, only 1 if all incoming 1
-    call ESMF_VMAllReduce(vm, singleCompCaseFlagInt, singleCompCaseInt, 1, &
-      ESMF_REDUCE_MIN, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-      rcToReturn=rc)) return
-    singleCompCaseFlag = (singleCompCaseInt(1)==1)  ! globally consistent result
-
-#ifdef RECONCILE_LOG_on
-    block
-      character(160):: msgStr
-      write(msgStr,*) "ESMF_StateReconcile_driver() global-singleCompCaseFlag: ", &
-        singleCompCaseFlag
-      call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-        rcToReturn=rc)) return
-    end block
-#endif
-
-    if (profile) then
-      call ESMF_TraceRegionExit("Decide between cases", rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-        rcToReturn=rc)) return
-    endif
 
     ! -------------------------------------------------------------------------
     if (profile) then
@@ -944,7 +875,7 @@ end block
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
       call idesc%Update(state, "", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_LogWrite("state_json_after_vmid="//ESMF_InfoDump(idesc%info), rc=localrc)
+      call ESMF_LogWrite("state_json_after_vmid="//ESMF_InfoDump(idesc%info), ESMF_LOGMSG_DEBUG, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
       call idesc%Destroy(rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -992,79 +923,62 @@ end block
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
       call idesc%Update(state, "", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_LogWrite("state_json_after_set_field_meta="//ESMF_InfoDump(idesc%info), rc=localrc)
+      call ESMF_LogWrite("state_json_after_set_field_meta="//ESMF_InfoDump(idesc%info), ESMF_LOGMSG_DEBUG, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
       call idesc%Destroy(rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     end block
 #endif
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!TODO: Remove this once done with testing!
-!singleCompCaseFlag = .false.
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-    if (singleCompCaseFlag) then
-      ! CASE: a single component interacting with a state
-      ! ------------------------------------------------------------------------
-      if (profile) then
-        call ESMF_TraceRegionEnter("(2<) ESMF_ReconcileSingleCompCase", rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-          rcToReturn=rc)) return
-      endif
-      ! ------------------------------------------------------------------------
-#if 0
-      call ESMF_ReconcileSingleCompCase(state, vm=vm, vmId=vmIdSingleComp, &
-        vmIntId=singleCompIndex, &
-        attreconflag=attreconflag, siwrap=siwrap, vmintids_send=vmintids_send, &
-        rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-        rcToReturn=rc)) return
-#else
-      call ESMF_ReconcileMultiCompCase(state, vm=vm, vmIdMap=vmIdMap_ptr, &
-        attreconflag=attreconflag, siwrap=siwrap, vmintids_send=vmintids_send, &
-        rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-#endif
-      ! ------------------------------------------------------------------------
-      if (profile) then
-        call ESMF_TraceRegionExit("(2<) ESMF_ReconcileSingleCompCase", rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-          rcToReturn=rc)) return
-      endif
-      ! ------------------------------------------------------------------------
-    else
-      ! CASE: multiple components interacting with a state
-      ! ------------------------------------------------------------------------
-      if (profile) then
-        call ESMF_TraceRegionEnter("(2<) ESMF_ReconcileMultiCompCase", rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-          rcToReturn=rc)) return
-      endif
-      ! ------------------------------------------------------------------------
 #if 1
-      call ESMF_ReconcileMultiCompCase(state, vm=vm, vmIdMap=vmIdMap_ptr, &
-        attreconflag=attreconflag, siwrap=siwrap, vmintids_send=vmintids_send, &
-        rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-#else
-      call ESMF_ReconcileBruteForce(state, vm=vm, &
-        attreconflag=attreconflag, siwrap=siwrap, ids_send=ids_send, &
-        vmids_send=vmids_send, vmintids_send=vmintids_send, &
-        nitems_buf=nitems_buf, rc=localrc)
+    ! ------------------------------------------------------------------------
+    ! This is the new (2024) Reconcile implementation with log(petCount) scaling
+    ! ------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionEnter("(2<) ESMF_ReconcileMultiCompCase", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
         rcToReturn=rc)) return
-#endif
-      ! ------------------------------------------------------------------------
-      if (profile) then
-        call ESMF_TraceRegionExit("(2<) ESMF_ReconcileMultiCompCase", rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-          rcToReturn=rc)) return
-      endif
-      ! ------------------------------------------------------------------------
     endif
+    ! ------------------------------------------------------------------------
+    call ESMF_ReconcileMultiCompCase(state, vm=vm, vmIdMap=vmIdMap_ptr, &
+      attreconflag=attreconflag, siwrap=siwrap, vmintids_send=vmintids_send, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+      rcToReturn=rc)) return
+    ! ------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionExit("(2<) ESMF_ReconcileMultiCompCase", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+    endif
+    ! ------------------------------------------------------------------------
+#else
+    ! ------------------------------------------------------------------------
+    ! This is the old Reconcile implementation. It uses a brute force appraoch
+    ! using Alltoall() communication that scales with petCount^2.
+    ! Only left here in case we run into situations that are not covered by the
+    ! new Reconcile implementation.
+    ! ------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionEnter("(2<) ESMF_ReconcileBruteForce", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+    endif
+    ! ------------------------------------------------------------------------
+    call ESMF_ReconcileBruteForce(state, vm=vm, &
+      attreconflag=attreconflag, siwrap=siwrap, ids_send=ids_send, &
+      vmids_send=vmids_send, vmintids_send=vmintids_send, &
+      nitems_buf=nitems_buf, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+      rcToReturn=rc)) return
+    ! ------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionExit("(2<) ESMF_ReconcileBruteForce", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+    endif
+    ! ------------------------------------------------------------------------
+#endif
 
     ! Clean up
 
@@ -1078,30 +992,27 @@ end block
 
     if (associated (ids_send)) then
       deallocate (ids_send, vmids_send, stat=memstat)
-      if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT,  &
-          rcToReturn=rc)) return
+      if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
     end if
 
     call ESMF_VMIdDestroy(vmIdMap, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+      rcToReturn=rc)) return
 
     deallocate (vmIdMap, stat=memstat)
-    if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
+    if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+      rcToReturn=rc)) return
 
     if (associated (siwrap)) then
       deallocate (siwrap, stat=memstat)
-      if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT,  &
-          rcToReturn=rc)) return
+      if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
     end if
 
     deallocate (nitems_buf, stat=memstat)
-    if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
+    if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+      rcToReturn=rc)) return
 
     ! -------------------------------------------------------------------------
     if (profile) then
@@ -1142,11 +1053,13 @@ end block
 
     ! Traverse the State hierarchy and fix Field references to a shared geometry
     call ESMF_InfoCacheReassembleFields(state, state, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+      rcToReturn=rc)) return
 
     ! Traverse the state hierarchy and remove reconcile-specific attributes
     call ESMF_InfoCacheReassembleFieldsFinalize(state, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+      rcToReturn=rc)) return
 
     if (profile) then
       call ESMF_TraceRegionExit("(X+2) Use Field metadata for unique geometries", rc=localrc)
@@ -1676,9 +1589,8 @@ end block
 
     !!!!! Allocate buffer to serialize into !!!!!
     allocate(buffer(0:sizeBuffer-1), stat=memstat)
-    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
+    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+      rcToReturn=rc)) return
 
     !!!!! Serialize information into buffer !!!!!
 
