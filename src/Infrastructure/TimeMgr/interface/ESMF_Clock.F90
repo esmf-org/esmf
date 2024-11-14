@@ -447,6 +447,13 @@
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.7.0] Added argument {\tt repeatDuration}.
+!              The new argument allows the user to specify that they want the
+!              clock to be a repeat clock and repeatedly go through the same
+!              interval of time.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -718,6 +725,13 @@
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.7.0] Added arguments {\tt repeatDuration} and {\tt repeatCount}.
+!              The argument {\tt repeatDuration} allows the user to get information
+!              about how far the clock will advance before repeating. The argument
+!              {\tt repeatCount} tells how many times the clock has repeated.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -773,9 +787,11 @@
 !          {\tt ESMF\_ClockIsReverse()}, an alternative for convenient use in
 !          "if" and "do while" constructs.
 !     \item[{[repeatDuration]}]
-!          If not 0, then how long the clock should run before going back to startTime.
+!          If not 0, then tells how long the clock will advance before going back to
+!          startTime. If 0, then the clock is not a repeat clock. 
 !     \item[{[repeatCount]}]
-!          The number of times this clock has gone back to startTime when repeating.       
+!          If this clock is a repeat clock, then gives the number of times this
+!          clock has gone back to startTime.     
 !     \item[{[name]}]
 !          The name of this clock.
 !     \item[{[rc]}]

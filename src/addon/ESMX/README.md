@@ -41,6 +41,7 @@ options:
   [--disable-comps=DISABLE_COMPS]
   [--build-type=BUILD_TYPE] or [-g]
   [--build-args=BUILD_ARGS]
+  [--cmake-args=CMAKE_ARGS]
   [--build-jobs=JOBS]
   [--load-modulefile=MODULEFILE]
   [--load-bashenv=BASHENV]
@@ -68,7 +69,10 @@ where:
   --build-type=BUILD_TYPE  build type; valid options are 'debug', 'release', 'relWithDebInfo'
   -g                       (default: release) (-g sets BUILD_TYPE to debug)
 
-  --build-args=BUILD_ARGS  global cmake arguments (e.g. -DVAR=val)
+  --build-args=BUILD_ARGS  build arguments passed to every component (e.g. -DVAR=val)
+
+  --cmake-args=CMAKE_ARGS  cmake arguments are used to configure cmake while building ESMX
+                           (e.g. -DVAR=val)
 
   --build-jobs=BUILD_JOBS  number of jobs used for building esmx and components
 

@@ -213,7 +213,7 @@ ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
 ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 
 ############################################################
-# Need this until the file convention is fixed (then remove these two lines)
+# Explicit flags for handling specific format and cpp combos
 #
 ESMF_F90COMPILEFREENOCPP = -fpp0 -FR
 ESMF_F90COMPILEFIXCPP    = -fpp

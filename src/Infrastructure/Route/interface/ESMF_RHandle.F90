@@ -1127,7 +1127,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RouteHandlePrint"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RouteHandlePrint - Print the contents of a RouteHandle
 
 ! !INTERFACE:
@@ -1149,7 +1149,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 

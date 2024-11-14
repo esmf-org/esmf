@@ -476,16 +476,16 @@
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, &
         rcToReturn=rc)) return
-      ! deallocate actual StateClass allocation      
+      ! deallocate actual StateClass allocation
       deallocate(state%statep, stat=localrc)
       localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-      if (ESMF_LogFoundAllocError(localrc, msg="Deallocating State", &
+      if (ESMF_LogFoundDeallocError(localrc, msg="Deallocating State", &
         ESMF_CONTEXT, &
         rcToReturn=rc)) return
     endif
     nullify(state%statep)
 
-    ! return successfully  
+    ! return successfully
     rc = ESMF_SUCCESS
 
   end subroutine f_esmf_statecollectgarbage

@@ -2194,7 +2194,7 @@ msg="This call does not work with packed FieldBundle.",&
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldBundleGetIndex()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldBundleGet - Access the Field at a specific index in a FieldBundle
 !
 ! !INTERFACE:
@@ -2225,7 +2225,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
     integer                       :: l_fieldCount, i         ! helper variable
