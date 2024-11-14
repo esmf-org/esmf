@@ -456,6 +456,280 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
   if (elems_around_node_ids != NULL) delete [] elems_around_node_ids;
 
 
+
+    // Check for Split 
+    // Count the number of extra elements we need for splitting
+    int num_extra_elem=0;
+    int max_num_conn=0;
+    for (int e = 0; e < num_elems; ++e) {
+      if (elemType[e] >4) {
+        num_extra_elem += (elemType[e]-3); // Original elem + # sides-2
+      }
+      
+      if (elemType[e] > max_num_conn) max_num_conn=elemType[e];
+    }
+
+    int tot_num_extra_elem=0;
+    MPI_Allreduce(&num_extra_elem,&tot_num_extra_elem,1,MPI_INT,MPI_SUM,Par::Comm());
+
+    // If there's num_extra_elem than it's a split mesh
+    if (tot_num_extra_elem>0) {
+      dual_mesh->is_split=true;
+    } else {
+      dual_mesh->is_split=false;
+    }
+
+
+  // Compute the extra element ranges
+  int beg_extra_ids=0;
+  if (dual_mesh->is_split) {      
+    // get maximum local elem id      
+    int max_id=0;
+    for (int e = 0; e < num_elems; ++e) {
+      if (elemId[e] > max_id) {
+        max_id=elemId[e];
+      }
+    }
+
+    // Calc global max id
+    int global_max_id=0;
+    MPI_Allreduce(&max_id,&global_max_id,1,MPI_INT,MPI_MAX,Par::Comm());
+    
+    // Set maximum of non-split ids
+    dual_mesh->max_non_split_id=global_max_id;
+
+    // Calc our range of extra elem ids
+    beg_extra_ids=0;
+    MPI_Scan(&num_extra_elem,&beg_extra_ids,1,MPI_INT,MPI_SUM,Par::Comm());
+    
+    // Remove this processor's number from the sum to get the beginning
+    beg_extra_ids=beg_extra_ids-num_extra_elem;
+    
+    // Start 1 up from max
+    beg_extra_ids=beg_extra_ids+global_max_id+1;
+    
+    // printf("%d# beg_extra_ids=%d end=%d\n",Par::Rank(),beg_extra_ids,beg_extra_ids+num_extra_elem-1);
+  }
+
+
+
+  // Generate connectivity list with split elements
+  // TODO: MAYBE EVENTUALLY PUT EXTRA SPLIT ONES AT END
+  int num_elems_wsplit=0;
+  int *elemConn_wsplit=NULL;
+  int *elemType_wsplit=NULL;
+  UInt *elemId_wsplit=NULL;
+  UInt *elemOwner_wsplit=NULL;
+  double *elemCoords_wsplit=NULL;
+  double *elemOrigCoords_wsplit=NULL;
+  double *elemMaskVal_wsplit=NULL;
+  double *elemMask_wsplit=NULL;
+  
+  //  int *elemMaskIIArray_wsplit=NULL;
+  //InterArray *elemMaskII_wsplit=NULL;
+
+  if (dual_mesh->is_split) {
+    // New number of elements
+    num_elems_wsplit=num_elems+num_extra_elem;
+
+    // Allocate arrays to hold split lists
+    elemConn_wsplit=new int[max_num_elemConn+3*num_extra_elem];
+    elemType_wsplit=new int[num_elems_wsplit];
+    elemId_wsplit=new UInt[num_elems_wsplit];
+    elemOwner_wsplit=new UInt[num_elems_wsplit];
+    elemCoords_wsplit=new double[sdim*num_elems_wsplit];
+    if (dual_has_elemOrigCoords) elemOrigCoords_wsplit=new double[orig_sdim*num_elems_wsplit];
+    if (dual_has_elemMaskVal) elemMaskVal_wsplit=new double[num_elems_wsplit];
+    if (dual_has_elemMask) elemMask_wsplit=new double[num_elems_wsplit];
+    
+      // Allocate some temporary variables for splitting
+      double *polyCoords = NULL;
+      double *polyDblBuf = NULL;
+      int    *polyIntBuf = NULL;
+      int    *triInd = NULL;
+      double *triFrac = NULL;
+
+      //There is nothing to do if there are no local elements, 
+      //plus the max_num_conn will be zero in this case
+      //which will try to allocate negative memory below
+      if (num_elems > 0) {
+        polyCoords = new double[3*max_num_conn];
+        polyDblBuf = new double[3*max_num_conn];
+        polyIntBuf = new int[max_num_conn];
+        triInd = new int[3*(max_num_conn-2)];
+        triFrac = new double[max_num_conn-2];
+      }
+
+      // Fill elem array, so it can be used to get coords for triangulation
+      double *dual_node_coords=new double[sdim*num_nodes];
+      MeshDB::iterator ei = src_mesh->elem_begin_all(), ee = src_mesh->elem_end_all();
+      int pos=0;
+      for (; ei != ee; ++ei) {
+        MeshObj &elem=*ei;
+
+        // Get elem coord pointer
+        double *ec=src_elem_coords->data(elem);
+
+        // Copy to array
+        for (int i=0; i<sdim; i++) {
+          dual_node_coords[pos]=ec[i];
+          pos++;
+        }        
+      }
+
+      
+      // new id counter
+      int curr_extra_id=beg_extra_ids;
+
+      // Loop through elems generating split elems if necessary
+      int conn_pos = 0;
+      int split_conn_pos = 0;
+      int split_elem_pos = 0;
+      for (int e = 0; e < num_elems; ++e) {
+
+        // More than 4 side, split
+        if (elemType[e]>4) {
+
+          // Get coordinates
+          int crd_pos=0;
+          for (int i=0; i<elemType[e]; i++) {
+            int dnc_pos=sdim*elemConn[conn_pos+i];
+            for (int j=0; j<sdim; j++) {
+              polyCoords[crd_pos]=dual_node_coords[dnc_pos];
+              crd_pos++;
+              dnc_pos++;
+            }
+
+            //printf("%d# id=%d c=%d coord=%f %f \n",Par::Rank(),elemId[e],elemConn[conn_pos+i],polyCoords[crd_pos-2],polyCoords[crd_pos-1]);
+          }
+
+          // Triangulate polygon
+          triangulate(sdim, elemType[e], polyCoords, polyDblBuf, polyIntBuf, 
+                      triInd, triFrac); 
+          
+
+          // Create split element list
+          int tI_pos=0;
+          for (int i=0; i<elemType[e]-2; i++) {
+            // First id is same, others are from new ids
+            if (i==0) {
+              elemId_wsplit[split_elem_pos]=elemId[e];
+              dual_mesh->split_id_to_frac[elemId[e]]=triFrac[i];
+            } else {
+              elemId_wsplit[split_elem_pos]=curr_extra_id;
+              dual_mesh->split_to_orig_id[curr_extra_id]=elemId[e]; // Store map of split to original id
+              dual_mesh->split_id_to_frac[curr_extra_id]=triFrac[i];
+              curr_extra_id++;
+            }
+
+            // Owner is the same
+            elemOwner_wsplit[split_elem_pos]=elemOwner[e];
+
+            // Type is triangle
+            elemType_wsplit[split_elem_pos]=3; 
+
+            // Set mask (if it exists)
+            //  if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
+
+            // Set element coords.
+            double *elem_pnt=elemCoords+sdim*e;
+            double *elem_pnt_wsplit=elemCoords_wsplit+sdim*split_elem_pos;
+            for (int d=0; d<sdim; d++) {
+              elem_pnt_wsplit[d]=elem_pnt[d];
+            }
+
+            // Set orig element coords.
+            if (elemOrigCoords && elemOrigCoords_wsplit) {
+              double *elem_orig_pnt=elemOrigCoords+orig_sdim*e;
+              double *elem_orig_pnt_wsplit=elemOrigCoords_wsplit+orig_sdim*split_elem_pos;
+              for (int od=0; od<orig_sdim; od++) {
+                elem_orig_pnt_wsplit[od]=elem_orig_pnt[od];
+              }
+            }
+
+            // Set elem mask val
+            if (elemMaskVal && elemMaskVal_wsplit) {
+              elemMaskVal_wsplit[split_elem_pos]=elemMaskVal[e];
+            }
+
+            // Set elem mask
+            if (elemMask && elemMask_wsplit) {
+              elemMask_wsplit[split_elem_pos]=elemMask[e];
+            }
+            
+            // Next split element
+            split_elem_pos++;
+
+            // Set triangle corners based on triInd
+            elemConn_wsplit[split_conn_pos]=elemConn[conn_pos+triInd[tI_pos]];
+            elemConn_wsplit[split_conn_pos+1]=elemConn[conn_pos+triInd[tI_pos+1]];
+            elemConn_wsplit[split_conn_pos+2]=elemConn[conn_pos+triInd[tI_pos+2]];
+
+            //printf("%d eid=%d seid=%d %d %d %d %f\n",i,elemId[e],elemId_wsplit[split_elem_pos-1],elemConn_wsplit[split_conn_pos],elemConn_wsplit[split_conn_pos+1],elemConn_wsplit[split_conn_pos+2],triFrac[i]);
+            split_conn_pos +=3;
+            tI_pos +=3;
+
+          }
+
+          // Advance to next elemConn position 
+          conn_pos +=elemType[e];
+
+        } else { // just copy
+          elemId_wsplit[split_elem_pos]=elemId[e];
+          elemOwner_wsplit[split_elem_pos]=elemOwner[e];
+          elemType_wsplit[split_elem_pos]=elemType[e];
+          // if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
+          split_elem_pos++;
+          for (int i=0; i<elemType[e]; i++) {
+            elemConn_wsplit[split_conn_pos]=elemConn[conn_pos];
+            split_conn_pos++;
+            conn_pos++;
+          }
+        }
+      }
+      
+      
+      // Delete some temporary variables for splitting
+      if (polyCoords != NULL) delete [] polyCoords;
+      if (polyDblBuf != NULL) delete [] polyDblBuf;
+      if (polyIntBuf != NULL) delete [] polyIntBuf;
+      if (triInd != NULL) delete [] triInd;
+      if (triFrac !=NULL) delete [] triFrac;
+      if (dual_node_coords != NULL) delete [] dual_node_coords;
+      
+
+      // Delete original element information
+      if (elemType !=NULL) delete [] elemType;
+      if (elemId !=NULL) delete [] elemId;
+      if (elemOwner !=NULL) delete [] elemOwner;
+      if (elemConn !=NULL) delete [] elemConn;
+      if (elemCoords !=NULL) delete [] elemCoords;
+      if (elemOrigCoords !=NULL) delete [] elemOrigCoords;
+      if (elemMaskVal !=NULL) delete [] elemMaskVal;
+      if (elemMask !=NULL) delete [] elemMask;
+      
+      // Use the new split list for the connection lists below
+      num_elems=num_elems_wsplit;
+      elemConn=elemConn_wsplit;
+      elemType=elemType_wsplit;
+      elemId=elemId_wsplit;
+      elemOwner=elemOwner_wsplit;
+      elemCoords=elemCoords_wsplit;
+      elemOrigCoords=elemOrigCoords_wsplit;
+      elemMaskVal=elemMaskVal_wsplit;
+      elemMask=elemMask_wsplit;
+
+#if 0
+      if (elemMaskII != NULL) { 
+        elemMaskII=elemMaskII_wsplit;
+      }
+#endif
+  }  
+
+
+  
+  //// Create Dual Nodes ////
+
   // Iterate through all src elements creating nodes
   MeshObj **nodes=NULL;
   if (num_nodes>0) nodes=new MeshObj *[num_nodes];
@@ -596,276 +870,11 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
       }
       // Next pos
       pos++;
-    }
+    }  
 
-
-    // Check for Split 
-    // Count the number of extra elements we need for splitting
-    int num_extra_elem=0;
-    int max_num_conn=0;
-    for (int e = 0; e < num_elems; ++e) {
-      if (elemType[e] >4) {
-        num_extra_elem += (elemType[e]-3); // Original elem + # sides-2
-      }
-      
-      if (elemType[e] > max_num_conn) max_num_conn=elemType[e];
-    }
-
-    int tot_num_extra_elem=0;
-    MPI_Allreduce(&num_extra_elem,&tot_num_extra_elem,1,MPI_INT,MPI_SUM,Par::Comm());
-
-    // If there's num_extra_elem than it's a split mesh
-    if (tot_num_extra_elem>0) {
-      dual_mesh->is_split=true;
-    } else {
-      dual_mesh->is_split=false;
-    }
-
-
-  // Compute the extra element ranges
-  int beg_extra_ids=0;
-  if (dual_mesh->is_split) {      
-    // get maximum local elem id      
-    int max_id=0;
-    for (int e = 0; e < num_elems; ++e) {
-      if (elemId[e] > max_id) {
-        max_id=elemId[e];
-      }
-    }
-
-    // Calc global max id
-    int global_max_id=0;
-    MPI_Allreduce(&max_id,&global_max_id,1,MPI_INT,MPI_MAX,Par::Comm());
-    
-    // Set maximum of non-split ids
-    dual_mesh->max_non_split_id=global_max_id;
-
-    // Calc our range of extra elem ids
-    beg_extra_ids=0;
-    MPI_Scan(&num_extra_elem,&beg_extra_ids,1,MPI_INT,MPI_SUM,Par::Comm());
-    
-    // Remove this processor's number from the sum to get the beginning
-    beg_extra_ids=beg_extra_ids-num_extra_elem;
-    
-    // Start 1 up from max
-    beg_extra_ids=beg_extra_ids+global_max_id+1;
-    
-    // printf("%d# beg_extra_ids=%d end=%d\n",Par::Rank(),beg_extra_ids,beg_extra_ids+num_extra_elem-1);
-  }
-
-
-
-  // Generate connectivity list with split elements
-  // TODO: MAYBE EVENTUALLY PUT EXTRA SPLIT ONES AT END
-  int num_elems_wsplit=0;
-  int *elemConn_wsplit=NULL;
-  int *elemType_wsplit=NULL;
-  UInt *elemId_wsplit=NULL;
-  UInt *elemOwner_wsplit=NULL;
-  double *elemCoords_wsplit=NULL;
-  double *elemOrigCoords_wsplit=NULL;
-  double *elemMaskVal_wsplit=NULL;
-  double *elemMask_wsplit=NULL;
   
-  //  int *elemMaskIIArray_wsplit=NULL;
-  //InterArray *elemMaskII_wsplit=NULL;
-
-  if (dual_mesh->is_split) {
-    // New number of elements
-    num_elems_wsplit=num_elems+num_extra_elem;
-
-    // Allocate arrays to hold split lists
-    elemConn_wsplit=new int[max_num_elemConn+3*num_extra_elem];
-    elemType_wsplit=new int[num_elems_wsplit];
-    elemId_wsplit=new UInt[num_elems_wsplit];
-    elemOwner_wsplit=new UInt[num_elems_wsplit];
-    elemCoords_wsplit=new double[sdim*num_elems_wsplit];
-    if (dual_has_elemOrigCoords) elemOrigCoords_wsplit=new double[orig_sdim*num_elems_wsplit];
-    if (dual_has_elemMaskVal) elemMaskVal_wsplit=new double[num_elems_wsplit];
-    if (dual_has_elemMask) elemMask_wsplit=new double[num_elems_wsplit];
+    //// Create Dual Elements ////
     
-#if 0
-      //// Setup for split mask
-      int *elemMaskIIArray=NULL;
-      if (elemMaskII != NULL) { 
-
-        // Get mask value array
-        elemMaskIIArray=elemMaskII->array;
-
-        int extent[1];
-        elemMaskIIArray_wsplit=new int[num_elems_wsplit];
-
-        extent[0]=num_elems_wsplit;
-        elemMaskII_wsplit=new InterArray(elemMaskIIArray_wsplit,1,extent);
-      }
-#endif
-
-      // Allocate some temporary variables for splitting
-      double *polyCoords = NULL;
-      double *polyDblBuf = NULL;
-      int    *polyIntBuf = NULL;
-      int    *triInd = NULL;
-      double *triFrac = NULL;
-
-      //There is nothing to do if there are no local elements, 
-      //plus the max_num_conn will be zero in this case
-      //which will try to allocate negative memory below
-      if (num_elems > 0) {
-        polyCoords = new double[3*max_num_conn];
-        polyDblBuf = new double[3*max_num_conn];
-        polyIntBuf = new int[max_num_conn];
-        triInd = new int[3*(max_num_conn-2)];
-        triFrac = new double[max_num_conn-2];
-      }
-
-      // new id counter
-      int curr_extra_id=beg_extra_ids;
-
-      // Loop through elems generating split elems if necessary
-      int conn_pos = 0;
-      int split_conn_pos = 0;
-      int split_elem_pos = 0;
-      for (int e = 0; e < num_elems; ++e) {
-
-        // More than 4 side, split
-        if (elemType[e]>4) {
-
-          // Get coordinates
-          int crd_pos=0;
-          for (int i=0; i<elemType[e]; i++) {
-            MeshObj *node=nodes[elemConn[conn_pos+i]];
-            double *crd=dm_node_coord->data(*node);
-            for (int j=0; j<sdim; j++) {
-              polyCoords[crd_pos]=crd[j];
-              crd_pos++;
-            }
-
-            //printf("%d# id=%d c=%d coord=%f %f \n",Par::Rank(),elemId[e],elemConn[conn_pos+i],polyCoords[crd_pos-2],polyCoords[crd_pos-1]);
-          }
-
-          // Triangulate polygon
-          triangulate(sdim, elemType[e], polyCoords, polyDblBuf, polyIntBuf, 
-                      triInd, triFrac); 
-          
-
-          // Create split element list
-          int tI_pos=0;
-          for (int i=0; i<elemType[e]-2; i++) {
-            // First id is same, others are from new ids
-            if (i==0) {
-              elemId_wsplit[split_elem_pos]=elemId[e];
-              dual_mesh->split_id_to_frac[elemId[e]]=triFrac[i];
-            } else {
-              elemId_wsplit[split_elem_pos]=curr_extra_id;
-              dual_mesh->split_to_orig_id[curr_extra_id]=elemId[e]; // Store map of split to original id
-              dual_mesh->split_id_to_frac[curr_extra_id]=triFrac[i];
-              curr_extra_id++;
-            }
-
-            // Owner is the same
-            elemOwner_wsplit[split_elem_pos]=elemOwner[e];
-
-            // Type is triangle
-            elemType_wsplit[split_elem_pos]=3; 
-
-            // Set mask (if it exists)
-            //  if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
-
-            // Set element coords.
-            double *elem_pnt=elemCoords+sdim*e;
-            double *elem_pnt_wsplit=elemCoords_wsplit+sdim*split_elem_pos;
-            for (int d=0; d<sdim; d++) {
-              elem_pnt_wsplit[d]=elem_pnt[d];
-            }
-
-            // Set orig element coords.
-            if (elemOrigCoords && elemOrigCoords_wsplit) {
-              double *elem_orig_pnt=elemOrigCoords+orig_sdim*e;
-              double *elem_orig_pnt_wsplit=elemOrigCoords_wsplit+orig_sdim*split_elem_pos;
-              for (int od=0; od<orig_sdim; od++) {
-                elem_orig_pnt_wsplit[od]=elem_orig_pnt[od];
-              }
-            }
-
-            // Set elem mask val
-            if (elemMaskVal && elemMaskVal_wsplit) {
-              elemMaskVal_wsplit[split_elem_pos]=elemMaskVal[e];
-            }
-
-            // Set elem mask
-            if (elemMask && elemMask_wsplit) {
-              elemMask_wsplit[split_elem_pos]=elemMask[e];
-            }
-            
-            // Next split element
-            split_elem_pos++;
-
-            // Set triangle corners based on triInd
-            elemConn_wsplit[split_conn_pos]=elemConn[conn_pos+triInd[tI_pos]];
-            elemConn_wsplit[split_conn_pos+1]=elemConn[conn_pos+triInd[tI_pos+1]];
-            elemConn_wsplit[split_conn_pos+2]=elemConn[conn_pos+triInd[tI_pos+2]];
-
-            //printf("%d eid=%d seid=%d %d %d %d %f\n",i,elemId[e],elemId_wsplit[split_elem_pos-1],elemConn_wsplit[split_conn_pos],elemConn_wsplit[split_conn_pos+1],elemConn_wsplit[split_conn_pos+2],triFrac[i]);
-            split_conn_pos +=3;
-            tI_pos +=3;
-
-          }
-
-          // Advance to next elemConn position 
-          conn_pos +=elemType[e];
-
-        } else { // just copy
-          elemId_wsplit[split_elem_pos]=elemId[e];
-          elemOwner_wsplit[split_elem_pos]=elemOwner[e];
-          elemType_wsplit[split_elem_pos]=elemType[e];
-          // if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
-          split_elem_pos++;
-          for (int i=0; i<elemType[e]; i++) {
-            elemConn_wsplit[split_conn_pos]=elemConn[conn_pos];
-            split_conn_pos++;
-            conn_pos++;
-          }
-        }
-      }
-      
-      
-      // Delete some temporary variables for splitting
-      if (polyCoords != NULL) delete [] polyCoords;
-      if (polyDblBuf != NULL) delete [] polyDblBuf;
-      if (polyIntBuf != NULL) delete [] polyIntBuf;
-      if (triInd != NULL) delete [] triInd;
-      if (triFrac !=NULL) delete [] triFrac;
-
-
-      // Delete original element information
-      if (elemType !=NULL) delete [] elemType;
-      if (elemId !=NULL) delete [] elemId;
-      if (elemOwner !=NULL) delete [] elemOwner;
-      if (elemConn !=NULL) delete [] elemConn;
-      if (elemCoords !=NULL) delete [] elemCoords;
-      if (elemOrigCoords !=NULL) delete [] elemOrigCoords;
-      if (elemMaskVal !=NULL) delete [] elemMaskVal;
-      if (elemMask !=NULL) delete [] elemMask;
-      
-      // Use the new split list for the connection lists below
-      num_elems=num_elems_wsplit;
-      elemConn=elemConn_wsplit;
-      elemType=elemType_wsplit;
-      elemId=elemId_wsplit;
-      elemOwner=elemOwner_wsplit;
-      elemCoords=elemCoords_wsplit;
-      elemOrigCoords=elemOrigCoords_wsplit;
-      elemMaskVal=elemMaskVal_wsplit;
-      elemMask=elemMask_wsplit;
-
-#if 0
-      if (elemMaskII != NULL) { 
-        elemMaskII=elemMaskII_wsplit;
-      }
-#endif
-  }  
-
-
     // Build elements
     // Now loop the elements and add them to the mesh.
     int cur_conn = 0;
