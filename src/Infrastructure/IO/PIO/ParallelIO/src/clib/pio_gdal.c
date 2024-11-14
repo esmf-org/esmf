@@ -844,7 +844,7 @@ GDALc_shp_write_float_field(int fileid, int varid, const size_t *startp,
     OGR_F_SetFieldDouble(hF,varid,(float)ip[i]);
     OGR_L_SetFeature(hL,hF);
     OGR_F_Destroy( hF );
-    //printf("<<>> ip[%d]=%f\n",i,ip[i]);
+    printf("<<>> ip[%d]=%f\n",i,ip[i]);
   }
 
   return PIO_NOERR;
@@ -976,6 +976,7 @@ GDALc_def_field(int ncid, const char *name, nc_type xtype, int ndims, int *varid
 	  // 5. Create & add field
 	  OGRFieldDefnH hFieldDefn = OGR_Fld_Create( name, OFTReal );
 	  OGR_Fld_SetWidth( hFieldDefn, 32);
+	  OGR_Fld_SetPrecision( hFieldDefn, 8);
 	  if( OGR_L_CreateField( hL, hFieldDefn, TRUE ) != OGRERR_NONE )
 	    {
 	      printf( "Creating Name field failed.\n" );

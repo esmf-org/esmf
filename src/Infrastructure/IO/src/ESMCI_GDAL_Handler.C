@@ -648,27 +648,6 @@ void GDAL_Handler::arrayReadOneTileFile(
       return;
     }
 
-//>>    int frame;
-//>>    if (((int *)NULL != timeslice) && (*timeslice > 0) && narrDims < nioDims) {
-//>>      //
-//>>      // Do not use the unlimited dim in iodesc calculation
-//>>      //
-//>>      int dimids[narrDims];
-//>>      gdalrc = GDALc_inq_vardimid(filedesc, vardesc, dimids);
-//>>      // This should never happen
-//>>      const std::string errmsg = "variable " + varname + " inq_dimid failed";
-//>>      if (!CHECKGDALERROR(gdalrc, errmsg, ESMF_RC_FILE_READ, (*rc))) {
-//>>	return;
-//>>      }
-
-//>>      if(unlim == dimids[narrDims-1]){
-//>>	narrDims = narrDims - 1;
-//>>      }
-//>>      for (int i=0; i<narrDims; i++){
-//>>        // Note that arrDims[i] will be 0 if this DE doesn't own the current tile
-//>>	arrlen *= arrDims[i];
-//>>      }
-
 //>> TBD! THIS REQUIRES SOME DISCUSSION: HOW TO DEAL WITH FILES W/O DATE/TIME DEFS? -- MSL
       int dimid_time;
       MPI_Offset time_len;
@@ -787,20 +766,18 @@ void GDAL_Handler::arrayWriteOneTileFile(
 
   PRINTPOS;
 
-//>>>  if ((int *)NULL != timeslice) {
-//>>>    timesliceVal = *timeslice;
-//>>>  }
-//>>>  // File open?
-//>>>  if (isOpen(tile) != ESMF_TRUE)
-//>>>    if (ESMC_LogDefault.MsgFoundError (ESMF_RC_FILE_READ, "file not open",
-//>>>        ESMC_CONTEXT, rc)) return;
-//>>>
-//>>>  // Array compatible with this object?
-//>>>  localrc = checkArray(arr_p);
-//>>>  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
-//>>>    return;
-//>>>
+  // File open?
+  if (isOpen(tile) != ESMF_TRUE)
+    if (ESMC_LogDefault.MsgFoundError (ESMF_RC_FILE_READ, "file not open",
+        ESMC_CONTEXT, rc)) return;
+
+  // Array compatible with this object?
+  localrc = checkArray(arr_p);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+    return;
+
 //>>>  filedesc = gdalFileDesc[tile-1]; // note that tile indices are 1-based
+
   fileID   = gdalFileID[tile-1];   // note that tile indices are 1-based
   iodesc = getIODesc(gdalSystemDesc, arr_p, tile, &ioDims, &nioDims,
 		     &arrDims, &narrDims, &basegdaltype, &localrc);
@@ -813,14 +790,6 @@ void GDAL_Handler::arrayWriteOneTileFile(
     }
   }
 
-//>>>  if (dimLabels.size() > 0 && dimLabels.size() < (unsigned int)nioDims) {
-//>>>    std::stringstream errmsg;
-//>>>    errmsg << dimLabels.size() << " user dimension label(s) supplied, " << nioDims << " expected";
-//>>>    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_SIZE, errmsg,
-//>>>            ESMC_CONTEXT, rc)) return;
-//>>>  }
-//>>>
-//>>>
   // Get a pointer to the array data
   // Still have the one DE restriction so use localDE = 0
   localDE = 0;
@@ -856,7 +825,6 @@ void GDAL_Handler::arrayWriteOneTileFile(
     int nAtt;                           // Number of attributes in file
     int nfDims;                         // Number of dimensions in file
 
-    printf("<<>> fileID 1: %d\n",fileID);
     // See if the variable is in there
     PRINTMSG("Looking for variable in file");
     gdalrc = GDALc_inq_fieldid(fileID, fieldname.c_str(), &fielddesc);
@@ -865,7 +833,6 @@ void GDAL_Handler::arrayWriteOneTileFile(
   }
     // We have a GDAL file, see if the variable is in there
     // Define the field
-    printf("<<>> fileID 2: %d (%d)\n",fileID,fielddesc);
   if (!fieldExists) {
     ESMCI_IOREGION_ENTER("GDALc_def_field");
     gdalrc =  GDALc_def_field(fileID, fieldname.c_str(), basegdaltype, 1, &fielddesc);
@@ -885,11 +852,11 @@ void GDAL_Handler::arrayWriteOneTileFile(
 		      ESMF_RC_FILE_WRITE, (*rc))) {
     return;
   }
-//>>>  new_file[tile-1] = false;
-//>>>  ESMCI_IOREGION_EXIT("GDALc_write_darray");
-//>>>
-//>>>  // Cleanup & return
-//>>>  PRINTMSG("cleanup and return");
+  new_file[tile-1] = false;
+  ESMCI_IOREGION_EXIT("GDALc_write_darray");
+
+  // Cleanup & return
+  PRINTMSG("cleanup and return");
   if (rc != NULL) {
     *rc = ESMF_SUCCESS;
   }
@@ -1258,13 +1225,11 @@ void GDAL_Handler::flushOneTileFile(
   // Not open? No problem, just skip
   if (isOpen(tile) == ESMF_TRUE) {
     PRINTMSG("calling sync");
-//>>    ESMCI_IOREGION_ENTER("GDALc_sync");
+    ESMCI_IOREGION_ENTER("GDALc_sync");
     if (gdalFileDesc[tile-1] != NULL) {
-//>>      OGR_DS_Destroy(gdalFileDesc[tile-1]);
       gdalrc = PIOc_sync(gdalFileID[tile-1]);
     }
-//>>    GDALc_sync(gdalFileDesc[tile-1]);
-//>>    ESMCI_IOREGION_EXIT("GDALc_sync");
+    ESMCI_IOREGION_EXIT("GDALc_sync");
   }
   // return successfully
   if (rc != NULL) {
