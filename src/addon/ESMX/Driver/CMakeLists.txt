@@ -160,6 +160,15 @@ foreach(ESMX_LINK_LIBRARY IN ITEMS ${ESMX_LINK_LIBRARIES})
   endif()
 endforeach()
 
+# CMake has a bug with NAG and OpenMP:
+#   https://gitlab.kitware.com/cmake/cmake/-/issues/21280
+# so we work around it ... credit to https://github.com/mathomp4
+if (OpenMP_Fortran_FOUND AND CMAKE_Fortran_COMPILER_ID STREQUAL "NAG")
+  message(WARNING "NAG Fortran detected, resetting OpenMP flags to avoid CMake bug")
+  set_property(TARGET OpenMP::OpenMP_Fortran PROPERTY INTERFACE_LINK_LIBRARIES "")
+  set_property(TARGET OpenMP::OpenMP_Fortran PROPERTY INTERFACE_LINK_OPTIONS "-openmp")
+endif()
+
 # link options
 if(DEFINED ESMX_LINK_OPTIONS)
   target_link_options(esmx_driver PUBLIC ${ESMX_LINK_OPTIONS})
