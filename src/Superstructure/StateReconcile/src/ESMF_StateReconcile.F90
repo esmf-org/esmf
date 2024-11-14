@@ -13,7 +13,7 @@
 !
 #define UNIQUE_GEOM_INFO_TREAT_on
 !
-#define RECONCILE_LOG_on
+#define RECONCILE_LOG_off
 #define RECONCILE_ZAP_LOG_off
 !
 ! ESMF StateReconcile module
@@ -327,7 +327,7 @@ localCheckFlag = .true. ! force checking
         call idesc%Update(state, "", rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
         jsonStr = "state_json_after_reassemble="//ESMF_InfoDump(idesc%info)
-#if 1
+#ifdef RECONCILE_LOG_on
         call ESMF_LogWrite(jsonStr, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
@@ -977,7 +977,8 @@ end block
     ! -------------------------------------------------------------------------
     if (meminfo) call ESMF_VMLogMemInfo ("after (1) Construct send arrays")
 
-#if 0
+#ifdef UNIQUE_GEOM_INFO_TREAT_on
+#ifdef RECONCILE_LOG_on
     block
       type(ESMF_InfoDescribe)   :: idesc
       ! Log a JSON State representation -----------------------------------------
@@ -992,8 +993,6 @@ end block
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
     end block
 #endif
-
-#ifdef UNIQUE_GEOM_INFO_TREAT_on
     ! -------------------------------------------------------------------------
     if (profile) then
       call ESMF_TraceRegionEnter("(2) Set Field metadata for unique geometries", rc=localrc)
@@ -1029,7 +1028,7 @@ end block
     if (meminfo) call ESMF_VMLogMemInfo ("after (2) Update Field metadata")
 #endif
 
-#if 1
+#ifdef RECONCILE_LOG_on
     block
       type(ESMF_InfoDescribe)   :: idesc
       ! Log a JSON State representation -----------------------------------------
