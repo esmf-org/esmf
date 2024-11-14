@@ -1124,6 +1124,8 @@ end block
     type(ESMF_VMId)           :: vmId
     type(ESMF_VMId),  pointer :: vmIdSingleComp
 
+    logical, parameter    :: profile = .true.
+
     rc = ESMF_SUCCESS
 
 #ifdef RECONCILE_LOG_on
@@ -1175,11 +1177,21 @@ end block
         ! objects with vmIdMap(i) are not defined on all PETs of the
         ! reconciling context -> need to reconcile
         vmIdSingleComp => vmIdMap(i)
+        if (profile) then
+          call ESMF_TraceRegionEnter("ESMF_ReconcileSingleCompCase", rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+            rcToReturn=rc)) return
+        endif
         call ESMF_ReconcileSingleCompCase(state, vm=vm, vmId=vmIdSingleComp, &
           vmIntId=i, attreconflag=attreconflag, siwrap=siwrap, &
           vmintids_send=vmintids_send, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
           rcToReturn=rc)) return
+        if (profile) then
+          call ESMF_TraceRegionExit("ESMF_ReconcileSingleCompCase", rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+            rcToReturn=rc)) return
+        endif
       endif
     enddo
 
