@@ -4487,8 +4487,10 @@ module NUOPC_Connector
       gridList=>gridList%prev
 #define CLEAN_OUT_OLD_ACCEPTOR_GRID
 #ifdef CLEAN_OUT_OLD_ACCEPTOR_GRID
+#if 0
 call ESMF_PointerLog(gridListE%keyGrid%this, prefix="about to destroy Grid: ", &
   logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
       call ESMF_GridDestroy(gridListE%keyGrid, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -4501,8 +4503,10 @@ call ESMF_PointerLog(gridListE%keyGrid%this, prefix="about to destroy Grid: ", &
       meshList=>meshList%prev
 #define CLEAN_OUT_OLD_ACCEPTOR_MESH
 #ifdef CLEAN_OUT_OLD_ACCEPTOR_MESH
+#if 0
 call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
   logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
       call ESMF_MeshDestroy(meshListE%keyMesh, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -4578,10 +4582,12 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     integer                         :: stat
     integer                         :: localPet
     type(ESMF_State)                :: state
+    type(ESMF_DistGrid)             :: gridDG, arrayDG
+    type(ESMF_DistGridMatch_Flag)   :: dgMatch
 
     ! set RC
     rc = ESMF_SUCCESS
-    
+
     ! queries
     call ESMF_FieldGet(acceptorField, grid=grid, name=fieldName, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4625,10 +4631,32 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
-    ! obtain the array from provider to be shared with acceptor
+
+    ! obtain the array from provider to be shared with acceptor, effectively
+    ! sharing the provider data allocation with the acceptor field
     call ESMF_FieldGet(providerField, array=array, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
+
+    ! access grid and array DistGrids to ensure match level is high enough
+    ! to support field sharing
+    call ESMF_GridGet(grid, staggerloc=staggerloc, distgrid=gridDG, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    call ESMF_ArrayGet(array, distgrid=arrayDG, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    dgMatch = ESMF_DistGridMatch(gridDG, arrayDG, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    if (dgMatch < ESMF_DISTGRIDMATCH_EXACT) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="The available Grid does not support Field sharing!",&
+        line=__LINE__, file=trim(name)//":"//FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+
     ! obtain the vm from provider to create the new field on the provider vm
     ! This way shared fields will only be send/receive during Timestamp
     ! propagation on actvive PETs. This is what you expect for a shared field.
@@ -4648,7 +4676,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     if (localPet>-1) then
       ! this is an active PET -> create the acceptorField
-      
+
       !TODO: make sure that this FieldCreate() sets total widths correctly
       !TODO: difficult to do with current FieldCreate() for multiple DEs/PET
       if (fieldDimCount - gridDimCount > 0) then
@@ -4670,7 +4698,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return
     endif
-  
+
     ! reconcile across the entire Connector VM
     call ESMF_StateReconcile(state, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4678,7 +4706,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     call ESMF_StateGet(state, itemName=fieldName, field=acceptorField, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
-    
+
     ! done with the helper state
     call ESMF_StateDestroy(state, noGarbage=.true., rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4703,7 +4731,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
         msg="Deallocating ungriddedUBound", &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
-    
+
   end subroutine
 
   !-----------------------------------------------------------------------------
@@ -4726,10 +4754,12 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     integer                         :: stat
     integer                         :: localPet
     type(ESMF_State)                :: state
+    type(ESMF_DistGrid)             :: meshDG, arrayDG
+    type(ESMF_DistGridMatch_Flag)   :: dgMatch
 
     ! set RC
     rc = ESMF_SUCCESS
-    
+
     ! queries
     call ESMF_FieldGet(acceptorField, mesh=mesh, name=fieldName, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4769,10 +4799,38 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
-    ! obtain the array from provider to be shared with acceptor
+
+    ! obtain the array from provider to be shared with acceptor, effectively
+    ! sharing the provider data allocation with the acceptor field
     call ESMF_FieldGet(providerField, array=array, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
+
+    ! access mesh and array DistGrids to ensure match level is high enough
+    ! to support field sharing
+    if (meshloc == ESMF_MESHLOC_NODE) then
+      call ESMF_MeshGet(mesh, nodalDistgrid=meshDG, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    else
+      call ESMF_MeshGet(mesh, elementDistgrid=meshDG, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    endif
+    call ESMF_ArrayGet(array, distgrid=arrayDG, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    dgMatch = ESMF_DistGridMatch(meshDG, arrayDG, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    if (dgMatch < ESMF_DISTGRIDMATCH_EXACT) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="The available Mesh does not support Field sharing!",&
+        line=__LINE__, file=trim(name)//":"//FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+
     ! obtain the vm from provider to create the new field on the provider vm
     ! This way shared fields will only be send/receive during Timestamp
     ! propagation on actvive PETs. This is what you expect for a shared field.
@@ -4814,7 +4872,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return
     endif
-      
+
     ! reconcile across the entire Connector VM
     call ESMF_StateReconcile(state, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4827,7 +4885,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     call ESMF_StateDestroy(state, noGarbage=.true., rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
-      
+
     ! clean-up
     deallocate(gridToFieldMap, stat=rc)
     if (ESMF_LogFoundDeallocError(rc, &
@@ -4843,7 +4901,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
         msg="Deallocating ungriddedUBound", &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
-    
+
   end subroutine
 
   !-----------------------------------------------------------------------------

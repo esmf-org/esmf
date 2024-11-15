@@ -5363,9 +5363,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ftype%is_proxy .or. ftype%geomb_internal) then
         
           if (ftype%is_proxy) then
-            ! proxies destroy their actual geometry object, but must leave
+#if 1
+!gjt: Destroying geom object for proxies might not be a good idea. If this
+!gjt: every cases issues, then we might want to disable it here.
+!gjt: Disable, because proxy geoms might be used outside the original the
+!gjt: proxy field... cannot destroy here, but instead must keep proxy the
+!gjt: geom alive!!!
+
+            ! Proxies destroy their actual geometry object, but must leave
             ! in garbage collection because multiple fields might be referencing
-            ! the same actual geometry object, and try to destroy
+            ! the same actual geometry object, and try to destroy. Garbage
+            ! collection makes those double destroy calls safe noops.
 
             call ESMF_GeomGet(ftype%geom, geomtype=geomtype, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
@@ -5421,14 +5429,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ESMF_CONTEXT, rcToReturn=rc)
               return
             endif
-            
+            ! the Geom needs to be destroyed
+            call ESMF_GeomDestroy(ftype%geom, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
+          else
+            ! the Geom needs to be destroyed
+            call ESMF_GeomDestroy(ftype%geom, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
           endif
-
-          ! proxy or not, the Geom needs to be destroyed
-          call ESMF_GeomDestroy(ftype%geom, rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
         ftype%status = ESMF_FIELDSTATUS_UNINIT  ! mark invalid

@@ -43,6 +43,7 @@ module ESMF_RHandleMod
   use ESMF_LogErrMod              ! ESMF error handling
   use ESMF_F90InterfaceMod        ! ESMF F90-C++ interface helper
   use ESMF_IOUtilMod              ! ESMF I/O utility layer
+  use ESMF_VMMod
 
   implicit none
 
@@ -755,12 +756,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_RouteHandleGet()
-  subroutine ESMF_RouteHandleGetP(routehandle, keywordEnforcer, name, rc)
+  subroutine ESMF_RouteHandleGetP(routehandle, keywordEnforcer, name, vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(in)            :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),       intent(out), optional :: name
+    type(ESMF_VM),          intent(out), optional :: vm
     integer,                intent(out), optional :: rc
 
 !
@@ -773,6 +775,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          {\tt ESMF\_RouteHandle} to be queried.
 !     \item [{[name]}]
 !          Name of the RouteHandle object.
+!     \item [{[vm}]
+!         The VM on which the RouteHandle object was created.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -791,6 +795,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call c_ESMC_GetName(routehandle, name, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    if (present(vm)) then
+      call c_ESMC_GetVM(routehandle, vm, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Set init code on the VM object before returning
+      call ESMF_VMSetInitCreated(vm, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 

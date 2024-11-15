@@ -280,11 +280,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, allocatable :: distgridToGridMap(:)
       integer, allocatable :: distgridToPackedArrayMap(:)
       integer, allocatable :: arrayCompUBnd(:, :), arrayCompLBnd(:, :)
-      type(ESMF_DistGrid)  :: arrayDistGrid, gridDistGrid
-      type(ESMF_GridDecompType) :: decompType
-      type(ESMF_GeomType_Flag) :: geomtype
-      type(ESMF_Grid) :: grid
-      type(ESMF_Status) :: basestatus
+      type(ESMF_DistGrid)  :: arrayDistGrid, geomDistGrid
+      type(ESMF_GridDecompType)     :: decompType
+      type(ESMF_GeomType_Flag)      :: geomtype
+      type(ESMF_Grid)               :: grid
+      type(ESMF_Status)             :: basestatus
+      type(ESMF_DistGridMatch_Flag) :: dgMatch
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -342,7 +343,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif   
           ! get grid dim and extents for the local piece
           call ESMF_GeomGet(ftypep%geom, dimCount=gridrank, &
-                            distgrid=gridDistGrid, localDECount=localDECount, rc=localrc)
+                            distgrid=geomDistGrid, localDECount=localDECount, rc=localrc)
           if (localrc .ne. ESMF_SUCCESS) then
              call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
                 msg="Cannot retrieve distgrid, gridrank, localDECount from ftypep%grid", &
@@ -379,13 +380,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 msg="Cannot retrieve dimCount, localDECount, arrayDistGrid, arrayrank from ftypep%array", &
                  ESMF_CONTEXT, rcToReturn=rc)
              return
-          endif 
-          
-          ! Verify the distgrids in array and grid match.
-          if(ESMF_DistGridMatch(gridDistGrid, arrayDistGrid, rc=localrc) &
-            < ESMF_DISTGRIDMATCH_EXACT) then
+          endif
+
+          ! Verify the distgrids in array and geom match.
+          dgMatch = ESMF_DistGridMatch(geomDistGrid, arrayDistGrid, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+                 ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+          if(dgMatch < ESMF_DISTGRIDMATCH_EXACT) then
               call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-                 msg="grid DistGrid does not match array DistGrid", &
+                 msg="geom DistGrid does not match array DistGrid", &
                   ESMF_CONTEXT, rcToReturn=rc)
               return
           endif
