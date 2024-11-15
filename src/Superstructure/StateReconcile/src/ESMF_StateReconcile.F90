@@ -182,7 +182,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM)               :: localvm
     logical                     :: isNoop, isFlag, localCheckFlag
 
-    logical, parameter :: profile = .true.
+    logical, parameter :: profile = .false.
 
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -429,7 +429,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical                 :: isNoopLoc
     integer                 :: isNoopLocInt(1), isNoopInt(1)
 
-    logical, parameter      :: profile = .true.
+    logical, parameter      :: profile = .false.
 
     localrc = ESMF_RC_NOT_IMPL
 
@@ -713,7 +713,7 @@ end block
     integer :: localPet, petCount
 
     logical, parameter    :: meminfo = .false.
-    logical, parameter    :: profile = .true.
+    logical, parameter    :: profile = .false.
 
     integer, pointer                     :: nitems_buf(:)
     type (ESMF_StateItemWrap), pointer   :: siwrap(:)
@@ -1126,7 +1126,7 @@ end block
     type(ESMF_VMId)           :: vmId
     type(ESMF_VMId),  pointer :: vmIdSingleComp
 
-    logical, parameter    :: profile = .true.
+    logical, parameter    :: profile = .false.
 
     rc = ESMF_SUCCESS
 
@@ -1963,7 +1963,7 @@ end block
     character,                  pointer     :: buffer_recv(:)
 
     logical, parameter :: meminfo = .false.
-    logical, parameter :: profile = .true.
+    logical, parameter :: profile = .false.
 
     rc = ESMF_SUCCESS
 
@@ -2884,7 +2884,7 @@ end block
     type(ESMF_Info) :: base_info, base_temp_info
 
     logical, parameter :: debug = .false.
-    logical, parameter :: profile = .true.
+    logical, parameter :: profile = .false.
 
     rc = ESMF_RC_NOT_IMPL
 
@@ -3402,7 +3402,7 @@ end block
 
     logical, parameter :: debug = .false.
     logical, parameter :: meminfo = .false.
-    logical, parameter :: profile = .true.
+    logical, parameter :: profile = .false.
 
     character(len=ESMF_MAXSTR) :: logmsg
 
@@ -3642,7 +3642,7 @@ end block
     character(ESMF_MAXSTR) :: msgstring
 
     logical, parameter :: debug = .false.
-    logical, parameter :: profile = .true.
+    logical, parameter :: profile = .false.
 
     localrc = ESMF_RC_NOT_IMPL
 
@@ -3974,7 +3974,7 @@ end block
     integer :: nitems_local(1)
     integer :: localPet, petCount
 
-    logical, parameter :: profile = .true.
+    logical, parameter :: profile = .false.
 
     localrc = ESMF_RC_NOT_IMPL
 
