@@ -273,13 +273,6 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
   // Number of local nodes
   int num_nodes=pos;
 
-  // Allocate vector to record which nodes are used
-  int *nodes_used=NULL;
-  if (num_nodes >0) nodes_used=new int[num_nodes];
-  for (int i=0; i<num_nodes; i++) {
-    nodes_used[i]=0;
-  }
-
   // Iterate through src nodes counting sizes
   // Note that the elems around the node are the maximum possible, it
   // could be less when actually counted and uniqued. 
@@ -435,9 +428,6 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
       // Get index of this element
       int node_index=id_to_index[elem_id];
       
-      // Record that this node was used
-      nodes_used[node_index]=1;
-
       // Push connection
       elemConn[conn_pos]=node_index;
 
@@ -726,7 +716,37 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
 #endif
   }  
 
+  //// See which nodes are used ////
 
+  // Allocate and init array to record which nodes are used
+  int *nodes_used=NULL;
+  if (num_nodes >0) nodes_used=new int[num_nodes];
+  for (int i=0; i<num_nodes; i++) {
+    nodes_used[i]=0;
+  }
+
+  // Loop filling in used nodes
+  for (int e = 0, conn_pos=0; e < num_elems; ++e) {
+
+      // Get the element topology
+      const MeshObjTopo *topo = ElemType2Topo(pdim, sdim,                                               
+                                              elemType[e]);
+
+      // Get the number of nodes in this elem
+      int num_nodes = topo->num_nodes;
+
+      // Loop over nodes in elem
+      for (int n = 0; n < num_nodes; ++n) {
+      
+        // Record that this node was used
+        nodes_used[elemConn[conn_pos]]=1;
+        
+        // Advance to next
+        conn_pos++;
+      }
+    } // for e
+
+  
   
   //// Create Dual Nodes ////
 
