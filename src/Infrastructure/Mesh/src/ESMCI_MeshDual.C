@@ -52,7 +52,7 @@ namespace ESMCI {
 
   const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype);
 
-  void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind, 
+  bool triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind, 
                    double *tri_frac);
   
   void get_num_elems_around_node(MeshObj *node, int *_num_ids);
@@ -594,9 +594,12 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
           }
 
           // Triangulate polygon
-          triangulate(sdim, elemType[e], polyCoords, polyDblBuf, polyIntBuf, 
-                      triInd, triFrac); 
-          
+         bool tri_success=triangulate(sdim, elemType[e], polyCoords, polyDblBuf, polyIntBuf, 
+                                      triInd, triFrac); 
+
+         // If we didn't succeed then go onto next element
+         if (!tri_success) continue;
+         
 
           // Create split element list
           int tI_pos=0;
@@ -677,6 +680,8 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
           }
         }
       }
+
+      
       
       
       // Delete some temporary variables for splitting
@@ -699,7 +704,8 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
       if (elemMask !=NULL) delete [] elemMask;
       
       // Use the new split list for the connection lists below
-      num_elems=num_elems_wsplit;
+      //  num_elems=num_elems_wsplit; Use below instead
+      num_elems=split_elem_pos; 
       elemConn=elemConn_wsplit;
       elemType=elemType_wsplit;
       elemId=elemId_wsplit;
@@ -1146,7 +1152,8 @@ const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype) {
 // ti    = temporary integer buffer size = num_p
 // tri_ind = output array  size = 3*(nump-2)
 // tri_frac = fraction each triangle is of whole poly size=(num_p-2)
-void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind, 
+// returns true if triagulation was successful and output is valid, otherwise returns false
+bool triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind, 
                  double *tri_frac) {
           int localrc;
           
@@ -1166,6 +1173,8 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
 
           // Check return code
           if (ret != ESMCI_TP_SUCCESS) {
+            return false;
+#if 0
             if (ret == ESMCI_TP_DEGENERATE_POLY) {
               Throw() << " - can't triangulate a polygon with less than 3 sides"; 
             } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
@@ -1173,6 +1182,7 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
             } else {
               Throw() <<" - unknown error in triangulation";
             }
+#endif            
           }
 
 
@@ -1214,7 +1224,7 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
             else tri_frac[i]=0.0;
           }
 
-    return;
+    return true;
 }
 
 
