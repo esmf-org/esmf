@@ -2389,6 +2389,13 @@
         write(name, *) "Testing completing a Field from a Geom object and a typekind"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+        !------------------------------------------------------------------------
+        !NEX_UTest_Multi_Proc_Only
+        ! Testing ESMF_FieldEmptyReset()
+        call test_FieldEmptyReset(rc)
+        write(failMsg, *) ""
+        write(name, *) "Test resetting a Field back to a less complete status"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
         
     call ESMF_TestEnd(ESMF_SRCLINE)
 
@@ -9078,6 +9085,120 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
     end subroutine test_geom_comp_tkr
+
+
+    subroutine test_FieldEmptyReset(rc)
+        integer, intent(out)  :: rc
+        integer                 :: localrc
+        type(ESMF_Field)        :: field
+        type(ESMF_Grid)         :: grid1, grid2, tmpGrid
+        real, dimension(:,:), allocatable   :: farray
+
+        type(ESMF_VM)                               :: vm
+        integer                                     :: lpe
+        integer, dimension(2)             :: ec, cc
+        integer, dimension(2)             :: gelb, geub, gclb, gcub
+        type(ESMF_StaggerLoc)                       :: sloc
+        type (ESMF_TypeKind_Flag) :: typekind
+        character(len = 20) :: tmpName
+        
+        rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
+
+        ! Create Grids
+        grid1 = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/16,20/), &
+             regDecomp=(/4,1/), name="testgrid1", rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        grid2 = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/32,40/), &
+             regDecomp=(/4,1/), name="testgrid2", rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! Create Empty Field
+        field = ESMF_FieldEmptyCreate(rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! Add a Grid
+        call ESMF_FieldEmptySet(field, grid1, rc=localrc) 
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! Complete
+        call ESMF_FieldEmptyComplete(field, ESMF_TYPEKIND_R8, rc=localrc) 
+        if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+        ! Reset
+        call ESMF_FieldEmptyReset(field, status=ESMF_FIELDSTATUS_EMPTY, &
+             rc=localrc) 
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! Set a different Grid
+        call ESMF_FieldEmptySet(field, grid2, rc=localrc) 
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        
+        ! Complete again with a different type
+        call ESMF_FieldEmptyComplete(field, ESMF_TYPEKIND_I4, rc=localrc) 
+        if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return                
+
+        
+        ! Get info to check if Field was reset
+        call ESMF_FieldGet(field, typekind=typekind, grid=tmpGrid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return                
+        
+        ! Check type
+        if (typekind /= ESMF_TYPEKIND_I4) then
+           rc= ESMF_FAILURE
+           return
+        endif
+                   
+        ! Check Grid
+        call ESMF_GridGet(tmpGrid, name=tmpName, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return                
+
+        if (trim(tmpName) /= "testgrid2") then
+           rc= ESMF_FAILURE
+           return
+        endif
+       
+        
+        ! Get rid of Field and Grid
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_GridDestroy(grid1, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_GridDestroy(grid2, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        
+      end subroutine test_FieldEmptyReset
+
 
     
 

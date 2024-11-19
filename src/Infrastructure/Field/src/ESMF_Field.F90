@@ -51,6 +51,10 @@ module ESMF_FieldMod
   use ESMF_StaggerLocMod
   use ESMF_DistGridMod
   use ESMF_GridMod
+  use ESMF_XGridMod
+  use ESMF_XGridCreateMod  
+  use ESMF_MeshMod
+  use ESMF_LocStreamMod  
   use ESMF_GeomMod
   use ESMF_ArrayMod
   use ESMF_ArrayCreateMod
@@ -148,7 +152,8 @@ module ESMF_FieldMod
    public ESMF_FieldSerialize
    public ESMF_FieldDeserialize
    public ESMF_FieldInitialize         ! Default initiailze field member variables
-
+   public ESMF_FieldDestructArray
+   public ESMF_FieldDestructGeom
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
@@ -441,6 +446,224 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !------------------------------------------------------------------------------
 
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldDestruct"
+!BOPI
+! !IROUTINE:   ESMF_FieldDestructArray - Release Field Array memory
+!
+! !INTERFACE:
+  subroutine ESMF_FieldDestructArray(ftype, noGarbage, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_FieldType), pointer               :: ftype
+    logical,              intent(in),  optional :: noGarbage
+    integer,              intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Releases Field Array memory.
+!
+! The arguments are:
+! \begin{description}
+! \item[ftype]
+!      Pointer to an {\tt ESMF\_Field} object.
+! \item[{[noGarbage]}]
+!      If set to {\tt .TRUE.} the object will be fully destroyed and removed
+!      from the ESMF garbage collection system. Note however that under this
+!      condition ESMF cannot protect against accessing the destroyed object
+!      through dangling aliases -- a situation which may lead to hard to debug
+!      application crashes.
+!
+!      It is generally recommended to leave the {\tt noGarbage} argument
+!      set to {\tt .FALSE.} (the default), and to take advantage of the ESMF
+!      garbage collection system which will prevent problems with dangling
+!      aliases or incorrect sequences of destroy calls. However this level of
+!      support requires that a small remnant of the object is kept in memory
+!      past the destroy call. This can lead to an unexpected increase in memory
+!      consumption over the course of execution in applications that use
+!      temporary ESMF objects. For situations where the repeated creation and
+!      destruction of temporary objects leads to memory issues, it is
+!      recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully
+!      removing the entire temporary object from memory.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc        ! local return code
+    type(ESMF_Status)       :: basestatus
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Only get rid of Array if complete
+    if(ftype%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
+       if(ftype%is_proxy .or. ftype%array_internal) then
+          call ESMF_ArrayDestroy(ftype%array, noGarbage=noGarbage, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+       endif
+    endif
+
+    ! Return success
+    if  (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_FieldDestructArray
+!------------------------------------------------------------------------------
+
+      
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldDestructGeom"
+!BOPI
+! !IROUTINE:   ESMF_FieldDestructGeom - Clear out a Fields Geometry
+!
+! !INTERFACE:
+  subroutine ESMF_FieldDestructGeom(ftype, noGarbage, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_FieldType), pointer               :: ftype
+    logical,              intent(in),  optional :: noGarbage
+    integer,              intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Releases all geometry resources.
+!
+! The arguments are:
+! \begin{description}
+! \item[ftype]
+!      Pointer to an {\tt ESMF\_Field} object.
+! \item[{[noGarbage]}]
+!      If set to {\tt .TRUE.} the object will be fully destroyed and removed
+!      from the ESMF garbage collection system. Note however that under this
+!      condition ESMF cannot protect against accessing the destroyed object
+!      through dangling aliases -- a situation which may lead to hard to debug
+!      application crashes.
+!
+!      It is generally recommended to leave the {\tt noGarbage} argument
+!      set to {\tt .FALSE.} (the default), and to take advantage of the ESMF
+!      garbage collection system which will prevent problems with dangling
+!      aliases or incorrect sequences of destroy calls. However this level of
+!      support requires that a small remnant of the object is kept in memory
+!      past the destroy call. This can lead to an unexpected increase in memory
+!      consumption over the course of execution in applications that use
+!      temporary ESMF objects. For situations where the repeated creation and
+!      destruction of temporary objects leads to memory issues, it is
+!      recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully
+!      removing the entire temporary object from memory.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc        ! local return code
+    type(ESMF_GeomType_Flag):: geomtype
+    type(ESMF_Grid)         :: grid
+    type(ESMF_Mesh)         :: mesh
+    type(ESMF_LocStream)    :: locstream
+    type(ESMF_Xgrid)        :: xgrid
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Field only has Geom if complete or gridset
+    if ((ftype%status .eq. ESMF_FIELDSTATUS_GRIDSET) .or. &
+         (ftype%status .eq. ESMF_FIELDSTATUS_COMPLETE)) then
+
+        if (ftype%is_proxy .or. ftype%geomb_internal) then
+        
+          if (ftype%is_proxy) then
+#if 1
+!gjt: Destroying geom object for proxies might not be a good idea. If this
+!gjt: every cases issues, then we might want to disable it here.
+!gjt: Disable, because proxy geoms might be used outside the original the
+!gjt: proxy field... cannot destroy here, but instead must keep proxy the
+!gjt: geom alive!!!
+
+            ! Proxies destroy their actual geometry object, but must leave
+            ! in garbage collection because multiple fields might be referencing
+            ! the same actual geometry object, and try to destroy. Garbage
+            ! collection makes those double destroy calls safe noops.
+
+            call ESMF_GeomGet(ftype%geom, geomtype=geomtype, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+            ! call into the GEOMTYPE specific Destroy() method
+            if (geomtype .eq. ESMF_GEOMTYPE_GRID) then
+              call ESMF_GeomGet(ftype%geom, grid=grid, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+              ! destroy the Grid proxy
+              call ESMF_GridDestroy(grid, noGarbage=.false., rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            else if (geomtype .eq. ESMF_GEOMTYPE_MESH) then
+              call ESMF_GeomGet(ftype%geom, mesh=mesh, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+              ! destroy the Mesh proxy
+              call ESMF_MeshDestroy(mesh, noGarbage=.false., rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            else if (geomtype .eq. ESMF_GEOMTYPE_LOCSTREAM) then
+              call ESMF_GeomGet(ftype%geom, locstream=locstream, &
+                rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+              ! destroy the LocStream proxy
+              call ESMF_LocStreamDestroy(locstream, noGarbage=.false., &
+                rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            else if (geomtype .eq. ESMF_GEOMTYPE_XGRID) then
+              call ESMF_GeomGet(ftype%geom, xgrid=xgrid, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+              ! destroy the XGrid proxy
+              call ESMF_XGridDestroy(xgrid, noGarbage=.false., rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            else
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_INTNRL_BAD, &
+                msg="Unvalid GeomType detected. Garbage collection issue?", &
+                ESMF_CONTEXT, rcToReturn=rc)
+              return
+            endif
+            ! the Geom needs to be destroyed
+            call ESMF_GeomDestroy(ftype%geom, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
+          else
+            ! the Geom needs to be destroyed
+            call ESMF_GeomDestroy(ftype%geom, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+        endif
+
+    ! Return success
+    if  (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_FieldDestructGeom
+!------------------------------------------------------------------------------
+      
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
