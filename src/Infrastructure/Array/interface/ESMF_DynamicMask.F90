@@ -519,6 +519,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_SET_DEFINED(dynamicMask)
 
     ! return successfully
+    write(*,*)'bmaa rc present: ',present(rc),present(handleAllElements),present(dynamicSrcMaskValue),present(dynamicDstMaskValue)
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_DynamicMaskSetR4R8R4V

@@ -49,7 +49,7 @@ module ESMF_ArrayMod
   use ESMF_F90InterfaceMod  ! ESMF Fortran-C++ interface helper
   use ESMF_FactorReadMod    ! ESMF helpers for reading from netCDF file
   use ESMF_DynamicMaskMod
-  use ESMF_UtilPredefinedDynamicMaskMod
+  use ESMF_PredefinedDynamicMaskMod
   
   ! class sub modules
   use ESMF_ArrayCreateMod   ! contains the ESMF_Array derived type definition
@@ -718,7 +718,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Logical)          :: handleAllElements
     type(ESMF_Pointer)          :: this
     type(ESMF_TypeKind_Flag)    :: type_src, type_dst
+    type(ESMF_DynamicMask), target :: local_dynamicMask
+    type(Logical)          :: have_dynMask 
 
+    write(*,*)"bmaa options array ",present(preDefinedDynamicMask),present(dynamicMask)
     write(*,*)"bmaa ",__FILE__,__LINE__
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -729,7 +732,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     end if
+    have_dynMask = present(dynamicMask) .or. present(preDefinedDynamicMask)
+    if (present(dynamicMask)) local_dynamicMask = dynamicMask
+    if(present(preDefinedDynamicMask)) local_dynamicMask = preDefinedDynamicMask%set()
 
+    write(*,*)"bmaa ",__FILE__,__LINE__
     ! Check init status of arguments, deal with optional Array args
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
     if (present(srcArray)) then
@@ -745,6 +752,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+    write(*,*)"bmaa ",__FILE__,__LINE__
     if (present(dstArray)) then
       call ESMF_ArrayGetThis(dstArray, this, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -758,158 +766,160 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-    
+   
+    write(*,*)'bmaa have_dynMask: ',have_dynMask 
     ! prepare for passing of dynamic masking
-    if (present(dynamicMask)) then
+    if (have_dynMask) then
       ! check for valid input
-      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_DynamicMaskGetInit, dynamicMask, rc)
-      if (dynamicMask%typeKey=="R8R8R8") then
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_DynamicMaskGetInit, local_dynamicMask, rc)
+      if (local_dynamicMask%typeKey=="R8R8R8") then
         ! insert dynMaskState into RouteHandle for Fortran layer
-        dynMaskStateR8R8R8%wrap => dynamicMask%dmsR8R8R8
+        dynMaskStateR8R8R8%wrap => local_dynamicMask%dmsR8R8R8
         call c_ESMC_RouteHandleSetASR8R8R8(routehandle, dynMaskStateR8R8R8, &
           localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! set required dynamic masking info for C++ layer
-        if (dynamicMask%dmsR8R8R8%dynamicSrcMaskIsPresent) then
+        if (local_dynamicMask%dmsR8R8R8%dynamicSrcMaskIsPresent) then
           call c_ESMC_RouteHandleSetDynSrcMask(routehandle, &
-            dynamicMask%dmsR8R8R8%dynamicSrcMaskValue, localrc)
+            local_dynamicMask%dmsR8R8R8%dynamicSrcMaskValue, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        if (dynamicMask%dmsR8R8R8%dynamicDstMaskIsPresent) then
+        if (local_dynamicMask%dmsR8R8R8%dynamicDstMaskIsPresent) then
           call c_ESMC_RouteHandleSetDynDstMask(routehandle, &
-            dynamicMask%dmsR8R8R8%dynamicDstMaskValue, localrc)
+            local_dynamicMask%dmsR8R8R8%dynamicDstMaskValue, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        handleAllElements = dynamicMask%dmsR8R8R8%handleAllElements
+        handleAllElements = local_dynamicMask%dmsR8R8R8%handleAllElements
         call c_ESMC_RouteHandleSetHandleAll(routehandle, &
           handleAllElements, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 #ifndef ESMF_NO_DYNMASKOVERLOAD
-      else if (dynamicMask%typeKey=="R8R8R8V") then
+      else if (local_dynamicMask%typeKey=="R8R8R8V") then
         ! insert dynMaskState into RouteHandle for Fortran layer
-        dynMaskStateR8R8R8V%wrap => dynamicMask%dmsR8R8R8V
+        dynMaskStateR8R8R8V%wrap => local_dynamicMask%dmsR8R8R8V
         call c_ESMC_RouteHandleSetASR8R8R8V(routehandle, dynMaskStateR8R8R8V, &
           localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! set required dynamic masking info for C++ layer
-        if (dynamicMask%dmsR8R8R8V%dynamicSrcMaskIsPresent) then
+        if (local_dynamicMask%dmsR8R8R8V%dynamicSrcMaskIsPresent) then
           call c_ESMC_RouteHandleSetDynSrcMask(routehandle, &
-            dynamicMask%dmsR8R8R8V%dynamicSrcMaskValue, localrc)
+            local_dynamicMask%dmsR8R8R8V%dynamicSrcMaskValue, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        if (dynamicMask%dmsR8R8R8V%dynamicDstMaskIsPresent) then
+        if (local_dynamicMask%dmsR8R8R8V%dynamicDstMaskIsPresent) then
           call c_ESMC_RouteHandleSetDynDstMask(routehandle, &
-            dynamicMask%dmsR8R8R8V%dynamicDstMaskValue, localrc)
+            local_dynamicMask%dmsR8R8R8V%dynamicDstMaskValue, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        handleAllElements = dynamicMask%dmsR8R8R8V%handleAllElements
+        handleAllElements = local_dynamicMask%dmsR8R8R8V%handleAllElements
         call c_ESMC_RouteHandleSetHandleAll(routehandle, &
           handleAllElements, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      else if (dynamicMask%typeKey=="R4R8R4") then
+      else if (local_dynamicMask%typeKey=="R4R8R4") then
         ! insert dynMaskState into RouteHandle for Fortran layer
-        dynMaskStateR4R8R4%wrap => dynamicMask%dmsR4R8R4
+        dynMaskStateR4R8R4%wrap => local_dynamicMask%dmsR4R8R4
         call c_ESMC_RouteHandleSetASR4R8R4(routehandle, dynMaskStateR4R8R4, &
           localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! set required dynamic masking info for C++ layer
-        if (dynamicMask%dmsR4R8R4%dynamicSrcMaskIsPresent) then
+        if (local_dynamicMask%dmsR4R8R4%dynamicSrcMaskIsPresent) then
           call c_ESMC_RouteHandleSetDynSrcMask(routehandle, &
-            dynamicMask%dmsR4R8R4%dynamicSrcMaskValue, localrc)
+            local_dynamicMask%dmsR4R8R4%dynamicSrcMaskValue, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        if (dynamicMask%dmsR4R8R4%dynamicDstMaskIsPresent) then
+        if (local_dynamicMask%dmsR4R8R4%dynamicDstMaskIsPresent) then
           call c_ESMC_RouteHandleSetDynDstMask(routehandle, &
-            dynamicMask%dmsR4R8R4%dynamicDstMaskValue, localrc)
+            local_dynamicMask%dmsR4R8R4%dynamicDstMaskValue, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        handleAllElements = dynamicMask%dmsR4R8R4%handleAllElements
+        handleAllElements = local_dynamicMask%dmsR4R8R4%handleAllElements
         call c_ESMC_RouteHandleSetHandleAll(routehandle, &
           handleAllElements, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      else if (dynamicMask%typeKey=="R4R8R4V") then
+      else if (local_dynamicMask%typeKey=="R4R8R4V") then
         ! insert dynMaskState into RouteHandle for Fortran layer
-        dynMaskStateR4R8R4V%wrap => dynamicMask%dmsR4R8R4V
+        write(*,*)'bmaa have R4R8R4V mask'
+        dynMaskStateR4R8R4V%wrap => local_dynamicMask%dmsR4R8R4V
         call c_ESMC_RouteHandleSetASR4R8R4V(routehandle, dynMaskStateR4R8R4V, &
           localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! set required dynamic masking info for C++ layer
-        if (dynamicMask%dmsR4R8R4V%dynamicSrcMaskIsPresent) then
+        if (local_dynamicMask%dmsR4R8R4V%dynamicSrcMaskIsPresent) then
           call c_ESMC_RouteHandleSetDynSrcMask(routehandle, &
-            dynamicMask%dmsR4R8R4V%dynamicSrcMaskValue, localrc)
+            local_dynamicMask%dmsR4R8R4V%dynamicSrcMaskValue, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        if (dynamicMask%dmsR4R8R4V%dynamicDstMaskIsPresent) then
+        if (local_dynamicMask%dmsR4R8R4V%dynamicDstMaskIsPresent) then
           call c_ESMC_RouteHandleSetDynDstMask(routehandle, &
-            dynamicMask%dmsR4R8R4V%dynamicDstMaskValue, localrc)
+            local_dynamicMask%dmsR4R8R4V%dynamicDstMaskValue, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        handleAllElements = dynamicMask%dmsR4R8R4V%handleAllElements
+        handleAllElements = local_dynamicMask%dmsR4R8R4V%handleAllElements
         call c_ESMC_RouteHandleSetHandleAll(routehandle, &
           handleAllElements, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      else if (dynamicMask%typeKey=="R4R4R4") then
+      else if (local_dynamicMask%typeKey=="R4R4R4") then
         ! insert dynMaskState into RouteHandle for Fortran layer
-        dynMaskStateR4R4R4%wrap => dynamicMask%dmsR4R4R4
+        dynMaskStateR4R4R4%wrap => local_dynamicMask%dmsR4R4R4
         call c_ESMC_RouteHandleSetASR4R4R4(routehandle, dynMaskStateR4R4R4, &
           localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! set required dynamic masking info for C++ layer
-        if (dynamicMask%dmsR4R4R4%dynamicSrcMaskIsPresent) then
+        if (local_dynamicMask%dmsR4R4R4%dynamicSrcMaskIsPresent) then
           call c_ESMC_RouteHandleSetDynSrcMask(routehandle, &
-            dynamicMask%dmsR4R4R4%dynamicSrcMaskValue, localrc)
+            local_dynamicMask%dmsR4R4R4%dynamicSrcMaskValue, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        if (dynamicMask%dmsR4R4R4%dynamicDstMaskIsPresent) then
+        if (local_dynamicMask%dmsR4R4R4%dynamicDstMaskIsPresent) then
           call c_ESMC_RouteHandleSetDynDstMask(routehandle, &
-            dynamicMask%dmsR4R4R4%dynamicDstMaskValue, localrc)
+            local_dynamicMask%dmsR4R4R4%dynamicDstMaskValue, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        handleAllElements = dynamicMask%dmsR4R4R4%handleAllElements
+        handleAllElements = local_dynamicMask%dmsR4R4R4%handleAllElements
         call c_ESMC_RouteHandleSetHandleAll(routehandle, &
           handleAllElements, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      else if (dynamicMask%typeKey=="R4R4R4V") then
+      else if (local_dynamicMask%typeKey=="R4R4R4V") then
         ! insert dynMaskState into RouteHandle for Fortran layer
-        dynMaskStateR4R4R4V%wrap => dynamicMask%dmsR4R4R4V
+        dynMaskStateR4R4R4V%wrap => local_dynamicMask%dmsR4R4R4V
         call c_ESMC_RouteHandleSetASR4R4R4V(routehandle, dynMaskStateR4R4R4V, &
           localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! set required dynamic masking info for C++ layer
-        if (dynamicMask%dmsR4R4R4V%dynamicSrcMaskIsPresent) then
+        if (local_dynamicMask%dmsR4R4R4V%dynamicSrcMaskIsPresent) then
           call c_ESMC_RouteHandleSetDynSrcMask(routehandle, &
-            dynamicMask%dmsR4R4R4V%dynamicSrcMaskValue, localrc)
+            local_dynamicMask%dmsR4R4R4V%dynamicSrcMaskValue, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        if (dynamicMask%dmsR4R4R4V%dynamicDstMaskIsPresent) then
+        if (local_dynamicMask%dmsR4R4R4V%dynamicDstMaskIsPresent) then
           call c_ESMC_RouteHandleSetDynDstMask(routehandle, &
-            dynamicMask%dmsR4R4R4V%dynamicDstMaskValue, localrc)
+            local_dynamicMask%dmsR4R4R4V%dynamicDstMaskValue, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        handleAllElements = dynamicMask%dmsR4R4R4V%handleAllElements
+        handleAllElements = local_dynamicMask%dmsR4R4R4V%handleAllElements
         call c_ESMC_RouteHandleSetHandleAll(routehandle, &
           handleAllElements, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

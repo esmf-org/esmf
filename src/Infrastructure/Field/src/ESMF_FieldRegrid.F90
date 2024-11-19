@@ -28,7 +28,7 @@ module ESMF_FieldRegridMod
   use ESMF_UtilTypesMod
   use ESMF_VMMod
   use ESMF_LogErrMod
-  use ESMF_UtilPredefinedDynamicMaskMod
+  use ESMF_PredefinedDynamicMaskMod
   use ESMF_DynamicMaskMod
   use ESMF_ArrayMod
   use ESMF_DistGridMod
@@ -216,7 +216,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_Array)     :: srcArray
         type(ESMF_Array)     :: dstArray
 
-        write(*,*)"bmaa ",__FILE__,__LINE__ 
+        write(*,*)"bmaa ",__FILE__,__LINE__,present(preDefinedDynamicMask),present(dynamicMask)
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -246,21 +246,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
                  routehandle=routehandle, zeroregion=zeroregion, &
                  termorderflag=termorderflag, checkflag=checkflag, &
-                 dynamicMask=dynamicMask, rc=localrc)
+                 dynamicMask=dynamicMask, preDefinedDynamicMask=preDefinedDynamicMask, rc=localrc)
         else if (present(srcField) .and. .not. present(dstField)) then
           call ESMF_ArraySMM(srcArray=srcArray, &
                  routehandle=routehandle, zeroregion=zeroregion, &
                  termorderflag=termorderflag, checkflag=checkflag, &
-                 dynamicMask=dynamicMask, rc=localrc)
+                 dynamicMask=dynamicMask, preDefinedDynamicMask=preDefinedDynamicMask,  rc=localrc)
         else if (.not. present(srcField) .and. present(dstField)) then
           call ESMF_ArraySMM(dstArray=dstArray, &
                  routehandle=routehandle, zeroregion=zeroregion, &
                  termorderflag=termorderflag, checkflag=checkflag, &
-                 dynamicMask=dynamicMask, rc=localrc)
+                 dynamicMask=dynamicMask, preDefinedDynamicMask=preDefinedDynamicMask,  rc=localrc)
         else if (.not. present(srcField) .and. .not. present(dstField)) then
           call ESMF_ArraySMM(routehandle=routehandle, zeroregion=zeroregion, &
                  termorderflag=termorderflag, checkflag=checkflag, &
-                 dynamicMask=dynamicMask, rc=localrc)
+                 dynamicMask=dynamicMask, preDefinedDynamicMask=preDefinedDynamicMask, rc=localrc)
         else
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
             msg="Supplied combination of optional Fields not supported", &

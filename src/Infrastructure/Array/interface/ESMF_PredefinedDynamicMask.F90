@@ -10,10 +10,11 @@
 !
 #define ESMF_FILENAME "ESMF_UtilCubedSphere.F90"
 
-module ESMF_UtilPredefinedDynamicMaskMod
+module ESMF_PredefinedDynamicMaskMod
 
   ! !USES:
   use ESMF_UtilTypesMod     ! ESMF utility types
+  use ESMF_DynamicMaskMod
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   implicit none
   private
@@ -23,15 +24,39 @@ module ESMF_UtilPredefinedDynamicMaskMod
 !
 !------------------------------------------------------------------------------
   type ESMF_PredefinedDynamicMask
-    real(ESMF_KIND_R8) :: srcMaskValue
-    real(ESMF_KIND_R8) :: dstMaskValue
+    real(ESMF_KIND_R4) :: srcMaskValue
+    real(ESMF_KIND_R4) :: dstMaskValue
     type(ESMF_PredefinedDynamicMask_Flag) :: maskType
+    contains 
+       procedure :: set
   end type
 
 
   public :: ESMF_PredefinedDynamicMask 
+  public :: ESMF_PredefinedDynamicMaskSet
 
   contains
+
+  subroutine ESMF_PredefinedDynamicMaskSet(preDefinedDynamicMask,srcMaskValue,dstMaskValue,maskType,rc)
+    type(ESMF_PredefinedDynamicMask), intent(out) :: preDefinedDynamicMask
+    real(ESMF_KIND_R4), intent(in), optional :: srcMaskValue
+    real(ESMF_KIND_R4), intent(in), optional :: dstMaskValue
+    type(ESMF_PredefinedDynamicMask_Flag), intent(in), optional :: maskType
+    integer, optional, intent(out) :: rc
+
+    if (present(srcMaskValue)) preDefinedDynamicMask%srcMaskValue=srcMaskValue
+    if (present(dstMaskValue)) preDefinedDynamicMask%dstMaskValue=dstMaskValue
+    if (present(maskType)) preDefinedDynamicMask%maskType=maskType
+
+    if (present(rc)) rc =ESMF_SUCCESS
+  end subroutine ESMF_PredefinedDynamicMaskSet 
+
+  function set(this) result(dynamicMask)
+     type(ESMF_DynamicMask) :: dynamicMask
+     class(ESMF_PredefinedDynamicMask), intent(in) :: this
+
+     call ESMF_DynamicMaskSetR4R8R4V(dynamicMask, simpleDynMaskProcV,dynamicSrcMaskValue=this%srcMaskValue)
+  end function
 
   subroutine simpleDynMaskProcV(dynamicMaskList, dynamicSrcMaskValue, dynamicDstMaskValue, rc)
     type(ESMF_DynamicMaskElementR4R8R4V), pointer              :: dynamicMaskList(:)
@@ -74,5 +99,5 @@ module ESMF_UtilPredefinedDynamicMaskMod
     match = (missing==b)
   end function match
 
-end module ESMF_UtilPredefinedDynamicMaskMod
+end module ESMF_PredefinedDynamicMaskMod
 
