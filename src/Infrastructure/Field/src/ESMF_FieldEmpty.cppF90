@@ -4319,7 +4319,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldEmptyReset"
 !BOP
-! !IROUTINE: ESMF_FieldEmptyReset - Reset a Field back to an earlier status. 
+! !IROUTINE: ESMF_FieldEmptyReset - Reset a Field back to an earlier status 
 
 ! !INTERFACE:
   subroutine ESMF_FieldEmptyReset(field, status, keywordEnforcer, vm, rc)
