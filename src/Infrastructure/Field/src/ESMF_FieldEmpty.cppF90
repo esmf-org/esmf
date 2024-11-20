@@ -4336,8 +4336,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 ! Reset an {\tt ESMF\_Field} to a less complete status. After this
 ! operation, methods appropriate to the new status can be used on the Field.
-! For example, if reset to status {\tt ESMF\_FIELDSTATUS\_EMPTY}, then {\tt ESMF\_FieldEmpySet()}
+! For example, if reset to status {\tt ESMF\_FIELDSTATUS\_EMPTY}, then {\tt ESMF\_FieldEmptySet()}
 ! could be used to set a new Grid in the Field.
+!
+! Note that if used improperly, this method can cause inconsistencies. For example, creating a routeHandle
+! on a Field and then using this method to change the geometry (e.g. Grid) under the Field could lead to the
+! routeHandle no longer being valid for the Field. 
 !
 ! The arguments are:
 ! \begin{description}
