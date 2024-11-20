@@ -124,7 +124,7 @@ ESMF_OPENMP_F90LINKOPTS    += -mp
 ESMF_OPENMP_CXXLINKOPTS    += -mp
 
 ############################################################
-# Need this until the file convention is fixed (then remove these two lines)
+# Explicit flags for handling specific format and cpp combos
 #
 ESMF_F90COMPILEFREENOCPP = -freeform
 ESMF_F90COMPILEFIXCPP    = -fixedform -cpp

@@ -273,21 +273,6 @@ Array::Array(
     dimCount * sizeof(int));
   // indexflag
   indexflag = indexflagArg;
-  // exclusiveElementCountPDe
-  int deCount = delayout->getDeCount();
-  exclusiveElementCountPDe = new int[deCount];
-  const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
-  for (int i=0; i<deCount; i++){
-    exclusiveElementCountPDe[i] = 1;   // prime exclusiveElementCountPDe element
-    for (int jj=0; jj<rank; jj++){
-      int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 for tensor d
-      if (j){
-        // decomposed dimension
-        --j;  // shift to basis 0
-        exclusiveElementCountPDe[i] *= indexCountPDimPDe[i*dimCount+j];
-      }
-    }
-  }
   // totalElementCountPLocalDe
   totalElementCountPLocalDe = new int[ssiLocalDeCount];
   for (int i=0; i<ssiLocalDeCount; i++){
@@ -439,8 +424,6 @@ void Array::destruct(bool followCreator, bool noGarbage){
       delete [] distgridToPackedArrayMap;
     if (contiguousFlag != NULL)
       delete [] contiguousFlag;
-    if (exclusiveElementCountPDe != NULL)
-      delete [] exclusiveElementCountPDe;
     if (totalElementCountPLocalDe != NULL)
       delete [] totalElementCountPLocalDe;
     if (sizeSuperUndist != NULL)
@@ -2412,11 +2395,6 @@ Array *Array::create(
     arrayOut->distgridToPackedArrayMap = new int[dimCount];
     memcpy(arrayOut->distgridToPackedArrayMap,
       arrayIn->distgridToPackedArrayMap, dimCount * sizeof(int));
-    // exclusiveElementCountPDe
-    int deCount = arrayIn->delayout->getDeCount();
-    arrayOut->exclusiveElementCountPDe = new int[deCount];
-    memcpy(arrayOut->exclusiveElementCountPDe,
-      arrayIn->exclusiveElementCountPDe, deCount * sizeof(int));
 
     // Set up rim members and fill with canonical seqIndex values
     arrayOut->setRimMembers();
@@ -2623,12 +2601,6 @@ Array *Array::create(
     if (ssiLocalDeCount)
       memcpy(arrayOut->contiguousFlag, arrayIn->contiguousFlag,
         ssiLocalDeCount * sizeof(int));
-    // exclusiveElementCountPDe
-    int deCount = arrayIn->delayout->getDeCount();
-    arrayOut->exclusiveElementCountPDe = new int[deCount];
-    if (deCount)
-      memcpy(arrayOut->exclusiveElementCountPDe,
-        arrayIn->exclusiveElementCountPDe, deCount * sizeof(int));
     // totalElementCountPLocalDe
     arrayOut->totalElementCountPLocalDe = new int[ssiLocalDeCount];
     if (ssiLocalDeCount)
@@ -4179,13 +4151,17 @@ void Array::log(
   msg << prefix << "--- Array::log() start -----------------------------------";
   ESMC_LogDefault.Write(msg.str(), msgType);
 
+  msg.str("");  // clear
+  msg << prefix << this;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+
   if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY){
     msg.str("");  // clear
     msg << prefix << "Array object is invalid! Not created or deleted!";
     ESMC_LogDefault.Write(msg.str(), msgType);
   }else{
     msg.str("");  // clear
-    msg << prefix << " <name: " << getName() << ">";
+    msg << prefix << "<name: " << getName() << ">";
     ESMC_LogDefault.Write(msg.str(), msgType);
     if (deepFlag) getDistGrid()->log(prefix+"! ", msgType, deepFlag);
   }
@@ -4233,30 +4209,6 @@ int Array::print()const{
     int de = localDeToDeMap[i];
     printf("~ local data in LocalArray for DE %d ~\n", de);
     larrayList[i]->print();
-    if (exclusiveElementCountPDe[de]){
-      // associated DE
-      int j=0;    // reset
-      int jjj=0;  // reset
-      for (int jj=0; jj<rank; jj++){
-        if (arrayToDistGridMap[jj]){
-          // distributed dimension
-          printf("dim %d: [%d]: [%d [%d [%d, %d] %d] %d]\n",
-            jj+1, j,
-            totalLBound[i*redDimCount+j], computationalLBound[i*redDimCount+j],
-            exclusiveLBound[i*redDimCount+j], exclusiveUBound[i*redDimCount+j],
-            computationalUBound[i*redDimCount+j], totalUBound[i*redDimCount+j]);
-          ++j;
-        }else{
-          // non-distributed dimension
-          printf("dim %d: undistLBound[%d]=%d            undistUBound[%d]=%d\n",
-            jj+1, jjj, undistLBound[jjj], jjj, undistUBound[jjj]);
-          ++jjj;
-        }
-      }
-    }else{
-      // unassociated DE
-      printf("this DE is not associated with DistGrid points\n");
-    }
   }
   printf("--- ESMCI::Array::print end ---\n");
 
@@ -4535,11 +4487,8 @@ int Array::serialize(
       *ip++ = distgridToPackedArrayMap[i];
     *ip++ = tensorElementCount;
     *ip++ = replicatedDimCount;
-    for (int i=0; i<delayout->getDeCount(); i++)
-      *ip++ = exclusiveElementCountPDe[i];
   } else
-    ip += 3 + 2*tensorCount + 2*distgrid->getDimCount () +
-      rank + delayout->getDeCount ();
+    ip += 3 + 2*tensorCount + 2*distgrid->getDimCount () + rank;
 
   // fix offset
   cp = (char *)ip;
@@ -4631,9 +4580,6 @@ int Array::deserialize(
     distgridToPackedArrayMap[i] = *ip++;
   tensorElementCount = *ip++;
   replicatedDimCount = *ip++;
-  exclusiveElementCountPDe = new int[delayout->getDeCount()];
-  for (int i=0; i<delayout->getDeCount(); i++)
-    exclusiveElementCountPDe[i] = *ip++;
 
   // fix offset
   cp = (char *)ip;
@@ -4790,6 +4736,20 @@ int Array::gather(
   int localDeCount = delayout->getLocalDeCount();
 
   int redDimCount = rank - tensorCount;
+
+  // setup exclusiveElementCountPDe
+  vector<int> exclusiveElementCountPDe(deCount);
+  for (int i=0; i<deCount; i++){
+    exclusiveElementCountPDe[i] = 1;   // prime exclusiveElementCountPDe element
+    for (int jj=0; jj<rank; jj++){
+      int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 for tensor d
+      if (j){
+        // decomposed dimension
+        --j;  // shift to basis 0
+        exclusiveElementCountPDe[i] *= indexCountPDimPDe[i*dimCount+j];
+      }
+    }
+  }
 
   // prepare for comms
   VMK::commhandle *commh;                       // used by all comm calls
@@ -5187,6 +5147,20 @@ int Array::scatter(
   int localDeCount = delayout->getLocalDeCount();
 
   int redDimCount = rank - tensorCount;
+
+  // setup exclusiveElementCountPDe
+  vector<int> exclusiveElementCountPDe(deCount);
+  for (int i=0; i<deCount; i++){
+    exclusiveElementCountPDe[i] = 1;   // prime exclusiveElementCountPDe element
+    for (int jj=0; jj<rank; jj++){
+      int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 for tensor d
+      if (j){
+        // decomposed dimension
+        --j;  // shift to basis 0
+        exclusiveElementCountPDe[i] *= indexCountPDimPDe[i*dimCount+j];
+      }
+    }
+  }
 
   // prepare for comms
   VMK::commhandle *commh;                       // used by all comm calls
@@ -9378,17 +9352,29 @@ template<typename SIT, typename DIT>
   const int srcLocalDeCount = srcArray->delayout->getLocalDeCount();
   const int *srcLocalDeToDeMap = srcArray->delayout->getLocalDeToDeMap();
   int *srcLocalDeElementCount = new int[srcLocalDeCount];
+  const int *srcIndexCountPDimPDe = srcArray->distgrid->getIndexCountPDimPDe();
   int srcElementCount = 0;   // initialize
   for (int i=0; i<srcLocalDeCount; i++){
     int de = srcLocalDeToDeMap[i];  // global DE index
-    srcLocalDeElementCount[i] = srcArray->exclusiveElementCountPDe[de]
-      * srcArray->tensorElementCount;
+    srcLocalDeElementCount[i] = 1;  // prime the element count
+    for (int jj=0; jj<srcArray->rank; jj++){
+      int j = srcArray->arrayToDistGridMap[jj]; // j is dimIndex basis 1,
+                                                // or 0 for tensor dim
+      if (j){
+        // decomposed dimension
+        --j;  // shift to basis 0
+        srcLocalDeElementCount[i] *= 
+          srcIndexCountPDimPDe[de*(srcArray->distgrid->getDimCount())+j];
+      }
+    }
+    srcLocalDeElementCount[i] *= srcArray->tensorElementCount;
     srcElementCount += srcLocalDeElementCount[i];
   }
   // determine local dstElementCount
   const int dstLocalDeCount = dstArray->delayout->getLocalDeCount();
   const int *dstLocalDeToDeMap = dstArray->delayout->getLocalDeToDeMap();
   int *dstLocalDeElementCount = new int[dstLocalDeCount];
+  const int *dstIndexCountPDimPDe = dstArray->distgrid->getIndexCountPDimPDe();
   int dstElementCount = 0;   // initialize
   for (int i=0; i<dstLocalDeCount; i++){
     if (haloFlag){
@@ -9405,8 +9391,18 @@ template<typename SIT, typename DIT>
       }
     }else{
       int de = dstLocalDeToDeMap[i];  // global DE index
-      dstLocalDeElementCount[i] = dstArray->exclusiveElementCountPDe[de]
-        * dstArray->tensorElementCount;
+      dstLocalDeElementCount[i] = 1;  // prime the element count
+      for (int jj=0; jj<dstArray->rank; jj++){
+        int j = dstArray->arrayToDistGridMap[jj]; // j is dimIndex basis 1,
+                                                  // or 0 for tensor dim
+        if (j){
+          // decomposed dimension
+          --j;  // shift to basis 0
+          dstLocalDeElementCount[i] *= 
+            dstIndexCountPDimPDe[de*(dstArray->distgrid->getDimCount())+j];
+        }
+      }
+      dstLocalDeElementCount[i] *= dstArray->tensorElementCount;
     }
     dstElementCount += dstLocalDeElementCount[i];
   }

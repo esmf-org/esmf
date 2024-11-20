@@ -211,15 +211,15 @@
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! deallocate actual LocStreamType allocation      
+    ! deallocate actual LocStreamType allocation
     if (associated(locstream%lstypep)) then
       deallocate(locstream%lstypep, stat=localrc)
-      if (ESMF_LogFoundAllocError(localrc, msg="Deallocating LocStream", &
+      if (ESMF_LogFoundDeallocError(localrc, msg="Deallocating LocStream", &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     nullify(locstream%lstypep)
 
-    ! return successfully  
+    ! return successfully
     rc = ESMF_SUCCESS
 
   end subroutine f_esmf_locstreamcollectgarbage

@@ -203,13 +203,6 @@ namespace ESMCI {
                                       // entry of 0 indicates replicated dim
                                       // distr. Array dims as 1, 2, 3, .. only
     int *contiguousFlag;              // [ssiLocalDeCount]
-    int *exclusiveElementCountPDe;    // [deCount] number of elements in
-                                      // exclusive region only considering
-                                      // DistGrid dims that are associated with
-                                      // the Array dims.
-                                      // Multiply with tensorElementCount to get
-                                      // total number of elements in exclusive
-                                      // Array region.
     int *totalElementCountPLocalDe;   // [ssiLocalDeCount] number of elements in
                                       // total region only considering
                                       // DistGrid dims that are associated with
@@ -272,7 +265,6 @@ namespace ESMCI {
       distgridToPackedArrayMap = NULL;
       contiguousFlag = NULL;
       tensorElementCount = 0;
-      exclusiveElementCountPDe = NULL;
       totalElementCountPLocalDe = NULL;
       sizeSuperUndist = NULL;
       sizeDist = NULL;
@@ -311,7 +303,6 @@ namespace ESMCI {
       distgridToPackedArrayMap = NULL;
       contiguousFlag = NULL;
       tensorElementCount = 0;
-      exclusiveElementCountPDe = NULL;
       totalElementCountPLocalDe = NULL;
       sizeSuperUndist = NULL;
       sizeDist = NULL;
@@ -392,8 +383,6 @@ namespace ESMCI {
     int getReplicatedDimCount()             const {return replicatedDimCount;}
     const int *getUndistLBound()            const {return undistLBound;}
     const int *getUndistUBound()            const {return undistUBound;}
-    const int *getExclusiveElementCountPDe()const
-      {return exclusiveElementCountPDe;}
     const int *getTotalElementCountPLocalDe()const
       {return totalElementCountPLocalDe;}
     int getTensorElementCount()             const {return tensorElementCount;}

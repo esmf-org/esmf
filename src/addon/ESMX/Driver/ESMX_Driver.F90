@@ -150,7 +150,8 @@ module ESMX_Driver
       isFlag = ESMF_HConfigValidateMapKeys(hconfigNode, &
         vocabulary=["attributes   ", &  ! ESMX_Driver option
                     "componentList", &  ! ESMX_Driver option
-                    "runSequence  "  &  ! ESMX_Driver option
+                    "runSequence  ", &  ! ESMX_Driver option
+                    "logSystem    "  &  ! ESMX_Driver option
                     ], badKey=string1, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) &
@@ -161,6 +162,27 @@ module ESMX_Driver
           line=__LINE__, file=FILENAME, rcToReturn=rc)
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
       endif
+      ! Ingest logSystem logical
+      isFlag = ESMF_HConfigIsDefined(hconfigNode, keyString="logSystem", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      isFlag = isFlag .and. &
+        .not.ESMF_HConfigIsNull(hconfigNode, keyString="logSystem", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      if (isFlag) then
+        isFlag = ESMF_HConfigAsLogical(hconfigNode, keyString="logSystem", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+        if (isFLag) then
+          call ESMF_VMLogSystem(prefix="ESMX_Driver: ", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+        endif
+      endif
+
       ! Ingest the generic component label list
       isFlag = ESMF_HConfigIsDefined(hconfigNode, keyString="componentList", &
         rc=rc)
@@ -300,8 +322,8 @@ module ESMX_Driver
 
       if (inCompDef) then
         ! add child component with SetVM and SetServices in CompDef
-#if defined (__INTEL_LLVM_COMPILER) || (__NVCOMPILER)
-!TODO: remove once IFX, NVHPC, and PGI compilers work correctly w/o work-around
+#if defined (__INTEL_LLVM_COMPILER) || defined (__NVCOMPILER) || defined (NAGFOR)
+!TODO: remove once IFX, NVHPC, and NAG compilers work correctly w/o work-around
         call NUOPC_DriverAddGridCompPtr(driver, trim(compLabel), hconfig=hconfig, &
           compSetServicesRoutine=CompDef(j)%ssPtr, compSetVMRoutine=CompDef(j)%svPtr, &
           info=info, petList=petList, devList=devList, comp=comp, rc=rc)

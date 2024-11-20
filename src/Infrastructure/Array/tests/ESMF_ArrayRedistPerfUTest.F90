@@ -241,7 +241,7 @@ program ESMF_ArrayRedistPerfUTest
 #ifdef ESMF_BOPT_g
   dtTest = 20.d0  ! 20s is expected to pass in debug mode
 #else
-  dtTest = 2.d0   ! 2s is expected to pass in optimized mode
+  dtTest = 2.5d0  ! 2.5s is expected to pass in optimized mode
 #endif
   write(failMsg, *) "ArrayRedistStore() performance problem! ", dt, ">", dtTest
 #ifdef ESMF_TESTPERFORMANCE

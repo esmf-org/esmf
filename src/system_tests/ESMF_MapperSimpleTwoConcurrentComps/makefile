@@ -7,7 +7,7 @@ run: tree_run_system_tests
 LOCDIR	  = src/system_tests/ESMF_MapperSimpleTwoConcurrentComps
 
 
-SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_MapperSimpleTwoConcurrentCompsSTest
+SYSTEM_TESTS_BUILD    = $(ESMF_TESTDIR)/ESMF_MapperSimpleTwoConcurrentCompsSTest
 
 # Object files other than *STest.o that the
 # system tests executable will depend on.

@@ -69,7 +69,7 @@ program ESMF_IO_FileTypeCheckUTest
   write(failMsg, *) "Returned wrong file type"
   call ESMF_Test(fileType == ESMF_FILEFORMAT_SCRIP, name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *), "Comparison did not fail as expected"
+  write(failMsg, *) "Comparison did not fail as expected"
   call ESMF_Test(fileType /= ESMF_FILEFORMAT_SCRIP, name, failMsg, result, ESMF_SRCLINE)
 #endif
   !------------------------------------------------------------------------
@@ -91,7 +91,7 @@ program ESMF_IO_FileTypeCheckUTest
   write(failMsg, *) "Returned wrong file type"
   call ESMF_Test(fileType == ESMF_FILEFORMAT_UGRID, name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *), "Comparison did not fail as expected"
+  write(failMsg, *) "Comparison did not fail as expected"
   call ESMF_Test(fileType /= ESMF_FILEFORMAT_UGRID, name, failMsg, result, ESMF_SRCLINE)
 #endif
   !------------------------------------------------------------------------
@@ -113,7 +113,7 @@ program ESMF_IO_FileTypeCheckUTest
   write(failMsg, *) "Returned wrong file type"
   call ESMF_Test(fileType == ESMF_FILEFORMAT_ESMFMESH, name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *), "Comparison did not fail as expected"
+  write(failMsg, *) "Comparison did not fail as expected"
   call ESMF_Test(fileType /= ESMF_FILEFORMAT_ESMFMESH, name, failMsg, result, ESMF_SRCLINE)
 #endif
   !------------------------------------------------------------------------
@@ -135,7 +135,7 @@ program ESMF_IO_FileTypeCheckUTest
   write(failMsg, *) "Returned wrong file type"
   call ESMF_Test(fileType == ESMF_FILEFORMAT_GRIDSPEC, name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *), "Comparison did not fail as expected"
+  write(failMsg, *) "Comparison did not fail as expected"
   call ESMF_Test(fileType /= ESMF_FILEFORMAT_GRIDSPEC, name, failMsg, result, ESMF_SRCLINE)
 #endif
   !------------------------------------------------------------------------
@@ -157,7 +157,7 @@ program ESMF_IO_FileTypeCheckUTest
   write(failMsg, *) "Returned wrong file type"
   call ESMF_Test(fileType == ESMF_FILEFORMAT_MOSAIC, name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *), "Comparison did not fail as expected"
+  write(failMsg, *) "Comparison did not fail as expected"
   call ESMF_Test(fileType /= ESMF_FILEFORMAT_MOSAIC, name, failMsg, result, ESMF_SRCLINE)
 #endif
   !------------------------------------------------------------------------
@@ -179,7 +179,7 @@ program ESMF_IO_FileTypeCheckUTest
   write(failMsg, *) "Returned wrong file type"
   call ESMF_Test(fileType == ESMF_FILEFORMAT_TILE, name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *), "Comparison did not fail as expected"
+  write(failMsg, *) "Comparison did not fail as expected"
   call ESMF_Test(fileType /= ESMF_FILEFORMAT_TILE, name, failMsg, result, ESMF_SRCLINE)
 #endif
   !------------------------------------------------------------------------
@@ -201,7 +201,7 @@ program ESMF_IO_FileTypeCheckUTest
   write(failMsg, *) "Returned wrong file type"
   call ESMF_Test(fileType == ESMF_FILEFORMAT_SCRIP, name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *), "Comparison did not fail as expected"
+  write(failMsg, *) "Comparison did not fail as expected"
   call ESMF_Test(fileType /= ESMF_FILEFORMAT_SCRIP, name, failMsg, result, ESMF_SRCLINE)
 #endif
   !------------------------------------------------------------------------

@@ -369,7 +369,12 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate from Copy (ALLOC), 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  farrayPtr2D     = real(localPet+10, ESMF_KIND_R8)  ! fill with data to check
+  ! In most circumstances it is best to avoid using random_number in unit tests.
+  ! In this case farrayPtr2D will be compared to an uninitialized array, which
+  ! is already effectively random. Filling farrayPtr2D with random numbers
+  ! reduces the chance of a value collision to near zero.
+  call random_number(farrayPtr2D) ! fill with data to check
+  farrayPtr2D = farrayPtr2D * 1000.0_ESMF_KIND_R8
   arrayDup = ESMF_ArrayCreate(array, datacopyflag=ESMF_DATACOPY_ALLOC, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -398,14 +403,14 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Verify Array vs Array Copy (ALLOC) no data copy"
   write(failMsg, *) "Unexpected data copy"
-  dataCorrect = .true.
+  dataCorrect = .false.
   do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
   do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
     write (msg,*) "farrayPtr2D(",i,",",j,")=", farrayPtr2D(i,j), &
       "  farrayPtr2DCpy(",i,",",j,")=", farrayPtr2DCpy(i,j)
     call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    if (abs(farrayPtr2D(i,j)-farrayPtr2DCpy(i,j)) < 1.d-10) dataCorrect=.false.
+    if (abs(farrayPtr2D(i,j)-farrayPtr2DCpy(i,j)) >= 1.d-10) dataCorrect=.true.
   enddo
   enddo
   call ESMF_Test((dataCorrect), name, failMsg, result, ESMF_SRCLINE)

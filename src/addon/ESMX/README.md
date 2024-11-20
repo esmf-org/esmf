@@ -41,6 +41,7 @@ options:
   [--disable-comps=DISABLE_COMPS]
   [--build-type=BUILD_TYPE] or [-g]
   [--build-args=BUILD_ARGS]
+  [--cmake-args=CMAKE_ARGS]
   [--build-jobs=JOBS]
   [--load-modulefile=MODULEFILE]
   [--load-bashenv=BASHENV]
@@ -68,7 +69,10 @@ where:
   --build-type=BUILD_TYPE  build type; valid options are 'debug', 'release', 'relWithDebInfo'
   -g                       (default: release) (-g sets BUILD_TYPE to debug)
 
-  --build-args=BUILD_ARGS  global cmake arguments (e.g. -DVAR=val)
+  --build-args=BUILD_ARGS  build arguments passed to every component (e.g. -DVAR=val)
+
+  --cmake-args=CMAKE_ARGS  cmake arguments are used to configure cmake while building ESMX
+                           (e.g. -DVAR=val)
 
   --build-jobs=BUILD_JOBS  number of jobs used for building esmx and components
 
@@ -121,27 +125,28 @@ There are *three* top level sections recognized in the ESMX build file. Each is 
 
 These options affect the ESMX application layer. If no key/value pair is provided then the default will be used.
 
-| Option key            | Description / Value options                           | Default                |
-| --------------------- | ----------------------------------------------------- | ---------------------- |
-| `exe_name`            | executable name for application                       | `esmx_app`             |
-| `disable_comps`       | scalar or list of components to disable               | *None*                 |
-| `link_module_paths`   | scalar or list of search paths for CMake modules      | *None*                 |
-| `link_packages`       | scalar or list of cmake packages, linked to esmx      | *None*                 |
-| `link_paths`          | scalar or list of search path for external libraries  | *None*                 |
-| `link_libraries`      | scalar or list of external libraries, linked to esmx  | *None*                 |
-| `build_args`          | scalar or list of arguments passed to all build_types | *None*                 |
-| `build_jobs`          | job number used for all build_types                   | *None*                 |
-| `build_verbose`       | verbosity setting used for all build_types            | *None*                 |
-| `cmake_build_args`    | scalar or list of argumens passed to all cmake builds | *None*                 |
-| `cmake_build_jobs`    | job number used for all cmake builds                  | *None*                 |
-| `cmake_build_verbose` | verbosity setting used for all cmake builds           | *None*                 |
-| `make_build_args`     | scalar or list of argumens passed to all make builds  | *None*                 |
-| `make_build_jobs`     | job number used for all make builds                   | *None*                 |
-| `script_build_args`   | scalar or list of argumens passed to all script builds| *None*                 |
-| `test`                | (beta) add test cases: `on` or `off`                  | `off`                  |
-| `test_exe`            | (beta) executable used to launch test cases           | ESMF_INTERNAL_MPIRUN   |
-| `test_dir`            | (beta) output directory for test cases                | CMAKE_BINARY_DIR-tests |
-| `test_tasks`          | (beta) number of tasks used to run test cases         | `4`                    |
+| Option key            | Description / Value options                                          | Default                |
+| --------------------- | -------------------------------------------------------------------- | ---------------------- |
+| `exe_name`            | executable name for application                                      | `esmx_app`             |
+| `disable_comps`       | scalar or list of components to disable                              | *None*                 |
+| `link_module_paths`   | scalar or list of search paths for CMake modules                     | *None*                 |
+| `link_libraries`      | scalar or list of external libraries, linked to esmx                 | *None*                 |
+| `link_options`        | scalar or list of options used during linking of esmx                | *None*                 |
+| `link_packages`       | scalar or list of cmake packages, use link_libraries to link to esmx | *None*                 |
+| `link_paths`          | scalar or list of search path for external libraries                 | *None*                 |
+| `build_args`          | scalar or list of arguments passed to all build_types                | *None*                 |
+| `build_jobs`          | job number used for all build_types                                  | *None*                 |
+| `build_verbose`       | verbosity setting used for all build_types                           | *None*                 |
+| `cmake_build_args`    | scalar or list of argumens passed to all cmake builds                | *None*                 |
+| `cmake_build_jobs`    | job number used for all cmake builds                                 | *None*                 |
+| `cmake_build_verbose` | verbosity setting used for all cmake builds                          | *None*                 |
+| `make_build_args`     | scalar or list of argumens passed to all make builds                 | *None*                 |
+| `make_build_jobs`     | job number used for all make builds                                  | *None*                 |
+| `script_build_args`   | scalar or list of argumens passed to all script builds               | *None*                 |
+| `test`                | (beta) add test cases: `on` or `off`                                 | `off`                  |
+| `test_exe`            | (beta) executable used to launch test cases                          | ESMF_INTERNAL_MPIRUN   |
+| `test_dir`            | (beta) output directory for test cases                               | CMAKE_BINARY_DIR-tests |
+| `test_tasks`          | (beta) number of tasks used to run test cases                        | `4`                    |
 
 #### Component Options (`components` key)
 

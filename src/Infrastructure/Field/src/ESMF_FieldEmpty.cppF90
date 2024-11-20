@@ -53,6 +53,7 @@ module ESMF_FieldEmptyMod
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
   public ESMF_FieldEmptyCreate
+  public ESMF_FieldEmptyReset
   public ESMF_FieldEmptySet
   public ESMF_FieldEmptyComplete
   public ESMF_FieldConstructIANew     ! For internal ESMF use only
@@ -4313,7 +4314,192 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   end function ESMF_FieldEmptyCreate
 !------------------------------------------------------------------------------
+  
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldEmptyReset"
+!BOP
+! !IROUTINE: ESMF_FieldEmptyReset - Reset a Field back to an earlier status. 
 
+! !INTERFACE:
+  subroutine ESMF_FieldEmptyReset(field, status, keywordEnforcer, vm, rc)
+
+!
+! !ARGUMENTS:
+  type(ESMF_Field),            intent(inout)   :: field
+  type(ESMF_FieldStatus_Flag), intent(in)      :: status
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_VM),         intent(in),  optional :: vm
+  integer,               intent(out), optional :: rc
+!
+!
+! !DESCRIPTION:
+! Reset an {\tt ESMF\_Field} to a less complete status. After this
+! operation, methods appropriate to the new status can be used on the Field.
+! For example, if reset to status {\tt ESMF\_FIELDSTATUS\_EMPTY}, then {\tt ESMF\_FieldEmpySet()}
+! could be used to set a new Grid in the Field.
+!
+! The arguments are:
+! \begin{description}
+! \item [field]
+!   The {\tt ESMF\_Field} object to reset. 
+! \item [status]
+!   The new status to set the Field to. 
+! \item[{[vm]}]
+!       If present, the Field object will only be accessed, and the Grid object
+!       set, on those PETs contained in the specified {\tt ESMF\_VM} object.
+!       The default is to assume the VM of the current context.
+! \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+  !------------------------------------------------------------------------------
+  type(ESMF_FieldType), pointer          :: ftypep
+  type(ESMF_FieldStatus_Flag)           :: currStatus
+  integer                               :: localrc
+  type(ESMF_Pointer)                    :: vmThis
+  logical                               :: actualFlag
+
+  if(present(rc)) rc = ESMF_RC_NOT_IMPL
+  localrc = ESMF_RC_NOT_IMPL
+
+  ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
+  ! Error check status
+  if(status == ESMF_FIELDSTATUS_UNINIT) then
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+      msg="FieldEmptyReset - cannot reset a Field to an uninitialized status.", &
+      ESMF_CONTEXT, rcToReturn=rc)
+    return
+  endif
+
+  
+  ! Must make sure the local PET is associated with an actual member
+  actualFlag = .true.
+  if (present(vm)) then
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    call ESMF_VMGetThis(vm, vmThis)
+    if (vmThis == ESMF_NULL_POINTER) then
+      actualFlag = .false.  ! local PET is not for an actual member
+    endif
+  endif
+
+  ! Just return success, if not an actual member
+  if (.not. actualFlag) then
+     if(present(rc)) rc = ESMF_SUCCESS
+     return
+  endif
+
+  ! Get pointer to internal Field
+  ftypep => field%ftypep  
+  
+  ! Get field's current status
+  currStatus=ftypep%status
+  
+  ! Change Field based on current status and new status
+  if (currStatus == ESMF_FIELDSTATUS_EMPTY) then
+     
+     if (status == ESMF_FIELDSTATUS_EMPTY) then
+         ! Don't do anything, since no change in status        
+     else if (status == ESMF_FIELDSTATUS_GRIDSET) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+             msg="a Field can't be reset to be more complete than its current status.", &
+             ESMF_CONTEXT, rcToReturn=rc)
+        return  
+     else if (status == ESMF_FIELDSTATUS_COMPLETE) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+             msg="a Field can't be reset to be more complete than its current status.", &
+             ESMF_CONTEXT, rcToReturn=rc)
+        return  
+     else
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+             msg="unknown status type", &
+             ESMF_CONTEXT, rcToReturn=rc)
+        return  
+     endif
+     
+  else if (currStatus == ESMF_FIELDSTATUS_GRIDSET) then
+     
+     if (status == ESMF_FIELDSTATUS_EMPTY) then
+
+        ! Destroy Geometry to go back to empty status
+        call ESMF_FieldDestructGeom(ftypep, noGarbage=.false., rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+            
+        ! Set flag back to it's inital setting
+        ftypep%geomb_internal = .false. 
+
+     else if (status == ESMF_FIELDSTATUS_GRIDSET) then
+         ! Don't do anything, since no change in status        
+     else if (status == ESMF_FIELDSTATUS_COMPLETE) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+             msg="a Field can't be reset to be more complete than its current status.", &
+             ESMF_CONTEXT, rcToReturn=rc)
+        return  
+     else
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+             msg="unknown status type", &
+             ESMF_CONTEXT, rcToReturn=rc)
+        return  
+     endif     
+
+     
+  else if (currStatus == ESMF_FIELDSTATUS_COMPLETE) then
+     
+     if (status == ESMF_FIELDSTATUS_EMPTY) then
+
+        ! Destroy Array
+        call ESMF_FieldDestructArray(ftypep, noGarbage=.false., rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! Set Array internal flag back to it's inital setting
+        ftypep%array_internal = .false. 
+        
+        ! Destroy Geometry
+        call ESMF_FieldDestructGeom(ftypep, noGarbage=.false., rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! Set geom internal flag back to it's inital setting
+        ftypep%geomb_internal = .false. 
+        
+     else if (status == ESMF_FIELDSTATUS_GRIDSET) then
+
+        ! Destroy Array
+        call ESMF_FieldDestructArray(ftypep, noGarbage=.false., rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! Set Array internal flag back to it's inital setting
+        ftypep%array_internal = .false. 
+        
+     else if (status == ESMF_FIELDSTATUS_COMPLETE) then
+         ! Don't do anything, since no change in status        
+     else
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+             msg="unknown status type", &
+             ESMF_CONTEXT, rcToReturn=rc)
+        return  
+     endif
+     
+  else
+     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+          msg="unknown status type", &
+          ESMF_CONTEXT, rcToReturn=rc)
+     return  
+  endif
+
+  ! Set new status
+  ftypep%status = status
+  
+  ! Return success
+  if(present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_FieldEmptyReset
+!------------------------------------------------------------------------------  
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldEmptySetGeom"

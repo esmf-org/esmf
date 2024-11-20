@@ -715,6 +715,13 @@ default is {\tt O} (capital oh) which builds an optimized version of the
 library. If {\tt ESMF\_BOPT} is {\tt O}, {\tt ESMF\_OPTLEVEL} can also be set
 to a numeric value between 0 and 4 to select a specific optimization level.
 
+\item[ESMF\_C]
+Possible value: {\em executable}
+
+This variable can be used to override the default C compiler and linker
+front-end executables. The executable may be specified with absolute path
+overriding the location determined by default from the user's PATH variable.
+
 \item[ESMF\_COMM]
 Possible value: {\em system-dependent}
 
@@ -956,6 +963,13 @@ location can be specified as absolute path (starting with "/") or relative to
 Possible value: {\em relative or absolute path}
 
 Location into which to install the F90 module files during installation. This
+location can be specified as absolute path (starting with "/") or relative to
+{\tt ESMF\_INSTALL\_PREFIX}.
+
+\item[ESMF\_INSTALL\_CMAKEDIR]
+Possible value: {\em relative or absolute path}
+
+Location into which to install the CMake module files during installation. This
 location can be specified as absolute path (starting with "/") or relative to
 {\tt ESMF\_INSTALL\_PREFIX}.
 
@@ -1322,6 +1336,7 @@ variables:
 \item {\tt ESMF\_INSTALL\_MODDIR} -- where to install Fortran module files.
 \item {\tt ESMF\_INSTALL\_BINDIR} -- where to install application files.
 \item {\tt ESMF\_INSTALL\_DOCDIR} -- where to install documentation files.
+\item {\tt ESMF\_INSTALL\_CMAKEDIR} -- where to install cmake module files.
 \end{itemize}
 
 Section~\ref{EnvironmentVariables} describes what each of these
