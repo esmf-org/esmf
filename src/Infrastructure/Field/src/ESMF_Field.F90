@@ -573,8 +573,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Field only has Geom if complete or gridset
     if ((ftype%status .eq. ESMF_FIELDSTATUS_GRIDSET) .or. &
          (ftype%status .eq. ESMF_FIELDSTATUS_COMPLETE)) then
-
-        if (ftype%is_proxy .or. ftype%geomb_internal) then
+       
+       if (ftype%is_proxy .or. ftype%geomb_internal) then
         
           if (ftype%is_proxy) then
 #if 1
@@ -642,24 +642,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 msg="Unvalid GeomType detected. Garbage collection issue?", &
                 ESMF_CONTEXT, rcToReturn=rc)
               return
-            endif
-            ! the Geom needs to be destroyed
-            call ESMF_GeomDestroy(ftype%geom, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
+           
+           ! the Geom needs to be destroyed
+           call ESMF_GeomDestroy(ftype%geom, rc=localrc)
+           if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
-          else
-            ! the Geom needs to be destroyed
-            call ESMF_GeomDestroy(ftype%geom, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-          endif
+        else
+           ! the Geom needs to be destroyed
+           call ESMF_GeomDestroy(ftype%geom, rc=localrc)
+           if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-
-    ! Return success
-    if  (present(rc)) rc = ESMF_SUCCESS
+     endif
+  endif
+     
+  ! Return success
+  if  (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_FieldDestructGeom
 !------------------------------------------------------------------------------
