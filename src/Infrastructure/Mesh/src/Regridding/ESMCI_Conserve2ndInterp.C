@@ -1266,10 +1266,10 @@ namespace ESMCI {
     // Put the nbrs into counter clockwise order
     _make_nbr_elems_cntrclk(src_cntr, nbrs);
 
-#if 0
-    if (src_elem->get_id() == 137) {
+#if 1
+    if (src_elem->get_id() == 19) {
       // Check output
-      printf("%d# src_elem=%d is_local=%d active=%d nbrs= ",Par::Rank(),src_elem->get_id(),GetAttr(*src_elem).is_locally_owned(),GetAttr(*src_elem).GetContext().is_set(Attr::ACTIVE_ID));
+      printf("BOB: %d# src_elem=%d is_local=%d active=%d nbrs= ",Par::Rank(),src_elem->get_id(),GetAttr(*src_elem).is_locally_owned(),GetAttr(*src_elem).GetContext().is_set(Attr::ACTIVE_ID));
       for (int i=0; i<nbrs->size(); i++) {
         NBR_ELEM *nbr=&((*nbrs)[i]);
 
@@ -1277,7 +1277,7 @@ namespace ESMCI {
       }
       printf("\n");
 
-      printf("src_elem=%d sm_cells->size()=%d\n",src_elem->get_id(),sm_cells->size());
+      printf("BOB: %d#  src_elem=%d sm_cells->size()=%d\n",Par::Rank(),src_elem->get_id(),sm_cells->size());
 
     }
 #endif
@@ -1343,6 +1343,12 @@ namespace ESMCI {
       tmp_hcw.wgt=weight;
       wgts->push_back(tmp_hcw);
 
+      if ((src_elem->get_id() == 19) &&
+          (tmp_hcw.dst_id == 3083)) {
+        printf("BOB: %d# src_elem=%d dst_elem=%d weight=%20.17E",Par::Rank(),src_elem->get_id(),tmp_hcw.dst_id,weight);
+      }
+
+      
       // add parts due to neighbors
       for (int n=0; n<nbrs->size(); n++) {
         NBR_ELEM *nbr=&((*nbrs)[n]);
@@ -1354,6 +1360,12 @@ namespace ESMCI {
         tmp_hcw.dst_index=sm_cell->dst_index;
         tmp_hcw.wgt=sintd_wgt;
         wgts->push_back(tmp_hcw);
+
+        if ((src_elem->get_id() == 19) &&
+            (tmp_hcw.dst_id == 3083)) {
+          printf("BOB: %d# src_elem=%d dst_elem=%d n=%d swgt=%20.17E",Par::Rank(),src_elem->get_id(),tmp_hcw.dst_id,n,sintd_wgt);
+        }
+        
       }
     }
 
