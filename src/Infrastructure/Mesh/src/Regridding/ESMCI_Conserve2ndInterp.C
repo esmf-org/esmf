@@ -1269,7 +1269,7 @@ namespace ESMCI {
 #if 1
     if (src_elem->get_id() == 19) {
       // Check output
-      printf("BOB: %d# src_elem=%d is_local=%d active=%d nbrs= ",Par::Rank(),src_elem->get_id(),GetAttr(*src_elem).is_locally_owned(),GetAttr(*src_elem).GetContext().is_set(Attr::ACTIVE_ID));
+      printf("BOB: %d# sid=%d is_local=%d active=%d nbrs= ",Par::Rank(),src_elem->get_id(),GetAttr(*src_elem).is_locally_owned(),GetAttr(*src_elem).GetContext().is_set(Attr::ACTIVE_ID));
       for (int i=0; i<nbrs->size(); i++) {
         NBR_ELEM *nbr=&((*nbrs)[i]);
 
@@ -1277,7 +1277,7 @@ namespace ESMCI {
       }
       printf("\n");
 
-      printf("BOB: %d#  src_elem=%d sm_cells->size()=%d\n",Par::Rank(),src_elem->get_id(),sm_cells->size());
+      printf("BOB: %d# sid=%d sm_cells->size()=%d\n",Par::Rank(),src_elem->get_id(),sm_cells->size());
 
     }
 #endif
@@ -1300,7 +1300,7 @@ namespace ESMCI {
 
 #if 0
     // Check output
-    printf("src_elem=%d nbrs= \n",src_elem->get_id());
+    printf("sid=%d nbrs= \n",src_elem->get_id());
     for (int i=0; i<nbrs.size(); i++) {
       NBR_ELEM *nbr=&((*nbrs)[i]);
 
@@ -1345,7 +1345,7 @@ namespace ESMCI {
 
       if ((src_elem->get_id() == 19) &&
           (tmp_hcw.dst_id == 3083)) {
-        printf("BOB: %d# src_elem=%d dst_elem=%d weight=%20.17E",Par::Rank(),src_elem->get_id(),tmp_hcw.dst_id,weight);
+        printf("BOB: %d# sid=%d did=%d weight=%20.17E\n",Par::Rank(),src_elem->get_id(),tmp_hcw.dst_id,weight);
       }
 
       
@@ -1363,7 +1363,11 @@ namespace ESMCI {
 
         if ((src_elem->get_id() == 19) &&
             (tmp_hcw.dst_id == 3083)) {
-          printf("BOB: %d# src_elem=%d dst_elem=%d n=%d swgt=%20.17E",Par::Rank(),src_elem->get_id(),tmp_hcw.dst_id,n,sintd_wgt);
+          printf("BOB:     %d# sid=%d did=%d n=%d nbr sid=%d\n",Par::Rank(),src_elem->get_id(),tmp_hcw.dst_id,n,tmp_hcw.src_id);
+          printf("BOB:     %d# sid=%d did=%d n=%d diff_cntr=%20.17E %20.17E %20.17E\n",Par::Rank(),src_elem->get_id(),tmp_hcw.dst_id,n,MU_LST_VEC3D(diff_cntr));
+          printf("BOB:     %d# sid=%d did=%d n=%d grad=%20.17E %20.17E %20.17E\n",Par::Rank(),src_elem->get_id(),tmp_hcw.dst_id,n,MU_LST_VEC3D(nbr->grad));
+          printf("BOB:     %d# sid=%d did=%d n=%d ar=%20.17E\n",Par::Rank(),src_elem->get_id(),tmp_hcw.dst_id,n,area_ratio);
+          printf("BOB:     %d# sid=%d did=%d n=%d swgt=%20.17E\n",Par::Rank(),src_elem->get_id(),tmp_hcw.dst_id,n,sintd_wgt);
         }
         
       }
