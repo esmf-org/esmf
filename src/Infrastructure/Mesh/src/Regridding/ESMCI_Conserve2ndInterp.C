@@ -1346,6 +1346,24 @@ namespace ESMCI {
       if ((src_elem->get_id() == 19) &&
           (tmp_hcw.dst_id == 3083)) {
         printf("BOB: %d# sid=%d did=%d weight=%20.17E\n",Par::Rank(),src_elem->get_id(),tmp_hcw.dst_id,weight);
+
+        int num_nodes;
+        double coords[3*10];
+        int ids[10];
+
+        printf("BOB: %d# sid=%d\n coords and ids:\n",Par::Rank(),src_elem->get_id());
+        get_elem_coords_and_ids(src_elem, src_cfield, 3, 10, &num_nodes, coords, ids);
+        for (int i=0; i<num_nodes; i++) {
+          double *pnt=3*i+coords;
+          printf("BOB:   %d %20.17E %20.17E %20.17E\n",ids[i],MU_LST_VEC3D(pnt));
+        }
+
+        printf("BOB: %d# did=%d\n coords and ids:\n",Par::Rank(),dst_elems[sm_cell->dst_index]->get_id());
+        get_elem_coords_and_ids(dst_elems[sm_cell->dst_index], dst_cfield, 3, 10, &num_nodes, coords, ids);
+        for (int i=0; i<num_nodes; i++) {
+          double *pnt=3*i+coords;
+          printf("BOB:   %d %20.17E %20.17E %20.17E\n",ids[i],MU_LST_VEC3D(pnt));
+        }       
       }
 
       
