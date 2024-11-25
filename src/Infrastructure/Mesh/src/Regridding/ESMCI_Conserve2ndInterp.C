@@ -1346,7 +1346,10 @@ namespace ESMCI {
       if ((src_elem->get_id() == 19) &&
           (tmp_hcw.dst_id == 3083)) {
         printf("BOB: %d# sid=%d did=%d weight=%20.17E\n",Par::Rank(),src_elem->get_id(),tmp_hcw.dst_id,weight);
-
+        printf("BOB: %d# sid=%d did=%d sm->cntr=%20.17E %20.17E %20.17E\n",Par::Rank(),src_elem->get_id(),tmp_hcw.dst_id, MU_LST_VEC3D(sm_cell->cntr));
+        printf("BOB: %d# sid=%d did=%d src_cntr=%20.17E %20.17E %20.17E\n",Par::Rank(),src_elem->get_id(),tmp_hcw.dst_id, MU_LST_VEC3D(src_cntr));
+        printf("BOB: %d# sid=%d did=%d diff_cntr=%20.17E %20.17E %20.17E\n",Par::Rank(),src_elem->get_id(),tmp_hcw.dst_id, MU_LST_VEC3D(diff_cntr));
+        
         int num_nodes;
         double coords[3*10];
         int ids[10];
@@ -1355,14 +1358,14 @@ namespace ESMCI {
         get_elem_coords_and_ids(src_elem, src_cfield, 3, 10, &num_nodes, coords, ids);
         for (int i=0; i<num_nodes; i++) {
           double *pnt=3*i+coords;
-          printf("BOB:   %d %20.17E %20.17E %20.17E\n",ids[i],MU_LST_VEC3D(pnt));
+          printf("BOB:   %d %30.27E %30.27E %30.27E\n",ids[i],MU_LST_VEC3D(pnt));
         }
 
         printf("BOB: %d# did=%d\n coords and ids:\n",Par::Rank(),dst_elems[sm_cell->dst_index]->get_id());
         get_elem_coords_and_ids(dst_elems[sm_cell->dst_index], dst_cfield, 3, 10, &num_nodes, coords, ids);
         for (int i=0; i<num_nodes; i++) {
           double *pnt=3*i+coords;
-          printf("BOB:   %d %20.17E %20.17E %20.17E\n",ids[i],MU_LST_VEC3D(pnt));
+          printf("BOB:   %d %30.27E %30.27E %30.27E\n",ids[i],MU_LST_VEC3D(pnt));
         }       
       }
 
@@ -1379,6 +1382,7 @@ namespace ESMCI {
         tmp_hcw.wgt=sintd_wgt;
         wgts->push_back(tmp_hcw);
 
+#if 0        
         if ((src_elem->get_id() == 19) &&
             (tmp_hcw.dst_id == 3083)) {
           printf("BOB:     %d# sid=%d did=%d n=%d nbr sid=%d\n",Par::Rank(),src_elem->get_id(),tmp_hcw.dst_id,n,tmp_hcw.src_id);
@@ -1387,6 +1391,7 @@ namespace ESMCI {
           printf("BOB:     %d# sid=%d did=%d n=%d ar=%20.17E\n",Par::Rank(),src_elem->get_id(),tmp_hcw.dst_id,n,area_ratio);
           printf("BOB:     %d# sid=%d did=%d n=%d swgt=%20.17E\n",Par::Rank(),src_elem->get_id(),tmp_hcw.dst_id,n,sintd_wgt);
         }
+#endif
         
       }
     }
