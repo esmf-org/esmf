@@ -801,6 +801,8 @@ namespace ESMCI {
   }
 
 
+  bool debug_GT=false;
+  
   void _calc_centroid_from_sm_cells(std::vector<SM_CELL> *sm_cells, double *cntr) {
 
     // Init
@@ -812,6 +814,9 @@ namespace ESMCI {
     for (int i=0; i<sm_cells->size(); i++) {
       SM_CELL *sm_cell=&((*sm_cells)[i]);
 
+      printf("BOB: %d# ccfs %d sm->cntr=%30.27E %30.27E %30.27E\n",Par::Rank(),i,MU_LST_VEC3D(sm_cell->cntr));
+      printf("BOB: %d# ccfs %d sm->area=%30.27E\n",Par::Rank(),i,sm_cell->area);
+      
       cntr[0]+=sm_cell->cntr[0]*sm_cell->area;
       cntr[1]+=sm_cell->cntr[1]*sm_cell->area;
       cntr[2]+=sm_cell->cntr[2]*sm_cell->area;
@@ -1256,12 +1261,17 @@ namespace ESMCI {
     // If there are no sm cells then leave
     if (sm_cells->empty()) return;
 
+    // Turn on debugging
+    if (src_elem->get_id() == 19) debug_GT=true;
+    
     // Get list of source elements surrounding this one
     _get_neighbor_elems_2D_3D_sph(src_elem, src_cfield, src_mask_field, nbrs);
 
     // Compute src centroid
     double src_cntr[3];
     _calc_centroid_from_sm_cells(sm_cells, src_cntr);
+
+    debug_GT=false;
 
     // Put the nbrs into counter clockwise order
     _make_nbr_elems_cntrclk(src_cntr, nbrs);
