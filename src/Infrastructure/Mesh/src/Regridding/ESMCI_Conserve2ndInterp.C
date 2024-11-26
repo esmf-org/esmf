@@ -814,8 +814,10 @@ namespace ESMCI {
     for (int i=0; i<sm_cells->size(); i++) {
       SM_CELL *sm_cell=&((*sm_cells)[i]);
 
-      printf("BOB: %d# ccfs %d sm->cntr=%30.27E %30.27E %30.27E\n",Par::Rank(),i,MU_LST_VEC3D(sm_cell->cntr));
-      printf("BOB: %d# ccfs %d sm->area=%30.27E\n",Par::Rank(),i,sm_cell->area);
+      if (debug_GT) {
+        printf("BOB: %d# ccfs %d sm->cntr=%30.27E %30.27E %30.27E\n",Par::Rank(),i,MU_LST_VEC3D(sm_cell->cntr));
+        printf("BOB: %d# ccfs %d sm->area=%30.27E\n",Par::Rank(),i,sm_cell->area);
+      }
       
       cntr[0]+=sm_cell->cntr[0]*sm_cell->area;
       cntr[1]+=sm_cell->cntr[1]*sm_cell->area;
@@ -1250,6 +1252,19 @@ namespace ESMCI {
                                            std::vector<SM_CELL> *sm_cells,
                                            std::vector<NBR_ELEM> *nbrs
                                         ) {
+
+#if 1
+    if (src_elem->get_id() == 19) {
+
+      printf("BOB: %d# sid=%d dids->size()=%d dids= ",Par::Rank(),src_elem->get_id(),dst_elems.size());
+      for (int i=0; i<dst_elems.size(); i++) {
+        printf(" %d",dst_elems[i]->get_id());
+      }
+      printf("\n");
+    }
+#endif
+
+    
     // Create super mesh cells by intersecting src_elem and list of dst_elems
     create_SM_cells_2D_3D_sph(src_elem, src_cfield,
                               dst_elems, dst_cfield, dst_mask_field, dst_frac2_field,
@@ -1278,7 +1293,6 @@ namespace ESMCI {
 
 #if 1
     if (src_elem->get_id() == 19) {
-      // Check output
       printf("BOB: %d# sid=%d is_local=%d active=%d nbrs= ",Par::Rank(),src_elem->get_id(),GetAttr(*src_elem).is_locally_owned(),GetAttr(*src_elem).GetContext().is_set(Attr::ACTIVE_ID));
       for (int i=0; i<nbrs->size(); i++) {
         NBR_ELEM *nbr=&((*nbrs)[i]);
@@ -1286,7 +1300,7 @@ namespace ESMCI {
         printf(" %d %g",nbr->elem->get_id(),nbr->angle);
       }
       printf("\n");
-
+      
       printf("BOB: %d# sid=%d sm_cells->size()=%d\n",Par::Rank(),src_elem->get_id(),sm_cells->size());
 
     }
