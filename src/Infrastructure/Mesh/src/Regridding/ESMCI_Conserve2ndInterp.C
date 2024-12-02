@@ -1276,6 +1276,9 @@ namespace ESMCI {
     // If there are no sm cells then leave
     if (sm_cells->empty()) return;
 
+    // Sort SM cells by dst id to keep things consistent
+    sort_SM_CELLS_by_dst_id(sm_cells, dst_elems);
+    
     // Turn on debugging
     if (src_elem->get_id() == 19) debug_GT=true;
     

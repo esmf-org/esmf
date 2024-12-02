@@ -1069,5 +1069,24 @@ namespace ESMCI {
 
   //////////////// END CALC 2D 3D WEIGHTS //////////////////
 
+  // Used to sort SM_CELLs by dst id
+  class SMDstIdsLess {
+    public:
+    SMDstIdsLess(std::vector<const MeshObj *> &_dst_elems) : dst_elems(_dst_elems) {}
+    bool operator()(const SM_CELL &lhs, const SM_CELL &rhs) {
+      return (dst_elems[lhs.dst_index]->get_id() < dst_elems[rhs.dst_index]->get_id());
+    }
+  private:
+     std::vector<const MeshObj *> &dst_elems;
+
+  };
+  
+  // Sort SM cells by dst id
+  void sort_SM_CELLS_by_dst_id(std::vector<SM_CELL> *sm_cells, std::vector<const MeshObj *> &dst_elems) {
+    
+    // Sort using dst ids
+    std::sort(sm_cells->begin(), sm_cells->end(), SMDstIdsLess(dst_elems));        
+  }
+    
 
 } // namespace

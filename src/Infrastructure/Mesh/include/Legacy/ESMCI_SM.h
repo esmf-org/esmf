@@ -37,6 +37,8 @@ namespace ESMCI {
                                   std::vector<int> *tmp_valid, std::vector<double> *tmp_sintd_areas_out, std::vector<double> *tmp_dst_areas_out, 
                                   std::vector<SM_CELL> *sm_cells);
 
+  void sort_SM_CELLS_by_dst_id(std::vector<SM_CELL> *sm_cells, std::vector<const MeshObj *> &dst_elems);
+  
 } // namespace
 
 #endif
