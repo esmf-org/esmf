@@ -3042,8 +3042,9 @@ interp_method(imethod)
         } else {
           // If 2nd order see if it's an XGrid and then use that
           if (interp_method == Interp::INTERP_CONSERVE_2ND) {
+
             // If an XGrid is involved, then do a search using that
-            if ((grend.GetSrcRend().side==3) || (grend.GetSrcRend().side==3)) {
+            if ((grend.GetSrcRend().side==3) || (grend.GetDstRend().side==3)) {
               XGridGatherOverlappingElems(grend.GetSrcRend(), grend.GetDstRend(), sres); 
             } else { // ...otherwise just use the regular search
               OctSearchElems(grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
