@@ -2803,9 +2803,6 @@ void calc_wgts_from_xgrid_to_side_mesh(Mesh *src_xgrid_mesh, Mesh *dst_side_mesh
 
   void srcXGridGatherOverlappingElems(Mesh &srcXGridMesh, Mesh &dstMesh, SearchResult &result) {
 
-    printf("sXGE src side=%d  src ind=%d\n",srcXGridMesh.side,srcXGridMesh.ind);
-    printf("sXGE dst side=%d  dst ind=%d\n",dstMesh.side,dstMesh.ind);
-
     // Get dst side mesh info
     int side=dstMesh.side;
     int ind=dstMesh.ind;
@@ -2872,10 +2869,6 @@ void calc_wgts_from_xgrid_to_side_mesh(Mesh *src_xgrid_mesh, Mesh *dst_side_mesh
   }
 
   void dstXGridGatherOverlappingElems(Mesh &srcMesh, Mesh &dstXGridMesh, SearchResult &result) {
-
-    printf("dXGE src side=%d  src ind=%d\n",srcMesh.side,srcMesh.ind);
-    printf("dXGE dst side=%d  dst ind=%d\n",dstXGridMesh.side,dstXGridMesh.ind);
-
 
     // Get dst side mesh info
     int side=srcMesh.side;

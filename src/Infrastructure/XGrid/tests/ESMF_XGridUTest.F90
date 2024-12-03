@@ -204,13 +204,13 @@
     write(name, *) "Test 2nd order on an XGrid between Meshes"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-    ! !------------------------------------------------------------------------
-    ! !NEX_UTest
-    ! ! Create an XGrid in 2D from Cartesian Meshes with user supplied area
-    ! call test_CartMeshToMesh_2nd(rc)
-    ! write(failMsg, *) ""
-    ! write(name, *) "Test 2nd order on an XGrid between Cartesian Meshes"
-    ! call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    ! Create an XGrid in 2D from Cartesian Meshes with user supplied area
+    call test_CartMeshToMesh_2nd(rc)
+    write(failMsg, *) ""
+    write(name, *) "Test 2nd order on an XGrid between Cartesian Meshes"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     
 #if 0
