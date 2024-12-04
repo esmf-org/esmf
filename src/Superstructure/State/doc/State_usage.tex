@@ -8,8 +8,6 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-%\subsection{Use and Examples}
-
 A Gridded Component generally has one associated import 
 State and one export State.  Generally the States 
 associated with a Gridded Component will be created by 
@@ -41,7 +39,7 @@ a Gridded Component's run method, the filled export State
 is passed out through the argument list into a Coupler 
 Component's run method.  We recommend the convention that 
 it enters the Coupler Component as the Coupler Component's
-import State.  Here is it transformed into a form
+import State.  Here the data is transformed into a form
 that another Gridded Component requires, and passed out
 of the Coupler Component as its export State.  It can then
 be passed into the run method of a recipient Gridded Component
@@ -78,19 +76,3 @@ objects it creates a {\it proxy} object which contains any
 qualities of the original object plus enough information for it
 to be a data source or destination for a regrid or data redistribution
 operation.
-
-\subsubsection{State create and destroy}
-
-States can be created and destroyed at any time during
-application execution.  The {\tt ESMF\_StateCreate()} routine
-can take many different combinations of optional arguments.  Refer
-to the API description for all possible methods of creating a State.
-An empty State can be created by providing only a name and type for
-the intended State:
-
-{\tt state = ESMF\_StateCreate(name, stateintent=ESMF\_STATEINTENT\_IMPORT, rc=rc)}
-
-When finished with an {\tt ESMF\_State}, the {\tt ESMF\_StateDestroy} method
-removes it.  However, the objects inside the {\tt ESMF\_State}
-created externally should be destroyed separately,
-since objects can be added to more than one {\tt ESMF\_State}.
