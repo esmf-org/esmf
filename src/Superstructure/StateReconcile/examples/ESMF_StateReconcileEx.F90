@@ -18,8 +18,8 @@ use ESMF
 contains
 
 !BOE
-!\subsubsection{{\tt ESMF\_StateReconcile()} usage}
-!  
+!\subsubsection{Reconcile a State}
+!
 ! The set services routines are used to tell ESMF which routine
 ! hold the user code for the initialize, run, and finalize
 ! blocks of user level Components.
@@ -40,9 +40,9 @@ subroutine comp1_init(gcomp, istate, ostate, clock, rc)
     print *, "i am comp1_init"
 
     field1 = ESMF_FieldEmptyCreate(name="Comp1 Field", rc=localrc)
-  
+
     call ESMF_StateAdd(istate, (/field1/), rc=localrc)
-    
+
     rc = localrc
 
 end subroutine comp1_init
@@ -60,7 +60,7 @@ subroutine comp2_init(gcomp, istate, ostate, clock, rc)
     print *, "i am comp2_init"
 
     field2 = ESMF_FieldEmptyCreate(name="Comp2 Field", rc=localrc)
-    
+
     call ESMF_StateAdd(istate, (/field2/), rc=localrc)
 
     rc = localrc
@@ -74,7 +74,7 @@ subroutine comp_dummy(gcomp, rc)
    rc = ESMF_SUCCESS
 end subroutine comp_dummy
 !EOC
-    
+
 end module ESMF_StateReconcileEx_Mod
 
 
@@ -129,7 +129,7 @@ end module ESMF_StateReconcileEx_Mod
 
     call ESMF_Initialize(vm=vm, defaultlogfilename="StateReconcileEx.Log", &
                      logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
-    
+
     ! verify that this example can run on the given petCount
     call ESMF_VMGet(vm, petCount=petCount, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
@@ -138,15 +138,15 @@ end module ESMF_StateReconcileEx_Mod
       print *, "This test must run on at least 4 PETs."
       goto 20
     endif
-    
+
 
 !-------------------------------------------------------------------------
 !BOE
-!      
+!
 !  A Component can be created which will run only on a subset of the
 !  current PET list.
 !EOE
- 
+
     print *, "State Reconcile Example 1: Component Creation"
 
 !BOC
@@ -168,7 +168,7 @@ end module ESMF_StateReconcileEx_Mod
 !BOC
 
     statename = "Ocn2Atm"
-    state1 = ESMF_StateCreate(name=statename, rc=rc)  
+    state1 = ESMF_StateCreate(name=statename, rc=rc)
 !EOC
     print *, "State Create returned, name = ", trim(statename)
 
@@ -177,14 +177,14 @@ end module ESMF_StateReconcileEx_Mod
 
 !-------------------------------------------------------------------------
 !BOE
-!   
+!
 !  Here we register the subroutines which should be called for initialization.
 !  Then we call ESMF\_GridCompInitialize() on all PETs, but the code runs
 !  only on the PETs given in the petList when the Component was created.
 !
 !  Because this example is so short, we call the entry point code
 !  directly instead of the normal procedure of nesting it in a separate
-!  SetServices() subroutine.  
+!  SetServices() subroutine.
 !
 !EOE
 
@@ -247,7 +247,7 @@ end module ESMF_StateReconcileEx_Mod
 
 !-------------------------------------------------------------------------
 !BOE
-!   
+!
 ! Now we have {\tt state1} containing {\tt field1} on PETs 0 and 1, and
 ! {\tt state1} containing {\tt field2} on PETs 2 and 3.  For the code
 ! to have a rational view of the data, we call {\tt ESMF\_StateReconcile}
