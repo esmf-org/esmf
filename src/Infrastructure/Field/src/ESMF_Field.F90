@@ -579,7 +579,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ftype%is_proxy) then
 #if 1
 !gjt: Destroying geom object for proxies might not be a good idea. If this
-!gjt: every cases issues, then we might want to disable it here.
+!gjt: ever causes issues, then we might want to disable it here.
 !gjt: Disable, because proxy geoms might be used outside the original the
 !gjt: proxy field... cannot destroy here, but instead must keep proxy the
 !gjt: geom alive!!!
