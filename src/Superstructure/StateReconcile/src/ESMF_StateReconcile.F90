@@ -152,13 +152,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !
 !   Must be called for any {\tt ESMF\_State} which contains ESMF objects
-!   that have not been created on all the {\tt PET}s of the current VM.
-!   For example, if a coupler component is operating on data
-!   which was created by another component that ran on only a subset
-!   of the coupler {\tt PET}s, the coupler must make this call first
+!   that have not been created on all the PETs of {\tt vm}.
+!   For example, if a coupler component is operating on objects
+!   which were created by another component that ran on only a subset
+!   of the coupler PETs, the coupler must make this call first
 !   before operating with any of the objects held by the {\tt ESMF\_State}.
-!   After calling {\tt ESMF\_StateReconcile()} all {\tt PET}s will have
+!   After calling {\tt ESMF\_StateReconcile()} all PETs will have
 !   a common view of all objects contained in this {\tt ESMF\_State}.
+!
+!   The Info metadata keys of reconciled objects are also reconciled. This
+!   means that after reconciliation, every object in {\tt state} holds a
+!   consistent set of Info {\em keys} across all the PETs of {\tt vm}.
+!   Notice however, that no guarantee is made with respect to the Info
+!   {\em value} that is associated with reconciled Info keys.
+!
+!   The Info metadata keys of the {\tt state} object itself are also reconciled
+!   for most common cases. The only exception is for the case where Info keys
+!   were added to {\tt state} under a component that is executing on a subset
+!   of PETs, and no actual object created under such component was added to
+!   {\tt state}.
 !
 !   This call is collective across the specified VM.
 !
