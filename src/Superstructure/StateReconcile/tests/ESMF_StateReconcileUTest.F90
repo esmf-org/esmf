@@ -1508,7 +1508,10 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     !NEX_UTest_Multi_Proc_Only
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Reconciling state with Base attribute test"
-    call ESMF_StateReconcile (state_attr, checkflag=.true., rc=rc)
+    ! use explicit checkflag=.false, because state Info values will not be
+    ! consistent across PETs... and in case we force default .true. for
+    ! development, make sure this is explicitly set to .false. here
+    call ESMF_StateReconcile (state_attr, checkflag=.false., rc=rc)
     call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------

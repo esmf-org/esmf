@@ -205,12 +205,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     localCheckFlag = .false.  ! default
-    if (present(checkFlag)) localCheckFlag = checkFlag
-
 #if 0
-  ! Activate this when working on StateReoncile, so all tests validate!
-  localCheckFlag = .true. ! force checking
+    ! Activate this when working on StateReoncile, so default is to check result
+    localCheckFlag = .true. ! force checking by default
 #endif
+    if (present(checkFlag)) localCheckFlag = checkFlag
 
     if (present (vm)) then
       localvm = vm
@@ -374,9 +373,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  "All         ", &
                                  "1           ", &
                                  "2           ", &
-                                 "3           ", &
-                                 "1           ", &
-                                 "2           ", &
                                  "            ", &
                                  "            ", &
                                  "M           ", &
@@ -387,9 +383,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  ], &
               plusStringList  = ["All    ", &
                                  "None   ", &
-                                 "0      ", &
-                                 "0      ", &
-                                 "0      ", &
                                  "2      ", &
                                  "1      ", &
                                  "DEF    ", &
