@@ -152,13 +152,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !
 !   Must be called for any {\tt ESMF\_State} which contains ESMF objects
-!   that have not been created on all the {\tt PET}s of the current VM.
-!   For example, if a coupler component is operating on data
-!   which was created by another component that ran on only a subset
-!   of the coupler {\tt PET}s, the coupler must make this call first
+!   that have not been created on all the PETs of {\tt vm}.
+!   For example, if a coupler component is operating on objects
+!   which were created by another component that ran on only a subset
+!   of the coupler PETs, the coupler must make this call first
 !   before operating with any of the objects held by the {\tt ESMF\_State}.
-!   After calling {\tt ESMF\_StateReconcile()} all {\tt PET}s will have
+!   After calling {\tt ESMF\_StateReconcile()} all PETs will have
 !   a common view of all objects contained in this {\tt ESMF\_State}.
+!
+!   The Info metadata keys of reconciled objects are also reconciled. This
+!   means that after reconciliation, every object in {\tt state} holds a
+!   consistent set of Info {\em keys} across all the PETs of {\tt vm}.
+!   Notice however, that no guarantee is made with respect to the Info
+!   {\em value} that is associated with reconciled Info keys.
+!
+!   The Info metadata keys of the {\tt state} object itself are also reconciled
+!   for most common cases. The only exception is for the case where Info keys
+!   were added to {\tt state} under a component that is executing on a subset
+!   of PETs, and no actual object created under such component was added to
+!   {\tt state}.
 !
 !   This call is collective across the specified VM.
 !
@@ -193,12 +205,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     localCheckFlag = .false.  ! default
-    if (present(checkFlag)) localCheckFlag = checkFlag
-
 #if 0
-  ! Activate this when working on StateReoncile, so all tests validate!
-  localCheckFlag = .true. ! force checking
+    ! Activate this when working on StateReoncile, so default is to check result
+    localCheckFlag = .true. ! force checking by default
 #endif
+    if (present(checkFlag)) localCheckFlag = checkFlag
 
     if (present (vm)) then
       localvm = vm
@@ -229,7 +240,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
       call idesc%Update(state, "", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_LogWrite("state_json_before_reconcile="//ESMF_InfoDump(idesc%info), ESMF_LOGMSG_DEBUG, rc=localrc)
+      call ESMF_LogWrite("state_json_before_reconcile="// &
+        ESMF_InfoDump(idesc%info, indent=2), ESMF_LOGMSG_DEBUG, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
       call idesc%Destroy(rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -274,34 +286,45 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
 
     if (isNoop) then
-      ! successful early return because of NOOP condition
-      if (present(rc)) rc = ESMF_SUCCESS
-      return  ! NOOP -> EARLY RETURN
-    endif
 
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    ! Go on to reconcile the State !
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      ! Quick exit for Noop, but still must reconcile State level Info !
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    if (profile) then
-      call ESMF_TraceRegionEnter("ESMF_StateReconcile_driver", rc=localrc)
+      !TODO: Only need to do the State level Info reconcile here for a very
+      !TODO: specific Noop case where no objects were added under a sub context,
+      !TODO: but top level State Attributes were set under the sub context.
+      !TODO: This is tricky to detect here, and to figure out which PET(s)
+      !TODO: to use for correct rootPets!!
+      !TODO: Luckily this is a very special edge case... and for now get away
+      !TODO: not handling it... but it could some day cause an issue!!!
+
+    else
+
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      ! Go on to reconcile the State !
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      if (profile) then
+        call ESMF_TraceRegionEnter("ESMF_StateReconcile_driver", rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+          rcToReturn=rc)) return
+      endif
+
+      call ESMF_StateReconcile_driver(state, vm=localvm, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
         rcToReturn=rc)) return
+
+      if (profile) then
+        call ESMF_TraceRegionExit("ESMF_StateReconcile_driver", rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+          rcToReturn=rc)) return
+      endif
     endif
 
-    call ESMF_StateReconcile_driver(state, vm=localvm, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-      rcToReturn=rc)) return
-
-    if (profile) then
-      call ESMF_TraceRegionExit("ESMF_StateReconcile_driver", rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-        rcToReturn=rc)) return
-    endif
-
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    ! Conditinally check the reconciled State for consistency across PETs !
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ! Conditionally check the reconciled State for consistency across PETs !
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     if (localCheckFlag) then
       if (profile) then
@@ -318,7 +341,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
         call idesc%Update(state, "", rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-        jsonStr = "state_json_after_reassemble="//ESMF_InfoDump(idesc%info)
+        jsonStr = "state_json_after_reassemble="//&
+          ESMF_InfoDump(idesc%info, indent=2, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 #ifdef RECONCILE_LOG_on
         call ESMF_LogWrite(jsonStr, ESMF_LOGMSG_DEBUG, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -702,8 +727,6 @@ end block
 !     {\tt ESMF\_VM} will exchange information about objects which might
 !     only be known to one or more PETs, and ensure all PETs in this VM
 !     have a consistent view of the object list in this {\tt ESMF\_State}.
-!   \item[{[attreconflag]}]
-!     Flag to tell if Attribute reconciliation is to be done as well as data reconciliation
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -877,7 +900,8 @@ end block
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
       call idesc%Update(state, "", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_LogWrite("state_json_after_vmid="//ESMF_InfoDump(idesc%info), ESMF_LOGMSG_DEBUG, rc=localrc)
+      call ESMF_LogWrite("state_json_after_vmid="// &
+        ESMF_InfoDump(idesc%info, indent=2), ESMF_LOGMSG_DEBUG, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
       call idesc%Destroy(rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -925,7 +949,8 @@ end block
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
       call idesc%Update(state, "", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_LogWrite("state_json_after_set_field_meta="//ESMF_InfoDump(idesc%info), ESMF_LOGMSG_DEBUG, rc=localrc)
+      call ESMF_LogWrite("state_json_after_set_field_meta="// &
+        ESMF_InfoDump(idesc%info, indent=2), ESMF_LOGMSG_DEBUG, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
       call idesc%Destroy(rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1385,6 +1410,8 @@ end block
 !BOPI
 ! !IROUTINE: ESMF_ReconcileSerializeAll
 !
+!TODO: This routine looks almost redundant to ESMF_StateSerialize()!!!!!!!!!!
+!
 ! !INTERFACE:
   subroutine ESMF_ReconcileSerializeAll(state, itemList, itemCount, &
     attreconflag, siwrap, buffer, rc)
@@ -1598,6 +1625,24 @@ end block
       sizeBuffer = sizeBuffer + itemSize
     enddo
 
+    ! Size of the State's Base itself
+    call ESMF_BaseSerialize(state%statep%base, fakeBuffer, itemSize, &
+      attreconflag=attreconflag, inquireflag=inqflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+      rcToReturn=rc)) return
+#ifdef RECONCILE_LOG_on
+    block
+      character(160)          :: msgStr
+      write(msgStr,*) "Serialize top State Base itself, size=", itemSize
+      call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+    end block
+#endif
+
+    ! Update buffer size by itemSize
+    sizeBuffer = sizeBuffer + itemSize
+
     ! Get rid of fakeBuffer
     deallocate(fakeBuffer)
 
@@ -1685,6 +1730,12 @@ end block
       end select
     enddo
 
+    ! Serialize of the State's Base itself
+    call ESMF_BaseSerialize(state%statep%base, buffer, posBuffer, &
+      attreconflag=attreconflag, inquireflag=inqflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+      rcToReturn=rc)) return
+
     ! Return success
     rc = ESMF_SUCCESS
 
@@ -1698,6 +1749,8 @@ end block
 
 ! !INTERFACE:
   subroutine ESMF_ReconcileDeserializeAll(state, vm, attreconflag, buffer, rc)
+!
+!TODO: This routine looks almost redundant to ESMF_StateDeserialize()!!!!!!!!!!
 !
 ! !ARGUMENTS:
     type (ESMF_State), intent(inout)      :: state
@@ -1726,7 +1779,6 @@ end block
 !EOPI
 
     integer :: localrc
-    integer :: memstat
 
     type(ESMF_FieldBundle) :: fieldbundle
     type(ESMF_Field) :: field
@@ -1737,7 +1789,6 @@ end block
     integer :: stateitem_type
     character(ESMF_MAXSTR) :: errstring
     character(ESMF_MAXSTR) :: name
-    integer :: localPet
 
     integer :: item, numNewItems
     integer :: itemType
@@ -1749,11 +1800,6 @@ end block
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
       rcToReturn=rc)) return
 #endif
-
-    ! VM information for debug output
-    call ESMF_VMGet (vm, localPet=localPet, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-      rcToReturn=rc)) return
 
     ! Set start position of buffer
     posBuffer = 0
@@ -1905,6 +1951,48 @@ end block
       end select
 
     enddo
+
+    ! Deserialize the received State's Base itself and add to local top State
+    block
+      type(ESMF_Base) :: base_temp
+      type(ESMF_Info) :: base_info, base_temp_info
+
+#ifdef RECONCILE_LOG_on
+       block
+         character(160)          :: msgStr
+         write(msgStr,*) "deserializing top State Base itself, pos =", posBuffer
+         call ESMF_LogWrite(msgStr, ESMF_LOGMSG_DEBUG, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+           rcToReturn=rc)) return
+       end block
+#endif
+
+      base_temp = ESMF_BaseDeserializeWoGarbage(buffer, &
+          offset=posBuffer, attreconflag=attreconflag, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+
+      call ESMF_BaseSetInitCreated(base_temp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+
+      call ESMF_InfoGetFromBase(base_temp, base_temp_info, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+
+      call ESMF_InfoGetFromBase(state%statep%base, base_info, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+
+      call ESMF_InfoUpdate(base_info, base_temp_info, recursive=.true., &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+
+      call ESMF_BaseDestroyWoGarbage(base_temp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+    end block
 
     ! Return success
     rc = ESMF_SUCCESS
@@ -2173,6 +2261,30 @@ end block
     endif
     ! -------------------------------------------------------------------------
     if (meminfo) call ESMF_VMLogMemInfo ("after (8) Deserialize received objects and create proxies")
+
+    ! -------------------------------------------------------------------------
+    ! (9) Attributes on the State itself
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionEnter("(9) Attributes on the State itself", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
+    if (attreconflag == ESMF_ATTRECONCILE_ON) then
+      call ESMF_ReconcileExchgAttributes (state, vm, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+    end if
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionExit("(9) Attributes on the State itself", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
+    if (meminfo) call ESMF_VMLogMemInfo ("after (9) Attributes on the State itself")
 
     ! Clean up
 
