@@ -9,7 +9,10 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-!
+
+!==============================================================================
+!ESMF_MULTI_PROC_EXAMPLE        String used by test script to count examples.
+!==============================================================================
 
 module ESMF_StateReconcileEx_Mod
 
@@ -96,8 +99,6 @@ end module ESMF_StateReconcileEx_Mod
   program ESMF_StateReconcileEx
 !EOC
 
-!------------------------------------------------------------------------------
-!ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 !
 ! !PROGRAM: ESMF_StateReconcileEx - State reconciliation
