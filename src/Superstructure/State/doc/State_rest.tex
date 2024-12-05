@@ -1,26 +1,48 @@
 % $Id$
 %
 % Earth System Modeling Framework
-% Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
-% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-% Laboratory, University of Michigan, National Centers for Environmental 
-% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+% Laboratory, University of Michigan, National Centers for Environmental
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-%\subsubsection{Restrictions and Future Work}
-
 \begin{enumerate}
-\item{\bf No synchronization of object IDs at object create time.}
+
+\item{\bf No synchronization of object IDs at object create time - Unison Rule:}
 Object IDs are used during the reconcile process to identify objects
 which are unknown to some subset of the PETs in the currently running VM.
-Object IDs are assigned in sequential order at object create time.
-
-One important request by the user community during the ESMF object design was
-that there be no communication overhead or synchronization when creating
-distributed ESMF objects. As a consequence it is required to create these
-objects in {\bf unison} across all PETs in order to keep the ESMF object
+Object IDs are assigned in sequential order at object create time across the
+context of the current VM without communication. This design was requested by
+the user community during ESMF object design to reduce communication and
+synchronization overhead when creating distributed ESMF objects.
+As a consequence it is required to create distributed ESMF objects in
+{\bf unison} across all PETs of the current VM in order to keep the ESMF object
 identification in sync.
+
+Violation of the unison rule will lead to undefined behavior when reconciling
+a State that contains objects with inconsistent object IDs.
+
+\item{\bf Info keys on top level State not reconciled without actual objects
+present from the relevant sub-context.} One of the actions of the
+{\tt ESMF\_StateReconcile()} method is to reconcile the Info keys of the
+State object itself. The endresult is that the reconciled State has the
+same Info {\em keys} on all of the PETs of the VM across which it was
+reconciled -- albeit with potentially different values across PETs
+(see the {\tt ESMF\_StateReconcile()} API doc for more details). An edge case
+for which {\tt ESMF\_StateReconcile()} does {\bf not} provide Info key
+reconcilation is when keys were added under a component executing on a subset
+of PETs (compared to the reconciling VM), but no actual object
+(Field, FieldBundle, Array, ArrayBundle, or nested State) was added under the
+VM of that sub-context.
+
+The situation of unreconciled Info keys across PETs for an ESMF State is not an
+error condition per-se, however, it can lead to unexpected behavior in
+downstream code. Specifically if such code expects to find consistent Info keys
+across all PETs. If this is the case, care should be taken to ensure actual
+objects are added to the top level State on the sub-context PETs where new Info
+keys are added.
 
 \end{enumerate}
 
