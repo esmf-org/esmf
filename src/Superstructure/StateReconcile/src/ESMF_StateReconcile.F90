@@ -374,6 +374,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  "All         ", &
                                  "1           ", &
                                  "2           ", &
+                                 "3           ", &
+                                 "1           ", &
+                                 "2           ", &
                                  "            ", &
                                  "            ", &
                                  "M           ", &
@@ -384,6 +387,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  ], &
               plusStringList  = ["All    ", &
                                  "None   ", &
+                                 "0      ", &
+                                 "0      ", &
+                                 "0      ", &
                                  "2      ", &
                                  "1      ", &
                                  "DEF    ", &
