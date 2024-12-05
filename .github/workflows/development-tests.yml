@@ -75,6 +75,8 @@ jobs:
           sudo apt-get -qq update
           sudo apt install -qq -y autoconf automake libtool
         elif [[ "${{matrix.config.osys}}" == "macos-"* ]]; then
+          sudo systemsetup -setusingnetworktime off
+          sudo rm -rf /etc/ntp.conf
           brew install autoconf automake libtool
           brew unlink libevent || true
         fi
