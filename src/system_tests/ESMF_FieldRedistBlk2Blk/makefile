@@ -4,7 +4,7 @@ run: tree_run_system_tests
 
 LOCDIR	  = src/system_tests/ESMF_FieldRedistBlk2Blk
 
-SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldRedistBlk2BlkSTest
+SYSTEM_TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldRedistBlk2BlkSTest
 
 # Object files other than %STest.o that the
 # system tests executable will depend on.

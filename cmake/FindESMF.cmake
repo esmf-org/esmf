@@ -12,6 +12,21 @@
 # Set ESMFMKFILE as defined by system env variable. If it's not explicitly set
 # try to find esmf.mk file in default locations (ESMF_ROOT, CMAKE_PREFIX_PATH,
 # etc)
+
+# - Common Usage
+#
+# Where to look for this FindESMF.cmake file
+#   list(APPEND CMAKE_MODULE_PATH "<PATH_TO_THIS_FILE>")
+#   <PATH_TO_THIS_FILE> is to be replaced with the directory for this file
+#
+# How to locate ESMF libraries and create target
+#   find_package(ESMF <X.Y.Z> MODULE REQUIRED)
+#   <X.Y.Z> is to be replaced with the minimum version required
+#
+# How to link targets
+#   target_link_libraries(<CMAKE_TARGET> PUBLIC ESMF::ESMF)
+#   <CMAKE_TARGET> is to be replaced with your CMake target
+
 if(NOT DEFINED ESMFMKFILE)
   if(NOT DEFINED ENV{ESMFMKFILE})
     find_path(ESMFMKFILE_PATH esmf.mk PATH_SUFFIXES lib lib64)

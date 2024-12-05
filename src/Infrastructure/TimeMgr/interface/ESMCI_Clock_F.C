@@ -47,6 +47,7 @@ extern "C" {
                                        TimeInterval *runDuration,
                                        int *runTimeStepCount,
                                        Time *refTime,
+                                       TimeInterval *repeatDuration,
                                        int *status,
                                        ESMCI_FortranStrLenArg name_l) {
           *ptr = ESMCI_ClockCreate(
@@ -59,6 +60,7 @@ extern "C" {
                     ESMC_NOT_PRESENT_FILTER(runDuration),
                     ESMC_NOT_PRESENT_FILTER(runTimeStepCount),
                     ESMC_NOT_PRESENT_FILTER(refTime),
+                    ESMC_NOT_PRESENT_FILTER(repeatDuration),
                     ESMC_NOT_PRESENT_FILTER(status) );
        }
 
@@ -126,6 +128,8 @@ extern "C" {
                                  ESMC_I8 *advanceCount,
                                  int *alarmCount,
                                  ESMC_Direction *direction,
+                                 TimeInterval *repeatDuration,
+                                 ESMC_I8 *repeatCount,
                                  int *status,
                                  ESMCI_FortranStrLenArg tempName_l) {
           ESMF_CHECK_POINTER(*ptr, status)
@@ -149,7 +153,10 @@ extern "C" {
                     ESMC_NOT_PRESENT_FILTER(timeZone),
                     ESMC_NOT_PRESENT_FILTER(advanceCount),
                     ESMC_NOT_PRESENT_FILTER(alarmCount),
-                    ESMC_NOT_PRESENT_FILTER(direction) );
+                    ESMC_NOT_PRESENT_FILTER(direction),
+                    ESMC_NOT_PRESENT_FILTER(repeatDuration),
+                    ESMC_NOT_PRESENT_FILTER(repeatCount)
+                                      );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 

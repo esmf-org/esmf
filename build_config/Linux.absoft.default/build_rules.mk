@@ -181,7 +181,7 @@ ESMF_PIO               = OFF
 ESMF_F90IMOD        = -p
 
 ############################################################
-# Need this until the file convention is fixed (then remove these two lines)
+# Explicit flags for handling specific format and cpp combos
 #
 ESMF_F90COMPILEFREENOCPP = -ffree
 ESMF_F90COMPILEFIXCPP    = -ffixed

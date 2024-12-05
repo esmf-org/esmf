@@ -20,6 +20,9 @@ namespace ESMCI {
     int dst_index;
   } SM_CELL;
 
+
+  void sort_SM_CELLS_by_dst_id(std::vector<SM_CELL> *sm_cells, std::vector<const MeshObj *> &dst_elems);
+  
   void create_SM_cells_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, 
                                  std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
                                  double *src_elem_area,

@@ -538,6 +538,57 @@ int ArrayBundle::write(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayBundle::log()"
+//BOPI
+// !IROUTINE:  ESMCI::ArrayBundle::log
+//
+// !INTERFACE:
+void ArrayBundle::log(
+//
+// !DESCRIPTION:
+//    Log details of ArrayBundle object
+//
+// !ARGUMENTS:
+//
+  std::string prefix,
+  ESMC_LogMsgType_Flag msgType,
+  bool deepFlag
+  )const{
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  std::stringstream msg;
+  msg << prefix << "--- ArrayBundle::log() start -----------------------------";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY){
+    msg.str("");  // clear
+    msg << prefix << "ArrayBundle object is invalid! Not created or deleted!";
+    ESMC_LogDefault.Write(msg.str(), msgType);
+  }else{
+    msg.str("");  // clear
+    msg << prefix << "ArrayBundle object is valid!"
+      << " <name: " << getName() << "> <itemCount: " << getCount() << ">";
+    ESMC_LogDefault.Write(msg.str(), msgType);
+    int item=0;
+    for (auto it = arrayContainer.begin(); it != arrayContainer.end(); ++it,
+      item++){
+      msg.str("");  // clear
+      msg << prefix << "+-<item: " << item << "> <itemName: "
+        << it->second->second->getName() << ">";
+      ESMC_LogDefault.Write(msg.str(), msgType);
+      if (deepFlag) it->second->second->log(prefix+"! ", msgType, deepFlag);
+    }
+  }
+  msg.str("");  // clear
+  msg << prefix << "--- ArrayBundle::log() end -------------------------------";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::ArrayBundle::print()"
 //BOPI
 // !IROUTINE:  ESMCI::ArrayBundle::print

@@ -260,7 +260,6 @@
 #endif
         type(ESMF_Container):: stateContainer
         integer :: alloccount
-        logical :: reconcileneededflag
          ESMF_INIT_DECLARE
       end type
 

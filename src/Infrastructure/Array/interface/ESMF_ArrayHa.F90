@@ -68,6 +68,7 @@ module ESMF_ArrayHaMod
   public ESMF_ArrayHaloRelease
   public ESMF_ArrayHaloStore
   public ESMF_ArrayIsCreated
+  public ESMF_ArrayLog
   public ESMF_ArrayPrint
   public ESMF_ArrayRead
   public ESMF_ArrayRedist
@@ -554,6 +555,76 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_ArrayGetInit(array)==ESMF_INIT_CREATED) &
       ESMF_ArrayIsCreated = .true.
   end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayLog()"
+!BOP
+! !IROUTINE: ESMF_ArrayLog - Log Array information
+
+! !INTERFACE:
+  subroutine ESMF_ArrayLog(array, keywordEnforcer, prefix, logMsgFlag, deepFlag, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),       intent(in)              :: array
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(len=*),       intent(in),   optional  :: prefix
+    type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
+    logical,                intent(in),   optional  :: deepFlag
+    integer, intent(out),                 optional  :: rc
+!
+! !DESCRIPTION:
+!   Write information about {\tt array} to the ESMF default Log.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[array]
+!     The {\tt ESMF\_Array} object logged.
+!   \item [{[prefix]}]
+!     String to prefix the log message. Default is no prefix.
+!   \item [{[logMsgFlag]}]
+!     Type of log message generated. See section \ref{const:logmsgflag} for
+!     a list of valid message types. Default is {\tt ESMF\_LOGMSG\_INFO}.
+!   \item[{[deepFlag]}]
+!     When set to {\tt .false.} (default), only log top level information about
+!     the Array.
+!     When set to {\tt .true.}, additionally log deep information.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_LogMsg_Flag)  :: logMsg
+    type(ESMF_Logical)      :: deep
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
+
+    ! deal with optional logMsgFlag
+    logMsg = ESMF_LOGMSG_INFO ! default
+    if (present(logMsgFlag)) logMsg = logMsgFlag
+
+    ! deal with optional deepFlag
+    deep = ESMF_FALSE ! default
+    if (present(deepFlag)) deep = deepFlag
+
+    ! Call into the C++ interface.
+    call c_esmc_arraylog(array, prefix, logMsg, deep, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayLog
 !------------------------------------------------------------------------------
 
 

@@ -379,6 +379,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     routehandle, &
                     factorList, factorIndexList, & 
                     weights, indices, &  ! DEPRECATED ARGUMENTS
+                    transposeRoutehandle, &
                     srcFracField, dstFracField, &
                     dstStatusField, &
                     unmappedDstList, &
@@ -410,6 +411,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4),          pointer,       optional :: factorIndexList(:,:)
       real(ESMF_KIND_R8),    pointer, optional :: weights(:)   ! DEPRECATED ARG
       integer(ESMF_KIND_I4), pointer, optional :: indices(:,:) ! DEPRECATED ARG
+      type(ESMF_RouteHandle),         intent(inout), optional :: transposeRoutehandle
       type(ESMF_Field),               intent(inout), optional :: srcFracField
       type(ESMF_Field),               intent(inout), optional :: dstFracField
       type(ESMF_Field),               intent(inout), optional :: dstStatusField
@@ -463,7 +465,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[8.6.0] Added argument {\tt vectorRegrid} to enable the user to turn on vector regridding. This
 !              functionality treats an undistributed dimension of the input Fields as the components of a vector and
 !              maps it through 3D Cartesian space to give more consistent results (especially near the pole) than
-!              just regridding the components individually. 
+!              just regridding the components individually.
+!
+! \item[8.8.0] Added argument {\tt transposeRoutehandle} to enable the user to retrieve
+!              a routeHandle containing the transpose of the regrid sparse matrix.  
 !              
 ! \end{description}
 ! \end{itemize}
@@ -553,7 +558,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           second as the north component.
 !           In addition, this functionality presently only
 !           works when both the source and destination Fields are build on a geometry (e.g. an ESMF Grid) with
-!           a spherical coordinate system (e.g. ESMF\_COORDSYS\_SPH\_DEG). We expect these restrictions to be loosened over
+!           a spherical coordinate system (e.g. ESMF\_COORDSYS\_SPH\_DEG). Also, this functionality is not currently supported with conservative
+!           regrid methods (e.g. {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}). We expect these restrictions to be loosened over
 !           time as new requirements come in from users. See section~\ref{sec::vectorRegrid} for further
 !           information on this functionality. If not specified, this argument defaults to false.
 !     \item [{[extrapMethod]}]
@@ -659,8 +665,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The {\tt factorIndexList} array is allocated by the method and the user is responsible for deallocating it. 
 !     \item [{[weights]}] 
 !           \apiDeprecatedArgWithReplacement{factorList}
-!     \item [{[indices]}] 
+!     \item [{[indices]}]
 !           \apiDeprecatedArgWithReplacement{factorIndexList}
+!     \item [transposeRoutehandle]
+!           A routeHandle for the transpose of the regrid sparse matrix. The
+!           transposed operation goes from {\tt dstField} to {\tt srcField}.
 !     \item [{[srcFracField]}] 
 !           The fraction of each source cell participating in the regridding. Only 
 !           valid when regridmethod is {\tt ESMF\_REGRIDMETHOD\_CONSERVE} or  {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE\_2ND}.
@@ -969,10 +978,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            endif
         endif
 
-
-
-
-
+        ! Can't use vectorRegrid with conservative right now
+        if (localVectorRegrid) then
+           if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) .or. &
+                (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                   msg=" vector regridding currently not supported with conservative "// &
+                       "regrid methods.", ESMF_CONTEXT, rcToReturn=rc) 
+              return
+           endif
+        endif
 
         
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1200,6 +1215,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   unmappedaction, localIgnoreDegenerate, &
                                   srcTermProcessing, pipeLineDepth, &
                                   routehandle, tmp_indices, tmp_weights, &
+                                  transposeRoutehandle, &                                  
                                   unmappedDstList, &
                                   localCheckFlag, &
                                   localrc)
@@ -1232,6 +1248,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   unmappedaction, localIgnoreDegenerate, &
                                   srcTermProcessing, pipeLineDepth, &
                                   routehandle, &
+                                  transposeRoutehandle=transposeRoutehandle, &
                                   unmappedDstList=unmappedDstList, &
                                   checkFlag=localCheckFlag, &
                                   rc=localrc)

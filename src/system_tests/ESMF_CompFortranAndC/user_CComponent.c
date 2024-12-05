@@ -73,11 +73,11 @@ void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
   printf("local ptr[0] = %g\n", ptr[0]);
   
   // Create a Mesh from VTK file
-  ESMC_CoordSys_Flag local_coordSys=ESMC_COORDSYS_CART;
+  enum ESMC_CoordSys_Flag local_coordSys=ESMC_COORDSYS_CART;
   mesh = ESMC_MeshCreate(pdim, sdim, &local_coordSys, rc);
   if (*rc!=ESMF_SUCCESS) return;  // bail out
 
-  // Hold this to be deleted later, because getting a C mesh from a C field broken  
+  // Hold to be deleted later, because getting a C mesh from a C field is broken
   tmp_mesh=mesh;
 
   // Read input files' header data
@@ -110,7 +110,7 @@ void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
   }
 
   // Add node information to the mesh
-  *rc = ESMC_MeshAddNodes(mesh, num_node, nodeId, nodeCoord, nodeOwner);
+  *rc = ESMC_MeshAddNodes(mesh, num_node, nodeId, nodeCoord, nodeOwner, NULL);
   if (*rc!=ESMF_SUCCESS) return;  // bail out
   
   // Add element information to the mesh
@@ -195,7 +195,7 @@ void myRunInC(ESMC_GridComp gcomp, ESMC_State importState,
   for (j=0; j<2; j++){
     for (i=0; i<5; i++){
       ij= j*5 +i;
-      if ( fabs(ptr[ij]-float((j+1)*10+i+1)) > 1.e-8 ){
+      if ( fabs(ptr[ij]-(float)((j+1)*10+i+1)) > 1.e-8 ){
         printf("Array has wrong values at i=%d, j=%d, ij=%d\n", i, j, ij);
         *rc = ESMF_FAILURE; // indicate failure in return code
         return; // bail out
@@ -250,29 +250,27 @@ void myFinalInC(ESMC_GridComp gcomp, ESMC_State importState,
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
 
-extern "C" {
-  // The SetServices entry point must ensure to have external C linkage,
-  // so it can be called from Fortran.
-  
-  void FTN_X(my_setservicesinc)(ESMC_GridComp gcomp, int *rc){
-    // set entry points for standard Component methods Init(), Run(), Finalize()
-    
-    // initialize return code
-    *rc = ESMF_SUCCESS;
-    
-    printf("In mySetServicesInC()\n");
-    
-    *rc = ESMC_GridCompPrint(gcomp);
-    if (*rc!=ESMF_SUCCESS) return;  // bail out
+// Public entry point into this component written in C
+// Use Fortran name mangling to make it accessible from Fortran during linking.
 
-    *rc = ESMC_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE,myInitInC,1);
-    if (*rc!=ESMF_SUCCESS) return;  // bail out
-    *rc = ESMC_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, myRunInC, 1);
-    if (*rc!=ESMF_SUCCESS) return;  // bail out
-    *rc = ESMC_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE,myFinalInC, 1);
-    if (*rc!=ESMF_SUCCESS) return;  // bail out
-  }
-} //extern "C"
+void FTN_X(my_setservicesinc)(ESMC_GridComp gcomp, int *rc){
+  // set entry points for standard Component methods Init(), Run(), Finalize()
+  
+  // initialize return code
+  *rc = ESMF_SUCCESS;
+  
+  printf("In mySetServicesInC()\n");
+  
+  *rc = ESMC_GridCompPrint(gcomp);
+  if (*rc!=ESMF_SUCCESS) return;  // bail out
+
+  *rc = ESMC_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE,myInitInC,1);
+  if (*rc!=ESMF_SUCCESS) return;  // bail out
+  *rc = ESMC_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, myRunInC, 1);
+  if (*rc!=ESMF_SUCCESS) return;  // bail out
+  *rc = ESMC_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE,myFinalInC, 1);
+  if (*rc!=ESMF_SUCCESS) return;  // bail out
+}
 
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------

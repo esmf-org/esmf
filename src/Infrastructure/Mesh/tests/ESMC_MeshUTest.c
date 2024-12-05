@@ -381,7 +381,7 @@ int main(void){
   }
 
   // Add nodes to mesh                                                     
-  localrc = ESMC_MeshAddNodes(mesh, numNodes, nodeIds, nodeCoords, nodeOwners);
+  localrc = ESMC_MeshAddNodes(mesh, numNodes, nodeIds, nodeCoords, nodeOwners, NULL);
   if (localrc != ESMF_SUCCESS) rc=ESMF_FAILURE;
 
   // Add elements and finish the mesh   

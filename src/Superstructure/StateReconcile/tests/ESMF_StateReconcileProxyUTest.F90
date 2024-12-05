@@ -277,7 +277,7 @@ program ESMF_StateReconcileProxyUTest
   
   ! Reconcile the State
   !NEX_UTest_Multi_Proc_Only
-  call ESMF_StateReconcile(exportState, rc=rc)
+  call ESMF_StateReconcile(exportState, checkflag=.true., rc=rc)
   write(name, *) "Reconciling a State"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -357,7 +357,7 @@ program ESMF_StateReconcileProxyUTest
 
   ! Re-Reconcile the State
   !NEX_UTest_Multi_Proc_Only
-  call ESMF_StateReconcile(exportState, rc=rc)
+  call ESMF_StateReconcile(exportState, checkflag=.true., rc=rc)
   write(name, *) "Re-Reconciling a State"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
