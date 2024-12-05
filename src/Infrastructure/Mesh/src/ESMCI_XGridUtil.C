@@ -2903,9 +2903,17 @@ void calc_wgts_from_xgrid_to_side_mesh(Mesh *src_xgrid_mesh, Mesh *dst_side_mesh
     for (; dxei != dxee; ++dxei) {
       MeshObj &dst_elem = *dxei;
 
+      if (dst_elem.get_id() == 107) {
+        printf("%d# dXGOE H1 dst_elem=%d\n",Par::Rank(),dst_elem.get_id());
+      }
+      
       // Skip non-local elements
-      if (!GetAttr(dst_elem).is_locally_owned()) continue;
+      //      if (!GetAttr(dst_elem).is_locally_owned()) continue;
 
+      if (dst_elem.get_id() == 107) {
+        printf("%d# dXGOE H2 dst_elem=%d\n",Par::Rank(),dst_elem.get_id());
+      }
+      
       // Get XGrid element ind
       // (Round to nearest to take care of possible representation issues)
       double *elem_mesh_ind_dbl = mesh_ind_field->data(dst_elem);
