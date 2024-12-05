@@ -518,6 +518,9 @@ namespace ESMCI {
     // If there are no sm cells then leave
     if (sm_cells->empty()) return;
 
+    // Sort SM cells by dst id to keep things consistent
+    sort_SM_CELLS_by_dst_id(sm_cells, dst_elems);
+    
     // Get list of source elements surrounding this one
     _get_neighbor_elems_2D_2D_cart(src_elem, src_cfield, src_mask_field, nbrs);
 
@@ -1256,6 +1259,9 @@ namespace ESMCI {
     // If there are no sm cells then leave
     if (sm_cells->empty()) return;
 
+    // Sort SM cells by dst id to keep things consistent
+    sort_SM_CELLS_by_dst_id(sm_cells, dst_elems);
+    
     // Get list of source elements surrounding this one
     _get_neighbor_elems_2D_3D_sph(src_elem, src_cfield, src_mask_field, nbrs);
 
