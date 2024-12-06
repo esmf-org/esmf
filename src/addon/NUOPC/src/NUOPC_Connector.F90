@@ -618,10 +618,10 @@ module NUOPC_Connector
       call ESMF_StateGet(exportState, name=stateName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      ! set namespace on exportState, creating a nestedState
+      ! set namespace on exportState, creating a nestedState on acceptor VM
       call NUOPC_AddNamespace(exportState, namespace=trim(namespace), &
         nestedStateName=trim(stateName)//"-namespace:"//trim(namespace), &
-        nestedState=exportNestedState, rc=rc)
+        nestedState=exportNestedState, vm=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       ! mirror importState items into exportNestedState
@@ -713,10 +713,10 @@ module NUOPC_Connector
       call ESMF_StateGet(importState, name=stateName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      ! set namespace on importState, creating a nestedState
+      ! set namespace on importState, creating a nestedState on acceptor VM
       call NUOPC_AddNamespace(importState, namespace=trim(namespace), &
         nestedStateName=trim(stateName)//"-namespace:"//trim(namespace), &
-        nestedState=importNestedState, rc=rc)
+        nestedState=importNestedState, vm=vm, rc=rc)
       ! mirror exportState items into importNestedState
       call doMirror(exportState, importNestedState, acceptorVM=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
