@@ -1170,7 +1170,7 @@ module NUOPC_Driver
           return  ! bail out
         namespace=cmEntry%wrap%label
       else
-        ! in the old style (pre v7) there are no component labels availabl
+        ! in the old style (pre v7) there are no component labels available
         namespace="DEFAULT" ! cannot be empty for sake of AttributeSet()
       endif
       ! add State level attributes, set the namespace according to comp label
@@ -1188,6 +1188,14 @@ module NUOPC_Driver
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
+        ! for available component label, also set State name for clarity
+        if (namespace /= "DEFAULT") then
+          call ESMF_StateSet(is%wrap%modelIS(i), &
+            name=trim(namespace)//"-ImportState", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
       endif
       ! add State level attributes, set the namespace according to comp label
       stateIsCreated = ESMF_StateIsCreated(is%wrap%modelES(i), rc=rc)
@@ -1204,6 +1212,14 @@ module NUOPC_Driver
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
+        ! for available component label, also set State name for clarity
+        if (namespace /= "DEFAULT") then
+          call ESMF_StateSet(is%wrap%modelES(i), &
+            name=trim(namespace)//"-ExportState", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
       endif
     enddo
 
@@ -1600,8 +1616,6 @@ module NUOPC_Driver
         logical                 :: areServicesSet
         character(ESMF_MAXSTR)  :: iString, pLabel
         logical                 :: mustAttributeUpdate(1:is%wrap%modelCount)
-        logical                 :: isPresent
-        type(ESMF_Info)         :: info
         rc = ESMF_SUCCESS
         mustAttributeUpdate = .false.
         ! loop through all the model components first time to execute
@@ -1644,48 +1658,7 @@ module NUOPC_Driver
               return  ! bail out
           endif
         enddo
-        ! loop through all the model components second time to add extra metadata
-        do i=1, is%wrap%modelCount
-           call ESMF_GridCompGet(is%wrap%modelComp(i), name=compName, rc=rc)
-           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-             return  ! bail out
-           ! add metadata to import state
-           call ESMF_InfoGetFromHost(is%wrap%modelIS(i), info=info, rc=rc)
-           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-             return  ! bail out
-           call ESMF_InfoGet(info, key="/NUOPC/Instance/CompName", &
-             isPresent=isPresent, rc=rc)
-           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-             return  ! bail out
-           if (.not. isPresent) then
-              call ESMF_InfoSet(info, key="/NUOPC/Instance/CompName", &
-                value=trim(compName), rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-                return  ! bail out
-           end if
-           ! add metadata to export state
-           call ESMF_InfoGetFromHost(is%wrap%modelES(i), info=info, rc=rc)
-           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-             return  ! bail out
-           call ESMF_InfoGet(info, key="/NUOPC/Instance/CompName", &
-             isPresent=isPresent, rc=rc)
-           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-             return  ! bail out
-           if (.not. isPresent) then
-              call ESMF_InfoSet(info, key="/NUOPC/Instance/CompName", &
-                value=trim(compName), rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-                return  ! bail out
-           end if
-        end do
-        ! loop through all the model components third time to update Attributes
+        ! loop through all the model components second time to update Attributes
         do i=1, is%wrap%modelCount
           if (mustAttributeUpdate(i)) then
             ! need to update the Component attributes across all PETs
