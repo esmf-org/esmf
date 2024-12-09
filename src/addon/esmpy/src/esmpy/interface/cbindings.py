@@ -215,8 +215,8 @@ def ESMP_Initialize(logkind = constants.LogKind.MULTI):
         raise ValueError('ESMC_Initialize() failed with rc = '+str(rc)+'.    '+
                         constants._errmsg)
 
-_ESMF.ESMC_Finalize.restype = ct.c_int
-_ESMF.ESMC_Finalize.argtypes = []
+_ESMF.ESMC_FinalizeWithFlag.restype = ct.c_int
+_ESMF.ESMC_FinalizeWithFlag.argtypes = [ct.c_uint]
 
 def ESMP_Finalize(endFlag = constants.EndAction.NORMAL):
     """
@@ -389,7 +389,7 @@ def ESMP_VMGetGlobal():
                         constants._errmsg)
     return vm.ptr
 
-_ESMF.ESMC_VMLogMemInfo.argtypes = [ct.c_int]
+_ESMF.ESMC_VMLogMemInfo.restype = ct.c_int
 _ESMF.ESMC_VMLogMemInfo.argtypes = [ct.c_char_p]
 
 def ESMP_VMLogMemInfo(str):
@@ -1216,7 +1216,8 @@ _ESMF.ESMC_MeshCreateFromFile.argtypes = [Py3Char, ct.c_int,
                                           OptionalNamedConstant,
                                           Py3Char,
                                           OptionalNamedConstant,
-                                          Py3Char]
+                                          Py3Char,
+                                          ct.POINTER(ct.c_int)]
 
 @pio
 @netcdf
@@ -2425,7 +2426,7 @@ def ESMP_GridspecInq(filename):
 #### RouteHandle #####################################################
 
 _ESMF.ESMC_RouteHandleCreateFromFile.restype = ESMP_RouteHandle
-_ESMF.ESMC_RouteHandleCreateFromFile.argtypes = [Py3Char]
+_ESMF.ESMC_RouteHandleCreateFromFile.argtypes = [Py3Char, ct.POINTER(ct.c_int)]
 def ESMP_RouteHandleCreateFromFile(filename):
     """
     Preconditions: ESMP has been initialized.\n
