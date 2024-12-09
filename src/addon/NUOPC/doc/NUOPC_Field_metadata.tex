@@ -3,7 +3,7 @@ The Field metadata is implemented through ESMF\_Info. It can be accessed
 using the JSON Pointer "/NUOPC/Instance/" prefix followed by the "Attribute name"
 as per the table below. E.g. "StandardName" is accessed using {\tt key="/NUOPC/Instance/StandardName"}.
 
-\begin{longtable}{|p{.22\textwidth}|p{.6\textwidth}|p{.2\textwidth}|}
+\begin{longtable}{|p{.3\textwidth}|p{.4\textwidth}|p{.3\textwidth}|}
      \hline\hline
      {\bf Attribute name} & {\bf Definition} & {\bf Controlled vocabulary}\\
      \hline\hline
@@ -31,6 +31,5 @@ as per the table below. E.g. "StandardName" is accessed using {\tt key="/NUOPC/I
      {\tt MaxIndex} & Integer value list. If present equals the {\tt maxIndex} (of tile 1) of the provider field.during a GeomObject transfer. & {\em no restriction}\\ \hline
      {\tt TypeKind} & Integer value. If present equals the integer representation of {\tt typekind} of the provider field.during a GeomObject transfer. & {\em implementation dependent range}\\ \hline
      {\tt GeomLoc} & Integer value. If present equals the integer representation of {\tt staggerloc} (for Grid) or {\tt meshloc} (for Mesh) of the provider field.during a GeomObject transfer. & {\em implementation dependent range}\\ \hline
-     {\tt ProviderCompName} & String value holding the name of provider component that is indicated in run sequence\\ \hline
      \hline
 \end{longtable}

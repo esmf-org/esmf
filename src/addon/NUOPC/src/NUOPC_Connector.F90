@@ -608,7 +608,7 @@ module NUOPC_Connector
       call doMirror(importState, exportState, acceptorVM=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    elseif (trim(exportXferPolicy)=="transferAllAsNests") then
+    elseif (trim(exportXferPolicy)=="transferAllWithNamespace") then
       ! access importState namespace so it can be transferred to exportState
       call NUOPC_GetAttribute(importState, name="Namespace", &
         value=namespace, rc=rc)
@@ -703,7 +703,7 @@ module NUOPC_Connector
       call doMirror(exportState, importState, acceptorVM=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    elseif (trim(importXferPolicy)=="transferAllAsNests") then
+    elseif (trim(importXferPolicy)=="transferAllWithNamespace") then
       ! access exportState namespace so it can be transferred to importState
       call NUOPC_GetAttribute(exportState, name="Namespace", &
         value=namespace, rc=rc)
