@@ -436,6 +436,7 @@ module NUOPC_Connector
     integer                   :: i, j
     character(ESMF_MAXSTR)    :: importCplSet, exportCplSet
     character(len=240)        :: msgString
+    character(ESMF_MAXSTR)    :: stateName, namespace
 
     rc = ESMF_SUCCESS
 
@@ -607,6 +608,26 @@ module NUOPC_Connector
       call doMirror(importState, exportState, acceptorVM=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    elseif (trim(exportXferPolicy)=="transferAllWithNamespace") then
+      ! access importState namespace so it can be transferred to exportState
+      call NUOPC_GetAttribute(importState, name="Namespace", &
+        value=namespace, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! access name of exportState for nestedStateName construction for clarity
+      call ESMF_StateGet(exportState, name=stateName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! set namespace on exportState, creating a nestedState on acceptor VM
+      call NUOPC_AddNamespace(exportState, namespace=trim(namespace), &
+        nestedStateName=trim(stateName)//"-namespace:"//trim(namespace), &
+        nestedState=exportNestedState, vm=vm, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! mirror importState items into exportNestedState
+      call doMirror(importState, exportNestedState, acceptorVM=vm, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     elseif (importHasNested .and. exportHasNested) then
       ! loop through the nested states inside of the exportState and see if 
       ! any of them request mirroring
@@ -680,6 +701,24 @@ module NUOPC_Connector
     if (trim(importXferPolicy)=="transferAll") then
       ! top level mirroring into importState
       call doMirror(exportState, importState, acceptorVM=vm, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    elseif (trim(importXferPolicy)=="transferAllWithNamespace") then
+      ! access exportState namespace so it can be transferred to importState
+      call NUOPC_GetAttribute(exportState, name="Namespace", &
+        value=namespace, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! access name of importState for nestedStateName construction for clarity
+      call ESMF_StateGet(importState, name=stateName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! set namespace on importState, creating a nestedState on acceptor VM
+      call NUOPC_AddNamespace(importState, namespace=trim(namespace), &
+        nestedStateName=trim(stateName)//"-namespace:"//trim(namespace), &
+        nestedState=importNestedState, vm=vm, rc=rc)
+      ! mirror exportState items into importNestedState
+      call doMirror(exportState, importNestedState, acceptorVM=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     elseif (importHasNested .and. exportHasNested) then
@@ -792,7 +831,7 @@ module NUOPC_Connector
     recursive subroutine doMirror(providerState, acceptorState, acceptorVM, rc)
       type(ESMF_State)           :: providerState
       type(ESMF_State)           :: acceptorState
-      type(ESMF_VM), intent(in)  :: acceptorVM       
+      type(ESMF_VM), intent(in)  :: acceptorVM
       integer,       intent(out) :: rc
 
       integer                :: item, itemCount
@@ -818,7 +857,7 @@ module NUOPC_Connector
       character(ESMF_MAXSTR)      :: valueString
       type(ESMF_Pointer)          :: vmThis
       logical                     :: actualFlag
-      
+
       rc = ESMF_SUCCESS
 
       nullify(providerStandardNameList)
@@ -826,13 +865,13 @@ module NUOPC_Connector
       nullify(providerFieldList)
       nullify(providerCplSetList)
       nullify(acceptorStandardNameList)
-      
+
       actualFlag = .true.
       call ESMF_VMGetThis(acceptorVM, vmThis)
       if (vmThis == ESMF_NULL_POINTER) then
         actualFlag = .false.  ! local PET is not for an actual member
       endif
-    
+
       call ESMF_StateGet(acceptorState, name=acceptorStateName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1008,9 +1047,10 @@ module NUOPC_Connector
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
+
         end do
       endif
-      
+
       if (flipIntent) then
         ! Need to flip the accetorState intent back (same as providerIntent).
         call ESMF_StateSet(acceptorState, stateIntent=providerIntent, rc=rc)

@@ -59,6 +59,7 @@ module ESMF_StateAPIMod
       use ESMF_IOUtilMod
       use ESMF_UtilMod
       use ESMF_UtilStringMod
+      use ESMF_InfoMod
 
       implicit none
 
@@ -1851,6 +1852,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+
+#if 0
+!TODO: need a way to indicate from calling side that info should be logged
+        block
+          type(ESMF_Info) :: info
+          call ESMF_InfoGetFromBase(stateR%statep%base, info=info, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          call ESMF_InfoLog(info, prefix=prefix, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        end block
+#endif
 
         if (itemCount > 0) then
           allocate(itemNameList(itemCount))
