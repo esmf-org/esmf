@@ -23,7 +23,6 @@
 #include "par_median_const.h"
 #include "par_bisect_const.h"
 
-
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
 extern "C" {
@@ -396,17 +395,30 @@ static int rcb_fn(
   MPI_Datatype box_type;
   MPI_User_function Zoltan_RCB_box_merge;
 
+  int localPet,petCount;
+
+
+  /* For debugging */
+  MPI_Comm_rank(zz->Communicator,&localPet);
+  MPI_Comm_size(zz->Communicator,&petCount); 
+  printf("%d# out of %d RCB: Beg\n",localPet,petCount);  
+
+  
   ZOLTAN_TRACE_ENTER(zz, yo);
   if (stats || (zz->Debug_Level >= ZOLTAN_DEBUG_ATIME)) {
     MPI_Barrier(zz->Communicator);
     timestart = time1 = Zoltan_Time(zz->Timer);
   }
 
+
+  
   /* setup for parallel */
 
   proc = zz->Proc;
   nprocs = zz->Num_Proc;
   num_parts = zz->LB.Num_Global_Parts;
+
+
 
   /* create MPI data and function types for box and median */
 
@@ -916,7 +928,9 @@ static int rcb_fn(
     }
     else {
        if (set) partlower = partmid;
+       printf("%d# out of %d RCB: H1\n",localPet,petCount);
        MPI_Comm_split(local_comm,set,proc,&tmp_comm);
+       printf("%d# out of %d RCB: H2\n",localPet,petCount);
        MPI_Comm_free(&local_comm);
        local_comm = tmp_comm;
        old_nprocs = num_procs;
@@ -1139,6 +1153,8 @@ End:
     ZOLTAN_FREE(&(rcb->Dots));
   }
 
+  printf("%d# out of %d RCB: End\n",localPet,petCount);  
+  
   ZOLTAN_TRACE_EXIT(zz, yo);
   return(ierr);  
 }
