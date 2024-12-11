@@ -1490,10 +1490,6 @@ namespace ESMCI {
 
       // Get dst coords
       get_elem_coords_3D_ccw(dst_elem, dst_cfield, MAX_NUM_DST_POLY_NODES, tmp_coords, &num_dst_nodes, dst_coords);
-
-      if (dst_elem->get_id() == 107) {
-        printf("%d # dst id=%d\n",Par::Rank(),dst_elem->get_id());
-      }
       
       // Get rid of degenerate edges
       remove_0len_edges3D(&num_dst_nodes, dst_coords);

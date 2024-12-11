@@ -5556,7 +5556,7 @@ end subroutine createTestMesh3x3Cart_T
   enddo    ! lDE
 
 
-#if 1
+#if 0
   call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CORNER, &
         filename="srcGridCnr", &
        rc=localrc)
@@ -5593,7 +5593,7 @@ end subroutine createTestMesh3x3Cart_T
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-#if 1
+#if 0
    call ESMF_XGridGet(xgrid, mesh=xgridMesh, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &

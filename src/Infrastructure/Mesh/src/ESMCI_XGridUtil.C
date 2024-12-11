@@ -2834,8 +2834,8 @@ void calc_wgts_from_xgrid_to_side_mesh(Mesh *src_xgrid_mesh, Mesh *dst_side_mesh
     for (; sxei != sxee; ++sxei) {
       MeshObj &src_elem = *sxei;
 
-      // Skip non-local elements
-      if (!GetAttr(src_elem).is_locally_owned()) continue;
+      // Skip non-active (e.g. ghostcell) elements
+      if (!GetAttr(src_elem).GetContext().is_set(Attr::ACTIVE_ID)) continue;      
 
       // Get XGrid element ind
       // (Round to nearest to take care of possible representation issues)
@@ -2854,7 +2854,10 @@ void calc_wgts_from_xgrid_to_side_mesh(Mesh *src_xgrid_mesh, Mesh *dst_side_mesh
         Mesh::MeshObjIDMap::iterator mi =  dstMesh.map_find(MeshObj::ELEMENT, dst_orig_elem_id);
         if (mi != dstMesh.map_end(MeshObj::ELEMENT)) {
           MeshObj *dst_elem=&*mi;
-        
+          
+          // Skip non-active (e.g. ghostcell) elements
+          if (!GetAttr(*dst_elem).GetContext().is_set(Attr::ACTIVE_ID)) continue;
+          
           // Create Search result
           Search_result *sr=new Search_result();
           sr->elem=&src_elem; // Add src elem
@@ -2903,16 +2906,9 @@ void calc_wgts_from_xgrid_to_side_mesh(Mesh *src_xgrid_mesh, Mesh *dst_side_mesh
     for (; dxei != dxee; ++dxei) {
       MeshObj &dst_elem = *dxei;
 
-      if (dst_elem.get_id() == 107) {
-        printf("%d# dXGOE H1 dst_elem=%d\n",Par::Rank(),dst_elem.get_id());
-      }
-      
-      // Skip non-local elements
-      //      if (!GetAttr(dst_elem).is_locally_owned()) continue;
-
-      if (dst_elem.get_id() == 107) {
-        printf("%d# dXGOE H2 dst_elem=%d\n",Par::Rank(),dst_elem.get_id());
-      }
+      /* XMRKX */
+      // Skip non-active (e.g. ghostcell) elements
+      if (!GetAttr(dst_elem).GetContext().is_set(Attr::ACTIVE_ID)) continue;
       
       // Get XGrid element ind
       // (Round to nearest to take care of possible representation issues)
@@ -2932,6 +2928,9 @@ void calc_wgts_from_xgrid_to_side_mesh(Mesh *src_xgrid_mesh, Mesh *dst_side_mesh
         if (mi != srcMesh.map_end(MeshObj::ELEMENT)) {
           MeshObj *src_elem=&*mi;
 
+          // Skip non-active (e.g. ghostcell) elements
+          if (!GetAttr(*src_elem).GetContext().is_set(Attr::ACTIVE_ID)) continue;
+          
           // Find search result to add to
           std::map<int,Search_result *>::iterator itsr=id_to_sr_map.find(src_elem->get_id());
 
