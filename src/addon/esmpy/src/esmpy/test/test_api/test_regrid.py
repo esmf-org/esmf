@@ -836,11 +836,12 @@ class TestRegrid(TestBase):
                     dst_mask_values=np.atleast_1d(np.array([0])))
         dstfield = rh(srcfield, dstfield, zero_region=Region.SELECT)
 
-        # validate that the masked values were not zeroed out
+        # validate that the masked values were not zeroed out (zero_region=Region.SELECT
+        # should leave the masked values at their original values)
         for i in range(dstfield.data.shape[x]):
             for j in range(dstfield.data.shape[y]):
                 if dstfield.grid.mask[StaggerLoc.CENTER][i, j] == 0:
-                    assert(dstfield[i, j] == 0)
+                    assert(dstfield.data[i, j] == -100)
 
     @pytest.mark.skipif(_ESMF_PIO==False, reason="PIO required in ESMF build")
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
