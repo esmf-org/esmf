@@ -134,6 +134,10 @@ void ESMCI_regrid_create(
   VM::logMemInfo(std::string("RegridCreate1.0"));
 #endif
 
+  char buff[1024];
+  sprintf(buff,"BOB: RS Begin regrid(%d) from %s to %s",*regridMethod,srcarray.getName(),dstarray.getName());
+  ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+  
   try {
 
     // Declare local return code
@@ -811,6 +815,9 @@ void ESMCI_regrid_create(
     return;
   }
 
+  sprintf(buff,"BOB: RS End regrid(%d) from %s to %s",*regridMethod,srcarray.getName(),dstarray.getName());
+  ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+  
 #ifdef PROGRESSLOG_on
   ESMC_LogDefault.Write("c_esmc_regrid_create(): Final return.", ESMC_LOGMSG_INFO);
 #endif

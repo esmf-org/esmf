@@ -41,6 +41,10 @@ namespace ESMCI {
             bool set_dst_status, WMat &dst_status,
             bool checkFlag) {
 
+  char buff[1024];
+  sprintf(buff,"BOB: MR Beg rm=%d rpt=%d",*regridMethod,*regridPoleType);
+  ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+   
 
    // See if it could have a pole
    bool maybe_pole=false;
@@ -77,6 +81,10 @@ namespace ESMCI {
       }
     }
 
+  sprintf(buff,"BOB: MR H1 mpole=%d",maybe_pole);
+  ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+
+     
      // Output Mesh for Debugging
 #ifdef ESMF_REGRID_DEBUG_WRITE_MESH
     if (srcmesh != NULL) WriteMesh(*srcmesh, "src_rgd_mesh");
@@ -184,6 +192,9 @@ namespace ESMCI {
     // destroyed before we do other things like the extrapolation below
     {
 
+      sprintf(buff,"BOB: MR H2");
+      ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+      
       // Only pass the dstMesh into rendezvous grid creation, if the dstpointlist doesn't exist.
       // (sometimes we have both for extrapolation)
       Mesh *tmp_dstmesh=NULL;
@@ -197,16 +208,25 @@ namespace ESMCI {
                     mtype, *unmappedaction, checkFlag);
       ESMCI_REGRID_TRACE_EXIT("NativeMesh regrid interp 1");
 
+      sprintf(buff,"BOB: MR H3");
+      ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+      
       ESMCI_REGRID_TRACE_ENTER("NativeMesh regrid interp 2");
       // Create the weight matrix
       interp(0, wts, set_dst_status, dst_status);
       ESMCI_REGRID_TRACE_EXIT("NativeMesh regrid interp 2");
 
+      sprintf(buff,"BOB: MR H4");
+      ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+      
       // Release the Zoltan struct if we used it for the mid mesh
       if(midmesh) interp.release_zz();
 
     } // block which contains inter object existance
 
+      sprintf(buff,"BOB: MR H5");
+      ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+    
      // Factor out poles if they exist
      if (maybe_pole) {
        if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
@@ -218,6 +238,9 @@ namespace ESMCI {
        }
      }
 
+      sprintf(buff,"BOB: MR H6");
+      ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+     
      // Do extrapolation if the user has requested it
      if (*extrapMethod != ESMC_EXTRAPMETHOD_NONE) {
        extrap(srcmesh, srcpointlist, dstmesh, dstpointlist,
@@ -226,6 +249,9 @@ namespace ESMCI {
               *extrapNumLevels, *extrapNumInputLevels,
               set_dst_status, dst_status);
      }
+
+     sprintf(buff,"BOB: MR End");
+     ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
 
     return 1;
  }
