@@ -1600,6 +1600,12 @@ void GeomRend::build_dst_mig_all_overlap(ZoltanUD &zud) {
 
 void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF, struct Zoltan_Struct **zzp, bool free_zz) {
   Trace __trace("GeomRend::Build()");
+
+  {
+    char buff[1024];
+    sprintf(buff,"BOB: GR::Build Beg");
+    ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+  }
   
   ThrowRequire(built == false);
   built = true;
@@ -1608,6 +1614,14 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
     Build_Merge(nsrcF, srcF, ndstF, dstF, zzp);
     status=GEOMREND_STATUS_COMPLETE;
     return;
+  }
+
+
+
+  {
+    char buff[1024];
+    sprintf(buff,"BOB: GR::Build H1");
+    ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
   }
 
   
@@ -1622,9 +1636,23 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
   else
     dst_coordField_ptr = NULL;
 
+ 
 
+  {
+    char buff[1024];
+    sprintf(buff,"BOB: GR::Build H2");
+    ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+  }
+
+  
   ZoltanUD zud(sdim, src_coordField_ptr, dst_coordField_ptr, srcplist, dstplist, iter_is_obj);
 
+  {
+    char buff[1024];
+    sprintf(buff,"BOB: GR::Build H3");
+    ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+  }
+  
   // Gather the destination points.  Also get a min/max
   int num_dst_local=0;
   double cmin[3], cmax[3];
@@ -1638,6 +1666,12 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
 
   BBox dstBound = BBoxParUnion(BBox(sdim, cmin, cmax));
 
+  {
+    char buff[1024];
+    sprintf(buff,"BOB: GR::Build H4");
+    ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+  }
+  
   // Get src mesh (within dst bounding box)
   int num_src_local=0;
   if (srcplist == NULL) {
@@ -1647,6 +1681,12 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
     num_src_local=srcplist->get_curr_num_pts(); 
   }
 
+  {
+    char buff[1024];
+    sprintf(buff,"BOB: GR::Build H5");
+    ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+  }
+  
   // Compute global sums
   int local[2];
   int global_tot[2];
@@ -1654,6 +1694,12 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
   local[1]=num_src_local;
   MPI_Allreduce(local,global_tot,2,MPI_INT,MPI_SUM,Par::Comm());
 
+  {
+    char buff[1024];
+    sprintf(buff,"BOB: GR::Build H6");
+    ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+  }
+  
   // Leave if there are no destination points
   if (global_tot[0] == 0) {
     status=GEOMREND_STATUS_NO_DST;
@@ -1668,13 +1714,24 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
   }
 
 
+  {
+    char buff[1024];
+    sprintf(buff,"BOB: GR::Build H7");
+    ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+  }
+  
   float ver;
   int rc = Zoltan_Initialize(0, NULL, &ver);
 
   int rank = Par::Rank();
   int csize = Par::Size();
 
-
+  {
+    char buff[1024];
+    sprintf(buff,"BOB: GR::Build H8 %d out of %d",rank,csize);
+    ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+  }
+  
   struct Zoltan_Struct * zz = Zoltan_Create(Par::Comm());
   *zzp = zz;
 
@@ -1703,10 +1760,27 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
   Zoltan_Set_Num_Geom_Fn(zz, GetNumGeom, (void*) &zud);
   Zoltan_Set_Geom_Multi_Fn(zz, GetObject, (void*) &zud);
 
+
+
+  {
+    char buff[1024];
+    sprintf(buff,"BOB: GR::Build H9");
+    ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+  }
+
+  
   // Call zoltan
   rc = Zoltan_LB_Partition(zz, &changes, &numGidEntries, &numLidEntries,
     &numImport, &importGlobalids, &importLocalids, &importProcs, &importToPart,
     &numExport, &exportGlobalids, &exportLocalids, &exportProcs, &exportToPart);
+
+
+  {
+    char buff[1024];
+    sprintf(buff,"BOB: GR::Build H10");
+    ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+  }
+
 
   //for (int xx=0; xx<numImport; xx++) {
   //for (int xx=0; xx<numExport; xx++) {
@@ -1783,6 +1857,13 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
     Zoltan_Destroy(&zz);
   }
 
+  {
+    char buff[1024];
+    sprintf(buff,"BOB: GR::Build End");
+    ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+  }
+
+  
   // Set status before leaving
   status=GEOMREND_STATUS_COMPLETE;
 }

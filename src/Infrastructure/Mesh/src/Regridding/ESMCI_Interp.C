@@ -2939,7 +2939,13 @@ interp_method(imethod)
   }
 
   if (is_parallel) {
-
+    
+    {
+      char buff[1024];
+      sprintf(buff,"BOB: Interp H1 sf.size=%d dF.size=%d",srcF.size(),dstF.size());
+      ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+    }
+    
     // Form the parallel rendezvous meshes/specs
    //  if (Par::Rank() == 0)
        //std::cout << "Building rendezvous..." << std::endl;
@@ -2947,6 +2953,12 @@ interp_method(imethod)
                 dstF.size(), (dstF.size()>0)?(&dstF[0]):NULL,
                 &zz, midmesh==0? true:false);
 
+    {
+      char buff[1024];
+      sprintf(buff,"BOB: Interp H2 grend.status=%d",grend.status);
+      ESMC_LogDefault.Write(buff, ESMC_LOGMSG_INFO);
+    }
+    
     // Check grend status, if it's not complete
     if (grend.status != GEOMREND_STATUS_COMPLETE) {
       if (grend.status == GEOMREND_STATUS_NO_DST) {
