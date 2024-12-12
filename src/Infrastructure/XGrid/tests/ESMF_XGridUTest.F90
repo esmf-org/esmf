@@ -56,7 +56,7 @@
  
     !------------------------------------------------------------------------
 
-#if 0
+#if 1
   !------------------------------------------------------------------------
   !NEX_UTest
   ! Don't know if I should keep this turned on as an actual unit test, but it's useful for debugging
@@ -211,9 +211,7 @@
     write(failMsg, *) ""
     write(name, *) "Test 2nd order on an XGrid between Cartesian Meshes"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#endif    
-    
-#if 1
+
     !------------------------------------------------------------------------
     !NEX_UTest
     ! Create an XGrid in 2D from Meshes

@@ -3478,7 +3478,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_GeomType_Flag)  :: geomtype, srcgeomtype, dstgeomtype
         type(ESMF_XGrid)     :: srcXGrid, dstXGrid        
         type(ESMF_Mesh)      :: srcMesh, dstMesh
-
+        type(ESMF_Array)     :: srcArray, dstArray
         integer :: srcIdx, dstIdx, ngrid_a, ngrid_b
         integer :: sideAGC, sideAMC, sideBGC, sideBMC
         type(ESMF_XGridSide_Flag) :: srcSide, dstSide
@@ -3494,11 +3494,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_RegridMethod_Flag) :: lregridmethod
         type(ESMF_Mesh)      :: xgridMesh, sideMesh
         logical              :: sideMeshDestroy
-        type(ESMF_Field)     :: tmpSrcField, tmpDstField
-        type(ESMF_Field)     :: sideField
-        type(ESMF_Typekind_Flag) :: fieldTypeKind
         integer :: xgridSide, xgridInd, sideMeshSide, sideMeshInd
 
+        type(ESMF_PointList) :: dstPointList, srcPointList
+        type(ESMF_Array)     :: statusArray
         
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
@@ -3993,68 +3992,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-        else
-
-           ! Init side info
-           sideMeshDestroy=.false.
-           sideMeshSide=0
-           sideMeshInd=0
            
-           ! Set temporary field for source
-           if (srcSide == ESMF_XGRIDSIDE_BALANCED) then
+        else if (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE_2ND) then
 
-              ! Get Field typekind
-              call ESMF_FieldGet(srcField, typekind=fieldTypeKind, &
-                   rc=localrc) 
-              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                   ESMF_CONTEXT, rcToReturn=rc)) return
-
-              ! Get Super Mesh
-              call ESMF_XGridGet(xgrid, mesh=xgridMesh, rc=localrc)
-              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                   ESMF_CONTEXT, rcToReturn=rc)) return
-
-              ! Create temporary field
-              tmpSrcField=ESMF_FieldCreate(xgridMesh, &
-                   typekind=fieldTypeKind, &
-                   meshloc=ESMF_MESHLOC_ELEMENT, &
-                   rc=localrc)
-              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                   ESMF_CONTEXT, rcToReturn=rc)) return
-           else 
-              sideField=srcField
-              sideMeshSide=1  ! side A
-              if (srcSide == ESMF_XGRIDSIDE_B) sideMeshSide=2 ! side B
-              sideMeshInd=srcIdx
-           endif
-
-           ! Set temporary field for dst
-           if (dstSide == ESMF_XGRIDSIDE_BALANCED) then
-
-              ! Get Field typekind
-              call ESMF_FieldGet(dstField, typekind=fieldTypeKind, &
-                   rc=localrc) 
-              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                   ESMF_CONTEXT, rcToReturn=rc)) return
-
-              ! Get Super Mesh
-              call ESMF_XGridGet(xgrid, mesh=xgridMesh, rc=localrc)
-              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                   ESMF_CONTEXT, rcToReturn=rc)) return
-
-              ! Create temporary field
-              tmpDstField=ESMF_FieldCreate(xgridMesh, &
-                   typekind=fieldTypeKind, &
-                   meshloc=ESMF_MESHLOC_ELEMENT, &
-                   rc=localrc)
-              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                   ESMF_CONTEXT, rcToReturn=rc)) return
-           else 
-              sideField=dstField
-              sideMeshSide=1  ! side A
-              if (dstSide == ESMF_XGRIDSIDE_B) sideMeshSide=2 ! side B
-              sideMeshInd=dstIdx
-           endif
+           ! Get Super Mesh
+           call ESMF_XGridGet(xgrid, mesh=xgridMesh, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
            ! Set XGrid side and ind information
            xgridSide=3
@@ -4063,112 +4007,198 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
+           
 
-           ! Get/create sideMesh
-           call ESMF_FieldGet(sideField, geomtype=geomtype, &
-                rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
 
-           if (geomtype == ESMF_GEOMTYPE_GRID) then
-              call ESMF_FieldGet(sideField, grid=srcGrid, &
+           ! Init side info
+           sideMeshDestroy=.false.
+           sideMeshSide=0
+           sideMeshInd=0
+           
+           ! Get srcMesh
+           if (srcSide == ESMF_XGRIDSIDE_BALANCED) then ! Src is XGrid
+
+              ! SrcMesh is super mesh
+              srcMesh=xgridMesh
+
+           else ! src is side mesh
+
+              ! Set side info
+              sideMeshSide=1  ! side A
+              if (srcSide == ESMF_XGRIDSIDE_B) sideMeshSide=2 ! side B
+              sideMeshInd=srcIdx
+
+              ! Get/create sideMesh
+              call ESMF_FieldGet(srcField, geomtype=geomtype, &
                    rc=localrc)
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
 
-               ! Create Mesh from Grid
-               sideMesh=conserve_GridToMesh(srcGrid, &
-                    !maskValues, turnedOnMeshElemMask, &
-                    rc=localrc)
-               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc)) return                            
+              if (geomtype == ESMF_GEOMTYPE_GRID) then
+                 call ESMF_FieldGet(srcField, grid=srcGrid, &
+                   rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+                 
+                 ! Create Mesh from Grid
+                 sideMesh=conserve_GridToMesh(srcGrid, &
+                      !maskValues, turnedOnMeshElemMask, &
+                      rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return                            
 
                ! Record that we created the mesh
                sideMeshDestroy=.true.
 
-           else if (geomtype == ESMF_GEOMTYPE_MESH) then
-              call ESMF_FieldGet(sideField, mesh=sideMesh, rc=localrc)
+               ! srcMesh is sideMesh
+               srcMesh=sideMesh
+               
+            else if (geomtype == ESMF_GEOMTYPE_MESH) then
+
+               ! Get side Mesh
+               call ESMF_FieldGet(srcField, mesh=sideMesh, rc=localrc)
+               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+               
+               ! srcMesh is sideMesh
+               srcMesh=sideMesh
+               
+            else
+               call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+                    msg="srcField is not built on Grid, or Mesh.", &
+                    ESMF_CONTEXT, rcToReturn=rc) 
+               return
+            endif
+         endif
+           
+         ! Get srcArray
+         call ESMF_FieldGet(srcField, array=srcArray, &
+              rc=localrc) 
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+         
+         ! Get dstMesh
+         if (dstSide == ESMF_XGRIDSIDE_BALANCED) then ! Dst is XGrid
+            
+            ! DstMesh is super mesh
+              dstMesh=xgridMesh
+
+           else ! dst is side mesh
+
+              ! Set side info
+              sideMeshSide=1  ! side A
+              if (dstSide == ESMF_XGRIDSIDE_B) sideMeshSide=2 ! side B
+              sideMeshInd=dstIdx
+
+              ! Get/create sideMesh
+              call ESMF_FieldGet(dstField, geomtype=geomtype, &
+                   rc=localrc)
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
-           else
-              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                   msg=" side Field is not built on Grid, or Mesh.", &
-                   ESMF_CONTEXT, rcToReturn=rc) 
-              return
-           endif
 
-           ! Set side Mesh info
-           call c_esmc_meshsetxgridinfo(sideMesh, sideMeshSide, sideMeshInd, localrc)
-           if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
+              if (geomtype == ESMF_GEOMTYPE_GRID) then
+                 call ESMF_FieldGet(dstField, grid=dstGrid, &
+                   rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+                 
+                 ! Create Mesh from Grid
+                 sideMesh=conserve_GridToMesh(dstGrid, &
+                      !maskValues, turnedOnMeshElemMask, &
+                      rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return                            
+
+               ! Record that we created the mesh
+               sideMeshDestroy=.true.
+
+               ! dstMesh is sideMesh
+               dstMesh=sideMesh
+               
+            else if (geomtype == ESMF_GEOMTYPE_MESH) then
+
+               ! Get side Mesh
+               call ESMF_FieldGet(dstField, mesh=sideMesh, rc=localrc)
+               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+               
+               ! dstMesh is sideMesh
+               dstMesh=sideMesh
+               
+            else
+               call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+                    msg="dstField is not built on Grid, or Mesh.", &
+                    ESMF_CONTEXT, rcToReturn=rc) 
+               return
+            endif
+         endif
+           
+         ! Get dstArray
+         call ESMF_FieldGet(dstField, array=dstArray, &
+              rc=localrc) 
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+         
+         ! Set side Mesh info
+         call c_esmc_meshsetxgridinfo(sideMesh, sideMeshSide, sideMeshInd, localrc)
+         if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+         ! Generate routehandle for 2nd order conservative
+         call ESMF_RegridStore(srcMesh, srcArray, &
+              srcPointList, .false., &
+              dstMesh, dstArray, &
+              dstPointList, .false. , &
+              regridMethod=ESMF_REGRIDMETHOD_CONSERVE_2ND, &
+              lineType=ESMF_LINETYPE_GREAT_CIRCLE, &
+              normType=ESMF_NORMTYPE_DSTAREA, &
+              vectorRegrid=.false., &
+              polemethod=ESMF_POLEMETHOD_NONE, regridPoleNPnts=4, &
+              hasStatusArray=.false., statusArray=statusArray, &
+              extrapMethod=ESMF_EXTRAPMETHOD_NONE, &
+              extrapNumSrcPnts=8, extrapDistExponent=2.0_ESMF_KIND_R8, &
+              extrapNumLevels=2, extrapNumInputLevels=2, &
+              unmappedaction=ESMF_UNMAPPEDACTION_ERROR, &
+              ignoreDegenerate=.true., &
+              srcTermProcessing=srcTermProcessing, &
+              pipeLineDepth=pipeLineDepth, &
+              routehandle=routeHandle, &
+              checkFlag=.false., &
+              rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
-           ! Set temporary field for side 
-           if (srcSide /= ESMF_XGRIDSIDE_BALANCED) then
-
-              ! Get Field typekind
-              call ESMF_FieldGet(srcField, typekind=fieldTypeKind, &
-                   rc=localrc) 
-              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ! If present, copy src fraction information
+           if (present(srcFracField)) then
+              call copyFracsIntoOutputField(srcField, srcMesh, srcFracField, localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                    ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
 
-              ! Create temporary field
-              tmpSrcField=ESMF_FieldCreate(sideMesh, &
-                   typekind=fieldTypeKind, &
-                   meshloc=ESMF_MESHLOC_ELEMENT, &
-                   rc=localrc)
-              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                   ESMF_CONTEXT, rcToReturn=rc)) return
-           else if (dstSide /= ESMF_XGRIDSIDE_BALANCED) then
-
-              ! Get Field typekind
-              call ESMF_FieldGet(dstField, typekind=fieldTypeKind, &
-                   rc=localrc) 
-              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                   ESMF_CONTEXT, rcToReturn=rc)) return
-
-              ! Create temporary field
-              tmpDstField=ESMF_FieldCreate(sideMesh, &
-                   typekind=fieldTypeKind, &
-                   meshloc=ESMF_MESHLOC_ELEMENT, &
-                   rc=localrc)
-              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ! If present, copy dst fraction information
+           if (present(dstFracField)) then
+              call copyFracsIntoOutputField(dstField, dstMesh, dstFracField, localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                    ESMF_CONTEXT, rcToReturn=rc)) return
            endif
 
            
-           ! Generate routehandle other that 1st order conserve
-           call ESMF_FieldRegridStoreNX(&
-                srcField=tmpSrcField, &
-                dstField=tmpDstField, &
-! ??            srcMaskValues, dstMaskValues, &
-                regridmethod=lregridmethod, &
-                srcTermProcessing=srcTermProcessing, &
-                pipeLineDepth=pipeLineDepth, &
-                routehandle=routehandle, &
-                srcFracField=srcFracField, &
-                dstFracField=dstFracField, &
-                rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-
-           ! Get rid of temporary source Fields if necessary
-           call ESMF_FieldDestroy(tmpSrcField, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-
-           call ESMF_FieldDestroy(tmpDstField, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-
-
            ! Get rid of temporary sideMesh if necessary
            if (sideMeshDestroy) then
               call ESMF_MeshDestroy(sideMesh, rc=localrc)
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return              
            endif
-           
+
+        else
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                msg=" unsupported regridMethod with XGrid version of ESMF_FieldRegridStore().", & 
+                ESMF_CONTEXT, rcToReturn=rc) 
+           return           
         endif
 
 
