@@ -4148,6 +4148,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
 
+         
          ! Generate routehandle for 2nd order conservative
          call ESMF_RegridStore(srcMesh, srcArray, &
               srcPointList, .false., &
@@ -4162,7 +4163,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               extrapMethod=ESMF_EXTRAPMETHOD_NONE, &
               extrapNumSrcPnts=8, extrapDistExponent=2.0_ESMF_KIND_R8, &
               extrapNumLevels=2, extrapNumInputLevels=2, &
-              unmappedaction=ESMF_UNMAPPEDACTION_ERROR, &
+              unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, & ! Otherwise, dst = sideMesh will often lead to unmapped errors
               ignoreDegenerate=.true., &
               srcTermProcessing=srcTermProcessing, &
               pipeLineDepth=pipeLineDepth, &
@@ -4172,6 +4173,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
+           ! The fraction information should be the same as stored in the XGrid. However,
+           ! use the version actually calculated during 2nd order calc, so that it matches more
+           ! precisely the values used during that calculation. 
+           
            ! If present, copy src fraction information
            if (present(srcFracField)) then
               call copyFracsIntoOutputField(srcField, srcMesh, srcFracField, localrc)
@@ -4187,6 +4192,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            endif
 
            
+           ! Reset Mesh side info so that it doesn't interfere elsewhere
+           call c_esmc_meshsetxgridinfo(xgridMesh, -1, -1, localrc)
+           if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+           
+           call c_esmc_meshsetxgridinfo(sideMesh, -1, -1, localrc)
+           if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return           
+                      
+           
            ! Get rid of temporary sideMesh if necessary
            if (sideMeshDestroy) then
               call ESMF_MeshDestroy(sideMesh, rc=localrc)
@@ -4201,7 +4218,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            return           
         endif
 
-
+        ! Return success
         if(present(rc)) rc = ESMF_SUCCESS
 
     end subroutine ESMF_FieldRegridStoreX

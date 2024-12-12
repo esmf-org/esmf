@@ -1518,10 +1518,12 @@ function ESMF_XGridCreate(keywordEnforcer, &
     ! store the middle mesh if needed
     ! and clean up temporary memory used
     if(xgtype%storeOverlay) then
+
+      ! Set in XGrid structure
       xgtype%mesh = mesh
 
       ! If keeping, turn off side information
-      call c_esmc_meshsetxgridinfo(mesh, -1, -1, localrc)
+      call c_esmc_meshsetxgridinfo(xgtype%mesh, -1, -1, localrc)
       if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return         
