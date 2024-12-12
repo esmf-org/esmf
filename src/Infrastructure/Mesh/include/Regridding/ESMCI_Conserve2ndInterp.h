@@ -21,6 +21,7 @@
 #include <Mesh/include/Legacy/ESMCI_MCoord.h>
 #include <Mesh/include/Legacy/ESMCI_Sintdnode.h>
 #include <Mesh/include/Legacy/ESMCI_SM.h>
+#include <Mesh/include/ESMCI_XGridUtil.h>
 
 #include <vector>
 
@@ -52,9 +53,6 @@ namespace ESMCI {
   } SM_CELL;
 #endif
 
-  enum XGRID_USE {XGRID_USE_NONE, XGRID_USE_SRC, XGRID_USE_DST};
-
-  
   void calc_2nd_order_weights_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, MEField<> *src_mask_field, 
                                         std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field, XGRID_USE xgrid_use, 
                                            double *src_elem_area,

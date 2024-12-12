@@ -768,19 +768,7 @@ void calc_2nd_order_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, 
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
 
   // See if we're using an XGrid
-  XGRID_USE xgrid_use=XGRID_USE_NONE;
-  if (srcmesh.side==3) {
-    // Extra check to ensure that it's actually a side mesh going to XGrid
-    if ((dstmesh.side == 1) || (dstmesh.side == 2)) {
-      xgrid_use=XGRID_USE_SRC;
-    }
-  } else if (dstmesh.side==3) {
-    // Extra check to ensure that it's actually a side mesh going to XGrid
-    if ((srcmesh.side == 1) || (srcmesh.side == 2)) {
-      xgrid_use=XGRID_USE_DST;
-    }
-  }
-
+  XGRID_USE xgrid_use=detect_xgrid_regrid_info_type(srcmesh, dstmesh);
   
   // Get src coord field
   MEField<> *src_cfield = srcmesh.GetCoordField();
@@ -1102,18 +1090,7 @@ void calc_2nd_order_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh,
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
 
   // See if we're using an XGrid
-  XGRID_USE xgrid_use=XGRID_USE_NONE;
-  if (srcmesh.side==3) {
-    // Extra check to ensure that it's actually a side mesh going to XGrid
-    if ((dstmesh.side == 1) || (dstmesh.side == 2)) {
-      xgrid_use=XGRID_USE_SRC;
-    }
-  } else if (dstmesh.side==3) {
-    // Extra check to ensure that it's actually a side mesh going to XGrid
-    if ((srcmesh.side == 1) || (srcmesh.side == 2)) {
-      xgrid_use=XGRID_USE_DST;
-    }
-  }
+  XGRID_USE xgrid_use=detect_xgrid_regrid_info_type(srcmesh, dstmesh);
   
   // Get src coord field
   MEField<> *src_cfield = srcmesh.GetCoordField();
@@ -3043,11 +3020,11 @@ interp_method(imethod)
           // If 2nd order see if it's an XGrid and then use that
           if (interp_method == Interp::INTERP_CONSERVE_2ND) {
 
-            // If an XGrid is involved, then do a search using that
-            if ((grend.GetSrcRend().side==3) || (grend.GetDstRend().side==3)) {
-              XGridGatherOverlappingElems(grend.GetSrcRend(), grend.GetDstRend(), sres); 
-            } else { // ...otherwise just use the regular search
+            // If an XGrid isn't involved, then do a search using regular method
+            if (detect_xgrid_regrid_info_type(grend.GetSrcRend(), grend.GetDstRend()) == XGRID_USE_NONE) {
               OctSearchElems(grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
+            } else { // ...otherwise use XGrid information
+              XGridGatherOverlappingElems(grend.GetSrcRend(), grend.GetDstRend(), sres);
             }
           } else { // ...otherwise just use the regular search
             OctSearchElems(grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
@@ -3089,11 +3066,11 @@ interp_method(imethod)
         // If 2nd order see if it's an XGrid and then use that
         if (interp_method == Interp::INTERP_CONSERVE_2ND) {
           
-          // If an XGrid is involved, then do a search using that
-          if ((src->side==3) || (dest->side==3)) {
-            XGridGatherOverlappingElems(*src, *dest, sres); 
-          } else { // ...otherwise just use the regular search
+          // If an XGrid isn't involved, then do a search using regular method
+          if (detect_xgrid_regrid_info_type(*src, *dest) == XGRID_USE_NONE) {
             OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, *dest, unmappedaction, 1e-8, sres);
+          } else { // ...otherwise use XGrid info to do search
+            XGridGatherOverlappingElems(*src, *dest, sres); 
           }
         } else { // ...otherwise just use the regular search
           OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, *dest, unmappedaction, 1e-8, sres);

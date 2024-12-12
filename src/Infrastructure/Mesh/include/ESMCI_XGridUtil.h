@@ -21,6 +21,8 @@
 
 namespace ESMCI {
 
+
+  
 /**
  *\brief generate a mesh based on the nodes and cells vector. The cells are unique and refer to the nodes.
  * @param[in] sintd_nodes vector to allocated intersecting nodal points
@@ -306,7 +308,12 @@ void test_clip3D(int pdim, int sdim, int num_s, double * s_coord, int num_c, dou
 void dump_sph_coords(int num, const double * coord);
 void dump_cart_coords(int num, const double * coord, bool only_sph=false);
  void dump_polygon(const polygon & poly, bool only_sph=false);
- 
+
+  // Whether XGrid is being used for regridding
+  enum XGRID_USE {XGRID_USE_NONE, XGRID_USE_SRC, XGRID_USE_DST};
+
+  // Deterimine if the input meshes have XGrid regridding information and if so what type
+  XGRID_USE detect_xgrid_regrid_info_type(Mesh &srcmesh, Mesh &dstmesh);
 
 
 } // namespace

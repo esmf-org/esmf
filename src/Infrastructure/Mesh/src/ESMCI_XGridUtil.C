@@ -2978,6 +2978,30 @@ void calc_wgts_from_xgrid_to_side_mesh(Mesh *src_xgrid_mesh, Mesh *dst_side_mesh
     else Throw() << "Unexpectedly neither src or dst Mesh is an XGrid.";
     
   }
+
+  // Detect if we should use XGrid information for regridding and how
+  XGRID_USE detect_xgrid_regrid_info_type(Mesh &srcmesh, Mesh &dstmesh) {
+    
+    XGRID_USE xgrid_use=XGRID_USE_NONE;
+    if (srcmesh.side==3) {
+      // Extra check to ensure that it's actually a side mesh going to XGrid
+      if ((dstmesh.side == 1) || (dstmesh.side == 2)) {
+        xgrid_use=XGRID_USE_SRC;
+      }
+    } else if (dstmesh.side==3) {
+      // Extra check to ensure that it's actually a side mesh going to XGrid
+      if ((srcmesh.side == 1) || (srcmesh.side == 2)) {
+        xgrid_use=XGRID_USE_DST;
+      }
+    }
+
+    return xgrid_use;
+  } 
+
+  
+ 
+
+
   
 
 } //namespace
