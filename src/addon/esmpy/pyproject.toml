@@ -7,10 +7,14 @@ name = "esmpy"
 description = "ESMF Python interface"
 # readme = "README.md"
 maintainers = [ { name = "ESMF Core Team", email = "esmf_support@ucar.edu" } ]
-requires-python = ">=3.7"
+# The following is the earliest python version that we test with:
+requires-python = ">=3.8"
 license = { text = "University of Illinois-NCSA" }
 dependencies = [
-    "numpy",
+    # The following is the earliest numpy version that we test with; the latest we test
+    # with is version 2.x, so we assume that version 3 might break backwards
+    # compatibility:
+    "numpy >= 1.19, < 3",
     'importlib-metadata; python_version < "3.8"',
     # setuptools-git-versioning shouldn't be needed here, but is
     # included as a workaround for problems with the build-time
