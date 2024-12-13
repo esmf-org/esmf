@@ -1170,7 +1170,7 @@ module NUOPC_Driver
           return  ! bail out
         namespace=cmEntry%wrap%label
       else
-        ! in the old style (pre v7) there are no component labels availabl
+        ! in the old style (pre v7) there are no component labels available
         namespace="DEFAULT" ! cannot be empty for sake of AttributeSet()
       endif
       ! add State level attributes, set the namespace according to comp label
@@ -1188,6 +1188,14 @@ module NUOPC_Driver
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
+        ! for available component label, also set State name for clarity
+        if (namespace /= "DEFAULT") then
+          call ESMF_StateSet(is%wrap%modelIS(i), &
+            name=trim(namespace)//"-ImportState", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
       endif
       ! add State level attributes, set the namespace according to comp label
       stateIsCreated = ESMF_StateIsCreated(is%wrap%modelES(i), rc=rc)
@@ -1204,6 +1212,14 @@ module NUOPC_Driver
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
+        ! for available component label, also set State name for clarity
+        if (namespace /= "DEFAULT") then
+          call ESMF_StateSet(is%wrap%modelES(i), &
+            name=trim(namespace)//"-ExportState", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
       endif
     enddo
 

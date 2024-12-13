@@ -154,12 +154,13 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_AddNamespace - Add a nested state with Namespace to a State
 ! !INTERFACE:
   subroutine NUOPC_AddNamespace(state, Namespace, nestedStateName, &
-    nestedState, rc)
+    nestedState, vm, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)         :: state
     character(len=*), intent(in)            :: Namespace
     character(len=*), intent(in),  optional :: nestedStateName
     type(ESMF_State), intent(out), optional :: nestedState
+    type(ESMF_VM),    intent(in),  optional :: vm
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Add a Namespace to {\tt state}. Namespaces are implemented via nested 
@@ -178,6 +179,10 @@ module NUOPC_Base
 !     Name of the nested state. Defaults to {\tt Namespace}.
 !   \item[{[nestedState]}]
 !     Optional return of the newly created nested state.
+!   \item[{[vm]}]
+!     If present, the nested State created to hold the namespace is created on
+!     the specified {\tt ESMF\_VM} object. The default is to create the nested
+!     State on the VM of the current component context.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -189,9 +194,10 @@ module NUOPC_Base
     type(ESMF_State)            :: nestedS
     character(len=80)           :: nestedSName
     type(ESMF_StateIntent_Flag) :: stateIntent
-    
+    logical                     :: stateIsCreated
+
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
     call ESMF_StateGet(state, stateIntent=stateIntent, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
@@ -201,31 +207,39 @@ module NUOPC_Base
     else
       nestedSName = trim(Namespace)
     endif
-    
+
     nestedS = ESMF_StateCreate(name=nestedSName, stateIntent=stateIntent, &
-      rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      
-    call NUOPC_InitAttributes(nestedS, rc=localrc)
+      vm=vm, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
-    call NUOPC_SetAttribute(nestedS, name="Namespace", &
-      value=trim(Namespace), rc=localrc)
+    stateIsCreated = ESMF_StateIsCreated(nestedS, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-    
-    call ESMF_StateAdd(state, (/nestedS/), rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    if (stateIsCreated) then
+
+      call NUOPC_InitAttributes(nestedS, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+      call NUOPC_SetAttribute(nestedS, name="Namespace", &
+        value=trim(Namespace), rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+      call ESMF_StateAdd(state, (/nestedS/), rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    endif
 
     if (present(nestedState)) &
       nestedState = nestedS
-    
+
   end subroutine
-  !---------------------------------------------------------------------
-  
+  !-----------------------------------------------------------------------------
+
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_AddNestedState - Add a nested state to a state with NUOPC attributes
@@ -623,13 +637,14 @@ module NUOPC_Base
 ! !INTERFACE:
   ! Private name; call using NUOPC_Advertise() 
   subroutine NUOPC_AdvertiseFields(state, StandardNames, &
-    TransferOfferGeomObject, SharePolicyField, SharePolicyGeomObject, rc)
+    TransferOfferGeomObject, SharePolicyField, SharePolicyGeomObject, vm, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)         :: state
     character(*),     intent(in)            :: StandardNames(:)
     character(*),     intent(in),  optional :: TransferOfferGeomObject
     character(*),     intent(in),  optional :: SharePolicyField
     character(*),     intent(in),  optional :: SharePolicyGeomObject
+    type(ESMF_VM),    intent(in),  optional :: vm
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   \label{NUOPC_AdvertiseFields}
@@ -668,6 +683,10 @@ module NUOPC_Base
 !     controls the vocabulary of this attribute. Valid options are 
 !     "share", and "not share".
 !     If omitted, the default is equal to {\tt SharePolicyField}.
+!   \item[{[vm]}]
+!     If present, the Field objects used during advertising are created on the
+!     specified {\tt ESMF\_VM} object. The default is to create the Field
+!     objects on the VM of the current component context.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -682,8 +701,9 @@ module NUOPC_Base
 
     do i=1, size(StandardNames)
       call NUOPC_AdvertiseField(state, StandardName=StandardNames(i), &
-        TransferOfferGeomObject=TransferOfferGeomObject, SharePolicyField=SharePolicyField, &
-        SharePolicyGeomObject=SharePolicyGeomObject, rc=localrc)
+        TransferOfferGeomObject=TransferOfferGeomObject, &
+        SharePolicyField=SharePolicyField, &
+        SharePolicyGeomObject=SharePolicyGeomObject, vm=vm, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME, &

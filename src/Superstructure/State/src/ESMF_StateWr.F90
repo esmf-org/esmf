@@ -48,8 +48,12 @@ module ESMF_StateWrMod
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
-      public :: ESMF_StateWrite
-      public :: ESMF_StateWriteRestart
+
+      ! These methods are broken and create Arrays in a bad configuration.
+      ! We are taking them out so no one uses them. Eventually, new correct 
+      ! versions will be implemented.
+      !  public :: ESMF_StateWrite
+      !  public :: ESMF_StateWriteRestart
 
 !EOPI
 
@@ -123,7 +127,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateWrite"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateWrite -- Write items from a State to file
 !
 ! !INTERFACE:
@@ -162,7 +166,7 @@ contains
 !       not present.
 !     \end{description}
 !
-!EOP
+!EOPI
 !       TODO: use item flag ESMF_STATEITEM_ARRAY<BUNDLE>
 
         integer :: localrc

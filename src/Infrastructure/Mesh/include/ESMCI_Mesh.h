@@ -148,8 +148,8 @@ ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<i
  ESMC_CoordSys_Flag coordsys;
 
  // Temp XGrid info
- int side; // 1=A, 2=B, 3= middle
- int ind; // which number grid on the side
+ int side; // 1=A, 2=B, 3= middle  -1=unused
+ int ind; // which number grid on the side (-1 unused)
 
  // Original comm where this mesh was commited               
  MPI_Comm orig_comm;

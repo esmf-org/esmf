@@ -1518,8 +1518,16 @@ function ESMF_XGridCreate(keywordEnforcer, &
     ! store the middle mesh if needed
     ! and clean up temporary memory used
     if(xgtype%storeOverlay) then
+
+      ! Set in XGrid structure
       xgtype%mesh = mesh
 
+      ! If keeping, turn off side information
+      call c_esmc_meshsetxgridinfo(xgtype%mesh, -1, -1, localrc)
+      if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return         
+      
      !! Debug output of xgrid mesh
 #ifdef BOB_XGRID_DEBUG
       call ESMF_MeshWrite(mesh, "xgrid_mid_mesh")
@@ -1532,51 +1540,74 @@ function ESMF_XGridCreate(keywordEnforcer, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
+    ! Clean up Meshes for side A
     do i = 1, ngrid_a
-      if(present(sideAMaskValues)) then
-        call ESMF_MeshTurnOffCellMask(meshAt(i), rc=localrc);
-        if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
-      if(xggt_a(i) == ESMF_XGRIDGEOMTYPE_GRID) then
-        call ESMF_MeshDestroy(meshAt(i), rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
+       ! If it originally came from a Grid, then just destroy
+       if(xggt_a(i) == ESMF_XGRIDGEOMTYPE_GRID) then
+          call ESMF_MeshDestroy(meshAt(i), rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+       else ! ...otherwise turn things off
+          ! Turn off masking
+          if(present(sideAMaskValues)) then
+             call ESMF_MeshTurnOffCellMask(meshAt(i), rc=localrc);
+             if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+
+          ! Turn off side information
+          call c_esmc_meshsetxgridinfo(meshAt(i), -1, -1, localrc)
+          if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return         
+       endif
     enddo
 
+    ! Clean up Meshes for side B
     do i = 1, ngrid_b
-      if(present(sideBMaskValues)) then
-        call ESMF_MeshTurnOffCellMask(meshBt(i), rc=localrc);
-        if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
-      if(xggt_b(i) == ESMF_XGRIDGEOMTYPE_GRID) then
-        call ESMF_MeshDestroy(meshBt(i), rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
+       ! If it originally came from a Grid, then just destroy
+       if(xggt_b(i) == ESMF_XGRIDGEOMTYPE_GRID) then
+          call ESMF_MeshDestroy(meshBt(i), rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+          
+       else ! ...otherwise turn things off
+          
+          ! Turn off masking
+          if(present(sideBMaskValues)) then
+             call ESMF_MeshTurnOffCellMask(meshBt(i), rc=localrc);
+             if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+          
+          ! Turn off side information
+          call c_esmc_meshsetxgridinfo(meshBt(i), -1, -1, localrc)
+          if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return         
+          
+       endif
     enddo
-
+  
     deallocate(meshAt, meshBt)
     deallocate(xggt_a, xggt_b)
 
-    ! Finalize XGrid Creation
-    xgtype%online = 1
-    xgtype%status = ESMF_STATUS_READY
-    ESMF_XGridCreate%xgtypep => xgtype 
-    ESMF_INIT_SET_CREATED(ESMF_XGridCreate)
+  ! Finalize XGrid Creation
+  xgtype%online = 1
+  xgtype%status = ESMF_STATUS_READY
+  ESMF_XGridCreate%xgtypep => xgtype 
+  ESMF_INIT_SET_CREATED(ESMF_XGridCreate)
 
-    !call ESMF_XGridValidate(ESMF_XGridCreate, rc=localrc)
-    !if (ESMF_LogFoundError(localrc, &
-    !    ESMF_ERR_PASSTHRU, &
-    !    ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if(present(rc)) rc = ESMF_SUCCESS
+  !call ESMF_XGridValidate(ESMF_XGridCreate, rc=localrc)
+  !if (ESMF_LogFoundError(localrc, &
+  !    ESMF_ERR_PASSTHRU, &
+  !    ESMF_CONTEXT, rcToReturn=rc)) return
+  
+  if(present(rc)) rc = ESMF_SUCCESS
 
 end function ESMF_XGridCreate
 

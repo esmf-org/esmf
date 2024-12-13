@@ -9,8 +9,8 @@ Requirements
 The following packages are *required* to work with ESMPy:
 
 * `ESMF installation <http://earthsystemmodeling.org/docs/release/latest/ESMF_usrdoc/>`_
-* `python <http://python.org/>`_, minimum version 3.7
-* `numpy <http://www.numpy.org/>`_
+* `python <http://python.org/>`_, minimum version 3.8
+* `numpy <http://www.numpy.org/>`_, minimum version 1.19
 
 The following packages are *optional*:
 
