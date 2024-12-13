@@ -734,7 +734,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end if
     have_dynMask = present(dynamicMask) .or. present(preDefinedDynamicMask)
     if (present(dynamicMask)) local_dynamicMask = dynamicMask
-    if(present(preDefinedDynamicMask)) local_dynamicMask = preDefinedDynamicMask%set()
+    if(present(preDefinedDynamicMask)) local_dynamicMask = preDefinedDynamicMask%create_DynamicMask()
 
     write(*,*)"bmaa ",__FILE__,__LINE__
     ! Check init status of arguments, deal with optional Array args

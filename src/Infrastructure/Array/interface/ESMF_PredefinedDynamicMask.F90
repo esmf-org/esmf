@@ -28,7 +28,7 @@ module ESMF_PredefinedDynamicMaskMod
     real(ESMF_KIND_R4) :: dstMaskValue
     type(ESMF_PredefinedDynamicMask_Flag) :: maskType
     contains 
-       procedure :: set
+       procedure :: create_DynamicMask
   end type
 
 
@@ -51,12 +51,22 @@ module ESMF_PredefinedDynamicMaskMod
     if (present(rc)) rc =ESMF_SUCCESS
   end subroutine ESMF_PredefinedDynamicMaskSet 
 
-  function set(this) result(dynamicMask)
+  function create_DynamicMask(this, rc) result(dynamicMask)
      type(ESMF_DynamicMask) :: dynamicMask
      class(ESMF_PredefinedDynamicMask), intent(in) :: this
+     integer, optional, intent(out) :: rc
+     integer :: localrc
 
-     call ESMF_DynamicMaskSetR4R8R4V(dynamicMask, simpleDynMaskProcV,dynamicSrcMaskValue=this%srcMaskValue)
-  end function
+     select case(this%maskType)
+     case(ESMF_PREDEFINEDDYNAMICMASK_MASKDEST)
+        call ESMF_DynamicMaskSetR4R8R4V(dynamicMask, simpleDynMaskProcV,dynamicSrcMaskValue=this%srcMaskValue)
+     case default 
+        rc = ESMF_RC_NOT_IMPL
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+     end select
+  end function create_DynamicMask
 
   subroutine simpleDynMaskProcV(dynamicMaskList, dynamicSrcMaskValue, dynamicDstMaskValue, rc)
     type(ESMF_DynamicMaskElementR4R8R4V), pointer              :: dynamicMaskList(:)

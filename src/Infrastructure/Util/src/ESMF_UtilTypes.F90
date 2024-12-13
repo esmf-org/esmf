@@ -882,7 +882,9 @@
 
       type(ESMF_PredefinedDynamicMask_Flag), parameter :: &
            ESMF_PREDEFINEDDYNAMICMASK_MASKDEST  =  ESMF_PredefinedDynamicMask_Flag(0), &
-           ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE  =  ESMF_PredefinedDynamicMask_Flag(1)
+           ESMF_PREDEFINEDDYNAMICMASK_MASKSRC   =  ESMF_PredefinedDynamicMask_Flag(1), &
+           ESMF_PREDEFINEDDYNAMICMASK_MASKSRCDEST  =  ESMF_PredefinedDynamicMask_Flag(2), &
+           ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE  =  ESMF_PredefinedDynamicMask_Flag(3)
 
 
 !------------------------------------------------------------------------------
