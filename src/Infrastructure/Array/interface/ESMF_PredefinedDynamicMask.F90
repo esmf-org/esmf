@@ -8,7 +8,7 @@
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !
-#define ESMF_FILENAME "ESMF_UtilCubedSphere.F90"
+#include "ESMF.h"
 
 module ESMF_PredefinedDynamicMaskMod
 
@@ -16,6 +16,7 @@ module ESMF_PredefinedDynamicMaskMod
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_DynamicMaskMod
   use ESMF_InitMacrosMod    ! ESMF initializer macros
+  use ESMF_LogErrMod
   implicit none
   private
 
@@ -57,15 +58,14 @@ module ESMF_PredefinedDynamicMaskMod
      integer, optional, intent(out) :: rc
      integer :: localrc
 
-     select case(this%maskType)
-     case(ESMF_PREDEFINEDDYNAMICMASK_MASKDEST)
+     if (this%maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKDEST) then
         call ESMF_DynamicMaskSetR4R8R4V(dynamicMask, simpleDynMaskProcV,dynamicSrcMaskValue=this%srcMaskValue)
-     case default 
-        rc = ESMF_RC_NOT_IMPL
-        if (ESMF_LogFoundError(localrc, &
+     else
+        localrc = ESMF_RC_NOT_IMPL
+        if (ESMF_LogFoundError(rcTocheck=localrc, &
            ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
-     end select
+           line=__LINE__, file=__FILE__, rcToReturn=rc)) return
+     end if
   end function create_DynamicMask
 
   subroutine simpleDynMaskProcV(dynamicMaskList, dynamicSrcMaskValue, dynamicDstMaskValue, rc)

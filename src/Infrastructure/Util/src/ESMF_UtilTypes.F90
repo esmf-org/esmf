@@ -1337,6 +1337,7 @@ interface operator (==)
   module procedure ESMF_NormTypeEqual
   module procedure ESMF_RWGCheckMethodEqual
   module procedure ESMF_TermOrderEq
+  module procedure ESMF_PredefinedDynamicMask_FlagEq
 end interface
 
 interface operator (/=)
@@ -2417,7 +2418,38 @@ end function
 
       end function ESMF_TermOrderEq
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TermOrderEq"
+!BOPI
+! !IROUTINE: ESMF_TermOrderEq - Equality of TermOrder Flag
+!
+! !INTERFACE:
+      impure elemental function ESMF_PredefinedDynamicMask_FlagEq(flag1, flag2)
 
+! !RETURN VALUE:
+      logical :: ESMF_PredefinedDynamicMask_FlagEq
+
+! !ARGUMENTS:
+
+      type (ESMF_PredefinedDynamicMask_Flag), intent(in) :: &
+         flag1,      &
+         flag2 
+
+! !DESCRIPTION:
+!     This routine compares two ESMF PredefinedDynamicMask flags to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[flag1, flag2]
+!          PredefinedDynamicMask flags
+!     \end{description}
+!
+!EOPI
+
+      ESMF_PredefinedDynamicMask_FlagEq = (flag1%PredefinedDynamicMask == flag2%PredefinedDynamicMask)
+
+      end function ESMF_PredefinedDynamicMask_FlagEq
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
