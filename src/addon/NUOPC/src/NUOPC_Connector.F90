@@ -85,6 +85,10 @@ module NUOPC_Connector
     type(ESMF_VM)                       :: srcVM
     type(ESMF_VM)                       :: dstVM
     type(ESMF_Clock)                    :: driverClock
+    logical                             :: epochEnable
+    logical                             :: epochEnterKeepAlloc
+    logical                             :: epochExitKeepAlloc
+    integer                             :: epochThrottle
   end type
 
   type type_InternalState
@@ -5105,7 +5109,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       character(ESMF_MAXSTR), pointer :: cplList(:)
       integer                         :: j
     end type
-    
+
     ! local variables
     character(*), parameter         :: rName="InitializeIPDv05p6b"
     character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
@@ -5130,7 +5134,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     type(type_InternalState)        :: is
     logical                         :: foundFlag
     integer                         :: localrc
-    logical                         :: existflag
+    logical                         :: existflag, isSet
     character(ESMF_MAXSTR)          :: connectionString
     character(ESMF_MAXSTR)          :: name, iString
     character(len=160)              :: msgString
@@ -5139,6 +5143,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     integer                         :: sIndex
     character(ESMF_MAXSTR)          :: iShareStatus, eShareStatus
     logical                         :: sharedFlag
+    character(ESMF_MAXSTR)          :: valueString
     integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
@@ -5547,12 +5552,37 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
           ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      endif    
+      endif
     endif
-    
+
     ! determine whether there is src/dst overlap on any PET
     call DetermineSrcDstOverlap(is%wrap%srcFieldList, is%wrap%dstFieldList, &
       is%wrap%srcDstOverlap, is%wrap%srcFlag, is%wrap%dstFlag, verbosity, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! access and set Epoch flags
+    is%wrap%epochEnable = .true. ! default
+    call NUOPC_CompAttributeGet(connector, name="EpochEnable", &
+      value=valueString, isSet=isSet, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (isSet) is%wrap%epochEnable = trim(valueString)=="true"
+    is%wrap%epochEnterKeepAlloc = .true. ! default
+    call NUOPC_CompAttributeGet(connector, name="EpochEnterKeepAlloc", &
+      value=valueString, isSet=isSet, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (isSet) is%wrap%epochEnterKeepAlloc = trim(valueString)=="true"
+    is%wrap%epochExitKeepAlloc = .true. ! default
+    call NUOPC_CompAttributeGet(connector, name="EpochExitKeepAlloc", &
+      value=valueString, isSet=isSet, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (isSet) is%wrap%epochExitKeepAlloc = trim(valueString)=="true"
+    is%wrap%epochThrottle = 10 ! default
+    call NUOPC_CompAttributeGet(connector, name="EpochThrottle", &
+      value=is%wrap%epochThrottle, isSet=isSet, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -6295,14 +6325,14 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     type(type_InternalState)  :: is
     type(ESMF_VM)             :: vm
     integer                   :: localrc
-    logical                   :: existflag, isSet
+    logical                   :: existflag
     logical                   :: routeHandleIsCreated
     character(ESMF_MAXSTR)    :: compName, pLabel
     character(len=160)        :: msgString
     integer                   :: phase
     integer                   :: verbosity, diagnostic, profiling
     character(ESMF_MAXSTR)    :: name
-    integer                   :: i, epochThrottle
+    integer                   :: i
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
 
@@ -6400,9 +6430,10 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
 #endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+
     ! conditional profiling for src/dst PETs
-    if (btest(profiling,3) .and. .not.is%wrap%srcDstOverlap) then
+    if (btest(profiling,3) .and. &
+      (is%wrap%epochEnable.and. .not.is%wrap%srcDstOverlap)) then
       if (is%wrap%srcFlag) then
         call ESMF_TraceRegionEnter(rName//"-srcPETs", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -6415,13 +6446,13 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
           return  ! bail out
       endif
     endif
-    
+
     ! store the incoming clock as driverClock in internal state
     is%wrap%driverClock = clock
 
     !TODO: here may be the place to ensure incoming States are consistent
     !TODO: with the Fields held in the FieldBundle inside the internal State?
-      
+
     ! SPECIALIZE by calling into attached method to execute routehandle
     if (btest(profiling,4)) then
       call ESMF_TraceRegionEnter("label_ExecuteRouteHandle")
@@ -6443,23 +6474,11 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       endif
       ! if not specialized -> use default method to execute the exchange
       ! Conditionally enter VMEpoch
-      if (.not. is%wrap%srcDstOverlap) then
-        call NUOPC_CompAttributeGet(connector, name="EpochThrottle", &
-          value=epochThrottle, isSet=isSet, rc=rc)
+      if (is%wrap%epochEnable.and. .not.is%wrap%srcDstOverlap) then
+        call ESMF_VMEpochEnter(epoch=ESMF_VMEPOCH_BUFFER, &
+          throttle=is%wrap%epochThrottle, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        if (isSet) then
-          ! using custom throttle
-          call ESMF_VMEpochEnter(epoch=ESMF_VMEPOCH_BUFFER, &
-            throttle=epochThrottle, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        else
-          ! using default throttle
-          call ESMF_VMEpochEnter(epoch=ESMF_VMEPOCH_BUFFER, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        endif
       endif
       ! call the SMM consistent with CplSets present or not
       if (is%wrap%cplSetCount > 1) then
@@ -6479,7 +6498,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
         enddo
-      else
+      else;
         routeHandleIsCreated = ESMF_RouteHandleIsCreated(is%wrap%rh, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -6497,7 +6516,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       ! Conditionally exit VMEpoch
-      if (.not. is%wrap%srcDstOverlap) then
+      if (is%wrap%epochEnable.and. .not.is%wrap%srcDstOverlap) then
         call ESMF_VMEpochExit(rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -6563,7 +6582,8 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! conditional profiling for src/dst PETs
-    if (btest(profiling,3) .and. .not.is%wrap%srcDstOverlap) then
+    if (btest(profiling,3) .and. &
+      (is%wrap%epochEnable.and. .not.is%wrap%srcDstOverlap)) then
       if (is%wrap%srcFlag) then
         call ESMF_TraceRegionExit(rName//"-srcPETs", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

@@ -2219,13 +2219,16 @@ module NUOPC_Comp
       line=__LINE__, &
       file=FILENAME, &
       rcToReturn=rc)) return  ! bail out
-    
+
     ! The NUOPC/Connector Attributes
-    allocate(attrList(4))
+    allocate(attrList(7))
     attrList(1) = "CplList"
     attrList(2) = "CplSetList"
     attrList(3) = "ConnectionOptions"
-    attrList(4) = "EpochThrottle"
+    attrList(4) = "EpochEnable"
+    attrList(5) = "EpochEnterKeepAlloc"
+    attrList(6) = "EpochExitKeepAlloc"
+    attrList(7) = "EpochThrottle"
     call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
       attrList=attrList, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2255,6 +2258,8 @@ module NUOPC_Comp
     call NUOPC_CompAttributeSet(comp, &
       name="Diagnostic", value="0", &
       rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
   end subroutine
   !-----------------------------------------------------------------------------
