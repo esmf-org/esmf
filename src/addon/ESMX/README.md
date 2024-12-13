@@ -288,6 +288,7 @@ This section affects the driver level.
 | --------------- | -------------------------------------------------------------------- | --------------- |
 | `componentList` | list of component labels, each matching a top level key in this file | *Empty*         |
 | `runSequence`   | block literal string defining the run sequence                       | *NUOPC default* |
+| `logSystem`     | enable/disable ESMF_VMLogSystem() during Driver SetModelServices(): `true` or `false`| `false`         |
 | `attributes`    | map of key value pairs, each defining a driver attribute             | *None*          |
 
 #### Component Label Options
