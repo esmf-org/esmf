@@ -1,3 +1,4 @@
+from functools import reduce
 # This file contains old routines to dump internal ESMF info from ESMPy Grid and Field objects
 # This code is likely obsolete, but was useful in the original development process ..
 #    so it is being kept for a rainy day situation
@@ -6,11 +7,11 @@ def dump_gridinfo(self, stagger):
 
     [x,y,z] = [0,1,2]
 
-    print "bounds - low, high"
-    print self.lower_bounds[stagger], \
-                self.upper_bounds[stagger]
-    print "shape - [x, y, z] or [lat, lon]"
-    print self.coords[stagger][0].shape
+    print("bounds - low, high")
+    print(self.lower_bounds[stagger], \
+                self.upper_bounds[stagger])
+    print("shape - [x, y, z] or [lat, lon]")
+    print(self.coords[stagger][0].shape)
 
     if self.rank == 2:
         return [self.coords[stagger][x], self.coords[stagger][y]]
@@ -20,11 +21,11 @@ def dump_gridinfo(self, stagger):
 def dump_gridinfo_lower(self, stagger):
     [x, y, z] = [0, 1, 2]
 
-    print "bounds - low, high"
-    print self.lower_bounds[stagger], \
-                self.upper_bounds[stagger]
-    print "shape - [x, y, z] or [lat, lon]"
-    print self.coords[stagger][0].shape
+    print("bounds - low, high")
+    print(self.lower_bounds[stagger], \
+                self.upper_bounds[stagger])
+    print("shape - [x, y, z] or [lat, lon]")
+    print(self.coords[stagger][0].shape)
 
     # retrieve buffers to esmf coordinate memory
     gridptrX = self.get_grid_coords_from_esmc(x, stagger)
@@ -67,10 +68,10 @@ def dump_gridinfo_ctypes(self, stagger, dim=2):
         np.dtype(constants._ESMF2PythonType[self.type]).itemsize*size)
     ycoords = np.frombuffer(ybuffer, constants._ESMF2PythonType[self.type])
 
-    print "DIAGNOSTICS:"
-    print "self.type = ", self.type
-    print "constants._ESMF2PythonType", constants._ESMF2PythonType[self.type]
-    print "constants._ESMF2PythonType.itemsize", constants._ESMF2PythonType[self.type].itemsize
+    print("DIAGNOSTICS:")
+    print("self.type = ", self.type)
+    print("constants._ESMF2PythonType", constants._ESMF2PythonType[self.type])
+    print("constants._ESMF2PythonType.itemsize", constants._ESMF2PythonType[self.type].itemsize)
 
 
     # find the size of the local coordinates at this stagger location
@@ -80,12 +81,12 @@ def dump_gridinfo_ctypes(self, stagger, dim=2):
     # these appear to both return bounds information only
     lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger)
 
-    print "Bounds:"
-    print "  ESMPy.Grid:    ", size
-    print "  ESMPy.ctypes1: ", lb, ub
+    print("Bounds:")
+    print("  ESMPy.Grid:    ", size)
+    print("  ESMPy.ctypes1: ", lb, ub)
 
 
-    print "Coordinates:"
+    print("Coordinates:")
     I = ub[x]-lb[x]
     J = ub[y]-lb[y]
     if dim == 3:
@@ -103,7 +104,7 @@ def dump_gridinfo_ctypes(self, stagger, dim=2):
                     (ycoords[ind] > -1e-10 and 1e-10 > ycoords[ind] and ycoords[ind] != 0) or \
                     ycoords[ind] > 90:
 
-                    print "[", i, ", ", j, "] = [", xcoords[ind], ", ", ycoords[ind], "]"
+                    print("[", i, ", ", j, "] = [", xcoords[ind], ", ", ycoords[ind], "]")
 
                 coordcount += 1
     elif dim == 3:
@@ -113,9 +114,9 @@ def dump_gridinfo_ctypes(self, stagger, dim=2):
             np.dtype(constants._ESMF2PythonType[self.type]).itemsize*size)
         zcoords = np.frombuffer(zbuffer, constants._ESMF2PythonType[self.type])
 
-        for i in xrange(I):
-            for j in xrange(J):
-                for k in xrange(K):
+        for i in range(I):
+            for j in range(J):
+                for k in range(K):
                     ind = i*I + j*J + k
                     if  (1e-10 > xcoords[ind] and xcoords[ind] != 0) or \
                         xcoords[ind] > 360 or \
@@ -123,10 +124,10 @@ def dump_gridinfo_ctypes(self, stagger, dim=2):
                         (ycoords[ind] > -1e-10 and 1e-10 > ycoords[ind] and ycoords[ind] != 0) or \
                         ycoords[ind] > 90:
 
-                        print "[", i, ", ", j, "] = [", xcoords[ind], ", ", ycoords[ind], "]"
+                        print("[", i, ", ", j, "] = [", xcoords[ind], ", ", ycoords[ind], "]")
                     coordcount += 1
 
-    print "Coordcount = ", coordcount
+    print("Coordcount = ", coordcount)
     '''
     # create a numpy array to point to the ESMF allocation
     # reshape the numpy array of coordinates using Fortran ordering in Grid
@@ -148,4 +149,4 @@ def _dump_field_coords_(self):
         np.dtype(constants._ESMF2PythonType[self.type]).itemsize*size)
     esmf_coords = np.frombuffer(buffer, constants._ESMF2PythonType[self.type])
 
-    print esmf_coords
+    print(esmf_coords)
