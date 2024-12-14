@@ -519,10 +519,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_StateItem_Flag), allocatable  :: itemTypeList(:)
       type(ESMF_State)            :: nestedState
       type(ESMF_Field)            :: field
-      type(ESMF_Field), allocatable :: fieldList(:)
       type(ESMF_FieldBundle)      :: fieldbundle
       type(ESMF_Array)            :: array
-      type(ESMF_Array), allocatable :: arrayList(:)
       type(ESMF_ArrayBundle)      :: arraybundle
       type(ESMF_RouteHandle)      :: routehandle
       type(ESMF_VM)               :: vmItem
@@ -558,11 +556,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             call ESMF_StateGet(nestedState, vm=vmItem, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
               rcToReturn=rc)) return
-            ! recursion into nested state
-            call StateReconcileIsNoopLoc(stateR=nestedState, &
-              isNoopLoc=isNoopLoc, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
           else if (itemtypeList(item) == ESMF_STATEITEM_FIELD) then
             call ESMF_StateGet(stateR, itemName=itemNameList(item), &
               field=field, rc=localrc)
@@ -576,34 +569,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               fieldbundle=fieldbundle, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
               rcToReturn=rc)) return
-            call ESMF_FieldBundleGet(fieldbundle, fieldCount=fieldCount, &
-              isPacked=isFlag, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-            if (.not.isFlag) then
-              ! not a packed fieldbundle -> check each field item
-              allocate(fieldList(fieldCount))
-              call ESMF_FieldBundleGet(fieldbundle, fieldList=fieldList, &
-                rc=localrc)
-              if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-              do i=1, fieldCount
-                call ESMF_FieldGet(fieldList(i), vm=vmItem, rc=localrc)
-                if (ESMF_LogFoundError(localrc, &
-                  ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return
-                call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
-                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-                  rcToReturn=rc)) return
-                isNoopLoc = ESMF_VMIdCompare(vmIdItem, vmId, keyOnly=.true., &
-                  rc=localrc)
-                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-                  rcToReturn=rc)) return
-                if (.not.isNoopLoc) exit  ! exit for .false.
-              enddo
-              deallocate(fieldList)
-            endif
             call ESMF_FieldBundleGet(fieldbundle, vm=vmItem, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
               rcToReturn=rc)) return
@@ -620,30 +585,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               arraybundle=arraybundle, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
               rcToReturn=rc)) return
-            call ESMF_ArrayBundleGet(arraybundle, arrayCount=arrayCount, &
-              rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-            allocate(arrayList(arrayCount))
-            call ESMF_ArrayBundleGet(arraybundle, arrayList=arrayList, &
-              rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-              rcToReturn=rc)) return
-            do i=1, arrayCount
-              call ESMF_ArrayGet(arrayList(i), vm=vmItem, rc=localrc)
-              if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-              call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
-              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-                rcToReturn=rc)) return
-              isNoopLoc = ESMF_VMIdCompare(vmIdItem, vmId, keyOnly=.true., &
-                rc=localrc)
-              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
-                rcToReturn=rc)) return
-              if (.not.isNoopLoc) exit  ! exit for .false.
-            enddo
-            deallocate(arrayList)
             call ESMF_ArrayBundleGet(arraybundle, vm=vmItem, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
               rcToReturn=rc)) return
@@ -667,7 +608,7 @@ call ESMF_LogWrite("processing "//trim(itemNameList(item)), ESMF_LOGMSG_DEBUG, r
 
           if (thisItem == ESMF_NULL_POINTER) isNoopLoc = .false.  ! found proxy
 
-          ! exit for .false. already from proxy, recursive state, or bundles
+          ! exit for .false. already from proxy
           if (.not.isNoopLoc) exit
 
           call ESMF_VMGetVMId(vmItem, vmId=vmIdItem, rc=localrc)
