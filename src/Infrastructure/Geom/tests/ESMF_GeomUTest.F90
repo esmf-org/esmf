@@ -75,6 +75,7 @@ program ESMF_GeomUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  ! Testing ESMF_GeomOperator(==)()    
   write(name, *) "Geom equality before assignment Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   shouldBeFalse = (geom1 == geom2)
@@ -89,6 +90,7 @@ program ESMF_GeomUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  ! Testing ESMF_GeomAssignment(=)() 
   write(name, *) "Geom equality with alias test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
@@ -113,6 +115,7 @@ program ESMF_GeomUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  ! Testing ESMF_GeomOperator(/=)()
   write(name, *) "Geom inequality with two different geoms"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
