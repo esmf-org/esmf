@@ -161,10 +161,10 @@
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
-      ! When asking for real-valued time variables, they are still normalized by days, but
-      ! they are NOT normalized by time units finer than days. Furthermore, all times
-      ! include the full, fractional time (so hours, minutes and seconds all give the same
-      ! time value, just in different units).
+      ! When asking for double precision time variables, they are still normalized by
+      ! days, but they are NOT normalized by time units finer than days. Furthermore, all
+      ! times include the full, fractional time (so hours, minutes and seconds all give
+      ! the same time value, just in different units).
       write(name, *) "Get Time Test - real-valued time variables with int-valued date variables"
       write(failMsg, *) " Did not return correct time values or ESMF_SUCCESS"
       call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h_r8=H_r8, m_r8=M_r8, s_r8=S_r8, rc=rc)
@@ -181,9 +181,9 @@
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
-      ! Time units include the full time even when asking for some time units in integer.
-      ! This contrasts with the behavior when asking for all things in integer, where the
-      ! finer time units are normalized by the coarser time units.
+      ! Double precision time units include the full time even when asking for some time
+      ! units in integer. This contrasts with the behavior when asking for all things in
+      ! integer, where the finer time units are normalized by the coarser time units.
       write(name, *) "Get Time Test - mix of coarser int-valued and finer real-valued time variables"
       write(failMsg, *) " Did not return correct time values or ESMF_SUCCESS"
       call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m_r8=M_r8, s_r8=S_r8, rc=rc)
@@ -198,11 +198,11 @@
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
-      ! When asking for coarser time units in reals, days are still used to normalize
-      ! finer-valued time units, but time variables (e.g., hours) in real are NOT used to
-      ! normalize finer-valued time units in integer. This contrasts with the behavior
-      ! when asking for all things in integer, where the finer time units are normalized
-      ! by the coarser time units.
+      ! When asking for coarser time units as double precision, days are still used to
+      ! normalize finer-valued time units, but time variables (e.g., hours) in double
+      ! precision are NOT used to normalize finer-valued time units in integer. This
+      ! contrasts with the behavior when asking for all things in integer, where the finer
+      ! time units are normalized by the coarser time units.
       write(name, *) "Get Time Test - mix of coarser real-valued and finer int-valued time variables"
       write(failMsg, *) " Did not return correct time values or ESMF_SUCCESS"
       call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h_r8=H_r8, m=M, s=S, rc=rc)
