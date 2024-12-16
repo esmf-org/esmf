@@ -1086,6 +1086,10 @@
 !       {\tt days = 1}, {\tt seconds = 0},
 !     whereas {\tt ESMF\_TimeIntervalGet(s = seconds)} would return
 !       {\tt seconds = 86400}.
+!     However, double precision time units are not considered in this normalization:
+!     Double precision time units are still bound by units of a day or larger, but double
+!     precision time units of an hour or smaller neither bind nor are bound by other time
+!     units of an hour or smaller (either integer or double precision).
 !
 !     For timeString, converts {\tt ESMF\_TimeInterval}'s value into
 !     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO} and
@@ -1313,6 +1317,10 @@
 !       {\tt days = 1}, {\tt seconds = 0},
 !     whereas {\tt ESMF\_TimeIntervalGet(s = seconds)} would return
 !       {\tt seconds = 86400}.
+!     However, double precision time units are not considered in this normalization:
+!     Double precision time units are still bound by units of a day or larger, but double
+!     precision time units of an hour or smaller neither bind nor are bound by other time
+!     units of an hour or smaller (either integer or double precision).
 !
 !     For timeString, converts {\tt ESMF\_TimeInterval}'s value into
 !     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO} and
@@ -1548,6 +1556,10 @@
 !       {\tt days = 1}, {\tt seconds = 0},
 !     whereas {\tt ESMF\_TimeIntervalGet(s = seconds)} would return
 !       {\tt seconds = 86400}.
+!     However, double precision time units are not considered in this normalization:
+!     Double precision time units are still bound by units of a day or larger, but double
+!     precision time units of an hour or smaller neither bind nor are bound by other time
+!     units of an hour or smaller (either integer or double precision).
 !
 !     For timeString, converts {\tt ESMF\_TimeInterval}'s value into
 !     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO} and
@@ -1785,6 +1797,10 @@
 !       {\tt days = 1}, {\tt seconds = 0},
 !     whereas {\tt ESMF\_TimeIntervalGet(s = seconds)} would return
 !       {\tt seconds = 86400}.
+!     However, double precision time units are not considered in this normalization:
+!     Double precision time units are still bound by units of a day or larger, but double
+!     precision time units of an hour or smaller neither bind nor are bound by other time
+!     units of an hour or smaller (either integer or double precision).
 !
 !     For timeString, converts {\tt ESMF\_TimeInterval}'s value into
 !     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO} and
