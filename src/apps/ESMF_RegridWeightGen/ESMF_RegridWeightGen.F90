@@ -1379,7 +1379,7 @@ contains
     print *, "                      [--no_log]"
     print *, "                      [--check]"
     print *, "                      [--checkFlag]"
-    print *, "                      [--help]"
+    print *, "                      [--help|-h]"
     print *, "                      [--version]"
     print *, "                      [-V]"
     print *, "where"
