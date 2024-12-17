@@ -75,6 +75,7 @@
       integer :: nargs
       character(ESMF_MAXPATHLEN) :: program_path
       integer :: argindex
+      logical :: matchFlag
 
       real(ESMF_KIND_R8) :: random_values(50) = (/  &
         0.997560, 0.566825, 0.965915, 0.747928, 0.367391,  &
@@ -1005,6 +1006,57 @@
 
 ! Internal string utilities (NOT part of the external ESMF API)
 !==============================================================
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilStringDiffMatch() - identical strings - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  matchFlag = ESMF_UtilStringDiffMatch( &
+    string1="A simple test string", string2="A simple test string", &
+    minusStringList=[""], plusStringList=[""], rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilStringDiffMatch() - identical strings - match Test"
+  write(failMsg, *) "Did not return correct match flag"
+  call ESMF_Test(matchFlag, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilStringDiffMatch() - different strings - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  matchFlag = ESMF_UtilStringDiffMatch( &
+    string1="A simple test string", string2="A xyzzyx test string", &
+    minusStringList=[""], plusStringList=[""], rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilStringDiffMatch() - different strings - match Test"
+  write(failMsg, *) "Did not return correct match flag"
+  call ESMF_Test(.not.matchFlag, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilStringDiffMatch() - different strings minus/plus - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  matchFlag = ESMF_UtilStringDiffMatch( &
+    string1="A simple test string", string2="A xyzzyx test string", &
+    minusStringList=["simple"], plusStringList=["xyzzyx"], rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilStringDiffMatch() - different strings minus/plus - match Test"
+  write(failMsg, *) "Did not return correct match flag"
+  call ESMF_Test(matchFlag, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
     !EX_UTest

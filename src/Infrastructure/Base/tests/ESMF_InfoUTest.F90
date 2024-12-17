@@ -341,6 +341,29 @@ program ESMF_InfoUTest
 
   !----------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "ESMF_InfoLog"
+  write(failMsg, *) "Did not return success."
+
+  rc = ESMF_FAILURE
+
+  info6 = ESMF_InfoCreate(rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_InfoSet(info6, "/i/am/nested", 111, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_InfoSet(info6, "top-level", 222, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_InfoLog(info6, prefix="info6: ", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  call ESMF_InfoDestroy(info6, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !----------------------------------------------------------------------------
+
+  !----------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "ESMF_InfoRemove Child From Parent"
   write(failMsg, *) "Child not erased from parent"
 

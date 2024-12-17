@@ -997,7 +997,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   !-----------------------------------------------------------------------------
 
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_UtilStringDiffMatch - Match differences between two strings
 ! !INTERFACE:
   function ESMF_UtilStringDiffMatch(string1, string2, minusStringList, &
@@ -1031,7 +1031,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------
     ! local variables
     integer                   :: localrc
