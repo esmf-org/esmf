@@ -1004,6 +1004,9 @@
   call ESMF_Test(abs (valueDouble - 789.0d0) < 0.000001d0, name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
+! Internal string utilities (NOT part of the external ESMF API)
+!==============================================================
+
   !------------------------------------------------------------------------
   !EX_UTest
   write(name, *) "ESMF_UtilStringDiffMatch() - identical strings - Test"
@@ -1054,9 +1057,6 @@
   write(failMsg, *) "Did not return correct match flag"
   call ESMF_Test(matchFlag, name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
-
-! Internal string utilities (NOT part of the external ESMF API)
-!==============================================================
 
   !------------------------------------------------------------------------
     !EX_UTest
