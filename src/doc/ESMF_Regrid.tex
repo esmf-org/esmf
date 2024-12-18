@@ -255,7 +255,7 @@ ESMF_Regrid
         [--dst_regional]
         [--check]
         [--no_log]
-	[--help]
+        [--help|-h]
         [--version]
         [-V]
 where
@@ -280,7 +280,7 @@ where
                         is srcdatafile.tilename.nc, where tilename is the tile 
                         name defined in the MOSAIC file.
 
-  --srcdatafile       - If the destination grid is a GRIDSPEC MOSAIC grid, the data 
+  --dstdatafile       - If the destination grid is a GRIDSPEC MOSAIC grid, the data 
                         is stored in separate files, one per tile. dstdatafile
                         is the prefix of the destination data file.  The filename
                         is dstdatafile.tilename.nc, where tilename is the tile 
@@ -380,7 +380,7 @@ where
 
      --no_log         - Turn off the ESMF error log.
 
-     --help           - Print the usage message and exit.
+     --help or -h     - Print the usage message and exit.
 
      --version        - Print ESMF version and license information and exit.
 
