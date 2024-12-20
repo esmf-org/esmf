@@ -34,7 +34,7 @@ Pre-built binaries for ESMF and ESMPy are available through a number of channels
    ```
    docker run -it --rm esmf/esmf-build-release:latest
    ```
-   Replace `latest` in the above command with a valid version, like `8.8.0`, in order to access a specific ESMF version.
+   Replace `latest` in the above command with a valid version, like `8.9.0`, in order to access a specific ESMF version.
    
  * [Anaconda Conda-Forge](https://anaconda.org/conda-forge/): Under [conda-forge/esmpy](https://anaconda.org/conda-forge/esmpy). To install locally (_note Windows is not supported_), run:
    ```
