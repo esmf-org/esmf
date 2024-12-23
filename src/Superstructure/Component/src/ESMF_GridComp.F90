@@ -1396,7 +1396,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
     integer :: timeoutArg
-
+    character(ESMF_MAXSTR) :: name,logmsg
+    logical :: vmispresent
+    type(ESMF_VM) :: compVM
+    integer :: compPetCount
+    
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
@@ -1415,6 +1419,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     timeoutArg = ESMF_DEFAULT_TIMEOUT ! default 1h
     if (present(timeout)) timeoutArg = timeout
 
+    ! BOB DEBUG
+    call ESMF_GridCompGet(gridcomp, name=name, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_GridCompGet(gridcomp, vmispresent=vmispresent, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    compPetCount=-1
+    if (vmispresent) then
+       call ESMF_GridCompGet(gridcomp, vm=compVM, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_VMGet(compvm, petCount=compPetCount, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    write(logmsg,*) "BOB: Before init for ",trim(name)," comp VM petCount=",compPetCount
+    
+    call ESMF_LogWrite(logmsg,ESMF_LOGMSG_DEBUG)
+
+    
     ! call Comp method
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_METHOD_INITIALIZEIC, &
       importState=importState, exportState=exportState, clock=clock, &
@@ -1432,6 +1465,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! BOB DEBUG
+    call ESMF_GridCompGet(gridcomp, name=name, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_GridCompGet(gridcomp, vmispresent=vmispresent, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    compPetCount=-1
+    if (vmispresent) then
+       call ESMF_GridCompGet(gridcomp, vm=compVM, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_VMGet(compvm, petCount=compPetCount, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    write(logmsg,*) "BOB: After init for ",trim(name)," comp VM petCount=",compPetCount
+    
+    call ESMF_LogWrite(logmsg,ESMF_LOGMSG_DEBUG)
+
+    
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_GridCompInitialize
@@ -1465,13 +1527,46 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-
+    character(ESMF_MAXSTR) :: name,logmsg
+    logical :: vmispresent
+    type(ESMF_VM) :: compVM
+    integer :: compPetCount
+    
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
+    ! BOB DEBUG
+    call ESMF_GridCompGet(gridcomp, name=name, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_GridCompGet(gridcomp, vmispresent=vmispresent, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    compPetCount=-1
+    if (vmispresent) then
+       call ESMF_GridCompGet(gridcomp, vm=compVM, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_VMGet(compvm, petCount=compPetCount, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    write(logmsg,*) "BOB: Before init for ",trim(name)," comp VM petCount=",compPetCount
+    
+    call ESMF_LogWrite(logmsg,ESMF_LOGMSG_DEBUG)
+
+    
     ! call Comp method
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_METHOD_INITIALIZE, &
       importState=importState, exportState=exportState, clock=clock, &
@@ -1479,6 +1574,36 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! BOB DEBUG
+    call ESMF_GridCompGet(gridcomp, name=name, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_GridCompGet(gridcomp, vmispresent=vmispresent, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    compPetCount=-1
+    if (vmispresent) then
+       call ESMF_GridCompGet(gridcomp, vm=compVM, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_VMGet(compvm, petCount=compPetCount, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    write(logmsg,*) "BOB: After init for ",trim(name)," comp VM petCount=",compPetCount
+    
+    call ESMF_LogWrite(logmsg,ESMF_LOGMSG_DEBUG)
+    
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1880,7 +2005,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
     integer :: timeoutArg
-
+    character(ESMF_MAXSTR) :: name,logmsg
+    logical :: vmispresent
+    type(ESMF_VM) :: compVM
+    integer :: compPetCount
+    
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
@@ -1899,6 +2028,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     timeoutArg = ESMF_DEFAULT_TIMEOUT ! default 1h
     if (present(timeout)) timeoutArg = timeout
 
+    ! BOB DEBUG
+    call ESMF_GridCompGet(gridcomp, name=name, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_GridCompGet(gridcomp, vmispresent=vmispresent, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    compPetCount=-1
+    if (vmispresent) then
+       call ESMF_GridCompGet(gridcomp, vm=compVM, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_VMGet(compvm, petCount=compPetCount, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    write(logmsg,*) "BOB: Before run for ",trim(name)," comp VM petCount=",compPetCount
+    
+    call ESMF_LogWrite(logmsg,ESMF_LOGMSG_DEBUG)
+
+    
     ! call Comp method
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_METHOD_RUNIC, &
       importState=importState, exportState=exportState, clock=clock, &
@@ -1916,6 +2074,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+
+    ! BOB DEBUG
+    call ESMF_GridCompGet(gridcomp, vmispresent=vmispresent, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    compPetCount=-1
+    if (vmispresent) then
+       call ESMF_GridCompGet(gridcomp, vm=compVM, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_VMGet(compvm, petCount=compPetCount, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    write(logmsg,*) "BOB: After run for ",trim(name)," comp VM petCount=",compPetCount    
+    call ESMF_LogWrite(logmsg,ESMF_LOGMSG_DEBUG)
+    
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_GridCompRun
