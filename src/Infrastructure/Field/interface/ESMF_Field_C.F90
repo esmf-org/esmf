@@ -1,7 +1,7 @@
 !  $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1183,7 +1183,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     use ESMF_FieldCreateMod
     use ESMF_FieldGetMod
     use ESMF_IOScripMod
-    use ESMF_GeomBaseMod
+    use ESMF_GeomMod
     use ESMF_GridMod
     use ESMF_MeshMod
     use ESMF_LocStreamMod
@@ -1378,7 +1378,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
       
       ! determine which stagger locations are available
       dstslc = 0
-      if (srcgt == ESMF_GEOMTYPE_GRID) then
+      if (dstgt == ESMF_GEOMTYPE_GRID) then
         call ESMF_FieldGet(dstField, grid=dstgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1396,7 +1396,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (ecip .eqv. .true.) dstslc = 2
-      else if (srcgt == ESMF_GEOMTYPE_MESH) then
+      else if (dstgt == ESMF_GEOMTYPE_MESH) then
         call ESMF_FieldGet(dstField, mesh=dstmesh, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1408,7 +1408,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
 
         dstslc = 1
         if (ecip .eqv. .true.) dstslc = 2
-      else if (srcgt == ESMF_GEOMTYPE_XGRID) then
+      else if (dstgt == ESMF_GEOMTYPE_XGRID) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_IMPL, &
                             msg="- xgrid cannot retrieve areas", &
                             ESMF_CONTEXT, rcToReturn=rc)

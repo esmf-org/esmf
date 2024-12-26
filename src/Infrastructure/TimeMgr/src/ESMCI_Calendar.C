@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -900,7 +900,7 @@ int Calendar::count=0;
         strncpy(tempName, this->name, nameLen-1);
         tempName[nameLen] = '\0';  // null terminate
 
-        char logMsg[ESMF_MAXSTR];
+        char logMsg[2*ESMF_MAXSTR];
         sprintf(logMsg, "For calendar name %s, "
                 "length >= given character array; truncated.", this->name);
         ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);

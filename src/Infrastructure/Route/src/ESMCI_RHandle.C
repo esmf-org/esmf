@@ -1,15 +1,13 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
-//==============================================================================
-#define ESMC_FILENAME "ESMCI_RHandle.C"
 //==============================================================================
 #define RH_CREATE_MEMLOG_off
 //==============================================================================
@@ -45,6 +43,11 @@
 #include "ESMCI_LogErr.h"                  // for LogErr
 
 using namespace std;
+
+//==============================================================================
+#undef  ESMC_FILENAME
+#define ESMC_FILENAME "ESMCI_RHandle.C"
+//==============================================================================
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string

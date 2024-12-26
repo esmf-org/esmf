@@ -117,6 +117,8 @@ src/system_tests/ESMF_ArrayRedistMPMD/user_model2.mod
 src/system_tests/ESMF_ArrayRedistMPMD/user_model2.o
 src/system_tests/ESMF_ArrayRedistSharedObj/user_coupler.so
 src/system_tests/ESMF_ArrayRedistSharedObj/user_model1.so
+src/system_tests/ESMF_ArrayRedistSharedObj/user_coupler.dylib
+src/system_tests/ESMF_ArrayRedistSharedObj/user_model1.dylib
 
 src/Infrastructure/Trace/preload/preload.o
 src/Infrastructure/Trace/preload/preload_io.o

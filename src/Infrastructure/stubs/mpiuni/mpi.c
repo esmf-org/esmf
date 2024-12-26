@@ -4,6 +4,8 @@
       This provides a few of the MPI-uni functions that cannot be implemented
     with C macros
 */
+#include <stddef.h>
+
 #if !defined (ESMF_OS_MinGW)
 #include <sys/time.h>
 #else
@@ -182,10 +184,9 @@ int Petsc_MPI_Finalize(void)
 double ESMC_MPI_Wtime(void)
 {
   struct timeval tv;
-  struct timezone tz;
   double seconds;
- 
-  gettimeofday(&tv, &tz);
+
+  gettimeofday(&tv, NULL);
   seconds = tv.tv_sec + tv.tv_usec * 0.000001;
   return seconds;
 }

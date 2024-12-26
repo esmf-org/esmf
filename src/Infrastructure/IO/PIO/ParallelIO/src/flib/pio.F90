@@ -22,7 +22,7 @@ module pio
        pio_freedecomp, pio_syncfile, &
        pio_finalize, pio_set_hint, pio_getnumiotasks, pio_file_is_open, &
        PIO_deletefile, PIO_get_numiotasks, PIO_iotype_available, &
-       pio_set_rearr_opts
+       pio_set_rearr_opts, pio_initdecomp_readonly
 
 #ifdef NETCDF_INTEGRATION
   use ncint_mod, only: nf_def_iosystem, nf_free_iosystem, &

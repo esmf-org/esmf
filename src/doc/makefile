@@ -30,7 +30,7 @@ TEXINPUTS_VALUE = ".:$(ESMF_DIR)/src/doc:$(ESMF_BUILD_DOCDIR):"
 # all of the dependent files, but even a partial listing  will be helpful.
 
 REFDOC_DEP_FILES = ESMF_options.tex
-USRDOC_DEP_FILES = ESMF_acknowledge.tex ESMF_whatisesmf.tex ESMF_usrintro.tex ESMF_usrsupport.tex ESMF_quickstart.tex ESMF_techoverview.tex ESMF_archoverview.tex ESMF_adoption.tex ESMF_use.tex ESMF_debug.tex ESMF_clts.tex ESMF_install.tex ESMF_builddetail.tex ESMF_testing.tex ESMF_examples.tex ESMF_esmfmkfiletesting.tex $(ESMF_DIR)/build/doc/user_arch.tex
+USRDOC_DEP_FILES = ESMF_acknowledge.tex ESMF_whatisesmf.tex ESMF_usrintro.tex ESMF_usrsupport.tex ESMF_quickstart.tex ESMF_techoverview.tex ESMF_archoverview.tex ESMF_adoption.tex ESMF_use.tex ESMF_debug.tex ESMF_clts.tex ESMF_install.tex $(ESMF_DIR)/build/doc/ESMF_builddetail.tex ESMF_testing.tex ESMF_examples.tex ESMF_esmfmkfiletesting.tex $(ESMF_DIR)/build/doc/user_make.tex $(ESMF_DIR)/build/doc/user_arch.tex
 
 include $(ESMF_DIR)/makefile
 
@@ -50,13 +50,13 @@ CLOBBERDIRS =
 #-------------------------------------------------------------------------------
 dvi:  tex $(DVIFILES)
 
-ESMF_usrdoc.dvi: ESMF_usrdoc.ctex $(USRDOC_DEP_FILES)
+ESMF_usrdoc.dvi: ESMF_usrdoc.ctex $(USRDOC_DEP_FILES) verstitle_alldoc.tex
 	${DO_LATEX} ESMF usr
 
-ESMF_refdoc.dvi: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
+ESMF_refdoc.dvi: ESMF_refdoc.ctex $(REFDOC_DEP_FILES) verstitle_alldoc.tex
 	${DO_LATEX} ESMF ref
 
-ESMC_crefdoc.dvi: ESMC_crefdoc.ctex $(REFDOC_DEP_FILES)
+ESMC_crefdoc.dvi: ESMC_crefdoc.ctex $(REFDOC_DEP_FILES) verstitle_alldoc.tex
 	${DO_LATEX} ESMC cref
 
 

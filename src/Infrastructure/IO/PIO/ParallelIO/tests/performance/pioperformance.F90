@@ -357,8 +357,7 @@ contains
                 end if
 ! Now the Read
 
-                write(fname, '(a,i1,a,i4.4,a,i1,a)') 'pioperf.',1,'-',ntasks,'-',iotype,'.nc'
-
+                write(fname, '(a,i1,a,i4.4,a,i1,a)') 'pioperf.',rearr,'-',ntasks,'-',iotype,'.nc'
 
                 ierr = PIO_OpenFile(iosystem, File, iotype, trim(fname), mode=PIO_NOWRITE);
                 do nv=1,nvars
@@ -397,6 +396,7 @@ contains
 #ifdef VARINT
                       call PIO_setframe(File, vari(nv), frame)
                       call pio_read_darray(File, vari(nv), iodesc_i4, ifld_in(:,nv,frame), ierr)
+                      print *,__FILE__,__LINE__,size(ifld_in),ifld_in(1,1,1)
 #endif
 #ifdef VARREAL
                       call PIO_setframe(File, varr(nv), frame)
@@ -428,9 +428,9 @@ contains
                                !if(errorcnt < 10) then
                                !   print *,__LINE__,'Int: ',mype,j,nv,ifld(j,nv),ifld_in(j,nv,frame),compmap(j)
                                !endif
-                               write(*,*) '***ERROR:Mismatch!***'
-                               write(*,'(a11,i2,a9,i11,a9,i11,a9,i11)') &
-                                 ' Int    PE=',mype,'ifld=',ifld(j,nv),' ifld_in=',ifld_in(j,nv,frame),' compmap=',compmap(j)
+!                               write(*,*) '***ERROR:Mismatch!***'
+!                               write(*,'(a11,i2,a9,i11,a9,i11,a9,i11)') &
+!                                 ' Int    PE=',mype,'ifld=',ifld(j,nv),' ifld_in=',ifld_in(j,nv,frame),' compmap=',compmap(j)
 
                                errorcnt = errorcnt+1
                             endif

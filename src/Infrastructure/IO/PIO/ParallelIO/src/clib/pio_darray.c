@@ -303,7 +303,7 @@ PIOc_write_darray_multi(int ncid, const int *varids, int ioid, int nvars,
     }
     if (iodesc->needssort)
     {
-        if (!(tmparray = malloc(arraylen*nvars*iodesc->piotype_size)))
+        if (!(tmparray = calloc(arraylen*nvars, iodesc->piotype_size)))
             return pio_err(ios, NULL, PIO_ENOMEM, __FILE__, __LINE__);
         pio_sorted_copy(array, tmparray, iodesc, nvars, 0);
     }
@@ -955,11 +955,11 @@ PIOc_read_darray(int ncid, int varid, int ioid, PIO_Offset arraylen,
 
     /* If the map is not monotonically increasing we will need to sort
      * it. */
-    PLOG((3, "iodesc->needssort %d", iodesc->needssort));
+    PLOG((2, "iodesc->needssort %d", iodesc->needssort));
 
     if (iodesc->needssort)
     {
-        if (!(tmparray = malloc(iodesc->piotype_size * iodesc->maplen)))
+        if (!(tmparray = calloc(iodesc->maplen, iodesc->piotype_size)))
             return pio_err(ios, NULL, PIO_ENOMEM, __FILE__, __LINE__);
     }
     else
@@ -993,16 +993,16 @@ PIOc_read_darray(int ncid, int varid, int ioid, PIO_Offset arraylen,
     if ((ierr = rearrange_io2comp(ios, iodesc, iobuf, tmparray)))
         return pio_err(ios, file, ierr, __FILE__, __LINE__);
 
+    /* Free the buffer. */
+    if (ios->ioproc && rlen > 0)
+        free(iobuf);
+
     /* If we need to sort the map, do it. */
     if (iodesc->needssort && ios->compproc)
     {
         pio_sorted_copy(tmparray, array, iodesc, 1, 1);
         free(tmparray);
     }
-
-    /* Free the buffer. */
-    if (rlen > 0)
-        free(iobuf);
 
 #ifdef USE_MPE
     pio_stop_mpe_log(DARRAY_READ, __func__);

@@ -1,0 +1,125 @@
+name: Build ESMF Using Spack
+
+env:
+  compiler: gcc@11.3.0
+  esmf_version: 'esmf@develop'
+  nuopc_app_version: 'develop'
+
+on:
+  workflow_dispatch:
+    inputs:
+      esmf_version: 
+        description: 'ESMF version or tag like esmf@develop or esmf@=8.5.0b23'
+        required: false
+        type: string
+        default: 'esmf@develop'
+      nuopc_app_version:
+        description: 'NUOPC Application Prototypes version or tag like develop or v8.5.0b23'
+        required: false
+        type: string
+        default: 'develop'
+  schedule:
+    - cron: '0 6 * * *'
+
+jobs:
+  set-matrix:
+    runs-on: ubuntu-latest
+
+    outputs:
+      matrix: ${{ steps.list_comp_pkgs.outputs.matrix }}
+      nuopc_app_version: ${{ steps.list_comp_pkgs.outputs.nuopc_app_version }}
+
+    steps:
+    # generete matrix
+    - name: Generate Matrix by Listing Compiler and ESMF Packages
+      id: list_comp_pkgs
+      run: |
+        # output variables for debugging
+        echo "INPUT: >${{ inputs.esmf_version }}< >${{ inputs.nuopc_app_version }}<"
+        echo "ENV  : >${{ env.esmf_version }}< >${{ env.nuopc_app_version }}<"
+
+        # create matrix JSON file
+        str1="{\"compiler\": [\"${{ env.compiler }}\"],"
+        if [ -z "${{ inputs.esmf_version }}" ]; then
+          str2="\"esmf\": [\"${{ env.esmf_version }}+external-parallelio\", \"${{ env.esmf_version }}~external-parallelio\"]}"
+          echo "nuopc_app_version=${{ env.nuopc_app_version }}" >> $GITHUB_OUTPUT
+        else
+          str2="\"esmf\": [\"${{ inputs.esmf_version }}+external-parallelio\", \"${{ inputs.esmf_version }}~external-parallelio\"]}"
+          echo "nuopc_app_version=${{ inputs.nuopc_app_version }}" >> $GITHUB_OUTPUT
+        fi
+
+        # output contect for debugging
+        echo "matrix=${str1}${str2}"
+
+        # output for next step
+        echo "matrix=${str1}${str2}" >> $GITHUB_OUTPUT
+
+  build:
+    needs: set-matrix
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
+
+    steps:
+    # check out base repo
+    - name: Checkout Base Repository
+      uses: actions/checkout@v3
+
+    # prepare core environment
+    - name: Install Core Development Tools
+      run: |
+        sudo apt-get -qq update
+        sudo apt-get -qq install tar unzip file curl gringo
+        sudo apt-get -qq install build-essential binutils-dev gfortran gdb
+        sudo apt-get -qq install python3-dev
+
+    # restore Intel oneAPI compiler installation from cache
+    - name: Restore Intel oneAPI Compiler Installation
+      uses: actions/cache@v3
+      if: ${{ startsWith(matrix.compiler, 'oneapi') }}
+      with:
+        path: /opt/intel/oneapi
+        key: intel-${{ runner.os }}-${{ matrix.compiler }}
+        restore-keys: |
+          intel-${{ runner.os }}-${{ matrix.compiler }}
+
+    # install compiler
+    - name: Install Intel oneAPI Compiler
+      if: ${{ startsWith(matrix.compiler, 'oneapi') }}
+      run: |
+        cd ${{ github.workspace }}/.github/workflows
+        scripts/install_oneapi.sh -c ${{ matrix.compiler }}
+
+    # concretize test environment 
+    - name: Concretize Spack Environment Using YAML Specification
+      run: |
+        ${{ github.workspace }}/.github/workflows/scripts/spack_concretize.sh \
+          -a x86_64 \
+          -c ${{ matrix.compiler }} \
+          -d ${{ matrix.esmf }} \
+          -i ~/.spack-ci \
+          -r ${{ github.workspace }} 
+
+    # install test environment
+    - name: Install ESMF with Spack 
+      run: |
+        ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
+          -r ${{ github.workspace }}
+
+    # checkout NUOPC app prototypes
+    - name: Checkout NUOPC app prototypes
+      uses: actions/checkout@v3
+      with:
+        repository: esmf-org/nuopc-app-prototypes
+        path: ${{ github.workspace }}/nuopc-app-prototypes
+        ref: ${{ needs.set-matrix.outputs.nuopc_app_version }}
+
+    # test installation using NUOPC app prototypes
+    - name: Run NUOPC app prototypes
+      run: |
+        ${{ github.workspace }}/.github/workflows/scripts/run_nuopc_app_proto.sh \
+          -c ${{ matrix.compiler }} \
+          -r ${{ github.workspace }}/nuopc-app-prototypes \
+          -s ~/.spack-ci

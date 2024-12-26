@@ -1,7 +1,7 @@
 # JSON for Modern C++
 
 * URL: https://github.com/nlohmann/json
-* Release: v3.7.3
+* Release: v3.11.2
 * Git Clone Command: `git clone -b <Release> --depth 1 <URL>`
 
 ## Updating to New Version
@@ -18,3 +18,5 @@
     * Added `README.md` describing how to bring in additional versions
 * 2020-03-02, Ben Koziol
     * Updated `nlohmann/json` to tag `v3.7.3`.
+* 2022-09-15, Bill Sacks
+    * Updated `nlohmann/json` to tag `v3.11.2`.

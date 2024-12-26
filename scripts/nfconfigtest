@@ -1,8 +1,8 @@
 #!/bin/sh
 # return "working" if nf-config is working, "notworking" otherwise
-firstpart=`$1 --version  | awk '{ print $1 }'`
-if ([ $firstpart = "netCDF-Fortran" ]); then
-echo "working"
+$1 --flibs | grep -i 'not.*implemented' > /dev/null
+if [ $? = 0 ]; then
+    echo "notworking"
 else
-echo "notworking"
+    echo "working"
 fi

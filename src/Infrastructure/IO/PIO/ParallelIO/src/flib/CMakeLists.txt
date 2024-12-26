@@ -36,7 +36,12 @@ if (NETCDF_INTEGRATION)
   set (PIO_Fortran_MODS ${PIO_Fortran_MODS} ${CMAKE_CURRENT_BINARY_DIR}/ncint_mod.mod)
 endif ()
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 add_library (piof ${PIO_Fortran_SRCS} ${PIO_GenF90_SRCS})
+# Always use -fPIC
+set_property(TARGET piof PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 if (NOT PIO_ENABLE_FORTRAN)
   set_target_properties(piof PROPERTIES EXCLUDE_FROM_ALL TRUE)
 endif ()

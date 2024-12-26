@@ -2,17 +2,57 @@
 
 
 The following compilers and utilities are required for compiling, linking and
-testing the ESMF software:
+testing the ESMF software. It is good common practice to use a consistent set
+of Fortran/C++/C compilers from the same vendor, e.g. GNU, Intel, etc.
+However, some vendor {\em combinations} of Fortran, C++, and C compilers,
+e.g. Intel ifort with GNU g++, are also supported.
 \begin{itemize}
-\item Fortran90 (or later) compiler;
-\item C++ compiler;
-\item MPI implementation compatible with the above compilers (but see below);
+\item Fortran compiler:
+  \begin{itemize}
+  \item GNU's gfortran v7.0 and newer, or
+  \item Intel's ifort v18.0 and newer, or
+  \item PGI's pgf90 v18.1 and newer, or
+  \item NVHPC's nvfortran, or
+  \item NAG's nagfor, or
+  \item IBM's xlf, or
+  \item CCE's ftn.
+  \end{itemize}
+\item C++ compiler:
+  \begin{itemize}
+  \item GNU's g++ v7.0 and newer, or
+  \item Intel's icpc v18.0 and newer, or
+  \item PGI's pgCC v18.1 and newer, or
+  \item NVHPC's nvc++, or
+  \item IBM's xlC, or
+  \item CCE's CC.
+  \item LLVM's clang
+  \end{itemize}
+\item C compiler:
+  \begin{itemize}
+  \item GNU's gcc v7.0 and newer, or
+  \item Intel's icc v18.0 and newer, or
+  \item PGI pgcc v18.1 and newer, or
+  \item NVHPC's nvcc, or
+  \item IBM's xlc, or
+  \item CCE's cc.
+  \item LLVM's clang
+  \end{itemize}
+\item MPI implementation compatible with the above compilers (but also see below
+for the MPI-bypass build option):
+  \begin{itemize}
+  \item OpenMPI v3.0 and newer, or
+  \item MPICH v2.1 and newer, or
+  \item MVAPICH2 v2.0 and newer, or
+  \item IntelMPI v18.0 and newer, or
+  \item MPT 2.17 and newer, or
+  \item CRAY-MPICH v7.7 and newer.
+  \end{itemize}
 \item GNU's \htmladdnormallink{gcc compiler}{http://gcc.gnu.org} -
-for a standard cpp preprocessor implementation;
-\item \htmladdnormallink{GNU Make}{http://www.gnu.org/software/make/make.html}; 
+for a standard cpp preprocessor implementation.
+\item \htmladdnormallink{GNU Make}{http://www.gnu.org/software/make/make.html}.
 \item \htmladdnormallink{Perl}{http://www.perl.com/download.csp} - for running
 test scripts.
-\end{itemize} 
+\end{itemize}
 
 Internal packages that can optionally reference external libraries:
 \begin{itemize}
@@ -26,7 +66,7 @@ Optional external packages that must be specified for certain functions:
 \item NetCDF - version 3.6.x or newer (version 4.4 or newer required by PIO)
 \item parallel-NetCDF - version 1.2.0 or newer (version 1.12 or newer required by PIO)
 \item Xerces - version 3.1.0 or newer
-\end{itemize}  
+\end{itemize}
 
 ESMF can be built using a single-processor MPI-bypass library
 that comes with ESMF by setting {\tt ESMF\_COMM=mpiuni}. This allows ESMF applications

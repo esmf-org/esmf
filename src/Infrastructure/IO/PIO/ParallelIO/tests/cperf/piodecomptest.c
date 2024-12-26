@@ -148,7 +148,8 @@ int test_write_darray(int iosys, const char decomp_file[], int rank, const char 
     double dsum=0;
     for(int i=0; i < maplen[rank]; i++)
         dsum += dvarw[i];
-    printf("%d: dvarwsum = %d\n",rank, dsum);
+    if(dsum != rank)
+        printf("%d: dvarwsum = %d\n",rank, dsum);
 
     ierr = PIOc_write_darray(ncid, varid, ioid, maplen[rank], dvarw, NULL);
     free(maplen);
@@ -246,7 +247,8 @@ int test_read_darray(int iosys,const char decomp_file[], int rank, const char my
         double dsum=0;
         for(int i=0; i < maplen[rank]; i++)
             dsum += dvarr[i];
-        printf("%d: dsum = %d\n",rank, dsum);
+        if(dsum != rank)
+            printf("%d: dsum = %d\n",rank, dsum);
         break;
     case PIO_INT:
         ivarr = malloc(sizeof(int)*maplen[rank]);
@@ -277,11 +279,7 @@ int test_read_darray(int iosys,const char decomp_file[], int rank, const char my
     ierr = PIOc_closefile(ncid);
     if(ierr || debug) printf("%d %d\n",__LINE__,ierr);
 
-    if(rank == 3)
-    {
-        for(int i=0; i < maplen[rank]; i++)
-            printf("dvarr[%d] = %f\n",i, dvarr[i]);
-    }
+
     free(maplen);
     return ierr;
 
@@ -313,7 +311,7 @@ int main(int argc, char *argv[])
 
     iotasks = comm_size/36;
 
-    ierr = PIOc_Init_Intracomm(MPI_COMM_WORLD, 4, 1, 0, PIO_REARR_SUBSET, &iosys);
+    ierr = PIOc_Init_Intracomm(MPI_COMM_WORLD, iotasks, 36, 0, PIO_REARR_SUBSET, &iosys);
     if(ierr || debug) printf("%d %d\n",__LINE__,ierr);
 
     if(arguments.wdecomp_file)

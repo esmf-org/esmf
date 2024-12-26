@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -64,6 +64,8 @@ module ESMF_StateReconcileMod
   use ESMF_FieldCreateMod
   use ESMF_FieldBundleMod
   use ESMF_RHandleMod
+
+  use ESMF_TraceMod
 
   use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoGetFromBase, ESMF_InfoUpdate
   use ESMF_InfoCacheMod
@@ -174,6 +176,8 @@ contains
 
     type(ESMF_InfoDescribe) :: idesc
 
+    logical, parameter :: profile = .false.
+
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
@@ -201,11 +205,25 @@ contains
     ! Attributes must be reconciled to de-deduplicate Field geometries
     lattreconflag = ESMF_ATTRECONCILE_ON
 
+    if (profile) then
+      call ESMF_TraceRegionEnter("ESMF_StateReconcile_driver", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+
     call ESMF_StateReconcile_driver (state, vm=localvm, &
         attreconflag=lattreconflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+
+    if (profile) then
+      call ESMF_TraceRegionExit("ESMF_StateReconcile_driver", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
 
 #if 0
     ! Log a JSON State representation -----------------------------------------
@@ -222,6 +240,13 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
+    if (profile) then
+      call ESMF_TraceRegionEnter("ESMF_InfoCacheReassembleFields", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+
     ! Traverse the State hierarchy and fix Field references to a shared geometry
     call ESMF_InfoCacheReassembleFields(state, state, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
@@ -229,6 +254,13 @@ contains
     ! Traverse the state hierarchy and remove reconcile-specific attributes
     call ESMF_InfoCacheReassembleFieldsFinalize(state, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (profile) then
+      call ESMF_TraceRegionExit("ESMF_InfoCacheReassembleFields", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -289,6 +321,7 @@ contains
     logical, parameter :: debug = .false.
     logical, parameter :: meminfo = .false.
     logical, parameter :: trace = .false.
+    logical, parameter :: profile = .false.
 
     character(160)  :: prefixStr
     type(ESMF_VMId), allocatable, target :: vmIdMap(:)
@@ -300,9 +333,10 @@ contains
     type(ESMF_InfoDescribe) :: idesc
 
     ! -------------------------------------------------------------------------
-
     localrc = ESMF_RC_NOT_IMPL
     nullify(vmIdMap_ptr)
+
+    if (meminfo) call ESMF_VMLogMemInfo ("entering ESMF_StateReconcile_driver")
 
     call ESMF_VMGet(vm, localPet=mypet, petCount=npets, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -319,7 +353,16 @@ contains
       end do
     end if
 
+    ! -------------------------------------------------------------------------
     ! 0.) Interchange item counts between PETs.  Set up counts/displacements
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionEnter("0.) Interchange item counts", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ': *** Step 0 - Initialize item counts and siwrappers')
@@ -333,17 +376,40 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-    if (meminfo) call ESMF_VMLogMemInfo ('after Step 0 - initialization')
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionExit("0.) Interchange item counts", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
+    if (meminfo) call ESMF_VMLogMemInfo ("after 0.) Interchange item counts")
 
+    ! -------------------------------------------------------------------------
     ! 1.) Each PET constructs its send arrays containing local Id
     ! and VMId info for each object contained in the State.
     ! Note that element zero is reserved for the State itself.
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionEnter("1.) Construct send arrays", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ': *** Step 1.0 - Build send arrays')
     end if
     ids_send   => null ()
     vmids_send => null ()
+    if (profile) then
+      call ESMF_TraceRegionEnter("ESMF_ReconcileGetStateIDInfo", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
     call ESMF_ReconcileGetStateIDInfo (state, siwrap,  &
           id=  ids_send,  &
         vmid=vmids_send,  &
@@ -353,7 +419,12 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-    if (meminfo) call ESMF_VMLogMemInfo ('after Step 1 - constructed send Id/VMId info')
+    if (profile) then
+      call ESMF_TraceRegionExit("ESMF_ReconcileGetStateIDInfo", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
 
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
@@ -362,19 +433,44 @@ contains
 
     ! Translate VmId objects to an integer representation to minimize memory
     ! usage. This is also beneficial for performance.
+    if (profile) then
+      call ESMF_TraceRegionEnter("ESMF_VMTranslateVMId", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
     call ESMF_VMTranslateVMId(vm, vmIds=vmids_send, ids=vmintids_send, &
       vmIdMap=vmIdMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT,  &
       rcToReturn=rc)) return
+    if (profile) then
+      call ESMF_TraceRegionExit("ESMF_VMTranslateVMId", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
 
     ! VM integer ids should always start with 1
+    if (profile) then
+      call ESMF_TraceRegionEnter("Check vmIntIds", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
     do i=lbound(vmintids_send,1),ubound(vmintids_send,1)
       if (vmintids_send(i) <= 0) then
         if (ESMF_LogFoundError(ESMF_FAILURE, msg="A <= zero VM integer id was encountered", &
           ESMF_CONTEXT, rcToReturn=rc)) return
       end if
     enddo
+    if (profile) then
+      call ESMF_TraceRegionExit("Check vmIntIds", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+
     vmIdMap_ptr => vmIdMap
 
 #if 0
@@ -403,6 +499,13 @@ contains
     ! geometry objects and maintain sufficient information to re-establish
     ! references once the objects have been communicated and deserialized.
     ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionEnter("info_cache for unique geometries", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+
     call info_cache%Initialize(localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -411,15 +514,39 @@ contains
 
     call info_cache%Destroy(localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-    ! -------------------------------------------------------------------------
 
+    if (profile) then
+      call ESMF_TraceRegionExit("info_cache for unique geometries", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionExit("1.) Construct send arrays", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
+    if (meminfo) call ESMF_VMLogMemInfo ("after 1.) Construct send arrays")
+
+    ! -------------------------------------------------------------------------
     ! 2.) All PETs send their items Ids and VMIds to all the other PETs,
     ! then create local directories of which PETs have which ids/VMIds.
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionEnter("2.) Send arrays exchange", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ': *** Step 2 - Exchange Ids/VMIds')
     end if
-
     allocate (id_info(0:npets-1), stat=memstat)
     if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
@@ -435,22 +562,36 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-    if (meminfo) call ESMF_VMLogMemInfo ('after Step 2 - exchanged Ids/VMIds')
-
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionExit("2.) Send arrays exchange", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
+    if (meminfo) call ESMF_VMLogMemInfo ("after 2.) Send arrays exchange")
 
 ! At this point, each PET knows what items can be found on all of
 ! the other PETs.  The id_info array has global PET info in it.
 
+    ! -------------------------------------------------------------------------
     ! 3.) Construct needs list.  Receiving PETs compare IDs and VMIds
     ! in their send ID/VMId array with what was received from the
     ! currently-being-processed sending PET.  Note that multiple PETs
     ! can 'offer' an item.
-
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionEnter("3.) Construct needs list", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ': *** Step 3 - Compare and create needs arrays')
     end if
-
     call ESMF_ReconcileCompareNeeds (vm,  &
           id=  ids_send,  &
         vmid=vmintids_send,  &
@@ -461,20 +602,34 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-    if (meminfo) call ESMF_VMLogMemInfo ('after Step 3 - compared needs arrays')
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionExit("3.) Construct needs list", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
+    if (meminfo) call ESMF_VMLogMemInfo ("after 3.) Construct needs list")
 
-
+    ! -------------------------------------------------------------------------
     ! 4.) Communicate needs back to the offering PETs.
     ! Send to each offering PET a buffer containing 'needed' array
     ! specifying which items are needed.  The array is the same size as,
     ! and corresponds to, the ID and VMId arrays that were previously
     ! offered.
-
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionEnter("4.) Communicate needs back", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ': *** Step 4 - Exchange needs')
     end if
-
     recvd_needs_matrix => null ()
     call ESMF_ReconcileExchgNeeds (vm,  &
         id_info=id_info,  &
@@ -485,11 +640,26 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-    if (meminfo) call ESMF_VMLogMemInfo ('after Step 4 - exchanged needs')
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionExit("4.) Communicate needs back", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
+    if (meminfo) call ESMF_VMLogMemInfo ("after 4.) Communicate needs back")
 
-
-    ! 5.) Serialized needed objects
-
+    ! -------------------------------------------------------------------------
+    ! 5.) Serialize needed objects
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionEnter("5.) Serialize needed objects", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ': *** Step 5 - Serialize needs', ask=.false.)
@@ -504,21 +674,34 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-
     deallocate (recvd_needs_matrix, stat=memstat)
     if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-    if (meminfo) call ESMF_VMLogMemInfo ('after Step 5 - serialized needs')
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionExit("5.) Serialize needed objects", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
+    if (meminfo) call ESMF_VMLogMemInfo ("after 5.) Serialize needed objects")
 
-
+    ! -------------------------------------------------------------------------
     ! 6.) Send/receive serialized objects to whoever needed them
-
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionEnter("6.) Send/receive serialized objects", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ': *** Step 6 - Exchange serialized objects')
     end if
-
     allocate (items_recv(0:npets-1), stat=memstat)
     if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
@@ -534,17 +717,31 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-    if (meminfo) call ESMF_VMLogMemInfo ('after Step 6 - exchanged items')
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionExit("6.) Send/receive serialized objects", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
+    if (meminfo) call ESMF_VMLogMemInfo ("after 6.) Send/receive serialized objects")
 
-
+    ! -------------------------------------------------------------------------
     ! 7.) Deserialize received objects and create proxies (recurse on
     !     nested States as needed)
-
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionEnter("7.) Deserialize received objects and create proxies", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ': *** Step 7 - Deserialize needs')
     end if
-
     do, i=0, npets-1
       if (debug) then
         write (*, '(a,i0,a,i0,a,l1)')  &
@@ -573,15 +770,14 @@ contains
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ': *** Step 7 - Complete')
     end if
-    if (meminfo) call ESMF_VMLogMemInfo ('after Step 7 - deserialized items')
 
 ! Clean up
 
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ': At clean up.', ask=.false.)
+      call ESMF_VMBarrier (vm)
     end if
-    call ESMF_VMBarrier (vm)
 
     if (associated (buffer_recv)) then
       deallocate (buffer_recv, stat=memstat)
@@ -643,30 +839,55 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionExit("7.) Deserialize received objects and create proxies", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
+    if (meminfo) call ESMF_VMLogMemInfo ("after 7.) Deserialize received objects and create proxies")
 
+    ! -------------------------------------------------------------------------
     ! 8.) Attributes on the State itself
-
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionEnter("8.) Attributes on the State itself", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
     if (attreconflag == ESMF_ATTRECONCILE_ON) then
       if (trace) then
         call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
             ': *** Step 8 - Exchange Base Attributes', ask=.false.)
+        call ESMF_VMBarrier (vm)
       end if
-
-      call ESMF_VMBarrier (vm)
       call ESMF_ReconcileExchgAttributes (state, vm, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
-      if (meminfo) call ESMF_VMLogMemInfo ('after Step 8 - State base attributes')
     end if
-
     state%statep%reconcileneededflag = .false.
+    ! -------------------------------------------------------------------------
+    if (profile) then
+      call ESMF_TraceRegionExit("8.) Attributes on the State itself", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+    ! -------------------------------------------------------------------------
+    if (meminfo) call ESMF_VMLogMemInfo ("after 8.) Attributes on the State itself")
 
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD // ': Complete!')
       call ESMF_VMBarrier (vm)
     end if
     rc = ESMF_SUCCESS
+
+    if (meminfo) call ESMF_VMLogMemInfo ("exiting ESMF_StateReconcile_driver")
 
   end subroutine ESMF_StateReconcile_driver
 
@@ -1366,6 +1587,7 @@ contains
     type(ESMF_Info) :: base_info, base_temp_info
 
     logical, parameter :: debug = .false.
+    logical, parameter :: profile = .false.
 
     rc = ESMF_RC_NOT_IMPL
 
@@ -1377,6 +1599,12 @@ contains
     base => state%statep%base
 
     ! Serialize the Base attributes
+    if (profile) then
+      call ESMF_TraceRegionEnter("Serialize the Base attributes", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
     do, pass = 1, 2
       select case (pass)
       case (1)
@@ -1411,28 +1639,63 @@ contains
           rcToReturn=rc)) return
 
     end do ! pass
+    if (profile) then
+      call ESMF_TraceRegionExit("Serialize the Base attributes", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
 
     ! Exchange serialized buffer sizes
+    if (profile) then
+      call ESMF_TraceRegionEnter("Exchange serialized buffer sizes", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
     allocate (recv_sizes(0:npets-1), stat=memstat)
     if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-
     buffer_size(1) = offset
+
+    if (profile) then
+      call ESMF_TraceRegionEnter("ESMF_VMAllGather", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
     call ESMF_VMAllGather (vm,  &
         sendData=buffer_size, recvData=recv_sizes,  &
         count=1, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+    if (profile) then
+      call ESMF_TraceRegionExit("ESMF_VMAllGather", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
 
+    if (profile) then
+      call ESMF_TraceRegionExit("Exchange serialized buffer sizes", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
     if (debug) then
       print *, ESMF_METHOD,  &
           ':  PET', mypet, ': Base sizes   recved are:', recv_sizes
     end if
 
     ! Exchange serialized buffers
-
+    if (profile) then
+      call ESMF_TraceRegionEnter("Exchange serialized buffers", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
     allocate (  &
         buffer_recv(0:sum (recv_sizes)-1),  &
         recv_offsets(0:npets-1), stat=memstat)
@@ -1450,6 +1713,12 @@ contains
           ':  PET', mypet, ': Base offsets recved are:', recv_offsets
     end if
 
+    if (profile) then
+      call ESMF_TraceRegionEnter("ESMF_VMAllGatherV", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
     call ESMF_VMAllGatherV (vm,  &
         sendData=buffer_local(:buffer_size(1)-1), sendCount=buffer_size(1),  &
         recvData=buffer_recv, recvCounts=recv_sizes, recvOffsets=recv_offsets,  &
@@ -1457,8 +1726,27 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+    if (profile) then
+      call ESMF_TraceRegionExit("ESMF_VMAllGatherV", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+
+    if (profile) then
+      call ESMF_TraceRegionExit("Exchange serialized buffers", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
 
     ! Update local Base
+    if (profile) then
+      call ESMF_TraceRegionEnter("Update local Base", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
     do, i=0, npets-1
       if (i /= mypet) then
         base_temp = ESMF_BaseDeserializeWoGarbage(buffer_recv, &
@@ -1494,6 +1782,12 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
       end if
     end do
+    if (profile) then
+      call ESMF_TraceRegionExit("Update local Base", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
 
     deallocate(buffer_local)
     deallocate(recv_sizes)
@@ -1844,9 +2138,10 @@ contains
     character, pointer :: cptr_tmp(:)
 
     logical, parameter :: debug = .false.
+    logical, parameter :: meminfo = .false.
+    logical, parameter :: profile = .false.
 
     character(len=ESMF_MAXSTR) :: logmsg
-    logical, parameter :: meminfo = .false.
 
     ! -------------------------------------------------------------------------
 
@@ -1922,6 +2217,12 @@ contains
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
+    if (profile) then
+      call ESMF_TraceRegionEnter("ESMF_VMAllToAll", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
     call ESMF_VMAllToAll (vm,  &
         sendData=counts_send, sendCount=1,  &
         recvData=counts_recv, recvCount=1,  &
@@ -1929,6 +2230,12 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+    if (profile) then
+      call ESMF_TraceRegionExit("ESMF_VMAllToAll", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
     if (debug) then
       print *, ESMF_METHOD, ': PET', mypet, ': serialized buffer sizes',  &
           ': counts_send =', counts_send,  &
@@ -1961,6 +2268,12 @@ contains
 
     ! AlltoAllV
 
+    if (profile) then
+      call ESMF_TraceRegionEnter("ESMF_VMAllToAllV", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
     call ESMF_VMAllToAllV (vm,  &
         sendData=buffer_send, sendCounts=counts_send, sendOffsets=offsets_send,  &
         recvData=recv_buffer, recvCounts=counts_recv, recvOffsets=offsets_recv,  &
@@ -1968,6 +2281,12 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+    if (profile) then
+      call ESMF_TraceRegionExit("ESMF_VMAllToAllV", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
 
     if (meminfo) call ESMF_VMLogMemInfo("tp ESMF_ReconcileExchgItems: after ESMF_VMAllToAllV")
 
@@ -2064,6 +2383,7 @@ contains
     character(ESMF_MAXSTR) :: msgstring
 
     logical, parameter :: debug = .false.
+    logical, parameter :: profile = .false.
 
     localrc = ESMF_RC_NOT_IMPL
 
@@ -2142,6 +2462,14 @@ contains
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ': calling VMAllToAll')
     end if
+
+    if (profile) then
+      call ESMF_TraceRegionEnter("ESMF_VMAllToAllV", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+
     call ESMF_VMAllToAllV (vm,  &
         sendData=buffer_send, sendCounts=counts_send, sendOffsets=offsets_send, &
         recvData=buffer_recv, recvCounts=counts_recv, recvOffsets=offsets_recv, &
@@ -2149,6 +2477,13 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+
+    if (profile) then
+      call ESMF_TraceRegionExit("ESMF_VMAllToAllV", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
 
     ! Copy recv buffers into recv_needs
 
@@ -2388,6 +2723,8 @@ contains
     integer :: nitems_local(1)
     integer :: mypet, npets
 
+    logical, parameter :: profile = .false.
+
     localrc = ESMF_RC_NOT_IMPL
 
     if (associated (siwrap) .or. associated (nitems_all)) then
@@ -2409,10 +2746,22 @@ contains
     ! a communication step to see if any removals have taken place.
     ! Conditionally zap the proxies depending on whether it is actually
     ! needed.
+    if (profile) then
+      call ESMF_TraceRegionEnter("ESMF_ReconcileZapProxies", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
     call ESMF_ReconcileZapProxies (state, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+    if (profile) then
+      call ESMF_TraceRegionExit("ESMF_ReconcileZapProxies", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
 
     ! Obtain local PET item list
     siwrap => null ()
@@ -2434,12 +2783,24 @@ contains
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
+    if (profile) then
+      call ESMF_TraceRegionEnter("ESMF_VMAllGather", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
     call ESMF_VMAllGather (vm,  &
         sendData=nitems_local, recvData=nitems_all,  &
         count=1, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+    if (profile) then
+      call ESMF_TraceRegionExit("ESMF_VMAllGather", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
 
   end subroutine ESMF_ReconcileInitialize
 
@@ -3048,8 +3409,10 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     logical,                  pointer :: zapFlag(:)
     character(len=ESMF_MAXSTR)        :: thisname
     character(len=ESMF_MAXSTR)        :: name
-    type(ESMF_Field)                  :: tempField, tempFieldAlloc
-    type(ESMF_FieldBundle)            :: tempFB, tempFBAlloc
+    type(ESMF_Field)                  :: tempField
+    type(ESMF_FieldType)              :: tempFieldType
+    type(ESMF_FieldBundle)            :: tempFB
+    type(ESMF_FieldBundleType)        :: tempFBType
     character(len=80)                 :: msgString
 
     ! Initialize return code; assume routine not implemented
@@ -3067,9 +3430,6 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    allocate(tempFieldAlloc%ftypep)
-    allocate(tempFBAlloc%this)
-
 #ifdef RECONCILE_ZAP_LOG_on
     call ESMF_VMLogGarbageInfo(prefix="ZappedProxies bef: ", &
       logMsgFlag=ESMF_LOGMSG_DEBUG, rc=localrc)
@@ -3080,6 +3440,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
       call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): have lists", &
         ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
+
       do i=1, size(itemList)
         if (itemList(i)%si%proxyFlag .and. &
           (itemList(i)%si%otype==ESMF_STATEITEM_FIELD .or. &
@@ -3134,10 +3495,10 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found Field: "//trim(name), &
                   ! re-reconciled, and the same proxies are needed. Basically
                   ! a user should be able to hang on to a proxy.
                   tempField%ftypep => itemList(i)%si%datap%fp%ftypep
-                  tempFieldAlloc%ftypep = zapList(k)%si%datap%fp%ftypep
+                  tempFieldType = zapList(k)%si%datap%fp%ftypep
                   zapList(k)%si%datap%fp%ftypep = itemList(i)%si%datap%fp%ftypep
                   itemList(i)%si%datap%fp%ftypep => zapList(k)%si%datap%fp%ftypep
-                  tempField%ftypep = tempFieldAlloc%ftypep
+                  tempField%ftypep = tempFieldType
                   ! Finally destroy the old Field internals
                   ESMF_INIT_SET_CREATED(tempField)
                   call ESMF_FieldDestroy(tempField, noGarbage=.true., rc=localrc)
@@ -3170,10 +3531,10 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found FieldBundle: "//trim(na
                   ! re-reconciled, and the same proxies are needed. Basically
                   ! a user should be able to hang on to a proxy.
                   tempFB%this => itemList(i)%si%datap%fbp%this
-                  tempFBAlloc%this = zapList(k)%si%datap%fbp%this
-                  zapList(k)%si%datap%fbp%this = itemList(i)%si%datap%fbp%this
+                  call ESMF_FieldBundleTypeDeepCopy(zapList(k)%si%datap%fbp%this, tempFBType)
+                  call ESMF_FieldBundleTypeDeepCopy(itemList(i)%si%datap%fbp%this, zapList(k)%si%datap%fbp%this)
                   itemList(i)%si%datap%fbp%this => zapList(k)%si%datap%fbp%this
-                  tempFB%this = tempFBAlloc%this
+                  call ESMF_FieldBundleTypeDeepCopy(tempFBType, tempFB%this)
                   ! Finally destroy the old FieldBundle internals
                   ESMF_INIT_SET_CREATED(tempFB)
                   call ESMF_FieldBundleDestroy(tempFB, noGarbage=.true., &
@@ -3185,6 +3546,7 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found FieldBundle: "//trim(na
                   ! deallocate the associated StateItem
                   deallocate(zapList(k)%si)
                 end if
+
               end if
             end if
           end do ! k
@@ -3222,9 +3584,6 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found FieldBundle: "//trim(na
     call ESMF_VMLogGarbageInfo(prefix="ZappedProxies aft: ", &
       logMsgFlag=ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
-
-    deallocate(tempFieldAlloc%ftypep)
-    deallocate(tempFBAlloc%this)
 
     if (associated (itemList)) then
       deallocate(itemList, stat=memstat)

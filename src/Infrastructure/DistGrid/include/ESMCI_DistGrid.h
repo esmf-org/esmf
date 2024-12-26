@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -242,6 +242,7 @@ namespace ESMCI {
       if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
       return tileListPDe;
     }
+    int getTilePLocalDe(int localDe, int *rc) const;
     int const *getContigFlagPDimPDe() const {
       if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
       return contigFlagPDimPDe;

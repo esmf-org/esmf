@@ -1,7 +1,6 @@
 ! $Id$
 !
 ! System test code MapperTwoConcurrentComps
-!  Description on Sourceforge under System Test #79497
 
 !-------------------------------------------------------------------------
 !ESMF_disabled_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.

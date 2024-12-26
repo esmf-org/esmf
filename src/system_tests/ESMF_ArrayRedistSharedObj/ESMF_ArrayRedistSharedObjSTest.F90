@@ -70,6 +70,12 @@ program ESMF_ArrayRedistSharedObjSTest
   ! individual test failure message, and final status msg
   character(ESMF_MAXSTR) :: failMsg, finalMsg
 
+#ifdef ESMF_OS_Darwin
+  character(len=*), parameter :: sharedObjExt="dylib"
+#else
+  character(len=*), parameter :: sharedObjExt="so"
+#endif
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -147,7 +153,7 @@ program ESMF_ArrayRedistSharedObjSTest
 !-------------------------------------------------------------------------
 
   call ESMF_GridCompSetVM(comp1, userRoutine="userm1_setvm_", &
-    sharedObj="./user_model1.so", userRC=userrc, rc=localrc)
+    sharedObj="./user_model1."//sharedObjExt, userRC=userrc, rc=localrc)
   print *, "Comp SetVM finished, rc= ", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -157,7 +163,7 @@ program ESMF_ArrayRedistSharedObjSTest
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   call ESMF_GridCompSetServices(comp1, userRoutine="userm1_reg_", &
-    sharedObj="./user_model1.so", userRC=userrc, rc=localrc)
+    sharedObj="./user_model1."//sharedObjExt, userRC=userrc, rc=localrc)
   print *, "Comp SetServices finished, rc= ", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -187,7 +193,7 @@ program ESMF_ArrayRedistSharedObjSTest
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   call ESMF_CplCompSetVM(cpl, userRoutine="usercpl_setvm_", &
-    sharedObj="./user_coupler.so", userRC=userrc, rc=localrc)
+    sharedObj="./user_coupler."//sharedObjExt, userRC=userrc, rc=localrc)
   print *, "Comp SetVM finished, rc= ", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -197,7 +203,7 @@ program ESMF_ArrayRedistSharedObjSTest
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   call ESMF_CplCompSetServices(cpl, userRoutine="usercpl_reg_", &
-    sharedObj="./user_coupler.so", userRC=userrc, rc=localrc)
+    sharedObj="./user_coupler."//sharedObjExt, userRC=userrc, rc=localrc)
   print *, "Comp SetServices finished, rc= ", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &

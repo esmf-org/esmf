@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -39,7 +39,7 @@ module ESMFIOMod
   use ESMF_UtilTypesMod
   use ESMF_VMMod
   use ESMF_ArrayMod
-  use ESMF_GeomBaseMod
+  use ESMF_GeomMod
   use ESMF_StaggerLocTypeMod
   use ESMF_StateMod
   use ESMF_ClockMod

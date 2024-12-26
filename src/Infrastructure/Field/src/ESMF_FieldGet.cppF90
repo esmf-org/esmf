@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -41,7 +41,7 @@ module ESMF_FieldGetMod
   use ESMF_XGridMod
   use ESMF_MeshMod
   use ESMF_LocStreamMod
-  use ESMF_GeomBaseMod
+  use ESMF_GeomMod
   use ESMF_StaggerLocMod
   use ESMF_InitMacrosMod
 
@@ -82,7 +82,6 @@ module ESMF_FieldGetMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
     module procedure ESMF_FieldGetDefault
-    !module procedure ESMF_FieldGetLocalArray !TODO: FIELDINTEGRATION
     TypeKindRankInterfaceMacro(FieldGetDataPtr)
 
 ! !DESCRIPTION:
@@ -116,7 +115,8 @@ contains
     gridindex, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     totalLWidth, totalUWidth, localDeCount, ssiLocalDeCount, &
     localDeToDeMap, minIndex, maxIndex, elementCount, &
-    localMinIndex, localMaxIndex, localElementCount, name, vm, rc)
+    localMinIndex, localMaxIndex, localElementCount, isESMFAllocated, &
+    name, vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Field),           intent(in)            :: field
@@ -151,6 +151,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(out), optional :: localMinIndex(:)
     integer,                    intent(out), optional :: localMaxIndex(:)
     integer,                    intent(out), optional :: localElementCount(:)
+    logical,                    intent(out), optional :: isESMFAllocated
     character(len=*),           intent(out), optional :: name
     type(ESMF_VM),              intent(out), optional :: vm
     integer,                    intent(out), optional :: rc
@@ -179,6 +180,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              image (SSI).\newline
 !              Added argument {\tt localDeToDeMap} to support DE handling from
 !              the Field level rather than require user to go to Array level.
+! \item[8.5.0] Added argument {\tt isESMFAllocated} to support user query of
+!              whether ESMF or user is responsible for the data allocation
+!              referenced by this object.
 ! \end{description}
 ! \end{itemize}
 !
@@ -340,12 +344,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[localElementCount]}]
 !     Upon return this holds the PET local number of items of the field data.
 !     {\tt localElementCount} must be allocated to be of size equal to the field rank.
-! \item [{[name]}]
-!       Name of queried item.
-! \item [{[vm]}]
-!       The VM on which the Field object was created.
+!   \item[{[isESMFAllocated]}]
+!     Set to {\tt .true.} for data allocations held by ESMF. Set to
+!     {\tt .false.} otherwise.
+! \item[{[name]}]
+!     Name of the Field object.
+! \item[{[vm]}]
+!     The VM on which the Field object was created.
 ! \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !EOP
 !------------------------------------------------------------------------------
@@ -400,7 +407,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Get the geometry type
     if (present(geomtype)) then
-        call ESMF_GeomBaseGet(ftype%geombase, geomtype=localGeomType, rc=localrc)
+        call ESMF_GeomGet(ftype%geom, geomtype=localGeomType, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -414,7 +421,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No Grid or invalid Grid attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   grid=grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -428,7 +435,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No Grid or invalid Grid attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   staggerloc=staggerloc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -442,7 +449,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No Mesh or invalid Mesh attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   meshloc=meshloc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -456,7 +463,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No Mesh or invalid Mesh attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   mesh=mesh, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -470,7 +477,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No LocStream or invalid LocStream attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   locstream=locstream, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -484,7 +491,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No XGrid or invalid XGrid attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   xgrid=xgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -498,7 +505,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No XGrid or invalid XGrid attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   xgridside=xgridside, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -512,7 +519,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No XGrid or invalid XGrid attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   gridIndex=gridIndex, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -696,13 +703,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
       endif
 
-      call ESMF_GeomBaseGet(ftype%geombase, geomtype=localGeomType, rc=localrc)
+      call ESMF_GeomGet(ftype%geom, geomtype=localGeomType, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       if(localGeomType == ESMF_GEOMTYPE_GRID) then
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   grid=l_grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -801,7 +808,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         deallocate(dg2fmap, minIndexPTile, maxIndexPTile, minIndexPDe, maxIndexPDe) 
         deallocate(ldeToDeMap, isDist)
       else if(localGeomType == ESMF_GEOMTYPE_MESH) then
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   mesh=l_mesh, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -906,14 +913,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       deallocate(ll_min, ll_max, ll_elecount) 
     endif ! present(index and elementCount)
 
-    if (present(name) .and. field%isNamedAlias) then
-      ! access NamedAlias name
-      name = trim(field%name)
-    else
-      call ESMF_GetName(ftype%base, name, localrc)
-      if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(name)) then
+      if (field%isNamedAlias) then
+        name = trim(field%name)
+      else
+        call ESMF_GetName(ftype%base, name, localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
     endif
 
     if (present(vm)) then
@@ -924,72 +932,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     endif
 
+    ! Obtain dealloc information
+    if (present(isESMFAllocated)) then
+      isESMFAllocated = .false.
+      if (ftype%status /= ESMF_FIELDSTATUS_COMPLETE) then
+        call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+          msg="No data attached to Field", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+      call ESMF_ArrayGet(ftype%array, isESMFAllocated=isESMFAllocated, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
+
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_FieldGetDefault
 !------------------------------------------------------------------------------
-
-
-! TODO:FIELDINTEGRATION Restore FieldGetLocalArray
-#if 0
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldGetLocalArray"
-!BOPI
-! !IROUTINE: ESMF_FieldGet - Get LocalArray associated with the Field
-
-! !INTERFACE:
-  ! Private name; call using ESMF_FieldGet()
-  subroutine ESMF_FieldGetLocalArray(field, localarray, keywordEnforcer, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Field), intent(in) :: field
-    type(ESMF_LocalArray), intent(out) :: localarray
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Get data in {\tt ESMF\_LocalArray} form.
-!
-! The arguments are:
-! \begin{description}
-! \item [field]
-!       An {\tt ESMF\_Field} object.
-! \item [{[localarray]}]
-!       Field {\tt ESMF\_LocalArray}.
-! \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!EOPI
-!------------------------------------------------------------------------------
-    integer :: localrc
-    !character(len=ESMF_MAXSTR) :: str
-    type(ESMF_Array) :: array
-
-    ! Initialize
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! check variables
-    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
-
-    call ESMF_FieldGetArray(field, array, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-                              ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-    call ESMF_ArrayGet(array, localarray, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-                              ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Set return values.
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_FieldGetLocalArray
-!------------------------------------------------------------------------------
-#endif
 
 
 #define FieldGetDataPtrDoc() \
@@ -1303,7 +1264,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! check variables
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-    call ESMF_GeomBaseGet(field%ftypep%geombase, dimCount=gridrank, rc=localrc)
+    call ESMF_GeomGet(field%ftypep%geom, dimCount=gridrank, rc=localrc)
     if (localrc .ne. ESMF_SUCCESS) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
           msg="Cannot retrieve gridrank from ftypep%grid", &

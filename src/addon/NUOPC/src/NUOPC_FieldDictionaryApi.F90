@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -426,7 +426,7 @@ module NUOPC_FieldDictionaryApi
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_FieldDictionarySetup - Setup the NUOPC Field dictionary from file
+! !IROUTINE: NUOPC_FieldDictionarySetup - Setup the NUOPC Field dictionary from YAML file
 ! !INTERFACE:
   ! Private name; call using NUOPC_FieldDictionarySetup()
   subroutine NUOPC_FieldDictionarySetupFile(fileName, rc)
@@ -445,9 +445,8 @@ module NUOPC_FieldDictionaryApi
 
     if (present(rc)) rc = ESMF_SUCCESS
 
-    ! create a NUOPC FreeFormat by reading from file with I/O format iofmt
-    freeFormat = NUOPC_FreeFormatCreate(fileName, &
-      iofmt=ESMF_IOFMT_YAML, rc=localrc)
+    ! create a NUOPC FreeFormat FD representation by reading from YAML file
+    freeFormat = NUOPC_FreeFormatCreateFDYAML(fileName, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 

@@ -7,8 +7,8 @@
 # Default compiler setting.
 #
 ESMF_F90DEFAULT         = f90
+ESMF_F90LINKERDEFAULT   = $(ESMF_CXXLINKER)
 ESMF_CXXDEFAULT         = CC
-ESMF_F90LINKERDEFAULT   = CC
 
 ############################################################
 # Default MPI setting.
@@ -22,16 +22,13 @@ endif
 #
 ifeq ($(ESMF_COMM),mpiuni)
 # MPI stub library -----------------------------------------
-ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_CPPFLAGS          += -DESMF_MPIUNI -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpi)
 # Vendor MPI -----------------------------------------------
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpiCC
-ESMF_F90LINKERDEFAULT   = mpiCC
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3

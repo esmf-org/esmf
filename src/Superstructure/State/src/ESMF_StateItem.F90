@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -226,8 +226,9 @@
       type(ESMF_StateIntent_Flag), parameter :: &
                 ESMF_STATEINTENT_IMPORT   = ESMF_StateIntent_Flag(1), &
                 ESMF_STATEINTENT_EXPORT   = ESMF_StateIntent_Flag(2), &
-                ESMF_STATEINTENT_UNSPECIFIED = ESMF_StateIntent_Flag(3), &
-                ESMF_STATEINTENT_INVALID  = ESMF_StateIntent_Flag(4)
+                ESMF_STATEINTENT_INTERNAL  = ESMF_StateIntent_Flag(3), &
+                ESMF_STATEINTENT_UNSPECIFIED = ESMF_StateIntent_Flag(4), &
+                ESMF_STATEINTENT_INVALID  = ESMF_StateIntent_Flag(5)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_StateClass
@@ -276,6 +277,7 @@
         ESMF_STATEITEM_NOTFOUND
       public ESMF_StateItemConstruct
       public ESMF_StateIntent_Flag, ESMF_STATEINTENT_IMPORT, ESMF_STATEINTENT_EXPORT, &
+                                   ESMF_STATEINTENT_INTERNAL, &
                                    ESMF_STATEINTENT_UNSPECIFIED
 #if 0
       public ESMF_NeededFlag, ESMF_NEEDED, &

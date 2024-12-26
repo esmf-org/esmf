@@ -22,9 +22,7 @@ endif
 #
 ifeq ($(ESMF_COMM),mpiuni)
 # MPI stub library -----------------------------------------
-ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_CPPFLAGS          += -DESMF_MPIUNI -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpich1)
@@ -205,6 +203,8 @@ ESMF_CRPATHPREFIX           = -Wl,-rpath,
 # Determine where gcc's stdc++ or clang's c++ libraries are located, depending
 # on which underlying compiler is in use.
 #
+# Note that the result of -print-file-name will be the full path to the file if it is found
+# within the compiler installation, and simply the file name verbatim if it is NOT found.
 ifeq ($(ESMF_CLANGSTR), clang)
 ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.dylib)
 ifeq ($(ESMF_LIBSTDCXX),libc++.dylib)

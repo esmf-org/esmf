@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -114,9 +114,9 @@ int Alarm::count=0;
       } else {
         // truncate
         strncpy(alarm->name, name, ESMF_MAXSTR-1);
-        alarm->name[ESMF_MAXSTR-1] = '\0';  // null terminate
+        alarm->name[2*ESMF_MAXSTR-1] = '\0';  // null terminate
 
-        char logMsg[ESMF_MAXSTR];
+        char logMsg[2*ESMF_MAXSTR];
         sprintf(logMsg, "alarm name %s, length >= ESMF_MAXSTR; truncated.", 
                 name);
         ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
@@ -360,9 +360,9 @@ int Alarm::count=0;
       } else {
         // truncate
         strncpy(this->name, name, ESMF_MAXSTR-1);
-        this->name[ESMF_MAXSTR-1] = '\0';  // null terminate
+        this->name[2*ESMF_MAXSTR-1] = '\0';  // null terminate
 
-        char logMsg[ESMF_MAXSTR];
+        char logMsg[2*ESMF_MAXSTR];
         sprintf(logMsg, "alarm name %s, length >= ESMF_MAXSTR; truncated.", 
                 name);
         ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
@@ -492,7 +492,7 @@ void Alarm::enableSticky(void){
         strncpy(tempName, this->name, nameLen-1);
         tempName[nameLen] = '\0';  // null terminate
 
-        char logMsg[ESMF_MAXSTR];
+        char logMsg[2*ESMF_MAXSTR];
         sprintf(logMsg, "For alarm name %s, "
                 "length >= given character array; truncated.", this->name);
         ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
@@ -675,7 +675,7 @@ void Alarm::enableSticky(void){
     }
 
     if(!enabled) {
-      char logMsg[ESMF_MAXSTR];
+      char logMsg[2*ESMF_MAXSTR];
       sprintf(logMsg, "Attempted to turn on ringer of disabled alarm %s.",
               this->name);
       ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
@@ -846,7 +846,7 @@ void Alarm::enableSticky(void){
 
     // must be associated with a clock
     if(clock == ESMC_NULL_POINTER) {
-      char logMsg[ESMF_MAXSTR];
+      char logMsg[2*ESMF_MAXSTR];
       sprintf(logMsg, "alarm %s is not associated with any clock.", name);
       ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
       if (rc != ESMC_NULL_POINTER) *rc = ESMC_RC_PTR_NULL;
@@ -983,7 +983,7 @@ void Alarm::enableSticky(void){
     // mutually exclusive: can only specify one ring duration type
     if (ringDuration != ESMC_NULL_POINTER &&
         ringTimeStepCount != ESMC_NULL_POINTER) {
-      char logMsg[ESMF_MAXSTR];
+      char logMsg[2*ESMF_MAXSTR];
       sprintf(logMsg, 
               "Alarm %s: can only specify one type of ring duration, not both.",
               name);
@@ -1123,7 +1123,7 @@ bool Alarm::canRingAtNextTime(Clock & clock, TimeInterval * timeStep) const {
 
     // must be associated with a clock
     if(clock == ESMC_NULL_POINTER) {
-      char logMsg[ESMF_MAXSTR];
+      char logMsg[2*ESMF_MAXSTR];
       sprintf(logMsg, "newalarm %s is not associated with any clock.", name);
       ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
       return(false);
@@ -1385,7 +1385,7 @@ void Alarm::clockChangeDirection(const ESMC_Direction & old_direction,
 
     // must have a ring time; ringDuration, stopTime, prevRingTime optional
     if (ringTime.Time::validate() != ESMF_SUCCESS) {
-      char logMsg[ESMF_MAXSTR];
+      char logMsg[2*ESMF_MAXSTR];
       sprintf(logMsg, "Alarm %s: invalid ringTime.", name);
       ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
       return(ESMF_FAILURE);
@@ -1393,7 +1393,7 @@ void Alarm::clockChangeDirection(const ESMC_Direction & old_direction,
 
     // invalid state
     if (!enabled && ringing) {
-      char logMsg[ESMF_MAXSTR];
+      char logMsg[2*ESMF_MAXSTR];
       sprintf(logMsg, "Alarm %s: invalid state: disabled and ringing.", name);
       ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
       return(ESMF_FAILURE);
@@ -1446,7 +1446,7 @@ void Alarm::clockChangeDirection(const ESMC_Direction & old_direction,
 
       // make options case insensitive
       // TODO: put this into function to share
-      char opts[ESMF_MAXSTR];
+      char opts[2*ESMF_MAXSTR];
       int i;
       for(i=0; i<strlen(options) && i<ESMF_MAXSTR-1; i++) {
         opts[i] = tolower(options[i]);
