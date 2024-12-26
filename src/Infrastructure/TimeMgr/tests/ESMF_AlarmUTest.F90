@@ -1191,6 +1191,7 @@ program ESMF_AlarmTest
 
       ! ----------------------------------------------------------------------------
 
+      !EX_UTest
       write(failMsg, *) " Alarms with ClockSet... "
       write(name, *) "Test ClockSet after alarm attached to clock "
       rc = ESMF_SUCCESS
@@ -1203,6 +1204,7 @@ program ESMF_AlarmTest
 
       ! ----------------------------------------------------------------------------
 
+      !EX_UTest
       ! The following tests are from Ben@NASA's support ticket 3614994
       write(failMsg, *) " Alarms did not rewind correct number of times "
       write(name, *) "Test multiple alarms rewind correct number of times "
@@ -1215,6 +1217,7 @@ program ESMF_AlarmTest
 
       ! ----------------------------------------------------------------------------
 
+      !EX_UTest
       write(failMsg, *) " Alarms hang... "
       write(name, *) "Test multiple alarms replay without hanging "
       rc = ESMF_SUCCESS
@@ -1226,6 +1229,7 @@ program ESMF_AlarmTest
 
       ! ----------------------------------------------------------------------------
 
+      !EX_UTest
       write(failMsg, *) " Alarms with ring intervals equal to clock interval, incorrect behavior "
       write(name, *) "Test running an alarms forward-reverse-forward with ring interval equal to clock interval "
       rc = ESMF_SUCCESS
@@ -1237,6 +1241,7 @@ program ESMF_AlarmTest
 
       ! ----------------------------------------------------------------------------
 
+      !EX_UTest
       write(failMsg, *) " Alarms reverse with sticky set... "
       write(name, *) "Test running an alarm reverse with sticky bit set "
       rc = ESMF_SUCCESS
@@ -1249,6 +1254,7 @@ program ESMF_AlarmTest
       ! ----------------------------------------------------------------------------
 
 #if 1
+      !EX_UTest
       write(failMsg, *) " Alarms with getPrevRingTime... "
       write(name, *) "Test getPrevRingTime... after alarm attached to clock "
       rc = ESMF_SUCCESS
