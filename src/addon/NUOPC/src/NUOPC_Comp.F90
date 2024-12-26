@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -2994,16 +2994,16 @@ module NUOPC_Comp
       ! set component kind specific verbosity levels
       if (trim(valueString)=="Driver") then
         max   = 65535  ! all 16 lower bits set
-        high  = 32529  ! bits 0, 4, 8, 9, 10, 11, 12, 13, 14
-        low   =  9985  ! bits 0, 8, 9, 10, 13 
+        high  = 32625  ! bits 0, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14
+        low   =  9985  ! bits 0, 8, 9, 10, 13
       else if (trim(valueString)=="Model") then
         max   = 65535  ! all 16 lower bits set
-        high  = 32513  ! bits 0, 8, 9, 10, 11, 12, 13, 14
-        low   =  9985  ! bits 0, 8, 9, 10, 13 
+        high  = 32561  ! bits 0, 4, 5, 8, 9, 10, 11, 12, 13, 14
+        low   =  9985  ! bits 0, 8, 9, 10, 13
       else if (trim(valueString)=="Mediator") then
         max   = 65535  ! all 16 lower bits set
-        high  = 32513  ! bits 0, 8, 9, 10, 11, 12, 13, 14
-        low   =  9985  ! bits 0, 8, 9, 10, 13 
+        high  = 32561  ! bits 0, 4, 5, 8, 9, 10, 11, 12, 13, 14
+        low   =  9985  ! bits 0, 8, 9, 10, 13
       endif
       ! query the component for Verbosity
       call NUOPC_CompAttributeGet(comp, name="Verbosity", value=valueString, &
@@ -3012,8 +3012,8 @@ module NUOPC_Comp
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       verbosity = ESMF_UtilString2Int(valueString, &
-        specialStringList=(/"max ", "high", "low ", "off "/), &
-        specialValueList=(/max, high, low, 0/), &
+        specialStringList=(/"max ", "high", "low ", "off ", "F   "/), &
+        specialValueList=(/max, high, low, 0, 0/), &
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
@@ -3030,8 +3030,8 @@ module NUOPC_Comp
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       profiling = ESMF_UtilString2Int(valueString, &
-        specialStringList=(/"max ", "high", "low ", "off "/), &
-        specialValueList=(/65535, 511, 73, 0/), &
+        specialStringList=(/"max ", "high", "low ", "off ", "F   "/), &
+        specialValueList=(/65535, 511, 73, 0, 0/), &
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
@@ -3048,8 +3048,8 @@ module NUOPC_Comp
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       diagnostic = ESMF_UtilString2Int(valueString, &
-        specialStringList=(/"max ", "high", "low ", "off "/), &
-        specialValueList=(/65535, 65535, 65535, 0/), &
+        specialStringList=(/"max ", "high", "low ", "off ", "F   "/), &
+        specialValueList=(/65535, 65535, 65535, 0, 0/), &
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
@@ -3098,7 +3098,7 @@ module NUOPC_Comp
       verbosity = 0
       ! set specific verbosity levels
       max   = 65535  ! all 16 lower bits set
-      high  = 65281  ! bits 0, 8, 9, 10, 11, 12, 13, 14, 15
+      high  = 65329  ! bits 0, 4, 5, 8, 9, 10, 11, 12, 13, 14, 15
       low   =  8193  ! bits 0, 13
       ! query the component for Verbosity
       call NUOPC_CompAttributeGet(comp, name="Verbosity", value=valueString, &
@@ -3107,8 +3107,8 @@ module NUOPC_Comp
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       verbosity = ESMF_UtilString2Int(valueString, &
-        specialStringList=(/"max ", "high", "low ", "off "/), &
-        specialValueList=(/max, high, low, 0/), &
+        specialStringList=(/"max ", "high", "low ", "off ", "F   "/), &
+        specialValueList=(/max, high, low, 0, 0/), &
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
@@ -3129,8 +3129,8 @@ module NUOPC_Comp
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       profiling = ESMF_UtilString2Int(valueString, &
-        specialStringList=(/"max ", "high", "low ", "off "/), &
-        specialValueList=(/65535, 511, 73, 0/), &
+        specialStringList=(/"max ", "high", "low ", "off ", "F   "/), &
+        specialValueList=(/65535, 511, 73, 0, 0/), &
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
@@ -3147,8 +3147,8 @@ module NUOPC_Comp
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       diagnostic = ESMF_UtilString2Int(valueString, &
-        specialStringList=(/"max ", "high", "low ", "off "/), &
-        specialValueList=(/65535, 65535, 65535, 0/), &
+        specialStringList=(/"max ", "high", "low ", "off ", "F   "/), &
+        specialValueList=(/65535, 65535, 65535, 0, 0/), &
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
@@ -4112,6 +4112,11 @@ module NUOPC_Comp
 !   and execute the routine. An attempt is made to find a routine that
 !   is close in name to "{\tt SetServices}", allowing for compiler name
 !   mangling, i.e. upper and lower case, as well as trailing underscores.
+!   The asterisk character {\tt (*)} is supported as a wildcard for the
+!   file name suffix in {\tt sharedObj}. When present, the asterisk is replaced
+!   by "so", "dylib", and "dll", in this order, and the first successfully
+!   loaded object is used. If the {\tt sharedObj} argument is not provided, the
+!   executable itself is searched.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -4247,6 +4252,11 @@ module NUOPC_Comp
 !   and execute the routine. An attempt is made to find a routine that
 !   is close in name to "{\tt SetVM}", allowing for compiler name
 !   mangling, i.e. upper and lower case, as well as trailing underscores.
+!   The asterisk character {\tt (*)} is supported as a wildcard for the
+!   file name suffix in {\tt sharedObj}. When present, the asterisk is replaced
+!   by "so", "dylib", and "dll", in this order, and the first successfully
+!   loaded object is used. If the {\tt sharedObj} argument is not provided, the
+!   executable itself is searched.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables

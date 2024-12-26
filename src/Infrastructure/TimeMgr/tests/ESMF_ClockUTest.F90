@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -78,6 +78,7 @@
       ! Random number
       real :: ranNum
       integer :: timevals(8)
+      integer :: milliseconds
       integer, allocatable :: seed(:)
       integer :: seed_size
 
@@ -1510,9 +1511,15 @@ call ESMF_LogSet (flush=.true.)
 
       if (rc.eq.ESMF_SUCCESS) then
         call date_and_time(values=timevals)
+        milliseconds = timevals(8)
         call random_seed (size=seed_size)
         allocate (seed(seed_size))
-        seed=timevals(8)
+        if (milliseconds.eq.0) then
+          ! random_seed needs non-zero values, at least with some compilers (e.g., nvhpc)
+          seed = 1000
+        else
+          seed = milliseconds
+        end if
         call random_seed(put=seed)
         deallocate (seed)
         testResults = 0

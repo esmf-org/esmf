@@ -2,7 +2,7 @@
 ! ESMX_Driver (Earth System Model eXecutable Driver)
 !   This file contains the ESMX top level driver.
 !==============================================================================
-#define FILENAME "src/addon/ESMX/ESMX_Driver.F90"
+#define FILENAME "src/addon/ESMX/Driver/ESMX_Driver.F90"
 !==============================================================================
 
 module ESMX_Driver

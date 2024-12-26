@@ -87,11 +87,13 @@ class Manager(object):
 
     :param bool debug: outputs logging information to ESMF logfiles. If
         ``None``, defaults to False.
+    :param bool endFlag: determines the action to take on ESMF finalization.
+        See :class:`~esmpy.api.constants.EndAction` docstring for details. Defaults to ``EndAction.NORMAL``.
     '''
     # The singleton instance for this class
     __singleton = None
     
-    def __new__(cls, debug=False):
+    def __new__(cls, debug=False, endFlag=EndAction.NORMAL):
         '''
         Returns the singleton instance of this class, creating it if it does 
         not already exist.
@@ -106,7 +108,7 @@ class Manager(object):
         return cls.__singleton
 
 
-    def __init__(self, debug=False):
+    def __init__(self, debug=False, endFlag=EndAction.NORMAL):
         # Return no-op
         if self.__esmp_finalized:
             return
@@ -121,6 +123,7 @@ class Manager(object):
             ESMP_Initialize(logkind=logkind)
             import atexit; atexit.register(self.__del__)
             self.__esmp_initialized = True
+            self.__esmp_end_flag = endFlag
 
             # set information related to the ESMF Virtual Machine
             vm = ESMP_VMGetGlobal()
@@ -183,7 +186,7 @@ class Manager(object):
             return
 
         # Call ESMP_Finalize and set flags indicating this has been done
-        ESMP_Finalize()
+        ESMP_Finalize(self.__esmp_end_flag)
         self.__esmp_initialized = False
         self.__esmp_finalized = True
 

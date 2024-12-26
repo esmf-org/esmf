@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -57,6 +57,11 @@ enum ESMC_CoordSys_Flag {ESMC_COORDSYS_INVALID=-2,
 enum ESMC_Decomp_Flag {ESMC_DECOMP_INVALID=0,
                        ESMC_DECOMP_BALANCED, ESMC_DECOMP_RESTFIRST,
                        ESMC_DECOMP_RESTLAST, ESMC_DECOMP_CYCLIC};
+
+// end flag
+typedef enum ESMC_End_Flag { ESMC_END_NORMAL=1,
+                             ESMC_END_KEEPMPI,
+                             ESMC_END_ABORT} ESMC_End_Flag;
 
 enum ESMC_ExtrapMethod_Flag {ESMC_EXTRAPMETHOD_NONE=0,
                              ESMC_EXTRAPMETHOD_NEAREST_STOD,

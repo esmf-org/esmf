@@ -2,7 +2,7 @@
 ! ESMX (Earth System Model eXecutable)
 !   This file contains the main ESMX Application program.
 !==============================================================================
-#define FILENAME "src/addon/ESMX/ESMF_App.F90"
+#define FILENAME "src/addon/ESMX/ESMX_App.F90"
 !==============================================================================
 
 !==============================================================================
