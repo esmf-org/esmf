@@ -789,14 +789,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_Status flags to see if they're the same or not
 
-function ESMF_sfeq(sf1, sf2)
+impure elemental function ESMF_sfeq(sf1, sf2)
  logical ESMF_sfeq
  type(ESMF_FieldStatus_Flag), intent(in) :: sf1, sf2
 
  ESMF_sfeq = (sf1%status == sf2%status)
 end function
 
-function ESMF_sfne(sf1, sf2)
+impure elemental function ESMF_sfne(sf1, sf2)
  logical ESMF_sfne
  type(ESMF_FieldStatus_Flag), intent(in) :: sf1, sf2
 

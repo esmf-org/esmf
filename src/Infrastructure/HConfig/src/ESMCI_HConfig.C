@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -47,7 +47,7 @@ using namespace std;
 extern "C" {
 
   void FTN_X(f_esmf_configsetstring)(ESMCI_Config** config, const char* value,
-    const char* label, int* rc, ESMCI_FortranStrLenArg vlen, 
+    const char* label, int* rc, ESMCI_FortranStrLenArg vlen,
     ESMCI_FortranStrLenArg llen);
 
 }; // end prototypes for fortran interface
@@ -305,8 +305,8 @@ int HConfig::load(
 //
 // !ARGUMENTS:
     const std::string& content){       // in
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine which loads HConfig from string.
 //
 //EOP
@@ -354,8 +354,8 @@ int HConfig::loadFile(
 // !ARGUMENTS:
     const std::string& filename,    // in
     int *docIndex){                 // in
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine which loads HConfig from file.
 //
 //EOP
@@ -416,8 +416,8 @@ int HConfig::saveFile(
 // !ARGUMENTS:
     const std::string& filename,    // in
     int *docIndex){                 // in
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine which saves HConfig to file. Only localPet==0 does the writing.
 //
 //EOP
@@ -974,8 +974,8 @@ int HConfig::add(
 //
 // !ARGUMENTS:
     HConfig *value){  // in  - value to be added
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to add node value via deep copy
 //
 //EOP
@@ -1046,8 +1046,8 @@ int HConfig::add(
 // !ARGUMENTS:
     HConfig *key,     // in  - key to be added
     HConfig *value){  // in  - value to be added
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to add node value via deep copy
 //
 //EOP
@@ -1122,8 +1122,8 @@ int HConfig::addMapKey(
 //
 // !ARGUMENTS:
     HConfig *value){  // in  - value to be added
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to add map key node value via deep copy
 //
 //EOP
@@ -1183,8 +1183,8 @@ int HConfig::addMapKey(
 // !ARGUMENTS:
     HConfig *key,     // in  - key to be added
     HConfig *value){  // in  - value to be added
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to add map key node value via deep copy
 //
 //EOP
@@ -1248,8 +1248,8 @@ int HConfig::addMapVal(
 //
 // !ARGUMENTS:
     HConfig *value){  // in  - value to be added
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to add map value node value via deep copy
 //
 //EOP
@@ -1309,8 +1309,8 @@ int HConfig::addMapVal(
 // !ARGUMENTS:
     HConfig *key,     // in  - key to be added
     HConfig *value){  // in  - value to be added
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to add map value node value via deep copy
 //
 //EOP
@@ -1823,8 +1823,8 @@ int HConfig::isNull(
 //
 // !ARGUMENTS:
     bool *flag){      // out
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to access node type
 //
 //EOP
@@ -1874,8 +1874,8 @@ int HConfig::isScalar(
 //
 // !ARGUMENTS:
     bool *flag){      // out
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to access node type
 //
 //EOP
@@ -1925,8 +1925,8 @@ int HConfig::isSequence(
 //
 // !ARGUMENTS:
     bool *flag){      // out
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to access node type
 //
 //EOP
@@ -1976,8 +1976,8 @@ int HConfig::isMap(
 //
 // !ARGUMENTS:
     bool *flag){      // out
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to access node type
 //
 //EOP
@@ -2027,8 +2027,8 @@ int HConfig::isDefined(
 //
 // !ARGUMENTS:
     bool *flag){      // out
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to access node type
 //
 //EOP
@@ -2078,8 +2078,8 @@ int HConfig::isNullMapKey(
 //
 // !ARGUMENTS:
     bool *flag){      // out
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to access node type
 //
 //EOP
@@ -2127,8 +2127,8 @@ int HConfig::isScalarMapKey(
 //
 // !ARGUMENTS:
     bool *flag){      // out
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to access node type
 //
 //EOP
@@ -2176,8 +2176,8 @@ int HConfig::isSequenceMapKey(
 //
 // !ARGUMENTS:
     bool *flag){      // out
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to access node type
 //
 //EOP
@@ -2225,8 +2225,8 @@ int HConfig::isMapMapKey(
 //
 // !ARGUMENTS:
     bool *flag){      // out
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to access node type
 //
 //EOP
@@ -2274,8 +2274,8 @@ int HConfig::isDefinedMapKey(
 //
 // !ARGUMENTS:
     bool *flag){      // out
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to access node type
 //
 //EOP
@@ -2323,8 +2323,8 @@ int HConfig::isNullMapVal(
 //
 // !ARGUMENTS:
     bool *flag){      // out
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to access node type
 //
 //EOP
@@ -2372,8 +2372,8 @@ int HConfig::isScalarMapVal(
 //
 // !ARGUMENTS:
     bool *flag){      // out
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to access node type
 //
 //EOP
@@ -2421,8 +2421,8 @@ int HConfig::isSequenceMapVal(
 //
 // !ARGUMENTS:
     bool *flag){      // out
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to access node type
 //
 //EOP
@@ -2470,8 +2470,8 @@ int HConfig::isMapMapVal(
 //
 // !ARGUMENTS:
     bool *flag){      // out
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to access node type
 //
 //EOP
@@ -2519,8 +2519,8 @@ int HConfig::isDefinedMapVal(
 //
 // !ARGUMENTS:
     bool *flag){      // out
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to access node type
 //
 //EOP
@@ -2568,8 +2568,8 @@ int HConfig::isIterator(
 //
 // !ARGUMENTS:
     bool *flag){      // out
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to access node type
 //
 //EOP
@@ -2609,8 +2609,8 @@ int HConfig::isSequenceIterator(
 //
 // !ARGUMENTS:
     bool *flag){      // out
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to access node type
 //
 //EOP
@@ -2650,8 +2650,8 @@ int HConfig::isMapIterator(
 //
 // !ARGUMENTS:
     bool *flag){      // out
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to access node type
 //
 //EOP
@@ -3043,8 +3043,8 @@ int HConfig::iterNext(
 //
 // !ARGUMENTS:
     ){
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  Steps the iterator forward by one step.
 //EOP
 //-----------------------------------------------------------------------------
@@ -3249,8 +3249,8 @@ int HConfig::set(
 //
 // !ARGUMENTS:
     HConfig *value){  // in  - value to be set
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to set node value via deep copy
 //
 //EOP
@@ -3305,8 +3305,8 @@ int HConfig::setMapKey(
 //
 // !ARGUMENTS:
     HConfig *value){  // in  - value to be set
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to set node map key value via deep copy
 //
 //EOP
@@ -3358,8 +3358,8 @@ int HConfig::setMapVal(
 //
 // !ARGUMENTS:
     HConfig *value){  // in  - value to be set
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine to set node map val value via deep copy
 //
 //EOP
@@ -3411,8 +3411,8 @@ int HConfig::remove(
 //
 // !ARGUMENTS:
     int index){  // in  - index to remove
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  Remove an element from sequence by index.
 //
 //EOP
@@ -3476,8 +3476,8 @@ int HConfig::remove(
 //
 // !ARGUMENTS:
     const std::string& keyString){  // in  - keyString to remove
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  Remove an element from sequence by index.
 //
 //EOP
@@ -3541,8 +3541,8 @@ int HConfig::toConfig(
 //
 // !ARGUMENTS:
     ESMCI_Config **config){       // in
-// 
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  ESMF routine which attempts to fill Config from HConfig to the level
 //  that this is supported. Expectation on the highest level (doc-level) is
 //  a map of scalars keys to the following three value options:

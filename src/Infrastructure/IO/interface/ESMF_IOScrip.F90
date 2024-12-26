@@ -1092,15 +1092,6 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              titlelocal = "ESMF Offline Regridding Weight Generator"
           endif
 
-          ! Norm type
-          if (localNormType .eq. ESMF_NORMTYPE_DSTAREA) then
-             norm = "destarea"
-          elseif (localNormType .eq. ESMF_NORMTYPE_FRACAREA) then
-             norm = "fracarea"
-          else
-             norm = "unknown"
-          endif
-
          ! Regrid method
          if (present(method)) then
            methodlocal = method
@@ -1135,6 +1126,22 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            map_method = "Bilinear remapping"
            esmf_regrid_method = "Bilinear"
          endif
+
+         ! Norm type
+         if (methodlocal%regridmethod == ESMF_REGRIDMETHOD_CONSERVE%regridmethod .or. &
+              methodlocal%regridmethod == ESMF_REGRIDMETHOD_CONSERVE_2ND%regridmethod) then
+            if (localNormType .eq. ESMF_NORMTYPE_DSTAREA) then
+               norm = "destarea"
+            elseif (localNormType .eq. ESMF_NORMTYPE_FRACAREA) then
+               norm = "fracarea"
+            else
+               norm = "unknown"
+            endif
+         else
+            ! For regrid methods other than conservative, the normalization type is irrelevant
+            norm = "N/A"
+         end if
+
          conventions = "NCAR-CSM"
 
          ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "title", trim(titlelocal))

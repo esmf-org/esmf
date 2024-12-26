@@ -48,6 +48,7 @@
 #include "ESMC_XGrid.h"
 #include "ESMC_Field.h"
 #include "ESMC_LocStream.h"
+#include "ESMC_Trace.h"
 
 // Superstructure headers
 #include "ESMC_State.h"

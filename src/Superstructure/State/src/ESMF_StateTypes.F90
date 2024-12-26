@@ -164,14 +164,14 @@ end interface
 
 ! functions to compare two ESMF types to see if they're the same or not
 
-function ESMF_oteq(s1, s2)
+impure elemental function ESMF_oteq(s1, s2)
  logical ESMF_oteq
  type(ESMF_StateItem_Flag), intent(in) :: s1, s2
 
  ESMF_oteq = (s1%ot == s2%ot)
 end function
 
-function ESMF_otne(s1, s2)
+impure elemental function ESMF_otne(s1, s2)
  logical ESMF_otne
  type(ESMF_StateItem_Flag), intent(in) :: s1, s2
 
@@ -179,14 +179,14 @@ function ESMF_otne(s1, s2)
 end function
 
 
-function ESMF_imexeq(s1, s2)
+impure elemental function ESMF_imexeq(s1, s2)
  logical ESMF_imexeq
  type(ESMF_StateIntent_Flag), intent(in) :: s1, s2
 
  ESMF_imexeq = (s1%state == s2%state)
 end function
 
-function ESMF_imexne(s1, s2)
+impure elemental function ESMF_imexne(s1, s2)
  logical ESMF_imexne
  type(ESMF_StateIntent_Flag), intent(in) :: s1, s2
 
@@ -195,14 +195,14 @@ end function
 
 
 #if ESMF_ENABLE_NEEDED
-function ESMF_needeq(s1, s2)
+impure elemental function ESMF_needeq(s1, s2)
  logical ESMF_needeq
  type(ESMF_NeededFlag), intent(in) :: s1, s2
 
  ESMF_needeq = (s1%needed == s2%needed)
 end function
 
-function ESMF_needne(s1, s2)
+impure elemental function ESMF_needne(s1, s2)
  logical ESMF_needne
  type(ESMF_NeededFlag), intent(in) :: s1, s2
 
@@ -210,14 +210,14 @@ function ESMF_needne(s1, s2)
 end function
 
 
-function ESMF_redyeq(s1, s2)
+impure elemental function ESMF_redyeq(s1, s2)
  logical ESMF_redyeq
  type(ESMF_ReadyFlag), intent(in) :: s1, s2
 
  ESMF_redyeq = (s1%ready == s2%ready)
 end function
 
-function ESMF_redyne(s1, s2)
+impure elemental function ESMF_redyne(s1, s2)
  logical ESMF_redyne
  type(ESMF_ReadyFlag), intent(in) :: s1, s2
 
@@ -225,14 +225,14 @@ function ESMF_redyne(s1, s2)
 end function
 
 
-function ESMF_valideq(s1, s2)
+impure elemental function ESMF_valideq(s1, s2)
  logical ESMF_valideq
  type(ESMF_ValidFlag), intent(in) :: s1, s2
 
  ESMF_valideq = (s1%valid == s2%valid)
 end function
 
-function ESMF_validne(s1, s2)
+impure elemental function ESMF_validne(s1, s2)
  logical ESMF_validne
  type(ESMF_ValidFlag), intent(in) :: s1, s2
 

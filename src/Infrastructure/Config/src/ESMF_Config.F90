@@ -94,7 +94,7 @@
     interface ESMF_ConfigCreate
 
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_ConfigCreateEmpty
+        module procedure ESMF_ConfigCreateDefault
         module procedure ESMF_ConfigCreateFromSection
 
 ! !DESCRIPTION:
@@ -200,11 +200,7 @@
 
        character, parameter :: BLK = achar(32)   ! blank (space)
        character, parameter :: TAB = achar(09)   ! TAB
-#ifdef ESMF_HAS_ACHAR_BUG
-       character, parameter :: EOL = achar(12)   ! end of line mark (cr)
-#else
        character, parameter :: EOL = achar(10)   ! end of line mark (newline)
-#endif
        character, parameter :: EOB = achar(00)   ! end of buffer mark (null)
        character, parameter :: NUL = achar(00)   ! what it says
        
@@ -236,7 +232,8 @@
           integer :: nattr                             ! number of attributes
                                                        !   in the "used" table
           character(len=LSZ)          :: current_attr  ! the current attr label
-          type(ESMF_HConfig) :: hconfig  ! hierarchical configuration
+          type(ESMF_HConfig) :: hconfig   ! hierarchical configuration
+          logical :: hconfig_owner        ! .true. if hconfig is owned by config
           ESMF_INIT_DECLARE
        end type ESMF_ConfigClass
 
@@ -595,33 +592,41 @@
     end function ESMF_ConfigGetInit
 
 
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ConfigCreateEmpty"
+#define ESMF_METHOD "ESMF_ConfigCreateDefault"
 !BOP
 !
 ! !IROUTINE: ESMF_ConfigCreate - Instantiate a Config object
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ConfigCreate()
-      type(ESMF_Config) function ESMF_ConfigCreateEmpty(keywordEnforcer, rc)
+    ! Private name; call using ESMF_ConfigCreate()
+    type(ESMF_Config) function ESMF_ConfigCreateDefault(keywordEnforcer, hconfig, rc)
 
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-     integer,intent(out), optional              :: rc 
+      type(ESMF_HConfig), intent(in),  optional   :: hconfig
+      integer,            intent(out), optional   :: rc
 !
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.6.0] Added the {\tt hconfig} argument to support creation from HConfig
+!    object.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION: 
-!   Instantiates an {\tt ESMF\_Config} object for use in subsequent calls.
+!   Instantiates an {\tt ESMF\_Config} object. Optionally create from HConfig.
 !
 !   The arguments are:
 !   \begin{description}
+!   \item [{[hconfig]}]
+!     If specified, create Config from HConfig. By default create an empty
+!     Config object.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -637,7 +642,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  
 ! Initialization
       allocate(config_local, stat=memstat)
-      ESMF_ConfigCreateEmpty%cptr => config_local
+      ESMF_ConfigCreateDefault%cptr => config_local
       if (ESMF_LogFoundAllocError(memstat, msg="Allocating config class", &
                                         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -659,16 +664,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       config_local%attr_used => attr_used_local
 
-      config_local%hconfig = ESMF_HConfigCreate(rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (present(hconfig)) then
+        ! Config from HConfig (reference)
+        config_local%hconfig_owner = .false.
+        config_local%hconfig = hconfig
+        call c_ESMC_HConfigToConfig(config_local%hconfig, &
+          ESMF_ConfigCreateDefault, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        ! Config empty
+        config_local%hconfig_owner = .true.
+        config_local%hconfig = ESMF_HConfigCreate(rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
 
       if (present( rc ))  rc = ESMF_SUCCESS
 
-      ESMF_INIT_SET_CREATED(ESMF_ConfigCreateEmpty)
+      ESMF_INIT_SET_CREATED(ESMF_ConfigCreateDefault)
       return
 
-    end function ESMF_ConfigCreateEmpty
+    end function ESMF_ConfigCreateDefault
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -747,7 +765,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end if
 
       ! Create and populate new Config object from parent object's section
-      ESMF_ConfigCreateFromSection = ESMF_ConfigCreateEmpty(rc=localrc)
+      ESMF_ConfigCreateFromSection = ESMF_ConfigCreate(rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, &
         msg="Instantiating new config object",  &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -776,6 +794,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ESMF_ConfigCreateFromSection%cptr%hconfig_owner = .true.
       ESMF_ConfigCreateFromSection%cptr%hconfig = ESMF_HConfigCreate(rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -849,9 +868,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundDeallocError(memstat, msg="Deallocating local buffer 1", &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-      call ESMF_HConfigDestroy(config%cptr%hconfig, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (config%cptr%hconfig_owner) then
+        call ESMF_HConfigDestroy(config%cptr%hconfig, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
 
       deallocate(config%cptr, stat = memstat)
       if (ESMF_LogFoundDeallocError(memstat, msg="Deallocating config type", &
@@ -3923,7 +3944,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE:  ESMF_ConfigEQ - Compare two Config objects for equality
 !
 ! !INTERFACE:
-  function ESMF_ConfigEQ(Config1, Config2)
+  impure elemental function ESMF_ConfigEQ(Config1, Config2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_ConfigEQ
@@ -3949,7 +3970,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE:  ESMF_ConfigEQ - Compare two Config objects for inequality
 !
 ! !INTERFACE:
-  function ESMF_ConfigNE(Config1, Config2)
+  impure elemental function ESMF_ConfigNE(Config1, Config2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_ConfigNE

@@ -2,9 +2,9 @@ name: strict_autotools_ubuntu_latest
 
 on:
   push:
-    branches: [ master ]
+    branches: [ maintodo ]
   pull_request:
-    branches: [ master ]
+    branches: [ maintodo ]
 
 jobs:
   build:
@@ -14,19 +14,16 @@ jobs:
     env:
       CC: mpicc
       FC: mpifort
-      CPPFLAGS: "-I/usr/include -I/usr/local/include -I/home/runner/pnetcdf/include"
-      LDFLAGS: "-L/home/runner/pnetcdf/lib"
-      FCFLAGS: "-fallow-argument-mismatch"
-      PNETCDF_VERSION: 1.12.3
+      CPPFLAGS: "-I/usr/include -I/usr/local/include -I${GITHUB_WORKSPACE}/pnetcdf/include"
+      LDFLAGS: "-L/usr/lib -L${GITHUB_WORKSPACE}/pnetcdf/lib"
+      CFLAGS: "-std=c99 -Wall"
+      FCFLAGS: "-fallow-argument-mismatch -Wall"
+      PNETCDF_VERSION: checkpoint.1.12.3
     steps:
     - uses: actions/checkout@v3
     - name: Installs
       run: |
         set -x
-        #sudo gem install apt-spy2
-        #sudo apt-spy2 check
-        #sudo apt-spy2 fix --commit
-        # after selecting a specific mirror, we need to run 'apt-get update'
         sudo apt-get update
         sudo apt-get install netcdf-bin libnetcdf-dev doxygen graphviz wget gfortran libjpeg-dev libz-dev openmpi-bin libopenmpi-dev
 
@@ -34,29 +31,23 @@ jobs:
       id: cache-pnetcdf
       uses: actions/cache@v3
       with:
-        path: ~/pnetcdf
-        key: pnetcdf-${{ runner.os }}-${{ env.PNETCDF_VERSION }}
+        path: ~/work/ParallelIO/ParallelIO/pnetcdf
+        key: pnetcdf-${{ runner.os }}-${{ env.PNETCDF_VERSION }}-openmpi
 
-    - name: build-pnetcdf
+    - name: Build PNetCDF
       if: steps.cache-pnetcdf.outputs.cache-hit != 'true'
+      uses: ./.github/actions/buildpnetcdf
+      with:
+        pnetcdf_version: ${{ env.PNETCDF_VERSION }}
+        install_prefix: ${GITHUB_WORKSPACE}/pnetcdf
+    - name: Build ParallelIO with autotools
+      uses: ./.github/actions/parallelio_autotools
+      with:
+        enable_fortran: True
+        with_mpiexec: 'mpiexec --oversubscribe'
+        with_pnetcdf: ${GITHUB_WORKSPACE}/pnetcdf
+        parallelio_version: ${{ env.GITHUB_SHA }}
+    - name: Run Tests
       run: |
-        set -x
-        wget https://parallel-netcdf.github.io/Release/pnetcdf-${{ env.PNETCDF_VERSION }}.tar.gz &> /dev/null
-        tar -xzvf pnetcdf-${{ env.PNETCDF_VERSION }}.tar.gz
-        pushd pnetcdf-${{ env.PNETCDF_VERSION }}
-        ./configure --prefix=/home/runner/pnetcdf --enable-shared --disable-cxx
-        make
-        sudo make install
-        popd
-
-    - name: autoreconf
-      run: autoreconf -i
-    - name: build
-      run: |
-        set -x
-        export CFLAGS="-std=c99 -Wall"
-        export FFLAGS="-Wall"
-        export FCFLAGS="$FCFLAGS -Wall"
-        export DISTCHECK_CONFIGURE_FLAGS="--enable-fortran --with-mpiexec='/usr/bin/mpiexec --oversubscribe'"
-        ./configure
+        cd ${GITHUB_WORKSPACE}/parallelio-src
         make -j distcheck

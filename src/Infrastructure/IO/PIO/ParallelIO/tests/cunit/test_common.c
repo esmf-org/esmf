@@ -80,7 +80,7 @@ int pio_type[NUM_PIO_TYPES_TO_TEST] = {PIO_BYTE, PIO_CHAR, PIO_SHORT, PIO_INT, P
 
 /* Attribute test data. */
 signed char byte_att_data[ATT_LEN] = {NC_MAX_BYTE, NC_MIN_BYTE, NC_MAX_BYTE};
-char char_att_data[ATT_LEN] = {NC_MAX_CHAR, 0, NC_MAX_CHAR};
+char char_att_data[ATT_LEN] = {(char) NC_MAX_CHAR, (char) 0, (char) NC_MAX_CHAR};
 short short_att_data[ATT_LEN] = {NC_MAX_SHORT, NC_MIN_SHORT, NC_MAX_SHORT};
 int int_att_data[ATT_LEN] = {NC_MAX_INT, NC_MIN_INT, NC_MAX_INT};
 float float_att_data[ATT_LEN] = {NC_MAX_FLOAT, NC_MIN_FLOAT, NC_MAX_FLOAT};
@@ -95,7 +95,7 @@ unsigned long long uint64_att_data[ATT_LEN] = {NC_MAX_UINT64, 0, NC_MAX_UINT64};
 
 /* Scalar variable test data. */
 signed char byte_scalar_data = NC_MAX_BYTE;
-char char_scalar_data = NC_MAX_CHAR;
+char char_scalar_data = (char) NC_MAX_CHAR;
 short short_scalar_data = NC_MAX_SHORT;
 int int_scalar_data = NC_MAX_INT;
 float float_scalar_data = NC_MAX_FLOAT;
@@ -441,13 +441,10 @@ create_nc_sample(int sample, int iosysid, int format, char *filename, int my_ran
     {
     case 0:
         return create_nc_sample_0(iosysid, format, filename, my_rank, ncid);
-        break;
     case 1:
         return create_nc_sample_1(iosysid, format, filename, my_rank, ncid);
-        break;
     case 2:
         return create_nc_sample_2(iosysid, format, filename, my_rank, ncid);
-        break;
     }
     return PIO_EINVAL;
 }
@@ -460,13 +457,10 @@ check_nc_sample(int sample, int iosysid, int format, char *filename, int my_rank
     {
     case 0:
         return check_nc_sample_0(iosysid, format, filename, my_rank, ncid);
-        break;
     case 1:
         return check_nc_sample_1(iosysid, format, filename, my_rank, ncid);
-        break;
     case 2:
         return check_nc_sample_2(iosysid, format, filename, my_rank, ncid);
-        break;
     }
     return PIO_EINVAL;
 }
@@ -602,8 +596,8 @@ create_nc_sample_1(int iosysid, int format, char *filename, int my_rank, int *nc
         return ret;
 
     /* Write some data. For the PIOc_put/get functions, all data must
-     * be on compmaster before the function is called. Only
-     * compmaster's arguments are passed to the async msg handler. All
+     * be on compmain before the function is called. Only
+     * compmain's arguments are passed to the async msg handler. All
      * other computation tasks are ignored. */
     for (int i = 0; i < DIM_LEN_S1; i++)
         data[i] = i;
@@ -797,8 +791,8 @@ create_nc_sample_2(int iosysid, int format, char *filename, int my_rank, int *nc
         return ret;
 
     /* Write some data. For the PIOc_put/get functions, all data must
-     * be on compmaster before the function is called. Only
-     * compmaster's arguments are passed to the async msg handler. All
+     * be on compmain before the function is called. Only
+     * compmain's arguments are passed to the async msg handler. All
      * other computation tasks are ignored. */
     for (int i = 0; i < DIM_LEN_S2; i++)
         data[i] = i;
@@ -828,7 +822,7 @@ int
 check_nc_sample_2(int iosysid, int format, char *filename, int my_rank, int *ncidp)
 {
     int ncid;
-    int ret;
+    int ret=PIO_NOERR;
     int ndims, nvars, ngatts, unlimdimid;
     int ndims2, nvars2, ngatts2, unlimdimid2;
     int dimid2;
@@ -998,7 +992,7 @@ check_nc_sample_2(int iosysid, int format, char *filename, int my_rank, int *nci
             return ERR_CHECK;
     }
 
-    return 0;
+    return ret;
 }
 
 /* Create the decomposition to divide the 3-dimensional sample data
@@ -1122,7 +1116,7 @@ int create_nc_sample_3(int iosysid, int iotype, int my_rank, int my_comp_idx,
     sprintf(var_name, "%s_%d", THREED_VAR_NAME, my_comp_idx);
     if ((ret = PIOc_def_var(ncid, var_name, PIO_SHORT, NDIM3, dimid, &varid[2])))
         ERR(ret);
-    
+
     /* End define mode. */
     if ((ret = PIOc_enddef(ncid)))
         ERR(ret);
@@ -1138,7 +1132,7 @@ int create_nc_sample_3(int iosysid, int iotype, int my_rank, int my_comp_idx,
     /* Write the 2-D variable with put_var(). */
     if ((ret = PIOc_put_var_short(ncid, 1, data_2d)))
         ERR(ret);
-    
+
     /* Write the 3D data. */
     if (use_darray)
     {
@@ -1156,11 +1150,11 @@ int create_nc_sample_3(int iosysid, int iotype, int my_rank, int my_comp_idx,
     {
         PIO_Offset start[NDIM3] = {0, 0, 0};
         PIO_Offset count[NDIM3] = {1, DIM_X_LEN, DIM_Y_LEN};
-        
+
         /* Write a record of the 3-D variable with put_vara(). */
         if ((ret = PIOc_put_vara_short(ncid, varid[2], start, count, data_2d)))
             ERR(ret);
-        
+
         /* Write another record of the 3-D variable with put_vara(). */
         start[0] = 1;
         if ((ret = PIOc_put_vara_short(ncid, varid[2], start, count, data_2d)))
@@ -1281,14 +1275,14 @@ int check_nc_sample_3(int iosysid, int iotype, int my_rank, int my_comp_idx,
     {
         PIO_Offset start[NDIM3] = {0, 0, 0};
         PIO_Offset count[NDIM3] = {1, DIM_X_LEN, DIM_Y_LEN};
-        
+
         /* Read a record of the 3-D variable with get_vara(). */
         if ((ret = PIOc_get_vara_short(ncid, 2, start, count, data_2d)))
             ERR(ret);
         for (int i = 0; i < DIM_X_LEN * DIM_Y_LEN; i++)
             if (data_2d[i] != my_comp_idx + i)
                 ERR(ERR_WRONG);
-        
+
         /* Read another record of the 3-D variable with get_vara(). */
         start[0] = 1;
         if ((ret = PIOc_get_vara_short(ncid, 2, start, count, data_2d)))

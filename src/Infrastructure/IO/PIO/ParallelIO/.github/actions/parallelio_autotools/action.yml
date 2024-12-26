@@ -1,0 +1,131 @@
+description: 'Build the parallelio library using cmake'
+inputs:
+  parallelio_version:
+    description: 'Tag in the parallelio repository to use'
+    default: pio2_5_10
+    required: False
+    type: string
+  shared_libraries:
+    description: 'Build shared libraries'
+    default: True
+    required: False
+    type: boolean
+  enable_examples:
+    description: 'Build parallelio examples'
+    default: False
+    required: False
+    type: boolean
+  enable_logging:
+    description: 'Enable parallelio logging (for debugging)'
+    default: False
+    required: False
+    type: boolean
+  enable_timing:
+    description: 'Enable parallelio timing library (GPTL)'
+    default: False
+    required: False
+    type: boolean
+  enable_doc:
+    description: 'Build parallelio Documentation'
+    default: False
+    required: False
+    type: boolean
+  enable_coverage:
+    description: 'Enable parallelio code coverage'
+    default: False
+    required: False
+    type: boolean
+  enable_netcdf_integration:
+    description: 'Enable netcdf integration'
+    default: False
+    required: False
+    type: boolean
+  with_mpi-serial:
+    description: 'Build with mpi-serial library'
+    default:
+    required: False
+    type: string
+  with_pnetcdf:
+    description: 'Build with pnetcdf library'
+    default:
+    required: False
+    type: string
+  with_netcdf:
+    description: 'Build with netcdf library'
+    default: /usr
+    required: False
+    type: string
+  with_netcdff:
+    description: 'Build with netcdff library'
+    default:
+    required: False
+    type: string
+  with_valgrind:
+    description: 'Build the parallelio valgrind leak check '
+    default: False
+    required: False
+    type: boolean
+  enable_fortran:
+    description: 'Build the parallelio Fortran Library '
+    default: False
+    required: False
+    type: boolean
+  extra_cflags:
+    description: 'Additional cflags to use'
+    default:
+    required: False
+    type: string
+
+  extra_fflags:
+    description: 'Additional fflags to use'
+    default:
+    required: False
+    type: string
+  with_mpiexec:
+    description: 'alternate mpiexec command'
+    default: mpiexec
+    required: False
+    type: string
+  install_prefix:
+    description: 'Install path of parallelio'
+    default: ${GITHUB_WORKSPACE}/parallelio
+    required: False
+    type: string
+  src_path:
+    description: 'Path to parallelio source'
+    default: ${GITHUB_WORKSPACE}/parallelio-src
+    required: False
+    type: string
+    
+runs:
+  using: composite
+  steps:
+    - name: Check if already present
+      uses: andstor/file-existence-action@v2
+      with:
+       files: ${{ inputs.src_path }}
+    - name: get parallelio
+      if: ${{ steps.check_files.outputs.files_exists != 'true' }}
+      uses: actions/checkout@v3
+      with:
+        repository: NCAR/ParallelIO
+        path: ${{ inputs.src_path }}
+        ref: ${{ inputs.parallelio_version }}
+    - id: parallelio-build
+      shell: bash
+      run: |
+        cd ${{ inputs.src_path }}
+        autoreconf -i
+        config_opts='--prefix=${{ inputs.install_prefix }} '
+        if [[ -z "${{ inputs.with_pnetcdf }}" ]];
+        then
+          config_opts="${config_opts} --disable-pnetcdf "
+        fi
+        if [ "${{ inputs.enable_fortran }}" = "true" ];
+        then
+          config_opts="${config_opts} --enable-fortran=yes "
+        fi
+        echo "config_opts = ${config_opts} --with-mpiexec=${{ inputs.with_mpiexec }}"
+        ./configure ${config_opts} --with-mpiexec="${{ inputs.with_mpiexec }}"
+        make -j 4 VERBOSE=1
+        make install

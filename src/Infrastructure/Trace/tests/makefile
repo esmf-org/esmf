@@ -14,8 +14,9 @@ TESTS_BUILD = \
 		$(ESMF_TESTDIR)/ESMF_TraceUTest \
 		$(ESMF_TESTDIR)/ESMF_TraceIOUTest \
 		$(ESMF_TESTDIR)/ESMF_TraceMPIUTest \
-                $(ESMF_TESTDIR)/ESMCI_TraceRegionUTest \
-		$(ESMF_TESTDIR)/ESMF_ProfileUTest 
+		$(ESMF_TESTDIR)/ESMCI_TraceRegionUTest \
+		$(ESMF_TESTDIR)/ESMC_TraceRegionUTest \
+		$(ESMF_TESTDIR)/ESMF_ProfileUTest
 
 
 TESTS_RUN = \
@@ -24,7 +25,8 @@ TESTS_RUN = \
 		RUN_ESMF_TraceClkMonoSyncUTest \
 		RUN_ESMF_TraceIOUTest \
 		RUN_ESMF_TraceMPIUTest \
-                RUN_ESMCI_TraceRegionUTest \
+		RUN_ESMCI_TraceRegionUTest \
+		RUN_ESMC_TraceRegionUTest \
 		RUN_ESMF_ProfileUTest	
 
 TESTS_RUN_UNI = \
@@ -34,6 +36,7 @@ TESTS_RUN_UNI = \
 		RUN_ESMF_TraceIOUTestUNI \
 		RUN_ESMF_TraceMPIUTestUNI \
 		RUN_ESMCI_TraceRegionUTestUNI \
+		RUN_ESMC_TraceRegionUTestUNI \
 		RUN_ESMF_ProfileUTestUNI
 
 include ${ESMF_DIR}/makefile
@@ -47,13 +50,20 @@ CLOBBERDIRS =
 ESMF_TESTTRACE_TARGET = ftest_profile
 
 ifeq ($(ESMF_TRACE_LIB_BUILD),ON)
+# activate trace testing
 ESMF_F90COMPILEOPTS += -DESMF_TESTTRACE
-# add link options for static builds, if required
 ifneq ($(ESMF_TRACE_BUILD_SHARED),ON)
+# add link options for static builds
 ESMF_F90LINKOPTS += $(ESMF_TRACE_STATICLINKOPTS)
 ESMF_F90ESMFLINKLIBS += $(ESMF_TRACE_STATICLINKLIBS)
 else
+ifeq ($(ESMF_TRACE_PRELOAD_LINKED),ON)
+ESMF_F90LINKLIBS := $(ESMF_TRACE_DYNAMICLINKLIBS) $(ESMF_F90LINKLIBS)
 ESMF_TESTTRACE_TARGET = ftest_profile_preload
+else
+# set dynamic preload trace test target
+ESMF_TESTTRACE_TARGET = ftest_profile_preload
+endif
 endif
 endif
 
@@ -87,15 +97,15 @@ RUN_ESMF_TraceClkMonoSyncUTestUNI:
 # --- TraceIOUTest
 
 RUN_ESMF_TraceIOUTest:
-	$(MAKE) TNAME=TraceIO NP=4 $(ESMF_TESTTRACE_TARGET) 
+	$(MAKE) TNAME=TraceIO NP=4 $(ESMF_TESTTRACE_TARGET)
 
 RUN_ESMF_TraceIOUTestUNI:
-	$(MAKE) TNAME=TraceIO NP=1 $(ESMF_TESTTRACE_TARGET) 
+	$(MAKE) TNAME=TraceIO NP=1 $(ESMF_TESTTRACE_TARGET)
 
 # --- TraceMPIUTest
 
 RUN_ESMF_TraceMPIUTest:
-	env ESMF_RUNTIME_PROFILE=ON $(MAKE) TNAME=TraceMPI NP=4 $(ESMF_TESTTRACE_TARGET) 
+	$(MAKE) TNAME=TraceMPI NP=4 $(ESMF_TESTTRACE_TARGET)
 
 RUN_ESMF_TraceMPIUTestUNI:
 	$(MAKE) TNAME=TraceMPI NP=1 $(ESMF_TESTTRACE_TARGET)
@@ -108,6 +118,13 @@ RUN_ESMCI_TraceRegionUTest:
 RUN_ESMCI_TraceRegionUTestUNI:
 	$(MAKE) TNAME=TraceRegion NP=1 citest
 
+# ---
+
+RUN_ESMC_TraceRegionUTest:
+	$(MAKE) TNAME=TraceRegion NP=4 ctest
+
+RUN_ESMC_TraceRegionUTestUNI:
+	$(MAKE) TNAME=TraceRegion NP=1 ctest
 
 # --- ProfileUTest
 ESMF_ProfileUTest.o: ESMF_SimpleCompB.o

@@ -11,7 +11,7 @@
 #if PIO_USE_MPISERIAL
 #define MPI_Type_create_hvector MPI_Type_hvector
 #endif
-#define SIZEOF_MPI_OFFSET sizeof(MPI_Offset)
+
 /**
  * Convert a 1-D index into a coordinate value in an arbitrary
  * dimension space. E.g., for index 4 into a array defined as a[3][2],
@@ -35,7 +35,7 @@ idx_to_dim_list(int ndims, const int *gdimlen, PIO_Offset idx,
     /* Check inputs. */
     pioassert(ndims >= 0 && gdimlen && idx >= -1 && dim_list, "invalid input",
               __FILE__, __LINE__);
-    PLOG((2, "idx_to_dim_list ndims = %d idx = %d", ndims, idx));
+    PLOG((3, "idx_to_dim_list ndims = %d idx = %d", ndims, idx));
 
     /* Easiest to start from the right and move left. */
     for (int i = ndims - 1; i >= 0; --i)
@@ -314,7 +314,7 @@ create_mpi_datatypes(MPI_Datatype mpitype, int msgcnt,
     if (mindex)
     {
       for(int j=0; j<numinds; j++)
-        PLOG((3,"mindex[%d] = %d",j,mindex[j]));
+        PLOG((5,"mindex[%d] = %d",j,mindex[j]));
       if (!(lindex = malloc(numinds * sizeof(PIO_Offset))))
             return pio_err(NULL, NULL, PIO_ENOMEM, __FILE__, __LINE__);
         memcpy(lindex, mindex, (size_t)(numinds * sizeof(PIO_Offset)));
@@ -476,7 +476,7 @@ define_iodesc_datatypes(iosystem_desc_t *ios, io_desc_t *iodesc)
 
                 /* The different rearrangers get different values for mfrom. */
                 int *mfrom = iodesc->rearranger == PIO_REARR_SUBSET ? iodesc->rfrom : NULL;
-                
+
                 /* Create the MPI datatypes. */
                 PLOG((2, "Calling create_mpi_datatypes at line %d ",__LINE__));
                 if ((ret = create_mpi_datatypes(iodesc->mpitype, iodesc->nrecvs, iodesc->rindex,
@@ -510,7 +510,7 @@ define_iodesc_datatypes(iosystem_desc_t *ios, io_desc_t *iodesc)
 
             /* Remember how many types we created for the send side. */
             iodesc->num_stypes = ntypes;
-            
+
             /* Create the MPI data types. */
             PLOG((2, "Calling create_mpi_datatypes at line %d",__LINE__));
             if ((ret = create_mpi_datatypes(iodesc->mpitype, ntypes, iodesc->sindex,
@@ -1113,7 +1113,7 @@ rearrange_io2comp(iosystem_desc_t *ios, io_desc_t *iodesc, void *sbuf,
 
     /* Data in sbuf on the ionodes is sent to rbuf on the compute
      * nodes. */
-    
+
     if ((ret = pio_swapm(sbuf, sendcounts, sdispls, sendtypes, rbuf, recvcounts,
                          rdispls, recvtypes, mycomm, &iodesc->rearr_opts.io2comp)))
         return pio_err(ios, NULL, ret, __FILE__, __LINE__);
@@ -2260,7 +2260,6 @@ subset_rearrange_create(iosystem_desc_t *ios, int maplen, PIO_Offset *compmap,
     PIO_Offset soffset;
     /* we only want a single copy of each source point in the iobuffer but it may be sent to multiple destinations
        in a read operation */
-    int k=0;
 //    PIO_Offset previomap[ntasks];
 //    for (i = 0; i < ntasks; i++)
 //        previomap[i] = -1;

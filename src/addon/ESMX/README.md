@@ -2,6 +2,8 @@
 
 ESMX is the **E**arth **S**ystem **M**odel e**X**ecutable layer.
 
+http://earthsystemmodeling.org/esmx/
+
 The ESMX layer is built on top of the ESMF and NUOPC APIs.
 
 The idea behind ESMX is to make it as simple as possible for a user to build, run, and test NUOPC based systems. The approach implemented is the same whether applied to a single component, or a fully coupled system of NUOPC-compliant components. ESMX user interfaces are implemented through [YAML](https://yaml.org/) based configuration files.
@@ -248,16 +250,28 @@ On the highest level, `ESMX Run Configuration` is expected to define the `ESMX` 
 
 This section affects the application level.
 
+**CAUTION:** Specifying any of the  `ESMF_RUNTIME_*` keys overrides the corresponding environment variables set in the user's environment.
+
 | Option key                | Description / Value options                               | Default         |
 | ------------------------- | --------------------------------------------------------- | --------------- |
 | `startTime`               | string setting the application start time                 | *non-optional*  |
 | `stopTime`                | string setting the application stop time                  | *non-optional*  |
 | `globalResourceControl`   | enable/disable global resource control: `true` or `false` | `false`         |
-| `logKindFlag`             | string constant setting ESMF logging kind, see ESMF RefDoc| `ESMF_LOGKIND_Multi_On_Error`|
+| `logKindFlag`             | ESMF logging kind, see ESMF RefDoc for options            | `ESMF_LOGKIND_Multi_On_Error`|
 | `logAppendFlag`           | enable/disable log append: `true` or `false`              | `true`          |
 | `defaultLogFilename`      | name of the default ESMF log file (suffix if multi PET)   | `ESMF_LogFile`  |
+| `defaultCalKind`          | ESMF calendar kind used by default, see ESMF RefDoc for options | `ESMF_CALKIND_GREGORIAN` |
 | `logFlush`                | enable/disable log flush for each write: `true` or `false`| `false`         |
 | `fieldDictionary`         | name of the NUOPC field dictionary file to be loaded      | *None*          |
+| `ESMF_RUNTIME_PROFILE`    | enable/disable all profiling functions: `ON` or `OFF`     | `OFF`           |
+| `ESMF_RUNTIME_PROFILE_OUTPUT` | output format; multiple can be selected: `TEXT` `SUMMARY` `BINARY` | `TEXT`      |
+| `ESMF_RUNTIME_PROFILE_PETLIST`| limit profiling to an explicit list of PETs           | *all PETs*      |
+| `ESMF_RUNTIME_TRACE`      | enable/disable all tracing functions: `ON` or `OFF`       | `OFF`           |
+| `ESMF_RUNTIME_TRACE_CLOCK`| type of clock for events: `REALTIME` or `MONOTONIC` or `MONOTONIC_SYNC`  | `REALTIME`|
+| `ESMF_RUNTIME_TRACE_PETLIST`| limit tracing to an explicit list of PETs               | *all PETs*      |
+| `ESMF_RUNTIME_TRACE_COMPONENT`| enable/disable tracing of component events: `ON` or `OFF` | `ON`        |
+| `ESMF_RUNTIME_TRACE_FLUSH`| frequency of event stream flushing to file: `DEFAULT` or `EAGER` | `DEFAULT`|
+| `ESMF_RUNTIME_COMPLIANCECHECK`| enable/disable NUOPC compliance checking: `ON` or `OFF` with `DEPTH` | `OFF`|
 
 #### ESMX/Driver Options
 
@@ -277,6 +291,7 @@ This section affects the specific component instance.
 | --------------------- | --------------------------------------------------------------------- | --------------- |
 | `model`               | string associating the instance with a *component-name* defined in `esmxBuild.yaml` | *non-optional*  |
 | `petList`             | list of PETs on which the component executes                          | *None*          |
+| `devList`             | list of DEVs (accelerator devices) to be associated with the component| *None*          |
 | `ompNumThreads`       | setting of /NUOPC/Hint/PePerPet/MaxCount (see NUOPC ref doc)          | *None*          |
 | `attributes`          | map of key value pairs, each defining a component attribute           | *None*          |
 | *model specific yaml* | each model can define its own YAML section, e.g. with key value pairs, etc. | *None*          |

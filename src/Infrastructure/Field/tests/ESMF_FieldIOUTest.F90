@@ -65,6 +65,7 @@ program ESMF_FieldIOUTest
   type(ESMF_Mesh) :: elem_mesh
   type(ESMF_Field) :: field_att, field_ugd_att
   type(ESMF_Field) :: field_ug, field_ug2
+  type(ESMF_Field) :: field_ug_w2DE, field_ug_r2DE
 
   type(ESMF_DistGrid) :: dg_debl
   type(ESMF_DistGridConnection), allocatable :: connectionList(:)
@@ -75,6 +76,8 @@ program ESMF_FieldIOUTest
 
   real(ESMF_KIND_R8), pointer :: Farray_DE0_w(:,:) => null (), Farray_DE0_r(:,:) => null ()
   real(ESMF_KIND_R8), pointer :: Farray_DE1_w(:,:) => null (), Farray_DE1_r(:,:) => null ()
+  real(ESMF_KIND_R8), pointer :: Farray_ug_DE0_w(:,:,:) => null(), Farray_ug_DE0_r(:,:,:) => null()
+  real(ESMF_KIND_R8), pointer :: Farray_ug_DE1_w(:,:,:) => null(), Farray_ug_DE1_r(:,:,:) => null()
 
   integer              :: rc, ncstat, ncid
   integer, allocatable :: computationalLBound(:),computationalUBound(:)
@@ -84,7 +87,7 @@ program ESMF_FieldIOUTest
   integer :: elem_tlb(1), elem_tub(1), elem_tc(1)
   integer :: tlb3(3), tub3(3), tlb4(3), tub4(3)
   integer :: i, j, t, endtime, k
-  logical :: failed
+  logical :: failed, allEqual
   real(ESMF_KIND_R8) :: Maxvalue, diff
 #if defined ESMF_NETCDF
   integer :: dim1id, dim2id, dim1len, dim2len, varid, ndims
@@ -1174,13 +1177,6 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Destroy globally indexed 2DE Grid"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_GridDestroy(grid_2DE, rc=rc)
-  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-!------------------------------------------------------------------------
 ! Mesh Write test
 !------------------------------------------------------------------------
 
@@ -1682,8 +1678,152 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
+! Tests with both (a) multiple DEs per PET and (b) ungridded dimensions
+! (Note that these are exhaustive-only unit tests.)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  ! Create Field
+  field_ug_w2DE=ESMF_FieldCreate(grid_2DE, typekind=ESMF_TYPEKIND_R8, &
+       ungriddedLBound=(/1/), ungriddedUBound=(/2/), &
+       name="temperature", rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Create a Field from 2DE grid with 1 ungridded dim"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  ! Fill Field for DE0
+  call ESMF_FieldGet(field_ug_w2DE, localDe=0, farrayPtr=Farray_ug_DE0_w, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Get and fill farray from field_ug_w2DE, DE 0"
+  if (rc == ESMF_SUCCESS) then
+     do k = lbound(Farray_ug_DE0_w, 3), ubound(Farray_ug_DE0_w, 3)
+        do j = lbound(Farray_ug_DE0_w, 2), ubound(Farray_ug_DE0_w, 2)
+           do i = lbound(Farray_ug_DE0_w, 1), ubound(Farray_ug_DE0_w, 1)
+              Farray_ug_DE0_w(i,j,k) = (localPet+1) * real(k*1000 + j*100 + i, ESMF_KIND_R8)
+           end do
+        end do
+     end do
+  end if
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  ! Fill Field for DE1
+  call ESMF_FieldGet(field_ug_w2DE, localDe=1, farrayPtr=Farray_ug_DE1_w, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Get and fill farray from field_ug_w2DE, DE 1"
+  if (rc == ESMF_SUCCESS) then
+     do k = lbound(Farray_ug_DE1_w, 3), ubound(Farray_ug_DE1_w, 3)
+        do j = lbound(Farray_ug_DE1_w, 2), ubound(Farray_ug_DE1_w, 2)
+           do i = lbound(Farray_ug_DE1_w, 1), ubound(Farray_ug_DE1_w, 1)
+              Farray_ug_DE1_w(i,j,k) = 7 * (localPet+1) * real(k*1000 + j*100 + i, ESMF_KIND_R8)
+           end do
+        end do
+     end do
+  end if
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  ! Write Field with both (a) multiple DEs per PET and (b) ungridded dimensions
+  call ESMF_FieldWrite(field_ug_w2DE, fileName="field_ug_2DE.nc", &
+       iofmt=ESMF_IOFMT_NETCDF, &
+       status=ESMF_FILESTATUS_REPLACE, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Write Field from 2DE grid with 1 ungridded dim"
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  ! Create Field
+  field_ug_r2DE=ESMF_FieldCreate(grid_2DE, typekind=ESMF_TYPEKIND_R8, &
+       ungriddedLBound=(/1/), ungriddedUBound=(/2/), &
+       name="temperature", rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Create a Field from 2DE grid with 1 ungridded dim for read"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  ! Read Field with both (a) multiple DEs per PET and (b) ungridded dimensions
+  call ESMF_FieldRead(field_ug_r2DE, fileName="field_ug_2DE.nc", rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Read Field from 2DE grid with 1 ungridded dim"
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  ! Get Farray from read-in Field on DE 0
+  call ESMF_FieldGet(field_ug_r2DE, localDe=0, farrayPtr=Farray_ug_DE0_r, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Get farray from field_ug_r2DE, DE 0"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  ! Compare read-in Field with original for DE 0
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  allEqual = all(Farray_ug_DE0_r == Farray_ug_DE0_w)
+#else
+  allEqual = .true.
+#endif
+  write(failMsg, *) "Some read-in values differ from original"
+  write(name, *) "Comparison of read-in Field from 2DE grid with 1 ungridded dim vs original, DE 0"
+  call ESMF_Test(allEqual, name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  ! Get Farray from read-in Field on DE 1
+  call ESMF_FieldGet(field_ug_r2DE, localDe=1, farrayPtr=Farray_ug_DE1_r, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Get farray from field_ug_r2DE, DE 1"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  ! Compare read-in Field with original for DE 1
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  allEqual = all(Farray_ug_DE1_r == Farray_ug_DE1_w)
+#else
+  allEqual = .true.
+#endif
+  write(failMsg, *) "Some read-in values differ from original"
+  write(name, *) "Comparison of read-in Field from 2DE grid with 1 ungridded dim vs original, DE 1"
+  call ESMF_Test(allEqual, name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
 ! Destroy all Fields and cleanup
 !------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Destroy globally indexed 2DE Grid"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_GridDestroy(grid_2DE, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -1722,6 +1862,10 @@ program ESMF_FieldIOUTest
   call ESMF_FieldDestroy(field_ug, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_FieldDestroy(field_ug2, rc=rc)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
+  call ESMF_FieldDestroy(field_ug_w2DE, rc=rc)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
+  call ESMF_FieldDestroy(field_ug_r2DE, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_FieldDestroy(elem_field, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1

@@ -322,7 +322,7 @@ contains
 ! !IROUTINE:  ESMF_DELayoutEQ - Compare two DELayouts for equality
 !
 ! !INTERFACE:
-  function ESMF_DELayoutEQ(delayout1, delayout2)
+  impure elemental function ESMF_DELayoutEQ(delayout1, delayout2)
 ! 
 ! !RETURN VALUE:
     logical :: ESMF_DELayoutEQ
@@ -373,7 +373,7 @@ contains
 ! !IROUTINE:  ESMF_DELayoutNE - Compare two DELayouts for non-equality
 !
 ! !INTERFACE:
-  function ESMF_DELayoutNE(delayout1, delayout2)
+  impure elemental function ESMF_DELayoutNE(delayout1, delayout2)
 ! 
 ! !RETURN VALUE:
     logical :: ESMF_DELayoutNE

@@ -77,13 +77,13 @@ Building PIO requires running the CMake configure and then make. In the PIO_buil
 <ol>
 <li>Directory setup
 
-Download a copy of the PIO source into a sub-directory of your working directory (refered to here as the PIO_source directory). Create another sub-directory for the build (refered to here as the PIO_build directory) and 'cd' into it. 
+Download a copy of the PIO source into a sub-directory of your working directory (refered to here as the PIO_source directory). Create another sub-directory for the build (refered to here as the PIO_build directory) and 'cd' into it.
 
 <li>Modules
 
-Modules required for installation depend on your prefered compiler. Issue the commands below to set the module environment for building PIO on Edison. 
+Modules required for installation depend on your prefered compiler. Issue the commands below to set the module environment for building PIO on Edison.
 
-+ Intel 
++ Intel
 
   %> module purge<br>
   %> module load PrgEnv-intel<br>
@@ -156,7 +156,7 @@ Building PIO requires running the CMake configure and then make. In the PIO_buil
 <ol>
 <li>Directory setup
 
-Download a copy of the PIO source into a sub-directory of your working directory (refered to here as the PIO_source directory). Create another sub-directory for the build (refered to here as the PIO_build directory) and 'cd' into it. 
+Download a copy of the PIO source into a sub-directory of your working directory (refered to here as the PIO_source directory). Create another sub-directory for the build (refered to here as the PIO_build directory) and 'cd' into it.
 
 <li> Softenv packages and environment variables
 
@@ -187,11 +187,11 @@ Building PIO requires running the CMake configure and then make. In the PIO_buil
 <ol>
 <li>Directory setup
 
-Download a copy of the PIO source into a sub-directory of your working directory (refered to here as the PIO_source directory). Create another sub-directory for the build (refered to here as the PIO_build directory) and 'cd' into it. 
+Download a copy of the PIO source into a sub-directory of your working directory (refered to here as the PIO_source directory). Create another sub-directory for the build (refered to here as the PIO_build directory) and 'cd' into it.
 
 <li>Modules
 
-Modules required for installation depend on your prefered compiler. Issue the commands below to set the module environment for building PIO on Hobart. 
+Modules required for installation depend on your prefered compiler. Issue the commands below to set the module environment for building PIO on Hobart.
 
 + Intel
 
@@ -244,11 +244,11 @@ Building PIO requires running the CMake configure and then make. In the PIO_buil
 <ol>
 <li>Directory setup
 
-Download a copy of the PIO source into a sub-directory of your working directory (refered to here as the PIO_source directory). Create another sub-directory for the build (refered to here as the PIO_build directory) and 'cd' into it. 
+Download a copy of the PIO source into a sub-directory of your working directory (refered to here as the PIO_source directory). Create another sub-directory for the build (refered to here as the PIO_build directory) and 'cd' into it.
 
 <li>Modules
 
-Modules required for installation depend on your prefered compiler. Issue the commands below to set the module environment for building PIO on Hobart. 
+Modules required for installation depend on your prefered compiler. Issue the commands below to set the module environment for building PIO on Hobart.
 
 + Intel
 
@@ -261,7 +261,7 @@ Modules required for installation depend on your prefered compiler. Issue the co
   %> module purge<br>
   %> module load compiler/nag/6.0<br>
   %> module load tool/parallel-netcdf/1.6.1/nag/openmpi<br>
-  
+
 + PGI
 
   %> module purge<br>

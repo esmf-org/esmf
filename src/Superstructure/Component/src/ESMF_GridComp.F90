@@ -273,7 +273,7 @@ contains
 ! !IROUTINE:  ESMF_GridCompEQ - Compare two GridComps for equality
 !
 ! !INTERFACE:
-  function ESMF_GridCompEQ(gridcomp1, gridcomp2)
+  impure elemental function ESMF_GridCompEQ(gridcomp1, gridcomp2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_GridCompEQ
@@ -325,7 +325,7 @@ contains
 ! !IROUTINE:  ESMF_GridCompNE - Compare two GridComps for non-equality
 !
 ! !INTERFACE:
-  function ESMF_GridCompNE(gridcomp1, gridcomp2)
+  impure elemental function ESMF_GridCompNE(gridcomp1, gridcomp2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_GridCompNE
@@ -365,7 +365,7 @@ contains
 ! !INTERFACE:
   recursive function ESMF_GridCompCreate(keywordEnforcer, grid, gridList, &
     mesh, meshList, locstream, locstreamList, xgrid, xgridList, &
-    config, configFile, clock, petList, contextflag, name, rc)
+    config, configFile, clock, petList, devList, contextflag, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_GridComp) :: ESMF_GridCompCreate
@@ -384,6 +384,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),        intent(in),    optional :: configFile
     type(ESMF_Clock),        intent(in),    optional :: clock
     integer,                 intent(in),    optional :: petList(:)
+    integer,                 intent(in),    optional :: devList(:)
     type(ESMF_Context_Flag), intent(in),    optional :: contextflag
     character(len=*),        intent(in),    optional :: name
     integer,                 intent(out),   optional :: rc
@@ -399,6 +400,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   These arguments add support for holding references to multiple geom objects,
 !   either of the same type, or different type, in the same
 !   {\tt ESMF\_GridComp} object.
+! \item[8.6.0] Added argument {\tt devList} to support management of accelerator
+!   devices.
 ! \end{sloppypar}
 ! \end{description}
 ! \end{itemize}
@@ -524,6 +527,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   parent {\tt PET}s are given to the child component. The order of
 !   PETs in {\tt petList} determines how the child local PETs map back to
 !   the parent PETs.
+! \item[{[devList]}]
+!   List of accelerator devices global ids {\tt DEV}s to be associated with the
+!   created child component. If {\tt devList} is not specified, or is empty,
+!   no devices are associated with the component.
 ! \item[{[contextflag]}]
 !   Specify the component's VM context. The default context is
 !   {\tt ESMF\_CONTEXT\_OWN\_VM}. See section \ref{const:contextflag} for a
@@ -562,7 +569,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! call Comp method
     call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
       configFile=configFile, config=config, clock=clock, petList=petList, &
-      contextflag=contextflag, rc=localrc)
+      devList=devList, contextflag=contextflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) then

@@ -254,7 +254,7 @@ int test_decomp_read_write(int iosysid, int ioid, int num_flavors, int *flavor, 
     for (int fmt = 0; fmt < num_flavors; fmt++)
     {
 	int ret;              /* Return code. */
-	
+
         /* Create the filename. */
         sprintf(filename, "decomp_%s_iotype_%d.nc", TEST_NAME, flavor[fmt]);
 

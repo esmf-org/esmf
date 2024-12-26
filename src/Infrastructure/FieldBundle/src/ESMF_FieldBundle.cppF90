@@ -490,7 +490,7 @@ contains
 ! !IROUTINE:  ESMF_FieldBundleEQ - Compare two FieldBundles for equality
 !
 ! !INTERFACE:
-  function ESMF_FieldBundleEQ(fieldbundle1, fieldbundle2)
+  impure elemental function ESMF_FieldBundleEQ(fieldbundle1, fieldbundle2)
 ! 
 ! !RETURN VALUE:
     logical :: ESMF_FieldBundleEQ
@@ -541,7 +541,7 @@ contains
 ! !IROUTINE:  ESMF_FieldBundleNE - Compare two FieldBundles for non-equality
 !
 ! !INTERFACE:
-  function ESMF_FieldBundleNE(fieldbundle1, fieldbundle2)
+  impure elemental function ESMF_FieldBundleNE(fieldbundle1, fieldbundle2)
 ! 
 ! !RETURN VALUE:
     logical :: ESMF_FieldBundleNE

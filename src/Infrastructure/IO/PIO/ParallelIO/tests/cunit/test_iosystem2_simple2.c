@@ -49,7 +49,7 @@ int main(int argc, char **argv)
     {
 	int num_flavors; /* Number of PIO netCDF flavors in this build. */
 	int flavor[NUM_FLAVORS]; /* iotypes for the supported netCDF IO flavors. */
-	
+
         /* Figure out iotypes. */
         if ((ret = get_iotypes(&num_flavors, flavor)))
             ERR(ret);

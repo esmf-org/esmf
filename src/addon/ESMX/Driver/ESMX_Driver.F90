@@ -19,11 +19,37 @@ module ESMX_Driver
 
   public SetServices, SetVM, HConfigCreateFoundNode
 
+#if defined (__NVCOMPILER)
+!TODO: remove once NVHPC and PGI compilers work correctly w/o work-around
+
+  abstract interface
+    recursive subroutine SetServicesRoutine(gridcomp, rc)
+      use ESMF
+      implicit none
+      type(ESMF_GridComp)        :: gridcomp ! must not be optional
+      integer, intent(out)       :: rc       ! must not be optional
+    end subroutine
+    recursive subroutine SetVMRoutine(gridcomp, rc)
+      use ESMF
+      implicit none
+      type(ESMF_GridComp)        :: gridcomp ! must not be optional
+      integer, intent(out)       :: rc       ! must not be optional
+    end subroutine
+  end interface
+
+  type type_CompDef
+    procedure(SetServicesRoutine), pointer, nopass :: ssPtr => null()
+    procedure(SetVMRoutine),       pointer, nopass :: svPtr => null()
+    character(ESMF_MAXSTR)                  :: name = "__uninitialized__"
+  end type
+
+#else
   type type_CompDef
     procedure(SetServices), pointer, nopass :: ssPtr => null()
     procedure(SetVM),       pointer, nopass :: svPtr => null()
     character(ESMF_MAXSTR)                  :: name = "__uninitialized__"
   end type
+#endif
 
   include "compCnt.inc"
 
@@ -64,7 +90,7 @@ module ESMX_Driver
 
     ! local variables
     integer                         :: i, j, componentCount, ompNumThreads
-    integer, allocatable            :: petList(:)
+    integer, allocatable            :: petList(:), devList(:)
     type(ESMF_GridComp)             :: comp
     type(ESMF_Config)               :: config
     type(ESMF_HConfig)              :: hconfig, hconfigNode, hconfigNode2
@@ -223,6 +249,25 @@ module ESMX_Driver
         allocate(petList(0))
       endif
 
+      ! set up devList
+      isFlag = ESMF_HConfigIsDefined(hconfigNode, keyString="devList", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      if (isFlag) then
+        hconfigNode2 = ESMF_HConfigCreateAt(hconfigNode, keyString="devList", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+        call NUOPC_IngestPetList(devList, hconfigNode2, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+        call ESMF_HConfigDestroy(hconfigNode2, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+      else
+        allocate(devList(0))
+      endif
+
       ! Set NUOPC hint for OpenMP
       info = ESMF_InfoCreate(rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -261,18 +306,29 @@ module ESMX_Driver
 
       if (inCompDef) then
         ! add child component with SetVM and SetServices in CompDef
-        call NUOPC_DriverAddComp(driver, trim(compLabel), config=config, &
+#if defined (__INTEL_LLVM_COMPILER) || (__NVCOMPILER)
+!TODO: remove once IFX, NVHPC, and PGI compilers work correctly w/o work-around
+        call NUOPC_DriverAddGridCompPtr(driver, trim(compLabel), config=config, &
           compSetServicesRoutine=CompDef(j)%ssPtr, compSetVMRoutine=CompDef(j)%svPtr, &
-          info=info, petList=petList, comp=comp, rc=rc)
+          info=info, petList=petList, devList=devList, comp=comp, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, &
           msg="Unable to add component '"//trim(compLabel)// &
             "' to driver via Fortran module.", &
           line=__LINE__, file=FILENAME)) return  ! bail out
+#else
+        call NUOPC_DriverAddComp(driver, trim(compLabel), config=config, &
+          compSetServicesRoutine=CompDef(j)%ssPtr, compSetVMRoutine=CompDef(j)%svPtr, &
+          info=info, petList=petList, devList=devList, comp=comp, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, &
+          msg="Unable to add component '"//trim(compLabel)// &
+            "' to driver via Fortran module.", &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+#endif
       else
         ! add child component with SetVM and SetServices in shared object
         call NUOPC_DriverAddComp(driver, trim(compLabel), config=config, &
-          sharedObj=trim(model), info=info, petList=petList, comp=comp, &
-          rc=rc)
+          sharedObj=trim(model), info=info, petList=petList, devList=devList, &
+          comp=comp, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, &
           msg="Unable to add component '"//trim(compLabel)// &
             "' to driver via shared object: "//trim(model), &
@@ -298,7 +354,7 @@ module ESMX_Driver
       endif
 
       ! clean-up
-      deallocate(petList)
+      deallocate(petList, devList)
       call ESMF_InfoDestroy(info, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out

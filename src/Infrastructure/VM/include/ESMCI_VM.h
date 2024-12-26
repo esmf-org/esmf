@@ -148,6 +148,7 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     static void rmFObject(void **fobject);
     static bool validObject(ESMC_Base *);
     static char const *getenv(char const *name);
+    static void setenv(char const *name, char const *value);
     // misc.
     int print() const;
     int validate() const;
@@ -197,6 +198,7 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
 class VMPlan : public VMKPlan {   // inherits from ESMCI::VMKPlan
 
   public:
+    VMPlan(int _ndevlist=0, int *_devlist=NULL) : VMKPlan(_ndevlist,_devlist){}
     int nspawn;     // number of PETs this PET will spawn
     VM **myvms;     // pointer array of VM instances for this PET
     VMK **myvmachs; // pointer array of VMK instances for this PET

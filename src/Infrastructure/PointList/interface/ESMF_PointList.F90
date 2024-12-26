@@ -215,7 +215,7 @@ contains
 ! !IROUTINE: ESMF_PointListCreateFrmGrid - Create a new PointList from input Grid
 
 ! !INTERFACE:
-  function ESMF_PointListCreateFrmGrid(grid, staggerLoc, maskValues, rc)
+  function ESMF_PointListCreateFrmGrid(grid, staggerLoc, maskValues, addOrigCoords, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_PointList) :: ESMF_PointListCreateFrmGrid
@@ -224,6 +224,7 @@ contains
     type(ESMF_Grid), intent(in)       :: grid
     type(ESMF_StaggerLoc), intent(in) :: staggerLoc
     integer(ESMF_KIND_I4), optional   :: maskValues(:)
+    logical, optional                 :: addOrigCoords
     integer, intent(out), optional    :: rc
 !
 ! !DESCRIPTION:
@@ -238,6 +239,9 @@ contains
 !     stagger location
 !   \item[{maskValues}]
 !     Values to set as masked
+!   \item[{[addOrigCoords]}]
+!     Also put the original (spherical) coordinate values in the PointList
+!     Defaults to false.    
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -247,7 +251,8 @@ contains
     integer             :: localrc      ! local return code
     type(ESMF_PointList)  :: pointlist
     type(ESMF_InterArray) :: maskValuesArg
-
+    type(ESMF_Logical) :: opt_addOrigCoords
+    
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -256,10 +261,15 @@ contains
     ! convert mask values
     maskValuesArg = ESMF_InterArrayCreate(maskValues, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Convert addOrigCoords
+    opt_addOrigCoords=ESMF_FALSE
+    if (present(addOrigCoords)) opt_addOrigCoords=addOrigCoords
+    
     ! Call C++ create code
-    call c_ESMC_PointListCreateFrmGrid(grid, staggerLoc%staggerloc, maskValuesArg, pointlist, localrc)
+    call c_ESMC_PointListCreateFrmGrid(grid, staggerLoc%staggerloc, maskValuesArg, opt_addOrigCoords, &
+         pointlist, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -291,7 +301,7 @@ contains
 ! !IROUTINE: ESMF_PointListCreateFrmMesh - Create a new PointList from input Mesh
 
 ! !INTERFACE:
-  function ESMF_PointListCreateFrmMesh(mesh, meshLoc, maskValues, rc)
+  function ESMF_PointListCreateFrmMesh(mesh, meshLoc, maskValues, addOrigCoords, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_PointList) :: ESMF_PointListCreateFrmMesh
@@ -300,6 +310,7 @@ contains
     type(ESMF_Mesh), intent(in)     :: mesh
     type(ESMF_MeshLoc), intent(in)  :: meshLoc
     integer(ESMF_KIND_I4), optional :: maskValues(:)
+    logical, optional               :: addOrigCoords
     integer, intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
@@ -314,6 +325,9 @@ contains
 !     mesh location
 !   \item[{maskValues}]
 !     Values to set as masked
+!   \item[{[addOrigCoords]}]
+!     Also put the original (spherical) coordinate values in the PointList
+!     Defaults to false.    
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -323,7 +337,8 @@ contains
     integer             :: localrc      ! local return code
     type(ESMF_PointList)  :: pointlist
     type(ESMF_InterArray) :: maskValuesArg
-
+    type(ESMF_Logical) :: opt_addOrigCoords
+    
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -334,8 +349,13 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Convert addOrigCoords
+    opt_addOrigCoords=ESMF_FALSE
+    if (present(addOrigCoords)) opt_addOrigCoords=addOrigCoords
+    
     ! Call C++ create code
-    call c_ESMC_PointListCreateFrmMesh(mesh, meshLoc, maskValuesArg, pointlist, localrc)
+    call c_ESMC_PointListCreateFrmMesh(mesh, meshLoc, maskValuesArg, opt_addOrigCoords, &         
+         pointlist, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -363,7 +383,7 @@ contains
 ! !IROUTINE: ESMF_PointListCreateFrmLocStream - Create a new PointList from input LocStream
 
 ! !INTERFACE:
-  function ESMF_PointListCreateFrmLocStream(locstream, maskValues, rc)
+  function ESMF_PointListCreateFrmLocStream(locstream, maskValues, addOrigCoords, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_PointList) :: ESMF_PointListCreateFrmLocStream
@@ -371,6 +391,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_LocStream), intent(in)  :: locstream
     integer(ESMF_KIND_I4), intent(in), optional   :: maskValues(:)
+    logical, optional                 :: addOrigCoords    
     integer, intent(out), optional    :: rc
 !
 ! !DESCRIPTION:
@@ -383,6 +404,9 @@ contains
 !     The Location Stream to get the information from to create the PointList.
 !   \item[{maskValues}]
 !     Values to set as masked
+!   \item[{[addOrigCoords]}]
+!     Also put the original (spherical) coordinate values in the PointList.
+!     Defaults to false.    
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -405,16 +429,23 @@ contains
     type(ESMF_DistGrid) :: distgridOut
     integer :: seqCount
     type(ESMF_Array)       :: XArr,YArr,ZArr,MArr
-
-    type(ESMF_CoordSys_Flag) :: coordSysLocal
+    integer :: origCoordDim
+    type(ESMF_CoordSys_Flag) :: coordSysLocal, origCoordSys
     type(ESMF_PointList)  :: pointlist
-
+    logical :: localAddOrigCoords
+    
+    
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     pointlist%this = ESMF_NULL_POINTER
 
 
+    ! Set default of localAddOrigCoords
+    localAddOrigCoords=.false.
+    if (present(addOrigCoords)) localAddOrigCoords=addOrigCoords
+    
+    ! Get information from LocStream
     call ESMF_LocStreamGet(locstream, coordSys=coordSysLocal, localDECount=localDECount, &
                            distgrid=distgridOut, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -537,7 +568,17 @@ contains
       enddo
     enddo
 
-    pointlist = ESMF_PointListCreate(maxpts=num_local_pts,numdims=regrid_dims, rc=localrc)
+    ! Set original coordinates info based on whether they are requested
+    origCoordDim=0 ! 0 -> don't add original coords
+    if (localAddOrigCoords) origCoordDim=dimcount
+
+    origCoordSys=ESMF_COORDSYS_UNINIT
+    if (localAddOrigCoords) origCoordSys=coordSysLocal
+
+    
+    ! Create pointlist 
+    pointlist = ESMF_PointListCreate(maxpts=num_local_pts,numdims=regrid_dims, &
+         origCoordDim=origCoordDim, origCoordSys=origCoordSys, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -627,11 +668,18 @@ contains
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
 
-          call ESMF_PointListAdd(pointlist=pointlist,id=seqInd(j-cl+1), &
-                                 loc_coords=cart_coords, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-        endif
+          if (localAddOrigCoords) then
+             call ESMF_PointListAdd(pointlist=pointlist,id=seqInd(j-cl+1), &
+                  loc_coords=cart_coords, loc_orig_coords=mycoords, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+          else
+             call ESMF_PointListAdd(pointlist=pointlist,id=seqInd(j-cl+1), &
+                  loc_coords=cart_coords, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return            
+          endif
+       endif
       enddo
       deallocate(seqInd, stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
@@ -663,14 +711,17 @@ contains
 ! !IROUTINE: ESMF_PointListCreateFrmInput - Create a new PointList from user input
 
 ! !INTERFACE:
-  function ESMF_PointListCreateFrmInput(maxpts, numdims, rc)
+  function ESMF_PointListCreateFrmInput(maxpts, numdims, &
+       origCoordDim, origCoordSys, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_PointList) :: ESMF_PointListCreateFrmInput
 !
 ! !ARGUMENTS:
-    integer, intent(in)                             :: maxpts, numdims
-    integer, intent(out), optional                  :: rc
+    integer, intent(in)                            :: maxpts, numdims
+    integer, intent(in), optional                  :: origCoordDim
+    type(ESMF_CoordSys_Flag), intent(in), optional :: origCoordSys
+    integer, intent(out), optional                 :: rc
 !
 ! !DESCRIPTION:
 !   Allocates memory for a new {\tt ESMF\_PointList} object and
@@ -682,6 +733,11 @@ contains
 !     The maximum number of points to hold in the PointList.
 !   \item[{numdims}]
 !     The number of dimensions for points in the PointList.
+!   \item[{[origCoordDim]}]
+!     The number of dimensions for original (i.e. before conversion to Cart.) coords
+!     If not specified or specified to 0, then no original coordinates are stored.     
+!   \item[{[origCoordSys]}]
+!    The coordinate system of the original coordinates.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -697,8 +753,8 @@ contains
     pointlist%this = ESMF_NULL_POINTER
 
     ! Call C++ create code
-
-    call c_ESMC_PointListCreateFrmInput(maxpts, numdims, pointlist, localrc)
+    call c_ESMC_PointListCreateFrmInput(maxpts, numdims, pointlist, &
+         origCoordDim, origCoordSys, localrc)
 
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -921,13 +977,14 @@ contains
 ! !IROUTINE: ESMF_PointListAdd - Adds a point to a PointList
 
 ! !INTERFACE:
-  subroutine ESMF_PointListAdd(pointlist, id, loc_coords, rc)
+  subroutine ESMF_PointListAdd(pointlist, id, loc_coords, loc_orig_coords, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_PointList), intent(in)               :: pointlist
-    integer,            intent(in)               :: id
-    real(ESMF_KIND_R8), intent(in), dimension(:) :: loc_coords
-    integer,            intent(out), optional    :: rc
+    type(ESMF_PointList), intent(in)                      :: pointlist
+    integer,            intent(in)                        :: id
+    real(ESMF_KIND_R8), intent(in), dimension(:)          :: loc_coords
+    real(ESMF_KIND_R8), intent(in), dimension(:),optional :: loc_orig_coords
+    integer,            intent(out), optional             :: rc
 !
 ! !DESCRIPTION:
 !   Add a point to an {\tt ESMF\_PointList} with the given values.
@@ -940,6 +997,10 @@ contains
 !          The id associated with point to add.
 !     \item[{[loc_coords]}]
 !          The array of coordinates associated with point to add.
+!     \item[{[loc_orig_coords]}]
+!          The array of orig. coordinates associated with point to add.
+!          (Only valid if the pointlist has been created to hold original
+!           coords (e.g. by creating with origCoordDim != 0.0))
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -954,11 +1015,20 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_PointListGetInit,pointlist,rc)
 
-    call c_ESMC_PointListAdd(pointlist, id, loc_coords, localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! Add based on presence of orig coords.
+    if (present(loc_orig_coords)) then
+       call c_ESMC_PointListAddWOrig(pointlist, id, loc_coords, loc_orig_coords, localrc)
+       if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+       call c_ESMC_PointListAdd(pointlist, id, loc_coords, localrc)
+       if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
+    
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 

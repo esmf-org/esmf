@@ -90,8 +90,6 @@ void FTN_X(c_esmc_initget_esmf_dir) (
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_initget_esmf_dir()"
 
-#define XSTR(X) STR(X)
-#define STR(X) #X
   const char* esmf_dir = XSTR(ESMF_DIR);
   int localrc = ESMC_CtoF90string (esmf_dir, esmf_dir_str, esmf_dir_str_l);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,

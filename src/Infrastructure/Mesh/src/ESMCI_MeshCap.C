@@ -1441,7 +1441,8 @@ MeshCap *MeshCap::GridToMeshCell(const Grid &grid_,
 
 // This method converts a Mesh to a PointList
 void MeshCap::MeshCap_to_PointList(ESMC_MeshLoc_Flag meshLoc,
-                                   ESMCI::InterArray<int> *maskValuesArg, 
+                                   ESMCI::InterArray<int> *maskValuesArg,
+                                   bool addOrigCoords, 
                                    PointList **out_pl,
                                    int *rc) {
 #undef ESMC_METHOD
@@ -1452,7 +1453,7 @@ void MeshCap::MeshCap_to_PointList(ESMC_MeshLoc_Flag meshLoc,
   
   if (is_esmf_mesh) {
     *out_pl=mesh->MeshToPointList(meshLoc,
-                                  maskValuesArg, &localrc);
+                                  maskValuesArg, addOrigCoords, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
 
@@ -1566,6 +1567,7 @@ void MeshCap::regrid_create(
     int *regridMethod,
     int *map_type,
     int *norm_type,
+    int *_vectorRegrid, 
     int *regridPoleType, int *regridPoleNPnts,
     int *extrapMethod,
     int *extrapNumSrcPnts,
@@ -1657,6 +1659,7 @@ void MeshCap::regrid_create(
                         regridMethod,
                         map_type,
                         norm_type,
+                        _vectorRegrid,
                         regridPoleType, regridPoleNPnts,
                         extrapMethod,
                         extrapNumSrcPnts,

@@ -4,9 +4,9 @@ ALL: onedoc
 
 LOCDIR	  = src/Infrastructure/Trace/doc
 
-DVIFILES  = Trace_refdoc.dvi
-PDFFILES  = Trace_refdoc.pdf
-HTMLFILES = Trace_refdoc
+DVIFILES  = Trace_refdoc.dvi Trace_crefdoc.dvi
+PDFFILES  = Trace_refdoc.pdf Trace_crefdoc.pdf
+HTMLFILES = Trace_refdoc Trace_crefdoc
 
 #
 # Tex Files to make
@@ -33,13 +33,13 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # These lists almost certainly will not be an exhastive list of 
 # all of the dependent files, but even a partial listing  will be helpfull.
 #
-REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
+REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) Trace_desc.tex Trace_rest.tex Trace_usage.tex
 
 include $(ESMF_DIR)/makefile
 
 DIRS	    = 
 
-CLEANDIRS   = Trace_refdoc $(HTMLFILES)
+CLEANDIRS   = Trace_refdoc Trace_crefdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              Trace_refdoc.tex $(PDFFILES) 
+              Trace_refdoc.tex Trace_crefdoc.tex $(PDFFILES) 
 CLOBBERDIRS =

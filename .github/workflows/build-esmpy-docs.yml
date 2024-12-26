@@ -41,13 +41,13 @@ jobs:
       with:
         name: esmpy-docs
         path: ${{ github.workspace }}/artifacts
-        
+    
     - name: Checkout esmpy_doc
       uses: actions/checkout@v3
       with:
           repository: esmf-org/esmpy_doc
-          path: esmpy_doc
-          token: ${{ secrets.ESMF_WEB_TOKEN }}
+          path: ${{github.workspace}}/esmpy_doc
+          ssh-key: ${{secrets.ESMPY_WEB_DEPLOY_KEY}}
     
     - name: Copy docs
       run: | 
@@ -60,10 +60,10 @@ jobs:
         cp -rf latex/ESMPy.pdf ${{ github.workspace }}/esmpy_doc/docs/nightly/${{ github.ref_name }}/
 
     - name: Commit and publish docs
-      uses: actions-js/push@master
-      with:
-        repository: esmf-org/esmpy_doc
-        directory: ${{ github.workspace }}/esmpy_doc
-        branch: master
-        github_token: ${{ secrets.ESMF_WEB_TOKEN }}
-        message: 'Publish ESMPy Docs'
+      run: |
+        cd ${{ github.workspace }}/esmpy_doc
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add .
+        git diff-index --quiet HEAD || git commit --message "Publish ESMPy Docs"
+        git push origin

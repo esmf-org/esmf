@@ -8,8 +8,7 @@ information on each of these steps is provided in sections \ref{sec:TechOver},
  \ref{sec:TechOver2} and \ref{sec:CLTs}, respectively.
 
 With a growing user community requiring access to ESMF, central computing 
-resources (such as ORNL for the {\it Jaguar} and {\it Kraken} supercomputers) 
-have recently started providing system wide ESMF installations. The availablity 
+resources have started providing system wide ESMF installations. The availablity 
 of center-managed ESMF installations dramatically increases the ease of use of 
 ESMF. Practically it means that if you are working on a system (such as 
 {\it Jaguar}) that offers a standard ESMF installation, you do not have to 
@@ -52,7 +51,9 @@ After downloading and unpacking the ESMF tar file, the build procedure is:
 \item Type {\tt make check } to run self-tests to verify
 the build was successful.
 \end{enumerate}
-See the following sections for more information on each of these steps.
+See the following subsections for more information on each of these steps. Also
+consult section \ref{sec:TechOver} for a complete discussion of the the ESMF
+build process.
 
 \subsubsection{Environment variables}
 
@@ -66,8 +67,8 @@ an environment variable are:
 
 The shell environment variables listed below are the ones most
 frequently used.  There are others which address needs on specific
-platforms or are needed under more unusual circumstances; 
-see Section \ref{sec:TechOver} for the full list.  
+platforms or are needed under more unusual circumstances;
+see section \ref{sec:TechOver} for the full list.
 \begin{description}
 
 \item[ESMF\_DIR]

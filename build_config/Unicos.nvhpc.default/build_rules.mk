@@ -158,6 +158,11 @@ ESMF_CXXLINKOPTS          += -Wl,--no-as-needed
 ############################################################
 # Shared library options
 #
+ifeq ($(ESMF_OPENACC),ON)
+# Currently accelerator code is not supported inside shared libraries.
+# Turn off shared lib build if OpenACC code active inside ESMF.
+ESMF_SL_LIBS_TO_MAKE  =
+endif
 ESMF_SL_LIBOPTS  += -shared
 
 ############################################################

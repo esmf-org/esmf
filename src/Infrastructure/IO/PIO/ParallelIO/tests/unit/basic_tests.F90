@@ -42,7 +42,7 @@ module basic_tests
       iotype   = iotypes(test_id)
 
       ! Delete file before initial create
-!      if (master_task) call system("rm -f " // trim(filename))
+!      if (main_task) call system("rm -f " // trim(filename))
 
       call PIO_deletefile(pio_iosystem, filename)
 
@@ -104,7 +104,7 @@ module basic_tests
       call mpi_barrier(mpi_comm_world,ret_val)
       ! Recreate file with NOCLOBBER
       if (is_netcdf(iotype)) then
-        if(master_task) write(*,"(6x,A,1x)") "trying to create with noclobber, error expected ... "
+        if(main_task) write(*,"(6x,A,1x)") "trying to create with noclobber, error expected ... "
         call mpi_barrier(mpi_comm_world,ret_val)
         ret_val = PIO_createfile(pio_iosystem, pio_file, iotype, filename, PIO_NOCLOBBER)
 
@@ -159,7 +159,7 @@ module basic_tests
       iotype   = iotypes(test_id)
 
       ! Open file that doesn't exist
-      if(master_task) write(*,"(6x,A)") "trying to open nonexistant file error expected ... "
+      if(main_task) write(*,"(6x,A)") "trying to open nonexistant file error expected ... "
       call mpi_barrier(MPI_COMM_WORLD,ret_val)
       ret_val = PIO_openfile(pio_iosystem, pio_file, iotype, "FAKE.FILE", &
                              PIO_nowrite)
@@ -256,7 +256,7 @@ module basic_tests
         end if
 
         ! Try to write (should fail)
-        if(master_task) write(*,"(6x,A)") "trying to write to readonly file, error expected ... "
+        if(main_task) write(*,"(6x,A)") "trying to write to readonly file, error expected ... "
         call mpi_barrier(MPI_COMM_WORLD,ret_val)
         call PIO_write_darray(pio_file, pio_var, iodesc_nCells, data_buffer, ret_val)
 
@@ -304,7 +304,7 @@ module basic_tests
 
       ! Try to open standard binary file as netcdf (if iotype = netcdf)
       if (is_netcdf(iotype)) then
-         if(master_task) write(*,"(6x,A,1x)") "trying to open non-netcdf file using netcdf, error expected ... "
+         if(main_task) write(*,"(6x,A,1x)") "trying to open non-netcdf file using netcdf, error expected ... "
          call mpi_barrier(MPI_COMM_WORLD,ret_val)
 
         ret_val = PIO_openfile(pio_iosystem, pio_file, iotype, &

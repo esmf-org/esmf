@@ -1,0 +1,30 @@
+description: 'Build the MPICH library'
+inputs:
+  mpich_version:
+    description: 'Tag in the MPICH repository to use'
+    default: v4.0.3
+    required: False
+    type: string
+  install_prefix:
+    description: 'Install path of mpich'
+    default: $HOME/mpich
+    required: False
+    type: string
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        repository: pmodels/mpich
+        path: mpich-src
+        ref: ${{ inputs.mpich_version }}
+        submodules: 'recursive'
+    - id: mpich-build
+      shell: bash
+      run: |
+        pushd mpich-src
+        ./autogen.sh
+        ./configure --prefix=${{ inputs.install_prefix }}
+        make -j4
+        make install
+        popd
