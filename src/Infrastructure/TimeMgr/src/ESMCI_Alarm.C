@@ -1124,7 +1124,7 @@ bool Alarm::canRingAtNextTime(Clock & clock, TimeInterval * timeStep) const {
     // must be associated with a clock
     if(clock == ESMC_NULL_POINTER) {
       char logMsg[2*ESMF_MAXSTR];
-      sprintf(logMsg, "newalarm %s is not associated with any clock.", name);
+      sprintf(logMsg, "alarm %s is not associated with any clock.", name);
       ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
       return(false);
     }
