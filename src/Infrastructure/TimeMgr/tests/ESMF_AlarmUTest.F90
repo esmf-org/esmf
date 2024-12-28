@@ -2667,6 +2667,7 @@ end subroutine Test_GetPrevRingTime
 ! Forward and Reverse
 !------------------------------------------------------------------------
   subroutine ForwardReverseAlarm_Test1(rc)
+    ! Test 1: c.t0 = a.t0, c.dt = a.dt = 10 min
 
     integer, intent(out) :: rc
 
@@ -2675,11 +2676,13 @@ end subroutine Test_GetPrevRingTime
     type (ESMF_Time)  :: startTime, stopTime, ringTime
     type (ESMF_TimeInterval)  :: timeStep, ringTimeInterval
 
-    integer           :: status, n, nrings=0
+    integer           :: status, n
     logical           :: ringing, enabled, sticky
+    logical           :: allCorrect
 
-    rc = ESMF_SUCCESS
-    print *, 'Forward and Reverse Alarms Tests: '
+    rc = ESMF_FAILURE
+    allCorrect = .true.
+
     call ESMF_TimeSet(startTime,yy=1,mm=1,dd=1,h=0,m=0,s=0,rc=status)
     if(status /= ESMF_SUCCESS) call ESMF_Finalize()
     call ESMF_TimeSet(stopTime,yy=1,mm=1,dd=1,h=1,m=0,s=0,rc=status)
@@ -2687,8 +2690,6 @@ end subroutine Test_GetPrevRingTime
     call ESMF_TimeSet(ringTime,yy=1,mm=1,dd=1,h=0,m=0,s=0,rc=status)
     if(status /= ESMF_SUCCESS) call ESMF_Finalize()
 
-  ! Test 1: c.t0 = a.t0, c.dt = a.dt = 10 min
-    print *, 'Test 1: c.t0 = a.t0, c.dt = a.dt = 10 min'
     call ESMF_TimeIntervalSet(timeStep,S=600, sN=0, sD=1,rc=status)
     if(status /= ESMF_SUCCESS) call ESMF_Finalize()
     call ESMF_TimeIntervalSet(ringTimeInterval,S=600, sN=0, sD=1,rc=status)
@@ -2703,15 +2704,17 @@ end subroutine Test_GetPrevRingTime
 
     call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, rc=status)
     if(status /= ESMF_SUCCESS) call ESMF_Finalize()
-    if(ringing) nrings = nrings + 1
-    print *, 'Test 1: ringing = ', ringing, trim(clockCurrTime(clock))
+    if (.not. ringing) then
+      allCorrect = .false.
+    end if
     do n = 1, 6
       call ESMF_ClockAdvance(clock,rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize()
       call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize()
-      print *, '  Test 1: ringing = ', ringing, trim(clockCurrTime(clock))
-      if(ringing) nrings = nrings + 1
+      if (.not. ringing) then
+        allCorrect = .false.
+      end if
     enddo
     call ESMF_ClockSet(clock, direction = ESMF_DIRECTION_REVERSE, rc=status)
     if(status /= ESMF_SUCCESS) call ESMF_Finalize()
@@ -2720,15 +2723,17 @@ end subroutine Test_GetPrevRingTime
       if(status /= ESMF_SUCCESS) call ESMF_Finalize()
       call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize()
-      if(ringing) nrings = nrings + 1
-      print *, '  Test 1: ringing = ', ringing, trim(clockCurrTime(clock))
+      if (.not. ringing) then
+        allCorrect = .false.
+      end if
     enddo
-    rc = ESMF_FAILURE
-    print *, nrings
-    if(nrings == 13) rc = ESMF_SUCCESS
+    if (allCorrect) then
+      rc = ESMF_SUCCESS
+    end if
   end subroutine
 
   subroutine ForwardReverseAlarm_Test2(rc)
+    ! Test 2: c.t0 = a.t0, c.dt = 10 min, a.dt = 20 min
 
     integer, intent(out) :: rc
 
@@ -2737,11 +2742,13 @@ end subroutine Test_GetPrevRingTime
     type (ESMF_Time)  :: startTime, stopTime, ringTime
     type (ESMF_TimeInterval)  :: timeStep, ringTimeInterval
 
-    integer           :: status, n, nrings=0
+    integer           :: status, n
     logical           :: ringing, enabled, sticky
+    logical           :: allCorrect
 
-    rc = ESMF_SUCCESS
-    print *, 'Forward and Reverse Alarms Tests: '
+    rc = ESMF_FAILURE
+    allCorrect = .true.
+
     call ESMF_TimeSet(startTime,yy=1,mm=1,dd=1,h=0,m=0,s=0,rc=status)
     if(status /= ESMF_SUCCESS) call ESMF_Finalize()
     call ESMF_TimeSet(stopTime,yy=1,mm=1,dd=1,h=1,m=0,s=0,rc=status)
@@ -2749,8 +2756,6 @@ end subroutine Test_GetPrevRingTime
     call ESMF_TimeSet(ringTime,yy=1,mm=1,dd=1,h=0,m=0,s=0,rc=status)
     if(status /= ESMF_SUCCESS) call ESMF_Finalize()
 
-  ! Test 2: c.t0 = a.t0, c.dt = a.dt = 10 min
-    print *, 'Test 2: c.t0 = a.t0, c.dt = a.dt = 20 min'
     call ESMF_TimeIntervalSet(timeStep,S=600, sN=0, sD=1,rc=status)
     if(status /= ESMF_SUCCESS) call ESMF_Finalize()
     call ESMF_TimeIntervalSet(ringTimeInterval,S=1200, sN=0, sD=1,rc=status)
@@ -2765,15 +2770,25 @@ end subroutine Test_GetPrevRingTime
 
     call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, rc=status)
     if(status /= ESMF_SUCCESS) call ESMF_Finalize()
-    if(ringing) nrings = nrings + 1
-    print *, 'Test 2: ringing = ', ringing, trim(clockCurrTime(clock))
+    if (.not. ringing) then
+      allCorrect = .false.
+    end if
     do n = 1, 6
       call ESMF_ClockAdvance(clock,rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize()
       call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize()
-      print *, '  Test 2: ringing = ', ringing, trim(clockCurrTime(clock))
-      if(ringing) nrings = nrings + 1
+      if (modulo(n,2) == 0) then
+        ! Alarm should be ringing on even time steps
+        if (.not. ringing) then
+          allCorrect = .false.
+        end if
+      else
+        ! Alarm should NOT be ringing on odd time steps
+        if (ringing) then
+          allCorrect = .false.
+        end if
+      end if
     enddo
     call ESMF_ClockSet(clock, direction = ESMF_DIRECTION_REVERSE, rc=status)
     if(status /= ESMF_SUCCESS) call ESMF_Finalize()
@@ -2782,15 +2797,25 @@ end subroutine Test_GetPrevRingTime
       if(status /= ESMF_SUCCESS) call ESMF_Finalize()
       call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize()
-      if(ringing) nrings = nrings + 1
-      print *, '  Test 2: ringing = ', ringing, trim(clockCurrTime(clock))
+      if (modulo(n,2) == 0) then
+        ! Alarm should be ringing on even time steps
+        if (.not. ringing) then
+          allCorrect = .false.
+        end if
+      else
+        ! Alarm should NOT be ringing on odd time steps
+        if (ringing) then
+          allCorrect = .false.
+        end if
+      end if
     enddo
-    rc = ESMF_FAILURE
-    print *, nrings
-    if(nrings == 7) rc = ESMF_SUCCESS
+    if (allCorrect) then
+      rc = ESMF_SUCCESS
+    end if
   end subroutine
 
   subroutine ForwardReverseAlarm_Test3(rc)
+    ! Test 3: c.t0 = a.t0, c.dt = 10 min, a.dt = 12 min
 
     integer, intent(out) :: rc
 
@@ -2799,11 +2824,13 @@ end subroutine Test_GetPrevRingTime
     type (ESMF_Time)  :: startTime, stopTime, ringTime
     type (ESMF_TimeInterval)  :: timeStep, ringTimeInterval
 
-    integer           :: status, n, nrings=0
+    integer           :: status, n
     logical           :: ringing, enabled, sticky
+    logical           :: allCorrect
 
-    rc = ESMF_SUCCESS
-    print *, 'Forward and Reverse Alarms Tests: '
+    rc = ESMF_FAILURE
+    allCorrect = .true.
+
     call ESMF_TimeSet(startTime,yy=1,mm=1,dd=1,h=0,m=0,s=0,rc=status)
     if(status /= ESMF_SUCCESS) call ESMF_Finalize()
     call ESMF_TimeSet(stopTime,yy=1,mm=1,dd=1,h=1,m=0,s=0,rc=status)
@@ -2811,8 +2838,6 @@ end subroutine Test_GetPrevRingTime
     call ESMF_TimeSet(ringTime,yy=1,mm=1,dd=1,h=0,m=0,s=0,rc=status)
     if(status /= ESMF_SUCCESS) call ESMF_Finalize()
 
-  ! Test 3: c.t0 = a.t0, c.dt = a.dt = 10 min
-    print *, 'Test 3: c.t0 = a.t0, c.dt = a.dt = 12 min'
     call ESMF_TimeIntervalSet(timeStep,S=600, sN=0, sD=1,rc=status)
     if(status /= ESMF_SUCCESS) call ESMF_Finalize()
     call ESMF_TimeIntervalSet(ringTimeInterval,S=720, sN=0, sD=1,rc=status)
@@ -2827,15 +2852,25 @@ end subroutine Test_GetPrevRingTime
 
     call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, rc=status)
     if(status /= ESMF_SUCCESS) call ESMF_Finalize()
-    if(ringing) nrings = nrings + 1
-    print *, 'Test 3: ringing = ', ringing, trim(clockCurrTime(clock))
+    if (.not. ringing) then
+      allCorrect = .false.
+    end if
     do n = 1, 6
       call ESMF_ClockAdvance(clock,rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize()
       call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize()
-      print *, '  Test 3: ringing = ', ringing, trim(clockCurrTime(clock))
-      if(ringing) nrings = nrings + 1
+      if (n == 6) then
+        ! Alarm should be ringing on the 6th time step, when alarm dt aligns with clock dt
+        if (.not. ringing) then
+          allCorrect = .false.
+        end if
+      else
+        ! Alarm should NOT be ringing on other time steps
+        if (ringing) then
+          allCorrect = .false.
+        end if
+      end if
     enddo
     call ESMF_ClockSet(clock, direction = ESMF_DIRECTION_REVERSE, rc=status)
     if(status /= ESMF_SUCCESS) call ESMF_Finalize()
@@ -2844,12 +2879,21 @@ end subroutine Test_GetPrevRingTime
       if(status /= ESMF_SUCCESS) call ESMF_Finalize()
       call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize()
-      if(ringing) nrings = nrings + 1
-      print *, '  Test 3: ringing = ', ringing, trim(clockCurrTime(clock))
+      if (n == 6) then
+        ! Alarm should be ringing on the 6th time step, when alarm dt aligns with clock dt
+        if (.not. ringing) then
+          allCorrect = .false.
+        end if
+      else
+        ! Alarm should NOT be ringing on other time steps
+        if (ringing) then
+          allCorrect = .false.
+        end if
+      end if
     enddo
-    rc = ESMF_FAILURE
-    print *, nrings
-    if(nrings == 3) rc = ESMF_SUCCESS
+    if (allCorrect) then
+      rc = ESMF_SUCCESS
+    end if
   end subroutine
 
 end program ESMF_AlarmTest
