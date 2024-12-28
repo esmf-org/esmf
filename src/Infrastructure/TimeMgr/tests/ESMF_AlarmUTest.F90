@@ -1259,7 +1259,6 @@ program ESMF_AlarmTest
 
       ! ----------------------------------------------------------------------------
 
-#if 1
       !EX_UTest
       write(failMsg, *) " Alarms with getPrevRingTime... "
       write(name, *) "Test getPrevRingTime... after alarm attached to clock "
@@ -1269,7 +1268,6 @@ program ESMF_AlarmTest
       if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
       if (.not. testPass) print *, 'bad return codes discovered'
       call ESMF_Test (testPass, name, failMsg, result, ESMF_SRCLINE)
-#endif
 
       ! ----------------------------------------------------------------------------
       ! ----------------------------------------------------------------------------
@@ -1284,7 +1282,6 @@ program ESMF_AlarmTest
       ! finalize ESMF framework
       call ESMF_TestEnd(ESMF_SRCLINE)
 
-#if 1
   contains
 
     subroutine test_reverseAlarms(testPass, rc)
@@ -1867,8 +1864,6 @@ subroutine Test_GetPrevRingTime(testPass, rc)
 #undef CHECKRC
 end subroutine Test_GetPrevRingTime
 
-
-#endif
 
   character*64 function clockCurrTime(clock)
     type(ESMF_Clock) :: clock
