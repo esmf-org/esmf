@@ -1224,8 +1224,6 @@ program ESMF_AlarmTest
       !EX_UTest
       write(failMsg, *) " Alarms hang... "
       write(name, *) "Test multiple alarms replay without hanging "
-      rc = ESMF_SUCCESS
-      testPass = .true.
       call Test_AlarmHang(testPass, rc)
       if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
       if (.not. testPass) print *, 'bad return codes discovered'
@@ -1292,8 +1290,6 @@ program ESMF_AlarmTest
       type(ESMF_TimeInterval) :: dt
       type(ESMF_Time) :: start_time, clock_start, clock_end
       type(ESMF_Clock) :: clock
-      character(len=5) :: add_2nd
-      integer :: nargs
 
       type(ESMF_TimeInterval) :: tint
       type(ESMF_Alarm) :: esmfalarm, firstalarm
@@ -1478,24 +1474,26 @@ program ESMF_AlarmTest
 
     subroutine Test_AlarmHang(testPass, rc)
       logical, intent(out) :: testPass
-      integer :: status,rc
+      integer, intent(out) :: rc
+
+      integer :: status
 
       type(ESMF_TimeInterval) :: dt
       type(ESMF_Time) :: start_time, clock_start, clock_end
       type(ESMF_Clock) :: clock
-      character(len=5) :: add_2nd
-      integer :: nargs
-           
+
       integer :: i,nstep
 
       type(ESMF_TimeInterval) :: tint
       type(ESMF_Time) :: time
       type(ESMF_Alarm) :: esmfalarm
       type(ESMF_Alarm) :: testalarm
-      logical :: esmf_ring
-      integer :: nalarms
+      logical :: esmfalarm_ring, testalarm_ring
+      logical :: allCorrect
 
+      rc = ESMF_SUCCESS
       testPass = .false.
+      allCorrect = .true.
 
       call ESMF_CalendarSetDefault ( ESMF_CALKIND_GREGORIAN, rc=status )
       call verify_(status)
@@ -1513,9 +1511,6 @@ program ESMF_AlarmTest
       call verify_(status)
 
       nstep = 12
-      call ESMF_ClockGet(clock,currtime=start_time,alarmCount=nalarms,rc=status)
-      !write(*,*) "alarms already in clock: ",nalarms
-      call verify_(status)
       call ESMF_TimeIntervalSet(tint,h=1,rc=status)
       call verify_(status)
       esmfalarm = ESMF_AlarmCreate(clock=clock,ringInterval=tint,ringTime=start_time,sticky=.false.,name="alarm2",rc=status)
@@ -1526,50 +1521,95 @@ program ESMF_AlarmTest
       call ESMF_AlarmRingerOff(testalarm,rc=status)
       call verify_(status)
       do i=1,nstep
-         call ESMF_AlarmRingerOn(testalarm,rc=status)
-         call verify_(status)
-         call ESMF_ClockGet(clock,currTime=time)
-         esmf_ring = ESMF_AlarmIsRinging(esmfalarm,rc=status)
-         call verify_(status)
-         if ( esmf_ring) then
-            !write(*,*)'ringing: esmfalarm'
-            call ESMF_TimePrint(time,options='string')
-         end if
-         call ESMF_ClockAdvance(clock)
+        call ESMF_AlarmRingerOn(testalarm,rc=status)
+        call verify_(status)
+        esmfalarm_ring = ESMF_AlarmIsRinging(esmfalarm,rc=status)
+        call verify_(status)
+        if (modulo((i-1),4) == 0) then
+          if (.not. esmfalarm_ring) then
+            allCorrect = .false.
+          end if
+        else
+          if (esmfalarm_ring) then
+            allCorrect = .false.
+          end if
+        end if
+        testalarm_ring = ESMF_AlarmIsRinging(testalarm,rc=status)
+        call verify_(status)
+        if (.not. testalarm_ring) then
+          allCorrect = .false.
+        end if
+        call ESMF_ClockAdvance(clock,rc=status)
+        call verify_(status)
       enddo
+
       call ESMF_ClockSet(clock, direction=ESMF_DIRECTION_REVERSE, rc=status)
       call verify_(status)
       call ESMF_AlarmRingerOff(testalarm,rc=status)
       call verify_(status)
-      !write(*,*)"*************** start rewind *********************"
+      i = 0
       do
-         call ESMF_ClockAdvance(clock,rc=status)
-         call verify_(status)
-         call ESMF_ClockGet(clock,currTime=time)
-         if (ESMF_AlarmIsRinging(esmfalarm)) then
-            !write(*,*)'rewinding one step: esmfalarm ',ESMF_AlarmIsRinging(esmfalarm)
-            call ESMF_TimePrint(time,options='string')
-         end if
-
-         if (ESMF_AlarmIsRinging(esmfalarm)) then
-            write(*,*)'rewinding one step: testalarm ',ESMF_AlarmIsRinging(testalarm)
-            call ESMF_TimePrint(time,options='string')
-         end if
-         
-         if (time == start_time) exit
+        i = i + 1
+        call ESMF_ClockAdvance(clock,rc=status)
+        call verify_(status)
+        esmfalarm_ring = ESMF_AlarmIsRinging(esmfalarm,rc=status)
+        call verify_(status)
+        if (modulo(i,4) == 0) then
+          if (.not. esmfalarm_ring) then
+            allCorrect = .false.
+          end if
+        else
+          if (esmfalarm_ring) then
+            allCorrect = .false.
+          end if
+        end if
+        testalarm_ring = ESMF_AlarmIsRinging(testalarm,rc=status)
+        call verify_(status)
+        call ESMF_ClockGet(clock,currTime=time,rc=status)
+        call verify_(status)
+        if (time == start_time &
+            ! Reversing the clock leads to a shift by one time step in the alarm time, so
+            ! we also expect it to ring at (start_time + dt) (see also discussion here:
+            ! https://github.com/esmf-org/esmf/pull/340#discussion_r1900300522)
+            .or. time == (start_time + dt) &
+            ! FIXME:(wjs, 2025-01-02) Due to what may be a bug, the clock also currently
+            ! rings at start_time + 2*dt, because the ring time is adjusted by an
+            ! additional dt when calling ESMF_AlarmRingerOff after setting the clock's
+            ! direction to reverse (see
+            ! https://github.com/esmf-org/esmf/pull/340#issuecomment-2566736806)
+            .or. time == (start_time + 2*dt)) then
+          if (.not. testalarm_ring) then
+            allCorrect = .false.
+          end if
+        else
+          if (testalarm_ring) then
+            allCorrect = .false.
+          end if
+        end if
+        if (time == start_time) exit
       enddo
+
       call ESMF_ClockSet(clock, direction=ESMF_DIRECTION_FORWARD, rc=status)
       call verify_(status)
-      !write(*,*)"*************** end rewind *********************"
       do i=1,nstep*2
-         call ESMF_ClockGet(clock,currTime=time)
-         esmf_ring = ESMF_AlarmIsRinging(esmfalarm,rc=status)
-         call verify_(status)
-         if ( esmf_ring ) then
-            !write(*,*)'ringing: esmfalarm'
-            call ESMF_TimePrint(time,options='string')
-         end if
-         call ESMF_ClockAdvance(clock)
+        esmfalarm_ring = ESMF_AlarmIsRinging(esmfalarm,rc=status)
+        call verify_(status)
+        if (modulo((i-1),4) == 0) then
+          if (.not. esmfalarm_ring) then
+            allCorrect = .false.
+          end if
+        else
+          if (esmfalarm_ring) then
+            allCorrect = .false.
+          end if
+        end if
+        testalarm_ring = ESMF_AlarmIsRinging(testalarm,rc=status)
+        call verify_(status)
+        if (.not. testalarm_ring) then
+          allCorrect = .false.
+        end if
+        call ESMF_ClockAdvance(clock,rc=status)
+        call verify_(status)
       enddo
 
        call ESMF_AlarmDestroy(esmfalarm, rc=status)
@@ -1579,7 +1619,11 @@ program ESMF_AlarmTest
        call ESMF_ClockDestroy(clock, rc=status)
        call verify_(status)
 
-       testPass = .true.
+       if (allCorrect) then
+         testPass = .true.
+       else
+        testPass = .false.
+       end if
       
     end subroutine Test_AlarmHang
 
