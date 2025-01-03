@@ -1609,7 +1609,7 @@ program ESMF_AlarmTest
        if (allCorrect) then
          testPass = .true.
        else
-        testPass = .false.
+         testPass = .false.
        end if
       
     end subroutine Test_AlarmHang
