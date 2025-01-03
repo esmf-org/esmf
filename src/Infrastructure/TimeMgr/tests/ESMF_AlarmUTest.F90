@@ -1244,8 +1244,6 @@ program ESMF_AlarmTest
       !EX_UTest
       write(failMsg, *) " Alarms with getPrevRingTime... "
       write(name, *) "Test getPrevRingTime... after alarm attached to clock "
-      rc = ESMF_SUCCESS
-      testPass = .true.
       call Test_GetPrevRingTime(testPass, rc)
       if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
       if (.not. testPass) print *, 'bad return codes discovered'
@@ -1837,8 +1835,8 @@ subroutine Test_GetPrevRingTime(testPass, rc)
 #define CONTEXT line=__LINE__,file=__FILE__
 #define CHECKRC if(ESMF_LogFoundError(rcToCheck=rc,msg=ESMF_LOGERR_PASSTHRU,CONTEXT,rcToReturn=rc))then;write(0,*)'app abort: ',__FILE__,__LINE__;return;endif
   logical, intent(out) :: testPass
+  integer, intent(out) :: rc
   integer, parameter :: r8 = SELECTED_REAL_KIND(12)   ! real r8
-  integer :: rc
   
   type(ESMF_Clock)         :: clock
   type(ESMF_Alarm)         :: alarm
@@ -1847,9 +1845,11 @@ subroutine Test_GetPrevRingTime(testPass, rc)
   real(kind=r8)            :: secs
   logical                  :: reverse_clock, sticky_alarm, esmf_ring
   integer                  :: i, nstep = 6, nrings
+  logical                  :: allCorrect
 
   rc = ESMF_SUCCESS
-  testPass = .true.
+  testPass = .false.
+  allCorrect = .true.
   
   call ESMF_TimeSet(time, yy=2021, mm=4, dd=6, rc=rc)                          ; CHECKRC
   
@@ -1892,7 +1892,7 @@ subroutine Test_GetPrevRingTime(testPass, rc)
        call ESMF_TimePrint(ringTime,options='string')
 
        diffTime = ringTime - prevTime
-       if(diffTime /= esmf_ival) testPass = .false. ! both should be 20 minutes or 120 seconds
+       if(diffTime /= esmf_ival) allCorrect = .false. ! both should be 20 minutes or 120 seconds
        prevTime = ringTime
       end if
   enddo
@@ -1920,6 +1920,11 @@ subroutine Test_GetPrevRingTime(testPass, rc)
 !  
 !  call ESMF_alarmPrint(alarm,options='sticky')
 
+  if (allCorrect) then
+    testPass = .true.
+  else
+    testPass = .false.
+  end if
 
 #undef CONTEXT
 #undef CHECKRC
