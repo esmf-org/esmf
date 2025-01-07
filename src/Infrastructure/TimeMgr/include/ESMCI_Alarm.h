@@ -257,9 +257,6 @@ class Alarm {
 //
  // < declare private interface methods here >
 
-    // check if time to turn on alarm
-    bool checkTurnOn(bool timeStepPositive);
-
     // reconstruct ringBegin during ESMF_DIRECTION_REVERSE
     int resetRingBegin(bool timeStepPositive);
 
