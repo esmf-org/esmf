@@ -899,7 +899,6 @@ void Alarm::enableSticky(void){
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
     // get clock's prev time
-    if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
     // Time clockTime = clock->currTime - clock->timeStep;
     // return canRingAtTime(clockTime);
     return ringingOnPrevTimeStep;
