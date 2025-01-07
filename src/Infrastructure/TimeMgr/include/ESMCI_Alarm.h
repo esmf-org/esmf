@@ -127,12 +127,6 @@ class Alarm {
                                               //   number of time steps.
 
     bool              ringing;    // (TMG 4.4) currently ringing
-    bool              ringingOnCurrTimeStep; // was ringing immediately after
-                                             // current clock timestep.
-                                             // (could have been turned off
-                                             //  later due to RingerOff or
-                                             //  Disable commands or
-                                             //  non-sticky alarm expiration).
     bool              ringingOnPrevTimeStep; // was ringing immediately after
                                              // previous clock timestep.
     bool              userChangedRingTime;       // true if changed via Set(),

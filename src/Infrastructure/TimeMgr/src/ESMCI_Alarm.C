@@ -1595,7 +1595,7 @@ void Alarm::clockChangeDirection(const ESMC_Direction & old_direction,
     clock = ESMC_NULL_POINTER;
     ringTimeStepCount = 1;
     timeStepRingingCount = 0;
-    ringing = ringingOnCurrTimeStep = ringingOnPrevTimeStep = false;
+    ringing = ringingOnPrevTimeStep = false;
     userChangedRingTime = false;
     userChangedRingInterval = false;
     enabled = true;
