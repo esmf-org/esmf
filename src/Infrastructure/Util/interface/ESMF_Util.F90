@@ -90,6 +90,7 @@
       public :: ESMF_UtilString2Real
       public :: ESMF_UtilString2Double
       public :: ESMF_UtilStringInt2String
+      public :: ESMF_UtilStringDiffMatch
       public :: ESMF_UtilStringLowerCase
       public :: ESMF_UtilStringUpperCase
       public :: ESMF_UtilArray2String
@@ -777,7 +778,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
   !-----------------------------------------------------------------------------
     ! local variables
     integer                 :: ioerr
@@ -857,7 +858,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
   !-----------------------------------------------------------------------------
     ! local variables
     logical                   :: ssL, svL
@@ -958,7 +959,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
   !-----------------------------------------------------------------------------
     ! local variables
     integer                   :: ioerr
@@ -993,6 +994,71 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
   end function ESMF_UtilString2Real
+  !-----------------------------------------------------------------------------
+
+
+!BOPI
+! !IROUTINE: ESMF_UtilStringDiffMatch - Match differences between two strings
+! !INTERFACE:
+  function ESMF_UtilStringDiffMatch(string1, string2, minusStringList, &
+    plusStringList, keywordEnforcer, rc)
+! !RETURN VALUE:
+    logical :: ESMF_UtilStringDiffMatch
+! !ARGUMENTS:
+    character(len=*), intent(in)            :: string1
+    character(len=*), intent(in)            :: string2
+    character(len=*), intent(in)            :: minusStringList(:)
+    character(len=*), intent(in)            :: plusStringList(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Match the list of differences between {\tt string1} and {\tt string2}
+!   against {\tt plus} and {\tt minus} string pairs.
+!   The generated differences are based on Myers diff algorithm implementation
+!   provided by \url{https://github.com/gritzko/myers-diff}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[string1]
+!     First string in the difference.
+!   \item[string2]
+!     Second string in the difference.
+!   \item[minusStringList]
+!     List of strings that are allowed to show up as "minus" in the difference.
+!   \item[plusStringList]
+!     List of strings that are allowed to show up as "plus" in the difference.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                   :: localrc
+    integer                   :: matchCount
+    type(ESMF_Logical)        :: tf
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ESMF_UtilStringDiffMatch = .false.  ! default return value
+
+    matchCount = size(minusStringList)
+    if (size(plusStringList) /= matchCount) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Number of strings in minus/plus string lists must match!`", &
+        line=__LINE__, &
+        file=ESMF_FILENAME, &
+        rcToReturn=rc)
+      return ! bail out
+    endif
+
+    call c_ESMC_StringDiffMatch(string1, string2, minusStringList, &
+      plusStringList, matchCount, tf, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    ESMF_UtilStringDiffMatch = (tf == ESMF_TRUE)
+
+  end function ESMF_UtilStringDiffMatch
   !-----------------------------------------------------------------------------
 
 

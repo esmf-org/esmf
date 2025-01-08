@@ -20,6 +20,9 @@ namespace ESMCI {
     int dst_index;
   } SM_CELL;
 
+
+  void sort_SM_CELLS_by_dst_id(std::vector<SM_CELL> *sm_cells, std::vector<const MeshObj *> &dst_elems);
+  
   void create_SM_cells_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, 
                                  std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
                                  double *src_elem_area,
@@ -28,6 +31,21 @@ namespace ESMCI {
                                  std::vector<int> *tmp_valid, std::vector<double> *tmp_sintd_areas_out, std::vector<double> *tmp_dst_areas_out,
                                  std::vector<SM_CELL> *sm_cells);
 
+  void create_dst_xgrid_SM_cells_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, 
+                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
+                                           double *src_elem_area,
+                                           std::vector<int> *valid, 
+                                           std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
+                                           std::vector<SM_CELL> *sm_cells);
+  
+  void create_src_xgrid_SM_cells_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, 
+                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
+                                           double *src_elem_area,
+                                           std::vector<int> *valid, 
+                                           std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
+                                           std::vector<SM_CELL> *sm_cells);
+
+  
 
   void create_SM_cells_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield, 
                                   std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
@@ -36,6 +54,22 @@ namespace ESMCI {
                                   std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
                                   std::vector<int> *tmp_valid, std::vector<double> *tmp_sintd_areas_out, std::vector<double> *tmp_dst_areas_out, 
                                   std::vector<SM_CELL> *sm_cells);
+
+  void create_dst_xgrid_SM_cells_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield, 
+                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
+                                           double *src_elem_area,
+                                           std::vector<int> *valid, 
+                                           std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
+                                           std::vector<SM_CELL> *sm_cells);
+  
+  void create_src_xgrid_SM_cells_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield, 
+                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
+                                           double *src_elem_area,
+                                           std::vector<int> *valid, 
+                                           std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
+                                           std::vector<SM_CELL> *sm_cells);
+
+  
 
 } // namespace
 

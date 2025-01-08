@@ -11,6 +11,7 @@ import sys, os
 
 from esmpy.util.cache_data import DATA_DIR
 from esmpy.util.exceptions import DataMissing
+from functools import reduce
 
 # The data files can be retrieved from the ESMF data repository by uncommenting the
 # following block of code:
@@ -94,8 +95,8 @@ def compute_error(dstfield, xctfield):
         meanrelerr = relerr / num_nodes
 
     meanrelerr = relerr / num_nodes
-    print "ESMPy regridding as a spawned MPI process:"
-    print "  interpolation mean relative error = {0}".format(meanrelerr)
+    print("ESMPy regridding as a spawned MPI process:")
+    print("  interpolation mean relative error = {0}".format(meanrelerr))
 
 
 ########################################### MAIN #############################

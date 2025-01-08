@@ -6,7 +6,7 @@ on:
       tag1:
         description: 'First ESMF Tag'
         required: true
-        default: 'v8.6.0'
+        default: 'v8.7.0'
       tag2:
         description: 'Second ESMF Tag'
         required: true

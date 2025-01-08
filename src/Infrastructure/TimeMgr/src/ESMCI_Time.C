@@ -545,7 +545,7 @@ namespace ESMCI{
       *timeZone = this->timeZone;
     }
     if (tempTimeString != ESMC_NULL_POINTER && timeStringLen > 0) {
-      rc = Time::getString(tempTimeString);
+      rc = Time::getString(tempTimeString, timeStringLen);
       if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         &rc))
         return(rc);
@@ -554,7 +554,7 @@ namespace ESMCI{
     }
     if (tempTimeStringISOFrac != ESMC_NULL_POINTER &&
         timeStringLenISOFrac > 0) {
-      rc = Time::getString(tempTimeStringISOFrac, "isofrac");
+      rc = Time::getString(tempTimeStringISOFrac, timeStringLenISOFrac, "isofrac");
       if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         &rc))
         return(rc);
@@ -1260,7 +1260,7 @@ namespace ESMCI{
     if (options != ESMC_NULL_POINTER) {
       if (strncmp(options, "string", 6) == 0) {
         char timeString[ESMF_MAXSTR];
-        Time::getString(timeString, &options[6]);
+        Time::getString(timeString, sizeof(timeString)-1, &options[6]);
         printf("%s\n", timeString);
         // see also method Time::get()
       }
@@ -1393,9 +1393,9 @@ namespace ESMCI{
 //    int error return code
 //
 // !ARGUMENTS:
-      char *timeString, const char *options) const {    // out - time value in
-                                                        //       string format
-                                                        // in  - format options
+      char *timeString,               // out - time value in string format
+      int timeStringLen,              // in  - max number of characters that can be stored in timeString, not including the null terminator
+      const char *options) const {    // in  - format options
 //
 // !DESCRIPTION:
 //      Gets a {\tt time}'s value in ISO 8601 string format
@@ -1451,14 +1451,25 @@ namespace ESMCI{
       &rc))
       return(rc);
 
+    int requiredLen;
+    
     // format everything except seconds
-    sprintf(timeString, "%04lld-%02d-%02dT%02d:%02d:", yy_i8, mm, dd, h, m);
+    requiredLen = snprintf(timeString, timeStringLen+1, "%04lld-%02d-%02dT%02d:%02d:", yy_i8, mm, dd, h, m);
+    if (requiredLen > timeStringLen) {
+      std::stringstream msg;
+      msg << "timeString too small for result: " << timeStringLen << " < " << requiredLen;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE, msg, ESMC_CONTEXT, &rc);
+      return(rc);
+    }
 
     // format seconds according to specified options
     bool isofrac = false;
     if (options != ESMC_NULL_POINTER) {
       if (strstr(options, "isofrac") != ESMC_NULL_POINTER) isofrac = true;
     }
+
+    char timeStringTemp[timeStringLen+1];
+    strncpy(timeStringTemp, timeString, sizeof(timeStringTemp));
     if (isofrac) {
       // strict ISO 8601 format YYYY-MM-DDThh:mm:ss[.f]
 
@@ -1468,19 +1479,26 @@ namespace ESMCI{
 
       // if fractionalSeconds non-zero (>= 0.5 ns) append full fractional value
       if (fabs(fractionalSeconds) >= 5e-10) {
-        sprintf(timeString, "%s%012.9f", timeString, (s + fractionalSeconds));
+        requiredLen = snprintf(timeString, timeStringLen+1, "%s%012.9f", timeStringTemp, (s + fractionalSeconds));
       } else { // no fractional seconds, just append integer seconds
-        sprintf(timeString, "%s%02d", timeString, s);
+        requiredLen = snprintf(timeString, timeStringLen+1, "%s%02d", timeStringTemp, s);
       }
     } else { // not strict ISO fractional seconds format
       // hybrid ISO 8601 format YYYY-MM-DDThh:mm:ss[:n/d]
 
       // if fractionalSeconds non-zero (sN!=0) append full fractional value
       if (sN != 0) {
-        sprintf(timeString, "%s%02d:%lld/%lld", timeString, s, sN, sD);
+        requiredLen = snprintf(timeString, timeStringLen+1, "%s%02d:%lld/%lld", timeStringTemp, s, sN, sD);
       } else { // no fractional seconds, just append integer seconds
-        sprintf(timeString, "%s%02d", timeString, s);
+        requiredLen = snprintf(timeString, timeStringLen+1, "%s%02d", timeStringTemp, s);
       }
+    }
+    if (requiredLen > timeStringLen)
+    {
+      std::stringstream msg;
+      msg << "timeString too small for result: " << timeStringLen << " < " << requiredLen;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE, msg, ESMC_CONTEXT, &rc);
+      return (rc);
     }
 
     return(rc);

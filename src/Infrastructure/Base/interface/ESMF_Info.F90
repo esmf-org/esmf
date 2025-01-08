@@ -223,6 +223,7 @@ public ESMF_InfoSetNULL
 public ESMF_InfoSetDirty
 public ESMF_InfoIsSet
 public ESMF_InfoIsPresent
+public ESMF_InfoLog
 public ESMF_InfoPrint
 public ESMF_InfoDump
 public ESMF_InfoUpdate
@@ -2492,6 +2493,71 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_SUCCESS
 end function ESMF_InfoIsSet
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoLog()"
+!BOP
+! !IROUTINE: ESMF_InfoLog - Log contents of an Info object
+!
+! !INTERFACE:
+subroutine ESMF_InfoLog(info, keywordEnforcer, prefix, logMsgFlag, rc)
+! !ARGUMENTS:
+  type(ESMF_Info), intent(in)                       :: info
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(len=*),       intent(in),   optional  :: prefix
+    type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
+    integer, intent(out),                 optional  :: rc
+!
+! !DESCRIPTION:
+!   Write information about {\tt info} object to the ESMF default Log.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[info]
+!     {\tt ESMF\_Info} object logged.
+!   \item [{[prefix]}]
+!     String to prefix the log message. Default is no prefix.
+!   \item [{[logMsgFlag]}]
+!     Type of log message generated. See section \ref{const:logmsgflag} for
+!     a list of valid message types. Default is {\tt ESMF\_LOGMSG\_INFO}.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+  integer                   :: localrc
+  character(:), allocatable :: output, local_preString
+
+  ! initialize return code; assume routine not implemented
+  localrc = ESMF_RC_NOT_IMPL
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+  !TODO: This should really be implemented on the C++ side where we could
+  !TODO: correctly deal with line breaks and prepend the prefix string on
+  !TODO: each line, much like for ESMF_HConfigLog().
+  !TODO: For now implemented quickly on the Fortran side to make available.
+
+  if (present(prefix)) then
+    local_preString = prefix
+  else
+    local_preString = ""
+  endif
+
+  output = ESMF_InfoDump(info, indent=2, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_LogWrite(local_preString//output, logMsgFlag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! return successfully
+  if (present(rc)) rc = ESMF_SUCCESS
+
+end subroutine ESMF_InfoLog
 
 !------------------------------------------------------------------------------
 

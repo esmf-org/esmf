@@ -116,7 +116,7 @@ module NUOPC_Driver
 
   ! Generic methods
   public NUOPC_DriverAddComp
-#if defined (__INTEL_LLVM_COMPILER) || (__NVCOMPILER)
+#if defined (__INTEL_LLVM_COMPILER) || defined (__NVCOMPILER) || defined (NAGFOR)
   public NUOPC_DriverAddGridCompPtr !TODO: remove once compliers are fixed
 #endif
   public NUOPC_DriverAddRunElement
@@ -1170,7 +1170,7 @@ module NUOPC_Driver
           return  ! bail out
         namespace=cmEntry%wrap%label
       else
-        ! in the old style (pre v7) there are no component labels availabl
+        ! in the old style (pre v7) there are no component labels available
         namespace="DEFAULT" ! cannot be empty for sake of AttributeSet()
       endif
       ! add State level attributes, set the namespace according to comp label
@@ -1188,6 +1188,14 @@ module NUOPC_Driver
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
+        ! for available component label, also set State name for clarity
+        if (namespace /= "DEFAULT") then
+          call ESMF_StateSet(is%wrap%modelIS(i), &
+            name=trim(namespace)//"-ImportState", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
       endif
       ! add State level attributes, set the namespace according to comp label
       stateIsCreated = ESMF_StateIsCreated(is%wrap%modelES(i), rc=rc)
@@ -1204,6 +1212,14 @@ module NUOPC_Driver
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
+        ! for available component label, also set State name for clarity
+        if (namespace /= "DEFAULT") then
+          call ESMF_StateSet(is%wrap%modelES(i), &
+            name=trim(namespace)//"-ExportState", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
       endif
     enddo
 
@@ -2427,7 +2443,7 @@ module NUOPC_Driver
         return  ! bail out
       ! optionally log info
       if (btest(verbosity,11)) then
-        write(msgString, "(A,l,A,I4)") trim(name)//&
+        write(msgString, "(A,L2,A,I4)") trim(name)//&
           ": InitializeDataComplete='"//trim(oldDataComplete)//&
           "', allUpdated=", allUpdated, ", updatedCount=", oldUpdatedCount
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -2503,7 +2519,7 @@ module NUOPC_Driver
 
       ! optionally log info
       if (btest(verbosity,11)) then
-        write(msgString, "(A,l,A,I4)") trim(name)//&
+        write(msgString, "(A,L2,A,I4)") trim(name)//&
           ": InitializeDataComplete='"//trim(newDataComplete)//&
           "', allUpdated=", allUpdated, ", updatedCount=", newUpdatedCount
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -2775,7 +2791,7 @@ module NUOPC_Driver
           return  ! bail out
 
         if (btest(verbosity,11)) then
-          write(msgString, "(A,l)") trim(name)//&
+          write(msgString, "(A,L2)") trim(name)//&
             ": loopDataDependentInitialize() returned with dataDepAllComplete: ",&
             is%wrap%dataDepAllComplete
           call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -3266,7 +3282,7 @@ module NUOPC_Driver
             return  ! bail out
 
           if (btest(verbosity,11)) then
-            write(msgString, "(A,I4,A,L)") &
+            write(msgString, "(A,I4,A,L2)") &
               trim(name)//": component ", i, "="//trim(compName)//&
               ", dataComplete (global): ", (helperOut==petCount)
             call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -3377,7 +3393,7 @@ module NUOPC_Driver
           if (helperOut > 0) someProgress=.true. ! toggle flag
 
           if (btest(verbosity,11)) then
-            write(msgString, "(A,I4,A,L)") &
+            write(msgString, "(A,I4,A,L2)") &
               trim(name)//": component ", i, "="//trim(compName)//&
               ", someProgress (global): ", someProgress
             call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -3391,7 +3407,7 @@ module NUOPC_Driver
       if (present(dataDepAllComplete)) dataDepAllComplete=allComplete
 
       if (btest(verbosity,11)) then
-        write(msgString, "(A,l,A,l,A,l)") &
+        write(msgString, "(A,L2,A,L2,A,L2)") &
           trim(name)//": someProgress=", someProgress, ", allComplete=", &
           allComplete, ", present(dataDepAllComplete)=", &
           present(dataDepAllComplete)
@@ -4526,7 +4542,7 @@ module NUOPC_Driver
   !-----------------------------------------------------------------------------
   !-----------------------------------------------------------------------------
 
-#if defined (__INTEL_LLVM_COMPILER) || defined (__NVCOMPILER)
+#if defined (__INTEL_LLVM_COMPILER) || defined (__NVCOMPILER) || defined (NAGFOR)
   !-----------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: NUOPC_DriverAddComp - Add a GridComp child to a Driver using procedure pointers

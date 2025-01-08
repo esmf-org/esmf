@@ -662,6 +662,16 @@
 !     and {\tt ESMF\_TimeGet(yy = year, s=seconds)} would return
 !       {\tt year = 2004}, {\tt seconds = 2772000} (770 * 3600).
 !
+!     However, double precision time units are not considered in this normalization:
+!     Double precision time units are still bound by units of a day or larger, but double
+!     precision time units of an hour or smaller neither bind nor are bound by other time
+!     units of an hour or smaller (either integer or double precision). For example,
+!     with the same time setting as above (2:00 am on February 2, 2004),
+!     {\tt ESMF\_TimeGet(dd=day, h\_r8=hours\_r8, s=seconds)} would return
+!       {\tt day = 2}, {\tt hours\_r8 = 2.0}, {\tt seconds = 7200}, and
+!     {\tt ESMF\_TimeGet(dd=day, h=hours, s\_r8=seconds\_r8)} would return
+!       {\tt day = 2}, {\tt hours = 2}, {\tt seconds\_r8 = 7200.0}.
+!
 !     For {\tt timeString}, {\tt timeStringISOFrac}, {\tt dayOfWeek},
 !     {\tt midMonth}, {\tt dayOfYear}, {\tt dayOfYear\_intvl}, and
 !     {\tt dayOfYear\_r8} described below, valid calendars are Gregorian,

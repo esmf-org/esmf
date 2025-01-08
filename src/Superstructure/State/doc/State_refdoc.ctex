@@ -21,7 +21,7 @@
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{State Reference Manual}
-\newcommand{\myauthors}{Walter Spector, Ben Koziol}
+\newcommand{\myauthors}{Walter Spector, Ben Koziol, Gerhard Theurich}
 % these are temporary patches until something more
 % permanent is done to the protex script.
 \newlength{\oldparskip}
@@ -66,12 +66,10 @@
 \input{State_usage}
 \input{ESMF_StateEx_fapi}
 \input{../../StateReconcile/doc/ESMF_StateReconcileEx_fapi}
-\input{ESMF_StateReadWriteEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/State/doc/State_usage}
 \input{../Superstructure/State/doc/ESMF_StateEx_fapi}
 \input{../Superstructure/StateReconcile/doc/ESMF_StateReconcileEx_fapi}
-\input{../Superstructure/State/doc/ESMF_StateReadWriteEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
