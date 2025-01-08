@@ -18,6 +18,14 @@
 ! The SLEEPTIME macro defines the time in seconds that Finalize will delay
 #define SLEEPTIME 3.0_ESMF_KIND_R8
 
+! The DRIFTTIME macro defines a clock drift tolerance in seconds
+! DRIFTTIME is used to work around system clock errors on macOS runners
+#ifdef ESMF_OS_Darwin
+#define DRIFTTIME 0.01_ESMF_KIND_R8
+#else
+#define DRIFTTIME 0.00_ESMF_KIND_R8
+#endif
+
 module ESMF_CompTunnelUTest_comp_mod
 
   ! modules
@@ -461,10 +469,10 @@ program ESMF_CompTunnelUTest
   delayTime = endTime - startTime
   if (ESMF_GridCompIsPetLocal(dualComp)) then
     ! PETs in Dual Component petList must be blocking
-    call ESMF_Test(delayTime > SLEEPTIME-2*precTime, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(delayTime > SLEEPTIME-DRIFTTIME-2*precTime, name, failMsg, result, ESMF_SRCLINE)
   else
     ! PETs not in Dual Component petList must not be blocking
-    call ESMF_Test(delayTime < SLEEPTIME+2*precTime, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(delayTime < SLEEPTIME+DRIFTTIME+2*precTime, name, failMsg, result, ESMF_SRCLINE)
   endif
   write(logString, *) "delayTime (blocking) = ", delayTime
   call ESMF_LogWrite(logString, ESMF_LOGMSG_INFO, rc=rc)
@@ -516,10 +524,10 @@ program ESMF_CompTunnelUTest
   delayTime = endTime - startTime
   if (ESMF_GridCompIsPetLocal(dualComp)) then
     ! PETs in Dual Component petList must be blocking
-    call ESMF_Test(delayTime > SLEEPTIME-2*precTime, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(delayTime > SLEEPTIME-DRIFTTIME-2*precTime, name, failMsg, result, ESMF_SRCLINE)
   else
     ! PETs not in Dual Component petList must not be blocking
-    call ESMF_Test(delayTime < SLEEPTIME+2*precTime, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(delayTime < SLEEPTIME+DRIFTTIME+2*precTime, name, failMsg, result, ESMF_SRCLINE)
   endif
   write(logString, *) "delayTime (wait) = ", delayTime
   call ESMF_LogWrite(logString, ESMF_LOGMSG_INFO, rc=rc)
@@ -1204,10 +1212,10 @@ program ESMF_CompTunnelUTest
   delayTime = endTime - startTime
   if (ESMF_GridCompIsPetLocal(dualCompD)) then
     ! PETs in Dual Component petList must be blocking
-    call ESMF_Test(delayTime > SLEEPTIME-2*precTime, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(delayTime > SLEEPTIME-DRIFTTIME-2*precTime, name, failMsg, result, ESMF_SRCLINE)
   else
     ! PETs not in Dual Component petList must not be blocking
-    call ESMF_Test(delayTime < SLEEPTIME+2*precTime, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(delayTime < SLEEPTIME+DRIFTTIME+2*precTime, name, failMsg, result, ESMF_SRCLINE)
   endif
   write(logString, *) "delayTime (blocking) = ", delayTime
   call ESMF_LogWrite(logString, ESMF_LOGMSG_INFO, rc=rc)
@@ -1280,10 +1288,10 @@ program ESMF_CompTunnelUTest
   delayTime = endTime - startTime
   if (ESMF_GridCompIsPetLocal(dualCompD)) then
     ! PETs in Dual Component petList must be blocking
-    call ESMF_Test(delayTime > SLEEPTIME-2*precTime, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(delayTime > SLEEPTIME-DRIFTTIME-2*precTime, name, failMsg, result, ESMF_SRCLINE)
   else
     ! PETs not in Dual Component petList must not be blocking
-    call ESMF_Test(delayTime < SLEEPTIME+2*precTime, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test(delayTime < SLEEPTIME+DRIFTTIME+2*precTime, name, failMsg, result, ESMF_SRCLINE)
   endif
   write(logString, *) "delayTime (wait) = ", delayTime
   call ESMF_LogWrite(logString, ESMF_LOGMSG_INFO, rc=rc)
