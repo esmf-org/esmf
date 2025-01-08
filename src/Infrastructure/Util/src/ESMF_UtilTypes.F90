@@ -88,7 +88,7 @@
       logical, parameter :: ESMF_VERSION_PUBLIC       = .true.
       logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .false.
 
-      character(*), parameter :: ESMF_VERSION_STRING  = "8.8.0
+      character(*), parameter :: ESMF_VERSION_STRING  = "8.8.0"
 
 #if defined (ESMF_NETCDF)
       logical, parameter :: ESMF_IO_NETCDF_PRESENT = .true.
