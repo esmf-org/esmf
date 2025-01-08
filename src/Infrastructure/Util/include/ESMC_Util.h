@@ -198,5 +198,10 @@ enum ESMC_TypeKind_Flag {ESMC_TYPEKIND_I1=1,
 enum ESMC_UnmappedAction_Flag {ESMC_UNMAPPEDACTION_ERROR=0,
                                ESMC_UNMAPPEDACTION_IGNORE};
 
+enum ESMC_PredefinedDynamicMask_Flag {ESMC_PREDEFINEDDYNAMICMASK_MASKDEST=0,
+                                      ESMC_PREDEFINEDDYNAMICMASK_MASKSRC,
+                                      ESMC_PREDEFINEDDYNAMICMASK_MASKDESTDEST,
+                                      ESMC_PREDEFINEDDYNAMICMASK_MASKVOTE};
+
 
 #endif  // ESMC_UTIL_H

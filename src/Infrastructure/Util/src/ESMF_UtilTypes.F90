@@ -1185,6 +1185,8 @@
 
       public ESMF_PredefinedDynamicMask_Flag, &
              ESMF_PREDEFINEDDYNAMICMASK_MASKDEST, &
+             ESMF_PREDEFINEDDYNAMICMASK_MASKSRC, &
+             ESMF_PREDEFINEDDYNAMICMASK_MASKSRCDEST, &
              ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE
 
       public ESMF_CubedSphereCalc_Flag, &
@@ -1298,7 +1300,7 @@
 
       public ESMF_RWGCheckMethod_Flag
       public ESMF_RWGCHECKMETHOD_ARRAY, ESMF_RWGCHECKMETHOD_FIELD
-      
+
 !  Overloaded = operator functions
       public operator(==), operator(/=), assignment(=)
 !
