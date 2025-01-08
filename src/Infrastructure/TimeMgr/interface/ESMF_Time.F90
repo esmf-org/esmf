@@ -667,10 +667,10 @@
 !     precision time units of an hour or smaller neither bind nor are bound by other time
 !     units of an hour or smaller (either integer or double precision). For example,
 !     with the same time setting as above (2:00 am on February 2, 2004),
-!     {\tt ESMF\_TimeGet(dd=day, h_r8=hours_r8, s=seconds)} would return
-!       {\tt day = 2}, {\tt hours_r8 = 2.0}, {\tt seconds = 7200}, and
-!     {\tt ESMF\_TimeGet(dd=day, h=hours, s_r8=seconds_r8)} would return
-!       {\tt day = 2}, {\tt hours = 2}, {\tt seconds_r8 = 7200.0}.
+!     {\tt ESMF\_TimeGet(dd=day, h\_r8=hours\_r8, s=seconds)} would return
+!       {\tt day = 2}, {\tt hours\_r8 = 2.0}, {\tt seconds = 7200}, and
+!     {\tt ESMF\_TimeGet(dd=day, h=hours, s\_r8=seconds\_r8)} would return
+!       {\tt day = 2}, {\tt hours = 2}, {\tt seconds\_r8 = 7200.0}.
 !
 !     For {\tt timeString}, {\tt timeStringISOFrac}, {\tt dayOfWeek},
 !     {\tt midMonth}, {\tt dayOfYear}, {\tt dayOfYear\_intvl}, and
