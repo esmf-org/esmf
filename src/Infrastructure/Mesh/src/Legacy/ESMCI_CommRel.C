@@ -639,7 +639,7 @@ void CommRel::complete_range() {
       if (ro == ranMesh->map_end(type)) {
        Par::Out() << "P:" << Par::Rank() << "Error, complete range,couldn't find object!  Commname:" << comm_name << std::endl;
        Par::Out() << " object =" << MeshObjTypeString(type) << ", id=" << id << std::endl;
-       Throw() << "In complete range, could not find object!!";
+       Throw() << "In complete range, could not find object="<< MeshObjTypeString(type) << ", id=" << id << " !!";
       }
       
       MeshObj *robj = &*ro;
