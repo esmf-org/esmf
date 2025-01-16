@@ -87,7 +87,7 @@ jobs:
 
     # restore Intel oneAPI compiler installation from cache
     - name: Restore Intel oneAPI Compiler Installation
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       if: ${{ startsWith(matrix.compiler, 'oneapi') }}
       with:
         path: /opt/intel/oneapi
