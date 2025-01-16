@@ -2167,7 +2167,7 @@ end subroutine Test_GetPrevRingTime
       allCorrect = .false.
     end if
 
-    do n = 1, 6
+    do n = 1, 8
       call ESMF_ClockAdvance(clock,rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize()
       call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, rc=status)
@@ -2574,7 +2574,7 @@ end subroutine Test_GetPrevRingTime
     if (.not. ringing) then
       allCorrect = .false.
     end if
-    do n = 1, 6
+    do n = 1, 8
       call ESMF_ClockAdvance(clock,rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize()
       call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, rc=status)
