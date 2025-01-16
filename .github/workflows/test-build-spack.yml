@@ -74,7 +74,7 @@ jobs:
     steps:
     # check out base repo
     - name: Checkout Base Repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     # prepare core environment
     - name: Install Core Development Tools
@@ -120,7 +120,7 @@ jobs:
 
     # checkout NUOPC app prototypes
     - name: Checkout NUOPC App Prototypes
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: esmf-org/nuopc-app-prototypes
         path: ${{ github.workspace }}/nuopc-app-prototypes
