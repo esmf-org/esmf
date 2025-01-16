@@ -37,7 +37,7 @@ jobs:
         docker rm ${CID}        
             
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: esmf-docs
         path: ${{ github.workspace }}/artifacts

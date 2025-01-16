@@ -143,7 +143,7 @@ jobs:
 
    # push test results to artifacts
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Artifacts for ${{ matrix.compiler }} ${{ matrix.esmf }}
         path: ${{ github.workspace }}/nuopc-app-prototypes/Artifacts
