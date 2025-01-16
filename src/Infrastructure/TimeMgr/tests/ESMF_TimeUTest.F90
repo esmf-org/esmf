@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -45,6 +45,7 @@
 
       ! individual test result code
       integer :: rc, H, M, S, MM, DD, YY
+      real(ESMF_KIND_R8) :: D_r8, H_r8, M_r8, S_r8
 
       ! individual test name
       character(ESMF_MAXSTR) :: name
@@ -74,8 +75,8 @@
       logical :: bool
       integer :: dayOfYear, dayOfWeek, D, sD, sN, MS, NS, &
                  US
-      real(ESMF_KIND_R8) :: NS_r8, S_r8, US_r8, MS_r8
-      real(ESMF_KIND_R8) :: dayOfYear_r8, M_r8, D_r8, H_r8
+      real(ESMF_KIND_R8) :: NS_r8, US_r8, MS_r8
+      real(ESMF_KIND_R8) :: dayOfYear_r8
       integer(ESMF_KIND_I8) :: year, SN_I8, SD_i8
  
       ! instantitate some general times and timeintervals
@@ -145,6 +146,72 @@
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !print *, "startTime = ", timeString19
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! If you don't ask for all coarser time units, then the full remaining time gets
+      ! packed into the units you ask for
+      write(name, *) "Get Time Test - hours without all coarser time units"
+      write(failMsg, *) " Did not return correct un-normalized hours or ESMF_SUCCESS"
+      ! Do ask for years here, because otherwise we get the arbitrary baseline for years
+      ! folded into the result; but don't ask for any units between years and hours:
+      call ESMF_TimeGet(startTime, yy=YY, h=H, rc=rc)
+      ! Hours = (28 days)*(24 hours/day) + 12
+      call ESMF_Test((YY==2004 .and. H==684 .and. rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! When asking for double precision time variables, they are still normalized by
+      ! days, but they are NOT normalized by time units finer than days. Furthermore, all
+      ! times include the full, fractional time (so hours, minutes and seconds all give
+      ! the same time value, just in different units).
+      write(name, *) "Get Time Test - real-valued time variables with int-valued date variables"
+      write(failMsg, *) " Did not return correct time values or ESMF_SUCCESS"
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h_r8=H_r8, m_r8=M_r8, s_r8=S_r8, rc=rc)
+      ! Note that times are normalized by days; all times include the full time - with the
+      ! same value, just in different units
+      ! S = (12*60 + 17)*60 + 58
+      ! M = ((12*60 + 17)*60 + 58) / 60
+      ! H = (((12*60 + 17)*60 + 58) / 60) / 60
+      call ESMF_Test((YY==2004 .and. MM==1 .and. DD==29 .and. &
+                      abs(H_r8 - 12.299444444444445d0) < 1d-14 .and. &
+                      abs(M_r8 - 737.9666666666667d0) < 1d-12 .and. &
+                      abs(S_r8 - 44278.0d0) < 1d-11 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Double precision time units include the full time even when asking for some time
+      ! units in integer. This contrasts with the behavior when asking for all things in
+      ! integer, where the finer time units are normalized by the coarser time units.
+      write(name, *) "Get Time Test - mix of coarser int-valued and finer real-valued time variables"
+      write(failMsg, *) " Did not return correct time values or ESMF_SUCCESS"
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m_r8=M_r8, s_r8=S_r8, rc=rc)
+      ! Note that real-valued times include the full time - with the same value, just in
+      ! different units
+      ! S = (12*60 + 17)*60 + 58
+      ! M = ((12*60 + 17)*60 + 58) / 60
+      call ESMF_Test((YY==2004 .and. MM==1 .and. DD==29 .and. H==12 .and. &
+                      abs(M_r8 - 737.9666666666667d0) < 1d-12 .and. &
+                      abs(S_r8 - 44278.0d0) < 1d-11 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! When asking for coarser time units as double precision, days are still used to
+      ! normalize finer-valued time units, but time variables (e.g., hours) in double
+      ! precision are NOT used to normalize finer-valued time units in integer. This
+      ! contrasts with the behavior when asking for all things in integer, where the finer
+      ! time units are normalized by the coarser time units.
+      write(name, *) "Get Time Test - mix of coarser real-valued and finer int-valued time variables"
+      write(failMsg, *) " Did not return correct time values or ESMF_SUCCESS"
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h_r8=H_r8, m=M, s=S, rc=rc)
+      ! M = (12 hours)*(60 minutes/hour) + 17
+      ! S is normalized by M, so simply the remaining seconds, 58
+      call ESMF_Test((YY==2004 .and. MM==1 .and. DD==29 .and. &
+                      abs(H_r8 - 12.299444444444445d0) < 1d-14 .and. &
+                      M==737 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -165,6 +165,7 @@ end function my_xor
                  pipelineDepth, &
                  routehandle, &
                  indices, weights, &
+                 transposeRoutehandle, &
                  unmappedDstList, &
                  checkFlag, &
                  rc)
@@ -194,6 +195,7 @@ end function my_xor
       integer,                       intent(inout), optional :: srcTermProcessing
       integer,                       intent(inout), optional :: pipelineDepth
       type(ESMF_RouteHandle),  intent(inout), optional       :: routehandle
+      type(ESMF_RouteHandle),  intent(inout), optional       :: transposeRoutehandle
       integer(ESMF_KIND_I4), pointer, optional               :: indices(:,:)
       real(ESMF_KIND_R8), pointer, optional                  :: weights(:)
       integer(ESMF_KIND_I4),       pointer, optional         :: unmappedDstList(:)
@@ -239,7 +241,7 @@ end function my_xor
 !     \end{description}
 !EOPI
        integer :: localrc
-       integer :: has_rh, has_iw, nentries
+       integer :: has_rh, has_trh, has_iw, nentries
        type(ESMF_TempWeights) :: tweights
        integer :: has_udl, num_udl
        type(ESMF_TempUDL) :: tudl
@@ -262,7 +264,9 @@ end function my_xor
        endif
 
        ! Next, we require that the user request at least something
-       if (.not.(present(routehandle) .or. present(indices))) then
+       if (.not.(present(routehandle) .or. &
+                 present(transposeRoutehandle) .or. &
+                 present(indices))) then
          localrc = ESMF_RC_ARG_BAD
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
@@ -282,6 +286,10 @@ end function my_xor
        if (present(indices)) has_iw = 1
        if (present(unmappedDstList)) has_udl = 1
 
+       ! Record if transpose routehandle is present
+       has_trh = 0
+       if (present(transposeRoutehandle)) has_trh = 1
+       
        if (present(unmappedaction)) then
           localunmappedaction=unmappedaction
        else
@@ -366,6 +374,7 @@ end function my_xor
                    srcTermProcessing, pipelineDepth, &
                    routehandle, has_rh, has_iw, &
                    nentries, tweights, &
+                   transposeRoutehandle, has_trh, &
                    has_udl, num_udl, tudl, &
                    has_statusArrayInt, statusArray, &
                    checkFlagInt, &
@@ -401,13 +410,20 @@ end function my_xor
          endif
        endif
 
-       ! Mark route handle created
+       ! Mark routeHandle created
       if (present(routeHandle)) then 
         call ESMF_RouteHandleSetInitCreated(routeHandle, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
+      ! Mark transpose routeHandle created
+      if (present(transposeRoutehandle)) then 
+         call ESMF_RouteHandleSetInitCreated(transposeRoutehandle, localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+      
       rc = ESMF_SUCCESS
        end subroutine ESMF_RegridStore
 

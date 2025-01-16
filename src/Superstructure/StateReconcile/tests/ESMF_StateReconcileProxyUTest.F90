@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -277,7 +277,7 @@ program ESMF_StateReconcileProxyUTest
   
   ! Reconcile the State
   !NEX_UTest_Multi_Proc_Only
-  call ESMF_StateReconcile(exportState, rc=rc)
+  call ESMF_StateReconcile(exportState, checkflag=.true., rc=rc)
   write(name, *) "Reconciling a State"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -357,7 +357,7 @@ program ESMF_StateReconcileProxyUTest
 
   ! Re-Reconcile the State
   !NEX_UTest_Multi_Proc_Only
-  call ESMF_StateReconcile(exportState, rc=rc)
+  call ESMF_StateReconcile(exportState, checkflag=.true., rc=rc)
   write(name, *) "Re-Reconciling a State"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

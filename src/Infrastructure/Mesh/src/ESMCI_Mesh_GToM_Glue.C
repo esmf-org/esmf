@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1784,7 +1784,7 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
           // Init fracs
           if (efields[GTOM_EFIELD_FRAC]) {
             double *d=efields[GTOM_EFIELD_FRAC]->data(elem);
-            *d=1.0;
+            *d=0.0;
           }
 
           if (efields[GTOM_EFIELD_FRAC2]) {

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1610,7 +1610,10 @@ module NUOPC_Comp
 !   Important: Attributes ingested by this method are stored as type character
 !   strings, and must be accessed accordingly. Conversion from string into a
 !   different data type, e.g. {\tt integer} or {\tt real}, is the user's
-!   responsibility.
+!   responsibility. This method does not support value lists. Attribute values
+!   ingested by this method must not contain whitespace within the value. If
+!   whitespace is found within the value the attribute will not be added to
+!   the comp.
 !
 !   If {\tt addFlag} is {\tt .false.} (default), an error will be returned if 
 !   an attribute is to be ingested that was not previously added to the 
@@ -1643,6 +1646,20 @@ module NUOPC_Comp
 !   \end{verbatim}
 !   specifies a user-level Attribute, which is not part of the pre-defined 
 !   Attributes of any of the standard NUOPC component kinds.
+!
+!   Currently, whitespace is not supported in the attribute value and
+!   the following attributeName fails to be added.
+!
+!   \begin{verbatim}
+!     attributeName = attributeValue1 attributeValue2 attributedValue3
+!   \end{verbatim}
+!
+!   If a list is needed then a comma can be used as a delimiter. The
+!   attribute value list must then be parsed in user code.
+!
+!   \begin{verbatim}
+!     attributeName = attributeValue1,attributeValue2,attributedValue3
+!   \end{verbatim}
 !
 !EOP
   !-----------------------------------------------------------------------------
@@ -2219,13 +2236,16 @@ module NUOPC_Comp
       line=__LINE__, &
       file=FILENAME, &
       rcToReturn=rc)) return  ! bail out
-    
+
     ! The NUOPC/Connector Attributes
-    allocate(attrList(4))
+    allocate(attrList(7))
     attrList(1) = "CplList"
     attrList(2) = "CplSetList"
     attrList(3) = "ConnectionOptions"
-    attrList(4) = "EpochThrottle"
+    attrList(4) = "EpochEnable"
+    attrList(5) = "EpochEnterKeepAlloc"
+    attrList(6) = "EpochExitKeepAlloc"
+    attrList(7) = "EpochThrottle"
     call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
       attrList=attrList, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2255,6 +2275,8 @@ module NUOPC_Comp
     call NUOPC_CompAttributeSet(comp, &
       name="Diagnostic", value="0", &
       rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
   end subroutine
   !-----------------------------------------------------------------------------

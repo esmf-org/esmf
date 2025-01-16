@@ -112,11 +112,11 @@ def ESMP_ArraySpecSet(arrayspec, rank, typekind):
     if rc != _ESMP_SUCCESS:
         raise NameError('ESMC_ArraySpecSet() failed with rc = '+str(rc))
     arrayspec.shallowMem = las.value
-    print 'sizeof(arrayspec) = '+str(sizeof(arrayspec))
-    print 'arrayspec = '+str(arrayspec)
-    print 'sizeof(las) = '+str(sizeof(las))
-    print 'las = '+str(las)
-    print "\n"
+    print('sizeof(arrayspec) = '+str(sizeof(arrayspec)))
+    print('arrayspec = '+str(arrayspec))
+    print('sizeof(las) = '+str(sizeof(las)))
+    print('las = '+str(las))
+    print("\n")
     
     return arrayspec
 

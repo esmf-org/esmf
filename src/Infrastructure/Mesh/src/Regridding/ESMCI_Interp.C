@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -767,6 +767,9 @@ void calc_2nd_order_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, 
                                         struct Zoltan_Struct * zz, bool set_dst_status, WMat &dst_status) {
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
 
+  // See if we're using an XGrid
+  XGRID_USE xgrid_use=detect_xgrid_regrid_info_type(srcmesh, dstmesh);
+  
   // Get src coord field
   MEField<> *src_cfield = srcmesh.GetCoordField();
 
@@ -881,9 +884,10 @@ void calc_2nd_order_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, 
 
     // Calculate weights
     calc_2nd_order_weights_2D_3D_sph(sr.elem,src_cfield,src_mask_field,
-                                      sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
-                                        &src_elem_area, &valid, &wgts, &areas, &dst_areas,
-                                        &tmp_valid, &tmp_areas, &tmp_dst_areas, &sm_cells, &nbrs);
+                                     sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
+                                     xgrid_use, 
+                                     &src_elem_area, &valid, &wgts, &areas, &dst_areas,
+                                     &tmp_valid, &tmp_areas, &tmp_dst_areas, &sm_cells, &nbrs);
 
 
     // Invalidate masked destination elements
@@ -1085,6 +1089,9 @@ void calc_2nd_order_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh,
                                         struct Zoltan_Struct * zz, bool set_dst_status, WMat &dst_status) {
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
 
+  // See if we're using an XGrid
+  XGRID_USE xgrid_use=detect_xgrid_regrid_info_type(srcmesh, dstmesh);
+  
   // Get src coord field
   MEField<> *src_cfield = srcmesh.GetCoordField();
 
@@ -1199,7 +1206,7 @@ void calc_2nd_order_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh,
 
     // Calculate weights
     calc_2nd_order_weights_2D_2D_cart(sr.elem,src_cfield,src_mask_field,
-                                      sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
+                                      sr.elems,dst_cfield,dst_mask_field, dst_frac2_field, xgrid_use,
                                         &src_elem_area, &valid, &wgts, &areas, &dst_areas,
                                         &tmp_valid, &tmp_areas, &tmp_dst_areas, &sm_cells, &nbrs);
 
@@ -3010,7 +3017,18 @@ interp_method(imethod)
         if(freeze_src_) {
           OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
         } else {
-          OctSearchElems(grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
+          // If 2nd order see if it's an XGrid and then use that
+          if (interp_method == Interp::INTERP_CONSERVE_2ND) {
+
+            // If an XGrid isn't involved, then do a search using regular method
+            if (detect_xgrid_regrid_info_type(grend.GetSrcRend(), grend.GetDstRend()) == XGRID_USE_NONE) {
+              OctSearchElems(grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
+            } else { // ...otherwise use XGrid information
+              XGridGatherOverlappingElems(grend.GetSrcRend(), grend.GetDstRend(), sres);
+            }
+          } else { // ...otherwise just use the regular search
+            OctSearchElems(grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
+          }
         }
       }
     }
@@ -3045,7 +3063,18 @@ interp_method(imethod)
           _check_mesh(*dest, "destination");
         }
 
-        OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, *dest, unmappedaction, 1e-8, sres);
+        // If 2nd order see if it's an XGrid and then use that
+        if (interp_method == Interp::INTERP_CONSERVE_2ND) {
+          
+          // If an XGrid isn't involved, then do a search using regular method
+          if (detect_xgrid_regrid_info_type(*src, *dest) == XGRID_USE_NONE) {
+            OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, *dest, unmappedaction, 1e-8, sres);
+          } else { // ...otherwise use XGrid info to do search
+            XGridGatherOverlappingElems(*src, *dest, sres); 
+          }
+        } else { // ...otherwise just use the regular search
+          OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, *dest, unmappedaction, 1e-8, sres);
+        }        
       }
     }
 

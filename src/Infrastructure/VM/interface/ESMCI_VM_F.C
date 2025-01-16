@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1660,7 +1660,8 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_vmidcompare)(ESMCI::VMId **vmid1, ESMCI::VMId **vmid2,
-    ESMC_Logical *result, int *rc){
+    ESMC_Logical *keyOnly, ESMC_Logical *keySuper, ESMC_Logical *result,
+    int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmidcompare()"
     // Initialize return code; assume routine not implemented
@@ -1669,7 +1670,13 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(vmid1, rc)
     ESMCI_NULL_CHECK_PRC(vmid2, rc)
     ESMCI_NULL_CHECK_PRC(result, rc)
-    bool resultBool = ESMCI::VMIdCompare(*vmid1, *vmid2);
+    bool keyOnlyOpt = false; // default
+    bool keySuperOpt = false; // default
+    if (ESMC_NOT_PRESENT_FILTER(keyOnly) != ESMC_NULL_POINTER)
+      if (*keyOnly == ESMF_TRUE) keyOnlyOpt = true;
+    if (ESMC_NOT_PRESENT_FILTER(keySuper) != ESMC_NULL_POINTER)
+      if (*keySuper == ESMF_TRUE) keySuperOpt = true;
+    bool resultBool = ESMCI::VMIdCompare(*vmid1, *vmid2, keyOnlyOpt, keySuperOpt);
     *result = resultBool ? ESMF_TRUE : ESMF_FALSE;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1741,6 +1748,37 @@ extern "C" {
       rc)) return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
+  }
+
+  void FTN_X(c_esmci_vmidgetleftmostonbit)(ESMCI::VMId **vmid, int *leftmostOnBit,
+                              int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmci_vmidgetleftmostonbit()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vmid, rc)
+    ESMCI_NULL_CHECK_PRC(*vmid, rc)
+    localrc = (*vmid)->getLeftmostOnBit(leftmostOnBit);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
+  }  
+
+  void FTN_X(c_esmci_vmidgetislocalpetactive)(ESMCI::VMId **vmid,
+    ESMC_Logical *isLocalPetActive, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_ESMCI_VMIdGetIsLocalPetActive()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vmid, rc)
+    bool resultBool = ESMCI::VMIdIsLocalPetActive(*vmid);
+    *isLocalPetActive = resultBool ? ESMF_TRUE : ESMF_FALSE;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
   void FTN_X(c_esmc_vmidlog)(ESMCI::VMId **vmid, char *prefix, 
@@ -1946,7 +1984,10 @@ extern "C" {
     std::string prefixStr(prefix, prefix_l);
     std::stringstream msg;
     msg << prefixStr << ptr;
-    if (ptr) msg << " => " << *(void **)ptr;
+    if (ptr){
+      msg << " => " << *(void **)ptr;
+      if (*(void **)ptr) msg << " => " << **(void ***)ptr;
+    }
     ESMC_LogDefault.Write(msg.str(), *logMsgFlag);
   }
   

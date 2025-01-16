@@ -1,7 +1,7 @@
 // $Id: ESMCI_MeshRedist.C,v 1.23 2012/01/06 20:17:51 svasquez Exp $
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -105,7 +105,7 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
 
   // Don't currently support duals of 3D Meshes
   if (src_mesh->parametric_dim()>2) {
-    Throw() <<" Creation of a dual mesh isn't supported for Meshes of parametric dim greater than 3.\n";
+    Throw() <<" Creation of a dual mesh isn't supported for Meshes of parametric dim greater than 2.\n";
   }
 
   // Need element coordinates

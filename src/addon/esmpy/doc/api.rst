@@ -941,7 +941,7 @@ MPI.Spawn
             raise ValueError('Could not connect to parent - ' + usage)
 
         # worker code goes here, regridding etc..
-        print "Hello World from PET #"+str(rank)
+        print("Hello World from PET #"+str(rank))
 
         # Shutdown
         comm.Disconnect()

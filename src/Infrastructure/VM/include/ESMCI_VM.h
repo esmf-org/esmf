@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -61,6 +61,7 @@ class VMId {
   int create ();      // allocates memory for vmKey member
   int destroy ();     // frees memory for vmKey member
   int get(int *localID, char *key, int key_len);
+  int getLeftmostOnBit(int *leftmostOnBit);
   int set(int  localID, const char *key, int key_len);
   int serialize(const char *buffer, int *length, int *offset,
                 const ESMC_InquireFlag &inquireflag);
@@ -81,7 +82,9 @@ class VMId {
 namespace ESMCI {
 
 // ESMCI::VMId methods:
-bool VMIdCompare(const VMId *vmID1, const VMId *vmID2);
+bool VMIdCompare(const VMId *vmID1, const VMId *vmID2, bool keyOnly=false,
+  bool keySuper=false);
+bool VMIdIsLocalPetActive(const VMId *vmID);
 bool VMIdLessThan(const VMId *vmID1, const VMId *vmID2);
 int VMIdCopy(VMId *vmIDdst, VMId *vmIDsrc);
 } // namespace ESMCI
