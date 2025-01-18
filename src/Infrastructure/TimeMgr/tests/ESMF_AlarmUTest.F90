@@ -2131,12 +2131,12 @@ end subroutine Test_GetPrevRingTime
     integer, intent(out) :: rc
 
     type (ESMF_Clock) :: clock
-    type (ESMF_Alarm) :: alarm
+    type (ESMF_Alarm) :: alarm, alarm_sticky
     type (ESMF_Time)  :: startTime, stopTime, ringTime
     type (ESMF_TimeInterval)  :: timeStep, ringTimeInterval
 
     integer           :: status, n
-    logical           :: ringing, enabled, sticky
+    logical           :: ringing, enabled
     logical           :: allCorrect
 
     rc = ESMF_FAILURE
@@ -2160,17 +2160,29 @@ end subroutine Test_GetPrevRingTime
     if(status /= ESMF_SUCCESS) call ESMF_Finalize()
     ! call ESMF_AlarmDebug(alarm,'test4',rc=status)
     ! if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+    alarm_sticky = ESMF_AlarmCreate(clock, ringTime=ringTime, ringInterval=ringTimeInterval, enabled=.true., sticky=.true., name='alarm_sticky', rc=status)
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+    ! call ESMF_AlarmDebug(alarm_sticky,'test4',rc=status)
+    ! if(status /= ESMF_SUCCESS) call ESMF_Finalize()
 
-    call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, rc=status)
+    call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, rc=status)
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+    if (.not. ringing) then
+      allCorrect = .false.
+    end if
+    call ESMF_AlarmGet(alarm_sticky, ringing=ringing, enabled=enabled, rc=status)
     if(status /= ESMF_SUCCESS) call ESMF_Finalize()
     if (.not. ringing) then
       allCorrect = .false.
     end if
 
+    call ESMF_AlarmRingerOff(alarm_sticky, rc=status)
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+
     do n = 1, 8
       call ESMF_ClockAdvance(clock,rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize()
-      call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, rc=status)
+      call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize()
       if (n == 6) then
         ! Alarm should be ringing on the 6th time step, when alarm dt aligns with clock dt
@@ -2183,7 +2195,23 @@ end subroutine Test_GetPrevRingTime
           allCorrect = .false.
         end if
       end if
-    enddo
+
+      call ESMF_AlarmGet(alarm_sticky, ringing=ringing, enabled=enabled, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+      if (n == 6) then
+        ! Alarm should be ringing on the 6th time step, when alarm dt aligns with clock dt
+        if (.not. ringing) then
+          allCorrect = .false.
+        end if
+      else
+        ! Alarm should NOT be ringing on other time steps
+        if (ringing) then
+          allCorrect = .false.
+        end if
+      end if
+      call ESMF_AlarmRingerOff(alarm_sticky, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+   enddo
 
     if (allCorrect) then
       rc = ESMF_SUCCESS
