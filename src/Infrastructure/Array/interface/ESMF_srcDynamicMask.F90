@@ -21,8 +21,8 @@ module ESMF_srcDynamicMaskMod
 
   public :: srcDynMaskProcR4R8R4V
   public :: srcDynMaskProcR8R8R8V
-  !public :: srcDynMaskProcR4R8R4
-  !public :: srcDynMaskProcR8R8R8
+  public :: srcDynMaskProcR4R8R4
+  public :: srcDynMaskProcR8R8R8
 
 
   contains
@@ -98,6 +98,76 @@ module ESMF_srcDynamicMaskMod
     endif
     rc = ESMF_SUCCESS
   end subroutine srcDynMaskProcR8R8R8V
+
+  subroutine srcDynMaskProcR8R8R8(dynamicMaskList, dynamicSrcMaskValue, &
+    dynamicDstMaskValue, rc)
+    type(ESMF_DynamicMaskElementR8R8R8), pointer        :: dynamicMaskList(:)
+    real(ESMF_KIND_R8),            intent(in), optional :: dynamicSrcMaskValue
+    real(ESMF_KIND_R8),            intent(in), optional :: dynamicDstMaskValue
+    integer,                       intent(out)          :: rc
+    integer :: i, j
+    real(ESMF_KIND_R8)  :: renorm
+    if (associated(dynamicMaskList)) then
+      do i=1, size(dynamicMaskList)
+        dynamicMaskList(i)%dstElement = 0.d0 ! set to zero
+        renorm = 0.d0 ! reset
+        do j=1, size(dynamicMaskList(i)%factor)
+          if (.not. &
+            match_r8(dynamicSrcMaskValue,dynamicMaskList(i)%srcElement(j))) then
+            dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement &
+              + dynamicMaskList(i)%factor(j) &
+              * dynamicMaskList(i)%srcElement(j)
+            renorm = renorm + dynamicMaskList(i)%factor(j)
+          endif
+        enddo
+        if (renorm > 0.d0) then
+          dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement / renorm
+        else if (present(dynamicSrcMaskValue)) then
+          dynamicMaskList(i)%dstElement = dynamicSrcMaskValue
+        else
+          rc = ESMF_RC_ARG_BAD  ! error detected
+          return
+        endif
+      enddo
+    endif
+    ! return successfully
+    rc = ESMF_SUCCESS
+  end subroutine srcDynMaskProcR8R8R8
+
+  subroutine srcDynMaskProcR4R8R4(dynamicMaskList, dynamicSrcMaskValue, &
+    dynamicDstMaskValue, rc)
+    type(ESMF_DynamicMaskElementR4R8R4), pointer        :: dynamicMaskList(:)
+    real(ESMF_KIND_R4),            intent(in), optional :: dynamicSrcMaskValue
+    real(ESMF_KIND_R4),            intent(in), optional :: dynamicDstMaskValue
+    integer,                       intent(out)          :: rc
+    integer :: i, j
+    real(ESMF_KIND_R8)  :: renorm
+    if (associated(dynamicMaskList)) then
+      do i=1, size(dynamicMaskList)
+        dynamicMaskList(i)%dstElement = 0.d0 ! set to zero
+        renorm = 0.d0 ! reset
+        do j=1, size(dynamicMaskList(i)%factor)
+          if (.not. &
+            match_r4(dynamicSrcMaskValue,dynamicMaskList(i)%srcElement(j))) then
+            dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement &
+              + dynamicMaskList(i)%factor(j) &
+              * dynamicMaskList(i)%srcElement(j)
+            renorm = renorm + dynamicMaskList(i)%factor(j)
+          endif
+        enddo
+        if (renorm > 0.d0) then
+          dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement / renorm
+        else if (present(dynamicSrcMaskValue)) then
+          dynamicMaskList(i)%dstElement = dynamicSrcMaskValue
+        else
+          rc = ESMF_RC_ARG_BAD  ! error detected
+          return
+        endif
+      enddo
+    endif
+    ! return successfully
+    rc = ESMF_SUCCESS
+  end subroutine srcDynMaskProcR4R8R4
 
   logical function match_r4(missing,b)
     real(ESMF_KIND_R4), intent(in) :: missing, b

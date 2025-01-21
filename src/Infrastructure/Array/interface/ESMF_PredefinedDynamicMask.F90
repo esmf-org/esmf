@@ -18,6 +18,7 @@ module ESMF_PredefinedDynamicMaskMod
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_LogErrMod
   use ESMF_srcDynamicMaskMod
+  use ESMF_dstDynamicMaskMod
   implicit none
   private
 
@@ -41,20 +42,26 @@ module ESMF_PredefinedDynamicMaskMod
 
   contains
 
-  subroutine ESMF_PredefinedDynamicMaskSet(preDefinedDynamicMask,srcMaskValue,dstMaskValue,maskType,rc)
+  subroutine ESMF_PredefinedDynamicMaskSet(preDefinedDynamicMask,srcMaskValueR4,dstMaskValueR4,srcMaskValueR8,dstMaskValueR8,maskType,rc)
     type(ESMF_PredefinedDynamicMask), intent(out) :: preDefinedDynamicMask
-    real(ESMF_KIND_R4), intent(in), optional :: srcMaskValue
-    real(ESMF_KIND_R4), intent(in), optional :: dstMaskValue
+    real(ESMF_KIND_R4), intent(in), optional :: srcMaskValueR4
+    real(ESMF_KIND_R4), intent(in), optional :: dstMaskValueR4
+    real(ESMF_KIND_R8), intent(in), optional :: srcMaskValueR8
+    real(ESMF_KIND_R8), intent(in), optional :: dstMaskValueR8
     type(ESMF_PredefinedDynamicMask_Flag), intent(in), optional :: maskType
     integer, optional, intent(out) :: rc
 
-    if (present(srcMaskValue)) preDefinedDynamicMask%srcMaskValue_R4=srcMaskValue
-    if (present(dstMaskValue)) preDefinedDynamicMask%dstMaskValue_R4=dstMaskValue
-    if (present(srcMaskValue)) preDefinedDynamicMask%srcMaskValue_R8=srcMaskValue
-    if (present(dstMaskValue)) preDefinedDynamicMask%dstMaskValue_R8=dstMaskValue
+    if (present(srcMaskValueR4)) preDefinedDynamicMask%srcMaskValue_R4=srcMaskValueR4
+    if (present(dstMaskValueR4)) preDefinedDynamicMask%dstMaskValue_R4=dstMaskValueR4
+    if (present(srcMaskValueR8)) preDefinedDynamicMask%srcMaskValue_R8=srcMaskValueR8
+    if (present(dstMaskValueR8)) preDefinedDynamicMask%dstMaskValue_R8=dstMaskValueR8
     if (present(maskType)) preDefinedDynamicMask%maskType=maskType
 
     if (present(rc)) rc =ESMF_SUCCESS
+    write(*,*)__FILE__,__LINE__,preDefinedDynamicMask%masktype==ESMF_PREDEFINEDDYNAMICMASK_MASKSRC
+    write(*,*)__FILE__,__LINE__,preDefinedDynamicMask%masktype==ESMF_PREDEFINEDDYNAMICMASK_MASKSRCV
+    write(*,*)__FILE__,__LINE__,preDefinedDynamicMask%masktype==ESMF_PREDEFINEDDYNAMICMASK_MASKDEST
+    write(*,*)__FILE__,__LINE__,preDefinedDynamicMask%masktype==ESMF_PREDEFINEDDYNAMICMASK_MASKDESTV
   end subroutine ESMF_PredefinedDynamicMaskSet 
 
   function create_DynamicMask(this, src_type, dst_type, rc) result(dynamicMask)
@@ -66,15 +73,34 @@ module ESMF_PredefinedDynamicMaskMod
      integer :: localrc
      type(ESMF_TypeKind_Flag) :: mask_type
      
-     print*,'bmaa ',__FILE__,__LINE__
      mask_type = get_mask_type(src_type, dst_type, rc) 
-     if (this%maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKSRC) then
+    write(*,*)__FILE__,__LINE__,this%masktype==ESMF_PREDEFINEDDYNAMICMASK_MASKSRC
+    write(*,*)__FILE__,__LINE__,this%masktype==ESMF_PREDEFINEDDYNAMICMASK_MASKSRCV
+    write(*,*)__FILE__,__LINE__,this%masktype==ESMF_PREDEFINEDDYNAMICMASK_MASKDEST
+    write(*,*)__FILE__,__LINE__,this%masktype==ESMF_PREDEFINEDDYNAMICMASK_MASKDESTV
+     if (this%maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKSRCV) then
         if (mask_type == ESMF_TYPEKIND_R4) then 
-           print*,'bmaa ',__FILE__,__LINE__
-           call ESMF_DynamicMaskSetR4R8R4V(dynamicMask, srcDynMaskProcR4R8R4V ,dynamicSrcMaskValue=this%srcMaskValue_R4)
+           call ESMF_DynamicMaskSetR4R8R4V(dynamicMask, srcDynMaskProcR4R8R4V ,dynamicSrcMaskValue=this%srcMaskValue_R4, handleAllElements=.true.)
         else if (mask_type == ESMF_TYPEKIND_R8) then
-           print*,'bmaa ',__FILE__,__LINE__
-           call ESMF_DynamicMaskSetR8R8R8V(dynamicMask, srcDynMaskProcR8R8R8V ,dynamicSrcMaskValue=this%srcMaskValue_R8)
+           call ESMF_DynamicMaskSetR8R8R8V(dynamicMask, srcDynMaskProcR8R8R8V ,dynamicSrcMaskValue=this%srcMaskValue_R8, handleAllElements=.true.)
+        end if
+     else if (this%maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKSRC) then
+        if (mask_type == ESMF_TYPEKIND_R4) then 
+           call ESMF_DynamicMaskSetR4R8R4(dynamicMask, srcDynMaskProcR4R8R4 ,dynamicSrcMaskValue=this%srcMaskValue_R4, handleAllElements=.true.)
+        else if (mask_type == ESMF_TYPEKIND_R8) then
+           call ESMF_DynamicMaskSetR8R8R8(dynamicMask, srcDynMaskProcR8R8R8 ,dynamicSrcMaskValue=this%srcMaskValue_R8, handleAllElements=.true.)
+        end if
+     else if (this%maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKDESTV) then
+        if (mask_type == ESMF_TYPEKIND_R4) then 
+           call ESMF_DynamicMaskSetR4R8R4V(dynamicMask, dstDynMaskProcR4R8R4V ,dynamicSrcMaskValue=this%srcMaskValue_R4, handleAllElements=.true.)
+        else if (mask_type == ESMF_TYPEKIND_R8) then
+           call ESMF_DynamicMaskSetR8R8R8V(dynamicMask, dstDynMaskProcR8R8R8V ,dynamicSrcMaskValue=this%srcMaskValue_R8, handleAllElements=.true.)
+        end if
+     else if (this%maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKDEST) then
+        if (mask_type == ESMF_TYPEKIND_R4) then 
+           call ESMF_DynamicMaskSetR4R8R4(dynamicMask, dstDynMaskProcR4R8R4 ,dynamicDstMaskValue=this%dstMaskValue_R4, handleAllElements=.true.)
+        else if (mask_type == ESMF_TYPEKIND_R8) then
+           call ESMF_DynamicMaskSetR8R8R8(dynamicMask, dstDynMaskProcR8R8R8 ,dynamicDstMaskValue=this%dstMaskValue_R8, handleAllElements=.true.)
         end if
      else
         localrc = ESMF_RC_NOT_IMPL
