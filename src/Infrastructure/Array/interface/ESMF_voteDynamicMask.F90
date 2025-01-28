@@ -47,14 +47,14 @@ module ESMF_voteDynamicMaskMod
           do k = 1, size(dynamicMaskList(i)%srcElement(j)%ptr)
             if (.not. &
               match_r4(dynamicSrcMaskValue,dynamicMaskList(i)%srcElement(j)%ptr(k))) then
-              dynamicMaskList(i)%dstElement(k) = dynamicMaskList(i)%dstElement(k) &
-              + dynamicMaskList(i)%factor(j) * dynamicMaskList(i)%srcElement(j)%ptr(k)
-                     renorm(k) = renorm(k) + dynamicMaskList(i)%factor(j)
+              if (dynamicMaskList(i)%factor(j) > renorm(k)) then
+                 renorm(k) = dynamicMaskList(i)%factor(j)
+                 dynamicMaskList(i)%dstElement(k) = dynamicMaskList(i)%srcElement(j)%ptr(k)
+              end if
             endif
           end do
         end do
         where (renorm > 0.d0)
-          dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement / renorm
         elsewhere
             dynamicMaskList(i)%dstElement = dynamicSrcMaskValue
         end where
@@ -83,14 +83,14 @@ module ESMF_voteDynamicMaskMod
           do k = 1, size(dynamicMaskList(i)%srcElement(j)%ptr)
             if (.not. &
               match_r8(dynamicSrcMaskValue,dynamicMaskList(i)%srcElement(j)%ptr(k))) then
-              dynamicMaskList(i)%dstElement(k) = dynamicMaskList(i)%dstElement(k) &
-              + dynamicMaskList(i)%factor(j) * dynamicMaskList(i)%srcElement(j)%ptr(k)
-                     renorm(k) = renorm(k) + dynamicMaskList(i)%factor(j)
+              if (dynamicMaskList(i)%factor(j) > renorm(k)) then
+                 renorm(k) = dynamicMaskList(i)%factor(j)
+                 dynamicMaskList(i)%dstElement(k) = dynamicMaskList(i)%srcElement(j)%ptr(k)
+              end if
             endif
           end do
         end do
         where (renorm > 0.d0)
-          dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement / renorm
         elsewhere
             dynamicMaskList(i)%dstElement = dynamicSrcMaskValue
         end where
@@ -114,14 +114,13 @@ module ESMF_voteDynamicMaskMod
         do j=1, size(dynamicMaskList(i)%factor)
           if (.not. &
             match_r8(dynamicSrcMaskValue,dynamicMaskList(i)%srcElement(j))) then
-            dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement &
-              + dynamicMaskList(i)%factor(j) &
-              * dynamicMaskList(i)%srcElement(j)
-            renorm = renorm + dynamicMaskList(i)%factor(j)
+            if (dynamicMaskList(i)%factor(j) > renorm) then
+               renorm=dynamicMaskList(i)%factor(j)
+               dynamicMaskList(i)%dstElement = dynamicMaskList(i)%srcElement(j)
+            end if
           endif
         enddo
         if (renorm > 0.d0) then
-          dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement / renorm
         else if (present(dynamicSrcMaskValue)) then
           dynamicMaskList(i)%dstElement = dynamicSrcMaskValue
         else
@@ -149,14 +148,13 @@ module ESMF_voteDynamicMaskMod
         do j=1, size(dynamicMaskList(i)%factor)
           if (.not. &
             match_r4(dynamicSrcMaskValue,dynamicMaskList(i)%srcElement(j))) then
-            dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement &
-              + dynamicMaskList(i)%factor(j) &
-              * dynamicMaskList(i)%srcElement(j)
-            renorm = renorm + dynamicMaskList(i)%factor(j)
+            if (dynamicMaskList(i)%factor(j) > renorm) then
+               renorm=dynamicMaskList(i)%factor(j)
+               dynamicMaskList(i)%dstElement = dynamicMaskList(i)%srcElement(j)
+            end if
           endif
         enddo
         if (renorm > 0.d0) then
-          dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement / renorm
         else if (present(dynamicSrcMaskValue)) then
           dynamicMaskList(i)%dstElement = dynamicSrcMaskValue
         else

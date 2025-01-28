@@ -19,6 +19,7 @@ module ESMF_PredefinedDynamicMaskMod
   use ESMF_LogErrMod
   use ESMF_srcDynamicMaskMod
   use ESMF_dstDynamicMaskMod
+  use ESMF_voteDynamicMaskMod
   implicit none
   private
 
@@ -101,6 +102,18 @@ module ESMF_PredefinedDynamicMaskMod
            call ESMF_DynamicMaskSetR4R8R4(dynamicMask, dstDynMaskProcR4R8R4 ,dynamicDstMaskValue=this%dstMaskValue_R4, handleAllElements=.true.)
         else if (mask_type == ESMF_TYPEKIND_R8) then
            call ESMF_DynamicMaskSetR8R8R8(dynamicMask, dstDynMaskProcR8R8R8 ,dynamicDstMaskValue=this%dstMaskValue_R8, handleAllElements=.true.)
+        end if
+     else if (this%maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKVOTEV) then
+        if (mask_type == ESMF_TYPEKIND_R4) then 
+           call ESMF_DynamicMaskSetR4R8R4V(dynamicMask, voteDynMaskProcR4R8R4V ,dynamicSrcMaskValue=this%srcMaskValue_R4, handleAllElements=.true.)
+        else if (mask_type == ESMF_TYPEKIND_R8) then
+           call ESMF_DynamicMaskSetR8R8R8V(dynamicMask, voteDynMaskProcR8R8R8V ,dynamicSrcMaskValue=this%srcMaskValue_R8, handleAllElements=.true.)
+        end if
+     else if (this%maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE) then
+        if (mask_type == ESMF_TYPEKIND_R4) then 
+           call ESMF_DynamicMaskSetR4R8R4(dynamicMask, voteDynMaskProcR4R8R4 ,dynamicDstMaskValue=this%dstMaskValue_R4, handleAllElements=.true.)
+        else if (mask_type == ESMF_TYPEKIND_R8) then
+           call ESMF_DynamicMaskSetR8R8R8(dynamicMask, voteDynMaskProcR8R8R8 ,dynamicDstMaskValue=this%dstMaskValue_R8, handleAllElements=.true.)
         end if
      else
         localrc = ESMF_RC_NOT_IMPL
