@@ -1288,7 +1288,6 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     bool finished;
     bool cancelled;
-    printf("bmaa hello c_esmc_arraysmm %d\n",__LINE__);
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMul(
       *srcArray, *dstArray, routehandle, *commflag, &finished, &cancelled,
       *zeroflag, *termorderflag, checkflagOpt),

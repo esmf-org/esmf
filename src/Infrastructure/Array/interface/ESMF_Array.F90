@@ -721,8 +721,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DynamicMask), target :: local_dynamicMask
     type(Logical)          :: have_dynMask 
 
-    write(*,*)"bmaa options array ",present(preDefinedDynamicMask),present(dynamicMask)
-    write(*,*)"bmaa ",__FILE__,__LINE__
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -735,7 +733,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     have_dynMask = present(dynamicMask) .or. present(preDefinedDynamicMask)
     if (present(dynamicMask)) local_dynamicMask = dynamicMask
 
-    write(*,*)"bmaa ",__FILE__,__LINE__
     ! Check init status of arguments, deal with optional Array args
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
     if (present(srcArray)) then
@@ -753,7 +750,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
       src_type = ESMF_NOKIND
     endif
-    write(*,*)"bmaa ",__FILE__,__LINE__
     if (present(dstArray)) then
       call ESMF_ArrayGetThis(dstArray, this, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -770,10 +766,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       dst_type = ESMF_NOKIND
     endif
   
-    write(*,*)"bmaa ",__FILE__,__LINE__,present(preDefinedDynamicMask)
     if(present(preDefinedDynamicMask)) local_dynamicMask = preDefinedDynamicMask%create_DynamicMask(src_type, dst_type, rc)
-    write(*,*)"bmaa ",__FILE__,__LINE__
-    write(*,*)'bmaa have_dynMask: ',have_dynMask 
     ! prepare for passing of dynamic masking
     if (have_dynMask) then
       ! check for valid input
@@ -805,7 +798,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
 #ifndef ESMF_NO_DYNMASKOVERLOAD
       else if (local_dynamicMask%typeKey=="R8R8R8V") then
-        write(*,*)'bmaa have R8R8R8V mask'
         ! insert dynMaskState into RouteHandle for Fortran layer
         dynMaskStateR8R8R8V%wrap => local_dynamicMask%dmsR8R8R8V
         call c_ESMC_RouteHandleSetASR8R8R8V(routehandle, dynMaskStateR8R8R8V, &
@@ -857,7 +849,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
       else if (local_dynamicMask%typeKey=="R4R8R4V") then
         ! insert dynMaskState into RouteHandle for Fortran layer
-        write(*,*)'bmaa have R4R8R4V mask'
         dynMaskStateR4R8R4V%wrap => local_dynamicMask%dmsR4R8R4V
         call c_ESMC_RouteHandleSetASR4R8R4V(routehandle, dynMaskStateR4R8R4V, &
           localrc)

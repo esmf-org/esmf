@@ -216,7 +216,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_Array)     :: srcArray
         type(ESMF_Array)     :: dstArray
 
-        write(*,*)"bmaa ",__FILE__,__LINE__,present(preDefinedDynamicMask),present(dynamicMask)
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
         if (present(rc)) rc = ESMF_RC_NOT_IMPL

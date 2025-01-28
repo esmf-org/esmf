@@ -547,7 +547,6 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     int localrc = ESMC_RC_NOT_IMPL;
 
     // typecase into ESMCI type
-    printf("bmaa %s, %d\n",__FILE__,__LINE__);
     ESMCI::Field *fieldpsrc = reinterpret_cast<ESMCI::Field *>(srcField.ptr);
     ESMCI::Field *fieldpdst = reinterpret_cast<ESMCI::Field *>(dstField.ptr);
     ESMCI::RouteHandle *routehandlep = 

@@ -80,11 +80,8 @@ module ESMF_dstDynamicMaskMod
     real(ESMF_KIND_R8),            intent(in), optional :: dynamicDstMaskValue
     integer,                       intent(out)          :: rc
     integer :: i, j
-    write(*,*)"bmaa ",__FILE__,__LINE__
     if (associated(dynamicMaskList)) then
-      write(*,*)"bmaa ",__FILE__,__LINE__
       do i=1, size(dynamicMaskList)
-        write(*,*)"bmaa ",__FILE__,__LINE__,i,match_r8(dynamicDstMaskValue, dynamicMaskList(i)%dstElement)
         if (.not. match_r8(dynamicDstMaskValue, dynamicMaskList(i)%dstElement)) then
            write(*,*)__FILE__,__LINE__
            dynamicMaskList(i)%dstElement=0.d0
@@ -94,7 +91,6 @@ module ESMF_dstDynamicMaskMod
                  * dynamicMaskList(i)%srcElement(j)
            enddo
         endif
-        write(*,*)"bmaa ",__FILE__,__LINE__,i,dynamicMaskList(i)%dstElement
       enddo
     endif
     ! return successfully
