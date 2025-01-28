@@ -59,10 +59,7 @@ module ESMF_PredefinedDynamicMaskMod
     if (present(maskType)) preDefinedDynamicMask%maskType=maskType
 
     if (present(rc)) rc =ESMF_SUCCESS
-    write(*,*)__FILE__,__LINE__,preDefinedDynamicMask%masktype==ESMF_PREDEFINEDDYNAMICMASK_MASKSRC
-    write(*,*)__FILE__,__LINE__,preDefinedDynamicMask%masktype==ESMF_PREDEFINEDDYNAMICMASK_MASKSRCV
-    write(*,*)__FILE__,__LINE__,preDefinedDynamicMask%masktype==ESMF_PREDEFINEDDYNAMICMASK_MASKDEST
-    write(*,*)__FILE__,__LINE__,preDefinedDynamicMask%masktype==ESMF_PREDEFINEDDYNAMICMASK_MASKDESTV
+
   end subroutine ESMF_PredefinedDynamicMaskSet 
 
   function create_DynamicMask(this, src_type, dst_type, rc) result(dynamicMask)
@@ -75,10 +72,7 @@ module ESMF_PredefinedDynamicMaskMod
      type(ESMF_TypeKind_Flag) :: mask_type
      
      mask_type = get_mask_type(src_type, dst_type, rc) 
-    write(*,*)__FILE__,__LINE__,this%masktype==ESMF_PREDEFINEDDYNAMICMASK_MASKSRC
-    write(*,*)__FILE__,__LINE__,this%masktype==ESMF_PREDEFINEDDYNAMICMASK_MASKSRCV
-    write(*,*)__FILE__,__LINE__,this%masktype==ESMF_PREDEFINEDDYNAMICMASK_MASKDEST
-    write(*,*)__FILE__,__LINE__,this%masktype==ESMF_PREDEFINEDDYNAMICMASK_MASKDESTV
+
      if (this%maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKSRCV) then
         if (mask_type == ESMF_TYPEKIND_R4) then 
            call ESMF_DynamicMaskSetR4R8R4V(dynamicMask, srcDynMaskProcR4R8R4V ,dynamicSrcMaskValue=this%srcMaskValue_R4, handleAllElements=.true.)
