@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -997,7 +997,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   !-----------------------------------------------------------------------------
 
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_UtilStringDiffMatch - Match differences between two strings
 ! !INTERFACE:
   function ESMF_UtilStringDiffMatch(string1, string2, minusStringList, &
@@ -1031,7 +1031,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------
     ! local variables
     integer                   :: localrc

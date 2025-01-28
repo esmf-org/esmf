@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -75,6 +75,7 @@ program ESMF_GeomUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  ! Testing ESMF_GeomOperator(==)()    
   write(name, *) "Geom equality before assignment Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   shouldBeFalse = (geom1 == geom2)
@@ -89,6 +90,7 @@ program ESMF_GeomUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  ! Testing ESMF_GeomAssignment(=)() 
   write(name, *) "Geom equality with alias test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
@@ -113,6 +115,7 @@ program ESMF_GeomUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  ! Testing ESMF_GeomOperator(/=)()
   write(name, *) "Geom inequality with two different geoms"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
