@@ -92,7 +92,7 @@
 
 # Keep this if you don't know what it does...
 # -------------------------------------------
-  $[ = 1;                 # set array base to 1
+#  $[ = 1;              # set array base to 1 (Removed to maintain compatability with Perl 5.30)
   $, = ' ';               # set output field separator
   $\ = "\n";              # set output record separator
 
@@ -296,8 +296,8 @@ LINE:
 
 #       Straight quote
 #       --------------
-        if ($Fld[1] eq '!QUOTE:') {
-           for ($i = 2; $i <= $#Fld; $i++) {
+        if ($Fld[0] eq '!QUOTE:') {
+           for ($i = 1; $i <= $#Fld - 1; $i++) {
                printf '%s ', $Fld[$i];
 }#         end for
            print " ";
@@ -306,13 +306,13 @@ LINE:
 
 #       Handle optional Title Page and Introduction
 #       -------------------------------------------
-        if ($Fld[1] eq $boi_string) {
+        if ($Fld[0] eq $boi_string) {
            print ' ';
            $intro = 1;
            next LINE;
 }#      end if
 
-        if ($Fld[2] eq '!TITLE:') {
+        if ($Fld[1] eq '!TITLE:') {
            if ( $intro ) {
               shift @Fld;
               shift @Fld;
@@ -322,7 +322,7 @@ LINE:
 }#         end if
 }#      end if
 
-        if ($Fld[2] eq '!AUTHORS:') {
+        if ($Fld[1] eq '!AUTHORS:') {
            if ( $intro ) {
               shift @Fld;
               shift @Fld;
@@ -332,7 +332,7 @@ LINE:
 }#         end if
 }#      end if
 
-        if ($Fld[2] eq '!AFFILIATION:') {
+        if ($Fld[1] eq '!AFFILIATION:') {
            if ( $intro ) {
               shift @Fld;
               shift @Fld;
@@ -342,7 +342,7 @@ LINE:
 }#         end if
 }#      end if
 
-        if ($Fld[2] eq '!DATE:') {
+        if ($Fld[1] eq '!DATE:') {
            if ( $intro ) {
               shift @Fld;
               shift @Fld;
@@ -352,7 +352,7 @@ LINE:
 }#         end if
 }#      end if
 
-        if ($Fld[2] eq '!INTRODUCTION:') {
+        if ($Fld[1] eq '!INTRODUCTION:') {
            if ( $intro ) {
               &do_beg();
               print ' ';
@@ -367,7 +367,7 @@ LINE:
 
 #       End of introduction
 #       -------------------
-        if ($Fld[1] eq $eoi_string) {
+        if ($Fld[0] eq $eoi_string) {
            print ' ';
            print '%/////////////////////////////////////////////////////////////';
            print "\\newpage";
@@ -377,7 +377,7 @@ LINE:
 
 #       Beginning of latex table
 #       ---------------------
-        if ($Fld[1] eq $bot_string) {
+        if ($Fld[0] eq $bot_string) {
            print " ";
            print "%/////////////////////////////////////////////////////////////";
            shift @Fld;
@@ -391,7 +391,7 @@ LINE:
 
 #       End of latex table
 #       -------------------
-        if ($Fld[1] eq $eot_string) {
+        if ($Fld[0] eq $eot_string) {
            print "\\hline";
            print "\\end{tabular}";
            print "%/////////////////////////////////////////////////////////////";
@@ -402,7 +402,7 @@ LINE:
 
 #       Beginning of fd latex longtable
 #       ---------------------
-        if ($Fld[1] eq $boltfd_string) {
+        if ($Fld[0] eq $boltfd_string) {
            print " ";
            print "%/////////////////////////////////////////////////////////////";
            shift @Fld;
@@ -416,7 +416,7 @@ LINE:
 
 #       End of fd latex longtable
 #       -------------------
-        if ($Fld[1] eq $eoltfd_string) {
+        if ($Fld[0] eq $eoltfd_string) {
            print "\\hline";
            print "\\end{longtable}";
            print "%/////////////////////////////////////////////////////////////";
@@ -427,7 +427,7 @@ LINE:
 
 #       Beginning of fd latex longtable contents
 #       ---------------------
-        if ($Fld[1] eq $boltcfd_string) {
+        if ($Fld[0] eq $boltcfd_string) {
            if (!$tableline&&$tableelement){printf "\\\\";}
            if (!$tableline){printf " \\hline \\hline\n\n";}
            print " ";
@@ -438,13 +438,13 @@ LINE:
 
 #       End of fd latex longtable contents
 #       -------------------
-        if ($Fld[1] eq $eoltcfd_string) {
+        if ($Fld[0] eq $eoltcfd_string) {
            next LINE;
 }#      end if
 
 #       Beginning of prologue
 #       ---------------------
-        if ($Fld[1] eq $bop_string) {
+        if ($Fld[0] eq $bop_string) {
            if ( $source ) { &do_eoc(); }
            print ' ';
            print '%/////////////////////////////////////////////////////////////'; 
@@ -468,7 +468,7 @@ LINE:
 
 #	Beginning of internal prologue
 #	------------------------------
-	if ($Fld[1] eq $bopi_string) {
+	if ($Fld[0] eq $bopi_string) {
 	   if ($opt_i) {$prologue = 0;}
            else {
               if ($source) { &do_eoc(); }
@@ -494,7 +494,7 @@ LINE:
 
 #       A new subroutine/function
 #       -------------------------
-        if ($Fld[2] eq '!ROUTINE:' ) { 
+        if ($Fld[1] eq '!ROUTINE:' ) { 
            if ($prologue) {
               shift @Fld;
               shift @Fld;
@@ -512,7 +512,7 @@ LINE:
 
 #       A new Module
 #       ------------
-        if ($Fld[2] eq '!MODULE:' ) { 
+        if ($Fld[1] eq '!MODULE:' ) { 
            if ($prologue) {
               shift @Fld;
               shift @Fld;
@@ -531,7 +531,7 @@ LINE:
 
 #       A new include file
 #       ------------------
-        if ($Fld[2] eq '!INCLUDE:' ) { 
+        if ($Fld[1] eq '!INCLUDE:' ) { 
            if ($prologue) {
               shift @Fld;
               shift @Fld;
@@ -551,16 +551,16 @@ LINE:
 
 #       Anchor
 #       ----------------------------------
-        if ($Fld[2] eq '!ANCHOR:') {            # HTML anchor
+        if ($Fld[1] eq '!ANCHOR:') {            # HTML anchor
            if ($prologue) {
-	      printf("\\label{$Fld[3]}\n");
+	      printf("\\label{$Fld[2]}\n");
               next LINE;
 }#         end if
 }#      end if
 
 #       A new INTERNAL subroutine/function
 #       ----------------------------------
-        if ($Fld[2] eq '!IROUTINE:') {            # Internal routine
+        if ($Fld[1] eq '!IROUTINE:') {            # Internal routine
            if ($prologue) {
               shift @Fld;
               shift @Fld;
@@ -568,7 +568,7 @@ LINE:
               $name_is = $_;
               s/_/\\_/g;                        # Replace "_" with "\_"
 	      @words = split " ", $_;
-              printf "\\subsubsection [$words[1]] {$_}\n\n";
+              printf "\\subsubsection [$words[0]] {$_}\n\n";
               $have_name = 1;
               next LINE;
 }#         end if
@@ -576,7 +576,7 @@ LINE:
 
 #       A new CLASS
 #       ------------
-        if ($Fld[2] eq '!CLASS:' ) { 
+        if ($Fld[1] eq '!CLASS:' ) { 
            if ($prologue) {
               shift @Fld;
               shift @Fld;
@@ -595,7 +595,7 @@ LINE:
 
 #       A new Method
 #       -------------------------
-        if ($Fld[2] eq '!METHOD:' ) { 
+        if ($Fld[1] eq '!METHOD:' ) { 
            if ($prologue) {
               shift @Fld;
               shift @Fld;
@@ -613,7 +613,7 @@ LINE:
 
 #       A new function
 #       -------------------------
-        if ($Fld[2] eq '!FUNCTION:' ) { 
+        if ($Fld[1] eq '!FUNCTION:' ) { 
            if ($prologue) {
               shift @Fld;
               shift @Fld;
@@ -631,7 +631,7 @@ LINE:
 
 #       Status
 #       ----------------------------------
-        if ($Fld[2] eq '!STATUS:') {            # Internal routine
+        if ($Fld[1] eq '!STATUS:') {            # Internal routine
            if ($prologue) {
               shift @Fld;
               shift @Fld;
@@ -689,9 +689,9 @@ KEY:       foreach $key ( @keys ) {
                  $_ = $key;
                 if( /USES/ || /INPUT/ || /OUTPUT/ || /PARAMETERS/ || 
                     /VALUE/  || /ARGUMENTS/ ) {
-                    printf "{\\em %s}\n", substr($k, 2, $ln - 1); } # italics
+                    printf "{\\em %s}\n", substr($k, 1, $ln - 1); } # italics
 		 else {
-                    printf "{\\sf %s}\n", substr($k, 2, $ln - 1); # san serif
+                    printf "{\\sf %s}\n", substr($k, 1, $ln - 1); # san serif                     
 }#               end if
 
                  printf "\\begin{verbatim} ";
@@ -707,7 +707,7 @@ KEY:       foreach $key ( @keys ) {
 
 #       End of prologue
 #       ---------------
-        if ($Fld[1] eq $eop_string) {
+        if ($Fld[0] eq $eop_string) {
            if ($verb) {
               print "\\end{verbatim}";
               $verb = 0;
@@ -724,7 +724,7 @@ KEY:       foreach $key ( @keys ) {
 #       End of Internal Prologue
 #	------------------------
 
-	if ($Fld[1] eq $eopi_string) {
+	if ($Fld[0] eq $eopi_string) {
            if ($verb) {
               print "\\end{verbatim}";
               $verb = 0;
@@ -739,7 +739,7 @@ KEY:       foreach $key ( @keys ) {
 #
 #          Beginning of source code section
 #          --------------------------------
-           if ($Fld[1] eq $boc_string) {
+           if ($Fld[0] eq $boc_string) {
 #              print ' ';
               print '%/////////////////////////////////////////////////////////////';
               $first = 0;
@@ -754,7 +754,7 @@ KEY:       foreach $key ( @keys ) {
 
 #          End of source code
 #          ------------------
-           if ($Fld[1] eq $eoc_string) {
+           if ($Fld[0] eq $eoc_string) {
               &do_eoc();
               $prologue = 0;
               next LINE;
@@ -762,7 +762,7 @@ KEY:       foreach $key ( @keys ) {
 
 #          Beginning of example prologue
 #          -----------------------------
-           if ($Fld[1] eq $boe_string) {
+           if ($Fld[0] eq $boe_string) {
               if ( $source ) { &do_eoc(); }
               print ' ';
               print '%/////////////////////////////////////////////////////////////'; 
@@ -775,14 +775,14 @@ KEY:       foreach $key ( @keys ) {
 
 #       End of example prologue
 #       -----------------------
-        if ($Fld[1] eq $eoe_string) {
+        if ($Fld[0] eq $eoe_string) {
            if ($verb) {
               print "\\end{verbatim}";
               $verb = 0;
 }#         end if
            $prologue = 0;
            if ( $opt_l ) {
-              $Fld[1] = $boc_string;}
+              $Fld[0] = $boc_string;}
            else { next LINE; }
 }#      end if
 
@@ -791,10 +791,10 @@ KEY:       foreach $key ( @keys ) {
 #   Prologue or Introduction, print regular line (except for !)
 #   -----------------------------------------------------------
     if ($prologue||$intro) {
-        if ( $verb && $#Fld == 1 && ( $Fld[1] eq $comment_string ) ) {
+        if ( $verb && $#Fld == 0 && ( $Fld[0] eq $comment_string ) ) {
            next LINE;                # to eliminate excessive blanks 
 }#      end if
-        if ( $Fld[2] eq "\\ev" ) {   # special handling
+        if ( $Fld[1] eq "\\ev" ) {   # special handling
            $_ = $comment_string . " \\end{verbatim}";
 }#      end if
         s/^$comment_string/ /;       # replace comment string with blank
@@ -819,10 +819,10 @@ KEY:       foreach $key ( @keys ) {
     if ($table) {
         s/_/\\_/g;                         # Replace "_" with "\_"
         @Fldt = split('"', $_, 9999);
-        if ($Fldt[2]) { 
+        if ($Fldt[1]) { 
             if (!$tableline&&!$tableelement){print "\\hline \\hline";}
             if ($tableelement) { printf " & ";} else { printf "   ";}
-            print $Fldt[2]; 
+            print $Fldt[1]; 
             $tableelement++;
         }
         next LINE;
@@ -833,12 +833,12 @@ KEY:       foreach $key ( @keys ) {
     if ($fdtable) {
         s/_/\\_/g;                         # Replace "_" with "\_"
         @Fldt = split('"', $_, 9999);
-        if ($Fldt[2]) { 
-            @Fldtt = split(':', $Fldt[2], 9999);
-            if ($Fldtt[2]) { 
+        if ($Fldt[1]) { 
+            @Fldtt = split(':', $Fldt[1], 9999);
+            if ($Fldtt[1]) { 
               if (!$tableline&&!$tableelement){print "\\hline \\hline";}
               if ($tableelement) { printf " & ";} else { printf "   ";}
-              print $Fldtt[2]; 
+              print $Fldtt[1]; 
               $tableelement++;
             }else{
               print "\\\\ \\hline";
