@@ -125,27 +125,19 @@ module ESMF_PredefinedDynamicMaskMod
      integer, optional, intent(out)       :: rc
 
      integer :: localrc
-     
-     if ((src_type .eq. ESMF_NOKIND) .and. (dst_type .eq. ESMF_NOKIND)) then
-        mask_type = ESMF_NOKIND
-     end if
-     if ((src_type .eq. ESMF_TYPEKIND_R4) .and. (dst_type .eq. ESMF_NOKIND)) then
-        mask_type = ESMF_TYPEKIND_R4
-     end if
-     if ((src_type .eq. ESMF_TYPEKIND_R8) .and. (dst_type .eq. ESMF_NOKIND)) then
-        mask_type = ESMF_TYPEKIND_R8
-     end if
-     if ((dst_type .eq. ESMF_TYPEKIND_R4) .and. (src_type .eq. ESMF_NOKIND)) then
-        mask_type = ESMF_TYPEKIND_R4
-     end if
-     if ((dst_type .eq. ESMF_TYPEKIND_R8) .and. (src_type .eq. ESMF_NOKIND)) then
-        mask_type = ESMF_TYPEKIND_R8
-     end if
-     if ((src_type .eq. ESMF_TYPEKIND_R8) .and. (dst_type .eq. ESMF_TYPEKIND_R8)) then
-        mask_type = ESMF_TYPEKIND_R8
-     end if
-     if ((src_type .eq. ESMF_TYPEKIND_R4) .and. (dst_type .eq. ESMF_TYPEKIND_R4)) then
-        mask_type = ESMF_TYPEKIND_R4
+
+     if (src_type == dst_type) then
+        mask_type = src_type
+     else
+        if ((src_type .eq. ESMF_TYPEKIND_R4) .and. (dst_type .eq. ESMF_NOKIND)) then
+           mask_type = ESMF_TYPEKIND_R4
+        else if ((src_type .eq. ESMF_TYPEKIND_R8) .and. (dst_type .eq. ESMF_NOKIND)) then
+           mask_type = ESMF_TYPEKIND_R8
+        else if ((dst_type .eq. ESMF_TYPEKIND_R4) .and. (src_type .eq. ESMF_NOKIND)) then
+           mask_type = ESMF_TYPEKIND_R4
+        else if ((dst_type .eq. ESMF_TYPEKIND_R8) .and. (src_type .eq. ESMF_NOKIND)) then
+           mask_type = ESMF_TYPEKIND_R8
+        end if
      end if
      if (present(rc)) rc=ESMF_SUCCESS
 

@@ -83,7 +83,6 @@ module ESMF_dstDynamicMaskMod
     if (associated(dynamicMaskList)) then
       do i=1, size(dynamicMaskList)
         if (.not. match_r8(dynamicDstMaskValue, dynamicMaskList(i)%dstElement)) then
-           write(*,*)__FILE__,__LINE__
            dynamicMaskList(i)%dstElement=0.d0
            do j=1, size(dynamicMaskList(i)%factor)
                dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement &
