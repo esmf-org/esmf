@@ -1216,13 +1216,192 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
   }
 
   // sort MDSS by id
-  bool less_by_ids(MDSS a, MDSS b) {
+  bool less_by_ids(const MDSS &a, const MDSS &b) {
     return (a.id < b.id);
   }
 
   bool equal_by_ids(MDSS a, MDSS b) {
     return (a.id == b.id);
   }
+
+
+/* XMRKX */
+
+  struct PntD {
+    double pnt[3];
+    int dir;
+
+    PntD() {
+      pnt[0]=0.0;
+      pnt[1]=0.0;
+      pnt[2]=0.0;
+      dir=0;
+    }
+  };
+
+  // Fill id array using sorted tmp_mdss
+void make_id_loop_from_angle_ordered_points(Mesh *mesh, int num_ids, MDSS *tmp_mdss, UInt *ids) {
+    
+    // If no points, then leave
+    if (num_ids < 1) return;
+
+    // If a triangle or less, then just copy ids and leave
+    if (num_ids <= 3) {
+
+      // Fill ids
+      for (int i=0; i< num_ids; i++) {
+        ids[i]=tmp_mdss[i].id;
+      }
+      
+      // Leave
+      return;      
+    }
+
+    // From now on we can assume that we have >3 points.
+    
+    // Get the min and max angle
+    double min_angle=tmp_mdss[0].angle;
+    double max_angle=tmp_mdss[num_ids-1].angle;
+
+    // If points go more than half way around, then it's a loop, so fill and leave
+    if (max_angle-min_angle > M_PI) {
+
+      // Fill ids
+      for (int i=0; i< num_ids; i++) {
+        ids[i]=tmp_mdss[i].id;
+      }
+
+      // Leave
+      return;
+    }
+
+  /* XMRKX */
+    
+    // Maybe in a more complicated situation with loop on one side of center, so
+    // check for that and fill appropriately
+
+    // Get useful info
+    int sdim=mesh->spatial_dim();
+
+    MEField<> *elem_coords=mesh->GetField("elem_coordinates"); 
+    if (!elem_coords) {
+      Throw() <<" Creation of a dual mesh requires element coordinates. \n";
+    }
+
+
+    // Vector to hold points
+    std::vector<PntD> pntds;
+    pntds.reserve(num_ids);
+    
+    // Loop getting point for each id
+    // TODO: you might be able to loop and put things in order without
+    //       having an extra array, think about that, but not too long... :-) 
+    for (int i=0; i< num_ids; i++) {
+      
+      // Get pointer to elem corresponding to id
+      Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::ELEMENT, tmp_mdss[i].id);
+      if (mi == mesh->map_end(MeshObj::ELEMENT)) {
+        Throw() << "Element not in mesh";
+      }
+      const MeshObj *elem = &(*mi);
+
+      // Put information into struct
+      PntD pntd;
+      double *ec=elem_coords->data(*elem);
+      pntd.pnt[0]=ec[0];
+      pntd.pnt[1]=ec[1];
+      pntd.pnt[2]= sdim > 2 ? ec[2]:0.0;
+      pntd.dir=0;
+
+      // Add to list
+      pntds.push_back(pntd);
+    }    
+    
+    // Get vector from first to last
+    double fl_vec[3];
+    MU_SUB_VEC3D(fl_vec,pntds[num_ids-1].pnt,pntds[0].pnt);
+
+    // Normal out of surface
+    double srf_norm[3];
+    if (sdim > 2) {
+      MU_ASSIGN_VEC3D(srf_norm, pntds[0].pnt);
+    } else {
+      srf_norm[0]=0.0; srf_norm[1]=0.0; srf_norm[2]=1.0;
+    }
+    
+    // Loop over middle points marking direction
+    for (int i=1; i <num_ids-1; i++) {
+
+      // Get vector from first to point i
+      double fpi_vec[3];
+      MU_SUB_VEC3D(fpi_vec,pntds[i].pnt,pntds[0].pnt);
+      
+      // Cross product between vectors
+      double fpi_cross_fl_vec[3];
+      MU_CROSS_PRODUCT_VEC3D(fpi_cross_fl_vec,fpi_vec,fl_vec);
+      
+      // Dot with normal out of surface
+      double dot_w_norm=MU_DOT_VEC3D(fpi_cross_fl_vec,srf_norm);
+
+      // Assign direction based on whether it's the same direction as norm
+      if (dot_w_norm > 0.0) pntds[i].dir=1;
+      else if (dot_w_norm < 0.0) pntds[i].dir=-1;
+      else pntds[i].dir=0;             
+    }
+
+
+    // See where the points are
+    bool has_right=false;
+    bool has_left=false;
+    for (int i=1; i<num_ids-1; i++) {
+      if (pntds[i].dir==1) has_right=true;
+      if (pntds[i].dir==-1) has_left=true;
+    }
+
+    // If they are all on the right, then just fill and leave
+    if (!has_left) {
+      // Fill ids
+      for (int i=0; i< num_ids; i++) {
+        ids[i]=tmp_mdss[i].id;
+      }
+      
+      // Leave
+      return;
+    }
+
+    // If they are on right and left, then need to do something fancier.
+    // Start with the first point, then fill in the points on right. 
+    // Then do the last point and after that fill in the points on the left.
+    int ids_pos=0;
+
+    // Put in first point
+    ids[ids_pos++]=tmp_mdss[0].id;
+
+    // Add points on right
+    for (int i=1; i<num_ids-1; i++) {
+
+      // If on right or neither, add it
+      if (pntds[i].dir != -1) {
+        ids[ids_pos++]=tmp_mdss[i].id;
+      }
+      
+    }
+    
+    // Put in last point
+    ids[ids_pos++]=tmp_mdss[num_ids-1].id;
+    
+    // Add points on left in reverse order
+    for (int i=num_ids-2; i>0; i--) {
+
+      // If on left, add it
+      if (pntds[i].dir == -1) {
+        ids[ids_pos++]=tmp_mdss[i].id;
+      }
+      
+    }
+        
+  }
+
 
   // Get the element ids around a node
   // the ids should be in order around the node
@@ -1239,7 +1418,7 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
   // _ids = where the ids will be put (needs to be allocated large enough to hold all the ids)
   void get_unique_elems_around_node(MeshObj *node, Mesh *mesh, MDSS *tmp_mdss,
                                     int *_num_ids, UInt *ids) {
-
+    
     // Get useful info
     int sdim=mesh->spatial_dim();
     int pdim=mesh->parametric_dim();
@@ -1432,11 +1611,11 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
     // Now Sort the uniqued list by angle
     std::sort(tmp_mdss, tmp_mdss+num_ids);
 
-    // Output
+    // Using the angle sorted tmp_mdss points make a loop and fill ids with it
+    make_id_loop_from_angle_ordered_points(mesh, num_ids, tmp_mdss, ids);
+    
+    // Output number of ids
     *_num_ids=num_ids;
-    for (int i=0; i< num_ids; i++) {
-      ids[i]=tmp_mdss[i].id;
-    }
   }
 
 
