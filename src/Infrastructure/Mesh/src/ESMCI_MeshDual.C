@@ -50,15 +50,7 @@ static const char *const version = "$Id: ESMCI_MeshDual.C,v 1.23 2012/01/06 20:1
  
 namespace ESMCI {
 
-  const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype);
-
-  void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind, 
-                   double *tri_frac);
-  
-  void get_num_elems_around_node(MeshObj *node, int *_num_ids);
-
-  void add_ghost_elems_to_split_orig_id_map(Mesh *mesh);
-
+  // Struct used for organizing ids around center   
   struct MDSS {
     double angle;
     UInt id;
@@ -80,13 +72,32 @@ namespace ESMCI {
 
   };
 
-  void get_unique_elems_around_node(MeshObj *node, Mesh *mesh, MDSS *tmp_mdss,
-                                int *_num_ids, UInt *ids);
 
+  // Struct used for loop creation method below
+  struct PntS {
+    double pnt[3];
+    
+    enum Side {
+      Neither, Left, Right
+    };
+    Side side;
+    
+    PntS() {
+      pnt[0]=0.0;
+      pnt[1]=0.0;
+      pnt[2]=0.0;
+      side=Neither;
+    }
+  };
 
+  
+  void get_unique_elems_around_node(MeshObj *node, Mesh *mesh, std::vector<MDSS> &tmp_mdss, std::vector<PntS> &tmp_pntss,
+                                    int *_num_ids, UInt *ids);
+  
+  
   void _fill_elem_fields(Mesh *dual_mesh, int sdim, int orig_sdim,
-                          double *elemCoords,  double *elemOrigCoords,
-                          double *elemMaskVal, double *elemMask);
+                         double *elemCoords,  double *elemOrigCoords,
+                         double *elemMaskVal, double *elemMask);
 
   
   void _change_owners_from_src_to_curr_comm(Mesh *dual_mesh, MPI_Comm src_comm);
@@ -94,77 +105,89 @@ namespace ESMCI {
   void _set_elem_ownership_context_based_on_owned_pet(Mesh *dual_mesh);
 
   void _set_node_ownership_context_based_on_owned_pet(Mesh *dual_mesh);
+
+
+  const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype);
+
+  void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind, 
+                   double *tri_frac);
+  
+  void get_num_elems_around_node(MeshObj *node, int *_num_ids);
+
+  void add_ghost_elems_to_split_orig_id_map(Mesh *mesh);
+
+
   
   
   // Create a dual of the input Mesh 
   // This adds ghostcells to the input mesh, 
   // it also creates ghostcells for the dual mesh
-void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
-
-  Trace __trace("MeshDual(Mesh *src_mesh, Mesh **dual_mesh)");
-
-  // Don't currently support duals of 3D Meshes
-  if (src_mesh->parametric_dim()>2) {
-    Throw() <<" Creation of a dual mesh isn't supported for Meshes of parametric dim greater than 2.\n";
-  }
-
-  // Need element coordinates
-  if (!src_mesh->GetField("elem_coordinates")) {
-    Throw() <<" Creation of a dual mesh requires element coordinates. \n";
-  }
-
-
+  void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
+    
+    Trace __trace("MeshDual(Mesh *src_mesh, Mesh **dual_mesh)");
+    
+    // Don't currently support duals of 3D Meshes
+    if (src_mesh->parametric_dim()>2) {
+      Throw() <<" Creation of a dual mesh isn't supported for Meshes of parametric dim greater than 2.\n";
+    }
+    
+    // Need element coordinates
+    if (!src_mesh->GetField("elem_coordinates")) {
+      Throw() <<" Creation of a dual mesh requires element coordinates. \n";
+    }
+    
+    
 #ifdef DEBUG_TRI
-{
-  int nn = 0;
-  int on = 0;
-  MeshDB::iterator ni = src_mesh->node_begin(), ne = src_mesh->node_end();
-  for (; ni != ne; ++ni) {
-    ++nn;
-    MeshObj &node=*ni;
-    if (node.get_owner() != Par::Rank()) on++;
-  }
-
-  int nee = 0;
-  int oe = 0;
-  MeshDB::iterator ei = src_mesh->elem_begin(), ee = src_mesh->elem_end();
-  for (; ei != ee; ++ei) {
-    ++nee;
-    MeshObj &elem=*ei;
-    if (elem.get_owner() != Par::Rank()) oe++;
-  }
-  
-  printf("%d# BEFORE GHOST nodes %d owned %d elems %d owned %d\n", Par::Rank(), nn, on, nee, oe);
-}
+    {
+      int nn = 0;
+      int on = 0;
+      MeshDB::iterator ni = src_mesh->node_begin(), ne = src_mesh->node_end();
+      for (; ni != ne; ++ni) {
+        ++nn;
+        MeshObj &node=*ni;
+        if (node.get_owner() != Par::Rank()) on++;
+      }
+      
+      int nee = 0;
+      int oe = 0;
+      MeshDB::iterator ei = src_mesh->elem_begin(), ee = src_mesh->elem_end();
+      for (; ei != ee; ++ei) {
+        ++nee;
+        MeshObj &elem=*ei;
+        if (elem.get_owner() != Par::Rank()) oe++;
+      }
+      
+      printf("%d# BEFORE GHOST nodes %d owned %d elems %d owned %d\n", Par::Rank(), nn, on, nee, oe);
+    }
 #endif
-
-
+    
+    
 #ifdef DEBUG_WRITE_MESH
-  {int *rc;
-  int len = 18; char fname[len];
-  sprintf(fname, "NativeBeforeGhost");
-  ESMCI_meshwrite(&src_mesh, fname, rc, len);}
+    {int *rc;
+      int len = 18; char fname[len];
+      sprintf(fname, "NativeBeforeGhost");
+      ESMCI_meshwrite(&src_mesh, fname, rc, len);}
 #endif
-
-  //// Add ghostcells to source mesh, because we need the surrounding cells
-  
-  // Create ghost cells
-  src_mesh->CreateGhost();
-  
-  // Communicate values to ghost cells
-  src_mesh->GhostCommAllFields();
-
-  // If src_mesh is split, add newly created ghost elements to split_to_orig map
-  if (src_mesh->is_split) add_ghost_elems_to_split_orig_id_map(src_mesh);
-
-  
+    
+    //// Add ghostcells to source mesh, because we need the surrounding cells
+    
+    // Create ghost cells
+    src_mesh->CreateGhost();
+    
+    // Communicate values to ghost cells
+    src_mesh->GhostCommAllFields();
+    
+    // If src_mesh is split, add newly created ghost elements to split_to_orig map
+    if (src_mesh->is_split) add_ghost_elems_to_split_orig_id_map(src_mesh);
+    
+    
 #ifdef DEBUG_WRITE_MESH
-  {int *rc;
-  int len = 18; char fname[len];
-  sprintf(fname, "NativeAfterGhost");
-  ESMCI_meshwrite(&src_mesh, fname, rc, len);}
+    {int *rc;
+      int len = 18; char fname[len];
+      sprintf(fname, "NativeAfterGhost");
+      ESMCI_meshwrite(&src_mesh, fname, rc, len);}
 #endif
-
+    
 #ifdef DEBUG_TRI
 {
   int nn = 0;
@@ -186,25 +209,25 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
   }
   
   printf("%d# AFTER GHOST nodes %d owned %d elems %d owned %d\n", Par::Rank(), nn, on, nee, oe);
-}
+ }
 #endif
 
 
-  // Get some useful info
-  int sdim=src_mesh->spatial_dim();
-  int orig_sdim=src_mesh->orig_spatial_dim;
-  int pdim=src_mesh->parametric_dim();
-
-  // Create Mesh
-  Mesh *dual_mesh=new Mesh();
-
-  // Set Mesh dimensions
-  dual_mesh->set_spatial_dimension(sdim);
-  dual_mesh->set_parametric_dimension(pdim);
-  dual_mesh->orig_spatial_dim=orig_sdim;
-  dual_mesh->coordsys=src_mesh->coordsys;
-
-
+// Get some useful info
+ int sdim=src_mesh->spatial_dim();
+ int orig_sdim=src_mesh->orig_spatial_dim;
+ int pdim=src_mesh->parametric_dim();
+ 
+ // Create Mesh
+ Mesh *dual_mesh=new Mesh();
+ 
+ // Set Mesh dimensions
+ dual_mesh->set_spatial_dimension(sdim);
+ dual_mesh->set_parametric_dimension(pdim);
+ dual_mesh->orig_spatial_dim=orig_sdim;
+ dual_mesh->coordsys=src_mesh->coordsys;
+ 
+ 
   // Get element coordinates
   MEField<> *src_elem_coords=src_mesh->GetField("elem_coordinates"); 
   if (!src_elem_coords) {
@@ -315,12 +338,19 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
  
 
   // Create temp arrays for getting ordered elem ids
-  MDSS *tmp_mdss=NULL;
   UInt *elems_around_node_ids=NULL;
   if (max_num_node_elems > 0) {
-    tmp_mdss=new MDSS[max_num_node_elems];
     elems_around_node_ids=new UInt[max_num_node_elems];
   }
+
+  // Vector to hold MDSS
+  std::vector<MDSS> tmp_mdss;
+  tmp_mdss.reserve(max_num_node_elems);
+  
+  // Vector to hold points
+  std::vector<PntS> tmp_pntss;
+  tmp_pntss.reserve(max_num_node_elems);
+
 
   // Create element lists
   int *elemType=NULL;
@@ -367,7 +397,7 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
        
     // Get list of element ids
     int num_elems_around_node_ids=0;
-    get_unique_elems_around_node(&node, src_mesh, tmp_mdss,
+    get_unique_elems_around_node(&node, src_mesh, tmp_mdss, tmp_pntss, 
                           &num_elems_around_node_ids,
                           elems_around_node_ids);
 
@@ -452,7 +482,6 @@ void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
   }
 
   // Free tmp arrays
-  if (tmp_mdss != NULL) delete [] tmp_mdss;
   if (elems_around_node_ids != NULL) delete [] elems_around_node_ids;
 
 
@@ -1227,20 +1256,10 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
 
 /* XMRKX */
 
-  struct PntD {
-    double pnt[3];
-    int dir;
 
-    PntD() {
-      pnt[0]=0.0;
-      pnt[1]=0.0;
-      pnt[2]=0.0;
-      dir=0;
-    }
-  };
 
   // Fill id array using sorted tmp_mdss
-void make_id_loop_from_angle_ordered_points(Mesh *mesh, int num_ids, MDSS *tmp_mdss, UInt *ids) {
+  void make_id_loop_from_angle_ordered_points(Mesh *mesh, int num_ids, std::vector<MDSS> &tmp_mdss, std::vector<PntS> &tmp_pntss,UInt *ids) {
     
     // If no points, then leave
     if (num_ids < 1) return;
@@ -1289,9 +1308,8 @@ void make_id_loop_from_angle_ordered_points(Mesh *mesh, int num_ids, MDSS *tmp_m
     }
 
 
-    // Vector to hold points
-    std::vector<PntD> pntds;
-    pntds.reserve(num_ids);
+    // Clear point vector before using
+    tmp_pntss.clear();
     
     // Loop getting point for each id
     // TODO: you might be able to loop and put things in order without
@@ -1306,25 +1324,25 @@ void make_id_loop_from_angle_ordered_points(Mesh *mesh, int num_ids, MDSS *tmp_m
       const MeshObj *elem = &(*mi);
 
       // Put information into struct
-      PntD pntd;
+      PntS pnts;
       double *ec=elem_coords->data(*elem);
-      pntd.pnt[0]=ec[0];
-      pntd.pnt[1]=ec[1];
-      pntd.pnt[2]= sdim > 2 ? ec[2]:0.0;
-      pntd.dir=0;
+      pnts.pnt[0]=ec[0];
+      pnts.pnt[1]=ec[1];
+      pnts.pnt[2]= sdim > 2 ? ec[2]:0.0;
+      pnts.side=PntS::Neither;
 
       // Add to list
-      pntds.push_back(pntd);
+      tmp_pntss.push_back(pnts);
     }    
     
     // Get vector from first to last
     double fl_vec[3];
-    MU_SUB_VEC3D(fl_vec,pntds[num_ids-1].pnt,pntds[0].pnt);
+    MU_SUB_VEC3D(fl_vec,tmp_pntss[num_ids-1].pnt,tmp_pntss[0].pnt);
 
     // Normal out of surface
     double srf_norm[3];
     if (sdim > 2) {
-      MU_ASSIGN_VEC3D(srf_norm, pntds[0].pnt);
+      MU_ASSIGN_VEC3D(srf_norm, tmp_pntss[0].pnt);
     } else {
       srf_norm[0]=0.0; srf_norm[1]=0.0; srf_norm[2]=1.0;
     }
@@ -1334,7 +1352,7 @@ void make_id_loop_from_angle_ordered_points(Mesh *mesh, int num_ids, MDSS *tmp_m
 
       // Get vector from first to point i
       double fpi_vec[3];
-      MU_SUB_VEC3D(fpi_vec,pntds[i].pnt,pntds[0].pnt);
+      MU_SUB_VEC3D(fpi_vec,tmp_pntss[i].pnt,tmp_pntss[0].pnt);
       
       // Cross product between vectors
       double fpi_cross_fl_vec[3];
@@ -1344,9 +1362,9 @@ void make_id_loop_from_angle_ordered_points(Mesh *mesh, int num_ids, MDSS *tmp_m
       double dot_w_norm=MU_DOT_VEC3D(fpi_cross_fl_vec,srf_norm);
 
       // Assign direction based on whether it's the same direction as norm
-      if (dot_w_norm > 0.0) pntds[i].dir=1;
-      else if (dot_w_norm < 0.0) pntds[i].dir=-1;
-      else pntds[i].dir=0;             
+      if (dot_w_norm > 0.0) tmp_pntss[i].side=PntS::Right;
+      else if (dot_w_norm < 0.0) tmp_pntss[i].side=PntS::Left;
+      else tmp_pntss[i].side=PntS::Neither;             
     }
 
 
@@ -1354,8 +1372,8 @@ void make_id_loop_from_angle_ordered_points(Mesh *mesh, int num_ids, MDSS *tmp_m
     bool has_right=false;
     bool has_left=false;
     for (int i=1; i<num_ids-1; i++) {
-      if (pntds[i].dir==1) has_right=true;
-      if (pntds[i].dir==-1) has_left=true;
+      if (tmp_pntss[i].side=PntS::Right) has_right=true;
+      if (tmp_pntss[i].side==PntS::Left) has_left=true;
     }
 
     // If they are all on the right, then just fill and leave
@@ -1381,7 +1399,7 @@ void make_id_loop_from_angle_ordered_points(Mesh *mesh, int num_ids, MDSS *tmp_m
     for (int i=1; i<num_ids-1; i++) {
 
       // If on right or neither, add it
-      if (pntds[i].dir != -1) {
+      if (tmp_pntss[i].side != PntS::Left) {
         ids[ids_pos++]=tmp_mdss[i].id;
       }
       
@@ -1394,7 +1412,7 @@ void make_id_loop_from_angle_ordered_points(Mesh *mesh, int num_ids, MDSS *tmp_m
     for (int i=num_ids-2; i>0; i--) {
 
       // If on left, add it
-      if (pntds[i].dir == -1) {
+      if (tmp_pntss[i].side == PntS::Left) {
         ids[ids_pos++]=tmp_mdss[i].id;
       }
       
@@ -1416,7 +1434,7 @@ void make_id_loop_from_angle_ordered_points(Mesh *mesh, int num_ids, MDSS *tmp_m
   // tmp_mdss = temporary list of structures used to sort elems (needs to be allocated large enough to hold all the ids)
   // _num_ids = the number of ids
   // _ids = where the ids will be put (needs to be allocated large enough to hold all the ids)
-  void get_unique_elems_around_node(MeshObj *node, Mesh *mesh, MDSS *tmp_mdss,
+  void get_unique_elems_around_node(MeshObj *node, Mesh *mesh, std::vector<MDSS> &tmp_mdss, std::vector<PntS> &tmp_pntss, 
                                     int *_num_ids, UInt *ids) {
     
     // Get useful info
@@ -1539,6 +1557,9 @@ void make_id_loop_from_angle_ordered_points(Mesh *mesh, int num_ids, MDSS *tmp_m
     //  Throw() << " Can't order points in dual creation using a 0-vector";
     //}
 
+    // Clear tmp_mdss
+    tmp_mdss.clear();
+    
     // Start over looping through elems attached to node, calculating angles
     int num_ids=0;
     el = MeshObjConn::find_relation(*node, MeshObj::ELEMENT);
@@ -1563,7 +1584,7 @@ void make_id_loop_from_angle_ordered_points(Mesh *mesh, int num_ids, MDSS *tmp_m
       double vcurr[3];
       double *ec=elem_coords->data(*elem);
       vcurr[0]=ec[0];
-        vcurr[1]=ec[1];
+      vcurr[1]=ec[1];
       vcurr[2]= sdim > 2 ? ec[2]:0.0;
       MU_SUB_VEC3D(vcurr,vcurr,center);
 
@@ -1578,9 +1599,12 @@ void make_id_loop_from_angle_ordered_points(Mesh *mesh, int num_ids, MDSS *tmp_m
         Throw() <<" angle calc can't be used for vecs with spatial dimension not equal to 2 or 3";
       }
 
+      
       // Put this into the list
-      tmp_mdss[num_ids].id=elem_id;
-      tmp_mdss[num_ids].angle=angle;
+      MDSS mdss;
+      mdss.id=elem_id;
+      mdss.angle=angle;
+      tmp_mdss.push_back(mdss);      
       num_ids++;
       
       // Next element
@@ -1588,10 +1612,9 @@ void make_id_loop_from_angle_ordered_points(Mesh *mesh, int num_ids, MDSS *tmp_m
     }
 
 
-
     // Take out repeats due to split elements
      //// Sort by id
-    std::sort(tmp_mdss, tmp_mdss+num_ids, less_by_ids);
+    std::sort(tmp_mdss.begin(), tmp_mdss.end(), less_by_ids);
 
     //// Unique by id
     int prev_id=tmp_mdss[0].id;
@@ -1607,12 +1630,13 @@ void make_id_loop_from_angle_ordered_points(Mesh *mesh, int num_ids, MDSS *tmp_m
       }
     }
     num_ids=new_num_ids;
-
+    tmp_mdss.resize(new_num_ids);
+    
     // Now Sort the uniqued list by angle
-    std::sort(tmp_mdss, tmp_mdss+num_ids);
+    std::sort(tmp_mdss.begin(), tmp_mdss.end());
 
     // Using the angle sorted tmp_mdss points make a loop and fill ids with it
-    make_id_loop_from_angle_ordered_points(mesh, num_ids, tmp_mdss, ids);
+    make_id_loop_from_angle_ordered_points(mesh, num_ids, tmp_mdss, tmp_pntss, ids);
     
     // Output number of ids
     *_num_ids=num_ids;
