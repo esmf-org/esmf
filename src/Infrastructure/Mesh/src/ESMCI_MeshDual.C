@@ -92,7 +92,7 @@ namespace ESMCI {
 
   
   void get_unique_elems_around_node(MeshObj *node, Mesh *mesh, std::vector<MDSS> &tmp_mdss, std::vector<PntS> &tmp_pntss,
-                                    int *_num_ids, UInt *ids);
+                                    std::vector<UInt> &ids);
   
   
   void _fill_elem_fields(Mesh *dual_mesh, int sdim, int orig_sdim,
@@ -336,13 +336,6 @@ namespace ESMCI {
     max_num_elemConn += num_node_elems;
   }
  
-
-  // Create temp arrays for getting ordered elem ids
-  UInt *elems_around_node_ids=NULL;
-  if (max_num_node_elems > 0) {
-    elems_around_node_ids=new UInt[max_num_node_elems];
-  }
-
   // Vector to hold MDSS
   std::vector<MDSS> tmp_mdss;
   tmp_mdss.reserve(max_num_node_elems);
@@ -350,6 +343,10 @@ namespace ESMCI {
   // Vector to hold points
   std::vector<PntS> tmp_pntss;
   tmp_pntss.reserve(max_num_node_elems);
+
+  // Vector to hold elem ids
+  std::vector<UInt> new_elem_ids;
+  new_elem_ids.reserve(max_num_node_elems);
 
 
   // Create element lists
@@ -396,24 +393,22 @@ namespace ESMCI {
 
        
     // Get list of element ids
-    int num_elems_around_node_ids=0;
-    get_unique_elems_around_node(&node, src_mesh, tmp_mdss, tmp_pntss, 
-                          &num_elems_around_node_ids,
-                          elems_around_node_ids);
+    get_unique_elems_around_node(&node, src_mesh, tmp_mdss, tmp_pntss, new_elem_ids);
 
 #ifdef DEBUG_UNIQUE_ELEMS
     {
-    printf("%d# mesh node id %d, unique elems %d [", Par::Rank(), node.get_id(), num_elems_around_node_ids);
-    for (int i=0; i<num_elems_around_node_ids; i++) {  
-      printf("%d, ", elems_around_node_ids[i]);
+    printf("%d# mesh node id %d, unique elems %d [", Par::Rank(), node.get_id(), num_new_elem_ids);
+    for (int i=0; i<num_new_elem_ids; i++) {  
+      printf("%d, ", new_elem_ids[i]);
     }
     printf("]\n");}
 #endif
+
     // If less than 3 (a triangle) then don't make an element
-    if (num_elems_around_node_ids < 3) continue;
+    if (new_elem_ids.size() < 3) continue;
     
     // Save elemType/number of connections 
-    elemType[num_elems]=num_elems_around_node_ids;
+    elemType[num_elems]=new_elem_ids.size();
     
     // Save elemId
     elemId[num_elems]=node.get_id();
@@ -455,10 +450,10 @@ namespace ESMCI {
     num_elems++;
 
     // Loop elements attached to node and build connection list
-    for (int i=0; i<num_elems_around_node_ids; i++) {
+    for (int i=0; i<new_elem_ids.size(); i++) {
 
       // Get elem id
-      UInt elem_id=elems_around_node_ids[i];
+      UInt elem_id=new_elem_ids[i];
       
       // printf(" %d ",elem_id);
 
@@ -480,9 +475,6 @@ namespace ESMCI {
 
     // printf("\n");
   }
-
-  // Free tmp arrays
-  if (elems_around_node_ids != NULL) delete [] elems_around_node_ids;
 
 
   // Iterate through all src elements creating nodes
@@ -1259,17 +1251,20 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
 
 
   // Fill id array using sorted tmp_mdss
-  void make_id_loop_from_angle_ordered_points(Mesh *mesh, int num_ids, std::vector<MDSS> &tmp_mdss, std::vector<PntS> &tmp_pntss,UInt *ids) {
+  void make_id_loop_from_angle_ordered_pnts(Mesh *mesh, std::vector<MDSS> &tmp_mdss, std::vector<PntS> &tmp_pntss, std::vector<UInt> &ids) {
     
+    // Clear ids vector so if we leave early it's empty
+    ids.clear();
+
     // If no points, then leave
-    if (num_ids < 1) return;
+    if (tmp_mdss.empty()) return;
 
     // If a triangle or less, then just copy ids and leave
-    if (num_ids <= 3) {
+    if (tmp_mdss.size() <= 3) {
 
       // Fill ids
-      for (int i=0; i< num_ids; i++) {
-        ids[i]=tmp_mdss[i].id;
+      for (MDSS mdss: tmp_mdss) {
+        ids.push_back(mdss.id);
       }
       
       // Leave
@@ -1280,15 +1275,15 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
     
     // Get the min and max angle
     double min_angle=tmp_mdss[0].angle;
-    double max_angle=tmp_mdss[num_ids-1].angle;
+    double max_angle=tmp_mdss[tmp_mdss.size()-1].angle;
 
     // If points go more than half way around, then it's a loop, so fill and leave
     if (max_angle-min_angle > M_PI) {
 
       // Fill ids
-      for (int i=0; i< num_ids; i++) {
-        ids[i]=tmp_mdss[i].id;
-      }
+      for (MDSS mdss: tmp_mdss) {
+        ids.push_back(mdss.id);
+      }      
 
       // Leave
       return;
@@ -1312,12 +1307,10 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
     tmp_pntss.clear();
     
     // Loop getting point for each id
-    // TODO: you might be able to loop and put things in order without
-    //       having an extra array, think about that, but not too long... :-) 
-    for (int i=0; i< num_ids; i++) {
+    for (MDSS mdss: tmp_mdss) {
       
       // Get pointer to elem corresponding to id
-      Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::ELEMENT, tmp_mdss[i].id);
+      Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::ELEMENT, mdss.id);
       if (mi == mesh->map_end(MeshObj::ELEMENT)) {
         Throw() << "Element not in mesh";
       }
@@ -1334,25 +1327,31 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
       // Add to list
       tmp_pntss.push_back(pnts);
     }    
-    
+
+    // Get first point
+    double *f_pnt=tmp_pntss[0].pnt;
+
+    // Get last point
+    double *l_pnt=tmp_pntss[tmp_pntss.size()-1].pnt;
+
     // Get vector from first to last
     double fl_vec[3];
-    MU_SUB_VEC3D(fl_vec,tmp_pntss[num_ids-1].pnt,tmp_pntss[0].pnt);
+    MU_SUB_VEC3D(fl_vec,l_pnt,f_pnt);
 
     // Normal out of surface
     double srf_norm[3];
     if (sdim > 2) {
-      MU_ASSIGN_VEC3D(srf_norm, tmp_pntss[0].pnt);
+      MU_ASSIGN_VEC3D(srf_norm, f_pnt);
     } else {
       srf_norm[0]=0.0; srf_norm[1]=0.0; srf_norm[2]=1.0;
     }
     
     // Loop over middle points marking direction
-    for (int i=1; i <num_ids-1; i++) {
+    for (int i=1; i < tmp_pntss.size()-1; i++) {
 
       // Get vector from first to point i
       double fpi_vec[3];
-      MU_SUB_VEC3D(fpi_vec,tmp_pntss[i].pnt,tmp_pntss[0].pnt);
+      MU_SUB_VEC3D(fpi_vec,tmp_pntss[i].pnt,f_pnt);
       
       // Cross product between vectors
       double fpi_cross_fl_vec[3];
@@ -1371,18 +1370,19 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
     // See where the points are
     bool has_right=false;
     bool has_left=false;
-    for (int i=1; i<num_ids-1; i++) {
+    for (int i=1; i < tmp_pntss.size()-1; i++) {
       if (tmp_pntss[i].side=PntS::Right) has_right=true;
       if (tmp_pntss[i].side==PntS::Left) has_left=true;
     }
 
     // If they are all on the right, then just fill and leave
     if (!has_left) {
+
       // Fill ids
-      for (int i=0; i< num_ids; i++) {
-        ids[i]=tmp_mdss[i].id;
-      }
-      
+      for (MDSS mdss: tmp_mdss) {
+        ids.push_back(mdss.id);
+      } 
+
       // Leave
       return;
     }
@@ -1390,34 +1390,32 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
     // If they are on right and left, then need to do something fancier.
     // Start with the first point, then fill in the points on right. 
     // Then do the last point and after that fill in the points on the left.
-    int ids_pos=0;
 
     // Put in first point
-    ids[ids_pos++]=tmp_mdss[0].id;
+    ids.push_back(tmp_mdss[0].id);
 
     // Add points on right
-    for (int i=1; i<num_ids-1; i++) {
+    for (int i=1; i<tmp_pntss.size()-1; i++) {
 
       // If on right or neither, add it
       if (tmp_pntss[i].side != PntS::Left) {
-        ids[ids_pos++]=tmp_mdss[i].id;
+        ids.push_back(tmp_mdss[i].id);
       }
       
     }
     
     // Put in last point
-    ids[ids_pos++]=tmp_mdss[num_ids-1].id;
+    ids.push_back(tmp_mdss[tmp_mdss.size()-1].id);
     
     // Add points on left in reverse order
-    for (int i=num_ids-2; i>0; i--) {
+    for (int i=tmp_pntss.size()-2; i>0; i--) {
 
       // If on left, add it
       if (tmp_pntss[i].side == PntS::Left) {
-        ids[ids_pos++]=tmp_mdss[i].id;
+        ids.push_back(tmp_mdss[i].id);
       }
       
-    }
-        
+    }        
   }
 
 
@@ -1435,7 +1433,10 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
   // _num_ids = the number of ids
   // _ids = where the ids will be put (needs to be allocated large enough to hold all the ids)
   void get_unique_elems_around_node(MeshObj *node, Mesh *mesh, std::vector<MDSS> &tmp_mdss, std::vector<PntS> &tmp_pntss, 
-                                    int *_num_ids, UInt *ids) {
+                                    std::vector<UInt> &ids) {
+
+    // Clear ids vector so if we leave early it's empty
+    ids.clear();
     
     // Get useful info
     int sdim=mesh->spatial_dim();
@@ -1472,7 +1473,6 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
 
     // No elements so leave
     if (el == node->Relations.end() || el->obj->get_type() != MeshObj::ELEMENT){
-      *_num_ids=0;
       return;
     }
 
@@ -1561,7 +1561,6 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
     tmp_mdss.clear();
     
     // Start over looping through elems attached to node, calculating angles
-    int num_ids=0;
     el = MeshObjConn::find_relation(*node, MeshObj::ELEMENT);
     while (el != node->Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
       MeshObj *elem=el->obj;
@@ -1605,7 +1604,6 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
       mdss.id=elem_id;
       mdss.angle=angle;
       tmp_mdss.push_back(mdss);      
-      num_ids++;
       
       // Next element
       ++el;
@@ -1619,7 +1617,7 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
     //// Unique by id
     int prev_id=tmp_mdss[0].id;
     int new_num_ids=1;
-    for (int i=1; i<num_ids; i++) {
+    for (int i=1; i<tmp_mdss.size(); i++) {
  
       // if it has a different id, store it
       if (tmp_mdss[i].id != prev_id) {
@@ -1629,17 +1627,15 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
         new_num_ids++;
       }
     }
-    num_ids=new_num_ids;
+
+    // Resize
     tmp_mdss.resize(new_num_ids);
     
     // Now Sort the uniqued list by angle
     std::sort(tmp_mdss.begin(), tmp_mdss.end());
 
     // Using the angle sorted tmp_mdss points make a loop and fill ids with it
-    make_id_loop_from_angle_ordered_points(mesh, num_ids, tmp_mdss, tmp_pntss, ids);
-    
-    // Output number of ids
-    *_num_ids=num_ids;
+    make_id_loop_from_angle_ordered_pnts(mesh, tmp_mdss, tmp_pntss, ids);
   }
 
 
