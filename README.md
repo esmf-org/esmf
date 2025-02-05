@@ -1,3 +1,4 @@
+[![ESMF All Tests](https://github.com/esmf-org/esmf/actions/workflows/esmf-all-tests.yml/badge.svg?branch=develop&event=push)](https://github.com/esmf-org/esmf/actions/workflows/esmf-all-tests.yml)
 [![ESMF Doc Build](https://github.com/esmf-org/esmf/actions/workflows/build-esmf-docs.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/build-esmf-docs.yml)
 [![ESMPy Doc Build](https://github.com/esmf-org/esmf/actions/workflows/build-esmpy-docs.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/build-esmpy-docs.yml)
 [![Build ESMF Using Spack](https://github.com/esmf-org/esmf/actions/workflows/test-build-spack.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/test-build-spack.yml)

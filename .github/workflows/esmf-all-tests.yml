@@ -1,8 +1,11 @@
-name: Development Tests
+name: ESMF All Tests
 
 on:
   schedule:
     - cron: "15 8 * * 3"
+  push:
+    branches:
+      - develop
   pull_request:
     branches:
       - develop
