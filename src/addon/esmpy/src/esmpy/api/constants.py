@@ -118,6 +118,23 @@ class DecompFlag(IntEnum):
     Decompose elements cyclically across DEs.
     """
 
+class EndAction(IntEnum):
+    """
+    Specify what action to take on finalization.
+    """
+    NORMAL = 1
+    """
+    Indicates ESMF to finalize normally.
+    """
+    KEEP_MPI = 2
+    """
+    Indicates ESMF to finalize normally, but leave MPI initialized.
+    """
+    ABORT = 3
+    """
+    Indicates ESMF to abort on finalization.
+    """
+
 # ExtrapMethod
 class ExtrapMethod(IntEnum):
     """

@@ -227,6 +227,10 @@ ifndef ESMF_TESTEXHAUSTIVE
 export ESMF_TESTEXHAUSTIVE = default
 endif
 
+ifndef ESMF_TESTPERFORMANCE
+export ESMF_TESTPERFORMANCE = default
+endif
+
 ifndef ESMF_TESTCOMPTUNNEL
 export ESMF_TESTCOMPTUNNEL = default
 endif
@@ -453,6 +457,10 @@ ifneq ($(ESMF_TRACE_PRELOAD_LINKED),ON)
 export ESMF_TRACE_PRELOAD_LINKED = OFF
 endif
 
+ifneq ($(ESMF_TESTPERFORMANCE),OFF)
+export ESMF_TESTPERFORMANCE = ON
+endif
+
 ifneq ($(ESMF_TESTCOMPTUNNEL),OFF)
 export ESMF_TESTCOMPTUNNEL = ON
 endif
@@ -542,6 +550,16 @@ ifeq ($(pathtype),rel)
 export ESMF_INSTALL_DOCDIR_ABSPATH = $(ESMF_INSTALL_PREFIX_ABSPATH)/$(ESMF_INSTALL_DOCDIR)
 else
 export ESMF_INSTALL_DOCDIR_ABSPATH = $(ESMF_INSTALL_DOCDIR)
+endif
+
+ifndef ESMF_INSTALL_CMAKEDIR
+ESMF_INSTALL_CMAKEDIR := cmake
+endif
+pathtype := $(shell $(ESMF_DIR)/scripts/pathtype $(ESMF_INSTALL_CMAKEDIR))
+ifeq ($(pathtype),rel)
+export ESMF_INSTALL_CMAKEDIR_ABSPATH = $(ESMF_INSTALL_PREFIX_ABSPATH)/$(ESMF_INSTALL_CMAKEDIR)
+else
+export ESMF_INSTALL_CMAKEDIR_ABSPATH = $(ESMF_INSTALL_CMAKEDIR)
 endif
 
 #-------------------------------------------------------------------------------
@@ -645,6 +663,9 @@ ESMF_APPSDIR     = $(ESMF_BUILD)/apps/apps$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILE
 
 # unified nuopc executable directory
 ESMF_ESMXDIR     = $(ESMF_BUILD)/src/addon/ESMX
+
+# cmake modules directory
+ESMF_CMAKEDIR    = $(ESMF_DIR)/cmake
 
 # include file directory
 ESMF_INCDIR     = $(ESMF_BUILD)/src/include
@@ -993,7 +1014,7 @@ endif
 ifeq ($(origin ESMF_F90LINKLIBS_ENV), environment)
 ESMF_F90LINKLIBS = $(ESMF_F90LINKLIBS_ENV)
 endif
-ESMF_F90LINKLIBS     +=
+ESMF_F90LINKLIBS     += $(ESMF_F90LINKLIBSTHIRD)
 ESMF_F90ESMFLINKLIBS += -lesmf $(ESMF_F90LINKLIBS)
 ESMF_F90ESMFPRELOADLINKLIBS += -lesmf $(ESMF_TRACE_DYNAMICLINKLIBS) $(ESMF_F90LINKLIBS)
 
@@ -1047,7 +1068,7 @@ endif
 ifeq ($(origin ESMF_CXXLINKLIBS_ENV), environment)
 ESMF_CXXLINKLIBS = $(ESMF_CXXLINKLIBS_ENV)
 endif
-ESMF_CXXLINKLIBS     +=
+ESMF_CXXLINKLIBS     += $(ESMF_CXXLINKLIBSTHIRD)
 ESMF_CXXESMFLINKLIBS += -lesmf $(ESMF_CXXLINKLIBS)
 
 # - CLINKER
@@ -1310,9 +1331,9 @@ ESMF_CXXCOMPILEPATHSTHIRD += -I$(ESMF_MOAB_INCLUDE)
 ESMF_F90COMPILEPATHSTHIRD += -I$(ESMF_MOAB_INCLUDE)
 endif
 ifdef ESMF_MOAB_LIBS
-ESMF_CXXLINKLIBS          += $(ESMF_MOAB_LIBS)
+ESMF_CXXLINKLIBSTHIRD     += $(ESMF_MOAB_LIBS)
 ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_MOAB_LIBS))))
-ESMF_F90LINKLIBS          += $(ESMF_MOAB_LIBS)
+ESMF_F90LINKLIBSTHIRD     += $(ESMF_MOAB_LIBS)
 ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_MOAB_LIBS))))
 endif
 ifdef ESMF_MOAB_LIBPATH
@@ -1379,9 +1400,9 @@ ifdef ESMF_LAPACK_INTERNAL
 ESMF_CPPFLAGS             += -DESMF_LAPACK_INTERNAL=1
 endif
 ifdef ESMF_LAPACK_LIBS
-ESMF_CXXLINKLIBS          += $(ESMF_LAPACK_LIBS)
+ESMF_CXXLINKLIBSTHIRD     += $(ESMF_LAPACK_LIBS)
 ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_LAPACK_LIBS))))
-ESMF_F90LINKLIBS          += $(ESMF_LAPACK_LIBS)
+ESMF_F90LINKLIBSTHIRD     += $(ESMF_LAPACK_LIBS)
 ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_LAPACK_LIBS))))
 endif
 ifdef ESMF_LAPACK_LIBPATH
@@ -1425,9 +1446,9 @@ ESMF_CXXCOMPILEPATHSTHIRD += -I$(ESMF_ACC_SOFTWARE_STACK_INCLUDE)
 ESMF_F90COMPILEPATHSTHIRD += -I$(ESMF_ACC_SOFTWARE_STACK_INCLUDE)
 endif
 ifdef ESMF_ACC_SOFTWARE_STACK_LIBS
-ESMF_CXXLINKLIBS          += $(ESMF_ACC_SOFTWARE_STACK_LIBS)
+ESMF_CXXLINKLIBSTHIRD     += $(ESMF_ACC_SOFTWARE_STACK_LIBS)
 ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_ACC_SOFTWARE_STACK_LIBS))))
-ESMF_F90LINKLIBS          += $(ESMF_ACC_SOFTWARE_STACK_LIBS)
+ESMF_F90LINKLIBSTHIRD     += $(ESMF_ACC_SOFTWARE_STACK_LIBS)
 ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_ACC_SOFTWARE_STACK_LIBS))))
 endif
 ifdef ESMF_ACC_SOFTWARE_STACK_LIBPATH
@@ -1559,12 +1580,12 @@ ifdef ESMF_NETCDF
     ESMF_F90COMPILEPATHSTHIRD += -I$(ESMF_NETCDFF_INCLUDE)
   endif
   ifdef ESMF_NETCDF_LIBS
-    ESMF_CXXLINKLIBS          += $(ESMF_NETCDF_LIBS)
-    ESMF_F90LINKLIBS          += $(ESMF_NETCDF_LIBS)
+    ESMF_CXXLINKLIBSTHIRD     += $(ESMF_NETCDF_LIBS)
+    ESMF_F90LINKLIBSTHIRD     += $(ESMF_NETCDF_LIBS)
   endif
   ifdef ESMF_NETCDFF_LIBS
-    ESMF_CXXLINKLIBS          += $(ESMF_NETCDFF_LIBS)
-    ESMF_F90LINKLIBS          += $(ESMF_NETCDFF_LIBS)
+    ESMF_CXXLINKLIBSTHIRD     += $(ESMF_NETCDFF_LIBS)
+    ESMF_F90LINKLIBSTHIRD     += $(ESMF_NETCDFF_LIBS)
   endif
   ifdef ESMF_NETCDF_LIBPATH
     ESMF_CXXLINKPATHSTHIRD    += $(addprefix -L,$(ESMF_NETCDF_LIBPATH))
@@ -1602,9 +1623,9 @@ ESMF_CXXCOMPILEPATHSTHIRD += -I$(ESMF_PNETCDF_INCLUDE)
 ESMF_F90COMPILEPATHSTHIRD += -I$(ESMF_PNETCDF_INCLUDE)
 endif
 ifdef ESMF_PNETCDF_LIBS
-ESMF_CXXLINKLIBS          += $(ESMF_PNETCDF_LIBS)
+ESMF_CXXLINKLIBSTHIRD     += $(ESMF_PNETCDF_LIBS)
 ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_PNETCDF_LIBS))))
-ESMF_F90LINKLIBS          += $(ESMF_PNETCDF_LIBS)
+ESMF_F90LINKLIBSTHIRD     += $(ESMF_PNETCDF_LIBS)
 ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_PNETCDF_LIBS))))
 endif
 ifdef ESMF_PNETCDF_LIBPATH
@@ -1631,9 +1652,9 @@ ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_XERCES_INCLUDE)
 ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_XERCES_INCLUDE)
 endif
 ifdef ESMF_XERCES_LIBS
-ESMF_CXXLINKLIBS          += $(ESMF_XERCES_LIBS)
+ESMF_CXXLINKLIBSTHIRD     += $(ESMF_XERCES_LIBS)
 ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_XERCES_LIBS))))
-ESMF_F90LINKLIBS          += $(ESMF_XERCES_LIBS)
+ESMF_F90LINKLIBSTHIRD     += $(ESMF_XERCES_LIBS)
 ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_XERCES_LIBS))))
 endif
 ifdef ESMF_XERCES_LIBPATH
@@ -1669,9 +1690,9 @@ ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_YAMLCPP_INCLUDE)
 ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_YAMLCPP_INCLUDE)
 endif
 ifdef ESMF_YAMLCPP_LIBS
-ESMF_CXXLINKLIBS          += $(ESMF_YAMLCPP_LIBS)
+ESMF_CXXLINKLIBSTHIRD     += $(ESMF_YAMLCPP_LIBS)
 ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_YAMLCPP_LIBS))))
-ESMF_F90LINKLIBS          += $(ESMF_YAMLCPP_LIBS)
+ESMF_F90LINKLIBSTHIRD     += $(ESMF_YAMLCPP_LIBS)
 ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_YAMLCPP_LIBS))))
 endif
 ifdef ESMF_YAMLCPP_LIBPATH
@@ -1691,12 +1712,6 @@ export ESMF_PIO = $(ESMF_PIODEFAULT)
 endif
 
 ifeq ($(ESMF_PIO),internal)
-ifeq ($(ESMF_COMM),mpiuni)
-#TODO: This turns PIO off if it was set to internal from a default setting.
-#TODO: We need to do this while our internal PIO does not support mpiuni mode,
-#TODO: but want to allow external PIO or explicit ESMF_PIO setting for developm. #TODO: Eventually this should become unnecessary.
-ESMF_PIO = OFF
-endif
 ifndef ESMF_NETCDF
 # PIO, starting with version 2, depends on NetCDF. Defaulting to internal needs
 # be turned off if there is no NetCDF available. Externally set PIO will be let
@@ -1722,9 +1737,9 @@ ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_PIO_INCLUDE)
 ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_PIO_INCLUDE)
 endif
 ifdef ESMF_PIO_LIBS
-ESMF_CXXLINKLIBS          += $(ESMF_PIO_LIBS)
+ESMF_CXXLINKLIBSTHIRD     += $(ESMF_PIO_LIBS)
 ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_PIO_LIBS))))
-ESMF_F90LINKLIBS          += $(ESMF_PIO_LIBS)
+ESMF_F90LINKLIBSTHIRD     += $(ESMF_PIO_LIBS)
 ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_PIO_LIBS))))
 endif
 ifdef ESMF_PIO_LIBPATH
@@ -1761,9 +1776,9 @@ ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_PROJ4_INCLUDE)
 ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_PROJ4_INCLUDE)
 endif
 ifdef ESMF_PROJ4_LIBS
-ESMF_CXXLINKLIBS          += $(ESMF_PROJ4_LIBS)
+ESMF_CXXLINKLIBSTHIRD     += $(ESMF_PROJ4_LIBS)
 ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_PROJ4_LIBS))))
-ESMF_F90LINKLIBS          += $(ESMF_PROJ4_LIBS)
+ESMF_F90LINKLIBSTHIRD     += $(ESMF_PROJ4_LIBS)
 ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_PROJ4_LIBS))))
 endif
 ifdef ESMF_PROJ4_LIBPATH
@@ -1790,9 +1805,9 @@ ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_BABELTRACE_INCLUDE)
 ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_BABELTRACE_INCLUDE)
 endif
 ifdef ESMF_BABELTRACE_LIBS
-ESMF_CXXLINKLIBS          += $(ESMF_BABELTRACE_LIBS)
+ESMF_CXXLINKLIBSTHIRD     += $(ESMF_BABELTRACE_LIBS)
 ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_BABELTRACE_LIBS))))
-ESMF_F90LINKLIBS          += $(ESMF_BABELTRACE_LIBS)
+ESMF_F90LINKLIBSTHIRD     += $(ESMF_BABELTRACE_LIBS)
 ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_BABELTRACE_LIBS))))
 endif
 ifdef ESMF_BABELTRACE_LIBPATH
@@ -1804,8 +1819,48 @@ endif
 endif
 
 #-------------------------------------------------------------------------------
+# NUMA
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_NUMA),OFF)
+ESMF_NUMA=
+endif
+
+ifeq ($(ESMF_NUMA),ON)
+ESMF_NUMA = standard
+endif
+ifeq ($(ESMF_NUMA),standard)
+ifneq ($(origin ESMF_NUMA_LIBS), environment)
+ESMF_NUMA_LIBS = -lnuma
+endif
+endif
+
+ifdef ESMF_NUMA
+ESMF_CPPFLAGS                += -DESMF_NUMA=1
+ifdef ESMF_NUMA_INCLUDE
+ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_NUMA_INCLUDE)
+ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_NUMA_INCLUDE)
+endif
+ifdef ESMF_NUMA_LIBS
+ESMF_CXXLINKLIBSTHIRD     += $(ESMF_NUMA_LIBS)
+ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_NUMA_LIBS))))
+ESMF_F90LINKLIBSTHIRD     += $(ESMF_NUMA_LIBS)
+ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_NUMA_LIBS))))
+endif
+ifdef ESMF_NUMA_LIBPATH
+ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_NUMA_LIBPATH)
+ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_NUMA_LIBPATH)
+ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_NUMA_LIBPATH)
+ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_NUMA_LIBPATH)
+endif
+endif
+
+#-------------------------------------------------------------------------------
 # NVML
 #-------------------------------------------------------------------------------
+ifeq ($(ESMF_NVML),OFF)
+ESMF_NVML=
+endif
+
 ifeq ($(ESMF_NVML),ON)
 ESMF_NVML = standard
 endif
@@ -1822,9 +1877,9 @@ ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_NVML_INCLUDE)
 ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_NVML_INCLUDE)
 endif
 ifdef ESMF_NVML_LIBS
-ESMF_CXXLINKLIBS          += $(ESMF_NVML_LIBS)
+ESMF_CXXLINKLIBSTHIRD     += $(ESMF_NVML_LIBS)
 ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_NVML_LIBS))))
-ESMF_F90LINKLIBS          += $(ESMF_NVML_LIBS)
+ESMF_F90LINKLIBSTHIRD     += $(ESMF_NVML_LIBS)
 ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_NVML_LIBS))))
 endif
 ifdef ESMF_NVML_LIBPATH
@@ -1905,6 +1960,15 @@ endif
 # between the different BOPT modes.
 #-------------------------------------------------------------------------------
 ESMF_CPPFLAGS       += -DESMF_BOPT_$(ESMF_BOPT)
+
+#-------------------------------------------------------------------------------
+# ESMF_TESTPERFORMANCE is passed (by CPP) into test programs to control whether
+# to run performance tests (these can be turned off on machines where
+# performance tests are highly variable and can lead to spurious failures).
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_TESTPERFORMANCE),ON)
+ESMF_CPPFLAGS       += -DESMF_TESTPERFORMANCE
+endif
 
 #-------------------------------------------------------------------------------
 # ESMF_TESTCOMPTUNNEL is passed (by CPP) into test programs to control the
@@ -2032,6 +2096,8 @@ ESMF_TRACE_LDPRELOAD := $(ESMF_LIBDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX)
 ESMF_PRELOADSCRIPT = $(ESMF_LIBDIR)/preload.sh
 
 ESMF_SL_PRELOAD_LIBLINKER = $(ESMF_CXXCOMPILER)
+ESMF_SL_PRELOAD_LIBOPTS = $(ESMF_CXXLINKOPTS)
+ESMF_SL_PRELOAD_LIBLIBS = $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_CXXLINKLIBS)
 
 ifeq ($(ESMF_OS),Darwin)
 ESMF_ENV_PRELOAD          = DYLD_INSERT_LIBRARIES
@@ -2039,6 +2105,10 @@ ESMF_ENV_PRELOAD_DELIMIT  = ':'
 ifeq ($(ESMF_COMM),openmpi)
 # make sure to link in the Fortran MPI bindings
 ESMF_SL_PRELOAD_LIBLINKER = $(ESMF_F90COMPILER)
+# and since we're using the F90 compiler as the linker, make sure to use link
+# options and libs appropriate for the F90 compiler instead of the C++ compiler
+ESMF_SL_PRELOAD_LIBOPTS = $(ESMF_F90LINKOPTS)
+ESMF_SL_PRELOAD_LIBLIBS = $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) $(ESMF_F90LINKLIBS)
 endif
 else
 ESMF_ENV_PRELOAD          = LD_PRELOAD
@@ -2327,7 +2397,7 @@ endif
 lib: info
 	@$(MAKE) build_libs
 	@$(MAKE) build_tracelibs
-	@$(MAKE) info_mk
+	@$(MAKE) info_mk ESMF_CCOMPILEPATHS="$(ESMF_CCOMPILEPATHS) -I$(ESMF_CONFDIR)"
 	@echo "ESMF library built successfully on "`date`
 	@echo "To verify, build and run the unit and system tests with: $(MAKE) check"
 	@echo " or the more extensive: $(MAKE) all_tests"
@@ -2749,6 +2819,10 @@ $(ESMF_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(addsuffix .$(E
 	$(ESMF_F90LINKER) $(ESMF_EXE_F90LINKOPTS) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) $(ESMF_EXEOUT_OPTION) $(SYSTEM_TESTS_OBJ) $< $(ESMF_F90ESMFLINKLIBS)
 	$(ESMF_RM) -f *.o *.mod
 
+$(ESMF_TESTDIR)/ESMC_%STest : ESMC_%STest.o $(SYSTEM_TESTS_OBJ) $(addsuffix .$(ESMF_SL_SUFFIX), $(SYSTEM_TESTS_SHOBJ)) $(ESMFLIB)
+	$(MAKE) chkdir_tests
+	$(ESMF_CLINKER) $(ESMF_EXE_CLINKOPTS) $(ESMF_CLINKOPTS) $(ESMF_CLINKPATHS) $(ESMF_CLINKRPATHS) $(ESMF_EXEOUT_OPTION) $(SYSTEM_TESTS_OBJ) $< $(ESMF_CESMFLINKLIBS)
+	$(ESMF_RM) -f *.o *.mod
 
 # debugging aid:  link the executable, standard output, and log file to
 # temporary names in the current directory (they are built in the test
@@ -2905,6 +2979,19 @@ stest:
 	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)STest 1> ./ESMF_$(TNAME)STest.stdout 2>&1 ; \
 	fi ; \
 	cat ./PET*$(TNAME)STest.Log> ./ESMF_$(TNAME)STest.Log ; \
+	$(ESMF_RM) ./PET*$(TNAME)STest.Log
+
+sctest:
+	-@cd $(ESMF_TESTDIR) ; \
+	$(ESMF_RM) ./PET*$(TNAME)STest.Log ; \
+	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMC_$(TNAME)STest ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMC_$(TNAME)STest ; \
+	else \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMC_$(TNAME)STest 1\> ./ESMC_$(TNAME)STest.stdout 2\>\&1 ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMC_$(TNAME)STest 1> ./ESMC_$(TNAME)STest.stdout 2>&1 ; \
+	fi ; \
+	cat ./PET*$(TNAME)STest.Log> ./ESMC_$(TNAME)STest.Log ; \
 	$(ESMF_RM) ./PET*$(TNAME)STest.Log
 
 #

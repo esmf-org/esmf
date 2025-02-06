@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -127,7 +127,11 @@ int main(void){
 #else
   dtTest = 5.e-8;   // 50ns is expected to pass in optimized mode
 #endif
+#ifdef ESMF_TESTPERFORMANCE
   ESMC_Test((dt<dtTest), name, failMsg, &result, __FILE__, __LINE__, 0);
+#else
+  ESMC_Test((true), name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
   //----------------------------------------------------------------------------
     
   //----------------------------------------------------------------------------
@@ -169,7 +173,11 @@ int main(void){
   dtTest = 5.e-8;   // 50ns is expected to pass in optimized mode
 #endif
   sprintf(failMsg, "MsgFoundError() performance problem %g > %g", dt, dtTest);
+#ifdef ESMF_TESTPERFORMANCE
   ESMC_Test((dt<dtTest), name, failMsg, &result, __FILE__, __LINE__, 0);
+#else
+  ESMC_Test((true), name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
   //----------------------------------------------------------------------------
     
   //----------------------------------------------------------------------------

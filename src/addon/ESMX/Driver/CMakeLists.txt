@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.22)
 
 # load packages and modules
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
+set(Python_FIND_UNVERSIONED_NAMES "FIRST")
+set(Python_FIND_FRAMEWORK "LAST")
+set(Python_FIND_REGISTRY  "LAST")
 find_package(Python 3.5 REQUIRED COMPONENTS Interpreter)
 find_package(ESMF 8.6.0 MODULE REQUIRED)
 include(FetchContent)
@@ -32,6 +35,19 @@ execute_process(COMMAND ${Python_EXECUTABLE}
   ${CMAKE_CURRENT_LIST_DIR}/esmx_app_config.py --ifile ${ESMX_BUILD_FILE} --odir ${CMAKE_CURRENT_BINARY_DIR}
   RESULT_VARIABLE ret)
 esmx_check_ret(${ret} "esmx_app_config.py failed processing ${ESMX_BUILD_FILE}")
+
+include(${CMAKE_CURRENT_BINARY_DIR}/modConf.txt)
+
+# add module paths
+foreach(ESMX_CMAKE_MODULE_PATH IN ITEMS ${ESMX_LINK_MODULE_PATHS})
+  list(APPEND CMAKE_MODULE_PATH ${ESMX_CMAKE_MODULE_PATH})
+endforeach()
+
+# link packages
+foreach(ESMX_LINK_PACKAGE IN ITEMS ${ESMX_LINK_PACKAGES})
+  find_package(${ESMX_LINK_PACKAGE} REQUIRED)
+endforeach()
+
 include(${CMAKE_CURRENT_BINARY_DIR}/appConf.txt)
 
 # disabled components
@@ -121,24 +137,16 @@ add_library(esmx_driver ESMX_Driver.F90)
 target_include_directories(esmx_driver PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(esmx_driver PUBLIC ESMF)
 
-# add module paths
-foreach(ESMX_CMAKE_MODULE_PATH IN ITEMS ${ESMX_CMAKE_MODULE_PATHS})
-  list(APPEND CMAKE_MODULE_PATH ${ESMX_CMAKE_MODULE_PATH})
-endforeach()
-
-# link packages
-foreach(ESMX_LINK_PACKAGE IN ITEMS ${ESMX_LINK_PACKAGES})
-  find_package(${ESMX_LINK_PACKAGE} REQUIRED)
-endforeach()
-
 # link external libraries
 foreach(ESMX_LINK_LIBRARY IN ITEMS ${ESMX_LINK_LIBRARIES})
   if(TARGET ${ESMX_LINK_LIBRARY})
     target_link_libraries(esmx_driver PUBLIC ${ESMX_LINK_LIBRARY})
   else()
+    get_filename_component(FND_LIB_PATH ${ESMX_LINK_LIBRARY} DIRECTORY)
+    get_filename_component(FND_LIB_NAME ${ESMX_LINK_LIBRARY} NAME)
     find_library(FND_LINK_LIBRARY
-      NAMES ${ESMX_LINK_LIBRARY}
-      HINTS ${ESMX_LINK_PATHS}
+      NAMES ${FND_LIB_NAME}
+      HINTS ${ESMX_LINK_PATHS} ${FND_LIB_PATH}
       PATH_SUFFIXES "." "lib" "lib64"
       NO_CACHE
     )
@@ -147,8 +155,24 @@ foreach(ESMX_LINK_LIBRARY IN ITEMS ${ESMX_LINK_LIBRARIES})
     endif()
     target_link_libraries(esmx_driver PUBLIC ${FND_LINK_LIBRARY})
     unset(FND_LINK_LIBRARY)
+    unset(FND_LIB_PATH)
+    unset(FND_LIB_NAME)
   endif()
 endforeach()
+
+# CMake has a bug with NAG and OpenMP:
+#   https://gitlab.kitware.com/cmake/cmake/-/issues/21280
+# so we work around it ... credit to https://github.com/mathomp4
+if (OpenMP_Fortran_FOUND AND CMAKE_Fortran_COMPILER_ID STREQUAL "NAG")
+  message(WARNING "NAG Fortran detected, resetting OpenMP flags to avoid CMake bug")
+  set_property(TARGET OpenMP::OpenMP_Fortran PROPERTY INTERFACE_LINK_LIBRARIES "")
+  set_property(TARGET OpenMP::OpenMP_Fortran PROPERTY INTERFACE_LINK_OPTIONS "-openmp")
+endif()
+
+# link options
+if(DEFINED ESMX_LINK_OPTIONS)
+  target_link_options(esmx_driver PUBLIC ${ESMX_LINK_OPTIONS})
+endif()
 
 # add components
 set(CMP_OPTIONS BUILD_TYPE;
@@ -165,6 +189,7 @@ set(CMP_OPTIONS BUILD_TYPE;
                 LIBRARIES;
                 LINK_LIBRARIES;
                 LINK_PATHS;
+                LINK_INTO_APP;
                 BUILD_ARGS;
                 BUILD_SCRIPT;
                 TEST_DIR;
@@ -391,64 +416,68 @@ foreach(CMP IN ITEMS ${COMPS})
   endif()
 
   # include modules and link libraries
-  find_file(FND_CMAKE_CONFIG
-    NAMES ${CMP_CMAKE_CONFIG}
-    HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
-    PATH_SUFFIXES ${CMP_CONFIG_DIR} "." "cmake" "config"
-    NO_CACHE NO_DEFAULT_PATH
-  )
-  if(FND_CMAKE_CONFIG)
-    include(${FND_CMAKE_CONFIG})
-  endif()
-  find_path(FND_FORT_MODULE
-    NAMES ${CMP_FORT_MODULE}
-    HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
-    PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
-    NO_CACHE NO_DEFAULT_PATH
-  )
-  if(FND_FORT_MODULE)
-    target_include_directories(esmx_driver PUBLIC ${FND_FORT_MODULE})
-  elseif(NOT FND_CMAKE_CONFIG)
-    message(FATAL_ERROR "Cannot find fort_module ${CMP_FORT_MODULE} in ${CMP_INSTALL_PREFIX}")
-  endif()
-  unset(FND_FORT_MODULE)
-  unset(FND_CMAKE_CONFIG)
-  foreach(CMP_LIBRARY IN ITEMS ${CMP_LIBRARIES})
-    if(TARGET ${CMP_LIBRARY})
-      target_link_libraries(esmx_driver PUBLIC ${CMP_LIBRARY})
-    else()
-      find_library(FND_LIBRARY
-        NAMES ${CMP_LIBRARY}
-        HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
-        PATH_SUFFIXES ${CMP_LIBRARY_DIR} "." "lib" "lib64"
-        NO_CACHE NO_DEFAULT_PATH
-      )
-      if(NOT FND_LIBRARY)
-        message(FATAL_ERROR "Cannot find libraries ${CMP_LIBRARY} in ${CMP_INSTALL_PREFIX}")
-      endif()
-      target_link_libraries(esmx_driver PUBLIC ${FND_LIBRARY})
-      unset(FND_LIBRARY)
+  if(${CMP_LINK_INTO_APP} STREQUAL "True")
+    find_file(FND_CMAKE_CONFIG
+      NAMES ${CMP_CMAKE_CONFIG}
+      HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
+      PATH_SUFFIXES ${CMP_CONFIG_DIR} "." "cmake" "config"
+      NO_CACHE NO_DEFAULT_PATH
+    )
+    if(FND_CMAKE_CONFIG)
+      include(${FND_CMAKE_CONFIG})
     endif()
-  endforeach()
+    find_path(FND_FORT_MODULE
+      NAMES ${CMP_FORT_MODULE}
+      HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
+      PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
+      NO_CACHE NO_DEFAULT_PATH
+    )
+    if(FND_FORT_MODULE)
+      target_include_directories(esmx_driver PUBLIC ${FND_FORT_MODULE})
+    elseif(NOT FND_CMAKE_CONFIG)
+      message(FATAL_ERROR "Cannot find fort_module ${CMP_FORT_MODULE} in ${CMP_INSTALL_PREFIX}")
+    endif()
+    unset(FND_FORT_MODULE)
+    unset(FND_CMAKE_CONFIG)
+    foreach(CMP_LIBRARY IN ITEMS ${CMP_LIBRARIES})
+      if(TARGET ${CMP_LIBRARY})
+        target_link_libraries(esmx_driver PUBLIC ${CMP_LIBRARY})
+      else()
+        find_library(FND_LIBRARY
+          NAMES ${CMP_LIBRARY}
+          HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
+          PATH_SUFFIXES ${CMP_LIBRARY_DIR} "." "lib" "lib64"
+          NO_CACHE NO_DEFAULT_PATH
+        )
+        if(NOT FND_LIBRARY)
+          message(FATAL_ERROR "Cannot find libraries ${CMP_LIBRARY} in ${CMP_INSTALL_PREFIX}")
+        endif()
+        target_link_libraries(esmx_driver PUBLIC ${FND_LIBRARY})
+        unset(FND_LIBRARY)
+      endif()
+    endforeach()
+  endif()
 
   # link external libraries
-  foreach(CMP_LINK_LIBRARY IN ITEMS ${CMP_LINK_LIBRARIES})
-    if(TARGET ${CMP_LINK_LIBRARY})
-      target_link_libraries(esmx_driver PUBLIC ${CMP_LINK_LIBRARY})
-    else()
-      find_library(FND_LINK_LIBRARY
-        NAMES ${CMP_LINK_LIBRARY}
-        HINTS ${CMP_LINK_PATHS}
-        PATH_SUFFIXES "." "lib" "lib64"
-        NO_CACHE
-      )
-      if(NOT FND_LINK_LIBRARY)
-        message(FATAL_ERROR "Cannot find link_libraries ${CMP_LINK_LIBRARY} in ${CMP_LINK_PATHS}")
+  if(${CMP_LINK_INTO_APP} STREQUAL "True")
+    foreach(CMP_LINK_LIBRARY IN ITEMS ${CMP_LINK_LIBRARIES})
+      if(TARGET ${CMP_LINK_LIBRARY})
+        target_link_libraries(esmx_driver PUBLIC ${CMP_LINK_LIBRARY})
+      else()
+        find_library(FND_LINK_LIBRARY
+          NAMES ${CMP_LINK_LIBRARY}
+          HINTS ${CMP_LINK_PATHS}
+          PATH_SUFFIXES "." "lib" "lib64"
+          NO_CACHE
+        )
+        if(NOT FND_LINK_LIBRARY)
+          message(FATAL_ERROR "Cannot find link_libraries ${CMP_LINK_LIBRARY} in ${CMP_LINK_PATHS}")
+        endif()
+        target_link_libraries(esmx_driver PUBLIC ${FND_LINK_LIBRARY})
+        unset(FND_LINK_LIBRARY)
       endif()
-      target_link_libraries(esmx_driver PUBLIC ${FND_LINK_LIBRARY})
-      unset(FND_LINK_LIBRARY)
-    endif()
-  endforeach()
+    endforeach()
+  endif()
 
   # add component test
   if(ESMX_TEST)

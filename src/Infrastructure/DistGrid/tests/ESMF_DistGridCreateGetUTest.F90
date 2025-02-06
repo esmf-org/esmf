@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -227,7 +227,7 @@ program ESMF_DistGridCreateGetUTest
   !NEX_UTest
   ! Testing ESMF_DistGridAssignment(=)()
   write(name, *) "DistGrid assignment and equality Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Did not produce alias"
   distgridAlias = distgrid
   distgridBool = (distgridAlias.eq.distgrid)
   call ESMF_Test(distgridBool, name, failMsg, result, ESMF_SRCLINE)
@@ -642,6 +642,13 @@ program ESMF_DistGridCreateGetUTest
   write(name, *) "DistGridPrint()"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_DistGridPrint(distgrid3, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridLog()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridLog(distgrid3, prefix="distgrid3: ", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------

@@ -1,10 +1,13 @@
+[![ESMF All Tests](https://github.com/esmf-org/esmf/actions/workflows/esmf-all-tests.yml/badge.svg?branch=develop&event=push)](https://github.com/esmf-org/esmf/actions/workflows/esmf-all-tests.yml)
 [![ESMF Doc Build](https://github.com/esmf-org/esmf/actions/workflows/build-esmf-docs.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/build-esmf-docs.yml)
 [![ESMPy Doc Build](https://github.com/esmf-org/esmf/actions/workflows/build-esmpy-docs.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/build-esmpy-docs.yml)
 [![Build ESMF Using Spack](https://github.com/esmf-org/esmf/actions/workflows/test-build-spack.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/test-build-spack.yml)
 
 # Earth System Modeling Framework (ESMF)
 
->Copyright (c) 2002-2023 University Corporation for Atmospheric Research, Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory, University of Michigan, National Centers for Environmental Prediction, Los Alamos National Laboratory, Argonne National Laboratory, NASA Goddard Space Flight Center. All rights reserved.
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11205526.svg)](https://doi.org/10.5281/zenodo.11205526)
+
+>Copyright (c) 2002-2025 University Corporation for Atmospheric Research, Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory, University of Michigan, National Centers for Environmental Prediction, Los Alamos National Laboratory, Argonne National Laboratory, NASA Goddard Space Flight Center. All rights reserved.
 
 Hello and welcome to ESMF.
 
@@ -32,7 +35,7 @@ Pre-built binaries for ESMF and ESMPy are available through a number of channels
    ```
    docker run -it --rm esmf/esmf-build-release:latest
    ```
-   Replace `latest` in the above command with a valid version, like `8.6.0`, in order to access a specific ESMF version.
+   Replace `latest` in the above command with a valid version, like `8.9.0`, in order to access a specific ESMF version.
    
  * [Anaconda Conda-Forge](https://anaconda.org/conda-forge/): Under [conda-forge/esmpy](https://anaconda.org/conda-forge/esmpy). To install locally (_note Windows is not supported_), run:
    ```

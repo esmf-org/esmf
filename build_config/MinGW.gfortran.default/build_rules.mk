@@ -138,11 +138,6 @@ ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_DLFCN
 
 ############################################################
-# Windows does not have support for "gethostid()"
-#
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_GETHOSTID
-
-############################################################
 # Windows does not have support for signals
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SIGNALS
@@ -163,7 +158,7 @@ ESMF_CXXCOMPILECPPFLAGS += -DNO_TIMES
 ESMF_PTHREADS := OFF
 
 ############################################################
-# Need this until the file convention is fixed (then remove these two lines)
+# Explicit flags for handling specific format and cpp combos
 #
 ESMF_F90COMPILEFREENOCPP = -ffree-form
 ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form

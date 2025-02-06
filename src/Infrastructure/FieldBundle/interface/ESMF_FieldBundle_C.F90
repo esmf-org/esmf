@@ -1,7 +1,7 @@
 !  $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -94,9 +94,9 @@
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, &
         rcToReturn=rc)) return
-      ! deallocate actual FieldBundleType allocation      
+      ! deallocate actual FieldBundleType allocation
       deallocate(fb%this, stat=localrc)
-      if (ESMF_LogFoundAllocError(localrc, msg="Deallocating FieldBundle", &
+      if (ESMF_LogFoundDeallocError(localrc, msg="Deallocating FieldBundle", &
         ESMF_CONTEXT, &
         rcToReturn=rc)) return
     endif

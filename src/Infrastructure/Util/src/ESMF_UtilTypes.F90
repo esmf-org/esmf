@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -82,13 +82,13 @@
 !EOPI
 
       integer, parameter :: ESMF_VERSION_MAJOR        = 8
-      integer, parameter :: ESMF_VERSION_MINOR        = 7
+      integer, parameter :: ESMF_VERSION_MINOR        = 9
       integer, parameter :: ESMF_VERSION_REVISION     = 0
       integer, parameter :: ESMF_VERSION_PATCHLEVEL   = 0
       logical, parameter :: ESMF_VERSION_PUBLIC       = .false.
       logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .true.
 
-      character(*), parameter :: ESMF_VERSION_STRING  = "8.7.0 beta snapshot"
+      character(*), parameter :: ESMF_VERSION_STRING  = "8.9.0 beta snapshot"
 
 #if defined (ESMF_NETCDF)
       logical, parameter :: ESMF_IO_NETCDF_PRESENT = .true.
@@ -782,6 +782,20 @@
 
 
 !------------------------------------------------------------------------------
+      type ESMF_CubedSphereCalc_Flag
+#ifndef ESMF_NO_SEQUENCE
+      sequence
+#endif
+!  private
+         integer :: cubedspherecalc
+      end type
+
+      
+      type(ESMF_CubedSphereCalc_Flag), parameter :: &
+           ESMF_CUBEDSPHERECALC_1TILE = ESMF_CubedSphereCalc_Flag(1), &
+           ESMF_CUBEDSPHERECALC_LOCAL = ESMF_CubedSphereCalc_Flag(2)
+      
+!------------------------------------------------------------------------------
       type ESMF_LineType_Flag
 #ifndef ESMF_NO_SEQUENCE
       sequence
@@ -1155,6 +1169,11 @@
              ESMF_EXTRAPMETHOD_CREEP, &
              ESMF_EXTRAPMETHOD_CREEP_NRST_D
 
+      public ESMF_CubedSphereCalc_Flag, &
+             ESMF_CUBEDSPHERECALC_1TILE, &
+             ESMF_CUBEDSPHERECALC_LOCAL 
+      
+      
       public ESMF_LineType_Flag, &
              ESMF_LINETYPE_CART, &
              ESMF_LINETYPE_GREAT_CIRCLE
@@ -1295,6 +1314,7 @@ interface operator (==)
   module procedure ESMF_FileStatusEq
   module procedure ESMF_RegridMethodEq
   module procedure ESMF_ExtrapMethodEq
+  module procedure ESMF_CubedSphereCalcEq
   module procedure ESMF_CoordSysEqual
   module procedure ESMF_LineTypeEqual
   module procedure ESMF_NormTypeEqual
@@ -1320,6 +1340,7 @@ interface operator (/=)
   module procedure ESMF_FileStatusNe
   module procedure ESMF_RegridMethodNe
   module procedure ESMF_ExtrapMethodNe
+  module procedure ESMF_CubedSphereCalcNe
   module procedure ESMF_CoordSysNotEqual
   module procedure ESMF_LineTypeNotEqual
   module procedure ESMF_NormTypeNotEqual
@@ -2030,6 +2051,23 @@ impure elemental function ESMF_RegridMethodNe(rp1, rp2)
 end function
 
 !------------------------------------------------------------------------------
+! function to compare two ESMF_CubedSphereCalc types
+
+impure elemental function ESMF_CubedSphereCalcEq(csc1, csc2)
+ logical ESMF_CubedSphereCalcEq
+ type(ESMF_CubedSphereCalc_Flag), intent(in) :: csc1, csc2
+
+ ESMF_CubedSphereCalcEq = (csc1%cubedspherecalc == csc2%cubedspherecalc)
+end function
+
+impure elemental function ESMF_CubedSphereCalcNe(csc1, csc2)
+ logical ESMF_CubedSphereCalcNe
+ type(ESMF_CubedSphereCalc_Flag), intent(in) :: csc1, csc2
+
+ ESMF_CubedSphereCalcNe = (csc1%cubedspherecalc /= csc2%cubedspherecalc)
+end function
+
+!------------------------------------------------------------------------------
 ! function to compare two ESMF_ExtrapMethod types
 
 impure elemental function ESMF_ExtrapMethodEq(ep1, ep2)
@@ -2427,7 +2465,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         print *, ""
         print *, "Earth System Modeling Framework"
         print *, ""
-        print *, "Copyright (c) 2002-2023 University Corporation for Atmospheric Research,"
+        print *, "Copyright (c) 2002-2025 University Corporation for Atmospheric Research,"
         print *, "Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory,"
         print *, "University of Michigan, National Centers for Environmental Prediction,"
         print *, "Los Alamos National Laboratory, Argonne National Laboratory,"

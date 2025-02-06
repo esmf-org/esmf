@@ -209,7 +209,7 @@ ESMF_OPENMP_F90LINKOPTS    += -fopenmp
 ESMF_OPENMP_CXXLINKOPTS    += -Xpreprocessor -fopenmp
 
 ############################################################
-# Need this until the file convention is fixed (then remove these two lines)
+# Explicit flags for handling specific format and cpp combos
 #
 ESMF_F90COMPILEFREENOCPP = -ffree-form
 ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
@@ -272,8 +272,7 @@ ESMF_F90LINKLIBS += -lgfortran
 ############################################################
 # Shared library options
 ESMF_SL_LIBOPTS  += -dynamiclib
-# No need for "$(ESMF_F90LINKPATHS) $(ESMF_F90LINKLIBS)" in the following because they are identical to the CXX versions:
-ESMF_SL_LIBLIBS  += $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)
+ESMF_SL_LIBLIBS  += $(ESMF_F90LINKPATHS) $(ESMF_F90LINKLIBS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)
 
 ############################################################
 # Static builds on Darwin do not support trace lib due to missing linker option

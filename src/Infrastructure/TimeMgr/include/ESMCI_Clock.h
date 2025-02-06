@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -95,6 +95,12 @@ namespace ESMCI{
     Time         currTime;  // current time
     Time         prevTime;  // previous time
 
+   
+    bool         repeat;  // If true, this is a repeating clock
+    TimeInterval repeatDuration;  // Duration to repeat over if it's a repeating clock
+    ESMC_I8     repeatCount;             // the number of times the clock has repeated
+   
+   
     ESMC_I8      advanceCount;             // number of times
                                                 //   ESMCI_ClockAdvance has
                                                 //   been called (number of
@@ -163,7 +169,10 @@ namespace ESMCI{
                       int               *timeZone=0,
                       ESMC_I8      *advanceCount=0, 
                       int               *alarmCount=0,
-                      ESMC_Direction    *direction=0);
+                      ESMC_Direction    *direction=0,
+                      TimeInterval *repeatDuration=0,
+                      ESMC_I8      *repeatCount=0
+            );
 
     int advance(TimeInterval *timeStep=0,
                           char *ringingAlarmList1stElementPtr=0, 
@@ -229,7 +238,7 @@ namespace ESMCI{
     // friend function to allocate and initialize clock from heap
     friend Clock *ESMCI_ClockCreate(int, const char*, TimeInterval*,
                                  Time*, Time*, TimeInterval*,
-                                 int*, Time*, int*);
+                                 int*, Time*, TimeInterval*, int*);
 // TODO: add overload for ESMC_R8  *runTimeStepCount
 
     // friend function to copy a clock
@@ -284,6 +293,7 @@ namespace ESMCI{
                                  int               *runTimeStepCount=0,
 // TODO: add overload for ESMC_R8             *runTimeStepCount=0,
                                  Time*         refTime=0,
+                                 TimeInterval *repeatDuration=0,
                                  int*               rc=0);
 
     // friend function to copy a clock

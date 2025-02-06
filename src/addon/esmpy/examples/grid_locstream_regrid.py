@@ -95,4 +95,4 @@ if esmpy.local_pet() == 0:
     print ("ESMPy Grid LocStream Regridding Example")
     print ("  interpolation mean relative error = {0}".format(meanrelerr))
 
-    assert (meanrelerr < 2e-2)
+    assert (meanrelerr < 5e-6)

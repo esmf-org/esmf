@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -799,10 +799,9 @@ exclusion_loop:  &
       ! create a file name for the log file
       ! find locations of the underscore and period
       underScore = index (file, "_")
-      Period = index (file, ".")
+      Period = index (file, substring=".", back=.true.) ! search from back of string,
+                                                        ! safe for ./file start
       logFileName = file(underScore+1:Period)  // "Log"
-
-
 
       ! initialize the framework.  if this fails, print a message directly
       ! because there is no guarentee that the log code will be working.

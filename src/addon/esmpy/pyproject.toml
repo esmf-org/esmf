@@ -5,12 +5,35 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "esmpy"
 description = "ESMF Python interface"
-# readme = "README.md"
+readme = "README.md"
 maintainers = [ { name = "ESMF Core Team", email = "esmf_support@ucar.edu" } ]
-requires-python = ">=3.7"
+authors = [
+    { name = "University Corporation for Atmospheric Research" },
+    { name = "Massachusetts Institute of Technology" },
+    { name = "Geophysical Fluid Dynamics Laboratory" },
+    { name = "University of Michigan" },
+    { name = "National Centers for Environmental Prediction" },
+    { name = "Los Alamos National Laboratory" },
+    { name = "Argonne National Laboratory" },
+    { name = "NASA Goddard Space Flight Center" },
+]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: University of Illinois/NCSA Open Source License",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+    "Topic :: Scientific/Engineering :: Oceanography",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+# The following is the earliest python version that we test with:
+requires-python = ">=3.8"
 license = { text = "University of Illinois-NCSA" }
 dependencies = [
-    "numpy",
+    # The following is the earliest numpy version that we test with; the latest we test
+    # with is version 2.x, so we assume that version 3 might break backwards
+    # compatibility:
+    "numpy >= 1.19, < 3",
     'importlib-metadata; python_version < "3.8"',
     # setuptools-git-versioning shouldn't be needed here, but is
     # included as a workaround for problems with the build-time
@@ -28,12 +51,18 @@ testing = [
     "pytest-json-report",
 ]
 
+[project.urls]
+Homepage = "http://earthsystemmodeling.org/esmpy/"
+Documentation = "https://earthsystemmodeling.org/esmpy_doc/release/latest/html/"
+sourcecode = "https://github.com/esmf-org/esmf/tree/develop/src/addon/esmpy"
+releasenotes = "https://earthsystemmodeling.org/static/releases.html"
+
 [tool.setuptools-git-versioning]
 enabled = true
 template = "{tag}"
 dev_template = "{tag}"
 dirty_template = "{tag}"
-starting_version = "8.7.0beta" # this is a backup for pip <= 22.0 where git-versioning doesn't work
+starting_version = "8.9.0beta" # this is a backup for pip <= 22.0 where git-versioning doesn't work
 
 [tool.dynamic]
 version = "placeholder" # this is a placeholder for the version pulled with git-versioning

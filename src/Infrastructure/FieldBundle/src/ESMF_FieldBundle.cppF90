@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1705,7 +1705,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Private name; call using ESMF_FieldBundleGet()   
     subroutine ESMF_FieldBundleGetListAll(fieldbundle, keywordEnforcer, &
       itemorderflag, geomtype, grid, locstream, mesh, xgrid, &
-      fieldCount, fieldList, fieldNameList, isPacked, name, rc)
+      fieldCount, fieldList, fieldNameList, isPacked, name, vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle),    intent(in)            :: fieldbundle
@@ -1721,6 +1721,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),          intent(out), optional :: fieldNameList(:)
     logical,                   intent(out), optional :: isPacked
     character(len=*),          intent(out), optional :: name
+    type(ESMF_VM),             intent(out), optional :: vm
     integer,                   intent(out), optional :: rc
 !
 ! !STATUS:
@@ -1733,6 +1734,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              the items are returned.
 ! \item[8.0.0] Added argument {\tt isPacked}.
 !              The new argument allows the user to query if this is a packed FieldBundle.
+! \item[8.8.0] Added argument {\tt vm} in order to offer information about the
+!              VM on which the FieldBundle was created.
 ! \end{description}
 ! \end{itemize}
 !
@@ -1771,7 +1774,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [{[isPacked]}]
 !         Upon return holds the information if this FieldBundle is packed.
 !   \item [{[name]}]
-!         Name of the fieldbundle object.
+!         Name of the FieldBundle object.
+!   \item [{[vm}]
+!         The VM on which the FieldBundle object was created.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1960,7 +1965,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
     endif
-    
+
+    if (present(vm)) then
+      call ESMF_GetVM(fieldbundle%this%base, vm, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   
@@ -2184,7 +2195,7 @@ msg="This call does not work with packed FieldBundle.",&
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldBundleGetIndex()"
 !BOPI
-! !IROUTINE: ESMF_FieldBundleGet - Access the fieldIndex-th Field in FieldBundle
+! !IROUTINE: ESMF_FieldBundleGet - Access the Field at a specific index in a FieldBundle
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_FieldBundleGet()   
@@ -2198,21 +2209,16 @@ msg="This call does not work with packed FieldBundle.",&
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !
-! TODO: This method is DEPRECATED starting at 5.2.0r (was not part of the 5.2.0r
-!       reference manual.
-! TODO: We should put a deprecation message into the Log file when this message
-!       is being called!
-!
 ! !DESCRIPTION:
-!   Get the fieldIndex-th Field in FieldBundle. The order of the Field in FieldBundle
-!   is not guranteed. If this call is used iteratively, then any Add, Replace, Remove
-!   call on the FieldBundle will invalidate the order of the Field in the FieldBundle.
+!   Get the fieldIndex-th Field from a FieldBundle. The order of the Fields in FieldBundle
+!   is not guranteed. If this call is used iteratively, then any Add, Replace, or Remove
+!   call on the FieldBundle can change the order and/or number of Fields in that FieldBundle.
 !
 !   \begin{description}
 !   \item [fieldbundle]
 !         {\tt ESMF\_FieldBundle} to be queried.
 !   \item [fieldIndex]
-!         The fieldIndex-th Field to be returned.
+!         The index of the Field to be returned.
 !   \item [field]
 !         The fieldIndex-th Field to be returned.
 !   \item [{[rc]}]

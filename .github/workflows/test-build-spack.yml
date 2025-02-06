@@ -28,7 +28,7 @@ on:
 
 jobs:
   set-matrix:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     outputs:
       matrix: ${{ steps.list_comp_pkgs.outputs.matrix }}
@@ -66,7 +66,7 @@ jobs:
   build:
     needs: set-matrix
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     strategy:
       matrix: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
@@ -74,7 +74,7 @@ jobs:
     steps:
     # check out base repo
     - name: Checkout Base Repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     # prepare core environment
     - name: Install Core Development Tools
@@ -87,7 +87,7 @@ jobs:
 
     # restore Intel oneAPI compiler installation from cache
     - name: Restore Intel oneAPI Compiler Installation
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       if: ${{ startsWith(matrix.compiler, 'oneapi') }}
       with:
         path: /opt/intel/oneapi
@@ -119,17 +119,44 @@ jobs:
           -r ${{ github.workspace }}
 
     # checkout NUOPC app prototypes
-    - name: Checkout NUOPC app prototypes
-      uses: actions/checkout@v3
+    - name: Checkout NUOPC App Prototypes
+      uses: actions/checkout@v4
       with:
         repository: esmf-org/nuopc-app-prototypes
         path: ${{ github.workspace }}/nuopc-app-prototypes
         ref: ${{ needs.set-matrix.outputs.nuopc_app_version }}
 
     # test installation using NUOPC app prototypes
-    - name: Run NUOPC app prototypes
+    - name: Run NUOPC App Prototypes
       run: |
         ${{ github.workspace }}/.github/workflows/scripts/run_nuopc_app_proto.sh \
           -c ${{ matrix.compiler }} \
           -r ${{ github.workspace }}/nuopc-app-prototypes \
           -s ~/.spack-ci
+
+    # compress run directory of NUOPC app prototypes
+    - name: Prepare NUOPC App Prototypes Artifacts Directory
+      run: |
+        cd ${{ github.workspace }}/nuopc-app-prototypes
+        mkdir Artifacts
+        mv NUOPC-PROTO-RESULTS Artifacts/
+
+   # push test results to artifacts
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Artifacts for ${{ matrix.compiler }} ${{ matrix.esmf }}
+        path: ${{ github.workspace }}/nuopc-app-prototypes/Artifacts
+        retention-days: 5
+
+    # force to fail if there is any failed nuopc app prototypes
+    - name: Check Result of NUOPC App Prototypes 
+      run: |
+        if [[ "${{ env.NUOPC_APP_PROTO_PASS }}" == "false" ]]; then
+          echo "Some of NUOPC app prototypes are failed! Exiting ..."
+          exit 1
+        else
+          echo "All tests are passed."
+          exit 0
+        fi
+      shell: bash

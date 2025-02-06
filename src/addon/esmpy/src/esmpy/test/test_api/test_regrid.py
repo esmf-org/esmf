@@ -1,18 +1,227 @@
 """
 regrid unit test file
 """
-
-import pytest
-
 import os
 
-from esmpy import *
+import esmpy
+import numpy as np
+import pytest
+from esmpy.api.constants import _ESMF_NETCDF
+from esmpy.api.constants import _ESMF_PIO
+from esmpy.api.constants import _ESMF_USE_INMEM_FACTORS
+from esmpy.api.constants import CoordSys
+from esmpy.api.constants import GridItem
+from esmpy.api.constants import LineType
+from esmpy.api.constants import Region
+from esmpy.api.constants import StaggerLoc
+from esmpy.api.constants import UnmappedAction
+from esmpy.api.esmpymanager import local_pet
+from esmpy.api.esmpymanager import Manager
+from esmpy.api.esmpymanager import pet_count
+from esmpy.api.field import Field
+from esmpy.api.grid import Grid
+from esmpy.api.mesh import Mesh
+from esmpy.api.mesh import MeshElemType
+from esmpy.api.mesh import MeshLoc
+from esmpy.api.regrid import Regrid
+from esmpy.api.regrid import RegridFromFile
+from esmpy.api.regrid import RegridMethod
 from esmpy.test.base import TestBase
-from esmpy.api.constants import _ESMF_NETCDF, _ESMF_PIO
-from esmpy.util.field_utilities import compare_fields
-from esmpy.util.grid_utilities import *
-from esmpy.util.mesh_utilities import *
 from esmpy.util.cache_data import DATA_DIR
+from esmpy.util.field_utilities import compare_fields
+from esmpy.util.grid_utilities import compute_mass_grid
+from esmpy.util.grid_utilities import grid_create_from_bounds
+from esmpy.util.grid_utilities import grid_create_from_bounds_3d
+from esmpy.util.grid_utilities import grid_create_from_bounds_periodic
+from esmpy.util.grid_utilities import grid_create_from_bounds_periodic_3d
+from esmpy.util.grid_utilities import initialize_field_grid
+from esmpy.util.grid_utilities import initialize_field_grid_3d
+from esmpy.util.grid_utilities import initialize_field_grid_periodic
+from esmpy.util.grid_utilities import initialize_field_grid_periodic_3d
+from esmpy.util.mesh_utilities import compute_mass_mesh
+from esmpy.util.mesh_utilities import initialize_field_mesh
+from esmpy.util.mesh_utilities import mesh_create_10
+from esmpy.util.mesh_utilities import mesh_create_10_parallel
+from esmpy.util.mesh_utilities import mesh_create_50
+from esmpy.util.mesh_utilities import mesh_create_50_parallel
+from esmpy.util.mesh_utilities import mesh_create_50_ngons
+from esmpy.util.mesh_utilities import mesh_create_50_ngons_parallel
+from numpy.testing import assert_array_almost_equal
+
+
+NON_CONSERVATIVE_METHODS = (
+    RegridMethod.BILINEAR,
+    RegridMethod.NEAREST_DTOS,
+    RegridMethod.NEAREST_STOD,
+    RegridMethod.PATCH,
+)
+
+# Note that the tests of regridding fields with a mask are outside the test class because
+# some are parametrized, and pytest doesn't allow parametrized test methods within a class.
+
+def create_raster_field(x_of_col, y_of_row, node_mask=None):
+    """Create a mesh that is a structured grid of squares."""
+    x_of_col, y_of_row = np.asarray(x_of_col), np.asarray(y_of_row)
+    if node_mask is not None:
+        node_mask = np.asarray(node_mask).flatten()
+
+    mesh = Mesh(parametric_dim=2, spatial_dim=2, coord_sys=CoordSys.CART)
+
+    x_of_point, y_of_point = np.meshgrid(x_of_col, y_of_row)
+    xy_of_point = np.c_[x_of_point.flat, y_of_point.flat]
+    n_rows, n_cols = len(y_of_row), len(x_of_col)
+    n_points = n_rows * n_cols
+    id_of_point = np.arange(n_points).reshape((n_rows, n_cols))
+
+    x_of_element, y_of_element = np.meshgrid(
+        0.5 * (x_of_col[:-1] + x_of_col[1:]),
+        0.5 * (y_of_row[:-1] + y_of_row[1:]),
+    )
+    xy_of_element = np.c_[x_of_element.flat, y_of_element.flat]
+    n_elements = (n_rows - 1) * (n_cols - 1)
+    id_of_element = np.arange(n_elements)
+    points_at_element = np.c_[
+        id_of_point[:-1,:-1].flat,
+        id_of_point[1:,:-1].flat,
+        id_of_point[1:,1:].flat,
+        id_of_point[:-1,1:].flat,
+    ]
+
+    mesh.add_nodes(
+        n_points,
+        id_of_point.flatten()+1, #PR204 esmpy currently uses 1-based indexing for mesh node ids
+        xy_of_point.flatten(),
+        np.zeros(n_points, dtype=int),
+        node_mask=node_mask,
+    )
+
+    mesh.add_elements(
+        n_elements,
+        np.arange(n_elements, dtype=int)+1, #PR204 esmpy currently uses 1-based indexing for mesh element ids
+        np.full(n_elements, MeshElemType.QUAD, dtype=int),
+        points_at_element,
+        xy_of_element, #PR204 this is an optional parameter, should use a keyword to specify which desired
+    )
+
+    return Field(mesh, meshloc=MeshLoc.NODE)
+
+
+@pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
+@pytest.mark.parametrize("mask_value", (None, 0, True, 1, False))
+@pytest.mark.parametrize("method", NON_CONSERVATIVE_METHODS)
+def test_regrid_with_const_node_mask(mask_value, method):
+    """Check regriding with an all-or-nothing mask."""
+    if mask_value is None:
+        mask = None
+    else:
+        mask = np.full(12, mask_value)
+
+    src = create_raster_field([0.0, 1.0, 2.0, 3.0], [0.0, 1.0, 2.0], node_mask=mask)
+    dst = create_raster_field([0.0, 1.0, 2.0, 3.0], [0.0, 1.0, 2.0], node_mask=mask)
+    src.data[:] = 100.0
+    dst.data[:] = -999.0
+
+    regrid = Regrid(
+        src,
+        dst,
+        regrid_method=method,
+        unmapped_action=UnmappedAction.IGNORE,
+        src_mask_values=(1,),
+        dst_mask_values=(1,),
+    )
+
+    if mask is None:
+        mask = np.full(src.data.size, False, dtype=bool)
+    else:
+        mask = np.asarray(mask, dtype=bool).reshape(-1)
+
+    assert_array_almost_equal(dst.data[~mask], src.data[~mask])
+    assert_array_almost_equal(dst.data[mask], -999)
+
+
+@pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
+@pytest.mark.parametrize(
+    "mask",
+    (
+        [[1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],
+        [[0, 0, 0, 0], [0, 0, 0, 0], [1, 1, 1, 1]],
+        [[1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0]],
+        [[1, 0, 0, 1], [1, 0, 0, 1], [1, 0, 0, 1]],
+        [[0, 0, 0, 1], [0, 0, 0, 1], [0, 0, 0, 1]],
+    ),
+)
+@pytest.mark.parametrize("method", NON_CONSERVATIVE_METHODS)
+def test_regrid_with_node_mask(mask, method):
+    """Check that unmasked nodes are regridded and masked nodes remain unchanged."""
+    src = create_raster_field([0.0, 1.0, 2.0, 3.0], [0.0, 1.0, 2.0], node_mask=mask)
+    dst = create_raster_field([0.0, 1.0, 2.0, 3.0], [0.0, 1.0, 2.0], node_mask=mask)
+    src.data[:] = 100.0
+    dst.data[:] = -999.0
+
+    regrid = Regrid(
+        src,
+        dst,
+        regrid_method=method,
+        unmapped_action=UnmappedAction.IGNORE,
+        src_mask_values=(1,),
+        dst_mask_values=(1,),
+    )
+
+    if mask is None:
+        mask = np.full(src.data.size, False, dtype=bool)
+    else:
+        mask = np.asarray(mask, dtype=bool).reshape(-1)
+
+    assert_array_almost_equal(dst.data[~mask], src.data[~mask])
+    assert_array_almost_equal(dst.data[mask], -999)
+
+
+@pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
+@pytest.mark.parametrize("method", NON_CONSERVATIVE_METHODS)
+def test_regrid_with_multivalued_node_mask(method):
+    """Check regridding that masks multiple values."""
+    n_rows, n_cols = 4, 5
+
+    src_data = np.array([-0.75, 0.75, 0.4, -0.25, 0.25,
+                         0.6, 0.8, -0.9, -0.3, -0.1,
+                         0.2, -0.6, 0.3, 0.7, -0.2,
+                         0.7, 0.6, 0.1, -0.7, -0.6])
+
+    mask = np.zeros(src_data.size, dtype=int)
+    mask[src_data < -0.5] = 1
+    mask[(src_data >= -0.5) & (src_data < 0.5)] = 2
+    mask[src_data >= 0.5] = 3
+
+    src = create_raster_field(
+        np.linspace(0.0, 5.0, num=n_cols, endpoint=True),
+        np.linspace(0.0, 4.0, num=n_rows, endpoint=True),
+        node_mask=mask,
+    )
+    dst = create_raster_field(
+        np.linspace(0.25, 4.25, num=n_cols - 1, endpoint=True),
+        np.linspace(0.25, 3.25, num=n_rows - 1, endpoint=True),
+        node_mask=None,
+    )
+
+    src.data[:] = src_data
+    dst.data[:] = 999.0
+
+    regrid = Regrid(
+        src,
+        dst,
+        regrid_method=method,
+        unmapped_action=UnmappedAction.IGNORE,
+        src_mask_values=(1, 3),
+    )
+
+    actual = np.asarray(dst.data).reshape((n_rows - 1, n_cols - 1))
+    if method == RegridMethod.NEAREST_DTOS:
+        # For this method and grid layout, the last row and column take
+        # input from multiple source nodes, and thus we can't be sure about
+        # the values at the destination nodes.
+        actual = actual[:-1, :-1]
+
+    assert np.all(((actual >= -0.5) & (actual < 0.5)) | (actual == 999.0))
 
 
 class TestRegrid(TestBase):
@@ -83,7 +292,7 @@ class TestRegrid(TestBase):
                     line_type=LineType.CART, factors=False)
         _ = rh(srcfield, dstfield)
 
-    @pytest.mark.skipif(not constants._ESMF_USE_INMEM_FACTORS, reason="compiler does not support in-memory weights")
+    @pytest.mark.skipif(not _ESMF_USE_INMEM_FACTORS, reason="compiler does not support in-memory weights")
     @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_field_regrid_factor_retrieval(self):
         # Test retrieving factors from a route handle.
@@ -627,11 +836,12 @@ class TestRegrid(TestBase):
                     dst_mask_values=np.atleast_1d(np.array([0])))
         dstfield = rh(srcfield, dstfield, zero_region=Region.SELECT)
 
-        # validate that the masked values were not zeroed out
+        # validate that the masked values were not zeroed out (zero_region=Region.SELECT
+        # should leave the masked values at their original values)
         for i in range(dstfield.data.shape[x]):
             for j in range(dstfield.data.shape[y]):
                 if dstfield.grid.mask[StaggerLoc.CENTER][i, j] == 0:
-                    assert(dstfield[i, j] == 0)
+                    assert(dstfield.data[i, j] == -100)
 
     @pytest.mark.skipif(_ESMF_PIO==False, reason="PIO required in ESMF build")
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")

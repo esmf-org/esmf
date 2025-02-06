@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -66,6 +66,7 @@ extern "C" void FTN_X(c_esmc_regrid_create)(MeshCap **meshsrcpp,
                                             int *srcTermProcessing, int *pipelineDepth,
                                             ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
                                             int *nentries, ESMCI::TempWeights **tweights,
+                                            ESMCI::RouteHandle **trh, int *has_trh,
                                             int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
                                             int *has_statusArray, ESMCI::Array **statusArray,
                                             int *checkFlag, 
@@ -103,8 +104,9 @@ MeshCap::regrid_create(meshsrcpp, arraysrcpp, plsrcpp,
                        extrapNumInputLevels, 
                        unmappedaction, _ignoreDegenerate,
                        srcTermProcessing, pipelineDepth,
-                       rh, has_rh, has_iw,
-                       nentries, tweights,
+                       rh, has_rh,
+                       has_iw, nentries, tweights,
+                       trh, has_trh,
                        has_udl, _num_udl, _tudl,
                        has_statusArray, statusArray,
                        checkFlag, 
