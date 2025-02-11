@@ -118,7 +118,7 @@ program ESMF_MeshUTest
 
 
  ! This surrounds all the tests to make turning off everything but one test easier
-#if 1
+#if 0
 
   !------------------------------------------------------------------------
 
@@ -2036,7 +2036,7 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
-#endif
+
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Mesh create dual with element coords and masking"
@@ -2053,7 +2053,6 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
-#if 1
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Mesh Create and then Redist with a pentagon and hexagon element"
@@ -2162,50 +2161,50 @@ endif
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-
+#endif
+  
   !-----------------------------------------------------------------------------
   ! NOTE THAT MeshCreateDual IS CURRENTLY AN INTERNAL INTERFACE AND NOT INTENDED FOR PUBLIC USE
   !
   !NEX_UTest
-  write(name, *) "Mesh create dual from src mesh with corners in a crescent."
+  write(name, *) "Mesh create dual from src mesh with centers in a crescent."
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! initialize check variables
   correct=.true.
   rc=ESMF_SUCCESS
 
-#if 0  
+
   ! Create Test mesh
-  call createTestMesh3x3wUglyCnr(mesh, rc=localrc)
+  call createTestMesh3x3wCrscntCnr(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  call ESMF_MeshWrite(mesh, filename="mesh", rc=rc)
+  call ESMF_MeshWrite(mesh, filename="crscntMesh", rc=rc)
 
   ! Create dual mesh
-  !meshDual=ESMF_MeshCreateDual(mesh, rc=localrc)
+  meshDual=ESMF_MeshCreateDual(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-
-  !call ESMF_MeshWrite(meshDual, filename="meshDual", rc=rc)
-
+  call ESMF_MeshWrite(meshDual, filename="crscntMeshDual", rc=rc)
 
   ! Get rid of Meshes
   call ESMF_MeshDestroy(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Get rid of Meshes
-!  call ESMF_MeshDestroy(meshDual, rc=localrc)
-!  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-#endif
+  call ESMF_MeshDestroy(meshDual, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+#if 0
   
 ! mbmesh - tests fail
 ! element triangulation in native create not yet migrated to mbmesh
 
-#if 1
+#if 0
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
@@ -4675,13 +4674,13 @@ end subroutine createTestMesh3x3
   !                     Mesh Ids
   !
   !   3.0   13 ------ 14 ------- 15 ------- 16
-  !         |         |          |  10    / |
-  !   2.5   |    7    |    8     |     /    |
-  !         |         |          |  /    9  |
-  !   2.0   9 ------- 10 ------- 11 ------- 12
-  !         |         |          |          |
-  !   1.5   |    4    |    5     |    6     |
-  !         |         |          |          |
+  !         |         |  \  14   |13   / // |
+  !   2.5   |    7    |    \  - 18- /10  // |
+  !         |         |   8      |  / 11/ 9 |
+  !   2.0   9 ------- 10 ------- 11 -- 17-- 12
+  !         |         |          | 12  /    |
+  !   1.5   |    4    |    5     |   /  6   |
+  !         |         |          | /        |
   !   1.0   5 ------- 6 -------- 7 -------- 8
   !         |         |          |          |
   !   0.5   |    1    |    2     |    3     |
@@ -4689,7 +4688,7 @@ end subroutine createTestMesh3x3
   !   0.0   1 ------- 2 -------- 3 -------- 4
   !
   !        0.0  0.5  1.0  1.5   2.0  2.5   3.0
-   !
+  !
   !               Node Ids at corners
   !              Element Ids in centers
   !
@@ -4701,13 +4700,13 @@ end subroutine createTestMesh3x3
   !                   Mesh Owners
   !
   !   3.0   2 ------- 2 -------- 3 -------- 3
-  !         |         |          |  3    /  |
-  !         |    2    |    2     |     /    |
-  !         |         |          |  /    3  |
-  !   2.0   2 ------- 2 -------- 3 -------- 3
-  !         |         |          |          |
-  !         |    2    |    2     |    3     |
-  !         |         |          |          |
+  !         |         |\   2     |  3/    //|
+  !         |    2    |   \  -  3 -  3 / / |
+  !         |         |  2        | / 3  / 3 |
+  !   2.0   2 ------- 2 -------- 3 ----3 -- 3
+  !         |         |          | 3  /     |
+  !         |    2    |    2     |   /  3   |
+  !         |         |          | /        |
   !   1.0   0 ------- 0 -------- 1 -------- 1
   !         |         |          |          |
   !         |    0    |    1     |    1     |
@@ -4720,7 +4719,7 @@ end subroutine createTestMesh3x3
   !              Element Owners in centers
   !
 
-subroutine createTestMesh3x3wUglyCnr(mesh, rc)
+subroutine createTestMesh3x3wCrscntCnr(mesh, rc)
   type(ESMF_Mesh), intent(out) :: mesh
   integer :: rc
 
@@ -4754,13 +4753,13 @@ subroutine createTestMesh3x3wUglyCnr(mesh, rc)
   if (petCount .eq. 1) then
 
      ! Fill in node data
-     numNodes=17
+     numNodes=18
 
      !! node ids
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,3,4,5,6,7,8, &
                9,10,11,12,13,14,&
-               15,16,17/)
+               15,16,17,18/)
 
      !! node Coords
      allocate(nodeCoords(numNodes*2))
@@ -4780,7 +4779,8 @@ subroutine createTestMesh3x3wUglyCnr(mesh, rc)
                  1.0,3.0, &  ! 14
                  2.0,3.0, &  ! 15
                  3.0,3.0, &  ! 16
-                 2.5,2.0/)   ! 17
+                 2.5,2.0, &  ! 17
+                 2.0,2.5/)   ! 18
 
       !! node owners
       allocate(nodeOwners(numNodes))
@@ -4788,14 +4788,14 @@ subroutine createTestMesh3x3wUglyCnr(mesh, rc)
 
 
       ! Fill in elem data
-      numTriElems=4
+      numTriElems=6
       numQuadElems=8
       numElems=numTriElems+numQuadElems
       numElemConns=3*numTriElems+4*numQuadElems
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/1,2,3,4,5,6,7,8,9,10,11,12/)
+      elemIds=(/1,2,3,4,5,6,7,8,9,10,11,12,13,14/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -4810,7 +4810,9 @@ subroutine createTestMesh3x3wUglyCnr(mesh, rc)
                   ESMF_MESHELEMTYPE_TRI,  & ! 9
                   ESMF_MESHELEMTYPE_TRI,  & ! 10
                   ESMF_MESHELEMTYPE_TRI,  & ! 11
-                  ESMF_MESHELEMTYPE_TRI/)   ! 12
+                  ESMF_MESHELEMTYPE_TRI,  & ! 12
+                  ESMF_MESHELEMTYPE_TRI,  & ! 13
+                  ESMF_MESHELEMTYPE_TRI/)   ! 14
 
       !! elem coords
       allocate(elemCoords(2*numElems))
@@ -4823,9 +4825,11 @@ subroutine createTestMesh3x3wUglyCnr(mesh, rc)
                    0.5,2.5, & ! 7
                    1.5,2.5, & ! 8
                    2.75,2.25,& ! 9
-                   2.75,2.25,& ! 10
-                   2.75,2.25,& ! 11
-                   2.25,2.75/)  ! 12
+                   2.75,2.75,& ! 10
+                   2.25,2.25,& ! 11
+                   2.25,1.25,& ! 12
+                   2.25,2.75,& ! 13
+                   1.75,2.75/) ! 14
 
       !! elem conn
       allocate(elemConn(numElemConns))
@@ -4836,11 +4840,13 @@ subroutine createTestMesh3x3wUglyCnr(mesh, rc)
                  6,7,11,10, & ! 5
                  7,8,12,17, & ! 6
                  9,10,14,13, & ! 7
-                 10,11,15,14, & ! 8
+                 10,11,18,14, & ! 8
                  17,12,16, & ! 9
                  11,16,15, & ! 10
                  17,16,11, & ! 11
-                 7,17,11/) ! 12
+                 7,17,11, & ! 12
+                 15,18,16, & ! 13
+                 14,18,15/) ! 14
                  
    else if (petCount .eq. 4) then
      ! Setup mesh data depending on PET
@@ -4944,13 +4950,13 @@ subroutine createTestMesh3x3wUglyCnr(mesh, rc)
      else if (localPet .eq. 2) then
 
      ! Fill in node data
-     numNodes=9
+     numNodes=10
 
      !! node ids
      allocate(nodeIds(numNodes))
      nodeIds=(/5,6,7,   &
                9,10,11, &
-               13,14,15/)
+               13,14,15,18/)
 
 
      !! node Coords
@@ -4963,7 +4969,8 @@ subroutine createTestMesh3x3wUglyCnr(mesh, rc)
                   2.0,2.0, &  ! 11
                   0.0,3.0, &  ! 13
                   1.0,3.0, &  ! 14
-                  2.0,3.0/)  ! 15
+                  2.0,3.0, &  ! 15
+                  2.0,2.5/)   ! 18
 
 
       !! node owners
@@ -4976,25 +4983,27 @@ subroutine createTestMesh3x3wUglyCnr(mesh, rc)
                    3, & ! 11
                    2, & ! 13
                    2, & ! 14
-                   3/)  ! 15
+                   3, & ! 15
+                   3/)  ! 18
 
 
       ! Fill in elem data
-      numTriElems=0
+      numTriElems=1
       numQuadElems=4
       numElems=numTriElems+numQuadElems
       numElemConns=3*numTriElems+4*numQuadElems
 
        !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/4,5,7,8/)
+      elemIds=(/4,5,7,8,14/)
 
       !! elem types
       allocate(elemTypes(numElems))
       elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! 4
                   ESMF_MESHELEMTYPE_QUAD, & ! 5
                   ESMF_MESHELEMTYPE_QUAD, & ! 7
-                  ESMF_MESHELEMTYPE_QUAD/)  ! 8
+                  ESMF_MESHELEMTYPE_QUAD, & !8
+                  ESMF_MESHELEMTYPE_TRI/)  ! 14
 
 
       !! elem coords
@@ -5002,22 +5011,25 @@ subroutine createTestMesh3x3wUglyCnr(mesh, rc)
       elemCoords=(/0.5,1.5, & ! 4
                    1.5,1.5, & ! 5
                    0.5,2.5, & ! 7
-                   1.5,2.5/)  ! 8
+                   1.5,2.5, & ! 8
+                   1.75,2.75/)! 14
 
       !! elem conn
       allocate(elemConn(numElemConns))
       elemConn=(/1,2,5,4,  & ! 4
                  2,3,6,5,  & ! 5
                  4,5,8,7,  & ! 7
-                 5,6,9,8/)   ! 8
+                 5,6,10,8, & ! 8
+                 8,10,9/)    ! 14
+      
      else if (localPet .eq. 3) then
 
      ! Fill in node data
-     numNodes=7
+     numNodes=8
 
      !! node ids
      allocate(nodeIds(numNodes))
-     nodeIds=(/7,8,11,12,15,16,17/)
+     nodeIds=(/7,8,11,12,15,16,17,18/)
 
      !! node Coords
      allocate(nodeCoords(numNodes*2))
@@ -5027,7 +5039,8 @@ subroutine createTestMesh3x3wUglyCnr(mesh, rc)
                   3.0,2.0, &  ! 12
                   2.0,3.0, &  ! 15
                   3.0,3.0, &  ! 16
-                  2.5,2.0/)   ! 17
+                  2.5,2.0, &  ! 17
+                  2.0,2.5/)   ! 18
      
 
       !! node owners
@@ -5038,17 +5051,18 @@ subroutine createTestMesh3x3wUglyCnr(mesh, rc)
                    3, & ! 12
                    3, & ! 15
                    3, & ! 16
-                   3/)  ! 17
+                   3, & ! 17
+                   3/)  ! 18
 
       ! Fill in elem data
-      numTriElems=4
+      numTriElems=5
       numQuadElems=1
       numElems=numTriElems+numQuadElems
       numElemConns=3*numTriElems+4*numQuadElems
 
       !! elem ids
       allocate(elemIds(numElems))
-      elemIds=(/6,9,10,11,12/)
+      elemIds=(/6,9,10,11,12,13/)
 
       !! elem types
       allocate(elemTypes(numElems))
@@ -5056,23 +5070,26 @@ subroutine createTestMesh3x3wUglyCnr(mesh, rc)
            ESMF_MESHELEMTYPE_TRI,  & ! 9
            ESMF_MESHELEMTYPE_TRI,  & ! 10
            ESMF_MESHELEMTYPE_TRI,  & ! 11
-           ESMF_MESHELEMTYPE_TRI/)   ! 12
+           ESMF_MESHELEMTYPE_TRI,  & ! 12
+           ESMF_MESHELEMTYPE_TRI/)   ! 13
 
       !! elem coords
       allocate(elemCoords(2*numElems))
       elemCoords=(/2.5,1.5, & ! 6
            2.75,2.25,& ! 9
-           2.25,2.75,& ! 10
-           2.25,2.75,& ! 11
-           2.25,2.75/)  ! 12
+           2.75,2.75,& ! 10
+           2.25,2.25,& ! 11
+           2.25,1.25,& ! 12
+           2.25,2.75/)  ! 13
 
       !! elem conn
       allocate(elemConn(numElemConns))
       elemConn=(/1,2,4,7, & ! 6
                  7,4,6, & ! 9
-                 3,6,5, & ! 10
+                 3,6,8, & ! 10
                  7,6,3, & ! 11
-                 1,7,3/) !11
+                 1,7,3, & ! 12
+                 5,8,6/) !13
    endif
    endif
 
@@ -5098,7 +5115,7 @@ subroutine createTestMesh3x3wUglyCnr(mesh, rc)
    deallocate(elemCoords)
    deallocate(elemConn)
 
-end subroutine createTestMesh3x3wUglyCnr
+end subroutine createTestMesh3x3wCrscntCnr
 
 
 

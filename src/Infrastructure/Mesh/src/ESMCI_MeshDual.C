@@ -1381,10 +1381,11 @@ const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype) {
     bool has_right=false;
     bool has_left=false;
     for (int i=1; i < tmp_pntss.size()-1; i++) {
-      if (tmp_pntss[i].side=PntS::Right) has_right=true;
-      if (tmp_pntss[i].side==PntS::Left) has_left=true;
+      if (tmp_pntss[i].side == PntS::Right) has_right=true;
+      if (tmp_pntss[i].side == PntS::Left) has_left=true;
     }
 
+    
     // If they are all on the right, then just fill and leave
     if (!has_left) {
 
@@ -1425,7 +1426,15 @@ const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype) {
         ids.push_back(tmp_mdss[i].id);
       }
       
-    }        
+    }
+
+    // DEBUG OUTPUT
+    //    std::cout << "End ids=";
+    //for (UInt id: ids) {
+    //  std::cout << " " << id;
+    // }      
+    //std::cout <<"\n";
+    
   }
 
 
@@ -1646,6 +1655,7 @@ const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype) {
 
     // Using the angle sorted tmp_mdss points make a loop and fill ids with it
     make_id_loop_from_angle_ordered_pnts(mesh, tmp_mdss, tmp_pntss, ids);
+
   }
 
 
