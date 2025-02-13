@@ -752,6 +752,7 @@ namespace ESMCI {
         // More than 4 side, split
         if (elemType[e]>4) {
 
+          
           // Get coordinates
           int crd_pos=0;
           for (int i=0; i<elemType[e]; i++) {
@@ -900,7 +901,7 @@ namespace ESMCI {
 
       int nnodes = topo->num_nodes;
       std::vector<MeshObj*> nconnect(nnodes, static_cast<MeshObj*>(0));
-
+      
       // The object
       UInt eid = elemId[e];
       MeshObj *elem = new MeshObj(MeshObj::ELEMENT, eid, e);
@@ -1650,9 +1651,9 @@ const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype) {
     // Resize
     tmp_mdss.resize(new_num_ids);
     
-    // Now Sort the uniqued list by angle
+    // Now sort the uniqued list by angle
     std::sort(tmp_mdss.begin(), tmp_mdss.end());
-
+    
     // Using the angle sorted tmp_mdss points make a loop and fill ids with it
     make_id_loop_from_angle_ordered_pnts(mesh, tmp_mdss, tmp_pntss, ids);
 

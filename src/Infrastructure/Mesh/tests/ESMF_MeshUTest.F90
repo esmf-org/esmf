@@ -118,7 +118,7 @@ program ESMF_MeshUTest
 
 
  ! This surrounds all the tests to make turning off everything but one test easier
-#if 0
+#if 1
 
   !------------------------------------------------------------------------
 
@@ -2179,13 +2179,13 @@ endif
   call createTestMesh3x3wCrscntCnr(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  call ESMF_MeshWrite(mesh, filename="crscntMesh", rc=rc)
+  !call ESMF_MeshWrite(mesh, filename="crscntMesh", rc=rc)
 
   ! Create dual mesh
   meshDual=ESMF_MeshCreateDual(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  call ESMF_MeshWrite(meshDual, filename="crscntMeshDual", rc=rc)
+  !call ESMF_MeshWrite(meshDual, filename="crscntMeshDual", rc=rc)
 
   ! Get rid of Meshes
   call ESMF_MeshDestroy(mesh, rc=localrc)
@@ -2199,7 +2199,7 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
-#if 0
+#if 1
   
 ! mbmesh - tests fail
 ! element triangulation in native create not yet migrated to mbmesh
@@ -4825,9 +4825,9 @@ subroutine createTestMesh3x3wCrscntCnr(mesh, rc)
                    0.5,2.5, & ! 7
                    1.5,2.5, & ! 8
                    2.75,2.25,& ! 9
-                   2.75,2.75,& ! 10
-                   2.25,2.25,& ! 11
-                   2.25,1.25,& ! 12
+                   2.60,2.65,& ! 10
+                   2.50,2.25,& ! 11
+                   2.15,1.75,& ! 12
                    2.25,2.75,& ! 13
                    1.75,2.75/) ! 14
 
@@ -4842,7 +4842,7 @@ subroutine createTestMesh3x3wCrscntCnr(mesh, rc)
                  9,10,14,13, & ! 7
                  10,11,18,14, & ! 8
                  17,12,16, & ! 9
-                 11,16,15, & ! 10
+                 11,16,18, & ! 10
                  17,16,11, & ! 11
                  7,17,11, & ! 12
                  15,18,16, & ! 13
@@ -5077,9 +5077,9 @@ subroutine createTestMesh3x3wCrscntCnr(mesh, rc)
       allocate(elemCoords(2*numElems))
       elemCoords=(/2.5,1.5, & ! 6
            2.75,2.25,& ! 9
-           2.75,2.75,& ! 10
-           2.25,2.25,& ! 11
-           2.25,1.25,& ! 12
+           2.60,2.65,& ! 10
+           2.50,2.25,& ! 11
+           2.15,1.75,& ! 12
            2.25,2.75/)  ! 13
 
       !! elem conn
@@ -9240,7 +9240,7 @@ subroutine exhaustiveMeshDualTest(correct, rc)
    if (rc /= ESMF_SUCCESS) return
 
 
-   call ESMF_MeshWrite(dualMesh, "dualMesh", rc=rc)
+  ! call ESMF_MeshWrite(dualMesh, "dualMesh", rc=rc)
 
    ! Init correct
    correct=.true.
