@@ -1163,8 +1163,6 @@ const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype) {
             if (ret == ESMCI_TP_DEGENERATE_POLY) {
               Throw() << " - can't triangulate a polygon with less than 3 sides"; 
             } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
-              Throw() <<" - there was a problem (e.g. repeated points, clockwise poly, etc.) with the triangulation of the new elem being created around node id="<<elem_id<<" in the orig. mesh";
-
 #if 1
               // Output bad poly to vtk file 
               if (sdim==2) {
@@ -1172,7 +1170,11 @@ const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype) {
               } else if (sdim==3) {
                 write_3D_poly_to_vtk("tri_bad_poly_", elem_id, num_p, p);    
               }              
-#endif                            
+#endif
+
+              Throw() <<" there was a problem (e.g. repeated points, clockwise poly, etc.) with the triangulation of the new elem being created around node id="<<elem_id<<" in the orig. mesh";
+
+              
             } else {
               Throw() <<" - unknown error in triangulation";
             }
