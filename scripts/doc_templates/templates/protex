@@ -92,7 +92,6 @@
 
 # Keep this if you don't know what it does...
 # -------------------------------------------
-#  $[ = 1;              # set array base to 1 (Removed to maintain compatability with Perl 5.30)
   $, = ' ';               # set output field separator
   $\ = "\n";              # set output record separator
 
@@ -297,7 +296,7 @@ LINE:
 #       Straight quote
 #       --------------
         if ($Fld[0] eq '!QUOTE:') {
-           for ($i = 1; $i <= $#Fld - 1; $i++) {
+           for ($i = 1; $i <= $#Fld; $i++) {
                printf '%s ', $Fld[$i];
 }#         end for
            print " ";
@@ -661,7 +660,7 @@ LINE:
                  $verb = 1;
                  $first_verb = 1; }
               else {
-                 for ($i = 3; $i <= $#Fld; $i++) {
+                 for ($i = 2; $i <= $#Fld; $i++) {
                     printf '%s ', $Fld[$i];
 }#               end for
 }#            end if
@@ -684,8 +683,8 @@ KEY:       foreach $key ( @keys ) {
 }#               end if
                  $k = sprintf('%s', $key);
                  $ln = length($k);
-                 ###printf "\\subsubsection*{%s}\n", substr($k, 2, $ln - 1);
-                 ###printf "{\\Large \\em %s}\n", ucfirst lc substr($k, 2, $ln - 1);
+                 ###printf "\\subsubsection*{%s}\n", substr($k, 1, $ln - 1);
+                 ###printf "{\\Large \\em %s}\n", ucfirst lc substr($k, 1, $ln - 1);
                  $_ = $key;
                 if( /USES/ || /INPUT/ || /OUTPUT/ || /PARAMETERS/ || 
                     /VALUE/  || /ARGUMENTS/ ) {
@@ -715,7 +714,7 @@ KEY:       foreach $key ( @keys ) {
            $prologue = 0;
 #           &check_if_all_there(); # check if all required keywords are there.
            if ( $opt_l ) {
-              $Fld[1] = $boc_string;}
+              $Fld[0] = $boc_string;}
            else { next LINE; }
 }#      end if
 
@@ -732,7 +731,7 @@ KEY:       foreach $key ( @keys ) {
            $prologue = 0;
 #          &check_if_all_there(); # check if all required keywords are there.
            if ($opt_l) {
-              $Fld[1] = $boc_string;}
+              $Fld[0] = $boc_string;}
            else { next LINE; }
 }#       endif
 
@@ -745,7 +744,7 @@ KEY:       foreach $key ( @keys ) {
               $first = 0;
               $prologue = 0;
               $source = 1;
-              ### printf "\\subsubsection*{CONTENTS:}\n\n", $Fld[3];
+              ### printf "\\subsubsection*{CONTENTS:}\n\n", $Fld[2];
               ###printf "{\\sf CONTENTS:}";
               printf "\n \\begin{verbatim}\n";
               $verb = 1;
@@ -802,7 +801,7 @@ KEY:       foreach $key ( @keys ) {
 #       $ln = length($line);         # not necessary -- comment str is absent
         unless ( $first_verb ) { printf "\n "; }
         printf '%s', $_;
-#       printf '%s', substr($line, 1, $ln - 1);     # comment str is absent
+#       printf '%s', substr($line, 0, $ln - 1);     # comment str is absent
         $first_verb = 0;
         next LINE;
 }#  end if
@@ -906,8 +905,8 @@ KEY:       foreach $key ( @keys ) {
           $options eq "-" ) {return -1}
 
      local(@Options) = split( / */, $options );
-     if ( $Options[ $[ ] ne "-" &&
-          $Options[ $[ ] ne "+" ) {return -1;}
+     if ( $Options[ 0 ] ne "-" &&
+          $Options[ 0 ] ne "+" ) {return -1;}
 
      local($option, $option_sign, $valid_list, $pos);
      local($errs)    = 0;
@@ -921,7 +920,7 @@ KEY:       foreach $key ( @keys ) {
            else
               { $valid_list = $valid_sw_options; }
            $pos = index ($valid_list,$option); 
-           if ( $pos < $[ &&
+           if ( $pos < 0 &&
                 $quiet_mode ) {
               $errs++;
               print STDERR "Invalid option: $option_sign$option \n"; 
@@ -958,8 +957,8 @@ KEY:       foreach $key ( @keys ) {
           $options eq "-" ) {return -1}
 
      local(@Options)       = split( / */, $options );
-     if ( $Options[ $[ ] ne "-" &&
-          $Options[ $[ ] ne "+" ) {return -1;}
+     if ( $Options[ 0 ] ne "-" &&
+          $Options[ 0 ] ne "+" ) {return -1;}
 
      local($option, $option_sign);
 
@@ -971,7 +970,7 @@ KEY:       foreach $key ( @keys ) {
 
         else {
 
-           if ( index ($valid_options,$option) >= $[ ) {
+           if ( index ($valid_options,$option) >= 0 ) {
               if ( $option_sign eq "-" ) {${"opt_$option"} = 1;}
               if ( $option_sign eq "+" ) {${"opt_$option"} = 0;};
 
@@ -1012,8 +1011,8 @@ KEY:       foreach $key ( @keys ) {
 
      local(@Options)       = split( / */, $options       );
      local(@ValidOptions)  = split( / */, $valid_options );
-     if ( $Options[ $[ ] ne "-" &&
-          $Options[ $[ ] ne "+" ) {return -1;}
+     if ( $Options[ 0 ] ne "-" &&
+          $Options[ 0 ] ne "+" ) {return -1;}
 
      local($option, $option_sign);
 
@@ -1021,7 +1020,7 @@ KEY:       foreach $key ( @keys ) {
         if ( $option ne "-" &&
              $option ne "+" ) {
 
-           if ( index ($valid_options,$option) >= $[ ) {
+           if ( index ($valid_options,$option) >= 0 ) {
               foreach $valid_option (@ValidOptions ) {
                  ${"opt_$valid_option"} = 0;
 
