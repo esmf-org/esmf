@@ -1609,6 +1609,11 @@ const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype) {
       vcurr[2]= sdim > 2 ? ec[2]:0.0;
       MU_SUB_VEC3D(vcurr,vcurr,center);
 
+      // BOB DEBUG
+      if (node->get_id() == 714123) {
+        printf("BOB: nid=%d eid=%d ec=[%20.17f %20.17f %20.17f]\n",node->get_id(),elem_id,ec[0],ec[1],ec[2]);
+      }
+      
       // Calculate angle 
       // Do differentiate between 2D and 3D here to prevent inaccuracies
       double angle;
