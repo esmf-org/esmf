@@ -2541,7 +2541,10 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
     sarg[i].cargo = cargo;
     // stdout and stderr redirect
     string stdTemp; size_t pos; // temp helpers
-    stdTemp = string(vmp->stdoutName);
+    if (vmp->stdoutName)
+      stdTemp = string(vmp->stdoutName);
+    else 
+      stdTemp = string("");
     pos = stdTemp.rfind('*');  // right most asterisk
     if (pos != string::npos){
       // found wildcard -> replace with local pet number
@@ -2554,7 +2557,10 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
       // no wildcard -> use incoming string verbatim
       sarg[i].stdoutName = stdTemp;
     }
-    stdTemp = string(vmp->stderrName);
+    if (vmp->stderrName)
+      stdTemp = string(vmp->stderrName);
+    else 
+      stdTemp = string("");
     pos = stdTemp.rfind('*');  // right most asterisk
     if (pos != string::npos){
       // found wildcard -> replace with local pet number
