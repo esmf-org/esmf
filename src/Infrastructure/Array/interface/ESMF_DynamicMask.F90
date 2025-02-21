@@ -35,6 +35,9 @@ module ESMF_DynamicMaskMod
   use ESMF_LogErrMod              ! ESMF error handling
   use ESMF_RHandleMod
   use ESMF_F90InterfaceMod        ! ESMF F90-C++ interface helper
+  use ESMF_srcDynamicMaskMod
+  use ESMF_dstDynamicMaskMod
+  use ESMF_voteDynamicMaskMod
   
   implicit none
 
@@ -66,6 +69,7 @@ module ESMF_DynamicMaskMod
 
   public ESMF_DynamicMask, ESMF_DynamicMaskGet, ESMF_DynamicMaskGetInit
   public ESMF_DynamicMaskSetR8R8R8
+  public ESMF_DynamicMaskPredefinedSetR8R8R8
 #ifndef ESMF_NO_DYNMASKOVERLOAD
   public ESMF_DynamicMaskSetR8R8R8V
   public ESMF_DynamicMaskSetR4R8R4
@@ -127,6 +131,111 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end subroutine ESMF_DynamicMaskGet
 !------------------------------------------------------------------------------
 
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DynamicMaskSetR8R8R8()"
+!BOP
+! !IROUTINE: ESMF_DynamicMaskSetR8R8R8 - Set DynamicMask for R8R8R8
+! !INTERFACE:
+  subroutine ESMF_DynamicMaskPredefinedSetR8R8R8(dynamicMask, maskType, &
+    keywordEnforcer, handleAllElements, dynamicSrcMaskValue, &
+    dynamicDstMaskValue, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DynamicMask), intent(out)           :: dynamicMask
+    type(ESMF_PredefinedDynamicMask_Flag), intent(in) :: maskType
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                intent(in),  optional :: handleAllElements
+    real(ESMF_KIND_R8),     intent(in),  optional :: dynamicSrcMaskValue
+    real(ESMF_KIND_R8),     intent(in),  optional :: dynamicDstMaskValue
+    integer,                intent(out), optional :: rc
+!         
+! !DESCRIPTION:
+!   \label{api:DynamicMaskSetR8R8R8}
+!   Set an {\tt ESMF\_DynamicMask} object suitable for 
+!   destination element typekind {\tt ESMF\_TYPEKIND\_R8},
+!   factor typekind {\tt ESMF\_TYPEKIND\_R8}, and
+!   source element typekind {\tt ESMF\_TYPEKIND\_R8}.
+!   
+!   All values in {\tt dynamicMask} will be reset by this call.
+!
+!   See section \ref{RH:DynMask} for a general discussion of dynamic masking.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[dynamicMask] 
+!     DynamicMask object.
+!   \item [dynamicMaskRoutine]
+!     The routine responsible for handling dynamically masked source and 
+!     destination elements. See section \ref{RH:DynMask} for the precise
+!     definition of the {\tt dynamicMaskRoutine} procedure interface.
+!     The routine is only called on PETs where {\em at least one} interpolation 
+!     element is identified for special handling.
+!   \item [{[handleAllElements]}]
+!     If set to {\tt .true.}, all local elements, regardless of their dynamic
+!     masking status, are made available to {\tt dynamicMaskRoutine} for
+!     handling. This option can be used to implement fully customized
+!     interpolations based on the information provided by ESMF.
+!     The default is {\tt .false.}, meaning that only elements affected by
+!     dynamic masking will be handed to {\tt dynamicMaskRoutine}.
+!   \item [{[dynamicSrcMaskValue]}]
+!     The value for which a source element is considered dynamically
+!     masked.
+!     The default is to {\em not} consider any source elements as
+!     dynamically masked.
+!   \item [{[dynamicDstMaskValue]}]
+!     The value for which a destination element is considered dynamically
+!     masked.
+!     The default is to {\em not} consider any destination elements as
+!     dynamically masked.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: dimCount
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! mark output as uninitialized    
+    ESMF_INIT_SET_DELETED(dynamicMask)
+
+    ! set the internals
+    dynamicMask%typeKey           =   "R8R8R8"
+    dynamicMask%dmsR8R8R8%typeKey =   dynamicMask%typeKey
+    dynamicMask%dmsR8R8R8%dynamicSrcMaskIsPresent = present(dynamicSrcMaskValue)
+    if (present(dynamicSrcMaskValue)) &
+      dynamicMask%dmsR8R8R8%dynamicSrcMaskValue = dynamicSrcMaskValue
+    dynamicMask%dmsR8R8R8%dynamicDstMaskIsPresent = present(dynamicDstMaskValue)
+    if (present(dynamicDstMaskValue)) &
+      dynamicMask%dmsR8R8R8%dynamicDstMaskValue = dynamicDstMaskValue
+    if (present(handleAllElements)) then
+      dynamicMask%dmsR8R8R8%handleAllElements = handleAllElements
+    else
+      dynamicMask%dmsR8R8R8%handleAllElements = .false. ! default
+    endif
+
+    if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKSRC) then
+       dynamicMask%dmsR8R8R8%routine =>  srcDynMaskProcR8R8R8
+    else if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKDEST) then
+       dynamicMask%dmsR8R8R8%routine =>  dstDynMaskProcR8R8R8
+    else if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE) then
+       dynamicMask%dmsR8R8R8%routine =>  voteDynMaskProcR8R8R8
+    end if
+    
+    ! mark output as successfully initialized
+    ESMF_INIT_SET_DEFINED(dynamicMask)
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_DynamicMaskPredefinedSetR8R8R8
+!------------------------------------------------------------------------------
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
