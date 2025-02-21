@@ -33,6 +33,13 @@
 #endif
 #include <map>
 
+#if !defined (ESMF_OS_MinGW)
+#include <unistd.h>
+#include <sys/time.h>
+#else
+#include <windows.h>
+#endif
+
 #ifndef ESMF_NO_OPENMP
 #include <omp.h>
 #endif
@@ -288,16 +295,29 @@ class VMK{
     int omp_num_threads;
 #endif
 #endif
+    int oldStdout;
+    int oldStderr;
    public:
     void reset(){
 #ifndef ESMF_NO_PTHREADS
 #if !defined(ESMF_OS_Darwin) && !defined(ESMF_OS_Cygwin)
+      // restore thread affinity
       pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
 #endif
 #ifndef ESMF_NO_OPENMP
+      // restore threading level
       omp_set_num_threads(omp_num_threads);
 #endif
 #endif
+      // restore stdout and stderr
+      if (oldStdout > -1){
+        dup2(oldStdout, STDOUT_FILENO); // restore stdout
+        close(oldStdout); // free up file descriptor, file stays open
+      }
+      if (oldStderr > -1){
+        dup2(oldStderr, STDERR_FILENO); // restore stderr
+        close(oldStderr); // free up file descriptor, file stays open
+      }
     }
   };
 
@@ -671,6 +691,9 @@ class VMKPlan{
     // OpenMP handling
     int openmphandling; // 0-none, 1-setnumthreads, 2-initialize, 3-pinaffinity
     int openmpnumthreads; // -1 default: local peCount
+    // stdout and stderr redirect
+    char *stdoutName;
+    char *stderrName;
 
   public:
     VMKPlan(int _ndevlist=0, int *_devlist=NULL);
@@ -687,14 +710,14 @@ class VMKPlan{
       // set the mpi communicator for participating PETs
     void vmkplan_useparentvm(VMK &vm);
       // use the parent VM, don't create new context
-    void vmkplan_maxthreads(VMK &vm);  
+    void vmkplan_maxthreads(VMK &vm);
       // set up a VMKPlan that will maximize the number of thread-pets
-    void vmkplan_maxthreads(VMK &vm, int max);  
+    void vmkplan_maxthreads(VMK &vm, int max);
       // set up a VMKPlan that will max. number of thread-pets up to max
     void vmkplan_maxthreads(VMK &vm, int max, 
       int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi);
       // set up a VMKPlan that will max. number of thread-pets up to max
-    void vmkplan_maxthreads(VMK &vm, int max, int *plist, int nplist);  
+    void vmkplan_maxthreads(VMK &vm, int max, int *plist, int nplist);
       // set up a VMKPlan that will max. number of thread-pets up to max
       // but only allow PETs listed in plist to participate
     int vmkplan_maxthreads(VMK &vm, int max, int *plist, int nplist,

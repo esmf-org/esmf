@@ -88,6 +88,7 @@ module ESMF_GridCompMod
   public ESMF_GridCompSetVMMaxPEs
   public ESMF_GridCompSetVMMaxThreads
   public ESMF_GridCompSetVMMinThreads
+  public ESMF_GridCompSetVMStdRedirect
   public ESMF_GridCompValidate
   public ESMF_GridCompWait
   public ESMF_GridCompWriteRestart
@@ -3437,6 +3438,62 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_GridCompSetVMMinThreads
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompSetVMMinThreads"
+!BOP
+! !IROUTINE: ESMF_GridCompSetVMStdRedirect - Set stdout and stderr redirect in GridComp VM
+!
+! !INTERFACE:
+  subroutine ESMF_GridCompSetVMStdRedirect(gridcomp, keywordEnforcer, &
+    stdout, stderr, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp), intent(inout)         :: gridcomp
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(*),        intent(in),  optional :: stdout
+    character(*),        intent(in),  optional :: stderr
+    integer,             intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Set stdout and stderr redirect in the {\tt ESMF\_VM} for this
+!   {\tt ESMF\_GridComp}.
+!
+! The arguments are:
+! \begin{description}
+! \item[gridcomp]
+!   {\tt ESMF\_GridComp} to set the {\tt ESMF\_VM} for.
+! \item[{[stdout]}]
+!   Filename for the stdout redirect. By default do not redirect.
+! \item[{[stderr]}]
+!   Filename for the stderr redirect. By default do not redirect.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                     ! local error status
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+
+    ! call Comp method
+    call ESMF_CompSetVMStdRedirect(gridcomp%compp, stdout=stdout, &
+      stderr=stderr, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_GridCompSetVMStdRedirect
 !------------------------------------------------------------------------------
 
 
