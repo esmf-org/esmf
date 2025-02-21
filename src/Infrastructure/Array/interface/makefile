@@ -8,7 +8,7 @@ SOURCEF	  = $(AUTOGEN) ESMF_DynamicMask.F90 ESMF_ArrayHa.F90 ESMF_Array.F90 ESMF
 SOURCEH	  = 
 
 # List all .h files which should be copied to common include dir
-STOREH	  = ESMC_Array.h
+STOREH	  = ESMC_Array.h ESMC_DynamicMask.h
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))

@@ -75,7 +75,7 @@
     ! return successfully
     rc = ESMF_SUCCESS
 
-  end subroutine f_esmf_dynamicmaskset
+  end subroutine f_esmf_dynamicmaskpredefinedsetr8r8r8
 
 !---------------------------------------------------------------
 
