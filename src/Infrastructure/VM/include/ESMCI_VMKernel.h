@@ -295,8 +295,6 @@ class VMK{
     int omp_num_threads;
 #endif
 #endif
-    int oldStdout;
-    int oldStderr;
    public:
     void reset(){
 #ifndef ESMF_NO_PTHREADS
@@ -309,6 +307,14 @@ class VMK{
       omp_set_num_threads(omp_num_threads);
 #endif
 #endif
+    }
+  };
+
+  struct Redirects{
+    int oldStdout;
+    int oldStderr;
+   public:
+    void reset(){
       // restore stdout and stderr
       if (oldStdout > -1){
         dup2(oldStdout, STDOUT_FILENO); // restore stdout
@@ -449,6 +455,9 @@ class VMK{
 
     Affinities setAffinities(void *ssarg);
       // set thread affinities, including OpenMP handling if configured
+
+    static Redirects setRedirects(void *ssarg);
+      // set stdout and stderr redirects
 
     void construct(void *sarg);
       // fill an already existing VMK object with info

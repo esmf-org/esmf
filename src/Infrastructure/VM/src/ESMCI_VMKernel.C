@@ -957,10 +957,18 @@ VMK::Affinities VMK::setAffinities(void *ssarg){
   }
 #endif
 #endif
+  // return stucture with original values
+  return affs;
+}
+
+
+VMK::Redirects VMK::setRedirects(void *ssarg){
+  SpawnArg *sarg = (SpawnArg *)ssarg;
+  Redirects reds;
   // stdout and stderr redirect
   if (sarg->stdoutName){
-    affs.oldStdout = fcntl(STDOUT_FILENO, F_DUPFD, 0);  // keep access to stdout
-    if (affs.oldStdout == -1){
+    reds.oldStdout = fcntl(STDOUT_FILENO, F_DUPFD, 0);  // keep access to stdout
+    if (reds.oldStdout == -1){
       int localrc;
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
         "Did not obtain a valid file descriptor", ESMC_CONTEXT, &localrc);
@@ -976,11 +984,11 @@ VMK::Affinities VMK::setAffinities(void *ssarg){
     dup2(newStdout, STDOUT_FILENO); // redirect
     close(newStdout);               // free up file descriptor, file stays open
   }else{
-    affs.oldStdout = -1;  // indicate no redirect
+    reds.oldStdout = -1;  // indicate no redirect
   }
   if (sarg->stderrName){
-    affs.oldStderr = fcntl(STDERR_FILENO, F_DUPFD, 0);  // keep access to stderr
-    if (affs.oldStderr == -1){
+    reds.oldStderr = fcntl(STDERR_FILENO, F_DUPFD, 0);  // keep access to stderr
+    if (reds.oldStderr == -1){
       int localrc;
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
         "Did not obtain a valid file descriptor", ESMC_CONTEXT, &localrc);
@@ -996,10 +1004,10 @@ VMK::Affinities VMK::setAffinities(void *ssarg){
     dup2(newStderr, STDERR_FILENO); // redirect
     close(newStderr);               // free up file descriptor, file stays open
   }else{
-    affs.oldStderr = -1;  // indicate no redirect
+    reds.oldStderr = -1;  // indicate no redirect
   }
   // return stucture with original values
-  return affs;
+  return reds;
 }
 
 
@@ -1322,6 +1330,9 @@ static void enter_callback(SpawnArg *sarg, void *mutex){
   // set affinities and OpenMP details according to plan, keep current settings
   VMK::Affinities oldAffs = vm->setAffinities((void *)sarg);
 
+  // set stdout and stderr redirects
+  VMK::Redirects oldReds = VMK::setRedirects((void *)sarg);
+
   // call the function pointer with the new VMK as its argument
   // this is where we finally enter the user code again...
   if (vmkt->arg==NULL)
@@ -1382,7 +1393,10 @@ static void enter_callback(SpawnArg *sarg, void *mutex){
 #endif
   }
 
-  // reset previous affinities, OpenMP settings, and stdout/stderr
+  // reset previous stdout and stderr settings
+  oldReds.reset();
+
+  // reset previous affinities and OpenMP settings
   oldAffs.reset();
 
 }
@@ -2622,10 +2636,15 @@ void VMK::enter(class VMKPlan *vmp, void *arg, void *argvmkt){
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
+    // set stdout and stderr redirects
+    VMK::Redirects oldReds = VMK::setRedirects((void *)sarg);
+    // callback
     if (argvmkt==NULL)
       sarg[0].fctp((void *)sarg[0].myvm, sarg[0].cargo);
     else
       sarg[0].fctp((void *)sarg[0].myvm, argvmkt);
+    // reset previous stdout and stderr settings
+    oldReds.reset();
 #ifdef VM_PETMANAGEMENTLOG_on
       {
         std::stringstream msg;

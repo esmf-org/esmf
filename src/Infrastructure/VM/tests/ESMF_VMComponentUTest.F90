@@ -720,6 +720,15 @@ program ESMF_VMComponentUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "Testing SetVMStdRedirect()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_GridCompSetVMStdRedirect(gcomp2, &
+    stdout="redirectTest.stdout", stderr="redirectTest.stderr", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "Set test VM for IsCreated"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_GridCompSetServices(gcomp2, userRoutine=mygcomp_register_nexh, &
