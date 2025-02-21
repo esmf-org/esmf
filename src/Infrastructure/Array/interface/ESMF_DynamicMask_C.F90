@@ -65,7 +65,7 @@
     localrc = ESMF_RC_NOT_IMPL
     rc = ESMF_RC_NOT_IMPL
 
-    call DynamicMaskPredefinedSetR8R8R8(dynamicmask=dynamicmask, maskType=maskType, &
+    call ESMF_DynamicMaskPredefinedSetR8R8R8(dynamicmask=dynamicmask, maskType=maskType, &
       handleAllElements=handleAllElements, dynamicSrcMaskValue=dynamicSrcMaskValue, &
       dynamicDstMaskValue=dynamicDstMaskValue, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
