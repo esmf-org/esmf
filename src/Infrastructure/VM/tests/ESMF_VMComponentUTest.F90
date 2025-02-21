@@ -55,8 +55,8 @@ module ESMF_VMComponentUTest_gcomp_mod
     call ESMF_GridCompGet(gcomp, name=compName, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_GridCompSetVMStdRedirect(gcomp, &
-      stdout=trim(compName)//".stdout", &
-      stderr=trim(compName)//".stderr", rc=rc)
+      stdout=trim(compName)//"_*.stdout", &
+      stderr=trim(compName)//"_*.stderr", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     print *, "stdout inside mygcomp_setvm()"
   end subroutine !--------------------------------------------------------------
@@ -94,8 +94,8 @@ module ESMF_VMComponentUTest_gcomp_mod
     call ESMF_GridCompGet(gcomp, name=compName, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_GridCompSetVMStdRedirect(gcomp, &
-      stdout=trim(compName)//".stdout", &
-      stderr=trim(compName)//".stderr", rc=rc)
+      stdout=trim(compName)//"_force.stdout", &
+      stderr=trim(compName)//"_force.stderr", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     print *, "stdout inside mygcomp_setvmForcePthreads()"
   end subroutine !--------------------------------------------------------------

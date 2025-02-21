@@ -877,8 +877,8 @@ struct SpawnArg{
   bool threadsflag;
   int openmphandling;
   int openmpnumthreads;
-  char *stdoutName;
-  char *stderrName;
+  string stdoutName;
+  string stderrName;
   // device variables
   int devCount;
   int ssiLocalDevCount;
@@ -966,7 +966,7 @@ VMK::Redirects VMK::setRedirects(void *ssarg){
   SpawnArg *sarg = (SpawnArg *)ssarg;
   Redirects reds;
   // stdout and stderr redirect
-  if (sarg->stdoutName){
+  if (sarg->stdoutName.length()){
     reds.oldStdout = fcntl(STDOUT_FILENO, F_DUPFD, 0);  // keep access to stdout
     if (reds.oldStdout == -1){
       int localrc;
@@ -974,7 +974,8 @@ VMK::Redirects VMK::setRedirects(void *ssarg){
         "Did not obtain a valid file descriptor", ESMC_CONTEXT, &localrc);
       throw localrc;  // bail out with exception
     }
-    int newStdout = open(sarg->stdoutName, O_WRONLY | O_CREAT | O_APPEND, 0644);
+    int newStdout = open(sarg->stdoutName.c_str(),
+      O_WRONLY | O_CREAT | O_APPEND, 0644);
     if (newStdout == -1){
       int localrc;
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -986,7 +987,7 @@ VMK::Redirects VMK::setRedirects(void *ssarg){
   }else{
     reds.oldStdout = -1;  // indicate no redirect
   }
-  if (sarg->stderrName){
+  if (sarg->stderrName.length()){
     reds.oldStderr = fcntl(STDERR_FILENO, F_DUPFD, 0);  // keep access to stderr
     if (reds.oldStderr == -1){
       int localrc;
@@ -994,7 +995,8 @@ VMK::Redirects VMK::setRedirects(void *ssarg){
         "Did not obtain a valid file descriptor", ESMC_CONTEXT, &localrc);
       throw localrc;  // bail out with exception
     }
-    int newStderr = open(sarg->stderrName, O_WRONLY | O_CREAT | O_APPEND, 0644);
+    int newStderr = open(sarg->stderrName.c_str(),
+      O_WRONLY | O_CREAT | O_APPEND, 0644);
     if (newStderr == -1){
       int localrc;
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -2538,14 +2540,40 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
     // cargo
     sarg[i].cargo = cargo;
     // stdout and stderr redirect
-    sarg[i].stdoutName = vmp->stdoutName;
-    sarg[i].stderrName = vmp->stderrName;
+    string stdTemp; size_t pos; // temp helpers
+    stdTemp = string(vmp->stdoutName);
+    pos = stdTemp.rfind('*');  // right most asterisk
+    if (pos != string::npos){
+      // found wildcard -> replace with local pet number
+      int digits = (int) log10(new_npets-1) + 1;  // number of digets needed
+      std::stringstream label;                    // fill with zeros from left
+      label << setw(digits) << setfill('0') << to_string(sarg[i].mypet);
+      sarg[i].stdoutName = stdTemp.substr(0, pos) + label.str()
+        + stdTemp.substr(pos+1, string::npos);    // store the concretized name
+    }else{
+      // no wildcard -> use incoming string verbatim
+      sarg[i].stdoutName = stdTemp;
+    }
+    stdTemp = string(vmp->stderrName);
+    pos = stdTemp.rfind('*');  // right most asterisk
+    if (pos != string::npos){
+      // found wildcard -> replace with local pet number
+      int digits = (int) log10(new_npets-1) + 1;  // number of digets needed
+      std::stringstream label;                    // fill with zeros from left
+      label << setw(digits) << setfill('0') << to_string(sarg[i].mypet);
+      sarg[i].stderrName = stdTemp.substr(0, pos) + label.str()
+        + stdTemp.substr(pos+1, string::npos);    // store the concretized name
+    }else{
+      // no wildcard -> use incoming string verbatim
+      sarg[i].stderrName = stdTemp;
+    }
     if (i==0){
       // stdout and stderr redirect is a per process feature
       // only do this for the first PET, even if potentially multiple spawned
-      if (sarg[i].stdoutName){
+      if (sarg[i].stdoutName.length()){
         // create stdout file and possibly truncate if already there
-        int fd = open(sarg[i].stdoutName, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        int fd = open(sarg[i].stdoutName.c_str(),
+          O_WRONLY | O_CREAT | O_TRUNC, 0644);
         if (fd == -1){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
             "Did not obtain a valid file descriptor", ESMC_CONTEXT, rc);
@@ -2553,9 +2581,10 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
         }
         close(fd);  // free up file descriptor, file will be opened again later
       }
-      if (sarg[i].stderrName){
+      if (sarg[i].stderrName.length()){
         // create stderr file and possibly truncate if already there
-        int fd = open(sarg[i].stderrName, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        int fd = open(sarg[i].stderrName.c_str(),
+          O_WRONLY | O_CREAT | O_TRUNC, 0644);
         if (fd == -1){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
             "Did not obtain a valid file descriptor", ESMC_CONTEXT, rc);
