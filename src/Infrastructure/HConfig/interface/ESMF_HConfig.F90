@@ -11629,7 +11629,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_HConfig[Iter]), intent(inout)      :: hconfig
+!    type(ESMF_HConfig[Iter]), intent(inout)   :: hconfig
 !    <Type>,             intent(in)            :: content[(:)]
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,            intent(in),  optional :: index
