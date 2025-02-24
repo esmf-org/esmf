@@ -19,13 +19,13 @@ jobs:
       FFLAGS: "-fallow-argument-mismatch"
       FCFLAGS: "-fallow-argument-mismatch"
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Installs
       run: |
         sudo apt-get install doxygen graphviz wget gfortran libjpeg-dev libz-dev libcurl4-gnutls-dev
     - name: cache-mpich
       id: cache-mpich
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/work/ParallelIO/ParallelIO/mpich
         key: mpich-${{ runner.os }}-${{ env.MPICH_VERSION }}
@@ -39,7 +39,7 @@ jobs:
 
     - name: cache-hdf5
       id: cache-hdf5
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/work/ParallelIO/ParallelIO/hdf5
         key: hdf5-${{ runner.os }}-${{ env.HDF5_VERSION }}-mpich-${{ env.MPICH_VERSION }}
@@ -55,7 +55,7 @@ jobs:
 
     - name: cache-netcdf
       id: cache-netcdf
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/work/ParallelIO/ParallelIO/netcdf
         key: netcdf-${{ runner.os }}-${{ env.NETCDF_C_VERSION }}-${{ env.NETCDF_FORTRAN_VERSION }}-mpich-${{ env.MPICH_VERSION }}-hdf5-${{ env.HDF5_VERSION }}
@@ -79,7 +79,7 @@ jobs:
 
     - name: cache-netcdf-fortran
       id: cache-netcdf-fortran
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/netcdf-fortran
         key: netcdf-fortran-${{ runner.os }}-${{ env.NETCDF_FORTRAN_VERSION }}-mpich-${{ env.MPICH_VERSION }}-hdf5-${{ env.HDF5_VERSION }}

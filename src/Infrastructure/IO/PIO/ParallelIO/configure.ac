@@ -2,7 +2,7 @@
 ## Ed Hartnett 8/16/17
 
 # Initialize autoconf and automake.
-AC_INIT(pio, 2.6.2)
+AC_INIT(pio, 2.6.5)
 AC_CONFIG_SRCDIR(src/clib/pio_darray.c)
 AM_INIT_AUTOMAKE([foreign serial-tests])
 
@@ -11,7 +11,7 @@ AM_INIT_AUTOMAKE([foreign serial-tests])
 # AC_DEFINE_UNQUOTED for config.h.
 AC_SUBST([PIO_VERSION_MAJOR]) PIO_VERSION_MAJOR=2
 AC_SUBST([PIO_VERSION_MINOR]) PIO_VERSION_MINOR=6
-AC_SUBST([PIO_VERSION_PATCH]) PIO_VERSION_PATCH=2
+AC_SUBST([PIO_VERSION_PATCH]) PIO_VERSION_PATCH=5
 AC_DEFINE_UNQUOTED([PIO_VERSION_MAJOR], [$PIO_VERSION_MAJOR], [PIO major version])
 AC_DEFINE_UNQUOTED([PIO_VERSION_MINOR], [$PIO_VERSION_MINOR], [PIO minor version])
 AC_DEFINE_UNQUOTED([PIO_VERSION_PATCH], [$PIO_VERSION_PATCH], [PIO patch version])
@@ -19,7 +19,7 @@ AC_DEFINE_UNQUOTED([PIO_VERSION_PATCH], [$PIO_VERSION_PATCH], [PIO patch version
 # Once more for the documentation.
 AC_SUBST([VERSION_MAJOR], [2])
 AC_SUBST([VERSION_MINOR], [6])
-AC_SUBST([VERSION_PATCH], [2])
+AC_SUBST([VERSION_PATCH], [5])
 
 
 # The m4 directory holds macros for autoconf.
@@ -38,7 +38,7 @@ fi
 LD=ld # Required for MPE to work.
 LT_INIT
 
-# Find and learn about install 
+# Find and learn about install
 AC_PROG_INSTALL
 
 # Find and learn about the C compiler.
@@ -294,7 +294,7 @@ AC_MSG_CHECKING([whether netCDF provides parallel filter support])
 AC_CHECK_LIB([netcdf], [nc_inq_filter_avail], [have_par_filters=yes], [have_par_filters=no])
 AC_MSG_RESULT([${have_par_filters}])
 if test "x$have_par_filters" = xyes ; then
-   AC_DEFINE([HAVE_PAR_FILTERS], [1], [if true, netcdf-c supports filters with parallel I/O])
+   AC_DEFINE([PIO_HAS_PAR_FILTERS], [1], [if true, netcdf-c supports filters with parallel I/O])
 fi
 
 # Is this version 4.7.2, which does not work?
@@ -472,8 +472,8 @@ AC_CONFIG_HEADERS([config.h])
 
 # Create the makefiles.
 AC_CONFIG_FILES(Makefile
-	        src/Makefile
-        	src/clib/Makefile
+                src/Makefile
+                src/clib/Makefile
                 src/ncint/Makefile
                 src/flib/Makefile
                 src/gptl/Makefile

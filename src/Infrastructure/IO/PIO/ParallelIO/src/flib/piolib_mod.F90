@@ -1343,8 +1343,7 @@ contains
   !! @param file The returned file descriptor
   !! @param iotype @copydoc PIO_iotype
   !! @param fname The name of the file to open
-  !! @param amode_in The NetCDF creation mode flag - NC_NOWRITE for
-  !! read-only access or NC_WRITE for read-write access.
+  !! @param amode_in The NetCDF creation mode flag:  PIO_CLOBBER, PIO_NOCLOBBER, PIO_64BIT_OFFSET, PIO_64BIT_DATA
   !! @retval ierr @copydoc error_return
   !! @author Jim Edwards
   !<
