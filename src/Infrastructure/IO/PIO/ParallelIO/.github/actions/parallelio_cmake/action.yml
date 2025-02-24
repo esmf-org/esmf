@@ -2,7 +2,7 @@ description: 'Build the parallelio library using cmake'
 inputs:
   parallelio_version:
     description: 'Tag in the parallelio repository to use'
-    default: pio2_5_9
+    default: pio2_6_3
     required: False
     type: string
   shared_libraries:
@@ -110,7 +110,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: NCAR/ParallelIO
         path: parallelio-src

@@ -19,7 +19,7 @@ jobs:
       LDFLAGS: "-L/usr/lib/x86_64-linux-gnu -lnetcdf_mpi -lpnetcdf"
       FCFLAGS: "-Wall -Werror -fallow-argument-mismatch -Wno-conversion"
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Installs
       run: |
         set -x
@@ -54,4 +54,4 @@ jobs:
 
 #    - name: Setup tmate session
 #      if: ${{ failure() }}
-#      uses: mxschmitt/action-tmate@v3
+#      uses: mxschmitt/action-tmate@v4
