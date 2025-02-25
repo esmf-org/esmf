@@ -540,7 +540,8 @@ int ESMC_FieldGetBounds(ESMC_Field field,
 #define ESMC_METHOD "ESMC_FieldRegrid()"
   int ESMC_FieldRegrid(ESMC_Field srcField, ESMC_Field dstField, 
                             ESMC_RouteHandle routehandle, 
-                            enum ESMC_Region_Flag *zeroregion){
+                            enum ESMC_Region_Flag *zeroregion,
+                            ESMC_DynamicMask *dynamicmask){
 
     // Initialize return code. Assume routine not implemented
     int rc = ESMF_RC_NOT_IMPL;

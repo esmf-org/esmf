@@ -43,7 +43,8 @@
 !------------------------------------------------------------------------------
 
   subroutine f_esmf_dynamicmaskpredefinedsetr8r8r8(dynamicmask, maskType, &
-      handleAllElements, dynamicSrcMaskValue, dynamicDstMaskValue, rc)
+      handleAllElements, haePresent, dynamicSrcMaskValue, dsmPresent, &
+      dynamicDstMaskValue, ddmPresent, rc)
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_dynamicmaskpredefinedsetr8r8r8()"
     use ESMF_DynamicMaskMod
@@ -55,8 +56,11 @@
     type(ESMF_DynamicMask) :: dynamicmask
     type(ESMF_PredefinedDynamicMask_Flag) :: maskType
     logical :: handleAllElements
+    logical :: haePresent
     real(ESMF_KIND_R8) :: dynamicSrcMaskValue
+    logical :: dsmPresent
     real(ESMF_KIND_R8) :: dynamicDstMaskValue
+    logical :: ddmPresent
     integer :: rc
 
     integer                 :: localrc      ! local return code
@@ -65,9 +69,19 @@
     localrc = ESMF_RC_NOT_IMPL
     rc = ESMF_RC_NOT_IMPL
 
-    call ESMF_DynamicMaskPredefinedSetR8R8R8(dynamicmask=dynamicmask, maskType=maskType, &
-      handleAllElements=handleAllElements, dynamicSrcMaskValue=dynamicSrcMaskValue, &
-      dynamicDstMaskValue=dynamicDstMaskValue, rc=localrc)
+    write(*,*)"bmaa dynamicmask cfint ",haePresent,dsmPresent,ddmPresent
+    if (haePresent) then
+       call ESMF_DynamicMaskPredefinedSetR8R8R8(dynamicmask=dynamicmask, maskType=maskType, &
+         handleAllElements=handleAllElements, rc=localrc)
+    end if
+    if (dsmPresent) then
+       call ESMF_DynamicMaskPredefinedSetR8R8R8(dynamicmask=dynamicmask, maskType=maskType, &
+         dynamicSrcMaskValue=dynamicSrcMaskValue, rc=localrc)
+    end if
+    if (ddmPresent) then
+       call ESMF_DynamicMaskPredefinedSetR8R8R8(dynamicmask=dynamicmask, maskType=maskType, &
+         dynamicDstMaskValue=dynamicDstMaskValue, rc=localrc)
+    end if
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
       rcToReturn=rc)) return

@@ -28,8 +28,9 @@
 extern "C" {
   
 // Prototypes of the Fortran interface functions.
-void FTN_X(f_esmf_dynamicmaskpredefinedsetr8r8r8)(ESMCI::DynamicMask *DynamicMask, ESMC_PredefinedDynamicMask_Flag *maskType, bool *handleAllElements,
-  ESMC_R8 *dynamicSrcMaskValue, ESMC_R8 *dynamicDstMaskValue, int *rc);
+void FTN_X(f_esmf_dynamicmaskpredefinedsetr8r8r8)(ESMCI::DynamicMask *DynamicMask, ESMC_PredefinedDynamicMask_Flag *maskType, bool *handleAllElements, bool *haepresent, 
+  ESMC_R8 *dynamicSrcMaskValue, bool *dsmpresent, 
+  ESMC_R8 *dynamicDstMaskValue, bool *ddmpresent, int *rc);
 
 
 }; // extern "C"
@@ -43,14 +44,31 @@ static const char *const version = "$Id$";
 namespace ESMCI {
 
 int DynamicMask::setR8R8R8(
-  ESMC_PredefinedDynamicMask_Flag maskType, bool handleAllElements,
-  ESMC_R8 dynamicSrcMaskValue, ESMC_R8 dynamicDstMaskValue) {
+  ESMC_PredefinedDynamicMask_Flag maskType, bool *handleAllElements,
+  ESMC_R8 *dynamicSrcMaskValue, ESMC_R8 *dynamicDstMaskValue) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::DynamicMask::setR8R8R8()"
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  FTN_X(f_esmf_dynamicmaskpredefinedsetr8r8r8)(this, &maskType, &handleAllElements, &dynamicSrcMaskValue, &dynamicDstMaskValue, &localrc);
+  bool haepresent = false;
+  bool dsmpresent = false;
+  bool  ddmpresent = false;
+
+  //cout << "bmaa start of ESMCI set" << endl;
+  if (handleAllElements != ESMC_NULL_POINTER) {
+     haepresent = true;
+  }
+  if (dynamicSrcMaskValue != ESMC_NULL_POINTER) {
+	  //cout << "bmaa found null" << endl;
+     dsmpresent = true;
+  }
+  if (dynamicDstMaskValue != ESMC_NULL_POINTER) {
+	  //cout << "bmaa found null" << endl;
+     ddmpresent = true;
+  }
+  FTN_X(f_esmf_dynamicmaskpredefinedsetr8r8r8)(this, &maskType, handleAllElements, &haepresent,
+  dynamicSrcMaskValue, &dsmpresent, dynamicDstMaskValue, &ddmpresent, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
   // return successfully

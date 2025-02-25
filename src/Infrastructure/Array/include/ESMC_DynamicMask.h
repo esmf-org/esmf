@@ -54,9 +54,9 @@ typedef struct{
 int ESMC_DynamicMaskSetR8R8R8(
   ESMC_DynamicMask *DynamicMask,         // inout 
   enum  ESMC_PredefinedDynamicMask_Flag,  // in
-  bool handleAllElements, 
-  ESMC_R8 dynamicSrcMaskValue,
-  ESMC_R8 dynamicDstMaskValue 
+  bool *handleAllElements, 
+  ESMC_R8 *dynamicSrcMaskValue,
+  ESMC_R8 *dynamicDstMaskValue 
 );
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.

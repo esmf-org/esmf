@@ -205,6 +205,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! mark output as uninitialized    
     ESMF_INIT_SET_DELETED(dynamicMask)
 
+    write(*,*)'bmaa here ',__FILE__,__LINE__
     ! set the internals
     dynamicMask%typeKey           =   "R8R8R8"
     dynamicMask%dmsR8R8R8%typeKey =   dynamicMask%typeKey

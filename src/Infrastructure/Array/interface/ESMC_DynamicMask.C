@@ -40,8 +40,8 @@ static const char *const version =
 extern "C" {
 
 int ESMC_DynamicMaskSetR8R8R8(ESMC_DynamicMask *DynamicMask,
-  ESMC_PredefinedDynamicMask_Flag mask_flag, bool handleAllElements,
-  ESMC_R8 dynamicSrcMaskValue, ESMC_R8 dynamicDstMaskValue) {
+  ESMC_PredefinedDynamicMask_Flag mask_flag, bool *handleAllElements,
+  ESMC_R8 *dynamicSrcMaskValue, ESMC_R8 *dynamicDstMaskValue) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_DynamicMaskSetR8R8R8()"
     
@@ -49,6 +49,7 @@ int ESMC_DynamicMaskSetR8R8R8(ESMC_DynamicMask *DynamicMask,
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
+  printf("bmaa set r8r8r8 \n");
   // call into ESMCI interface
   localrc = ((ESMCI::DynamicMask *)DynamicMask)->setR8R8R8(mask_flag, handleAllElements, dynamicSrcMaskValue, dynamicDstMaskValue);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
