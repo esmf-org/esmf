@@ -5586,6 +5586,7 @@ module NUOPC_Base
     character(80)             :: ikey2
     integer                   :: maxCount, pthreadMinStackSize, openMpNumThreads
     character(40)             :: msgString, openMpHandling
+    character(80)             :: stdfilename
 
     rc = ESMF_SUCCESS
 
@@ -5748,6 +5749,66 @@ module NUOPC_Base
               forceChildPthreads=forceChildPthreads, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+        else if (trim(ikey)=="stdout") then
+          ! iterate through the stdout hint
+          call ESMF_InfoGet(info, key="/NUOPC/Hint/stdout", &
+            isPresent=isPresent2, isStructured=isStructured2, size=size2, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (isPresent2 .and. isStructured2) then
+            do idx2=1, size2
+              call ESMF_InfoGet(info, key="/NUOPC/Hint/stdout", idx=idx2, &
+                ikey=ikey2, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              if (trim(ikey2)=="filename") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/stdout/filename", &
+                  value=stdfilename, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                call ESMF_GridCompSetVMStdRedirect(gcomp, stdout=stdfilename, &
+                  rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              else
+                call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                  msg="Unknown NUOPC Hint: "//trim(ikey)//"/"//trim(ikey2), &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+                return  ! bail out
+              endif
+            enddo
+          endif
+        else if (trim(ikey)=="stderr") then
+          ! iterate through the stderr hint
+          call ESMF_InfoGet(info, key="/NUOPC/Hint/stderr", &
+            isPresent=isPresent2, isStructured=isStructured2, size=size2, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (isPresent2 .and. isStructured2) then
+            do idx2=1, size2
+              call ESMF_InfoGet(info, key="/NUOPC/Hint/stderr", idx=idx2, &
+                ikey=ikey2, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              if (trim(ikey2)=="filename") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/stderr/filename", &
+                  value=stdfilename, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                call ESMF_GridCompSetVMStdRedirect(gcomp, stderr=stdfilename, &
+                  rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              else
+                call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                  msg="Unknown NUOPC Hint: "//trim(ikey)//"/"//trim(ikey2), &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+                return  ! bail out
+              endif
+            enddo
           endif
         else
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &

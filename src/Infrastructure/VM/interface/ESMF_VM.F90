@@ -10147,13 +10147,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Call into the C++ interface,
 
     if (present(stdout)) then
-      call c_ESMC_VMPlanSetStdout(vmplan, stdout, localrc)
+      call c_ESMC_VMPlanSetStdout(vmplan, trim(stdout), localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(stderr)) then
-      call c_ESMC_VMPlanSetStderr(vmplan, stderr, localrc)
+      call c_ESMC_VMPlanSetStderr(vmplan, trim(stderr), localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
