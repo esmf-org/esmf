@@ -84,6 +84,7 @@ module ESMF_CplCompMod
   public ESMF_CplCompSetVMMaxPEs
   public ESMF_CplCompSetVMMaxThreads
   public ESMF_CplCompSetVMMinThreads
+  public ESMF_CplCompSetVMStdRedirect
   public ESMF_CplCompValidate
   public ESMF_CplCompWait
   public ESMF_CplCompWriteRestart
@@ -3068,6 +3069,62 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_CplCompSetVMMinThreads
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompSetVMStdRedirect"
+!BOP
+! !IROUTINE: ESMF_CplCompSetVMStdRedirect - Set stdout and stderr redirect in CplComp VM
+!
+! !INTERFACE:
+  subroutine ESMF_CplCompSetVMStdRedirect(cplcomp, keywordEnforcer, &
+    stdout, stderr, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp),  intent(inout)         :: cplcomp
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(*),        intent(in),  optional :: stdout
+    character(*),        intent(in),  optional :: stderr
+    integer,             intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Set stdout and stderr redirect in the {\tt ESMF\_VM} for this
+!   {\tt ESMF\_CplComp}.
+!
+! The arguments are:
+! \begin{description}
+! \item[cplcomp]
+!   {\tt ESMF\_CplComp} to set the {\tt ESMF\_VM} for.
+! \item[{[stdout]}]
+!   Filename for the stdout redirect. By default do not redirect.
+! \item[{[stderr]}]
+!   Filename for the stderr redirect. By default do not redirect.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                     ! local error status
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+
+    ! call Comp method
+    call ESMF_CompSetVMStdRedirect(cplcomp%compp, stdout=stdout, &
+      stderr=stderr, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_CplCompSetVMStdRedirect
 !------------------------------------------------------------------------------
 
 

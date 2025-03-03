@@ -3443,7 +3443,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCompSetVMMinThreads"
+#define ESMF_METHOD "ESMF_GridCompSetVMStdRedirect"
 !BOP
 ! !IROUTINE: ESMF_GridCompSetVMStdRedirect - Set stdout and stderr redirect in GridComp VM
 !
