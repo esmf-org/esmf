@@ -3098,9 +3098,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[cplcomp]
 !   {\tt ESMF\_CplComp} to set the {\tt ESMF\_VM} for.
 ! \item[{[stdout]}]
-!   Filename for the stdout redirect. By default do not redirect.
+!   Filename for the stdout redirect. If found, the last occurance of the
+!   asterisk symbol {\tt *} in {\tt stdout} is treated as a wildcard and
+!   replaced by the local PET number. By default do not redirect.
 ! \item[{[stderr]}]
-!   Filename for the stderr redirect. By default do not redirect.
+!   Filename for the stderr redirect. If found, the last occurance of the
+!   asterisk symbol {\tt *} in {\tt stderr} is treated as a wildcard and
+!   replaced by the local PET number. By default do not redirect.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
