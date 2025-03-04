@@ -83,6 +83,9 @@ void CpMeshElemDataToArray(Grid &grid, int staggerloc, ESMCI::Mesh &mesh, ESMCI:
 void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array);
 
 
+void regrid_info_str(char *prefix,Array **_src_array,Array **_dst_array, int *regridMethod,
+                     char *buff);
+
 
 void ESMCI_regrid_create(
                      Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
@@ -110,7 +113,14 @@ void ESMCI_regrid_create(
 #define ESMC_METHOD "ESMCI_regrid_create()"
   Trace __trace(" FTN_X(regrid_test)(ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
 
+  char regrid_info[1024];
+  
+  regrid_info_str("Begin:", arraysrcpp, arraydstpp, regridMethod, regrid_info);
+  ESMC_LogDefault.Write(regrid_info, ESMC_LOGMSG_INFO);
 
+  regrid_info_str("", arraysrcpp, arraydstpp, regridMethod, regrid_info);
+  ESMCI::TraceEventRegionEnter(regrid_info, NULL);
+  
   ESMCI::Array &srcarray = **arraysrcpp;
   ESMCI::Array &dstarray = **arraydstpp;
 
@@ -318,9 +328,7 @@ void ESMCI_regrid_create(
 
 
 
-
-
-
+  ESMCI::TraceEventRegionEnter("Weight generation", NULL);
     
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Entering weight generation.", ESMC_LOGMSG_INFO);
@@ -384,6 +392,8 @@ void ESMCI_regrid_create(
       }
     }
 
+    ESMCI::TraceEventRegionExit("Weight generation", NULL);
+    
     ESMCI_REGRID_TRACE_EXIT("NativeMesh Weight Generation");
 
 #ifdef PROGRESSLOG_on
@@ -613,7 +623,7 @@ void ESMCI_regrid_create(
     //TODO: also drop PointList objects here if possible to reduce Store() memory footrint
 #endif
 
-
+  ESMCI::TraceEventRegionEnter("RouteHandle creation", NULL);
     
     //// Creation of routeHandle ////
     
@@ -649,7 +659,7 @@ void ESMCI_regrid_create(
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Returned from ArraySMMStore().", ESMC_LOGMSG_INFO);
 #endif
 
-
+    ESMCI::TraceEventRegionExit("RouteHandle creation", NULL);
     
     //// Creation of transpose routeHandle ////
 
@@ -788,7 +798,8 @@ void ESMCI_regrid_create(
       *_num_udl=num_udl;
       *_tudl=tudl;
     }
-
+   
+    
   } catch(std::exception &x) {
     // catch Mesh exception return code
     if (x.what()) {
@@ -815,8 +826,36 @@ void ESMCI_regrid_create(
   ESMC_LogDefault.Write("c_esmc_regrid_create(): Final return.", ESMC_LOGMSG_INFO);
 #endif
 
+    regrid_info_str("", arraysrcpp, arraydstpp, regridMethod, regrid_info);
+    ESMCI::TraceEventRegionExit(regrid_info, NULL);
+
+    regrid_info_str("End:  ", arraysrcpp, arraydstpp, regridMethod, regrid_info);
+    ESMC_LogDefault.Write(regrid_info, ESMC_LOGMSG_INFO);
+
+    
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
+
+
+/* XMRKX */
+void regrid_info_str(char *prefix,Array **_src_array,Array **_dst_array, int *regridMethod,
+                     char *buff) {
+
+  Array *src_array=*_src_array;
+  Array *dst_array=*_dst_array;
+
+  char method[20];
+  if (*regridMethod==ESMC_REGRID_METHOD_BILINEAR) sprintf(method,"bilinear");
+  else if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) sprintf(method,"conserve");
+  else if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND) sprintf(method,"conserve2nd");
+  else if (*regridMethod==ESMC_REGRID_METHOD_PATCH) sprintf(method,"patch");
+  else if (*regridMethod==ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST) sprintf(method,"neareststod");
+  else if (*regridMethod==ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) sprintf(method,"nearestdtos");
+  else sprintf(method,"unknown");
+  
+  sprintf(buff,"%s ESMCI_regrid_create(src=%s dst=%s method=%s)",prefix,src_array->getName(),dst_array->getName(),method);
+  
 }
 
 
