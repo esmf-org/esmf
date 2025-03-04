@@ -3400,8 +3400,20 @@ VM *VM::initialize(
 
   // obtain ESMF runtime environment
   if (GlobalVM->getLocalPet() == 0){
-    char const *esmfRuntimeVarName = "ESMF_RUNTIME_COMPLIANCECHECK";
+    char const *esmfRuntimeVarName = "ESMF_RUNTIME_ABORT_ACTION";
     char const *esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
+    if (esmfRuntimeVarValue){
+      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
+      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
+    }
+    esmfRuntimeVarName = "ESMF_RUNTIME_ABORT_LOGMSG_TYPES";
+    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
+    if (esmfRuntimeVarValue){
+      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
+      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
+    }
+    esmfRuntimeVarName = "ESMF_RUNTIME_COMPLIANCECHECK";
+    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
     if (esmfRuntimeVarValue){
       esmfRuntimeEnv.push_back(esmfRuntimeVarName);
       esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
