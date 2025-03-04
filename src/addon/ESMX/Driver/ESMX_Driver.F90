@@ -96,11 +96,11 @@ module ESMX_Driver
     character(:), allocatable       :: configKey(:)
     character(:), allocatable       :: componentList(:)
     character(:), allocatable       :: compLabel
-    character(:), allocatable       :: model
+    character(:), allocatable       :: model, fname
     character(:), allocatable       :: string1, string2
     type(ESMF_Info)                 :: info
     type(type_CompDef), allocatable :: CompDef(:)
-    logical                         :: inCompDef, isFlag
+    logical                         :: inCompDef, isFlag, isFlag2
 
     rc = ESMF_SUCCESS
 
@@ -284,10 +284,12 @@ module ESMX_Driver
         allocate(devList(0))
       endif
 
-      ! Set NUOPC hint for OpenMP
+      ! Set up info object for NUOPC hints
       info = ESMF_InfoCreate(rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
+
+      ! OpenMP hints
       isFlag = ESMF_HConfigIsDefined(hconfigNode, &
         keyString="ompNumThreads", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -299,6 +301,64 @@ module ESMX_Driver
           line=__LINE__, file=FILENAME)) return  ! bail out
         call ESMF_InfoSet(info, key="/NUOPC/Hint/PePerPet/MaxCount", &
           value=ompNumThreads, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+      endif
+
+      ! stdout redirect hints
+      isFlag = ESMF_HConfigIsDefined(hconfigNode, &
+        keyString="stdout", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      if (isFlag) then
+        hconfigNode2 = ESMF_HConfigCreateAt(hconfigNode, keyString="stdout", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+        isFlag2 = ESMF_HConfigIsDefined(hconfigNode2, &
+          keyString="filename", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+        if (isFlag2) then
+          fname = ESMF_HConfigAsString(hconfigNode2, keyString="filename", &
+            rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+          call ESMF_InfoSet(info, key="/NUOPC/Hint/stdout/filename", &
+            value=fname, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+        endif
+        call ESMF_HConfigDestroy(hconfigNode2, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+      endif
+
+      ! stderr redirect hints
+      isFlag = ESMF_HConfigIsDefined(hconfigNode, &
+        keyString="stderr", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      if (isFlag) then
+        hconfigNode2 = ESMF_HConfigCreateAt(hconfigNode, keyString="stderr", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+        isFlag2 = ESMF_HConfigIsDefined(hconfigNode2, &
+          keyString="filename", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+        if (isFlag2) then
+          fname = ESMF_HConfigAsString(hconfigNode2, keyString="filename", &
+            rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+          call ESMF_InfoSet(info, key="/NUOPC/Hint/stderr/filename", &
+            value=fname, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+        endif
+        call ESMF_HConfigDestroy(hconfigNode2, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME)) return  ! bail out
       endif
