@@ -90,6 +90,12 @@ namespace ESMCI {
     }
   };
 
+
+  bool less_by_data_index(const MeshObj *a, const MeshObj *b) {
+    return (a->get_data_index() < b->get_data_index());
+  }
+
+
   
   void get_unique_elems_around_node(MeshObj *node, Mesh *mesh, std::vector<MDSS> &tmp_mdss, std::vector<PntS> &tmp_pntss,
                                     std::vector<UInt> &ids);
@@ -304,15 +310,28 @@ namespace ESMCI {
     nodes_used[i]=0;
   }
 
+  // Save source nodes in a vector
+  std::vector<MeshObj *> src_nodes;
+  src_nodes.reserve(src_mesh->num_nodes());
+  MeshDB::iterator ni = src_mesh->node_begin(), ne = src_mesh->node_end();
+  for (; ni != ne; ++ni) {
+    MeshObj *node=&(*ni);
+    
+    src_nodes.push_back(node);    
+  }
+
+  // Sort src_nodes by data index, so the elements in the output dual mesh 
+  // will have the same order as the nodes in the source mesh
+  std::sort(src_nodes.begin(), src_nodes.end(), less_by_data_index);
+
+
   // Iterate through src nodes counting sizes
   // Note that the elems around the node are the maximum possible, it
   // could be less when actually counted and uniqued. 
   int max_num_elems=0;
   int max_num_elemConn=0;
   int max_num_node_elems=0;
-  MeshDB::iterator ni = src_mesh->node_begin(), ne = src_mesh->node_end();
-  for (; ni != ne; ++ni) {
-    MeshObj &node=*ni;
+  for (MeshObj *node: src_nodes) {
     
     // Only do local nodes
     // ALSO DO NON-LOCAL NODES, BECAUSE OTHERWISE YOU 
@@ -322,7 +341,7 @@ namespace ESMCI {
 
     // Get number of elems
     int num_node_elems=0;
-    get_num_elems_around_node(&node, &num_node_elems);    
+    get_num_elems_around_node(node, &num_node_elems);    
     
     // If less than 3 (a triangle) then don't make an element
     if (num_node_elems < 3) continue;
@@ -377,9 +396,7 @@ namespace ESMCI {
   int conn_pos=0;
   int ec_pos=0;
   int eoc_pos=0;
-  ni = src_mesh->node_begin();
-  for (; ni != ne; ++ni) {
-    MeshObj &node=*ni;
+  for (MeshObj *node: src_nodes) {
     
     // Only do local nodes
     // ALSO DO NON-LOCAL NODES, BECAUSE OTHERWISE YOU 
@@ -394,7 +411,7 @@ namespace ESMCI {
 
        
     // Get list of element ids
-    get_unique_elems_around_node(&node, src_mesh, tmp_mdss, tmp_pntss, new_elem_ids);
+    get_unique_elems_around_node(node, src_mesh, tmp_mdss, tmp_pntss, new_elem_ids);
 
 #ifdef DEBUG_UNIQUE_ELEMS
     {
@@ -412,15 +429,15 @@ namespace ESMCI {
     elemType[num_elems]=new_elem_ids.size();
     
     // Save elemId
-    elemId[num_elems]=node.get_id();
+    elemId[num_elems]=node->get_id();
 
     // Save owner
-    elemOwner[num_elems]=node.get_owner();
+    elemOwner[num_elems]=node->get_owner();
 
     // printf("%d# eId=%d eT=%d ::",Par::Rank(),elemId[num_elems],elemType[num_elems]);
 
     // Save coordinates
-    double *coords=src_node_coords->data(node);
+    double *coords=src_node_coords->data(*node);
     for (auto d=0; d<sdim; d++) {
       elemCoords[ec_pos]=coords[d];
       ec_pos++;
@@ -428,7 +445,7 @@ namespace ESMCI {
 
     // If present, save original coordinates
     if (elemOrigCoords && src_node_orig_coords) {
-      double *orig_coords=src_node_orig_coords->data(node);
+      double *orig_coords=src_node_orig_coords->data(*node);
       for (auto od=0; od<orig_sdim; od++) {
         elemOrigCoords[eoc_pos]=orig_coords[od];
         eoc_pos++;
@@ -437,13 +454,13 @@ namespace ESMCI {
 
     // If present, save element mask value
     if (elemMaskVal && src_node_mask_val) {
-      double *nmv=src_node_mask_val->data(node);
+      double *nmv=src_node_mask_val->data(*node);
       elemMaskVal[num_elems]=*nmv;
     }
 
     // If present, save element mask value
     if (elemMask && src_node_mask) {
-      double *nm=src_node_mask->data(node);
+      double *nm=src_node_mask->data(*node);
       elemMask[num_elems]=*nm;
     }
     
@@ -901,11 +918,20 @@ namespace ESMCI {
 
       int nnodes = topo->num_nodes;
       std::vector<MeshObj*> nconnect(nnodes, static_cast<MeshObj*>(0));
+
+      // For dist fix:
+      // - e below is the data index
+      // - What should it be for split elems?
+      //   + A: It looks like in mesh create code, the split elems are just interleaved.
+      //        I guess that I should just mimic that, so that there aren't issues.
+      //        If you want to change it, then both should be changed. 
+
       
       // The object
       UInt eid = elemId[e];
       MeshObj *elem = new MeshObj(MeshObj::ELEMENT, eid, e);
 
+      // Get connectivity
       for (int n = 0; n < nnodes; ++n) {
       
         // Get 0-based node index
