@@ -471,9 +471,6 @@ void ESMCI_meshwritewarrays(Mesh **meshpp, char *fname, ESMCI_FortranStrLenArg n
 
     char *filename = ESMC_F90toCstring(fname, nlen);
 
-    //   printf("mg: nna=%d\n",num_nodeArrays);
-
-
     WriteMesh(**meshpp, filename, 
               num_nodeArrays, nodeArrays, 
               num_elemArrays, elemArrays);
@@ -865,22 +862,6 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         }
       }
      }
-
-    // BOB DEBUG
-    if (*_elemCoordsPresent) {
-      for (auto e=0; e<num_elems; e++) {
-        if ((elemId[e] == 1429564) ||
-            (elemId[e] == 1410296) ||
-            (elemId[e] == 1429565) ||
-            (elemId[e] == 1429566) ||
-            (elemId[e] == 1410298) ||
-            (elemId[e] == 1410297)) {
-          printf("BOB: eid=%d orig ec=[%20.17f %20.17f]\n",elemId[e],elemCoords[2*e],elemCoords[2*e+1]);
-        }          
-      }
-    }
-
-
     
     // Variable indicating if any of the elements on this PET are split
     bool is_split_local=false;
