@@ -9287,10 +9287,10 @@ subroutine exhaustiveMeshDualTest(correct, rc)
    if (rc /= ESMF_SUCCESS) return
 
     ! ! DEBUG OUTPUT
-    ! write(*,*) localPet,"# nodeIds=",nodeIds
-    ! write(*,*) localPet,"# nodeCoords=",nodeCoords
-    ! write(*,*) localPet,"# elemIds=",elemIds
-    ! write(*,*) localPet,"# elemCoords=",elemCoords
+    !write(*,*) localPet,"# nodeIds=",nodeIds
+    !write(*,*) localPet,"# nodeCoords=",nodeCoords
+    !write(*,*) localPet,"# elemIds=",elemIds
+    !write(*,*) localPet,"# elemCoords=",elemCoords
 
    
    ! Check based on PetCount
@@ -9369,8 +9369,8 @@ subroutine exhaustiveMeshDualTest(correct, rc)
          enddo
          
          ! Check elem ids and coords
-         elemIdsTst=(/7,6/)
-         elemCoordsTst=(/2.0, 1.0, 1.0, 1.0/)
+         elemIdsTst=(/6,7/)
+         elemCoordsTst=(/1.0, 1.0, 2.0, 1.0/)
          do i=1,numElems
             if (elemIdsTst(i) /= elemIds(i)) correct=.false.
             if (elemCoordsTst(2*i-1) /= elemCoords(2*i-1)) correct=.false.
@@ -9395,8 +9395,8 @@ subroutine exhaustiveMeshDualTest(correct, rc)
          enddo
          
          ! Check elem ids and coords
-         elemIdsTst=(/10, 6, 7, 11/)
-         elemCoordsTst=(/1.0,  2.0,  1.0,  1.0,  2.0,  1.0,  2.0,  2.0/)
+         elemIdsTst=(/6, 7, 10, 11/)
+         elemCoordsTst=(/1.0,  1.0,  2.0,  1.0,  1.0,  2.0,  2.0,  2.0/)
          do i=1,numElems
             if (elemIdsTst(i) /= elemIds(i)) correct=.false.
             if (elemCoordsTst(2*i-1) /= elemCoords(2*i-1)) correct=.false.
@@ -9421,8 +9421,8 @@ subroutine exhaustiveMeshDualTest(correct, rc)
          enddo
          
          ! Check elem ids and coords
-         elemIdsTst=(/11, 7/)
-         elemCoordsTst=(/2.0, 2.0, 2.0, 1.0/)
+         elemIdsTst=(/7, 11/)
+         elemCoordsTst=(/2.0, 1.0, 2.0, 2.0/)
          do i=1,numElems
             if (elemIdsTst(i) /= elemIds(i)) correct=.false.
             if (elemCoordsTst(2*i-1) /= elemCoords(2*i-1)) correct=.false.
