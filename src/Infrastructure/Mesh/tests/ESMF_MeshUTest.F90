@@ -2161,7 +2161,7 @@ endif
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-#endif
+
   
   !-----------------------------------------------------------------------------
   ! NOTE THAT MeshCreateDual IS CURRENTLY AN INTERNAL INTERFACE AND NOT INTENDED FOR PUBLIC USE
@@ -2199,13 +2199,6 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
-#if 1
-  
-! mbmesh - tests fail
-! element triangulation in native create not yet migrated to mbmesh
-
-#if 0
-
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Mesh Create with a multipart element"
@@ -2229,7 +2222,7 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
-! preprocessing before native mesh create not yet migrated to mbmesh
+
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Mesh create easy elems"
@@ -2259,7 +2252,6 @@ endif
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-#endif
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
