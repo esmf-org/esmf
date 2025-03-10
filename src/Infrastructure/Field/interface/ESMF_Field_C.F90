@@ -870,7 +870,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_regrid"
-  subroutine f_esmf_regrid(srcField, dstField, routehandle, zeroregion, zrpresent, rc)
+  subroutine f_esmf_regrid(srcField, dstField, routehandle, zeroregion, zrpresent, dynamicMask, dmpresent, rc)
 
     use ESMF_UtilTypesMod
     use ESMF_BaseMod
@@ -878,6 +878,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     use ESMF_RHandleMod
     use ESMF_FieldRegridMod
     use ESMF_FieldMod
+    use ESMF_DynamicMaskMod
 
     implicit none
 
@@ -885,11 +886,15 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     type(ESMF_Field)        :: dstField
     type(ESMF_RouteHandle)  :: routehandle
     type(ESMF_Region_Flag)  :: zeroregion
-    integer, intent(in)     :: zrpresent
+    logical                 :: zrpresent
+    type(ESMF_DynamicMask)  :: dynamicMask
+    logical                 :: dmpresent
     integer                 :: rc 
 
     integer :: localrc
     type(ESMF_RouteHandle)  :: l_routehandle
+    type(ESMF_DynamicMask), allocatable :: dynamicMask_
+    type(ESMF_Region_Flag), allocatable :: zeroregion_
   
     ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
@@ -906,14 +911,10 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! handle the zeroregion flag
-    if (zrpresent == 0) then
-      call ESMF_FieldRegrid(srcField, dstField, routehandle=l_routehandle, &
-        rc=localrc)
-    elseif (zrpresent == 1) then
-      call ESMF_FieldRegrid(srcField, dstField, routehandle=l_routehandle, &
-        zeroregion=zeroregion, rc=localrc)
-    endif
+    if (zrpresent) allocate(zeroregion_, source=zeroregion) 
+    if (dmpresent) allocate(dynamicMask_, source=DynamicMask)
+    call ESMF_FieldRegrid(srcField, dstField, routehandle=l_routehandle, &
+      zeroregion=zeroregion, DynamicMask=dynamicMask, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
   

@@ -55,16 +55,16 @@ int DynamicMask::setR8R8R8(
   bool dsmpresent = false;
   bool  ddmpresent = false;
 
-  //cout << "bmaa start of ESMCI set" << endl;
   if (handleAllElements != ESMC_NULL_POINTER) {
+	  bool templ = *handleAllElements;
      haepresent = true;
   }
   if (dynamicSrcMaskValue != ESMC_NULL_POINTER) {
-	  //cout << "bmaa found null" << endl;
+     ESMC_R8 rtemp;
+     rtemp = *dynamicSrcMaskValue;
      dsmpresent = true;
   }
   if (dynamicDstMaskValue != ESMC_NULL_POINTER) {
-	  //cout << "bmaa found null" << endl;
      ddmpresent = true;
   }
   FTN_X(f_esmf_dynamicmaskpredefinedsetr8r8r8)(this, &maskType, handleAllElements, &haepresent,

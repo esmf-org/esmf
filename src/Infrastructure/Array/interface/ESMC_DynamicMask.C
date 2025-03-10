@@ -49,7 +49,6 @@ int ESMC_DynamicMaskSetR8R8R8(ESMC_DynamicMask *DynamicMask,
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  printf("bmaa set r8r8r8 \n");
   // call into ESMCI interface
   localrc = ((ESMCI::DynamicMask *)DynamicMask)->setR8R8R8(mask_flag, handleAllElements, dynamicSrcMaskValue, dynamicDstMaskValue);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,

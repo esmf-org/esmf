@@ -64,24 +64,26 @@
     integer :: rc
 
     integer                 :: localrc      ! local return code
+    real(ESMF_KIND_R8), allocatable :: dynamicSrcMaskValue_, dynamicDstMaskValue_
+    logical, allocatable :: handleAllElements_
+    
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     rc = ESMF_RC_NOT_IMPL
 
-    write(*,*)"bmaa dynamicmask cfint ",haePresent,dsmPresent,ddmPresent
     if (haePresent) then
-       call ESMF_DynamicMaskPredefinedSetR8R8R8(dynamicmask=dynamicmask, maskType=maskType, &
-         handleAllElements=handleAllElements, rc=localrc)
+        allocate(handleAllElements_,source=handleAllElements)
     end if
     if (dsmPresent) then
-       call ESMF_DynamicMaskPredefinedSetR8R8R8(dynamicmask=dynamicmask, maskType=maskType, &
-         dynamicSrcMaskValue=dynamicSrcMaskValue, rc=localrc)
+       allocate(dynamicSrcMaskValue_,source= dynamicSrcMaskValue)
     end if
-    if (ddmPresent) then
-       call ESMF_DynamicMaskPredefinedSetR8R8R8(dynamicmask=dynamicmask, maskType=maskType, &
-         dynamicDstMaskValue=dynamicDstMaskValue, rc=localrc)
-    end if
+    if (ddmPresent) allocate(dynamicDstMaskValue_,source= dynamicdstMaskValue)
+
+     call ESMF_DynamicMaskPredefinedSetR8R8R8(dynamicmask=dynamicmask, maskType=maskType, &
+       handleAllElements=handleAllElements_, dynamicSrcMaskValue=dynamicSrcMaskValue_, &
+       dynamicDstMaskValue=dynamicDstMaskValue_, rc=localrc)
+
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
       rcToReturn=rc)) return

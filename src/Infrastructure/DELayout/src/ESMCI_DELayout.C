@@ -6818,6 +6818,7 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
   bool dynMask = false; // default
   if (rh) dynMask = rh->validAsPtr();
 #endif
+	 printf("%s %s %d\n","bmaa", __FILE__, __LINE__);
   if(superVector){
 #ifdef XXE_EXEC_OPSLOG_on
     char msg[1024];
@@ -7241,6 +7242,7 @@ void XXE::psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
     ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
+	 printf("%s %s %d\n","bmaa", __FILE__, __LINE__);
   if (resolved==0){
     ++resolved;
     switch (valueTK){
@@ -7399,6 +7401,7 @@ void XXE::psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
       "taking vector branch...");
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
+	 printf("%s %s %d\n","bmaa", __FILE__, __LINE__);
     exec_psssSrcRra(rraBase, rraOffsetList, factorList,
       elementBase, elementOffsetList, termCount, vectorL);
   }

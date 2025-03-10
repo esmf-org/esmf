@@ -44,7 +44,7 @@ class DynamicMask {   // NOT inherited from Base class
   private:
     // Allocate enough memory to store members in the Fortran side.
     // Adjust if members are added, rounding up to multiples of 64 byte
-    char shallowMem[192];
+    char shallowMem[1024];
 
   public:
     int setR8R8R8(ESMC_PredefinedDynamicMask_Flag maskType, bool *handleAllElements, ESMC_R8 *dynamicSrcMaskValue, ESMC_R8 *dynamicDstMaskValue);

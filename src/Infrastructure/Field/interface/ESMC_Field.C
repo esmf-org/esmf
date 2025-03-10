@@ -555,7 +555,7 @@ int ESMC_FieldGetBounds(ESMC_Field field,
 
     // Invoke the C++ interface
     localrc = ESMCI::Field::regrid(fieldpsrc, fieldpdst, routehandlep, 
-                                   zeroregion);
+                                   zeroregion, dynamicmask);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;  // bail out
 

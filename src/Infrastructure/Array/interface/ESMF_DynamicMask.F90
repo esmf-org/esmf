@@ -38,6 +38,7 @@ module ESMF_DynamicMaskMod
   use ESMF_srcDynamicMaskMod
   use ESMF_dstDynamicMaskMod
   use ESMF_voteDynamicMaskMod
+  use, intrinsic :: iso_c_binding
   
   implicit none
 
@@ -198,6 +199,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                 :: localrc      ! local return code
     integer                 :: dimCount
 
+    type(c_funptr) ::c_ptr_func
+    integer(c_intptr_t) :: faddress
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -205,16 +208,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! mark output as uninitialized    
     ESMF_INIT_SET_DELETED(dynamicMask)
 
-    write(*,*)'bmaa here ',__FILE__,__LINE__
     ! set the internals
     dynamicMask%typeKey           =   "R8R8R8"
     dynamicMask%dmsR8R8R8%typeKey =   dynamicMask%typeKey
     dynamicMask%dmsR8R8R8%dynamicSrcMaskIsPresent = present(dynamicSrcMaskValue)
-    if (present(dynamicSrcMaskValue)) &
-      dynamicMask%dmsR8R8R8%dynamicSrcMaskValue = dynamicSrcMaskValue
-    dynamicMask%dmsR8R8R8%dynamicDstMaskIsPresent = present(dynamicDstMaskValue)
-    if (present(dynamicDstMaskValue)) &
-      dynamicMask%dmsR8R8R8%dynamicDstMaskValue = dynamicDstMaskValue
+    if (present(dynamicSrcMaskValue)) then
+       dynamicMask%dmsR8R8R8%dynamicSrcMaskValue = dynamicSrcMaskValue
+    end if
+    dynamicMask%dmsR8R8R8%dynamicsrcMaskIsPresent = present(dynamicSrcMaskValue)
+    if (present(dynamicDstMaskValue)) then
+       dynamicMask%dmsR8R8R8%dynamicDstMaskValue = dynamicDstMaskValue
+    end if
     if (present(handleAllElements)) then
       dynamicMask%dmsR8R8R8%handleAllElements = handleAllElements
     else
@@ -228,7 +232,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE) then
        dynamicMask%dmsR8R8R8%routine =>  voteDynMaskProcR8R8R8
     end if
-    
+   
     ! mark output as successfully initialized
     ESMF_INIT_SET_DEFINED(dynamicMask)
 

@@ -41,7 +41,7 @@ extern "C" {
 typedef struct{
   // Allocate enough memory to store members in the Fortran side.
   // Adjust if members are added, rounding up to multiples of 64 byte
-  char shallowMem[192];
+  char shallowMem[1024];
 }ESMC_DynamicMask;
 
 // Class API
@@ -53,7 +53,7 @@ typedef struct{
 // !INTERFACE:
 int ESMC_DynamicMaskSetR8R8R8(
   ESMC_DynamicMask *DynamicMask,         // inout 
-  enum  ESMC_PredefinedDynamicMask_Flag,  // in
+  enum  ESMC_PredefinedDynamicMask_Flag mask_flag,  // in
   bool *handleAllElements, 
   ESMC_R8 *dynamicSrcMaskValue,
   ESMC_R8 *dynamicDstMaskValue 
