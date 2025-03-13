@@ -62,7 +62,7 @@ enabled = true
 template = "{tag}"
 dev_template = "{tag}"
 dirty_template = "{tag}"
-starting_version = "8.9.0beta" # this is a backup for pip <= 22.0 where git-versioning doesn't work
+starting_version = "8.9.0beta" # this is a backup for pip <= 22.0 where git-versioning doesn't work; it is also needed for the conda distribution of ESMPy; it is important that this does NOT include "beta" on release branches
 
 [tool.dynamic]
 version = "placeholder" # this is a placeholder for the version pulled with git-versioning

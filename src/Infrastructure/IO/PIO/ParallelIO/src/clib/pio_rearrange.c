@@ -80,9 +80,6 @@ expand_region(int dim, const int *gdimlen, int maplen, const PIO_Offset *map,
               int region_size, int region_stride, const int *max_size,
               PIO_Offset *count)
 {
-    /* Flag used to signal that we can no longer expand the region
-       along dimension dim. */
-    int expansion_done = 0;
     /* Check inputs. */
     pioassert(dim >= 0 && gdimlen && maplen >= 0 && map && region_size >= 0 &&
               maplen >= region_size && region_stride >= 0 && max_size && count,
@@ -100,26 +97,18 @@ expand_region(int dim, const int *gdimlen, int maplen, const PIO_Offset *map,
            Assuming monotonicity in the map, we could skip this for the
            innermost dimension, but it's necessary past that because the
            region does not necessarily comprise contiguous values. */
-        for (int j = 0; j < region_size; j++)
+	int test_idx = i * region_size;
+        for (int j = 0; j < region_size; j++, test_idx++)
         {
-            int test_idx; /* Index we are testing. */
-
-            test_idx = j + i * region_size;
-
             /* If we have exhausted the map, or the map no longer matches,
                we are done, break out of both loops. */
             //PLOG((3,"dim=%d maplen = %d map[%d]=%d map[%d]=%d i=%d region_stride=%d",dim, maplen, test_idx, map[test_idx], j, map[j],i,region_stride));
             if (test_idx >= maplen || map[test_idx] != map[j] + i * region_stride)
             {
-                expansion_done = 1;
-                break;
+		return;
             }
         }
-        if (expansion_done)
-            break;
-
     }
-    PLOG((3,"expansion_done = %d count[%d]=%ld",expansion_done, dim, count[dim]));
     /* Move on to next outermost dimension if there are more left,
      * else return. */
     if (dim > 0)
@@ -1827,7 +1816,10 @@ compare_offsets(const void *a, const void *b)
     mapsort *y = (mapsort *)b;
     if (!x || !y)
         return 0;
-    return (int)(x->iomap - y->iomap);
+
+    if (x->iomap < y->iomap) { return -1; }
+    if (x->iomap > y->iomap) { return 1; }
+    return 0;
 }
 
 /**

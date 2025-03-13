@@ -45,7 +45,7 @@ processors (see @ref iosystem).
 PIO uses <a
 href=http://www.unidata.ucar.edu/software/netcdf/docs/html_guide/index.html#user_guide>
 netcdf </a> and <a
-href=http://trac.mcs.anl.gov/projects/parallel-netcdf> pnetcdf</a> to
+href=https://parallel-netcdf.github.io/> pnetcdf</a> to
 read and write the netCDF files (see @ref install).
 
 ## Basic description of how to optimize IO in a parallel environment:

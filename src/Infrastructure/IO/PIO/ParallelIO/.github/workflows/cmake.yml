@@ -19,7 +19,7 @@ jobs:
 #      LDFLAGS: "-static-libasan"
 #      ASAN_OPTIONS: "detect_odr_violation=0"
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Installs
       run: |
         set -x

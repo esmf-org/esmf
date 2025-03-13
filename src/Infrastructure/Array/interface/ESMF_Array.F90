@@ -3857,11 +3857,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer, real, or double precision.  Dimension label attributes can co-exist with
 !   variable attributes within a common Attribute package.
 !
-!   Limitations:
-!   \begin{itemize}
-!     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
-!   \end{itemize}
-!
 !  The arguments are:
 !  \begin{description}
 !   \item[array]

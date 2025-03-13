@@ -105,7 +105,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{itemize}
 !     \item Only {\tt real(ESMF\_KIND\_R8) factorList} and 
 !           {\tt integer(ESMF\_KIND\_I4) factorIndexList} supported.
-!     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
 !  The arguments are:

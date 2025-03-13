@@ -676,12 +676,6 @@ int ESMC_FieldPrint(
 //  should be set to either "internal" or "external" when the ESMF library is built.
 //  Please see the section on Data I/O,~\ref{io:dataio}.
 //
-//  Limitations:
-//  \begin{itemize}
-//    \item Only 1 DE per PET supported.
-//    \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
-//  \end{itemize}
-//
 //  The arguments are:
 //  \begin{description}
 //  \item [field]
@@ -1195,12 +1189,6 @@ int ESMC_FieldSMMStore(
 //  environment variable {\tt ESMF\_PIO} should be set to either "internal" or "external" when
 //  the ESMF library is built.  Please see the section on 
 //  Data I/O,~\ref{io:dataio}.
-//
-//  Limitations:
-//  \begin{itemize}
-//    \item Only 1 DE per PET supported.
-//    \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
-//  \end{itemize}
 //
 //  The arguments are:
 //  \begin{description}

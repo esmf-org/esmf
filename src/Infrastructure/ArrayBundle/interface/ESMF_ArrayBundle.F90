@@ -1764,7 +1764,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{itemize}
 !     \item For multi-tile Arrays, all Arrays in the ArrayBundle must contain
 !     the same number of tiles.
-!     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
 !   The arguments are:
@@ -3919,7 +3918,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{itemize}
 !     \item For multi-tile Arrays,all Arrays in the ArrayBundle must contain
 !     the same number of tiles.
-!     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
 !   The arguments are:
