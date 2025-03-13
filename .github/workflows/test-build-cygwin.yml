@@ -53,7 +53,7 @@ jobs:
           install-dir: 'C:\tools\cygwin'
           packages: >-
             openmpi gcc-core gcc-fortran gcc-g++ libnetcdf-devel libnetcdf-fortran-devel 
-            texlive-collection-latex texlive-collection-latexextra perl make bash dash 
+            perl make bash dash 
             liblapack-devel cmake
             python39-devel python39-pip python39-numpy python39-pytest
       - name: Set Windows PATH
