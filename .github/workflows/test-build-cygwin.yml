@@ -61,12 +61,16 @@ jobs:
         run: |
           C:\tools\cygwin\bin\dash.exe -c "/usr/bin/make all"
       - name: Build ESMPy
+        env:
+          ESMFMKFILE: "${ESMF_DIR}/esmf.mk"
         run: |
           C:\tools\cygwin\bin\dash.exe -c "cd src/addon/esmpy; python -m pip install ."
       - name: Check ESMF
         run: |
           C:\tools\cygwin\bin\dash.exe -c "/usr/bin/make check"
       - name: Check ESMPy
+        env:
+          ESMFMKFILE: "${ESMF_DIR}/esmf.mk"
         run: |
           C:\tools\cygwin\bin\dash.exe -c "cd src/addon/esmpy; /usr/bin/make download test_all"
       - name: Build ESMF Docs
