@@ -48,7 +48,7 @@ jobs:
           packages: >-
             openmpi gcc-core gcc-fortran gcc-g++ libnetcdf-devel libnetcdf-fortran-devel 
             texlive-collection-latex texlive-collection-latexextra perl make bash dash 
-            liblapack-devel cmake
+            liblapack-devel cmake libyaml-devel
             python39-devel python39-pip python39-numpy python39-pytest
       - name: Set Windows PATH
         uses: egor-tensin/cleanup-path@v3
@@ -68,9 +68,17 @@ jobs:
       - name: Check ESMF
         run: |
           C:\tools\cygwin\bin\dash.exe -c "/usr/bin/make check"
+      - name: Install ESMF
+        run: |
+          C:\tools\cygwin\bin\dash.exe -c "/usr/bin/make install"
+      - name: ESMF Installcheck
+        env:
+          ESMFMKFILE: "/tmp/fakeroot/usr/lib/esmf.mk"
+        run: |
+          C:\tools\cygwin\bin\dash.exe -c "/usr/bin/make installcheck"
       - name: Check ESMPy
         env:
-          ESMFMKFILE: "${ESMF_DIR}/esmf.mk"
+          ESMFMKFILE: "/tmp/fakeroot/usr/lib/esmf.mk"
         run: |
           C:\tools\cygwin\bin\dash.exe -c "cd src/addon/esmpy; /usr/bin/make download test_all"
       - name: Build ESMF Docs
