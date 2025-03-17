@@ -82,7 +82,8 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 void CpMeshElemDataToArray(Grid &grid, int staggerloc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray);
 void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array);
 
-
+void create_regrid_info_str(Array **_src_array,Array **_dst_array, int *regridMethod,
+                            std::string &ristr);
 
 void ESMCI_regrid_create(
                      Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
@@ -111,6 +112,12 @@ void ESMCI_regrid_create(
   Trace __trace(" FTN_X(regrid_test)(ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
 
 
+  std::string ristr;
+  create_regrid_info_str(arraysrcpp, arraydstpp, regridMethod, ristr);
+
+  std::cout<<"Regrid Info Str: "<<ristr<<"\n";
+
+  
   ESMCI::Array &srcarray = **arraysrcpp;
   ESMCI::Array &dstarray = **arraydstpp;
 
@@ -123,6 +130,9 @@ void ESMCI_regrid_create(
   int has_statusArray=*_has_statusArray;
   ESMCI::Array *statusArray=*_statusArray;
 
+
+
+  
 #define PROGRESSLOG_off
 #define MEMLOG_off
 
@@ -818,6 +828,40 @@ void ESMCI_regrid_create(
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
+
+
+/* XMRKX */
+void create_regrid_info_str(Array **_src_array,Array **_dst_array, int *regridMethod,
+                            std::string &ristr) {
+
+  Array *src_array=*_src_array;
+  Array *dst_array=*_dst_array;
+
+  // Add beginning part
+  ristr="ESMCI_regrid_create(";
+
+  // Add src
+  ristr=ristr+"src="+src_array->getName()+" ";
+
+  // Add dst
+  ristr=ristr+"dst="+dst_array->getName()+" ";
+      
+  // Add method
+  ristr=ristr+"method=";
+
+  // Add method name 
+  if (*regridMethod==ESMC_REGRID_METHOD_BILINEAR) ristr=ristr+"bilinear";
+  else if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ristr=ristr+"conserve";
+  else if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND) ristr=ristr+"conserve2nd";
+  else if (*regridMethod==ESMC_REGRID_METHOD_PATCH) ristr=ristr+"patch";
+  else if (*regridMethod==ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST) ristr=ristr+"neareststod";
+  else if (*regridMethod==ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) ristr=ristr+"nearestdtos";
+  else ristr=ristr+"unknown";
+  
+  // Add end
+  ristr=ristr+")";
+}
+
 
 
 void ESMCI_regrid_getiwts(Grid **gridpp,
