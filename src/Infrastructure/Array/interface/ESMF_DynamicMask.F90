@@ -199,8 +199,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                 :: localrc      ! local return code
     integer                 :: dimCount
 
-    type(c_funptr) ::c_ptr_func
-    integer(c_intptr_t) :: faddress
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
