@@ -113,8 +113,10 @@ elif "Linux" in esmfos:
     constants._ESMF_OS = constants._ESMF_OS_LINUX
 elif "Unicos" in esmfos:
     constants._ESMF_OS = constants._ESMF_OS_UNICOS
+elif "Cygwin" in esmfos:
+    constants._ESMF_OS = constants._ESMF_OS_CYGWIN
 else:
-    raise ValueError("Unrecognized ESMF_OS setting!")
+    raise ValueError(f"Unrecognized ESMF_OS setting: {esmfos:s}!")
 
 # set _ESMF_ABI for 32/64 switching
 if "64" in esmfabi:
@@ -146,7 +148,7 @@ constants._ESMF_USE_INMEM_FACTORS = use_inmem_factors
 
 # load the shared library for esmf
 try:
-    if constants._ESMF_OS == constants._ESMF_OS_DARWIN:
+    if constants._ESMF_OS in (constants._ESMF_OS_DARWIN, constants._ESMF_OS_CYGWIN):
         _ESMF = np.ctypeslib.load_library('libesmf_fullylinked',libsdir)
     else:
         _ESMF = ct.CDLL(os.path.join(libsdir,'libesmf_fullylinked.so'),
