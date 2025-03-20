@@ -819,6 +819,9 @@ install: envdump
 	cp -f $(ESMF_MODDIR)/*.mod $(ESMF_INSTALL_MODDIR_ABSPATH)
 	mkdir -p $(ESMF_INSTALL_LIBDIR_ABSPATH)
 	cp -f $(ESMF_LIBDIR)/libesmf*.* $(ESMF_INSTALL_LIBDIR_ABSPATH)
+ifeq ($(ESMF_OS),Cygwin)
+	cp -f $(ESMF_LIBDIR)/cygesmf*.* $(ESMF_INSTALL_BINDIR_ABSPATH)
+endif
 
 ifeq ($(ESMF_PIO),internal)
 	cp -f $(ESMF_LIBDIR)/libpioc.* $(ESMF_INSTALL_LIBDIR_ABSPATH)
