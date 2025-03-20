@@ -111,13 +111,15 @@ void ESMCI_regrid_create(
 #define ESMC_METHOD "ESMCI_regrid_create()"
   Trace __trace(" FTN_X(regrid_test)(ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
 
-
+  // Create string describing regrid case
   std::string ristr;
   create_regrid_info_str(arraysrcpp, arraydstpp, regridMethod, ristr);
 
-  std::cout<<"Regrid Info Str: "<<ristr<<"\n";
-
+  // Trace around whole regrid create
+  ESMCI::TraceEventRegionEnter(ristr, NULL);
   
+
+  // Dereference input variables
   ESMCI::Array &srcarray = **arraysrcpp;
   ESMCI::Array &dstarray = **arraydstpp;
 
@@ -328,9 +330,10 @@ void ESMCI_regrid_create(
 
 
 
-
-
-
+    // Trace around weight generation
+    ESMCI::TraceEventRegionEnter("Weight generation", &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+  
     
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Entering weight generation.", ESMC_LOGMSG_INFO);
@@ -394,6 +397,11 @@ void ESMCI_regrid_create(
       }
     }
 
+    // Trace around weight generation
+    ESMCI::TraceEventRegionExit("Weight generation", &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+
+    
     ESMCI_REGRID_TRACE_EXIT("NativeMesh Weight Generation");
 
 #ifdef PROGRESSLOG_on
@@ -636,6 +644,11 @@ void ESMCI_regrid_create(
     // Build the RouteHandle using ArraySMMStore() 
     if (*has_rh) {
       
+      // Trace around routehandle creation
+      ESMCI::TraceEventRegionEnter("RouteHandle creation", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      
+
       // Set some flags
       enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
       ESMC_Logical ignoreUnmatched = ESMF_FALSE;
@@ -651,6 +664,12 @@ void ESMCI_regrid_create(
             pipelineDepth, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+
+
+      // Trace around routehandle creation
+      ESMCI::TraceEventRegionExit("RouteHandle creation", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      
     }
 
     ESMCI_REGRID_TRACE_EXIT("NativeMesh ArraySMMStore");
@@ -732,7 +751,7 @@ void ESMCI_regrid_create(
       // Get rid of transposed factor index list
       delete [] transpose_iientries;
 
-      ESMCI_REGRID_TRACE_EXIT("NativeMesh Transpose ArraySMMStore");
+    ESMCI_REGRID_TRACE_EXIT("NativeMesh Transpose ArraySMMStore");
       
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Returned from transpose ArraySMMStore().", ESMC_LOGMSG_INFO);
@@ -825,6 +844,9 @@ void ESMCI_regrid_create(
   ESMC_LogDefault.Write("c_esmc_regrid_create(): Final return.", ESMC_LOGMSG_INFO);
 #endif
 
+  // Trace around whole regrid create
+  ESMCI::TraceEventRegionExit(ristr, NULL);
+  
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }

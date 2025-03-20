@@ -28,6 +28,8 @@
 #include <Mesh/include/ESMCI_XGridUtil.h>
 #include "PointList/include/ESMCI_PointList.h"
 
+#include "ESMCI_TraceMacros.h"  // for profiling
+
 #include <iostream>
 #include <fstream>
 #include <cmath>
@@ -2901,6 +2903,8 @@ Interp::Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *dstplist, 
                bool set_dst_status, WMat &dst_status,
                MAP_TYPE mtype, int unmappedaction, bool checkFlag, 
                int _num_src_pnts, ESMC_R8 _dist_exponent):
+#undef  ESMC_METHOD
+#define ESMC_METHOD "Interp::Interp()"
 
 sres(),
 grend(src, srcplist, dest, dstplist, get_dst_config(imethod), freeze_src_, (mtype==MAP_TYPE_GREAT_CIRCLE)),
@@ -2946,7 +2950,10 @@ interp_method(imethod)
   }
 
   if (is_parallel) {
-
+    int localrc;
+    ESMCI::TraceEventRegionEnter("Regrid geometry redist", &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+    
     // Form the parallel rendezvous meshes/specs
    //  if (Par::Rank() == 0)
        //std::cout << "Building rendezvous..." << std::endl;
@@ -2954,6 +2961,9 @@ interp_method(imethod)
                 dstF.size(), (dstF.size()>0)?(&dstF[0]):NULL,
                 &zz, midmesh==0? true:false);
 
+    ESMCI::TraceEventRegionExit("Regrid geometry redist", &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+    
     // Check grend status, if it's not complete
     if (grend.status != GEOMREND_STATUS_COMPLETE) {
       if (grend.status == GEOMREND_STATUS_NO_DST) {
@@ -2976,30 +2986,52 @@ interp_method(imethod)
     }
 
 
-    
+
     if (has_nearest_dst_to_src) {
       Throw() << "unable to proceed with interpolation method dst_to_src";
 
     } else if (has_nearest_src_to_dst) {
-      ParSearchNearestSrcToDst(grend.GetSrcPlistRend(), grend.GetDstPlistRend(), unmappedaction, sres, set_dst_status, dst_status);
+      int localrc;
+      ESMCI::TraceEventRegionEnter("Search", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
 
+      // Do search
+      ParSearchNearestSrcToDst(grend.GetSrcPlistRend(), grend.GetDstPlistRend(), unmappedaction, sres, set_dst_status, dst_status);
+      
+      ESMCI::TraceEventRegionExit("Search", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      
       // Redistribute regrid status
       if (set_dst_status) {
         dst_status.Migrate(*dstplist);
       }
     } else if (has_nearest_idavg) {
+      int localrc;
+      ESMCI::TraceEventRegionEnter("Search", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      
       ParSearchNearestSrcToDstNPnts(grend.GetSrcPlistRend(), grend.GetDstPlistRend(), num_src_pnts, unmappedaction, sres, set_dst_status, dst_status);
 
+      ESMCI::TraceEventRegionExit("Search", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      
       // Redistribute regrid status
       if (set_dst_status) {
         dst_status.Migrate(*dstplist);
       }
     } else {
       if (search_obj_type == MeshObj::NODE) {
-
+        int localrc;
+        ESMCI::TraceEventRegionEnter("Search", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+        
         // Search
         OctSearch(grend.GetSrcRend(), grend.GetDstPlistRend(), mtype, search_obj_type,
                   unmappedaction, sres, set_dst_status, dst_status, 1e-8);
+
+        ESMCI::TraceEventRegionExit("Search", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+        
         // Redistribute regrid status
         if (set_dst_status) {
           dst_status.Migrate(*dstplist);
@@ -3015,13 +3047,25 @@ interp_method(imethod)
         // Search
         //      OctSearchElems(grend.GetDstRend(), unmappedaction, grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, 1e-8, sres);
         if(freeze_src_) {
+          int localrc;
+          ESMCI::TraceEventRegionEnter("Search", &localrc);
+          if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+
           OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
+
+          ESMCI::TraceEventRegionExit("Search", &localrc);
+          if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+
         } else {
+          ESMCI::TraceEventRegionEnter("Search", &localrc);
+          if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+          
           // If 2nd order see if it's an XGrid and then use that
           if (interp_method == Interp::INTERP_CONSERVE_2ND) {
 
             // If an XGrid isn't involved, then do a search using regular method
             if (detect_xgrid_regrid_info_type(grend.GetSrcRend(), grend.GetDstRend()) == XGRID_USE_NONE) {
+                    int localrc;
               OctSearchElems(grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
             } else { // ...otherwise use XGrid information
               XGridGatherOverlappingElems(grend.GetSrcRend(), grend.GetDstRend(), sres);
@@ -3029,6 +3073,10 @@ interp_method(imethod)
           } else { // ...otherwise just use the regular search
             OctSearchElems(grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
           }
+
+          ESMCI::TraceEventRegionExit("Search", &localrc);
+          if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+          
         }
       }
     }
@@ -3043,18 +3091,42 @@ interp_method(imethod)
   } else {
     // Serial track.  Meshes already in geometric rendezvous.  (Perhaps get
     // the subset of the mesh for interpolating??)
+    int localrc;
 
     if (has_nearest_dst_to_src) {
       Throw() << "unable to proceed with interpolation method dst_to_src";
     } else if (has_nearest_src_to_dst) {
+
+      ESMCI::TraceEventRegionEnter("Search", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      
       SearchNearestSrcToDst(*srcpointlist, *dstpointlist, unmappedaction, sres, set_dst_status, dst_status);
+
+      ESMCI::TraceEventRegionExit("Search", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      
+
     } else if (has_nearest_idavg) {
+
+      ESMCI::TraceEventRegionEnter("Search", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+
       SearchNearestSrcToDstNPnts(*srcpointlist, *dstpointlist, num_src_pnts, unmappedaction, sres, set_dst_status, dst_status);
+
+      ESMCI::TraceEventRegionExit("Search", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      
     } else {
 
       if (search_obj_type == MeshObj::NODE) {
+          ESMCI::TraceEventRegionEnter("Search", &localrc);
+          if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+        
         OctSearch(*src, *dstpointlist, mtype, search_obj_type,
                   unmappedaction, sres, set_dst_status, dst_status, 1e-8);
+
+        ESMCI::TraceEventRegionExit("Search", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
         //OctSearch(src, dest, mtype, search_obj_type, unmappedaction, sres, 1e-8);
       } else if (search_obj_type == MeshObj::ELEMENT) {
         // Check grids
@@ -3062,6 +3134,10 @@ interp_method(imethod)
           _check_mesh(*src, "source");
           _check_mesh(*dest, "destination");
         }
+        
+          ESMCI::TraceEventRegionEnter("Search", &localrc);
+          if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+       
 
         // If 2nd order see if it's an XGrid and then use that
         if (interp_method == Interp::INTERP_CONSERVE_2ND) {
@@ -3074,7 +3150,10 @@ interp_method(imethod)
           }
         } else { // ...otherwise just use the regular search
           OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, *dest, unmappedaction, 1e-8, sres);
-        }        
+        }
+
+        ESMCI::TraceEventRegionExit("Search", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
       }
     }
 
@@ -3128,6 +3207,9 @@ static void _set_mesh_masked_elem_status(Mesh &mesh, WMat &status) {
  * There is an ASSUMPTION here that the field is nodal, both sides
  */
 void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &dst_status) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "Interp::operator()"
+  
   Trace __trace("Interp::operator()(int fpair_num, IWeights &iw)");
 
   IWeights src_frac,dst_frac; // Use IW to get out source and dst frac and to migrate it to the correct procs
@@ -3193,9 +3275,17 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
   }
 
   // Calculate weights
+  // Trace around weight generation
+  int localrc;
+  ESMCI::TraceEventRegionEnter("Weight calculation", &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+  
   if (is_parallel) mat_transfer_parallel(fpair_num, iw, src_frac, dst_frac, set_dst_status, dst_status);
   else mat_transfer_serial(fpair_num, iw, src_frac, dst_frac, set_dst_status, dst_status);
 
+  ESMCI::TraceEventRegionExit("Weight calculation", &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+  
 #if 0
   {
   WMat::WeightMap::iterator wi = iw.begin_row(), we = iw.end_row();
