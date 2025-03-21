@@ -4202,7 +4202,7 @@ shared:
 		    mkdir tmp_$$NEXTLIB ;\
 		    cd tmp_$$NEXTLIB  ;\
 	                $(ESMF_AREXTRACT) ../$$NEXTLIB.$(ESMF_LIB_SUFFIX) ;\
-		    if [ "${ESMF_SL_SUFFIX}" -ne "dll.a" ] ; then \
+		    if [ "${ESMF_SL_SUFFIX}" != "dll.a" ] ; then \
                     echo $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB.$(ESMF_SL_SUFFIX) *.o $(ESMF_SL_LIBLIBS) ;\
 		    $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB.$(ESMF_SL_SUFFIX) *.o $(ESMF_SL_LIBLIBS) ;\
 		    echo Converting $$NEXTLIB.$(ESMF_SL_SUFFIX) to $$NEXTLIB\_fullylinked.$(ESMF_SL_SUFFIX) ;\
