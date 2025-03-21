@@ -4209,8 +4209,11 @@ shared:
                     echo $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB\_fullylinked.$(ESMF_SL_SUFFIX) *.o $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_CXXLINKLIBS) ;\
 		    $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB\_fullylinked.$(ESMF_SL_SUFFIX) *.o $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_CXXLINKLIBS) ;\
 		    else \
-			echo $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/cyg$${NEXTLIB#lib}\.dll -Wl,--out-implib=$(ESMF_LDIR)/$$NEXTLIB\.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive *.o -Wl,--no-whole-archive $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_CXXLINKLIBS) ;\
-                        $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/cyg$${NEXTLIB#lib}\.dll -Wl,--out-implib=$(ESMF_LDIR)/$$NEXTLIB\.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import -Wl,--whole-archive *.o -Wl,--no-whole-archive $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_CXXLINKLIBS) ;\
+			echo $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/cyg$${NEXTLIB#lib}\.dll -Wl,--out-implib=$(ESMF_LDIR)/$$NEXTLIB\.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import \
+                            -Wl,--whole-archive *.o -Wl,--no-whole-archive $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_CXXLINKLIBS) ;\
+                        $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/cyg$${NEXTLIB#lib}\.dll -Wl,--out-implib=$(ESMF_LDIR)/$$NEXTLIB\.dll.a -Wl,--export-all-symbols -Wl,--enable-auto-import \
+                            -Wl,--whole-archive *.o -Wl,--no-whole-archive $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_CXXLINKLIBS) ;\
+                        ls $(ESMF_LDIR)
 	            fi ;\
 		    cd .. ;\
 		    $(ESMF_RM) -r tmp_$$NEXTLIB ;\
