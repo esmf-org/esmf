@@ -47,7 +47,7 @@ class DynamicMask {   // NOT inherited from Base class
     char shallowMem[1024];
 
   public:
-    int setR8R8R8(ESMC_PredefinedDynamicMask_Flag maskType, bool *handleAllElements, ESMC_R8 *dynamicSrcMaskValue, ESMC_R8 *dynamicDstMaskValue);
+    int setR8R8R8(ESMC_PredefinedDynamicMask_Flag maskType, int *handleAllElements, ESMC_R8 *dynamicSrcMaskValue, ESMC_R8 *dynamicDstMaskValue);
 
 };
 

@@ -886,9 +886,9 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     type(ESMF_Field)        :: dstField
     type(ESMF_RouteHandle)  :: routehandle
     type(ESMF_Region_Flag)  :: zeroregion
-    logical                 :: zrpresent
+    integer                 :: zrpresent
     type(ESMF_DynamicMask)  :: dynamicMask
-    logical                 :: dmpresent
+    integer                 :: dmpresent
     integer                 :: rc 
 
     integer :: localrc
@@ -911,8 +911,8 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if (zrpresent) allocate(zeroregion_, source=zeroregion) 
-    if (dmpresent) allocate(dynamicMask_, source=DynamicMask)
+    if (zrpresent==1) allocate(zeroregion_, source=zeroregion) 
+    if (dmpresent==1) allocate(dynamicMask_, source=DynamicMask)
     call ESMF_FieldRegrid(srcField, dstField, routehandle=l_routehandle, &
       zeroregion=zeroregion, DynamicMask=dynamicMask, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

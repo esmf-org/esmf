@@ -55,12 +55,12 @@
 
     type(ESMF_DynamicMask) :: dynamicmask
     type(ESMF_PredefinedDynamicMask_Flag) :: maskType
-    logical :: handleAllElements
-    logical :: haePresent
+    integer  :: handleAllElements
+    integer  :: haePresent
     real(ESMF_KIND_R8) :: dynamicSrcMaskValue
-    logical :: dsmPresent
+    integer  :: dsmPresent
     real(ESMF_KIND_R8) :: dynamicDstMaskValue
-    logical :: ddmPresent
+    integer  :: ddmPresent
     integer :: rc
 
     integer                 :: localrc      ! local return code
@@ -72,13 +72,17 @@
     localrc = ESMF_RC_NOT_IMPL
     rc = ESMF_RC_NOT_IMPL
 
-    if (haePresent) then
-        allocate(handleAllElements_,source=handleAllElements)
+    if (haePresent==1) then
+        if (handleAllElements==0) then
+           allocate(handleAllElements_,source=.false.)
+        else if (handleAllElements==1) then
+           allocate(handleAllElements_,source=.true.)
+        end if
     end if
-    if (dsmPresent) then
+    if (dsmPresent==1) then
        allocate(dynamicSrcMaskValue_,source= dynamicSrcMaskValue)
     end if
-    if (ddmPresent) allocate(dynamicDstMaskValue_,source= dynamicdstMaskValue)
+    if (ddmPresent==1) allocate(dynamicDstMaskValue_,source= dynamicdstMaskValue)
 
      call ESMF_DynamicMaskPredefinedSetR8R8R8(dynamicmask=dynamicmask, maskType=maskType, &
        handleAllElements=handleAllElements_, dynamicSrcMaskValue=dynamicSrcMaskValue_, &

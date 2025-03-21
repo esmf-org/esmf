@@ -718,7 +718,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(c_funptr) :: c_ptr_func
     integer(c_intptr_t) :: faddress
 
-    write(*,*)"bmaa ",__FILE__,__LINE__,present(dynamicMask)
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -936,7 +935,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return
     endif
        
-    write(*,*)"bmaa ",__FILE__,__LINE__ 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMM(opt_srcArray, opt_dstArray, routehandle, &
       opt_routesyncflag, opt_finishedflag, opt_cancelledflag, opt_zeroregion, &
@@ -949,7 +947,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       finishedflag = opt_finishedflag
     endif
    
-    write(*,*)"bmaa ",__FILE__,__LINE__
     ! translate back cancelledflag
     if (present(cancelledflag)) then
       cancelledflag = opt_cancelledflag
