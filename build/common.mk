@@ -1731,6 +1731,8 @@ ifdef ESMF_PIO
 ESMF_CPPFLAGS                += -DESMF_PIO=1
 ifneq ($(origin ESMF_PIO_LIBS), environment)
 ESMF_PIO_LIBS = -lpioc
+ifeq ($(ESMF_OS),Cygwin)
+ESMF_PIO_LIBS += $(ESMF_NETCDF_LIBS)
 endif
 ifdef ESMF_PIO_INCLUDE
 ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_PIO_INCLUDE)
