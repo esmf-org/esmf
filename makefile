@@ -820,6 +820,7 @@ install: envdump
 	mkdir -p $(ESMF_INSTALL_LIBDIR_ABSPATH)
 	cp -f $(ESMF_LIBDIR)/libesmf*.* $(ESMF_INSTALL_LIBDIR_ABSPATH)
 ifeq ($(ESMF_OS),Cygwin)
+	mkdir -p $(ESMF_INSTALL_BINDIR_ABSPATH)
 	cp -f $(ESMF_LIBDIR)/cygesmf*.* $(ESMF_INSTALL_BINDIR_ABSPATH)
 endif
 
