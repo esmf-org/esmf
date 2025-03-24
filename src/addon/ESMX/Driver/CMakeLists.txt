@@ -426,23 +426,25 @@ foreach(CMP IN ITEMS ${COMPS})
     if(FND_CMAKE_CONFIG)
       include(${FND_CMAKE_CONFIG})
     endif()
-    find_path(FND_FORT_MODULE
-      NAMES ${CMP_FORT_MODULE}
-      HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
-      PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
-      NO_CACHE NO_DEFAULT_PATH
-    )
-    if(FND_FORT_MODULE)
-      target_include_directories(esmx_driver PUBLIC ${FND_FORT_MODULE})
-    elseif(NOT FND_CMAKE_CONFIG)
-       message(STATUS "Cannot find fort_module ${CMP_FORT_MODULE} in ${CMP_INSTALL_PREFIX}")
-    endif()
-    unset(FND_FORT_MODULE)
     unset(FND_CMAKE_CONFIG)
     foreach(CMP_LIBRARY IN ITEMS ${CMP_LIBRARIES})
       if(TARGET ${CMP_LIBRARY})
         target_link_libraries(esmx_driver PUBLIC ${CMP_LIBRARY})
       else()
+        # not a known CMake target -> find the Fortran module
+        find_path(FND_FORT_MODULE
+          NAMES ${CMP_FORT_MODULE}
+          HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
+          PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
+          NO_CACHE NO_DEFAULT_PATH
+        )
+        if(FND_FORT_MODULE)
+          target_include_directories(esmx_driver PUBLIC ${FND_FORT_MODULE})
+        else()
+          message(FATAL_ERROR "Cannot find fort_module ${CMP_FORT_MODULE} in ${CMP_INSTALL_PREFIX}")
+        endif()
+        unset(FND_FORT_MODULE)
+        # not a known CMake target -> find the library
         find_library(FND_LIBRARY
           NAMES ${CMP_LIBRARY}
           HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
