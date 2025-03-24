@@ -2,7 +2,7 @@ description: 'Build the pnetcdf library'
 inputs:
   pnetcdf_version:
     description: 'Tag in the pnetcdf repository to use'
-    default: checkpoint.1.12.3
+    default: checkpoint.1.14.0
     required: False
     type: string
   install_prefix:
@@ -23,7 +23,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: Parallel-NetCDF/PnetCDF
         path: pnetcdf-src

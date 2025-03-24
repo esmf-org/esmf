@@ -22,13 +22,13 @@ jobs:
       FCFLAGS: "-fallow-argument-mismatch"
       FFLAGS: "-fallow-argument-mismatch"
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Installs
       run: |
         sudo apt-get install doxygen graphviz wget gfortran libjpeg-dev libz-dev
     - name: cache-openmpi
       id: cache-openmpi
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/work/ParallelIO/ParallelIO/openmpi
         key: openmpi-${{ runner.os }}-${{ env.OPENMPI_VERSION }}
@@ -42,7 +42,7 @@ jobs:
 
     - name: cache-hdf5
       id: cache-hdf5
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/work/ParallelIO/ParallelIO/hdf5
         key: hdf5-${{ runner.os }}-${{ env.HDF5_VERSION }}-openmpi-${{ env.OPENMPI_VERSION }}
@@ -58,7 +58,7 @@ jobs:
 
     - name: cache-netcdf
       id: cache-netcdf
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/work/ParallelIO/ParallelIO/netcdf
         key: netcdf-${{ runner.os }}-${{ env.NETCDF_C_VERSION }}-${{ env.NETCDF_FORTRAN_VERSION }}-openmpi-${{ env.OPENMPI_VERSION }}-hdf5-${{ env.HDF5_VERSION }}
@@ -73,7 +73,7 @@ jobs:
 
 #    - name: Setup tmate session
 #      if: ${{ failure() }}
-#      uses: mxschmitt/action-tmate@v3
+#      uses: mxschmitt/action-tmate@v4
 
     - name: Build NetCDF Fortran
       if: steps.cache-netcdf.outputs.cache-hit != 'true'
@@ -85,7 +85,7 @@ jobs:
 
     # - name: cache-pnetcdf
     #   id: cache-pnetcdf
-    #   uses: actions/cache@v3
+    #   uses: actions/cache@v4
     #   with:
     #     path: ~/pnetcdf
     #     key: pnetcdf-${{ runner.os }}-${{ env.PNETCDF_VERSION }}-openmpi-${{ env.OPENMPI_VERSION_MAJOR }}.${{ env.OPENMPI_VERSION_PATCH }}
