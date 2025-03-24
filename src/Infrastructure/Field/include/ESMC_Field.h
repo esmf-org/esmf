@@ -757,6 +757,7 @@ int ESMC_FieldRegridStore(
     int *extrapNumLevels,                          // in
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
     enum ESMC_Logical *ignoreDegenerate,           // in
+    int *srcTermProcessing,                        // in
     double **factorList,                           // inout
     int **factorIndexList,                         // inout
     int *numFactors,                               // inout
@@ -884,6 +885,7 @@ int ESMC_FieldRegridStoreFile(
     enum ESMC_NormType_Flag *normType,             // in
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
     enum ESMC_Logical *ignoreDegenerate,           // in
+    int *srcTermProcessing,                        // in
     enum ESMC_Logical *create_rh,                  // in
     enum ESMC_FileMode_Flag *filemode,                  // in
     const char *srcFile,                           // in

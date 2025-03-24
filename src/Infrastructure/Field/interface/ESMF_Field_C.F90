@@ -1011,6 +1011,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                 extrapNumLevels, &
                                 unmappedaction, &
                                 ignoreDegenerate, &
+                                srcTermProcessing, &
                                 factorList, &
                                 factorIndexList, &
                                 numFactors, &
@@ -1046,6 +1047,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     integer, optional                       :: extrapNumLevels
     type(ESMF_UnmappedAction_Flag),optional :: unmappedaction
     logical,optional                        :: ignoreDegenerate
+    integer,optional                        :: srcTermProcessing
 
     type(C_PTR), optional                   :: factorList
     type(C_PTR), optional                   :: factorIndexList
@@ -1092,6 +1094,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                 extrapNumLevels=extrapNumLevels, &
                                 unmappedaction=unmappedaction, &
                                 ignoreDegenerate=ignoreDegenerate, &
+                                srcTermProcessing=srcTermProcessing, & 
                                 factorList=factorListFPtr, &
                                 factorIndexList=factorIndexListFPtr, &
                                 srcFracField=srcFracField, &
@@ -1124,6 +1127,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                 extrapNumLevels=extrapNumLevels, &
                                 unmappedaction=unmappedaction, &
                                 ignoreDegenerate=ignoreDegenerate, &
+                                srcTermProcessing=srcTermProcessing, &
                                 srcFracField=srcFracField, &
                                 dstFracField=dstFracField, &
                                 rc=localrc)
@@ -1164,6 +1168,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                     normtype, &
                                     unmappedaction, &
                                     ignoreDegenerate, &
+                                    srcTermProcessing, &
                                     createRoutehandle, &
                                     filemode, &
                                     srcFile, &
@@ -1210,6 +1215,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     type(ESMF_NormType_Flag)                :: normtype
     type(ESMF_UnmappedAction_Flag)          :: unmappedaction
     logical                                 :: ignoreDegenerate
+    integer                                 :: srcTermProcessing
     logical, optional                       :: createRoutehandle
 
     type(ESMF_FileMode_Flag),   optional    :: filemode
@@ -1269,6 +1275,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    normType=normtype, &
                                    unmappedaction=unmappedaction, &
                                    ignoreDegenerate=ignoreDegenerate, &
+                                   srcTermProcessing=srcTermProcessing, &
                                    factorList=localFactorList, &
                                    factorIndexList=localFactorIndexList, &
                                    srcFracField=srcFracField, &
@@ -1287,6 +1294,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    normType=normtype, &
                                    unmappedaction=unmappedaction, &
                                    ignoreDegenerate=ignoreDegenerate, &
+                                   srcTermProcessing=srcTermProcessing, &
                                    routehandle=l_routehandle, &
                                    factorList=localFactorList, &
                                    factorIndexList=localFactorIndexList, &
@@ -1307,6 +1315,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                  normType=normtype, &
                                  unmappedaction=unmappedaction, &
                                  ignoreDegenerate=ignoreDegenerate, &
+                                  srcTermProcessing=srcTermProcessing, &
                                  routehandle=l_routehandle, &
                                  factorList=localFactorList, &
                                  factorIndexList=localFactorIndexList, &
