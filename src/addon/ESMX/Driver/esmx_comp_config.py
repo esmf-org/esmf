@@ -14,6 +14,7 @@ def create_compList(cmpCfg: ESMXCmpCfg, odir):
             options = [ESMXOpt('build_type', 'none', str),
                 ESMXOpt('source_dir', cmp, dir),
                 ESMXOpt('cmake_config', str(cmp)+'.cmake', str),
+                ESMXOpt('cmake_target', str(cmp), str),
                 ESMXOpt('install_prefix', '', dir),
                 ESMXOpt('config_dir', 'cmake', str),
                 ESMXOpt('library_dir', 'lib', str),
