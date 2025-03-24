@@ -181,6 +181,7 @@ set(CMP_OPTIONS BUILD_TYPE;
                 GIT_TAG;
                 GIT_DIR;
                 CMAKE_CONFIG;
+                CMAKE_TARGET;
                 INSTALL_PREFIX;
                 LIBRARY_DIR;
                 CONFIG_DIR;
@@ -429,38 +430,35 @@ foreach(CMP IN ITEMS ${COMPS})
     endif()
     unset(FND_CMAKE_CONFIG)
     if(TARGET ${CMP_CMAKE_TARGET})
+      message(STATUS "Found CMake target dependency: ${CMP_CMAKE_TARGET}")
       target_link_libraries(esmx_driver PUBLIC ${CMP_CMAKE_TARGET})
     else()
+      # not a known CMake target -> find the Fortran module
+      find_path(FND_FORT_MODULE
+        NAMES ${CMP_FORT_MODULE}
+        HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
+        PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
+        NO_CACHE NO_DEFAULT_PATH
+      )
+      if(FND_FORT_MODULE)
+        target_include_directories(esmx_driver PUBLIC ${FND_FORT_MODULE})
+      else()
+        message(FATAL_ERROR "Cannot find fort_module ${CMP_FORT_MODULE} in ${CMP_INSTALL_PREFIX}")
+      endif()
+      unset(FND_FORT_MODULE)
+      # not a known CMake target -> find the libraries
       foreach(CMP_LIBRARY IN ITEMS ${CMP_LIBRARIES})
-        if(TARGET ${CMP_LIBRARY})
-          target_link_libraries(esmx_driver PUBLIC ${CMP_LIBRARY})
-        else()
-          # not a known CMake target -> find the Fortran module
-          find_path(FND_FORT_MODULE
-            NAMES ${CMP_FORT_MODULE}
-            HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
-            PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
-            NO_CACHE NO_DEFAULT_PATH
-          )
-          if(FND_FORT_MODULE)
-            target_include_directories(esmx_driver PUBLIC ${FND_FORT_MODULE})
-          else()
-            message(FATAL_ERROR "Cannot find fort_module ${CMP_FORT_MODULE} in ${CMP_INSTALL_PREFIX}")
-          endif()
-          unset(FND_FORT_MODULE)
-          # not a known CMake target -> find the library
-          find_library(FND_LIBRARY
-            NAMES ${CMP_LIBRARY}
-            HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
-            PATH_SUFFIXES ${CMP_LIBRARY_DIR} "." "lib" "lib64"
-            NO_CACHE NO_DEFAULT_PATH
-          )
-          if(NOT FND_LIBRARY)
-            message(FATAL_ERROR "Cannot find libraries ${CMP_LIBRARY} in ${CMP_INSTALL_PREFIX}")
-          endif()
-          target_link_libraries(esmx_driver PUBLIC ${FND_LIBRARY})
-          unset(FND_LIBRARY)
+        find_library(FND_LIBRARY
+          NAMES ${CMP_LIBRARY}
+          HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
+          PATH_SUFFIXES ${CMP_LIBRARY_DIR} "." "lib" "lib64"
+          NO_CACHE NO_DEFAULT_PATH
+        )
+        if(NOT FND_LIBRARY)
+          message(FATAL_ERROR "Cannot find libraries ${CMP_LIBRARY} in ${CMP_INSTALL_PREFIX}")
         endif()
+        target_link_libraries(esmx_driver PUBLIC ${FND_LIBRARY})
+        unset(FND_LIBRARY)
       endforeach()
     endif()
   endif()
