@@ -54,7 +54,8 @@ add_executable(${ESMX_EXE_NAME} ESMX_App.F90)
 target_include_directories(${ESMX_EXE_NAME} PUBLIC ${PROJECT_BINARY_DIR})
 target_link_libraries(${ESMX_EXE_NAME} PUBLIC esmx_driver)
 set_target_properties(${ESMX_EXE_NAME} PROPERTIES
-  INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}"
+  INSTALL_RPATH     "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}"
+  LINKER_LANGUAGE   Fortran
 )
 
 # Install executable
