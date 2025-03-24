@@ -74,6 +74,9 @@ jobs:
       - name: List ESMF Installed files
         run: |
           C:\tools\cygwin\bin\dash.exe -c "/usr/bin/find /tmp/fakeroot"
+      - name: Print esmf.mk
+        run: |
+          C:\tools\cygwin\bin\dash.exe -c "/usr/bin/find /tmp/fakeroot -name esmf.mk -exec cat {} +"
       - name: ESMF Installcheck
         env:
           ESMFMKFILE: "/tmp/fakeroot/usr/lib/libO/Cygwin.gfortran.64.mpiuni.default/esmf.mk"
