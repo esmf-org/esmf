@@ -103,6 +103,17 @@ elseif(DEFINED ESMX_BUILD_JOBS)
   set(ESMX_MAKE_BUILD_JOBS "--jobs=${ESMX_BUILD_JOBS}")
 endif()
 
+# diagnostic output
+message("")
+message("ESMX_BUILD_FILE ............. ${ESMX_BUILD_FILE}")
+message("ESMX_EXE_NAME ............... ${ESMX_EXE_NAME}")
+message("ESMX_DISABLE_COMPS .......... ${ESMX_DISABLE_COMPS}")
+#message("ESMX_CMAKE_BUILD_VERBOSE .... ${ESMX_CMAKE_BUILD_VERBOSE}")
+#message("ESMX_CMAKE_BUILD_JOBS ....... ${ESMX_CMAKE_BUILD_JOBS}")
+#message("ESMX_TEST_DIR ............... ${ESMX_TEST_DIR}")
+#message("ESMX_TEST_TASKS ............. ${ESMX_TEST_TASKS}")
+message("")
+
 # compiler options
 if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
   set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
@@ -442,7 +453,7 @@ foreach(CMP IN ITEMS ${COMPS})
         NO_CACHE NO_DEFAULT_PATH
       )
       if(FND_FORT_MODULE)
-        message(STATUS "ESMX Found Fortran module: ${FND_FORT_MODULE}")
+        message(STATUS "ESMX Found Fortran module ${CMP_FORT_MODULE} in: ${FND_FORT_MODULE}")
         target_include_directories(esmx_driver PUBLIC ${FND_FORT_MODULE})
       else()
         message(FATAL_ERROR "Cannot find fort_module ${CMP_FORT_MODULE} in ${CMP_INSTALL_PREFIX}")
