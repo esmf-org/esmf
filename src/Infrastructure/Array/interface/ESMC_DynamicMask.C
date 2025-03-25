@@ -39,7 +39,7 @@ static const char *const version =
 
 extern "C" {
 
-int ESMC_DynamicMaskSetR8R8R8(ESMC_DynamicMask *DynamicMask,
+int ESMC_DynamicMaskPredefinedSetR8R8R8(ESMC_DynamicMask *DynamicMask,
   ESMC_PredefinedDynamicMask_Flag mask_flag, int *handleAllElements,
   ESMC_R8 *dynamicSrcMaskValue, ESMC_R8 *dynamicDstMaskValue) {
 #undef  ESMC_METHOD

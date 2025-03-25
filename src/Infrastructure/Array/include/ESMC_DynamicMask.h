@@ -51,7 +51,7 @@ typedef struct{
 // !IROUTINE: ESMC_DynamicMaskSet - Set values for an DynamicMask
 //
 // !INTERFACE:
-int ESMC_DynamicMaskSetR8R8R8(
+int ESMC_DynamicMaskPredefinedSetR8R8R8(
   ESMC_DynamicMask *DynamicMask,         // inout 
   enum  ESMC_PredefinedDynamicMask_Flag mask_flag,  // in
   int *handleAllElements, 
