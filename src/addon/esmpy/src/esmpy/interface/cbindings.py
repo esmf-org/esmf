@@ -2050,6 +2050,7 @@ _ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p,              # srcField
                                         OptionalInt,              # extrapNumLevels
                                         OptionalNamedConstant,    # unmappedaction
                                         OptionalBool,             # ignoreDegenerate
+                                        OptionalInt,              # srcTermProcessing
                                         ct.POINTER(ct.POINTER(ct.c_double)),  # factorList
                                         ct.POINTER(ct.POINTER(ct.c_int)),  # factorIndexList
                                         ct.POINTER(ct.c_int),     # numfac
@@ -2073,6 +2074,7 @@ def ESMP_FieldRegridStore(srcField,
                           extrapNumLevels=None,
                           unmappedaction=None,
                           ignoreDegenerate=None,
+                          srcTermProcessing=None,
                           factorList=None,
                           factorIndexList=None,
                           numFactors=None,
@@ -2134,6 +2136,7 @@ def ESMP_FieldRegridStore(srcField,
                                      extrapNumLevels,
                                      unmappedaction,
                                      ignoreDegenerate,
+                                     srcTermProcessing,
                                      arg_factorList,
                                      arg_factorIndexList,
                                      ct.byref(numfac),
@@ -2163,6 +2166,7 @@ _ESMF.ESMC_FieldRegridStoreFile.argtypes = [ct.c_void_p, ct.c_void_p,
                                             OptionalNamedConstant,
                                             OptionalNamedConstant,
                                             OptionalBool,
+                                            OptionalInt,
                                             OptionalBool,
                                             OptionalNamedConstant,
                                             ct.c_char_p,
@@ -2179,7 +2183,7 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
                           regridmethod=None,
                           polemethod=None, regridPoleNPnts=None,
                           lineType=None, normType=None, unmappedaction=None,
-                          ignoreDegenerate=None, createRH=None,
+                          ignoreDegenerate=None, srcTermProcessing=None, createRH=None,
                           filemode=None, srcFile=None, dstFile=None,
                           srcFileType=None, dstFileType=None,
                           largeFileFlag=None,
@@ -2300,6 +2304,7 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
                                      normType,
                                      unmappedaction,
                                      ignoreDegenerate,
+                                     srcTermProcessing,
                                      createRH,
                                      filemode,
                                      b_srcfilename,
@@ -2316,9 +2321,9 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
 
 _ESMF.ESMC_FieldRegrid.restype = ct.c_int
 _ESMF.ESMC_FieldRegrid.argtypes = [ct.c_void_p, ct.c_void_p, ESMP_RouteHandle,
-                                   OptionalNamedConstant]
+                                   OptionalNamedConstant, ct.c_void_p]
 
-def ESMP_FieldRegrid(srcField, dstField, routehandle, zeroregion=None):
+def ESMP_FieldRegrid(srcField, dstField, routehandle, zeroregion=None, dynamicMask=None):
     """
     Preconditions: ESMP_RegridStore() has been called.\n
     Postconditions: An ESMP regridding operation has been performed,
@@ -2330,7 +2335,7 @@ def ESMP_FieldRegrid(srcField, dstField, routehandle, zeroregion=None):
         RegionFlag       :: zeroregion\n
     """
     rc = _ESMF.ESMC_FieldRegrid(srcField.struct.ptr, dstField.struct.ptr, \
-                                routehandle, zeroregion)
+                                routehandle, zeroregion, dynamicMask)
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_FieldRegrid() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)
