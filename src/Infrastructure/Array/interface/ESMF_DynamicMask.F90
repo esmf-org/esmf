@@ -167,10 +167,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item[dynamicMask] 
 !     DynamicMask object.
-!   \item [dynamicMaskRoutine]
-!     The routine responsible for handling dynamically masked source and 
-!     destination elements. See section \ref{RH:DynMask} for the precise
-!     definition of the {\tt dynamicMaskRoutine} procedure interface.
+!   \item [maskType]
+!     The use a predefined mask for handling dynamically masked source and 
+!     destination elements. See section \ref{RH:DynMask} for the available
+!     {\tt ESMF\_PredefinedDynamicMask\_Flag} flags.
 !     The routine is only called on PETs where {\em at least one} interpolation 
 !     element is identified for special handling.
 !   \item [{[handleAllElements]}]
