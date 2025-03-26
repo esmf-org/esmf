@@ -49,7 +49,7 @@ jobs:
             openmpi gcc-core gcc-fortran gcc-g++ libnetcdf-devel libnetcdf-fortran-devel 
             texlive-collection-latex texlive-collection-latexextra perl make bash dash 
             liblapack-devel cmake libyaml-devel
-            python39-devel python39-pip python39-numpy python39-pytest
+            python39-devel python39-pip python39-numpy python39-pytest==7.3.0
       - name: Set Windows PATH
         uses: egor-tensin/cleanup-path@v3
         with:
@@ -86,6 +86,7 @@ jobs:
         env:
           ESMFMKFILE: "/tmp/fakeroot/usr/lib/libO/Cygwin.gfortran.64.mpiuni.default/esmf.mk"
         run: |
+          C:\tools\cygwin\bin\dash.exe -c "/usr/bin/python -m pip install pytest"
           C:\tools\cygwin\bin\dash.exe -c "cd src/addon/esmpy; /usr/bin/make download test_all"
       - name: Build ESMF Docs
         run: |
