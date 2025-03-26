@@ -51,6 +51,7 @@ with open(esmfmk, 'r') as MKFILE:
     
     # investigate esmf.mk
     libsdir = None
+    appsdir = None
     esmfos = None
     esmfabi = None
     esmfcomm = None
@@ -62,8 +63,8 @@ with open(esmfmk, 'r') as MKFILE:
     for line in MKFILE:
         if 'ESMF_LIBSDIR' in line:
             libsdir = line.split("=")[1]
-        elif 'ESMF_BINDIR' in line:
-            bindir = line.split("=", 1)[1].strip()
+        elif 'ESMF_APPSDIR' in line:
+            appsdir = line.split("=", 1)[1].strip()
         elif 'ESMF_OS:' in line:
             esmfos = line.split(":")[1]
         elif 'ESMF_ABI:' in line:
@@ -153,7 +154,7 @@ try:
     if constants._ESMF_OS == constants._ESMF_OS_DARWIN:
         _ESMF = np.ctypeslib.load_library('libesmf_fullylinked',libsdir)
     elif constants._ESMF_OS == constants._ESMF_OS_CYGWIN:
-        _ESMF = np.ctypeslib.load_library('cygesmf.dll', bindir)
+        _ESMF = np.ctypeslib.load_library('cygesmf.dll', appsdir)
     else:
         _ESMF = ct.CDLL(os.path.join(libsdir,'libesmf_fullylinked.so'),
                         mode=ct.RTLD_GLOBAL)
