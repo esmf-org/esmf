@@ -16,14 +16,22 @@ function(esmx_check_ret RETVAL MESSAGE)
   endif()
 endfunction()
 
-# unset user ESMF variables stored in cache
-get_cmake_property(_variableNames VARIABLES)
-foreach (_variableName ${_variableNames})
-  if("${_variableName}" MATCHES "^ESMX_*")
-    set(${_variableName} ${${_variableName}})
-    unset(${_variableName} CACHE)
+# is_subdirectory check functions
+function(is_subdirectory CHECK_DIR POTENTIAL_PARENT RESULT_VAR)
+  string(FIND "${CHECK_DIR}" "${POTENTIAL_PARENT}" FIND_RESULT)
+  if(FIND_RESULT EQUAL 0)
+    # CHECK_DIR starts with POTENTIAL_PARENT
+    string(LENGTH "${POTENTIAL_PARENT}" PARENT_LENGTH)
+    string(LENGTH "${CHECK_DIR}" CHECK_LENGTH)
+    if(CHECK_LENGTH GREATER PARENT_LENGTH)
+      set(${RESULT_VAR} TRUE PARENT_SCOPE)
+    else()
+      set(${RESULT_VAR} FALSE PARENT_SCOPE)
+    endif()
+  else()
+    set(${RESULT_VAR} FALSE PARENT_SCOPE)
   endif()
-endforeach()
+endfunction()
 
 # define ESMX_BUILD_FILE
 if(NOT DEFINED ESMX_BUILD_FILE)
@@ -331,45 +339,7 @@ foreach(CMP IN ITEMS ${COMPS})
 
   # build component with cmake
   if(${CMP_BUILD_TYPE} STREQUAL "cmake")
-    message(STATUS "ESMX building (CMAKE) - ${CMP} - ${CMP_SOURCE_DIR}")
-    find_file(FND_CMAKE_LISTS
-      NAMES CMakeLists.txt cmakelists.txt CMAKELISTS.txt
-      PATHS ${CMP_SOURCE_DIR}
-      NO_CACHE NO_DEFAULT_PATH
-    )
-    if(NOT FND_CMAKE_LISTS)
-      message(FATAL_ERROR "Could not find CMakeLists.txt"
-        " in ${CMP_SOURCE_DIR}."
-        " Check source_dir in build configuration."
-      )
-    endif()
-    unset(FND_CMAKE_LISTS)
-    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${CMP})
-    execute_process(
-      COMMAND ${CMAKE_COMMAND} -S${CMP_SOURCE_DIR}
-        ${ESMX_CMAKE_BUILD_ARGS}
-        ${ESMX_BUILD_ARGS}
-        ${CMP_BUILD_ARGS}
-        -DCMAKE_INSTALL_PREFIX=${CMP_INSTALL_PREFIX}
-        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${CMP}
-      RESULT_VARIABLE ret
-    )
-    esmx_check_ret(${ret} "cmake generate failed for ${CMP}")
-    execute_process(
-      COMMAND ${CMAKE_COMMAND} --build .
-        ${ESMX_CMAKE_BUILD_VERBOSE}
-        ${ESMX_CMAKE_BUILD_JOBS}
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${CMP}
-      RESULT_VARIABLE ret
-    )
-    esmx_check_ret(${ret} "cmake build failed for ${CMP}")
-    execute_process(
-      COMMAND ${CMAKE_COMMAND} --install .
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${CMP}
-      RESULT_VARIABLE ret
-    )
-    esmx_check_ret(${ret} "cmake install failed for ${CMP}")
+    # CMake builds are only configured at this stage!
 
   # build component with make
   elseif(${CMP_BUILD_TYPE} STREQUAL "make")
@@ -428,23 +398,40 @@ foreach(CMP IN ITEMS ${COMPS})
     message(FATAL_ERROR "Invalid BUILD_TYPE: ${CMP_BUILD_TYPE} for ${CMP}")
   endif()
 
-  # look for CMake target and conditionally include modules and link libraries
+  # look for CMake target and conditionally include config, modules, link libs
   if(${CMP_LINK_INTO_APP} STREQUAL "True")
-    find_file(FND_CMAKE_CONFIG
-      NAMES ${CMP_CMAKE_CONFIG}
-      HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
-      PATH_SUFFIXES ${CMP_CONFIG_DIR} "." "cmake" "config"
-      NO_CACHE NO_DEFAULT_PATH
-    )
-    if(FND_CMAKE_CONFIG)
-      message(STATUS "ESMX found CMake configuration: ${FND_CMAKE_CONFIG}")
-      include(${FND_CMAKE_CONFIG})
-    endif()
-    unset(FND_CMAKE_CONFIG)
     if(TARGET ${CMP_CMAKE_TARGET})
       message(STATUS "ESMX Found CMake target dependency: ${CMP_CMAKE_TARGET}")
       target_link_libraries(esmx_driver PUBLIC ${CMP_CMAKE_TARGET})
+    elseif(${CMP_BUILD_TYPE} STREQUAL "cmake")
+      message(STATUS "ESMX Found CMake subdirectory: ${CMP_SOURCE_DIR}")
+      is_subdirectory(${CMP_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR} IS_SUB)
+      if(IS_SUB)
+        # component source dir under current source dir
+        add_subdirectory(${CMP_SOURCE_DIR})
+      else()
+        # component source dir NOT under current source dir
+        add_subdirectory(${CMP_SOURCE_DIR} ${CMAKE_BINARY_DIR}/${CMP})
+      endif()
+      if(TARGET ${CMP_CMAKE_TARGET})
+        message(STATUS "ESMX Found CMake target dependency: ${CMP_CMAKE_TARGET}")
+        target_link_libraries(esmx_driver PUBLIC ${CMP_CMAKE_TARGET})
+      else()
+        message(FATAL_ERROR "ESMX Did not find expected CMake target dependency after adding subdirectory: ${CMP_CMAKE_TARGET}")
+      endif()
     else()
+      # not a known CMake target -> find the config file
+      find_file(FND_CMAKE_CONFIG
+        NAMES ${CMP_CMAKE_CONFIG}
+        HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
+        PATH_SUFFIXES ${CMP_CONFIG_DIR} "." "cmake" "config"
+        NO_CACHE NO_DEFAULT_PATH
+      )
+      if(FND_CMAKE_CONFIG)
+        message(STATUS "ESMX found CMake configuration: ${FND_CMAKE_CONFIG}")
+        include(${FND_CMAKE_CONFIG})
+      endif()
+      unset(FND_CMAKE_CONFIG)
       # not a known CMake target -> find the Fortran module
       find_path(FND_FORT_MODULE
         NAMES ${CMP_FORT_MODULE}

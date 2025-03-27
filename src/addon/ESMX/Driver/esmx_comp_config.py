@@ -11,7 +11,7 @@ def create_compList(cmpCfg: ESMXCmpCfg, odir):
         for cmp in cmpCfg.list():
             f.write('# - auto-generated section for component: {}\n'.format(cmp))
             cfg = cmpCfg.get_config(cmp)
-            options = [ESMXOpt('build_type', 'none', str),
+            options = [ESMXOpt('build_type', 'auto', str),
                 ESMXOpt('source_dir', cmp, dir),
                 ESMXOpt('cmake_config', str(cmp)+'.cmake', str),
                 ESMXOpt('cmake_target', str(cmp), str),
