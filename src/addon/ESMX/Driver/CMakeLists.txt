@@ -399,69 +399,71 @@ foreach(CMP IN ITEMS ${COMPS})
   endif()
 
   # look for CMake target and conditionally include config, modules, link libs
-  if(${CMP_LINK_INTO_APP} STREQUAL "True")
-    if(TARGET ${CMP_CMAKE_TARGET})
+  if(TARGET ${CMP_CMAKE_TARGET})
+    if(${CMP_LINK_INTO_APP} STREQUAL "True")
       message(STATUS "ESMX Found CMake target dependency: ${CMP_CMAKE_TARGET}")
       target_link_libraries(esmx_driver PUBLIC ${CMP_CMAKE_TARGET})
-    elseif(${CMP_BUILD_TYPE} STREQUAL "cmake")
-      message(STATUS "ESMX Found CMake subdirectory: ${CMP_SOURCE_DIR}")
-      is_subdirectory(${CMP_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR} IS_SUB)
-      if(IS_SUB)
-        # component source dir under current source dir
-        add_subdirectory(${CMP_SOURCE_DIR})
-      else()
-        # component source dir NOT under current source dir
-        add_subdirectory(${CMP_SOURCE_DIR} ${CMAKE_BINARY_DIR}/${CMP})
-      endif()
-      if(TARGET ${CMP_CMAKE_TARGET})
+    endif()
+  elseif(${CMP_BUILD_TYPE} STREQUAL "cmake")
+    message(STATUS "ESMX Found CMake subdirectory: ${CMP_SOURCE_DIR}")
+    is_subdirectory(${CMP_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR} IS_SUB)
+    if(IS_SUB)
+      # component source dir under current source dir
+      add_subdirectory(${CMP_SOURCE_DIR})
+    else()
+      # component source dir NOT under current source dir
+      add_subdirectory(${CMP_SOURCE_DIR} ${CMAKE_BINARY_DIR}/${CMP})
+    endif()
+    if(TARGET ${CMP_CMAKE_TARGET})
+      if(${CMP_LINK_INTO_APP} STREQUAL "True")
         message(STATUS "ESMX Found CMake target dependency: ${CMP_CMAKE_TARGET}")
         target_link_libraries(esmx_driver PUBLIC ${CMP_CMAKE_TARGET})
-      else()
-        message(FATAL_ERROR "ESMX Did not find expected CMake target dependency after adding subdirectory: ${CMP_CMAKE_TARGET}")
       endif()
     else()
-      # not a known CMake target -> find the config file
-      find_file(FND_CMAKE_CONFIG
-        NAMES ${CMP_CMAKE_CONFIG}
-        HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
-        PATH_SUFFIXES ${CMP_CONFIG_DIR} "." "cmake" "config"
-        NO_CACHE NO_DEFAULT_PATH
-      )
-      if(FND_CMAKE_CONFIG)
-        message(STATUS "ESMX found CMake configuration: ${FND_CMAKE_CONFIG}")
-        include(${FND_CMAKE_CONFIG})
-      endif()
-      unset(FND_CMAKE_CONFIG)
-      # not a known CMake target -> find the Fortran module
-      find_path(FND_FORT_MODULE
-        NAMES ${CMP_FORT_MODULE}
-        HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
-        PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
-        NO_CACHE NO_DEFAULT_PATH
-      )
-      if(FND_FORT_MODULE)
-        message(STATUS "ESMX Found Fortran module ${CMP_FORT_MODULE} in: ${FND_FORT_MODULE}")
-        target_include_directories(esmx_driver PUBLIC ${FND_FORT_MODULE})
-      else()
-        message(FATAL_ERROR "Cannot find fort_module ${CMP_FORT_MODULE} in ${CMP_INSTALL_PREFIX}")
-      endif()
-      unset(FND_FORT_MODULE)
-      # not a known CMake target -> find the libraries
-      foreach(CMP_LIBRARY IN ITEMS ${CMP_LIBRARIES})
-        find_library(FND_LIBRARY
-          NAMES ${CMP_LIBRARY}
-          HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
-          PATH_SUFFIXES ${CMP_LIBRARY_DIR} "." "lib" "lib64"
-          NO_CACHE NO_DEFAULT_PATH
-        )
-        if(NOT FND_LIBRARY)
-          message(FATAL_ERROR "Cannot find libraries ${CMP_LIBRARY} in ${CMP_INSTALL_PREFIX}")
-        endif()
-        message(STATUS "ESMX Found link library: ${FND_LIBRARY}")
-        target_link_libraries(esmx_driver PUBLIC ${FND_LIBRARY})
-        unset(FND_LIBRARY)
-      endforeach()
+      message(FATAL_ERROR "ESMX Did not find expected CMake target dependency after adding subdirectory: ${CMP_CMAKE_TARGET}")
     endif()
+  else()
+    # not a known CMake target -> find the config file
+    find_file(FND_CMAKE_CONFIG
+      NAMES ${CMP_CMAKE_CONFIG}
+      HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
+      PATH_SUFFIXES ${CMP_CONFIG_DIR} "." "cmake" "config"
+      NO_CACHE NO_DEFAULT_PATH
+    )
+    if(FND_CMAKE_CONFIG)
+      message(STATUS "ESMX found CMake configuration: ${FND_CMAKE_CONFIG}")
+      include(${FND_CMAKE_CONFIG})
+    endif()
+    unset(FND_CMAKE_CONFIG)
+    # not a known CMake target -> find the Fortran module
+    find_path(FND_FORT_MODULE
+      NAMES ${CMP_FORT_MODULE}
+      HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
+      PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
+      NO_CACHE NO_DEFAULT_PATH
+    )
+    if(FND_FORT_MODULE)
+      message(STATUS "ESMX Found Fortran module ${CMP_FORT_MODULE} in: ${FND_FORT_MODULE}")
+      target_include_directories(esmx_driver PUBLIC ${FND_FORT_MODULE})
+    else()
+      message(FATAL_ERROR "Cannot find fort_module ${CMP_FORT_MODULE} in ${CMP_INSTALL_PREFIX}")
+    endif()
+    unset(FND_FORT_MODULE)
+    # not a known CMake target -> find the libraries
+    foreach(CMP_LIBRARY IN ITEMS ${CMP_LIBRARIES})
+      find_library(FND_LIBRARY
+        NAMES ${CMP_LIBRARY}
+        HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
+        PATH_SUFFIXES ${CMP_LIBRARY_DIR} "." "lib" "lib64"
+        NO_CACHE NO_DEFAULT_PATH
+      )
+      if(NOT FND_LIBRARY)
+        message(FATAL_ERROR "Cannot find libraries ${CMP_LIBRARY} in ${CMP_INSTALL_PREFIX}")
+      endif()
+      message(STATUS "ESMX Found link library: ${FND_LIBRARY}")
+      target_link_libraries(esmx_driver PUBLIC ${FND_LIBRARY})
+      unset(FND_LIBRARY)
+    endforeach()
   endif()
 
   # link external libraries
