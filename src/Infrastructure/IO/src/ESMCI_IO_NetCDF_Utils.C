@@ -16,13 +16,13 @@
 // BOP
 
 // EOP
-//-------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //
 //  !DESCRIPTION:
 //
 //  The code in this file implements utility functions for NetCDF.
 //
-//-------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 // associated header file
 #include "ESMCI_IO_NetCDF_Utils.h"
@@ -35,23 +35,51 @@ using namespace std;
 static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
-//-------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI::NetCDFUtils::ncerrToEsmcRc"
-int ESMCI::NetCDFUtils::ncerrToEsmcRc(int ncerror)
-{
+//BOPI
+// !IROUTINE:  ESMCI::NetCDFUtils::ncerrToEsmcRc
+//
+// !INTERFACE:
+int ESMCI::NetCDFUtils::ncerrToEsmcRc(
+//
+// !RETURN VALUE:
+//    int ESMC error code
+//
+// !ARGUMENTS:
+   int ncerror  // (in) NetCDF error code
+   ){
+// !DESCRIPTION:
+//    Convert a NetCDF error code to an ESMC error code.
+//EOPI
+//-----------------------------------------------------------------------------
    if (ncerror == NC_NOERR)
       return ESMF_SUCCESS;
    else
       return ESMF_FAILURE;
-} // end ncerrToEsmcRc
+}
+//-----------------------------------------------------------------------------
 
-//-------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI::NetCDFUtils::ncToEsmcType"
-ESMC_TypeKind_Flag ESMCI::NetCDFUtils::ncToEsmcType(nc_type ncTypeVal)
-{
-
+//BOPI
+// !IROUTINE:  ESMCI::NetCDFUtils::ncToEsmcType
+//
+// !INTERFACE:
+ESMC_TypeKind_Flag ESMCI::NetCDFUtils::ncToEsmcType(
+//
+// !RETURN VALUE:
+//    ESMC_TypeKind_Flag ESMC data type code
+//
+// !ARGUMENTS:
+   nc_type ncTypeVal  // (in) NetCDF data type code
+   ){
+// !DESCRIPTION:
+//    Convert a NetCDF data type code to an ESMC data type code.
+//EOPI
+//-----------------------------------------------------------------------------
    ESMC_TypeKind_Flag esmcTypeVal = ESMF_NOKIND;
 
 #if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
@@ -86,12 +114,25 @@ ESMC_TypeKind_Flag ESMCI::NetCDFUtils::ncToEsmcType(nc_type ncTypeVal)
    return esmcTypeVal;
 }
 
-//-------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI::NetCDFUtils::esmcToNcType"
-nc_type ESMCI::NetCDFUtils::esmcToNcType(ESMC_TypeKind_Flag esmcTypeVal)
-{
-
+//BOPI
+// !IROUTINE:  ESMCI::NetCDFUtils::esmcToNcType
+//
+// !INTERFACE:
+nc_type ESMCI::NetCDFUtils::esmcToNcType(
+//
+// !RETURN VALUE:
+//    nc_type NetCDF data type code
+//
+// !ARGUMENTS:
+   ESMC_TypeKind_Flag esmcTypeVal  // (in) ESMC data type code
+   ){
+// !DESCRIPTION:
+//    Convert an ESMC data type code to a NetCDF data type code.
+//EOPI
+//-----------------------------------------------------------------------------
    nc_type ncTypeVal = NC_UNSPECIFIED;
 
 #if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
