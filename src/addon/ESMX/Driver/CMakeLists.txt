@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
 # load packages and modules
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../cmake)
 set(Python_FIND_UNVERSIONED_NAMES "FIRST")
 set(Python_FIND_FRAMEWORK "LAST")
 set(Python_FIND_REGISTRY  "LAST")
