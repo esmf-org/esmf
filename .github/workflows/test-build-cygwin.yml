@@ -1,5 +1,11 @@
 name: Test on Cygwin
-on: ["push", "pull_request"]
+on: 
+  workflow_dispatch:
+  release:
+    type: ["published"]
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -47,9 +53,9 @@ jobs:
           install-dir: 'C:\tools\cygwin'
           packages: >-
             openmpi gcc-core gcc-fortran gcc-g++ libnetcdf-devel libnetcdf-fortran-devel 
-            texlive-collection-latex texlive-collection-latexextra perl make bash dash 
+            perl make bash dash 
             liblapack-devel cmake libyaml-devel
-            python39-devel python39-pip python39-numpy python39-pytest==7.3.0
+            python39-devel python39-pip python39-numpy python39-pytest
       - name: Set Windows PATH
         uses: egor-tensin/cleanup-path@v3
         with:
@@ -88,6 +94,3 @@ jobs:
         run: |
           C:\tools\cygwin\bin\dash.exe -c "/usr/bin/python -m pip install pytest"
           C:\tools\cygwin\bin\dash.exe -c "cd src/addon/esmpy; /usr/bin/make download test_all"
-      - name: Build ESMF Docs
-        run: |
-          C:\tools\cygwin\bin\dash.exe -c "/usr/bin/make doc"
