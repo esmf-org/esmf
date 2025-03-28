@@ -34,8 +34,13 @@ typedef int nc_type;
 
 namespace ESMCI{
    namespace NetCDFUtils{
+      // Convert a NetCDF error code to an ESMC error code
       int ncerrToEsmcRc(int ncerr);
+
+      // Convert a NetCDF data type code to an ESMC data type code
       ESMC_TypeKind_Flag ncToEsmcType(nc_type ncTypeVal);
+
+      // Convert an ESMC data type code to a NetCDF data type code
       nc_type esmcToNcType(ESMC_TypeKind_Flag esmcTypeVal);
    }
 }
