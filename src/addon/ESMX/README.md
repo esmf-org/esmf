@@ -159,6 +159,7 @@ This section contains a key for for each *component-name*, specifying component 
 | `build_args`     | scalar or list of arguments for building component                        | *None*                 |
 | `source_dir`     | source directory for build                    | *component-name*       |
 | `cmake_config`   | CMake configuration file                      | *component-name*.cmake |
+| `cmake_target`   | CMake target                                  | *component-name*       |
 | `libraries`      | component libraries, linked to esmx           | *component-name*       |
 | `fort_module`    | fortran module filename for NUOPC SetServices | *component-name*.mod   |
 | `install_prefix` | root directory for installation               | `install`              |
