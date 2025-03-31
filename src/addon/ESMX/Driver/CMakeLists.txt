@@ -33,6 +33,15 @@ function(is_subdirectory CHECK_DIR POTENTIAL_PARENT RESULT_VAR)
   endif()
 endfunction()
 
+# unset user ESMX variables stored in cache
+get_cmake_property(_variableNames VARIABLES)
+foreach (_variableName ${_variableNames})
+  if("${_variableName}" MATCHES "^ESMX_*")
+    set(${_variableName} ${${_variableName}})
+    unset(${_variableName} CACHE)
+  endif()
+endforeach()
+
 # define ESMX_BUILD_FILE
 if(NOT DEFINED ESMX_BUILD_FILE)
   set(ESMX_BUILD_FILE "esmxBuild.yaml")
