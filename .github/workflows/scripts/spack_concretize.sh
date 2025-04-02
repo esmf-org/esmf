@@ -167,12 +167,11 @@ echo "  specs:" >> spack.yaml
 IFS=', ' read -r -a array <<< "$deps"
 for d in "${array[@]}"
 do
-  echo "  - $d %$comp target=$arch" >> spack.yaml
+  echo "  - $d target=$arch %$comp" >> spack.yaml
 done
 echo "  packages:" >> spack.yaml
 echo "    all:" >> spack.yaml
 echo "      target: ['$arch']" >> spack.yaml
-echo "      compiler: [$comp]" >> spack.yaml
 echo "      providers:" >> spack.yaml
 if [[ "$comp" == *"oneapi"* ]]; then
 echo "        mpi: [intel-${mpi}]" >> spack.yaml
