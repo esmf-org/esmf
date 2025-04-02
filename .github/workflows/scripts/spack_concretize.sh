@@ -138,13 +138,20 @@ fi
 if [[ "$comp" == *"gcc"* ]]; then
   echo "::group::Check gcc compiler"
   str=`echo $comp | awk -F\@ '{print $1}'`
-  echo "str = $str"
-  comp_ver=`grep -ir "${str}@" ~/.spack/packages.yaml | awk -F: '{print $3}' | awk '{print $1}' | tr -d "${str}@" | sort -n | tail -n 1`
-  echo "comp_ver = $comp_ver"
-  echo `grep -ir "${str}@" ~/.spack/packages.yaml`
-  echo `grep -ir "${str}@" ~/.spack/packages.yaml | awk -F: '{print $3}'`
-  echo `grep -ir "${str}@" ~/.spack/packages.yaml | awk -F: '{print $3}' | awk '{print $1}'`
-  echo `grep -ir "${str}@" ~/.spack/packages.yaml | awk -F: '{print $3}' | awk '{print $1}' | tr -d "${str}@"`
+  echo "A"
+  spack compiler list
+  echo "B"
+  spack compiler list | grep "${str}@"
+  echo "C"
+  spack compiler list | grep "${str}@" | tr -d "${str}@" | sort -n | tail -n 1
+  
+  #echo "str = $str"
+  #comp_ver=`grep -ir "${str}@" ~/.spack/packages.yaml | awk -F: '{print $3}' | awk '{print $1}' | tr -d "${str}@" | sort -n | tail -n 1`
+  #echo "comp_ver = $comp_ver"
+  #echo `grep -ir "${str}@" ~/.spack/packages.yaml`
+  #echo `grep -ir "${str}@" ~/.spack/packages.yaml | awk -F: '{print $3}'`
+  #echo `grep -ir "${str}@" ~/.spack/packages.yaml | awk -F: '{print $3}' | awk '{print $1}'`
+  #echo `grep -ir "${str}@" ~/.spack/packages.yaml | awk -F: '{print $3}' | awk '{print $1}' | tr -d "${str}@"`
 
   use_latest=0
   if [[ "$comp" == *"gcc@latest"* ]]; then
