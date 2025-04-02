@@ -137,15 +137,14 @@ fi
 # check given gcc compiler is found or not? If not, use newer version
 if [[ "$comp" == *"gcc"* ]]; then
   echo "::group::Check gcc compiler"
-  comp_str=${comp/@/@=}
-  str=`echo $comp_str | awk -F\@ '{print $1}'`
-  comp_ver=`grep -ir "${str}@=" ~/.spack/packages.yaml | tr -d "spec: ${str}@=" | sort -n | tail -n 1`
+  str=`echo $comp | awk -F\@ '{print $1}'`
+  comp_ver=`grep -ir "${str}@" packages.yaml | awk -F: '{print $3}' | awk '{print $1}' | tr -d "${str}@" | sort -n | tail -n 1`
 
   use_latest=0
   if [[ "$comp" == *"gcc@latest"* ]]; then
      echo "The gcc@latest is set. Trying to find latest available gcc compiler ..."
      use_latest=1
-  elif [ -z "$(cat ~/.spack/packages.yaml | grep $comp_str)" ]; then
+  elif [ -z "$(cat ~/.spack/packages.yaml | grep $comp)" ]; then
      echo "Given compiler ($comp) is not found! Exiting ..."
      exit 1
   fi
