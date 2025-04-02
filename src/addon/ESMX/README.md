@@ -224,7 +224,7 @@ This section contains a key for for each *component-name*, specifying component 
 
 | Option key       | Description / Value options                   | Default                |
 | ---------------- | --------------------------------------------- | ---------------------- |
-| `build_type`     | [build type:](#build-types) `auto`, `cmake`, `make`, `script`, `none`     | `auto`                 |
+| `build_type`     | [build type:](#build-types) `auto`, `cmake`, `cmake.external`, `make`, `script`, `none`     | `auto`                 |
 | `build_script`   | build script                                  | `compile`              |
 | `build_args`     | scalar or list of arguments for building component                        | *None*                 |
 | `source_dir`     | source directory for build                    | *component-name*       |
@@ -250,19 +250,22 @@ This section contains a key for for each *component-name*, specifying component 
 ##### Build Types:
 
 **`auto`** -
-The ESMX build system searches for `CMakeLists.txt`, `Makefile`, and a build_script in order in the `source_dir` and uses the first build option it finds. If no build files are found then the ESMX build system searches for the CMake configuration file, fortran module, and libraries in the `install_prefix` directory but does not build the model. If no build option, CMake configuration, or libraries are found then the build fails.
+The ESMX build system searches for `CMakeLists.txt` (cmake), `Makefile` (make), and a build_script (script) in order in the `source_dir` and uses the first build option it finds. If no build files are found then the component's `build_type` is set to `none`.
 
 **`cmake`** -
-The ESMX build system searches for `CMakeLists.txt` in the `source_dir` and builds using CMake. Once built, the ESMX build system searches for the CMake configuration file and libraries in the `install_prefix` directory.
+The ESMX build system integrates the component's `source_dir` into the ESMX CMake build using the CMake `add_subdirectory()` function. This ensures a shared build environment and consistent package handling between components and ESMX.
+
+**`cmake.external`** -
+The ESMX build system attempts to configure/build/install the component externally by calling CMake on the component's `source_dir`. Once built, the ESMX build system searches for the CMake configuration file, Fortran module, and libraries in the `install_prefix` directory.
 
 **`make`** -
-The ESMX build system searches for `Makefile` in the `source_dir` and builds using Make without a target. If a specific target is desired then it can be configured using `build_args`. Once built, the ESMX build system searches for libraries and fortran modules in the `install_prefix` directory.
+The ESMX build system uses GNU Make on the component's `source_dir` without a target. If a specific target is desired then it can be configured using `build_args`. Once built, the ESMX build system searches for libraries and Fortran modules in the `install_prefix` directory.
 
 **`script`** -
-The ESMX build system searches for a `build_script` in the `source_dir` and builds using this script. Once built, the ESMX build system searches for libraries and fortran modules in the `install_prefix` directory.
+The ESMX build system uses `build_script` in the component's `source_dir` to build the component. Once built, the ESMX build system searches for the CMake configuration file, Fortran module, and libraries in the `install_prefix` directory.
 
 **`none`** -
-The ESMX build system will not build the component. The ESMX build system searches for the CMake configuration file, fortran module, and libraries in the install_prefix directory.
+The ESMX build system will not build the component. The ESMX build system searches for the CMake configuration file, Fortran module, and libraries in the `install_prefix` directory.
 
 
 #### Test Options (`tests` key)

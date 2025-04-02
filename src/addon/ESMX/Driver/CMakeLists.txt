@@ -333,6 +333,48 @@ foreach(CMP IN ITEMS ${COMPS})
   if(${CMP_BUILD_TYPE} STREQUAL "cmake")
     # CMake builds are only configured at this stage!
 
+  # build component with cmake.external
+  elseif(${CMP_BUILD_TYPE} STREQUAL "cmake.external")
+    message(STATUS "ESMX building (CMAKE external) - ${CMP} - ${CMP_SOURCE_DIR}")
+    find_file(FND_CMAKE_LISTS
+      NAMES CMakeLists.txt cmakelists.txt CMAKELISTS.txt
+      PATHS ${CMP_SOURCE_DIR}
+      NO_CACHE NO_DEFAULT_PATH
+    )
+    if(NOT FND_CMAKE_LISTS)
+      message(FATAL_ERROR "Could not find CMakeLists.txt"
+        " in ${CMP_SOURCE_DIR}."
+        " Check source_dir in build configuration."
+      )
+    endif()
+    unset(FND_CMAKE_LISTS)
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${CMP})
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -S${CMP_SOURCE_DIR}
+        ${ESMX_CMAKE_BUILD_ARGS}
+        ${ESMX_BUILD_ARGS}
+        ${CMP_BUILD_ARGS}
+        -DCMAKE_INSTALL_PREFIX=${CMP_INSTALL_PREFIX}
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${CMP}
+      RESULT_VARIABLE ret
+    )
+    esmx_check_ret(${ret} "cmake generate failed for ${CMP}")
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} --build .
+        ${ESMX_CMAKE_BUILD_VERBOSE}
+        ${ESMX_CMAKE_BUILD_JOBS}
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${CMP}
+      RESULT_VARIABLE ret
+    )
+    esmx_check_ret(${ret} "cmake build failed for ${CMP}")
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} --install .
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${CMP}
+      RESULT_VARIABLE ret
+    )
+    esmx_check_ret(${ret} "cmake install failed for ${CMP}")
+
   # build component with make
   elseif(${CMP_BUILD_TYPE} STREQUAL "make")
     message(STATUS "ESMX building (MAKE) - ${CMP} - ${CMP_SOURCE_DIR}")
