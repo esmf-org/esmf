@@ -138,7 +138,7 @@ fi
 if [[ "$comp" == *"gcc"* ]]; then
   echo "::group::Check gcc compiler"
   str=`echo $comp | awk -F\@ '{print $1}'`
-  comp_ver=`grep -ir "${str}@" packages.yaml | awk -F: '{print $3}' | awk '{print $1}' | tr -d "${str}@" | sort -n | tail -n 1`
+  comp_ver=`grep -ir "${str}@" ~/.spack/packages.yaml | awk -F: '{print $3}' | awk '{print $1}' | tr -d "${str}@" | sort -n | tail -n 1`
 
   use_latest=0
   if [[ "$comp" == *"gcc@latest"* ]]; then
