@@ -95,7 +95,7 @@ fi
 # find compilers
 . spack/share/spack/setup-env.sh
 spack compiler find
-cat ~/.spack/linux/compilers.yaml
+cat ~/.spack/packages.yaml
 echo "::endgroup::"
 
 # find external tools
@@ -139,13 +139,13 @@ if [[ "$comp" == *"gcc"* ]]; then
   echo "::group::Check gcc compiler"
   comp_str=${comp/@/@=}
   str=`echo $comp_str | awk -F\@ '{print $1}'`
-  comp_ver=`grep -ir "${str}@=" ~/.spack/linux/compilers.yaml | tr -d "spec: ${str}@=" | sort -n | tail -n 1`
+  comp_ver=`grep -ir "${str}@=" ~/.spack/packages.yaml | tr -d "spec: ${str}@=" | sort -n | tail -n 1`
 
   use_latest=0
   if [[ "$comp" == *"gcc@latest"* ]]; then
      echo "The gcc@latest is set. Trying to find latest available gcc compiler ..."
      use_latest=1
-  elif [ -z "$(cat ~/.spack/linux/compilers.yaml | grep $comp_str)" ]; then
+  elif [ -z "$(cat ~/.spack/packages.yaml | grep $comp_str)" ]; then
      echo "Given compiler ($comp) is not found! Exiting ..."
      exit 1
   fi
