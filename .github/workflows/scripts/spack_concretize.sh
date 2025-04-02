@@ -98,9 +98,9 @@ spack compiler find
 cat ~/.spack/packages.yaml
 echo "::endgroup::"
 
-# find external tools
+# find external tools, excluding cmake since runner uses 4.0 which is not compatible with some libraries
 echo "::group::Find Externals"
-spack external find
+spack external find --exclude cmake
 echo "::endgroup::"
 
 # create config file (to fix FetchError issue)
