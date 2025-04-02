@@ -8,7 +8,8 @@ LOCDIR	  = src/Infrastructure/IO/tests
 
 .NOTPARALLEL:
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IO_NetCDFUTest  \
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IO_NetCDF_UtilsUTest \
+		$(ESMF_TESTDIR)/ESMCI_IO_NetCDFUTest  \
 		$(ESMF_TESTDIR)/ESMCI_IO_PIOUTest \
 		$(ESMF_TESTDIR)/ESMC_IO_InqUTest \
 		$(ESMF_TESTDIR)/ESMF_IO_YAMLUTest \
@@ -16,7 +17,8 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IO_NetCDFUTest  \
 		$(ESMF_TESTDIR)/ESMF_IO_MultitileUTest \
 		$(ESMF_TESTDIR)/ESMF_IO_FileTypeCheckUTest
 
-TESTS_RUN     = RUN_ESMCI_IO_NetCDFUTest \
+TESTS_RUN     = RUN_ESMCI_IO_NetCDF_UtilsUTest \
+		RUN_ESMCI_IO_NetCDFUTest \
 		RUN_ESMCI_IO_PIOUTest \
 		RUN_ESMC_IO_InqUTest \
 		RUN_ESMF_IO_YAMLUTest \
@@ -24,7 +26,8 @@ TESTS_RUN     = RUN_ESMCI_IO_NetCDFUTest \
 		RUN_ESMF_IO_MultitileUTest \
 		RUN_ESMF_IO_FileTypeCheckUTest
 
-TESTS_RUN_UNI = RUN_ESMCI_IO_NetCDFUTestUNI \
+TESTS_RUN_UNI = RUN_ESMCI_IO_NetCDF_UtilsUTestUNI \
+		RUN_ESMCI_IO_NetCDFUTestUNI \
 		RUN_ESMCI_IO_PIOUTestUNI \
 		RUN_ESMC_IO_InqUTestUNI \
 		RUN_ESMF_IO_YAMLUTestUNI \
@@ -39,7 +42,13 @@ CLEANDIRS   =
 CLEANFILES  = $(TESTS_BUILD)
 CLOBBERDIRS =
 
+# Note that we run this with NP=1 because there is little value in running these tests
+# with multiple processors
+RUN_ESMCI_IO_NetCDF_UtilsUTest:
+	$(MAKE) TNAME=IO_NetCDF_Utils NP=1 citest
 
+RUN_ESMCI_IO_NetCDF_UtilsUTestUNI:
+	$(MAKE) TNAME=IO_NetCDF_Utils NP=1 citest
 
 RUN_ESMCI_IO_NetCDFUTest:
 	cp -f ./io_netcdf_testdata.nc $(ESMF_TESTDIR)
