@@ -56,7 +56,12 @@ int main(void)
    //NEX_UTest
    strcpy(name, "ncerrToEsmcRc with error");
    strcpy(failMsg, "Did not return ESMF_FAILURE");
+#if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
    rc = NetCDFUtils::ncerrToEsmcRc(NC_EBADID);
+#else
+   // This is a dummy NetCDF error code, since we don't have a real NetCDF library
+   rc = NetCDFUtils::ncerrToEsmcRc(NC_NOERR+1);
+#endif
    Test((rc == ESMF_FAILURE), name, failMsg, &result, __FILE__, __LINE__, 0);
    //----------------------------------------------------------------------------
 
@@ -69,13 +74,15 @@ int main(void)
    strcpy(failMsg, "Did not return ESMF_NOKIND for one or more NetCDF types");
 #endif
    const int num_vals = 6;
-   const nc_type ncTypeVals[num_vals] = {NC_BYTE, NC_CHAR, NC_SHORT, NC_INT, NC_FLOAT, NC_DOUBLE};
 #if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
+   const nc_type ncTypeVals[num_vals] = {NC_BYTE, NC_CHAR, NC_SHORT, NC_INT, NC_FLOAT, NC_DOUBLE};
    const ESMC_TypeKind_Flag expectedEsmcTypeVals[num_vals] = {
       ESMC_TYPEKIND_I1, ESMC_TYPEKIND_CHARACTER, ESMC_TYPEKIND_I2,
       ESMC_TYPEKIND_I4, ESMC_TYPEKIND_R4, ESMC_TYPEKIND_R8
    };
 #else
+   const nc_type ncTypeVals[num_vals] = {NC_UNSPECIFIED, NC_UNSPECIFIED, NC_UNSPECIFIED,
+      NC_UNSPECIFIED, NC_UNSPECIFIED, NC_UNSPECIFIED};
    const ESMC_TypeKind_Flag expectedEsmcTypeVals[num_vals] = {
       ESMF_NOKIND, ESMF_NOKIND, ESMF_NOKIND,
       ESMF_NOKIND, ESMF_NOKIND, ESMF_NOKIND
