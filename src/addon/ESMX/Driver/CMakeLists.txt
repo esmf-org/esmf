@@ -16,23 +16,6 @@ function(esmx_check_ret RETVAL MESSAGE)
   endif()
 endfunction()
 
-# is_subdirectory check functions
-function(is_subdirectory CHECK_DIR POTENTIAL_PARENT RESULT_VAR)
-  string(FIND "${CHECK_DIR}" "${POTENTIAL_PARENT}" FIND_RESULT)
-  if(FIND_RESULT EQUAL 0)
-    # CHECK_DIR starts with POTENTIAL_PARENT
-    string(LENGTH "${POTENTIAL_PARENT}" PARENT_LENGTH)
-    string(LENGTH "${CHECK_DIR}" CHECK_LENGTH)
-    if(CHECK_LENGTH GREATER PARENT_LENGTH)
-      set(${RESULT_VAR} TRUE PARENT_SCOPE)
-    else()
-      set(${RESULT_VAR} FALSE PARENT_SCOPE)
-    endif()
-  else()
-    set(${RESULT_VAR} FALSE PARENT_SCOPE)
-  endif()
-endfunction()
-
 # unset user ESMX variables stored in cache
 get_cmake_property(_variableNames VARIABLES)
 foreach (_variableName ${_variableNames})
@@ -415,14 +398,9 @@ foreach(CMP IN ITEMS ${COMPS})
     endif()
   elseif(${CMP_BUILD_TYPE} STREQUAL "cmake")
     message(STATUS "ESMX Found CMake subdirectory for ${CMP}: ${CMP_SOURCE_DIR}")
-    is_subdirectory(${CMP_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR} IS_SUB)
-    if(IS_SUB)
-      # component source dir under current source dir
-      add_subdirectory(${CMP_SOURCE_DIR})
-    else()
-      # component source dir NOT under current source dir
-      add_subdirectory(${CMP_SOURCE_DIR} ${CMAKE_BINARY_DIR}/${CMP})
-    endif()
+    # add source subdirectory with explicit binary directory path. This works for
+    # internal as well as external component source directories
+    add_subdirectory(${CMP_SOURCE_DIR} ${CMAKE_BINARY_DIR}/${CMP})
     if(TARGET ${CMP_CMAKE_TARGET})
       if(${CMP_LINK_INTO_APP} STREQUAL "True")
         message(STATUS "ESMX Found CMake target dependency for ${CMP}: ${CMP_CMAKE_TARGET}")
