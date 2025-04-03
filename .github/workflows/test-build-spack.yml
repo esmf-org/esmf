@@ -1,4 +1,4 @@
-name: Build ESMF Using Spack
+name: ESMF Spack Test
 
 env:
   compiler: gcc@latest

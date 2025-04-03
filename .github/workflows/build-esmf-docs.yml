@@ -1,4 +1,4 @@
-name: Build ESMF Docs
+name: ESMF Docs
 
 on:
   workflow_dispatch:
