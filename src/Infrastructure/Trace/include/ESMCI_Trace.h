@@ -89,7 +89,11 @@ namespace ESMCI {
   void TraceTest_GetMPIWaitStats(int *count, long long *time);
   void TraceTest_CheckMPIRegion(std::string name, int *exists);
   //////////////////////////////
-    
+
+  // Trace by specific type info
+  enum ESMC_ProfileType {ESMC_PROFILETYPE_REGRID=0, ESMC_PROFILETYPE_NUM};
+
+
   
   ////////////////////////////////
 
@@ -108,6 +112,8 @@ namespace ESMCI {
   void TraceEventMemInfo();
   void TraceEventClock(int *ep_year, int *ep_month, int *ep_day,
                        int *ep_hour, int *ep_minute, int *ep_second);
+
+  int TraceGetProfileTypeInfo(enum ESMC_ProfileType type);
 
 }
 
