@@ -474,8 +474,6 @@ foreach(CMP IN ITEMS ${COMPS})
     if(FND_FORT_MODULE)
       message(STATUS "ESMX Found Fortran module ${CMP_FORT_MODULE} for ${CMP} in: ${FND_FORT_MODULE}")
       target_include_directories(esmx_driver PUBLIC ${FND_FORT_MODULE})
-    else()
-      message(FATAL_ERROR "Cannot find fort_module ${CMP_FORT_MODULE} for ${CMP} in ${CMP_INSTALL_PREFIX}")
     endif()
     unset(FND_FORT_MODULE)
     # not a known CMake target -> find the libraries
