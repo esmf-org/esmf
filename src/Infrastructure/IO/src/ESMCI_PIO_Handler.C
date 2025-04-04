@@ -1471,7 +1471,7 @@ void PIO_Handler::attPackPut (
     ESMC_CATCH_ERRPASSTHRU
 
     ESMC_TypeKind_Flag att_type = ESMCI::json_type_to_esmf_typekind(jcurr, true, is_32bit);
-    nc_type att_nc_type = NetCDFUtils::esmcToNcType(att_type);
+    nc_type att_nc_type = esmcToNcType(att_type);
     // We deliberately don't do error checking here on att_nc_type (checking whether it's
     // NC_UNSPECIFIED): we only use att_nc_type in certain cases, and don't want to raise
     // an error in situations where we don't need its value anyway.

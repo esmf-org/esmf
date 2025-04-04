@@ -37,12 +37,12 @@ static const char *const version = "$Id$";
 
 //-----------------------------------------------------------------------------
 #undef ESMC_METHOD
-#define ESMC_METHOD "ESMCI::NetCDFUtils::ncerrToEsmcRc"
+#define ESMC_METHOD "ESMCI::ncerrToEsmcRc"
 //BOPI
-// !IROUTINE:  ESMCI::NetCDFUtils::ncerrToEsmcRc
+// !IROUTINE:  ESMCI::ncerrToEsmcRc
 //
 // !INTERFACE:
-int ESMCI::NetCDFUtils::ncerrToEsmcRc(
+int ESMCI::ncerrToEsmcRc(
 //
 // !RETURN VALUE:
 //    int ESMC error code
@@ -63,12 +63,12 @@ int ESMCI::NetCDFUtils::ncerrToEsmcRc(
 
 //-----------------------------------------------------------------------------
 #undef ESMC_METHOD
-#define ESMC_METHOD "ESMCI::NetCDFUtils::ncToEsmcType"
+#define ESMC_METHOD "ESMCI::ncToEsmcType"
 //BOPI
-// !IROUTINE:  ESMCI::NetCDFUtils::ncToEsmcType
+// !IROUTINE:  ESMCI::ncToEsmcType
 //
 // !INTERFACE:
-ESMC_TypeKind_Flag ESMCI::NetCDFUtils::ncToEsmcType(
+ESMC_TypeKind_Flag ESMCI::ncToEsmcType(
 //
 // !RETURN VALUE:
 //    ESMC_TypeKind_Flag ESMC data type code
@@ -116,12 +116,12 @@ ESMC_TypeKind_Flag ESMCI::NetCDFUtils::ncToEsmcType(
 
 //-----------------------------------------------------------------------------
 #undef ESMC_METHOD
-#define ESMC_METHOD "ESMCI::NetCDFUtils::esmcToNcType"
+#define ESMC_METHOD "ESMCI::esmcToNcType"
 //BOPI
-// !IROUTINE:  ESMCI::NetCDFUtils::esmcToNcType
+// !IROUTINE:  ESMCI::esmcToNcType
 //
 // !INTERFACE:
-nc_type ESMCI::NetCDFUtils::esmcToNcType(
+nc_type ESMCI::esmcToNcType(
 //
 // !RETURN VALUE:
 //    nc_type NetCDF data type code
