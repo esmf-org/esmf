@@ -1462,6 +1462,13 @@ endif
 #-------------------------------------------------------------------------------
 # PIO
 #-------------------------------------------------------------------------------
+
+# This section for PIO needs to come before the NETCDF and PNETCDF sections so that -lpioc
+# appears before -lnetcdf on the link line: Otherwise, some linkers fail due to missing
+# symbols (e.g., on cygwin). However, note that this PIO section references ESMF_NETCDF,
+# so it's important that the final value of ESMF_NETCDF be set at this point (rather than
+# potentially being modified in the NETCDF section below).
+
 ifneq ($(origin ESMF_PIO), environment)
 ifndef ESMF_PIO
 export ESMF_PIO = $(ESMF_PIODEFAULT)
