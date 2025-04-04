@@ -640,7 +640,7 @@ void IO_NetCDF::destruct(void) {
       numValues *= dimSizes[j];
     }
 
-    ESMC_TypeKind_Flag  arrayType = NetCDFUtils::ncToEsmcType(nctype);
+    ESMC_TypeKind_Flag  arrayType = ncToEsmcType(nctype);
     if (arrayType == ESMF_NOKIND) {
       string errstr = string(": problem converting NetCDF type to ESMF type");
       ESMC_LogDefault.Write(errstr, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
@@ -883,7 +883,7 @@ void IO_NetCDF::destruct(void) {
 
     ESMC_TypeKind_Flag  esmcType = thisArray->getTypekind();
 //printf("ESMC Type: %d\n", esmcType);
-    nc_type            ncType = NetCDFUtils::esmcToNcType(esmcType);
+    nc_type            ncType = esmcToNcType(esmcType);
     if (ncType == NC_UNSPECIFIED) {
       string errstr = string(": problem converting ESMF type to NetCDF type");
       ESMC_LogDefault.MsgFoundError(ESMF_FAILURE, errstr, ESMC_CONTEXT, &localrc);

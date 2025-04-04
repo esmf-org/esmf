@@ -48,7 +48,7 @@ int main(void)
    //NEX_UTest
    strcpy(name, "ncerrToEsmcRc with non-error");
    strcpy(failMsg, "Did not return ESMF_SUCCESS");
-   rc = NetCDFUtils::ncerrToEsmcRc(NC_NOERR);
+   rc = ncerrToEsmcRc(NC_NOERR);
    Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
    //----------------------------------------------------------------------------
 
@@ -57,10 +57,10 @@ int main(void)
    strcpy(name, "ncerrToEsmcRc with error");
    strcpy(failMsg, "Did not return ESMF_FAILURE");
 #if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
-   rc = NetCDFUtils::ncerrToEsmcRc(NC_EBADID);
+   rc = ncerrToEsmcRc(NC_EBADID);
 #else
    // This is a dummy NetCDF error code, since we don't have a real NetCDF library
-   rc = NetCDFUtils::ncerrToEsmcRc(NC_NOERR+1);
+   rc = ncerrToEsmcRc(NC_NOERR+1);
 #endif
    Test((rc == ESMF_FAILURE), name, failMsg, &result, __FILE__, __LINE__, 0);
    //----------------------------------------------------------------------------
@@ -90,7 +90,7 @@ int main(void)
 #endif
    allCorrect = true;
    for (int i = 0; i < num_vals; ++i) {
-      esmcTypeVal = NetCDFUtils::ncToEsmcType(ncTypeVals[i]);
+      esmcTypeVal = ncToEsmcType(ncTypeVals[i]);
       if (esmcTypeVal != expectedEsmcTypeVals[i]) {
          allCorrect = false;
       }
@@ -102,7 +102,7 @@ int main(void)
    //NEX_UTest
    strcpy(name, "ncToEsmcType with an invalid NetCDF type");
    strcpy(failMsg, "Did not return ESMF_NOKIND");
-   esmcTypeVal = NetCDFUtils::ncToEsmcType(NC_UNSPECIFIED);
+   esmcTypeVal = ncToEsmcType(NC_UNSPECIFIED);
    Test((esmcTypeVal == ESMF_NOKIND), name, failMsg, &result, __FILE__, __LINE__, 0);
    //----------------------------------------------------------------------------
 
@@ -135,7 +135,7 @@ int main(void)
 #endif
    allCorrect = true;
    for (int i = 0; i < num_vals2; ++i) {
-      ncTypeVal = NetCDFUtils::esmcToNcType(esmcTypeVals[i]);
+      ncTypeVal = esmcToNcType(esmcTypeVals[i]);
       if (ncTypeVal != expectedNcTypeVals[i]) {
          allCorrect = false;
       }
@@ -147,7 +147,7 @@ int main(void)
    //NEX_UTest
    strcpy(name, "esmcToNcType with an invalid ESMC type");
    strcpy(failMsg, "Did not return NC_UNSPECIFIED");
-   ncTypeVal = NetCDFUtils::esmcToNcType(ESMF_NOKIND);
+   ncTypeVal = esmcToNcType(ESMF_NOKIND);
    Test((ncTypeVal == NC_UNSPECIFIED), name, failMsg, &result, __FILE__, __LINE__, 0);
    //----------------------------------------------------------------------------
 
