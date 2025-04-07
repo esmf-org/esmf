@@ -90,10 +90,6 @@ namespace ESMCI {
   void TraceTest_CheckMPIRegion(std::string name, int *exists);
   //////////////////////////////
 
-  // Trace by specific type info
-  enum ESMC_ProfileType {ESMC_PROFILETYPE_REGRID=0, ESMC_PROFILETYPE_NUM};
-
-
   
   ////////////////////////////////
 

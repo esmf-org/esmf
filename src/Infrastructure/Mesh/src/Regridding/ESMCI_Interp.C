@@ -2928,6 +2928,9 @@ zz(0),
 interp_method(imethod)
 {
 
+  // Declare local return code
+  int localrc;
+  
   // Different paths for parallel/serial
   UInt search_obj_type = grend.GetDstObjType();
 
@@ -2950,9 +2953,12 @@ interp_method(imethod)
   }
 
   if (is_parallel) {
-    int localrc;
-    ESMCI::TraceEventRegionEnter("Regrid geometry redist", &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+
+    // Enter profile around geom redist
+    if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+      ESMCI::TraceEventRegionEnter("Regrid geometry redist", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+    }
     
     // Form the parallel rendezvous meshes/specs
    //  if (Par::Rank() == 0)
@@ -2961,8 +2967,11 @@ interp_method(imethod)
                 dstF.size(), (dstF.size()>0)?(&dstF[0]):NULL,
                 &zz, midmesh==0? true:false);
 
-    ESMCI::TraceEventRegionExit("Regrid geometry redist", &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+    // Exit profile around geom redist
+    if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+      ESMCI::TraceEventRegionExit("Regrid geometry redist", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+    }
     
     // Check grend status, if it's not complete
     if (grend.status != GEOMREND_STATUS_COMPLETE) {
@@ -2986,34 +2995,44 @@ interp_method(imethod)
     }
 
 
-
     if (has_nearest_dst_to_src) {
       Throw() << "unable to proceed with interpolation method dst_to_src";
 
     } else if (has_nearest_src_to_dst) {
-      int localrc;
-      ESMCI::TraceEventRegionEnter("Search", &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
-
+      // Enter profile around search
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+        ESMCI::TraceEventRegionEnter("Search", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
+      
       // Do search
       ParSearchNearestSrcToDst(grend.GetSrcPlistRend(), grend.GetDstPlistRend(), unmappedaction, sres, set_dst_status, dst_status);
-      
-      ESMCI::TraceEventRegionExit("Search", &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+
+      // Exit profile for search
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+        ESMCI::TraceEventRegionExit("Search", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
       
       // Redistribute regrid status
       if (set_dst_status) {
         dst_status.Migrate(*dstplist);
       }
     } else if (has_nearest_idavg) {
-      int localrc;
-      ESMCI::TraceEventRegionEnter("Search", &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      // Enter profile around search      
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+        ESMCI::TraceEventRegionEnter("Search", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
       
+      // Do search
       ParSearchNearestSrcToDstNPnts(grend.GetSrcPlistRend(), grend.GetDstPlistRend(), num_src_pnts, unmappedaction, sres, set_dst_status, dst_status);
 
-      ESMCI::TraceEventRegionExit("Search", &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      // Exit profile for search
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+        ESMCI::TraceEventRegionExit("Search", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
       
       // Redistribute regrid status
       if (set_dst_status) {
@@ -3021,16 +3040,21 @@ interp_method(imethod)
       }
     } else {
       if (search_obj_type == MeshObj::NODE) {
-        int localrc;
-        ESMCI::TraceEventRegionEnter("Search", &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+        // Enter profile around search      
+        if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+          ESMCI::TraceEventRegionEnter("Search", &localrc);
+          if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+        }
         
         // Search
         OctSearch(grend.GetSrcRend(), grend.GetDstPlistRend(), mtype, search_obj_type,
                   unmappedaction, sres, set_dst_status, dst_status, 1e-8);
 
-        ESMCI::TraceEventRegionExit("Search", &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+        // Exit profile for search
+        if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+          ESMCI::TraceEventRegionExit("Search", &localrc);
+          if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+        }
         
         // Redistribute regrid status
         if (set_dst_status) {
@@ -3047,19 +3071,28 @@ interp_method(imethod)
         // Search
         //      OctSearchElems(grend.GetDstRend(), unmappedaction, grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, 1e-8, sres);
         if(freeze_src_) {
-          int localrc;
-          ESMCI::TraceEventRegionEnter("Search", &localrc);
-          if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+          // Enter profile around search      
+          if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+            ESMCI::TraceEventRegionEnter("Search", &localrc);
+            if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+          }
 
+          // Do search
           OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
 
-          ESMCI::TraceEventRegionExit("Search", &localrc);
-          if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
-
-        } else {
-          ESMCI::TraceEventRegionEnter("Search", &localrc);
-          if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+          // Exit profile for search
+          if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+            ESMCI::TraceEventRegionExit("Search", &localrc);
+            if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+          }
           
+        } else {
+          // Enter profile around search      
+          if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+            ESMCI::TraceEventRegionEnter("Search", &localrc);
+            if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+          }
+            
           // If 2nd order see if it's an XGrid and then use that
           if (interp_method == Interp::INTERP_CONSERVE_2ND) {
 
@@ -3074,8 +3107,11 @@ interp_method(imethod)
             OctSearchElems(grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
           }
 
-          ESMCI::TraceEventRegionExit("Search", &localrc);
-          if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+          // Exit profile for search          
+          if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+            ESMCI::TraceEventRegionExit("Search", &localrc);
+            if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+          }
           
         }
       }
@@ -3091,42 +3127,60 @@ interp_method(imethod)
   } else {
     // Serial track.  Meshes already in geometric rendezvous.  (Perhaps get
     // the subset of the mesh for interpolating??)
-    int localrc;
 
     if (has_nearest_dst_to_src) {
       Throw() << "unable to proceed with interpolation method dst_to_src";
     } else if (has_nearest_src_to_dst) {
+      // Enter profile around search      
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+        ESMCI::TraceEventRegionEnter("Search", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
 
-      ESMCI::TraceEventRegionEnter("Search", &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
-      
+      // Do search      
       SearchNearestSrcToDst(*srcpointlist, *dstpointlist, unmappedaction, sres, set_dst_status, dst_status);
 
-      ESMCI::TraceEventRegionExit("Search", &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
-      
+      // Exit profile for search
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+        ESMCI::TraceEventRegionExit("Search", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
 
     } else if (has_nearest_idavg) {
+      // Enter profile around search      
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+        ESMCI::TraceEventRegionEnter("Search", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
 
-      ESMCI::TraceEventRegionEnter("Search", &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
-
+      // Do search      
       SearchNearestSrcToDstNPnts(*srcpointlist, *dstpointlist, num_src_pnts, unmappedaction, sres, set_dst_status, dst_status);
 
-      ESMCI::TraceEventRegionExit("Search", &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      // Exit profile for search      
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+        ESMCI::TraceEventRegionExit("Search", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
       
     } else {
 
       if (search_obj_type == MeshObj::NODE) {
+        // Enter profile around search      
+        if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
           ESMCI::TraceEventRegionEnter("Search", &localrc);
           if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
-        
+        }
+
+        // Do search
         OctSearch(*src, *dstpointlist, mtype, search_obj_type,
                   unmappedaction, sres, set_dst_status, dst_status, 1e-8);
 
-        ESMCI::TraceEventRegionExit("Search", &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+        // Exit profile for search
+        if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+          ESMCI::TraceEventRegionExit("Search", &localrc);
+          if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+        }
+          
         //OctSearch(src, dest, mtype, search_obj_type, unmappedaction, sres, 1e-8);
       } else if (search_obj_type == MeshObj::ELEMENT) {
         // Check grids
@@ -3134,10 +3188,11 @@ interp_method(imethod)
           _check_mesh(*src, "source");
           _check_mesh(*dest, "destination");
         }
-        
+        // Enter profile around search      
+        if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
           ESMCI::TraceEventRegionEnter("Search", &localrc);
           if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
-       
+        }
 
         // If 2nd order see if it's an XGrid and then use that
         if (interp_method == Interp::INTERP_CONSERVE_2ND) {
@@ -3152,8 +3207,11 @@ interp_method(imethod)
           OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, *dest, unmappedaction, 1e-8, sres);
         }
 
-        ESMCI::TraceEventRegionExit("Search", &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+        // Exit profile for search
+        if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+          ESMCI::TraceEventRegionExit("Search", &localrc);
+          if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+        }
       }
     }
 
@@ -3277,14 +3335,22 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
   // Calculate weights
   // Trace around weight generation
   int localrc;
-  ESMCI::TraceEventRegionEnter("Weight calculation", &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
   
+  // Enter profile for weight calc.
+  if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+    ESMCI::TraceEventRegionEnter("Weight calculation", &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+  }
+
+  // Weight calc. using search results
   if (is_parallel) mat_transfer_parallel(fpair_num, iw, src_frac, dst_frac, set_dst_status, dst_status);
   else mat_transfer_serial(fpair_num, iw, src_frac, dst_frac, set_dst_status, dst_status);
 
-  ESMCI::TraceEventRegionExit("Weight calculation", &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+  // Exit profile for weight calc.
+  if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+    ESMCI::TraceEventRegionExit("Weight calculation", &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+  }
   
 #if 0
   {
