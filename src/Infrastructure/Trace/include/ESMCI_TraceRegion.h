@@ -13,11 +13,18 @@
 
 #include "ESMCI_Comp.h"
 
-namespace ESMCI { 
+namespace ESMCI {
+
   void TraceEventRegionEnter(std::string name, int *rc);
   void TraceEventRegionExit(std::string name, int *rc);
   void TraceEventCompPhaseEnter(ESMCI::Comp *comp, enum ESMCI::method *method, int *phase, int *rc);
   void TraceEventCompPhaseExit(ESMCI::Comp *comp, enum ESMCI::method *method, int *phase, int *rc);
+
+  // Trace by specific type info
+  enum ESMC_ProfileType {ESMC_PROFILETYPE_REGRID=0, ESMC_PROFILETYPE_NUM};
+  
+  int TraceGetProfileTypeInfo(enum ESMC_ProfileType type);
+
 }
 
 #endif

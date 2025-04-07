@@ -26,6 +26,7 @@
 #include "ESMCI_Array.h"
 
 #include "ESMCI_TraceMacros.h"  // for profiling
+#include "ESMCI_TraceRegion.h"  // for profiling
 
 #include "Mesh/include/ESMCI_Mesh.h"
 #include "Mesh/include/Legacy/ESMCI_MeshRead.h"
@@ -111,13 +112,19 @@ void ESMCI_regrid_create(
 #define ESMC_METHOD "ESMCI_regrid_create()"
   Trace __trace(" FTN_X(regrid_test)(ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
 
-  // Create string describing regrid case
-  std::string ristr;
-  create_regrid_info_str(arraysrcpp, arraydstpp, regridMethod, ristr);
+  // Declare local return code
+  int localrc;
 
-  // Trace around whole regrid create
-  ESMCI::TraceEventRegionEnter(ristr, NULL);
-  
+  // Enter profile around whole regrid create
+  std::string ristr;
+  if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 0) {
+    // Create string describing regrid case
+    create_regrid_info_str(arraysrcpp, arraydstpp, regridMethod, ristr);
+    
+    // Trace around whole regrid create
+    ESMCI::TraceEventRegionEnter(ristr, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
+  }
 
   // Dereference input variables
   ESMCI::Array &srcarray = **arraysrcpp;
@@ -147,9 +154,6 @@ void ESMCI_regrid_create(
 #endif
 
   try {
-
-    // Declare local return code
-    int localrc;
 
     // Initialize the parallel environment for mesh
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
@@ -329,11 +333,11 @@ void ESMCI_regrid_create(
     }
 
 
-
-    // Trace around weight generation
-    ESMCI::TraceEventRegionEnter("Weight generation", &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
-  
+    // Enter profile around weight generation
+    if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 1) {
+      ESMCI::TraceEventRegionEnter("Weight generation", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+    }
     
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Entering weight generation.", ESMC_LOGMSG_INFO);
@@ -397,10 +401,11 @@ void ESMCI_regrid_create(
       }
     }
 
-    // Trace around weight generation
-    ESMCI::TraceEventRegionExit("Weight generation", &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
-
+    // Exit profile around weight generation
+    if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 1) {
+      ESMCI::TraceEventRegionExit("Weight generation", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+    }
     
     ESMCI_REGRID_TRACE_EXIT("NativeMesh Weight Generation");
 
@@ -643,11 +648,12 @@ void ESMCI_regrid_create(
 
     // Build the RouteHandle using ArraySMMStore() 
     if (*has_rh) {
-      
-      // Trace around routehandle creation
-      ESMCI::TraceEventRegionEnter("RouteHandle creation", &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
-      
+
+      // Enter profile around routehandle creation
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 1) {
+        ESMCI::TraceEventRegionEnter("RouteHandle creation", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
 
       // Set some flags
       enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
@@ -666,10 +672,11 @@ void ESMCI_regrid_create(
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
 
 
-      // Trace around routehandle creation
-      ESMCI::TraceEventRegionExit("RouteHandle creation", &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
-      
+      // Exit profile around routehandle creation
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 1) {
+        ESMCI::TraceEventRegionExit("RouteHandle creation", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
     }
 
     ESMCI_REGRID_TRACE_EXIT("NativeMesh ArraySMMStore");
@@ -844,8 +851,12 @@ void ESMCI_regrid_create(
   ESMC_LogDefault.Write("c_esmc_regrid_create(): Final return.", ESMC_LOGMSG_INFO);
 #endif
 
-  // Trace around whole regrid create
-  ESMCI::TraceEventRegionExit(ristr, NULL);
+      
+  // Exit profile around whole regrid create
+  if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 0) {
+    ESMCI::TraceEventRegionExit(ristr, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
+  }
   
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;

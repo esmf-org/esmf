@@ -472,7 +472,8 @@ static void SetProfileTypeInfoFromEnv() {
   if (envRegridChar != NULL && strlen(envRegridChar) > 0) {
 
     // Get regrid info from string
-    int info;
+    int info=0; // Default if nothing is recognized
+    if (envRegridChar[0] == '0') info=0;
     if (envRegridChar[0] == '1') info=1;
     else if (envRegridChar[0] == '2') info=2;
     else if (envRegridChar[0] == '3') info=3;
