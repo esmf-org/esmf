@@ -44,6 +44,9 @@ class ESMP_RouteHandle(ct.Structure):
 class ESMP_VM(ct.Structure):
         _fields_ = [("ptr", ct.c_void_p)]
 
+class ESMP_DynamicMask(ct.Structure):
+        _fields_ = [("ptr", ct.c_void_p)]
+
 # this class allows optional arguments to be passed in place of
 # numpy float64 arrays
 class OptionalNumpyArrayFloat64(object):
@@ -1712,6 +1715,8 @@ def ESMP_FieldCreateGrid(grid, name=None,
                                                ungriddedLBound_i,
                                                ungriddedUBound_i,
                                                name, ct.byref(lrc))
+    field.ptr
+
     rc = lrc.value
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_FieldCreateGridTK() failed with rc = '+str(rc)+
@@ -2321,7 +2326,7 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
 
 _ESMF.ESMC_FieldRegrid.restype = ct.c_int
 _ESMF.ESMC_FieldRegrid.argtypes = [ct.c_void_p, ct.c_void_p, ESMP_RouteHandle,
-                                   OptionalNamedConstant, ct.c_void_p]
+                                   OptionalNamedConstant, ct.POINTER(ESMP_DynamicMask)] 
 
 def ESMP_FieldRegrid(srcField, dstField, routehandle, zeroregion=None, dynamicMask=None):
     """
@@ -2334,8 +2339,9 @@ def ESMP_FieldRegrid(srcField, dstField, routehandle, zeroregion=None, dynamicMa
         ESMP_RouteHandle :: routehandle\n
         RegionFlag       :: zeroregion\n
     """
+
     rc = _ESMF.ESMC_FieldRegrid(srcField.struct.ptr, dstField.struct.ptr, \
-                                routehandle, zeroregion, dynamicMask)
+                                routehandle, zeroregion, dynamicMask) 
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_FieldRegrid() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)
@@ -2462,3 +2468,41 @@ def ESMP_RouteHandleWrite(routehandle, filename):
     if rc != constants._ESMP_SUCCESS:
         raise NameError('ESMC_RouteHandleWrite() failed with rc = '+str(rc))
     return
+
+#### DynamicMask #####################################################
+
+_ESMF.ESMC_DynamicMaskPredefinedSetR8R8R8.restype = ct.c_int
+_ESMF.ESMC_DynamicMaskPredefinedSetR8R8R8.argtypes = [ct.POINTER(ESMP_DynamicMask), ct.c_uint,
+                                               OptionalInt,
+                                               OptionalFloat,
+                                               OptionalFloat]
+
+def ESMP_DynamicMaskPredefinedSetR8R8R8(masktype=constants.PredefinedDynamicMask.MASKSRC,
+                                           handleAllElements=None,
+                                           srcMaskValue=None,
+                                           dstMaskValue=None):
+
+    #handleAllElements_i = handleAllElements
+    #if not isinstance(handleAllElements, type(None)):
+        #if (handleAllElements.dtype != np.int32):
+           #raise TypeError('handleAllElements must have dtype=int32')
+        #handleAllElements_i = ESMP_InterfaceInt(handleAllElements)
+
+    #srcMaskValue_i = srcMaskValue
+    #if not isinstance(srcMaskValue, type(None)):
+        #if (srcMaskValue.dtype != np.float64):
+           #raise TypeError('srcMaskValue must have dtype=float64')
+
+    #dstMaskValue_i = dstMaskValue
+    #if not isinstance(dstMaskValue, type(None)):
+        #if (dstMaskValue.dtype != np.float64):
+           #raise TypeError('dstMaskValue must have dtype=float64')
+     
+    dynamic_mask = ESMP_DynamicMask()
+    rc = _ESMF.ESMC_DynamicMaskPredefinedSetR8R8R8(ct.byref(dynamic_mask),masktype, 
+                                                             handleAllElements,
+                                                             srcMaskValue,
+                                                             dstMaskValue)
+    handle_esmf_error(rc, 'ESMC_DynamicMaskPredefinedSetR8R8R8')
+
+    return dynamic_mask
