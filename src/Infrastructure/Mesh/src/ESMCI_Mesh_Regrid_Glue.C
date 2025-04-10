@@ -83,9 +83,6 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 void CpMeshElemDataToArray(Grid &grid, int staggerloc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray);
 void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array);
 
-void create_regrid_info_str(Array **_src_array,Array **_dst_array, int *regridMethod,
-                            std::string &ristr);
-
 void ESMCI_regrid_create(
                      Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
                      Mesh **meshdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
@@ -115,17 +112,7 @@ void ESMCI_regrid_create(
   // Declare local return code
   int localrc;
 
-  // Enter profile around whole regrid create
-  std::string ristr;
-  if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 0) {
-    // Create string describing regrid case
-    create_regrid_info_str(arraysrcpp, arraydstpp, regridMethod, ristr);
-    
-    // Trace around whole regrid create
-    ESMCI::TraceEventRegionEnter(ristr, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
-  }
-
+  
   // Dereference input variables
   ESMCI::Array &srcarray = **arraysrcpp;
   ESMCI::Array &dstarray = **arraydstpp;
@@ -138,8 +125,6 @@ void ESMCI_regrid_create(
 
   int has_statusArray=*_has_statusArray;
   ESMCI::Array *statusArray=*_statusArray;
-
-
 
   
 #define PROGRESSLOG_off
@@ -699,6 +684,12 @@ void ESMCI_regrid_create(
 
       ESMCI_REGRID_TRACE_ENTER("NativeMesh Transpose ArraySMMStore");
       
+      // Enter profile around routehandle creation
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 1) {
+        ESMCI::TraceEventRegionEnter("Transpose RouteHandle creation", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
+
       // Allocate transpose matrix
       int *transpose_iientries = new int[iientries_entry_size*num_entries];
       
@@ -758,7 +749,13 @@ void ESMCI_regrid_create(
       // Get rid of transposed factor index list
       delete [] transpose_iientries;
 
-    ESMCI_REGRID_TRACE_EXIT("NativeMesh Transpose ArraySMMStore");
+      // Exit profile around routehandle creation
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 1) {
+        ESMCI::TraceEventRegionExit("Transpose RouteHandle creation", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
+
+      ESMCI_REGRID_TRACE_EXIT("NativeMesh Transpose ArraySMMStore");
       
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Returned from transpose ArraySMMStore().", ESMC_LOGMSG_INFO);
@@ -851,51 +848,10 @@ void ESMCI_regrid_create(
   ESMC_LogDefault.Write("c_esmc_regrid_create(): Final return.", ESMC_LOGMSG_INFO);
 #endif
 
-      
-  // Exit profile around whole regrid create
-  if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 0) {
-    ESMCI::TraceEventRegionExit(ristr, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
-  }
   
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
-
-
-/* XMRKX */
-void create_regrid_info_str(Array **_src_array,Array **_dst_array, int *regridMethod,
-                            std::string &ristr) {
-
-  Array *src_array=*_src_array;
-  Array *dst_array=*_dst_array;
-
-  // Add beginning part
-  ristr="ESMCI_regrid_create(";
-
-  // Add src
-  ristr=ristr+"src="+src_array->getName()+" ";
-
-  // Add dst
-  ristr=ristr+"dst="+dst_array->getName()+" ";
-      
-  // Add method
-  ristr=ristr+"method=";
-
-  // Add method name 
-  if (*regridMethod==ESMC_REGRID_METHOD_BILINEAR) ristr=ristr+"bilinear";
-  else if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ristr=ristr+"conserve";
-  else if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND) ristr=ristr+"conserve2nd";
-  else if (*regridMethod==ESMC_REGRID_METHOD_PATCH) ristr=ristr+"patch";
-  else if (*regridMethod==ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST) ristr=ristr+"neareststod";
-  else if (*regridMethod==ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) ristr=ristr+"nearestdtos";
-  else ristr=ristr+"unknown";
-  
-  // Add end
-  ristr=ristr+")";
-}
-
-
 
 void ESMCI_regrid_getiwts(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
