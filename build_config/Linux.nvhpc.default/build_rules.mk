@@ -74,15 +74,7 @@ ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),mvapich)
-# Mvapich ---------------------------------------------------
-ESMF_F90DEFAULT         = mpif90
-ESMF_CXXDEFAULT         = mpicxx
-ESMF_CDEFAULT           = mpicc
-ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
-ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-else
-ifeq ($(ESMF_COMM),mvapich2)
-# Mvapich2 ---------------------------------------------------
+# Mvapich any version --------------------------------------
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
@@ -111,7 +103,6 @@ ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------
 else
 $(error Invalid ESMF_COMM setting: $(ESMF_COMM))
-endif
 endif
 endif
 endif
