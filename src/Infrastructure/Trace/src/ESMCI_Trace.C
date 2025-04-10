@@ -99,6 +99,9 @@ namespace ESMCI {
   static bool profileOutputToBinary = false; // output to binary trace?
   static bool profileOutputSummary = false;   // output aggregate profile on root PET?
 
+  // Profile information by type
+  static int ProfileTypeInfo[ESMC_PROFILETYPE_NUM];
+  
   static bool profileLocalPetThread(){
     return (profileLocalPet && VM::isThreadKnown());
   }
@@ -451,6 +454,36 @@ namespace ESMCI {
 #endif
   }
 
+static void SetProfileTypeInfoFromEnv() {
+  
+  // Init to 0
+  for (int i=0; i<ESMC_PROFILETYPE_NUM; i++) {
+    ProfileTypeInfo[i]=0;
+  }
+  
+  // Check for environment variable and set based on that
+  // These will probably be fairly specific to the type, so for now
+  // not trying to do anything automatic across different types
+
+  // NOTE: You need to set up the env variable in ESMCI_VM.C before it'll work here
+  
+  // Set ESMF_ProfileType_Regrid 
+  char const *envRegridChar = VM::getenv("ESMF_RUNTIME_PROFILE_REGRID");
+  if (envRegridChar != NULL && strlen(envRegridChar) > 0) {
+
+    // Get regrid info from string
+    int info=0; // Default if nothing is recognized
+    if (envRegridChar[0] == '0') info=0;
+    if (envRegridChar[0] == '1') info=1;
+    else if (envRegridChar[0] == '2') info=2;
+    else if (envRegridChar[0] == '3') info=3;
+
+    // Set in profile info array
+    ProfileTypeInfo[ESMC_PROFILETYPE_REGRID] = info;
+  }    
+}
+
+  
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceOpen()"
   void TraceOpen(std::string trace_dir, int *profileToLog, int *rc) {
@@ -464,7 +497,7 @@ namespace ESMCI {
     if (ESMC_LogDefault.MsgFoundError(localrc,
          ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
       return;
-
+    
     //determine if tracing is turned on for this PET
     traceLocalPet = TraceIsEnabledForPET(globalvm->getLocalPet(), &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -472,6 +505,7 @@ namespace ESMCI {
       traceLocalPet = false;
       return;
     }
+
 
     //determine if profiling is turned on for this PET
     //if tracing is enabled, automatically turn on profiling
@@ -481,7 +515,7 @@ namespace ESMCI {
       profileLocalPet = false;
       return;
     }
-
+    
     //determine output method for profiling, if enabled
     if (profileLocalPetThread()) {
       //always output binary if tracing is enabled
@@ -530,6 +564,9 @@ namespace ESMCI {
       ESMC_LogDefault.Write("ESMF Profiling Enabled", ESMC_LOGMSG_INFO);
     }
 
+    // Set other profile information
+    SetProfileTypeInfoFromEnv();
+    
     // initialize the clock
     struct esmftrc_platform_filesys_ctx *ctx;
     if (traceLocalPet || profileLocalPetThread()) {
@@ -1240,6 +1277,7 @@ namespace ESMCI {
   }
 
 
+  
 
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceClose()"
@@ -1329,6 +1367,13 @@ namespace ESMCI {
   }
 
 
+  
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceGetProfileTypeInfo()"
+  int TraceGetProfileTypeInfo(enum ESMC_ProfileType type) {
+    return ProfileTypeInfo[type];
+  }
+  
 
   ///////////////////// I/O Tracing //////////////////
 
