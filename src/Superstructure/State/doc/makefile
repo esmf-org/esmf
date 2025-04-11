@@ -26,10 +26,10 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f90))))
 
 #
-# Files that a doc depends on.  Do not list the the ctex file !  
+# Files that a doc depends on.  Do not list the the ctex file!
 # The ctex file is listed in the rule found in the build/common file.
-# These lists almost certainly will not be an exhastive list of 
-# all of the dependent files, but even a partial listing  will be helpfull.
+# These lists almost certainly will not be an exhastive list of
+# all of the dependent files, but even a partial listing will be helpful.
 #
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) State_desc.tex State_options.tex State_usage.tex State_rest.tex State_implnotes.tex State_obj.tex
 
