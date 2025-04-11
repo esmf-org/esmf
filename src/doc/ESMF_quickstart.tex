@@ -92,8 +92,9 @@ implementation.
 For other systems (e.g. Linux or Darwin) where a multitude of MPI
 implementations are available, {\tt ESMF\_COMM} must be set to indicate which
 implementation is used to build the ESMF library. Set {\tt ESMF\_COMM} according
-to your situation to: {\tt mpt, mpich, mpich1, mpich2, mpich3, mvapich2, lam, openmpi}
-or {\tt intelmpi}. {\tt ESMF\_COMM} may also be set to {\tt user} indicating 
+to your situation to: {\tt mpt, mpich (version 3 and up), mpich1, mpich2,
+mvapich (all versions), lam, openmpi}, or {\tt intelmpi}.
+{\tt ESMF\_COMM} may also be set to {\tt user} indicating
 that the user will set all the required flags using advanced ESMF environment
 variables.  Some individual MPI builds may create additional libraries that 
 need to be linked in, such as the legacy C++ bindings. These may be specified 
