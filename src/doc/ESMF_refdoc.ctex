@@ -150,6 +150,8 @@
 
 #include "../Superstructure/State/doc/State_refdoc.ctex"
 
+#include "../Superstructure/InternalState/doc/InternalState_refdoc.ctex"
+
 #include "../Superstructure/AttachMethods/doc/AttachMethods_refdoc.ctex"
 
 #include "../Superstructure/WebServices/doc/WebServices_refdoc.ctex"

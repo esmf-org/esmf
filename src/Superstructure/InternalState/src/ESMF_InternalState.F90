@@ -230,7 +230,7 @@ module ESMF_InternalStateMod
 !
 ! The arguments are:
 ! \begin{description}
-! \item[gcomp]
+! \item[cplcomp]
 !   The {\tt ESMF\_CplComp} object holding the internal states.
 ! \item[labelList]
 !   List of labels of {\em all} the internal states. On return, it will be
