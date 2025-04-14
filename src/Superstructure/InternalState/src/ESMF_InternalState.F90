@@ -54,6 +54,7 @@ module ESMF_InternalStateMod
 
 ! !PUBLIC MEMBER FUNCTIONS:
 
+  public ESMF_InternalStateAdd
   public ESMF_InternalStateGet
 
 #ifndef ESMF_NO_F2018ASSUMEDTYPE
@@ -72,11 +73,16 @@ module ESMF_InternalStateMod
 ! ! The InternalState functionality is implemented on the C++ side. Fortran
 ! ! interfaces are defined here.
 
+  interface ESMF_InternalStateAdd
+    module procedure ESMF_InternalStateCplCompAdd
+    module procedure ESMF_InternalStateGridCompAdd
+  end interface
+
   interface ESMF_InternalStateGet
-    module procedure ESMF_InternalStateGridCompGetL
-    module procedure ESMF_InternalStateCplCompGetL
-    module procedure ESMF_InternalStateGridCompGet
     module procedure ESMF_InternalStateCplCompGet
+    module procedure ESMF_InternalStateGridCompGet
+    module procedure ESMF_InternalStateCplCompGetL
+    module procedure ESMF_InternalStateGridCompGetL
   end interface
 
 #ifndef ESMF_NO_F2018ASSUMEDTYPE
@@ -151,6 +157,126 @@ module ESMF_InternalStateMod
       contains
 
 !==============================================================================
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InternalStateCplCompAdd"
+!BOP
+! !IROUTINE: ESMF_InternalStateAdd - Add an InternalState to CplComp
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_InternalStateAdd()
+  subroutine ESMF_InternalStateCplCompAdd(cplcomp, label, internalState, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp),  intent(in)            :: cplcomp
+    character(*),        intent(in),  optional :: label
+    type(*)                                    :: internalState
+    integer,             intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Add an internal state.
+!
+! The arguments are:
+! \begin{description}
+! \item[cplcomp]
+!   The {\tt ESMF\_CplComp} object to hold the internal state.
+! \item[{[label]}]
+!   The label to associate with the internal state. By default, associated
+!   without label.
+! \item[internalState]
+!   The internal state to add.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                       ! local error status
+    integer :: count, maxLen
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
+
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
+    call ESMF_UserCompSetInternalState(cplcomp, label, internalState, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+#else
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_IMPL, &
+      msg="The implementation requires Fortran 20018 assumed type support.", &
+      ESMF_CONTEXT, rcToReturn=rc)
+    return
+#endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InternalStateGridCompAdd"
+!BOP
+! !IROUTINE: ESMF_InternalStateAdd - Add an InternalState to GridComp
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_InternalStateAdd()
+  subroutine ESMF_InternalStateGridCompAdd(gcomp, label, internalState, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp), intent(in)            :: gcomp
+    character(*),        intent(in),  optional :: label
+    type(*)                                    :: internalState
+    integer,             intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Add an internal state.
+!
+! The arguments are:
+! \begin{description}
+! \item[gcomp]
+!   The {\tt ESMF\_GridComp} object to hold the internal state.
+! \item[{[label]}]
+!   The label to associate with the internal state. By default, associated
+!   without label.
+! \item[internalState]
+!   The internal state to add.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                       ! local error status
+    integer :: count, maxLen
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gcomp, rc)
+
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
+    call ESMF_UserCompSetInternalState(gcomp, label, internalState, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+#else
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_IMPL, &
+      msg="The implementation requires Fortran 20018 assumed type support.", &
+      ESMF_CONTEXT, rcToReturn=rc)
+    return
+#endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
