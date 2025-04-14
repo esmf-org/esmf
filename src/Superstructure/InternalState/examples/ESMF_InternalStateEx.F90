@@ -16,19 +16,17 @@
 
 !-------------------------------------------------------------------------
 !BOP
-!\subsubsection{Set and Get the Internal State}  
+!\subsubsection{Add and Get the Internal State}
 !
 !   ESMF provides the concept of an Internal State that is associated with
-!   a Component. Through the Internal State API a user can attach a private
+!   a Component. Through the InternalState API a user can attach a private
 !   data block to a Component, and later retrieve a pointer to this memory
-!   allocation. Setting and getting of Internal State information are
+!   allocation. Adding and getting of InternalState information are
 !   supported from anywhere in the Component's SetServices, Initialize, Run,
 !   or Finalize code.
 !
-!   The code below demonstrates the basic Internal State API
-!   of {\tt ESMF\_<Grid|Cpl>SetInternalState()} and
-!   {\tt ESMF\_<Grid|Cpl>GetInternalState()}. Notice that an extra level of
-!   indirection to the user data is necessary!
+!   The code below demonstrates the basic InternalState API. Notice that an
+!   extra level of indirection to the user data is necessary!
 !
 !EOP
 !-------------------------------------------------------------------------
@@ -43,7 +41,7 @@ program ESMF_InternalStateEx
   use ESMF
   use ESMF_TestMod
   implicit none
-  
+
   type(ESMF_GridComp) :: comp
   integer :: rc, finalrc
 
@@ -77,12 +75,10 @@ program ESMF_InternalStateEx
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-
-
   finalrc = ESMF_SUCCESS
 !BOC
 !-------------------------------------------------------------------------
-        
+
   call ESMF_Initialize(defaultlogfilename="InternalStateEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -90,8 +86,8 @@ program ESMF_InternalStateEx
 !-------------------------------------------------------------------------
 
   !  Creation of a Component
-  comp = ESMF_GridCompCreate(name="test", rc=rc)  
-  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
+  comp = ESMF_GridCompCreate(name="test", rc=rc)
+  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !-------------------------------------------------------------------------
 ! This could be called, for example, during a Component's initialize phase.
@@ -100,20 +96,20 @@ program ESMF_InternalStateEx
   data%testValue = 4567
   data%testScaling = 0.5
 
-  ! Set Internal State
+  ! Add Internal State
   wrap1%p => data
-  call ESMF_GridCompSetInternalState(comp, wrap1, rc)
-  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
+  call ESMF_InternalStateAdd(comp, internalState=wrap1, rc=rc)
+  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !-------------------------------------------------------------------------
 ! This could be called, for example, during a Component's run phase.
 
   ! Get Internal State
-  call ESMF_GridCompGetInternalState(comp, wrap2, rc)
-  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
+  call ESMF_InternalStateGet(comp, internalState=wrap2, rc=rc)
+  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
   ! Access private data block and verify data
-  datap => wrap2%p 
+  datap => wrap2%p
   if ((datap%testValue .ne. 4567) .or. (datap%testScaling .ne. 0.5)) then
     print *, "did not get same values back"
     finalrc = ESMF_FAILURE
@@ -125,7 +121,7 @@ program ESMF_InternalStateEx
 !-------------------------------------------------------------------------
 
   call ESMF_GridCompDestroy(comp, rc=rc)
-  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
+  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
   ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
   ! file that the scripts grep for.
@@ -133,13 +129,13 @@ program ESMF_InternalStateEx
 
 
   call ESMF_Finalize(rc=rc)
-  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
+  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
   if (finalrc .eq. ESMF_SUCCESS) then
     print *, "PASS: ESMF_InternalStateEx.F90"
-  else 
+  else
     print *, "FAIL: ESMF_InternalStateEx.F90"
   end if
 
 end program ESMF_InternalStateEx
-    
+
