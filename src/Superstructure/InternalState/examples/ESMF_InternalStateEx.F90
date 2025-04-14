@@ -15,20 +15,16 @@
 !==============================================================================
 
 !-------------------------------------------------------------------------
-!BOP
+!BOE
 !\subsubsection{Add and Get the Internal State}
 !
-!   ESMF provides the concept of an Internal State that is associated with
-!   a Component. Through the InternalState API a user can attach a private
-!   data block to a Component, and later retrieve a pointer to this memory
-!   allocation. Adding and getting of InternalState information are
-!   supported from anywhere in the Component's SetServices, Initialize, Run,
-!   or Finalize code.
+!   Adding and getting of InternalState information are supported from anywhere
+!   in the Component's SetServices, Initialize, Run, or Finalize code.
 !
 !   The code below demonstrates the basic InternalState API. Notice that an
 !   extra level of indirection to the user data is necessary!
 !
-!EOP
+!EOE
 !-------------------------------------------------------------------------
 
 program ESMF_InternalStateEx
@@ -43,7 +39,7 @@ program ESMF_InternalStateEx
   implicit none
 
   type(ESMF_GridComp) :: comp
-  integer :: rc, finalrc
+  integer :: rc, finalrc, i
 
   ! Internal State Variables
   type testData
@@ -57,9 +53,8 @@ program ESMF_InternalStateEx
     type(testData), pointer :: p
   end type
 
-  type(dataWrapper) :: wrap1, wrap2
-  type(testData), target :: data
-  type(testData), pointer :: datap  ! extra level of indirection
+  type(dataWrapper)             :: wrap
+  character(len=:), allocatable :: labelList(:)
 !EOC
   integer :: result
   character(ESMF_MAXSTR) :: testname
@@ -70,7 +65,6 @@ program ESMF_InternalStateEx
 
   write(failMsg, *) "Example failure"
   write(testname, *) "Example ESMF_InternalStateEx"
-
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -89,36 +83,121 @@ program ESMF_InternalStateEx
   comp = ESMF_GridCompCreate(name="test", rc=rc)
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-!-------------------------------------------------------------------------
+!EOC
+!BOE
 ! This could be called, for example, during a Component's initialize phase.
+!EOE
+!BOC
 
-    ! Initialize private data block
-  data%testValue = 4567
-  data%testScaling = 0.5
+  ! Allocate private data
+  allocate(wrap%p)
 
-  ! Add Internal State
-  wrap1%p => data
-  call ESMF_InternalStateAdd(comp, internalState=wrap1, rc=rc)
+  ! Initialize private data block
+  wrap%p%testValue = 4567
+  wrap%p%testScaling = 0.5
+
+  ! Add Internal State to Component
+  call ESMF_InternalStateAdd(comp, internalState=wrap, rc=rc)
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-!-------------------------------------------------------------------------
+  ! "Forget" the local reference to the private data block, do demonstrate that
+  ! it can be correctly retrieved below.
+  wrap%p => null()
+
+!EOC
+!BOE
 ! This could be called, for example, during a Component's run phase.
+!EOE
+!BOC
 
   ! Get Internal State
-  call ESMF_InternalStateGet(comp, internalState=wrap2, rc=rc)
+  call ESMF_InternalStateGet(comp, internalState=wrap, rc=rc)
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
   ! Access private data block and verify data
-  datap => wrap2%p
-  if ((datap%testValue .ne. 4567) .or. (datap%testScaling .ne. 0.5)) then
-    print *, "did not get same values back"
+  if ((wrap%p%testValue .ne. 4567) .or. &
+    (wrap%p%testScaling - 0.5 > tiny(wrap%p%testScaling))) then
+    print *, "private data validation NOT successful"
     finalrc = ESMF_FAILURE
   else
-    print *, "got same values back from GetInternalState as original"
+    print *, "private data validation successful"
   endif
+
+  ! Deallocate the private data block
+  deallocate(wrap%p)
 
 !EOC
 !-------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------
+!BOE
+!\subsubsection{Add and Get Internal State with label}
+!
+!   InternalState information added to a component can be associated with a
+!   string label. Multiple such named internal states can be added to the same
+!   component object.
+!
+!EOE
+!BOC
+  ! Allocate another private data block
+  allocate(wrap%p)
+
+  ! Initialize private data block
+  wrap%p%testValue = 1234
+  wrap%p%testScaling = 0.8
+
+  ! Add Internal State to the Component with label
+  call ESMF_InternalStateAdd(comp, label="first named data block", &
+    internalState=wrap, rc=rc)
+  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+  ! And allocate another private data block
+  allocate(wrap%p)
+
+  ! Initialize private data block
+  wrap%p%testValue = 4321
+  wrap%p%testScaling = 0.1
+
+  ! Add Internal State to the Component with label
+  call ESMF_InternalStateAdd(comp, label="second named data block", &
+    internalState=wrap, rc=rc)
+  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+  ! A list of InternalState labels can be queried from the component object.
+  call ESMF_InternalStateGet(comp, labelList=labelList, rc=rc)
+  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+  ! write the labelList to log
+  do i=1, size(labelList)
+    call ESMF_LogWrite("InternalState label: "//labelList(i), &
+      ESMF_LOGMSG_INFO, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  enddo
+
+!EOC
+!BOE
+!   The last internal state added under a specific label can be retrieved using
+!   the {\tt ESMF\_InternalStateGet()} method with the {\tt lable} argument.
+!EOE
+!BOC
+
+  ! Get Internal State
+  call ESMF_InternalStateGet(comp, label="first named data block", &
+    internalState=wrap, rc=rc)
+  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+  ! Deallocate the private data block
+  deallocate(wrap%p)
+
+  ! Get Internal State
+  call ESMF_InternalStateGet(comp, label="second named data block", &
+    internalState=wrap, rc=rc)
+  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+  ! Deallocate the private data block
+  deallocate(wrap%p)
+
+!EOC
 
   call ESMF_GridCompDestroy(comp, rc=rc)
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
