@@ -75,6 +75,8 @@ module ESMF_InternalStateMod
   interface ESMF_InternalStateGet
     module procedure ESMF_InternalStateGridCompGetL
     module procedure ESMF_InternalStateCplCompGetL
+    module procedure ESMF_InternalStateGridCompGet
+    module procedure ESMF_InternalStateCplCompGet
   end interface
 
 #ifndef ESMF_NO_F2018ASSUMEDTYPE
@@ -152,32 +154,32 @@ module ESMF_InternalStateMod
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InternalStateGridCompGetL"
+#define ESMF_METHOD "ESMF_InternalStateCplCompGet"
 !BOP
-! !IROUTINE: ESMF_InternalStateGet - Get info about internal states in GridComp
+! !IROUTINE: ESMF_InternalStateGet - Get InternalState from CplComp
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InternalStateGet()
-  subroutine ESMF_InternalStateGridCompGetL(gcomp, labelList, rc)
+  subroutine ESMF_InternalStateCplCompGet(cplcomp, label, internalState, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp)                                  :: gcomp
-    character(len=:), allocatable, intent(out)           :: labelList(:)
-    integer,                       intent(out), optional :: rc
+    type(ESMF_CplComp),  intent(in)            :: cplcomp
+    character(*),        intent(in),  optional :: label
+    type(*)                                    :: internalState
+    integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Access labels of all the internal states.
+! Access the internal state.
 !
 ! The arguments are:
 ! \begin{description}
-! \item[gcomp]
-!   The {\tt ESMF\_GridComp} object holding the internal states.
-! \item[labelList]
-!   List of labels of {\em all} the internal states. On return, it will be
-!   allocated with as many list elements as there are internal states. The
-!   length of each label in {\tt labelList} is that of the longest label
-!   currently set. Elements with shorter labels are padded with white
-!   spaces.
+! \item[cplcomp]
+!   The {\tt ESMF\_CplComp} object holding the internal state.
+! \item[{[label]}]
+!   The label of the internal state accessed. By default, access the last
+!   internal state set without label.
+! \item[internalState]
+!   The returned internal state.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -191,19 +193,19 @@ module ESMF_InternalStateMod
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
-    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gcomp, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
 
-    call c_ESMC_InternalStateGetInfo(gcomp, count, maxLen, localrc)
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
+    call ESMF_UserCompGetInternalState(cplcomp, label, internalState, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-    allocate(character(maxLen) :: labelList(count))
-
-    call c_ESMC_InternalStateGetLabels(gcomp, labelList, localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+#else
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_IMPL, &
+      msg="The implementation requires Fortran 20018 assumed type support.", &
+      ESMF_CONTEXT, rcToReturn=rc)
+    return
+#endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -214,14 +216,14 @@ module ESMF_InternalStateMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InternalStateCplCompGetL"
 !BOP
-! !IROUTINE: ESMF_InternalStateGet - Get info about internal states in CplComp
+! !IROUTINE: ESMF_InternalStateGet - Get InternalState labels from CplComp
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InternalStateGet()
   subroutine ESMF_InternalStateCplCompGetL(cplcomp, labelList, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp)                                   :: cplcomp
+    type(ESMF_CplComp),            intent(in)            :: cplcomp
     character(len=:), allocatable, intent(out)           :: labelList(:)
     integer,                       intent(out), optional :: rc
 !
@@ -261,6 +263,126 @@ module ESMF_InternalStateMod
     allocate(character(maxLen) :: labelList(count))
 
     call c_ESMC_InternalStateGetLabels(cplcomp, labelList, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InternalStateGridCompGet"
+!BOP
+! !IROUTINE: ESMF_InternalStateGet - Get InternalState from GridComp
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_InternalStateGet()
+  subroutine ESMF_InternalStateGridCompGet(gcomp, label, internalState, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp), intent(in)            :: gcomp
+    character(*),        intent(in),  optional :: label
+    type(*)                                    :: internalState
+    integer,             intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Access the internal state.
+!
+! The arguments are:
+! \begin{description}
+! \item[cplcomp]
+!   The {\tt ESMF\_CplComp} object holding the internal state.
+! \item[{[label]}]
+!   The label of the internal state accessed. By default, access the last
+!   internal state set without label.
+! \item[internalState]
+!   The returned internal state.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                       ! local error status
+    integer :: count, maxLen
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gcomp, rc)
+
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
+    call ESMF_UserCompGetInternalState(gcomp, label, internalState, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+#else
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_IMPL, &
+      msg="The implementation requires Fortran 20018 assumed type support.", &
+      ESMF_CONTEXT, rcToReturn=rc)
+    return
+#endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InternalStateGridCompGetL"
+!BOP
+! !IROUTINE: ESMF_InternalStateGet - Get InternalState labels from GridComp
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_InternalStateGet()
+  subroutine ESMF_InternalStateGridCompGetL(gcomp, labelList, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp),           intent(in)            :: gcomp
+    character(len=:), allocatable, intent(out)           :: labelList(:)
+    integer,                       intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Access labels of all the internal states.
+!
+! The arguments are:
+! \begin{description}
+! \item[gcomp]
+!   The {\tt ESMF\_GridComp} object holding the internal states.
+! \item[labelList]
+!   List of labels of {\em all} the internal states. On return, it will be
+!   allocated with as many list elements as there are internal states. The
+!   length of each label in {\tt labelList} is that of the longest label
+!   currently set. Elements with shorter labels are padded with white
+!   spaces.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                       ! local error status
+    integer :: count, maxLen
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gcomp, rc)
+
+    call c_ESMC_InternalStateGetInfo(gcomp, count, maxLen, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    allocate(character(maxLen) :: labelList(count))
+
+    call c_ESMC_InternalStateGetLabels(gcomp, labelList, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
