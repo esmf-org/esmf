@@ -130,9 +130,15 @@ if(EXISTS ${ESMFMKFILE})
     endif()
   endif()
 
-  # Add ESMF as an alias to ESMF::ESMF for backward compatibility
+  # Add aliases for ESMF and ESMC
+  if(NOT TARGET ESMF::ESMF_Fortran)
+    add_library(ESMF::ESMF_Fortran ALIAS ESMF::ESMF)
+  endif()
   if(NOT TARGET ESMF)
     add_library(ESMF ALIAS ESMF::ESMF)
+  endif()
+  if(NOT TARGET ESMF::ESMF_C)
+    add_library(ESMF::ESMF_C ALIAS ESMF::ESMC)
   endif()
 
   # Add ESMF include directories
