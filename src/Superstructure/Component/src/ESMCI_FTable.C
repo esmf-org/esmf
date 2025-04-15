@@ -543,6 +543,10 @@ extern "C" {
   //  ESMF_InternalStateAddReplace()
   //  ESMF_InternalStateGet()
   //  ESMF_InternalStateRemove()
+  //
+  // TODO: Change the back-end implementation of the InternalState feature to
+  // TODO: leverage ESMF_Container, analogous to how AttachableMethods are
+  // TODO: implemented!
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_internalstategetinfo"
