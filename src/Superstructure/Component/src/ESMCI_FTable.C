@@ -529,7 +529,8 @@ extern "C" {
 // These functions have no leading c_ and are ESMF and not ESMC because
 // they're intended to be called directly by F90 user code.
 //
-// The Fortran interfaces for these entry points are defined in ESMF_Comp.F90.
+// The Fortran interfaces for these entry points are defined in
+// ESMF_InternalState.F90
 //
 // These interface subroutine names MUST be in lower case.
 extern "C" {

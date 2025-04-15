@@ -1017,7 +1017,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompGetInternalState - Get private data block pointer
+! !IROUTINE: ESMF_CplCompGetInternalState - Get private data block pointer - (DEPRECATED METHOD)
 !
 ! !INTERFACE:
 ! subroutine ESMF_CplCompGetInternalState(cplcomp, wrappedDataPointer, rc)
@@ -1030,6 +1030,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiDeprecatedMethodWithReplacement{8.9.0}{ESMF\_InternalStateGet}{esmfinternalstategetcplcomp}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -2078,7 +2079,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompSetInternalState - Set private data block pointer
+! !IROUTINE: ESMF_CplCompSetInternalState - Set private data block pointer - (DEPRECATED METHOD)
 !
 ! !INTERFACE:
 ! subroutine ESMF_CplCompSetInternalState(cplcomp, wrappedDataPointer, rc)
@@ -2091,6 +2092,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiDeprecatedMethodWithReplacement{8.9.0}{ESMF\_InternalStateAdd}{esmfinternalstateaddcplcomp}
 ! \end{itemize}
 !
 ! !DESCRIPTION:

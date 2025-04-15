@@ -163,6 +163,7 @@ module ESMF_InternalStateMod
 #define ESMF_METHOD "ESMF_InternalStateCplCompAdd"
 !BOP
 ! !IROUTINE: ESMF_InternalStateAdd - Add an InternalState to CplComp
+! \label{esmfinternalstateaddcplcomp}
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InternalStateAdd()
@@ -223,6 +224,7 @@ module ESMF_InternalStateMod
 #define ESMF_METHOD "ESMF_InternalStateGridCompAdd"
 !BOP
 ! !IROUTINE: ESMF_InternalStateAdd - Add an InternalState to GridComp
+! \label{esmfinternalstateaddgcomp}
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InternalStateAdd()
@@ -283,6 +285,7 @@ module ESMF_InternalStateMod
 #define ESMF_METHOD "ESMF_InternalStateCplCompGet"
 !BOP
 ! !IROUTINE: ESMF_InternalStateGet - Get InternalState from CplComp
+! \label{esmfinternalstategetcplcomp}
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InternalStateGet()
@@ -403,6 +406,7 @@ module ESMF_InternalStateMod
 #define ESMF_METHOD "ESMF_InternalStateGridCompGet"
 !BOP
 ! !IROUTINE: ESMF_InternalStateGet - Get InternalState from GridComp
+! \label{esmfinternalstategetgcomp}
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InternalStateGet()
