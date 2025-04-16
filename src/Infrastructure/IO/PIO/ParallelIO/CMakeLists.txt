@@ -10,7 +10,7 @@ project (PIO C)
 # The project version number.
 set(VERSION_MAJOR   2   CACHE STRING "Project major version number.")
 set(VERSION_MINOR   6   CACHE STRING "Project minor version number.")
-set(VERSION_PATCH   5   CACHE STRING "Project patch version number.")
+set(VERSION_PATCH   6   CACHE STRING "Project patch version number.")
 mark_as_advanced(VERSION_MAJOR VERSION_MINOR VERSION_PATCH)
 
 # Create version info in autotools parlance for pio_meta.h.
@@ -244,7 +244,7 @@ if (PIO_ENABLE_COVERAGE)
 endif ()
 
 # Allow argument mismatch in gfortran versions > 10 for mpi library compatibility
-if (CMAKE_C_COMPILER_NAME STREQUAL "GNU")
+if (CMAKE_Fortran_COMPILER_NAME STREQUAL "GNU")
   if ("${CMAKE_Fortran_COMPILER_VERSION}" VERSION_LESS 10)
     message (WARNING "gfortran version is ${CMAKE_Fortran_COMPILER_VERSION}")
   else()
