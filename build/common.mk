@@ -147,6 +147,10 @@ ifeq ($(ESMF_COMM),mpich3)
 export ESMF_COMM = mpich
 $(warning !!! For MPICH3 and up, please use ESMF_COMM=mpich !!!)
 endif
+ifeq ($(ESMF_COMM),mvapich2)
+export ESMF_COMM = mvapich
+$(warning !!! For all versions of MVAPICH, including MVAPICH2, please use ESMF_COMM=mvapich !!!)
+endif
 endif
 
 ifndef ESMF_COMPILER
