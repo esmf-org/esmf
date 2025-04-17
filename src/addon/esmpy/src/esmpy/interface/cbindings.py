@@ -45,7 +45,7 @@ class ESMP_VM(ct.Structure):
         _fields_ = [("ptr", ct.c_void_p)]
 
 class ESMP_DynamicMask(ct.Structure):
-        _fields_ = [("ptr", ct.c_void_p)]
+        _fields_ = [("shallowMem", ct.c_char*1024)] 
 
 # this class allows optional arguments to be passed in place of
 # numpy float64 arrays
