@@ -606,7 +606,7 @@ class RegridFromFile(object):
         import atexit; atexit.register(self.__del__)
         self._finalized = False
 
-    def __call__(self, srcfield, dstfield, zero_region=None, dynamic_mask=None):
+    def __call__(self, srcfield, dstfield, zero_region=None):
         """
         Call a regridding operation from srcfield to dstfield.
 
@@ -627,8 +627,7 @@ class RegridFromFile(object):
 
         # call into the ctypes layer
         ESMP_FieldRegrid(srcfield, dstfield,
-                         self._routehandle, zeroregion=zero_region,
-                         dynamicmask=dynamicmask)
+                         self._routehandle, zeroregion=zero_region)
         return dstfield
 
     def __del__(self):

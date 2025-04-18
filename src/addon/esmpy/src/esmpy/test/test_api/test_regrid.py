@@ -1631,3 +1631,48 @@ class TestRegrid(TestBase):
         meanrel, _, _ = compare_fields(dstfield, exactfield, 80E-1, 80E-1, 10E-16)
 
         self.assertAlmostEqual(meanrel, 0)
+
+    def test_field_regrid_srcmask_R8R8R8(self):
+        # create a grid
+        srcgrid = grid_create_from_bounds_periodic(60, 30, corners=True, domask=False)
+        dstgrid = grid_create_from_bounds_periodic(55, 28, corners=True)
+        total_points = 55*28
+
+        # create the Fields
+        srcfield = esmpy.Field(srcgrid, name='srcfield')
+        dstfield = esmpy.Field(dstgrid, name='dstfield')
+
+        # initialize the Fields
+        def_value=np.float64(170)
+        undef_value=np.float64(20000.0)
+        fbounds = srcfield.data.shape
+        for i in range(fbounds[0]):
+            for j in range(fbounds[1]):
+                srcfield.data[i,j] = def_value
+                if i < fbounds[0]/2 and j < fbounds[1]/2: 
+                    srcfield.data[i,j] = undef_value
+          
+
+        # run the ESMF regridding
+        regridSrc2Dst = esmpy.Regrid(srcfield, dstfield,
+                                    src_mask_values=np.atleast_1d(np.array([0])),
+                                    regrid_method=esmpy.RegridMethod.BILINEAR,
+                                    unmapped_action=esmpy.UnmappedAction.ERROR,
+                                    src_term_processing=0)
+ 
+        handle_all = np.int32(1)
+        dyn_mask = esmpy.DynamicMask(esmpy.constants.PredefinedDynamicMask.MASKSRC,handle_all_elements=handle_all,src_mask_value=undef_value, dst_mask_value=undef_value)
+        dstfield = regridSrc2Dst(srcfield, dstfield, dynamic_mask=dyn_mask)
+        fbounds = dstfield.data.shape
+        delta = 0.000001
+        count_def = 0
+        count_undef = 0
+        for i in range(fbounds[0]):
+            for j in range(fbounds[1]):
+                if (undef_value-delta < dstfield.data[i,j]) & (dstfield.data[i,j] < undef_value+delta):
+                   count_undef = count_undef + 1
+                if (def_value-delta < dstfield.data[i,j]) & (dstfield.data[i,j] < def_value+delta):
+                   count_def = count_def + 1
+        
+        self.assertEqual(total_points, count_undef+count_def)
+
