@@ -160,6 +160,17 @@ class OptionalFloat(object):
                 paramptr = ptr(ct.c_float(param))
                 return paramptr
 
+# this class allows optional arguments to be passed in place of float
+class OptionalDouble(object):
+        @classmethod
+        def from_param(cls, param):
+            if isinstance(param, type(None)):
+                return None
+            else:
+                ptr = ct.POINTER(ct.c_double)
+                paramptr = ptr(ct.c_double(param))
+                return paramptr
+
 # this class allows optional arguments to be passed in place of pointers
 class OptionalPtr(object):
         @classmethod
@@ -2473,30 +2484,29 @@ def ESMP_RouteHandleWrite(routehandle, filename):
 
 _ESMF.ESMC_DynamicMaskPredefinedSetR8R8R8.restype = ct.c_int
 _ESMF.ESMC_DynamicMaskPredefinedSetR8R8R8.argtypes = [ct.POINTER(ESMP_DynamicMask), ct.c_uint,
+                                               #ct.POINTER(ct.c_int),
+                                               #ct.POINTER(ct.c_double),
+                                               #ct.POINTER(ct.c_double)]
                                                OptionalInt,
-                                               OptionalFloat,
-                                               OptionalFloat]
+                                               OptionalDouble,
+                                               OptionalDouble]
 
 def ESMP_DynamicMaskPredefinedSetR8R8R8(masktype=constants.PredefinedDynamicMask.MASKSRC,
                                            handleAllElements=None,
                                            srcMaskValue=None,
                                            dstMaskValue=None):
 
-    #handleAllElements_i = handleAllElements
-    #if not isinstance(handleAllElements, type(None)):
-        #if (handleAllElements.dtype != np.int32):
-           #raise TypeError('handleAllElements must have dtype=int32')
-        #handleAllElements_i = ESMP_InterfaceInt(handleAllElements)
+    if not isinstance(handleAllElements, type(None)):
+        if (handleAllElements.dtype != np.int32):
+           raise TypeError('handleAllElements must have dtype=int32')
 
-    #srcMaskValue_i = srcMaskValue
-    #if not isinstance(srcMaskValue, type(None)):
-        #if (srcMaskValue.dtype != np.float64):
-           #raise TypeError('srcMaskValue must have dtype=float64')
+    if not isinstance(srcMaskValue, type(None)):
+        if (srcMaskValue.dtype != np.float64):
+           raise TypeError('srcMaskValue must have dtype=float64')
 
-    #dstMaskValue_i = dstMaskValue
-    #if not isinstance(dstMaskValue, type(None)):
-        #if (dstMaskValue.dtype != np.float64):
-           #raise TypeError('dstMaskValue must have dtype=float64')
+    if not isinstance(dstMaskValue, type(None)):
+        if (dstMaskValue.dtype != np.float64):
+           raise TypeError('dstMaskValue must have dtype=float64')
      
     dynamic_mask = ESMP_DynamicMask()
     rc = _ESMF.ESMC_DynamicMaskPredefinedSetR8R8R8(ct.byref(dynamic_mask),masktype, 
