@@ -38,7 +38,8 @@ TESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMF_FieldRedistArbUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldMeshSMMUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldHaloUTest \
-		$(ESMF_TESTDIR)/ESMF_FieldSMMFromFileUTest
+		$(ESMF_TESTDIR)/ESMF_FieldSMMFromFileUTest \
+		$(ESMF_TESTDIR)/ESMF_FieldRegridDynMaskUTest
 
 # TESTS_BUILD   = \
 #		$(ESMF_TESTDIR)/ESMC_FieldRegridCsrvUTest
@@ -73,7 +74,8 @@ TESTS_RUN     = \
 		RUN_ESMF_FieldRedistArbUTest \
 		RUN_ESMF_FieldMeshSMMUTest \
 		RUN_ESMF_FieldHaloUTest \
-		RUN_ESMF_FieldSMMFromFileUTest
+		RUN_ESMF_FieldSMMFromFileUTest \
+      RUN_ESMF_FieldRegridDynMaskUTest
 
 #		RUN_ESMC_FieldGridRegridParUTest \
 
@@ -96,7 +98,8 @@ TESTS_RUN_UNI = \
 		RUN_ESMF_FieldRedistArbUTestUNI \
 		RUN_ESMF_FieldRegridCsrvUTestUNI \
 		RUN_ESMF_FieldRegridCsrv2ndUTestUNI \
-		RUN_ESMF_FieldSMMFromFileUTestUNI
+		RUN_ESMF_FieldSMMFromFileUTestUNI \
+      RUN_ESMF_FieldRegridDynMaskUTestUNI
 
 
 #
@@ -236,6 +239,9 @@ RUN_ESMF_FieldIOUTest:
 
 RUN_ESMF_FieldArbGridUTestUNI:
 	$(MAKE) TNAME=FieldArbGrid NP=1 ftest
+
+RUN_ESMF_FieldRegridDynMaskTest:
+	$(MAKE) TNAME=FieldRegridDynMask NP=1 ftest
 
 #
 # FieldStress
