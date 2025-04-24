@@ -14,6 +14,7 @@ def create_compList(cmpCfg: ESMXCmpCfg, odir):
             options = [ESMXOpt('build_type', 'auto', str),
                 ESMXOpt('source_dir', cmp, dir),
                 ESMXOpt('cmake_config', str(cmp)+'.cmake', str),
+                ESMXOpt('cmake_target', str(cmp), str),
                 ESMXOpt('install_prefix', '', dir),
                 ESMXOpt('config_dir', 'cmake', str),
                 ESMXOpt('library_dir', 'lib', str),
@@ -24,6 +25,7 @@ def create_compList(cmpCfg: ESMXCmpCfg, odir):
                 ESMXOpt('build_args', '', str),
                 ESMXOpt('link_libraries', '', str),
                 ESMXOpt('link_paths', '', dir),
+                ESMXOpt('link_into_app', 'True', str),
                 ESMXOpt('git_repository', '', str),
                 ESMXOpt('git_tag', '', str),
                 ESMXOpt('git_dir', '', dir),
@@ -44,6 +46,9 @@ def create_compList(cmpCfg: ESMXCmpCfg, odir):
                                 dirs[i] = os.path.abspath(dirs[i])
                         val = ';'.join(dirs)
                 f.write('set({}-{} {})\n'.format(cmp, opt.upper(), val))
+                if opt.option == "link_into_app":
+                    if not val:
+                        cmpCfg.remove_ci(cmp)
 
 def create_compUse(comps: ESMXCmpCfg, odir):
     # open file
@@ -107,7 +112,7 @@ def main(argv):
     for dis in disable_comps:
         comps.remove_ci(dis)
 
-    # create compList.txt for CMake
+    # create compList.txt for CMake, and remove unlinked components from list
     create_compList(comps, odir)
 
     # create compUse.inc

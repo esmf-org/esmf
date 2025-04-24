@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -62,8 +62,9 @@ void ESMCI_regrid_create(Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Poi
                          int *extrapNumInputLevels, 
                          int *unmappedaction, int *_ignoreDegenerate,
                          int *srcTermProcessing, int *pipelineDepth,
-                         ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
-                         int *nentries, ESMCI::TempWeights **tweights,
+                         ESMCI::RouteHandle **rh, int *has_rh,
+                         int *has_iw, int *nentries, ESMCI::TempWeights **tweights,
+                         ESMCI::RouteHandle **trh, int *has_trh,
                          int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
                          int *has_statusArray, ESMCI::Array **statusArray,
                          int *checkFlag,

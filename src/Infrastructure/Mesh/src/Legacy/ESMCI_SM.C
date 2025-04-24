@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -46,6 +46,26 @@ static const char *const version = "$Id$";
           
 namespace ESMCI {
 
+
+  // Comparison functor used to sort SM_CELLs by dst id
+  class SMDstIdsLess {
+    public:
+    SMDstIdsLess(std::vector<const MeshObj *> &_dst_elems) : dst_elems(_dst_elems) {}
+    bool operator()(const SM_CELL &lhs, const SM_CELL &rhs) {
+      return (dst_elems[lhs.dst_index]->get_id() < dst_elems[rhs.dst_index]->get_id());
+    }
+  private:
+     std::vector<const MeshObj *> &dst_elems;
+  };
+  
+  // Sort SM cells by dst id 
+  void sort_SM_CELLS_by_dst_id(std::vector<SM_CELL> *sm_cells, std::vector<const MeshObj *> &dst_elems) {
+    
+    // Sort using dst ids
+    std::sort(sm_cells->begin(), sm_cells->end(), SMDstIdsLess(dst_elems));        
+  }
+
+  
 
   //////////////// BEGIN CALC 2D 2D CELLS ////////////////  
 
@@ -549,6 +569,311 @@ namespace ESMCI {
   }
 
 
+  // This method creates sm cells for a 2nd order interpolation going from a side mesh to an XGrid
+  // Since the destination is an XGrid by definition all the destination cells are the SM cells.
+  // Because of that, we just have to loop through the destination cells and fill in the SM
+  // info. 
+
+  // Here valid and wghts need to be resized to the same size as dst_elems before being passed into 
+  // this call. 
+  void create_dst_xgrid_SM_cells_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield, 
+                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
+                                           double *src_elem_area,
+                                           std::vector<int> *valid, 
+                                           std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
+                                           std::vector<SM_CELL> *sm_cells) {
+// Maximum size for a supported polygon
+// Since the elements are of a small 
+// limited size. Fixed sized buffers seem 
+// the best way to handle them
+
+#define  MAX_NUM_SRC_POLY_NODES 40
+#define  MAX_NUM_SRC_POLY_COORDS_2D (2*MAX_NUM_SRC_POLY_NODES) 
+
+    // Declaration for src polygon
+    int num_src_nodes;
+    double src_coords[MAX_NUM_SRC_POLY_COORDS_2D];
+    double tmp_coords[MAX_NUM_SRC_POLY_COORDS_2D];
+
+    // Get src coords
+    get_elem_coords_2D_ccw(src_elem, src_cfield, MAX_NUM_SRC_POLY_NODES, tmp_coords, &num_src_nodes, src_coords);
+
+    // Get rid of degenerate edges
+    remove_0len_edges2D(&num_src_nodes, src_coords);
+
+    // If less than a triangle invalidate everything and leave because it won't results in weights
+    // Decision about returning error for degeneracy is made above this subroutine
+    if (num_src_nodes<3) {
+      *src_elem_area=0.0;    
+      for (int i=0; i<dst_elems.size(); i++) {
+        (*valid)[i]=0;
+        (*sintd_areas_out)[i]=0.0;
+        (*dst_areas_out)[i]=0.0;
+      }
+      return;
+    }
+
+    // If a smashed quad invalidate everything and leave because it won't results in weights
+    // Decision about returning error for degeneracy is made above this subroutine
+    if (is_smashed_quad2D(num_src_nodes, src_coords)) {
+      *src_elem_area=0.0;    
+      for (int i=0; i<dst_elems.size(); i++) {
+        (*valid)[i]=0;
+        (*sintd_areas_out)[i]=0.0;
+        (*dst_areas_out)[i]=0.0;
+      }
+      return;
+    }
+
+    // Set src area
+    *src_elem_area=area_of_flat_2D_polygon(num_src_nodes, src_coords); 
+
+    // Defs for dst polygon
+#define  MAX_NUM_DST_POLY_NODES 40
+#define  MAX_NUM_DST_POLY_COORDS_2D (2*MAX_NUM_DST_POLY_NODES) 
+
+    // Declaration for dst polygon
+    int num_dst_nodes;
+    double dst_coords[MAX_NUM_DST_POLY_COORDS_2D];
+   
+    // Loop over dst and put information into SM cells
+    for (int i=0; i<dst_elems.size(); i++) {
+      const MeshObj *dst_elem = dst_elems[i];
+
+      // Init everything to 0s
+      (*valid)[i]=0;
+      (*sintd_areas_out)[i]=0.0;
+      (*dst_areas_out)[i]=0.0;
+      
+      
+      // Invalidate masked destination elements
+      if (dst_mask_field) {
+        double *msk=dst_mask_field->data(*dst_elem);
+        if (*msk>0.5) {
+          // Init to 0's above
+          continue;
+        }
+      }
+      
+      // Invalidate creeped out dst element
+      if(dst_frac2_field){
+        double *dst_frac2=dst_frac2_field->data(*dst_elem);
+        if (*dst_frac2 == 0.0){
+          // Init to 0's above
+          continue;
+        }
+      }
+
+      // Get dst coords
+      get_elem_coords_2D_ccw(dst_elem, dst_cfield, MAX_NUM_DST_POLY_NODES, tmp_coords, &num_dst_nodes, dst_coords);
+      
+      // Get rid of degenerate edges
+      remove_0len_edges2D(&num_dst_nodes, dst_coords);
+      
+      // if less than a triangle skip
+      if (num_dst_nodes<3) {
+        // Init to 0's above
+        continue;
+      }
+
+      // if a smashed quad skip
+      if (is_smashed_quad2D(num_dst_nodes, dst_coords)) {
+        // Init to 0's above
+        continue;
+      }
+      
+      // Put dst cell information directly into SM cells and list 
+
+      // Calculate dst area
+      double dst_area=area_of_flat_2D_polygon(num_dst_nodes, dst_coords); 
+
+      // Declare temporary supermesh cell info structure
+      SM_CELL tmp_smc;
+
+      // Add destination cell index
+      tmp_smc.dst_index=i;
+
+      // Add area to supermesh cell info 
+      tmp_smc.area=dst_area;
+      
+      // Add centroid to supermesh cell info 
+      _calc_centroid_2D_2D_cart(num_dst_nodes, dst_coords, tmp_smc.cntr);
+
+      // Add to list
+      sm_cells->push_back(tmp_smc);
+      
+      // Set information into other lists
+      (*valid)[i]=1;
+      (*sintd_areas_out)[i]=dst_area; // because dst is XGrid sintd area = dst area
+      (*dst_areas_out)[i]=dst_area;
+      
+#undef  MAX_NUM_DST_POLY_NODES
+#undef  MAX_NUM_DST_POLY_COORDS_2D    
+    }
+    
+
+    
+#undef  MAX_NUM_SRC_POLY_NODES
+#undef  MAX_NUM_SRC_POLY_COORDS_2D    
+  }
+
+
+  // This method creates sm cells for a 2nd order interpolation going from an XGrid to a side mesh
+  // Since the source is an XGrid by definition the source cell is the SM cell.
+  // Because of that, we just have to set the 
+
+  // Here valid and wghts need to be resized to the same size as dst_elems before being passed into 
+  // this call. 
+  void create_src_xgrid_SM_cells_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield, 
+                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
+                                           double *src_elem_area,
+                                           std::vector<int> *valid, 
+                                           std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
+                                           std::vector<SM_CELL> *sm_cells) {
+
+    
+// Maximum size for a supported polygon
+// Since the elements are of a small 
+// limited size. Fixed sized buffers seem 
+// the best way to handle them
+
+#define  MAX_NUM_SRC_POLY_NODES 40
+#define  MAX_NUM_SRC_POLY_COORDS_2D (2*MAX_NUM_SRC_POLY_NODES) 
+
+    // Declaration for src polygon
+    int num_src_nodes;
+    double src_coords[MAX_NUM_SRC_POLY_COORDS_2D];
+    double tmp_coords[MAX_NUM_SRC_POLY_COORDS_2D];
+
+    // Get src coords
+    get_elem_coords_2D_ccw(src_elem, src_cfield, MAX_NUM_SRC_POLY_NODES, tmp_coords, &num_src_nodes, src_coords);
+
+    // Get rid of degenerate edges
+    remove_0len_edges2D(&num_src_nodes, src_coords);
+
+    // If less than a triangle invalidate everything and leave because it won't results in weights
+    // Decision about returning error for degeneracy is made above this subroutine
+    if (num_src_nodes<3) {
+      *src_elem_area=0.0;    
+      for (int i=0; i<dst_elems.size(); i++) {
+        (*valid)[i]=0;
+        (*sintd_areas_out)[i]=0.0;
+        (*dst_areas_out)[i]=0.0;
+      }
+      return;
+    }
+
+    // If a smashed quad invalidate everything and leave because it won't results in weights
+    // Decision about returning error for degeneracy is made above this subroutine
+    if (is_smashed_quad2D(num_src_nodes, src_coords)) {
+      *src_elem_area=0.0;    
+      for (int i=0; i<dst_elems.size(); i++) {
+        (*valid)[i]=0;
+        (*sintd_areas_out)[i]=0.0;
+        (*dst_areas_out)[i]=0.0;
+      }
+      return;
+    }
+
+    // Calc area of src cell
+    double src_area=area_of_flat_2D_polygon(num_src_nodes, src_coords);
+        
+    // Set output src area
+    *src_elem_area=src_area;
+    
+    // By definition there should be exactly one dst, if not complain
+    if (dst_elems.size() != 1) Throw() << "Each XGrid elem should correspond to just one element on each side. Here XGrid elem id="<<src_elem->get_id()<<" corresponds to "<<dst_elems.size()<<" elems.";
+    
+    // Look at dst just to make sure that it isn't masked
+    const MeshObj *dst_elem = dst_elems[0];
+    
+    // Init everything to 0s
+    (*valid)[0]=0;
+    (*sintd_areas_out)[0]=0.0;
+    (*dst_areas_out)[0]=0.0;
+      
+      
+    // Invalidate masked destination elements
+    if (dst_mask_field) {
+      double *msk=dst_mask_field->data(*dst_elem);
+      if (*msk>0.5) {
+        // Init to 0's above
+        return;
+      }
+    }
+      
+    // Invalidate creeped out dst element
+    if(dst_frac2_field){
+      double *dst_frac2=dst_frac2_field->data(*dst_elem);
+      if (*dst_frac2 == 0.0){
+        // Init to 0's above
+        return;
+      }
+    }
+
+    // Defs for dst polygon
+#define  MAX_NUM_DST_POLY_NODES 40
+#define  MAX_NUM_DST_POLY_COORDS_2D (2*MAX_NUM_DST_POLY_NODES) 
+
+    // Declaration for dst polygon
+    int num_dst_nodes;
+    double dst_coords[MAX_NUM_DST_POLY_COORDS_2D];
+    
+    // Get dst coords
+    get_elem_coords_2D_ccw(dst_elem, dst_cfield, MAX_NUM_DST_POLY_NODES, tmp_coords, &num_dst_nodes, dst_coords);
+      
+    // Get rid of degenerate edges
+    remove_0len_edges2D(&num_dst_nodes, dst_coords);
+    
+    // if less than a triangle skip
+    if (num_dst_nodes<3) {
+      // Init to 0's above
+      return;
+    }
+
+    // if a smashed quad skip
+    if (is_smashed_quad2D(num_dst_nodes, dst_coords)) {
+      // Init to 0's above
+      return;
+    }
+
+    // Calc dst area
+    double dst_area=area_of_flat_2D_polygon(num_dst_nodes, dst_coords); 
+
+    
+    // Dst looks ok, so put information into SM cell and lists
+
+    // Declare temporary supermesh cell info structure
+    SM_CELL tmp_smc;
+    
+    // Add destination cell index
+    tmp_smc.dst_index=0;
+    
+    // Add area to supermesh cell info 
+    tmp_smc.area=src_area;
+    
+    // Add centroid to supermesh cell info 
+    _calc_centroid_2D_2D_cart(num_src_nodes, src_coords, tmp_smc.cntr);
+    
+    // Add to list
+    sm_cells->push_back(tmp_smc);
+    
+    // Set information into other lists
+    (*valid)[0]=1;
+    (*sintd_areas_out)[0]=src_area; // because src is XGrid sintd area = src area
+    (*dst_areas_out)[0]=dst_area;
+
+    
+#undef  MAX_NUM_DST_POLY_NODES
+#undef  MAX_NUM_DST_POLY_COORDS_2D    
+    
+#undef  MAX_NUM_SRC_POLY_NODES
+#undef  MAX_NUM_SRC_POLY_COORDS_2D    
+  }
+
+
+
+  
   //////////////// END CALC 2D 2D WEIGHTS //////////////////
 
 
@@ -1067,7 +1392,314 @@ namespace ESMCI {
   }
 
 
+
+  // This method creates sm cells for a 2nd order interpolation going from a side mesh to an XGrid
+  // Since the destination is an XGrid by definition all the destination cells are the SM cells.
+  // Because of that, we just have to loop through the destination cells and fill in the SM
+  // info. 
+
+  // Here valid and wghts need to be resized to the same size as dst_elems before being passed into 
+  // this call. 
+  void create_dst_xgrid_SM_cells_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, 
+                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
+                                           double *src_elem_area,
+                                           std::vector<int> *valid, 
+                                           std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
+                                           std::vector<SM_CELL> *sm_cells) {
+// Maximum size for a supported polygon
+// Since the elements are of a small 
+// limited size. Fixed sized buffers seem 
+// the best way to handle them
+
+#define  MAX_NUM_SRC_POLY_NODES 40
+#define  MAX_NUM_SRC_POLY_COORDS_3D (3*MAX_NUM_SRC_POLY_NODES) 
+
+    // Declaration for src polygon
+    int num_src_nodes;
+    double src_coords[MAX_NUM_SRC_POLY_COORDS_3D];
+    double tmp_coords[MAX_NUM_SRC_POLY_COORDS_3D];
+
+    // Get src coords
+    get_elem_coords_3D_ccw(src_elem, src_cfield, MAX_NUM_SRC_POLY_NODES, tmp_coords, &num_src_nodes, src_coords);
+
+    // Get rid of degenerate edges
+    remove_0len_edges3D(&num_src_nodes, src_coords);
+
+    // If less than a triangle invalidate everything and leave because it won't results in weights
+    // Decision about returning error for degeneracy is made above this subroutine
+    if (num_src_nodes<3) {
+      *src_elem_area=0.0;    
+      for (int i=0; i<dst_elems.size(); i++) {
+        (*valid)[i]=0;
+        (*sintd_areas_out)[i]=0.0;
+        (*dst_areas_out)[i]=0.0;
+      }
+      return;
+    }
+
+    // If a smashed quad invalidate everything and leave because it won't results in weights
+    // Decision about returning error for degeneracy is made above this subroutine
+    if (is_smashed_quad3D(num_src_nodes, src_coords)) {
+      *src_elem_area=0.0;    
+      for (int i=0; i<dst_elems.size(); i++) {
+        (*valid)[i]=0;
+        (*sintd_areas_out)[i]=0.0;
+        (*dst_areas_out)[i]=0.0;
+      }
+      return;
+    }
+
+    // Set src area
+    *src_elem_area=great_circle_area(num_src_nodes, src_coords); 
+
+    // Defs for dst polygon
+#define  MAX_NUM_DST_POLY_NODES 40
+#define  MAX_NUM_DST_POLY_COORDS_3D (3*MAX_NUM_DST_POLY_NODES) 
+
+    // Declaration for dst polygon
+    int num_dst_nodes;
+    double dst_coords[MAX_NUM_DST_POLY_COORDS_3D];
+   
+    // Loop over dst and put information into SM cells
+    for (int i=0; i<dst_elems.size(); i++) {
+      const MeshObj *dst_elem = dst_elems[i];
+
+      // Init everything to 0s
+      (*valid)[i]=0;
+      (*sintd_areas_out)[i]=0.0;
+      (*dst_areas_out)[i]=0.0;
+      
+      
+      // Invalidate masked destination elements
+      if (dst_mask_field) {
+        double *msk=dst_mask_field->data(*dst_elem);
+        if (*msk>0.5) {
+          // Init to 0's above
+          continue;
+        }
+      }
+      
+      // Invalidate creeped out dst element
+      if(dst_frac2_field){
+        double *dst_frac2=dst_frac2_field->data(*dst_elem);
+        if (*dst_frac2 == 0.0){
+          // Init to 0's above
+          continue;
+        }
+      }
+
+      // Get dst coords
+      get_elem_coords_3D_ccw(dst_elem, dst_cfield, MAX_NUM_DST_POLY_NODES, tmp_coords, &num_dst_nodes, dst_coords);
+      
+      // Get rid of degenerate edges
+      remove_0len_edges3D(&num_dst_nodes, dst_coords);
+      
+      // if less than a triangle skip
+      if (num_dst_nodes<3) {
+        // Init to 0's above
+        continue;
+      }
+
+      // if a smashed quad skip
+      if (is_smashed_quad3D(num_dst_nodes, dst_coords)) {
+        // Init to 0's above
+        continue;
+      }
+      
+      // Put dst cell information directly into SM cells and list 
+
+      // Calculate dst area
+      double dst_area=great_circle_area(num_dst_nodes, dst_coords); 
+
+      // Declare temporary supermesh cell info structure
+      SM_CELL tmp_smc;
+
+      // Add destination cell index
+      tmp_smc.dst_index=i;
+
+      // Add area to supermesh cell info 
+      tmp_smc.area=dst_area;
+      
+      // Add centroid to supermesh cell info 
+      _calc_centroid_2D_3D_sph(num_dst_nodes, dst_coords, tmp_smc.cntr);
+
+      // Add to list
+      sm_cells->push_back(tmp_smc);
+      
+      // Set information into other lists
+      (*valid)[i]=1;
+      (*sintd_areas_out)[i]=dst_area; // because dst is XGrid sintd area = dst area
+      (*dst_areas_out)[i]=dst_area;
+      
+#undef  MAX_NUM_DST_POLY_NODES
+#undef  MAX_NUM_DST_POLY_COORDS_3D    
+    }
+    
+
+    
+#undef  MAX_NUM_SRC_POLY_NODES
+#undef  MAX_NUM_SRC_POLY_COORDS_3D    
+  }
+
+
+  // This method creates sm cells for a 2nd order interpolation going from an XGrid to a side mesh
+  // Since the source is an XGrid by definition the source cell is the SM cell.
+  // Because of that, we just have to set the 
+
+  // Here valid and wghts need to be resized to the same size as dst_elems before being passed into 
+  // this call. 
+  void create_src_xgrid_SM_cells_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, 
+                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
+                                           double *src_elem_area,
+                                           std::vector<int> *valid, 
+                                           std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
+                                           std::vector<SM_CELL> *sm_cells) {
+
+    
+// Maximum size for a supported polygon
+// Since the elements are of a small 
+// limited size. Fixed sized buffers seem 
+// the best way to handle them
+
+#define  MAX_NUM_SRC_POLY_NODES 40
+#define  MAX_NUM_SRC_POLY_COORDS_3D (3*MAX_NUM_SRC_POLY_NODES) 
+
+    // Declaration for src polygon
+    int num_src_nodes;
+    double src_coords[MAX_NUM_SRC_POLY_COORDS_3D];
+    double tmp_coords[MAX_NUM_SRC_POLY_COORDS_3D];
+
+    // Get src coords
+    get_elem_coords_3D_ccw(src_elem, src_cfield, MAX_NUM_SRC_POLY_NODES, tmp_coords, &num_src_nodes, src_coords);
+
+    // Get rid of degenerate edges
+    remove_0len_edges3D(&num_src_nodes, src_coords);
+
+    // If less than a triangle invalidate everything and leave because it won't results in weights
+    // Decision about returning error for degeneracy is made above this subroutine
+    if (num_src_nodes<3) {
+      *src_elem_area=0.0;    
+      for (int i=0; i<dst_elems.size(); i++) {
+        (*valid)[i]=0;
+        (*sintd_areas_out)[i]=0.0;
+        (*dst_areas_out)[i]=0.0;
+      }
+      return;
+    }
+
+    // If a smashed quad invalidate everything and leave because it won't results in weights
+    // Decision about returning error for degeneracy is made above this subroutine
+    if (is_smashed_quad3D(num_src_nodes, src_coords)) {
+      *src_elem_area=0.0;    
+      for (int i=0; i<dst_elems.size(); i++) {
+        (*valid)[i]=0;
+        (*sintd_areas_out)[i]=0.0;
+        (*dst_areas_out)[i]=0.0;
+      }
+      return;
+    }
+
+    // Calc area of src cell
+    double src_area=great_circle_area(num_src_nodes, src_coords);
+        
+    // Set output src area
+    *src_elem_area=src_area;
+    
+    // By definition there should be exactly one dst, if not complain
+    if (dst_elems.size() != 1) Throw() << "Each XGrid elem should correspond to just one element on each side. Here XGrid elem id="<<src_elem->get_id()<<" corresponds to "<<dst_elems.size()<<" elems.";
+    
+    // Look at dst just to make sure that it isn't masked
+    const MeshObj *dst_elem = dst_elems[0];
+    
+    // Init everything to 0s
+    (*valid)[0]=0;
+    (*sintd_areas_out)[0]=0.0;
+    (*dst_areas_out)[0]=0.0;
+      
+      
+    // Invalidate masked destination elements
+    if (dst_mask_field) {
+      double *msk=dst_mask_field->data(*dst_elem);
+      if (*msk>0.5) {
+        // Init to 0's above
+        return;
+      }
+    }
+      
+    // Invalidate creeped out dst element
+    if(dst_frac2_field){
+      double *dst_frac2=dst_frac2_field->data(*dst_elem);
+      if (*dst_frac2 == 0.0){
+        // Init to 0's above
+        return;
+      }
+    }
+
+    // Defs for dst polygon
+#define  MAX_NUM_DST_POLY_NODES 40
+#define  MAX_NUM_DST_POLY_COORDS_3D (3*MAX_NUM_DST_POLY_NODES) 
+
+    // Declaration for dst polygon
+    int num_dst_nodes;
+    double dst_coords[MAX_NUM_DST_POLY_COORDS_3D];
+    
+    // Get dst coords
+    get_elem_coords_3D_ccw(dst_elem, dst_cfield, MAX_NUM_DST_POLY_NODES, tmp_coords, &num_dst_nodes, dst_coords);
+      
+    // Get rid of degenerate edges
+    remove_0len_edges3D(&num_dst_nodes, dst_coords);
+    
+    // if less than a triangle skip
+    if (num_dst_nodes<3) {
+      // Init to 0's above
+      return;
+    }
+
+    // if a smashed quad skip
+    if (is_smashed_quad3D(num_dst_nodes, dst_coords)) {
+      // Init to 0's above
+      return;
+    }
+
+    // Calc dst area
+    double dst_area=great_circle_area(num_dst_nodes, dst_coords); 
+
+    
+    // Dst looks ok, so put information into SM cell and lists
+
+    // Declare temporary supermesh cell info structure
+    SM_CELL tmp_smc;
+    
+    // Add destination cell index
+    tmp_smc.dst_index=0;
+    
+    // Add area to supermesh cell info 
+    tmp_smc.area=src_area;
+    
+    // Add centroid to supermesh cell info 
+    _calc_centroid_2D_3D_sph(num_src_nodes, src_coords, tmp_smc.cntr);
+    
+    // Add to list
+    sm_cells->push_back(tmp_smc);
+    
+    // Set information into other lists
+    (*valid)[0]=1;
+    (*sintd_areas_out)[0]=src_area; // because src is XGrid sintd area = src area
+    (*dst_areas_out)[0]=dst_area;
+
+    
+#undef  MAX_NUM_DST_POLY_NODES
+#undef  MAX_NUM_DST_POLY_COORDS_3D    
+    
+#undef  MAX_NUM_SRC_POLY_NODES
+#undef  MAX_NUM_SRC_POLY_COORDS_3D    
+  }
+
+  
+
   //////////////// END CALC 2D 3D WEIGHTS //////////////////
 
+
+  
 
 } // namespace

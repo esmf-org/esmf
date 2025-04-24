@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -561,7 +561,7 @@ void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
 void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                               int *_areaPresent, double *elemArea,
                               int *_coordsPresent, double *elemCoords,
-                              int *_num_elemConn, int *elemConn, 
+                              int *_elemConn_size, int *elemConn, 
                               ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                               int *rc)
 {
@@ -576,7 +576,7 @@ void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, Inter
                           _num_elems, elemId, elemType, _elemMaskII ,
                           _areaPresent, elemArea,
                           _coordsPresent, elemCoords,
-                          _num_elemConn, elemConn, 
+                          _elemConn_size, elemConn, 
                           _coordSys, _orig_sdim,
                           &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,ESMC_CONTEXT, rc);
@@ -588,7 +588,7 @@ void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, Inter
                        _num_elems, elemId, elemType, _elemMaskII,
                        _areaPresent, elemArea,
                        _coordsPresent, elemCoords,
-                       _num_elemConn, elemConn,
+                       _elemConn_size, elemConn,
                        _coordSys, _orig_sdim,
                        &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,ESMC_CONTEXT, rc);
@@ -1576,8 +1576,9 @@ void MeshCap::regrid_create(
     int *extrapNumInputLevels,
     int *unmappedaction, int *_ignoreDegenerate,
     int *srcTermProcessing, int *pipelineDepth,
-    ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
-    int *nentries, ESMCI::TempWeights **tweights,
+    ESMCI::RouteHandle **rh, int *has_rh,
+    int *has_iw, int *nentries, ESMCI::TempWeights **tweights,
+    ESMCI::RouteHandle **trh, int *has_trh,
     int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
     int *has_statusArray, ESMCI::Array **statusArray,
     int *checkFlag, 
@@ -1668,8 +1669,9 @@ void MeshCap::regrid_create(
                         extrapNumInputLevels,
                         unmappedaction, _ignoreDegenerate,
                         srcTermProcessing, pipelineDepth,
-                        rh, has_rh, has_iw,
-                        nentries, tweights,
+                        rh, has_rh,
+                        has_iw, nentries, tweights,
+                        trh, has_trh,
                         has_udl, _num_udl, _tudl,
                         has_statusArray, statusArray,
                         checkFlag, 

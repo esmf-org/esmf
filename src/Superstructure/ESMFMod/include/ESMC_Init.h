@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -29,6 +29,7 @@
 #define ESMC_Init_H
 
 #include "ESMC_Arg.h"
+#include "ESMC_Util.h"
 
 // identifier list for optional ESMC arguments
 enum {
@@ -121,6 +122,39 @@ extern "C" {
 //  \end{description}
 //EOP
 //-----------------------------------------------------------------------------
+#ifdef __cplusplus
+} // extern "C"
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_FinalizeWithFlag - Finalize the ESMF Framework and specify the type of finalization.
+//
+// !INTERFACE:
+  int ESMC_FinalizeWithFlag(
+    ESMC_End_Flag endFlag); // enumerator for exit action (see below)
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+// This must be called once on each PET before the application exits to
+// allow ESMF to flush buffers, close open connections, and release
+// internal resources cleanly.
+//
+// The \texttt{endFlag} argument has one of three options:
+// \begin{description}
+//   \item [\texttt{ESMC\_END\_NORMAL}]
+//      Finalize normally.
+//   \item [\texttt{ESMC\_END\_KEEPMPI}]
+//      Finalize normally without finalizing MPI.
+//   \item [\texttt{ESMC\_END\_ABORT}]
+//      Abort on finalization.
+// \end{description}
+//EOP
 #ifdef __cplusplus
 } // extern "C"
 #endif

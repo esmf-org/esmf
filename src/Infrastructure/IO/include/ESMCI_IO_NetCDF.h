@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -45,7 +45,6 @@
 #include "netcdf.h"
 typedef int NcFile;
 typedef int NcDim;
-#define NC_UNSPECIFIED ((nc_type)0)
 #endif
 
 namespace ESMCI
@@ -106,10 +105,6 @@ namespace ESMCI
  // < declare private interface methods here >
 
 #ifdef ESMF_NETCDF
-    int ncerrToEsmcRc (int ncerr);
-    ESMC_TypeKind_Flag  ncToEsmcType(nc_type  ncTypeVal);
-    nc_type         esmcToNcType(ESMC_TypeKind_Flag  esmcTypeVal);
-
     Array*  readArray(NcFile  netCdfFile,
                        int    varIndex,
                        int    *rc);

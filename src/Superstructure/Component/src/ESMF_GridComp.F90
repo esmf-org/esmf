@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -40,6 +40,7 @@ module ESMF_GridCompMod
   use ESMF_BaseMod
   use ESMF_VMMod
   use ESMF_ConfigMod
+  use ESMF_HConfigMod
   use ESMF_ClockTypeMod
   use ESMF_ClockMod
   use ESMF_StateTypesMod
@@ -365,7 +366,7 @@ contains
 ! !INTERFACE:
   recursive function ESMF_GridCompCreate(keywordEnforcer, grid, gridList, &
     mesh, meshList, locstream, locstreamList, xgrid, xgridList, &
-    config, configFile, clock, petList, devList, contextflag, name, rc)
+    hconfig, config, configFile, clock, petList, devList, contextflag, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_GridComp) :: ESMF_GridCompCreate
@@ -380,6 +381,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocStream),    intent(in),    optional :: locstreamList(:)
     type(ESMF_XGrid),        intent(in),    optional :: xgrid
     type(ESMF_XGrid),        intent(in),    optional :: xgridList(:)
+    type(ESMF_HConfig),      intent(in),    optional :: hconfig
     type(ESMF_Config),       intent(in),    optional :: config
     character(len=*),        intent(in),    optional :: configFile
     type(ESMF_Clock),        intent(in),    optional :: clock
@@ -402,6 +404,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_GridComp} object.
 ! \item[8.6.0] Added argument {\tt devList} to support management of accelerator
 !   devices.
+! \item[8.7.0] Added argument {\tt hconfig} to simplify direct usage of
+!   {\tt ESMF\_HConfig} objects with Components.
 ! \end{sloppypar}
 ! \end{description}
 ! \end{itemize}
@@ -501,18 +505,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   error is returned in {\tt rc}.
 !   By default, i.e. if neither {\tt xgrid} nor {\tt xgridList} are provided,
 !   no {\tt ESMF\_XGrid} objects are associated with the component.
+! \item[{[hconfig]}]
+!   An already-created {\tt ESMF\_HConfig} object to be attached to the newly
+!   created component.
+!   Only one of {\tt hconfig}, {\tt config}, or {\tt configFile} must be
+!   specified.
 ! \item[{[config]}]
 !   An already-created {\tt ESMF\_Config} object to be attached to the newly
 !   created component.
-!   If both {\tt config} and {\tt configFile} arguments are specified,
-!   {\tt config} takes priority.
+!   Only one of {\tt hconfig}, {\tt config}, or {\tt configFile} must be
+!   specified.
 ! \item[{[configFile]}]
-!   The filename of an {\tt ESMF\_Config} format file.
+!   The filename of a config file.
 !   If specified, a new {\tt ESMF\_Config} object is created and attached to the
 !   newly created component. The {\tt configFile} file is opened and associated
 !   with the new config object.
-!   If both {\tt config} and {\tt configFile} arguments are specified,
-!   {\tt config} takes priority.
+!   Only one of {\tt hconfig}, {\tt config}, or {\tt configFile} must be
+!   specified.
 ! \item[{[clock]}]
 !   \begin{sloppypar}
 !   Component-specific {\tt ESMF\_Clock}.  This clock is available to be
@@ -550,6 +559,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: localrc                               ! local error status
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit,hconfig,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
@@ -568,8 +578,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
-      configFile=configFile, config=config, clock=clock, petList=petList, &
-      devList=devList, contextflag=contextflag, rc=localrc)
+      configFile=configFile, config=config, hconfig=hconfig, clock=clock, &
+      petList=petList, devList=devList, contextflag=contextflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) then
@@ -903,10 +913,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     gridIsPresent, grid, gridList, meshIsPresent, mesh, meshList, &
     locstreamIsPresent, locstream, locstreamList, xgridIsPresent, &
     xgrid, xgridList, importStateIsPresent, importState, &
-    exportStateIsPresent, exportState, configIsPresent, config, &
-    configFileIsPresent, configFile, clockIsPresent, clock, localPet, &
-    petCount, contextflag, currentMethod, currentPhase, comptype, &
-    vmIsPresent, vm, name, rc)
+    exportStateIsPresent, exportState, hconfigIsPresent, hconfig, &
+    configIsPresent, config, configFileIsPresent, configFile, &
+    clockIsPresent, clock, localPet, petCount, contextflag, &
+    currentMethod, currentPhase, comptype, vmIsPresent, vm, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),           intent(in)            :: gridcomp
@@ -927,6 +937,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_State),              intent(out), optional :: importState
     logical,                       intent(out), optional :: exportStateIsPresent
     type(ESMF_State),              intent(out), optional :: exportState
+    logical,                       intent(out), optional :: hconfigIsPresent
+    type(ESMF_HConfig),            intent(out), optional :: hconfig
     logical,                       intent(out), optional :: configIsPresent
     type(ESMF_Config),             intent(out), optional :: config
     logical,                       intent(out), optional :: configFileIsPresent
@@ -956,6 +968,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   These arguments add support for accessing references to multiple geom objects,
 !   either of the same type, or different type, associated with the same
 !   {\tt ESMF\_GridComp} object.
+! \item[8.7.0] Added arguments {\tt hconfigIsPresent} and {\tt hconfig} to
+!   simplify direct usage of {\tt ESMF\_HConfig} objects with Components.
 ! \end{sloppypar}
 ! \end{description}
 ! \end{itemize}
@@ -1057,16 +1071,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   It is an error to query for the export State if none is associated with
 !   the GridComp. If unsure, get {\tt exportStateIsPresent} first to determine
 !   the status.
+! \item[{[hconfigIsPresent]}]
+!   {\tt .true.} if {\tt hconfig} is available in the GridComp object,
+!   {\tt .false.} otherwise.
+! \item[{[hconfig]}]
+!   Return the associated HConfig object.
+!   It is an error to query for the HConfig object if none is associated with
+!   the GridComp. If unsure, get {\tt hconfigIsPresent} first to determine
+!   the status.
 ! \item[{[configIsPresent]}]
-!   {\tt .true.} if {\tt config} was set in GridComp object,
+!   {\tt .true.} if {\tt config} is available in the GridComp object,
 !   {\tt .false.} otherwise.
 ! \item[{[config]}]
-!   Return the associated Config.
+!   Return the associated Config object.
 !   It is an error to query for the Config if none is associated with
 !   the GridComp. If unsure, get {\tt configIsPresent} first to determine
 !   the status.
 ! \item[{[configFileIsPresent]}]
-!   {\tt .true.} if {\tt configFile} was set in GridComp object,
+!   {\tt .true.} if {\tt configFile} is available in the GridComp object,
 !   {\tt .false.} otherwise.
 ! \item[{[configFile]}]
 !   Return the associated configuration filename.
@@ -1128,8 +1150,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       locstream=locstream, locstreamList=locstreamList, &
       xgrid=xgrid, xgridList=xgridList, &
       importState=importState, exportState=exportState, clock=clock,&
-      configFile=configFile, config=config, currentMethod=currentMethod, &
-      currentPhase=currentPhase, localPet=localPet, petCount=petCount, &
+      configFile=configFile, config=config, hconfig=hconfig, &
+      currentMethod=currentMethod, currentPhase=currentPhase, &
+      localPet=localPet, petCount=petCount, &
       comptype=comptype, compStatus=compStatus, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -1143,6 +1166,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! call Comp method
     call ESMF_CompStatusGet(compStatus, &
       clockIsPresent = clockIsPresent, &
+      hconfigIsPresent = hconfigIsPresent, &
       configIsPresent = configIsPresent, &
       configFileIsPresent = configFileIsPresent, &
       vmIsPresent = vmIsPresent, &
@@ -2106,7 +2130,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   subroutine ESMF_GridCompSet(gridcomp, keywordEnforcer, grid, gridList, &
     mesh, meshList, locstream, locstreamList, xgrid, xgridList, &
-    config, configFile, clock, name, rc)
+    hconfig, config, configFile, clock, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),    intent(inout)         :: gridcomp
@@ -2119,6 +2143,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocStream),   intent(in),  optional :: locstreamList(:)
     type(ESMF_XGrid),       intent(in),  optional :: xgrid
     type(ESMF_XGrid),       intent(in),  optional :: xgridList(:)
+    type(ESMF_HConfig),     intent(in),  optional :: hconfig
     type(ESMF_Config),      intent(in),  optional :: config
     character(len=*),       intent(in),  optional :: configFile
     type(ESMF_Clock),       intent(in),  optional :: clock
@@ -2136,6 +2161,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   These arguments add support for holding references to multiple geom objects,
 !   either of the same type, or different type, in the same
 !   {\tt ESMF\_GridComp} object.
+! \item[8.7.0] Added argument {\tt hconfig} to simplify direct usage of
+!   {\tt ESMF\_HConfig} objects with Components.
 ! \end{sloppypar}
 ! \end{description}
 ! \end{itemize}
@@ -2233,18 +2260,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   By default, i.e. if neither {\tt xgrid} nor {\tt xgridList} are provided,
 !   the {\tt ESMF\_XGrid} association of the incoming {\tt gridcomp}
 !   component remains unchanged.
+! \item[{[hconfig]}]
+!   An already-created {\tt ESMF\_HConfig} object to be attached to the
+!   component.
+!   Only one of {\tt hconfig}, {\tt config}, or {\tt configFile} must be
+!   specified.
 ! \item[{[config]}]
 !   An already-created {\tt ESMF\_Config} object to be attached to the
 !   component.
-!   If both {\tt config} and {\tt configFile} arguments are specified,
-!   {\tt config} takes priority.
+!   Only one of {\tt hconfig}, {\tt config}, or {\tt configFile} must be
+!   specified.
 ! \item[{[configFile]}]
-!   The filename of an {\tt ESMF\_Config} format file.
+!   The filename of a config file.
 !   If specified, a new {\tt ESMF\_Config} object is created and attached to the
 !   component. The {\tt configFile} file is opened and associated
 !   with the new config object.
-!   If both {\tt config} and {\tt configFile} arguments are specified,
-!   {\tt config} takes priority.
+!   Only one of {\tt hconfig}, {\tt config}, or {\tt configFile} must be
+!   specified.
 ! \item[{[clock]}]
 !   Set the private clock for this {\tt ESMF\_GridComp}.
 ! \item[{[name]}]
@@ -2263,6 +2295,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit,hconfig,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
@@ -2274,7 +2307,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         grid=grid, gridList=gridList, mesh=mesh, meshList=meshList, &
         locstream=locstream, locstreamList=locstreamList, xgrid=xgrid, &
         xgridList=xgridList, clock=clock, configFile=configFile, config=config, &
-        rc=localrc)
+        hconfig=hconfig, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2284,7 +2317,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         grid=grid, gridList=gridList, mesh=mesh, meshList=meshList, &
         locstream=locstream, locstreamList=locstreamList, xgrid=xgrid, &
         xgridList=xgridList, clock=clock, configFile=configFile, config=config, &
-        rc=localrc)
+        hconfig=hconfig, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2608,8 +2641,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   standard Component Initialize(), Run(), and Finalize() methods.
 !   \end{sloppypar}
 ! \item[{[sharedObj]}]
-!   Name of shared object that contains {\tt userRoutine}. If the
-!   {\tt sharedObj} argument is not provided the executable itself will be
+!   Name of shared object that contains {\tt userRoutine}. The asterisk
+!   character {\tt (*)} is supported as a wildcard for the file name suffix.
+!   When present, the asterisk is replaced by "so", "dylib", and "dll", in this
+!   order, and the first successfully loaded object is used to search for
+!   {\tt userRoutine}.
+!   If the {\tt sharedObj} argument is not provided, the executable itself is
 !   searched for {\tt userRoutine}.
 ! \item[{[userRoutineFound]}]
 !   Report back whether the specified {\tt userRoutine} was found and executed,
@@ -2989,8 +3026,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_GridCompSetVMxxx()} methods to set the properties of the VM
 !   associated with the Gridded Component.
 ! \item[{[sharedObj]}]
-!   Name of shared object that contains {\tt userRoutine}. If the
-!   {\tt sharedObj} argument is not provided the executable itself will be
+!   Name of shared object that contains {\tt userRoutine}. The asterisk
+!   character {\tt (*)} is supported as a wildcard for the file name suffix.
+!   When present, the asterisk is replaced by "so", "dylib", and "dll", in this
+!   order, and the first successfully loaded object is used to search for
+!   {\tt userRoutine}.
+!   If the {\tt sharedObj} argument is not provided, the executable itself is
 !   searched for {\tt userRoutine}.
 ! \item[{[userRoutineFound]}]
 !   Report back whether the specified {\tt userRoutine} was found and executed,

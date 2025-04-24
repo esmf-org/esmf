@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -40,6 +40,7 @@ module ESMF_CplCompMod
   use ESMF_BaseMod
   use ESMF_VMMod
   use ESMF_ConfigMod
+  use ESMF_HConfigMod
   use ESMF_ClockTypeMod
   use ESMF_ClockMod
   use ESMF_StateTypesMod
@@ -357,14 +358,15 @@ contains
 ! !IROUTINE: ESMF_CplCompCreate - Create a CplComp
 !
 ! !INTERFACE:
-  recursive function ESMF_CplCompCreate(keywordEnforcer, config, configFile, &
-    clock, petList, devList, contextflag, name, rc)
+  recursive function ESMF_CplCompCreate(keywordEnforcer, hconfig, config, &
+    configFile, clock, petList, devList, contextflag, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_CplComp) :: ESMF_CplCompCreate
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_HConfig),      intent(in),  optional :: hconfig
     type(ESMF_Config),       intent(in),  optional :: config
     character(len=*),        intent(in),  optional :: configFile
     type(ESMF_Clock),        intent(in),  optional :: clock
@@ -381,6 +383,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[8.6.0] Added argument {\tt devList} to support management of accelerator
 !   devices.
+! \item[8.7.0] Added argument {\tt hconfig} to simplify direct usage of
+!   {\tt ESMF\_HConfig} objects with Components.
 ! \end{description}
 ! \end{itemize}
 !
@@ -399,18 +403,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! The arguments are:
 ! \begin{description}
+! \item[{[hconfig]}]
+!   An already-created {\tt ESMF\_HConfig} object to be attached to the newly
+!   created component.
+!   Only one of {\tt hconfig}, {\tt config}, or {\tt configFile} must be
+!   specified.
 ! \item[{[config]}]
 !   An already-created {\tt ESMF\_Config} object to be attached to the newly
 !   created component.
-!   If both {\tt config} and {\tt configFile} arguments are specified,
-!   {\tt config} takes priority.
+!   Only one of {\tt hconfig}, {\tt config}, or {\tt configFile} must be
+!   specified.
 ! \item[{[configFile]}]
-!   The filename of an {\tt ESMF\_Config} format file.
+!   The filename of a config file.
 !   If specified, a new {\tt ESMF\_Config} object is created and attached to the
 !   newly created component. The {\tt configFile} file is opened and associated
 !   with the new config object.
-!   If both {\tt config} and {\tt configFile} arguments are specified,
-!   {\tt config} takes priority.
+!   Only one of {\tt hconfig}, {\tt config}, or {\tt configFile} must be
+!   specified.
 ! \item[{[clock]}]
 !   \begin{sloppypar}
 !   Component-specific {\tt ESMF\_Clock}.  This clock is available to be
@@ -447,6 +456,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_CplComp)            :: cplcomp
     integer :: localrc                                ! local error localrc
 
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit,hconfig,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
@@ -465,8 +475,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
-      configFile=configFile, config=config, clock=clock, petList=petList, &
-      devList=devList, contextflag=contextflag, rc=localrc)
+      configFile=configFile, config=config, hconfig=hconfig, clock=clock, &
+      petList=petList, devList=devList, contextflag=contextflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) then
@@ -790,14 +800,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_CplCompGet - Get CplComp information
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompGet(cplcomp, keywordEnforcer, configIsPresent, config, &
-    configFileIsPresent, configFile, clockIsPresent, clock, localPet, &
+  subroutine ESMF_CplCompGet(cplcomp, keywordEnforcer, hconfigIsPresent, hconfig, &
+    configIsPresent, config, configFileIsPresent, configFile, clockIsPresent, clock, localPet, &
     petCount, contextflag, currentMethod, currentPhase, vmIsPresent, &
     vm, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),      intent(in)            :: cplcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                 intent(out), optional :: hconfigIsPresent
+    type(ESMF_HConfig),      intent(out), optional :: hconfig
     logical,                 intent(out), optional :: configIsPresent
     type(ESMF_Config),       intent(out), optional :: config
     logical,                 intent(out), optional :: configFileIsPresent
@@ -817,6 +829,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.7.0] Added arguments {\tt hconfigIsPresent} and {\tt hconfig} to
+!   simplify direct usage of {\tt ESMF\_HConfig} objects with Components.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -829,13 +846,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[configIsPresent]}]
 !   {\tt .true.} if {\tt config} was set in CplComp object,
 !   {\tt .false.} otherwise.
+! \item[{[hconfigIsPresent]}]
+!   {\tt .true.} if {\tt hconfig} is available in the CplComp object,
+!   {\tt .false.} otherwise.
+! \item[{[hconfig]}]
+!   Return the associated HConfig object.
+!   It is an error to query for the HConfig object if none is associated with
+!   the CplComp. If unsure, get {\tt hconfigIsPresent} first to determine
+!   the status.
+! \item[{[configIsPresent]}]
+!   {\tt .true.} if {\tt config} is available in the CplComp object,
+!   {\tt .false.} otherwise.
 ! \item[{[config]}]
-!   Return the associated Config.
+!   Return the associated Config object.
 !   It is an error to query for the Config if none is associated with
 !   the CplComp. If unsure, get {\tt configIsPresent} first to determine
 !   the status.
 ! \item[{[configFileIsPresent]}]
-!   {\tt .true.} if {\tt configFile} was set in CplComp object,
+!   {\tt .true.} if {\tt configFile} is available in the CplComp object,
 !   {\tt .false.} otherwise.
 ! \item[{[configFile]}]
 !   Return the associated configuration filename.
@@ -889,7 +917,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompGet(cplcomp%compp, name=name, vm=vm, contextflag=contextflag,&
-      clock=clock, configFile=configFile, config=config, &
+      clock=clock, configFile=configFile, config=config, hconfig=hconfig, &
       currentMethod=currentMethod, currentPhase=currentPhase, &
       localPet=localPet, petCount=petCount, compStatus=compStatus, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -904,6 +932,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! call Comp method
     call ESMF_CompStatusGet(compStatus, &
       clockIsPresent = clockIsPresent, &
+      hconfigIsPresent = hconfigIsPresent, &
       configIsPresent = configIsPresent, &
       configFileIsPresent = configFileIsPresent, &
       vmIsPresent = vmIsPresent, &
@@ -1859,12 +1888,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_CplCompSet - Set or reset information about the CplComp
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompSet(cplcomp, keywordEnforcer, config, configFile, &
-    clock, name, rc)
+  subroutine ESMF_CplCompSet(cplcomp, keywordEnforcer, hconfig, config, &
+    configFile, clock, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp), intent(inout)         :: cplcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_HConfig), intent(in),  optional :: hconfig
     type(ESMF_Config),  intent(in),  optional :: config
     character(len=*),   intent(in),  optional :: configFile
     type(ESMF_Clock),   intent(in),  optional :: clock
@@ -1874,6 +1904,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.7.0] Added argument {\tt hconfig} to simplify direct usage of
+!   {\tt ESMF\_HConfig} objects with Components.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1885,18 +1920,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_CplComp} to change.
 ! \item[{[name]}]
 !   Set the name of the {\tt ESMF\_CplComp}.
+! \item[{[hconfig]}]
+!   An already-created {\tt ESMF\_HConfig} object to be attached to the
+!   component.
+!   Only one of {\tt hconfig}, {\tt config}, or {\tt configFile} must be
+!   specified.
 ! \item[{[config]}]
 !   An already-created {\tt ESMF\_Config} object to be attached to the
 !   component.
-!   If both {\tt config} and {\tt configFile} arguments are specified,
-!   {\tt config} takes priority.
+!   Only one of {\tt hconfig}, {\tt config}, or {\tt configFile} must be
+!   specified.
 ! \item[{[configFile]}]
-!   The filename of an {\tt ESMF\_Config} format file.
+!   The filename of a config file.
 !   If specified, a new {\tt ESMF\_Config} object is created and attached to the
 !   component. The {\tt configFile} file is opened and associated
 !   with the new config object.
-!   If both {\tt config} and {\tt configFile} arguments are specified,
-!   {\tt config} takes priority.
+!   Only one of {\tt hconfig}, {\tt config}, or {\tt configFile} must be
+!   specified.
 ! \item[{[clock]}]
 !   Set the private clock for this {\tt ESMF\_CplComp}.
 ! \item[{[rc]}]
@@ -1912,6 +1952,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit,hconfig,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
@@ -1920,14 +1961,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       cplcomp%name = trim(name)
       ! call Comp method (without name)
       call ESMF_CompSet(cplcomp%compp, clock=clock, &
-        configFile=configFile, config=config, rc=localrc)
+        configFile=configFile, config=config, hconfig=hconfig, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! call Comp method
       call ESMF_CompSet(cplcomp%compp, name=name, clock=clock, &
-        configFile=configFile, config=config, rc=localrc)
+        configFile=configFile, config=config, hconfig=hconfig, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2251,8 +2292,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   standard Component Initialize(), Run(), and Finalize() methods.
 !   \end{sloppypar}
 ! \item[{[sharedObj]}]
-!   Name of shared object that contains {\tt userRoutine}. If the
-!   {\tt sharedObj} argument is not provided the executable itself will be
+!   Name of shared object that contains {\tt userRoutine}. The asterisk
+!   character {\tt (*)} is supported as a wildcard for the file name suffix.
+!   When present, the asterisk is replaced by "so", "dylib", and "dll", in this
+!   order, and the first successfully loaded object is used to search for
+!   {\tt userRoutine}.
+!   If the {\tt sharedObj} argument is not provided, the executable itself is
 !   searched for {\tt userRoutine}.
 ! \item[{[userRoutineFound]}]
 !   Report back whether the specified {\tt userRoutine} was found and executed,
@@ -2631,8 +2676,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_CplCompSetVMxxx()} methods to set the properties of the VM
 !   associated with the Coupler Component.
 ! \item[{[sharedObj]}]
-!   Name of shared object that contains {\tt userRoutine}. If the
-!   {\tt sharedObj} argument is not provided the executable itself will be
+!   Name of shared object that contains {\tt userRoutine}. The asterisk
+!   character {\tt (*)} is supported as a wildcard for the file name suffix.
+!   When present, the asterisk is replaced by "so", "dylib", and "dll", in this
+!   order, and the first successfully loaded object is used to search for
+!   {\tt userRoutine}.
+!   If the {\tt sharedObj} argument is not provided, the executable itself is
 !   searched for {\tt userRoutine}.
 ! \item[{[userRoutineFound]}]
 !   Report back whether the specified {\tt userRoutine} was found and executed,

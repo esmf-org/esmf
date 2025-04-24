@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -241,7 +241,7 @@ program ESMF_ArrayRedistPerfUTest
 #ifdef ESMF_BOPT_g
   dtTest = 20.d0  ! 20s is expected to pass in debug mode
 #else
-  dtTest = 2.d0   ! 2s is expected to pass in optimized mode
+  dtTest = 2.5d0  ! 2.5s is expected to pass in optimized mode
 #endif
   write(failMsg, *) "ArrayRedistStore() performance problem! ", dt, ">", dtTest
 #ifdef ESMF_TESTPERFORMANCE

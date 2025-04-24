@@ -12,7 +12,7 @@ jobs:
     steps:
 
     - name: Checkout Dockerfiles
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
           repository: esmf-org/esmf-containers
           path: esmf-containers
@@ -32,7 +32,7 @@ jobs:
         docker rm ${CID}
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: test-coverage
         path: ${{ github.workspace }}/artifacts

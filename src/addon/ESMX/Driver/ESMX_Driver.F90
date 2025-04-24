@@ -2,7 +2,7 @@
 ! ESMX_Driver (Earth System Model eXecutable Driver)
 !   This file contains the ESMX top level driver.
 !==============================================================================
-#define FILENAME "src/addon/ESMX/ESMX_Driver.F90"
+#define FILENAME "src/addon/ESMX/Driver/ESMX_Driver.F90"
 !==============================================================================
 
 module ESMX_Driver
@@ -92,7 +92,6 @@ module ESMX_Driver
     integer                         :: i, j, componentCount, ompNumThreads
     integer, allocatable            :: petList(:), devList(:)
     type(ESMF_GridComp)             :: comp
-    type(ESMF_Config)               :: config
     type(ESMF_HConfig)              :: hconfig, hconfigNode, hconfigNode2
     character(:), allocatable       :: configKey(:)
     character(:), allocatable       :: componentList(:)
@@ -106,33 +105,22 @@ module ESMX_Driver
     rc = ESMF_SUCCESS
 
     ! Look for config in the component
-    call ESMF_GridCompGet(driver, configIsPresent=isFlag, rc=rc)
+    call ESMF_GridCompGet(driver, hconfigIsPresent=isFlag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 
     if (isFlag) then
-      ! Get config from component
-      call ESMF_GridCompGet(driver, config=config, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
-      ! Access hconfig
-      call ESMF_ConfigGet(config, hconfig=hconfig, rc=rc)
+      ! Get hconfig from component
+      call ESMF_GridCompGet(driver, hconfig=hconfig, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
     else
-      ! Attempt to open hconfig from default file "esmxRun.yaml"
-      config = ESMF_ConfigCreate(rc=rc)
+      ! Attempt to open hconfig from default file "esmxRun.yaml", set on Comp
+      call ESMF_GridCompSet(driver, configFile="esmxRun.yaml", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
-      call ESMF_ConfigLoadFile(config, filename="esmxRun.yaml", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
-      ! Set config on the component
-      call ESMF_GridCompSet(driver, config=config, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
-      ! Access hconfig
-      call ESMF_ConfigGet(config, hconfig=hconfig, rc=rc)
+      ! Get hconfig from component
+      call ESMF_GridCompGet(driver, hconfig=hconfig, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
       ! Find hconfig node that holds driver level attributes, conditionally ingest
@@ -157,40 +145,68 @@ module ESMX_Driver
       foundFlag=isFlag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    if (.not.isFlag) then
-      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-        msg="Must provide settings for: "//configKey(1)//":"//configKey(2), &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)
-      return  ! bail out
-    endif
+    if (isFlag) then
+      ! Validate hconfigNode against ESMX/Driver controlled key vocabulary
+      isFlag = ESMF_HConfigValidateMapKeys(hconfigNode, &
+        vocabulary=["attributes   ", &  ! ESMX_Driver option
+                    "componentList", &  ! ESMX_Driver option
+                    "runSequence  ", &  ! ESMX_Driver option
+                    "logSystem    "  &  ! ESMX_Driver option
+                    ], badKey=string1, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) &
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      if (.not.isFlag) then
+        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+          msg="An invalid key was found in config under ESMX/Driver (maybe a typo?): "//string1, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      endif
+      ! Ingest logSystem logical
+      isFlag = ESMF_HConfigIsDefined(hconfigNode, keyString="logSystem", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      isFlag = isFlag .and. &
+        .not.ESMF_HConfigIsNull(hconfigNode, keyString="logSystem", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      if (isFlag) then
+        isFlag = ESMF_HConfigAsLogical(hconfigNode, keyString="logSystem", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+        if (isFLag) then
+          call ESMF_VMLogSystem(prefix="ESMX_Driver: ", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+        endif
+      endif
 
-    ! Validate hconfigNode against ESMX/Driver controlled key vocabulary
-    isFlag = ESMF_HConfigValidateMapKeys(hconfigNode, &
-      vocabulary=["attributes   ", &  ! ESMX_Driver option
-                  "componentList", &  ! ESMX_Driver option
-                  "runSequence  "  &  ! ESMX_Driver option
-                  ], badKey=string1, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) &
-      call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    if (.not.isFlag) then
-      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
-        msg="An invalid key was found in config under ESMX/Driver (maybe a typo?): "//string1, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)
-      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      ! Ingest the generic component label list
+      isFlag = ESMF_HConfigIsDefined(hconfigNode, keyString="componentList", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      isFlag = isFlag .and. &
+        .not.ESMF_HConfigIsNull(hconfigNode, keyString="componentList", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      if (isFlag) then
+        componentList = ESMF_HConfigAsStringSeq(hconfigNode, stringLen=32, &
+          keyString="componentList", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+      endif
+      call ESMF_HConfigDestroy(hconfigNode, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
     endif
-
-    ! Ingest the generic component label list
-    componentList = ESMF_HConfigAsStringSeq(hconfigNode, stringLen=32, &
-      keyString="componentList", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    call ESMF_HConfigDestroy(hconfigNode, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
 
     ! Determine componentCount
-    componentCount = size(componentList)
+    componentCount = 0  ! no components for unallocated componentList
+    if (allocated(componentList)) componentCount = size(componentList)
 
     ! Setup CompDef structure
     allocate(CompDef(componentDefCount))
@@ -306,9 +322,9 @@ module ESMX_Driver
 
       if (inCompDef) then
         ! add child component with SetVM and SetServices in CompDef
-#if defined (__INTEL_LLVM_COMPILER) || (__NVCOMPILER)
-!TODO: remove once IFX, NVHPC, and PGI compilers work correctly w/o work-around
-        call NUOPC_DriverAddGridCompPtr(driver, trim(compLabel), config=config, &
+#if defined (__INTEL_LLVM_COMPILER) || defined (__NVCOMPILER) || defined (NAGFOR)
+!TODO: remove once IFX, NVHPC, and NAG compilers work correctly w/o work-around
+        call NUOPC_DriverAddGridCompPtr(driver, trim(compLabel), hconfig=hconfig, &
           compSetServicesRoutine=CompDef(j)%ssPtr, compSetVMRoutine=CompDef(j)%svPtr, &
           info=info, petList=petList, devList=devList, comp=comp, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, &
@@ -316,7 +332,7 @@ module ESMX_Driver
             "' to driver via Fortran module.", &
           line=__LINE__, file=FILENAME)) return  ! bail out
 #else
-        call NUOPC_DriverAddComp(driver, trim(compLabel), config=config, &
+        call NUOPC_DriverAddComp(driver, trim(compLabel), hconfig=hconfig, &
           compSetServicesRoutine=CompDef(j)%ssPtr, compSetVMRoutine=CompDef(j)%svPtr, &
           info=info, petList=petList, devList=devList, comp=comp, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, &
@@ -326,7 +342,7 @@ module ESMX_Driver
 #endif
       else
         ! add child component with SetVM and SetServices in shared object
-        call NUOPC_DriverAddComp(driver, trim(compLabel), config=config, &
+        call NUOPC_DriverAddComp(driver, trim(compLabel), hconfig=hconfig, &
           sharedObj=trim(model), info=info, petList=petList, devList=devList, &
           comp=comp, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, &
@@ -383,18 +399,14 @@ module ESMX_Driver
     integer, intent(out) :: rc
 
     ! local variables
-    type(ESMF_Config)               :: config
     type(ESMF_HConfig)              :: hconfig, hconfigNode
     character(:), allocatable       :: configKey(:)
     logical                         :: isFlag
 
     rc = ESMF_SUCCESS
 
-    ! Query the driver for config -> hconfig
-    call ESMF_GridCompGet(driver, config=config, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    call ESMF_ConfigGet(config, hconfig=hconfig, rc=rc)
+    ! Query the driver for hconfig
+    call ESMF_GridCompGet(driver, hconfig=hconfig, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 
@@ -404,35 +416,30 @@ module ESMX_Driver
       foundFlag=isFlag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    if (.not.isFlag) then
-      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-        msg="Must provide settings for: "//configKey(1)//":"//configKey(2), &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)
-      return  ! bail out
-    endif
-
-    isFlag = ESMF_HConfigIsDefined(hconfigNode, keyString="runSequence", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
     if (isFlag) then
-      hconfig = ESMF_HConfigCreateAt(hconfigNode, keyString="runSequence", &
+      isFlag = ESMF_HConfigIsDefined(hconfigNode, keyString="runSequence", &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
-      call NUOPC_DriverIngestRunSequence(driver, hconfig, &
-        autoAddConnectors=.true., rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
-      call ESMF_HConfigDestroy(hconfig, rc=rc)
+      if (isFlag) then
+        hconfig = ESMF_HConfigCreateAt(hconfigNode, keyString="runSequence", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+        call NUOPC_DriverIngestRunSequence(driver, hconfig, &
+          autoAddConnectors=.true., rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, &
+          msg="Unable to ingest RunSequence!", &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+        call ESMF_HConfigDestroy(hconfig, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+      endif
+      ! clean-up
+      call ESMF_HConfigDestroy(hconfigNode, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
     endif
-
-    ! clean-up
-    call ESMF_HConfigDestroy(hconfigNode, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
 
   end subroutine SetRunSequence
 

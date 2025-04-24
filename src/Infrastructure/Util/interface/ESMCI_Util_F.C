@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -28,10 +28,13 @@
 #endif
 #include <map>
 #include <string>
+#include <regex>
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
 #include <sstream>
+#include <vector>
+
 using namespace std;
 
 #if !defined (ESMF_OS_MinGW)
@@ -47,6 +50,8 @@ using namespace std;
 #include "ESMCI_Util.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"
+
+#include "dmp_diff.hpp"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -371,11 +376,112 @@ extern "C" {
   if (len < pathname_l)
     memset (pathname+len, ' ', pathname_l-len);
 }
-
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
 void FTN_X(c_pointerprint)(void **ptr){
   printf("ESMF_PointerPrint: %p\n", *ptr);
 }
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  c_ESMC_StringDiffMatch - Mayers diff between two strings
+//
+// !INTERFACE:
+      void FTN_X(c_esmc_stringdiffmatch)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+//
+// !ARGUMENTS:
+      char *fstring1,                 // in - string object
+      char *fstring2,                 // in - string object
+      char *fminus,                   // in - string object
+      char *fplus,                    // in - string object
+      int *matchCount,                // in - string object
+      ESMC_Logical *resultFlag,       // out - result
+      int *rc,                        // out - return code
+      ESMCI_FortranStrLenArg clen1,   // in, hidden - string length
+      ESMCI_FortranStrLenArg clen2,   // in, hidden - string length
+      ESMCI_FortranStrLenArg clenMinus,   // in, hidden - string length
+      ESMCI_FortranStrLenArg clenPlus) {  // in, hidden - string length
+//
+// !DESCRIPTION:
+//     Produce Mayers diff between two strings. Then see if diffs match string
+//     pairs provided in fminus and fplus lists.
+//
+//EOPI
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_ESMC_StringDiffMatch"
+
+  if (rc) *rc = ESMF_SUCCESS;
+
+  string string1(fstring1, clen1);
+  string string2(fstring2, clen2);
+
+  vector<string> minusStrings(*matchCount);
+  vector<string> plusStrings(*matchCount);
+
+  for (auto i=0; i<*matchCount; i++){
+    // set up minus/plus Strings, trimming trailing white spaces
+    minusStrings[i] = regex_replace(string(fminus+i*clenMinus, clenMinus),
+      regex(" +$"), "");
+    plusStrings[i]  = regex_replace(string(fplus+i*clenPlus, clenPlus),
+      regex(" +$"), "");
+  }
+
+  MyersDiff<string> diff{string1, string2}; // generate the difference
+
+  bool allDiffOk = true;
+  for (auto it=diff.begin(); it!=diff.end(); ++it) {
+    string minusString, plusString;
+    bool diffFlag = false;
+    if (it->str().c_str()[0]=='-'){
+      // this is '-' check for '+' on the next string
+      diffFlag = true;
+      minusString = it->str().substr(2);
+      if ((it+1)->str().c_str()[0]=='+'){
+        ++it;
+        plusString = it->str().substr(2);
+      }
+    }else if (it->str().c_str()[0]=='+'){
+      diffFlag = true;
+      // this is '+' therefore minusString is empty
+      minusString = string("");
+      plusString = it->str().substr(2);
+    }
+    if (diffFlag){
+      // search for this minus/plus pair in the provided strings
+      auto i=0;
+      for (i=0; i<*matchCount; i++){
+        if ((minusString==minusStrings[i])&&(plusString==plusStrings[i])) break;
+      }
+      allDiffOk = (i<*matchCount);
+      if (!allDiffOk){
+        // debug help
+        stringstream msg;
+        msg << "c_esmc_stringdiffmatch() string1: " << string1;
+        ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+        msg.str("");  // clear
+        msg << "c_esmc_stringdiffmatch() string2: " << string2;
+        ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+        msg.str("");  // clear
+        msg << "c_esmc_stringdiffmatch() minusString: " << minusString;
+        ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+        msg.str("");  // clear
+        msg << "c_esmc_stringdiffmatch() plusString: " << plusString;
+        ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+      }
+    }
+    if (!allDiffOk) break;
+  }
+
+  *resultFlag = (allDiffOk) ? ESMF_TRUE : ESMF_FALSE;
+
+}  // end c_ESMC_StringSerialize
+
 
 } // extern "C"

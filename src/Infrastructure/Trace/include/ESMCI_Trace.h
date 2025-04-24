@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -89,7 +89,7 @@ namespace ESMCI {
   void TraceTest_GetMPIWaitStats(int *count, long long *time);
   void TraceTest_CheckMPIRegion(std::string name, int *exists);
   //////////////////////////////
-    
+
   
   ////////////////////////////////
 
@@ -108,6 +108,8 @@ namespace ESMCI {
   void TraceEventMemInfo();
   void TraceEventClock(int *ep_year, int *ep_month, int *ep_day,
                        int *ep_hour, int *ep_minute, int *ep_second);
+
+  int TraceGetProfileTypeInfo(enum ESMC_ProfileType type);
 
 }
 

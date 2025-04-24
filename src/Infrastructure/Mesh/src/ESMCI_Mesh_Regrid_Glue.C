@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -26,6 +26,7 @@
 #include "ESMCI_Array.h"
 
 #include "ESMCI_TraceMacros.h"  // for profiling
+#include "ESMCI_TraceRegion.h"  // for profiling
 
 #include "Mesh/include/ESMCI_Mesh.h"
 #include "Mesh/include/Legacy/ESMCI_MeshRead.h"
@@ -82,8 +83,6 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 void CpMeshElemDataToArray(Grid &grid, int staggerloc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray);
 void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array);
 
-
-
 void ESMCI_regrid_create(
                      Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
                      Mesh **meshdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
@@ -99,8 +98,9 @@ void ESMCI_regrid_create(
                      int *extrapNumInputLevels, 
                      int *unmappedaction, int *_ignoreDegenerate,
                      int *srcTermProcessing, int *pipelineDepth,
-                     ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
-                     int *nentries, ESMCI::TempWeights **tweights,
+                     ESMCI::RouteHandle **rh, int *has_rh,
+                     int *has_iw, int *nentries, ESMCI::TempWeights **tweights,
+                     ESMCI::RouteHandle **trh, int *has_trh,
                      int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
                      int *_has_statusArray, ESMCI::Array **_statusArray,
                      int *_checkFlag, 
@@ -109,7 +109,11 @@ void ESMCI_regrid_create(
 #define ESMC_METHOD "ESMCI_regrid_create()"
   Trace __trace(" FTN_X(regrid_test)(ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
 
+  // Declare local return code
+  int localrc;
 
+  
+  // Dereference input variables
   ESMCI::Array &srcarray = **arraysrcpp;
   ESMCI::Array &dstarray = **arraydstpp;
 
@@ -122,6 +126,7 @@ void ESMCI_regrid_create(
   int has_statusArray=*_has_statusArray;
   ESMCI::Array *statusArray=*_statusArray;
 
+  
 #define PROGRESSLOG_off
 #define MEMLOG_off
 
@@ -134,9 +139,6 @@ void ESMCI_regrid_create(
 #endif
 
   try {
-
-    // Declare local return code
-    int localrc;
 
     // Initialize the parallel environment for mesh
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
@@ -316,10 +318,11 @@ void ESMCI_regrid_create(
     }
 
 
-
-
-
-
+    // Enter profile around weight generation
+    if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 1) {
+      ESMCI::TraceEventRegionEnter("Weight generation", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+    }
     
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Entering weight generation.", ESMC_LOGMSG_INFO);
@@ -383,6 +386,12 @@ void ESMCI_regrid_create(
       }
     }
 
+    // Exit profile around weight generation
+    if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 1) {
+      ESMCI::TraceEventRegionExit("Weight generation", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+    }
+    
     ESMCI_REGRID_TRACE_EXIT("NativeMesh Weight Generation");
 
 #ifdef PROGRESSLOG_on
@@ -612,6 +621,10 @@ void ESMCI_regrid_create(
     //TODO: also drop PointList objects here if possible to reduce Store() memory footrint
 #endif
 
+
+    
+    //// Creation of routeHandle ////
+    
 #ifdef MEMLOG_on
     VM::logMemInfo(std::string("RegridCreate5.2"));
 #endif
@@ -619,8 +632,14 @@ void ESMCI_regrid_create(
     ESMCI_REGRID_TRACE_ENTER("NativeMesh ArraySMMStore");
 
     // Build the RouteHandle using ArraySMMStore() 
-    if (*has_rh != 0) {
-      
+    if (*has_rh) {
+
+      // Enter profile around routehandle creation
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 1) {
+        ESMCI::TraceEventRegionEnter("RouteHandle creation", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
+
       // Set some flags
       enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
       ESMC_Logical ignoreUnmatched = ESMF_FALSE;
@@ -636,6 +655,13 @@ void ESMCI_regrid_create(
             pipelineDepth, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+
+
+      // Exit profile around routehandle creation
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 1) {
+        ESMCI::TraceEventRegionExit("RouteHandle creation", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
     }
 
     ESMCI_REGRID_TRACE_EXIT("NativeMesh ArraySMMStore");
@@ -644,18 +670,111 @@ void ESMCI_regrid_create(
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Returned from ArraySMMStore().", ESMC_LOGMSG_INFO);
 #endif
 
+
+    
+    //// Creation of transpose routeHandle ////
+
 #ifdef MEMLOG_on
     VM::logMemInfo(std::string("RegridCreate6.0"));
 #endif
+    
+    
+    // If requested, build the transpose RouteHandle using ArraySMMStore() 
+    if (*has_trh) {
 
-    *nentries = num_entries;
-    // Clean up.  If has_iw, then we will use the arrays to
-    // fill out the users pointers.  These will be deleted following a copy.
-    if (*has_iw == 0) {
-      delete [] factors;
-      delete [] iientries;
-      *nentries = 0;
-    } else {
+      ESMCI_REGRID_TRACE_ENTER("NativeMesh Transpose ArraySMMStore");
+      
+      // Enter profile around routehandle creation
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 1) {
+        ESMCI::TraceEventRegionEnter("Transpose RouteHandle creation", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
+
+      // Allocate transpose matrix
+      int *transpose_iientries = new int[iientries_entry_size*num_entries];
+      
+      // Init to beginning entries of factor index lists
+      int *entry=iientries;
+      int *t_entry=transpose_iientries;
+      
+      // Depending on size of matrix entries, loop constructing transpose matrix
+      if (iientries_entry_size == 2) {
+        
+        // Loop through entries
+        for (int i=0; i<num_entries; i++) {
+          
+          // Swap src and dst values
+          t_entry[0]=entry[1];
+          t_entry[1]=entry[0];
+          
+          // Next entry
+          entry += 2;
+          t_entry += 2;
+        }
+      } else if (iientries_entry_size == 4) {
+
+        // Loop through entries
+        for (int i=0; i<num_entries; i++) {
+          
+          // Swap src and dst values
+          t_entry[0]=entry[2];
+          t_entry[1]=entry[3];
+          t_entry[2]=entry[0];
+          t_entry[3]=entry[1];
+          
+          // Next entry
+          entry += 4;
+          t_entry += 4;
+        }
+      } else {
+        Throw() << "Unsupported tuple size of "<<iientries_entry_size<<" in weight matrix.";
+      } 
+      
+      
+      // Set some flags
+      enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
+      ESMC_Logical ignoreUnmatched = ESMF_FALSE; // TODO: Maybe for transpose this should be true? 
+
+      // Wrap factorIndexList in InterArray
+      int transpose_larg[2] = {iientries_entry_size, num_entries};
+      ESMCI::InterArray<int> transpose_ii(transpose_iientries, 2, transpose_larg);
+      
+      // Call into Array sparse matrix multiply store to create RouteHandle
+      FTN_X(c_esmc_arraysmmstoreind4)(arraydstpp, arraysrcpp, trh, &tk, factors,
+                                      &num_entries, &transpose_ii, &ignoreUnmatched,
+                                      srcTermProcessing, pipelineDepth, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                        ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+
+      // Get rid of transposed factor index list
+      delete [] transpose_iientries;
+
+      // Exit profile around routehandle creation
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 1) {
+        ESMCI::TraceEventRegionExit("Transpose RouteHandle creation", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
+
+      ESMCI_REGRID_TRACE_EXIT("NativeMesh Transpose ArraySMMStore");
+      
+#ifdef PROGRESSLOG_on
+    ESMC_LogDefault.Write("c_esmc_regrid_create(): Returned from transpose ArraySMMStore().", ESMC_LOGMSG_INFO);
+#endif
+
+#ifdef MEMLOG_on
+    VM::logMemInfo(std::string("RegridCreate7.0"));
+#endif      
+    }
+
+
+    
+    //// Output of weight matrix ////
+
+    // If user has requested weights, then save them
+    if (*has_iw) {
+      // Record the number of entries
+      *nentries = num_entries;
+      
       // Save off the weights so the F90 caller can allocate arrays and
       // copy the values.
       if (num_entries>0) {
@@ -668,11 +787,21 @@ void ESMCI_regrid_create(
         // Make sure copying method below takes this into account
         *tweights = NULL;
       }
+
+    } else {  //...else get rid of them
+      *nentries = 0;
+      delete [] factors;
+      delete [] iientries;
     }
 
-    // Setup structure to transfer unmappedDstList
+
+    //// Handle output of unmapped destination list ////
+
+    // Init info for transferring list
     *_num_udl=0;
     *_tudl=NULL;
+
+    // If user wants umappedDstList, then setup structure to transfer it
     if (*has_udl) {
       // Get number of unmapped points
       int num_udl=unmappedDstList.size();
@@ -719,10 +848,10 @@ void ESMCI_regrid_create(
   ESMC_LogDefault.Write("c_esmc_regrid_create(): Final return.", ESMC_LOGMSG_INFO);
 #endif
 
+  
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
-
 
 void ESMCI_regrid_getiwts(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,

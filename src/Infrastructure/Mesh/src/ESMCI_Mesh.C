@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1689,6 +1689,32 @@ void Mesh::RemoveGhost() {
   ESMCI::Par::Init("MESHLOG", false, curr_comm);
 }
 
+
+// Function to communicate fields to ghost locations
+ void Mesh::GhostCommFields(UInt nfields, MEField<> *const *sfields, MEField<> *const *rfields) {
+
+  // Only do on the original comm that this mesh was committed on, so 
+  // leave if that's not set
+  if (orig_comm == MPI_COMM_NULL) return;
+
+   // Error check
+   if (!sghost) Throw()<<"Ghost communicator must be present for ghost communication.";
+   
+   // Save current comm
+   MPI_Comm curr_comm=Par::Comm();
+   
+   // Switch to orig comm
+   ESMCI::Par::Init("MESHLOG", false, orig_comm);
+
+   // Send Fields
+   sghost->SendFields(nfields, sfields, rfields);
+
+   // Switch back to curr comm
+   ESMCI::Par::Init("MESHLOG", false, curr_comm);
+ }
+
+
+ 
 // Convenience function to communicate all fields to ghost locations
  void Mesh::GhostCommAllFields() {
 
@@ -1725,6 +1751,8 @@ void Mesh::RemoveGhost() {
    // Switch back to curr comm
    ESMCI::Par::Init("MESHLOG", false, curr_comm);
  }
+
+
  
 
 void Mesh::build_sym_comm_rel(UInt obj_type) {

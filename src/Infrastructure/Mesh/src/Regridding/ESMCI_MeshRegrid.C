@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -111,7 +111,7 @@ namespace ESMCI {
       }
 
       srcmesh->CreateGhost();
-      srcmesh->GhostComm().SendFields(num_snd, snd, rcv);
+      srcmesh->GhostCommFields(num_snd, snd, rcv);
     }
 
     // Create a layer of ghost elements since the higher order conservative needs a
@@ -154,7 +154,7 @@ namespace ESMCI {
       }
 
       srcmesh->CreateGhost();
-      srcmesh->GhostComm().SendFields(num_snd, snd, rcv);
+      srcmesh->GhostCommFields(num_snd, snd, rcv);
 
 #if 0
       // DEBUG

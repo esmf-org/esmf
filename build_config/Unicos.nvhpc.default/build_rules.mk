@@ -126,7 +126,7 @@ ESMF_OPENACC_F90LINKOPTS    += -acc -Minfo
 ESMF_OPENACC_CXXLINKOPTS    += -acc -Minfo
 
 ############################################################
-# Need this until the file convention is fixed (then remove these two lines)
+# Explicit flags for handling specific format and cpp combos
 #
 ESMF_F90COMPILEFREENOCPP = -Mfreeform
 ESMF_F90COMPILEFIXCPP    = -Mpreprocess -Mnofreeform

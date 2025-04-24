@@ -172,7 +172,7 @@ ESMF_F90LINKPATHS += -L$(dir $(shell gcc -print-file-name=libstdc++.so))
 ESMF_F90LINKLIBS  += -lstdc++
 
 ############################################################
-# Need this until the file convention is fixed (then remove these two lines)
+# Explicit flags for handling specific format and cpp combos
 #
 ESMF_F90COMPILEFREENOCPP = -Mfreeform
 ESMF_F90COMPILEFIXCPP    = -Mpreprocess -Mnofreeform

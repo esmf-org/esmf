@@ -2,7 +2,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1379,7 +1379,7 @@ contains
     print *, "                      [--no_log]"
     print *, "                      [--check]"
     print *, "                      [--checkFlag]"
-    print *, "                      [--help]"
+    print *, "                      [--help|-h]"
     print *, "                      [--version]"
     print *, "                      [-V]"
     print *, "where"

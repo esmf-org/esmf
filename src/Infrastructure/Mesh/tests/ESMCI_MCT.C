@@ -1,7 +1,7 @@
 //==============================================================================
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -861,6 +861,8 @@ class MCT {
         int has_iw = 0;
         int nentries = 0;
         ESMCI::TempWeights *tweights = NULL;
+        ESMCI::RouteHandle *trh = NULL;
+        int has_trh = 0;
         int has_udl = 0;
         int num_udl = 0;
         ESMCI::TempUDL *tudl = NULL;
@@ -885,7 +887,8 @@ class MCT {
                                &ignore_degenerate, 
                                &src_term_processing, &pipeline_depth, 
                                &rh, &has_rh, 
-                               &has_iw, &nentries, &tweights, 
+                               &has_iw, &nentries, &tweights,
+                               &trh, &has_trh, 
                                &has_udl, &num_udl, &tudl, 
                                &has_status_array, &dummy_status_array, 
                                &check_flag, &localrc);

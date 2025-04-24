@@ -51,6 +51,7 @@ with open(esmfmk, 'r') as MKFILE:
     
     # investigate esmf.mk
     libsdir = None
+    appsdir = None
     esmfos = None
     esmfabi = None
     esmfcomm = None
@@ -62,12 +63,16 @@ with open(esmfmk, 'r') as MKFILE:
     for line in MKFILE:
         if 'ESMF_LIBSDIR' in line:
             libsdir = line.split("=")[1]
+        elif 'ESMF_APPSDIR' in line:
+            appsdir = line.split("=", 1)[1].strip()
         elif 'ESMF_OS:' in line:
             esmfos = line.split(":")[1]
         elif 'ESMF_ABI:' in line:
             esmfabi = line.split(":")[1]
         elif 'ESMF_NETCDF:' in line:
             netcdf = True
+        elif 'ESMF_PIO:' in line:
+            pio = True
         elif 'ESMF_COMM:' in line:
             esmfcomm = line.split(":")[1]
         elif 'ESMF_VERSION_STRING=' in line:
@@ -111,8 +116,10 @@ elif "Linux" in esmfos:
     constants._ESMF_OS = constants._ESMF_OS_LINUX
 elif "Unicos" in esmfos:
     constants._ESMF_OS = constants._ESMF_OS_UNICOS
+elif "Cygwin" in esmfos:
+    constants._ESMF_OS = constants._ESMF_OS_CYGWIN
 else:
-    raise ValueError("Unrecognized ESMF_OS setting!")
+    raise ValueError(f"Unrecognized ESMF_OS setting: {esmfos:s}!")
 
 # set _ESMF_ABI for 32/64 switching
 if "64" in esmfabi:
@@ -127,7 +134,7 @@ if netcdf:
     constants._ESMF_NETCDF = True
 
 # set _ESMF_PIO
-if "mpiuni" not in esmfcomm:
+if pio:
     constants._ESMF_PIO = True
 
 # set _ESMF_COMM
@@ -146,6 +153,8 @@ constants._ESMF_USE_INMEM_FACTORS = use_inmem_factors
 try:
     if constants._ESMF_OS == constants._ESMF_OS_DARWIN:
         _ESMF = np.ctypeslib.load_library('libesmf_fullylinked',libsdir)
+    elif constants._ESMF_OS == constants._ESMF_OS_CYGWIN:
+        _ESMF = np.ctypeslib.load_library('cygesmf.dll', appsdir)
     else:
         _ESMF = ct.CDLL(os.path.join(libsdir,'libesmf_fullylinked.so'),
                         mode=ct.RTLD_GLOBAL)

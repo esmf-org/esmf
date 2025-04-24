@@ -1,7 +1,7 @@
 !  $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2023, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -735,9 +735,9 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     implicit none
 
     type(ESMF_Field)      :: field
-    integer, intent(out)  :: rc     
+    integer, intent(out)  :: rc
   
-    integer :: localrc              
+    integer :: localrc
   
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -751,15 +751,15 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-      ! deallocate actual FieldType allocation      
+      ! deallocate actual FieldType allocation
       !print *, "deallocate(field%ftypep)"
       deallocate(field%ftypep, stat=localrc)
-      if (ESMF_LogFoundAllocError(localrc, msg="Deallocating Field", &
+      if (ESMF_LogFoundDeallocError(localrc, msg="Deallocating Field", &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     nullify(field%ftypep)
 
-    ! return successfully  
+    ! return successfully
     rc = ESMF_SUCCESS
 
   end subroutine f_esmf_fieldcollectgarbage

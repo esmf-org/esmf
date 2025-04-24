@@ -34,9 +34,10 @@ _ESMF_ABI = None
 
 # ESMF OS
 _ESMF_OS = None
-(_ESMF_OS_DARWIN,
+(_ESMF_OS_CYGWIN,
+ _ESMF_OS_DARWIN,
  _ESMF_OS_LINUX,
- _ESMF_OS_UNICOS) = (-5,-4,-3)
+ _ESMF_OS_UNICOS) = (-6, -5,-4,-3)
 
 # ESMF_NETCDF
 _ESMF_NETCDF = False
@@ -116,6 +117,23 @@ class DecompFlag(IntEnum):
     CYCLIC = 4
     """
     Decompose elements cyclically across DEs.
+    """
+
+class EndAction(IntEnum):
+    """
+    Specify what action to take on finalization.
+    """
+    NORMAL = 1
+    """
+    Indicates ESMF to finalize normally.
+    """
+    KEEP_MPI = 2
+    """
+    Indicates ESMF to finalize normally, but leave MPI initialized.
+    """
+    ABORT = 3
+    """
+    Indicates ESMF to abort on finalization.
     """
 
 # ExtrapMethod

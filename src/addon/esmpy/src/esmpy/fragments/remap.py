@@ -101,7 +101,7 @@ def remap(srcgrid, dstgrid, weights, method='bilinear'):
     if os.environ.get('ESMF_NUM_PROCS'):
         NUM_PROCS = os.environ.get('ESMF_NUM_PROCS')
     else:
-        print "ESMF_NUM_PROCS not defined in user environment, using default ESMF_NUM_PROCS=1"
+        print("ESMF_NUM_PROCS not defined in user environment, using default ESMF_NUM_PROCS=1")
         NUM_PROCS = "1"
     
     # read the esmf.mk and get the location of the executable and the OS for 
@@ -109,7 +109,7 @@ def remap(srcgrid, dstgrid, weights, method='bilinear'):
     if os.environ.get('ESMFMKFILE'):
         esmfmkfile = open(os.environ.get('ESMFMKFILE'))
     else:
-        print "ESMFMKFILE is not defined!"
+        print("ESMFMKFILE is not defined!")
         sys.exit
     
     for line in esmfmkfile:
@@ -137,7 +137,7 @@ def remap(srcgrid, dstgrid, weights, method='bilinear'):
         options = '-m conserve'
         file = 'c'
     else:
-        print 'Method: '+method+' is not supported!'
+        print('Method: '+method+' is not supported!')
         sys.exit
     
     # TODO: what is this cruft?

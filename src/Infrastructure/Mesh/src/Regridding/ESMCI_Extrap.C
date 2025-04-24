@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2023, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -14,6 +14,8 @@
 #include <Mesh/include/Legacy/ESMCI_MeshRead.h>
 #include <Mesh/include/Regridding/ESMCI_Interp.h>
 #include <Mesh/include/Regridding/ESMCI_CreepFill.h>
+#include "ESMCI_TraceRegion.h"
+
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
@@ -1021,9 +1023,20 @@ template void _merge_dst_to_dst_wts_into_src_to_dst_wts(PointList &dst, WMat &dt
               int extrapNumLevels,
               int extrapNumInputLevels, 
               bool set_dst_status, WMat &dst_status) {
-
+#undef  ESMC_METHOD
+#define ESMC_METHOD "extrap()"
+    
    //   printf("BOB: in extrap() extrapMethod=%d\n",extrapMethod);
 
+    // Declare local return code
+    int localrc;
+    
+    // Enter profile for extrap
+    if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+      ESMCI::TraceEventRegionEnter("Extrapolation", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+    }
+    
     // Branch to each type of extrapolation
     if (extrapMethod == ESMC_EXTRAPMETHOD_NONE) {
 
@@ -1082,6 +1095,12 @@ template void _merge_dst_to_dst_wts_into_src_to_dst_wts(PointList &dst, WMat &dt
       Throw() << " Unrecognized extrapolation method.";
     }
 
+    // Exit profile for extrap
+    if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+      ESMCI::TraceEventRegionExit("Extrapolation", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+    }
+    
   }
 
 
