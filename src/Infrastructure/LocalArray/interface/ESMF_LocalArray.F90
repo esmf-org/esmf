@@ -20,6 +20,8 @@ module ESMF_LocalArrayMod
 ! This file contains the sub modules for LocalArray class definition and methods
 !
 !------------------------------------------------------------------------------
+! INCLUDES
+#include "ESMF.h"
 
   use ESMF_LocalArrayCreateMod
   use ESMF_LocalArrayGetMod
