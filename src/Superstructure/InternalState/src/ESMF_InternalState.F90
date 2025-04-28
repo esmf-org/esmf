@@ -54,7 +54,9 @@ module ESMF_InternalStateMod
 
 ! !PUBLIC MEMBER FUNCTIONS:
 
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
   public ESMF_InternalStateAdd
+#endif
   public ESMF_InternalStateGet
 
 #ifndef ESMF_NO_F2018ASSUMEDTYPE
@@ -73,14 +75,18 @@ module ESMF_InternalStateMod
 ! ! The InternalState functionality is implemented on the C++ side. Fortran
 ! ! interfaces are defined here.
 
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
   interface ESMF_InternalStateAdd
     module procedure ESMF_InternalStateCplCompAdd
     module procedure ESMF_InternalStateGridCompAdd
   end interface
+#endif
 
   interface ESMF_InternalStateGet
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
     module procedure ESMF_InternalStateCplCompGet
     module procedure ESMF_InternalStateGridCompGet
+#endif
     module procedure ESMF_InternalStateCplCompGetL
     module procedure ESMF_InternalStateGridCompGetL
   end interface
