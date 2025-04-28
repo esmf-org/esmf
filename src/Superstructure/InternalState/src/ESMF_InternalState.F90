@@ -167,12 +167,14 @@ module ESMF_InternalStateMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InternalStateAdd()
-  subroutine ESMF_InternalStateCplCompAdd(cplcomp, label, internalState, rc)
+  subroutine ESMF_InternalStateCplCompAdd(cplcomp, keywordEnforcer, &
+    internalState, label, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(in)            :: cplcomp
-    character(*),        intent(in),  optional :: label
     type(*)                                    :: internalState
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(*),        intent(in),  optional :: label
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -182,11 +184,11 @@ module ESMF_InternalStateMod
 ! \begin{description}
 ! \item[cplcomp]
 !   The {\tt ESMF\_CplComp} object to hold the internal state.
+! \item[internalState]
+!   The internal state to add.
 ! \item[{[label]}]
 !   The label to associate with the internal state. By default, associated
 !   without label.
-! \item[internalState]
-!   The internal state to add.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -228,12 +230,14 @@ module ESMF_InternalStateMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InternalStateAdd()
-  subroutine ESMF_InternalStateGridCompAdd(gcomp, label, internalState, rc)
+  subroutine ESMF_InternalStateGridCompAdd(gcomp, keywordEnforcer, &
+    internalState, label, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(in)            :: gcomp
-    character(*),        intent(in),  optional :: label
     type(*)                                    :: internalState
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(*),        intent(in),  optional :: label
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -243,11 +247,11 @@ module ESMF_InternalStateMod
 ! \begin{description}
 ! \item[gcomp]
 !   The {\tt ESMF\_GridComp} object to hold the internal state.
+! \item[internalState]
+!   The internal state to add.
 ! \item[{[label]}]
 !   The label to associate with the internal state. By default, associated
 !   without label.
-! \item[internalState]
-!   The internal state to add.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -289,12 +293,14 @@ module ESMF_InternalStateMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InternalStateGet()
-  subroutine ESMF_InternalStateCplCompGet(cplcomp, label, internalState, rc)
+  subroutine ESMF_InternalStateCplCompGet(cplcomp, keywordEnforcer, &
+    internalState, label, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(in)            :: cplcomp
-    character(*),        intent(in),  optional :: label
     type(*)                                    :: internalState
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(*),        intent(in),  optional :: label
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -304,11 +310,11 @@ module ESMF_InternalStateMod
 ! \begin{description}
 ! \item[cplcomp]
 !   The {\tt ESMF\_CplComp} object holding the internal state.
+! \item[internalState]
+!   The returned internal state.
 ! \item[{[label]}]
 !   The label of the internal state accessed. By default, access the last
 !   internal state set without label.
-! \item[internalState]
-!   The returned internal state.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -410,12 +416,14 @@ module ESMF_InternalStateMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InternalStateGet()
-  subroutine ESMF_InternalStateGridCompGet(gcomp, label, internalState, rc)
+  subroutine ESMF_InternalStateGridCompGet(gcomp, keywordEnforcer, &
+    internalState, label, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(in)            :: gcomp
-    character(*),        intent(in),  optional :: label
     type(*)                                    :: internalState
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(*),        intent(in),  optional :: label
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -425,11 +433,11 @@ module ESMF_InternalStateMod
 ! \begin{description}
 ! \item[cplcomp]
 !   The {\tt ESMF\_CplComp} object holding the internal state.
+! \item[internalState]
+!   The returned internal state.
 ! \item[{[label]}]
 !   The label of the internal state accessed. By default, access the last
 !   internal state set without label.
-! \item[internalState]
-!   The returned internal state.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
