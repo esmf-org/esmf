@@ -69,6 +69,10 @@
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+#ifndef ESMF_NO_F2018ASSUMEDTYPE 
+! The InternalState API is only available with compilers that support the
+! Fortran 2018 assumed-type dummy argument feature.
+
     !------------------------------------------------------------------------
     !NEX_UTest
     write(name, *) "Creating a Component Test"
@@ -109,7 +113,7 @@
     wrapAdd%p%testBool    = .true.
     wrapAdd%p%testInteger = 2345
     wrapAdd%p%testReal    = 2345.6789
-    call ESMF_InternalStateAdd(gcomp, label="L1", internalState=wrapAdd, rc=rc)
+    call ESMF_InternalStateAdd(gcomp, internalState=wrapAdd, label="L1", rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
@@ -134,7 +138,7 @@
     wrapAdd%p%testBool    = .true.
     wrapAdd%p%testInteger = 3456
     wrapAdd%p%testReal    = 3456.7890
-    call ESMF_InternalStateAdd(gcomp, label="L2", internalState=wrapAdd, rc=rc)
+    call ESMF_InternalStateAdd(gcomp, internalState=wrapAdd, label="L2", rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
@@ -175,7 +179,7 @@
     !NEX_UTest
     write(name, *) "Get the InternalState with label #1 from a Component Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    call ESMF_InternalStateGet(gcomp, label="L1", internalState=wrapGet, rc=rc)
+    call ESMF_InternalStateGet(gcomp, internalState=wrapGet, label="L1", rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
@@ -195,7 +199,7 @@
     !NEX_UTest
     write(name, *) "Get the InternalState with label #2 from a Component Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    call ESMF_InternalStateGet(gcomp, label="L2", internalState=wrapGet, rc=rc)
+    call ESMF_InternalStateGet(gcomp, internalState=wrapGet, label="L2", rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
@@ -233,7 +237,7 @@
     !NEX_UTest
     write(name, *) "Get the InternalState with label #1 from a Component Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    call ESMF_InternalStateGet(gcomp, label="L1", internalState=wrapGet, rc=rc)
+    call ESMF_InternalStateGet(gcomp, internalState=wrapGet, label="L1", rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
@@ -251,7 +255,7 @@
     !NEX_UTest
     write(name, *) "Get the InternalState with label #2 from a Component Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    call ESMF_InternalStateGet(gcomp, label="L2", internalState=wrapGet, rc=rc)
+    call ESMF_InternalStateGet(gcomp, internalState=wrapGet, label="L2", rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
@@ -271,6 +275,15 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_GridCompDestroy(gcomp, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+#else
+    write(name, *) "Dummy Test"
+    write(failMsg, *) "Dummy Test Failure"
+    do i=1, 20
+      ! correct number of dummy ESMF_Test() calls to satisfy test scripts
+      call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE)
+    enddo
+#endif
 
     call ESMF_TestEnd(ESMF_SRCLINE)
 

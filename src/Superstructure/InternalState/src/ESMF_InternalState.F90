@@ -161,6 +161,7 @@ module ESMF_InternalStateMod
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InternalStateCplCompAdd"
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
 !BOP
 ! !IROUTINE: ESMF_InternalStateAdd - Add an InternalState to CplComp
 ! \label{esmfinternalstateaddcplcomp}
@@ -179,6 +180,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 ! Add an internal state.
+!
+! CAUTION: This interface is only implemented for compilers that support
+! Fortran 2018 assumed-type dummy arguments. Do not use this method in code
+! that requires portability with compilers that do not support this feature!
 !
 ! The arguments are:
 ! \begin{description}
@@ -204,26 +209,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
 
-#ifndef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompSetInternalState(cplcomp, label, internalState, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-#else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_IMPL, &
-      msg="The implementation requires Fortran 2018 assumed type support.", &
-      ESMF_CONTEXT, rcToReturn=rc)
-    return
-#endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
+#endif
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InternalStateGridCompAdd"
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
 !BOP
 ! !IROUTINE: ESMF_InternalStateAdd - Add an InternalState to GridComp
 ! \label{esmfinternalstateaddgcomp}
@@ -242,6 +242,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 ! Add an internal state.
+!
+! CAUTION: This interface is only implemented for compilers that support
+! Fortran 2018 assumed-type dummy arguments. Do not use this method in code
+! that requires portability with compilers that do not support this feature!
 !
 ! The arguments are:
 ! \begin{description}
@@ -267,26 +271,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gcomp, rc)
 
-#ifndef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompSetInternalState(gcomp, label, internalState, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-#else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_IMPL, &
-      msg="The implementation requires Fortran 2018 assumed type support.", &
-      ESMF_CONTEXT, rcToReturn=rc)
-    return
-#endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
+#endif
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InternalStateCplCompGet"
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
 !BOP
 ! !IROUTINE: ESMF_InternalStateGet - Get InternalState from CplComp
 ! \label{esmfinternalstategetcplcomp}
@@ -305,6 +304,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 ! Access the internal state.
+!
+! CAUTION: This interface is only implemented for compilers that support
+! Fortran 2018 assumed-type dummy arguments. Do not use this method in code
+! that requires portability with compilers that do not support this feature!
 !
 ! The arguments are:
 ! \begin{description}
@@ -330,21 +333,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
 
-#ifndef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(cplcomp, label, internalState, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-#else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_IMPL, &
-      msg="The implementation requires Fortran 2018 assumed type support.", &
-      ESMF_CONTEXT, rcToReturn=rc)
-    return
-#endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
+#endif
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -410,6 +407,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InternalStateGridCompGet"
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
 !BOP
 ! !IROUTINE: ESMF_InternalStateGet - Get InternalState from GridComp
 ! \label{esmfinternalstategetgcomp}
@@ -428,6 +426,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 ! Access the internal state.
+!
+! CAUTION: This interface is only implemented for compilers that support
+! Fortran 2018 assumed-type dummy arguments. Do not use this method in code
+! that requires portability with compilers that do not support this feature!
 !
 ! The arguments are:
 ! \begin{description}
@@ -453,21 +455,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gcomp, rc)
 
-#ifndef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(gcomp, label, internalState, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-#else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_IMPL, &
-      msg="The implementation requires Fortran 2018 assumed type support.", &
-      ESMF_CONTEXT, rcToReturn=rc)
-    return
-#endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
+#endif
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------

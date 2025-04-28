@@ -97,6 +97,10 @@ module user_mod
 
     rc = ESMF_SUCCESS
 
+#ifndef ESMF_NO_F2018ASSUMEDTYPE 
+! The InternalState API is only available with compilers that support the
+! Fortran 2018 assumed-type dummy argument feature.
+
     ! Allocate private data block
     allocate(data)
 
@@ -120,6 +124,7 @@ module user_mod
     wrap%p => data
     call ESMF_InternalStateAdd(gcomp, internalState=wrap, rc=rc)
     if (rc/=ESMF_SUCCESS) return
+#endif
 
   end subroutine !-------------------------------------------------------
 
@@ -136,6 +141,10 @@ module user_mod
     integer :: i
 
     rc = ESMF_SUCCESS
+
+#ifndef ESMF_NO_F2018ASSUMEDTYPE 
+! The InternalState API is only available with compilers that support the
+! Fortran 2018 assumed-type dummy argument feature.
 
     ! Get Internal State
     call ESMF_InternalStateGet(gcomp, internalState=wrap, rc=rc)
@@ -155,6 +164,7 @@ module user_mod
       print *, "did not get same values back"
       rc = ESMF_FAILURE
     endif
+#endif
 
   end subroutine !-------------------------------------------------------
 
@@ -170,6 +180,10 @@ module user_mod
 
     rc = ESMF_SUCCESS
 
+#ifndef ESMF_NO_F2018ASSUMEDTYPE 
+! The InternalState API is only available with compilers that support the
+! Fortran 2018 assumed-type dummy argument feature.
+
     ! Get Internal State
     call ESMF_InternalStateGet(gcomp, internalState=wrap, rc=rc)
     if (rc/=ESMF_SUCCESS) return
@@ -178,6 +192,7 @@ module user_mod
     data => wrap%p
     deallocate(data%testArray)  ! deallocate array data
     deallocate(data)
+#endif
 
   end subroutine !--------------------------------------------------------------
 

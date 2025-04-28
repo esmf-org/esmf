@@ -84,6 +84,11 @@ program ESMF_InternalStateEx
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !EOC
+
+#ifndef ESMF_NO_F2018ASSUMEDTYPE 
+! The InternalState API is only available with compilers that support the
+! Fortran 2018 assumed-type dummy argument feature.
+
 !BOE
 ! This could be called, for example, during a Component's initialize phase.
 !EOE
@@ -147,8 +152,8 @@ program ESMF_InternalStateEx
   wrap%p%testScaling = 0.8
 
   ! Add Internal State to the Component with label
-  call ESMF_InternalStateAdd(comp, label="first named data block", &
-    internalState=wrap, rc=rc)
+  call ESMF_InternalStateAdd(comp, internalState=wrap, &
+    label="first named data block", rc=rc)
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
   ! And allocate another private data block
@@ -159,8 +164,8 @@ program ESMF_InternalStateEx
   wrap%p%testScaling = 0.1
 
   ! Add Internal State to the Component with label
-  call ESMF_InternalStateAdd(comp, label="second named data block", &
-    internalState=wrap, rc=rc)
+  call ESMF_InternalStateAdd(comp, internalState=wrap, &
+    label="second named data block", rc=rc)
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
   ! A list of InternalState labels can be queried from the component object.
@@ -182,22 +187,24 @@ program ESMF_InternalStateEx
 !BOC
 
   ! Get Internal State
-  call ESMF_InternalStateGet(comp, label="first named data block", &
-    internalState=wrap, rc=rc)
+  call ESMF_InternalStateGet(comp, internalState=wrap, &
+    label="first named data block", rc=rc)
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
   ! Deallocate the private data block
   deallocate(wrap%p)
 
   ! Get Internal State
-  call ESMF_InternalStateGet(comp, label="second named data block", &
-    internalState=wrap, rc=rc)
+  call ESMF_InternalStateGet(comp, internalState=wrap, &
+    label="second named data block", rc=rc)
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
   ! Deallocate the private data block
   deallocate(wrap%p)
 
 !EOC
+
+#endif
 
   call ESMF_GridCompDestroy(comp, rc=rc)
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
