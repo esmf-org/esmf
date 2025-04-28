@@ -13,6 +13,9 @@
 !==============================================================================
 #define DEBUG_INGEST_RUNSEQUENCE_off
 
+! access platform dependent macros
+#include "ESMF_Conf.inc"
+
 module NUOPC_Driver
 
   !-----------------------------------------------------------------------------
