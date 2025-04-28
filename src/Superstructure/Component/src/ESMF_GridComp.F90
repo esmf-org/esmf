@@ -524,11 +524,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   specified.
 ! \item[{[clock]}]
 !   \begin{sloppypar}
-!   Component-specific {\tt ESMF\_Clock}.  This clock is available to be
-!   queried and updated by the new {\tt ESMF\_GridComp} as it chooses.
-!   This should
-!   not be the parent component clock, which should be maintained and passed
-!   down to the initialize/run/finalize routines separately.
+!   The {\tt ESMF\_Clock} object associated with the component. Often this will
+!   be a component specific clock that can be queried and updated by the
+!   component freely. In that case it should be a clock object separate from
+!   that of other components, particularily that of the parent component.
+!   However, ESMF itself does not access or update {\tt clock} and therefore
+!   does not impose any direct restrictions. It is the user's responsibility to
+!   ensure correct usage of the {\tt clock} object by the parent and child
+!   components.
 !   \end{sloppypar}
 ! \item[{[petList]}]
 !   List of parent {\tt PET}s given to the created child component by the
