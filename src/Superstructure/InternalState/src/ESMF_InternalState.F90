@@ -209,7 +209,7 @@ module ESMF_InternalStateMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 #else
     call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_IMPL, &
-      msg="The implementation requires Fortran 20018 assumed type support.", &
+      msg="The implementation requires Fortran 2018 assumed type support.", &
       ESMF_CONTEXT, rcToReturn=rc)
     return
 #endif
@@ -270,7 +270,7 @@ module ESMF_InternalStateMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 #else
     call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_IMPL, &
-      msg="The implementation requires Fortran 20018 assumed type support.", &
+      msg="The implementation requires Fortran 2018 assumed type support.", &
       ESMF_CONTEXT, rcToReturn=rc)
     return
 #endif
@@ -331,7 +331,7 @@ module ESMF_InternalStateMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 #else
     call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_IMPL, &
-      msg="The implementation requires Fortran 20018 assumed type support.", &
+      msg="The implementation requires Fortran 2018 assumed type support.", &
       ESMF_CONTEXT, rcToReturn=rc)
     return
 #endif
@@ -452,7 +452,7 @@ module ESMF_InternalStateMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 #else
     call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_IMPL, &
-      msg="The implementation requires Fortran 20018 assumed type support.", &
+      msg="The implementation requires Fortran 2018 assumed type support.", &
       ESMF_CONTEXT, rcToReturn=rc)
     return
 #endif
