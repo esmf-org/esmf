@@ -22,10 +22,10 @@ TEXFILES_TO_MAKE = $(addsuffix SeqPrF_fapi.tex, $(basename $(notdir $(wildcard .
 ##TEXFILES_TO_MAKE += $(addsuffix SeqPrF_fapi.tex, $(basename $(notdir $(wildcard ../seq_pairwise_fdriver_spmd/*.f90))))
 
 #
-# Files that a doc depends on.  Do not list the the ctex file !  
+# Files that a doc depends on.  Do not list the the ctex file!
 # The ctex file is listed in the rule found in the build/common file.
-# These lists almost certainly will not be an exhastive list of 
-# all of the dependent files, but even a partial listing  will be helpful.
+# These lists almost certainly will not be an exhaustive list of
+# all of the dependent files, but even a partial listing will be helpful.
 #
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) AppDriver_creqmethodsintro.tex AppDriver_desc.tex AppDriver_design.tex AppDriver_options.tex AppDriver_reqmethodsintro.tex AppDriver_reqmethods.tex AppDriver_rest.tex AppDriver_usage.tex
 include $(ESMF_DIR)/makefile

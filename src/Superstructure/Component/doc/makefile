@@ -32,7 +32,7 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 #
 # Files that a doc depends on.  Do not list the the ctex file!
 # The ctex file is listed in the rule found in the build/common file.
-# These lists almost certainly will not be an exhastive list of
+# These lists almost certainly will not be an exhaustive list of
 # all of the dependent files, but even a partial listing will be helpful.
 #
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) Component_crefdoc.ctex Component_refdoc.ctex GridComp_cdesc.tex GridComp_desc.tex GridComp_rest.tex GridComp_usage.tex CplComp_cdesc.tex CplComp_desc.tex CplComp_rest.tex CplComp_usage.tex SciComp_cdesc.tex SciComp_desc.tex SciComp_rest.tex SciComp_usage.tex CompTunnel_desc.tex CompTunnel_rest.tex CompTunnel_usage.tex
