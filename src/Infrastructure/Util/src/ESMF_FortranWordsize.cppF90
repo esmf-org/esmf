@@ -73,7 +73,7 @@ module ESMF_FortranWordsizeMod
   interface
 
     subroutine esmf_pointerdifference(n, s1, s2, len)
-      integer*8 :: n
+      integer(C_SIZE_T) :: n
       type(*) :: s1
       type(*) :: s2
       integer :: len
