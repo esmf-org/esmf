@@ -652,7 +652,7 @@ module NUOPC_Driver
     type(ESMF_CplComp)        :: connector
     character(len=80)         :: srcCompLabel
     character(len=80)         :: dstCompLabel
-    character(len=80)         :: hierarchyProtocol
+    character(len=80)         :: hierarchyConnectors, hierarchyProtocol
     type(ESMF_PtrInt1D), pointer :: petLists(:)
     integer, pointer          :: petList(:)
     logical, allocatable      :: mustAttributeUpdate(:)
@@ -994,113 +994,120 @@ module NUOPC_Driver
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
         ! potentially the connector must be created here to/from driver-self
-        call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", &
-          isSet=needConnector, rc=rc)
+        call NUOPC_CompAttributeGet(driver, name="HierarchyConnectors", &
+          value=hierarchyConnectors, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        needConnector=.not.needConnector  ! default to do connection
-        if (.not.needConnector) then
-          ! inspect the HierarchyProtocol attribute to see if it requests a
-          ! connection
+        if(trim(hierarchyConnectors)=="auto") then
+          ! continue with automatic hierarchy connector creation here ...
           call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", &
-            value=hierarchyProtocol, rc=rc)
+            isSet=needConnector, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (trim(hierarchyProtocol)=="PushUpAllExportsAndUnsatisfiedImports" &
-            .or. trim(hierarchyProtocol)=="ConnectProvidedFields" &
-            .or. trim(hierarchyProtocol)=="Explorer") then
-            needConnector = .true.
-          endif
-        endif
-        areServicesSet = NUOPC_CompAreServicesSet(connector, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        if (.not.areServicesSet.and.(i==0.or.j==0)) then
-          ! the connector was not added by the user level code SetModelServices
-          ! and this involves the driver itself -> maybe automatic connector add
-          if (.not.(i==0.and.j==0)) then
-            ! not a driver-to-driver-self connection, which has no known purpose
-            if (i==0) then
-              needConnector = needConnector.and. &
-                ESMF_StateIsCreated(is%wrap%modelIS(i), rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return
-            else
-              ! j==0
-              needConnector = needConnector.and. &
-                ESMF_StateIsCreated(is%wrap%modelES(j), rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return
+          needConnector=.not.needConnector  ! default to do connection
+          if (.not.needConnector) then
+            ! HierarchyProtocol is set
+            ! -> must inspect to see whether a hierarchy connector is needed
+            call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", &
+              value=hierarchyProtocol, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (trim(hierarchyProtocol)=="PushUpAllExportsAndUnsatisfiedImports" &
+              .or. trim(hierarchyProtocol)=="ConnectProvidedFields" &
+              .or. trim(hierarchyProtocol)=="Explorer") then
+              needConnector = .true.
             endif
-            if (needConnector) then
-              ! driver import or export States exist and connection requested
-              ! -> automatic connector add
-              call NUOPC_DriverAddComp(driver, &
-                srcCompLabel=srcCompLabel, dstCompLabel=dstCompLabel, &
-                compSetServicesRoutine=cplSS, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
-              ! retrieve the component with petList
-              call NUOPC_DriverGetComp(driver, srcCompLabel, dstCompLabel, &
-                comp=connector, petList=petList, relaxedflag=.true., rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
-              ! automatically created connectors inherit Verbosity from parent
-              call NUOPC_CompAttributeGet(driver, name="Verbosity", &
-                value=valueString, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
-              if (trim(valueString)=="max" .or. trim(valueString)=="high" .or. &
-                trim(valueString)=="low" .or. trim(valueString)=="off") then
-                ! directly inherit presets
-                vString = trim(valueString)
-              else
-                ! not a preset level: lower 8-bit of parent's verbosity setting
-                vInherit = ibits(verbosity,0,8)
-                write(vString,"(I10)") vInherit
-              endif
-              if (btest(verbosity,13)) then
-                write (msgString,"(A)") trim(name)//&
-                  " - Setting Verbosity on created component to: "// &
-                  trim(vString)
-                call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+          endif
+          areServicesSet = NUOPC_CompAreServicesSet(connector, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (.not.areServicesSet.and.(i==0.or.j==0)) then
+            ! the connector was not added by the user level code SetModelServices
+            ! and this involves the driver itself -> maybe automatic connector add
+            if (.not.(i==0.and.j==0)) then
+              ! not a driver-to-driver-self connection, which has no known purpose
+              if (i==0) then
+                needConnector = needConnector.and. &
+                  ESMF_StateIsCreated(is%wrap%modelIS(i), rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, &
-                  file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-                  return  ! bail out
-              endif
-              call NUOPC_CompAttributeSet(connector, name="Verbosity", &
-                value=vString, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
-              ! automatically created connectors inherit Profiling from parent
-              call NUOPC_CompAttributeGet(driver, name="Profiling", &
-                value=valueString, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
-              if (trim(valueString)=="max" .or. trim(valueString)=="high" .or. &
-                trim(valueString)=="low" .or. trim(valueString)=="off") then
-                ! directly inherit presets
-                vString = trim(valueString)
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return
               else
-                ! not a preset level: lower 16-bit of parent's profiling setting
-                vInherit = ibits(profiling,0,16)
-                write(vString,"(I10)") vInherit
-              endif
-              if (btest(verbosity,13)) then
-                write (msgString,"(A)") trim(name)//&
-                  " - Setting Profiling on created component to: "// &
-                  trim(vString)
-                call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                ! j==0
+                needConnector = needConnector.and. &
+                  ESMF_StateIsCreated(is%wrap%modelES(j), rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, &
-                  file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-                  return  ! bail out
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return
               endif
-              call NUOPC_CompAttributeSet(connector, name="Profiling", &
-                value=vString, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
+              if (needConnector) then
+                ! driver import or export States exist and connection requested
+                ! -> automatic connector add
+                call NUOPC_DriverAddComp(driver, &
+                  srcCompLabel=srcCompLabel, dstCompLabel=dstCompLabel, &
+                  compSetServicesRoutine=cplSS, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
+                ! retrieve the component with petList
+                call NUOPC_DriverGetComp(driver, srcCompLabel, dstCompLabel, &
+                  comp=connector, petList=petList, relaxedflag=.true., rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
+                ! automatically created connectors inherit Verbosity from parent
+                call NUOPC_CompAttributeGet(driver, name="Verbosity", &
+                  value=valueString, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
+                if (trim(valueString)=="max" .or. trim(valueString)=="high" .or. &
+                  trim(valueString)=="low" .or. trim(valueString)=="off") then
+                  ! directly inherit presets
+                  vString = trim(valueString)
+                else
+                  ! not a preset level: lower 8-bit of parent's verbosity setting
+                  vInherit = ibits(verbosity,0,8)
+                  write(vString,"(I10)") vInherit
+                endif
+                if (btest(verbosity,13)) then
+                  write (msgString,"(A)") trim(name)//&
+                    " - Setting Verbosity on created component to: "// &
+                    trim(vString)
+                  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                    line=__LINE__, &
+                    file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                    return  ! bail out
+                endif
+                call NUOPC_CompAttributeSet(connector, name="Verbosity", &
+                  value=vString, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
+                ! automatically created connectors inherit Profiling from parent
+                call NUOPC_CompAttributeGet(driver, name="Profiling", &
+                  value=valueString, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
+                if (trim(valueString)=="max" .or. trim(valueString)=="high" .or. &
+                  trim(valueString)=="low" .or. trim(valueString)=="off") then
+                  ! directly inherit presets
+                  vString = trim(valueString)
+                else
+                  ! not a preset level: lower 16-bit of parent's profiling setting
+                  vInherit = ibits(profiling,0,16)
+                  write(vString,"(I10)") vInherit
+                endif
+                if (btest(verbosity,13)) then
+                  write (msgString,"(A)") trim(name)//&
+                    " - Setting Profiling on created component to: "// &
+                    trim(vString)
+                  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                    line=__LINE__, &
+                    file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                    return  ! bail out
+                endif
+                call NUOPC_CompAttributeSet(connector, name="Profiling", &
+                  value=vString, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
+              endif
             endif
           endif
         endif
