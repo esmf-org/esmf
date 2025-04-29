@@ -43,6 +43,7 @@
 !BOC
 
 module user_mod
+#include "ESMF_Conf.inc"
 
   use ESMF
 
