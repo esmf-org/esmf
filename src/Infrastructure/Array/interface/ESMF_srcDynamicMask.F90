@@ -71,6 +71,7 @@ module ESMF_srcDynamicMaskMod
     integer :: i, j, k, n
     real(ESMF_KIND_R8), allocatable  :: renorm(:)
 
+    write(*,*)"bmaa ",__FILE__,__LINE__
     if (associated(dynamicMaskList)) then
       n = size(dynamicMaskList(1)%srcElement(1)%ptr)
       allocate(renorm(n))
@@ -107,6 +108,8 @@ module ESMF_srcDynamicMaskMod
     integer,                       intent(out)          :: rc
     integer :: i, j
     real(ESMF_KIND_R8)  :: renorm
+
+    write(*,*)"bmaa ",__FILE__,__LINE__
     if (associated(dynamicMaskList)) then
       do i=1, size(dynamicMaskList)
         dynamicMaskList(i)%dstElement = 0.d0 ! set to zero

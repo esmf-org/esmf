@@ -614,7 +614,3 @@ class PredefinedDynamicMask(IntEnum):
     MASKDEST = 1
     MASKSRCDEST = 2
     MASKVOTE = 3
-    MASKSRCV = 4
-    MASKDESTV = 5
-    MASKSRCDESTV = 6
-    MASKVOTEV = 7

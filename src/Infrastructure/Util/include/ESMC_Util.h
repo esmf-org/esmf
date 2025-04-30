@@ -201,11 +201,7 @@ enum ESMC_UnmappedAction_Flag {ESMC_UNMAPPEDACTION_ERROR=0,
 enum ESMC_PredefinedDynamicMask_Flag {ESMC_PREDEFINEDDYNAMICMASK_MASKSRC=0,
                                       ESMC_PREDEFINEDDYNAMICMASK_MASKDEST,
                                       ESMC_PREDEFINEDDYNAMICMASK_MASKSRCDEST,
-                                      ESMC_PREDEFINEDDYNAMICMASK_MASKVOTE,
-                                      ESMC_PREDEFINEDDYNAMICMASK_MASKSRCV,
-                                      ESMC_PREDEFINEDDYNAMICMASK_MASKDESTV,
-                                      ESMC_PREDEFINEDDYNAMICMASK_MASKSRCDESTV,
-                                      ESMC_PREDEFINEDDYNAMICMASK_MASKVOTEV};
+                                      ESMC_PREDEFINEDDYNAMICMASK_MASKVOTE};
 
 
 #endif  // ESMC_UTIL_H
