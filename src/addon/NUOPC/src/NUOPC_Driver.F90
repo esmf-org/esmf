@@ -638,7 +638,7 @@ module NUOPC_Driver
     logical                   :: clockIsCreated
     logical                   :: stateIsCreated
     logical                   :: areServicesSet
-    logical                   :: needConnector
+    logical                   :: isHierarchyProtocolSet, needConnector
     integer                   :: rootPet, rootVas
     type(ESMF_VM)             :: vm
     character(ESMF_MAXSTR)    :: name, valueString
@@ -1001,13 +1001,13 @@ module NUOPC_Driver
         if(trim(hierarchyConnectors)=="auto") then
           ! continue with automatic hierarchy connector creation here ...
           call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", &
-            isSet=needConnector, rc=rc)
+            isSet=isHierarchyProtocolSet, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          needConnector=.not.needConnector  ! default to do connection
-          if (.not.needConnector) then
+          needConnector=.true.          ! by default make hierarchy connections
+          if (isHierarchyProtocolSet) then
             ! HierarchyProtocol is set
-            ! -> must inspect to see whether a hierarchy connector is needed
+            ! -> must inspect to see whether hierarchy connectors are needed
             call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", &
               value=hierarchyProtocol, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1016,6 +1016,8 @@ module NUOPC_Driver
               .or. trim(hierarchyProtocol)=="ConnectProvidedFields" &
               .or. trim(hierarchyProtocol)=="Explorer") then
               needConnector = .true.
+            else
+              needConnector = .false.
             endif
           endif
           areServicesSet = NUOPC_CompAreServicesSet(connector, rc=rc)
