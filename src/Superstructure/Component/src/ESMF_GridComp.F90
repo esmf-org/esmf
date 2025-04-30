@@ -1260,7 +1260,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompGetInternalState - Get private data block pointer
+! !IROUTINE: ESMF_GridCompGetInternalState - Get private data block pointer - (DEPRECATED METHOD)
 !
 ! !INTERFACE:
 ! subroutine ESMF_GridCompGetInternalState(gridcomp, wrappedDataPointer, rc)
@@ -1273,6 +1273,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiDeprecatedMethodWithReplacement{8.9.0}{ESMF\_InternalStateGet}{esmfinternalstategetgcomp}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1323,7 +1324,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-
+! The associated Fortran interface is defined in ESMF_InternalState.F90
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2429,7 +2431,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompSetInternalState - Set private data block pointer
+! !IROUTINE: ESMF_GridCompSetInternalState - Set private data block pointer - (DEPRECATED METHOD)
 !
 ! !INTERFACE:
 ! subroutine ESMF_GridCompSetInternalState(gridcomp, wrappedDataPointer, rc)
@@ -2442,6 +2444,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiDeprecatedMethodWithReplacement{8.9.0}{ESMF\_InternalStateAdd}{esmfinternalstateaddgcomp}
 ! \end{itemize}
 !
 ! !DESCRIPTION:

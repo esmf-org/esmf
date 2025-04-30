@@ -2,11 +2,11 @@
 
 ALL: onedoc
 
-LOCDIR	  = src/Superstructure/State/doc
+LOCDIR	  = src/Superstructure/InternalState/doc
 
-DVIFILES  = State_refdoc.dvi State_crefdoc.dvi
-PDFFILES  = State_refdoc.pdf State_crefdoc.pdf
-HTMLFILES = State_refdoc State_crefdoc
+DVIFILES  = InternalState_refdoc.dvi
+PDFFILES  = InternalState_refdoc.pdf
+HTMLFILES = InternalState_refdoc
 
 #
 # Tex Files to make
@@ -31,14 +31,13 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # These lists almost certainly will not be an exhaustive list of
 # all of the dependent files, but even a partial listing will be helpful.
 #
-REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) State_desc.tex State_options.tex State_usage.tex State_rest.tex State_implnotes.tex State_obj.tex
+REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) InternalState_desc.tex InternalState_rest.tex InternalState_usage.tex
 
 include $(ESMF_DIR)/makefile
 
 DIRS	    = 
 
-CLEANDIRS   = State_refdoc State_crefdoc $(HTMLFILES)
+CLEANDIRS   = InternalState_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              State_refdoc.tex State_crefdoc.tex $(PDFFILES) 
+              InternalState_refdoc.tex $(PDFFILES) 
 CLOBBERDIRS =
-
