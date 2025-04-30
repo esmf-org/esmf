@@ -39,7 +39,7 @@ TESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMF_FieldMeshSMMUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldHaloUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldSMMFromFileUTest \
-		$(ESMF_TESTDIR)/ESMF_FieldRegridDynMaskUTest
+		$(ESMF_TESTDIR)/ESMF_FieldRegridDynMaskPredefSrcUTest
 
 # TESTS_BUILD   = \
 #		$(ESMF_TESTDIR)/ESMC_FieldRegridCsrvUTest
@@ -99,7 +99,6 @@ TESTS_RUN_UNI = \
 		RUN_ESMF_FieldRegridCsrvUTestUNI \
 		RUN_ESMF_FieldRegridCsrv2ndUTestUNI \
 		RUN_ESMF_FieldSMMFromFileUTestUNI \
-      RUN_ESMF_FieldRegridDynMaskUTestUNI
       RUN_ESMF_FieldRegridDynMaskPredefSrcUTestUNI
 
 
