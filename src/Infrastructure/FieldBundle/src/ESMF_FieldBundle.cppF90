@@ -297,6 +297,7 @@ module ESMF_FieldBundleMod
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
+    module procedure ESMF_FieldBundleSetGeom
     module procedure ESMF_FieldBundleSetGrid
     module procedure ESMF_FieldBundleSetLS
     module procedure ESMF_FieldBundleSetMesh
