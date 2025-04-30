@@ -114,6 +114,30 @@
     !return result
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+    !--------------------------------------
+    ! Test regridding using predefined SrcMask R4R8R4 and ungridded dim
+    write(failMsg, *) "Test unsuccessful"
+    write(name, *) "Regrid between fields with ungridded dim using predefined SrcMask R4R8R4"
+
+    rc = ESMF_SUCCESS
+    ! do test
+    call test_regridPredefinedSrcMaskR4R8R4_ungridded(rc)
+
+    !return result
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !--------------------------------------
+    ! Test regridding using predefined SrcMask R4R8R4V and ungridded dim
+    write(failMsg, *) "Test unsuccessful"
+    write(name, *) "Regrid between fields with ungridded dim using predefined SrcMask R4R8R4V"
+
+    rc = ESMF_SUCCESS
+    ! do test
+    call test_regridPredefinedSrcMaskR4R8R4V_ungridded(rc)
+
+    !return result
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
     call ESMF_TestEnd(ESMF_SRCLINE)
 
 contains
@@ -345,11 +369,7 @@ contains
           _VERIFY(localrc)
           do i1=clbnd(1),cubnd(1)
              do i2=clbnd(2),cubnd(2)
-                if (i1 .lt. src_nx/2 .and. i2 .lt. src_ny/2) then
-                   srcPtr(i1,i2)= undef_value
-                else
-                   srcPtr(i1,i2) = def_value
-                end if
+                if (i1 .lt. src_nx/2 .and. i2 .lt. src_ny/2) srcPtr(i1,i2)= undef_value
              enddo
           enddo
        enddo
@@ -483,6 +503,190 @@ contains
 
     end subroutine test_regridPredefinedSrcMaskR4R8R4V
 
+    subroutine test_regridPredefinedSrcMaskR4R8R4_ungridded(rc)
+       integer, intent(out) :: rc
+
+       type(ESMF_Grid)  :: srcGrid, dstGrid
+       type(ESMF_Field) :: srcField, dstField
+       real(ESMF_KIND_R4), pointer :: srcPtr(:,:,:), dstPtr(:,:,:)
+
+       integer :: localrc, src_nx, src_ny, dst_nx, dst_ny, localDECount, lde, i1, i2, i0, srcTermProcessing, lm
+       integer :: def_count, undef_count
+       integer :: clbnd(2),cubnd(2)
+       real(ESMF_KIND_R4) :: undef_value, def_value, zero_value
+       type(ESMF_DynamicMask) :: dyn_mask
+       type(ESMF_RouteHandle) :: rh
+       type(ESMF_VM) :: vm
+       logical :: correct
+
+       call ESMF_VMGetGlobal(vm, rc=localrc)
+       _VERIFY_PASS(localrc)
+
+       src_nx = 20
+       src_ny = 20
+       dst_nx = 27
+       dst_ny = 27
+       def_value = 17.0
+       undef_value = 20000.0
+       zero_value = 0.0
+       lm = 3
+       srcGrid = create_grid(src_nx,src_ny, 1, localrc)
+       _VERIFY(localrc)
+       dstGrid = create_grid(dst_nx,dst_ny, 2, localrc)
+       _VERIFY(localrc)
+       srcField = ESMF_FieldCreate(srcGrid, ESMF_TYPEKIND_R4, gridToFieldMap=[2,3], ungriddedLBound=[1], ungriddedUBound=[lm], rc=localrc)
+       _VERIFY(localrc)
+       dstField = ESMF_FieldCreate(dstGrid, ESMF_TYPEKIND_R4, gridToFieldMap=[2,3], ungriddedLBound=[1], ungriddedUBound=[lm], rc=localrc)
+       _VERIFY(localrc)
+       call ESMF_FieldFill(srcField, dataFillScheme="const", const1=real(def_value,kind=ESMF_KIND_R8), rc=localrc)
+       _VERIFY(localrc)
+       call ESMF_FieldFill(dstField, dataFillScheme="const", const1=real(zero_value,kind=ESMF_KIND_R8), rc=localrc)
+       _VERIFY(localrc)
+       call ESMF_GridGet(srcGrid, localDECount=localDECount, rc=localrc)
+       _VERIFY(localrc)
+       do lde = 0,localDECount-1
+          call ESMF_GridGet(srcGrid, ESMF_STAGGERLOC_CENTER, lDE, computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
+          call ESMF_FieldGet(srcField, lde, farrayPtr=srcPtr, rc=localrc)
+          _VERIFY(localrc)
+          do i0=1,3
+             do i1=clbnd(1),cubnd(1)
+                do i2=clbnd(2),cubnd(2)
+                   if (i1 .lt. src_nx/2 .and. i2 .lt. src_ny/2) srcPtr(i0,i1,i2)= undef_value
+                enddo
+             enddo
+          enddo
+       enddo
+
+       call ESMF_DynamicMaskPredefinedSetR4R8R4(dyn_mask, ESMF_PREDEFINEDDYNAMICMASK_MASKSRC, &
+        & dynamicSrcMaskValue=undef_value, rc=localrc)
+       _VERIFY(localrc)
+ 
+       srcTermProcessing=0 
+       call ESMF_FieldRegridStore(srcField, dstField, regridMethod=ESMF_REGRIDMETHOD_BILINEAR, &
+            linetype=ESMF_LINETYPE_GREAT_CIRCLE, srcTermProcessing=srcTermProcessing, routeHandle=rh, rc=localrc)
+       _VERIFY(localrc) 
+        call ESMF_FieldRegrid(srcField, dstField, routeHandle=rh, dynamicMask=dyn_mask, rc=localrc)
+       _VERIFY(localrc) 
+
+       call ESMF_GridGet(dstGrid, localDECount=localDECount, rc=localrc)
+       _VERIFY(localrc)
+       undef_count = count_value_in_field_r4_3d(dstField, undef_value, 0.001, rc=localrc)
+       _VERIFY(localrc)
+       def_count = count_value_in_field_r4_3d(dstField, def_value, 0.001, rc=localrc)
+       _VERIFY(localrc)
+
+       call ESMF_FieldDestroy(srcField, noGarbage=.true., rc=localrc)
+       _VERIFY(localrc)
+       call ESMF_FieldDestroy(dstField, noGarbage=.true., rc=localrc)
+       _VERIFY(localrc)
+       call ESMF_GridDestroy(srcGrid, noGarbage=.true., rc=localrc)
+       _VERIFY(localrc)
+       call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
+       _VERIFY(localrc)
+       call ESMF_RouteHandleDestroy(rh, noGarbage=.true., rc=localrc)
+       _VERIFY(localrc)
+
+       correct = (dst_ny*dst_nx*lm) == (def_count+undef_count)
+       if (correct) then
+          rc=ESMF_SUCCESS
+       else
+          rc=ESMF_FAILURE
+       endif
+
+    end subroutine test_regridPredefinedSrcMaskR4R8R4_ungridded
+
+    subroutine test_regridPredefinedSrcMaskR4R8R4V_ungridded(rc)
+       integer, intent(out) :: rc
+
+       type(ESMF_Grid)  :: srcGrid, dstGrid
+       type(ESMF_Field) :: srcField, dstField
+       real(ESMF_KIND_R4), pointer :: srcPtr(:,:,:), dstPtr(:,:,:)
+
+       integer :: localrc, src_nx, src_ny, dst_nx, dst_ny, localDECount, lde, i1, i2, i0, srcTermProcessing, lm
+       integer :: def_count, undef_count
+       integer :: clbnd(2),cubnd(2)
+       real(ESMF_KIND_R4) :: undef_value, def_value, zero_value
+       type(ESMF_DynamicMask) :: dyn_mask
+       type(ESMF_RouteHandle) :: rh
+       type(ESMF_VM) :: vm
+       logical :: correct
+
+       call ESMF_VMGetGlobal(vm, rc=localrc)
+       _VERIFY_PASS(localrc)
+
+       src_nx = 20
+       src_ny = 20
+       dst_nx = 27
+       dst_ny = 27
+       def_value = 17.0
+       undef_value = 20000.0
+       zero_value = 0.0
+       lm = 3
+       srcGrid = create_grid(src_nx,src_ny, 1, localrc)
+       _VERIFY(localrc)
+       dstGrid = create_grid(dst_nx,dst_ny, 2, localrc)
+       _VERIFY(localrc)
+       srcField = ESMF_FieldCreate(srcGrid, ESMF_TYPEKIND_R4, gridToFieldMap=[2,3], ungriddedLBound=[1], ungriddedUBound=[lm], rc=localrc)
+       _VERIFY(localrc)
+       dstField = ESMF_FieldCreate(dstGrid, ESMF_TYPEKIND_R4, gridToFieldMap=[2,3], ungriddedLBound=[1], ungriddedUBound=[lm], rc=localrc)
+       _VERIFY(localrc)
+       call ESMF_FieldFill(srcField, dataFillScheme="const", const1=real(def_value,kind=ESMF_KIND_R8), rc=localrc)
+       _VERIFY(localrc)
+       call ESMF_FieldFill(dstField, dataFillScheme="const", const1=real(zero_value,kind=ESMF_KIND_R8), rc=localrc)
+       _VERIFY(localrc)
+       call ESMF_GridGet(srcGrid, localDECount=localDECount, rc=localrc)
+       _VERIFY(localrc)
+       do lde = 0,localDECount-1
+          call ESMF_GridGet(srcGrid, ESMF_STAGGERLOC_CENTER, lDE, computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
+          call ESMF_FieldGet(srcField, lde, farrayPtr=srcPtr, rc=localrc)
+          _VERIFY(localrc)
+          do i0=1,3
+             do i1=clbnd(1),cubnd(1)
+                do i2=clbnd(2),cubnd(2)
+                   if (i1 .lt. src_nx/2 .and. i2 .lt. src_ny/2) srcPtr(i0,i1,i2)= undef_value
+                enddo
+             enddo
+          enddo
+       enddo
+
+       call ESMF_DynamicMaskPredefinedSetR4R8R4V(dyn_mask, ESMF_PREDEFINEDDYNAMICMASK_MASKSRC, &
+        & dynamicSrcMaskValue=undef_value, rc=localrc)
+       _VERIFY(localrc)
+ 
+       srcTermProcessing=0 
+       call ESMF_FieldRegridStore(srcField, dstField, regridMethod=ESMF_REGRIDMETHOD_BILINEAR, &
+            linetype=ESMF_LINETYPE_GREAT_CIRCLE, srcTermProcessing=srcTermProcessing, routeHandle=rh, rc=localrc)
+       _VERIFY(localrc) 
+        call ESMF_FieldRegrid(srcField, dstField, routeHandle=rh, dynamicMask=dyn_mask, rc=localrc)
+       _VERIFY(localrc) 
+
+       call ESMF_GridGet(dstGrid, localDECount=localDECount, rc=localrc)
+       _VERIFY(localrc)
+       undef_count = count_value_in_field_r4_3d(dstField, undef_value, 0.001, rc=localrc)
+       _VERIFY(localrc)
+       def_count = count_value_in_field_r4_3d(dstField, def_value, 0.001, rc=localrc)
+       _VERIFY(localrc)
+
+       call ESMF_FieldDestroy(srcField, noGarbage=.true., rc=localrc)
+       _VERIFY(localrc)
+       call ESMF_FieldDestroy(dstField, noGarbage=.true., rc=localrc)
+       _VERIFY(localrc)
+       call ESMF_GridDestroy(srcGrid, noGarbage=.true., rc=localrc)
+       _VERIFY(localrc)
+       call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
+       _VERIFY(localrc)
+       call ESMF_RouteHandleDestroy(rh, noGarbage=.true., rc=localrc)
+       _VERIFY(localrc)
+
+       correct = (dst_ny*dst_nx*lm) == (def_count+undef_count)
+       if (correct) then
+          rc=ESMF_SUCCESS
+       else
+          rc=ESMF_FAILURE
+       endif
+
+    end subroutine test_regridPredefinedSrcMaskR4R8R4V_ungridded
+
     function count_value_in_field_r8_2d(field, value, tolerance, rc) result(num_found)
        integer :: num_found
        type(ESMF_Field), intent(in) :: field 
@@ -562,6 +766,48 @@ contains
 
        rc=ESMF_SUCCESS
     end function count_value_in_field_r4_2d
+
+    function count_value_in_field_r4_3d(field, value, tolerance, rc) result(num_found)
+       integer :: num_found
+       type(ESMF_Field), intent(in) :: field 
+       real(ESMF_KIND_R4), intent(in) :: value       
+       real(ESMF_KIND_R4), intent(in) :: tolerance
+       integer, intent(out) :: rc
+       
+       type(ESMF_Grid) :: grid
+       integer :: localrc, localDECount, lDE
+       integer :: clbnd(2),cubnd(2), i1, i2, i0
+       integer :: val_count, global_val_count(1) 
+       type(ESMF_VM) :: vm
+       real(ESMF_KIND_R4), pointer :: ptr(:,:,:)
+
+       call ESMF_VMGetGlobal(vm, rc=localrc)
+       _VERIFY_PASS(localrc)
+       call ESMF_FieldGet(field, grid=grid, rc=localrc)
+       _VERIFY(localrc) 
+       call ESMF_GridGet(grid, localDECount=localDECount, rc=localrc)
+       _VERIFY(localrc) 
+       val_count = 0
+       do lde = 0,localDECount-1
+          call ESMF_GridGet(grid, ESMF_STAGGERLOC_CENTER, lDE, computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
+          call ESMF_FieldGet(field, lde, farrayPtr=ptr, rc=localrc)
+          _VERIFY(localrc)
+          do i0=1,size(ptr,1)
+             do i1=clbnd(1),cubnd(1)
+                do i2=clbnd(2),cubnd(2)
+                   if (value - tolerance < ptr(i0,i1,i2) .and. ptr(i0,i1,i2) < value + tolerance) val_count=val_count+1
+                enddo 
+             enddo
+          enddo
+       enddo
+
+       call ESMF_VMAllReduce(vm, [val_count], global_val_count, 1, ESMF_REDUCE_SUM, rc=localrc)
+       _VERIFY(localrc)
+
+       num_found = global_val_count(1)
+
+       rc=ESMF_SUCCESS
+    end function count_value_in_field_r4_3d
 
     function create_grid(nx, ny, distributed_dim, rc) result(grid)
        type(ESMF_Grid) :: grid
