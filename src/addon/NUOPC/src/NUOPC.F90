@@ -25,7 +25,7 @@ module NUOPC
   use NUOPC_Comp
 
   implicit none
-  
+
   private
 
   ! public
@@ -65,6 +65,8 @@ module NUOPC
   public NUOPC_CompCheckSetClock          ! method
   public NUOPC_CompDerive                 ! method
   public NUOPC_CompGet                    ! method
+  public NUOPC_CompHandleVerbosityIntro   ! method
+  public NUOPC_CompHandleVerbosityExtro   ! method
   public NUOPC_CompFilterPhaseMap         ! method
   public NUOPC_CompSearchPhaseMap         ! method
   public NUOPC_CompSearchRevPhaseMap      ! method
