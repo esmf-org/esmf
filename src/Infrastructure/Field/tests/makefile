@@ -40,7 +40,8 @@ TESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMF_FieldHaloUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldSMMFromFileUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridDynMaskPredefSrcUTest \
-		$(ESMF_TESTDIR)/ESMF_FieldRegridDynMaskPredefDstUTest
+		$(ESMF_TESTDIR)/ESMF_FieldRegridDynMaskPredefDstUTest \
+		$(ESMF_TESTDIR)/ESMF_FieldRegridDynMaskPredefVoteUTest
 
 # TESTS_BUILD   = \
 #		$(ESMF_TESTDIR)/ESMC_FieldRegridCsrvUTest
@@ -77,7 +78,8 @@ TESTS_RUN     = \
 		RUN_ESMF_FieldHaloUTest \
 		RUN_ESMF_FieldSMMFromFileUTest \
       RUN_ESMF_FieldRegridDynMaskPredefSrcUTest \
-      RUN_ESMF_FieldRegridDynMaskPredefDstUTest
+      RUN_ESMF_FieldRegridDynMaskPredefDstUTest \
+      RUN_ESMF_FieldRegridDynMaskPredefVoteUTest
 
 #		RUN_ESMC_FieldGridRegridParUTest \
 
@@ -102,7 +104,8 @@ TESTS_RUN_UNI = \
 		RUN_ESMF_FieldRegridCsrv2ndUTestUNI \
 		RUN_ESMF_FieldSMMFromFileUTestUNI \
       RUN_ESMF_FieldRegridDynMaskPredefSrcUTestUNI \
-      RUN_ESMF_FieldRegridDynMaskPredefDstUTestUNI
+      RUN_ESMF_FieldRegridDynMaskPredefDstUTestUNI \
+      RUN_ESMF_FieldRegridDynMaskPredefVoteUTestUNI
 
 
 #
@@ -246,8 +249,11 @@ RUN_ESMF_FieldArbGridUTestUNI:
 RUN_ESMF_FieldRegridDynMaskPredefSrcTest:
 	$(MAKE) TNAME=FieldRegridDynMaskPredefDst NP=1 ftest
 
-RUN_ESMF_FieldRegridDynMaskPredefSrcTest:
+RUN_ESMF_FieldRegridDynMaskPredefDstTest:
 	$(MAKE) TNAME=FieldRegridDynMaskPredefDst NP=1 ftest
+
+RUN_ESMF_FieldRegridDynMaskPredefVoteTest:
+	$(MAKE) TNAME=FieldRegridDynMaskPredefVote NP=1 ftest
 
 #
 # FieldStress
