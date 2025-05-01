@@ -82,7 +82,7 @@ autotools build.
 
  - @ref mach_walkthrough
 
-To configure the build, PIO requires CMake version 2.8.12+.  The typical
+To configure the build, PIO requires CMake version 3.5.2+.  The typical
 configuration with CMake can be done as follows:
 
     > CC=mpicc FC=mpif90 cmake [-DOPTION1=value1 -DOPTION2=value2 ...] /path/to/pio/source

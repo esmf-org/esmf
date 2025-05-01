@@ -471,9 +471,6 @@ void ESMCI_meshwritewarrays(Mesh **meshpp, char *fname, ESMCI_FortranStrLenArg n
 
     char *filename = ESMC_F90toCstring(fname, nlen);
 
-    //   printf("mg: nna=%d\n",num_nodeArrays);
-
-
     WriteMesh(**meshpp, filename, 
               num_nodeArrays, nodeArrays, 
               num_elemArrays, elemArrays);
@@ -865,8 +862,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         }
       }
      }
-
-
+    
     // Variable indicating if any of the elements on this PET are split
     bool is_split_local=false;
 

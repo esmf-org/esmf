@@ -1,4 +1,4 @@
-name: Build ESMF Using Spack
+name: ESMF Spack Test
 
 env:
   compiler: gcc@latest
@@ -84,6 +84,7 @@ jobs:
         sudo apt-get -qq install build-essential binutils-dev gfortran gdb
         sudo apt-get -qq install gfortran-12 gfortran-13
         sudo apt-get -qq install python3-dev
+        sudo apt-get -qq install curl libcurl4-openssl-dev
 
     # restore Intel oneAPI compiler installation from cache
     - name: Restore Intel oneAPI Compiler Installation

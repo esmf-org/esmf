@@ -1,4 +1,4 @@
-name: ESMF All Tests
+name: ESMF CI
 
 on:
   schedule:

@@ -6,7 +6,7 @@
 ############################################################
 # Default compiler setting.
 #
-ESMF_F90DEFAULT         = flang-new
+ESMF_F90DEFAULT         = flang
 ESMF_CXXDEFAULT         = clang++
 ESMF_CDEFAULT           = clang
 ESMF_CPPDEFAULT		= clang -E -P -x c
@@ -70,8 +70,8 @@ ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
-ifeq ($(ESMF_COMM),mvapich2)
-# Mvapich2 ---------------------------------------------------
+ifeq ($(ESMF_COMM),mvapich)
+# Mvapich any version --------------------------------------
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
@@ -239,7 +239,7 @@ ESMF_F90LINKLIBS += -lrt -lstdc++ -ldl
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lrt -lFortranRuntime -lFortranDecimal -lstdc++ -lm -ldl
+ESMF_CXXLINKLIBS += -lrt -lFortranDecimal -lflang_rt.runtime -lstdc++ -lm -ldl
 
 ############################################################
 # Linker option that ensures that the specified libraries are 

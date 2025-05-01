@@ -12,6 +12,9 @@
 #define FILENAME "src/addon/NUOPC/src/NUOPC_ModelBase.F90"
 !==============================================================================
 
+! access platform dependent macros
+#include "ESMF_Conf.inc"
+
 module NUOPC_ModelBase
 
   !-----------------------------------------------------------------------------

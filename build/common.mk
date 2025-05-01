@@ -147,6 +147,10 @@ ifeq ($(ESMF_COMM),mpich3)
 export ESMF_COMM = mpich
 $(warning !!! For MPICH3 and up, please use ESMF_COMM=mpich !!!)
 endif
+ifeq ($(ESMF_COMM),mvapich2)
+export ESMF_COMM = mvapich
+$(warning !!! For all versions of MVAPICH, including MVAPICH2, please use ESMF_COMM=mvapich !!!)
+endif
 endif
 
 ifndef ESMF_COMPILER
@@ -1460,6 +1464,60 @@ endif
 endif
 
 #-------------------------------------------------------------------------------
+# PIO
+#-------------------------------------------------------------------------------
+
+# This section for PIO needs to come before the NETCDF and PNETCDF sections so that -lpioc
+# appears before -lnetcdf on the link line: Otherwise, some linkers fail due to missing
+# symbols (e.g., on cygwin). However, note that this PIO section references ESMF_NETCDF,
+# so it's important that the final value of ESMF_NETCDF be set at this point (rather than
+# potentially being modified in the NETCDF section below).
+
+ifneq ($(origin ESMF_PIO), environment)
+ifndef ESMF_PIO
+export ESMF_PIO = $(ESMF_PIODEFAULT)
+endif
+
+ifeq ($(ESMF_PIO),internal)
+ifndef ESMF_NETCDF
+# PIO, starting with version 2, depends on NetCDF. Defaulting to internal needs
+# be turned off if there is no NetCDF available. Externally set PIO will be let
+# through, but will trigger the error down when actually attempting to build
+# PIO internally.
+ESMF_PIO = OFF
+endif
+endif
+
+endif
+
+ifeq ($(ESMF_PIO),OFF)
+ESMF_PIO=
+endif
+
+ifdef ESMF_PIO
+ESMF_CPPFLAGS                += -DESMF_PIO=1
+ifneq ($(origin ESMF_PIO_LIBS), environment)
+ESMF_PIO_LIBS = -lpioc
+endif
+ifdef ESMF_PIO_INCLUDE
+ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_PIO_INCLUDE)
+ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_PIO_INCLUDE)
+endif
+ifdef ESMF_PIO_LIBS
+ESMF_CXXLINKLIBSTHIRD     += $(ESMF_PIO_LIBS)
+ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_PIO_LIBS))))
+ESMF_F90LINKLIBSTHIRD     += $(ESMF_PIO_LIBS)
+ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_PIO_LIBS))))
+endif
+ifdef ESMF_PIO_LIBPATH
+ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_PIO_LIBPATH)
+ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_PIO_LIBPATH)
+ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_PIO_LIBPATH)
+ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_PIO_LIBPATH)
+endif
+endif
+
+#-------------------------------------------------------------------------------
 # NETCDF
 #-------------------------------------------------------------------------------
 
@@ -1700,53 +1758,6 @@ ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_YAMLCPP_LIBPATH)
 ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_YAMLCPP_LIBPATH)
 ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_YAMLCPP_LIBPATH)
 ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_YAMLCPP_LIBPATH)
-endif
-endif
-
-#-------------------------------------------------------------------------------
-# PIO
-#-------------------------------------------------------------------------------
-ifneq ($(origin ESMF_PIO), environment)
-ifndef ESMF_PIO
-export ESMF_PIO = $(ESMF_PIODEFAULT)
-endif
-
-ifeq ($(ESMF_PIO),internal)
-ifndef ESMF_NETCDF
-# PIO, starting with version 2, depends on NetCDF. Defaulting to internal needs
-# be turned off if there is no NetCDF available. Externally set PIO will be let
-# through, but will trigger the error down when actually attempting to build
-# PIO internally.
-ESMF_PIO = OFF
-endif
-endif
-
-endif
-
-ifeq ($(ESMF_PIO),OFF)
-ESMF_PIO=
-endif
-
-ifdef ESMF_PIO
-ESMF_CPPFLAGS                += -DESMF_PIO=1
-ifneq ($(origin ESMF_PIO_LIBS), environment)
-ESMF_PIO_LIBS = -lpioc
-endif
-ifdef ESMF_PIO_INCLUDE
-ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_PIO_INCLUDE)
-ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_PIO_INCLUDE)
-endif
-ifdef ESMF_PIO_LIBS
-ESMF_CXXLINKLIBSTHIRD     += $(ESMF_PIO_LIBS)
-ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_PIO_LIBS))))
-ESMF_F90LINKLIBSTHIRD     += $(ESMF_PIO_LIBS)
-ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_PIO_LIBS))))
-endif
-ifdef ESMF_PIO_LIBPATH
-ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_PIO_LIBPATH)
-ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_PIO_LIBPATH)
-ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_PIO_LIBPATH)
-ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_PIO_LIBPATH)
 endif
 endif
 

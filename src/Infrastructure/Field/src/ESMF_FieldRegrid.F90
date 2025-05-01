@@ -347,11 +347,74 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_FieldRegridRelease
 !------------------------------------------------------------------------------
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "fillProfileStr"    
+    subroutine fillProfileStr(srcField, dstField, regridmethod, profileStr, rc)
+      type(ESMF_Field),               intent(in)              :: srcField
+      type(ESMF_Field),               intent(inout)           :: dstField
+      type(ESMF_RegridMethod_Flag),   intent(in),optional     :: regridmethod
+      character (len=*),              intent(out)             :: profileStr
+      integer,                        intent(out),   optional :: rc
+
+      integer :: localrc
+      character (len=ESMF_MAXSTR) :: tmpStr 
+
+      
+      ! Set string
+      profileStr="ESMF_FieldRegridStore("
+
+      ! Get srcField name
+      call ESMF_FieldGet(srcField, name=tmpStr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return                 
+
+      ! Add to profileStr
+      profileStr=trim(profileStr)//"src="//trim(tmpStr)
+
+      
+      ! Get dstField name
+      call ESMF_FieldGet(dstField, name=tmpStr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return                 
+
+      ! Add to profileStr
+      profileStr=trim(profileStr)//" dst="//trim(tmpStr)
+
+      ! Get method name
+      if (present(regridmethod)) then
+         if (regridMethod == ESMF_REGRIDMETHOD_BILINEAR) then
+            tmpStr="bilinear"
+         else if (regridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+            tmpStr="conserve"
+         else if (regridMethod == ESMF_REGRIDMETHOD_CONSERVE_2ND) then
+            tmpStr="conserve2nd"
+         else if (regridMethod == ESMF_REGRIDMETHOD_PATCH) then
+            tmpStr="patch"
+         else if (regridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD) then
+            tmpStr="neareststod"
+         else if (regridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS) then
+            tmpStr="nearestdtos"
+         else
+            tmpStr="unknown"
+         endif
+      else
+         tmpStr="bilinear" ! Default to bilinear if not present
+      endif
+         
+      ! Add to profileStr
+      profileStr=trim(profileStr)//" method="//trim(tmpStr)         
+      
+      ! end it
+      profileStr=trim(profileStr)//")"
+ 
+      ! Return success !
+      if(present(rc)) rc = ESMF_SUCCESS      
+      
+    end subroutine fillProfileStr
 
 
-
+     
 #ifndef FRS_OLDWAY
-
     
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -739,17 +802,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         real(ESMF_KIND_R8),          pointer :: tmp_weights(:)
         real(ESMF_KIND_R8) :: beg_time, end_time
         logical :: addOrigCoordsToPointList
-                  
+        character (len=ESMF_MAXSTR) :: profileStr="<Not Set>"
+        
         ! Debug Timing stuff
         ! call ESMF_VMWtime(beg_time)
         ! ESMF_METHOD_ENTER(localrc)
-
 
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 
+        ! Profiling
+        if (ESMF_TraceGetProfileTypeInfo(ESMF_PROFILETYPE_REGRID) > 0) then
+           ! Fill profile string
+           call fillProfileStr(srcField, dstField, regridMethod, profileStr, localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return 
+
+           ! Start profile region
+           call ESMF_TraceRegionEnter(profileStr, localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return                 
+        endif
+
+        
 
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         !!!! Warnings for deprecated arguments !!!!
@@ -1342,6 +1419,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            call ESMF_MeshDestroy(dstMesh, noGarbage=.true., rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
+
+        ! Profiling
+        if (ESMF_TraceGetProfileTypeInfo(ESMF_PROFILETYPE_REGRID) > 0) then
+           call ESMF_TraceRegionExit(profileStr, localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return                 
         endif
 
         

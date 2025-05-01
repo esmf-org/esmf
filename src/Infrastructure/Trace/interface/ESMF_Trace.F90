@@ -36,16 +36,32 @@ module ESMF_TraceMod
 ! !PRIVATE TYPES:
   private
 
+  type ESMF_ProfileType
+     integer :: profiletype
+  end type ESMF_ProfileType
+
+  ! WARNING: THESE NEED TO MATCH ESMC_ProfileType IN ESMCI_TraceRegion.h
+  type (ESMF_ProfileType), parameter :: &
+       ESMF_PROFILETYPE_REGRID=ESMF_ProfileType(0)
+  
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
   public ESMF_TraceRegionEnter
   public ESMF_TraceRegionExit
+  
 
+  
+  
 ! - ESMF-internal methods:
   public ESMF_TraceOpen
   public ESMF_TraceClose
   public ESMF_TraceMemInfo
+  public ESMF_TraceGetProfileTypeInfo
 
+  ! - ESMF-internal methods:
+  public ESMF_ProfileType, ESMF_PROFILETYPE_REGRID
+  
+  
   ! - ESMF-internal - only for unit tests
   public ESMF_TraceTest_GetMPIWaitStats
   public ESMF_TraceTest_CheckMPIRegion
@@ -53,6 +69,7 @@ module ESMF_TraceMod
   
 contains
 
+  
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceOpen()"
 !BOPI 
@@ -102,6 +119,32 @@ contains
          ESMF_CONTEXT, rcToReturn=rc)) return
   end subroutine ESMF_TraceClose
 
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TraceGetProfileTypeInfo()"
+!BOPI 
+! !IROUTINE: ESMF_TraceGetProfileTypeInfo - Get information about a particular type of profile
+! 
+! !INTERFACE: 
+  function ESMF_TraceGetProfileTypeInfo(type)
+
+! ! Return value
+    integer :: ESMF_TraceGetProfileTypeInfo
+      
+! !ARGUMENTS: 
+    type(ESMF_PROFILETYPE), intent(in)  :: type
+!
+! !DESCRIPTION:
+!  Get information about a particular type of profile
+!
+!EOPI
+!-------------------------------------------------------------------------------
+    
+    call c_esmftrace_getprofiletypeinfo(type, ESMF_TraceGetProfileTypeInfo)
+    
+  end function ESMF_TraceGetProfileTypeInfo
+
+  
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TraceRegionEnter()"
 !BOP 

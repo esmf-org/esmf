@@ -297,6 +297,7 @@ module ESMF_FieldBundleMod
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
+    module procedure ESMF_FieldBundleSetGeom
     module procedure ESMF_FieldBundleSetGrid
     module procedure ESMF_FieldBundleSetLS
     module procedure ESMF_FieldBundleSetMesh
@@ -2834,7 +2835,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !   \begin{itemize}
 !     \item For multi-tile Fields, all Fields in the FieldBundle must contain
 !     the same number of tiles.
-!     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
 !   The arguments are:
@@ -6897,7 +6897,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !   \begin{itemize}
 !     \item For multi-tile Fields, all Fields in the FieldBundle must contain
 !     the same number of tiles.
-!     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
 !   The arguments are:

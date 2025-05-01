@@ -529,7 +529,8 @@ extern "C" {
 // These functions have no leading c_ and are ESMF and not ESMC because
 // they're intended to be called directly by F90 user code.
 //
-// The Fortran interfaces for these entry points are defined in ESMF_Comp.F90.
+// The Fortran interfaces for these entry points are defined in
+// ESMF_InternalState.F90
 //
 // These interface subroutine names MUST be in lower case.
 extern "C" {
@@ -542,6 +543,10 @@ extern "C" {
   //  ESMF_InternalStateAddReplace()
   //  ESMF_InternalStateGet()
   //  ESMF_InternalStateRemove()
+  //
+  // TODO: Change the back-end implementation of the InternalState feature to
+  // TODO: leverage ESMF_Container, analogous to how AttachableMethods are
+  // TODO: implemented!
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_internalstategetinfo"

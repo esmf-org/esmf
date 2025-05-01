@@ -34,7 +34,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: HDFGroup/hdf5
         path: hdf5-src
@@ -50,7 +50,10 @@ runs:
         -DHDF5_ENABLE_PARALLEL=${{ inputs.enable_parallel }} \
         -DHDF5_ENABLE_Z_LIB_SUPPORT=ON \
         -DBUILD_TESTING=${{ inputs.enable_testing }} \
+        -DHDF5_ENABLE_DEPRICATED_SYMBOLS=OFF \
+        -DHDF5_BUILD_EXAMPLES=OFF \
         -DHDF5_BUILD_TOOLS=OFF \
+        -DCMAKE_BUILD_TYPE=REL \
         ../
         make
         make install

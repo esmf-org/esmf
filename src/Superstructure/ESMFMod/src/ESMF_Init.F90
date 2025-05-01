@@ -58,6 +58,9 @@ module ESMF_InitMod
 !     !   ESMF_Initialize is called from what language?
       integer, parameter :: ESMF_MAIN_C=1, ESMF_MAIN_F90=2
 
+      logical :: already_init = .false.
+      logical :: already_final = .false.
+
 !------------------------------------------------------------------------------
 ! !PUBLIC SYMBOLS
       public ESMF_MAIN_C, ESMF_MAIN_F90
@@ -618,7 +621,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       logical :: rcpresent                       ! Return code present
       integer :: localrc
-      logical, save :: already_init = .false.    ! Static, maintains state.
       logical :: openflag, isPresent
       integer :: complianceCheckIsOn
       integer :: traceIsOn, profileIsOn, profileToLog
@@ -651,6 +653,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         rcpresent = .TRUE.
         rc = ESMF_RC_NOT_IMPL
       endif
+
+      if (already_final) then
+          ! If we have already finalized ESMF then it won't work to write to the ESMF
+          ! Logs, so instead write directly to stderr
+          if (rcpresent) rc = ESMF_RC_OBJ_DELETED
+          write(ESMF_UtilIOStderr,*) ESMF_METHOD, ": Cannot reinitialize ESMF after it has been finalized"
+          return
+      end if
 
       if (already_init) then
           if (rcpresent) rc = ESMF_SUCCESS
@@ -1612,7 +1622,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc
       character(ESMF_MAXSTR) :: errmsg, msgStr
       integer :: errmsg_l
-      logical, save :: already_final = .false.    ! Static, maintains state.
 
       integer :: traceIsOn, profileIsOn
 

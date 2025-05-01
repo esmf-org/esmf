@@ -280,7 +280,7 @@ struct SearchData {
 
 
 struct CommData {
-  double closest_dist;
+  double closest_dist2;
   int closest_src_gid;
   int proc;
 };
@@ -361,7 +361,7 @@ struct CommData {
 
   // Allocate space to hold closest gids, dist
   vector<int> closest_src_gid(dst_size,-1);
-  vector<double> closest_dist(dst_size,huge);
+  vector<double> closest_dist2(dst_size,huge);
 
   // Setup search structure
   SearchData sd;
@@ -410,7 +410,7 @@ struct CommData {
     // If we've found a nearest source point, then add to the search results list...
     if (sd.closest_src_id != SN_BAD_ID) {
       closest_src_gid[p]=sd.closest_src_id;
-      closest_dist[p]=sqrt(sd.closest_dist2);
+      closest_dist2[p]=sd.closest_dist2;
     }
   }
 
@@ -427,7 +427,7 @@ struct CommData {
 
     // If we've found a point, then search box is based on distance to it
     if (closest_src_gid[i] != -1) {
-      double dist=closest_dist[i];
+      double dist=sqrt(closest_dist2[i]);
 
       pnt_min[0] = pnt_crd[0]-dist;
       pnt_min[1] = pnt_crd[1]-dist;
@@ -551,13 +551,13 @@ struct CommData {
       const double *pnt_crd=dst_pl.get_coord_ptr(ind);
 
       // pack buf
-      double buf[4]; // 4 is biggest this should be (i.e. 3D+dist)
+      double buf[4]; // 4 is biggest this should be (i.e. 3D+dist2)
       buf[0]=pnt_crd[0];
       buf[1]=pnt_crd[1];
-      if (sdim < 3) buf[2]=closest_dist[ind];
+      if (sdim < 3) buf[2]=closest_dist2[ind];
       else {
         buf[2]=pnt_crd[2];
-        buf[3]=closest_dist[ind];
+        buf[3]=closest_dist2[ind];
       }
 
       // Push buf onto send struct
@@ -619,18 +619,21 @@ struct CommData {
 
       // Unpack buf
       double pnt[3]={0.0,0.0,0.0};
-      double dist=0.0;
+      double dist2=0.0;
 
       pnt[0]=buf[0];
       pnt[1]=buf[1];
-      if (sdim < 3) dist=buf[2];
+      if (sdim < 3) dist2=buf[2];
       else {
         pnt[2]=buf[2];
-        dist=buf[3];
+        dist2=buf[3];
       }
 
+      
       //// Point min max we expand the point by the distance to the closest point
       double pmin[3], pmax[3];
+      
+      double dist=sqrt(dist2); // Get actual dist, so we can compute minmax box
 
       pmin[0] = pnt[0]-dist;
       pmin[1] = pnt[1]-dist;
@@ -647,9 +650,7 @@ struct CommData {
       sd.dst_pnt[0] = pnt[0];
       sd.dst_pnt[1] = pnt[1];
       sd.dst_pnt[2] = (sdim == 3 ? pnt[2] : 0.0);
-      // sd.closest_src_node=NULL;
-      sd.closest_dist2=dist*dist;
-      // sd.src_coord=NULL;
+      sd.closest_dist2=dist2;
 
       sd.closest_src_id=SN_BAD_ID;
       sd.srcpointlist=&src_pl;
@@ -660,13 +661,13 @@ struct CommData {
       // Fill in structure to be sent
       CommData cd;
       if (sd.closest_src_id != SN_BAD_ID) {
-        cd.closest_dist=sqrt(sd.closest_dist2);
+        cd.closest_dist2=sd.closest_dist2;
         cd.closest_src_gid=sd.closest_src_id;
 
         //      printf("#%d c_s_g=%d \n", Par::Rank(),cd.closest_src_gid);
 
       } else {
-        cd.closest_dist=huge;
+        cd.closest_dist2=huge;
         cd.closest_src_gid=SN_BAD_ID;
       }
       cd.proc=Par::Rank();
@@ -748,14 +749,14 @@ struct CommData {
       if (cd.closest_src_gid > -1) {
         //      printf("#%d LAST c_s_g=%d \n", Par::Rank(),cd.closest_src_gid);
 
-        if (cd.closest_dist < closest_dist[pnt_ind]) {
-          closest_dist[pnt_ind]=cd.closest_dist;
+        if (cd.closest_dist2 < closest_dist2[pnt_ind]) {
+          closest_dist2[pnt_ind]=cd.closest_dist2;
           closest_src_gid[pnt_ind]=cd.closest_src_gid;
-        } else if (cd.closest_dist == closest_dist[pnt_ind]) {
+        } else if (cd.closest_dist2 == closest_dist2[pnt_ind]) {
           // If exactly the same distance chose the point with the smallest id
           // (To make things consistent when running on different numbers of procs)
           if (cd.closest_src_gid < closest_src_gid[pnt_ind]) {
-            closest_dist[pnt_ind]=cd.closest_dist;
+            closest_dist2[pnt_ind]=cd.closest_dist2;
             closest_src_gid[pnt_ind]=cd.closest_src_gid;
           }
         }

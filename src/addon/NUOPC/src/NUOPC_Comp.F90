@@ -2118,7 +2118,7 @@ module NUOPC_Comp
     endif
 
     ! Add NUOPC/Driver, NUOPC/Model, NUOPC/Mediator Attributes
-    allocate(attrList(9))
+    allocate(attrList(10))
     attrList(1) = "InternalInitializePhaseMap"  ! list of strings to map str to phase #
     attrList(2) = "InternalRunPhaseMap"  ! list of strings to map str to phase #
     attrList(3) = "InternalFinalizePhaseMap"  ! list of strings to map str to phase #
@@ -2127,7 +2127,11 @@ module NUOPC_Comp
     attrList(6) = "InitializeDataResolution"! values: strings "false"/"true"
     attrList(7) = "InitializeDataComplete"  ! values: strings "false"/"true"
     attrList(8) = "InitializeDataProgress"  ! values: strings "false"/"true"
-    attrList(9) = "HierarchyProtocol"       ! strings
+    attrList(9) = "HierarchyProtocol"       ! values: strings
+                                            ! "PushUpAllExportsAndUnsatisfiedImports"
+                                            ! "ConnectProvidedFields"
+                                            ! "Explorer" and "off"
+    attrList(10)= "HierarchyConnectors"     ! values: strings "auto"/"manual"
     ! add Attribute packages
     call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
       attrList=attrList, rc=localrc)
@@ -2187,6 +2191,11 @@ module NUOPC_Comp
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     call NUOPC_CompAttributeSet(comp, &
       name="InitializeDataProgress", value="false", &
+      rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    call NUOPC_CompAttributeSet(comp, &
+      name="HierarchyConnectors", value="auto", &
       rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out

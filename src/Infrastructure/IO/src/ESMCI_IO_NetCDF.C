@@ -36,6 +36,7 @@
 #include "ESMCI_ArraySpec.h"
 #include "ESMCI_LocalArray.h"
 #include "ESMCI_Array.h"
+#include "ESMCI_IO_NetCDF_Utils.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -585,110 +586,6 @@ void IO_NetCDF::destruct(void) {
 
 #ifdef ESMF_NETCDF
 
-  int IO_NetCDF::ncerrToEsmcRc (int ncerror)
-  {
-
-#undef ESMC_METHOD
-#define ESMC_METHOD "IO_NetCDF::ncerrToEsmcRc"
-
-  if (ncerror == NC_NOERR)
-    return ESMF_SUCCESS;
-  else
-    return ESMF_FAILURE;
-  } // end ncerrToEsmcRc
-
-  ESMC_TypeKind_Flag  IO_NetCDF::ncToEsmcType(nc_type ncTypeVal)
-  {
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "IO_NetCDF::ncToEsmcType"
-
-    ESMC_TypeKind_Flag  esmcTypeVal = ESMF_NOKIND;
-
-    switch (ncTypeVal)
-    {
-    case NC_BYTE:
-      esmcTypeVal = ESMC_TYPEKIND_I1;
-      break;
-    case NC_CHAR:
-      esmcTypeVal = ESMC_TYPEKIND_CHARACTER;
-      break;
-    case NC_SHORT:
-      esmcTypeVal = ESMC_TYPEKIND_I2;
-      break;
-    case NC_INT:
-      esmcTypeVal = ESMC_TYPEKIND_I4;
-      break;
-    //case NC_LONG:  // TODO?: deprecated in netCDF - same as NC_INT
-    // esmcTypeVal = ESMC_TYPEKIND_I8;
-    //break;
-    case NC_FLOAT:
-      esmcTypeVal = ESMC_TYPEKIND_R4;
-      break;
-    case NC_DOUBLE:
-      esmcTypeVal = ESMC_TYPEKIND_R8;
-      break;
-    default:
-      break;
-    }
-
-    return esmcTypeVal;
-  }
-
-
-//-------------------------------------------------------------------------
-
-  nc_type  IO_NetCDF::esmcToNcType(ESMC_TypeKind_Flag  esmcTypeVal)
-  {
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "IO_NetCDF::esmcToNcType"
-
-    nc_type  ncTypeVal = NC_UNSPECIFIED;
-
-    switch (esmcTypeVal)
-    {
-    case ESMC_TYPEKIND_I1:
-      ncTypeVal = NC_BYTE;
-      break;
-    case ESMC_TYPEKIND_I2:
-      ncTypeVal = NC_SHORT;
-      break;
-    case ESMC_TYPEKIND_I4:
-      ncTypeVal = NC_INT;
-      break;
-    case ESMC_TYPEKIND_I8:
-      ncTypeVal = NC_LONG;  // TODO?: deprecated in netCDF - same ncInt
-      break;
-    case ESMC_TYPEKIND_R4:
-      ncTypeVal = NC_FLOAT;
-      break;
-    case ESMC_TYPEKIND_R8:
-      ncTypeVal = NC_DOUBLE;
-      break;
-    case ESMF_C8:
-      ncTypeVal = NC_UNSPECIFIED;
-      // TODO:  ncTypeVal = netCDF 8 byte complex type?
-      break;
-    case ESMF_C16:
-      ncTypeVal = NC_UNSPECIFIED;
-      // TODO:  ncTypeVal = netCDF 16 byte complex type?
-      break;
-    case ESMC_TYPEKIND_LOGICAL:
-      ncTypeVal = NC_BYTE;
-      break;
-    case ESMC_TYPEKIND_CHARACTER:
-      ncTypeVal = NC_CHAR;
-      break;
-    default:
-      break;
-    }
-
-    return ncTypeVal;
-  }
-
-
-
 //-------------------------------------------------------------------------
 
   Array*  IO_NetCDF::readArray(NcFile  netCdfFile,
@@ -744,6 +641,11 @@ void IO_NetCDF::destruct(void) {
     }
 
     ESMC_TypeKind_Flag  arrayType = ncToEsmcType(nctype);
+    if (arrayType == ESMF_NOKIND) {
+      string errstr = string(": problem converting NetCDF type to ESMF type");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, errstr, ESMC_CONTEXT, rc);
+      return thisArray;
+    }
 
     if (trace)
       std::cerr << ESMC_METHOD << ": allocating values buffer, numValues = " << numValues << std::endl;
@@ -981,6 +883,11 @@ void IO_NetCDF::destruct(void) {
     ESMC_TypeKind_Flag  esmcType = thisArray->getTypekind();
 //printf("ESMC Type: %d\n", esmcType);
     nc_type            ncType = esmcToNcType(esmcType);
+    if (ncType == NC_UNSPECIFIED) {
+      string errstr = string(": problem converting ESMF type to NetCDF type");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, errstr, ESMC_CONTEXT, &localrc);
+      return localrc;
+    }
 
     int thisVar;
 
@@ -1085,7 +992,9 @@ void IO_NetCDF::destruct(void) {
       break;
 
     default:
-      break;
+      string errstr = string(": unhandled NetCDF type");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL, errstr, ESMC_CONTEXT, &localrc);
+      return localrc;
     }
 
     delete[] counts;

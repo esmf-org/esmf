@@ -50,8 +50,8 @@ ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
-ifeq ($(ESMF_COMM),mvapich2)
-# Mvapich2 ---------------------------------------------------
+ifeq ($(ESMF_COMM),mvapich)
+# Mvapich any version --------------------------------------
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
@@ -116,12 +116,6 @@ ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused $(ESMF_LINKOPTFLAG_G)
 # Set NAG unix modules when certain non-Standard system calls
 # (e.g., ABORT) are made.
 ESMF_F90COMPILEOPTS += -DESMF_NAG_UNIX_MODULE
-
-############################################################
-# Currently NAG does not support the Fortran2018 assumed type feature
-#
-ESMF_F90COMPILECPPFLAGS += -DESMF_NO_F2018ASSUMEDTYPE
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_F2018ASSUMEDTYPE
 
 ############################################################
 # Some ESMF tests fail for NAG with -O -> turn optimization off by default

@@ -1,4 +1,4 @@
-name: Build ESMPy Docs
+name: ESMPy Docs
 
 on:
   workflow_dispatch:

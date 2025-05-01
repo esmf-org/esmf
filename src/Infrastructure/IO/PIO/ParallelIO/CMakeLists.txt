@@ -10,7 +10,7 @@ project (PIO C)
 # The project version number.
 set(VERSION_MAJOR   2   CACHE STRING "Project major version number.")
 set(VERSION_MINOR   6   CACHE STRING "Project minor version number.")
-set(VERSION_PATCH   2   CACHE STRING "Project patch version number.")
+set(VERSION_PATCH   6   CACHE STRING "Project patch version number.")
 mark_as_advanced(VERSION_MAJOR VERSION_MINOR VERSION_PATCH)
 
 # Create version info in autotools parlance for pio_meta.h.
@@ -29,18 +29,18 @@ include(CheckSymbolExists)
 
 # Determine the configure date.
 IF(DEFINED ENV{SOURCE_DATE_EPOCH})
-	EXECUTE_PROCESS(
-	  COMMAND "date" "-u" "-d" "@$ENV{SOURCE_DATE_EPOCH}"
-	  OUTPUT_VARIABLE CONFIG_DATE
-	  )
+        EXECUTE_PROCESS(
+          COMMAND "date" "-u" "-d" "@$ENV{SOURCE_DATE_EPOCH}"
+          OUTPUT_VARIABLE CONFIG_DATE
+          )
 ELSE()
-	EXECUTE_PROCESS(
-	  COMMAND date
-	  OUTPUT_VARIABLE CONFIG_DATE
-	  )
+        EXECUTE_PROCESS(
+          COMMAND date
+          OUTPUT_VARIABLE CONFIG_DATE
+          )
 ENDIF()
 IF(CONFIG_DATE)
-	string(STRIP ${CONFIG_DATE} CONFIG_DATE)
+        string(STRIP ${CONFIG_DATE} CONFIG_DATE)
 ENDIF()
 
 # A function used to create autotools-style 'yes/no' definitions.
@@ -244,7 +244,7 @@ if (PIO_ENABLE_COVERAGE)
 endif ()
 
 # Allow argument mismatch in gfortran versions > 10 for mpi library compatibility
-if (CMAKE_C_COMPILER_NAME STREQUAL "GNU")
+if (CMAKE_Fortran_COMPILER_NAME STREQUAL "GNU")
   if ("${CMAKE_Fortran_COMPILER_VERSION}" VERSION_LESS 10)
     message (WARNING "gfortran version is ${CMAKE_Fortran_COMPILER_VERSION}")
   else()
@@ -352,7 +352,7 @@ CHECK_C_SOURCE_COMPILES("
 #if !NC_HAS_SZIP_WRITE
       choke me
 #endif
-int main() {return 0;}" HAVE_SZIP_WRITE)
+int main() {return 0;}" USE_SZIP)
 
 ###
 # Check to see if parallel filters are supported by HDF5/netcdf-c.
@@ -363,9 +363,9 @@ if (HAVE_NETCDF_PAR)
 #if !NC_HAS_PAR_FILTERS
     choke me
 #endif
-int main() {return 0;}" HAVE_PAR_FILTERS)
+int main() {return 0;}" PIO_HAS_PAR_FILTERS)
 else()
-  set(HAVE_PAR_FILTERS 0)
+  set(PIO_HAS_PAR_FILTERS 0)
 endif()
 
 ###
@@ -486,7 +486,7 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 INSTALL(FILES "${PIO_BINARY_DIR}/libpio.settings"
   DESTINATION lib
   COMPONENT libraries)
-  
+
 #####
 # Create pio_meta.h include file.
 #####
