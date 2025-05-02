@@ -1705,7 +1705,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
     ! Private name; call using ESMF_FieldBundleGet()   
     subroutine ESMF_FieldBundleGetListAll(fieldbundle, keywordEnforcer, &
-      itemorderflag, geomtype, grid, locstream, mesh, xgrid, &
+      itemorderflag, geomtype, geom, grid, locstream, mesh, xgrid, &
       fieldCount, fieldList, fieldNameList, isPacked, name, vm, rc)
 !
 ! !ARGUMENTS:
@@ -1713,6 +1713,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_ItemOrder_Flag), intent(in),  optional :: itemorderflag
     type(ESMF_GeomType_Flag),  intent(out), optional :: geomtype
+    type(ESMF_Geom),           intent(out), optional :: geom
     type(ESMF_Grid),           intent(out), optional :: grid
     type(ESMF_LocStream),      intent(out), optional :: locstream
     type(ESMF_Mesh),           intent(out), optional :: mesh
@@ -1737,6 +1738,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              The new argument allows the user to query if this is a packed FieldBundle.
 ! \item[8.8.0] Added argument {\tt vm} in order to offer information about the
 !              VM on which the FieldBundle was created.
+! \item[8.9.0] Added argument {\tt geom} to allow the user to retrieve a generic representation of
+!              the FieldBundle's geometry.
 ! \end{description}
 ! \end{itemize}
 !
@@ -1755,6 +1758,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Flag that indicates what type of geometry this FieldBundle object holds. 
 !      Can be {\tt ESMF\_GEOMTYPE\_GRID}, {\tt ESMF\_GEOMTYPE\_MESH}, {\tt ESMF\_GEOMTYPE\_LOCSTREAM},
 !      {\tt ESMF\_GEOMTYPE\_XGRID}
+!   \item[{[geom]}]
+!      The Geom object that this FieldBundle object holds. 
 !   \item[{[grid]}]
 !      The Grid object that this FieldBundle object holds. 
 !   \item[{[locstream]}]
@@ -1808,7 +1813,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     this => fieldbundle%this
 
-    ! geom
+    ! geomtype
     if(present(geomtype)) then
       if(this%status /= ESMF_FBSTATUS_GRIDSET) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
@@ -1822,6 +1827,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
+    ! Get Geom
+    if (present(geom)) then
+       geom=this%geom
+    endif
+
+    ! Get Grid
     if(present(grid)) then
       if(this%status /= ESMF_FBSTATUS_GRIDSET) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
