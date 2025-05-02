@@ -66,6 +66,7 @@ module ESMF_MeshMod
   ! ! ESMF_MeshStatus_Flag
   !
   !------------------------------------------------------------------------------
+
   type ESMF_MeshStatus_Flag
 #ifndef ESMF_NO_SEQUENCE
   sequence
