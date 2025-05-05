@@ -225,114 +225,8 @@ module NUOPC_ModelBase
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
-    
+
     rc = ESMF_SUCCESS
-
-  end subroutine
-  
-  !-----------------------------------------------------------------------------
-
-  subroutine handle_verbosity_in(gcomp, verbosity, rc)
-    type(ESMF_GridComp), intent(in)   :: gcomp
-    integer,             intent(in)   :: verbosity
-    integer,             intent(out)  :: rc
-
-    ! local variables
-    character(ESMF_MAXSTR)    :: name
-    character(ESMF_MAXSTR)    :: msgString, pLabel
-    integer                   :: phase
-    type(ESMF_Clock)          :: internalClock
-    logical                   :: clockIsPresent
-
-    ! handle verbosity
-    if (btest(verbosity,8)) then
-      call ESMF_GridCompGet(gcomp, name=name, currentPhase=phase, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) &
-        return  ! bail out
-      call NUOPC_CompSearchRevPhaseMap(gcomp, ESMF_METHOD_INITIALIZE, &
-        phaseIndex=phase, phaseLabel=pLabel, rc=rc)
-      if (len_trim(pLabel)==0) pLabel="<none>"
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_GridCompGet(gcomp, clockIsPresent=clockIsPresent, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) &
-        return  ! bail out
-      if (clockIsPresent) then
-        call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) &
-          return  ! bail out
-        call ESMF_ClockPrint(internalClock, options="currTime", &
-          preString=">>>"//trim(name)//&
-          ": entered Initialize (phase="//trim(adjustl(pLabel))// &
-          ") with current time: ", unit=msgString, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      else
-        write(msgString,"(A)") ">>>"//trim(name)//&
-          ": entered Initialize (phase="//trim(adjustl(pLabel))// &
-          ") without valid internal Clock."
-      endif
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-        return  ! bail out
-    endif
-
-  end subroutine
-
-  !-----------------------------------------------------------------------------
-
-  subroutine handle_verbosity_ex(gcomp, verbosity, rc)
-    type(ESMF_GridComp), intent(in)   :: gcomp
-    integer,             intent(in)   :: verbosity
-    integer,             intent(out)  :: rc
-
-    ! local variables
-    character(ESMF_MAXSTR)    :: name
-    character(ESMF_MAXSTR)    :: msgString, pLabel
-    integer                   :: phase
-    type(ESMF_Clock)          :: internalClock
-    logical                   :: clockIsPresent
-
-    ! handle verbosity
-    if (btest(verbosity,8)) then
-      call ESMF_GridCompGet(gcomp, name=name, currentPhase=phase, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) &
-        return  ! bail out
-      call NUOPC_CompSearchRevPhaseMap(gcomp, ESMF_METHOD_INITIALIZE, &
-        phaseIndex=phase, phaseLabel=pLabel, rc=rc)
-      if (len_trim(pLabel)==0) pLabel="<none>"
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_GridCompGet(gcomp, clockIsPresent=clockIsPresent, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) &
-        return  ! bail out
-      if (clockIsPresent) then
-        call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) &
-          return  ! bail out
-        call ESMF_ClockPrint(internalClock, options="currTime", &
-          preString="<<<"//trim(name)//&
-          ": leaving Initialize (phase="//trim(adjustl(pLabel))// &
-          ") with current time: ", unit=msgString, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      else
-        write(msgString,"(A)") "<<<"//trim(name)//&
-          ": leaving Initialize (phase="//trim(adjustl(pLabel))// &
-          ") without valid internal Clock."
-      endif
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-        return  ! bail out
-    endif
 
   end subroutine
 
@@ -396,7 +290,7 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle verbosity
-    call handle_verbosity_in(gcomp, verbosity, rc=rc)
+    call NUOPC_CompHandleVerbosityIntro(gcomp, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -575,7 +469,7 @@ module NUOPC_ModelBase
     endif
 
     ! handle verbosity
-    call handle_verbosity_ex(gcomp, verbosity, rc=rc)
+    call NUOPC_CompHandleVerbosityExtro(gcomp, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -648,7 +542,7 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle verbosity
-    call handle_verbosity_in(gcomp, verbosity, rc=rc)
+    call NUOPC_CompHandleVerbosityIntro(gcomp, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -718,7 +612,7 @@ module NUOPC_ModelBase
     endif
 
     ! handle verbosity
-    call handle_verbosity_ex(gcomp, verbosity, rc=rc)
+    call NUOPC_CompHandleVerbosityExtro(gcomp, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -791,7 +685,7 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle verbosity
-    call handle_verbosity_in(gcomp, verbosity, rc=rc)
+    call NUOPC_CompHandleVerbosityIntro(gcomp, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -861,7 +755,7 @@ module NUOPC_ModelBase
     endif
 
     ! handle verbosity
-    call handle_verbosity_ex(gcomp, verbosity, rc=rc)
+    call NUOPC_CompHandleVerbosityExtro(gcomp, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -934,7 +828,7 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle verbosity
-    call handle_verbosity_in(gcomp, verbosity, rc=rc)
+    call NUOPC_CompHandleVerbosityIntro(gcomp, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1004,7 +898,7 @@ module NUOPC_ModelBase
     endif
 
     ! handle verbosity
-    call handle_verbosity_ex(gcomp, verbosity, rc=rc)
+    call NUOPC_CompHandleVerbosityExtro(gcomp, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1077,7 +971,7 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle verbosity
-    call handle_verbosity_in(gcomp, verbosity, rc=rc)
+    call NUOPC_CompHandleVerbosityIntro(gcomp, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1147,7 +1041,7 @@ module NUOPC_ModelBase
     endif
 
     ! handle verbosity
-    call handle_verbosity_ex(gcomp, verbosity, rc=rc)
+    call NUOPC_CompHandleVerbosityExtro(gcomp, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1220,7 +1114,7 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle verbosity
-    call handle_verbosity_in(gcomp, verbosity, rc=rc)
+    call NUOPC_CompHandleVerbosityIntro(gcomp, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1290,7 +1184,7 @@ module NUOPC_ModelBase
     endif
 
     ! handle verbosity
-    call handle_verbosity_ex(gcomp, verbosity, rc=rc)
+    call NUOPC_CompHandleVerbosityExtro(gcomp, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1374,7 +1268,7 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle verbosity
-    call handle_verbosity_in(gcomp, verbosity, rc=rc)
+    call NUOPC_CompHandleVerbosityIntro(gcomp, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1492,7 +1386,7 @@ module NUOPC_ModelBase
     endif
     
     ! handle verbosity
-    call handle_verbosity_ex(gcomp, verbosity, rc=rc)
+    call NUOPC_CompHandleVerbosityExtro(gcomp, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1570,7 +1464,7 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle verbosity
-    call handle_verbosity_in(gcomp, verbosity, rc=rc)
+    call NUOPC_CompHandleVerbosityIntro(gcomp, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1756,7 +1650,7 @@ module NUOPC_ModelBase
     endif
 
     ! handle verbosity
-    call handle_verbosity_ex(gcomp, verbosity, rc=rc)
+    call NUOPC_CompHandleVerbosityExtro(gcomp, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1832,7 +1726,7 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle verbosity
-    call handle_verbosity_in(gcomp, verbosity, rc=rc)
+    call NUOPC_CompHandleVerbosityIntro(gcomp, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1958,7 +1852,7 @@ module NUOPC_ModelBase
     endif
     
     ! handle verbosity
-    call handle_verbosity_ex(gcomp, verbosity, rc=rc)
+    call NUOPC_CompHandleVerbosityExtro(gcomp, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 

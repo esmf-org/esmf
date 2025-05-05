@@ -171,6 +171,8 @@ module esmx_data
         vocabulary=["model        ", &  ! ESMX_Driver handled option
                     "petList      ", &  ! ESMX_Driver handled option
                     "ompNumThreads", &  ! ESMX_Driver handled option
+                    "stdout       ", &  ! ESMX_Driver handled option
+                    "stderr       ", &  ! ESMX_Driver handled option
                     "attributes   ", &  ! ESMX_Driver handled option
                     "output       ", &  ! ESMX_Data handled option
                     "geom         ", &  ! ESMX_Data handled option

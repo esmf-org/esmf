@@ -333,6 +333,7 @@ module ESMF_CompMod
   public ESMF_CompSetVMMaxPEs
   public ESMF_CompSetVMMaxThreads
   public ESMF_CompSetVMMinThreads
+  public ESMF_CompSetVMStdRedirect
   public ESMF_CompValidate
   public ESMF_CompWait
 
@@ -2152,7 +2153,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Print VM internals
+!     Configure VM for this component.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2297,7 +2298,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Print VM internals
+!     Configure VM for this component.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2401,7 +2402,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Print VM internals
+!     Configure VM for this component.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2480,6 +2481,85 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_CompSetVMMinThreads
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompSetVMStdRedirect"
+!BOPI
+! !IROUTINE: ESMF_CompSetVMStdRedirect - Set stdout and stderr redirect in VM
+
+! !INTERFACE:
+  subroutine ESMF_CompSetVMStdRedirect(compp, stdout, stderr, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CompClass), pointer               :: compp
+    character(*),         intent(in),  optional :: stdout
+    character(*),         intent(in),  optional :: stderr
+    integer,              intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Configure VM for this component.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[compp]
+!          component object
+!     \item[{[stdout]}]
+!          Filename for the stdout redirect. By default do not redirect.
+!     \item[{[stderr]}]
+!          Filename for the stderr redirect. By default do not redirect.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! Initialize return code; assume not implemented until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Test incoming compp object
+    if (.not.associated(compp)) then
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+        msg="Not a valid pointer to ESMF Component object", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
+
+    ! ensure that this is not a child_in_parent_vm plan
+    if (compp%contextflag == ESMF_CONTEXT_PARENT_VM) then
+      call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+        msg="CompSetVM() calls are incompatible with CHILD_IN_PARENT_VM component", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+    
+    ! ensure that this component's VM wasn't already created
+    if (compp%vm_info /= ESMF_NULL_POINTER) then
+      call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+        msg="CompSetVM() calls cannot be called on components with existing VM", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    ! set stdout and stderr redirect
+    call ESMF_VMPlanSetStdRedirect(compp%vmplan, stdout=stdout, stderr=stderr, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_CompSetVMStdRedirect
 !------------------------------------------------------------------------------
 
 
