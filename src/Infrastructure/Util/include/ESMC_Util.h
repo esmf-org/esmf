@@ -21,6 +21,7 @@
 #define ESMC_UTIL_H
 
 #include "ESMC_Conf.h"
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,13 +41,7 @@ extern "C" {
   typedef char      ESMC_I1;
   typedef double    ESMC_R8;
   typedef float     ESMC_R4;
-#if (ESMC_POINTER_SIZE == 4)
-  // 32-bit machine
-  typedef unsigned long ESMC_POINTER;
-#else
-  // 64-bit machine
-  typedef unsigned long long ESMC_POINTER;
-#endif
+  typedef size_t    ESMC_POINTER;
 
 enum ESMC_CoordSys_Flag {ESMC_COORDSYS_INVALID=-2,
                     ESMC_COORDSYS_UNINIT,
