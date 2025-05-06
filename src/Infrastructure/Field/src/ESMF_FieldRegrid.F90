@@ -3407,6 +3407,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     regridmethod, &
                     srcTermProcessing, pipeLineDepth, &
                     routehandle, &
+                    factorList, factorIndexList, & 
                     srcFracField, dstFracField, &
                     srcMergeFracField, dstMergeFracField, rc)
 !      
@@ -3419,6 +3420,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                        intent(inout), optional :: srcTermProcessing
       integer,                        intent(inout), optional :: pipeLineDepth
       type(ESMF_RouteHandle), intent(inout), optional         :: routehandle
+      real(ESMF_KIND_R8),             pointer,       optional :: factorList(:)
+      integer(ESMF_KIND_I4),          pointer,       optional :: factorIndexList(:,:)
       type(ESMF_Field),       intent(inout), optional         :: srcFracField
       type(ESMF_Field),       intent(inout), optional         :: dstFracField
       type(ESMF_Field),       intent(inout), optional         :: srcMergeFracField
@@ -3438,6 +3441,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              provide access to the tuning parameters affecting the sparse matrix
 !              execution. See the text for details on the impact
 !              {\tt srcTermProcessing} can have on bit-for-bit reproducibility.
+! \item[8.9.0] Added arguments {\tt factorList} and {\tt factorIndexList} to allow user
+!              to retrieve regridding weights.
+!
 ! \end{description}
 ! \end{itemize}
 !
@@ -3583,6 +3589,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         type(ESMF_PointList) :: dstPointList, srcPointList
         type(ESMF_Array)     :: statusArray
+        integer(ESMF_KIND_I4),       pointer :: tmpFactorIndexList(:,:)
+        real(ESMF_KIND_R8),          pointer :: tmpFactorList(:)
+
         
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
@@ -4235,29 +4244,65 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
          
          ! Generate routehandle for 2nd order conservative
-         call ESMF_RegridStore(srcMesh, srcArray, &
-              srcPointList, .false., &
-              dstMesh, dstArray, &
-              dstPointList, .false. , &
-              regridMethod=ESMF_REGRIDMETHOD_CONSERVE_2ND, &
-              lineType=ESMF_LINETYPE_GREAT_CIRCLE, &
-              normType=ESMF_NORMTYPE_DSTAREA, &
-              vectorRegrid=.false., &
-              polemethod=ESMF_POLEMETHOD_NONE, regridPoleNPnts=4, &
-              hasStatusArray=.false., statusArray=statusArray, &
-              extrapMethod=ESMF_EXTRAPMETHOD_NONE, &
-              extrapNumSrcPnts=8, extrapDistExponent=2.0_ESMF_KIND_R8, &
-              extrapNumLevels=2, extrapNumInputLevels=2, &
-              unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, & ! Otherwise, dst = sideMesh will often lead to unmapped errors
-              ignoreDegenerate=.true., &
-              srcTermProcessing=srcTermProcessing, &
-              pipeLineDepth=pipeLineDepth, &
-              routehandle=routeHandle, &
-              checkFlag=.false., &
-              rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
+         if (present(factorList) .or. present(factorIndexList)) then  ! Do weight matrix and maybe rh
+            call ESMF_RegridStore(srcMesh, srcArray, &
+                 srcPointList, .false., &
+                 dstMesh, dstArray, &
+                 dstPointList, .false. , &
+                 regridMethod=ESMF_REGRIDMETHOD_CONSERVE_2ND, &
+                 lineType=ESMF_LINETYPE_GREAT_CIRCLE, &
+                 normType=ESMF_NORMTYPE_DSTAREA, &
+                 vectorRegrid=.false., &
+                 polemethod=ESMF_POLEMETHOD_NONE, regridPoleNPnts=4, &
+                 hasStatusArray=.false., statusArray=statusArray, &
+                 extrapMethod=ESMF_EXTRAPMETHOD_NONE, &
+                 extrapNumSrcPnts=8, extrapDistExponent=2.0_ESMF_KIND_R8, &
+                 extrapNumLevels=2, extrapNumInputLevels=2, &
+                 unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, & ! Otherwise, dst = sideMesh will often lead to unmapped errors
+                 ignoreDegenerate=.true., &
+                 srcTermProcessing=srcTermProcessing, &
+                 pipeLineDepth=pipeLineDepth, &
+                 routehandle=routeHandle, &
+                 indices=tmpFactorIndexList, &
+                 weights=tmpFactorList, &
+                 checkFlag=.false., &
+                 rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
 
+            ! attach sparse matrix to appropriate output variable
+           if (present(factorList)) factorList=>tmpFactorList
+           if (present(factorIndexList)) factorIndexList=>tmpFactorIndexList
+
+           ! deallocate if not being passed out
+           if (.not. present(factorList)) deallocate(tmpfactorList)
+           if (.not. present(factorIndexList)) deallocate(tmpfactorIndexList)
+
+         else  ! Just do routeHandle
+            call ESMF_RegridStore(srcMesh, srcArray, &
+                 srcPointList, .false., &
+                 dstMesh, dstArray, &
+                 dstPointList, .false. , &
+                 regridMethod=ESMF_REGRIDMETHOD_CONSERVE_2ND, &
+                 lineType=ESMF_LINETYPE_GREAT_CIRCLE, &
+                 normType=ESMF_NORMTYPE_DSTAREA, &
+                 vectorRegrid=.false., &
+                 polemethod=ESMF_POLEMETHOD_NONE, regridPoleNPnts=4, &
+                 hasStatusArray=.false., statusArray=statusArray, &
+                 extrapMethod=ESMF_EXTRAPMETHOD_NONE, &
+                 extrapNumSrcPnts=8, extrapDistExponent=2.0_ESMF_KIND_R8, &
+                 extrapNumLevels=2, extrapNumInputLevels=2, &
+                 unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, & ! Otherwise, dst = sideMesh will often lead to unmapped errors
+                 ignoreDegenerate=.true., &
+                 srcTermProcessing=srcTermProcessing, &
+                 pipeLineDepth=pipeLineDepth, &
+                 routehandle=routeHandle, &
+                 checkFlag=.false., &
+                 rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+         endif
+            
            ! The fraction information should be the same as stored in the XGrid. However,
            ! use the version actually calculated during 2nd order calc, so that it matches more
            ! precisely the values used during that calculation. 
