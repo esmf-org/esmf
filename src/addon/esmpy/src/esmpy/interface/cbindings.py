@@ -2044,6 +2044,7 @@ _ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p,              # srcField
                                         ct.POINTER(ct.c_void_p),  # regridPoleNPnts
                                         OptionalNamedConstant,    # lineType
                                         OptionalNamedConstant,    # normType
+                                        OptionalBool,             # vectorRegrid
                                         OptionalNamedConstant,    # extrapMethod
                                         OptionalInt,              # extrapNumSrcPnts
                                         OptionalFloat,            # extrapDistExponent
@@ -2067,6 +2068,7 @@ def ESMP_FieldRegridStore(srcField,
                           regridPoleNPnts=None,
                           lineType=None,
                           normType=None,
+                          vectorRegrid=None,
                           extrapMethod=None, 
                           extrapNumSrcPnts=None,
                           extrapDistExponent=None,
@@ -2128,6 +2130,7 @@ def ESMP_FieldRegridStore(srcField,
                                      regridPoleNPnts_ct,
                                      lineType,
                                      normType,
+                                     vectorRegrid,
                                      extrapMethod, 
                                      extrapNumSrcPnts,
                                      extrapDistExponent,
@@ -2161,6 +2164,7 @@ _ESMF.ESMC_FieldRegridStoreFile.argtypes = [ct.c_void_p, ct.c_void_p,
                                             ct.POINTER(ct.c_void_p),
                                             OptionalNamedConstant,
                                             OptionalNamedConstant,
+                                            OptionalBool,
                                             OptionalNamedConstant,
                                             OptionalBool,
                                             OptionalBool,
@@ -2178,7 +2182,7 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
                           srcMaskValues=None, dstMaskValues=None,
                           regridmethod=None,
                           polemethod=None, regridPoleNPnts=None,
-                          lineType=None, normType=None, unmappedaction=None,
+                          lineType=None, normType=None, vectorRegrid=None, unmappedaction=None,
                           ignoreDegenerate=None, createRH=None,
                           filemode=None, srcFile=None, dstFile=None,
                           srcFileType=None, dstFileType=None,
@@ -2225,6 +2229,7 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
             Argument values:\n
                 (default) NormType.DSTAREA \n
                 NormType.DSTFRAC \n
+        boolean (optional)                  :: vectorRegrid\n
         unmappedAction (optional)           :: unmappedaction\n
             Argument values:\n
                 (default) UnmappedAction.ERROR\n
@@ -2298,6 +2303,7 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
                                      regridPoleNPnts_ct,
                                      lineType,
                                      normType,
+                                     vectorRegrid,
                                      unmappedaction,
                                      ignoreDegenerate,
                                      createRH,

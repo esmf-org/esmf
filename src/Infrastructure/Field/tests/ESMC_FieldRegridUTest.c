@@ -350,7 +350,7 @@ int main(void){
                              NULL, NULL,
                              &routehandle,
                              NULL, NULL, NULL, NULL,
-                             NULL, NULL, NULL,
+                             NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL,NULL, NULL);
 #else
@@ -358,7 +358,7 @@ int main(void){
                              NULL, NULL,
                              &routehandle,
                              NULL, NULL, NULL, NULL,
-                             NULL, NULL, NULL,
+                             NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL, NULL, NULL);
 #endif
@@ -569,7 +569,7 @@ int main(void){
                              &routehandle,
                              NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL, NULL,
-                             NULL, NULL, NULL,
+                             NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL, NULL, NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
