@@ -22,9 +22,7 @@ endif
 #
 ifeq ($(ESMF_COMM),mpiuni)
 # MPI stub library -----------------------------------------
-ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_CPPFLAGS          += -DESMF_MPIUNI -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),msmpi)
@@ -70,17 +68,17 @@ ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused
 ifeq ($(ESMF_FORTRANSYMBOLS),default)
 ESMF_F90COMPILEOPTS       += -fno-second-underscore
 ESMF_F90LINKOPTS          += -fno-second-underscore
-ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
+ESMF_CPPFLAGS             += -DESMF_LOWERCASE_SINGLEUNDERSCORE
 else
 ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_singleunderscore)
 ESMF_F90COMPILEOPTS       += -fno-second-underscore
 ESMF_F90LINKOPTS          += -fno-second-underscore
-ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
+ESMF_CPPFLAGS             += -DESMF_LOWERCASE_SINGLEUNDERSCORE
 else
 ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_doubleunderscore)
 ESMF_F90COMPILEOPTS       +=
 ESMF_F90LINKOPTS          +=
-ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_DOUBLEUNDERSCORE
+ESMF_CPPFLAGS             += -DESMF_LOWERCASE_DOUBLEUNDERSCORE
 else
 $(error "ESMF_FORTRANSYMBOLS = $(ESMF_FORTRANSYMBOLS)" not supported by ESMF and/or this platform)
 endif
@@ -140,11 +138,6 @@ ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_DLFCN
 
 ############################################################
-# Windows does not have support for "gethostid()"
-#
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_GETHOSTID
-
-############################################################
 # Windows does not have support for signals
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SIGNALS
@@ -165,7 +158,7 @@ ESMF_CXXCOMPILECPPFLAGS += -DNO_TIMES
 ESMF_PTHREADS := OFF
 
 ############################################################
-# Need this until the file convention is fixed (then remove these two lines)
+# Explicit flags for handling specific format and cpp combos
 #
 ESMF_F90COMPILEFREENOCPP = -ffree-form
 ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
@@ -185,6 +178,8 @@ ESMF_CRPATHPREFIX           = -Wl,-rpath,
 ############################################################
 # Determine where gcc's libraries are located
 #
+# Note that the result of -print-file-name will be the full path to the file if it is found
+# within the compiler installation, and simply the file name verbatim if it is NOT found.
 ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS) -print-file-name=libstdc++.so)
 ifeq ($(ESMF_LIBSTDCXX),libstdc++.so)
 ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS) -print-file-name=libstdc++.a)
@@ -195,8 +190,10 @@ ESMF_F90LINKRPATHS += $(ESMF_F90RPATHPREFIX)$(dir $(ESMF_LIBSTDCXX))
 ############################################################
 # Determine where gfortran's libraries are located
 #
+# Note that the result of -print-file-name will be the full path to the file if it is found
+# within the compiler installation, and simply the file name verbatim if it is NOT found.
 ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS) -print-file-name=libgfortran.so)
-ifeq ($(ESMF_LIBSTDCXX),libgfortran.so)
+ifeq ($(ESMF_LIBGFORTRAN),libgfortran.so)
 ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS) -print-file-name=libgfortran.a)
 endif
 ESMF_CXXLINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))

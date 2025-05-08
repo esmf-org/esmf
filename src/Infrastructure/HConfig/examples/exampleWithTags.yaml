@@ -1,0 +1,14 @@
+value_one:    {word1: this, word2: is, word3: a, word4: map}
+value_two:    [this, is, a, list]
+value_three:            123
+value_four:   !!float   123
+value_five:             2.5
+value_six:    !!str     2.5
+value_seven:            False
+value_eight:  !!str     true
+value_nine:             0x234
+value_ten:              Null
+value_eleven:
+value_twelve:  !myStuff xyz
+value_thirteen:         NO
+value_fourteen:         "NO"

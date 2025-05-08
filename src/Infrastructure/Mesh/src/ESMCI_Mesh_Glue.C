@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -182,10 +182,18 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *_num_nodes, int *nodeId,
      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
        throw localrc;  // bail out with exception
 
+     // Error check nodeIds
+     for (int n = 0; n < num_nodes; n++) {
+       if (nodeId[n] < 1) {
+         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                          " node ids must be >= 1 ", ESMC_CONTEXT,&localrc)) throw localrc;
+       }
+     }
+     
      // Get nodeOwner
      int *nodeOwner=NULL;
      bool nodeOwner_allocated=false;
-     if (present(nodeOwnerII)) { // if masks exist
+     if (present(nodeOwnerII)) { // if node owners exist
        // Error checking
        if (nodeOwnerII->dimCount !=1) {
          int localrc;
@@ -201,17 +209,15 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *_num_nodes, int *nodeId,
        
        // Get array
        nodeOwner=nodeOwnerII->array;
-     } else {
 
-       // If parts of the mesh exist on this PET, then autofill owner info
-       if (num_nodes >0) {
-         // Create local version of owners array
-         nodeOwner=new int[num_nodes];
-         nodeOwner_allocated=true;
+     } else { // automatically figure out node owners
 
-         // Autofill
-         set_node_owners_wo_list(num_nodes, nodeId, nodeOwner);         
-       }
+       // Create local version of owners array
+       nodeOwner=new int[num_nodes];
+       nodeOwner_allocated=true;
+       
+       // Autofill
+       set_node_owners_wo_list(num_nodes, nodeId, nodeOwner);        
      }
 
 
@@ -224,6 +230,9 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *_num_nodes, int *nodeId,
       }
     }
 
+
+
+    
     // Create new nodes
     for (int n = 0; n < num_nodes; ++n) {
 
@@ -461,9 +470,6 @@ void ESMCI_meshwritewarrays(Mesh **meshpp, char *fname, ESMCI_FortranStrLenArg n
     }
 
     char *filename = ESMC_F90toCstring(fname, nlen);
-
-    //   printf("mg: nna=%d\n",num_nodeArrays);
-
 
     WriteMesh(**meshpp, filename, 
               num_nodeArrays, nodeArrays, 
@@ -729,7 +735,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
                            int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                            int *_areaPresent, double *elemArea,
                            int *_elemCoordsPresent, double *elemCoords,
-                           int *_num_elemConn, int *elemConn, 
+                           int *_elemConn_size, int *elemConn, 
                            ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                            int *rc)
 #undef  ESMC_METHOD
@@ -758,8 +764,6 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
     int num_elems=*_num_elems;
 
-    int num_elemConn=*_num_elemConn;
-
     InterArray<int> *elemMaskII=_elemMaskII;
 
     int areaPresent=*_areaPresent;
@@ -772,7 +776,17 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     // Get parametric dimension
     int parametric_dim=mesh.parametric_dim();
 
-    // Error check input
+    
+    //// Error check input
+
+     // Error check elemIds
+     for (int e = 0; e < num_elems; e++) {
+       if (elemId[e] < 1) {
+         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                          " element ids must be >= 1 ", ESMC_CONTEXT,&localrc)) throw localrc;
+       }
+     }
+    
     //// Check element type
     ////(DON'T NEED TO CHECK PDIM==2, BECAUSE WE NOW SUPPORT
     //// ANY NUMBER OF CORNERS WITH PDIM=2)
@@ -788,26 +802,28 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     }
 
 
-    //// Check size of connectivity list
-    int expected_conn_size=0;
+    //// Calc size of connectivity list
+    int num_elemConn=0;
     if (parametric_dim==2) {
       for (int i=0; i< num_elems; i++) {
-        expected_conn_size += elemType[i];
+        num_elemConn += elemType[i];
       }
     } else if (parametric_dim==3) {
       for (int i=0; i< num_elems; i++) {
-        if (elemType[i]==10) expected_conn_size += 4;
-        else if (elemType[i]==12) expected_conn_size += 8;
+        if (elemType[i]==10) num_elemConn += 4;
+        else if (elemType[i]==12) num_elemConn += 8;
        }
     }
 
-    if (expected_conn_size != num_elemConn) {
-      int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-        "- element connectivity list doesn't contain the right number of entries ",
-                                       ESMC_CONTEXT, &localrc)) throw localrc;
+    /// If size of array is available, make sure it matches
+    if (_elemConn_size != NULL) {
+      if (*_elemConn_size != num_elemConn) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                         "element connectivity list doesn't contain the right number of entries ",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
     }
-
 
     // Error check size of elements
     if (parametric_dim==2) {
@@ -846,8 +862,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         }
       }
      }
-
-
+    
     // Variable indicating if any of the elements on this PET are split
     bool is_split_local=false;
 
@@ -2916,7 +2931,7 @@ void ESMCI_MeshGetNodeCreateInfo(Mesh *mesh,
 
 
 
-void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid **ngrid, int *rc) {
+void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid **node_distgrid, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshcreatenodedistgrid()"
 
@@ -2972,11 +2987,10 @@ void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid **ngrid, int *rc) {
 
     int *indices = (nsize==0)?NULL:&ngids[0];
     
-     FTN_X(f_esmf_getmeshdistgrid)(ngrid, &nsize, indices, &rc1);
-
+    FTN_X(f_esmf_getmeshdistgrid)(node_distgrid, &nsize, indices, &rc1);
     if (ESMC_LogDefault.MsgFoundError(rc1,
-      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc))) return;
+                                      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      ESMC_NOT_PRESENT_FILTER(rc))) return;
   }
 
   // Set return code
@@ -2985,7 +2999,7 @@ void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid **ngrid, int *rc) {
 }
 
 
-void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, DistGrid **egrid, int *rc) {
+void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, DistGrid **elem_distgrid, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshcreateelemdistgrid()"
 
@@ -3039,7 +3053,7 @@ void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, DistGrid **egrid, int *rc) {
     int *indices = (esize==0)?NULL:&egids[0];
 
 
-    FTN_X(f_esmf_getmeshdistgrid)(egrid, &esize, indices, &rc1);
+    FTN_X(f_esmf_getmeshdistgrid)(elem_distgrid, &esize, indices, &rc1);
 
     if(ESMC_LogDefault.MsgFoundError(rc1,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -4908,10 +4922,8 @@ void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesA
     if ((elem_mask_val!=NULL) &&
         (elem_mask    !=NULL)) {
 
-      // Loop through elements setting values
-      // Here we depend on the fact that data index for elements
-      // is set as the position in the local array above
-      Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      // Loop through all elements setting values
+      Mesh::iterator ei = mesh.elem_begin_all(), ee = mesh.elem_end_all();
       for (; ei != ee; ++ei) {
         MeshObj &elem = *ei;
 
@@ -5007,10 +5019,8 @@ void ESMCI_meshturnoffcellmask(Mesh **meshpp, int *rc) {
     if ((elem_mask_val!=NULL) &&
         (elem_mask    !=NULL)) {
 
-      // Loop through elements setting values
-      // Here we depend on the fact that data index for elements
-      // is set as the position in the local array above
-      Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      // Loop through all elements setting values
+      Mesh::iterator ei = mesh.elem_begin_all(), ee = mesh.elem_end_all();
       for (; ei != ee; ++ei) {
         MeshObj &elem = *ei;
 
@@ -5107,8 +5117,8 @@ void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesA
     if ((node_mask_val!=NULL) &&
         (node_mask    !=NULL)) {
 
-      // Loop through nodes setting values
-      Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+      // Loop through all nodes setting values
+      Mesh::iterator ni = mesh.node_begin_all(), ne = mesh.node_end_all();
       for (; ni != ne; ++ni) {
         MeshObj &node = *ni;
 
@@ -5202,10 +5212,8 @@ void ESMCI_meshturnoffnodemask(Mesh **meshpp, int *rc) {
     if ((node_mask_val!=NULL) &&
         (node_mask    !=NULL)) {
 
-      // Loop through elements setting values
-      // Here we depend on the fact that data index for elements
-      // is set as the position in the local array above
-      Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+      // Loop through all nodes setting values
+      Mesh::iterator ni = mesh.node_begin_all(), ne = mesh.node_end_all();
       for (; ni != ne; ++ni) {
         MeshObj &node = *ni;
 
@@ -6325,16 +6333,10 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
      int num_nodes=num_elemCorners; // one node per corner
 
      // Allocate node id array
-     int *node_ids=NULL;
-     if (num_nodes > 0) {
-       node_ids=new int[num_nodes];
-     }
+     int *node_ids=new int[num_nodes];
 
      // Allocate node owners array
-     int *node_owners=NULL;
-     if (num_nodes > 0) {
-       node_owners=new int[num_nodes];
-     }
+     int *node_owners=new int[num_nodes];
 
      // For now the node coord array is the same as the corner coord array
      double *node_coords=NULL;
@@ -6372,8 +6374,8 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
        throw localrc;  // bail out with exception
 
      // Deallocate node info
-     if (node_ids != NULL) delete [] node_ids;
-     if (node_owners != NULL) delete [] node_owners;
+     delete [] node_ids;
+     delete [] node_owners;
 
 
      ////// Create elements //////
@@ -6525,7 +6527,7 @@ void set_node_owners_wo_list(int num_nodes, int *node_ids, int *node_owners) {
   UInt curr_proc_best=0;
   bool first_time=true;
   std::vector<DDir<>::dentry>::iterator ri = lookups.begin(), re = lookups.end();
-     for (; ri != re; ++ri) {
+  for (; ri != re; ++ri) {
        DDir<>::dentry &dent = *ri;
 
        // Get info for this entry gid

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -61,16 +61,17 @@ int Clock::count=0;
 // !RETURN VALUE:
 //     pointer to newly allocated Clock
 //
-// !ARGUMENTS:
-      int                nameLen,          // in
-      const char        *name,             // in
+// !ARGUMENTS: 
+      int          nameLen,           // in
+      const char   *name,             // in
       TimeInterval *timeStep,         // in
       Time         *startTime,        // in
       Time         *stopTime,         // in
       TimeInterval *runDuration,      // in
-      int               *runTimeStepCount, // in
+      int          *runTimeStepCount, // in
       Time         *refTime,          // in
-      int               *rc) {             // out - return code
+      TimeInterval *repeatDuration,   // in
+      int          *rc) {             // out - return code
 
 // !DESCRIPTION:
 //      Allocates and Initializes a {\tt ESMC\_Clock} with given values
@@ -104,9 +105,9 @@ int Clock::count=0;
       } else {
         // truncate
         strncpy(clock->name, name, ESMF_MAXSTR-1);
-        clock->name[ESMF_MAXSTR-1] = '\0';  // null terminate
+        clock->name[2*ESMF_MAXSTR-1] = '\0';  // null terminate
 
-        char logMsg[ESMF_MAXSTR];
+        char logMsg[2*ESMF_MAXSTR];
         sprintf(logMsg, "clock name %s, length >= ESMF_MAXSTR; truncated.",
                 name);
         ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
@@ -153,6 +154,16 @@ int Clock::count=0;
     else clock->refTime = clock->startTime;
 
     clock->prevTime = clock->currTime = clock->startTime;
+
+    // Set repeat information
+    clock->repeat=false;
+    clock->repeatDuration=(TimeInterval)0;
+    clock->repeatCount=0;
+    if ((repeatDuration != ESMC_NULL_POINTER) &&
+        (*repeatDuration !=0 )){ // Gives a way to not have repeat, but still have arg. (useful for C->F)
+      clock->repeat=true;
+      clock->repeatDuration=*repeatDuration;
+    }
 
     returnCode = clock->validate();
     if (ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, 
@@ -312,9 +323,9 @@ int Clock::count=0;
       } else {
         // truncate
         strncpy(this->name, name, ESMF_MAXSTR-1);
-        this->name[ESMF_MAXSTR-1] = '\0';  // null terminate
+        this->name[2*ESMF_MAXSTR-1] = '\0';  // null terminate
 
-        char logMsg[ESMF_MAXSTR];
+        char logMsg[2*ESMF_MAXSTR];
         sprintf(logMsg, "clock name %s, length >= ESMF_MAXSTR; truncated.",
                 name);
         ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
@@ -323,7 +334,20 @@ int Clock::count=0;
       }
     }
 
-    if (timeStep  != ESMC_NULL_POINTER) this->timeStep  = *timeStep;
+    if (timeStep  != ESMC_NULL_POINTER) {
+
+      // Repeat isn't supported yet with a negative time step or one that's 0
+      if ((this->repeat) && (*timeStep <= (TimeInterval)0)) {
+        ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_INCONS,
+          "repeating clocks currently do not support negative or 0 time steps.",
+                                      ESMC_CONTEXT, &rc);
+          return(rc);
+      }
+
+      // Set new timeStep
+      this->timeStep  = *timeStep;
+    }
+    
     if (startTime != ESMC_NULL_POINTER) this->startTime = *startTime;
     if (stopTime  != ESMC_NULL_POINTER) {
       this->stopTime  = *stopTime;
@@ -367,6 +391,13 @@ int Clock::count=0;
     if (direction != ESMC_NULL_POINTER) {
       this->direction = *direction;
       this->userChangedDirection = true;
+
+      if ((this->repeat) && (this->direction==ESMF_DIRECTION_REVERSE)) {
+        ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_INCONS,
+         "repeating clocks are not currently supported with reverse direction.",
+                                      ESMC_CONTEXT, &rc);
+        return(rc);        
+      }
     }
 
     rc = Clock::validate();
@@ -409,7 +440,10 @@ int Clock::count=0;
       int            *timeZone,         // out
       ESMC_I8        *advanceCount,     // out
       int            *alarmCount,       // out
-      ESMC_Direction *direction) {      // out
+      ESMC_Direction *direction,        // out
+      TimeInterval   *repeatDuration,   // out
+      ESMC_I8        *repeatCount       // out
+                     ) {      
 
 // !DESCRIPTION:
 //      Gets a {\tt ESMC\_Clock}'s property values
@@ -438,7 +472,7 @@ int Clock::count=0;
         strncpy(tempName, this->name, nameLen-1);
         tempName[nameLen] = '\0';  // null terminate
 
-        char logMsg[ESMF_MAXSTR];
+        char logMsg[2*ESMF_MAXSTR];
         sprintf(logMsg, "clock name %s, "
                 "length >= given character array; truncated.", this->name);
         ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
@@ -527,11 +561,14 @@ int Clock::count=0;
     if (advanceCount != ESMC_NULL_POINTER) *advanceCount = this->advanceCount;
     if (alarmCount   != ESMC_NULL_POINTER) *alarmCount   = this->alarmCount;
     if (direction    != ESMC_NULL_POINTER) *direction    = this->direction;
+    if (repeatDuration  != ESMC_NULL_POINTER) *repeatDuration  = this->repeatDuration;
+    if (repeatCount  != ESMC_NULL_POINTER) *repeatCount  = this->repeatCount;
 
+    
     return(rc);
 
  } // end Clock::get
-
+  
 //-------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  Clock::advance - increment a clock's time
@@ -584,13 +621,54 @@ int Clock::count=0;
       prevAdvanceTimeStep = currAdvanceTimeStep;
       currAdvanceTimeStep = (timeStep != ESMC_NULL_POINTER) ?
                             *timeStep : this->timeStep;
-      currTime += currAdvanceTimeStep;
 
+      // Advance based on whether repeat clock or not
+      if (repeat) {
+
+        // Repeat isn't supported yet with a negative time step or one that's 0
+        // The code below will have to be re-thought to support either. 
+        if (currAdvanceTimeStep <= (TimeInterval)0) {
+          ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_INCONS,
+                 "repeating clocks currently do not support negative or 0 time steps.", ESMC_CONTEXT, &rc);
+          return(rc);
+        }
+        
+        // Time at which we repeat
+        Time repeatTime=startTime+repeatDuration;
+        
+        // At first use whole time step
+        TimeInterval leftoverTimeStep = currAdvanceTimeStep;
+
+        // Loop while we still have time step left
+        while (currTime+leftoverTimeStep >= repeatTime) {
+
+          // Check alarms from currTime to repeatTime
+
+          // Take off part to get to repeatTime
+          leftoverTimeStep = (currTime+leftoverTimeStep)-repeatTime;
+
+          // Move currTime back to startTime
+          currTime=startTime;
+          
+          // Because we went back to startTime, advance repeatCount
+          repeatCount++;                      
+        }
+
+        // Add remaining part of time step to currTime
+        currTime += leftoverTimeStep;
+
+        // Check Alarms from currTime to currTime+leftoverTimeStep
+        
+      } else {
+        currTime += currAdvanceTimeStep;
+      }
+
+      
       // count number of timesteps
       advanceCount++;
 
     } else { // ESMF_DIRECTION_REVERSE
-
+      
       // TODO: make more robust by removing simplifying assumptions:
       //       1) timeSteps are constant throughout clock run.
 
@@ -603,6 +681,13 @@ int Clock::count=0;
       //        Clock::set() and then reversed, the advanceCount does not
       //        account for the "missing" timeSteps.
 
+      // Repeat isn't supported yet with reverse direction
+      if (repeat) {
+        ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_INCONS,
+         "repeating clocks are not currently supported with reverse direction.", ESMC_CONTEXT, &rc);
+        return(rc);
+      }
+      
       // step backwards; use passed-in timestep if specified, otherwise
       //   use the clock's prevTime
       currTime -= (timeStep != ESMC_NULL_POINTER) ? *timeStep : this->timeStep;
@@ -664,7 +749,7 @@ int Clock::count=0;
             *((Alarm**)f90ArrayElementJ) = alarmList[i];
           } else {
             // list overflow!
-            char logMsg[ESMF_MAXSTR];
+            char logMsg[2*ESMF_MAXSTR];
             sprintf(logMsg, "For clock %s, "
                     "trying to report %dth ringing alarm, but given "
                     "ringingAlarmList array can only hold %d.",
@@ -971,14 +1056,58 @@ int Clock::count=0;
       return(rc);
     }
 
+    // Get tmp time step to use 
+    TimeInterval tmpTimeStep;
     if (timeStep != ESMC_NULL_POINTER) {
       // use passed-in timeStep if specified
-      *nextTime = currTime + *timeStep;
+      tmpTimeStep=*timeStep;
     } else {
       // otherwise use clock's own timestep
-      *nextTime = currTime + this->timeStep;
+      tmpTimeStep=this->timeStep;
     }
 
+    // Save currTime, so we don't change it
+    Time tmpCurrTime=currTime;
+
+    // Calculate nextTime taking repeat into account
+    if (repeat) {
+
+      // Repeat isn't supported yet with a negative time step or one that's 0
+      // The code below will have to be re-thought to support either. 
+      if (tmpTimeStep <= (TimeInterval)0) {
+        ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_INCONS,
+         "repeating clocks currently do not support negative or 0 time steps.", ESMC_CONTEXT, &rc);
+        return(rc);
+      }
+        
+      // Time at which we repeat
+      Time repeatTime=startTime+repeatDuration;
+      
+      // At first use whole time step
+      TimeInterval leftoverTimeStep = tmpTimeStep;
+      
+      // Loop while we still have time step left
+      while (tmpCurrTime+leftoverTimeStep >= repeatTime) {
+        
+        // Take off part to get to repeatTime
+        leftoverTimeStep = (tmpCurrTime+leftoverTimeStep)-repeatTime;
+        
+        // Move tmpCurrTime back to startTime
+        tmpCurrTime=startTime;
+        
+        // Because we went back to startTime, advance repeatCount
+        repeatCount++;                      
+      }
+      
+      // Add remaining part of time step to tmpCurrTime to get nextTime
+      *nextTime= tmpCurrTime + leftoverTimeStep;
+      
+    } else {
+      // If not repeating, then nextTime is just tmpCurrTime + timeStep
+      *nextTime= tmpCurrTime + tmpTimeStep;
+    }
+
+    // Return success
     return(ESMF_SUCCESS);
 
  } // end Clock::getNextTime
@@ -1016,7 +1145,7 @@ int Clock::count=0;
     }
 
     if (alarmnameLen >= ESMF_MAXSTR) {
-      char logMsg[ESMF_MAXSTR];
+      char logMsg[2*ESMF_MAXSTR];
       sprintf(logMsg, "For alarmname %s, length >= ESMF_MAXSTR, "
                       "truncated.", alarmname);
       ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
@@ -1024,7 +1153,7 @@ int Clock::count=0;
     }
 
     // TODO: use inherited methods from ESMC_Base
-    char alarmName[ESMF_MAXSTR];
+    char alarmName[2*ESMF_MAXSTR];
     strncpy(alarmName, alarmname, alarmnameLen);
     alarmName[alarmnameLen] = '\0';  // null terminate
 
@@ -1135,7 +1264,7 @@ int Clock::count=0;
 
         default :
           // unknown alarm list flag; return empty list
-          char logMsg[ESMF_MAXSTR];
+          char logMsg[2*ESMF_MAXSTR];
           sprintf(logMsg, "For clock %s, unknown alarm list flag %d.",
                   this->name, alarmlistflag);
           ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
@@ -1160,7 +1289,7 @@ int Clock::count=0;
             *((Alarm**)f90ArrayElementJ) = this->alarmList[i];
           } else {
             // list overflow!
-            char logMsg[ESMF_MAXSTR];
+            char logMsg[2*ESMF_MAXSTR];
             sprintf(logMsg, "For clock %s, "
                     "trying to return %dth requested alarm, but given "
                     "alarmList array can only hold %d.",
@@ -1384,12 +1513,16 @@ int Clock::count=0;
       refTime              = clock.refTime;
       currTime             = clock.currTime;
       prevTime             = clock.prevTime;
+      repeat               = clock.repeat;
+      repeatDuration       = clock.repeatDuration;
+      repeatCount          = clock.repeatCount;
       advanceCount         = clock.advanceCount;
       direction            = clock.direction;
       userChangedDirection = clock.userChangedDirection;
       stopTimeEnabled      = clock.stopTimeEnabled;
       id                   = clock.id;
 
+      
       // copy = true;   // TODO: Unique copy ? (id = ++count) (review operator==
                         //       and operator!=)  Must do same in assignment
                         //       overloaded method and interface from F90.
@@ -1589,7 +1722,7 @@ int Clock::count=0;
 
     if (direction != ESMF_DIRECTION_FORWARD && 
         direction != ESMF_DIRECTION_REVERSE) {
-      char logMsg[ESMF_MAXSTR];
+      char logMsg[2*ESMF_MAXSTR];
       sprintf(logMsg, "direction property %d is not ESMF_DIRECTION_FORWARD or "
               "ESMF_DIRECTION_REVERSE", direction);
       ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
@@ -1754,7 +1887,7 @@ int Clock::count=0;
 
       // make options case insensitive
       // TODO: put this into function to share
-      char opts[ESMF_MAXSTR];
+      char opts[2*ESMF_MAXSTR];
       int i;
       for(i=0; i<strlen(options) && i<ESMF_MAXSTR-1; i++) {
         opts[i] = tolower(options[i]);
@@ -1907,6 +2040,10 @@ int Clock::count=0;
     userChangedDirection = false;
     stopTimeEnabled = false;
     id = ++count;  // TODO: inherit from ESMC_Base class
+    repeat               = false;
+    repeatDuration       = (TimeInterval)0;
+    repeatCount          = 0;
+    
     // copy = false;  // TODO: see notes in constructors and destructor below
 
  } // end Clock
@@ -2020,7 +2157,7 @@ int Clock::count=0;
     }
 
     if (alarm == ESMC_NULL_POINTER) {
-      char logMsg[ESMF_MAXSTR];
+      char logMsg[2*ESMF_MAXSTR];
       sprintf(logMsg, "For clock %s, given alarm is NULL.", this->name);
       ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
       return(ESMF_FAILURE);
@@ -2028,7 +2165,7 @@ int Clock::count=0;
 
     // if alarm list full, re-allocate it
     if (alarmCount == alarmListCapacity) {
-      char logMsg[ESMF_MAXSTR];
+      char logMsg[2*ESMF_MAXSTR];
       sprintf(logMsg, "For clock %s, alarm list is full (%d alarms), "
               "re-allocating to hold %d alarms.",
                 this->name, alarmListCapacity, 
@@ -2100,7 +2237,7 @@ int Clock::count=0;
     }
 
     if (alarm == ESMC_NULL_POINTER) {
-      char logMsg[ESMF_MAXSTR];
+      char logMsg[2*ESMF_MAXSTR];
       sprintf(logMsg, "For clock %s, given alarm is NULL.", this->name);
       ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       return(ESMF_FAILURE);
@@ -2122,7 +2259,7 @@ int Clock::count=0;
     }
 
     // given alarm not found in list
-    char logMsg[ESMF_MAXSTR];
+    char logMsg[2*ESMF_MAXSTR];
     sprintf(logMsg, "For clock %s, given alarm is not in clock's alarmList.",
             this->name);
     ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);

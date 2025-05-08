@@ -1,21 +1,14 @@
 \label{StateMeta}
-The State metadata is implemented as an ESMF Attribute Package:
+The State metadata is implemented through ESMF\_Info. It can be accessed
+using the JSON Pointer "/NUOPC/Instance/" prefix followed by the "Attribute name"
+as per the table below. E.g. "Namespace" is accessed using {\tt key="/NUOPC/Instance/Namespace"}.
 
-\begin{itemize}
-    \item Convention: NUOPC
-    \item Purpose: Instance
-    \item Includes:
-    \begin{itemize}
-        \item {\em no other packages at the moment}
-    \end{itemize} 
-    \item Description: Namespace implementation for import and export. 
-\end{itemize}
-
-\begin{longtable}{|p{.22\textwidth}|p{.6\textwidth}|p{.2\textwidth}|}
+\begin{longtable}{|p{.3\textwidth}|p{.4\textwidth}|p{.3\textwidth}|}
      \hline\hline
      {\bf Attribute name} & {\bf Definition} & {\bf Controlled vocabulary}\\
      \hline\hline
-     {\tt Namespace}            & String value holding the namespace of all the objects contained in the State.& {\em no restriction}\\ \hline
-     {\tt FieldTransferPolicy}  & String value indicating to Connector to transfer/mirror Fields. & transferNone,\newline transferAll\\ \hline
+     {\tt Namespace}            & String value holding the namespace that applies to all of the objects contained in the State.& {\em no restriction}\\ \hline
+     {\tt FieldTransferPolicy}  & String value indicating to Connector whether to mirror transfer Fields into this State. & transferNone,\newline transferAll,\newline transferAllWithNamespace\\ \hline
+     {\tt CplSet}               & String value holding the coupling set name that applies to all of the objects contained in the State.& {\em no restriction}\\ \hline
      \hline
 \end{longtable}

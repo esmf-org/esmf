@@ -53,9 +53,66 @@ Use the following example command as a guide to check out a specific development
 
 Once downloaded, development snapshots are built in the same way as releases.
 
-\subsection{System Requirements}
+\subsection{System Specific Information}
+
+\subsubsection{General Requirements}
 \label{sec:systemreq}
 \input{ESMF_systemreq}
+
+\subsubsection{Intel Compiler (Classic and oneAPI)}
+
+ESMF supports the Intel compiler suite via {\tt ESMF\_COMPILER=intel}. Starting in 2020, Intel began promoting their
+new LLVM-based C/C++ and Fortran compiler line under the oneAPI brand. As of 2023, the older compilers are still
+part of the Intel compiler suite and referred to as Intel Compiler Classic. ESMF supports both the classic and oneAPI
+compiler lines. The following paragraphs provide important details that allow users to fine-tune the interaction
+with the Intel compilers.
+
+Under {\tt ESMF\_OS=Linux}, with {\tt ESMF\_COMPILER=intel} and {\tt ESMF\_COMM=mpiuni} set, the C, C++, and
+Fortran compiler front-ends default to the classic options {\tt icc}, {\tt icpc}, and {\tt ifort}, respectively. Any
+of these defaults can be overridden by explicitly setting the {\tt ESMF\_C}, {\tt ESMF\_CXX}, or {\tt ESMF\_F90}
+environment variables to the oneAPI options {\tt icx}, {\tt icpx}, and {\tt ifx}, respectively.
+
+Under {\tt ESMF\_OS=Linux}, with {\tt ESMF\_COMPILER=intel} and {\tt ESMF\_COMM=intelmpi} set, the C, C++, and
+Fortran compiler front-ends default to the MPI compiler wrappers {\tt mpiicc}, {\tt mpicpc}, and {\tt mpiifort},
+respectively. It depends on the IntelMPI installation details whether classic, oneAPI, or a mixture of compilers
+are used underneath the MPI wrappers. The IntelMPI defaults can be overridden by explicitly setting the
+{\tt I\_MPI\_CC}, {\tt I\_MPI\_CXX}, or {\tt I\_MPI\_F90} environment variables. This is an IntelMPI feature.
+
+The recommendation for Cray systems that use the Cray compiler wrappers {\tt cc}, {\tt CC}, and {\tt ftn},
+respectively, is to use {\tt ESMF\_OS=Unicos}. In most cases this setting is detected automatically by the ESMF
+build system, and should {\em not} be overridden.
+
+Under {\tt ESMF\_OS=Unicos}, with {\tt ESMF\_COMPILER=intel}, the C, C++, and Fortran compiler front-ends default to
+{\tt cc}, {\tt CC}, and {\tt ftn}, respectively, regardless of the  {\tt ESMF\_COMM} setting. The appropriate
+classic, oneAPI, or mixed compiler combination is typically determined by the Intel environment module loaded.
+Common module names on Cray systems are {\tt intel-classic}, {\tt intel-oneAPI}, and {\tt intel}, respectively.
+
+{\bf Tip: } Use the ESMF "{\tt make info}" target to query compiler version information. This can be used to determine the
+appropriate settings, and to diagnose issues before kicking off the complete ESMF build procedure.
+
+\subsubsection{MacOS Darwin}
+
+ESMF supports MacOS systems via the {\tt ESMF\_OS=Darwin} setting, which
+typically is auto-detected by the ESMF build system. Various compilers and
+MPI implementations are supported under Darwin using the {\tt ESMF\_COMPILER}
+and {\tt ESMF\_COMM} environment variables. There are some combinations under
+Darwin that require special attention; these combinations are listed below.
+
+On Darwin with {\tt ESMF\_COMPILER=gfortran} and {\tt ESMF\_COMM=mpich},
+using MPICH3 built from source, it is important to specify the
+{\tt --enable-two-level-namespace} configure option when building the MPICH3
+library. By default, i.e. without this option, the produced MPICH compiler
+wrappers include a linker flag ({\tt -flat\_namespace}) that causes issues with
+C++ exception handling under GNU g++. Building and linking ESMF applications
+with MPICH compiler wrappers that specify this linker option leads to
+"mysterious" application aborts during execution.
+
+On Darwin with {\tt ESMF\_COMPILER=intel}, command line arguments cannot be
+accessed from ESMF applications when linked against the shared library version
+({\tt libesmf.dylib}). There is no issue when linked against the static
+version ({\tt libesmf.a}). Setting the environment variable
+{\tt ESMF\_SHARED\_LIB\_BUILD=OFF} when building ESMF can be used as a
+work around for this issue.
 
 \subsection{Third Party Libraries}
 \label{sec:ThirdParty}
@@ -294,9 +351,9 @@ CMake version 2.8.12 or newer be available in the path.
 
 \item[{\tt "external"}] PIO-dependent features will be enabled and will use an
 external PIO library.  The additional parameters {\tt ESMF\_PIO\_INCLUDE} 
-(path to PIO include files) and {\tt ESMF\_PIO\_LIBPATH} (path to PIO library files)
-should also be set when using this option. The minimum version of PIO for
-this option is 2.5.7. 
+(path to PIO include files) and {\tt ESMF\_PIO\_LIBPATH} (path to PIO library
+files) should also be set when using this option. The minimum version of PIO for
+this option is 2.5.10.
 
 \item[{\tt "OFF"}] Disables PIO-dependent code.
 
@@ -549,15 +606,85 @@ the application.
 
 \end{description}
 
+\subsubsection{NUMA}
+\label{sec:NUMA}
+
+The LibNUMA API for Non Uniform Memory Access
+(\htmladdnormallink{NUMA}{https://halobates.de/numaapi3.pdf})
+can be used to discover the NUMA architecture at run-time.
+
+\begin{description}
+
+\item[ESMF\_NUMA] Possible values: {\tt "ON"}, {\tt "standard"}, {\tt "OFF"} (default).
+
+\begin{description}
+\item[{\tt "ON"}/{\tt "standard"}] The NUMA dependent code inside of ESMF will
+be enabled.
+The {\tt ESMF\_NUMA\_LIBS} environment variable will be set to
+{\tt "-lnuma"}.
+
+\item[{\tt "OFF"} (default)] Disables NUMA dependent code.
+\end{description}
+
+\item[ESMF\_NUMA\_INCLUDE] Typically not needed. (no default).
+
+Specifies the path where the NUMA header files are located.
+
+\item[ESMF\_NUMA\_LIBPATH] Typically not needed. (no default).
+
+Specifies the path where the NUMA library file is located.
+
+\item[ESMF\_NUMA\_LIBS] Typical value: {\tt "-lnuma"}.
+
+Specifies the linker directives needed to link the NUMA library to
+the application.
+
+\end{description}
+
+\subsubsection{NVML}
+\label{sec:NVML}
+
+The NVIDIA Management Library
+(\htmladdnormallink{NVML}{https://docs.nvidia.com/deploy/nvml-api/index.html})
+can be used to discover NVIDIA GPUs that are accessible at run-time.
+
+\begin{description}
+
+\item[ESMF\_NVML] Possible values: {\tt "ON"}, {\tt "standard"}, {\tt "OFF"} (default).
+
+\begin{description}
+\item[{\tt "ON"}/{\tt "standard"}] The NVML dependent code inside of ESMF will
+be enabled.
+The {\tt ESMF\_NVML\_LIBS} environment variable will be set to
+{\tt "-lnvidia-ml"}.
+
+\item[{\tt "OFF"} (default)] Disables NVML dependent code.
+\end{description}
+
+\item[ESMF\_NVML\_INCLUDE] Typically not needed. (no default).
+
+Specifies the path where the NVML header files are located.
+
+\item[ESMF\_NVML\_LIBPATH] Typically not needed. (no default).
+
+Specifies the path where the NVML library file is located.
+
+\item[ESMF\_NVML\_LIBS] Typical value: {\tt "-lnvidia-ml"}.
+
+Specifies the linker directives needed to link the NVML library to
+the application.
+
+\end{description}
+
 \subsection{ESMF Environment Variables}
 \label{EnvironmentVariables}
 
 The following is a full alphabetical list of all environment variables which
-are used by the ESMF build system. In many cases only {\tt ESMF\_DIR} must be
-set. On Linux and Darwin systems {\tt ESMF\_COMPILER} and {\tt ESMF\_COMM} must
-also be set to select the appropriate Fortran and C++ compilers and MPI
-implementation. The other variables have default values which work for
-most systems.
+are used by the ESMF build system. The {\tt ESMF\_DIR} must be set in all
+circumstances, while most other environment variables have defaults. However,
+it is recommended to explicitly set the compiler and MPI flavor using
+{\tt ESMF\_COMPILER} and {\tt ESMF\_COMM}, respectively, to ensure the expected
+behavior.
 
 \begin{description}
 
@@ -588,6 +715,13 @@ default is {\tt O} (capital oh) which builds an optimized version of the
 library. If {\tt ESMF\_BOPT} is {\tt O}, {\tt ESMF\_OPTLEVEL} can also be set
 to a numeric value between 0 and 4 to select a specific optimization level.
 
+\item[ESMF\_C]
+Possible value: {\em executable}
+
+This variable can be used to override the default C compiler and linker
+front-end executables. The executable may be specified with absolute path
+overriding the location determined by default from the user's PATH variable.
+
 \item[ESMF\_COMM]
 Possible value: {\em system-dependent}
 
@@ -598,8 +732,9 @@ implementation.
 For other systems (e.g. Linux or Darwin) where a multitude of MPI
 implementations are available, {\tt ESMF\_COMM} must be set to indicate which
 implementation is used to build the ESMF library. Set {\tt ESMF\_COMM} according
-to your situation to: {\tt mpt, mpich, mpich1, mpich2, mpich3, mvapich2, lam, openmpi}
-or {\tt intelmpi}. {\tt ESMF\_COMM} may also be set to {\tt user} indicating
+to your situation to: {\tt mpt, mpich (version 3 and up), mpich1, mpich2,
+mvapich (all versions), lam, openmpi}, or {\tt intelmpi}.
+{\tt ESMF\_COMM} may also be set to {\tt user} indicating
 that the user will set all the required flags using advanced ESMF environment
 variables.  Some individual MPI builds may create additional libraries that
 need to be linked in, such as the legacy C++ bindings. These may be specified
@@ -615,8 +750,8 @@ Possible value: {\em system-dependent}
 
 The ESMF library build requires a working Fortran90 and C++ compiler. On
 platforms that don't come with a single vendor supplied compiler suite
-(e.g. Linux or Darwin) {\tt ESMF\_COMPILER} must be set to select which Fortran
-and C++ compilers are being used to build the ESMF library. Notice that setting
+(e.g. Linux or Darwin) it is recommended to explicitly set {\tt ESMF\_COMPILER}
+to the desired compiler flavor. Notice that setting
 the {\tt ESMF\_COMPILER} variable does {\em not} affect how the compiler
 executables are located on the system. {\tt ESMF\_COMPILER} (together with
 {\tt ESMF\_COMM}) affect the name that is expected for the compiler executables.
@@ -633,7 +768,7 @@ specific compiler executables by specifying the full path. This can be used to
 pick specific compiler executables without having to modify the {\tt PATH}
 environment variable.
 
-Use 'gmake info' to see which compiler executables the ESMF build system will
+Use 'make info' to see which compiler executables the ESMF build system will
 be using according to your environment variable settings.
 
 To see possible values for {\tt ESMF\_COMPILER}, cd to
@@ -721,7 +856,7 @@ This variable can be used to override the deferring of the build of the
 ESMF library.  By default, the library is built after all of the source
 files have been compiled.  This speeds up the build process. It also
 allows parallel compilation of source code when the -j flag is used with
-gmake.  Setting this environment variable to {\tt OFF} forces the library to
+make.  Setting this environment variable to {\tt OFF} forces the library to
 be updated after each individual compilation, thus disabling the ability
 to use parallel compilation.
 
@@ -832,6 +967,13 @@ Location into which to install the F90 module files during installation. This
 location can be specified as absolute path (starting with "/") or relative to
 {\tt ESMF\_INSTALL\_PREFIX}.
 
+\item[ESMF\_INSTALL\_CMAKEDIR]
+Possible value: {\em relative or absolute path}
+
+Location into which to install the CMake module files during installation. This
+location can be specified as absolute path (starting with "/") or relative to
+{\tt ESMF\_INSTALL\_PREFIX}.
+
 \item[ESMF\_INSTALL\_PREFIX]
 Possible value: {\em relative or absolute path}
 
@@ -918,14 +1060,16 @@ Not normally set by user. Setting this variable to {\tt FALSE} instructs
 ESMF to generating data array interfaces for data types of 2-byte integers.
 
 \item[ESMF\_OPENACC]
-Possible value: {\tt ON}, {\tt OFF} (default)
+Possible value: {\tt ON}, {\tt OFF} (default is system dependent)
 
 Compiles and links the ESMF library with OpenACC compiler flags.
 
 \item[ESMF\_OPENMP]
-Possible value: {\tt ON}, {\tt OFF} (default is system dependent)
+Possible value: {\tt OMP4}, {\tt ON}, {\tt OFF} (default is system dependent)
 
 Compiles and links the ESMF library with OpenMP compiler flags.
+Both {\tt OMP4} and {\tt ON} enable the ESMF OpenMP features. Only with
+{\tt OMP4} will those features assume OpenMP 4.0 and higher.
 
 \item[ESMF\_OPTLEVEL]
 Possible value: {\em numerical value}
@@ -980,14 +1124,6 @@ Build configure file site name or the value default. If not set, then the value
 of default is assumed. When including platform-specific files, this value is
 used as the third part of the directory name (parts 1 and 2 are the
 ESMF\_OS value and ESMF\_COMPILER value, respectively.)
-
-The Sourceforge {\tt esmfcontrib} repository contains makefiles which have
-already been customized for certain machines.  If one exists for your site
-and you wish to use it, download the corresponding files into the
-{\tt build\_contrib} directory and set {\tt ESMF\_SITE} to your location
-(which corresponds to the last part of the directory name).  See the
-Sourceforge site
-\htmladdnormallink{http://sourceforge.net/projects/esmfcontrib}{http://sourceforge.net/projects/esmfcontrib} for more information.
 
 \item[ESMF\_TESTESMFMKFILE]
 Possible value: {\tt ON}, {\tt OFF} (default)
@@ -1089,7 +1225,7 @@ See \ref{sec:yaml-cpp}
 
 \end{description}
 
-Environment variables must be set in the user's shell or when calling gmake. It
+Environment variables must be set in the user's shell or when calling make. It
 is {\em not} necessary to edit ESMF makefiles or other build system files to set
 these variables. Here is an example of setting an environment variable in the
 csh/tcsh shell:
@@ -1104,10 +1240,10 @@ In bash/ksh shell environment variables are set this way:
   export ESMF_ABI=32
 \end{verbatim}
 
-Environment variables can also be set from the gmake command line:
+Environment variables can also be set from the make command line:
 
 \begin{verbatim}
-  gmake ESMF_ABI=32
+  make ESMF_ABI=32
 \end{verbatim}
 
 \subsection{Supported Platforms}
@@ -1127,24 +1263,24 @@ separate for different architectures or options.
 
 Build the library with the command:
 \begin{verbatim}
-  gmake
+  make
 \end{verbatim}
 
 %Build options that enable you to copy the library and *.mod files to
 %specified directories are explained in Section~\ref{BuildOptions}.
 
 Makefiles throughout the framework are configured to allow users to
-compile files only in the directory where {\tt gmake} is entered. Shared
+compile files only in the directory where {\tt make} is entered. Shared
 libraries are rebuilt only if necessary. In addition the entire ESMF
-framework may be built from any directory by entering {\tt gmake all},
+framework may be built from any directory by entering {\tt make all},
 assuming that all the environmental variables are set correctly as
 described in Section~\ref{EnvironmentVariables}.
 
 The makefiles are also configured to allow multiple make targets to be
-compiled in parallel, via the gmake -j flag.  For example, to use eight
+compiled in parallel, via the make -j flag.  For example, to use eight
 parallel processes to build the library, use -j8:
 \begin{verbatim}
-  gmake -j8 lib
+  make -j8 lib
 \end{verbatim}
 
 The parallel compilation feature depends on {\tt ESMF\_DEFER\_LIB\_BUILD=ON}
@@ -1157,21 +1293,16 @@ than 1.
 
 Users may also run examples or execute unit tests of specific classes
 by changing directories to the desired class {\tt examples} or {\tt tests}
-directories and entering {\tt gmake run\_examples} or
-{\tt gmake run\_unit\_tests}, respectively.  For non-multiprocessor machines,
-uni-processor targets are available as {\tt gmake run\_examples\_uni} or
-{\tt gmake run\_unit\_tests\_uni}.
+directories and entering {\tt make run\_examples} or
+{\tt make run\_unit\_tests}, respectively.  For non-multiprocessor machines,
+uni-processor targets are available as {\tt make run\_examples\_uni} or
+{\tt make run\_unit\_tests\_uni}.
 
 \subsection{Building the ESMF Documentation}
 \label{BuildDocumentation}
 
 The ESMF source documentation consists of an {\it ESMF User's Guide}
 and an {\it ESMF Reference Manual for Fortran}.
-
-The tarballs on the ESMF website for ESMF versions 3.0.1 and later do
-not contain the ESMF documentation files.  The documentation is
-available on the ESMF website in html or pdf form and most users should
-not need to build it from the source.
 
 If a user does want to build the documentation, they will need to download the
 ESMF code repository (see section \ref{sec:download}). Latex, latex2html, perl
@@ -1183,7 +1314,7 @@ Ubuntu Linux using:
 
 \noindent To build documentation:
 \begin{verbatim}
-  gmake doc              ! Builds the manuals, including pdf and html.
+  make doc              ! Builds the manuals, including pdf and html.
 \end{verbatim}
 
 \noindent The resulting documentation files will be
@@ -1206,6 +1337,7 @@ variables:
 \item {\tt ESMF\_INSTALL\_MODDIR} -- where to install Fortran module files.
 \item {\tt ESMF\_INSTALL\_BINDIR} -- where to install application files.
 \item {\tt ESMF\_INSTALL\_DOCDIR} -- where to install documentation files.
+\item {\tt ESMF\_INSTALL\_CMAKEDIR} -- where to install cmake module files.
 \end{itemize}
 
 Section~\ref{EnvironmentVariables} describes what each of these
@@ -1213,12 +1345,12 @@ environment variables does and how to set them.
 
 Install ESMF with the command:
 \begin{verbatim}
-  gmake install
+  make install
 \end{verbatim}
 
 Check the ESMF installation with the command:
 \begin{verbatim}
-  gmake installcheck
+  make installcheck
 \end{verbatim}
 
 {\em Advice to installers.} To complete the installation of ESMF, a single ESMF specific environment variable should be set. The variable is named {\tt ESMFMKFILE}, and it must point to the {\tt esmf.mk} file that was generated during the installation process. Systems that support multiple ESMF installations via management software (e.g. {\em modules, softenv, ...}) should set/reset the {\tt ESMFMKFILE} environment variable as part of the configuration.

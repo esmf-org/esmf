@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -245,7 +245,7 @@ class TimeInterval : public BaseTime {
 //
   private:
     // return in string format (TMG 1.5.9)
-    int getString(char *timeString, const char *options=0) const;
+    int getString(char *timeString, int timeStringLen, const char *options=0) const;
 
     // common method for overloaded comparison operators
     bool compare(const TimeInterval &, ESMC_ComparisonType) const;

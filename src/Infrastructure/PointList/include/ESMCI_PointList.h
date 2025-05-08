@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -37,6 +37,8 @@
 //EOPI
 //-------------------------------------------------------------------------
 
+#include "ESMCI_CoordSys.h"
+
 
 namespace ESMCI {
 
@@ -68,15 +70,31 @@ namespace ESMCI {
 
     point *points;
 
+    ESMC_CoordSys_Flag orig_coord_sys;
+    int orig_coord_dim;
+    point *orig_points;  // Contains original coord points. Id is repeated from above to allow sorting. In separate list to
+                         // keep typical implementation as standard as possible. i
+
+
   public:
-    // Construct
-    PointList(int max_size, int coord_dim);
+
+    // Construct 
+    PointList(int max_size, int coord_dim, int orig_coord_dim=0,ESMC_CoordSys_Flag orig_coord_sys=ESMC_COORDSYS_UNINIT);
 
     // Destruct
     ~PointList();
 
+    // Detect original coords
+    bool hasOrigCoords() const {return (orig_points != NULL);}
+
+    // Get coordinate system of original points
+    ESMC_CoordSys_Flag get_orig_coord_sys() const {return orig_coord_sys;}
+    
     // Add Point to List
     int add(int _id, const double *_coord);
+
+    // Add Point to List including original coords
+    int add(int _id, const double *_coord, const double *_orig_coord);
 
     // diagnostic print to file
     int WriteVTK(const char *filename);
@@ -87,10 +105,15 @@ namespace ESMCI {
     // Get a pointer to the coordinates for a particular location
     const double *get_coord_ptr(int loc) const;
 
+    // Get a pointer to the original coordinates for a particular location
+    const double *get_orig_coord_ptr(int loc) const;
+
     // Get a pointer to the id for a particular location
     const int *get_id_ptr(int loc) const;
 
     void get_coord(int loc, double *_coord) const;
+
+    void get_orig_coord(int loc, double *_orig_coord) const;
 
     // Get id for a particular location
     int get_id(int loc) const;
@@ -105,6 +128,11 @@ namespace ESMCI {
     // Get number of dimensions
     int get_coord_dim() const {
       return coord_dim;
+    }
+
+    // Get number of origina dimensions
+    int get_orig_coord_dim() const {
+      return orig_coord_dim;
     }
 
     // Get maximum number of points

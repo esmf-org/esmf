@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -116,8 +116,8 @@ void ESMCI_GridToMesh(const Grid &grid_, int staggerLoc,
             "- Grid being used in Regrid call does not contain coordinates at appropriate staggerloc ", ESMC_CONTEXT, &localrc);
    throw localrc;
  }
-
-
+ 
+ 
  // Create Mesh
  Mesh *meshp = new Mesh();
 
@@ -126,6 +126,7 @@ void ESMCI_GridToMesh(const Grid &grid_, int staggerLoc,
 
  // Make reference
  Mesh &mesh = *meshp;
+
 
  // *** Set some meta-data ***
  // We set the topological dimension of the mesh (quad = 2, hex = 3, etc...)
@@ -139,8 +140,15 @@ void ESMCI_GridToMesh(const Grid &grid_, int staggerLoc,
 
  // original spatial dim is the same as grid dimension
  mesh.orig_spatial_dim=pdim;
+ int orig_sdim=mesh.orig_spatial_dim; // for convenience also put in a local var.
+
+ // Get coordinate system
  mesh.coordsys=grid.getCoordSys();
 
+ // See if we should add original coords
+ bool add_orig_coords=false;
+ if (mesh.coordsys != ESMC_COORDSYS_CART) add_orig_coords=true;
+ 
  // See if this is for conservative regridding
  bool isConserve=false;
  if (*regridConserve == ESMC_REGRID_CONSERVE_ON) isConserve=true;
@@ -422,6 +430,13 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
    // Now set up the nodal coordinates
    IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", sdim);
 
+   // If required, add orig_coords
+   IOField<NodalField> *node_orig_coord = NULL;
+   if (add_orig_coords) {
+     node_orig_coord = mesh.RegisterNodalField(mesh, "orig_coordinates", orig_sdim);     
+   }
+
+   
 #if 0
   if (*regridConserve == ESMC_REGRID_CONSERVE_ON) {
     // Register the iwts field
@@ -436,10 +451,29 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
    // Create whatever fields the user wants
    std::vector<IOField<NodalField>*> nfields;
    for (UInt i = 0; i < arrays.size(); ++i) {
+     
+     // Get array undist. dim
+     int undistDimCount=arrays[i]->getTensorCount();
+
+     // Get array info based on if looks like a vector Array
+     // For now a Vector Array is a field with 1 undist dim of size 2 or 3
+     int meshFieldDim=1; // Not a vector by default
+     if (undistDimCount == 1) {
+       const int *undistLBound=arrays[i]->getUndistLBound();
+       const int *undistUBound=arrays[i]->getUndistUBound();
+       int tmp_meshFieldDim=undistUBound[0]-undistLBound[0]+1;
+       if ((tmp_meshFieldDim == 2) || (tmp_meshFieldDim == 3)) {
+         meshFieldDim=tmp_meshFieldDim;
+       }
+       // DEBUG OUTPUT
+       //  printf("%d Array undist dim size=%d\n",i,meshFieldDim);
+     }
+ 
+     // Register Field
      char buf[512];
-     std::sprintf(buf, "array_%03d", i);
+     std::sprintf(buf, "array_%03d", i+1);
      nfields.push_back(
-             mesh.RegisterNodalField(mesh, buf, 1)
+             mesh.RegisterNodalField(mesh, buf, meshFieldDim)
                       );
      nfields.back()->set_output_status(true);
    }
@@ -453,8 +487,16 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
    MeshDB::iterator ni = mesh.node_begin(), ne = mesh.node_end();
 
    for (; ni != ne; ++ni) {
+     // Get Cart. coords pointer
      double *c = node_coord->data(*ni);
 
+     // Get orig coords pointer
+     double *orig_c;
+     if (add_orig_coords) {
+       orig_c=node_orig_coord->data(*ni);
+     }
+
+     // field data
      double fdata;
 
      UInt lid = ngid2lid[ni->get_id()]; // we set this above when creating the node
@@ -474,12 +516,48 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
       }
     }
 
+    
+    // If requested and local fill in orig coords
+    if (add_orig_coords) {
+      if (gni->isLocal()) {
+        gni->getCoord(orig_c);
+      } else { // set to Null value to be ghosted later
+        for (int i=0; i<orig_sdim; i++) {
+          orig_c[i]=-10;
+        }
+      }
+    }
+    
     // Other arrays
     for (UInt i = 0; i < arrays.size(); ++i) {
-      gni->getArrayData(arrays[i], &fdata);
+
+      // Get array undist. dim
+      int undistDimCount=arrays[i]->getTensorCount();
+      
+      // Get array info based on if looks like a vector Array
+      // For now a Vector Array is a field with 1 undist dim of size 2 or 3
+      int meshFieldDim=1; // Not a vector by default
+      if (undistDimCount == 1) {
+        const int *undistLBound=arrays[i]->getUndistLBound();
+        const int *undistUBound=arrays[i]->getUndistUBound();
+        int tmp_meshFieldDim=undistUBound[0]-undistLBound[0]+1;
+        if ((tmp_meshFieldDim == 2) || (tmp_meshFieldDim == 3)) {
+          meshFieldDim=tmp_meshFieldDim;
+        }
+     }
+
+      // Get data pointer from mesh
       double *data = nfields[i]->data(*ni);
       ThrowRequire(data);
-      data[0] = fdata;
+      
+      // Get data based on the mesh field dim
+      if (meshFieldDim == 1) {
+        gni->getArrayData(arrays[i], &fdata);
+        data[0] = fdata;
+      } else {
+        gni->getArrayVecData(arrays[i], data);
+        // DEBUG OUTPUT  printf("%s data=%f %f %f\n", arrays[i]->getName(),data[0],data[1],data[2]);
+      }      
     }
 
 #ifdef G2M_DBG
@@ -1706,7 +1784,7 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
           // Init fracs
           if (efields[GTOM_EFIELD_FRAC]) {
             double *d=efields[GTOM_EFIELD_FRAC]->data(elem);
-            *d=1.0;
+            *d=0.0;
           }
 
           if (efields[GTOM_EFIELD_FRAC2]) {

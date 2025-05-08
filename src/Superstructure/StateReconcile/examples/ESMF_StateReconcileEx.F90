@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -9,85 +9,98 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-!
+
+!==============================================================================
+!ESMF_MULTI_PROC_EXAMPLE        String used by test script to count examples.
+!==============================================================================
 
 module ESMF_StateReconcileEx_Mod
 
-use ESMF
+  use ESMF
 
-contains
+  contains
 
 !BOE
-!\subsubsection{{\tt ESMF\_StateReconcile()} usage}
-!  
-! The set services routines are used to tell ESMF which routine
-! hold the user code for the initialize, run, and finalize
-! blocks of user level Components.
-! These are the separate subroutines called by the code below.
+!\subsubsection{Reconcile a State}
+!
+! An {\tt ESMF\_State} object must be reconciled if it contains objects that
+! were created and added to the State on a subset of the PETs from which the
+! objects are now accessed and operated on. A typical case of this is when
+! a State object is passed to a component that runs on a subset of PETs, and
+! that component creates objects that are added to the State. After the
+! component passes control back to the larger calling context (a parent
+! component or the main program), the State object is not consistent across
+! PETs. The {\tt ESMF\_StateReconcile()} method is used to reconcilce the State
+! across all PETs.
+!
+! In order to demonstrate State reconciliation we need to set up at least
+! one component that can be run on a subset of PETs. To this end an external
+! routine is created that adds a few emtpy Fields into its {\tt exportState}.
+!
 !EOE
-
 !BOC
-! Initialize routine which creates "field1" on PETs 0 and 1
-subroutine comp1_init(gcomp, istate, ostate, clock, rc)
+  subroutine init(gcomp, importState, exportState, clock, rc)
+    ! Abide to ESMF-prescribed Fortran interface
     type(ESMF_GridComp)  :: gcomp
-    type(ESMF_State)     :: istate, ostate
+    type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_Field) :: field1
-    integer :: localrc
+    type(ESMF_Field) :: field1, field2, field3
 
-    print *, "i am comp1_init"
+    rc = ESMF_SUCCESS   ! indicate success... unless error is found
 
-    field1 = ESMF_FieldEmptyCreate(name="Comp1 Field", rc=localrc)
-  
-    call ESMF_StateAdd(istate, (/field1/), rc=localrc)
-    
-    rc = localrc
+    field1 = ESMF_FieldEmptyCreate(name="Field1", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
 
-end subroutine comp1_init
+    field2 = ESMF_FieldEmptyCreate(name="Field2", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
 
-! Initialize routine which creates "field2" on PETs 2 and 3
-subroutine comp2_init(gcomp, istate, ostate, clock, rc)
-    type(ESMF_GridComp)  :: gcomp
-    type(ESMF_State)     :: istate, ostate
-    type(ESMF_Clock)     :: clock
-    integer, intent(out) :: rc
+    field3 = ESMF_FieldEmptyCreate(name="Field3", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
 
-    type(ESMF_Field) :: field2
-    integer :: localrc
+    call ESMF_StateAdd(exportState, [field1, field2, field3], rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
 
-    print *, "i am comp2_init"
+  end subroutine init
+!EOC
 
-    field2 = ESMF_FieldEmptyCreate(name="Comp2 Field", rc=localrc)
-    
-    call ESMF_StateAdd(istate, (/field2/), rc=localrc)
-
-    rc = localrc
-
-end subroutine comp2_init
-
-subroutine comp_dummy(gcomp, rc)
+!BOE
+! The standard way to register ESMF component routines is in the
+! {\tt SetServices} routine.
+!EOE
+!BOC
+  subroutine SetServices(gcomp, rc)
+   ! Abide to ESMF-prescribed Fortran interface
    type(ESMF_GridComp)  :: gcomp
    integer, intent(out) :: rc
 
-   rc = ESMF_SUCCESS
-end subroutine comp_dummy
+    rc = ESMF_SUCCESS   ! indicate success... unless error is found
+
+    ! register 'init' as component initialization method
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
+      userRoutine=init, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
+
+  end subroutine SetServices
 !EOC
-    
+
 end module ESMF_StateReconcileEx_Mod
 
-
-
-
-
-
-    program ESMF_StateReconcileEx
-
-!------------------------------------------------------------------------------
-!ESMF_EXAMPLE        String used by test script to count examples.
-!==============================================================================
+!BOE
+! A component can now be created in the main program that uses these routines.
+!EOE
 !BOC
+  program ESMF_StateReconcileEx
+!EOC
+
+!==============================================================================
+!
 ! !PROGRAM: ESMF_StateReconcileEx - State reconciliation
 !
 ! !DESCRIPTION:
@@ -103,13 +116,14 @@ end module ESMF_StateReconcileEx_Mod
     implicit none
 
     ! Local variables
-    integer :: rc, petCount
-    type(ESMF_State) :: state1
-    type(ESMF_GridComp) :: comp1, comp2
-    type(ESMF_VM) :: vm
-    character(len=ESMF_MAXSTR) :: comp1name, comp2name, statename
-
+    integer             :: rc, petCount
+    type(ESMF_State)    :: state
+!BOC
+!   ... other local variables ...
+    type(ESMF_GridComp) :: comp
 !EOC
+    type(ESMF_VM)       :: vm
+
     integer :: finalrc, result
     character(ESMF_MAXSTR) :: testname
     character(ESMF_MAXSTR) :: failMsg
@@ -120,179 +134,103 @@ end module ESMF_StateReconcileEx_Mod
     write(failMsg, *) "Example failure"
     write(testname, *) "Example ESMF_StateReconcileEx"
 
-
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
 
     finalrc = ESMF_SUCCESS
 
-
     call ESMF_Initialize(vm=vm, defaultlogfilename="StateReconcileEx.Log", &
-                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
-    
+      logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
     ! verify that this example can run on the given petCount
     call ESMF_VMGet(vm, petCount=petCount, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     if (petCount<4) then
       print *, "This test must run on at least 4 PETs."
+      finalrc = ESMF_FAILURE
       goto 20
     endif
-    
 
-!-------------------------------------------------------------------------
+!BOC
+    comp = ESMF_GridCompCreate(name="MyComp", petList=[0,1], rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
 !BOE
-!      
-!  A Component can be created which will run only on a subset of the
-!  current PET list.
-!EOE
- 
-    print *, "State Reconcile Example 1: Component Creation"
-
-!BOC
-    ! Get the global VM for this job.
-    call ESMF_VMGetGlobal(vm=vm, rc=rc)
-
-    comp1name = "Atmosphere"
-    comp1 = ESMF_GridCompCreate(name=comp1name, petList=(/ 0, 1 /), rc=rc)
-    print *, "GridComp Create returned, name = ", trim(comp1name)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!BOC
-
-    comp2name = "Ocean"
-    comp2 = ESMF_GridCompCreate(name=comp2name, petList=(/ 2, 3 /), rc=rc)
-    print *, "GridComp Create returned, name = ", trim(comp2name)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!BOC
-
-    statename = "Ocn2Atm"
-    state1 = ESMF_StateCreate(name=statename, rc=rc)  
-!EOC
-    print *, "State Create returned, name = ", trim(statename)
-
-    print *, "State Example 1 finished"
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!-------------------------------------------------------------------------
-!BOE
-!   
-!  Here we register the subroutines which should be called for initialization.
-!  Then we call ESMF\_GridCompInitialize() on all PETs, but the code runs
-!  only on the PETs given in the petList when the Component was created.
+! Here {\tt comp} is created to execute on two PETs: 0 and 1.
 !
-!  Because this example is so short, we call the entry point code
-!  directly instead of the normal procedure of nesting it in a separate
-!  SetServices() subroutine.  
-!
+! Next the Component {\tt SetServices} method is called to register the
+! custom component method(s).
 !EOE
-
 !BOC
-    ! This is where the VM for each component is initialized.
-    ! Normally you would call SetEntryPoint inside set services,
-    ! but to make this example very short, they are called inline below.
-    ! This is o.k. because the SetServices routine must execute from within
-    ! the parent component VM.
-    call ESMF_GridCompSetVM(comp1, comp_dummy, rc=rc)
+    call ESMF_GridCompSetServices(comp, userRoutine=SetServices, rc=rc)
 !EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!BOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    call ESMF_GridCompSetVM(comp2, comp_dummy, rc=rc)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!BOC
-
-    call ESMF_GridCompSetServices(comp1, userRoutine=comp_dummy, rc=rc)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!BOC
-
-    call ESMF_GridCompSetServices(comp2, userRoutine=comp_dummy, rc=rc)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!BOC
-
-
-    print *, "ready to set entry point 1"
-    call ESMF_GridCompSetEntryPoint(comp1, ESMF_METHOD_INITIALIZE, &
-         comp1_init, rc=rc)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!BOC
-
-
-    print *, "ready to set entry point 2"
-    call ESMF_GridCompSetEntryPoint(comp2, ESMF_METHOD_INITIALIZE, &
-         comp2_init, rc=rc)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!BOC
-
-
-
-    print *, "ready to call init for comp 1"
-    call ESMF_GridCompInitialize(comp1, exportState=state1, rc=rc)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!BOC
-
-    print *, "ready to call init for comp 2"
-    call ESMF_GridCompInitialize(comp2, exportState=state1, rc=rc)
-!EOC
-
-    print *, "State Example 2 finished"
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!-------------------------------------------------------------------------
 !BOE
-!   
-! Now we have {\tt state1} containing {\tt field1} on PETs 0 and 1, and
-! {\tt state1} containing {\tt field2} on PETs 2 and 3.  For the code
-! to have a rational view of the data, we call {\tt ESMF\_StateReconcile}
-! which determines which objects are missing from any PET, and communicates
-! information about the object. After the call to reconcile, all
-! {\tt ESMF\_State} objects now have a consistent view of the data.
+! Now a State is created that can be passed in when the registered Component
+! method is called.
 !EOE
 
 !BOC
-    print *, "State before calling StateReconcile()"
-    call ESMF_StatePrint(state1, rc=rc)
+    state = ESMF_StateCreate(rc=rc)
 !EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! The {\tt state} object is used as the Component's {\tt exportState}.
+!EOE
 !BOC
-
-
-    call ESMF_StateReconcile(state1, vm=vm, rc=rc)
+    call ESMF_GridCompInitialize(comp, exportState=state, rc=rc)
 !EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! Once control of execution has returned from the pevious
+! {\tt ESMF\_GridCompInitialize()} call, the {\tt state} object is in an
+! inconsistent state across the PETs of the current (main program) context.
+! This is because Fields were added on PETs 0 and 1, but not on the remaining
+! PETs (2 and 3). This situation can easliy be observed by writing the current
+! {\tt state} to the ESMF log.
+!EOE
 !BOC
-
-
-    print *, "State after calling StateReconcile()"
-    call ESMF_StatePrint(state1, rc=rc)
+    call ESMF_StateLog(state, prefix="Before Reconcile:", rc=rc)
 !EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    print *, "State Example 3 finished"
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOE
+! To reconcile {\tt state} across all of the PETs, use the
+! {\tt ESMF\_StateReconcile()} method.
+!EOE
+!BOC
+    call ESMF_StateReconcile(state, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! The output of {\tt state} to the ESMF log shows that the object is now
+! consistent across all PETs. I.e. {\tt state} contains identical items on
+! all of the PETs.
+!EOE
+!BOC
+    call ESMF_StateLog(state, prefix="After Reconcile:", rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------
 
-    call ESMF_StateDestroy (state1, rc=rc)
-    if (rc /= ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_StateDestroy (state, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    call ESMF_GridCompDestroy (comp2, rc=rc)
-    if (rc /= ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    call ESMF_GridCompDestroy (comp1, rc=rc)
-    if (rc /= ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_GridCompDestroy (comp, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 20  continue
     ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
     ! file that the scripts grep for.
     call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
-
 
     call ESMF_Finalize(rc=rc)
 

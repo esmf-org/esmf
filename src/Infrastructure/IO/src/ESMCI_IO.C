@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -336,28 +336,11 @@ int IO::read(
       localrc = ESMF_STATUS_UNALLOCATED;
       break;
     case IO_ARRAY:
-      // Check for undistributed dimensions
-      has_undist = undist_check (temp_array_p, &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
-        return rc;
-
-      if (has_undist) {
-        temp_array_undist_p = temp_array_p;
-        // Create an aliased Array which treats all dimensions as distributed.
-        // std::cout << ESMC_METHOD << ": calling undist_arraycreate_alldist" << std::endl;
-        undist_arraycreate_alldist (temp_array_undist_p, &temp_array_p, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
-          // Close the file but return original error even if close fails.
-          localrc = close();
-          return rc;
-        }
-      }
-
       // Check for redistribution (when DE/PET != 1)
       need_redist = redist_check(temp_array_p, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-          &rc)) {
-      // Close the file but return original error even if close fails.
+                                        &rc)) {
+        // Close the file but return original error even if close fails.
         localrc = close();
         return rc;
       }
@@ -366,8 +349,27 @@ int IO::read(
         // std::cout << ESMC_METHOD << ": calling redist_arraycreate1de" << std::endl;
         redist_arraycreate1de((*it)->getArray(), &temp_array_p, petCount, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-            &rc)) {
-        // Close the file but return original error even if close fails.
+                                          &rc)) {
+          // Close the file but return original error even if close fails.
+          localrc = close();
+          return rc;
+        }
+      }
+
+      // Check for undistributed dimensions
+      has_undist = undist_check (temp_array_p, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+        return rc;
+
+      // Save a version of the temporary array that possibly has undistributed dimensions
+      temp_array_undist_p = temp_array_p;
+
+      if (has_undist) {
+        // Create an aliased Array which treats all dimensions as distributed.
+        // std::cout << ESMC_METHOD << ": calling undist_arraycreate_alldist" << std::endl;
+        undist_arraycreate_alldist (temp_array_undist_p, &temp_array_p, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
+          // Close the file but return original error even if close fails.
           localrc = close();
           return rc;
         }
@@ -383,24 +385,52 @@ int IO::read(
       if (need_redist) {
         // Redistribute into the caller supplied Array
         // std::cout << ESMC_METHOD << ": DE count > 1 - redistStore" << std::endl;
-        localrc = ESMCI::Array::redistStore(temp_array_p, (*it)->getArray(), &rh, NULL);
+
+        // Note that, if has_undist is true, then we need to redistribute from the view
+        // prior to the aliasing that treated all dimensions as distributed - i.e.,
+        // temp_array_undist_p. Further note that, even though the arrayRead read into
+        // temp_array_p, this also filled the data in temp_array_undist_p, since those two
+        // are aliases of each other (i.e., with DATACOPY_REFERENCE). If has_undist is
+        // false, then temp_array_undist_p is identical to temp_array_p.
+        localrc = ESMCI::Array::redistStore(temp_array_undist_p, (*it)->getArray(), &rh, NULL);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
 
         // std::cout << ESMC_METHOD << ": DE count > 1 - redistribute data" << std::endl;
-        localrc = ESMCI::Array::redist(temp_array_p, (*it)->getArray(), &rh,
+        localrc = ESMCI::Array::redist(temp_array_undist_p, (*it)->getArray(), &rh,
           ESMF_COMM_BLOCKING, NULL, NULL, ESMC_REGION_TOTAL);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
 
-        localrc = temp_array_p->redistRelease(rh);
+        localrc = temp_array_undist_p->redistRelease(rh);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
         // std::cout << ESMC_METHOD << ": DE count > 1 - redistribute complete!" << std::endl;
+      }
 
-        // Cleanups
-        // std::cout << ESMC_METHOD << ": cleaning up" << std::endl;
+      // Cleanups
+      // std::cout << ESMC_METHOD << ": cleaning up" << std::endl;
+      //
+      // We need to clean up temporary arrays under the following conditions:
+      //
+      // - need_redist true, has_undist false: temp_array_p and temp_array_undist_p
+      //   reference the same temporary Array (created by redist_arraycreate1de); we need
+      //   to destroy one of them (it doesn't matter which one)
+      //
+      // - need_redist false, has_undist true: temp_array_p is a temporary Array (created
+      //   by undist_arraycreate_alldist), temp_array_undist_p points to the real Array;
+      //   we need to destroy temp_array_p
+      //
+      // - need_redist true, has_undist true: temp_array_p is a temporary Array (created
+      //   by undist_arraycreate_alldist), temp_array_undist_p is a different temporary
+      //   Array (created by redist_arraycreate1de); we need to destroy both of them
+      if (need_redist || has_undist) {
         localrc = ESMCI::Array::destroy(&temp_array_p);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+          return rc;
+      }
+      if (need_redist && has_undist) {
+        localrc = ESMCI::Array::destroy(&temp_array_undist_p);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
       }
@@ -544,19 +574,6 @@ int IO::write(
 
   for (it = objects.begin(); it < objects.end(); ++it) {
     Array *temp_array_p = (*it)->getArray();  // default to caller-provided Array
-    DistGrid *dg = temp_array_p->getDistGrid ();
-
-    int tilecount = dg->getTileCount ();
-    if (tilecount != 1) {
-      localrc = ESMF_RC_NOT_IMPL;
-    std::stringstream errmsg;
-    errmsg << "tile count of " << tilecount << " != 1 - not supported yet";
-    if (ESMC_LogDefault.MsgFoundError(localrc, errmsg.str(), ESMC_CONTEXT, &rc)) {
-        // Close the file but return original error even if close fails.
-        localrc = close();
-        return rc;
-      }
-    }
 
     std::vector<std::string> dimLabels;
     // Grid-level dimension labels
@@ -738,9 +755,28 @@ ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef arrayWrite()", ESMC_LOGMS
 #if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft arrayWrite()", ESMC_LOGMSG_INFO);
 #endif
-      // Clean ups //
-      if (need_redist) {
+      // Clean ups
+      //
+      // We need to clean up temporary arrays under the following conditions:
+
+      // - need_redist true, has_undist false: temp_array_p is a temporary Array (created
+      //   by redist_arraycreate1de), temp_array_undist_p is never created; we need to
+      //   destroy temp_array_p
+      //
+      // - need_redist false, has_undist true: temp_array_p is a temporary Array (created
+      //   by undist_arraycreate_alldist), temp_array_undist_p points to the real Array;
+      //   we need to destroy temp_array_p
+      //
+      // - need_redist true, has_undist true: temp_array_p is a temporary Array (created
+      //   by undist_arraycreate_alldist), temp_array_undist_p is a different temporary
+      //   Array (created by redist_arraycreate1de); we need to destroy both of them
+      if (need_redist || has_undist) {
         localrc = ESMCI::Array::destroy(&temp_array_p);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+          return rc;
+      }
+      if (need_redist && has_undist) {
+        localrc = ESMCI::Array::destroy(&temp_array_undist_p);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
           return rc;
       }
@@ -792,9 +828,13 @@ int IO::open(
   bool readonly                        // (in)  - If false then read/write
   ) {
 // !DESCRIPTION:
-//      Open a file or stream for I/O. Create a new IO_Handler if necessary
-//      It is an error if a handler exists with a different I/O format (iofmt)
-//      It is an error if the IO_Handler is already connected to an open stream
+//      Open a file or stream for I/O. Create a new IO_Handler if necessary.
+//      It is an error if a handler exists with a different I/O format (iofmt).
+//      It is an error if the IO_Handler is already connected to an open stream.
+//      If this IO object may be used to read / write multi-tile arrays, then
+//      those arrays must be added via a call to addArray before calling this
+//      open function (so that we can open the appropriate files for multi-tile
+//      I/O).
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -813,7 +853,7 @@ int IO::open(
 
   // Ensure that we have an IO_Handler (create if necessary)
   if ((IO_Handler *)NULL == ioHandler) {
-    ioHandler = IO_Handler::create(file, iofmt, &localrc);
+    ioHandler = IO_Handler::create(file, iofmt, getNtiles(), &localrc);
     if (ESMF_SUCCESS != localrc) {
       PRINTMSG("IO_Handler::create returned " << localrc);
       ioHandler = (IO_Handler *)NULL;
@@ -828,15 +868,6 @@ int IO::open(
     return localrc;
   }
   // No else (state looks OK)
-
-  // Check to make sure that a file is not already open
-  if (ioHandler->isOpen() != ESMF_FALSE) {
-    PRINTMSG("IO_Handler is already open ");
-    localrc = ESMC_RC_FILE_OPEN;
-    ESMC_LogDefault.Write("Internal error, ioHandler is already open",
-                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-    return localrc;
-  }
 
   // Open the file
   ioHandler->open(file, filestatusflag, overwrite, readonly, &localrc);
@@ -885,13 +916,11 @@ int IO::flush(void
     }
   }
 
-  // Check to make sure that a file is already open
-  if (ioHandler->isOpen() != ESMF_FALSE) {
-    ioHandler->flush(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      &rc)) {
-      return rc;
-    }
+  // Note that it is safe to call this even if the file isn't open
+  ioHandler->flush(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) {
+    return rc;
   }
 
   // return successfully
@@ -915,8 +944,8 @@ int IO::close(void
   ) {
 // !DESCRIPTION:
 //      Close an open file or stream
-//      It is an error if the file is not open
 //      It is an error if no IOHandler exists
+//      It is NOT an error if the file is not open
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -934,26 +963,17 @@ int IO::close(void
     }
   }
 
-  // Check to make sure that a file is already open
-  if (ioHandler->isOpen() != ESMF_FALSE) {
-      ioHandler->flush(&localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-                                        &rc)) {
-          return rc;
-      }
-    if (ESMF_SUCCESS == localrc) {
-      ioHandler->close();
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-        ESMC_CONTEXT, &rc)) {
-        return rc;
-      }
-    }
-  } else {
-    localrc = ESMC_RC_FILE_CLOSE;
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-      ESMC_CONTEXT, &rc)) {
-      return rc;
-    }
+  // No need to check if file is open: flush and close just won't do anything if
+  // the file isn't already open
+  ioHandler->flush(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                    &rc)) {
+    return rc;
+  }
+  ioHandler->close();
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                    ESMC_CONTEXT, &rc)) {
+    return rc;
   }
 
   // return successfully
@@ -980,6 +1000,8 @@ int IO::addArray(
 // !DESCRIPTION:
 //      Add an array to the list of objects to read or write.
 //      {\tt arr_p} is required
+//      If any arrays have multiple tiles, all arrays handled by a given IO
+//      object must have the same number of tiles.
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -1015,11 +1037,13 @@ int IO::addArray(
 //      {\tt dimAttPack} optional Attribute package for dimension names
 //      {\tt varAttPack} optional Attribute package for variable attributes
 //      {\tt gblAttPack} optional Attribute package for global attributes
+//      If any arrays have multiple tiles, all arrays handled by a given IO
+//      object must have the same number of tiles.
 //
 //EOP
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
-  int localrc = ESMF_SUCCESS;             // local return code
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   PRINTPOS;
@@ -1031,29 +1055,37 @@ int IO::addArray(
     return localrc;
   }
 
+  // Confirm that this array has the same number of tiles as other arrays that
+  // have been added to this IO object, or set the number of tiles if it hasn't
+  // yet been set. (See some comments about ntiles in ESMCI_IO.h for more
+  // details.)
+  int thisNtiles = arr_p->getDistGrid()->getTileCount();
+  localrc = setOrCheckNtiles(thisNtiles);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+    return rc;
+
 // Push Array onto the list
   try {
     IO_ObjectContainer *newObj = new IO_ObjectContainer((Array *)arr_p,
         variableName, dimAttPack, varAttPack, gblAttPack);
 
     if ((IO_ObjectContainer *)NULL == newObj) {
-      localrc = ESMC_RC_MEM_ALLOCATE;
       ESMC_LogDefault.AllocError(ESMC_CONTEXT, &rc);
       ESMC_LogDefault.Write("Unable to allocate storage for IO object",
                             ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+      return rc;
     } else {
       objects.push_back(newObj);
     }
   } catch(...) {
     PRINTMSG("CATCH: Alloc error!!");
     ESMC_LogDefault.AllocError(ESMC_CONTEXT, &rc);
+    return rc;
   }
 
-  // return
-  if (ESMC_RC_NOT_IMPL == rc) {
-    rc = localrc;
-  }
-  return (rc);
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
 }  // end IO::addArray
 //-------------------------------------------------------------------------
 
@@ -1214,65 +1246,91 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int pet
 
   DistGrid *dg_orig = src_array_p->getDistGrid();
 
-  localrc = (dg_orig->getTileCount() == 1) ? ESMF_SUCCESS : ESMF_RC_NOT_IMPL;
-  if (ESMC_LogDefault.MsgFoundError(localrc, "Tile count != 1 is not supported", ESMC_CONTEXT, rc))
-    return;
-
-  const int *minIndexTile = dg_orig->getMinIndexPDimPTile();
-  const int *maxIndexTile = dg_orig->getMaxIndexPDimPTile();
+  const int *minIndexPDimPTile = dg_orig->getMinIndexPDimPTile();
+  const int *maxIndexPDimPTile = dg_orig->getMaxIndexPDimPTile();
   const int *distgridToArrayMap = src_array_p->getDistGridToArrayMap();
 
   int ndims = dg_orig->getDimCount();
   int rank = src_array_p->getRank();
+  int tileCount = dg_orig->getTileCount();
 
-  int replicatedDims=0;
-  for (int i=0; i<ndims; i++)
-    if (distgridToArrayMap[i]==0) ++replicatedDims;
+  if (tileCount > petCount) {
+    // If tileCount > petCount, the decomposition created by the default DistGrid sets
+    // deCount = tileCount, which leads to having more DEs than PETs, which is exactly
+    // what we're trying to avoid in this function.
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD,
+      "Multi-tile I/O requires at least as many PETs as tiles", ESMC_CONTEXT, rc);
+    return; // bail out
+  }
 
-  std::vector<int> minIndexTileVec;
-  std::vector<int> maxIndexTileVec;
+  int replicatedDims = src_array_p->getReplicatedDimCount();
+
+  std::vector<int> minIndexPDimPTileVec;
+  std::vector<int> maxIndexPDimPTileVec;
   std::vector<int> distgridToArrayMapVec;
   if (replicatedDims>0){
+    // TODO(wjs, 2023-05-26) Still need to fix this loop to work with the multi-tile
+    // case; then remove the following error check.
+    //
+    // See commit 28f951b333 (reverted in c5f596127e) for an attempt to get this working
+    // in the multi-tile case. However, this attempt was aborted due to finding what
+    // appear to be issues with I/O with Arrays with replicated dimensions even in the
+    // single-tile case - see https://github.com/esmf-org/esmf/issues/184. We have decided
+    // to leave this functionality in place in case anyone is relying on it, but we do not
+    // expect I/O with Arrays with replicated dimensions to work reliably or consistently.
+    if (tileCount > 1) {
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_NOT_IMPL,
+        "Multi-tile with > 1 DE per PET and replicated dims not yet implemented", ESMC_CONTEXT, rc);
+      return;
+    }
+
     // eliminate replicated dimensions from the destination
     for (int i=0; i<ndims; i++){
       if (distgridToArrayMap[i]!=0){
         // not a replicated dim -> keep
-        minIndexTileVec.push_back(minIndexTile[i]);
-        maxIndexTileVec.push_back(maxIndexTile[i]);
+        minIndexPDimPTileVec.push_back(minIndexPDimPTile[i]);
+        maxIndexPDimPTileVec.push_back(maxIndexPDimPTile[i]);
         distgridToArrayMapVec.push_back(distgridToArrayMap[i]);
       }
     }
-    if (minIndexTileVec.size()<1){
+    if (minIndexPDimPTileVec.size()<1){
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD,
         "Not enough distributed dimensions", ESMC_CONTEXT, rc);
       return; // bail out
     }
     // now point to the set of reduced lists
-    minIndexTile = &(minIndexTileVec[0]);
-    maxIndexTile = &(maxIndexTileVec[0]);
+    minIndexPDimPTile = &(minIndexPDimPTileVec[0]);
+    maxIndexPDimPTile = &(maxIndexPDimPTileVec[0]);
     distgridToArrayMap = &(distgridToArrayMapVec[0]);
   }
 
-  if ((maxIndexTile[0]-minIndexTile[0]+1)<petCount){
-    ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD,
-      "Index space too small to be distributed across all PETs", ESMC_CONTEXT, rc);
-    return; // bail out
-  }
-
-  ESMCI::InterArray<int> minIndexInterface((int*)minIndexTile, ndims-replicatedDims);
-  ESMCI::InterArray<int> maxIndexInterface((int*)maxIndexTile, ndims-replicatedDims);
+  DistGrid *distgrid;
+  if (tileCount == 1) {
+    ESMCI::InterArray<int> minIndexInterface((int*)minIndexPDimPTile, ndims-replicatedDims);
+    ESMCI::InterArray<int> maxIndexInterface((int*)maxIndexPDimPTile, ndims-replicatedDims);
 #if 0
-  std::cout << ESMC_METHOD << "[" << me << "]: setting maxindex to: (";
-  for (int i=0; i<ndims; i++)
-    std::cout << " " << maxIndexTile[i];
-  std::cout << " )" << std::endl;
+    std::cout << ESMC_METHOD << "[" << me << "]: setting maxindex to: (";
+    for (int i=0; i<ndims; i++)
+      std::cout << " " << maxIndexPDimPTile[i];
+    std::cout << " )" << std::endl;
 #endif
-  // create default DistGrid, which means 1DE per PET
-  DistGrid *distgrid = DistGrid::create(&minIndexInterface, &maxIndexInterface, NULL,
-      NULL, 0, NULL, NULL, NULL, NULL, NULL, (ESMCI::DELayout*)NULL, NULL,
-      &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
-    return;
+    // create default DistGrid, which means 1DE per PET
+    distgrid = DistGrid::create(&minIndexInterface, &maxIndexInterface, NULL,
+        NULL, 0, NULL, NULL, NULL, NULL, NULL, (ESMCI::DELayout*)NULL, NULL,
+        &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+      return;
+  } else {
+    int dummyLen[] = {ndims-replicatedDims, tileCount};
+    ESMCI::InterArray<int> minIndexInterface((int*)minIndexPDimPTile, 2, dummyLen);
+    ESMCI::InterArray<int> maxIndexInterface((int*)maxIndexPDimPTile, 2, dummyLen);
+    // create default DistGrid, which means 1DE per PET
+    distgrid = DistGrid::create(&minIndexInterface, &maxIndexInterface, NULL,
+        NULL, 0, 0, NULL, NULL, NULL, NULL, NULL, (ESMCI::DELayout*)NULL, NULL,
+        &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+      return;
+  }
 
   // std::cout << ESMC_METHOD << ": creating temp Array for redistribution" << std::endl;
   ESMCI::ArraySpec arrayspec;
@@ -1342,46 +1400,40 @@ void IO::undist_arraycreate_alldist(Array *src_array_p, Array **dest_array_p, in
 
   int dimCount= dg->getDimCount();
   int deCount = dg->getDELayout()->getDeCount();
-
-  int tilecount = dg->getTileCount ();
-  if (tilecount != 1) {
-    localrc = ESMF_RC_NOT_IMPL;
-    std::stringstream errmsg;
-    errmsg << "tile count of " << tilecount << " != 1 - not supported yet";
-    if (ESMC_LogDefault.MsgFoundError(localrc, errmsg.str(), ESMC_CONTEXT,
-      rc)) return;
-  }
+  int tileCount = dg->getTileCount ();
 
   const int *arrayToDistGridMap = src_array_p->getArrayToDistGridMap();
   const int *undistLBound = src_array_p->getUndistLBound();
   const int *undistUBound = src_array_p->getUndistUBound();
-  const int *minIndexPTile = dg->getMinIndexPDimPTile();
-  const int *maxIndexPTile = dg->getMaxIndexPDimPTile();
+  const int *minIndexPDimPTile = dg->getMinIndexPDimPTile();
+  const int *maxIndexPDimPTile = dg->getMaxIndexPDimPTile();
   const int *minIndexPDimPDe = dg->getMinIndexPDimPDe();
   const int *maxIndexPDimPDe = dg->getMaxIndexPDimPDe();
 
   // construct the new minIndex and maxIndex and regDecomp taking into account
   // how Array dimensions are mapped against DistGrid dimensions
-  std::vector<int> minIndexNew(rank);
-  std::vector<int> maxIndexNew(rank);
+  std::vector<int> minIndexNew(rank*tileCount);
+  std::vector<int> maxIndexNew(rank*tileCount);
   std::vector<int> deBlockList(rank*2*deCount);
-  std::vector<int> deBlockListLen(3);
-  deBlockListLen[0]=rank; deBlockListLen[1]=2; deBlockListLen[2]=deCount;
   int jj = 0;
   for (int i=0; i<rank; i++) {
     int j = arrayToDistGridMap[i];
     if (j > 0) {
       // valid DistGrid dimension
-      minIndexNew[i] = minIndexPTile[j-1];
-      maxIndexNew[i] = maxIndexPTile[j-1];
+      for (int tile=0; tile<tileCount; tile++) {
+        minIndexNew[tile*rank + i] = minIndexPDimPTile[tile*dimCount + (j-1)];
+        maxIndexNew[tile*rank + i] = maxIndexPDimPTile[tile*dimCount + (j-1)];
+      }
       for (int k=0; k<deCount; k++){
         deBlockList[k*2*rank        + i] = minIndexPDimPDe[k*dimCount + (j-1)];
         deBlockList[k*2*rank + rank + i] = maxIndexPDimPDe[k*dimCount + (j-1)];
       }
     } else {
       // undistributed dimension
-      minIndexNew[i] = undistLBound[jj];
-      maxIndexNew[i] = undistUBound[jj];
+      for (int tile=0; tile<tileCount; tile++) {
+        minIndexNew[tile*rank + i] = undistLBound[jj];
+        maxIndexNew[tile*rank + i] = undistUBound[jj];
+      }
       for (int k=0; k<deCount; k++){
         deBlockList[k*2*rank        + i] = undistLBound[jj];
         deBlockList[k*2*rank + rank + i] = undistUBound[jj];
@@ -1391,15 +1443,31 @@ void IO::undist_arraycreate_alldist(Array *src_array_p, Array **dest_array_p, in
   }
 
   // create the fixed up DistGrid, making sure to use original DELayout
-  ESMCI::InterArray<int> minIndexInterface(minIndexNew);
-  ESMCI::InterArray<int> maxIndexInterface(maxIndexNew);
-  ESMCI::InterArray<int> deBlockListInterface(&deBlockList[0], 3, &deBlockListLen[0]);
+  int deBlockListLen[] = {rank, 2, deCount};
+  ESMCI::InterArray<int> deBlockListInterface(&deBlockList[0], 3, deBlockListLen);
   DELayout *delayout = dg->getDELayout();
-  DistGrid *dg_temp = DistGrid::create(&minIndexInterface,
-    &maxIndexInterface, &deBlockListInterface,
-    NULL, NULL, NULL, delayout, NULL, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
-    return;
+  DistGrid *dg_temp;
+  if (tileCount == 1) {
+    ESMCI::InterArray<int> minIndexInterface(minIndexNew);
+    ESMCI::InterArray<int> maxIndexInterface(maxIndexNew);
+    dg_temp = DistGrid::create(&minIndexInterface,
+      &maxIndexInterface, &deBlockListInterface,
+      NULL, NULL, NULL, delayout, NULL, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+      return;
+    }
+  } else {
+    int dummyLen[] = {rank, tileCount};
+    ESMCI::InterArray<int> minIndexInterface(&minIndexNew[0], 2, dummyLen);
+    ESMCI::InterArray<int> maxIndexInterface(&maxIndexNew[0], 2, dummyLen);
+    ESMCI::InterArray<int> deToTileMapInterface((int*)(dg->getTileListPDe()), 1, &deCount);
+    dg_temp = DistGrid::create(&minIndexInterface,
+      &maxIndexInterface, &deBlockListInterface,
+      &deToTileMapInterface,
+      NULL, NULL, NULL, delayout, NULL, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+      return;
+    }
   }
 
   // finally, create the fixed up Array using pointer to original data.
@@ -1447,7 +1515,106 @@ void IO::clear(void) {
     objects.pop_back();
     delete obj;
   }
-}  // end IO::close
+}  // end IO::clear
+//-------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO::setOrCheckNtiles()"
+//BOPI
+// !IROUTINE:  IO::setOrCheckNtiles - Set or check the ntiles value
+//
+// !INTERFACE:
+int IO::setOrCheckNtiles(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+  int ntiles_arg         // (in)  - number of tiles to set or check
+  ) {
+//
+// !DESCRIPTION:
+//      If ntiles has not yet been set (i.e., this function has not yet been
+//      called), then set ntiles to the given value. If ntiles has already been
+//      set, then verify that ntiles matches the already-set value; if it
+//      doesn't, return an error via the return value. Note that all arrays
+//      handled by this IO object must have the same number of tiles; to confirm
+//      that this is the case, this function should be called for each array,
+//      specifying the number of tiles for that array.
+//
+//      If this IO object will be handling multi-tile arrays, then this function
+//      must be called before calling open or any other function that depends on
+//      the number of tiles.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  if (!ntilesIsLocked) {
+    // ntiles hasn't been set on this object yet; set it and mark it as locked
+    ntiles = ntiles_arg;
+    ntilesIsLocked = true;
+    rc = ESMF_SUCCESS;
+    return rc;
+  } else {
+    // ntiles has already been set; verify that the new ntiles value matches the
+    // already-set value (because all arrays handled by a given IO object must
+    // have the same number of tiles)
+    int localrc = checkNtiles(ntiles_arg);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+      return rc;
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+} // end IO::setOrCheckNtiles
+//-------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO::checkNtiles()"
+//BOPI
+// !IROUTINE:  IO::checkNtiles - Check the ntiles value
+//
+// !INTERFACE:
+int IO::checkNtiles(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+  int ntiles_arg         // (in)  - number of tiles to check
+  )const{
+//
+// !DESCRIPTION:
+//      Verify that the given value of ntiles matches the already-set ntiles (set
+//      via a prior call to setOrCheckNtiles); if it doesn't, return an error via
+//      the return value. (Note that all arrays handled by this IO object must
+//      have the same number tiles.)
+//
+//      It is often better to use setOrCheckNtiles, since that version will set
+//      ntiles if it hasn't already been set; this version is meant only for the
+//      situation where ntiles should already have been set previously.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  if (ntiles_arg == ntiles) {
+    rc = ESMF_SUCCESS;
+    return rc;
+  } else {
+    std::stringstream errmsg;
+    errmsg << "New number of tiles (" << ntiles_arg
+           << ") does not match previously-set number of tiles (" << ntiles
+           << ") for this IO object. All arrays handled by a given IO object "
+           << "must have the same number of tiles.";
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_VAL_WRONG, errmsg, ESMC_CONTEXT, &rc);
+    return rc;
+  }
+} // end IO::checkNtiles
 //-------------------------------------------------------------------------
 
 }  // end namespace ESMCI

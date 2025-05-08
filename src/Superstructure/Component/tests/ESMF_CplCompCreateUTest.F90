@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -55,17 +55,20 @@
     end type
 
 #ifdef ESMF_TESTEXHAUSTIVE
-    logical                 :: bool
-    type(ESMF_VM)           :: vm
-    type(ESMF_CplComp)      :: cpl2
-    integer                 :: localPet
-    character(ESMF_MAXSTR)  :: cname, bname
-    type (dataWrapper)      :: wrap1, wrap2
-    type(testData), target  :: data1, data2
-    logical                 :: isPresent
-    type(ESMF_Config)       :: config
-    integer                 :: fred, i
+    logical                       :: bool
+    type(ESMF_VM)                 :: vm
+    type(ESMF_CplComp)            :: cpl2
+    integer                       :: localPet
+    character(ESMF_MAXSTR)        :: cname, bname
+    type (dataWrapper)            :: wrap1, wrap2
+    type(testData), target        :: data1, data2
+    logical                       :: isPresent
+    type(ESMF_Config)             :: config
+    type(ESMF_HConfig)            :: hconfig
+    integer                       :: fred, i
     character(len=:), allocatable :: labelList(:)
+    integer, allocatable          :: petList(:)
+    character(160)                :: msgStr
 #endif
 
 !-------------------------------------------------------------------------------
@@ -103,7 +106,7 @@
     !------------------------------------------------------------------------
     !NEX_UTest
     cplname = "One Way Coupler"
-    cpl = ESMF_CplCompCreate(name=cplname, configFile="comp.rc", rc=rc)
+    cpl = ESMF_CplCompCreate(name=cplname, configFile="comp.yaml", rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Coupler Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -473,7 +476,7 @@
     !EX_UTest
 !   !  Set a configFile
 
-    call ESMF_CplCompSet(cpl, configFile="comp.rc", rc=rc)
+    call ESMF_CplCompSet(cpl, configFile="comp.yaml", rc=rc)
 
     write(failMsg, *) "Did return ESMF_SUCCESS"
     write(name, *) "Setting a ConfigFile Test"
@@ -508,7 +511,7 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Config handling Test - configIsPresent"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-    
+
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
@@ -516,7 +519,7 @@
     write(failMsg, *) "Did not return correct isPresent status"
     write(name, *) "Config handling Test - configIsPresent value"
     call ESMF_Test((isPresent), name, failMsg, result, ESMF_SRCLINE)
-    
+
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
@@ -533,8 +536,9 @@
     !EX_UTest
 !   !  Test correct config handling
 
+    fred = 0
     call ESMF_ConfigGetAttribute(config, fred, label="fred:", rc=rc)
-    
+
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Config handling Test - access attribute through config"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -544,14 +548,204 @@
     !EX_UTest
 !   !  Test correct config handling
 
-    print *, "fred = ", fred
+    write(msgStr,*) "fred = ", fred
+    call ESMF_LogWrite(msgStr, ESMF_LOGMSG_INFO, rc=rc)
 
     write(failMsg, *) "Did not return correct value in fred"
     write(name, *) "Config handling Test - validate attribute value"
     call ESMF_Test((fred==1), name, failMsg, result, ESMF_SRCLINE)
-    
 
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct hconfig handling
 
+    call ESMF_CplCompGet(cpl, hconfigIsPresent=isPresent, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "HConfig handling Test - hconfigIsPresent"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct hconfig handling
+    write(failMsg, *) "Did not return correct isPresent status"
+    write(name, *) "HConfig handling Test - hconfigIsPresent value"
+    call ESMF_Test((isPresent), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct hconfig handling
+
+    call ESMF_CplCompGet(cpl, hconfig=hconfig, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "HConfig handling Test - get hconfig"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct hconfig handling
+
+    fred = 0
+    fred = ESMF_HConfigAsI4(hconfig, keyString="fred", rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "HConfig handling Test - access map through hconfig"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct hconfig handling
+
+    write(msgStr,*) "fred = ", fred
+    call ESMF_LogWrite(msgStr, ESMF_LOGMSG_INFO, rc=rc)
+
+    write(failMsg, *) "Did not return correct value in fred"
+    write(name, *) "HConfig handling Test - validate attribute value"
+    call ESMF_Test((fred==1), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component
+    write(name, *) "Creating a Component with Config Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+    cpl2 = ESMF_CplCompCreate(name="TestComp", config=config, rc=rc)
+
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+    write(name, *) "CplCompDestroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_CplCompDestroy(cpl2, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component
+    write(name, *) "Creating a Component with HConfig Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+    cpl2 = ESMF_CplCompCreate(name="TestComp", hconfig=hconfig, rc=rc)
+
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+    write(name, *) "CplCompDestroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_CplCompDestroy(cpl2, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component
+    write(name, *) "Creating a Component with too many config args Test"
+    write(failMsg, *) "Did not return expected return code"
+
+    cpl2 = ESMF_CplCompCreate(name="TestComp", hconfig=hconfig, &
+      config=config, rc=rc)
+
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component
+    write(name, *) "Creating a Component with too many config args Test"
+    write(failMsg, *) "Did not return expected return code"
+
+    cpl2 = ESMF_CplCompCreate(name="TestComp", config=config, &
+      configFile="comp.yaml", rc=rc)
+
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component
+    write(name, *) "Creating a Component with too many config args Test"
+    write(failMsg, *) "Did not return expected return code"
+
+    cpl2 = ESMF_CplCompCreate(name="TestComp", hconfig=hconfig, &
+      configFile="comp.yaml", rc=rc)
+
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component
+    write(name, *) "Creating a Component with too many config args Test"
+    write(failMsg, *) "Did not return expected return code"
+
+    cpl2 = ESMF_CplCompCreate(name="TestComp", hconfig=hconfig, &
+      config=config, configFile="comp.yaml", rc=rc)
+
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component
+    write(name, *) "Creating a Component Test"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
+
+    cpl2 = ESMF_CplCompCreate(name="TestComp", rc=rc)
+
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Set a hconfig
+    write(name, *) "Setting HConfig Test"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
+
+    call ESMF_CplCompSet(cpl2, hconfig=hconfig, rc=rc)
+
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Set a config
+    write(name, *) "Setting Config Test"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
+
+    call ESMF_CplCompSet(cpl2, config=config, rc=rc)
+
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Set a hconfig and config
+    write(name, *) "Setting HConfig and Config Test"
+    write(failMsg, *) "Did not return expected return code"
+
+    call ESMF_CplCompSet(cpl2, hconfig=hconfig, config=config, rc=rc)
+
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+    write(name, *) "CplCompDestroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_CplCompDestroy(cpl2, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
@@ -575,9 +769,96 @@
     write(name, *) "Destroying a Coupler Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component with petList
+    cpl = ESMF_CplCompCreate(petList=(/0/), rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Component with petList Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Destroying a component
+
+    call ESMF_CplCompDestroy(cpl, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Destroying a Component created with petList Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component with empty petList
+    allocate(petList(0))
+    cpl = ESMF_CplCompCreate(petList=petList, rc=rc)
+    deallocate(petList)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Component with empty petList Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Destroying a component
+
+    call ESMF_CplCompDestroy(cpl, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Destroying a Component created with empty petList Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component with petList
+    cpl = ESMF_CplCompCreate(petList=(/0/), rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Component with petList Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Destroying a component
+
+    call ESMF_CplCompDestroy(cpl, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Destroying a Component created with petList Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component with empty petList
+    allocate(petList(0))
+    cpl = ESMF_CplCompCreate(petList=petList, rc=rc)
+    deallocate(petList)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Component with empty petList Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Destroying a component
+
+    call ESMF_CplCompDestroy(cpl, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Destroying a Component created with empty petList Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
 #endif
 
     call ESMF_TestEnd(ESMF_SRCLINE)
 
     end program ESMF_CplCompCreateUTest
-    
+

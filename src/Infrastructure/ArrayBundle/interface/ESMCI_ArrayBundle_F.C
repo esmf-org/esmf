@@ -1,15 +1,13 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
-//==============================================================================
-#define ESMC_FILENAME "ESMCI_ArrayBundle_F.C"
 //==============================================================================
 //
 // This file contains the Fortran interface code to link F90 and C++.
@@ -29,6 +27,11 @@
 using std::exception;
 using std::string;
 using std::vector;
+
+//==============================================================================
+#undef  ESMC_FILENAME
+#define ESMC_FILENAME "ESMCI_ArrayBundle_F.C"
+//==============================================================================
 
 //------------------------------------------------------------------------------
 //BOP
@@ -84,7 +87,7 @@ extern "C" {
         rc);
       return;
     }catch(...){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "Caught exception",
         ESMC_CONTEXT, rc);
       return;
     }
@@ -117,7 +120,7 @@ extern "C" {
         rc);
       return;
     }catch(...){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "Caught exception",
         ESMC_CONTEXT, rc);
       return;
     }
@@ -160,7 +163,7 @@ extern "C" {
       delete [] cname;
     }else if(*len_name){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid string", ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+        "Not a valid string", ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
       return;
     }
     // return successfully
@@ -202,7 +205,7 @@ extern "C" {
       // opt_arrayList was provided
       if (*len_arrayList < *arrayCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- opt_arrayList must provide arrayCount elements", ESMC_CONTEXT, rc);
+          "opt_arrayList must provide arrayCount elements", ESMC_CONTEXT, rc);
         return;
       }
       // opt_arrayList has correct number of elements
@@ -223,6 +226,12 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // test if this is a valid ArrayBundle
+    if ((*ptr)->ESMC_BaseGetStatus()!=ESMF_STATUS_READY){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "not a valid object", ESMC_CONTEXT, rc);
+      return;
+    }
     // fill simple return values
     if (ESMC_NOT_PRESENT_FILTER(arrayCount) != ESMC_NULL_POINTER)
       *arrayCount = (*ptr)->getCount();
@@ -231,7 +240,7 @@ extern "C" {
       // opt_arrayList was provided
       if (*len_arrayList < (*ptr)->getCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- opt_arrayList must provide arrayCount elements", ESMC_CONTEXT, rc);
+          "opt_arrayList must provide arrayCount elements", ESMC_CONTEXT, rc);
         return;
       }
       // opt_arrayList has correct number of elements
@@ -266,7 +275,7 @@ extern "C" {
         rc);
       return;
     }catch(...){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "Caught exception",
         ESMC_CONTEXT, rc);
       return;
     }
@@ -300,7 +309,7 @@ extern "C" {
         rc);
       return;
     }catch(...){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "Caught exception",
         ESMC_CONTEXT, rc);
       return;
     }
@@ -330,7 +339,7 @@ extern "C" {
         rc);
       return;
     }catch(...){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "Caught exception",
         ESMC_CONTEXT, rc);
       return;
     }
@@ -370,6 +379,36 @@ extern "C" {
       *arraybundle, routehandle, checkflagOpt),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN_X(c_esmc_arraybundlelog)(ESMCI::ArrayBundle **arraybundle,
+    char *prefix, ESMC_LogMsgType_Flag *logMsgFlag, ESMC_Logical *deep,
+    int *rc, ESMCI_FortranStrLenArg prefix_l){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraybundlelog()"
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // convert to bool
+    bool deepFlag = false;  // default
+    if (ESMC_NOT_PRESENT_FILTER(deep) != ESMC_NULL_POINTER)
+      if (*deep == ESMF_TRUE) deepFlag = true;
+    try{
+      std::string prefixStr(prefix, prefix_l);
+      (*arraybundle)->log(prefixStr, *logMsgFlag, deepFlag);
+    }catch(int localrc){
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc))
+        return; // bail out
+    }catch(std::exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return; // bail out
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception", 
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
   void FTN_X(c_esmc_arraybundleprint)(ESMCI::ArrayBundle **ptr, int *rc){
@@ -555,7 +594,7 @@ extern "C" {
         rc);
       return;
     }catch(...){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "Caught exception",
         ESMC_CONTEXT, rc);
       return;
     }
@@ -602,7 +641,7 @@ extern "C" {
         rc);
       return;
     }catch(...){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "Caught exception",
         ESMC_CONTEXT, rc);
       return;
     }
@@ -628,24 +667,24 @@ extern "C" {
       // must provide valid factorList and factorIndexList args
       if (!present(factorIndexList)){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-          "- Not a valid pointer to factorIndexList array", ESMC_CONTEXT, rc);
+          "Not a valid pointer to factorIndexList array", ESMC_CONTEXT, rc);
         return;
       }
       if ((factorIndexList)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- factorIndexList array must be of rank 2", ESMC_CONTEXT, rc);
+          "factorIndexList array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
       if ((factorIndexList)->extent[0] != 2 && 
         (factorIndexList)->extent[0] != 4){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dimension of factorIndexList array must be of size 2 or 4",
+          "1st dimension of factorIndexList array must be of size 2 or 4",
           ESMC_CONTEXT, rc);
         return;
       }
       if ((factorIndexList)->extent[1] != *factorListCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 2nd dimension of factorIndexList does not match factorListCount",
+          "2nd dimension of factorIndexList does not match factorListCount",
           ESMC_CONTEXT, rc);
         return;
       }
@@ -674,7 +713,7 @@ extern "C" {
         rc);
       return;
     }catch(...){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "Caught exception",
         ESMC_CONTEXT, rc);
       return;
     }

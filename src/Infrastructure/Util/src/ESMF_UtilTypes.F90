@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -82,13 +82,13 @@
 !EOPI
 
       integer, parameter :: ESMF_VERSION_MAJOR        = 8
-      integer, parameter :: ESMF_VERSION_MINOR        = 3
+      integer, parameter :: ESMF_VERSION_MINOR        = 9
       integer, parameter :: ESMF_VERSION_REVISION     = 0
       integer, parameter :: ESMF_VERSION_PATCHLEVEL   = 0
       logical, parameter :: ESMF_VERSION_PUBLIC       = .false.
       logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .true.
 
-      character(*), parameter :: ESMF_VERSION_STRING  = "8.3.0 beta snapshot"
+      character(*), parameter :: ESMF_VERSION_STRING  = "8.9.0 beta snapshot"
 
 #if defined (ESMF_NETCDF)
       logical, parameter :: ESMF_IO_NETCDF_PRESENT = .true.
@@ -164,15 +164,7 @@
       sequence
 #endif
       !private
-#if 1
           integer(C_SIZE_T) :: ptr
-#else
-#if (ESMC_POINTER_SIZE == 4)
-          integer(selected_int_kind( 9)) :: ptr
-#else
-          integer(selected_int_kind(18)) :: ptr
-#endif
-#endif
       end type
 
       type(ESMF_Pointer), parameter :: ESMF_NULL_POINTER = ESMF_Pointer(0), &
@@ -782,6 +774,20 @@
 
 
 !------------------------------------------------------------------------------
+      type ESMF_CubedSphereCalc_Flag
+#ifndef ESMF_NO_SEQUENCE
+      sequence
+#endif
+!  private
+         integer :: cubedspherecalc
+      end type
+
+      
+      type(ESMF_CubedSphereCalc_Flag), parameter :: &
+           ESMF_CUBEDSPHERECALC_1TILE = ESMF_CubedSphereCalc_Flag(1), &
+           ESMF_CUBEDSPHERECALC_LOCAL = ESMF_CubedSphereCalc_Flag(2)
+      
+!------------------------------------------------------------------------------
       type ESMF_LineType_Flag
 #ifndef ESMF_NO_SEQUENCE
       sequence
@@ -1155,6 +1161,11 @@
              ESMF_EXTRAPMETHOD_CREEP, &
              ESMF_EXTRAPMETHOD_CREEP_NRST_D
 
+      public ESMF_CubedSphereCalc_Flag, &
+             ESMF_CUBEDSPHERECALC_1TILE, &
+             ESMF_CUBEDSPHERECALC_LOCAL 
+      
+      
       public ESMF_LineType_Flag, &
              ESMF_LINETYPE_CART, &
              ESMF_LINETYPE_GREAT_CIRCLE
@@ -1295,6 +1306,7 @@ interface operator (==)
   module procedure ESMF_FileStatusEq
   module procedure ESMF_RegridMethodEq
   module procedure ESMF_ExtrapMethodEq
+  module procedure ESMF_CubedSphereCalcEq
   module procedure ESMF_CoordSysEqual
   module procedure ESMF_LineTypeEqual
   module procedure ESMF_NormTypeEqual
@@ -1310,9 +1322,9 @@ interface operator (/=)
   module procedure ESMF_bfne
   module procedure ESMF_ctfne
   module procedure ESMF_tnfne
-  module procedure ESMF_ifneq
   module procedure ESMF_pinne
   module procedure ESMF_frne
+  module procedure ESMF_ifneq
   module procedure ESMF_unmappedactionne
   module procedure ESMF_RegridPoleNe
   module procedure ESMF_FileFormatNe
@@ -1320,6 +1332,7 @@ interface operator (/=)
   module procedure ESMF_FileStatusNe
   module procedure ESMF_RegridMethodNe
   module procedure ESMF_ExtrapMethodNe
+  module procedure ESMF_CubedSphereCalcNe
   module procedure ESMF_CoordSysNotEqual
   module procedure ESMF_LineTypeNotEqual
   module procedure ESMF_NormTypeNotEqual
@@ -1339,6 +1352,7 @@ interface assignment (=)
   module procedure ESMF_ptas2
   module procedure ESMF_ioas
   module procedure ESMF_ifas_string
+  module procedure ESMF_FileFormatAsString
   module procedure ESMF_FileStatusAs
 end interface  
 
@@ -1506,7 +1520,7 @@ end interface
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_AttReconcileFlag types
 
-function ESMF_atreceq(atrec1, atrec2)
+impure elemental function ESMF_atreceq(atrec1, atrec2)
   logical ESMF_atreceq
   type(ESMF_AttReconcileFlag), intent(in) :: atrec1, atrec2
 
@@ -1524,7 +1538,7 @@ recursive function ESMF_sfeq(sf1, sf2) result (sfeq)
 end function
 
 recursive function ESMF_sfne(sf1, sf2) result (sfne)
- logical sfne
+ logical :: sfne
  type(ESMF_Status), intent(in) :: sf1, sf2
 
  sfne = (sf1%status /= sf2%status)
@@ -1533,14 +1547,14 @@ end function
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_TypeKinds to see if they're the same or not
 
-function ESMF_dkeq(dk1, dk2)
+impure elemental function ESMF_dkeq(dk1, dk2)
  logical ESMF_dkeq
  type(ESMF_TypeKind_Flag), intent(in) :: dk1, dk2
 
  ESMF_dkeq = (dk1%dkind == dk2%dkind)
 end function
 
-function ESMF_dkne(dk1, dk2)
+impure elemental function ESMF_dkne(dk1, dk2)
  logical ESMF_dkne
  type(ESMF_TypeKind_Flag), intent(in) :: dk1, dk2
 
@@ -1618,14 +1632,14 @@ subroutine ESMF_bfas(bf1, bf2)
  bf1%value = bf2%value
 end subroutine
 
-function ESMF_bfeq(bf1, bf2)
+impure elemental function ESMF_bfeq(bf1, bf2)
  logical ESMF_bfeq
  type(ESMF_Sync_Flag), intent(in) :: bf1, bf2
 
  ESMF_bfeq = (bf1%value == bf2%value)
 end function
 
-function ESMF_bfne(bf1, bf2)
+impure elemental function ESMF_bfne(bf1, bf2)
  logical ESMF_bfne
  type(ESMF_Sync_Flag), intent(in) :: bf1, bf2
 
@@ -1635,14 +1649,14 @@ end function
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_Context_Flags
 
-function ESMF_ctfeq(ctf1, ctf2)
+impure elemental function ESMF_ctfeq(ctf1, ctf2)
  logical ESMF_ctfeq
  type(ESMF_Context_Flag), intent(in) :: ctf1, ctf2
 
  ESMF_ctfeq = (ctf1%value == ctf2%value)
 end function
 
-function ESMF_ctfne(ctf1, ctf2)
+impure elemental function ESMF_ctfne(ctf1, ctf2)
  logical ESMF_ctfne
  type(ESMF_Context_Flag), intent(in) :: ctf1, ctf2
 
@@ -1652,14 +1666,14 @@ end function
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_End_Flags
 
-function ESMF_tnfeq(tnf1, tnf2)
+impure elemental function ESMF_tnfeq(tnf1, tnf2)
  logical ESMF_tnfeq
  type(ESMF_End_Flag), intent(in) :: tnf1, tnf2
 
  ESMF_tnfeq = (tnf1%value == tnf2%value)
 end function
 
-function ESMF_tnfne(tnf1, tnf2)
+impure elemental function ESMF_tnfne(tnf1, tnf2)
  logical ESMF_tnfne
  type(ESMF_End_Flag), intent(in) :: tnf1, tnf2
 
@@ -1669,14 +1683,14 @@ end function
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_Pointers to see if they're the same or not
 
-function ESMF_pteq(pt1, pt2)
+impure elemental function ESMF_pteq(pt1, pt2)
  logical ESMF_pteq
  type(ESMF_Pointer), intent(in) :: pt1, pt2
 
  ESMF_pteq = (pt1%ptr == pt2%ptr)
 end function
 
-function ESMF_ptne(pt1, pt2)
+impure elemental function ESMF_ptne(pt1, pt2)
  logical ESMF_ptne
  type(ESMF_Pointer), intent(in) :: pt1, pt2
 
@@ -1701,14 +1715,14 @@ end subroutine
 ! function to compare two ESMF_Logicals to see if they're the same or not
 ! also assignment to real f90 logical 
 
-function ESMF_tfeq(tf1, tf2)
+impure elemental function ESMF_tfeq(tf1, tf2)
  logical ESMF_tfeq
  type(ESMF_Logical), intent(in) :: tf1, tf2
 
  ESMF_tfeq = (tf1%value == tf2%value)
 end function
 
-function ESMF_tfne(tf1, tf2)
+impure elemental function ESMF_tfne(tf1, tf2)
  logical ESMF_tfne
  type(ESMF_Logical), intent(in) :: tf1, tf2
 
@@ -1746,14 +1760,14 @@ end subroutine
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_Pin_Flag types
 
-function ESMF_pineq(pin1, pin2)
+impure elemental function ESMF_pineq(pin1, pin2)
  logical ESMF_pineq
  type(ESMF_Pin_Flag), intent(in) :: pin1, pin2
 
  ESMF_pineq = (pin1%value == pin2%value)
 end function
 
-function ESMF_pinne(pin1, pin2)
+impure elemental function ESMF_pinne(pin1, pin2)
  logical ESMF_pinne
  type(ESMF_Pin_Flag), intent(in) :: pin1, pin2
 
@@ -1763,14 +1777,14 @@ end function
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_Direction_Flag types
 
-function ESMF_freq(fr1, fr2)
+impure elemental function ESMF_freq(fr1, fr2)
  logical ESMF_freq
  type(ESMF_Direction_Flag), intent(in) :: fr1, fr2
 
  ESMF_freq = (fr1%value == fr2%value)
 end function
 
-function ESMF_frne(fr1, fr2)
+impure elemental function ESMF_frne(fr1, fr2)
  logical ESMF_frne
  type(ESMF_Direction_Flag), intent(in) :: fr1, fr2
 
@@ -1787,7 +1801,7 @@ subroutine ESMF_ioas(io1, io2)
  io1%io_type = io2%io_type
 end subroutine
 
-function ESMF_ioeq(io1, io2)
+impure elemental function ESMF_ioeq(io1, io2)
   logical ESMF_ioeq
   type(ESMF_IOFmt_Flag), intent(in) :: io1, io2
 
@@ -1797,14 +1811,14 @@ end function
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_Index_Flag types
 
-function ESMF_ifeq(if1, if2)
+impure elemental function ESMF_ifeq(if1, if2)
   logical ESMF_ifeq
   type(ESMF_Index_Flag), intent(in) :: if1, if2
 
   ESMF_ifeq = (if1%i_type == if2%i_type)
 end function
 
-function ESMF_ifneq(if1, if2)
+impure elemental function ESMF_ifneq(if1, if2)
   logical ESMF_ifneq
   type(ESMF_Index_Flag), intent(in) :: if1, if2
 
@@ -1831,7 +1845,7 @@ end subroutine
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_InquireFlag types
 
-function ESMF_inqfeq(inqf1, inqf2)
+impure elemental function ESMF_inqfeq(inqf1, inqf2)
   logical ESMF_inqfeq
   type(ESMF_InquireFlag), intent(in) :: inqf1, inqf2
 
@@ -1841,7 +1855,7 @@ end function ESMF_inqfeq
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_Region_Flag types
 
-function ESMF_rfeq(rf1, rf2)
+impure elemental function ESMF_rfeq(rf1, rf2)
   logical ESMF_rfeq
   type(ESMF_Region_Flag), intent(in) :: rf1, rf2
 
@@ -1861,14 +1875,14 @@ end subroutine
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_UNMAPPEDACTION types
 
-function ESMF_unmappedactioneq(uma1, uma2)
+impure elemental function ESMF_unmappedactioneq(uma1, uma2)
  logical ESMF_unmappedactioneq
  type(ESMF_UnmappedAction_Flag), intent(in) :: uma1, uma2
 
  ESMF_unmappedactioneq = (uma1%unmappedaction == uma2%unmappedaction)
 end function
 
-function ESMF_unmappedactionne(uma1, uma2)
+impure elemental function ESMF_unmappedactionne(uma1, uma2)
  logical ESMF_unmappedactionne
  type(ESMF_UnmappedAction_Flag), intent(in) :: uma1, uma2
 
@@ -1879,14 +1893,14 @@ end function
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_PoleMethod types
 
-function ESMF_RegridPoleEq(rp1, rp2)
+impure elemental function ESMF_RegridPoleEq(rp1, rp2)
  logical ESMF_RegridPoleEq
  type(ESMF_PoleMethod_Flag), intent(in) :: rp1, rp2
 
  ESMF_RegridPoleEq = (rp1%polemethod == rp2%polemethod)
 end function
 
-function ESMF_RegridPoleNe(rp1, rp2)
+impure elemental function ESMF_RegridPoleNe(rp1, rp2)
  logical ESMF_RegridPoleNe
  type(ESMF_PoleMethod_Flag), intent(in) :: rp1, rp2
 
@@ -1896,7 +1910,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FileFormatEq"
-function ESMF_FileFormatEq(FileFormat1, FileFormat2)
+impure elemental function ESMF_FileFormatEq(FileFormat1, FileFormat2)
 
 ! !RETURN VALUE:
       logical :: ESMF_FileFormatEq
@@ -1914,7 +1928,7 @@ end function ESMF_FileFormatEq
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FileFormatNe"
- function ESMF_FileFormatNe(FileFormat1, FileFormat2)
+ impure elemental function ESMF_FileFormatNe(FileFormat1, FileFormat2)
 
 ! !RETURN VALUE:
       logical :: ESMF_FileFormatNe
@@ -1930,11 +1944,41 @@ end function ESMF_FileFormatEq
                                  FileFormat2%fileformat)
 
 end function ESMF_FileFormatNe
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FileFormatAsString"
+subroutine ESMF_FileFormatAsString(String, FileFormat)
+  character(len=*), intent(out) :: String
+  type(ESMF_FileFormat_Flag), intent(in) :: FileFormat
+
+  if (FileFormat == ESMF_FILEFORMAT_UNKNOWN) then
+     String = 'ESMF_FILEFORMAT_UNKNOWN'
+  else if (FileFormat == ESMF_FILEFORMAT_VTK) then
+     String = 'ESMF_FILEFORMAT_VTK'
+  else if (FileFormat == ESMF_FILEFORMAT_SCRIP) then
+     String = 'ESMF_FILEFORMAT_SCRIP'
+  else if (FileFormat == ESMF_FILEFORMAT_ESMFMESH) then
+     String = 'ESMF_FILEFORMAT_ESMFMESH'
+  else if (FileFormat == ESMF_FILEFORMAT_ESMFGRID) then
+     String = 'ESMF_FILEFORMAT_ESMFGRID'
+  else if (FileFormat == ESMF_FILEFORMAT_UGRID) then
+     String = 'ESMF_FILEFORMAT_UGRID'
+  else if (FileFormat == ESMF_FILEFORMAT_CFGRID) then
+     ! Note that ESMF_FILEFORMAT_CFGRID is the same as ESMF_FILEFORMAT_GRIDSPEC
+     String = 'ESMF_FILEFORMAT_CFGRID/ESMF_FILEFORMAT_GRIDSPEC'
+  else if (FileFormat == ESMF_FILEFORMAT_MOSAIC) then
+     String = 'ESMF_FILEFORMAT_MOSAIC'
+  else if (FileFormat == ESMF_FILEFORMAT_TILE) then
+     String = 'ESMF_FILEFORMAT_TILE'
+  else
+     String = '(Unexpected ESMF_FILEFORMAT value)'
+  end if
+end subroutine ESMF_FileFormatAsString
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FileModeEq"
-function ESMF_FileModeEq(FileMode1, FileMode2)
+impure elemental function ESMF_FileModeEq(FileMode1, FileMode2)
 
   logical :: ESMF_FileModeEq
 
@@ -1946,7 +1990,7 @@ end function ESMF_FileModeEq
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FileModeNe"
-function ESMF_FileModeNe(FileMode1, FileMode2)
+impure elemental function ESMF_FileModeNe(FileMode1, FileMode2)
 
   logical :: ESMF_FileModeNe
 
@@ -1967,14 +2011,14 @@ subroutine ESMF_FileStatusAs(fs1, fs2)
  fs1%status_type = fs2%status_type
 end subroutine ESMF_FileStatusAs
 
-function ESMF_FileStatusEq(fs1, fs2)
+impure elemental function ESMF_FileStatusEq(fs1, fs2)
   logical ESMF_FileStatusEq
   type(ESMF_FileStatus_Flag), intent(in) :: fs1, fs2
 
   ESMF_FileStatusEq = (fs1%status_type == fs2%status_type)
 end function ESMF_FileStatusEq
 
-function ESMF_FileStatusNe(fs1, fs2)
+impure elemental function ESMF_FileStatusNe(fs1, fs2)
   logical ESMF_FileStatusNe
   type(ESMF_FileStatus_Flag), intent(in) :: fs1, fs2
 
@@ -1984,14 +2028,14 @@ end function ESMF_FileStatusNe
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_RegridMethod types
 
-function ESMF_RegridMethodEq(rp1, rp2)
+impure elemental function ESMF_RegridMethodEq(rp1, rp2)
  logical ESMF_RegridMethodEq
  type(ESMF_RegridMethod_Flag), intent(in) :: rp1, rp2
 
  ESMF_RegridMethodEq = (rp1%regridmethod == rp2%regridmethod)
 end function
 
-function ESMF_RegridMethodNe(rp1, rp2)
+impure elemental function ESMF_RegridMethodNe(rp1, rp2)
  logical ESMF_RegridMethodNe
  type(ESMF_RegridMethod_Flag), intent(in) :: rp1, rp2
 
@@ -1999,16 +2043,33 @@ function ESMF_RegridMethodNe(rp1, rp2)
 end function
 
 !------------------------------------------------------------------------------
+! function to compare two ESMF_CubedSphereCalc types
+
+impure elemental function ESMF_CubedSphereCalcEq(csc1, csc2)
+ logical ESMF_CubedSphereCalcEq
+ type(ESMF_CubedSphereCalc_Flag), intent(in) :: csc1, csc2
+
+ ESMF_CubedSphereCalcEq = (csc1%cubedspherecalc == csc2%cubedspherecalc)
+end function
+
+impure elemental function ESMF_CubedSphereCalcNe(csc1, csc2)
+ logical ESMF_CubedSphereCalcNe
+ type(ESMF_CubedSphereCalc_Flag), intent(in) :: csc1, csc2
+
+ ESMF_CubedSphereCalcNe = (csc1%cubedspherecalc /= csc2%cubedspherecalc)
+end function
+
+!------------------------------------------------------------------------------
 ! function to compare two ESMF_ExtrapMethod types
 
-function ESMF_ExtrapMethodEq(ep1, ep2)
+impure elemental function ESMF_ExtrapMethodEq(ep1, ep2)
  logical ESMF_ExtrapMethodEq
  type(ESMF_ExtrapMethod_Flag), intent(in) :: ep1, ep2
 
  ESMF_ExtrapMethodEq = (ep1%extrapmethod == ep2%extrapmethod)
 end function
 
-function ESMF_ExtrapMethodNe(ep1, ep2)
+impure elemental function ESMF_ExtrapMethodNe(ep1, ep2)
  logical ESMF_ExtrapMethodNe
  type(ESMF_ExtrapMethod_Flag), intent(in) :: ep1, ep2
 
@@ -2023,7 +2084,7 @@ end function
 ! !IROUTINE: ESMF_CoordSysEqual - Equality of Coordinate Systems
 !
 ! !INTERFACE:
-      function ESMF_CoordSysEqual(CoordSys1, CoordSys2)
+      impure elemental function ESMF_CoordSysEqual(CoordSys1, CoordSys2)
 
 ! !RETURN VALUE:
       logical :: ESMF_CoordSysEqual
@@ -2057,7 +2118,7 @@ end function
 ! !IROUTINE: ESMF_CoordSysNotEqual - Non-equality of CoordSys statuses
 !
 ! !INTERFACE:
-      function ESMF_CoordSysNotEqual(CoordSys1, CoordSys2)
+      impure elemental function ESMF_CoordSysNotEqual(CoordSys1, CoordSys2)
 
 ! !RETURN VALUE:
       logical :: ESMF_CoordSysNotEqual
@@ -2094,7 +2155,7 @@ end function
 ! !IROUTINE: ESMF_NormTypeEqual - Equality of Coordinate Systems
 !
 ! !INTERFACE:
-      function ESMF_NormTypeEqual(NormType1, NormType2)
+      impure elemental function ESMF_NormTypeEqual(NormType1, NormType2)
 
 ! !RETURN VALUE:
       logical :: ESMF_NormTypeEqual
@@ -2128,7 +2189,7 @@ end function
 ! !IROUTINE: ESMF_NormTypeNotEqual - Non-equality of NormType statuses
 !
 ! !INTERFACE:
-      function ESMF_NormTypeNotEqual(NormType1, NormType2)
+      impure elemental function ESMF_NormTypeNotEqual(NormType1, NormType2)
 
 ! !RETURN VALUE:
       logical :: ESMF_NormTypeNotEqual
@@ -2164,7 +2225,7 @@ end function
 ! !IROUTINE: ESMF_LineTypeEqual - Equality of Coordinate Systems
 !
 ! !INTERFACE:
-      function ESMF_LineTypeEqual(LineType1, LineType2)
+      impure elemental function ESMF_LineTypeEqual(LineType1, LineType2)
 
 ! !RETURN VALUE:
       logical :: ESMF_LineTypeEqual
@@ -2198,7 +2259,7 @@ end function
 ! !IROUTINE: ESMF_LineTypeNotEqual - Non-equality of LineType statuses
 !
 ! !INTERFACE:
-      function ESMF_LineTypeNotEqual(LineType1, LineType2)
+      impure elemental function ESMF_LineTypeNotEqual(LineType1, LineType2)
 
 ! !RETURN VALUE:
       logical :: ESMF_LineTypeNotEqual
@@ -2234,7 +2295,7 @@ end function
 ! !IROUTINE: ESMF_RWGCheckMethodEqual - Check equality of RWGCheckMethod flags.
 !
 ! !INTERFACE:
-      function ESMF_RWGCheckMethodEqual(CheckMethod1, CheckMethod2)
+      impure elemental function ESMF_RWGCheckMethodEqual(CheckMethod1, CheckMethod2)
 
 ! !RETURN VALUE:
       logical :: ESMF_RWGCheckMethodEqual
@@ -2268,7 +2329,7 @@ end function
 ! !IROUTINE: ESMF_RWGCheckMethodNotEqual - Check equality of RWGCheckMethod flags.
 !
 ! !INTERFACE:
-      function ESMF_RWGCheckMethodNotEqual(CheckMethod1, CheckMethod2)
+      impure elemental function ESMF_RWGCheckMethodNotEqual(CheckMethod1, CheckMethod2)
 
 ! !RETURN VALUE:
       logical :: ESMF_RWGCheckMethodNotEqual
@@ -2304,7 +2365,7 @@ end function
 ! !IROUTINE: ESMF_TermOrderEq - Equality of TermOrder Flag
 !
 ! !INTERFACE:
-      function ESMF_TermOrderEq(termOrder1, termOrder2)
+      impure elemental function ESMF_TermOrderEq(termOrder1, termOrder2)
 
 ! !RETURN VALUE:
       logical :: ESMF_TermOrderEq
@@ -2396,7 +2457,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         print *, ""
         print *, "Earth System Modeling Framework"
         print *, ""
-        print *, "Copyright (c) 2002-2022 University Corporation for Atmospheric Research,"
+        print *, "Copyright (c) 2002-2025 University Corporation for Atmospheric Research,"
         print *, "Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory,"
         print *, "University of Michigan, National Centers for Environmental Prediction,"
         print *, "Los Alamos National Laboratory, Argonne National Laboratory,"

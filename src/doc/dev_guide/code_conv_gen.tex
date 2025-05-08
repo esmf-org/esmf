@@ -51,7 +51,7 @@ Software documentation for all releases is at:
 \end{verbatim}
 
 Documents are available to developers for editing through the
-ESMF repository on the SourceForge site.
+ESMF repository on the GitHub site.
 
 \subsubsection{File format}
 
@@ -383,21 +383,6 @@ pointers because they are not part of Fortran-90 or Fortran-95.
 
 \subsection{Code: File Rules} 
 
-\subsubsection{Version Identification} 
-The first line of every file in ESMF
-  must be its CVS version identification. For example, each \LaTeX\ 
-  file must begin:
-\begin{verbatim}
-% $Id$ 
-\end{verbatim}
-
-In addition, for source code, the CVS identifier must have the 
-ability to be written to a variable for output to a configuration log.  
-Therefore each F90 module must contain a declaration:
-\begin{verbatim}
-character(len=80), private :: version = '$Id$'
-\end{verbatim}
-
 \subsubsection{License and Copyright Information}
 
 Source and documentation files must contain the ESMF license and 
@@ -405,7 +390,7 @@ copyright header:
 
 \begin{verbatim}
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,

@@ -113,7 +113,7 @@ use File::Find
 			push @all_files, "$File::Find::name\n" ;
         }
         # Get all system tests files
-        @st_files=grep (/STest.F90$|STest.C$/, @all_files);
+        @st_files=grep (/STest.F90$|STest.C$|STest.c$/, @all_files);
 	# Check for special case of MPMD test
 	$count=grep (/STestA.F90/, @all_files);
 	if ($count != 0) {
@@ -192,6 +192,9 @@ use File::Find
                 s/ESMF//;# Break first ESMF string
                 s/ESMF/ ESMF/;# Break it into 2 fields
                 s/([^ ]*) ([^ ]*)/$2/; # Get rid of the 1st field
+                s/ESMC//;# Break first ESMC string
+                s/ESMC/ ESMC/;# Break it into 2 fields
+                s/([^ ]*) ([^ ]*)/$2/; # Get rid of the 1st field
                 s/\./ /; # Break it into 2 fields
                 s/([^ ]*) ([^ ]*)/$1.Log\n/; # Get rid of the 2nd field
         }
@@ -225,7 +228,7 @@ use File::Find
                 @Log_files=grep (/STest/, @tmp_Log_files);
                 #Sort the list of Log files.
                 @Log_files = sort (@Log_files);
-                # Find the Log fles that are in the st_ex_files
+                # Find the Log fles that are in the st_st_files
                 foreach $file ( @st_st_files) {
                                 push @Log_st_files, grep (/$file/, @Log_files);
                 }
@@ -278,6 +281,12 @@ use File::Find
                         # Find the act_st_files fles that are in the pass_tests
                         foreach $file ( @pass_tests) {
                                 push @pass_st_files, grep (/$file.F90/, @act_st_files);
+                        }
+                        foreach $file ( @pass_tests) {
+                                push @pass_st_files, grep (/$file.C/, @act_st_files);
+                        }
+                        foreach $file ( @pass_tests) {
+                                push @pass_st_files, grep (/$file.c/, @act_st_files);
                         }
 			if (!$SUMMARY) { # Print only if full output requested
                 		print "\n\n";
@@ -345,7 +354,7 @@ use File::Find
                                 s/\.stdout//; # Delete stdout
                         }
 
-                        # Find the system test executable files that are in the st_ex_files
+                        # Find the system test executable files that are in the st_x_files
                         foreach $file ( @st_st_files) {
                                         push @stdout_st_files, grep (/$file/, @st_x_files);
                         }

@@ -22,9 +22,7 @@ endif
 #
 ifeq ($(ESMF_COMM),mpiuni)
 # MPI stub library -----------------------------------------
-ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_CPPFLAGS          += -DESMF_MPIUNI -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpich1)
@@ -35,8 +33,6 @@ ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpiCC
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),mpich2)
 # Mpich2 ---------------------------------------------------
@@ -45,8 +41,6 @@ ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),mpich)
 # Mpich3 and up --------------------------------------------
@@ -57,8 +51,8 @@ ESMF_CXXLINKLIBS       += $(shell $(ESMF_DIR)/scripts/libs.mpich3f90)
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
-ifeq ($(ESMF_COMM),mvapich2)
-# Mvapich2 ---------------------------------------------------
+ifeq ($(ESMF_COMM),mvapich)
+# Mvapich any version --------------------------------------
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
@@ -81,8 +75,6 @@ ESMF_CXXDEFAULT         = mpic++
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),openmpi)
 # OpenMPI --------------------------------------------------

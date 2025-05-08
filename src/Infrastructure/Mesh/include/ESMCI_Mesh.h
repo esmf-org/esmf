@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -102,11 +102,16 @@ void RemoveGhost();
 
 bool HasGhost() const { return sghost != NULL; }
 
- CommReg &GhostComm() { ThrowRequire(sghost); return *sghost; }
+CommReg &GhostComm() { ThrowRequire(sghost); return *sghost; }
 
- // Convenience function to communicate all fields to ghost locations
- void GhostCommAllFields();
+// Convenience function to communicate fields to ghost locations
+void GhostCommFields(UInt nfields, MEField<> *const *sfields, MEField<> *const *rfields);
+  
+  
+// Convenience function to communicate all fields to ghost locations
+void GhostCommAllFields();
 
+  
 // Create the sym rel
 void build_sym_comm_rel(UInt obj_type);
 
@@ -126,8 +131,9 @@ void change_comm(MPI_Comm new_comm);
  */
 void resolve_cspec_delete_owners(UInt obj_type);
 
- ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<int> *maskValuesArg, int *rc);
+ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<int> *maskValuesArg, bool add_orig_coords, int *rc);
 
+  
   public:
 // STUFF FOR SPLIT MESH
 // TODO: MOVE TO MESHCXX AND CALL THAT FROM F90
@@ -142,8 +148,8 @@ void resolve_cspec_delete_owners(UInt obj_type);
  ESMC_CoordSys_Flag coordsys;
 
  // Temp XGrid info
- int side; // 1=A, 2=B, 3= middle
- int ind; // which number grid on the side
+ int side; // 1=A, 2=B, 3= middle  -1=unused
+ int ind; // which number grid on the side (-1 unused)
 
  // Original comm where this mesh was commited               
  MPI_Comm orig_comm;

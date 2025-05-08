@@ -11,6 +11,12 @@ ESMF_CXXDEFAULT         = CC
 ESMF_CDEFAULT           = cc
 
 ############################################################
+# Do not use an explicit std switch for C99
+#
+ESMF_CSTD               = sysdefault
+ESMF_CSTDFLAG           =
+
+############################################################
 # Default MPI setting.
 #
 ifeq ($(ESMF_COMM),default)
@@ -22,9 +28,7 @@ endif
 #
 ifeq ($(ESMF_COMM),mpiuni)
 # MPI stub library -----------------------------------------
-ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_CPPFLAGS          += -DESMF_MPIUNI -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpi)
@@ -80,11 +84,6 @@ ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_DLFCN
 
 ############################################################
-# XT compute nodes do not have support for "gethostid()"
-#
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_GETHOSTID
-
-############################################################
 # XT compute nodes do not have support for signals
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SIGNALS
@@ -105,7 +104,7 @@ ESMF_PTHREADS := OFF
 ESMF_OPENMP := OFF
 
 ############################################################
-# Need this until the file convention is fixed (then remove these two lines)
+# Explicit flags for handling specific format and cpp combos
 #
 ESMF_F90COMPILEFREENOCPP = -Mfreeform
 ESMF_F90COMPILEFIXCPP    = -Mpreprocess -Mnofreeform

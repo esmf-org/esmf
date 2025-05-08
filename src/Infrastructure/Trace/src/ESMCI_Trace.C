@@ -3,7 +3,7 @@
  * Writes trace events to the file system.
  *
  * Earth System Modeling Framework
- * Copyright 2002-2022, University Corporation for Atmospheric Research,
+ * Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
  * Massachusetts Institute of Technology, Geophysical Fluid Dynamics
  * Laboratory, University of Michigan, National Centers for Environmental
  * Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -98,6 +98,13 @@ namespace ESMCI {
   static bool profileOutputToFile = false;   // output to text file?
   static bool profileOutputToBinary = false; // output to binary trace?
   static bool profileOutputSummary = false;   // output aggregate profile on root PET?
+
+  // Profile information by type
+  static int ProfileTypeInfo[ESMC_PROFILETYPE_NUM];
+  
+  static bool profileLocalPetThread(){
+    return (profileLocalPet && VM::isThreadKnown());
+  }
 
   static uint16_t next_local_id() {
     static uint16_t next = 1;
@@ -447,6 +454,36 @@ namespace ESMCI {
 #endif
   }
 
+static void SetProfileTypeInfoFromEnv() {
+  
+  // Init to 0
+  for (int i=0; i<ESMC_PROFILETYPE_NUM; i++) {
+    ProfileTypeInfo[i]=0;
+  }
+  
+  // Check for environment variable and set based on that
+  // These will probably be fairly specific to the type, so for now
+  // not trying to do anything automatic across different types
+
+  // NOTE: You need to set up the env variable in ESMCI_VM.C before it'll work here
+  
+  // Set ESMF_ProfileType_Regrid 
+  char const *envRegridChar = VM::getenv("ESMF_RUNTIME_PROFILE_REGRID");
+  if (envRegridChar != NULL && strlen(envRegridChar) > 0) {
+
+    // Get regrid info from string
+    int info=0; // Default if nothing is recognized
+    if (envRegridChar[0] == '0') info=0;
+    if (envRegridChar[0] == '1') info=1;
+    else if (envRegridChar[0] == '2') info=2;
+    else if (envRegridChar[0] == '3') info=3;
+
+    // Set in profile info array
+    ProfileTypeInfo[ESMC_PROFILETYPE_REGRID] = info;
+  }    
+}
+
+  
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceOpen()"
   void TraceOpen(std::string trace_dir, int *profileToLog, int *rc) {
@@ -460,7 +497,7 @@ namespace ESMCI {
     if (ESMC_LogDefault.MsgFoundError(localrc,
          ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
       return;
-
+    
     //determine if tracing is turned on for this PET
     traceLocalPet = TraceIsEnabledForPET(globalvm->getLocalPet(), &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -468,6 +505,7 @@ namespace ESMCI {
       traceLocalPet = false;
       return;
     }
+
 
     //determine if profiling is turned on for this PET
     //if tracing is enabled, automatically turn on profiling
@@ -477,9 +515,9 @@ namespace ESMCI {
       profileLocalPet = false;
       return;
     }
-
+    
     //determine output method for profiling, if enabled
-    if (profileLocalPet) {
+    if (profileLocalPetThread()) {
       //always output binary if tracing is enabled
       if (traceLocalPet) profileOutputToBinary = true;
       char const *envProfileOutput = VM::getenv("ESMF_RUNTIME_PROFILE_OUTPUT");
@@ -522,13 +560,16 @@ namespace ESMCI {
     if (traceLocalPet) {
       ESMC_LogDefault.Write("ESMF Tracing Enabled", ESMC_LOGMSG_INFO);
     }
-    if (profileLocalPet) {
+    if (profileLocalPetThread()) {
       ESMC_LogDefault.Write("ESMF Profiling Enabled", ESMC_LOGMSG_INFO);
     }
 
+    // Set other profile information
+    SetProfileTypeInfoFromEnv();
+    
     // initialize the clock
     struct esmftrc_platform_filesys_ctx *ctx;
-    if (traceLocalPet || profileLocalPet) {
+    if (traceLocalPet || profileLocalPetThread()) {
       ctx = FROM_VOID_PTR(struct esmftrc_platform_filesys_ctx, malloc(sizeof(*ctx)));
       if (!ctx) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_MEM_ALLOCATE, "Cannot allocate context",
@@ -536,7 +577,7 @@ namespace ESMCI {
         return;
       }
       ctx->latch_ts = 0;
-      ctx->fh == NULL;
+      ctx->fh = NULL;
 
       //store as global context
       traceCtx = ctx;
@@ -649,10 +690,17 @@ namespace ESMCI {
       globalvm->barrier();  //match barrier call above
     }
 
-    if (traceLocalPet || profileLocalPet) {
+    if (traceLocalPet || profileLocalPetThread()) {
       traceInitialized = true;
       // notify any function wrappers that trace is ready
       InitializeWrappers();
+    }
+
+    // enter global ESMF region
+    TraceEventRegionEnter("[ESMF]", &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,
+         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+      return;
     }
 
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -961,97 +1009,275 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI::GatherRegions()"
   static void GatherRegions(int *rc) {
 
+#define USE_GATHER
+#define LOG_DEBUG_off
+
     int localrc;
     VM *globalvm = VM::getGlobal(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc,
-          ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
-      return;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) return;
 
     char *serializedTree = NULL;
     size_t bufferSize = 0;
+    int bufferSizeInt = 0;
 
-    if (profileLocalPet && globalvm->getLocalPet() > 0) {
-      //std::cout << "serialize from pet: " << globalvm->getLocalPet() << "\n";
+    if (profileLocalPetThread() && globalvm->getLocalPet() > 0) {
       try {
         serializedTree = rootRegionNode.serialize(&bufferSize);
+        bufferSizeInt = bufferSize;
       }
       catch(std::exception& e) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                      e.what(), ESMC_CONTEXT, rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, e.what(),
+          ESMC_CONTEXT, rc);
         return;
       }
-      //std::cout << "sending profile from pet: " << globalvm->getLocalPet() << " (" << bufferSize << ")" << "\n";
       //send size of buffer
+#ifdef LOG_DEBUG
+      {
+        std::stringstream msg;
+        msg << "Sending local bufferSize=" << bufferSize <<
+          " or bufferSizeInt=" << bufferSizeInt;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
+#ifdef USE_GATHER
+      globalvm->gather((void *) &bufferSizeInt, NULL, sizeof(bufferSizeInt), 0);
+#else
       globalvm->send((void *) &bufferSize, sizeof(bufferSize), 0);
+#endif
+
+      //bcast root's decision whether to use gatherv or not
+      bool use_gatherv;
+      globalvm->broadcast(&use_gatherv, sizeof(bool), 0);
+#ifdef LOG_DEBUG
+      {
+        std::stringstream msg;
+        msg << "Root sent use_gatherv: " << use_gatherv;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
+
       //send buffer itself
-      globalvm->send((void *) serializedTree, bufferSize, 0);
+#ifdef LOG_DEBUG
+      {
+        std::stringstream msg;
+        msg << "Sending serializedTree at " << (void *)serializedTree;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
+      if (use_gatherv)
+        globalvm->gatherv((void *) serializedTree, bufferSizeInt,
+          NULL, NULL, NULL, vmBYTE, 0);
+      else
+        globalvm->send((void *) serializedTree, bufferSize, 0);
 
       free(serializedTree);
     }
     else if (globalvm->getLocalPet() == 0) {
 
       //clone root
-      //ESMCI::RegionNode *aggNode = new ESMCI::RegionNode(NULL, &rootRegionNode);
       ESMCI::RegionSummary *sumNode = new ESMCI::RegionSummary(NULL);
+
+#ifdef LOG_DEBUG
+      {
+        std::stringstream msg;
+        msg << "Root set up sumNode at " << (void *)sumNode;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
 
       //first add my own timing tree to the summary
       sumNode->merge(rootRegionNode, globalvm->getLocalPet());
 
-      //then gather from other PETs
-      for (int p=1; p<globalvm->getPetCount(); p++) {
+#ifdef LOG_DEBUG
+      {
+        std::stringstream msg;
+        msg << "After root merged own tree, sumNode at " << (void *)sumNode;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
 
-        if (ProfileIsEnabledForPET(p, &localrc) || TraceIsEnabledForPET(p, &localrc)) {
+      int petCount = globalvm->getPetCount();
+      unsigned long long int totalSize = 0;
+      bool use_gatherv = false;
+      vector<int> bufferSizeList;
+      vector<int> outOffSets;
+      vector<char> serializedTreeList;
 
-          bufferSize = 0;
-          globalvm->recv((void *) &bufferSize, sizeof(bufferSize), p);
-          //std::cout << "receive profile from pet: " << p << " (" << bufferSize << ")" << "\n";
+#ifdef USE_GATHER
+#ifdef LOG_DEBUG
+      {
+        std::stringstream msg;
+        msg << "GatherRegions root PET before Gather()";
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
+      bufferSizeList.resize(petCount);
+      globalvm->gather((void *) &bufferSizeInt, &(bufferSizeList[0]),
+        sizeof(bufferSizeInt), 0);
+#ifdef LOG_DEBUG
+      {
+        std::stringstream msg;
+        msg << "GatherRegions root PET after Gather()";
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        for (auto i=0; i<petCount; i++){
+          msg.str(""); // clear
+          msg << "bufferSizeList["<<i<<"]="<<bufferSizeList[i];
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        }
+      }
+#endif
 
-          serializedTree = (char *) malloc(bufferSize);
-          if (serializedTree == NULL) {
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_MEM_ALLOCATE,
-                                        "Error allocating memory when gather profiled regions",
-                                        ESMC_CONTEXT, rc);
-          return;
+      outOffSets.resize(petCount);
+      totalSize = 0;
+      outOffSets[0] = 0;
+      for (auto i=1; i<petCount; i++){
+        outOffSets[i] = outOffSets[i-1] + bufferSizeList[i-1];
+        totalSize += bufferSizeList[i];
+      }
+      if (totalSize <= VM_MPI_SIZE_LIMIT) use_gatherv = true;
+#ifdef LOG_DEBUG
+      {
+        std::stringstream msg;
+        msg << "totalSize="<<totalSize << " use_gatherv="<<use_gatherv;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        for (auto i=0; i<petCount; i++){
+          msg.str(""); // clear
+          msg << "outOffSets["<<i<<"]="<<outOffSets[i];
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        }
+      }
+#endif
+#endif
+
+      //bcast root's decision whether to use gatherv or not
+      globalvm->broadcast(&use_gatherv, sizeof(bool), 0);
+
+      if (use_gatherv){
+        serializedTreeList.resize(totalSize);
+#ifdef LOG_DEBUG
+        {
+          std::stringstream msg;
+          msg << "serializedTreeList at "<< (void *)&(serializedTreeList[0]);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+          msg.str("");  //clear
+          msg << "GatherRegions root PET before GatherV()";
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        }
+#endif
+        globalvm->gatherv(NULL, 0, (void *)&(serializedTreeList[0]),
+          (int *)&(bufferSizeList[0]), &(outOffSets[0]), vmBYTE, 0);
+#ifdef LOG_DEBUG
+        {
+          std::stringstream msg;
+          msg << "GatherRegions root PET after GatherV()";
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        }
+#endif
+      }
+
+      //then add from other PETs
+      for (int p=1; p<petCount; p++){
+
+        if (ProfileIsEnabledForPET(p, &localrc) || TraceIsEnabledForPET(p, &localrc)){
+
+#ifdef LOG_DEBUG
+          {
+            std::stringstream msg;
+            msg << "GatherRegions root PET merging from PET " << p;
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
-          memset(serializedTree, 0, bufferSize);
+#endif
 
-          globalvm->recv(serializedTree, bufferSize, p);
+#ifdef USE_GATHER
+          bufferSize = bufferSizeList[p];
+#else
+          bufferSize = 0;
+#ifdef LOG_DEBUG
+          {
+            std::stringstream msg;
+            msg << "GatherRegions root PET buffSize start receiving from PET " << p;
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+          }
+#endif
+          globalvm->recv((void *) &bufferSize, sizeof(bufferSize), p);
+#ifdef LOG_DEBUG
+          {
+            std::stringstream msg;
+            msg << "GatherRegions root PET buffSize done receiving from PET " << p;
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+          }
+#endif
+#endif
 
+          if (use_gatherv)
+            serializedTree = &(serializedTreeList[outOffSets[p]]);
+          else{
+            serializedTree = new char[bufferSize];
+            if (serializedTree == NULL){
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_MEM_ALLOCATE,
+                "Error allocating memory when gather profiled regions",
+                ESMC_CONTEXT, rc);
+              return;
+            }
+            memset(serializedTree, 0, bufferSize);
+#ifdef LOG_DEBUG
+            {
+              std::stringstream msg;
+              msg << "GatherRegions root PET start receiving from PET " << p;
+              ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+            }
+#endif
+            globalvm->recv(serializedTree, bufferSize, p);
+#ifdef LOG_DEBUG
+            {
+              std::stringstream msg;
+              msg << "GatherRegions root PET done receiving from PET " << p;
+              ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+            }
+#endif
+          }
+#ifdef LOG_DEBUG
+          {
+            std::stringstream msg;
+            msg << "serializedTree at " << (void *)serializedTree <<
+              " of size: " << bufferSize;
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+          }
+#endif
 
-          try {
-	    ESMCI::RegionNode *desNode = new ESMCI::RegionNode(serializedTree, bufferSize);
-	    //merge statistics
-	    sumNode->merge(*desNode, p);
-	    delete desNode;
-	  }
+          try{
+            ESMCI::RegionNode *desNode
+              = new ESMCI::RegionNode(serializedTree, bufferSize);
+            //merge statistics
+            sumNode->merge(*desNode, p);
+            delete desNode;
+          }
           catch(std::exception& e) {
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          e.what(), ESMC_CONTEXT, rc);
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, e.what(),
+              ESMC_CONTEXT, rc);
             return;
           }
 
-          free(serializedTree);
+          if (!use_gatherv)
+            delete [] serializedTree;
         }
-        else if (ESMC_LogDefault.MsgFoundError(localrc,
-                   ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
-          return;
-        }
-
+        else if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) return;
       }
 
       //now we have received and merged
       //profiles from all other PETs
       printSummaryProfile(sumNode, "ESMF_Profile.summary", &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc,
-           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
-        return;
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
 
       delete sumNode;
     }
-
   }
 
 
+  
 
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceClose()"
@@ -1063,6 +1289,14 @@ namespace ESMCI {
     // allow calling multiple times, only closes
     // on the first call, needed in testing
     if (traceInitialized) {
+
+      // exit global ESMF region
+      TraceEventRegionExit("[ESMF]", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,
+           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+        return;
+      }
+
       traceInitialized = false;
       FinalizeWrappers();
 
@@ -1133,6 +1367,13 @@ namespace ESMCI {
   }
 
 
+  
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceGetProfileTypeInfo()"
+  int TraceGetProfileTypeInfo(enum ESMC_ProfileType type) {
+    return ProfileTypeInfo[type];
+  }
+  
 
   ///////////////////// I/O Tracing //////////////////
 
@@ -1206,13 +1447,13 @@ namespace ESMCI {
   /////////////////// MPI /////////////////////
 
   void TraceMPIWaitStart() {
-    if (profileLocalPet) {
+    if (profileLocalPetThread()) {
       currentRegionNode->enteredMPI(TraceGetClock(traceCtx));
     }
   }
 
   void TraceMPIWaitEnd() {
-    if (profileLocalPet) {
+    if (profileLocalPetThread()) {
       currentRegionNode->exitedMPI(TraceGetClock(traceCtx));
     }
   }
@@ -1222,7 +1463,7 @@ namespace ESMCI {
    */
   void TraceTest_GetMPIWaitStats(int *count, long long *time) {
     if (!traceInitialized) return;
-    if (profileLocalPet) {
+    if (profileLocalPetThread()) {
       if (count != NULL)
         *count = currentRegionNode->getCountMPI();
       if (time != NULL)
@@ -1233,7 +1474,7 @@ namespace ESMCI {
   void TraceTest_CheckMPIRegion(string name, int *exists) {
     if (exists == NULL) return;
     *exists = 0;
-    if (traceLocalPet || profileLocalPet) {
+    if (traceLocalPet || profileLocalPetThread()) {
       if (currentRegionNode == NULL) return;
       uint16_t local_id = 0;
       //bool present = userRegionMap.get(name, local_id);
@@ -1245,13 +1486,12 @@ namespace ESMCI {
       bool present = false;
       for(it = entries.begin(); it != entries.end(); it++) {
         string regName = (*it)->getKey();
-	std::transform(regName.begin(), regName.end(), regName.begin(), ::tolower);
-	//std::cout << "Comparing: " << name << " to " << regName << "\n";
-	if (regName == name) {
-	  present = true;
-	  local_id = (*it)->getValue();
-	  break;
-	}
+        std::transform(regName.begin(), regName.end(), regName.begin(), ::tolower);
+        if (regName == name) {
+          present = true;
+          local_id = (*it)->getValue();
+          break;
+        }
       }
 
       if (!present) return;
@@ -1267,7 +1507,7 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI::TraceEventPhaseEnter()"
   void TraceEventPhaseEnter(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase, int *rc) {
 
-    if (traceLocalPet || profileLocalPet) {
+    if (traceLocalPet || profileLocalPetThread()) {
 
       uint16_t local_id = 0;
       ESMFPhaseId phaseId(ESMFId(*ep_vmid, *ep_baseid), *ep_method, *ep_phase);
@@ -1336,7 +1576,7 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI::TraceEventCompPhaseEnter()"
   void TraceEventCompPhaseEnter(Comp *comp, enum method *method, int *phase, int *rc) {
 
-    if (traceLocalPet || profileLocalPet) {
+    if (traceLocalPet || profileLocalPetThread()) {
       int localrc;
 
       int methodid = MethodToEnum(*method);
@@ -1372,7 +1612,7 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI::TraceEventCompPhaseExit()"
   void TraceEventCompPhaseExit(Comp *comp, enum method *method, int *phase, int *rc) {
 
-    if (traceLocalPet || profileLocalPet) {
+    if (traceLocalPet || profileLocalPetThread()) {
       int localrc;
 
       if (*method == ESMCI::METHOD_SETSERVICES || (ESMCI::METHOD_INITIALIZE && *phase==0)) {
@@ -1483,7 +1723,7 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI:TraceEventPhaseExit()"
   void TraceEventPhaseExit(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase, int *rc) {
 
-    if (traceLocalPet || profileLocalPet) {
+    if (traceLocalPet || profileLocalPetThread()) {
 
       TraceClockLatch(traceCtx);
 
@@ -1545,7 +1785,7 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI::TraceEventRegionEnter()"
   void TraceEventRegionEnter(std::string name, int *rc) {
 
-    if (traceLocalPet || profileLocalPet) {
+    if (traceLocalPet || profileLocalPetThread()) {
 
       uint16_t local_id = 0;
       bool present = userRegionMap.get(name, local_id);
@@ -1591,7 +1831,7 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI::TraceEventRegionExit()"
   void TraceEventRegionExit(std::string name, int *rc) {
 
-    if (traceLocalPet || profileLocalPet) {
+    if (traceLocalPet || profileLocalPetThread()) {
       TraceClockLatch(traceCtx);
       uint16_t local_id = 0;
       bool present = userRegionMap.get(name, local_id);
@@ -1690,7 +1930,7 @@ namespace ESMCI {
                                  strIPM.c_str(), strRPM.c_str(), strFPM.c_str());
     }
 
-    if (profileLocalPet) {
+    if (profileLocalPetThread()) {
       string compName(ep_name);
       ESMFId esmfId(*ep_vmid, *ep_baseid);
       UpdateComponentInfoMap(IPM, esmfId, 0, compName);

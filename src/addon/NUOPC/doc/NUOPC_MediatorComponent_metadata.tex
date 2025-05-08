@@ -1,20 +1,13 @@
 \label{MediatorCompMeta}
-The Mediator component metadata is implemented as an ESMF Attribute Package:
-
-\begin{itemize}
-    \item Convention: NUOPC
-    \item Purpose: Instance
-    \item Includes:
-    \begin{itemize}
-      \item CIM Model Component Simulation Description (see for example the \htmladdnormallink{Component Attribute packages}{http://www.earthsystemmodeling.org/esmf\_releases/public/ESMF\_5\_2\_0rp2/ESMF\_refdoc/node6.html\#SECTION06022100000000000000} section in the ESMF v5.2.0rp2 documentation)
-    \end{itemize} 
-\end{itemize}
+The Mediator Component metadata is implemented through ESMF\_Info. It can be accessed
+using the JSON Pointer "/NUOPC/Instance/" prefix followed by the "Attribute name"
+as per the table below. E.g. "Verbosity" is accessed using {\tt key="/NUOPC/Instance/Verbosity"}.
 
 {\bf Note} that some of the Attribute names in the following table are longer than the table column width. In these cases the
 Attribute name had to be broken into multiple lines. When that happens, a hyphen shows up to indicate the line break. The hyphen
 is {\em not} part of the Attribute name!
 
-\begin{longtable}{|p{.22\textwidth}|p{.5\textwidth}|p{.3\textwidth}|}
+\begin{longtable}{|p{.25\textwidth}|p{.4\textwidth}|p{.4\textwidth}|}
      \hline\hline
      {\bf Attribute name} & {\bf Definition} & {\bf Controlled vocabulary}\\
      \hline\hline
@@ -24,17 +17,17 @@ is {\em not} part of the Attribute name!
                        {\bf bit 1}: Intro/Extro with memory info.\newline
                        {\bf bit 2}: Intro/Extro with garbage collection info.\newline
                        {\bf bit 3}: Intro/Extro with local VM info.\newline
+                       {\bf bit 4}: Intro/Extro with ImportState info.\newline
+                       {\bf bit 5}: Intro/Extro with ExportState info.\newline
                        {\bf bit 8}: Log Initialize phase with $>>>$, $<<<$, and currTime.\newline
                        {\bf bit 9}: Log Run phase with $>>>$, $<<<$, and currTime.\newline
                        {\bf bit 10}: Log Finalize phase with $>>>$, $<<<$, and currTime.\newline
                        {\bf bit 11}: Log info about data dependency during initialize resolution.\newline
-                       {\bf bit 12}: Log run sequence execution.\newline
-                       {\bf bit 13}: Log Component creation.\newline
-                       {\bf bit 14}: Log State creation.
+                       {\bf bit 12}: Log run sequence execution.
                      & 0, 1, 2, ... \newline
                        "off" = 0 (default), \newline
-                       "low": some verbosity, \newline
-                       "high": more verbosity, \newline
+                       "low": some verbosity, bits: 0, 8, 9, 10, 13\newline
+                       "high": more verbosity, bits: 0, 4, 5, 8, 9, 10, 11, 12, 13, 14\newline
                        "max": all lower 16 bits\\ \hline
      {\tt Profiling} & String value, converted into an integer, and interpreted as a bit field. The lower 16 bits (0-15) are reserved to control profiling of the generic component implementation. Higher bits are available for user level profiling control. \newline
                        {\bf bit 0}: Top level profiling of {\em Initialize} phases.\newline
@@ -80,5 +73,6 @@ is {\em not} part of the Attribute name!
      {\tt Initialize\-DataComplete} & String value indicating whether all initialize data dependencies have been satisfied.& false, true\\ \hline
      {\tt Initialize\-DataProgress} & String value indicating whether progress is being made resolving initialize data dependencies.& false, true\\ \hline
      {\tt HierarchyProtocol} & String value specifying the hierarchy protocol.& "PushUpAllExportsAndUnsatisfiedImports" for field mirroring and connecting, "ConnectProvidedFields" to only connect provided fields (no mirroring), {\em All other values currently disable the hierarchy protocol.}\\ \hline
+     {\tt HierarchyConnectors} & String value specifying how hierarchy connectors are created.& "auto" (default), all of the connectors needed by "HierarchyProtocol" are created automatically. "manual", only connectors created manually will be used.\\ \hline
      \hline
 \end{longtable}

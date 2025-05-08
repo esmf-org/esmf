@@ -2,7 +2,7 @@
 ## Ed Hartnett 8/16/17
 
 # Initialize autoconf and automake.
-AC_INIT(pio, 2.5.7)
+AC_INIT(pio, 2.6.6)
 AC_CONFIG_SRCDIR(src/clib/pio_darray.c)
 AM_INIT_AUTOMAKE([foreign serial-tests])
 
@@ -10,16 +10,16 @@ AM_INIT_AUTOMAKE([foreign serial-tests])
 # The PIO version, again. Use AC_SUBST for pio_meta.h and
 # AC_DEFINE_UNQUOTED for config.h.
 AC_SUBST([PIO_VERSION_MAJOR]) PIO_VERSION_MAJOR=2
-AC_SUBST([PIO_VERSION_MINOR]) PIO_VERSION_MINOR=5
-AC_SUBST([PIO_VERSION_PATCH]) PIO_VERSION_PATCH=7
+AC_SUBST([PIO_VERSION_MINOR]) PIO_VERSION_MINOR=6
+AC_SUBST([PIO_VERSION_PATCH]) PIO_VERSION_PATCH=6
 AC_DEFINE_UNQUOTED([PIO_VERSION_MAJOR], [$PIO_VERSION_MAJOR], [PIO major version])
 AC_DEFINE_UNQUOTED([PIO_VERSION_MINOR], [$PIO_VERSION_MINOR], [PIO minor version])
 AC_DEFINE_UNQUOTED([PIO_VERSION_PATCH], [$PIO_VERSION_PATCH], [PIO patch version])
 
 # Once more for the documentation.
 AC_SUBST([VERSION_MAJOR], [2])
-AC_SUBST([VERSION_MINOR], [5])
-AC_SUBST([VERSION_PATCH], [7])
+AC_SUBST([VERSION_MINOR], [6])
+AC_SUBST([VERSION_PATCH], [6])
 
 
 # The m4 directory holds macros for autoconf.
@@ -38,13 +38,11 @@ fi
 LD=ld # Required for MPE to work.
 LT_INIT
 
-# Find and learn about install and ranlib.
+# Find and learn about install
 AC_PROG_INSTALL
-AC_PROG_RANLIB
 
 # Find and learn about the C compiler.
 AC_PROG_CC
-AC_PROG_CC_C99
 
 # Compiler with version information. This consists of the full path
 # name of the compiler and the reported version number.
@@ -292,15 +290,11 @@ AC_MSG_RESULT([${have_szip_write}])
 
 # Do we have parallel filter support? Parallel filters are required
 # for iotype NETCDF4P to use compression.
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include "netcdf_meta.h"],
-[[#if !NC_HAS_PAR_FILTERS
-# error
-#endif]
-])], [have_par_filters=yes], [have_par_filters=no])
 AC_MSG_CHECKING([whether netCDF provides parallel filter support])
+AC_CHECK_LIB([netcdf], [nc_inq_filter_avail], [have_par_filters=yes], [have_par_filters=no])
 AC_MSG_RESULT([${have_par_filters}])
 if test "x$have_par_filters" = xyes ; then
-   AC_DEFINE([HAVE_PAR_FILTERS], [1], [if true, netcdf-c supports filters with parallel I/O])
+   AC_DEFINE([PIO_HAS_PAR_FILTERS], [1], [if true, netcdf-c supports filters with parallel I/O])
 fi
 
 # Is this version 4.7.2, which does not work?
@@ -319,14 +313,17 @@ fi
 # Do we have the correct dispatch table version in netcdf-c for netcdf
 # integration?
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include "netcdf_meta.h"],
-[[#if NC_DISPATCH_VERSION != 2
+[[#if NC_DISPATCH_VERSION < 2
+# error
+#endif
+#if NC_DISPATCH_VERSION > 5
 # error
 #endif]
-])], [have_dispatch2=yes], [have_dispatch2=no])
-AC_MSG_CHECKING([whether netcdf-c supports version 2 of dispatch table for netcdf integration])
-AC_MSG_RESULT([${have_dispatch2}])
-if test "x$enable_netcdf_integration" = xyes -a "x$have_dispatch2" = xno; then
-   AC_MSG_ERROR([NetCDF integration cannot be used with this version of netcdf-c, please upgrade your netCDF version.])
+])], [have_dispatch=yes], [have_dispatch=no])
+AC_MSG_CHECKING([whether netcdf-c supports compatible dispatch table for netcdf integration])
+AC_MSG_RESULT([${have_dispatch}])
+if test "x$enable_netcdf_integration" = xyes -a "x$have_dispatch" = xno; then
+   AC_MSG_ERROR([NetCDF integration version is not compatible with that in ParallelIO])
 fi
 
 # Set some build settings for when netcdf-4 is supported.
@@ -336,12 +333,12 @@ fi
 AM_CONDITIONAL(BUILD_NETCDF4, [test "x$have_netcdf_par" = xyes])
 
 # Not working for some reason, so I will just set it...
-#AC_CHECK_TYPE([MPI_Offset], [], [], [#include <mpi.h>])
-#if test "x${ac_cv_type_MPI_Offset}" = xyes; then
-#   AC_CHECK_SIZEOF([MPI_Offset], [], [#include <mpi.h>])
-#else
-#   AC_MSG_ERROR([Unable to find type MPI_Offset in mpi.h])
-#fi
+AC_CHECK_TYPE([MPI_Offset], [], [], [#include <mpi.h>])
+if test "x${ac_cv_type_MPI_Offset}" = xyes; then
+   AC_CHECK_SIZEOF([MPI_Offset], [], [#include <mpi.h>])
+else
+   AC_MSG_ERROR([Unable to find type MPI_Offset in mpi.h])
+fi
 
 # If we want the timing library, we must find it.
 if test "x$enable_timing" = xyes; then
@@ -446,6 +443,7 @@ AX_SET_META([PIO_HAS_NETCDF_INTEGRATION], [$enable_netcdf_integration],[yes])
 
 # Create output variables from various shell variables, for use in
 # generating libpio.settings.
+
 AC_SUBST([enable_shared])
 AC_SUBST([enable_static])
 AC_SUBST([CFLAGS])
@@ -457,13 +455,13 @@ AC_SUBST([FPPFLAGS]) # ignored by autotools
 AC_SUBST(HAS_PNETCDF,[$enable_pnetcdf])
 AC_SUBST(HAS_LOGGING, [$enable_logging])
 AC_SUBST(HAS_SZIP_WRITE, [$have_szip_write])
-AC_SUBST([HAS_PAR_FILTERS], [$have_par_filters])
+AC_SUBST([have_par_filters])
 AC_SUBST([HAS_NETCDF4], [$have_netcdf4])
 AC_SUBST([HAS_NETCDF4_PAR], [$have_netcdf_par])
 AC_SUBST([HAS_NETCDF_INTEGRATION], [$enable_netcdf_integration])
 AC_SUBST([HAS_PIO_FORTRAN], [$enable_fortran])
 
-# Create the build summary file. 
+# Create the build summary file.
 AC_CONFIG_FILES([libpio.settings
                  src/clib/pio_meta.h
                  ])
@@ -473,30 +471,30 @@ AC_CONFIG_LINKS([tests/unit/input.nl:tests/unit/input.nl])
 AC_CONFIG_HEADERS([config.h])
 
 # Create the makefiles.
-AC_OUTPUT(Makefile
-          src/Makefile
-          src/clib/Makefile
-          src/ncint/Makefile
-          src/flib/Makefile
-          src/gptl/Makefile
-          tests/Makefile
-          tests/cunit/Makefile
-          tests/ncint/Makefile
-          tests/fncint/Makefile
-          tests/unit/Makefile
-          tests/general/Makefile
-          tests/general/util/Makefile
-          tests/performance/Makefile
-          doc/Makefile
-          doc/source/Makefile
-          doc/images/Makefile
-          examples/Makefile
-          examples/c/Makefile
-          examples/f03/Makefile
-          cmake/Makefile
-          scripts/Makefile)
+AC_CONFIG_FILES(Makefile
+                src/Makefile
+                src/clib/Makefile
+                src/ncint/Makefile
+                src/flib/Makefile
+                src/gptl/Makefile
+                tests/Makefile
+                tests/cunit/Makefile
+                tests/ncint/Makefile
+                tests/fncint/Makefile
+                tests/unit/Makefile
+                tests/general/Makefile
+                tests/general/util/Makefile
+                tests/performance/Makefile
+                doc/Makefile
+                doc/source/Makefile
+                doc/images/Makefile
+                examples/Makefile
+                examples/c/Makefile
+                examples/f03/Makefile
+                cmake/Makefile
+                scripts/Makefile)
+
+AC_OUTPUT()
 
 # Show the build summary.
 cat libpio.settings
-
-

@@ -16,6 +16,12 @@ endif
 ESMF_CDEFAULT           = pgcc
 
 ############################################################
+# Do not use an explicit std switch for C99
+#
+ESMF_CSTD               = sysdefault
+ESMF_CSTDFLAG           =
+
+############################################################
 # Default MPI setting.
 #
 ifeq ($(ESMF_COMM),default)
@@ -27,9 +33,7 @@ endif
 #
 ifeq ($(ESMF_COMM),mpiuni)
 # MPI stub library -----------------------------------------
-ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_CPPFLAGS          += -DESMF_MPIUNI -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpi)
@@ -57,8 +61,6 @@ ESMF_F90LINKLIBS       += -lpmpich++ -lmpich
 ESMF_CXXDEFAULT         = mpiCC
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),mpich2)
 # Mpich2 ---------------------------------------------------
@@ -67,8 +69,6 @@ ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),mpich)
 # Mpich3 and up --------------------------------------------
@@ -79,15 +79,7 @@ ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),mvapich)
-# Mvapich ---------------------------------------------------
-ESMF_F90DEFAULT         = mpif90
-ESMF_CXXDEFAULT         = mpicxx
-ESMF_CDEFAULT           = mpicc
-ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
-ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-else
-ifeq ($(ESMF_COMM),mvapich2)
-# Mvapich2 ---------------------------------------------------
+# Mvapich any version --------------------------------------
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
@@ -109,8 +101,6 @@ ESMF_CXXDEFAULT         = mpic++
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),lam)
 # LAM (assumed to be built with pgf90) ---------------------
@@ -120,8 +110,6 @@ ESMF_CXXDEFAULT         = mpic++
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),openmpi)
 # OpenMPI --------------------------------------------------
@@ -141,7 +129,6 @@ ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------
 else
 $(error Invalid ESMF_COMM setting: $(ESMF_COMM))
-endif
 endif
 endif
 endif
@@ -254,7 +241,7 @@ ESMF_OPENACC_F90LINKOPTS    += -acc -Minfo
 ESMF_OPENACC_CXXLINKOPTS    += -acc -Minfo
 
 ############################################################
-# Need this until the file convention is fixed (then remove these two lines)
+# Explicit flags for handling specific format and cpp combos
 #
 ESMF_F90COMPILEFREENOCPP = -Mfreeform
 ESMF_F90COMPILEFIXCPP    = -Mpreprocess -Mnofreeform

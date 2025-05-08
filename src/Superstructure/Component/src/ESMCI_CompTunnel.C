@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -821,7 +821,7 @@ printf("local rootPet was determined as %d\n", interRootPet);
         // this is a dual component side -> sender
         ESMC_LogDefault.Write("dual2actual() vmBased (dual side)...",
           ESMC_LOGMSG_DEBUG, ESMC_CONTEXT);
-        for (int i=0; i<localSendToPetList.size(); i++)
+        for (unsigned int i=0; i<localSendToPetList.size(); i++)
           bridgeVM->send(msg, len, localSendToPetList[i], tag);
       }else{
         // this is the actual component side -> receiver
@@ -936,7 +936,7 @@ printf("local rootPet was determined as %d\n", interRootPet);
         // this is a actual component side -> sender
         ESMC_LogDefault.Write("actual2dual() vmBased (actual side)...",
           ESMC_LOGMSG_DEBUG, ESMC_CONTEXT);
-        for (int i=0; i<localSendToPetList.size(); i++)
+        for (unsigned int i=0; i<localSendToPetList.size(); i++)
           bridgeVM->send(msg, len, localSendToPetList[i], tag);
       }else{
         // this is the dual component side -> receiver

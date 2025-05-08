@@ -7,11 +7,11 @@ run_uni:  run_unit_tests_uni
 LOCDIR	  = src/Infrastructure/Array/tests
 
 .NOTPARALLEL:
-#TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_ArrayInfoUTest
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayCreateGetUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayDataUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayScatterUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayGatherUTest \
+					 $(ESMF_TESTDIR)/ESMF_ArrayIOTypesUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayIOUTest \
                 $(ESMF_TESTDIR)/ESMF_ArraySMMUTest \
                 $(ESMF_TESTDIR)/ESMF_ArraySMMFromFileUTest \
@@ -25,6 +25,7 @@ TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMF_ArrayDataUTest  \
                 RUN_ESMF_ArrayScatterUTest \
                 RUN_ESMF_ArrayGatherUTest \
+					 RUN_ESMF_ArrayIOTypesUTest \
                 RUN_ESMF_ArrayIOUTest \
                 RUN_ESMF_ArraySMMUTest \
                 RUN_ESMF_ArraySMMFromFileUTest \
@@ -35,6 +36,7 @@ TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMC_ArrayUTest
 
 TESTS_RUN_UNI = RUN_ESMF_ArrayDataUTestUNI \
+					 RUN_ESMF_ArrayIOTypesUTestUNI \
                 RUN_ESMF_ArraySMMUTestUNI \
                 RUN_ESMF_ArraySMMFromFileUTestUNI \
                 RUN_ESMC_ArrayUTestUNI
@@ -83,6 +85,16 @@ RUN_ESMF_ArrayScatterUTest:
 
 RUN_ESMF_ArrayGatherUTest:
 	$(MAKE) TNAME=ArrayGather NP=4 ftest
+
+# ---
+
+RUN_ESMF_ArrayIOTypesUTest:
+	rm -f $(ESMF_TESTDIR)/ESMF_ArrayIOTypesUTest.nc
+	$(MAKE) TNAME=ArrayIOTypes NP=4 ftest
+
+RUN_ESMF_ArrayIOTypesUTestUNI:
+	rm -f $(ESMF_TESTDIR)/ESMF_ArrayIOTypesUTest.nc
+	$(MAKE) TNAME=ArrayIOTypes NP=1 ftest
 
 # ---
 

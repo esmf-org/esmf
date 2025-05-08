@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -48,7 +48,7 @@ use ESMF_ArrayMod
 use ESMF_ArrayBundleMod
 use ESMF_InfoMod
 use ESMF_UtilTypesMod
-use ESMF_GeomBaseMod
+use ESMF_GeomMod
 use ESMF_MeshMod
 use ESMF_GridMod
 use ESMF_XGridMod
@@ -92,6 +92,7 @@ interface ESMF_InfoGetFromHost
   module procedure ESMF_InfoGetFromHostState
   module procedure ESMF_InfoGetFromHostLocStream
   module procedure ESMF_InfoGetFromHostMesh
+  module procedure ESMF_InfoGetFromHostGeom
 end interface
 
 contains !=====================================================================
@@ -583,5 +584,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetFromHostMesh
+
+
+! Note: Documentation stub located in ESMF_InfoMod
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoGetFromHostGeom()"
+subroutine ESMF_InfoGetFromHostGeom(host, info, keywordEnforcer, rc)
+  type(ESMF_Geom), intent(in) :: host
+  type(ESMF_Info), intent(out) :: info
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  type(ESMF_InfoDescribe) :: eidesc
+
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+  info = eidesc%GetInfo(host, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoGetFromHostGeom
 
 end module ESMF_InfoSyncMod

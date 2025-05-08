@@ -1,0 +1,108 @@
+name: netcdf_hdf5_no_pnetcdf_ncint_mpich
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      CPPFLAGS: "-I${GITHUB_WORKSPACE}/mpich/include"
+      LDFLAGS: "-L${GITHUB_WORKSPACE}/mpich/lib "
+      # Note issue https://github.com/NCAR/ParallelIO/issues/1889 netcdf integration currently only works with netcdf 4.7.4
+      NETCDF_C_VERSION: v4.9.2
+      NETCDF_FORTRAN_VERSION: v4.6.1
+      MPICH_VERSION: v4.1.2
+      HDF5_VERSION: hdf5_1_12_2
+      FFLAGS: "-fallow-argument-mismatch"
+      FCFLAGS: "-fallow-argument-mismatch"
+    steps:
+    - uses: actions/checkout@v4
+    - name: Installs
+      run: |
+        sudo apt-get install doxygen graphviz wget gfortran libjpeg-dev libz-dev libcurl4-gnutls-dev
+    - name: cache-mpich
+      id: cache-mpich
+      uses: actions/cache@v4
+      with:
+        path: ~/work/ParallelIO/ParallelIO/mpich
+        key: mpich-${{ runner.os }}-${{ env.MPICH_VERSION }}
+
+    - name: build-mpich
+      if: steps.cache-mpich.outputs.cache-hit != 'true'
+      uses: ./.github/actions/buildmpich
+      with:
+        install_prefix: ${GITHUB_WORKSPACE}/mpich
+        mpich_version: ${{ env.MPICH_VERSION }}
+
+    - name: cache-hdf5
+      id: cache-hdf5
+      uses: actions/cache@v4
+      with:
+        path: ~/work/ParallelIO/ParallelIO/hdf5
+        key: hdf5-${{ runner.os }}-${{ env.HDF5_VERSION }}-mpich-${{ env.MPICH_VERSION }}
+
+    - name: build-hdf5
+      if: steps.cache-hdf5.outputs.cache-hit != 'true'
+      uses: ./.github/actions/buildhdf5
+      with:
+        install_prefix: $GITHUB_WORKSPACE/hdf5
+        enable_parallel: True
+        hdf5_version: ${{ env.HDF5_VERSION }}
+        mpi_path: $GITHUB_WORKSPACE/mpich
+
+    - name: cache-netcdf
+      id: cache-netcdf
+      uses: actions/cache@v4
+      with:
+        path: ~/work/ParallelIO/ParallelIO/netcdf
+        key: netcdf-${{ runner.os }}-${{ env.NETCDF_C_VERSION }}-${{ env.NETCDF_FORTRAN_VERSION }}-mpich-${{ env.MPICH_VERSION }}-hdf5-${{ env.HDF5_VERSION }}
+    - name: Prep Netcdf
+      run: |
+        export CC=mpicc
+        export FC=mpifort
+        export PATH="${GITHUB_WORKSPACE}/hdf5/bin:${GITHUB_WORKSPACE}/mpich/bin:${GITHUB_WORKSPACE}/netcdf/bin:$PATH"
+        export CPPFLAGS="$CPPFLAGS -I${GITHUB_WORKSPACE}/hdf5/include -I${GITHUB_WORKSPACE}/netcdf/include"
+        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${GITHUB_WORKSPACE}/hdf5/lib:/usr/lib/x86_64-linux-gnu/"
+        export LDFLAGS="$LDFLAGS -L${GITHUB_WORKSPACE}/hdf5/lib  -L${GITHUB_WORKSPACE}/netcdf/lib -L/usr/lib/x86_64-linux-gnu/ -lcurl"
+        printenv >> $GITHUB_ENV
+
+
+    - name: Build NetCDF C
+      if: steps.cache-netcdf.outputs.cache-hit != 'true'
+      uses: ./.github/actions/buildnetcdf
+      with:
+        netcdf_version: ${{ env.NETCDF_C_VERSION }}
+        install_prefix: ${GITHUB_WORKSPACE}/netcdf
+
+    - name: cache-netcdf-fortran
+      id: cache-netcdf-fortran
+      uses: actions/cache@v4
+      with:
+        path: ~/netcdf-fortran
+        key: netcdf-fortran-${{ runner.os }}-${{ env.NETCDF_FORTRAN_VERSION }}-mpich-${{ env.MPICH_VERSION }}-hdf5-${{ env.HDF5_VERSION }}
+
+    - name: Build NetCDF Fortran
+      if: steps.cache-netcdf.outputs.cache-hit != 'true'
+      uses: ./.github/actions/buildnetcdff
+      with:
+        netcdf_fortran_version: ${{ env.NETCDF_FORTRAN_VERSION }}
+        install_prefix: ${GITHUB_WORKSPACE}/netcdf
+        netcdf_c_path: ${GITHUB_WORKSPACE}/netcdf
+
+    - name: Build ParallelIO with autotools
+      uses: ./.github/actions/parallelio_autotools
+      with:
+        enable_fortran: True
+        enable_netcdf_integration: True
+        src_path: ${GITHUB_WORKSPACE}
+        parallelio_version: ${{ env.GITHUB_SHA }}
+    - name: make check
+      run: |
+        cd $GITHUB_WORKSPACE
+        make -j check
+#    - name: Setup tmate session
+#      if: ${{ failure() }}
+#      uses: mxschmitt/action-tmate@v3

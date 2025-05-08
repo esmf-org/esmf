@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -35,6 +35,7 @@
 
 #include "ESMCI_Util.h"
 #include "ESMCI_Macros.h"
+#include "ESMCI_F90Interface.h"
 
 //-------------------------------------------------------------------------
 
@@ -118,6 +119,8 @@ namespace ESMCI {
       DataCopyFlag docopy = DATACOPY_REFERENCE, int *rc = NULL);
     static LocalArray *create(const LocalArray *larrayIn, DataCopyFlag copyflag,
       const int *lbounds, const int *ubounds, int *rc);
+    static LocalArray *create(const LocalArray *larrayIn,
+      InterArray<int> *trailingTensorSlice, int *rc);
     static int destroy(LocalArray *array);
 
     // standard methods

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -141,6 +141,14 @@ void MBMesh_addnodes(MBMesh **mbmpp, int *_num_nodes, int *nodeId,
     int petCount = VM::getCurrent(&localrc)->getPetCount();
     ESMC_CHECK_PASSTHRU_THROW(localrc);
 
+    // Error check nodeIds
+    for (int n = 0; n < num_nodes; n++) {
+      if (nodeId[n] < 1) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                         " node ids must be >= 1 ", ESMC_CONTEXT,&localrc)) throw localrc;
+      }
+    }
+    
      // Get nodeOwner array and error check
     int *nodeOwner=NULL;
     if (present(nodeOwnerII)) { // if masks exist
@@ -244,7 +252,7 @@ void MBMesh_addelements(MBMesh **mbmpp,
                         int *elemType, InterArray<int> *_elemMaskII ,
                         int *_areaPresent, double *elemArea,
                         int *_coordsPresent, double *elemCoords,
-                        int *_num_elemConn, int *elemConn, 
+                        int *_elemConn_size, int *elemConn, 
                         ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                         int *rc)
 {
@@ -272,9 +280,6 @@ void MBMesh_addelements(MBMesh **mbmpp,
 
     // Number of elements being created
     int num_elems=*_num_elems;
-
-    // Total Size of connection list
-    int num_elemConn=*_num_elemConn;
 
     // Element mask array
     InterArray<int> *elemMaskII=_elemMaskII;
@@ -314,6 +319,15 @@ void MBMesh_addelements(MBMesh **mbmpp,
       if (elemCoordsPresent) ThrowRequire(elemCoords != NULL);
     }
 
+
+    // Error check elemIds
+    for (int e = 0; e < num_elems; e++) {
+      if (elemId[e] < 1) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                         " element ids must be >= 1 ", ESMC_CONTEXT,&localrc)) throw localrc;
+      }
+    }
+
     // Check element type
     // (Don't check when pdim=2, because any number of sides is allowed)
     if (pdim==3) {
@@ -327,24 +341,28 @@ void MBMesh_addelements(MBMesh **mbmpp,
       }
     }
 
-    // Check size of connectivity list
-    int expected_conn_size=0;
+
+    //// Calc size of connectivity list
+    int num_elemConn=0;
     if (pdim==2) {
       for (int i=0; i< num_elems; i++) {
-        expected_conn_size += elemType[i];
+        num_elemConn += elemType[i];
       }
     } else if (pdim==3) {
       for (int i=0; i< num_elems; i++) {
-        if (elemType[i]==10) expected_conn_size += 4;
-        else if (elemType[i]==12) expected_conn_size += 8;
-      }
+        if (elemType[i]==10) num_elemConn += 4;
+        else if (elemType[i]==12) num_elemConn += 8;
+       }
     }
 
-    if (expected_conn_size != num_elemConn) {
-      int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-        "- element connectivity list doesn't contain the right number of entries ",
-                                       ESMC_CONTEXT, &localrc)) throw localrc;
+    /// If size of array is available, make sure it matches
+    if (_elemConn_size != NULL) {
+      if (*_elemConn_size != num_elemConn) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                         "element connectivity list doesn't contain the right number of entries ",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
     }
 
 

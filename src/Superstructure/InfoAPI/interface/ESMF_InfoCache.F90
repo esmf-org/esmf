@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -24,6 +24,11 @@ use ESMF_UtilTypesMod     ! ESMF utility types
 use ESMF_InitMacrosMod    ! ESMF initializer macros
 use ESMF_BaseMod          ! ESMF base class
 use ESMF_LogErrMod        ! ESMF error handling
+use ESMF_StateMod
+use ESMF_StateItemMod
+use ESMF_FieldMod
+use ESMF_FieldGetMod
+use ESMF_FieldBundleMod
 
 use ESMF_VMMod
 use ESMF_InfoMod
@@ -37,8 +42,17 @@ implicit none
 ! =============================================================================
 ! =============================================================================
 
-!private
-!public
+private
+
+public c_infocache_initialize
+public c_infocache_destroy
+public c_infocache_updatefields
+public ESMF_InfoCacheFindField
+public ESMF_InfoCacheReassembleField
+public ESMF_InfoCacheReassembleFieldsFinalize
+public ESMF_InfoCacheReassembleFields
+
+public ESMF_InfoDescribe
 
 interface ! ===================================================================
 
@@ -396,13 +410,13 @@ subroutine ESMF_InfoCacheReassembleField(target, state, rc)
       if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (geom_type == "Grid") then
-        target%ftypep%geombase%gbcp%grid = archetype_field%ftypep%geombase%gbcp%grid
+        target%ftypep%geom%gbcp%grid = archetype_field%ftypep%geom%gbcp%grid
       else if (geom_type == "Mesh") then
-        target%ftypep%geombase%gbcp%mesh = archetype_field%ftypep%geombase%gbcp%mesh
+        target%ftypep%geom%gbcp%mesh = archetype_field%ftypep%geom%gbcp%mesh
       else if (geom_type == "XGrid") then
-        target%ftypep%geombase%gbcp%xgrid = archetype_field%ftypep%geombase%gbcp%xgrid
+        target%ftypep%geom%gbcp%xgrid = archetype_field%ftypep%geom%gbcp%xgrid
       else if (geom_type == "LocStream") then
-        target%ftypep%geombase%gbcp%locstream = archetype_field%ftypep%geombase%gbcp%locstream
+        target%ftypep%geom%gbcp%locstream = archetype_field%ftypep%geom%gbcp%locstream
       else
         if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, msg="Bad geom_type: "//trim(geom_type), &
           ESMF_CONTEXT, rcToReturn=rc)) return

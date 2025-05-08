@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -211,7 +211,7 @@ program ESMF_InfoSyncUTest
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   end if
 
-  if (localPet == 0) then
+  if (localPet == rootPet) then
     call desired_eidesc%Initialize(addObjectInfo=.true., rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -224,7 +224,7 @@ program ESMF_InfoSyncUTest
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   end if
 
-  call ESMF_InfoBroadcast(desired_info, 0, rc=rc)
+  call ESMF_InfoBroadcast(desired_info, rootPet, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_InfoSync(state, rootPet, vm, rc=rc)
@@ -325,7 +325,7 @@ program ESMF_InfoSyncUTest
   call eidesc%Destroy(rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  if (localPet == 0) then
+  if (localPet == rootPet) then
     call desired_eidesc%Destroy(rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   else

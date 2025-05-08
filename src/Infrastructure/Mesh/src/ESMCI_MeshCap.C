@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -561,7 +561,7 @@ void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
 void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                               int *_areaPresent, double *elemArea,
                               int *_coordsPresent, double *elemCoords,
-                              int *_num_elemConn, int *elemConn, 
+                              int *_elemConn_size, int *elemConn, 
                               ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                               int *rc)
 {
@@ -576,7 +576,7 @@ void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, Inter
                           _num_elems, elemId, elemType, _elemMaskII ,
                           _areaPresent, elemArea,
                           _coordsPresent, elemCoords,
-                          _num_elemConn, elemConn, 
+                          _elemConn_size, elemConn, 
                           _coordSys, _orig_sdim,
                           &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,ESMC_CONTEXT, rc);
@@ -588,7 +588,7 @@ void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, Inter
                        _num_elems, elemId, elemType, _elemMaskII,
                        _areaPresent, elemArea,
                        _coordsPresent, elemCoords,
-                       _num_elemConn, elemConn,
+                       _elemConn_size, elemConn,
                        _coordSys, _orig_sdim,
                        &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,ESMC_CONTEXT, rc);
@@ -1441,7 +1441,8 @@ MeshCap *MeshCap::GridToMeshCell(const Grid &grid_,
 
 // This method converts a Mesh to a PointList
 void MeshCap::MeshCap_to_PointList(ESMC_MeshLoc_Flag meshLoc,
-                                   ESMCI::InterArray<int> *maskValuesArg, 
+                                   ESMCI::InterArray<int> *maskValuesArg,
+                                   bool addOrigCoords, 
                                    PointList **out_pl,
                                    int *rc) {
 #undef ESMC_METHOD
@@ -1452,7 +1453,7 @@ void MeshCap::MeshCap_to_PointList(ESMC_MeshLoc_Flag meshLoc,
   
   if (is_esmf_mesh) {
     *out_pl=mesh->MeshToPointList(meshLoc,
-                                  maskValuesArg, &localrc);
+                                  maskValuesArg, addOrigCoords, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
 
@@ -1566,6 +1567,7 @@ void MeshCap::regrid_create(
     int *regridMethod,
     int *map_type,
     int *norm_type,
+    int *_vectorRegrid, 
     int *regridPoleType, int *regridPoleNPnts,
     int *extrapMethod,
     int *extrapNumSrcPnts,
@@ -1574,8 +1576,9 @@ void MeshCap::regrid_create(
     int *extrapNumInputLevels,
     int *unmappedaction, int *_ignoreDegenerate,
     int *srcTermProcessing, int *pipelineDepth,
-    ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
-    int *nentries, ESMCI::TempWeights **tweights,
+    ESMCI::RouteHandle **rh, int *has_rh,
+    int *has_iw, int *nentries, ESMCI::TempWeights **tweights,
+    ESMCI::RouteHandle **trh, int *has_trh,
     int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
     int *has_statusArray, ESMCI::Array **statusArray,
     int *checkFlag, 
@@ -1657,6 +1660,7 @@ void MeshCap::regrid_create(
                         regridMethod,
                         map_type,
                         norm_type,
+                        _vectorRegrid,
                         regridPoleType, regridPoleNPnts,
                         extrapMethod,
                         extrapNumSrcPnts,
@@ -1665,8 +1669,9 @@ void MeshCap::regrid_create(
                         extrapNumInputLevels,
                         unmappedaction, _ignoreDegenerate,
                         srcTermProcessing, pipelineDepth,
-                        rh, has_rh, has_iw,
-                        nentries, tweights,
+                        rh, has_rh,
+                        has_iw, nentries, tweights,
+                        trh, has_trh,
                         has_udl, _num_udl, _tudl,
                         has_statusArray, statusArray,
                         checkFlag, 
@@ -1763,7 +1768,7 @@ void MeshCap::meshcreatenodedistgrid(int *rc) {
         "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
 #endif
     }
-dg->validate(); //TODO: remove this validate() once all is working!!!
+
     // Set member 
     this->node_distgrid = dg;
     this->node_distgrid_set = true;
@@ -1771,6 +1776,9 @@ dg->validate(); //TODO: remove this validate() once all is working!!!
   } else {
       ESMC_LogDefault.Write("Node DistGrid has already been set", ESMC_LOGMSG_WARN);
   }
+
+  // Set to success
+  if (rc != NULL) *rc=ESMF_SUCCESS;
 }
 
 
@@ -1801,7 +1809,7 @@ void MeshCap::meshcreateelemdistgrid(int *rc) {
         "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
 #endif
     }
-dg->validate(); //TODO: remove this validate() once all is working!!!
+
     // Set member variables
     this->elem_distgrid = dg;
     this->elem_distgrid_set = true;
@@ -1809,6 +1817,9 @@ dg->validate(); //TODO: remove this validate() once all is working!!!
   } else {
     ESMC_LogDefault.Write("Elem DistGrid has already been set", ESMC_LOGMSG_WARN);
   }
+
+  // Set to success
+  if (rc != NULL) *rc=ESMF_SUCCESS;
 }
 
 DistGrid *MeshCap::meshgetnodedistgrid() {

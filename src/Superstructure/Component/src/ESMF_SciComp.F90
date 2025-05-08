@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -209,7 +209,7 @@ contains
 ! !IROUTINE:  ESMF_SciCompEQ - Compare two SciComps for equality
 !
 ! !INTERFACE:
-  function ESMF_SciCompEQ(scicomp1, scicomp2)
+  impure elemental function ESMF_SciCompEQ(scicomp1, scicomp2)
 ! 
 ! !RETURN VALUE:
     logical :: ESMF_SciCompEQ
@@ -261,7 +261,7 @@ contains
 ! !IROUTINE:  ESMF_SciCompNE - Compare two SciComps for non-equality
 !
 ! !INTERFACE:
-  function ESMF_SciCompNE(scicomp1, scicomp2)
+  impure elemental function ESMF_SciCompNE(scicomp1, scicomp2)
 ! 
 ! !RETURN VALUE:
     logical :: ESMF_SciCompNE
@@ -476,10 +476,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! call Comp method
     call ESMF_CompGet(scicomp%compp, name=name, compStatus=compStatus, &
        rc=localrc)
-print *, "Name: ", name
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=localrc)) return
+
+    if (scicomp%isNamedAlias .and. present(name)) then
+      ! access NamedAlias name
+      name = trim(scicomp%name)
+    endif
 
     ! call Comp method
     call ESMF_CompStatusGet(compStatus, rc = localrc)
@@ -616,11 +620,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_SciCompGetInit,scicomp,rc)
 
-    ! call Comp method
-    call ESMF_CompSet(scicomp%compp, name=name, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (scicomp%isNamedAlias .and. present(name)) then
+      ! set NamedAlias name
+      scicomp%name = trim(name)
+      ! call Comp method (without name)
+      call ESMF_CompSet(scicomp%compp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! call Comp method
+      call ESMF_CompSet(scicomp%compp, name=name, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS

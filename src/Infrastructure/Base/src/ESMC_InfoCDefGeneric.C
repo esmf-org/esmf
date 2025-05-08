@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -102,13 +102,13 @@ void ESMC_InfoGetI4(ESMCI::Info *info, char *key, int &value, int &esmc_rc, int 
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoGetI8()"
-void ESMC_InfoGetI8(ESMCI::Info *info, char *key, long int &value, int &esmc_rc, long int *def, int *index, int &fortran_bool_recursive) {
+void ESMC_InfoGetI8(ESMCI::Info *info, char *key, long long int &value, int &esmc_rc, long long int *def, int *index, int &fortran_bool_recursive) {
   ESMC_CHECK_INIT(info, esmc_rc)
   esmc_rc = ESMF_FAILURE;
   try {
     std::string local_key(key);
     bool recursive = fortran_bool_recursive == 1;
-    value = info->get<long int>(local_key, def, index, recursive, nullptr, false);
+    value = info->get<long long int>(local_key, def, index, recursive, nullptr, false);
     esmc_rc = ESMF_SUCCESS;
   }
   ESMC_CATCH_ISOC
@@ -253,7 +253,7 @@ void ESMC_InfoGetArrayI4(ESMCI::Info *info, char *key, int *value, int &count, i
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoGetArrayI8()"
-void ESMC_InfoGetArrayI8(ESMCI::Info *info, char *key, long int *value, int &count, int &esmc_rc, int &fortran_bool_recursive, bool &fortran_bool_scalarToArray, int &expected_size) {
+void ESMC_InfoGetArrayI8(ESMCI::Info *info, char *key, long long int *value, int &count, int &esmc_rc, int &fortran_bool_recursive, bool &fortran_bool_scalarToArray, int &expected_size) {
   ESMC_CHECK_INIT(info, esmc_rc)
   esmc_rc = ESMF_FAILURE;
   try {
@@ -285,7 +285,7 @@ void ESMC_InfoGetArrayI8(ESMCI::Info *info, char *key, long int *value, int &cou
         ESMC_CATCH_ERRPASSTHRU
       }
     } else {
-      value[0] = info->get<long int>(local_key, nullptr, nullptr, recursive, nullptr, false);
+      value[0] = info->get<long long int>(local_key, nullptr, nullptr, recursive, nullptr, false);
     }
     esmc_rc = ESMF_SUCCESS;
   }
@@ -389,7 +389,7 @@ void ESMC_InfoSetI4(ESMCI::Info *info, char *key, int &value, bool &force, int &
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoSetI8()"
-void ESMC_InfoSetI8(ESMCI::Info *info, char *key, long int &value, bool &force, int &esmc_rc, int *index, char *pkey) {
+void ESMC_InfoSetI8(ESMCI::Info *info, char *key, long long int &value, bool &force, int &esmc_rc, int *index, char *pkey) {
   ESMC_CHECK_INIT(info, esmc_rc)
   esmc_rc = ESMF_FAILURE;
   try {
@@ -397,7 +397,7 @@ void ESMC_InfoSetI8(ESMCI::Info *info, char *key, long int &value, bool &force, 
     std::string local_pkey(pkey);
     std::string *local_pkeyp = nullptr;
     if (local_pkey.size() != 0) {local_pkeyp = &local_pkey;}
-    info->set<long int>(local_key, value, force, index, local_pkeyp);
+    info->set<long long int>(local_key, value, force, index, local_pkeyp);
     esmc_rc = ESMF_SUCCESS;
   }
   ESMC_CATCH_ISOC
@@ -471,7 +471,7 @@ void ESMC_InfoSetArrayI4(ESMCI::Info *info, char *key, int *value, int &count, b
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_InfoSetArrayI8()"
-void ESMC_InfoSetArrayI8(ESMCI::Info *info, char *key, long int *value, int &count, bool &force, int &esmc_rc, char *pkey) {
+void ESMC_InfoSetArrayI8(ESMCI::Info *info, char *key, long long int *value, int &count, bool &force, int &esmc_rc, char *pkey) {
   ESMC_CHECK_INIT(info, esmc_rc)
   esmc_rc = ESMF_FAILURE;
   try {
@@ -479,7 +479,7 @@ void ESMC_InfoSetArrayI8(ESMCI::Info *info, char *key, long int *value, int &cou
     std::string local_pkey(pkey);
     std::string *local_pkeyp = nullptr;
     if (local_pkey.size() != 0) {local_pkeyp = &local_pkey;}
-    info->set<long int>(local_key, value, count, force, local_pkeyp);
+    info->set<long long int>(local_key, value, count, force, local_pkeyp);
     esmc_rc = ESMF_SUCCESS;
   }
   ESMC_CATCH_ISOC

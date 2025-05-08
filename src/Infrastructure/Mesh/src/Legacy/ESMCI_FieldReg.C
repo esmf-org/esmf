@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -12,9 +12,12 @@
 #include <Mesh/include/Legacy/ESMCI_FieldReg.h>
 #include <Mesh/include/Legacy/ESMCI_MEImprint.h>
 #include <Mesh/include/Legacy/ESMCI_ParEnv.h>
+#include "ESMCI_LogErr.h"
 
 #include <algorithm>
 #include <cstdio>
+
+
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -337,7 +340,8 @@ void FieldReg::Commit(MeshDB &mesh) {
       std::vector<UInt> nvalSet; // keep track of sizes of _fields
       std::vector<UInt> nvalSetObj; // keep track of sizes of _fields
       MEField<> &f = *fi->second;
-//std::cout << "Imprinting MEField:" << f.name() << std::endl;
+      //std::cout << "Imprinting MEField:" << f.name() << std::endl;
+      
       f.ordinal = ord++;
       // Loop obj type
       KernelList::iterator ki = mesh.set_begin(), ke = mesh.set_end(), kn;

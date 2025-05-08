@@ -1,7 +1,7 @@
 !  $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -511,15 +511,15 @@ recursive subroutine f_esmf_compcollectgarbage2(comp, rc)
     ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) return
 
-  ! deallocate actual CompClass allocation      
+  ! deallocate actual CompClass allocation
   if (associated(comp%compp)) then
     deallocate(comp%compp, stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, msg="Deallocating Comp", &
+    if (ESMF_LogFoundDeallocError(localrc, msg="Deallocating Comp", &
       ESMF_CONTEXT, rcToReturn=rc)) return
   endif
   nullify(comp%compp)
 
-  ! return successfully  
+  ! return successfully
   rc = ESMF_SUCCESS
 
 end subroutine f_esmf_compcollectgarbage2

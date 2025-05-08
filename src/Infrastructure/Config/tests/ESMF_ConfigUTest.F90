@@ -2,7 +2,7 @@
 !==============================================================================
 ! Earth System Modeling Framework
 !
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1531,8 +1531,8 @@ subroutine MultPar_SingleLine_Vf
       !EX_UTest
       ! Test Config From Empty Section Destroy
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Config From Empty Section Print Test"
-      call ESMF_ConfigPrint(cf2, rc=rc)
+      write(name, *) "Config From Empty Section Log Test"
+      call ESMF_ConfigLog(cf2, prefix="Config From Empty Section: ", rc=rc)
       success = rc.eq.ESMF_SUCCESS
       call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
 
@@ -1577,10 +1577,10 @@ subroutine MultPar_SingleLine_Vf
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test Config From Section Print
+      ! Test Config From Section Log
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Config Print Test"
-      call ESMF_ConfigPrint(cf2, rc=rc)
+      write(name, *) "Config from Section Log Test"
+      call ESMF_ConfigLog(cf2, prefix="Config from Section: ", rc=rc)
       success = rc.eq.ESMF_SUCCESS
       call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
 
@@ -1609,10 +1609,26 @@ subroutine MultPar_SingleLine_Vf
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test Config Create From Section
+      ! Test Config Create From Section with Table
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Config Create From Section Test"
+      write(name, *) "Config Create From Section with Table Test"
       cf2 = ESMF_ConfigCreate(cf, "%section_with_table", "%%", rc=rc)
+      success = rc.eq.ESMF_SUCCESS
+      call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+
+      counter_total = counter_total + 1
+      if (success) then
+        counter_success = counter_success + 1
+      else
+        print *, trim(name) // ' ERROR: rc = ', rc
+      end if
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Config From Section with Table Log
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Create From Section with Table Log Test"
+      call ESMF_ConfigLog(cf2, prefix="Config Create From Section with Table: ", rc=rc)
       success = rc.eq.ESMF_SUCCESS
       call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
 
@@ -2031,6 +2047,14 @@ end module config_subrs
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Create Test"
       cf = ESMF_ConfigCreate(rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Test Config Print
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Print Test"
+      call ESMF_ConfigPrint(cf, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -717,21 +717,21 @@ contains
 !------------------------------------------------------------------------------
 ! functions to compare two types to see if they're the same or not
 
-function ESMF_lmteq(mt1, mt2)
+impure elemental function ESMF_lmteq(mt1, mt2)
   logical ESMF_lmteq
   type(ESMF_LogMsg_Flag), intent(in) :: mt1,mt2
 
     ESMF_lmteq = (mt1%mtype == mt2%mtype)
 end function
 
-function ESMF_llteq(lt1, lt2)
+impure elemental function ESMF_llteq(lt1, lt2)
   logical ESMF_llteq
   type(ESMF_LogKind_Flag), intent(in) :: lt1,lt2
 
     ESMF_llteq = (lt1%ftype == lt2%ftype)
 end function
 
-function ESMF_lltne(lt1, lt2)
+impure elemental function ESMF_lltne(lt1, lt2)
   logical ESMF_lltne
   type(ESMF_LogKind_Flag), intent(in) :: lt1,lt2
 
@@ -2825,7 +2825,7 @@ end subroutine ESMF_LogEntryCopy
 ! !IROUTINE:  ESMF_LogEQ - Compare two Logs for equality
 !
 ! !INTERFACE:
-  function ESMF_LogEQ(log1, log2)
+  impure elemental function ESMF_LogEQ(log1, log2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_LogEQ
@@ -2851,7 +2851,7 @@ end subroutine ESMF_LogEntryCopy
 ! !IROUTINE:  ESMF_LogEQ - Compare two Logs for inequality
 !
 ! !INTERFACE:
-  function ESMF_LogNE(log1, log2)
+  impure elemental function ESMF_LogNE(log1, log2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_LogNE

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <vector>
 #ifndef ESMF_NO_DLFCN
 #include <dlfcn.h>
 #endif
@@ -43,6 +44,7 @@
 #include "ESMCI_Info.h"
 
 using std::string;
+using std::vector;
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -232,7 +234,7 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setvmshobj"
   void FTN_X(c_esmc_setvmshobj)(void *ptr, char const *routineArg,
-    char const *sharedObjArg, int *userRc, int *rc,
+    char const *sharedObjArg, ESMC_Logical *foundRoutine, int *userRc, int *rc,
     ESMCI_FortranStrLenArg rlen, ESMCI_FortranStrLenArg llen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -241,11 +243,21 @@ extern "C" {
       "- System does not support dynamic loading.", ESMC_CONTEXT, rc);
     return;
 #else
+    *foundRoutine = ESMF_FALSE; // initialize
     void *lib;
     if (llen>0){
       string sharedObj(sharedObjArg, llen);
       sharedObj.resize(sharedObj.find_last_not_of(" ")+1);
-      lib = dlopen(sharedObj.c_str(), RTLD_LAZY);
+      if (sharedObj.back()=='*'){
+        vector<string> suffixes{"so", "dylib", "dll"};
+        for (auto it=suffixes.begin(); it!=suffixes.end(); ++it){
+          string sharedObjTemp = sharedObj;
+          sharedObjTemp.replace(sharedObjTemp.end()-1,sharedObjTemp.end(), *it);
+          lib = dlopen(sharedObjTemp.c_str(), RTLD_LAZY);
+          if (lib) break;
+        }
+      }else
+        lib = dlopen(sharedObj.c_str(), RTLD_LAZY);
     }else
       lib = dlopen(NULL, RTLD_LAZY);  // search in executable
     if (lib == NULL){
@@ -256,14 +268,13 @@ extern "C" {
     string routine(routineArg, rlen);
     routine.resize(routine.find_last_not_of(" ")+1);
     void (*func)() = (void (*)())dlsym(lib, routine.c_str());
-    if ((void *)func == NULL){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "routine not found", ESMC_CONTEXT, rc);
-      return;
+    if ((void *)func != NULL){
+      // Routine was found
+      *foundRoutine = ESMF_TRUE;
+      ESMCI::FTable::setVM(ptr, func, userRc, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc)) return;
     }
-    ESMCI::FTable::setVM(ptr, func, userRc, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      rc)) return;
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
 #endif
@@ -298,7 +309,16 @@ extern "C" {
     if (llen>0){
       string sharedObj(sharedObjArg, llen);
       sharedObj.resize(sharedObj.find_last_not_of(" ")+1);
-      lib = dlopen(sharedObj.c_str(), RTLD_LAZY);
+      if (sharedObj.back()=='*'){
+        vector<string> suffixes{"so", "dylib", "dll"};
+        for (auto it=suffixes.begin(); it!=suffixes.end(); ++it){
+          string sharedObjTemp = sharedObj;
+          sharedObjTemp.replace(sharedObjTemp.end()-1,sharedObjTemp.end(), *it);
+          lib = dlopen(sharedObjTemp.c_str(), RTLD_LAZY);
+          if (lib) break;
+        }
+      }else
+        lib = dlopen(sharedObj.c_str(), RTLD_LAZY);
     }else
       lib = dlopen(NULL, RTLD_LAZY);  // search in executable
     if (lib == NULL){
@@ -509,7 +529,8 @@ extern "C" {
 // These functions have no leading c_ and are ESMF and not ESMC because
 // they're intended to be called directly by F90 user code.
 //
-// The Fortran interfaces for these entry points are defined in ESMF_Comp.F90.
+// The Fortran interfaces for these entry points are defined in
+// ESMF_InternalState.F90
 //
 // These interface subroutine names MUST be in lower case.
 extern "C" {
@@ -522,6 +543,10 @@ extern "C" {
   //  ESMF_InternalStateAddReplace()
   //  ESMF_InternalStateGet()
   //  ESMF_InternalStateRemove()
+  //
+  // TODO: Change the back-end implementation of the InternalState feature to
+  // TODO: leverage ESMF_Container, analogous to how AttachableMethods are
+  // TODO: implemented!
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_internalstategetinfo"

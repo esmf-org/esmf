@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -729,7 +729,6 @@
       print *, "Ending the no-op loop"
 
       ! Generate a random string using clock as seed and write it to log file
-      call random_seed()
       call random_seed(size=k)
       print *, "size of random seed = ", k
       allocate(rndseed(k))

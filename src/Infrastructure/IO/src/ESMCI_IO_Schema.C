@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -47,7 +47,6 @@ lonUnits=('degrees_north','degree_north','degrees_N', # Allowed lon unit names
 
 // other ESMF include files here.
 #include "ESMCI_Macros.h"
-#include "ESMCI_Container.h"
 #include "ESMCI_LogErr.h"
 
 //-------------------------------------------------------------------------

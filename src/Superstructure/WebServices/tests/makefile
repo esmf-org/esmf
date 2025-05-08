@@ -8,17 +8,17 @@ LOCDIR	  = src/Superstructure/WebServices/tests
 
 .NOTPARALLEL:
 TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMF_WebServUTest \
-                  $(ESMF_TESTDIR)/ESMC_WebServCompSvrClientUTest \
-                  $(ESMF_TESTDIR)/ESMC_WebServProcCtrlUTest \
-                  $(ESMF_TESTDIR)/ESMC_WebServProcCtrlClientUTest \
-                  $(ESMF_TESTDIR)/ESMC_WebServRegistrarClientUTest \
-                  $(ESMF_TESTDIR)/ESMC_WebServServerSocketUTest \
-                  $(ESMF_TESTDIR)/ESMC_WebServClientSocketUTest \
-                  $(ESMF_TESTDIR)/ESMC_WebServForkClientUTest 
+                  $(ESMF_TESTDIR)/ESMCI_WebServCompSvrClientUTest \
+                  $(ESMF_TESTDIR)/ESMCI_WebServProcCtrlUTest \
+                  $(ESMF_TESTDIR)/ESMCI_WebServProcCtrlClientUTest \
+                  $(ESMF_TESTDIR)/ESMCI_WebServRegistrarClientUTest \
+                  $(ESMF_TESTDIR)/ESMCI_WebServServerSocketUTest \
+                  $(ESMF_TESTDIR)/ESMCI_WebServClientSocketUTest \
+                  $(ESMF_TESTDIR)/ESMCI_WebServForkClientUTest 
 
-#                  $(ESMF_TESTDIR)/ESMC_WebServSecureServerSocketUTest 
-#                  $(ESMF_TESTDIR)/ESMC_WebServSecureClientSocketUTest 
-#                  $(ESMF_TESTDIR)/ESMC_WebServGRAMClientUTest 
+#                  $(ESMF_TESTDIR)/ESMCI_WebServSecureServerSocketUTest 
+#                  $(ESMF_TESTDIR)/ESMCI_WebServSecureClientSocketUTest 
+#                  $(ESMF_TESTDIR)/ESMCI_WebServGRAMClientUTest 
 
 TESTS_RUN     =	
 
@@ -45,11 +45,11 @@ RUN_ESMF_WebServUTest:
 RUN_ESMF_WebServUTestUNI:
 	@echo -e "NUMBER_OF_PROCESSORS 1\nPASS\nPASS\nPASS\nPASS\nPASS\nPASS\nPASS" > $(ESMF_TESTDIR)/ESMF_WebServUTest.Log
 
-RUN_ESMC_WebServCompSvrClientUTest:
-	@echo -e "NUMBER_OF_PROCESSORS 1\nPASS\nPASS\nPASS\nPASS\nPASS" > $(ESMF_TESTDIR)/ESMC_WebServCompSvrClientUTest.Log
+RUN_ESMCI_WebServCompSvrClientUTest:
+	@echo -e "NUMBER_OF_PROCESSORS 1\nPASS\nPASS\nPASS\nPASS\nPASS" > $(ESMF_TESTDIR)/ESMCI_WebServCompSvrClientUTest.Log
 
-RUN_ESMC_WebServCompSvrClientUTestUNI:
-	@echo -e "NUMBER_OF_PROCESSORS 1\nPASS\nPASS\nPASS\nPASS\nPASS" > $(ESMF_TESTDIR)/ESMC_WebServCompSvrClientUTest.Log
+RUN_ESMCI_WebServCompSvrClientUTestUNI:
+	@echo -e "NUMBER_OF_PROCESSORS 1\nPASS\nPASS\nPASS\nPASS\nPASS" > $(ESMF_TESTDIR)/ESMCI_WebServCompSvrClientUTest.Log
 
 else
 RUN_ESMF_WebServUTest:
@@ -60,39 +60,39 @@ RUN_ESMF_WebServUTestUNI:
 	$(MAKE) TNAME=WebServ NP=1 ftest & \
    sleep 5
 
-RUN_ESMC_WebServCompSvrClientUTest:
-	$(MAKE) TNAME=WebServCompSvrClient NP=1 ctest
+RUN_ESMCI_WebServCompSvrClientUTest:
+	$(MAKE) TNAME=WebServCompSvrClient NP=1 citest
 
-RUN_ESMC_WebServCompSvrClientUTestUNI:
-	$(MAKE) TNAME=WebServCompSvrClient NP=1 ctest
+RUN_ESMCI_WebServCompSvrClientUTestUNI:
+	$(MAKE) TNAME=WebServCompSvrClient NP=1 citest
 
-RUN_ESMC_WebServSecureUTest:
-	$(MAKE) TNAME=WebServSecure NP=1 ctest
+RUN_ESMCI_WebServSecureUTest:
+	$(MAKE) TNAME=WebServSecure NP=1 citest
 
-RUN_ESMC_WebServSecureUTestUNI:
-	$(MAKE) TNAME=WebServSecure NP=1 ctest
-
-
-RUN_ESMC_WebServGRAMClientUTest:
-	$(MAKE) TNAME=WebServGRAMClient NP=1 ctest
-
-RUN_ESMC_WebServGRAMClientUTestUNI:
-	$(MAKE) TNAME=WebServGRAMClient NP=1 ctest
+RUN_ESMCI_WebServSecureUTestUNI:
+	$(MAKE) TNAME=WebServSecure NP=1 citest
 
 
-RUN_ESMC_WebServProcCtrlUTest:
-	$(MAKE) TNAME=WebServProcCtrl NP=1 ctest & \
+RUN_ESMCI_WebServGRAMClientUTest:
+	$(MAKE) TNAME=WebServGRAMClient NP=1 citest
+
+RUN_ESMCI_WebServGRAMClientUTestUNI:
+	$(MAKE) TNAME=WebServGRAMClient NP=1 citest
+
+
+RUN_ESMCI_WebServProcCtrlUTest:
+	$(MAKE) TNAME=WebServProcCtrl NP=1 citest & \
    sleep 3 
 
-RUN_ESMC_WebServProcCtrlUTestUNI:
-	$(MAKE) TNAME=WebServProcCtrl NP=1 ctest & \
+RUN_ESMCI_WebServProcCtrlUTestUNI:
+	$(MAKE) TNAME=WebServProcCtrl NP=1 citest & \
    sleep 3 
 
 
-RUN_ESMC_WebServProcCtrlClientUTest:
-	$(MAKE) TNAME=WebServProcCtrlClient NP=1 ctest
+RUN_ESMCI_WebServProcCtrlClientUTest:
+	$(MAKE) TNAME=WebServProcCtrlClient NP=1 citest
 
-RUN_ESMC_WebServProcCtrlClientUTestUNI:
-	$(MAKE) TNAME=WebServProcCtrlClient NP=1 ctest
+RUN_ESMCI_WebServProcCtrlClientUTestUNI:
+	$(MAKE) TNAME=WebServProcCtrlClient NP=1 citest
 
 endif

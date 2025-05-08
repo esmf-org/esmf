@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.12)
+cmake_minimum_required (VERSION 3.5.2)
 include (CheckFunctionExists)
 project (PIOC C)
 
@@ -6,8 +6,23 @@ project (PIOC C)
 #  DEFINE THE TARGET
 #==============================================================================
 
+if (CMAKE_BUILD_TYPE)
+    define_property(
+        SOURCE
+        PROPERTY COMPILE_FLAGS
+        INHERITED
+        BRIEF_DOCS "brief-doc"
+        FULL_DOCS  "full-doc"
+    )
+    string(TOUPPER ${CMAKE_BUILD_TYPE} _build_type)
+    set_directory_properties(PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS_${_build_type}}")
+    set(CMAKE_CXX_FLAGS_${_build_type} "")
+endif()
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 set (src topology.c pio_file.c pioc_support.c pio_lists.c
-  pioc.c pioc_sc.c pio_spmd.c pio_rearrange.c pio_nc4.c
+  pioc.c pioc_sc.c pio_spmd.c pio_rearrange.c pio_nc4.c pioc_async.c
   pio_nc.c pio_put_nc.c pio_get_nc.c pio_getput_int.c pio_msg.c
   pio_darray.c pio_darray_int.c pio_get_vard.c pio_put_vard.c pio_error.c parallel_sort.c)
 if (NETCDF_INTEGRATION)
@@ -15,6 +30,16 @@ if (NETCDF_INTEGRATION)
 endif ()
 
 add_library (pioc ${src})
+
+# Always use -fPIC
+set_property(TARGET pioc PROPERTY POSITION_INDEPENDENT_CODE ON)
+
+set_source_files_properties(
+    pioc_async.c
+    PROPERTIES
+    COMPILE_FLAGS -O0
+)
+
 
 # set up include-directories
 include_directories(
@@ -38,7 +63,7 @@ target_compile_definitions (pioc
 
 # Compiler-specific compiler options
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-  string(APPEND CMAKE_C_FLAGS  " -std=c99 " )
+  string(APPEND CMAKE_C_FLAGS  " -std=gnu99 " )
 elseif ("${CMAKE_C_COMPILER_ID}" STREQUAL "PGI")
   string(APPEND CMAKE_C_FLAGS  " -c99 ")
 elseif ("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
@@ -150,8 +175,8 @@ endif ()
 
 include(CheckTypeSize)
 check_type_size("size_t" SIZEOF_SIZE_T)
-CHECK_TYPE_SIZE("long long" SIZEOF_LONG_LONG)
-if (NOT ${SIZEOF_SIZE_T} EQUAL ${SIZEOF_LONG_LONG})
+check_type_size("long long" SIZEOF_LONG_LONG)
+if (NOT "${SIZEOF_SIZE_T}" STREQUAL "${SIZEOF_LONG_LONG}")
   message (FATAL_ERROR "size_t and long long must be the same size!")
 endif ()
 
@@ -161,7 +186,6 @@ get_target_property(includes pioc INCLUDE_DIRECTORIES)
 foreach(x IN LISTS cppdefs)
   string(APPEND CPPFLAGS " -D${x}")
 endforeach()
-
 foreach(x IN LISTS includes)
   if (x)
     string(APPEND CPPFLAGS " -I${x}")

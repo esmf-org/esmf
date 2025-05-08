@@ -427,8 +427,10 @@ write_darray_multi_par(file_desc_t *file, int nvars, int fndims, const int *vari
         int rrcnt = 0; /* Number of subarray requests (pnetcdf only). */
         PIO_Offset *startlist[num_regions]; /* Array of start arrays for ncmpi_iput_varn(). */
         PIO_Offset *countlist[num_regions]; /* Array of count  arrays for ncmpi_iput_varn(). */
-#endif /* _PNETCDF */
 
+        ierr = ncmpi_wait_all(file->fh, NC_REQ_ALL, NULL, NULL);
+#endif /* _PNETCDF */
+	MPI_Offset chkcnt2=0;
         /* Process each region of data to be written. */
         for (int regioncnt = 0; regioncnt < num_regions; regioncnt++)
         {
@@ -436,6 +438,11 @@ write_darray_multi_par(file_desc_t *file, int nvars, int fndims, const int *vari
             if ((ierr = find_start_count(iodesc->ndims, fndims, vdesc, region, frame,
                                          start, count)))
                 return pio_err(ios, file, ierr, __FILE__, __LINE__);
+	    size_t cnt = 1;
+	    for(int i=0; i<fndims; i++){
+		cnt *= count[i];
+	    }
+	    chkcnt2 += cnt;
 
             /* IO tasks will run the netCDF/pnetcdf functions to write the data. */
             switch (file->iotype)
@@ -455,11 +462,12 @@ write_darray_multi_par(file_desc_t *file, int nvars, int fndims, const int *vari
                         bufptr = (void *)((char *)iobuf + iodesc->mpitype_size * (nv * llen + region->loffset));
 
                     /* Ensure collective access. */
-                    ierr = nc_var_par_access(file->fh, varids[nv], NC_COLLECTIVE);
+                    if((ierr = nc_var_par_access(file->fh, varids[nv], NC_COLLECTIVE)))
+                        return pio_err(ios, file, ierr, __FILE__, __LINE__);
 
                     /* Write the data for this variable. */
-                    if (!ierr)
-                        ierr = nc_put_vara(file->fh, varids[nv], (size_t *)start, (size_t *)count, bufptr);
+                    if((ierr = nc_put_vara(file->fh, varids[nv], (size_t *)start, (size_t *)count, bufptr)))
+                        return pio_err(ios, file, ierr, __FILE__, __LINE__);
                 }
                 break;
 #endif
@@ -487,10 +495,10 @@ write_darray_multi_par(file_desc_t *file, int nvars, int fndims, const int *vari
                     for (int i = 0; i < fndims; i++)
                     {
                         startlist[rrcnt][i] = start[i];
-                        countlist[rrcnt][i] = count[i];
-                        PLOG((3, "startlist[%d][%d] = %d countlist[%d][%d] = %d", rrcnt, i,
+                        countlist[rrcnt][i] = count[i]; 
+                        PLOG((3, "startlist[%d][%d] = %lld countlist[%d][%d] = %lld", rrcnt, i,
                               startlist[rrcnt][i], rrcnt, i, countlist[rrcnt][i]));
-                    }
+                   }
                     rrcnt++;
                 }
 
@@ -642,28 +650,22 @@ write_darray_multi_par(file_desc_t *file, int nvars, int fndims, const int *vari
                         else /* don't flush yet, accumulate the request size */
                             vard_llen += llen;
 #else
-                        if (vdesc->nreqs % PIO_REQUEST_ALLOC_CHUNK == 0)
-                        {
-                            if (!(vdesc->request = realloc(vdesc->request, sizeof(int) *
-                                                           (vdesc->nreqs + PIO_REQUEST_ALLOC_CHUNK))))
-                                return pio_err(ios, file, PIO_ENOMEM, __FILE__, __LINE__);
-
-                            for (int i = vdesc->nreqs; i < vdesc->nreqs + PIO_REQUEST_ALLOC_CHUNK; i++)
-                                vdesc->request[i] = NC_REQ_NULL;
-                        }
-
-                        /* Write, in non-blocking fashion, a list of subarrays. */
-//                        PLOG((3, "about to call ncmpi_iput_varn() varids[%d] = %d rrcnt = %d, llen = %d",
-//                              nv, varids[nv], rrcnt, llen));
-//                        for(int i=0;i < llen; i++)
-//                            PLOG((3, "bufptr[%d] = %d",i,((int *)bufptr)[i]));
                         ierr = ncmpi_iput_varn(file->fh, varids[nv], rrcnt, startlist, countlist,
-                                               bufptr, llen, iodesc->mpitype, &vdesc->request[vdesc->nreqs]);
+                                               bufptr, chkcnt2, iodesc->mpitype, NULL);
+//                                               bufptr, llen, iodesc->mpitype, NULL);
 
-                        /* keeps wait calls in sync */
-                        if (vdesc->request[vdesc->nreqs] == NC_REQ_NULL)
-                            vdesc->request[vdesc->nreqs] = PIO_REQ_NULL;
 
+			if (ierr){
+			    MPI_Offset chksize=0;
+			    for (int j = 0; j < rrcnt; j++)
+			    {
+/*				printf("%d: nv=%d startlist[%d][%d] = %lld countlist[%d][%d] = %lld\n", ios->io_rank, nv, j, i,
+				       startlist[j][i], j, i, countlist[j][i]);
+*/
+				chksize += countlist[j][0]*countlist[j][1]*countlist[j][2];
+			    }
+			    printf("llen = %lld chksize = %lld chkcnt2 = %lld\n",llen, chksize, chkcnt2);
+			}
                         vdesc->nreqs++;
 #endif
                     }
@@ -803,10 +805,9 @@ send_all_start_count(iosystem_desc_t *ios, io_desc_t *iodesc, PIO_Offset llen,
               "invalid inputs", __FILE__, __LINE__);
 
     /* Do a handshake. */
-#ifdef DO_HANDSHAKE
     if ((mpierr = MPI_Recv(&ierr, 1, MPI_INT, 0, 0, ios->io_comm, &status)))
         return check_mpi(ios, NULL, mpierr, __FILE__, __LINE__);
-#endif
+
     /* Send local length of iobuffer for each field (all
      * fields are the same length). */
     if ((mpierr = MPI_Send((void *)&llen, 1, MPI_OFFSET, 0, ios->io_rank, ios->io_comm)))
@@ -905,10 +906,9 @@ recv_and_write_data(file_desc_t *file, const int *varids, const int *frame,
         if (rtask)
         {
             /* handshake - tell the sending task I'm ready */
-#ifdef DO_HANDSHAKE
             if ((mpierr = MPI_Send(&ierr, 1, MPI_INT, rtask, 0, ios->io_comm)))
                 return check_mpi(ios, NULL, mpierr, __FILE__, __LINE__);
-#endif
+
             /* Get length of iobuffer for each field on this
              * task (all fields are the same length). */
             if ((mpierr = MPI_Recv(&rlen, 1, MPI_OFFSET, rtask, rtask, ios->io_comm,
@@ -1682,10 +1682,12 @@ pio_read_darray_nc_serial(file_desc_t *file, io_desc_t *iodesc, int vid,
                  * tasks. rtask here is the io task rank and
                  * ios->num_iotasks is the number of iotasks actually
                  * used in this decomposition. */
-                if (rtask < ios->num_iotasks && tmp_bufsize > 0)
+                if (rtask < ios->num_iotasks && tmp_bufsize > 0){
+
                     if ((mpierr = MPI_Send(iobuf, tmp_bufsize, iodesc->mpitype, rtask,
                                            4 * ios->num_iotasks + rtask, ios->io_comm)))
                         return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
+                }
             }
         }
     }
@@ -1749,58 +1751,34 @@ flush_output_buffer(file_desc_t *file, bool force, PIO_Offset addsize)
      * limit, then flush to disk. */
     if (force || (usage >= pio_pnetcdf_buffer_size_limit))
     {
-        int rcnt;
         int  maxreq;
-        int reqcnt;
         maxreq = 0;
-        reqcnt = 0;
-        rcnt = 0;
 
         for (int i = 0; i < file->nvars; i++)
         {
             if ((ierr = get_var_desc(i, &file->varlist, &vdesc)))
                 return pio_err(NULL, file, ierr, __FILE__, __LINE__);
-            reqcnt += vdesc->nreqs;
             if (vdesc->nreqs > 0)
                 maxreq = i;
         }
-        int request[reqcnt];
-        int status[reqcnt];
-
         if (file->varlist)
         {
             for (int i = 0; i <= maxreq; i++)
             {
                 if ((ierr = get_var_desc(i, &file->varlist, &vdesc)))
                     return pio_err(NULL, file, ierr, __FILE__, __LINE__);
-#ifdef MPIO_ONESIDED
-                /*onesided optimization requires that all of the requests in a wait_all call represent
-                  a contiguous block of data in the file */
-                if (rcnt > 0 && (prev_record != vdesc->record || vdesc->nreqs == 0))
-                {
-                    ierr = ncmpi_wait_all(file->fh, rcnt, request, status);
-                    rcnt = 0;
-                }
-                prev_record = vdesc->record;
-#endif
-                for (reqcnt = 0; reqcnt < vdesc->nreqs; reqcnt++)
-                    request[rcnt++] = max(vdesc->request[reqcnt], NC_REQ_NULL);
-                PLOG((3,"flush_output_buffer rcnt=%d",rcnt));
 
-                if (vdesc->request != NULL)
-                    free(vdesc->request);
-                vdesc->request = NULL;
                 vdesc->nreqs = 0;
 
 #ifdef FLUSH_EVERY_VAR
-                ierr = ncmpi_wait_all(file->fh, rcnt, request, status);
+                ierr = ncmpi_wait_all(file->fh, NC_REQ_ALL, NULL, NULL);
+                //ierr = ncmpi_wait_all(file->fh, rcnt, request, status);
                 rcnt = 0;
 #endif
             }
         }
-
-        if (rcnt > 0)
-            ierr = ncmpi_wait_all(file->fh, rcnt, request, status);
+        /* make sure all buffers are now clean */
+        ierr = ncmpi_wait_all(file->fh, NC_REQ_ALL, NULL, NULL);
 
         /* Release resources. */
         if (file->iobuf)

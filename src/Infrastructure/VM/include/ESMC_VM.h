@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -267,7 +267,7 @@ ESMC_VM ESMC_VMGetGlobal(
 //
 // !INTERFACE:
 int ESMC_VMLogMemInfo(
-  char *prefix                // in
+  const char *prefix                // in
 );
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.

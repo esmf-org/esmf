@@ -1,0 +1,30 @@
+description: 'Build the OPENMPI library'
+inputs:
+  openmpi_version:
+    description: 'Tag in the OPENMPI repository to use'
+    default: v4.1.4
+    required: False
+    type: string
+  install_prefix:
+    description: 'Install path of openmpi'
+    default: ${GITHUB_WORKSPACE}/openmpi
+    required: False
+    type: string
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: open-mpi/ompi
+        path: openmpi-src
+        ref: ${{ inputs.openmpi_version }}
+        submodules: 'recursive'
+    - id: openmpi-build
+      shell: bash
+      run: |
+        pushd openmpi-src
+        perl ./autogen.pl
+        ./configure --prefix=${{ inputs.install_prefix }}
+        make -j4
+        make install
+        popd

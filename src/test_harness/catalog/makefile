@@ -103,7 +103,7 @@ init_work_dir:
 	rm -f $(TH_WORKDIR)/* ; \
 	echo "loading commands" ; \
 	cp $(ESMF_TESTDIR)/ESMF_TestHarnessUTest $(TH_WORKDIR) ; \
-	cp $(ESMF_TESTDIR)/ESMC_TestHarnessLatexPPUTest $(TH_WORKDIR) ; \
+	cp $(ESMF_TESTDIR)/ESMCI_TestHarnessLatexPPUTest $(TH_WORKDIR) ; \
 	cp $(TH_SRCDIR)/tcasexml2tex $(TH_WORKDIR) ; \
 	echo "Loading templates" ; \
 	cp -f $(TH_SRCDIR)/*.xslt $(TH_WORKDIR) ; \

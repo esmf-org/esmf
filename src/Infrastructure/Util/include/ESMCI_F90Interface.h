@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -42,9 +42,12 @@
 namespace ESMCI {
 
   class F90ClassHolder{
-    void *memoryHolder[16]; // Reserves 16 times the space of a void pointer.
+    void *memoryHolder[48]; // Reserves 48 times the space of a void pointer.
                             // This value has been determined empirically to
                             // work on all the supported platforms.
+                            // Increased this from the previous value of 16
+                            // when ESMF_INIT_DECLARE_NAMED_ALIAS was
+                            // introduced. This now depends on ESMF_MAXSTR.
     friend std::ostream& operator<<(std::ostream& out,
       const F90ClassHolder& f90p){
       out << f90p.memoryHolder[0];
@@ -77,7 +80,7 @@ namespace ESMCI {
       void set(std::vector<T> &arrayArg);
       void set(T *arrayArg, int dimArg, const int *lenArg);
   };
-  
+
   // implementation of a present() method to detect present/absent optional
   template<typename T> bool present(InterArray<T> *ptr);
 
@@ -110,7 +113,7 @@ namespace ESMCI {
       extent[i]=0;
   }
 
-  template<typename T> InterArray<T>::InterArray(T *arrayArg, 
+  template<typename T> InterArray<T>::InterArray(T *arrayArg,
     int dimArg, const int *lenArg){
     // constructor
     array = arrayArg;
@@ -128,7 +131,7 @@ namespace ESMCI {
     for (int i=dimCount; i<7; i++)
       extent[i]=0;
   }
-  
+
   template<typename T> void InterArray<T>::set(void){
     // set NULL
     array = NULL;
@@ -155,7 +158,7 @@ namespace ESMCI {
       extent[i]=0;
   }
 
-  template<typename T> void InterArray<T>::set(T *arrayArg, int dimArg, 
+  template<typename T> void InterArray<T>::set(T *arrayArg, int dimArg,
     const int *lenArg){
     // set
     array = arrayArg;
@@ -165,11 +168,11 @@ namespace ESMCI {
     for (int i=dimCount; i<7; i++)
       extent[i]=0;
   }
-  
+
   template<typename T> bool present(InterArray<T> *ptr){
     return ( (ptr != NULL) && (ptr->array != NULL) );
   }
-  
+
 } // namespace ESMCI
 
 

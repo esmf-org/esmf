@@ -22,9 +22,7 @@ endif
 #
 ifeq ($(ESMF_COMM),mpiuni)
 # MPI stub library -----------------------------------------
-ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_CPPFLAGS          += -DESMF_MPIUNI -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpi)
@@ -40,9 +38,9 @@ ESMF_F90DEFAULT         = mpif90
 ESMF_F90LINKLIBS       += -lmpi++
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
-ESMF_MPILAUNCHOPTIONS   = -p "%g: "
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
+ESMF_MPILAUNCHOPTIONS   = -p %g: 
 else
 ifeq ($(ESMF_COMM),mpich1)
 # Mpich1 ---------------------------------------------------
@@ -52,8 +50,6 @@ ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpiCC
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),mpich2)
 # Mpich2 ---------------------------------------------------
@@ -62,8 +58,6 @@ ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),mpich)
 # Mpich3 and up --------------------------------------------
@@ -73,8 +67,8 @@ ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
-ifeq ($(ESMF_COMM),mvapich2)
-# Mvapich2 ---------------------------------------------------
+ifeq ($(ESMF_COMM),mvapich)
+# Mvapich any version --------------------------------------
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
@@ -96,8 +90,6 @@ ESMF_CXXDEFAULT         = mpic++
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),lam)
 # LAM (assumed to be built with ifort) ---------------------
@@ -107,8 +99,6 @@ ESMF_CXXDEFAULT         = mpic++
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),openmpi)
 # OpenMPI --------------------------------------------------
@@ -153,7 +143,7 @@ ESMF_CXXMAJORVERSION      = $(shell $(ESMF_DIR)/scripts/version.intel 1 ${ESMF_C
 ############################################################
 # Special debug flags
 #
-ESMF_F90OPTFLAG_G       += -traceback -check arg_temp_created,bounds,format,output_conversion,stack,uninit
+ESMF_F90OPTFLAG_G       += -traceback -check arg_temp_created,bounds,format,output_conversion,stack
 ESMF_CXXOPTFLAG_G       += -traceback -Wcheck
 
 ############################################################
@@ -280,7 +270,8 @@ ESMF_F90LINKPATHS +=
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -cxxlib -lrt -ldl
+ESMF_F90LINKOPTS += -cxxlib
+ESMF_F90LINKLIBS += -lrt -ldl
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end

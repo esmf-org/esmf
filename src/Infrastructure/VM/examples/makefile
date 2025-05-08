@@ -18,6 +18,7 @@ EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_VMDefaultBasicsEx \
                     $(ESMF_EXDIR)/ESMF_VMScatterVMGatherEx \
                     $(ESMF_EXDIR)/ESMF_VMAllFullReduceEx \
                     $(ESMF_EXDIR)/ESMF_VMHigherRankDataEx
+#                    $(ESMF_EXDIR)/ESMF_VMGetMPICommunicatorF08Ex
 
 EXAMPLES_RUN      = run_ESMF_VMDefaultBasicsEx \
                     run_ESMF_VMGetMPICommunicatorEx \
@@ -30,6 +31,7 @@ EXAMPLES_RUN      = run_ESMF_VMDefaultBasicsEx \
                     run_ESMF_VMScatterVMGatherEx \
                     run_ESMF_VMAllFullReduceEx \
                     run_ESMF_VMHigherRankDataEx
+#                    run_ESMF_VMGetMPICommunicatorF08Ex
 
 EXAMPLES_RUN_UNI  = run_ESMF_VMDefaultBasicsEx_uni \
                     run_ESMF_VMGetMPICommunicatorEx_uni \
@@ -42,6 +44,7 @@ EXAMPLES_RUN_UNI  = run_ESMF_VMDefaultBasicsEx_uni \
                     run_ESMF_VMScatterVMGatherEx_uni \
                     run_ESMF_VMAllFullReduceEx_uni \
                     run_ESMF_VMHigherRankDataEx_uni
+#                    run_ESMF_VMGetMPICommunicatorF08Ex_uni
 
 
 include $(ESMF_DIR)/makefile
@@ -66,6 +69,12 @@ run_ESMF_VMGetMPICommunicatorEx:
 
 run_ESMF_VMGetMPICommunicatorEx_uni:
 	$(MAKE) EXNAME=VMGetMPICommunicator NP=1 exfrun
+
+run_ESMF_VMGetMPICommunicatorF08Ex:
+	$(MAKE) EXNAME=VMGetMPICommunicatorF08 NP=4 exfrun
+
+run_ESMF_VMGetMPICommunicatorF08Ex_uni:
+	$(MAKE) EXNAME=VMGetMPICommunicatorF08 NP=1 exfrun
 
 run_ESMF_VMUserMpiEx:
 	$(MAKE) EXNAME=VMUserMpi NP=4 exfrun

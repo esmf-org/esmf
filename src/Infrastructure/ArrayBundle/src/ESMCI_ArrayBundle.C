@@ -1,15 +1,13 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
-//==============================================================================
-#define ESMC_FILENAME "ESMCI_ArrayBundle.C"
 //==============================================================================
 #define AB_REDISTSTORE_LOG_off
 #define ABSMM_EXEC_INFO_off
@@ -42,6 +40,11 @@
 #include "ESMCI_Container.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_IO.h"
+
+//==============================================================================
+#undef  ESMC_FILENAME
+#define ESMC_FILENAME "ESMCI_ArrayBundle.C"
+//==============================================================================
 
 using namespace std;
 
@@ -318,7 +321,7 @@ int ArrayBundle::read(
 // !DESCRIPTION:
 //   Read Array data to an ArrayBundle object from file(s).
 //   For this API to be functional, the environment variable {\tt ESMF\_PIO} 
-//   should be set to "internal" when the ESMF library is built.
+//   should be set to either "internal" or "external" when the ESMF library is built.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -426,7 +429,7 @@ int ArrayBundle::write(
 //
 // !DESCRIPTION:
 //   Write the Arrays into a file. For this API to be functional,
-//   the environment variable {\tt ESMF\_PIO} should be set to "internal"
+//   the environment variable {\tt ESMF\_PIO} should be set to either "internal" or "external"
 //   when the ESMF library is built.
 //
 //EOPI
@@ -532,6 +535,57 @@ int ArrayBundle::write(
 // misc.
 //
 //-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayBundle::log()"
+//BOPI
+// !IROUTINE:  ESMCI::ArrayBundle::log
+//
+// !INTERFACE:
+void ArrayBundle::log(
+//
+// !DESCRIPTION:
+//    Log details of ArrayBundle object
+//
+// !ARGUMENTS:
+//
+  std::string prefix,
+  ESMC_LogMsgType_Flag msgType,
+  bool deepFlag
+  )const{
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  std::stringstream msg;
+  msg << prefix << "--- ArrayBundle::log() start -----------------------------";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY){
+    msg.str("");  // clear
+    msg << prefix << "ArrayBundle object is invalid! Not created or deleted!";
+    ESMC_LogDefault.Write(msg.str(), msgType);
+  }else{
+    msg.str("");  // clear
+    msg << prefix << "ArrayBundle object is valid!"
+      << " <name: " << getName() << "> <itemCount: " << getCount() << ">";
+    ESMC_LogDefault.Write(msg.str(), msgType);
+    int item=0;
+    for (auto it = arrayContainer.begin(); it != arrayContainer.end(); ++it,
+      item++){
+      msg.str("");  // clear
+      msg << prefix << "+-<item: " << item << "> <itemName: "
+        << it->second->second->getName() << ">";
+      ESMC_LogDefault.Write(msg.str(), msgType);
+      if (deepFlag) it->second->second->log(prefix+"! ", msgType, deepFlag);
+    }
+  }
+  msg.str("");  // clear
+  msg << prefix << "--- ArrayBundle::log() end -------------------------------";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+}
+//-----------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

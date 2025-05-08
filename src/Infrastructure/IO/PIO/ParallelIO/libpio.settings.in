@@ -28,11 +28,10 @@ More Fortran Flags:	@FPPFLAGS@
 --------
 PnetCDF Support:	@HAS_PNETCDF@
 SZIP Write Support:	@HAS_SZIP_WRITE@
-Parallel Filters:	@HAS_PAR_FILTERS@
+Parallel Filters:	@have_par_filters@
 NetCDF/HDF5 Support:	@HAS_NETCDF4@
 NetCDF/HDF5 Par I/O:	@HAS_NETCDF4_PAR@
 NetCDF Integration:	@HAS_NETCDF_INTEGRATION@
 PIO Logging:		@HAS_LOGGING@
 MPIEXEC:		@WITH_MPIEXEC@
 Fortran:		@HAS_PIO_FORTRAN@
-

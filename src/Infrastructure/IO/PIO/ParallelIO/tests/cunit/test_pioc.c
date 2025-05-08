@@ -7,6 +7,7 @@
 #include <pio.h>
 #include <pio_internal.h>
 #include <pio_tests.h>
+#include <pio_meta.h>
 
 /* The number of tasks this test should run on. */
 #define TARGET_NTASKS 4
@@ -1048,7 +1049,7 @@ int test_empty_files(int iosysid, int num_flavors, int *flavor, int my_rank)
         if ((ret = get_iotype_name(flavor[fmt], iotype_name)))
             ERR(ret);
         sprintf(filename, "%s_empty_%s.nc", TEST_NAME, iotype_name);
-        
+
         if ((ret = PIOc_createfile(iosysid, &ncid, &flavor[fmt], filename, PIO_CLOBBER)))
             ERR(ret);
 
@@ -1076,10 +1077,10 @@ int test_empty_files(int iosysid, int num_flavors, int *flavor, int my_rank)
 /* Check that the fill values are correctly reported by find_var_fill().
  *
  * @param ncid the ID of the open test file.
- * @param ntypes the number ot types we are testing. 
+ * @param ntypes the number ot types we are testing.
  * @param use_custom_fill true if custom fill values were used.
  * @param my_rank rank of this task.
- * @return 0 on success. 
+ * @return 0 on success.
  */
 int check_fillvalues(int ncid, int num_types, int use_custom_fill, int my_rank)
 {
@@ -1128,7 +1129,7 @@ int check_fillvalues(int ncid, int num_types, int use_custom_fill, int my_rank)
 
     if ((ret = pio_get_file(ncid, &file)))
         ERR(ret);
-            
+
     for (int v = 0; v < num_types; v++)
     {
         var_desc_t *vdesc;
@@ -1136,7 +1137,7 @@ int check_fillvalues(int ncid, int num_types, int use_custom_fill, int my_rank)
         /* Get the var info. */
         if ((ret = get_var_desc(v, &file->varlist, &vdesc)))
             ERR(ret);
-                
+
         /* Check the fill value with this internal function. */
         if ((ret = find_var_fillvalue(file, v, vdesc)))
             ERR(ret);
@@ -1194,7 +1195,7 @@ int check_fillvalues(int ncid, int num_types, int use_custom_fill, int my_rank)
 
     return PIO_NOERR;
 }
-        
+
 /* Test the internal function that determins a var's fillvalue.
  *
  * @param iosysid the iosystem ID that will be used for the test.
@@ -1571,10 +1572,10 @@ int test_nc4(int iosysid, int num_flavors, int *flavor, int my_rank)
                 ERR(ret);
 
             /* Setting deflate works with parallel iotype starting
-	     * with netcdf-c-4.7.4. If present, HAVE_PAR_FILTERS will
+	     * with netcdf-c-4.7.4. If present, PIO_HAS_PAR_FILTERS will
 	     * be defined. */
 	    ret = PIOc_def_var_deflate(ncid, 0, 0, 1, 1);
-#ifdef HAVE_PAR_FILTERS
+#ifdef PIO_HAS_PAR_FILTERS
 	    if (ret)
 		ERR(ret);
 #else
@@ -1613,16 +1614,16 @@ int test_nc4(int iosysid, int num_flavors, int *flavor, int my_rank)
                     ERR(ERR_AWFUL);
 
             /* For parallel netCDF-4, we turned on deflate above, if
-	     * HAVE_PAR_FILTERS is defined. */
+	     * PIO_HAS_PAR_FILTERS is defined. */
             if (flavor[fmt] == PIO_IOTYPE_NETCDF4P)
 	    {
-#ifdef HAVE_PAR_FILTERS
+#ifdef PIO_HAS_PAR_FILTERS
 		if (shuffle || !deflate || deflate_level != 1)
                     ERR(ERR_AWFUL);
 #else
 		if (shuffle || deflate)
                     ERR(ERR_AWFUL);
-#endif /* HAVE_PAR_FILTERS */
+#endif /* PIO_HAS_PAR_FILTERS */
 	    }
 
             /* Check setting the chunk cache for the variable. */
@@ -1825,6 +1826,9 @@ int test_scalar(int iosysid, int num_flavors, int *flavor, int my_rank, int asyn
         /* Write a scalar value. */
         int test_val = TEST_VAL_42;
         if ((ret = PIOc_put_var_int(ncid, varid, &test_val)))
+            ERR(ret);
+        /* flush the write buffer */
+        if ((ret = PIOc_sync(ncid)))
             ERR(ret);
 
         /* Check the scalar var. */
@@ -2325,7 +2329,6 @@ int test_all(int iosysid, int num_flavors, int *flavor, int my_rank, MPI_Comm te
     /* This will be our file name for writing out decompositions. */
     sprintf(filename, "decomp_%d.txt", my_rank);
     sprintf(nc_filename, "decomp_%d.nc", my_rank);
-
     /* This is a simple test that just creates the decomp with
      * async. */
     if (async)

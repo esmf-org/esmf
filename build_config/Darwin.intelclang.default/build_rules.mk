@@ -7,7 +7,7 @@
 # Default compiler setting.
 #
 ESMF_F90DEFAULT         = ifort
-ESMF_CXXDEFAULT         = clang
+ESMF_CXXDEFAULT         = clang++
 ESMF_CDEFAULT           = clang
 ESMF_CPPDEFAULT         = clang -E -P -x c
 
@@ -25,9 +25,7 @@ endif
 #
 ifeq ($(ESMF_COMM),mpiuni)
 # MPI stub library -----------------------------------------
-ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_CPPFLAGS          += -DESMF_MPIUNI -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpich1)
@@ -38,8 +36,6 @@ ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpiCC
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),mpich2)
 # Mpich2 ---------------------------------------------------
@@ -48,8 +44,6 @@ ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),mpich)
 # Mpich3 and up --------------------------------------------
@@ -76,8 +70,6 @@ ESMF_CXXDEFAULT         = mpic++
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),openmpi)
 # OpenMPI --------------------------------------------------
@@ -146,12 +138,16 @@ endif
 ifeq ($(ESMF_ABISTRING),x86_64_32)
 ESMF_CXXCOMPILEOPTS       += -m32
 ESMF_CXXLINKOPTS          += -m32
+ESMF_CCOMPILEOPTS         += -m32
+ESMF_CLINKOPTS            += -m32
 ESMF_F90COMPILEOPTS       += -m32
 ESMF_F90LINKOPTS          += -m32
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_small)
 ESMF_CXXCOMPILEOPTS       += -m64
 ESMF_CXXLINKOPTS          += -m64
+ESMF_CCOMPILEOPTS         += -m64
+ESMF_CLINKOPTS            += -m64
 ESMF_F90COMPILEOPTS       += -m64
 ESMF_F90LINKOPTS          += -m64
 endif
@@ -162,8 +158,10 @@ endif
 ifeq ($(ESMF_PTHREADS),ON)
 ESMF_F90COMPILEOPTS += -threads
 ESMF_CXXCOMPILEOPTS += -pthread
+ESMF_CCOMPILEOPTS   += -pthread
 ESMF_F90LINKOPTS    += -threads
 ESMF_CXXLINKOPTS    += -pthread
+ESMF_CLINKOPTS      += -pthread
 ESMF_SL_LIBOPTS     += -pthread
 endif
 
@@ -189,6 +187,8 @@ ESMF_CXXLINKRPATHS += \
 ############################################################
 # Link against the c++ library
 #
+# Note that the result of -print-file-name will be the full path to the file if it is found
+# within the compiler installation, and simply the file name verbatim if it is NOT found.
 ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.dylib)
 ifeq ($(ESMF_LIBSTDCXX),libc++.dylib)
 ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.a)

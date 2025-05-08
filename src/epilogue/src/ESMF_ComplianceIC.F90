@@ -1276,6 +1276,8 @@ module ESMF_ComplianceICMod
         tempString = "ESMF_STATEINTENT_IMPORT"
       else if (stateintent==ESMF_STATEINTENT_EXPORT) then
         tempString = "ESMF_STATEINTENT_EXPORT"
+      else if (stateintent==ESMF_STATEINTENT_INTERNAL) then
+        tempString = "ESMF_STATEINTENT_INTERNAL"
       else if (stateintent==ESMF_STATEINTENT_UNSPECIFIED) then
         tempString = "ESMF_STATEINTENT_UNSPECIFIED"
       else

@@ -1,20 +1,16 @@
 \label{FieldMeta}
-The Field metadata is implemented as an ESMF Attribute Package:
+The Field metadata is implemented through ESMF\_Info. It can be accessed
+using the JSON Pointer "/NUOPC/Instance/" prefix followed by the "Attribute name"
+as per the table below. E.g. "StandardName" is accessed using {\tt key="/NUOPC/Instance/StandardName"}.
 
-\begin{itemize}
-    \item Convention: NUOPC
-    \item Purpose: Instance
-    \item Includes:
-    \begin{itemize}
-        \item ESG General
-    \end{itemize} 
-    \item Description: Basic Field description with connection and time stamp metadata. 
-\end{itemize}
-
-\begin{longtable}{|p{.22\textwidth}|p{.6\textwidth}|p{.2\textwidth}|}
+\begin{longtable}{|p{.3\textwidth}|p{.4\textwidth}|p{.3\textwidth}|}
      \hline\hline
      {\bf Attribute name} & {\bf Definition} & {\bf Controlled vocabulary}\\
      \hline\hline
+     {\tt StandardName} & String value & {\em no restriction}\\ \hline
+     {\tt Units} & String value & {\em no restriction}\\ \hline
+     {\tt LongName} & String value & {\em no restriction}\\ \hline
+     {\tt ShortName} & String value & {\em no restriction}\\ \hline
      {\tt Connected} & Connected status.& false, true\\ \hline
      {\tt ProducerConnection} & String value indicating whether the Field has been connected with a producer. & open, targeted,\newline connected\\ \hline
      {\tt ConsumerConnection} & String value indicating whether the Field has been connected with a consumer.& open, targeted,\newline connected\\ \hline

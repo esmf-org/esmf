@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -41,7 +41,7 @@ module ESMF_FieldGetMod
   use ESMF_XGridMod
   use ESMF_MeshMod
   use ESMF_LocStreamMod
-  use ESMF_GeomBaseMod
+  use ESMF_GeomMod
   use ESMF_StaggerLocMod
   use ESMF_InitMacrosMod
 
@@ -82,7 +82,6 @@ module ESMF_FieldGetMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
     module procedure ESMF_FieldGetDefault
-    !module procedure ESMF_FieldGetLocalArray !TODO: FIELDINTEGRATION
     TypeKindRankInterfaceMacro(FieldGetDataPtr)
 
 ! !DESCRIPTION:
@@ -110,13 +109,15 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
-  subroutine ESMF_FieldGetDefault(field, keywordEnforcer, arrayspec, &
-    status, geomtype, grid, mesh, locstream, xgrid, array, localarrayList, &
-    typekind, dimCount, rank, staggerloc, meshloc, xgridside, &
-    gridindex, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+  subroutine ESMF_FieldGetDefault(field, keywordEnforcer, arrayspec, status, &
+    geomtype, geom, grid, mesh, locstream, xgrid, array, localarrayList, &
+    typekind, rank, dimCount, geomDimCount, ungriddedDimCount, &
+    replicatedDimCount, staggerloc, meshloc, xgridside, gridindex, &
+    gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     totalLWidth, totalUWidth, localDeCount, ssiLocalDeCount, &
     localDeToDeMap, minIndex, maxIndex, elementCount, &
-    localMinIndex, localMaxIndex, localElementCount, name, vm, rc)
+    localMinIndex, localMaxIndex, localElementCount, isESMFAllocated, &
+    name, vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Field),           intent(in)            :: field
@@ -124,6 +125,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_ArraySpec),       intent(out), optional :: arrayspec
     type(ESMF_FieldStatus_Flag),intent(out), optional :: status
     type(ESMF_GeomType_Flag),   intent(out), optional :: geomtype
+    type(ESMF_Geom),            intent(out), optional :: geom
     type(ESMF_Grid),            intent(out), optional :: grid
     type(ESMF_Mesh),            intent(out), optional :: mesh
     type(ESMF_LocStream),       intent(out), optional :: locstream
@@ -131,8 +133,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Array),           intent(out), optional :: array
     type(ESMF_LocalArray), target, intent(out), optional :: localarrayList(:)
     type(ESMF_TypeKind_Flag),   intent(out), optional :: typekind
-    integer,                    intent(out), optional :: dimCount
     integer,                    intent(out), optional :: rank
+    integer,                    intent(out), optional :: dimCount
+    integer,                    intent(out), optional :: geomDimCount
+    integer,                    intent(out), optional :: ungriddedDimCount
+    integer,                    intent(out), optional :: replicatedDimCount
     type(ESMF_StaggerLoc),      intent(out), optional :: staggerloc
     type(ESMF_MeshLoc),         intent(out), optional :: meshloc
     type(ESMF_XGridSide_Flag),  intent(out), optional :: xgridside
@@ -151,6 +156,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(out), optional :: localMinIndex(:)
     integer,                    intent(out), optional :: localMaxIndex(:)
     integer,                    intent(out), optional :: localElementCount(:)
+    logical,                    intent(out), optional :: isESMFAllocated
     character(len=*),           intent(out), optional :: name
     type(ESMF_VM),              intent(out), optional :: vm
     integer,                    intent(out), optional :: rc
@@ -179,6 +185,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              image (SSI).\newline
 !              Added argument {\tt localDeToDeMap} to support DE handling from
 !              the Field level rather than require user to go to Array level.
+! \item[8.5.0] Added argument {\tt isESMFAllocated} to support user query of
+!              whether ESMF or user is responsible for the data allocation
+!              referenced by this object.
+! \item[8.6.0] Added argument {\tt geom} to support user query of Geom object.\newline
+!              Added argument {\tt geomDimCount} for easy access to dimension of
+!              underlying Geom object.\newline
+!              Added argument {\tt ungriddedDimCount} for easy access to the
+!              number of ungridded dimensions in the Field object.\newline
+!              Added argument {\tt replicatedDimCount} for easy access to the
+!              number of dimensions across which the Field object is replicated.
 ! \end{description}
 ! \end{itemize}
 !
@@ -204,6 +220,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[geomtype]}]
 !       The type of geometry on which the Field is built. See
 !       section~\ref{const:geomtype} for the range of values.
+! \item [{[geom]}]
+!       {\tt ESMF\_Geom}.
 ! \item [{[grid]}]
 !       {\tt ESMF\_Grid}.
 ! \item [{[mesh]}]
@@ -224,11 +242,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[typekind]}]
 !       TypeKind specifier for Field. See section \ref{const:typekind} for a
 !       complete list of values.
-! \item [{[dimCount]}]
-!       Number of geometrical dimensions in {\tt field}.
-!       For an detailed discussion of this parameter, please see
-!       section \ref{sec:field:usage:createArbGrid} and
-!       section \ref{sec:field:usage:createArbGridRep}.
 ! \item [{[rank]}]
 !       Number of dimensions in the physical memory of the {\tt field} data. It is
 !       identical to dimCount when the corresponding grid is a non-arbitrary grid.
@@ -236,6 +249,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       For an detailed discussion of this parameter, please see
 !       section \ref{sec:field:usage:createArbGrid} and
 !       section \ref{sec:field:usage:createArbGridRep}.
+! \item [{[dimCount]}]
+!       Number of geometrical dimensions in {\tt field}.
+!       For an detailed discussion of this parameter, please see
+!       section \ref{sec:field:usage:createArbGrid} and
+!       section \ref{sec:field:usage:createArbGridRep}.
+! \item [{[geomDimCount]}]
+!       Number of dimensions in the underlying Geom object.
+! \item [{[ungriddedDimCount]}]
+!       Number of ungridded dimensions in the Field object.
+! \item [{[replicatedDimCount]}]
+!       Number of replicated dimensions in the Field object.
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
 !       predefined values and interpretation of results see
@@ -272,22 +296,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       stored in the {\t field}.
 ! \item [{[ungriddedLBound]}]
 !       Lower bounds of the ungridded dimensions of the {\tt field}.
-!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded
+!       The number of elements in the {\tt ungriddedLBound} argument must be
+!       equal or greater to {\tt ungriddedDimCount}, the number of ungridded
 !       dimensions in the {\tt field}.  All ungridded dimensions of the
-!       {\tt field} are also undistributed. When field dimension count is
-!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
-!       must be specified. When both are specified the values are checked
-!       for consistency.  Note that the the ordering of
-!       these ungridded dimensions is the same as their order in the {\tt field}.
+!       {\tt field} are also undistributed. Note that the ordering of
+!       the ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[ungriddedUBound]}]
 !       Upper bounds of the ungridded dimensions of the {\tt field}.
-!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded
+!       The number of elements in the {\tt ungriddedUBound} argument must be
+!       equal or greater to {\tt ungriddedDimCount}, the number of ungridded
 !       dimensions in the {\tt field}.  All ungridded dimensions of the
-!       {\tt field} are also undistributed. When field dimension count is
-!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
-!       must be specified. When both are specified the values are checked
-!       for consistency.  Note that the the ordering of
-!       these ungridded dimensions is the same as their order in the {\tt field}.
+!       {\tt field} are also undistributed. Note that the ordering of
+!       the ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[totalLWidth]}]
 !       Lower bound of halo region.  The size of the first dimension of this array is the number
 !       of gridded dimensions in the {\tt field}.  However, ordering of the elements
@@ -340,33 +360,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[localElementCount]}]
 !     Upon return this holds the PET local number of items of the field data.
 !     {\tt localElementCount} must be allocated to be of size equal to the field rank.
-! \item [{[name]}]
-!       Name of queried item.
-! \item [{[vm]}]
-!       The VM on which the Field object was created.
+!   \item[{[isESMFAllocated]}]
+!     Set to {\tt .true.} for data allocations held by ESMF. Set to
+!     {\tt .false.} otherwise.
+! \item[{[name]}]
+!     Name of the Field object.
+! \item[{[vm]}]
+!     The VM on which the Field object was created.
 ! \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !EOP
 !------------------------------------------------------------------------------
     type(ESMF_FieldType), pointer :: ftype
     integer :: localrc, fieldrank
-    type(ESMF_GridDecompType) :: decompType
-    type(ESMF_GeomType_Flag) :: localGeomType
     type(ESMF_Status) :: fieldstatus
-    integer, dimension(:), allocatable :: l_min, l_max, l_elecount
-    integer, dimension(:), allocatable :: ll_min, ll_max, ll_elecount
-    integer                     :: tileCount, i, j, k
-    integer                     :: dg_dimcount, decount, ldecount
-    integer, allocatable        :: minIndexPTile(:,:)
-    integer, allocatable        :: maxIndexPTile(:,:)
-    integer, allocatable        :: minIndexPDe(:,:)
-    integer, allocatable        :: maxIndexPDe(:,:)
-    integer, allocatable        :: ldeToDeMap(:)
-    integer, allocatable        :: dg2gmap(:), dg2fmap(:)
-    logical, allocatable        :: isDist(:)
-    type(ESMF_Grid)             :: l_grid
-    type(ESMF_Mesh)             :: l_mesh
     type(ESMF_DistGrid)         :: distgrid
 
     ! Initialize
@@ -395,16 +403,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       status = ftype%status
     endif
 
-    ! set default decomp type to non-arb.
-    decompType = ESMF_GRID_NONARBITRARY
-
     ! Get the geometry type
     if (present(geomtype)) then
-        call ESMF_GeomBaseGet(ftype%geombase, geomtype=localGeomType, rc=localrc)
+        call ESMF_GeomGet(ftype%geom, geomtype=geomtype, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        geomtype = localGeomType
+    endif
+
+    if (present(geom)) then
+      geom = ftype%geom
     endif
 
     if (present(grid)) then
@@ -414,7 +422,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No Grid or invalid Grid attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   grid=grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -428,7 +436,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No Grid or invalid Grid attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   staggerloc=staggerloc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -442,7 +450,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No Mesh or invalid Mesh attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   meshloc=meshloc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -456,7 +464,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No Mesh or invalid Mesh attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   mesh=mesh, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -470,7 +478,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No LocStream or invalid LocStream attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   locstream=locstream, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -484,7 +492,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No XGrid or invalid XGrid attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   xgrid=xgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -498,7 +506,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No XGrid or invalid XGrid attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   xgridside=xgridside, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -512,7 +520,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="No XGrid or invalid XGrid attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        call ESMF_GeomBaseGet(ftype%geombase, &
+        call ESMF_GeomGet(ftype%geom, &
                   gridIndex=gridIndex, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -584,17 +592,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
-    if (present(rank)) then
-        if (ftype%status /= ESMF_FIELDSTATUS_COMPLETE) then
-            if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-              msg="Cannot return rank because no data attached to Field", &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-        endif
-        call ESMF_ArrayGet(ftype%array, &
-                           rank=rank, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
+    if (present(rank) &
+      .or.present(ungriddedDimCount).or.present(replicatedDimCount)) then
+      if (ftype%status /= ESMF_FIELDSTATUS_COMPLETE) then
+        if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
+          msg="Cannot access requested information, no data attached to Field", &
           ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+      call ESMF_ArrayGet(ftype%array, rank=rank, &
+        undistDimCount=ungriddedDimCount, replicatedDimCount=replicatedDimCount, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(dimCount)) then
@@ -604,6 +614,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
         dimCount = ftype%dimCount
+    endif
+
+    if (present(geomDimCount)) then
+      call ESMF_GeomGet(ftype%geom, dimCount=geomDimCount, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(localDeCount) &
@@ -623,294 +640,49 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
-    if(present(minIndex) .or. present(maxIndex) .or. &
-      present(elementCount) .or. &
-      present(localminIndex) .or. present(localmaxIndex) .or. &
-      present(localelementCount) ) then
+    if(present(minIndex) .or. present(maxIndex) .or. present(elementCount) .or. &
+         present(localMinIndex) .or. present(localMaxIndex) .or. present(localElementCount)) then
 
-      call ESMF_ArrayGet(ftype%array, rank=fieldrank, &
-          localDeCount=localDeCount, &
-          rc=localrc)
-      if (localrc .ne. ESMF_SUCCESS) then
-         call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-            msg="Cannot retrieve fieldrank from ftypep%array", &
-             ESMF_CONTEXT, rcToReturn=rc)
-         return
-      endif
-
-      allocate(l_min(fieldrank), l_max(fieldrank), l_elecount(fieldrank))
-      allocate(ll_min(fieldrank), ll_max(fieldrank), ll_elecount(fieldrank))
-      l_min = -1
-      l_max = -1
-      l_elecount = -1
-      ll_min = -1
-      ll_max = -1
-      ll_elecount = -1
-
-      if(present(minIndex)) then
-          if(size(minIndex) .ne. fieldrank) then
-             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
-                msg="the size of minIndex must equal to the field rank", &
-                 ESMF_CONTEXT, rcToReturn=rc)
-             return
-          endif
-      endif
-      if(present(maxIndex)) then
-          if(size(maxIndex) .ne. fieldrank) then
-             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
-                msg="the size of maxIndex must equal to the field rank", &
-                 ESMF_CONTEXT, rcToReturn=rc)
-             return
-          endif
-      endif
-      if(present(elementCount)) then
-          if(size(elementCount) .ne. fieldrank) then
-             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
-                msg="the size of elementCount must equal to the field rank", &
-                 ESMF_CONTEXT, rcToReturn=rc)
-             return
-          endif
-      endif
-      if(present(localminIndex)) then
-          if(size(localminIndex) .ne. fieldrank) then
-             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
-                msg="the size of localMinIndex must equal to the field rank", &
-                 ESMF_CONTEXT, rcToReturn=rc)
-             return
-          endif
-      endif
-      if(present(localmaxIndex)) then
-          if(size(localmaxIndex) .ne. fieldrank) then
-             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
-                msg="the size of localMaxIndex must equal to the field rank", &
-                 ESMF_CONTEXT, rcToReturn=rc)
-             return
-          endif
-      endif
-      if(present(localElementCount)) then
-          if(size(localElementCount) .ne. fieldrank) then
-             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
-                msg="the size of localElementCount must equal to the field rank", &
-                 ESMF_CONTEXT, rcToReturn=rc)
-             return
-          endif
-      endif
-
-      call ESMF_GeomBaseGet(ftype%geombase, geomtype=localGeomType, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      if(localGeomType == ESMF_GEOMTYPE_GRID) then
-        call ESMF_GeomBaseGet(ftype%geombase, &
-                  grid=l_grid, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_GridGet(l_grid, distgrid=distgrid, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_DistGridGet(distgrid, localdecount=ldecount, &
-          decount=decount, dimcount=dg_dimcount, tilecount=tilecount, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-        allocate(dg2gmap(dg_dimcount), dg2fmap(dg_dimcount))
-        allocate(isDist(fieldrank))
-
-        call ESMF_GridGet(l_grid, distgridToGridMap=dg2gmap, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-        dg2fmap = -1
-        isDist = .false.
-        do i = 1, dg_dimcount
-          dg2fmap(i) = ftype%gridToFieldMap(i)
-          isDist(dg2fmap(i)) = .true.
-        enddo
-        allocate(ldeToDeMap(1))
-        allocate(minIndexPTile(dg_dimcount, tilecount), maxIndexPTile(dg_dimcount, tileCount))
-        allocate(minIndexPDe(dg_dimcount, decount), maxIndexPDe(dg_dimcount, deCount))
-
-        call ESMF_DistGridGet(distgrid, localdeToDeMap=lDeToDeMap, &
-          minIndexPTile=minIndexPTile, maxIndexPTile = maxIndexPTile, &
-          minIndexPDe=minIndexPDe, maxIndexPDe=maxIndexPDe, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-        if(ldecount /= 1) then
+       call ESMF_ArrayGet(ftype%array, rank=fieldrank, &
+            distgrid=distgrid, rc=localrc)
+       if (localrc .ne. ESMF_SUCCESS) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-             msg="Only implemented for field with 1 localDe.", &
-              ESMF_CONTEXT, rcToReturn=rc)
+               msg="Cannot retrieve fieldrank from ftypep%array", &
+               ESMF_CONTEXT, rcToReturn=rc)
           return
-        endif
+       endif
 
-        if(tilecount /= 1) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-             msg="Cannot retrieve global information for more than 1 tile yet.", &
-              ESMF_CONTEXT, rcToReturn=rc)
-          return
-        endif
+       if(present(minIndex) .or. present(maxIndex) .or. &
+            present(elementCount)) then
+          call getGlobalIndexInfo(ftype=ftype, distgrid=distgrid, fieldrank=fieldrank, &
+               minIndex=minIndex, maxIndex=maxIndex, elementCount=elementCount, &
+               rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+       endif
 
-        ! Calculate global bounds
-        j = 1
-        k = 1
-        do i = 1, fieldrank
-          if(isDist(i)) then
-            ! Global Global, this will be identical on all pets
-            l_min(dg2fmap(j)) = minIndexPTile(j, 1)
-            l_max(dg2fmap(j)) = maxIndexPTile(j, 1)
-            l_elecount(dg2fmap(j)) = l_max(dg2fmap(j)) - l_min(dg2fmap(j)) + 1
-            
-            ! Global bounds on local PET
-            ll_min(dg2fmap(j)) = minIndexPDe(j, ldeToDeMap(1)+1)
-            ll_max(dg2fmap(j)) = maxIndexPDe(j, ldeToDeMap(1)+1)
-            ll_elecount(dg2fmap(j)) = ll_max(dg2fmap(j)) - ll_min(dg2fmap(j)) + 1
+       if(present(localminIndex) .or. present(localmaxIndex) .or. &
+            present(localelementCount) ) then
+          call getLocalIndexInfo(ftype=ftype, distgrid=distgrid, fieldrank=fieldrank, &
+               localMinIndex=localMinIndex, localMaxIndex=localMaxIndex, localElementCount=localElementCount, &
+               rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+       endif
 
-            j = j + 1
-          else
-            ! Global Global, this will be identical on all pets
-            l_min(i) = ftype%ungriddedLBound(k)
-            l_max(i) = ftype%ungriddedUBound(k)
-            l_elecount(i) = l_max(i) - l_min(i) + 1
-
-            ! Global bounds on local PET
-            ll_min(i) = ftype%ungriddedLBound(k)
-            ll_max(i) = ftype%ungriddedUBound(k)
-            ll_elecount(i) = ll_max(i) - ll_min(i) + 1
-
-            k = k + 1
-          endif
-        enddo
-#if 0
-        write(*, *) 'dimcount = ', dg_dimcount
-        write(*, *) 'fieldrank = ', fieldrank
-        write(*, *) 'decount = ', decount
-        write(*, *) 'localdecount = ', ldecount
-        write(*, *) 'tileCount = ', tilecount
-        write(*, *) 'minIndexPTile = ', minIndexPTile
-        write(*, *) 'maxIndexPTile = ', maxIndexPTile
-        write(*, *) 'g2fmap = ', ftype%gridToFieldMap
-        write(*, *) 'dg2gmap = ', dg2gmap
-        write(*, *) 'dg2fmap = ', dg2fmap
-#endif
-        deallocate(dg2fmap, minIndexPTile, maxIndexPTile, minIndexPDe, maxIndexPDe) 
-        deallocate(ldeToDeMap, isDist)
-      else if(localGeomType == ESMF_GEOMTYPE_MESH) then
-        call ESMF_GeomBaseGet(ftype%geombase, &
-                  mesh=l_mesh, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_MeshGet(l_mesh, nodaldistgrid=distgrid, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-        call ESMF_DistGridGet(distgrid, localdecount=ldecount, &
-          decount=decount, dimcount=dg_dimcount, tilecount=tilecount, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-        allocate(dg2fmap(dg_dimcount), isDist(fieldrank))
-        dg2fmap = -1
-        isDist = .false.
-        do i = 1, dg_dimcount
-          dg2fmap(i) = ftype%gridToFieldMap(i)
-          isDist(dg2fmap(i)) = .true.
-        enddo
-
-        allocate(ldeToDeMap(1))
-        allocate(minIndexPTile(dg_dimcount, tilecount), maxIndexPTile(dg_dimcount, tileCount))
-        allocate(minIndexPDe(dg_dimcount, decount), maxIndexPDe(dg_dimcount, deCount))
-        call ESMF_DistGridGet(distgrid, localdeToDeMap=lDeToDeMap, &
-          minIndexPTile=minIndexPTile, maxIndexPTile = maxIndexPTile, &
-          minIndexPDe=minIndexPDe, maxIndexPDe=maxIndexPDe, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        if(ldecount /= 1) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-             msg="Only implemented for field with 1 localDe.", &
-              ESMF_CONTEXT, rcToReturn=rc)
-          return
-        endif
-        if(tilecount /= 1) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-             msg="Cannot retrieve global information for more than 1 tile yet.", &
-              ESMF_CONTEXT, rcToReturn=rc)
-          return
-        endif
-
-        ! Calculate global bounds
-        j = 1
-        k = 1
-        do i = 1, fieldrank
-          if(isDist(i)) then
-            ! Global Global
-            l_min(dg2fmap(j)) = minIndexPTile(j, 1)
-            l_max(dg2fmap(j)) = maxIndexPTile(j, 1)
-            l_elecount(dg2fmap(j)) = l_max(dg2fmap(j)) - l_min(dg2fmap(j)) + 1
-            
-            ! Global bounds on local PET
-            ll_min(dg2fmap(j)) = minIndexPDe(j, ldeToDeMap(1)+1)
-            ll_max(dg2fmap(j)) = maxIndexPDe(j, ldeToDeMap(1)+1)
-            ll_elecount(dg2fmap(j)) = ll_max(dg2fmap(j)) - ll_min(dg2fmap(j)) + 1
-
-            j = j + 1
-          else
-            ! Global Global, this will be identical on all pets
-            l_min(i) = ftype%ungriddedLBound(k)
-            l_max(i) = ftype%ungriddedUBound(k)
-            l_elecount(i) = l_max(i) - l_min(i) + 1
-
-            ! Global bounds on local PET
-            ll_min(i) = ftype%ungriddedLBound(k)
-            ll_max(i) = ftype%ungriddedUBound(k)
-            ll_elecount(i) = ll_max(i) - ll_min(i) + 1
-
-            k = k + 1
-          endif
-        enddo
-#if 0
-        write(*, *) 'dimcount = ', dg_dimcount
-        write(*, *) 'fieldrank = ', fieldrank
-        write(*, *) 'decount = ', decount
-        write(*, *) 'localdecount = ', ldecount
-        write(*, *) 'tileCount = ', tilecount
-        write(*, *) 'minIndexPTile = ', minIndexPTile
-        write(*, *) 'maxIndexPTile = ', maxIndexPTile
-        write(*, *) 'g2fmap = ', ftype%gridToFieldMap
-        write(*, *) 'dg2fmap = ', dg2fmap
-#endif
-        deallocate(dg2fmap, minIndexPTile, maxIndexPTile, minIndexPDe, maxIndexPDe) 
-        deallocate(ldeToDeMap, isDist)
-      else
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-           msg="Only implemented for Grid and Mesh.", &
-            ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-      if(present(minIndex)) minIndex(1:fieldrank) = l_min
-      if(present(maxIndex)) maxIndex(1:fieldrank) = l_max
-      if(present(elementCount)) elementCount(1:fieldrank) = l_max - l_min + 1
-      if(present(localminIndex)) localminIndex(1:fieldrank) = ll_min
-      if(present(localmaxIndex)) localmaxIndex(1:fieldrank) = ll_max
-      if(present(localelementCount)) localelementCount(1:fieldrank) = ll_max - ll_min + 1
-      deallocate(l_min, l_max, l_elecount) 
-      deallocate(ll_min, ll_max, ll_elecount) 
-    endif ! present(index and elementCount)
+    endif ! present(minIndex or maxIndex or elementCount or localMinIndex or localMaxIndex or localElementCount)
 
     if (present(name)) then
+      if (field%isNamedAlias) then
+        name = trim(field%name)
+      else
         call ESMF_GetName(ftype%base, name, localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
     endif
 
     if (present(vm)) then
@@ -921,73 +693,290 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     endif
 
+    ! Obtain dealloc information
+    if (present(isESMFAllocated)) then
+      isESMFAllocated = .false.
+      if (ftype%status /= ESMF_FIELDSTATUS_COMPLETE) then
+        call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+          msg="No data attached to Field", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+      call ESMF_ArrayGet(ftype%array, isESMFAllocated=isESMFAllocated, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
+
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_FieldGetDefault
 !------------------------------------------------------------------------------
 
-
-! TODO:FIELDINTEGRATION Restore FieldGetLocalArray
-#if 0
-!------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldGetLocalArray"
-!BOPI
-! !IROUTINE: ESMF_FieldGet - Get LocalArray associated with the Field
+^define ESMF_METHOD "getGlobalIndexInfo"
+! Helper method to determine various global index information for an ESMF_Field
+  subroutine getGlobalIndexInfo(ftype, distgrid, fieldrank, &
+       minIndex, maxIndex, elementCount, &
+       rc)
 
-! !INTERFACE:
-  ! Private name; call using ESMF_FieldGet()
-  subroutine ESMF_FieldGetLocalArray(field, localarray, keywordEnforcer, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Field), intent(in) :: field
-    type(ESMF_LocalArray), intent(out) :: localarray
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Get data in {\tt ESMF\_LocalArray} form.
-!
-! The arguments are:
-! \begin{description}
-! \item [field]
-!       An {\tt ESMF\_Field} object.
-! \item [{[localarray]}]
-!       Field {\tt ESMF\_LocalArray}.
-! \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!EOPI
-!------------------------------------------------------------------------------
+    type(ESMF_FieldType),       intent(in)            :: ftype
+    type(ESMF_DistGrid),        intent(in)            :: distgrid
+    integer,                    intent(in)            :: fieldrank
+    integer,                    intent(out), optional :: minIndex(:)
+    integer,                    intent(out), optional :: maxIndex(:)
+    integer,                    intent(out), optional :: elementCount(:)
+    integer,                    intent(out), optional :: rc
+
     integer :: localrc
-    !character(len=ESMF_MAXSTR) :: str
-    type(ESMF_Array) :: array
+    integer, dimension(:), allocatable :: l_min, l_max, l_elecount
+    integer                     :: i, j, k
+    integer                     :: dg_dimcount, tilecount
+    integer, allocatable        :: dg2fmap(:)
+    logical, allocatable        :: isDist(:)
+    integer, allocatable        :: minIndexPTile(:,:)
+    integer, allocatable        :: maxIndexPTile(:,:)
 
-    ! Initialize
-    localrc = ESMF_RC_NOT_IMPL
+    ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! check variables
-    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+    allocate(l_min(fieldrank), l_max(fieldrank), l_elecount(fieldrank))
+    l_min = -1
+    l_max = -1
+    l_elecount = -1
 
-    call ESMF_FieldGetArray(field, array, rc=localrc)
+    if(present(minIndex)) then
+       if(size(minIndex) .ne. fieldrank) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
+               msg="the size of minIndex must equal to the field rank", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
+    endif
+    if(present(maxIndex)) then
+       if(size(maxIndex) .ne. fieldrank) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
+               msg="the size of maxIndex must equal to the field rank", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
+    endif
+    if(present(elementCount)) then
+       if(size(elementCount) .ne. fieldrank) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
+               msg="the size of elementCount must equal to the field rank", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
+    endif
+
+    call ESMF_DistGridGet(distgrid, &
+         dimcount=dg_dimcount, tilecount=tilecount, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
-                              ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rcToReturn=rc)) return
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
+    allocate(dg2fmap(dg_dimcount))
+    allocate(isDist(fieldrank))
 
-    call ESMF_ArrayGet(array, localarray, rc=localrc)
+    dg2fmap = -1
+    isDist = .false.
+    do i = 1, dg_dimcount
+       dg2fmap(i) = ftype%gridToFieldMap(i)
+       isDist(dg2fmap(i)) = .true.
+    enddo
+    allocate(minIndexPTile(dg_dimcount, tilecount), maxIndexPTile(dg_dimcount, tileCount))
+
+    call ESMF_DistGridGet(distgrid, &
+         minIndexPTile=minIndexPTile, maxIndexPTile = maxIndexPTile, &
+         rc=localrc)
     if (ESMF_LogFoundError(localrc, &
-                              ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rcToReturn=rc)) return
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Set return values.
+    if(tilecount /= 1) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
+            msg="Cannot retrieve global information for more than 1 tile yet.", &
+            ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
+
+    ! Calculate global bounds
+    j = 1
+    k = 1
+    do i = 1, fieldrank
+       if(isDist(i)) then
+          ! Global Global, this will be identical on all pets
+          ! - note hard-coding of tile=1 (hence the assumption of tilecount == 1,
+          ! enforced above)
+          l_min(dg2fmap(j)) = minIndexPTile(j, 1)
+          l_max(dg2fmap(j)) = maxIndexPTile(j, 1)
+          l_elecount(dg2fmap(j)) = l_max(dg2fmap(j)) - l_min(dg2fmap(j)) + 1
+
+          j = j + 1
+       else
+          ! Global Global, this will be identical on all pets
+          l_min(i) = ftype%ungriddedLBound(k)
+          l_max(i) = ftype%ungriddedUBound(k)
+          l_elecount(i) = l_max(i) - l_min(i) + 1
+
+          k = k + 1
+       endif
+    enddo
+#if 0
+    write(*, *) 'dimcount = ', dg_dimcount
+    write(*, *) 'fieldrank = ', fieldrank
+    write(*, *) 'tileCount = ', tilecount
+    write(*, *) 'minIndexPTile = ', minIndexPTile
+    write(*, *) 'maxIndexPTile = ', maxIndexPTile
+    write(*, *) 'g2fmap = ', ftype%gridToFieldMap
+    write(*, *) 'dg2fmap = ', dg2fmap
+#endif
+    deallocate(dg2fmap, minIndexPTile, maxIndexPTile)
+    deallocate(isDist)
+
+    if(present(minIndex)) minIndex(1:fieldrank) = l_min
+    if(present(maxIndex)) maxIndex(1:fieldrank) = l_max
+    if(present(elementCount)) elementCount(1:fieldrank) = l_max - l_min + 1
+    deallocate(l_min, l_max, l_elecount)
+
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_FieldGetLocalArray
-!------------------------------------------------------------------------------
-#endif
+  end subroutine getGlobalIndexInfo
 
+^undef  ESMF_METHOD
+^define ESMF_METHOD "getLocalIndexInfo"
+! Helper method to determine various local index information for an ESMF_Field
+  subroutine getLocalIndexInfo(ftype, distgrid, fieldrank, &
+       localMinIndex, localMaxIndex, localElementCount, &
+       rc)
+
+    type(ESMF_FieldType),       intent(in)            :: ftype
+    type(ESMF_DistGrid),        intent(in)            :: distgrid
+    integer,                    intent(in)            :: fieldrank
+    integer,                    intent(out), optional :: localMinIndex(:)
+    integer,                    intent(out), optional :: localMaxIndex(:)
+    integer,                    intent(out), optional :: localElementCount(:)
+    integer,                    intent(out), optional :: rc
+
+    integer :: localrc
+    integer, dimension(:), allocatable :: ll_min, ll_max, ll_elecount
+    integer                     :: i, j, k
+    integer                     :: decount, ldecount, dg_dimcount
+    integer, allocatable        :: dg2fmap(:)
+    logical, allocatable        :: isDist(:)
+    integer, allocatable        :: minIndexPDe(:,:)
+    integer, allocatable        :: maxIndexPDe(:,:)
+    integer, allocatable        :: ldeToDeMap(:)
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    allocate(ll_min(fieldrank), ll_max(fieldrank), ll_elecount(fieldrank))
+    ll_min = -1
+    ll_max = -1
+    ll_elecount = -1
+
+    if(present(localminIndex)) then
+       if(size(localminIndex) .ne. fieldrank) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
+               msg="the size of localMinIndex must equal to the field rank", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
+    endif
+    if(present(localmaxIndex)) then
+       if(size(localmaxIndex) .ne. fieldrank) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
+               msg="the size of localMaxIndex must equal to the field rank", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
+    endif
+    if(present(localElementCount)) then
+       if(size(localElementCount) .ne. fieldrank) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
+               msg="the size of localElementCount must equal to the field rank", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
+    endif
+
+    call ESMF_DistGridGet(distgrid, localdecount=ldecount, &
+         decount=decount, dimcount=dg_dimcount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    allocate(dg2fmap(dg_dimcount))
+    allocate(isDist(fieldrank))
+
+    dg2fmap = -1
+    isDist = .false.
+    do i = 1, dg_dimcount
+       dg2fmap(i) = ftype%gridToFieldMap(i)
+       isDist(dg2fmap(i)) = .true.
+    enddo
+    allocate(ldeToDeMap(1))
+    allocate(minIndexPDe(dg_dimcount, decount), maxIndexPDe(dg_dimcount, deCount))
+
+    call ESMF_DistGridGet(distgrid, localdeToDeMap=lDeToDeMap, &
+         minIndexPDe=minIndexPDe, maxIndexPDe=maxIndexPDe, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if(ldecount /= 1) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
+            msg="Only implemented for field with 1 localDe.", &
+            ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
+
+    ! Calculate global bounds
+    j = 1
+    k = 1
+    do i = 1, fieldrank
+       if(isDist(i)) then
+
+          ! Global bounds on local PET
+          ! - note hard-coding of DE=1 (hence the assumption of ldecount == 1,
+          ! enforced above)
+          ll_min(dg2fmap(j)) = minIndexPDe(j, ldeToDeMap(1)+1)
+          ll_max(dg2fmap(j)) = maxIndexPDe(j, ldeToDeMap(1)+1)
+          ll_elecount(dg2fmap(j)) = ll_max(dg2fmap(j)) - ll_min(dg2fmap(j)) + 1
+
+          j = j + 1
+       else
+
+          ! Global bounds on local PET
+          ll_min(i) = ftype%ungriddedLBound(k)
+          ll_max(i) = ftype%ungriddedUBound(k)
+          ll_elecount(i) = ll_max(i) - ll_min(i) + 1
+
+          k = k + 1
+       endif
+    enddo
+#if 0
+    write(*, *) 'dimcount = ', dg_dimcount
+    write(*, *) 'fieldrank = ', fieldrank
+    write(*, *) 'decount = ', decount
+    write(*, *) 'localdecount = ', ldecount
+    write(*, *) 'g2fmap = ', ftype%gridToFieldMap
+    write(*, *) 'dg2fmap = ', dg2fmap
+#endif
+    deallocate(dg2fmap, minIndexPDe, maxIndexPDe)
+    deallocate(ldeToDeMap, isDist)
+
+    if(present(localminIndex)) localminIndex(1:fieldrank) = ll_min
+    if(present(localmaxIndex)) localmaxIndex(1:fieldrank) = ll_max
+    if(present(localelementCount)) localelementCount(1:fieldrank) = ll_max - ll_min + 1
+    deallocate(ll_min, ll_max, ll_elecount)
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine getLocalIndexInfo
+!------------------------------------------------------------------------------
 
 #define FieldGetDataPtrDoc() \
 !---------------------------------------------------------------------------- @\
@@ -1300,7 +1289,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! check variables
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-    call ESMF_GeomBaseGet(field%ftypep%geombase, dimCount=gridrank, rc=localrc)
+    call ESMF_GeomGet(field%ftypep%geom, dimCount=gridrank, rc=localrc)
     if (localrc .ne. ESMF_SUCCESS) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
           msg="Cannot retrieve gridrank from ftypep%grid", &

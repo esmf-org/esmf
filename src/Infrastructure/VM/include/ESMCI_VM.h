@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -61,6 +61,7 @@ class VMId {
   int create ();      // allocates memory for vmKey member
   int destroy ();     // frees memory for vmKey member
   int get(int *localID, char *key, int key_len);
+  int getLeftmostOnBit(int *leftmostOnBit);
   int set(int  localID, const char *key, int key_len);
   int serialize(const char *buffer, int *length, int *offset,
                 const ESMC_InquireFlag &inquireflag);
@@ -81,7 +82,9 @@ class VMId {
 namespace ESMCI {
 
 // ESMCI::VMId methods:
-bool VMIdCompare(const VMId *vmID1, const VMId *vmID2);
+bool VMIdCompare(const VMId *vmID1, const VMId *vmID2, bool keyOnly=false,
+  bool keySuper=false);
+bool VMIdIsLocalPetActive(const VMId *vmID);
 bool VMIdLessThan(const VMId *vmID1, const VMId *vmID2);
 int VMIdCopy(VMId *vmIDdst, VMId *vmIDsrc);
 } // namespace ESMCI
@@ -130,6 +133,7 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     static void getArgs(int *argc, char ***argv, int *rc);  // command line args
     static VM *getGlobal(int *rc=NULL);       // global VM
     static VM *getCurrent(int *rc=NULL);      // current VM
+    static bool isThreadKnown(int *rc=NULL);  // is thread known under any VM
     static VMId *getCurrentID(int *rc=NULL);  // VMId of current VM
     static void getCurrentGarbageInfo(int *, int *); // garbage info current VM
     static void logGarbageInfo(std::string prefix, bool current=false,
@@ -147,6 +151,7 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     static void rmFObject(void **fobject);
     static bool validObject(ESMC_Base *);
     static char const *getenv(char const *name);
+    static void setenv(char const *name, char const *value);
     // misc.
     int print() const;
     int validate() const;
@@ -196,6 +201,7 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
 class VMPlan : public VMKPlan {   // inherits from ESMCI::VMKPlan
 
   public:
+    VMPlan(int _ndevlist=0, int *_devlist=NULL) : VMKPlan(_ndevlist,_devlist){}
     int nspawn;     // number of PETs this PET will spawn
     VM **myvms;     // pointer array of VM instances for this PET
     VMK **myvmachs; // pointer array of VMK instances for this PET

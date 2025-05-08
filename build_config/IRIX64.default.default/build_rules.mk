@@ -10,7 +10,7 @@ ESMF_AR                 = CC -ar
 ESMF_AREXTRACT          = ar -x 
 ESMF_ARCREATEFLAGS      = -o 
 ESMF_F90DEFAULT         = f90
-ESMF_F90LINKERDEFAULT   = CC
+ESMF_F90LINKERDEFAULT   = $(ESMF_CXXLINKER)
 ESMF_CXXDEFAULT         = CC
 ESMF_CXXLINKLIBS       += -lC
 ESMF_CDEFAULT           = cc
@@ -27,9 +27,7 @@ endif
 #
 ifeq ($(ESMF_COMM),mpiuni)
 # MPI stub library -----------------------------------------
-ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_CPPFLAGS          += -DESMF_MPIUNI -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpi)
@@ -37,8 +35,6 @@ ifeq ($(ESMF_COMM),mpi)
 ESMF_F90LINKLIBS       += -lmpi++ -lmpi
 ESMF_CXXLINKLIBS       += -lmpi++ -lmpi
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------

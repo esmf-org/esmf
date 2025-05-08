@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -727,7 +727,7 @@ void check_overflow(T dst, T2 tocheck) {
     ESMC_CHECK_RC("ESMC_RC_ARG_BAD", ESMC_RC_ARG_BAD, errmsg)
   }
 };
-template void check_overflow(int, long int);
+template void check_overflow(int, long long int);
 template void check_overflow(int, unsigned long int);
 template void check_overflow(float, double);
 
@@ -839,7 +839,7 @@ T Info::get(key_t &key, const T *def, const int *index, bool recursive, std::str
 template float Info::get(key_t&, const float*, const int*, bool, std::string*, bool) const;
 template double Info::get(key_t&, const double*, const int*, bool, std::string*, bool) const;
 template int Info::get(key_t&, const int*, const int*, bool, std::string*, bool) const;
-template long int Info::get(key_t&, const long int*, const int*, bool, std::string*, bool) const;
+template long long int Info::get(key_t&, const long long int*, const int*, bool, std::string*, bool) const;
 template bool Info::get(key_t&, const bool*, const int*, bool, std::string*, bool) const;
 template std::string Info::get(key_t&, const std::string*, const int*, bool, std::string*, bool) const;
 template json Info::get(key_t&, const json*, const int*, bool, std::string*, bool) const;
@@ -858,18 +858,29 @@ void Info::get(ESMCI::Info &info, key_t &key) const {
 #endif
 
   json j;
+  json const *ts = nullptr;
   try {
     j = this->get<json>(key);
+    check_init_from_json(j);    
 
+    const json &type_storage = this->getTypeStorage();    
+    if (!type_storage.is_null() && type_storage.size() > 0) {
+      json::json_pointer jpath = this->formatKey(key);
+      update_json_pointer(this->getTypeStorage(), &ts, jpath, true);
+      check_init_from_json(*ts);
+    }
+      
 #if 0
     std::string msg2 = std::string(ESMC_METHOD) + ": j dump=" + j.dump();
     ESMC_LogWrite(msg2.c_str(), ESMC_LOGMSG_DEBUG);
 #endif
-    
-    check_init_from_json(j);
+
   }
   ESMF_CATCH_INFO
   info.getStorageRefWritable() = std::move(j);
+  if (!type_storage.is_null() && type_storage.size() > 0) {
+    info.getTypeStorageWritable() = std::move(*ts);
+  }
 
 #if 0
   std::string msg3 = std::string(ESMC_METHOD) + ": info dump=" + info.dump(0);
@@ -1377,7 +1388,7 @@ void Info::set(key_t &key, T value, bool force, const int *index, const key_t * 
 template void Info::set<float>(key_t&, float, bool, const int*, const key_t * const);
 template void Info::set<double>(key_t&, double, bool, const int*, const key_t * const);
 template void Info::set<int>(key_t&, int, bool, const int*, const key_t * const);
-template void Info::set<long int>(key_t&, long int, bool, const int*, const key_t * const);
+template void Info::set<long long int>(key_t&, long long int, bool, const int*, const key_t * const);
 template void Info::set<std::string>(key_t&, std::string, bool, const int*, const key_t * const);
 template void Info::set<bool>(key_t&, bool, bool, const int*, const key_t * const);
 
@@ -1409,7 +1420,7 @@ void Info::set(key_t &key, T *values, int count, bool force, const key_t * const
 template void Info::set<float>(key_t&, float*, int, bool, const key_t * const);
 template void Info::set<double>(key_t&, double*, int, bool, const key_t * const);
 template void Info::set<int>(key_t&, int*, int, bool, const key_t * const);
-template void Info::set<long int>(key_t&, long int*, int, bool, const key_t * const);
+template void Info::set<long long int>(key_t&, long long int*, int, bool, const key_t * const);
 template void Info::set<bool>(key_t&, bool*, int, bool, const key_t * const);
 template void Info::set<std::vector<std::string>>(key_t&, std::vector<std::string>*, int, bool, const key_t * const);
 

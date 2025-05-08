@@ -160,7 +160,7 @@ test_darray(int iosysid, int ioid, int num_flavors, int *flavor,
 
         /* How many megabytes will we write? */
         num_megabytes = (NUM_TIMESTEPS * X_DIM_LEN * Y_DIM_LEN * Z_DIM_LEN * sizeof(int))/(MILLION);
-        
+
         sprintf(filename, "data_%s_iotype_%d_rearr_%d.nc", TEST_NAME, flavor[fmt],
                 rearranger);
         /* Create the filename. Use the same filename for all, so we
@@ -268,7 +268,7 @@ test_darray(int iosysid, int ioid, int num_flavors, int *flavor,
         /* Now reopen the file and re-read the data. */
         {
             int *test_data_in;
-            
+
             if (!(test_data_in = malloc(sizeof(int) * arraylen)))
                 ERR(PIO_ENOMEM);
 
@@ -319,9 +319,9 @@ test_darray(int iosysid, int ioid, int num_flavors, int *flavor,
 
             /* Free resources. */
             free(test_data_in);
-            
+
         } /* re-reading file */
-        
+
         if (!my_rank)
             printf("%d,\t%d,\t%s,\t%s,\t%s,\t%8.3f,\t%8.3f,\t%8.1f,\t%8.3f,\t%8.3f\n", ntasks, num_io_procs,
                    (rearranger == 1 ? "box" : "subset"), (provide_fill ? "fill" : "nofill"),

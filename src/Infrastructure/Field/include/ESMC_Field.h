@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -673,14 +673,8 @@ int ESMC_FieldPrint(
 //
 //  Read Field data from a file and put it into an {ESMF\_Field} object.
 //  For this API to be functional, the environment variable {\tt ESMF\_PIO}
-//  should be set to "internal" when the ESMF library is built.
+//  should be set to either "internal" or "external" when the ESMF library is built.
 //  Please see the section on Data I/O,~\ref{io:dataio}.
-//
-//  Limitations:
-//  \begin{itemize}
-//    \item Only 1 DE per PET supported.
-//    \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
-//  \end{itemize}
 //
 //  The arguments are:
 //  \begin{description}
@@ -884,7 +878,7 @@ int ESMC_FieldRegridStoreFile(
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
     enum ESMC_Logical *ignoreDegenerate,           // in
     enum ESMC_Logical *create_rh,                  // in
-    ESMC_FileMode_Flag *filemode,                  // in
+    enum ESMC_FileMode_Flag *filemode,                  // in
     const char *srcFile,                           // in
     const char *dstFile,                           // in
     enum ESMC_FileFormat_Flag *srcFileType,        // in
@@ -1192,15 +1186,9 @@ int ESMC_FieldSMMStore(
 //
 // !DESCRIPTION:
 //  Write Field data into a file.  For this API to be functional, the 
-//  environment variable {\tt ESMF\_PIO} should be set to "internal" when 
+//  environment variable {\tt ESMF\_PIO} should be set to either "internal" or "external" when
 //  the ESMF library is built.  Please see the section on 
 //  Data I/O,~\ref{io:dataio}.
-//
-//  Limitations:
-//  \begin{itemize}
-//    \item Only 1 DE per PET supported.
-//    \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
-//  \end{itemize}
 //
 //  The arguments are:
 //  \begin{description}

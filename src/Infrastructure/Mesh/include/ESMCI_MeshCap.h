@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -92,8 +92,9 @@ namespace ESMCI {
     void fit_on_vm(VM **vm, int *rc);
 
     void MeshCap_to_PointList(ESMC_MeshLoc_Flag meshLoc,
-                              ESMCI::InterArray<int> *maskValuesArg, PointList **out_pl,
-                              int *rc);
+                              ESMCI::InterArray<int> *maskValuesArg,
+                              bool addOrigCoords, 
+                              PointList **out_pl, int *rc);
 
     static MeshCap *create_from_ptr(void *_mesh, int *rc);
 
@@ -137,7 +138,7 @@ namespace ESMCI {
     void meshaddelements(int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                          int *_areaPresent, double *elemArea,
                          int *_coordsPresent, double *elemCoords,
-                         int *_num_elemConn, int *elemConn, 
+                         int *_elemConn_size, int *elemConn, 
                          ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                          int *rc);
 
@@ -275,6 +276,7 @@ namespace ESMCI {
       int *regridMethod,
       int *map_type,
       int *norm_type,
+      int *_vectorRegrid, 
       int *regridPoleType, int *regridPoleNPnts,
       int *extrapMethod,
       int *extrapNumSrcPnts,
@@ -283,8 +285,9 @@ namespace ESMCI {
       int *extrapNumInputLevels,
       int *unmappedaction, int *_ignoreDegenerate,
       int *srcTermProcessing, int *pipelineDepth,
-      ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
-      int *nentries, ESMCI::TempWeights **tweights,
+      ESMCI::RouteHandle **rh, int *has_rh,
+      int *has_iw,int *nentries, ESMCI::TempWeights **tweights,
+      ESMCI::RouteHandle **trh, int *has_trh,
       int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
       int *has_statusArray, ESMCI::Array **statusArray,
       int *checkFlag, 

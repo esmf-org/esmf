@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -128,16 +128,17 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()
-  subroutine ESMF_ArrayGetDefault(array, keywordEnforcer, arrayspec, typekind, &
+subroutine ESMF_ArrayGetDefault(array, keywordEnforcer, arrayspec, typekind, &
     rank, localarrayList, indexflag, distgridToArrayMap, &
     distgridToPackedArrayMap, arrayToDistGridMap, undistLBound, &
     undistUBound, exclusiveLBound, exclusiveUBound, computationalLBound, &
     computationalUBound, totalLBound, totalUBound, computationalLWidth, &
-    computationalUWidth, totalLWidth, totalUWidth, distgrid, dimCount, &
+    computationalUWidth, totalLWidth, totalUWidth, distgrid, &
+    dimCount,  undistDimCount, replicatedDimCount, &
     tileCount, minIndexPTile, maxIndexPTile, deToTileMap, indexCountPDe, &
     delayout, deCount, localDeCount, ssiLocalDeCount, localDeToDeMap, &
     localDeList, &    ! DEPRECATED ARGUMENT
-    name, vm, rc)
+    isESMFAllocated, name, vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),              intent(in)            :: array
@@ -164,6 +165,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,               target, intent(out), optional :: totalUWidth(:,:)
     type(ESMF_DistGrid),           intent(out), optional :: distgrid
     integer,                       intent(out), optional :: dimCount
+    integer,                       intent(out), optional :: undistDimCount
+    integer,                       intent(out), optional :: replicatedDimCount
     integer,                       intent(out), optional :: tileCount
     integer,                       intent(out), optional :: minIndexPTile(:,:)
     integer,                       intent(out), optional :: maxIndexPTile(:,:)
@@ -175,10 +178,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(out), optional :: ssiLocalDeCount
     integer,                       intent(out), optional :: localDeToDeMap(:)
     integer,                       intent(out), optional :: localDeList(:)     ! DEPRECATED ARGUMENT
+    logical,                       intent(out), optional :: isESMFAllocated
     character(len=*),              intent(out), optional :: name
     type(ESMF_VM),                 intent(out), optional :: vm
-    integer,                       intent(out), optional :: rc  
-!         
+    integer,                       intent(out), optional :: rc
+!
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
@@ -193,6 +197,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              between PETs on the same single system image (SSI).\newline
 !              Added argument {\tt vm} in order to offer information about the
 !              VM on which the Array was created.
+! \item[8.5.0] Added argument {\tt isESMFAllocated} to support user query of
+!              whether ESMF or user is responsible for the data allocation
+!              referenced by this object.
+! \item[8.6.0] Added argument {\tt undistDimCount} to support direct user
+!              query of the number of undistributed dimensions in the Array
+!              object.\newline
+!              Added argument {\tt replicatedDimCount} to support direct user
+!              query of the number of replicated dimensions in the Array
+!              object.
 ! \end{description}
 ! \end{itemize}
 !         
@@ -310,6 +323,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Upon return this holds the associated {\tt ESMF\_DistGrid} object.
 !   \item[{[dimCount]}]
 !     Number of dimensions (rank) of {\tt distgrid}.
+!   \item[{[undistDimCount]}]
+!     Number of undistributed dimensions in the Array. (See
+!     Section~\ref{sec:array:usage:undistributed_dims} for an explanation
+!     of undistributed Array dimensions.)
+!   \item[{[replicatedDimCount]}]
+!     Number of replicated dimensions in the Array. (See
+!     Section~\ref{sec:array:usage:replicated_dims} for an explanation of
+!     replicated Array dimensions.)
 !   \item[{[tileCount]}]
 !     Number of tiles in {\tt distgrid}.
 !   \item[{[minIndexPTile]}]
@@ -344,6 +365,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ssiLocalDeCount}, and will be filled accordingly.
 !   \item[{[localDeList]}]
 !     \apiDeprecatedArgWithReplacement{localDeToDeMap}
+!   \item[{[isESMFAllocated]}]
+!     Set to {\tt .true.} for data allocations held by ESMF. Set to
+!     {\tt .false.} otherwise.
 !   \item [{[name]}]
 !     Name of the Array object.
 !   \item [{[vm}]
@@ -379,14 +403,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_InterArray)           :: localDeToDeMapArg      ! helper variable
     type(ESMF_DistGrid)             :: opt_distgrid           ! helper variable
     type(ESMF_DELayout)             :: opt_delayout           ! helper variable
+    type(ESMF_LocalArray)           :: localArray             ! helper variable
 
     ! Initialize return code
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
-    
+
     ! Deal with (optional) array arguments
     if (present(localarrayList)) then
       len_localarrayPtrList = size(localarrayList)
@@ -454,7 +479,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayGet(array, opt_typekind, opt_rank, opt_ssiLocalDeCount, &
+    call c_ESMC_ArrayGet(array, opt_typekind, opt_rank, &
+      undistDimCount, replicatedDimCount, opt_ssiLocalDeCount, &
       opt_localarrayPtrList, len_localarrayPtrList, localDeToDeMapArg, &
       opt_distgrid, opt_delayout, indexflag, &
       distgridToArrayMapArg, distgridToPackedArrayMapArg, &
@@ -492,7 +518,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
     endif
-    
+
     ! Garbage collection
     deallocate(opt_localarrayPtrList)
     call ESMF_InterArrayDestroy(distgridToArrayMapArg, rc=localrc)
@@ -540,21 +566,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_InterArrayDestroy(totalUWidthArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
     ! Special call to get name out of Base class
     if (present(name)) then
-      call c_ESMC_GetName(array, name, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (array%isNamedAlias) then
+        name = trim(array%name)
+      else
+        call c_ESMC_GetName(array, name, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
     endif
-    
+
     ! Special call to get vm out of Base class
     if (present(vm)) then
       call c_ESMC_GetVM(array, vm, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Set init code on the VM object before returning
+      call ESMF_VMSetInitCreated(vm, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-    
+
     ! Obtain DistGrid information
     call ESMF_DistGridGet(opt_distgrid, dimCount=dimCount, &
       tileCount=tileCount, minIndexPTile=minIndexPTile, &
@@ -565,13 +599,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Obtain DELayout information
     call ESMF_DELayoutGet(opt_delayout, deCount=deCount, &
-      localDeCount=localDeCount, rc=localrc)
+      localDeCount=opt_localDeCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
+    ! Obtain dealloc information
+    if (present(isESMFAllocated)) then
+      isESMFAllocated = .false. ! initialize
+      do i=0, opt_localDeCount-1
+        call c_ESMC_ArrayGetLArray(array, i, localArray, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! prepare local alias variable localArray to be passed to Fortran API
+        call ESMF_LocalArraySetInitCreated(localArray, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! go through Fortran API to query isESMFAllocated
+        call ESMF_LocalArrayGet(localArray, isESMFAllocated=isESMFAllocated, &
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      end do
+    end if
+
     ! Deal with optional arguments that were already queried internally
     if (present(typekind)) typekind = opt_typekind
     if (present(rank)) rank = opt_rank
+    if (present(localDeCount)) localDeCount = opt_localDeCount
     if (present(ssiLocalDeCount)) ssiLocalDeCount = opt_ssiLocalDeCount
     ! Deal with optional arrayspec
     if (present(arrayspec)) then

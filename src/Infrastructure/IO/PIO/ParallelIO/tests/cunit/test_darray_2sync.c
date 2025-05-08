@@ -312,8 +312,8 @@ int darray_fill_test(int iosysid, int my_rank, int num_iotypes, int *iotype,
                     unsigned char data_in[elements_per_pe * NUM_COMPUTATION_PROCS];
                     if ((ret = PIOc_get_var_uchar(ncid2, 0, data_in)))
                         AERR(ret);
-                    if (my_rank && data_in[0] != 1 && data_in[1] != -1 && data_in[2] != 2 &&
-                        data_in[3] != -2 && data_in[4] != 3 && data_in[5] != -3)
+                    if (my_rank && data_in[0] != 1 && data_in[1] != 1 && data_in[2] != 2 &&
+                        data_in[3] != 2 && data_in[4] != 3 && data_in[5] != 3)
                         AERR(ERR_WRONG);
                 }
                 break;
@@ -322,8 +322,8 @@ int darray_fill_test(int iosysid, int my_rank, int num_iotypes, int *iotype,
                     unsigned short data_in[elements_per_pe * NUM_COMPUTATION_PROCS];
                     if ((ret = PIOc_get_var_ushort(ncid2, 0, data_in)))
                         AERR(ret);
-                    if (my_rank && data_in[0] != 1 && data_in[1] != -1 && data_in[2] != 2 &&
-                        data_in[3] != -2 && data_in[4] != 3 && data_in[5] != -3)
+                    if (my_rank && data_in[0] != 1 && data_in[1] != 1 && data_in[2] != 2 &&
+                        data_in[3] != 2 && data_in[4] != 3 && data_in[5] != 3)
                         AERR(ERR_WRONG);
                 }
                 break;
@@ -332,8 +332,8 @@ int darray_fill_test(int iosysid, int my_rank, int num_iotypes, int *iotype,
                     unsigned int data_in[elements_per_pe * NUM_COMPUTATION_PROCS];
                     if ((ret = PIOc_get_var_uint(ncid2, 0, data_in)))
                         AERR(ret);
-                    if (my_rank && data_in[0] != 1 && data_in[1] != -1 && data_in[2] != 2 &&
-                        data_in[3] != -2 && data_in[4] != 3 && data_in[5] != -3)
+                    if (my_rank && data_in[0] != 1 && data_in[1] != 1 && data_in[2] != 2 &&
+                        data_in[3] != 2 && data_in[4] != 3 && data_in[5] != 3)
                         AERR(ERR_WRONG);
                 }
                 break;

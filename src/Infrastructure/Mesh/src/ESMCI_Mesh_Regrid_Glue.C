@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -26,6 +26,7 @@
 #include "ESMCI_Array.h"
 
 #include "ESMCI_TraceMacros.h"  // for profiling
+#include "ESMCI_TraceRegion.h"  // for profiling
 
 #include "Mesh/include/ESMCI_Mesh.h"
 #include "Mesh/include/Legacy/ESMCI_MeshRead.h"
@@ -38,8 +39,10 @@
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/Legacy/ESMCI_Phedra.h"
 #include "Mesh/include/ESMCI_Mesh_Regrid_Glue.h"
+#include "Mesh/include/ESMCI_Mesh_Vector_Regrid.h"
 #include "Mesh/include/Legacy/ESMCI_MeshMerge.h"
 #include "Mesh/include/ESMCI_Mesh_GToM_Glue.h"
+
 
 #include <iostream>
 #include <vector>
@@ -57,18 +60,12 @@
 using namespace ESMCI;
 
 
-
-
 // prototypes from below
 static bool all_mesh_node_ids_in_wmat(PointList *pointlist, WMat &wts, int *missing_id);
 static bool all_mesh_elem_ids_in_wmat(Mesh *mesh, WMat &wts, int *missing_id);
 static bool any_cells_in_mesh_degenerate(Mesh *mesh);
 static void get_mesh_node_ids_not_in_wmat(PointList *pointlist, WMat &wts, std::vector<int> *missing_ids);
 static void get_mesh_elem_ids_not_in_wmat(Mesh *mesh, WMat &wts, std::vector<int> *missing_ids);
-static void translate_split_src_elems_in_wts(Mesh *srcmesh, int num_entries,
-                                      int *iientries);
-static void translate_split_dst_elems_in_wts(Mesh *dstmesh, int num_entries,
-                                      int *iientries, double *factors);
 static void change_wts_to_be_fracarea(Mesh *mesh, int num_entries,
                                int *iientries, double *factors);
 
@@ -86,14 +83,13 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 void CpMeshElemDataToArray(Grid &grid, int staggerloc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray);
 void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array);
 
-
-
 void ESMCI_regrid_create(
                      Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
                      Mesh **meshdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
                      int *regridMethod,
-                      int *map_type,
+                     int *map_type,
                      int *norm_type,
+                     int *_vectorRegrid, 
                      int *regridPoleType, int *regridPoleNPnts,
                      int *extrapMethod,
                      int *extrapNumSrcPnts,
@@ -102,8 +98,9 @@ void ESMCI_regrid_create(
                      int *extrapNumInputLevels, 
                      int *unmappedaction, int *_ignoreDegenerate,
                      int *srcTermProcessing, int *pipelineDepth,
-                     ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
-                     int *nentries, ESMCI::TempWeights **tweights,
+                     ESMCI::RouteHandle **rh, int *has_rh,
+                     int *has_iw, int *nentries, ESMCI::TempWeights **tweights,
+                     ESMCI::RouteHandle **trh, int *has_trh,
                      int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
                      int *_has_statusArray, ESMCI::Array **_statusArray,
                      int *_checkFlag, 
@@ -112,7 +109,11 @@ void ESMCI_regrid_create(
 #define ESMC_METHOD "ESMCI_regrid_create()"
   Trace __trace(" FTN_X(regrid_test)(ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
 
+  // Declare local return code
+  int localrc;
 
+  
+  // Dereference input variables
   ESMCI::Array &srcarray = **arraysrcpp;
   ESMCI::Array &dstarray = **arraydstpp;
 
@@ -125,6 +126,7 @@ void ESMCI_regrid_create(
   int has_statusArray=*_has_statusArray;
   ESMCI::Array *statusArray=*_statusArray;
 
+  
 #define PROGRESSLOG_off
 #define MEMLOG_off
 
@@ -138,14 +140,14 @@ void ESMCI_regrid_create(
 
   try {
 
-    // Declare local return code
-    int localrc;
-
     // Initialize the parallel environment for mesh
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;  // bail out with exception
     
-
+    // transalate vectorRegrid to C++ bool
+    bool vectorRegrid=false;
+    if (*_vectorRegrid == 1) vectorRegrid=true;
+    
     // transalate ignoreDegenerate to C++ bool
     bool ignoreDegenerate=false;
     if (*_ignoreDegenerate == 1) ignoreDegenerate=true;
@@ -154,6 +156,7 @@ void ESMCI_regrid_create(
     bool checkFlag=false;
     if (*_checkFlag == 1) checkFlag=true;
 
+    
     // Output Warning message about checkFlag
     if (checkFlag){
       ESMC_LogDefault.Write("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
@@ -198,6 +201,55 @@ void ESMCI_regrid_create(
       }
     }
 
+    /// vectorRegrid only supported with spherical geometries
+    if (vectorRegrid) {
+
+      // Get src coordSys
+      ESMC_CoordSys_Flag src_coord_sys=ESMC_COORDSYS_UNINIT;
+      if (srcmesh != NULL) src_coord_sys=srcmesh->coordsys;
+      else if (srcpointlist != NULL) src_coord_sys=srcpointlist->get_orig_coord_sys();
+
+      // Check that it's spherical 
+      if ((src_coord_sys != ESMC_COORDSYS_SPH_DEG) && (src_coord_sys != ESMC_COORDSYS_SPH_RAD)) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                         "Vector regridding currently only supported for source geometries (e.g. Grids) with a spherical coordinate system.",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+
+
+      // Get dst coordSys
+      ESMC_CoordSys_Flag dst_coord_sys=ESMC_COORDSYS_UNINIT;
+      if (dstmesh != NULL) dst_coord_sys=dstmesh->coordsys;
+      else if (dstpointlist != NULL) dst_coord_sys=dstpointlist->get_orig_coord_sys();
+
+      // Check that it's spherical 
+      if ((dst_coord_sys != ESMC_COORDSYS_SPH_DEG) && (dst_coord_sys != ESMC_COORDSYS_SPH_RAD)) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                         "Vector regridding currently only supported for destination geometries (e.g. Grids) with a spherical coordinate system.",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+
+    }
+
+    
+    /// vectorRegrid currently only supported with 1 ungridded dim
+    if (vectorRegrid) {
+
+      // Check src
+      if (srcarray.getTensorCount() != 1) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                         "srcField must have exactly 1 ungridded dimension to use vector regridding.",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+
+      // Check dst
+      if (dstarray.getTensorCount() != 1) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                         "dstField must have exactly 1 ungridded dimension to use vector regridding.",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+    }
+    
     
      //// Precheck Meshes for errors
     bool degenerate=false;
@@ -236,6 +288,42 @@ void ESMCI_regrid_create(
     }
 
 
+
+
+    // Get vectorRegrid dims
+    // TODO: Move to a better place
+    int num_vec_dims;
+    int src_vec_dims_undist_seqind[ESMF_MAXDIM];
+    int dst_vec_dims_undist_seqind[ESMF_MAXDIM];
+    if (vectorRegrid) {
+
+      // Get src info
+      int src_num_vec_dims;
+      get_vec_dims_for_vectorRegrid(srcarray, src_num_vec_dims, src_vec_dims_undist_seqind);
+
+      // Get dst info
+      int dst_num_vec_dims;
+      get_vec_dims_for_vectorRegrid(dstarray, dst_num_vec_dims, dst_vec_dims_undist_seqind);
+
+      // The size of the dimensions must match
+      if (src_num_vec_dims != dst_num_vec_dims) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                  "The srcField and the dstField must have the same size ungridded dimension to use vector regridding.",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+
+      // Set num vector dims
+      // (Setting to src, but dst should be the same as checked above)
+      num_vec_dims=src_num_vec_dims;
+    }
+
+
+    // Enter profile around weight generation
+    if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 1) {
+      ESMCI::TraceEventRegionEnter("Weight generation", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+    }
+    
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Entering weight generation.", ESMC_LOGMSG_INFO);
 #endif
@@ -298,6 +386,12 @@ void ESMCI_regrid_create(
       }
     }
 
+    // Exit profile around weight generation
+    if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 1) {
+      ESMCI::TraceEventRegionExit("Weight generation", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+    }
+    
     ESMCI_REGRID_TRACE_EXIT("NativeMesh Weight Generation");
 
 #ifdef PROGRESSLOG_on
@@ -372,19 +466,17 @@ void ESMCI_regrid_create(
     VM::logMemInfo(std::string("RegridCreate4.0"));
 #endif
 
+    
     /////// We have the weights, now set up the sparsemm object /////
 
-    // Firstly, the index list
+    // Get the size of the sparse matrix and allocate space for it
     std::pair<UInt,UInt> iisize = wts->count_matrix_entries();
     int num_entries = iisize.first;
+    int iientries_entry_size=2;
     int *iientries = new int[2*iisize.first];
-    int larg[2] = {2, static_cast<int>(iisize.first)};
-    // Gather the list
-    ESMCI::InterArray<int> ii(iientries, 2, larg);
-    ESMCI::InterArray<int> *iiptr = &ii;
-
     double *factors = new double[iisize.first];
 
+    
 
     // Translate weights to sparse matrix representation
     if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) {
@@ -463,6 +555,36 @@ void ESMCI_regrid_create(
       if (*norm_type==ESMC_NORM_TYPE_FRACAREA) change_wts_to_be_fracarea(dstmesh, num_entries, iientries, factors);
     }
 
+
+    ///// If requested, then change weights to be vector weights
+    if (vectorRegrid) {
+
+      // Declare vector Matrix
+      int num_entries_vec;
+      int *iientries_vec;
+      double *factors_vec;
+
+      // Create vector weights from regular weights
+      create_vector_sparse_mat_from_reg_sparse_mat(num_entries, iientries, factors,
+                                                    num_vec_dims, src_vec_dims_undist_seqind, dst_vec_dims_undist_seqind,
+                                                    srcmesh, srcpointlist,
+                                                    dstmesh, dstpointlist,
+                                                    num_entries_vec, iientries_vec, factors_vec);
+
+      // Get rid of old matrix
+      delete [] factors;
+      delete [] iientries;
+      num_entries = 0;      
+      
+      // Swap matrix to vector version
+      num_entries=num_entries_vec;
+      iientries=iientries_vec;
+      factors=factors_vec;
+      iientries_entry_size=4;  // Because we have the ungridded dims entries the matrix is now of size 4
+    }
+
+
+    
     // Copy status info from WMat to Array
     if (has_statusArray) {
       if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
@@ -490,6 +612,8 @@ void ESMCI_regrid_create(
     VM::logMemInfo(std::string("RegridCreate5.1"));
 #endif
 
+
+   
 #ifdef C_SIDE_REGRID_FREED_MESH
     // enabling this freature currently breaks several tests
     delete srcmesh;
@@ -497,21 +621,47 @@ void ESMCI_regrid_create(
     //TODO: also drop PointList objects here if possible to reduce Store() memory footrint
 #endif
 
+
+    
+    //// Creation of routeHandle ////
+    
 #ifdef MEMLOG_on
     VM::logMemInfo(std::string("RegridCreate5.2"));
 #endif
 
     ESMCI_REGRID_TRACE_ENTER("NativeMesh ArraySMMStore");
 
-    // Build the ArraySMM
-    if (*has_rh != 0) {
+    // Build the RouteHandle using ArraySMMStore() 
+    if (*has_rh) {
+
+      // Enter profile around routehandle creation
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 1) {
+        ESMCI::TraceEventRegionEnter("RouteHandle creation", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
+
+      // Set some flags
       enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
       ESMC_Logical ignoreUnmatched = ESMF_FALSE;
+
+      // Wrap factorIndexList in InterArray
+      int larg[2] = {iientries_entry_size, num_entries};
+      ESMCI::InterArray<int> ii(iientries, 2, larg);
+      ESMCI::InterArray<int> *iiptr = &ii;
+      
+      // Call into Array sparse matrix multiply store to create RouteHandle
       FTN_X(c_esmc_arraysmmstoreind4)(arraysrcpp, arraydstpp, rh, &tk, factors,
             &num_entries, iiptr, &ignoreUnmatched, srcTermProcessing,
             pipelineDepth, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+
+
+      // Exit profile around routehandle creation
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 1) {
+        ESMCI::TraceEventRegionExit("RouteHandle creation", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
     }
 
     ESMCI_REGRID_TRACE_EXIT("NativeMesh ArraySMMStore");
@@ -520,18 +670,111 @@ void ESMCI_regrid_create(
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Returned from ArraySMMStore().", ESMC_LOGMSG_INFO);
 #endif
 
+
+    
+    //// Creation of transpose routeHandle ////
+
 #ifdef MEMLOG_on
     VM::logMemInfo(std::string("RegridCreate6.0"));
 #endif
+    
+    
+    // If requested, build the transpose RouteHandle using ArraySMMStore() 
+    if (*has_trh) {
 
-    *nentries = num_entries;
-    // Clean up.  If has_iw, then we will use the arrays to
-    // fill out the users pointers.  These will be deleted following a copy.
-    if (*has_iw == 0) {
-      delete [] factors;
-      delete [] iientries;
-      *nentries = 0;
-    } else {
+      ESMCI_REGRID_TRACE_ENTER("NativeMesh Transpose ArraySMMStore");
+      
+      // Enter profile around routehandle creation
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 1) {
+        ESMCI::TraceEventRegionEnter("Transpose RouteHandle creation", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
+
+      // Allocate transpose matrix
+      int *transpose_iientries = new int[iientries_entry_size*num_entries];
+      
+      // Init to beginning entries of factor index lists
+      int *entry=iientries;
+      int *t_entry=transpose_iientries;
+      
+      // Depending on size of matrix entries, loop constructing transpose matrix
+      if (iientries_entry_size == 2) {
+        
+        // Loop through entries
+        for (int i=0; i<num_entries; i++) {
+          
+          // Swap src and dst values
+          t_entry[0]=entry[1];
+          t_entry[1]=entry[0];
+          
+          // Next entry
+          entry += 2;
+          t_entry += 2;
+        }
+      } else if (iientries_entry_size == 4) {
+
+        // Loop through entries
+        for (int i=0; i<num_entries; i++) {
+          
+          // Swap src and dst values
+          t_entry[0]=entry[2];
+          t_entry[1]=entry[3];
+          t_entry[2]=entry[0];
+          t_entry[3]=entry[1];
+          
+          // Next entry
+          entry += 4;
+          t_entry += 4;
+        }
+      } else {
+        Throw() << "Unsupported tuple size of "<<iientries_entry_size<<" in weight matrix.";
+      } 
+      
+      
+      // Set some flags
+      enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
+      ESMC_Logical ignoreUnmatched = ESMF_FALSE; // TODO: Maybe for transpose this should be true? 
+
+      // Wrap factorIndexList in InterArray
+      int transpose_larg[2] = {iientries_entry_size, num_entries};
+      ESMCI::InterArray<int> transpose_ii(transpose_iientries, 2, transpose_larg);
+      
+      // Call into Array sparse matrix multiply store to create RouteHandle
+      FTN_X(c_esmc_arraysmmstoreind4)(arraydstpp, arraysrcpp, trh, &tk, factors,
+                                      &num_entries, &transpose_ii, &ignoreUnmatched,
+                                      srcTermProcessing, pipelineDepth, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                        ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+
+      // Get rid of transposed factor index list
+      delete [] transpose_iientries;
+
+      // Exit profile around routehandle creation
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 1) {
+        ESMCI::TraceEventRegionExit("Transpose RouteHandle creation", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
+
+      ESMCI_REGRID_TRACE_EXIT("NativeMesh Transpose ArraySMMStore");
+      
+#ifdef PROGRESSLOG_on
+    ESMC_LogDefault.Write("c_esmc_regrid_create(): Returned from transpose ArraySMMStore().", ESMC_LOGMSG_INFO);
+#endif
+
+#ifdef MEMLOG_on
+    VM::logMemInfo(std::string("RegridCreate7.0"));
+#endif      
+    }
+
+
+    
+    //// Output of weight matrix ////
+
+    // If user has requested weights, then save them
+    if (*has_iw) {
+      // Record the number of entries
+      *nentries = num_entries;
+      
       // Save off the weights so the F90 caller can allocate arrays and
       // copy the values.
       if (num_entries>0) {
@@ -544,11 +787,21 @@ void ESMCI_regrid_create(
         // Make sure copying method below takes this into account
         *tweights = NULL;
       }
+
+    } else {  //...else get rid of them
+      *nentries = 0;
+      delete [] factors;
+      delete [] iientries;
     }
 
-    // Setup structure to transfer unmappedDstList
+
+    //// Handle output of unmapped destination list ////
+
+    // Init info for transferring list
     *_num_udl=0;
     *_tudl=NULL;
+
+    // If user wants umappedDstList, then setup structure to transfer it
     if (*has_udl) {
       // Get number of unmapped points
       int num_udl=unmappedDstList.size();
@@ -595,10 +848,10 @@ void ESMCI_regrid_create(
   ESMC_LogDefault.Write("c_esmc_regrid_create(): Final return.", ESMC_LOGMSG_INFO);
 #endif
 
+  
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
-
 
 void ESMCI_regrid_getiwts(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
@@ -1578,122 +1831,6 @@ static void noncnsrv_check_for_mesh_errors(Mesh *mesh, bool ignore_degenerate, b
 }
 
 #endif
-
-static void translate_split_src_elems_in_wts(Mesh *srcmesh, int num_entries,
-                                      int *iientries) {
-
-
-  // Get a list of split ids that we own
-  UInt num_gids=0;
-  UInt *gids_split=NULL;
-  UInt *gids_orig=NULL;
-
-  // Get number of split points
-  num_gids=srcmesh->split_to_orig_id.size();
-
-  // Allocate space
-  if (num_gids>0) {
-    gids_split= new UInt[num_gids];
-    gids_orig= new UInt[num_gids];
-
-    // Loop and get split-orig id pairs
-    std::map<UInt,UInt>::iterator mi=srcmesh->split_to_orig_id.begin();
-    std::map<UInt,UInt>::iterator me=srcmesh->split_to_orig_id.end();
-
-    int pos=0;
-    for ( ; mi != me; mi++) {
-      gids_split[pos]=mi->first;
-      gids_orig[pos]=mi->second;
-      pos++;
-    }
-
-    //    for (int i=0; i<num_gids; i++) {
-    //  printf("%d# s=%d o=%d\n",Par::Rank(),gids_split[i],gids_orig[i]);
-    //}
-  }
-
-  // Put into DDir
-  DDir<> id_map_dir;
-  id_map_dir.Create(num_gids,gids_split,gids_orig);
-
-  // Clean up
-  if (num_gids>0) {
-    if (gids_split!= NULL) delete [] gids_split;
-    if (gids_orig != NULL) delete [] gids_orig;
-  }
-
-
-  // Gather list of spit src ids
-  //// TODO: Maybe use a std::set instead to reduce the amount of communication??
-  std::vector<UInt> src_split_gids;
-  std::vector<int> src_split_gids_idx;
-
-  // Loop through weights modifying split dst elements
-  for (int i=0; i<num_entries; i++) {
-
-      // Get src id
-     UInt src_id=iientries[2*i];
-
-     // If a split id then add to list
-     if (src_id > srcmesh->max_non_split_id) {
-       src_split_gids.push_back(src_id);
-       src_split_gids_idx.push_back(2*i);
-     }
-
-  }
-
-  // Do remote lookup to translate
-  UInt num_src_split_gids=src_split_gids.size();
-  UInt *src_split_gids_proc=NULL;
-  UInt *src_split_gids_orig=NULL;
-
-  if (num_src_split_gids > 0) {
-    src_split_gids_proc = new UInt[num_src_split_gids];
-    src_split_gids_orig = new UInt[num_src_split_gids];
-  }
-
-  // Get mapping of split ids to original ids
-  id_map_dir.RemoteGID(num_src_split_gids, &src_split_gids[0], src_split_gids_proc, src_split_gids_orig);
-
-  // Loop setting new ids
-  for (int i=0; i<num_src_split_gids; i++) {
-    iientries[src_split_gids_idx[i]]=src_split_gids_orig[i];
-  }
-
-  // Clean up
-  if (num_src_split_gids > 0) {
-    if (src_split_gids_proc != NULL) delete [] src_split_gids_proc;
-    if (src_split_gids_orig != NULL) delete [] src_split_gids_orig;
-  }
-}
-
-
-
-static void translate_split_dst_elems_in_wts(Mesh *dstmesh, int num_entries,
-                                      int *iientries, double *factors) {
-
-  // Loop through weights modifying split dst elements
-  for (int i=0; i<num_entries; i++) {
-    int dst_id=iientries[2*i+1];
-
-    // See if the element is part of a larger polygon
-    std::map<UInt,double>::iterator mi =  dstmesh->split_id_to_frac.find(dst_id);
-
-    // It is part of a larger polygon, so process
-    if (mi != dstmesh->split_id_to_frac.end()) {
-
-      // Modify weight by fraction of orig polygon
-      factors[i] *= mi->second;
-
-      // See if the id needs to be translated, if so then translate
-      std::map<UInt,UInt>::iterator soi =  dstmesh->split_to_orig_id.find(dst_id);
-      if (soi != dstmesh->split_to_orig_id.end()) {
-        iientries[2*i+1]=soi->second;
-      }
-    }
-  }
-
-}
 
 static void change_wts_to_be_fracarea(Mesh *mesh, int num_entries,
                                int *iientries, double *factors) {

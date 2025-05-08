@@ -133,6 +133,29 @@ The valid values are:
 
 \end{description}
 
+\subsection{ESMF\_CUBEDSPHERECALC}
+\label{const:cubedspherecalcflag}
+{\sf DESCRIPTION:\\}  
+Indicates the method used to calculate coordinates during cubed sphere creation. 
+
+The type of this flag is:
+
+{\tt type(ESMF\_CubedSphereCalc\_Flag)}
+
+The valid values are:
+\begin{description}
+
+\item [ESMF\_CUBEDSPHERECALC\_1TILE:]
+  This is the original method used to calculate coordinates for the ESMF cubed sphere. It uses
+  an array the size of one tile of the cubed sphere on each PET to calculate coordinates
+  and ensure their symmetry. 
+\item [ESMF\_CUBEDSPHERECALC\_LOCAL:]
+  This method just uses an array large enough to hold the local cubed sphere coordinates on each PET.
+  It relies on careful design of loops and calculation to ensure symmetry of the coordinates. This
+  method will in general use less memory than ESMF\_CUBEDSPHERECALC\_1TILE.
+\end{description}
+
+
 \subsection{ESMF\_DATACOPY}
 \label{const:datacopyflag}
 {\sf DESCRIPTION:\\}
@@ -358,6 +381,9 @@ This flag is documented in section \ref{const:gridmatch}.
 \subsection{ESMF\_GRIDSTATUS}
 This flag is documented in section \ref{const:gridstatus}.
 
+\subsection{ESMF\_HCONFIGMATCH}
+This flag is documented in section \ref{const:hconfigmatch}.
+
 \subsection{ESMF\_INDEX}
 \label{const:indexflag}
 {\sf DESCRIPTION:\\}
@@ -543,12 +569,12 @@ The valid values are:
 \item [ESMF\_LINETYPE\_CART]
    Cartesian line. When this option is specified distances are calculated in a straight line through the 3D Cartesian space
    in which the sphere is embedded. Cells are approximated by 3D planes bounded by 3D Cartesian lines between their corner vertices. 
-   When calculating regrid weights, this line type is currently the default for the following regrid methods: ESMF\_REGRIDMETHOD\_BILINEAR, 
-   ESMF\_REGRIDMETHOD\_PATCH, ESMF\_REGRIDMETHOD\_NEAREST\_STOD, and  ESMF\_REGRIDMETHOD\_NEAREST\_DTOS.
+   When calculating regrid weights, this line type is currently the default for non-conservative regrid methods (e.g. ESMF\_REGRIDMETHOD\_BILINEAR, 
+   ESMF\_REGRIDMETHOD\_PATCH, ESMF\_REGRIDMETHOD\_NEAREST\_STOD, etc.).
 \item [ESMF\_LINETYPE\_GREAT\_CIRCLE]
    Great circle line. When this option is specified distances are calculated along a great circle path (the shortest distance
    between two points on a sphere surface). Cells are bounded by great circle paths between their corner vertices. When calculating regrid 
-   weights, this line type is currently the default for the following regrid method: ESMF\_REGRIDMETHOD\_CONSERVE. 
+   weights, this line type is currently the default for conservative regrid methods (e.g. ESMF\_REGRIDMETHOD\_CONSERVE, etc.).
 \end{description}
 
 

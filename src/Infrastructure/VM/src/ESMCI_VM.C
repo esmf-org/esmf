@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -52,6 +52,7 @@
 #endif
 #if (defined ESMF_OS_Darwin)
 #include <mach/mach.h>
+#include <AvailabilityMacros.h>
 #endif
 #include "ESMF_Pthread.h"
 #include "ESMCI_IO_Handler.h"
@@ -139,14 +140,19 @@ static bool esmfFinalized = false;
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VMKeyCompare()"
-static bool VMKeyCompare(unsigned char *vmKey1, unsigned char *vmKey2){
-  int i;
-  for (i=0; i<vmKeyWidth; i++)
-    if (vmKey1[i] != vmKey2[i]){
-      break;
-    }
-  if (i==vmKeyWidth) return true;
-  return false;
+static bool VMKeyCompare(unsigned char *vmKey1, unsigned char *vmKey2,
+  bool super=false){
+  if (vmKey1==vmKey2) return true;  // quick return for identical pointers
+  if (super){
+    // ensure each bit that is set in vmKey2 is also set in vmKey1,
+    // making vmKey1 a superset of vmKey2
+    for (int i=0; i<vmKeyWidth; i++)
+      if (vmKey2[i] & (~vmKey1[i])) return false; // return at first violation
+    return true;
+  }else{
+    // compare for identity
+    return std::memcmp(vmKey1, vmKey2, vmKeyWidth) == 0;
+  }
 }
 
 #undef  ESMC_METHOD
@@ -424,6 +430,50 @@ int VMId::get(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMId::getLeftmostOnBit()"
+//BOPI
+// !IROUTINE:  ESMCI::VMId::getLeftmostOnBit
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !INTERFACE:
+int VMId::getLeftmostOnBit(
+//
+// !RETURN VALUE:
+//    int return code
+//
+//
+// !ARGUMENTS:
+//
+  int  *leftmostOnBit
+  ){
+//
+// !DESCRIPTION:
+//   Gets the index of the leftmost on bit of the VMId. If there are on on bits, then
+//   returns -1.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // Initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;
+
+  // Get leftmost
+  unsigned unsigned_leftmost=VMKeyFirstBitFromLeft(this->vmKey);
+    
+  // a value returned of vmKeyWidth * 8 indicates that no bit was set
+  if (unsigned_leftmost == (unsigned)vmKeyWidth*8) *leftmostOnBit=-1;
+  else *leftmostOnBit=(signed int)unsigned_leftmost;
+ 
+  localrc = ESMF_SUCCESS;
+  return localrc;
+}
+//-----------------------------------------------------------------------------
+
+  
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VMId::set()"
 //BOPI
 // !IROUTINE:  ESMCI::VMId::set
@@ -489,14 +539,12 @@ void VMId::log(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   char digits[64];
-  char msg[800];
   std::stringstream info;
-  info << "  vmKeyWidth (bytes) = " << vmKeyWidth
+  info << prefix << " - VMId:  vmKeyWidth (bytes) = " << vmKeyWidth
     <<" vmKeyOff (invalid bits end of last byte) = " << vmKeyOff;
-  sprintf(msg, "%s - VMId: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, msgType);
+  ESMC_LogDefault.Write(info.str(), msgType);
   info.str(""); // clear info
-  info << "  vmKey=0x";
+  info << prefix << " - VMId:  vmKey=0x";
   int bitmap=0;
   int k=0;
   for (int i=0; i<vmKeyWidth; i++){
@@ -516,12 +564,10 @@ void VMId::log(
     sprintf(digits, "%08X", bitmap);
     info << digits;
   }
-  sprintf(msg, "%s - VMId: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, msgType);
+  ESMC_LogDefault.Write(info.str(), msgType);
   info.str(""); // clear info
-  info << "  localID = " << localID;
-  sprintf(msg, "%s - VMId: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, msgType);
+  info << prefix << " - VMId:  localID = " << localID;
+  ESMC_LogDefault.Write(info.str(), msgType);
 }
 //-----------------------------------------------------------------------------
 
@@ -751,11 +797,15 @@ bool VMIdCompare(
 // !ARGUMENTS:
 //
   const VMId *vmID1,
-  const VMId *vmID2
+  const VMId *vmID2,
+  bool keyOnly,
+  bool keySuper
   ){
 //
 // !DESCRIPTION:
-//    Compare two {\tt ESMC\_VMId} objects.
+//    Compare two {\tt ESMC\_VMId} objects. If {\tt keyOnly==true} only compare
+//    vmKey part. If {\tt keySuper==true}, allow vmID1 key to be superset of
+//    vmID2.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -764,10 +814,48 @@ bool VMIdCompare(
       "- Invalid vmIDs", ESMC_CONTEXT, NULL);
     return false;    // bail out
   }
-  if (vmID1->localID != vmID2->localID){
-    return false;
+  if (!keyOnly){
+    if (vmID1->localID != vmID2->localID){
+      return false;
+    }
   }
-  return VMKeyCompare(vmID1->vmKey, vmID2->vmKey);
+  return VMKeyCompare(vmID1->vmKey, vmID2->vmKey, keySuper);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMIdIsLocalPetActive()"
+//BOPI
+// !IROUTINE:  ESMCI::VMIdIsLocalPetActive
+//
+// !INTERFACE:
+bool VMIdIsLocalPetActive(
+//
+// !RETURN VALUE:
+//    bool indicating whether localPet is marked active in {\tt vmID}.
+//
+// !ARGUMENTS:
+//
+  const VMId *vmID
+  ){
+//
+// !DESCRIPTION:
+//    Return {\tt true} if the bit corresponding to the local PET is set in
+//    {\tt vmID}. Return {\tt false} otherwise.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  if (vmID==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "- Invalid vmID", ESMC_CONTEXT, NULL);
+    return false;    // bail out
+  }
+  int localPet = VM::getGlobal()->getLocalPet();
+  int index = localPet/8;
+  int bitIndex = localPet%8;
+  return (vmID->vmKey[index]&0x01<<(7-bitIndex));
 }
 //-----------------------------------------------------------------------------
 
@@ -2180,6 +2268,7 @@ VM *VM::getCurrent(
 #endif
   int i = matchTableIndex;
   if (matchTable_tid[i] != mytid){
+    // simple linear search for maching thread id
     for (i=0; i<matchTableBound; i++)
       if (matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
@@ -2193,6 +2282,55 @@ VM *VM::getCurrent(
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return matchTable_vm[i];
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::isThreadKnown()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::isThreadKnown - Is executing thread known by any VM
+//
+// !INTERFACE:
+bool VM::isThreadKnown(
+//
+// !RETURN VALUE:
+//    Bool
+//
+// !ARGUMENTS:
+//
+  int *rc){   // return code
+//
+// !DESCRIPTION:
+//   Indicate whether current thread is known by any VM in the local VAS.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  bool found = true;
+  esmf_pthread_t mytid;
+#ifndef ESMF_NO_PTHREADS
+  mytid = pthread_self();
+#else
+  mytid = 0;
+#endif
+  int i = matchTableIndex;
+  if (matchTable_tid[i] != mytid){
+    // simple linear search for maching thread id
+    for (i=0; i<matchTableBound; i++)
+      if (matchTable_tid[i] == mytid) break;
+    if (i == matchTableBound){
+      // executing thread is NOT known as PET by any VM under this VAS.
+      found = false;
+    }
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return found;
 }
 //-----------------------------------------------------------------------------
 
@@ -2652,6 +2790,7 @@ void VM::logMemInfo(
   log->Write(msg, msgType);
 #elif (defined ESMF_OS_Darwin)
   // Get memory
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= 1090
   task_vm_info_data_t mem_info;
   mach_msg_type_number_t size = TASK_VM_INFO_COUNT;
   kern_return_t kerr = task_info(mach_task_self(),
@@ -2690,6 +2829,21 @@ void VM::logMemInfo(
     log->Write(msg, msgType);
 #endif
   }
+#else
+  // Fallback for earlier systems
+  task_basic_info mem_info;
+  mach_msg_type_number_t size = TASK_BASIC_INFO_COUNT;
+  kern_return_t kerr = task_info(mach_task_self(),
+                                 TASK_BASIC_INFO,
+                                 (task_info_t)&mem_info,
+                                 &size);
+  if( kerr == KERN_SUCCESS ) {
+    sprintf(msg, "%s - MemInfo: VmRSS:                       \t%d (bytes)",prefix.c_str(),mem_info.resident_size);
+    log->Write(msg, msgType);
+    sprintf(msg, "%s - MemInfo: Total allocated space (bytes): \t%d",prefix.c_str(),mem_info.virtual_size);
+    log->Write(msg, msgType);
+  }
+#endif
 #endif
   // output the wtime since execution start
   double wt;
@@ -3012,9 +3166,9 @@ void VM::rmFObject(
     FTN_X(f_esmf_fortranudtpointercompare)(fobjectElement, (void *)fobject, &flag);
 
     if (flag){
-      void *cBase = **(void ***)fobject;
       matchTable_FObjects[i].erase(it);  // erase the object entry
 #ifdef GARBAGE_COLLECTION_LOG_on
+      void *cBase = **(void ***)fobject;
       std::stringstream msg;
       msg << "VM::rmFObject() object removed: " << *(void **)fobject << " - " <<
         cBase;
@@ -3095,7 +3249,7 @@ char const *VM::getenv(
   char const *name){
 //
 // !DESCRIPTION:
-//    Access environment variables in the global VM object
+//    Access environment variable cached within the global VM object
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -3108,6 +3262,43 @@ char const *VM::getenv(
 
   // match found
   return esmfRuntimeEnvValue[i].c_str();
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::setenv()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::setenv - set environment variable
+// !INTERFACE:
+ void VM::setenv(
+//
+// !RETURN VALUE:
+//    pointer to value or NULL
+//
+// !ARGUMENTS:
+//
+  char const *name,
+  char const *value){
+//
+// !DESCRIPTION:
+//    Set environment variable cached within the global VM object
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int count = esmfRuntimeEnv.size();
+  int i;
+  for (i=0; i<count; i++)
+    if (!esmfRuntimeEnv[i].compare(name)) break;
+  if (i == count){
+    // no match found -> add new variable
+    esmfRuntimeEnv.push_back(name);
+    esmfRuntimeEnvValue.push_back(value);
+  }else{
+    // match found -> update the value
+    esmfRuntimeEnvValue[i] = std::string(value);
+  }
 }
 //-----------------------------------------------------------------------------
 
@@ -3233,7 +3424,14 @@ VM *VM::initialize(
       esmfRuntimeEnv.push_back(esmfRuntimeVarName);
       esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
     }
+    esmfRuntimeVarName = "ESMF_RUNTIME_PROFILE_REGRID";
+    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
+    if (esmfRuntimeVarValue){
+      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
+      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
+    }
 
+    
     int count = esmfRuntimeEnv.size();
     GlobalVM->broadcast(&count, sizeof(int), 0);
     int *length = new int[2];

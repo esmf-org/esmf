@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -212,17 +212,36 @@ void MeshMerge(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp) {
   MPI_Allreduce(&nelem, &gnelem, 2, MPI_INT, MPI_SUM, Par::Comm());
 
   // if src and dst mesh are neigbors, just sew them together
-  if(gnelem[1] == 0) 
+  if(gnelem[1] == 0) {
     sew_meshes(srcmesh, dstmesh, meshmrg);
-  else
+  } else  {
     concat_meshes(srcmesh, dstmesh, meshmrg, *mesh_src, *mesh_dst, sres, &res_map);
+  }
 
   // clean up memory
-  if(interp) delete interp;
   interp_map_iter it = res_map.begin(), ie = res_map.end();
   for(; it != ie; ++it)
     delete it->second;
 
+  // Get rid of interp and search results
+  if(interp) {
+    delete interp; // This also gets rid of search results
+  } else {
+    // If no interp, then need to get rid of search results independantly
+    DestroySearchResult(sres);
+  }
+
+  // Get rid of sintd nodes before the vector goes away
+  for (auto i=0; i<sintd_nodes.size(); i++) {
+    delete sintd_nodes[i]; // delete
+    sintd_nodes[i]=NULL; // mark as empty
+   }
+
+  // Get rid of sintd cells before the vector goes away
+  for (auto i=0; i<sintd_cells.size(); i++) {
+    delete sintd_cells[i]; // Free memory
+    sintd_cells[i]=NULL; // mark as empty
+   }
 }
 
 bool subject_is_offplane(unsigned int sdim, unsigned int subject_num_nodes, double *cd){
@@ -434,6 +453,17 @@ void MeshCreateDiff(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp, double threshol
   for(; it != ie; ++it)
     delete it->second;
 
+  // Get rid of sintd nodes before the vector goes away
+  for (auto i=0; i<sintd_nodes.size(); i++) {
+    delete sintd_nodes[i]; // delete
+    sintd_nodes[i]=NULL; // mark as empty
+   }
+
+  // Get rid of sintd cells before the vector goes away
+  for (auto i=0; i<sintd_cells.size(); i++) {
+    delete sintd_cells[i]; // Free memory
+    sintd_cells[i]=NULL; // mark as empty
+   }
 }
 
   extern bool mathutil_debug;
@@ -1148,12 +1178,12 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
                       for(int npt=0; npt<clip_num_nodes; npt++) std::cout << clip_cd_sph[npt*2] << "  " << clip_cd_sph[npt*2+1] << std::endl; 
                       delete[] clip_cd_sph; 
                     }
-                    char msg[1024];
-                    sprintf(msg," - there was a problem (e.g. repeated points, clockwise poly, etc.) with the triangulation of the element:\n"); 
-                    sprintf(msg,"%selem Id: %d clip_elem Id: %d\n", msg, elem.get_id(), clip_elem.get_id());
+                    std::stringstream msg;
+                    msg << " - there was a problem (e.g. repeated points, clockwise poly, etc.) with the triangulation of the element:\n";
+                    msg << "elem Id: " << elem.get_id() << " clip_elem Id: " << clip_elem.get_id() << "\n";
                     {
-                      cd_sph = new double[num_p*2];   cart2sph(num_p, pts, cd_sph); 
-                      for(int npt=0; npt<num_p*2; npt++) sprintf(msg,"%s %g", msg, cd_sph[npt]); 
+                      cd_sph = new double[num_p*2];   cart2sph(num_p, pts, cd_sph);
+                      for(int npt=0; npt<num_p*2; npt++) msg << " " << cd_sph[npt];
                       delete[] cd_sph; 
                     }
                     if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg,

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -44,7 +44,7 @@ module ESMF_FieldSetMod
   use ESMF_StaggerLocMod
   use ESMF_DistGridMod
   use ESMF_GridMod
-  use ESMF_GeomBaseMod
+  use ESMF_GeomMod
   use ESMF_ArrayMod
   use ESMF_ArrayCreateMod
   use ESMF_ArrayGetMod
@@ -128,9 +128,13 @@ contains
     
     ! Set the name in Base object
     if (present(name)) then
-      call ESMF_SetName(field%ftypep%base, name=name, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (field%isNamedAlias) then
+        field%name = trim(name)
+      else
+        call ESMF_SetName(field%ftypep%base, name=name, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
     endif
 
     ! return successfully

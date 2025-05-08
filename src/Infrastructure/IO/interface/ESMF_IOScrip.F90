@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -105,7 +105,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{itemize}
 !     \item Only {\tt real(ESMF\_KIND\_R8) factorList} and 
 !           {\tt integer(ESMF\_KIND\_I4) factorIndexList} supported.
-!     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
 !  The arguments are:
@@ -1092,15 +1091,6 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              titlelocal = "ESMF Offline Regridding Weight Generator"
           endif
 
-          ! Norm type
-          if (localNormType .eq. ESMF_NORMTYPE_DSTAREA) then
-             norm = "destarea"
-          elseif (localNormType .eq. ESMF_NORMTYPE_FRACAREA) then
-             norm = "fracarea"
-          else
-             norm = "unknown"
-          endif
-
          ! Regrid method
          if (present(method)) then
            methodlocal = method
@@ -1135,6 +1125,22 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            map_method = "Bilinear remapping"
            esmf_regrid_method = "Bilinear"
          endif
+
+         ! Norm type
+         if (methodlocal%regridmethod == ESMF_REGRIDMETHOD_CONSERVE%regridmethod .or. &
+              methodlocal%regridmethod == ESMF_REGRIDMETHOD_CONSERVE_2ND%regridmethod) then
+            if (localNormType .eq. ESMF_NORMTYPE_DSTAREA) then
+               norm = "destarea"
+            elseif (localNormType .eq. ESMF_NORMTYPE_FRACAREA) then
+               norm = "fracarea"
+            else
+               norm = "unknown"
+            endif
+         else
+            ! For regrid methods other than conservative, the normalization type is irrelevant
+            norm = "N/A"
+         end if
+
          conventions = "NCAR-CSM"
 
          ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "title", trim(titlelocal))

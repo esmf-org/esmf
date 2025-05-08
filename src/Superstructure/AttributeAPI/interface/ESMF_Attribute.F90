@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -28,15 +28,19 @@ module ESMF_AttributeMod
 
 use iso_c_binding, only : C_PTR, C_NULL_PTR, c_associated
 
-use ESMF_UtilTypesMod
-use ESMF_LogErrMod
+use ESMF_UtilTypesMod     ! ESMF utility types
+use ESMF_InitMacrosMod    ! ESMF initializer macros
+use ESMF_BaseMod          ! ESMF base class
+use ESMF_LogErrMod        ! ESMF error handling
+
+use ESMF_VMMod
 use ESMF_InfoMod
 use ESMF_InfoDescribeMod
 use ESMF_InfoSyncMod
-use ESMF_InitMacrosMod
 use ESMF_StateTypesMod
 use ESMF_ArrayMod
 use ESMF_ArrayBundleMod
+use ESMF_CompMod
 use ESMF_CplCompMod
 use ESMF_GridCompMod
 use ESMF_SciCompMod

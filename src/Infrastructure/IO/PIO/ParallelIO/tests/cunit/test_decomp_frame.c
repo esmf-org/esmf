@@ -165,7 +165,7 @@ int main(int argc, char **argv)
 #define NUM_TYPES 11
                 int test_type[NUM_TYPES] = {PIO_BYTE, PIO_CHAR, PIO_SHORT, PIO_INT, PIO_FLOAT, PIO_DOUBLE,
                                             PIO_UBYTE, PIO_USHORT, PIO_UINT, PIO_INT64, PIO_UINT64};
-                
+
 #endif /* _NETCDF4 */
 
                 /* Determine what data to write. Put value of 42 into

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1158,7 +1158,7 @@ BBox bbox_from_pl(PointList &dst_pl) {
 
   // Set some parameters to control search
   const double normexp = 0.15;
-  const double dstint = 1e-8;
+  const double dstint = 2e-6; // Keep larger than tol. in found_func() and larger than final stol
 
 
   // If using great circle edges, set flag to treat as on a spherical surface when generating seach boxes

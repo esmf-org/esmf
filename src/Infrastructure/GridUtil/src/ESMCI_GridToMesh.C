@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1001,11 +1001,12 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 #endif
 
   // Convert Grid To PointList
-  void GridToPointList(Grid &grid, ESMC_StaggerLoc staggerLoc, ESMCI::InterArray<int> *maskValuesArg, ESMCI::PointList **_pl, int *rc) {
+  void GridToPointList(Grid &grid, ESMC_StaggerLoc staggerLoc, ESMCI::InterArray<int> *maskValuesArg, bool add_orig_coords, ESMCI::PointList **_pl, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "GridToPointList()"
     Trace __trace("GridToPointList()");
 
+    // Handy declarations
     int localrc;
 
     // Initialize the parallel environment for mesh (if not already done)
@@ -1013,6 +1014,15 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,rc))
       throw localrc;  // bail out with exception
 
+
+    // If needed get orig coord dim
+    int orig_coord_dim=0; // 0 indicates not to add orig coords
+    if (add_orig_coords) orig_coord_dim=grid.getDimCount();
+
+    // If needed get coordsys
+    ESMC_CoordSys_Flag coordSys=ESMC_COORDSYS_UNINIT;
+    if (add_orig_coords) coordSys=grid.getCoordSys();
+    
     // Loop nodes of the grid.  Here we loop all nodes, both owned and not.
     ESMCI::GridIter *gni=new ESMCI::GridIter(&grid,staggerLoc,true);
 
@@ -1051,9 +1061,10 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
         
       }
 
+
       // Create PointList
       // (Put Cartesian coordinates in list)
-      ESMCI::PointList *pl=new PointList(num_local_pts, grid.getCartCoordDimCount());
+      ESMCI::PointList *pl=new PointList(num_local_pts, grid.getCartCoordDimCount(), orig_coord_dim, coordSys);
 
       // loop through all nodes in the Grid
       for(gni->toBeg(); !gni->isDone(); gni->adv()) {
@@ -1079,8 +1090,14 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
           double cart_coord[ESMF_MAXDIM];
           gni->getCartCoord(cart_coord);
 
-          // Add Point
-          pl->add(gid,cart_coord);
+          // Add Point. If requested get and add original coords too, otherwise, just Cart. coords.
+          if (add_orig_coords) {
+            double orig_coord[ESMF_MAXDIM];
+            gni->getCoord(orig_coord);            
+            pl->add(gid,cart_coord,orig_coord);
+          } else {
+            pl->add(gid,cart_coord);
+          }
         }
       }
 
@@ -1098,7 +1115,7 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 
       // Create PointList
       // (Put Cartesian coordinates in list)
-      ESMCI::PointList *pl=new PointList(num_local_pts, grid.getCartCoordDimCount());
+      ESMCI::PointList *pl=new PointList(num_local_pts, grid.getCartCoordDimCount(), orig_coord_dim, coordSys);
 
       // loop through all nodes in the Grid
       for(gni->toBeg(); !gni->isDone(); gni->adv()) {
@@ -1111,8 +1128,15 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
         double cart_coord[ESMF_MAXDIM];
         gni->getCartCoord(cart_coord);
 
-        // Add Point
-        pl->add(gid,cart_coord);
+        // Add Point. If requested get and add original coords too, otherwise, just Cart. coords.
+        if (add_orig_coords) {
+          double orig_coord[ESMF_MAXDIM];
+          gni->getCoord(orig_coord);            
+          pl->add(gid,cart_coord,orig_coord);
+        } else {
+          pl->add(gid,cart_coord);
+        }
+        
       }
       // Output point list
       *_pl=pl;

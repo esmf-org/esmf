@@ -28,21 +28,25 @@ CLOBBERDIRS =
 # ESMF_ConfigOverviewEx
 #
 run_ESMF_ConfigOverviewEx:
-	cp  -f myResourceFile.rc $(ESMF_EXDIR)/myResourceFile.rc
+	cp -f myResourceFile.yaml $(ESMF_EXDIR)
+	cp -f myResourceFile.rc $(ESMF_EXDIR)
 	$(MAKE) EXNAME=ConfigOverview NP=4 exfrun
 
 run_ESMF_ConfigOverviewEx_uni:
-	cp -f myResourceFile.rc $(ESMF_EXDIR)/myResourceFile.rc
+	cp -f myResourceFile.yaml $(ESMF_EXDIR)
+	cp -f myResourceFile.rc $(ESMF_EXDIR)
 	$(MAKE) EXNAME=ConfigOverview NP=1 exfrun
 
 #
 # ESMC_ConfigOverviewEx
 #
 run_ESMC_ConfigOverviewEx:
-	cp -f myResourceFile.rc $(ESMF_EXDIR)/myResourceFile.rc
+	cp -f myResourceFile.yaml $(ESMF_EXDIR)
+	cp -f myResourceFile.rc $(ESMF_EXDIR)
 	$(MAKE) EXNAME=ConfigOverview NP=4 excrun
 
 run_ESMC_ConfigOverviewEx_uni:
-	cp -f myResourceFile.rc $(ESMF_EXDIR)/myResourceFile.rc
+	cp -f myResourceFile.yaml $(ESMF_EXDIR)
+	cp -f myResourceFile.rc $(ESMF_EXDIR)
 	$(MAKE) EXNAME=ConfigOverview NP=1 excrun
 

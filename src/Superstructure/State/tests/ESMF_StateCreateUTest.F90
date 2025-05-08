@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -85,6 +85,7 @@ end module
     type(ESMF_State) :: state2, state3, state4, state5
     type(ESMF_FieldBundle) :: bundle1, bundle2, bundle3, qbundle
     type(ESMF_FieldBundle) :: bundle5, bundle6, bundle7
+    type(ESMF_ArrayBundle) :: arraybundle1
     type(ESMF_VM) :: vm
     logical :: isNeeded
 
@@ -180,6 +181,16 @@ end module
       write(name, *) "Printing an empty State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest      
+      ! Test logging an Empty State
+      call ESMF_StateLog(state1, prefix="Log-Empty-State: ", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Logging an empty State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
       !------------------------------------------------------------------------
       !NEX_UTest      
       ! Test getting name from an Empty State
@@ -363,11 +374,36 @@ end module
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+      !EX_UTest 
+      ! Create an arraybundle to use in the subsequent tests
+      arraybundle1 = ESMF_ArrayBundleCreate(name="AB1", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating an empty arraybundle for State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest 
+      ! Test adding an arraybundle to a state
+      call ESMF_StateAdd(state2, (/arraybundle1/), rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Adding an ArrayBundle to a State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
       !EX_UTest      
       ! Test printing a State with 1 FieldBundle
       call ESMF_StatePrint(state2, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Printing a State with 1 FieldBundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test logging a State with 1 FieldBundle
+      call ESMF_StateLog(state2, prefix="Log-1FB-State: ", deepFlag=.true., &
+        rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Logging a State with 1 FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -393,6 +429,14 @@ end module
       call ESMF_StatePrint(state2, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Printing a State with 2 FieldBundles"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test logging a State with 2 FieldBundles
+      call ESMF_StateLog(state2, prefix="Log-2FB-State: ", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Logging a State with 2 FieldBundles Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -591,6 +635,14 @@ end module
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test logging a State with nested State
+      call ESMF_StateLog(state5, prefix="Log-flat-nestedState-State: ", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Logging a State with with nested State - flat - Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
       !EX_UTest      
       ! Test getting a nested State object
       call ESMF_StateGet(state=state5,  &
@@ -640,6 +692,15 @@ end module
       call ESMF_StatePrint (state5, nestedFlag=.true., options='long', rc=rc)
       write(failMsg, *) ""
       write(name, *) "Printing a nested State - nested"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test logging a State with nested State
+      call ESMF_StateLog(state5, prefix="Log-nested-nestedState-State: ", &
+        nestedFlag=.true., rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Logging a State with with nested State - nested - Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -836,56 +897,3 @@ end module
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-
-
-#if 0
-! older tests which have not yet been convereted to the normal template form.
-    sname = "Sea Ice Export"
-    state4 = ESMF_StateCreate(sname, ESMF_STATEINTENT_EXPORT, rc=rc)
-
-    sname = "Surface pressure"
-    call ESMF_StateAdd(state4, sname, rc=rc)
-    
-    call ESMF_StateSetNeeded(state4, sname, ESMF_NEEDED, rc=rc)
-    
-    sname = "Energy Flux"
-    call ESMF_StateAdd(state4, sname, rc=rc)
-    
-    call ESMF_StateSetNeeded(state4, sname, ESMF_NEEDED, rc=rc)
-    
-    sname = "Humidity"
-    call ESMF_StateAdd(state4, sname, rc=rc)
-    
-    call ESMF_StateSetNeeded(state4, sname, ESMF_NEEDED, rc=rc)
-    
-    call ESMF_StatePrint(state4, rc=rc)
-
-    bname = "Collected quantities"
-    bundle2 = ESMF_FieldBundleCreate(name=bname, rc=rc)
-      
-    fname = "Surface pressure"
-    field1 = ESMF_FieldCreateNoData(fname, rc=rc)
-
-    call ESMF_FieldBundleAdd(bundle2, (/field1/), rc=rc) 
-
-    fname = "Energy Flux"
-    field2 = ESMF_FieldCreateNoData(fname, rc=rc)
-
-    call ESMF_FieldBundleAdd(bundle2, (/field2/), rc=rc) 
-
-    call ESMF_FieldBundlePrint(bundle2, "", rc=rc)
-
-
-    call ESMF_StateAdd(state4, bundle2, rc=rc)
-
-    call ESMF_StatePrint(state4, rc=rc)
-    
-    call ESMF_StateDestroy(state4, rc=rc)
-
-    call ESMF_FieldBundleDestroy(bundle2, rc=rc)
-
-    call ESMF_FieldDestroy(field1, rc=rc)
-
-    call ESMF_FieldDestroy(field2, rc=rc)
-#endif
-    

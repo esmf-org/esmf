@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -499,25 +499,33 @@ function ESMF_XGridCreate(keywordEnforcer, &
 !           Parametric 2D Meshes on side B, for example, 
 !           these Meshes can be either Cartesian 2D or Spherical.
 !     \item [{[sideAGridPriority]}]
-!           Priority array of Grids on {\tt sideA} during overlay generation.
-!           The priority arrays describe the priorities of Grids at the overlapping region.
-!           Flux contributions at the overlapping region are computed in the order from the Grid of the
-!           highest priority to the lowest priority.
+!           Priority array of Grids on sideA during overlay generation.
+!           The {\tt sideAGridPriority} array should be the same size as the {\tt sideAGrid} array. The values
+!           in the array should range from 1 to size(sideAGrid)+size(sideAMesh). A Grid whose corresponding
+!           value in this array is lower than another side A Grid or Mesh, will take precedence over that Grid or Mesh
+!           during side A merging. In other words, if both have parts in the same region, then the object with the lower value will win, and
+!           the other Grid or Mesh part will be clipped away.
 !     \item [{[sideAMeshPriority]}]
-!           Priority array of Meshes on {\tt sideA} during overlay generation.
-!           The priority arrays describe the priorities of Meshes at the overlapping region.
-!           Flux contributions at the overlapping region are computed in the order from the Mesh of the
-!           highest priority to the lowest priority.
+!           Priority array of Meshes on sideA during overlay generation.
+!           The {\tt sideAMeshPriority} array should be the same size as the {\tt sideAMesh} array. The values
+!           in the array should range from 1 to size(sideAGrid)+size(sideAMesh). A Mesh whose corresponding
+!           value in this array is lower than another side A Grid or Mesh, will take precedence over that Grid or Mesh
+!           during side A merging. In other words, if both have parts in the same region, then the object with the lower value will win, and
+!           the other Grid or Mesh part will be clipped away.
 !     \item [{[sideBGridPriority]}]
-!           Priority of Grids on {\tt sideB} during overlay generation
-!           The priority arrays describe the priorities of Grids at the overlapping region.
-!           Flux contributions at the overlapping region are computed in the order from the Grid of the
-!           highest priority to the lowest priority.
+!           Priority array of Grids on sideB during overlay generation.
+!           The {\tt sideBGridPriority} array should be the same size as the {\tt sideBGrid} array. The values
+!           in the array should range from 1 to size(sideBGrid)+size(sideBMesh). A Grid whose corresponding
+!           value in this array is lower than another side B Grid or Mesh, will take precedence over that Grid or Mesh
+!           during side B merging. In other words, if both have parts in the same region, then the object with the lower value will win, and
+!           the other Grid or Mesh part will be clipped away.
 !     \item [{[sideBMeshPriority]}]
-!           Priority array of Meshes on {\tt sideB} during overlay generation.
-!           The priority arrays describe the priorities of Meshes at the overlapping region.
-!           Flux contributions at the overlapping region are computed in the order from the Mesh of the
-!           highest priority to the lowest priority.
+!           Priority array of Meshes on sideB during overlay generation.
+!           The {\tt sideBMeshPriority} array should be the same size as the {\tt sideBMesh} array. The values
+!           in the array should range from 1 to size(sideBGrid)+size(sideBMesh). A Mesh whose corresponding
+!           value in this array is lower than another side B Grid or Mesh, will take precedence over that Grid or Mesh
+!           during side B merging. In other words, if both have parts in the same region, then the object with the lower value will win, and
+!           the other Grid or Mesh part will be clipped away.
 !     \item [{[sideAMaskValues]}]
 !           Mask information can be set in the Grid (see~\ref{sec:usage:items}) or Mesh (see~\ref{sec:mesh:mask}) 
 !           upon which the {\tt Field} is built. The {\tt sideAMaskValues} argument specifies the values in that 
@@ -1510,8 +1518,16 @@ function ESMF_XGridCreate(keywordEnforcer, &
     ! store the middle mesh if needed
     ! and clean up temporary memory used
     if(xgtype%storeOverlay) then
+
+      ! Set in XGrid structure
       xgtype%mesh = mesh
 
+      ! If keeping, turn off side information
+      call c_esmc_meshsetxgridinfo(xgtype%mesh, -1, -1, localrc)
+      if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return         
+      
      !! Debug output of xgrid mesh
 #ifdef BOB_XGRID_DEBUG
       call ESMF_MeshWrite(mesh, "xgrid_mid_mesh")
@@ -1524,51 +1540,74 @@ function ESMF_XGridCreate(keywordEnforcer, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
+    ! Clean up Meshes for side A
     do i = 1, ngrid_a
-      if(present(sideAMaskValues)) then
-        call ESMF_MeshTurnOffCellMask(meshAt(i), rc=localrc);
-        if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
-      if(xggt_a(i) == ESMF_XGRIDGEOMTYPE_GRID) then
-        call ESMF_MeshDestroy(meshAt(i), rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
+       ! If it originally came from a Grid, then just destroy
+       if(xggt_a(i) == ESMF_XGRIDGEOMTYPE_GRID) then
+          call ESMF_MeshDestroy(meshAt(i), rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+       else ! ...otherwise turn things off
+          ! Turn off masking
+          if(present(sideAMaskValues)) then
+             call ESMF_MeshTurnOffCellMask(meshAt(i), rc=localrc);
+             if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+
+          ! Turn off side information
+          call c_esmc_meshsetxgridinfo(meshAt(i), -1, -1, localrc)
+          if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return         
+       endif
     enddo
 
+    ! Clean up Meshes for side B
     do i = 1, ngrid_b
-      if(present(sideBMaskValues)) then
-        call ESMF_MeshTurnOffCellMask(meshBt(i), rc=localrc);
-        if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
-      if(xggt_b(i) == ESMF_XGRIDGEOMTYPE_GRID) then
-        call ESMF_MeshDestroy(meshBt(i), rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
+       ! If it originally came from a Grid, then just destroy
+       if(xggt_b(i) == ESMF_XGRIDGEOMTYPE_GRID) then
+          call ESMF_MeshDestroy(meshBt(i), rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+          
+       else ! ...otherwise turn things off
+          
+          ! Turn off masking
+          if(present(sideBMaskValues)) then
+             call ESMF_MeshTurnOffCellMask(meshBt(i), rc=localrc);
+             if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+          
+          ! Turn off side information
+          call c_esmc_meshsetxgridinfo(meshBt(i), -1, -1, localrc)
+          if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return         
+          
+       endif
     enddo
-
+  
     deallocate(meshAt, meshBt)
     deallocate(xggt_a, xggt_b)
 
-    ! Finalize XGrid Creation
-    xgtype%online = 1
-    xgtype%status = ESMF_STATUS_READY
-    ESMF_XGridCreate%xgtypep => xgtype 
-    ESMF_INIT_SET_CREATED(ESMF_XGridCreate)
+  ! Finalize XGrid Creation
+  xgtype%online = 1
+  xgtype%status = ESMF_STATUS_READY
+  ESMF_XGridCreate%xgtypep => xgtype 
+  ESMF_INIT_SET_CREATED(ESMF_XGridCreate)
 
-    !call ESMF_XGridValidate(ESMF_XGridCreate, rc=localrc)
-    !if (ESMF_LogFoundError(localrc, &
-    !    ESMF_ERR_PASSTHRU, &
-    !    ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if(present(rc)) rc = ESMF_SUCCESS
+  !call ESMF_XGridValidate(ESMF_XGridCreate, rc=localrc)
+  !if (ESMF_LogFoundError(localrc, &
+  !    ESMF_ERR_PASSTHRU, &
+  !    ESMF_CONTEXT, rcToReturn=rc)) return
+  
+  if(present(rc)) rc = ESMF_SUCCESS
 
 end function ESMF_XGridCreate
 
@@ -1635,25 +1674,33 @@ integer,              intent(out),optional :: rc
 !           Parametric 2D Meshes on side B, for example, 
 !           these Meshes can be either Cartesian 2D or Spherical.
 !     \item [{[sideAGridPriority]}]
-!           Priority array of Grids on {\tt sideA} during overlay generation.
-!           The priority arrays describe the priorities of Grids at the overlapping region.
-!           Flux contributions at the overlapping region are computed in the order from the Grid of the
-!           highest priority to the lowest priority.
+!           Priority array of Grids on sideA during overlay generation.
+!           The {\tt sideAGridPriority} array should be the same size as the {\tt sideAGrid} array. The values
+!           in the array should range from 1 to size(sideAGrid)+size(sideAMesh). A Grid whose corresponding
+!           value in this array is lower than another side A Grid or Mesh, will take precedence over that Grid or Mesh
+!           during side A merging. In other words, if both have parts in the same region, then the object with the lower value will win, and
+!           the other Grid or Mesh part will be clipped away.
 !     \item [{[sideAMeshPriority]}]
-!           Priority array of Meshes on {\tt sideA} during overlay generation.
-!           The priority arrays describe the priorities of Meshes at the overlapping region.
-!           Flux contributions at the overlapping region are computed in the order from the Mesh of the
-!           highest priority to the lowest priority.
+!           Priority array of Meshes on sideA during overlay generation.
+!           The {\tt sideAMeshPriority} array should be the same size as the {\tt sideAMesh} array. The values
+!           in the array should range from 1 to size(sideAGrid)+size(sideAMesh). A Mesh whose corresponding
+!           value in this array is lower than another side A Grid or Mesh, will take precedence over that Grid or Mesh
+!           during side A merging. In other words, if both have parts in the same region, then the object with the lower value will win, and
+!           the other Grid or Mesh part will be clipped away.
 !     \item [{[sideBGridPriority]}]
-!           Priority of Grids on {\tt sideB} during overlay generation
-!           The priority arrays describe the priorities of Grids at the overlapping region.
-!           Flux contributions at the overlapping region are computed in the order from the Grid of the
-!           highest priority to the lowest priority.
+!           Priority array of Grids on sideB during overlay generation.
+!           The {\tt sideBGridPriority} array should be the same size as the {\tt sideBGrid} array. The values
+!           in the array should range from 1 to size(sideBGrid)+size(sideBMesh). A Grid whose corresponding
+!           value in this array is lower than another side B Grid or Mesh, will take precedence over that Grid or Mesh
+!           during side B merging. In other words, if both have parts in the same region, then the object with the lower value will win, and
+!           the other Grid or Mesh part will be clipped away.
 !     \item [{[sideBMeshPriority]}]
-!           Priority array of Meshes on {\tt sideB} during overlay generation.
-!           The priority arrays describe the priorities of Meshes at the overlapping region.
-!           Flux contributions at the overlapping region are computed in the order from the Mesh of the
-!           highest priority to the lowest priority.
+!           Priority array of Meshes on sideB during overlay generation.
+!           The {\tt sideBMeshPriority} array should be the same size as the {\tt sideBMesh} array. The values
+!           in the array should range from 1 to size(sideBGrid)+size(sideBMesh). A Mesh whose corresponding
+!           value in this array is lower than another side B Grid or Mesh, will take precedence over that Grid or Mesh
+!           during side B merging. In other words, if both have parts in the same region, then the object with the lower value will win, and
+!           the other Grid or Mesh part will be clipped away.
 !     \item [{[sparseMatA2X]}]
 !           indexlist from a Grid index space on side A to xgrid index space;
 !           indexFactorlist from a Grid index space on side A to xgrid index space.

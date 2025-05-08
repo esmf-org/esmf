@@ -1,5 +1,0 @@
-Settings for the NEC SX, with a cross-compiler running on a Linux front end.
-
-Requires the following environment settings:
-
-ESMF_COMPILER sxcross

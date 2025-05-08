@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1282,7 +1282,7 @@ end function ESMF_XGridGeomBaseMatch
 ! !IROUTINE: ESMF_XGridGeomTypeEqual - Equality of GeomTypes
 !
 ! !INTERFACE:
-      function ESMF_XGridGeomTypeEqual(GeomType1, GeomType2)
+      impure elemental function ESMF_XGridGeomTypeEqual(GeomType1, GeomType2)
 
 ! !RETURN VALUE:
       logical :: ESMF_XGridGeomTypeEqual
@@ -1316,7 +1316,7 @@ end function ESMF_XGridGeomBaseMatch
 ! !IROUTINE: ESMF_XGridGeomTypeNotEqual - Non-equality of GeomTypes
 !
 ! !INTERFACE:
-      function ESMF_XGridGeomTypeNotEqual(GeomType1, GeomType2)
+      impure elemental function ESMF_XGridGeomTypeNotEqual(GeomType1, GeomType2)
 
 ! !RETURN VALUE:
       logical :: ESMF_XGridGeomTypeNotEqual

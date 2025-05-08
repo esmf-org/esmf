@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -661,6 +661,16 @@
 !       {\tt year = 2004}, {\tt hours = 770} (32*24 + 2), {\tt seconds = 0},
 !     and {\tt ESMF\_TimeGet(yy = year, s=seconds)} would return
 !       {\tt year = 2004}, {\tt seconds = 2772000} (770 * 3600).
+!
+!     However, double precision time units are not considered in this normalization:
+!     Double precision time units are still bound by units of a day or larger, but double
+!     precision time units of an hour or smaller neither bind nor are bound by other time
+!     units of an hour or smaller (either integer or double precision). For example,
+!     with the same time setting as above (2:00 am on February 2, 2004),
+!     {\tt ESMF\_TimeGet(dd=day, h\_r8=hours\_r8, s=seconds)} would return
+!       {\tt day = 2}, {\tt hours\_r8 = 2.0}, {\tt seconds = 7200}, and
+!     {\tt ESMF\_TimeGet(dd=day, h=hours, s\_r8=seconds\_r8)} would return
+!       {\tt day = 2}, {\tt hours = 2}, {\tt seconds\_r8 = 7200.0}.
 !
 !     For {\tt timeString}, {\tt timeStringISOFrac}, {\tt dayOfWeek},
 !     {\tt midMonth}, {\tt dayOfYear}, {\tt dayOfYear\_intvl}, and
@@ -1707,7 +1717,7 @@
 ! !IROUTINE: ESMF_TimeEQ - Test if Time 1 is equal to Time 2
 !
 ! !INTERFACE:
-      function ESMF_TimeEQ(time1, time2)
+      impure elemental function ESMF_TimeEQ(time1, time2)
 !
 ! !RETURN VALUE:
       logical :: ESMF_TimeEQ
@@ -1742,7 +1752,7 @@
 ! !IROUTINE: ESMF_TimeNE - Test if Time 1 is not equal to Time 2
 !
 ! !INTERFACE:
-      function ESMF_TimeNE(time1, time2)
+      impure elemental function ESMF_TimeNE(time1, time2)
 !
 ! !RETURN VALUE:
       logical :: ESMF_TimeNE

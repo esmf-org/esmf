@@ -32,9 +32,7 @@ endif
 #
 ifeq ($(ESMF_COMM),mpiuni)
 # MPI stub library -----------------------------------------
-ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_CPPFLAGS          += -DESMF_MPIUNI -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),msmpi)
@@ -87,11 +85,6 @@ ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_DLFCN
 
 ############################################################
-# Windows does not have support for "gethostid()"
-#
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_GETHOSTID
-
-############################################################
 # Windows does not have support for signals
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SIGNALS
@@ -110,29 +103,6 @@ ESMF_CXXCOMPILECPPFLAGS += -DNO_TIMES
 # Windows does not have support for Pthreads
 #
 ESMF_PTHREADS := OFF
-
-############################################################
-# Fortran symbol convention
-#
-#ifeq ($(ESMF_FORTRANSYMBOLS),default)
-#ESMF_F90COMPILEOPTS       += -fno-second-underscore
-#ESMF_F90LINKOPTS          += -fno-second-underscore
-#ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
-#else
-#ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_singleunderscore)
-#ESMF_F90COMPILEOPTS       += -fno-second-underscore
-#ESMF_F90LINKOPTS          += -fno-second-underscore
-#ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
-#else
-#ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_doubleunderscore)
-#ESMF_F90COMPILEOPTS       +=
-#ESMF_F90LINKOPTS          +=
-#ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_DOUBLEUNDERSCORE
-#else
-#$(error "ESMF_FORTRANSYMBOLS = $(ESMF_FORTRANSYMBOLS)" not supported by ESMF and/or this platform)
-#endif
-#endif
-#endif
 
 ############################################################
 # Construct the ABISTRING
@@ -169,7 +139,7 @@ ESMF_CXXLINKOPTS        += -mcmodel=medium
 endif
 
 ############################################################
-# Need this until the file convention is fixed (then remove these two lines)
+# Explicit flags for handling specific format and cpp combos
 #
 ESMF_F90COMPILEFREENOCPP = -fpp0 -FR
 ESMF_F90COMPILEFIXCPP    = -fpp

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -69,9 +69,9 @@ module ESMF_ArrayCreateMod
 ^ifndef ESMF_NO_SEQUENCE
   sequence
 ^endif
-  private
+!  private
     type(ESMF_Pointer) :: this
-    ESMF_INIT_DECLARE
+    ESMF_INIT_DECLARE_NAMED_ALIAS
   end type
 
 !------------------------------------------------------------------------------
@@ -139,7 +139,7 @@ module ESMF_ArrayCreateMod
     module procedure ESMF_ArrayCreateAllocateAS
     module procedure ESMF_ArrayCreateAllocateASArb
     module procedure ESMF_ArrayCreateAllocateASArbI8
-    module procedure ESMF_ArrayCreateCopy
+    module procedure ESMF_ArrayCreateFromArray
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
@@ -295,7 +295,7 @@ contains
 ! !IROUTINE:  ESMF_ArrayEQ - Compare two Calendars for equality
 !
 ! !INTERFACE:
-  function ESMF_ArrayEQ(array1, array2)
+  impure elemental function ESMF_ArrayEQ(array1, array2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_ArrayEQ
@@ -346,7 +346,7 @@ contains
 ! !IROUTINE:  ESMF_ArrayNE - Compare two Calendars for non-equality
 !
 ! !INTERFACE:
-  function ESMF_ArrayNE(array1, array2)
+  impure elemental function ESMF_ArrayNE(array1, array2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_ArrayNE
@@ -3862,22 +3862,25 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 
 ! -------------------------- ESMF-public method -------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayCreateCopy()"
+^define ESMF_METHOD "ESMF_ArrayCreateFromArray()"
 !BOP
-! !IROUTINE: ESMF_ArrayCreate - Create Array object as copy of existing Array object
+! !IROUTINE: ESMF_ArrayCreate - Create Array object from an existing Array object
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateCopy(array, keywordEnforcer, datacopyflag, delayout, rc)
+  function ESMF_ArrayCreateFromArray(array, keywordEnforcer, datacopyflag, delayout, &
+    trailingUndistSlice, name, rc)
 !
 ! !RETURN VALUE:
-    type(ESMF_Array) :: ESMF_ArrayCreateCopy
+    type(ESMF_Array) :: ESMF_ArrayCreateFromArray
 !
 ! !ARGUMENTS:
        type(ESMF_Array),           intent(in)            :: array
        type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag
        type(ESMF_DELayout),        intent(in),  optional :: delayout
+       integer,                    intent(in),  optional :: trailingUndistSlice(:)
+       character (len=*),          intent(in),  optional :: name
        integer,                    intent(out), optional :: rc
 !
 ! !STATUS:
@@ -3886,21 +3889,25 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
 ! \item[8.1.0] Added argument {\tt datacopyflag} to select between different
-!   copy options.\newline
+!   data copy options.\newline
 !   Added argument {\tt delayout} to create Array with different localDe -> DE
 !   mapping. This is identical to a change in DE -> PET mapping.
+! \item[8.6.0] Added argument {\tt trailingUndistSlice} to allow slicing of
+!   arrays.\newline
+!   Added argument {\tt name} to allow specification during creation.
 ! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Create an {\tt ESMF\_Array} object as the copy of an existing Array.
+! Create an {\tt ESMF\_Array} object from an existing Array. Supports array
+! slicing.
 !
 ! The return value is the newly created {\tt ESMF\_Array} object.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[array]
-!     {\tt ESMF\_Array} object to be copied.
+!     {\tt ESMF\_Array} object to be used as originator.
 ! \item[{[datacopyflag]}]
 !      Specifies whether the created Array object references the memory
 !      allocation provided by {\tt array} directly or copies the data from
@@ -3909,6 +3916,19 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! \item[{[delayout]}]
 !      If present, override the DELayout of the incoming {\tt distgrid}.
 !      By default use the DELayout defined in {\tt distgrid}.
+! \item[{[trailingUndistSlice]}]
+!      If present, the returned Array refers to a slice of {\tt array}
+!      created by removing some or all of the trailing (i.e. rightmost)
+!      undistributed dimensions from the incoming Array object.
+!      The number of trailing dimensions removed is equal to the size $n$
+!      of {\tt trailingUndistSlice}, which must be less than or equal to the
+!      total number of trailing undistributed dimensions in {\tt array}.
+!      The {\tt trailingUndistSlice} argument is interpreted
+!      as an index tuple for the $n$ trailing undistributed
+!      dimensions in {\tt array} in order, and the Array slice at that
+!      location is returned.
+! \item[{[name]}]
+!      Name of the Array object.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3917,7 +3937,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !------------------------------------------------------------------------------
     integer                 :: localrc    ! local return code
     type(ESMF_Array)        :: arrayOut   ! opaque pointer to new C++ Array
-    type(ESMF_DataCopy_Flag):: datacopyflag_opt   ! helper variable
+    type(ESMF_DataCopy_Flag):: datacopyflag_opt       ! helper variable
+    type(ESMF_InterArray)   :: trailingUndistSliceArg ! helper variable
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -3925,30 +3946,48 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 
     ! Mark this Array object as invalid
     arrayOut%this = ESMF_NULL_POINTER
-    ESMF_ArrayCreateCopy = arrayOut
+    ESMF_ArrayCreateFromArray = arrayOut
 
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayGetInit, array, rc)
 
-    ! Set copy/ref behavior
+    ! Set data copy/ref behavior
     datacopyflag_opt = ESMF_DATACOPY_VALUE  ! default
     if (present(datacopyflag)) datacopyflag_opt = datacopyflag
 
-    ! Call into the C++ interface
-    call c_ESMC_ArrayCreateCopy(array, arrayOut, datacopyflag_opt, delayout, &
-      localrc)
+    ! Deal with (optional) array arguments
+    trailingUndistSliceArg = ESMF_InterArrayCreate( &
+      farray1D=trailingUndistSlice, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Call into the C++ interface
+    call c_ESMC_ArrayCreateFromArray(array, arrayOut, datacopyflag_opt, &
+      delayout, trailingUndistSliceArg, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Garbage collection
+    call ESMF_InterArrayDestroy(trailingUndistSliceArg, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set name
+    if (present(name)) then
+      call c_ESMC_SetName(arrayOut, "Array", name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
     ! Set return value
-    ESMF_ArrayCreateCopy = arrayOut
+    ESMF_ArrayCreateFromArray = arrayOut
 
     ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_ArrayCreateCopy)
+    ESMF_INIT_SET_CREATED(ESMF_ArrayCreateFromArray)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end function ESMF_ArrayCreateCopy
+  end function ESMF_ArrayCreateFromArray
 !------------------------------------------------------------------------------
 
 

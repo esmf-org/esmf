@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -80,7 +80,7 @@ extern "C" {
     localrc = (*vm)->allfullreduce(input, output, *count, vmt, (vmOp)(*op));
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -103,7 +103,7 @@ extern "C" {
     localrc = (*vm)->allgather(input, output, *size);
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -128,7 +128,7 @@ extern "C" {
       (ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -178,7 +178,7 @@ extern "C" {
       recvOffsets, vmt);
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -222,7 +222,7 @@ extern "C" {
     localrc = (*vm)->allreduce(input, output, *count, vmt, (vmOp)(*op));
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -269,7 +269,7 @@ extern "C" {
       recvData, *recvCount, vmt);
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -322,7 +322,7 @@ extern "C" {
       recvCounts, recvOffsets, vmt);
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -344,7 +344,7 @@ extern "C" {
     localrc = (*vm)->barrier();
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -367,7 +367,7 @@ extern "C" {
     localrc = (*vm)->broadcast(data, *size, *root);
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -392,7 +392,7 @@ extern "C" {
       (ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -486,7 +486,7 @@ extern "C" {
     localrc = (*vm)->gather(input, output, *size, *root);
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -511,7 +511,7 @@ extern "C" {
       (ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -557,7 +557,7 @@ extern "C" {
       recvOffsets, vmt, *root);
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -566,10 +566,11 @@ extern "C" {
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
-  
-  void FTN_X(c_esmc_vmget)(ESMCI::VM **vm, int *localPet, int *currentSsiPe, 
+
+  void FTN_X(c_esmc_vmget)(ESMCI::VM **vm, int *localPet, int *currentSsiPe,
     int *petCount, int *peCount, int *ssiCount, int *ssiMinPetCount,
-    int *ssiMaxPetCount, int *ssiLocalPetCount, int *mpiCommunicator,
+    int *ssiMaxPetCount, int *ssiLocalPetCount, int *ssiLocalPet,
+    int *ssiLocalDevCount, int *mpiCommunicator,
     ESMC_Logical *pthreadsEnabledFlag, ESMC_Logical *openMPEnabledFlag,
     ESMC_Logical *ssiSharedMemoryEnabledFlag, int *rc){
 #undef  ESMC_METHOD
@@ -601,6 +602,10 @@ extern "C" {
       *ssiMaxPetCount = (*vm)->getSsiMaxPetCount();
     if (ESMC_NOT_PRESENT_FILTER(ssiLocalPetCount) != ESMC_NULL_POINTER)
       *ssiLocalPetCount = (*vm)->getSsiLocalPetCount();
+    if (ESMC_NOT_PRESENT_FILTER(ssiLocalPet) != ESMC_NULL_POINTER)
+      *ssiLocalPet = (*vm)->getSsiLocalPet();
+    if (ESMC_NOT_PRESENT_FILTER(ssiLocalDevCount) != ESMC_NULL_POINTER)
+      *ssiLocalDevCount = (*vm)->getSsiLocalDevCount();
     if (ESMC_NOT_PRESENT_FILTER(mpiCommunicator) != ESMC_NULL_POINTER){
       mpiCommTemp = (*vm)->getMpi_c();
 #ifdef ESMF_DONT_HAVE_MPI_COMM_C2F
@@ -628,6 +633,36 @@ extern "C" {
       else
         *ssiSharedMemoryEnabledFlag = ESMF_FALSE;
     }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_vmgetssilocaldevlist)(ESMCI::VM **vm,
+    ESMCI::InterArray<int> *ssiLocalDevListArg, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmgetssilocaldevlist()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vm, rc)
+    ESMCI_NULL_CHECK_PRC(*vm, rc)
+    // access and transfer information
+    if (ssiLocalDevListArg->dimCount != 1){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+        "ssiLocalDevListArg must enter with one dimension",
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    int ssiLocalDevCount = ssiLocalDevListArg->extent[0];
+    if (ssiLocalDevCount != (*vm)->getSsiLocalDevCount()){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+        "ssiLocalDevListArg provide ssiLocalDevCount many elements",
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    int *ssiLocalDevList = ssiLocalDevListArg->array;
+    memcpy(ssiLocalDevList, (*vm)->getSsiLocalDevList(),
+      ssiLocalDevCount * sizeof(int));
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
@@ -734,8 +769,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmrecv)(ESMCI::VM **vm, void *message, int *size,
-    int *source, int *rc){
+  void FTN_X(c_esmc_vmrecv)(ESMCI::VM **vm, void *message,
+    unsigned long long int *size, int *source, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmrecv()"
     // Initialize return code; assume routine not implemented
@@ -747,7 +782,7 @@ extern "C" {
     localrc = (*vm)->recv(message, *size, *source);
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -757,8 +792,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmrecvnb)(ESMCI::VM **vm, void *message, int *size, 
-    int *source, void **commhandle, int *rc){
+  void FTN_X(c_esmc_vmrecvnb)(ESMCI::VM **vm, void *message,
+    unsigned long long int *size, int *source, void **commhandle, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmrecvnb()"
     // Initialize return code; assume routine not implemented
@@ -773,7 +808,7 @@ extern "C" {
       (ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -817,7 +852,7 @@ extern "C" {
     localrc = (*vm)->reduce(input, output, *count, vmt, (vmOp)(*op), *root);
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -840,7 +875,7 @@ extern "C" {
     localrc = (*vm)->scatter(input, output, *size, *root);
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -866,7 +901,7 @@ extern "C" {
       (ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -912,7 +947,7 @@ extern "C" {
       *recvCount, vmt, *root);
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -922,8 +957,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
-  void FTN_X(c_esmc_vmsend)(ESMCI::VM **vm, void *message, int *size, int *dest,
-    int *rc){
+  void FTN_X(c_esmc_vmsend)(ESMCI::VM **vm, void *message,
+    unsigned long long int *size, int *dest, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmsend()"
     // Initialize return code; assume routine not implemented
@@ -935,7 +970,7 @@ extern "C" {
     localrc = (*vm)->send(message, *size, *dest);
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -945,8 +980,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmsendnb)(ESMCI::VM **vm, void *message, int *size,
-    int *dest, void **commhandle, int *rc){
+  void FTN_X(c_esmc_vmsendnb)(ESMCI::VM **vm, void *message,
+    unsigned long long int *size, int *dest, void **commhandle, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmsendnb()"
     // Initialize return code; assume routine not implemented
@@ -961,7 +996,7 @@ extern "C" {
       (ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -985,7 +1020,7 @@ extern "C" {
       *recvSize, *src);
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -1012,7 +1047,7 @@ extern "C" {
       *recvSize, *src, (ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -1035,7 +1070,7 @@ extern "C" {
     localrc = (*vm)->commwait((ESMCI::VMK::commhandle **)commhandle);
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -1087,7 +1122,7 @@ extern "C" {
     localrc = (*vm)->threadbarrier();
     if (localrc){
       char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      sprintf(message, "VMKernel/MPI error #%d", localrc);
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, ESMC_CONTEXT,
         rc);
       delete [] message;
@@ -1170,6 +1205,33 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
+  void FTN_X(c_esmc_vmsetenv)(char *name, char *value, int *rc,
+    ESMCI_FortranStrLenArg name_l, ESMCI_FortranStrLenArg value_l){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmsetenv()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    try{
+      std::string nameStr(name, name_l);
+      std::string valueStr(value, value_l);
+      ESMCI::VM::setenv(nameStr.c_str(), valueStr.c_str());
+    }catch(int localrc){
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc))
+        return; // bail out
+    }catch(std::exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return; // bail out
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception", 
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
   void FTN_X(c_esmc_vmfinalize)(ESMC_Logical *keepMpiFlag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmfinalize()"
@@ -1245,7 +1307,8 @@ extern "C" {
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
   void FTN_X(c_esmc_vmplanconstruct)(ESMCI::VMPlan **ptr, ESMCI::VM **vm,
-    int *npetlist, int *petlist, ESMC_ContextFlag *contextflag, int *rc){
+    int *npetlist, int *petlist, int *ndevlist, int *devlist,
+    ESMC_ContextFlag *contextflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmplanconstruct()"
     // Initialize return code; assume routine not implemented
@@ -1254,7 +1317,17 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     ESMCI_NULL_CHECK_PRC(vm, rc)
     ESMCI_NULL_CHECK_PRC(*vm, rc)
-    (*ptr) = new ESMCI::VMPlan;
+    if (*npetlist > 0){
+      int localrc = ESMCI::VMK::checkPetList(petlist, *npetlist);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+    }
+    if (*ndevlist > 0){
+      int localrc = ESMCI::VMK::checkDevList(devlist, *ndevlist);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+    }
+    (*ptr) = new ESMCI::VMPlan(*ndevlist, devlist);
     if (*contextflag==ESMF_CHILD_IN_PARENT_VM)
       (*ptr)->vmkplan_useparentvm(**vm);
     else if (*npetlist > 0){
@@ -1353,7 +1426,41 @@ extern "C" {
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
-   
+
+  void FTN_X(c_esmc_vmplansetstdout)(ESMCI::VMPlan **ptr,
+    char *filename, int *rc, ESMCI_FortranStrLenArg len){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmplansetstdout()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    // set the stdoutName
+    std::string filenameStr(filename, len);
+    (*ptr)->stdoutName = new char[len+1];
+    strcpy((*ptr)->stdoutName, filenameStr.c_str());
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_vmplansetstderr)(ESMCI::VMPlan **ptr,
+    char *filename, int *rc, ESMCI_FortranStrLenArg len){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmplansetstderr()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    // set the stderrName
+    std::string filenameStr(filename, len);
+    (*ptr)->stderrName = new char[len+1];
+    strcpy((*ptr)->stderrName, filenameStr.c_str());
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
   void FTN_X(c_esmc_vmplanmaxpes)(ESMCI::VMPlan **ptr, ESMCI::VM **vm,
     int *max, int *pref_intra_process, int *pref_intra_ssi, int *pref_inter_ssi,
     int *npetlist, int *petlist, ESMC_Logical *forceEachChildPetOwnPthread,
@@ -1367,6 +1474,11 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     ESMCI_NULL_CHECK_PRC(vm, rc)
     ESMCI_NULL_CHECK_PRC(*vm, rc)
+    if (*npetlist > 0){
+      int localrc = ESMCI::VMK::checkPetList(petlist, *npetlist);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+    }
     // Sort out the non-present F90 optional arguments. 
     max = ESMC_NOT_PRESENT_FILTER(max);
     pref_intra_process = ESMC_NOT_PRESENT_FILTER(pref_intra_process);
@@ -1433,6 +1545,11 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     ESMCI_NULL_CHECK_PRC(vm, rc)
     ESMCI_NULL_CHECK_PRC(*vm, rc)
+    if (*npetlist > 0){
+      int localrc = ESMCI::VMK::checkPetList(petlist, *npetlist);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+    }
     // Sort out the non-present F90 optional arguments. 
     max = ESMC_NOT_PRESENT_FILTER(max);
     pref_intra_process = ESMC_NOT_PRESENT_FILTER(pref_intra_process);
@@ -1499,6 +1616,11 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     ESMCI_NULL_CHECK_PRC(vm, rc)
     ESMCI_NULL_CHECK_PRC(*vm, rc)
+    if (*npetlist > 0){
+      int localrc = ESMCI::VMK::checkPetList(petlist, *npetlist);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+    }
     // Sort out the non-present F90 optional arguments. 
     max = ESMC_NOT_PRESENT_FILTER(max);
     pref_intra_process = ESMC_NOT_PRESENT_FILTER(pref_intra_process);
@@ -1572,7 +1694,8 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_vmidcompare)(ESMCI::VMId **vmid1, ESMCI::VMId **vmid2,
-    ESMC_Logical *result, int *rc){
+    ESMC_Logical *keyOnly, ESMC_Logical *keySuper, ESMC_Logical *result,
+    int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmidcompare()"
     // Initialize return code; assume routine not implemented
@@ -1581,7 +1704,13 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(vmid1, rc)
     ESMCI_NULL_CHECK_PRC(vmid2, rc)
     ESMCI_NULL_CHECK_PRC(result, rc)
-    bool resultBool = ESMCI::VMIdCompare(*vmid1, *vmid2);
+    bool keyOnlyOpt = false; // default
+    bool keySuperOpt = false; // default
+    if (ESMC_NOT_PRESENT_FILTER(keyOnly) != ESMC_NULL_POINTER)
+      if (*keyOnly == ESMF_TRUE) keyOnlyOpt = true;
+    if (ESMC_NOT_PRESENT_FILTER(keySuper) != ESMC_NULL_POINTER)
+      if (*keySuper == ESMF_TRUE) keySuperOpt = true;
+    bool resultBool = ESMCI::VMIdCompare(*vmid1, *vmid2, keyOnlyOpt, keySuperOpt);
     *result = resultBool ? ESMF_TRUE : ESMF_FALSE;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1653,6 +1782,37 @@ extern "C" {
       rc)) return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
+  }
+
+  void FTN_X(c_esmci_vmidgetleftmostonbit)(ESMCI::VMId **vmid, int *leftmostOnBit,
+                              int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmci_vmidgetleftmostonbit()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vmid, rc)
+    ESMCI_NULL_CHECK_PRC(*vmid, rc)
+    localrc = (*vmid)->getLeftmostOnBit(leftmostOnBit);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
+  }  
+
+  void FTN_X(c_esmci_vmidgetislocalpetactive)(ESMCI::VMId **vmid,
+    ESMC_Logical *isLocalPetActive, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_ESMCI_VMIdGetIsLocalPetActive()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(vmid, rc)
+    bool resultBool = ESMCI::VMIdIsLocalPetActive(*vmid);
+    *isLocalPetActive = resultBool ? ESMF_TRUE : ESMF_FALSE;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
   void FTN_X(c_esmc_vmidlog)(ESMCI::VMId **vmid, char *prefix, 
@@ -1858,7 +2018,10 @@ extern "C" {
     std::string prefixStr(prefix, prefix_l);
     std::stringstream msg;
     msg << prefixStr << ptr;
-    if (ptr) msg << " => " << *(void **)ptr;
+    if (ptr){
+      msg << " => " << *(void **)ptr;
+      if (*(void **)ptr) msg << " => " << **(void ***)ptr;
+    }
     ESMC_LogDefault.Write(msg.str(), *logMsgFlag);
   }
   
