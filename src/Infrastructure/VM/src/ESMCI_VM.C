@@ -3339,6 +3339,36 @@ VM *VM::initialize(
       esmfRuntimeEnv.push_back(esmfRuntimeVarName);
       esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
     }
+    esmfRuntimeVarName = "ESMF_RUNTIME_GARBAGE";
+    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
+    if (esmfRuntimeVarValue){
+      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
+      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
+    }
+    esmfRuntimeVarName = "ESMF_RUNTIME_PROFILE";
+    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
+    if (esmfRuntimeVarValue){
+      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
+      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
+    }
+    esmfRuntimeVarName = "ESMF_RUNTIME_PROFILE_PETLIST";
+    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
+    if (esmfRuntimeVarValue){
+      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
+      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
+    }
+    esmfRuntimeVarName = "ESMF_RUNTIME_PROFILE_OUTPUT";
+    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
+    if (esmfRuntimeVarValue){
+      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
+      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
+    }
+    esmfRuntimeVarName = "ESMF_RUNTIME_PROFILE_REGRID";
+    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
+    if (esmfRuntimeVarValue){
+      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
+      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
+    }
     esmfRuntimeVarName = "ESMF_RUNTIME_TRACE";
     esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
     if (esmfRuntimeVarValue){
@@ -3369,32 +3399,7 @@ VM *VM::initialize(
       esmfRuntimeEnv.push_back(esmfRuntimeVarName);
       esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
     }
-    esmfRuntimeVarName = "ESMF_RUNTIME_PROFILE";
-    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
-    if (esmfRuntimeVarValue){
-      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
-      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
-    }
-    esmfRuntimeVarName = "ESMF_RUNTIME_PROFILE_PETLIST";
-    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
-    if (esmfRuntimeVarValue){
-      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
-      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
-    }
-    esmfRuntimeVarName = "ESMF_RUNTIME_PROFILE_OUTPUT";
-    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
-    if (esmfRuntimeVarValue){
-      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
-      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
-    }
-    esmfRuntimeVarName = "ESMF_RUNTIME_PROFILE_REGRID";
-    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
-    if (esmfRuntimeVarValue){
-      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
-      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
-    }
 
-    
     int count = esmfRuntimeEnv.size();
     GlobalVM->broadcast(&count, sizeof(int), 0);
     int *length = new int[2];
