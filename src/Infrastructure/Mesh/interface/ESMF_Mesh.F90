@@ -649,7 +649,7 @@ end subroutine
 !          so that the coordinates for an element lie in sequence in memory. (e.g. for a
 !          Mesh with spatial dimension 2, the coordinates for element 1 are in elementCoords(1) and
 !          elementCoords(2), the coordinates for element 2 are in elementCoords(3) and elementCoords(4),
-!          etc.).
+!          etc.). If not specified, the resulting Mesh won't have element coordinates. 
 !   \item [{[elementDistgrid]}]
 !          If present, use this as the element Distgrid for the Mesh.
 !          The passed in Distgrid
@@ -1213,7 +1213,7 @@ end subroutine
 !          so that the coordinates for an element lie in sequence in memory. (e.g. for a
 !          Mesh with spatial dimension 2, the coordinates for element 1 are in elementCoords(1) and
 !          elementCoords(2), the coordinates for element 2 are in elementCoords(3) and elementCoords(4),
-!          etc.).
+!          etc.). If not specified, the resulting Mesh won't have element coordinates. 
 !   \item [{[elementDistgrid]}]
 !          If present, use this as the element Distgrid for the Mesh.
 !          The passed in Distgrid
@@ -3809,7 +3809,7 @@ end function ESMF_MeshCreateDual
 !         to be created on this PET. The first dimension of this array is for the
 !         coordinates and should be of size 2 or 3. The size of this dimension will be
 !         used to determine the spatialDim of the Mesh. The second dimension is the number
-!         of corners for an element. The 3rd dimension is a list of all the elements on this PET.
+!         of corners for an element. The third dimension is a list of all the elements on this PET.
 !   \item [{[elementMask]}]
 !          An array containing values which can be used for element masking. Which values indicate
 !          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to
@@ -3826,7 +3826,7 @@ end function ESMF_MeshCreateDual
 !   \item[{[elementCoords]}]
 !          An array containing the physical coordinates of the elements to be created on this
 !          PET. This input consists of a 2D array with the first dimension that same size as the first dimension of {\tt elementCornerCoords}.
-!          The second dimension should be the same size as the {\tt elementTypes} argument.
+!          The second dimension should be the same size as the third dimension of {\tt elementCornerCoords}. If not specified, the resulting Mesh won't have element coordinates. 
 !   \item [{[elementDistgrid]}]
 !          If present, use this as the element Distgrid for the Mesh.
 !          The passed in Distgrid
@@ -3978,7 +3978,7 @@ end function ESMF_MeshCreateDual
 !   \item[{[elementCoords]}]
 !          An array containing the physical coordinates of the elements to be created on this
 !          PET. This input consists of a 2D array with the first dimension that same size as the first dimension of {\tt elementCornerCoords}.
-!          The second dimension should be the same size as the {\tt elementTypes} argument.
+!          The second dimension should be the same size as the {\tt elementTypes} argument. If not specified, the resulting Mesh won't have element coordinates. 
 !   \item [{[elementDistgrid]}]
 !          If present, use this as the element Distgrid for the Mesh.
 !          The passed in Distgrid
