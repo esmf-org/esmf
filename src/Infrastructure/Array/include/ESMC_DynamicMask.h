@@ -78,6 +78,102 @@ int ESMC_DynamicMaskPredefinedSetR8R8R8(
 //EOP
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_DynamicMaskSet - Set values for an DynamicMask
+//
+// !INTERFACE:
+int ESMC_DynamicMaskPredefinedSetR8R8R8V(
+  ESMC_DynamicMask *DynamicMask,         // inout 
+  enum  ESMC_PredefinedDynamicMask_Flag mask_flag,  // in
+  int *handleAllElements, 
+  ESMC_R8 *dynamicSrcMaskValue,
+  ESMC_R8 *dynamicDstMaskValue 
+);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Set an Array specification - typekind, and rank.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[DynamicMask]
+//    The {\tt ESMC\_DynamicMask} to set.
+//  \item[rank]
+//    Array rank (dimensionality - 1D, 2D, etc). Maximum allowed is 7D.
+//  \item[typekind]
+//    Array typekind. See section~\ref{const:ctypekind} for valid values.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_DynamicMaskSet - Set values for an DynamicMask
+//
+// !INTERFACE:
+int ESMC_DynamicMaskPredefinedSetR4R8R4(
+  ESMC_DynamicMask *DynamicMask,         // inout 
+  enum  ESMC_PredefinedDynamicMask_Flag mask_flag,  // in
+  int *handleAllElements, 
+  ESMC_R4 *dynamicSrcMaskValue,
+  ESMC_R4 *dynamicDstMaskValue 
+);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Set an Array specification - typekind, and rank.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[DynamicMask]
+//    The {\tt ESMC\_DynamicMask} to set.
+//  \item[rank]
+//    Array rank (dimensionality - 1D, 2D, etc). Maximum allowed is 7D.
+//  \item[typekind]
+//    Array typekind. See section~\ref{const:ctypekind} for valid values.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_DynamicMaskSet - Set values for an DynamicMask
+//
+// !INTERFACE:
+int ESMC_DynamicMaskPredefinedSetR4R8R4V(
+  ESMC_DynamicMask *DynamicMask,         // inout 
+  enum  ESMC_PredefinedDynamicMask_Flag mask_flag,  // in
+  int *handleAllElements, 
+  ESMC_R4 *dynamicSrcMaskValue,
+  ESMC_R4 *dynamicDstMaskValue 
+);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Set an Array specification - typekind, and rank.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[DynamicMask]
+//    The {\tt ESMC\_DynamicMask} to set.
+//  \item[rank]
+//    Array rank (dimensionality - 1D, 2D, etc). Maximum allowed is 7D.
+//  \item[typekind]
+//    Array typekind. See section~\ref{const:ctypekind} for valid values.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

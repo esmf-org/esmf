@@ -48,6 +48,10 @@ class DynamicMask {   // NOT inherited from Base class
 
   public:
     int setR8R8R8(ESMC_PredefinedDynamicMask_Flag maskType, int *handleAllElements, ESMC_R8 *dynamicSrcMaskValue, ESMC_R8 *dynamicDstMaskValue);
+    int setR8R8R8V(ESMC_PredefinedDynamicMask_Flag maskType, int *handleAllElements, ESMC_R8 *dynamicSrcMaskValue, ESMC_R8 *dynamicDstMaskValue);
+    int setR4R8R4(ESMC_PredefinedDynamicMask_Flag maskType, int *handleAllElements, ESMC_R4 *dynamicSrcMaskValue, ESMC_R4 *dynamicDstMaskValue);
+    int setR4R8R4V(ESMC_PredefinedDynamicMask_Flag maskType, int *handleAllElements, ESMC_R4 *dynamicSrcMaskValue, ESMC_R4 *dynamicDstMaskValue);
+
 
 };
 

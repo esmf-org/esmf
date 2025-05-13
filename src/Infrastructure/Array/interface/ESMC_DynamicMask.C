@@ -43,7 +43,7 @@ int ESMC_DynamicMaskPredefinedSetR8R8R8(ESMC_DynamicMask *DynamicMask,
   ESMC_PredefinedDynamicMask_Flag mask_flag, int *handleAllElements,
   ESMC_R8 *dynamicSrcMaskValue, ESMC_R8 *dynamicDstMaskValue) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DynamicMaskSetR8R8R8()"
+#define ESMC_METHOD "ESMC_DynamicMaskPredefinedSetR8R8R8()"
     
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -51,6 +51,66 @@ int ESMC_DynamicMaskPredefinedSetR8R8R8(ESMC_DynamicMask *DynamicMask,
 
   // call into ESMCI interface
   localrc = ((ESMCI::DynamicMask *)DynamicMask)->setR8R8R8(mask_flag, handleAllElements, dynamicSrcMaskValue, dynamicDstMaskValue);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+
+int ESMC_DynamicMaskPredefinedSetR8R8R8V(ESMC_DynamicMask *DynamicMask,
+  ESMC_PredefinedDynamicMask_Flag mask_flag, int *handleAllElements,
+  ESMC_R8 *dynamicSrcMaskValue, ESMC_R8 *dynamicDstMaskValue) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DynamicMaskPredefinedSetR8R8R8V()"
+    
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // call into ESMCI interface
+  localrc = ((ESMCI::DynamicMask *)DynamicMask)->setR8R8R8V(mask_flag, handleAllElements, dynamicSrcMaskValue, dynamicDstMaskValue);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+
+int ESMC_DynamicMaskPredefinedSetR4R8R4(ESMC_DynamicMask *DynamicMask,
+  ESMC_PredefinedDynamicMask_Flag mask_flag, int *handleAllElements,
+  ESMC_R4 *dynamicSrcMaskValue, ESMC_R4 *dynamicDstMaskValue) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DynamicMaskPredefinedSetR4R4R4()"
+    
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // call into ESMCI interface
+  localrc = ((ESMCI::DynamicMask *)DynamicMask)->setR4R8R4(mask_flag, handleAllElements, dynamicSrcMaskValue, dynamicDstMaskValue);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+
+int ESMC_DynamicMaskPredefinedSetR4R8R4V(ESMC_DynamicMask *DynamicMask,
+  ESMC_PredefinedDynamicMask_Flag mask_flag, int *handleAllElements,
+  ESMC_R4 *dynamicSrcMaskValue, ESMC_R4 *dynamicDstMaskValue) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DynamicMaskPredefinedSetR4R4R4V()"
+    
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // call into ESMCI interface
+  localrc = ((ESMCI::DynamicMask *)DynamicMask)->setR4R8R4V(mask_flag, handleAllElements, dynamicSrcMaskValue, dynamicDstMaskValue);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
 
