@@ -138,6 +138,9 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     static bool isThreadKnown(int *rc=NULL);  // is thread known under any VM
     static VMId *getCurrentID(int *rc=NULL);  // VMId of current VM
     static void getCurrentGarbageInfo(int *, int *); // garbage info current VM
+    bool isGarbageNone() const{
+      return (garbageMode==garbageNone);
+    }
     static void logGarbageInfo(std::string prefix, bool current=false,
       ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO); // garbage log current VM
     static void getMemInfo(int *virtMemPet, int *physMemPet);   // memory info
