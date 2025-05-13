@@ -346,10 +346,11 @@ This section affects the application level.
 | `fieldDictionary`         | name of the NUOPC field dictionary file to be loaded      | *None*          |
 | `ESMF_RUNTIME_COMPLIANCECHECK`| enable/disable NUOPC compliance checking: `ON` or `OFF` with `DEPTH` | `OFF`|
 | `ESMF_RUNTIME_GARBAGE`    | ESMF garbage collection setting: `NONE`, `FULL`,`SAFE`     | `SAFE`          |
+| `ESMF_RUNTIME_GARBAGE_LOG`| enable/disable logging of ESMF garbage collection: `ON` or `OFF`         | `OFF`|
 | `ESMF_RUNTIME_PROFILE`    | enable/disable all profiling functions: `ON` or `OFF`     | `OFF`           |
 | `ESMF_RUNTIME_PROFILE_OUTPUT` | output format; multiple can be selected: `TEXT` `SUMMARY` `BINARY` | `TEXT`      |
 | `ESMF_RUNTIME_PROFILE_PETLIST`| limit profiling to an explicit list of PETs           | *all PETs*      |
-| `ESMF_RUNTIME_PROFILE_REGRID` | enable/disable regrid profiling                       | `OFF`           |
+| `ESMF_RUNTIME_PROFILE_REGRID` | enable/disable regrid profiling: `ON` or `OFF`        | `OFF`           |
 | `ESMF_RUNTIME_TRACE`      | enable/disable all tracing functions: `ON` or `OFF`       | `OFF`           |
 | `ESMF_RUNTIME_TRACE_CLOCK`| type of clock for events: `REALTIME` or `MONOTONIC` or `MONOTONIC_SYNC`  | `REALTIME`|
 | `ESMF_RUNTIME_TRACE_PETLIST`| limit tracing to an explicit list of PETs               | *all PETs*      |

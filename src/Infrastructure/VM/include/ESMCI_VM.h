@@ -110,8 +110,10 @@ class VMTimer {
 // class definition
 class VM : public VMK {   // inherits from ESMCI::VMK class
   // This is the ESMF derived virtual machine class.
-    // performance timers
-    std::map<std::string, VMTimer> timers;
+  private:
+    enum GarbageMode{garbageNone, garbageFull, garbageSafe};
+    GarbageMode garbageMode = garbageSafe;  // default use safe garbage mode
+    std::map<std::string, VMTimer> timers;  // performance timers
   public:
     // initialize(), finalize() and abort() of global VM
     static VM *initialize(MPI_Comm mpiCommunicator, bool globalResourceControl,

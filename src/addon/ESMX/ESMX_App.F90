@@ -58,6 +58,7 @@ program ESMX_App
                 "globalResourceControl       ", & ! ESMF_Initialize option
                 "ESMF_RUNTIME_COMPLIANCECHECK", & ! ESMF_Initialize option
                 "ESMF_RUNTIME_GARBAGE        ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_GARBAGE_LOG    ", & ! ESMF_Initialize option
                 "ESMF_RUNTIME_PROFILE        ", & ! ESMF_Initialize option
                 "ESMF_RUNTIME_PROFILE_OUTPUT ", & ! ESMF_Initialize option
                 "ESMF_RUNTIME_PROFILE_PETLIST", & ! ESMF_Initialize option
