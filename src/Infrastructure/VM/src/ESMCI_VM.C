@@ -1158,19 +1158,20 @@ void VM::shutdown(
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                 ESMC_CONTEXT, rc))
                 return;
-#if 0
-//gjt: Disable cleaning up LocStream from the garbage collection level because
-//gjt: it leads to issues when a field tries to destroy it later.
-//gjt: This is going to be tricky to resolve with Fortran implemented classes.
-//gjt: For now rather have small memory leaks than invalid memory access.
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_LOCSTREAM.objectID){
-              FTN_X(f_esmf_locstreamcollectgarbage)(
-                &(matchTable_FObjects[i][k].fobject), &localrc);
-              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-                ESMC_CONTEXT, rc))
-                return;
-#endif
+              if (garbageMode == garbageFull){
+                // Cleaning up LocStream in garbage collection can be
+                // problematic because it leads to issues when a field tries to
+                // destroy it later. This is going to be tricky to resolve with
+                // Fortran implemented classes. Better a small memory leak than
+                // invalid memory access.
+                FTN_X(f_esmf_locstreamcollectgarbage)(
+                  &(matchTable_FObjects[i][k].fobject), &localrc);
+                if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                  ESMC_CONTEXT, rc))
+                  return;
+              }
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_STATE.objectID){
               FTN_X(f_esmf_statecollectgarbage)(
@@ -1201,17 +1202,19 @@ void VM::shutdown(
                 ESMC_CONTEXT, rc))
                 return;
             }
-// gjt: no longer remove remnant from garbage collection for safety
-//            matchTable_FObjects[i].pop_back();
+            if (garbageMode == garbageFull){
+              // Removing remnant from garbage collection might be unsafe
+              matchTable_FObjects[i].pop_back();
+            }
           }
-#if 0
-// gjt: no take down garbage collection table for safety
-          if (matchTable_FObjects[i].size() > 0)
-            std::cout << "Failure in VM::shutdown() line: "
-              << __LINE__ << std::endl;
-          // swap() trick with a temporary to free vector's memory
-          std::vector<FortranObject>().swap(matchTable_FObjects[i]);
-#endif
+          if (garbageMode == garbageFull){
+            // Taking down garbage collection table might be unsafe
+            if (matchTable_FObjects[i].size() > 0)
+              std::cout << "Failure in VM::shutdown() line: "
+                << __LINE__ << std::endl;
+            // swap() trick with a temporary to free vector's memory
+            std::vector<FortranObject>().swap(matchTable_FObjects[i]);
+          }
           // The following loop deletes deep C++ ESMF objects derived from
           // Base class. For deep Fortran classes it deletes the Base member.
           for (int k=matchTable_Objects[i].size()-1; k>=0; k--){
@@ -1233,18 +1236,19 @@ void VM::shutdown(
                 matchTable_Objects[i][k]->ESMC_BaseGetName());
               ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
             }
-// gjt: no longer remove remnant from garbage collection for safety
-//            delete matchTable_Objects[i][k];  // delete ESMF object, incl. Base
-//            matchTable_Objects[i].pop_back();
+            if (garbageMode == garbageFull){
+              // Removing remnant from garbage collection might be unsafe
+              matchTable_Objects[i].pop_back();
+            }
           }
-#if 0
-// gjt: no take down garbage collection table for safety
-          if (matchTable_Objects[i].size() > 0)
-            std::cout << "Failure in VM::shutdown() line: "
-              << __LINE__ << std::endl;
-          // swap() trick with a temporary to free vector's memory
-          std::vector<ESMC_Base *>().swap(matchTable_Objects[i]);
-#endif
+          if (garbageMode == garbageFull){
+            // Taking down garbage collection table might be unsafe
+            if (matchTable_Objects[i].size() > 0)
+              std::cout << "Failure in VM::shutdown() line: "
+                << __LINE__ << std::endl;
+            // swap() trick with a temporary to free vector's memory
+            std::vector<ESMC_Base *>().swap(matchTable_Objects[i]);
+          }
           // mark match table context as garbage collected, also VM will be gone
           matchTable_vm[i] = NULL;  
           // destroy VMId object
@@ -2939,26 +2943,26 @@ void VM::addObject(
   }
 
   // match found, proceed
-
-  // must lock/unlock for thread-safe access to std::vector
   VM *vm = getCurrent();
-  vm->lock();
-  matchTable_Objects[i].push_back(object);
 
-  if (garbageLog){
-    ESMC_LogDefault.Write("--- garbage log in ESMCI::VM::addObject() START ---",
-      ESMC_LOGMSG_DEBUG);
-    std::stringstream msg;
-    msg << "VM::addObject() object added to context #" << i << ": " << object
-      << ": VM=" << vm << ": " << object->ESMC_BaseGetName();
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
-    vmID->log("VM::addObject(): ", ESMC_LOGMSG_DEBUG);
-//  logBacktrace("VM::addObject(): ", ESMC_LOGMSG_DEBUG);  // enable to pin down specific caller
-    ESMC_LogDefault.Write("--- garbage log in ESMCI::VM::addObject() END ---",
-      ESMC_LOGMSG_DEBUG);
+  if (vm->garbageMode != garbageNone){
+    // push object into garbage collection table
+    vm->lock(); // lock for thread-safe access to std::vector
+    matchTable_Objects[i].push_back(object);
+    if (garbageLog){
+      ESMC_LogDefault.Write("--- garbage log in ESMCI::VM::addObject() START ---",
+        ESMC_LOGMSG_DEBUG);
+      std::stringstream msg;
+      msg << "VM::addObject() object added to context #" << i << ": " << object
+        << ": VM=" << vm << ": " << object->ESMC_BaseGetName();
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+//      vmID->log("VM::addObject(): ", ESMC_LOGMSG_DEBUG);
+//      logBacktrace("VM::addObject(): ", ESMC_LOGMSG_DEBUG);  // enable to pin down specific caller
+      ESMC_LogDefault.Write("--- garbage log in ESMCI::VM::addObject() END ---",
+        ESMC_LOGMSG_DEBUG);
+    }
+    vm->unlock(); // unlock for thread-safe access to std::vector
   }
-
-  vm->unlock();
 }
 //-----------------------------------------------------------------------------
 
@@ -3079,33 +3083,34 @@ void VM::addFObject(
   }
 
   // match found
-
-  // must lock/unlock for thread-safe access to std::vector
   VM *vm = getCurrent();
-  vm->lock();
-  int size = matchTable_FObjects[i].size();
-  matchTable_FObjects[i].resize(size+1);  // add element to FObjects list
-  void *fobjectElement = (void *)&(matchTable_FObjects[i][size].fobject);
 
-  FTN_X(f_esmf_fortranudtpointercopy)(fobjectElement, (void *)fobject);
+  if (vm->garbageMode != garbageNone){
+    // push object into garbage collection table
+    vm->lock(); // lock for thread-safe access to std::vector
+    int size = matchTable_FObjects[i].size();
+    matchTable_FObjects[i].resize(size+1);  // add element to FObjects list
+    void *fobjectElement = (void *)&(matchTable_FObjects[i][size].fobject);
 
-  matchTable_FObjects[i][size].objectID = objectID;
-  
-  if (garbageLog){
-    ESMC_LogDefault.Write("--- garbage log in ESMCI::VM::addFObject() START ---",
-      ESMC_LOGMSG_DEBUG);
-    std::stringstream msg;
-    msg << "VM::addFObject() object added to context #" << i << ": " <<
-      string(ESMC_ObjectID_Name(objectID)) << " " << *(void **)fobject << " - " <<
-      **(void ***)fobject;
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
-    vmID->log("VM::addFObject(): ", ESMC_LOGMSG_DEBUG);
-//  logBacktrace("VM::addFObject(): ", ESMC_LOGMSG_DEBUG);  // enable to pin down specific caller
-    ESMC_LogDefault.Write("--- garbage log in ESMCI::VM::addFObject() END ---",
-      ESMC_LOGMSG_DEBUG);
+    FTN_X(f_esmf_fortranudtpointercopy)(fobjectElement, (void *)fobject);
+
+    matchTable_FObjects[i][size].objectID = objectID;
+
+    if (garbageLog){
+      ESMC_LogDefault.Write("--- garbage log in ESMCI::VM::addFObject() START ---",
+        ESMC_LOGMSG_DEBUG);
+      std::stringstream msg;
+      msg << "VM::addFObject() object added to context #" << i << ": " <<
+        string(ESMC_ObjectID_Name(objectID)) << " " << *(void **)fobject << " - " <<
+        **(void ***)fobject;
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+//      vmID->log("VM::addFObject(): ", ESMC_LOGMSG_DEBUG);
+//      logBacktrace("VM::addFObject(): ", ESMC_LOGMSG_DEBUG);  // enable to pin down specific caller
+      ESMC_LogDefault.Write("--- garbage log in ESMCI::VM::addFObject() END ---",
+        ESMC_LOGMSG_DEBUG);
+    }
+    vm->unlock(); // unlock for thread-safe access to std::vector
   }
-
-  vm->unlock();
 }
 //-----------------------------------------------------------------------------
 
@@ -3683,19 +3688,20 @@ void VM::finalize(
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc))
           return;
-#if 0
-//gjt: Disable cleaning up LocStream from the garbage collection level because
-//gjt: it leads to issues when a field tries to destroy it later.
-//gjt: This is going to be tricky to resolve with Fortran implemented classes.
-//gjt: For now rather have small memory leaks than invalid memory access.
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_LOCSTREAM.objectID){
-        FTN_X(f_esmf_locstreamcollectgarbage)(
-          &(matchTable_FObjects[0][k].fobject), &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-          ESMC_CONTEXT, rc))
-          return;
-#endif
+        if (GlobalVM->garbageMode == garbageFull){
+          // Cleaning up LocStream in garbage collection can be
+          // problematic because it leads to issues when a field tries to
+          // destroy it later. This is going to be tricky to resolve with
+          // Fortran implemented classes. Better a small memory leak than
+          // invalid memory access.
+          FTN_X(f_esmf_locstreamcollectgarbage)(
+            &(matchTable_FObjects[0][k].fobject), &localrc);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+            ESMC_CONTEXT, rc))
+            return;
+        }
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_STATE.objectID){
         FTN_X(f_esmf_statecollectgarbage)(
@@ -3726,17 +3732,19 @@ void VM::finalize(
           ESMC_CONTEXT, rc))
           return;
       }
-// gjt: no longer remove remnant from garbage collection for safety
-//      matchTable_FObjects[0].pop_back();
+      if (GlobalVM->garbageMode == garbageFull){
+        // Removing remnant from garbage collection might be unsafe
+        matchTable_FObjects[0].pop_back();
+      }
     }
-#if 0
-// gjt: no take down garbage collection table for safety
-    if (matchTable_FObjects[0].size() > 0)
-      std::cout << "Failure in VM::finalize() line: "
-        << __LINE__ << std::endl;
-    // swap() trick with a temporary to free vector's memory
-    std::vector<FortranObject>().swap(matchTable_FObjects[0]);
-#endif
+    if (GlobalVM->garbageMode == garbageFull){
+      // Taking down garbage collection table might be unsafe
+      if (matchTable_FObjects[0].size() > 0)
+        std::cout << "Failure in VM::finalize() line: "
+          << __LINE__ << std::endl;
+      // swap() trick with a temporary to free vector's memory
+      std::vector<FortranObject>().swap(matchTable_FObjects[0]);
+    }
     // The following loop deletes deep C++ ESMF objects derived from
     // Base class. For deep Fortran classes it deletes the Base member.
     for (int k=matchTable_Objects[0].size()-1; k>=0; k--){
@@ -3758,18 +3766,20 @@ void VM::finalize(
           matchTable_Objects[0][k]->ESMC_BaseGetName());
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
       }
-// gjt: no longer remove remnant from garbage collection for safety
-//      delete matchTable_Objects[0][k];  // delete ESMF object, incl. Base
-//      matchTable_Objects[0].pop_back();
+      if (GlobalVM->garbageMode == garbageFull){
+        // Removing remnant from garbage collection might be unsafe
+        delete matchTable_Objects[0][k];  // delete ESMF object, incl. Base
+        matchTable_Objects[0].pop_back();
+      }
     }
-#if 0
-// gjt: no take down garbage collection table for safety
-    if (matchTable_Objects[0].size() > 0)
-      std::cout << "Failure in VM::finalize() line: "
-        << __LINE__ << std::endl;
-    // swap() trick with a temporary to free vector's memory
-    std::vector<ESMC_Base *>().swap(matchTable_Objects[0]);
-#endif
+    if (GlobalVM->garbageMode == garbageFull){
+      // Taking down garbage collection table might be unsafe
+      if (matchTable_Objects[0].size() > 0)
+        std::cout << "Failure in VM::finalize() line: "
+          << __LINE__ << std::endl;
+      // swap() trick with a temporary to free vector's memory
+      std::vector<ESMC_Base *>().swap(matchTable_Objects[0]);
+    }
     // destroy VMId object
     VMIdDestroy(&(matchTable_vmID[0]), &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
