@@ -845,9 +845,11 @@ ifneq ($(origin ESMF_F90OPTFLAG), environment)
 ESMF_F90OPTFLAG = $(ESMF_F90OPTFLAG_X)
 ifeq ($(ESMF_BOPT),g)
 ESMF_F90OPTFLAG = $(ESMF_F90OPTFLAG_G)
+ESMF_F90OPTFLAG += $(ESMF_OPTFLAG_G)
 endif
 ifeq ($(ESMF_BOPT),O)
 ESMF_F90OPTFLAG = $(ESMF_F90OPTFLAG_O)
+ESMF_F90OPTFLAG += $(ESMF_OPTFLAG_O)
 endif
 endif
 # - make sure environment variable gets prepended _once_
@@ -892,9 +894,11 @@ ifneq ($(origin ESMF_CXXOPTFLAG), environment)
 ESMF_CXXOPTFLAG = $(ESMF_CXXOPTFLAG_X)
 ifeq ($(ESMF_BOPT),g)
 ESMF_CXXOPTFLAG = $(ESMF_CXXOPTFLAG_G)
+ESMF_CXXOPTFLAG += $(ESMF_OPTFLAG_G)
 endif
 ifeq ($(ESMF_BOPT),O)
 ESMF_CXXOPTFLAG = $(ESMF_CXXOPTFLAG_O)
+ESMF_CXXOPTFLAG += $(ESMF_OPTFLAG_O)
 endif
 endif
 # - make sure environment variable gets prepended _once_
@@ -936,9 +940,11 @@ ifneq ($(origin ESMF_COPTFLAG), environment)
 ESMF_COPTFLAG = $(ESMF_COPTFLAG_X)
 ifeq ($(ESMF_BOPT),g)
 ESMF_COPTFLAG = $(ESMF_COPTFLAG_G)
+ESMF_COPTFLAG += $(ESMF_OPTFLAG_G)
 endif
 ifeq ($(ESMF_BOPT),O)
 ESMF_COPTFLAG = $(ESMF_COPTFLAG_O)
+ESMF_COPTFLAG += $(ESMF_OPTFLAG_O)
 endif
 endif
 # - make sure environment variable gets prepended _once_

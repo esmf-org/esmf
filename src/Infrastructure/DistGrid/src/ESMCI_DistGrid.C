@@ -3207,7 +3207,7 @@ int DistGrid::destroy(
   }
   
   // optionally delete the complete object and remove from garbage collection
-  if (noGarbage){
+  if (noGarbage || VM::getCurrent()->isGarbageNone()){
     VM::rmObject(*distgrid); // remove object from garbage collection
     delete (*distgrid);      // completely delete the object, free heap
   }

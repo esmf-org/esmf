@@ -104,13 +104,8 @@ ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} --version
 ############################################################
 # Special debug flags
 #
-# Activate to turn on UBSan:
-#ESMF_LINKOPTFLAG_G      += -fsanitize=undefined
-# Also set environment variable UBSAN_OPTIONS="print_stacktrace=1"
-# for stacktrace at runtime.
-#
 ESMF_F90OPTFLAG_G       += -C=array
-ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused $(ESMF_LINKOPTFLAG_G)
+ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused
 
 ############################################################
 # Set NAG unix modules when certain non-Standard system calls
