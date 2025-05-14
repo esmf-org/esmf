@@ -169,13 +169,8 @@ int main(void) {
   // Calculate regridding weights and routeHandle
   ESMC_RouteHandle routehandle;
   localrc = ESMC_FieldRegridStore(srcField, dstField, NULL, NULL, &routehandle, 
-<<<<<<< HEAD
-                                  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                                  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-=======
                                   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                                  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
->>>>>>> develop
+                                  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
   if (localrc != ESMF_SUCCESS) ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
   
