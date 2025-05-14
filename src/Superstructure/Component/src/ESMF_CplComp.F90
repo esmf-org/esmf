@@ -84,6 +84,7 @@ module ESMF_CplCompMod
   public ESMF_CplCompSetVMMaxPEs
   public ESMF_CplCompSetVMMaxThreads
   public ESMF_CplCompSetVMMinThreads
+  public ESMF_CplCompSetVMStdRedirect
   public ESMF_CplCompValidate
   public ESMF_CplCompWait
   public ESMF_CplCompWriteRestart
@@ -422,11 +423,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   specified.
 ! \item[{[clock]}]
 !   \begin{sloppypar}
-!   Component-specific {\tt ESMF\_Clock}.  This clock is available to be
-!   queried and updated by the new {\tt ESMF\_CplComp} as it chooses.
-!   This should
-!   not be the parent component clock, which should be maintained and passed
-!   down to the initialize/run/finalize routines separately.
+!   The {\tt ESMF\_Clock} object associated with the component. Often this will
+!   be a component specific clock that can be queried and updated by the
+!   component freely. In that case it should be a clock object separate from
+!   that of other components, particularily that of the parent component.
+!   However, ESMF itself does not access or update {\tt clock} and therefore
+!   does not impose any direct restrictions. It is the user's responsibility to
+!   ensure correct usage of the {\tt clock} object by the parent and child
+!   components.
 !   \end{sloppypar}
 ! \item[{[petList]}]
 !   List of parent {\tt PET}s given to the created child component by the
@@ -1017,7 +1021,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompGetInternalState - Get private data block pointer
+! !IROUTINE: ESMF_CplCompGetInternalState - Get private data block pointer - (DEPRECATED METHOD)
 !
 ! !INTERFACE:
 ! subroutine ESMF_CplCompGetInternalState(cplcomp, wrappedDataPointer, rc)
@@ -1030,6 +1034,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiDeprecatedMethodWithReplacement{8.9.0}{ESMF\_InternalStateGet}{esmfinternalstategetcplcomp}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -2078,7 +2083,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompSetInternalState - Set private data block pointer
+! !IROUTINE: ESMF_CplCompSetInternalState - Set private data block pointer - (DEPRECATED METHOD)
 !
 ! !INTERFACE:
 ! subroutine ESMF_CplCompSetInternalState(cplcomp, wrappedDataPointer, rc)
@@ -2091,6 +2096,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiDeprecatedMethodWithReplacement{8.9.0}{ESMF\_InternalStateAdd}{esmfinternalstateaddcplcomp}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -3068,6 +3074,66 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_CplCompSetVMMinThreads
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompSetVMStdRedirect"
+!BOP
+! !IROUTINE: ESMF_CplCompSetVMStdRedirect - Set stdout and stderr redirect in CplComp VM
+!
+! !INTERFACE:
+  subroutine ESMF_CplCompSetVMStdRedirect(cplcomp, keywordEnforcer, &
+    stdout, stderr, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp),  intent(inout)         :: cplcomp
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(*),        intent(in),  optional :: stdout
+    character(*),        intent(in),  optional :: stderr
+    integer,             intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Set stdout and stderr redirect in the {\tt ESMF\_VM} for this
+!   {\tt ESMF\_CplComp}.
+!
+! The arguments are:
+! \begin{description}
+! \item[cplcomp]
+!   {\tt ESMF\_CplComp} to set the {\tt ESMF\_VM} for.
+! \item[{[stdout]}]
+!   Filename for the stdout redirect. If found, the last occurance of the
+!   asterisk symbol {\tt *} in {\tt stdout} is treated as a wildcard and
+!   replaced by the local PET number. By default do not redirect.
+! \item[{[stderr]}]
+!   Filename for the stderr redirect. If found, the last occurance of the
+!   asterisk symbol {\tt *} in {\tt stderr} is treated as a wildcard and
+!   replaced by the local PET number. By default do not redirect.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                     ! local error status
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+
+    ! call Comp method
+    call ESMF_CompSetVMStdRedirect(cplcomp%compp, stdout=stdout, &
+      stderr=stderr, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_CplCompSetVMStdRedirect
 !------------------------------------------------------------------------------
 
 

@@ -1426,7 +1426,41 @@ extern "C" {
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
-   
+
+  void FTN_X(c_esmc_vmplansetstdout)(ESMCI::VMPlan **ptr,
+    char *filename, int *rc, ESMCI_FortranStrLenArg len){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmplansetstdout()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    // set the stdoutName
+    std::string filenameStr(filename, len);
+    (*ptr)->stdoutName = new char[len+1];
+    strcpy((*ptr)->stdoutName, filenameStr.c_str());
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_vmplansetstderr)(ESMCI::VMPlan **ptr,
+    char *filename, int *rc, ESMCI_FortranStrLenArg len){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmplansetstderr()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    // set the stderrName
+    std::string filenameStr(filename, len);
+    (*ptr)->stderrName = new char[len+1];
+    strcpy((*ptr)->stderrName, filenameStr.c_str());
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
   void FTN_X(c_esmc_vmplanmaxpes)(ESMCI::VMPlan **ptr, ESMCI::VM **vm,
     int *max, int *pref_intra_process, int *pref_intra_ssi, int *pref_inter_ssi,
     int *npetlist, int *petlist, ESMC_Logical *forceEachChildPetOwnPthread,

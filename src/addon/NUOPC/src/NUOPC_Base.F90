@@ -59,8 +59,6 @@ module NUOPC_Base
   public NUOPC_IsAtTime                   ! method
   public NUOPC_IsConnected                ! method
   public NUOPC_IsUpdated                  ! method
-  public NUOPC_LogIntro                   ! method
-  public NUOPC_LogExtro                   ! method
   public NUOPC_NoOp                       ! method
   public NUOPC_Realize                    ! method
   public NUOPC_Reconcile                  ! method
@@ -70,6 +68,8 @@ module NUOPC_Base
   
   ! internal Utility API
   public NUOPC_ChopString                 ! method
+  public NUOPC_LogIntro                   ! method
+  public NUOPC_LogExtro                   ! method
   public NUOPC_LogPetList                 ! method
   public NUOPC_SetVM                      ! method
 
@@ -3189,193 +3189,6 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: NUOPC_LogIntro - Log entering a method
-! !INTERFACE:
-  subroutine NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc)
-! !ARGUMENTS:
-    character(len=*), intent(in)   :: name
-    character(len=*), intent(in)   :: rName
-    integer,          intent(in)   :: verbosity
-    type(ESMF_State), intent(in)   :: importState, exportState
-    integer,          intent(out)  :: rc
-! !DESCRIPTION:
-!   Write information into Log on entering a method, according to the verbosity
-!   aspects.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[name]
-!     Component name.
-!   \item[rName]
-!     Routine name.
-!   \item[verbosity]
-!     Bit field corresponding to verbosity aspects.
-!   \item[importState]
-!     The importState of the component using this method.
-!   \item[exportState]
-!     The exportState of the component using this method.
-!   \item[rc]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-  !-----------------------------------------------------------------------------
-    ! local variables
-    integer             :: indentCount
-    character(len=120)  :: msg
-    type(ESMF_VM)       :: vm
-    integer             :: localPet, ssiLocalPetCount, peCount, accDeviceCount
-    if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_LogGet(indentCount=indentCount, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_LogSet(indentCount=indentCount+2, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,1)) then
-      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,2)) then
-      call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" intro:", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,3)) then
-      call ESMF_VMGetCurrent(vm, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_VMGet(vm, localPet=localPet, &
-        ssiLocalPetCount=ssiLocalPetCount, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_VMGet(vm, pet=localPet, peCount=peCount, &
-        accDeviceCount=accDeviceCount, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      write (msg,"(A,I3)") trim(name)//": "//rName// &
-        " intro: local peCount=", peCount
-      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      write (msg,"(A,I3)") trim(name)//": "//rName// &
-        " intro: local accDeviceCount=", accDeviceCount
-      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      write (msg,"(A,I3)") trim(name)//": "//rName// &
-        " intro: ssiLocalPetCount=", ssiLocalPetCount
-      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,4)) then
-      call ESMF_StateLog(importState, &
-        prefix=trim(name)//": "//rName//" intro {IS}:", &
-        nestedFlag=.true., deepFlag=.true., rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,5)) then
-      call ESMF_StateLog(exportState, &
-        prefix=trim(name)//": "//rName//" intro {ES}:", &
-        nestedFlag=.true., deepFlag=.true., rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    ! return successfully
-    rc = ESMF_SUCCESS
-  end subroutine
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: NUOPC_LogExtro - Log exiting a method
-! !INTERFACE:
-  subroutine NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc)
-! !ARGUMENTS:
-    character(len=*),           intent(in)   :: name
-    character(len=*),           intent(in)   :: rName
-    integer,                    intent(in)   :: verbosity
-    type(ESMF_State), optional, intent(in)   :: importState, exportState
-    integer,                    intent(out)  :: rc
-! !DESCRIPTION:
-!   Write information into Log on exiting a method, according to the verbosity
-!   aspects.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[name]
-!     Component name.
-!   \item[rName]
-!     Routine name.
-!   \item[verbosity]
-!     Bit field corresponding to verbosity aspects.
-!   \item[{[importState]}]
-!     The importState of the component using this method.
-!   \item[{[exportState]}]
-!     The exportState of the component using this method.
-!   \item[rc]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-  !-----------------------------------------------------------------------------
-    ! local variables
-    integer :: indentCount
-    if (btest(verbosity,4)) then
-      if (present(importState)) then
-        call ESMF_StateLog(importState, &
-          prefix=trim(name)//": "//rName//" extro {IS}:", &
-          nestedFlag=.true., deepFlag=.true., rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      endif
-    endif
-    if (btest(verbosity,5)) then
-      if (present(exportState)) then
-        call ESMF_StateLog(exportState, &
-          prefix=trim(name)//": "//rName//" extro {ES}:", &
-          nestedFlag=.true., deepFlag=.true., rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      endif
-    endif
-    if (btest(verbosity,2)) then
-      call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" extro:", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,1)) then
-      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,0)) then
-      call ESMF_LogGet(indentCount=indentCount, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_LogSet(indentCount=indentCount-2, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    ! return successfully
-    rc = ESMF_SUCCESS
-  end subroutine
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_NoOp - No-Operation attachable method for GridComp
 ! !INTERFACE:
@@ -5510,7 +5323,194 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: NUOPC_LogPetList - Chop a string into sub-strings
+! !IROUTINE: NUOPC_LogIntro - Log entering a method
+! !INTERFACE:
+  subroutine NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc)
+! !ARGUMENTS:
+    character(len=*), intent(in)   :: name
+    character(len=*), intent(in)   :: rName
+    integer,          intent(in)   :: verbosity
+    type(ESMF_State), intent(in)   :: importState, exportState
+    integer,          intent(out)  :: rc
+! !DESCRIPTION:
+!   Write information into Log on entering a method, according to the verbosity
+!   aspects.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[name]
+!     Component name.
+!   \item[rName]
+!     Routine name.
+!   \item[verbosity]
+!     Bit field corresponding to verbosity aspects.
+!   \item[importState]
+!     The importState of the component using this method.
+!   \item[exportState]
+!     The exportState of the component using this method.
+!   \item[rc]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer             :: indentCount
+    character(len=120)  :: msg
+    type(ESMF_VM)       :: vm
+    integer             :: localPet, ssiLocalPetCount, peCount, accDeviceCount
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_LogGet(indentCount=indentCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_LogSet(indentCount=indentCount+2, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" intro:", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,3)) then
+      call ESMF_VMGetCurrent(vm, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_VMGet(vm, localPet=localPet, &
+        ssiLocalPetCount=ssiLocalPetCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_VMGet(vm, pet=localPet, peCount=peCount, &
+        accDeviceCount=accDeviceCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      write (msg,"(A,I3)") trim(name)//": "//rName// &
+        " intro: local peCount=", peCount
+      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      write (msg,"(A,I3)") trim(name)//": "//rName// &
+        " intro: local accDeviceCount=", accDeviceCount
+      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      write (msg,"(A,I3)") trim(name)//": "//rName// &
+        " intro: ssiLocalPetCount=", ssiLocalPetCount
+      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,4)) then
+      call ESMF_StateLog(importState, &
+        prefix=trim(name)//": "//rName//" intro {IS}:", &
+        nestedFlag=.true., deepFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,5)) then
+      call ESMF_StateLog(exportState, &
+        prefix=trim(name)//": "//rName//" intro {ES}:", &
+        nestedFlag=.true., deepFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    ! return successfully
+    rc = ESMF_SUCCESS
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_LogExtro - Log exiting a method
+! !INTERFACE:
+  subroutine NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc)
+! !ARGUMENTS:
+    character(len=*),           intent(in)   :: name
+    character(len=*),           intent(in)   :: rName
+    integer,                    intent(in)   :: verbosity
+    type(ESMF_State), optional, intent(in)   :: importState, exportState
+    integer,                    intent(out)  :: rc
+! !DESCRIPTION:
+!   Write information into Log on exiting a method, according to the verbosity
+!   aspects.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[name]
+!     Component name.
+!   \item[rName]
+!     Routine name.
+!   \item[verbosity]
+!     Bit field corresponding to verbosity aspects.
+!   \item[{[importState]}]
+!     The importState of the component using this method.
+!   \item[{[exportState]}]
+!     The exportState of the component using this method.
+!   \item[rc]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer :: indentCount
+    if (btest(verbosity,4)) then
+      if (present(importState)) then
+        call ESMF_StateLog(importState, &
+          prefix=trim(name)//": "//rName//" extro {IS}:", &
+          nestedFlag=.true., deepFlag=.true., rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
+    endif
+    if (btest(verbosity,5)) then
+      if (present(exportState)) then
+        call ESMF_StateLog(exportState, &
+          prefix=trim(name)//": "//rName//" extro {ES}:", &
+          nestedFlag=.true., deepFlag=.true., rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" extro:", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,0)) then
+      call ESMF_LogGet(indentCount=indentCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_LogSet(indentCount=indentCount-2, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    ! return successfully
+    rc = ESMF_SUCCESS
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_LogPetList - Write a petList to log, max width 10
 ! !INTERFACE:
   subroutine NUOPC_LogPetList(petList, name, rc)
 ! !ARGUMENTS:
@@ -5518,6 +5518,7 @@ module NUOPC_Base
     character(*)                   :: name
     integer, intent(out), optional :: rc
 ! !DESCRIPTION:
+!   Write a petList to log, max width 10
 !
 !   The arguments are:
 !   \begin{description}
@@ -5586,6 +5587,7 @@ module NUOPC_Base
     character(80)             :: ikey2
     integer                   :: maxCount, pthreadMinStackSize, openMpNumThreads
     character(40)             :: msgString, openMpHandling
+    character(80)             :: stdfilename
 
     rc = ESMF_SUCCESS
 
@@ -5748,6 +5750,66 @@ module NUOPC_Base
               forceChildPthreads=forceChildPthreads, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+        else if (trim(ikey)=="stdout") then
+          ! iterate through the stdout hint
+          call ESMF_InfoGet(info, key="/NUOPC/Hint/stdout", &
+            isPresent=isPresent2, isStructured=isStructured2, size=size2, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (isPresent2 .and. isStructured2) then
+            do idx2=1, size2
+              call ESMF_InfoGet(info, key="/NUOPC/Hint/stdout", idx=idx2, &
+                ikey=ikey2, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              if (trim(ikey2)=="filename") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/stdout/filename", &
+                  value=stdfilename, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                call ESMF_GridCompSetVMStdRedirect(gcomp, stdout=stdfilename, &
+                  rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              else
+                call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                  msg="Unknown NUOPC Hint: "//trim(ikey)//"/"//trim(ikey2), &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+                return  ! bail out
+              endif
+            enddo
+          endif
+        else if (trim(ikey)=="stderr") then
+          ! iterate through the stderr hint
+          call ESMF_InfoGet(info, key="/NUOPC/Hint/stderr", &
+            isPresent=isPresent2, isStructured=isStructured2, size=size2, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (isPresent2 .and. isStructured2) then
+            do idx2=1, size2
+              call ESMF_InfoGet(info, key="/NUOPC/Hint/stderr", idx=idx2, &
+                ikey=ikey2, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              if (trim(ikey2)=="filename") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/stderr/filename", &
+                  value=stdfilename, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                call ESMF_GridCompSetVMStdRedirect(gcomp, stderr=stdfilename, &
+                  rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              else
+                call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                  msg="Unknown NUOPC Hint: "//trim(ikey)//"/"//trim(ikey2), &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+                return  ! bail out
+              endif
+            enddo
           endif
         else
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &

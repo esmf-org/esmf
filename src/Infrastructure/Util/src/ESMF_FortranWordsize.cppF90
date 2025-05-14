@@ -30,7 +30,7 @@ module ESMF_FortranWordsizeMod
 ! !USES:
   use iso_c_binding
 
-  use ESMF_UtilTypesMod      
+  use ESMF_UtilTypesMod
   use ESMF_LogErrMod
 
   implicit none
@@ -71,12 +71,13 @@ module ESMF_FortranWordsizeMod
 ^ifndef ESMF_NO_F2018ASSUMEDTYPE
 
   interface
-
+    
     subroutine esmf_pointerdifference(n, s1, s2, len)
-      integer*8 :: n
-      type(*) :: s1
-      type(*) :: s2
-      integer :: len
+      use iso_c_binding
+      integer(C_SIZE_T) :: n
+      type(*)           :: s1
+      type(*)           :: s2
+      integer           :: len
     end subroutine
 
 !EOPI

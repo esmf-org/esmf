@@ -877,6 +877,8 @@ struct SpawnArg{
   bool threadsflag;
   int openmphandling;
   int openmpnumthreads;
+  string stdoutName;
+  string stderrName;
   // device variables
   int devCount;
   int ssiLocalDevCount;
@@ -955,7 +957,59 @@ VMK::Affinities VMK::setAffinities(void *ssarg){
   }
 #endif
 #endif
+  // return stucture with original values
   return affs;
+}
+
+
+VMK::Redirects VMK::setRedirects(void *ssarg){
+  SpawnArg *sarg = (SpawnArg *)ssarg;
+  Redirects reds;
+  // stdout and stderr redirect
+  if (sarg->stdoutName.length()){
+    reds.oldStdout = fcntl(STDOUT_FILENO, F_DUPFD, 0);  // keep access to stdout
+    if (reds.oldStdout == -1){
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "Did not obtain a valid file descriptor", ESMC_CONTEXT, &localrc);
+      throw localrc;  // bail out with exception
+    }
+    int newStdout = open(sarg->stdoutName.c_str(),
+      O_WRONLY | O_CREAT | O_APPEND, 0644);
+    if (newStdout == -1){
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "Did not obtain a valid file descriptor", ESMC_CONTEXT, &localrc);
+      throw localrc;  // bail out with exception
+    }
+    dup2(newStdout, STDOUT_FILENO); // redirect
+    close(newStdout);               // free up file descriptor, file stays open
+  }else{
+    reds.oldStdout = -1;  // indicate no redirect
+  }
+  if (sarg->stderrName.length()){
+    reds.oldStderr = fcntl(STDERR_FILENO, F_DUPFD, 0);  // keep access to stderr
+    if (reds.oldStderr == -1){
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "Did not obtain a valid file descriptor", ESMC_CONTEXT, &localrc);
+      throw localrc;  // bail out with exception
+    }
+    int newStderr = open(sarg->stderrName.c_str(),
+      O_WRONLY | O_CREAT | O_APPEND, 0644);
+    if (newStderr == -1){
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "Did not obtain a valid file descriptor", ESMC_CONTEXT, &localrc);
+      throw localrc;  // bail out with exception
+    }
+    dup2(newStderr, STDERR_FILENO); // redirect
+    close(newStderr);               // free up file descriptor, file stays open
+  }else{
+    reds.oldStderr = -1;  // indicate no redirect
+  }
+  // return stucture with original values
+  return reds;
 }
 
 
@@ -1278,6 +1332,9 @@ static void enter_callback(SpawnArg *sarg, void *mutex){
   // set affinities and OpenMP details according to plan, keep current settings
   VMK::Affinities oldAffs = vm->setAffinities((void *)sarg);
 
+  // set stdout and stderr redirects
+  VMK::Redirects oldReds = VMK::setRedirects((void *)sarg);
+
   // call the function pointer with the new VMK as its argument
   // this is where we finally enter the user code again...
   if (vmkt->arg==NULL)
@@ -1337,7 +1394,10 @@ static void enter_callback(SpawnArg *sarg, void *mutex){
       pthread_mutex_unlock(pmutex);
 #endif
   }
-  
+
+  // reset previous stdout and stderr settings
+  oldReds.reset();
+
   // reset previous affinities and OpenMP settings
   oldAffs.reset();
 
@@ -2403,7 +2463,7 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
   //    new_pth_finish_count is valid shared memory counter
   //    new_commarray now holds valid shared memory shared_mp objects
   //
-  // next, enter the spawn-loop for mypet 
+  // next, enter the spawn-loop for mypet
   for (int i=0; i<vmp->spawnflag[mypet]; i++){
     // copy this threads information into the sarg structure
     sarg[i].fctp = fctp;
@@ -2479,6 +2539,68 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
     sarg[i].ssiLocalDevList = ssiLocalDevList;
     // cargo
     sarg[i].cargo = cargo;
+    // stdout and stderr redirect
+    string stdTemp; size_t pos; // temp helpers
+    if (vmp->stdoutName)
+      stdTemp = string(vmp->stdoutName);
+    else 
+      stdTemp = string("");
+    pos = stdTemp.rfind('*');  // right most asterisk
+    if (pos != string::npos){
+      // found wildcard -> replace with local pet number
+      int digits = 1; // default number of digits needed
+      if (new_npets>1) digits = (int) log10(new_npets-1) + 1;
+      std::stringstream label;                    // fill with zeros from left
+      label << setw(digits) << setfill('0') << to_string(sarg[i].mypet);
+      sarg[i].stdoutName = stdTemp.substr(0, pos) + label.str()
+        + stdTemp.substr(pos+1, string::npos);    // store the concretized name
+    }else{
+      // no wildcard -> use incoming string verbatim
+      sarg[i].stdoutName = stdTemp;
+    }
+    if (vmp->stderrName)
+      stdTemp = string(vmp->stderrName);
+    else 
+      stdTemp = string("");
+    pos = stdTemp.rfind('*');  // right most asterisk
+    if (pos != string::npos){
+      // found wildcard -> replace with local pet number
+      int digits = 1; // default number of digits needed
+      if (new_npets>1) digits = (int) log10(new_npets-1) + 1;
+      std::stringstream label;                    // fill with zeros from left
+      label << setw(digits) << setfill('0') << to_string(sarg[i].mypet);
+      sarg[i].stderrName = stdTemp.substr(0, pos) + label.str()
+        + stdTemp.substr(pos+1, string::npos);    // store the concretized name
+    }else{
+      // no wildcard -> use incoming string verbatim
+      sarg[i].stderrName = stdTemp;
+    }
+    if (i==0){
+      // stdout and stderr redirect is a per process feature
+      // only do this for the first PET, even if potentially multiple spawned
+      if (sarg[i].stdoutName.length()){
+        // create stdout file and possibly truncate if already there
+        int fd = open(sarg[i].stdoutName.c_str(),
+          O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        if (fd == -1){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+            "Did not obtain a valid file descriptor", ESMC_CONTEXT, rc);
+          return NULL; // bail out
+        }
+        close(fd);  // free up file descriptor, file will be opened again later
+      }
+      if (sarg[i].stderrName.length()){
+        // create stderr file and possibly truncate if already there
+        int fd = open(sarg[i].stderrName.c_str(),
+          O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        if (fd == -1){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+            "Did not obtain a valid file descriptor", ESMC_CONTEXT, rc);
+          return NULL; // bail out
+        }
+        close(fd);  // free up file descriptor, file will be opened again later
+      }
+    }
     // threading stuff
     sarg[i].openmphandling = vmp->openmphandling;
     sarg[i].openmpnumthreads = vmp->openmpnumthreads;
@@ -2551,10 +2673,15 @@ void VMK::enter(class VMKPlan *vmp, void *arg, void *argvmkt){
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
+    // set stdout and stderr redirects
+    VMK::Redirects oldReds = VMK::setRedirects((void *)sarg);
+    // callback
     if (argvmkt==NULL)
       sarg[0].fctp((void *)sarg[0].myvm, sarg[0].cargo);
     else
       sarg[0].fctp((void *)sarg[0].myvm, argvmkt);
+    // reset previous stdout and stderr settings
+    oldReds.reset();
 #ifdef VM_PETMANAGEMENTLOG_on
       {
         std::stringstream msg;
@@ -3399,13 +3526,16 @@ VMKPlan::VMKPlan(int _ndevlist, int *_devlist){
   // devlist
   ndevlist = _ndevlist;
   devlist = _devlist;
+  // stdout and stderr redirect
+  stdoutName = NULL;
+  stderrName = NULL;
 }
 
 
 VMKPlan::~VMKPlan(){
   // native destructor
   vmkplan_garbage();
-  if (lpid_mpi_g_part_map != NULL){
+  if (lpid_mpi_g_part_map){
     delete [] lpid_mpi_g_part_map;
     lpid_mpi_g_part_map = NULL;
   }
@@ -3413,9 +3543,17 @@ VMKPlan::~VMKPlan(){
     MPI_Comm_free(&mpi_c_part);
     commfreeflag = 0;
   }
+  if (stdoutName){
+    delete stdoutName;
+    stdoutName = NULL;
+  }
+  if (stderrName){
+    delete stderrName;
+    stderrName = NULL;
+  }
 }
 
-  
+
 void VMKPlan::vmkplan_garbage(){
   // perform garbage collection within a VMKPlan object
   if (spawnflag != NULL){

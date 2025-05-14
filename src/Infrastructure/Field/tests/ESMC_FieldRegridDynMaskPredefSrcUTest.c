@@ -214,8 +214,8 @@ int main() {
   rc = ESMC_FieldRegridStore(field_src, field_dst, NULL, NULL, &routehandle,
                              &regridmethod, &polemethod, NULL, NULL, NULL,
                              NULL, NULL, NULL, NULL, NULL,
-                             NULL, &srcTermProcessing, NULL, NULL, NULL,
-                             NULL, NULL);
+                             NULL, NULL, &srcTermProcessing, NULL, NULL,
+                             NULL, NULL, NULL);
   int srctermprocessing = 0;
 
   srcfieldptr_r8 = (double *)ESMC_FieldGetPtr(field_src, 0, &rc);
@@ -317,8 +317,8 @@ int main() {
   rc = ESMC_FieldRegridStore(field_src, field_dst, NULL, NULL, &routehandle,
                              &regridmethod, &polemethod, NULL, NULL, NULL,
                              NULL, NULL, NULL, NULL, NULL,
-                             NULL, &srcTermProcessing, NULL, NULL, NULL,
-                             NULL, NULL);
+                             NULL, NULL, &srcTermProcessing, NULL, NULL,
+                             NULL, NULL, NULL);
 
   srcfieldptr_r4 = (float *)ESMC_FieldGetPtr(field_src, 0, &rc);
 

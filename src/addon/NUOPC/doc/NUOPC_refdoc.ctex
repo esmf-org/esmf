@@ -221,6 +221,13 @@
 \input{../addon/NUOPC/doc/NUOPC_ResourceControl}
 #endif
 
+\subsection{Redirection of Component {\tt stdout} and {\tt stderr}}
+#ifdef STANDALONE
+\input{NUOPC_StdRedirect}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_StdRedirect}
+#endif
+
 \subsection{External NUOPC Interface}
 #ifdef STANDALONE
 \input{NUOPC_ExternalInterface}

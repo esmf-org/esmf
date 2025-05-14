@@ -57,7 +57,8 @@ def create_compUse(comps: ESMXCmpCfg, odir):
         for comp in comps.list():
             cfg = comps.get_config(comp)
             fort_module = cfg.get('fort_module', (comp+'.mod').lower())
-            f.write('use {}, only: {}SS => SetServices, {}SV => SetVM\n'.format(Path(fort_module).stem, comp, comp))
+            fort_compname = comp.replace("-", "_")  # Fortran does not support dashes in object names
+            f.write('use {}, only: {}SS => SetServices, {}SV => SetVM\n'.format(Path(fort_module).stem, fort_compname, fort_compname))
 
 def create_compDef(comps: ESMXCmpCfg, odir):
     # open file
@@ -65,8 +66,9 @@ def create_compDef(comps: ESMXCmpCfg, odir):
         # loop through components and create use statements
         i = 1
         for comp in comps.list():
-            f.write('CompDef({})%ssPtr => {}SS\n'.format(i, comp))
-            f.write('CompDef({})%svPtr => {}SV\n'.format(i, comp))
+            fort_compname = comp.replace("-", "_")  # Fortran does not support dashes in object names
+            f.write('CompDef({})%ssPtr => {}SS\n'.format(i, fort_compname))
+            f.write('CompDef({})%svPtr => {}SV\n'.format(i, fort_compname))
             f.write('CompDef({})%name = "{}"\n'.format(i, comp))
             i = i+1
 

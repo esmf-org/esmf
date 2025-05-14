@@ -88,6 +88,7 @@ module ESMF_GridCompMod
   public ESMF_GridCompSetVMMaxPEs
   public ESMF_GridCompSetVMMaxThreads
   public ESMF_GridCompSetVMMinThreads
+  public ESMF_GridCompSetVMStdRedirect
   public ESMF_GridCompValidate
   public ESMF_GridCompWait
   public ESMF_GridCompWriteRestart
@@ -524,11 +525,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   specified.
 ! \item[{[clock]}]
 !   \begin{sloppypar}
-!   Component-specific {\tt ESMF\_Clock}.  This clock is available to be
-!   queried and updated by the new {\tt ESMF\_GridComp} as it chooses.
-!   This should
-!   not be the parent component clock, which should be maintained and passed
-!   down to the initialize/run/finalize routines separately.
+!   The {\tt ESMF\_Clock} object associated with the component. Often this will
+!   be a component specific clock that can be queried and updated by the
+!   component freely. In that case it should be a clock object separate from
+!   that of other components, particularily that of the parent component.
+!   However, ESMF itself does not access or update {\tt clock} and therefore
+!   does not impose any direct restrictions. It is the user's responsibility to
+!   ensure correct usage of the {\tt clock} object by the parent and child
+!   components.
 !   \end{sloppypar}
 ! \item[{[petList]}]
 !   List of parent {\tt PET}s given to the created child component by the
@@ -1257,7 +1261,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompGetInternalState - Get private data block pointer
+! !IROUTINE: ESMF_GridCompGetInternalState - Get private data block pointer - (DEPRECATED METHOD)
 !
 ! !INTERFACE:
 ! subroutine ESMF_GridCompGetInternalState(gridcomp, wrappedDataPointer, rc)
@@ -1270,6 +1274,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiDeprecatedMethodWithReplacement{8.9.0}{ESMF\_InternalStateGet}{esmfinternalstategetgcomp}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1320,7 +1325,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-
+! The associated Fortran interface is defined in ESMF_InternalState.F90
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2426,7 +2432,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompSetInternalState - Set private data block pointer
+! !IROUTINE: ESMF_GridCompSetInternalState - Set private data block pointer - (DEPRECATED METHOD)
 !
 ! !INTERFACE:
 ! subroutine ESMF_GridCompSetInternalState(gridcomp, wrappedDataPointer, rc)
@@ -2439,6 +2445,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiDeprecatedMethodWithReplacement{8.9.0}{ESMF\_InternalStateAdd}{esmfinternalstateaddgcomp}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -3437,6 +3444,66 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_GridCompSetVMMinThreads
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompSetVMStdRedirect"
+!BOP
+! !IROUTINE: ESMF_GridCompSetVMStdRedirect - Set stdout and stderr redirect in GridComp VM
+!
+! !INTERFACE:
+  subroutine ESMF_GridCompSetVMStdRedirect(gridcomp, keywordEnforcer, &
+    stdout, stderr, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp), intent(inout)         :: gridcomp
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(*),        intent(in),  optional :: stdout
+    character(*),        intent(in),  optional :: stderr
+    integer,             intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Set stdout and stderr redirect in the {\tt ESMF\_VM} for this
+!   {\tt ESMF\_GridComp}.
+!
+! The arguments are:
+! \begin{description}
+! \item[gridcomp]
+!   {\tt ESMF\_GridComp} to set the {\tt ESMF\_VM} for.
+! \item[{[stdout]}]
+!   Filename for the stdout redirect. If found, the last occurance of the
+!   asterisk symbol {\tt *} in {\tt stdout} is treated as a wildcard and
+!   replaced by the local PET number. By default do not redirect.
+! \item[{[stderr]}]
+!   Filename for the stderr redirect. If found, the last occurance of the
+!   asterisk symbol {\tt *} in {\tt stderr} is treated as a wildcard and
+!   replaced by the local PET number. By default do not redirect.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                     ! local error status
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+
+    ! call Comp method
+    call ESMF_CompSetVMStdRedirect(gridcomp%compp, stdout=stdout, &
+      stderr=stderr, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_GridCompSetVMStdRedirect
 !------------------------------------------------------------------------------
 
 

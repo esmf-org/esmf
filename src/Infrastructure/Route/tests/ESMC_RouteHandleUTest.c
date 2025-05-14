@@ -256,7 +256,7 @@ int main(void){
 
   enum ESMC_UnmappedAction_Flag unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, NULL, &rh, 
-                             NULL, NULL, NULL, NULL, NULL,
+                             NULL, NULL, NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL, NULL, &unmappedaction,
                              NULL, NULL, NULL, NULL, NULL, NULL, 
                              NULL);

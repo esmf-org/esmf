@@ -14,6 +14,9 @@
 
 #define DEBUGLOG_off
 
+! access platform dependent macros
+#include "ESMF_Conf.inc"
+
 module NUOPC_Connector
 
   !-----------------------------------------------------------------------------

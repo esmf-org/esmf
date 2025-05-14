@@ -375,6 +375,8 @@ This section affects the specific component instance.
 | `petList`             | list of PETs on which the component executes                          | *None*          |
 | `devList`             | list of DEVs (accelerator devices) to be associated with the component| *None*          |
 | `ompNumThreads`       | setting of /NUOPC/Hint/PePerPet/MaxCount (see NUOPC ref doc)          | *None*          |
+| `stdout`              | stdout redirection into `filename` provided as subkey                 | *None*          |
+| `stderr`              | stderr redirection into `filename` provided as subkey                 | *None*          |
 | `attributes`          | map of key value pairs, each defining a component attribute           | *None*          |
 | *model specific yaml* | each model can define its own YAML section, e.g. with key value pairs, etc. | *None*          |
 
