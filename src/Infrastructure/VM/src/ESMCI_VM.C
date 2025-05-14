@@ -3436,13 +3436,13 @@ VM *VM::initialize(
       esmfRuntimeEnv.push_back(esmfRuntimeVarName);
       esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
     }
-    esmfRuntimeVarName = "ESMF_RUNTIME_PROFILE_PETLIST";
+    esmfRuntimeVarName = "ESMF_RUNTIME_PROFILE_OUTPUT";
     esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
     if (esmfRuntimeVarValue){
       esmfRuntimeEnv.push_back(esmfRuntimeVarName);
       esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
     }
-    esmfRuntimeVarName = "ESMF_RUNTIME_PROFILE_OUTPUT";
+    esmfRuntimeVarName = "ESMF_RUNTIME_PROFILE_PETLIST";
     esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
     if (esmfRuntimeVarValue){
       esmfRuntimeEnv.push_back(esmfRuntimeVarName);
@@ -3460,7 +3460,7 @@ VM *VM::initialize(
       esmfRuntimeEnv.push_back(esmfRuntimeVarName);
       esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
     }
-    esmfRuntimeVarName = "ESMF_RUNTIME_TRACE_PETLIST";
+    esmfRuntimeVarName = "ESMF_RUNTIME_TRACE_CLOCK";
     esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
     if (esmfRuntimeVarValue){
       esmfRuntimeEnv.push_back(esmfRuntimeVarName);
@@ -3472,13 +3472,13 @@ VM *VM::initialize(
       esmfRuntimeEnv.push_back(esmfRuntimeVarName);
       esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
     }
-    esmfRuntimeVarName = "ESMF_RUNTIME_TRACE_CLOCK";
+    esmfRuntimeVarName = "ESMF_RUNTIME_TRACE_FLUSH";
     esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
     if (esmfRuntimeVarValue){
       esmfRuntimeEnv.push_back(esmfRuntimeVarName);
       esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
     }
-    esmfRuntimeVarName = "ESMF_RUNTIME_TRACE_FLUSH";
+    esmfRuntimeVarName = "ESMF_RUNTIME_TRACE_PETLIST";
     esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
     if (esmfRuntimeVarValue){
       esmfRuntimeEnv.push_back(esmfRuntimeVarName);
