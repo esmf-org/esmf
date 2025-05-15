@@ -4077,15 +4077,39 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 dstSide, dstIdx, sparseMat=sparseMat, rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-           
-           ! call FieldSMMStore
-           call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
-                sparseMat%factorList, sparseMat%factorIndexList, &
-                srcTermProcessing=srcTermProcessing, &
-                pipeLineDepth=pipeLineDepth, &
-                rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
+
+           ! If routeHandle requested, create that
+           if (present(routeHandle)) then
+              ! call FieldSMMStore           
+              call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
+                   sparseMat%factorList, sparseMat%factorIndexList, &
+                   srcTermProcessing=srcTermProcessing, &
+                   pipeLineDepth=pipeLineDepth, &
+                   rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
+
+           ! If factorList requested, copy that
+           if (present(factorList)) then
+
+              ! Allocate space
+              allocate(factorList(size(sparseMat%factorList)))
+              
+              ! Copy
+              factorList=sparseMat%factorList
+           endif
+
+           ! If factorIndexList requested, copy that
+           if (present(factorIndexList)) then
+
+              ! Allocate space
+              allocate(factorIndexList(size(sparseMat%factorIndexList,1),size(sparseMat%factorIndexList,2)))
+              
+              ! Copy
+              factorIndexList=sparseMat%factorIndexList
+           endif
+
            
         else if (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE_2ND) then
 
