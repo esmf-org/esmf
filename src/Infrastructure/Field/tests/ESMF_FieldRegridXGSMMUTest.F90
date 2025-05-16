@@ -143,8 +143,8 @@ contains
         real(ESMF_KIND_R8)                  :: centroidBX(2), centroidBY(2)
         real(ESMF_KIND_R8), pointer         :: coordX(:), coordY(:)
         character(len=16)                   :: gridNameA(2), gridNameB(1)
-        integer(ESMF_KIND_I4), pointer  :: factorIndexList(:,:)
-        real(ESMF_KIND_R8), pointer     :: factorList(:)
+        integer(ESMF_KIND_I4), pointer      :: factorIndexList(:,:)
+        real(ESMF_KIND_R8), pointer         :: factorList(:)
         integer :: j,lbnd
 
         ! Init return codes
