@@ -2811,25 +2811,28 @@ void VM::logMemInfo(
   stderr = stderrOrig;  // restore original stderr
   fflush(fp);
   fclose(fp); // must close before free(buf), b/c buf may re-alloc!
-  std::string malloc_stats_output;
   if (buf){
-    malloc_stats_output = string(buf, buf+len);
+    if (len){
+      std::string malloc_stats_output = string(buf, buf+len);
+      size_t pos = malloc_stats_output.rfind("system bytes     =");
+      pos += 18;
+      long system = strtol(malloc_stats_output.c_str()+pos, NULL, 10);
+      info.str(""); // clear info
+      info << "[malloc] Total space held (mmap + non-mmap): " << setw(16)
+        << system;
+      sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());
+      log->Write(msg, msgType);
+      pos = malloc_stats_output.rfind("in use bytes     =");
+      pos += 18;
+      long in_use = strtol(malloc_stats_output.c_str()+pos, NULL, 10);
+      info.str(""); // clear info
+      info << "[malloc] Total space used (mmap + non-mmap): " << setw(16)
+        << in_use;
+      sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());
+      log->Write(msg, msgType);
+    }
     free(buf);
   }
-  size_t pos = malloc_stats_output.rfind("system bytes     =");
-  pos += 18;
-  long system = strtol(malloc_stats_output.c_str()+pos, NULL, 10);
-  info.str(""); // clear info
-  info << "[malloc] Total space held (mmap + non-mmap): " <<setw(16)<< system;
-  sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());
-  log->Write(msg, msgType);
-  pos = malloc_stats_output.rfind("in use bytes     =");
-  pos += 18;
-  long in_use = strtol(malloc_stats_output.c_str()+pos, NULL, 10);
-  info.str(""); // clear info
-  info << "[malloc] Total space used (mmap + non-mmap): " <<setw(16)<< in_use;
-  sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());
-  log->Write(msg, msgType);
 #elif (defined ESMF_OS_Darwin)
   // Get memory
 #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1090
