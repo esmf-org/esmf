@@ -274,16 +274,16 @@ int ArrayBundle::destroy(
   localrc = (*arraybundle)->destruct();
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   // mark as invalid object
   (*arraybundle)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
-  
+
   // optionally delete the complete object and remove from garbage collection
-  if (noGarbage){
+  if (noGarbage || VM::getCurrent()->isGarbageNone()){
     VM::rmObject(*arraybundle); // remove object from garbage collection
     delete (*arraybundle);      // completely delete the object, free heap
   }
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;

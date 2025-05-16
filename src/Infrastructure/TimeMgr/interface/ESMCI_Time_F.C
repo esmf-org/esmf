@@ -17,6 +17,7 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
+#include <string>
 #include <cstdio>
 
 #include "ESMCI_F90Interface.h"
@@ -205,10 +206,11 @@ extern "C" {
                                         const char *name,
                                         int *status,
                                         ESMCI_FortranStrLenArg name_l) {
+          std::string nameStr(name, ESMC_F90lentrim(name, name_l));
           int rc = (ptr)->Time::readRestart(
                                                *nameLen,  // always present 
                                                           //  internal argument.
-                                                name);    // required.
+                                                nameStr.c_str());    // required.
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
@@ -221,16 +223,16 @@ extern "C" {
        void FTN_X(c_esmc_timevalidate)(Time *ptr, const char *options,
                                      int *status,
                                      ESMCI_FortranStrLenArg options_l) {
-          int rc = (ptr)->Time::validate(
-                    ESMC_NOT_PRESENT_FILTER(options) );
+          std::string optionsStr(options, ESMC_F90lentrim(options, options_l));
+          int rc = (ptr)->Time::validate(optionsStr.c_str());
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
        void FTN_X(c_esmc_timeprint)(Time *ptr, const char *options,
                                   int *status,
                                   ESMCI_FortranStrLenArg options_l) {
-          int rc = (ptr)->Time::print(
-                 ESMC_NOT_PRESENT_FILTER(options) );
+          std::string optionsStr(options, ESMC_F90lentrim(options, options_l));
+          int rc = (ptr)->Time::print(optionsStr.c_str());
           fflush (stdout);
           if (ESMC_PRESENT(status)) *status = rc;
        }

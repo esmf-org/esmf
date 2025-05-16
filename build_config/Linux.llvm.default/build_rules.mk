@@ -239,7 +239,7 @@ ESMF_F90LINKLIBS += -lrt -lstdc++ -ldl
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lrt -lFortranDecimal -lflang_rt.runtime -lstdc++ -lm -ldl
+ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.llvm $(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)) -lrt -lstdc++ -lm -ldl
 
 ############################################################
 # Linker option that ensures that the specified libraries are 

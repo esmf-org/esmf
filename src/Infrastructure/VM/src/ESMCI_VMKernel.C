@@ -3544,11 +3544,11 @@ VMKPlan::~VMKPlan(){
     commfreeflag = 0;
   }
   if (stdoutName){
-    delete stdoutName;
+    delete [] stdoutName;
     stdoutName = NULL;
   }
   if (stderrName){
-    delete stderrName;
+    delete [] stderrName;
     stderrName = NULL;
   }
 }

@@ -818,7 +818,9 @@ int ESMC_FieldRegridStore(
 //    works when both the source and destination Fields are build on a geometry (e.g. an ESMF Grid) with
 //    a spherical coordinate system (e.g. ESMF\_COORDSYS\_SPH\_DEG). Also, this functionality is not currently supported with conservative
 //    regrid methods (e.g. {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}). We expect these restrictions to be loosened over
-//    time as new requirements come in from users. If not specified, this argument defaults to false.
+//    time as new requirements come in from users.
+//    For further information on this functionality, see the "Vector regridding" section in the ESMF Reference Manual for Fortran.
+//    If not specified, this argument defaults to false.
 //  \item [{[extrapMethod]}]
 //    The type of extrapolation. Please see Section~\ref{opt:cextrapmethod} 
 //    for a list of valid options. If not specified, defaults to 
@@ -966,7 +968,9 @@ int ESMC_FieldRegridStoreFile(
 //    works when both the source and destination Fields are build on a geometry (e.g. an ESMF Grid) with
 //    a spherical coordinate system (e.g. ESMF\_COORDSYS\_SPH\_DEG). Also, this functionality is not currently supported with conservative
 //    regrid methods (e.g. {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}). We expect these restrictions to be loosened over
-//    time as new requirements come in from users. If not specified, this argument defaults to false.
+//    time as new requirements come in from users.
+//    For further information on this functionality, see the "Vector regridding" section in the ESMF Reference Manual for Fortran.
+//    If not specified, this argument defaults to false.
 //  \item[{[unmappedaction]}]
 //    Specifies what should happen if there are destination points that can't
 //    be mapped to a source cell. Options are {\tt ESMC\_UNMAPPEDACTION\_ERROR} or

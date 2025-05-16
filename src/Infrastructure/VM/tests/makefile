@@ -245,8 +245,12 @@ RUN_ESMF_VMEpochLargeMsgUTest:
 #
 RUN_ESMF_VMComponentUTest:
 	$(MAKE) TNAME=VMComponent NP=4 ftest
+	find $(ESMF_TESTDIR) -name "MyGcomp*.stdout" -print0 | xargs -0 rm -f *.stdout
+	find $(ESMF_TESTDIR) -name "MyGcomp*.stderr" -print0 | xargs -0 rm -f *.stderr
 
 RUN_ESMF_VMComponentUTestUNI:
 	$(MAKE) TNAME=VMComponent NP=1 ftest
+	find $(ESMF_TESTDIR) -name "MyGcomp*.stdout" -print0 | xargs -0 rm -f *.stdout
+	find $(ESMF_TESTDIR) -name "MyGcomp*.stderr" -print0 | xargs -0 rm -f *.stderr
 
 

@@ -296,15 +296,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           value is set, potentially overriding the value defined within the
 !           user environment for the same variable.
 !           \begin{itemize}
+!              \item {\tt ESMF\_RUNTIME\_COMPLIANCECHECK}
+!              \item {\tt ESMF\_RUNTIME\_GARBAGE}
+!              \item {\tt ESMF\_RUNTIME\_GARBAGE\_LOG}
 !              \item {\tt ESMF\_RUNTIME\_PROFILE}
 !              \item {\tt ESMF\_RUNTIME\_PROFILE\_OUTPUT}
 !              \item {\tt ESMF\_RUNTIME\_PROFILE\_PETLIST}
+!              \item {\tt ESMF\_RUNTIME\_PROFILE\_REGRID}
 !              \item {\tt ESMF\_RUNTIME\_TRACE}
 !              \item {\tt ESMF\_RUNTIME\_TRACE\_CLOCK}
-!              \item {\tt ESMF\_RUNTIME\_TRACE\_PETLIST}
-!              \item {\tt ESMF\_RUNTIME\_TRACE\_COMPONENT}
 !              \item {\tt ESMF\_RUNTIME\_TRACE\_FLUSH}
-!              \item {\tt ESMF\_RUNTIME\_COMPLIANCECHECK}
+!              \item {\tt ESMF\_RUNTIME\_TRACE\_COMPONENT}
+!              \item {\tt ESMF\_RUNTIME\_TRACE\_PETLIST}
 !           \end{itemize}
 !     \item [{[configKey]}]
 !           If present, use {\tt configKey} to find the map of predefined
@@ -1326,15 +1329,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (haveConfig) then
         ! Ingest ESMF_RUNTIME_* settings from config -> possibly override environment
+        call ingest_environment_variable("ESMF_RUNTIME_COMPLIANCECHECK")
+        call ingest_environment_variable("ESMF_RUNTIME_GARBAGE")
+        call ingest_environment_variable("ESMF_RUNTIME_GARBAGE_LOG")
         call ingest_environment_variable("ESMF_RUNTIME_PROFILE")
         call ingest_environment_variable("ESMF_RUNTIME_PROFILE_OUTPUT")
         call ingest_environment_variable("ESMF_RUNTIME_PROFILE_PETLIST")
+        call ingest_environment_variable("ESMF_RUNTIME_PROFILE_REGRID")
         call ingest_environment_variable("ESMF_RUNTIME_TRACE")
         call ingest_environment_variable("ESMF_RUNTIME_TRACE_CLOCK")
-        call ingest_environment_variable("ESMF_RUNTIME_TRACE_PETLIST")
-        call ingest_environment_variable("ESMF_RUNTIME_TRACE_COMPONENT")
         call ingest_environment_variable("ESMF_RUNTIME_TRACE_FLUSH")
-        call ingest_environment_variable("ESMF_RUNTIME_COMPLIANCECHECK")
+        call ingest_environment_variable("ESMF_RUNTIME_TRACE_COMPONENT")
+        call ingest_environment_variable("ESMF_RUNTIME_TRACE_PETLIST")
         ! optionally destroy the HConfigNode
         if (validHConfigNode) then
           call ESMF_HConfigDestroy(hconfigNode, rc=localrc)

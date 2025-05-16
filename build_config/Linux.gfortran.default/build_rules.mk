@@ -132,13 +132,24 @@ ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} --version
 ############################################################
 # Special debug flags
 #
-# Activate to turn on UBSan:
-#ESMF_LINKOPTFLAG_G      += -fsanitize=undefined
-# Also set environment variable UBSAN_OPTIONS="print_stacktrace=1"
-# for stacktrace at runtime.
-#
 ESMF_F90OPTFLAG_G       += -Wall -Wextra -Wconversion -Wno-unused -Wno-unused-dummy-argument -fbacktrace -fimplicit-none -fcheck=all,no-pointer
-ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused $(ESMF_LINKOPTFLAG_G)
+ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused
+
+############################################################
+# Special sanitizer flags
+#
+# Activate to turn on UBSan:
+#ESMF_OPTFLAG_G          += -fsanitize=undefined
+#ESMF_LINKOPTFLAG_G      += -fsanitize=undefined
+# Also set environment variable UBSAN_OPTIONS="help=1" to see available
+# run-time options.
+#
+# Activate to turn on ASan:
+#ESMF_OPTFLAG_G          += -fsanitize=address
+#ESMF_LINKOPTFLAG_G      += -fsanitize=address
+# Also set environment variable ASAN_OPTIONS="help=1" to see available
+# run-time options.
+#
 
 ############################################################
 # Fortran symbol convention

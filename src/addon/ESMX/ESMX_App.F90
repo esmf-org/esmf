@@ -56,15 +56,18 @@ program ESMX_App
                 "logKindFlag                 ", & ! ESMF_Initialize option
                 "defaultCalKind              ", & ! ESMF_Initialize option
                 "globalResourceControl       ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_COMPLIANCECHECK", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_GARBAGE        ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_GARBAGE_LOG    ", & ! ESMF_Initialize option
                 "ESMF_RUNTIME_PROFILE        ", & ! ESMF_Initialize option
                 "ESMF_RUNTIME_PROFILE_OUTPUT ", & ! ESMF_Initialize option
                 "ESMF_RUNTIME_PROFILE_PETLIST", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_PROFILE_REGRID ", & ! ESMF_Initialize option
                 "ESMF_RUNTIME_TRACE          ", & ! ESMF_Initialize option
                 "ESMF_RUNTIME_TRACE_CLOCK    ", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_TRACE_PETLIST  ", & ! ESMF_Initialize option
                 "ESMF_RUNTIME_TRACE_COMPONENT", & ! ESMF_Initialize option
                 "ESMF_RUNTIME_TRACE_FLUSH    ", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_COMPLIANCECHECK", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_TRACE_PETLIST  ", & ! ESMF_Initialize option
                 "startTime                   ", & ! ESMX_App option
                 "stopTime                    ", & ! ESMX_App option
                 "logFlush                    ", & ! ESMX_App option
