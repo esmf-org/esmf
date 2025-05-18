@@ -1,5 +1,5 @@
 [build-system]
-requires = [ "setuptools>=41", "wheel", "setuptools-git-versioning" ]
+requires = [ "setuptools>=41", "wheel", "setuptools-scm" ]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -57,12 +57,11 @@ Documentation = "https://earthsystemmodeling.org/esmpy_doc/release/latest/html/"
 sourcecode = "https://github.com/esmf-org/esmf/tree/develop/src/addon/esmpy"
 releasenotes = "https://earthsystemmodeling.org/static/releases.html"
 
-[tool.setuptools-git-versioning]
-enabled = true
-template = "{tag}"
-dev_template = "{tag}"
-dirty_template = "{tag}"
-starting_version = "8.9.0beta" # this is a backup for pip <= 22.0 where git-versioning doesn't work; it is also needed for the conda distribution of ESMPy; it is important that this does NOT include "beta" on release branches
+[tool.setuptools_scm]
+root = "../../.."
+parentdir_prefix_version = "esmf-"
+fallback_version = "8.9.0beta" # this is needed for the conda distribution of ESMPy; it is important that this does NOT include "beta" on release branches
+fallback_root = "../../.."
 
 [tool.dynamic]
 version = "placeholder" # this is a placeholder for the version pulled with git-versioning

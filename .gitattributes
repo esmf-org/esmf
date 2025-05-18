@@ -1,5 +1,1 @@
-src/doc		export-ignore
-.gitattributes	export-ignore
-.gitignore	export-ignore
-
-*.C linguist-language=C++
+.git_archival.txt         export-subst
