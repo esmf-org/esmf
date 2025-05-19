@@ -296,6 +296,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           value is set, potentially overriding the value defined within the
 !           user environment for the same variable.
 !           \begin{itemize}
+!              \item {\tt ESMF\_RUNTIME\_ABORT\_ACTION}
+!              \item {\tt ESMF\_RUNTIME\_ABORT\_LOGMSG\_TYPES}
 !              \item {\tt ESMF\_RUNTIME\_COMPLIANCECHECK}
 !              \item {\tt ESMF\_RUNTIME\_GARBAGE}
 !              \item {\tt ESMF\_RUNTIME\_GARBAGE\_LOG}
@@ -1119,6 +1121,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_CONTEXT, rcToReturn=rc)) return
           endif
         endif
+
+        ! Ingest ESMF_RUNTIME_* log variables before initializing the log
+        call ingest_environment_variable("ESMF_RUNTIME_ABORT_ACTION")
+        call ingest_environment_variable("ESMF_RUNTIME_ABORT_LOGMSG_TYPES")
 
       endif ! have a default Config
 
