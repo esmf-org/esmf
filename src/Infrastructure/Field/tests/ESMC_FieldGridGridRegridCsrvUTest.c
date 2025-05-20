@@ -561,7 +561,7 @@ int main(void){
   //EX_UTest
   strcpy(name, "Execute ESMC_FieldRegrid()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, NULL);
+  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, NULL, NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

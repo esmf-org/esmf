@@ -392,7 +392,7 @@ int main(void){
 #ifdef masking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, &i_maskValues, 
                              &routehandle, 
-                             NULL, NULL, NULL, NULL, NULL, NULL
+                             NULL, NULL, NULL, NULL, NULL, NULL,
                              &extrapmethod, NULL, NULL, NULL, &unmappedaction,
                              NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 #else
@@ -413,9 +413,9 @@ int main(void){
   // SMM operation will need to be initialized to 0 before having the new
   // value added to them.
   enum ESMC_Region_Flag zeroregion = ESMC_REGION_SELECT;
-  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, &zeroregion);
+  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, &zeroregion, NULL);
 #else
-  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, NULL);
+  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, NULL, NULL);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
