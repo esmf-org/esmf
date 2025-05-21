@@ -901,6 +901,28 @@ struct SpawnArg{
 void VMK::abort(){
   // abort default (all MPI) virtual machine
   int finalized;
+
+  char const *envRTabort = VM::getenv("ESMF_RUNTIME_ABORT_ACTION");
+  if (envRTabort != NULL && strlen(envRTabort) > 0) {
+    std::string RTabort(envRTabort);
+    transform(RTabort.begin(), RTabort.end(), RTabort.begin(), ::toupper);
+    if (RTabort == "MPI_ABORT") {
+      ; // no-op, do not raise signal
+    } else if (RTabort == "SIGABRT") {
+      raise (SIGABRT);
+    } else if (RTabort == "SIGQUIT") {
+#ifdef SIGQUIT
+      raise (SIGQUIT);
+#else
+      fprintf(stderr, "SIGQUIT not defined for ESMF_RUNTIME_ABORT_ACTION\n"
+        "-> default to MPI_Abort.\n");
+#endif
+    } else {
+      fprintf(stderr, "Invalid ESMF_RUNTIME_ABORT_ACTION setting - %s\n"
+        "-> default to MPI_Abort.\n", RTabort.c_str());
+    }
+  }
+  // signal may be caught therefore call MPI_Abort if code gets here
   MPI_Finalized(&finalized);
   if (!finalized)
     MPI_Abort(default_mpi_c, EXIT_FAILURE);
@@ -3544,11 +3566,11 @@ VMKPlan::~VMKPlan(){
     commfreeflag = 0;
   }
   if (stdoutName){
-    delete stdoutName;
+    delete [] stdoutName;
     stdoutName = NULL;
   }
   if (stderrName){
-    delete stderrName;
+    delete [] stderrName;
     stderrName = NULL;
   }
 }
