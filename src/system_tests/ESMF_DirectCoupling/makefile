@@ -7,7 +7,7 @@ run_uni:  tree_run_system_tests_uni
 LOCDIR	  = src/system_tests/ESMF_DirectCoupling
 
 
-SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_DirectCouplingSTest
+SYSTEM_TESTS_BUILD    = $(ESMF_TESTDIR)/ESMF_DirectCouplingSTest
 
 # Object files other than STest%.o that the
 # system tests executable will depend on.

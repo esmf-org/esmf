@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -17,9 +17,9 @@ module NUOPC_FreeFormatDef
   use ESMF
 
   implicit none
-  
+
   private
-  
+
   ! type
   public NUOPC_FreeFormat
   
@@ -29,19 +29,19 @@ module NUOPC_FreeFormatDef
   ! methods  
   public NUOPC_FreeFormatAdd
   public NUOPC_FreeFormatCreate
+  public NUOPC_FreeFormatCreateFDYAML
   public NUOPC_FreeFormatDestroy
   public NUOPC_FreeFormatGet
   public NUOPC_FreeFormatGetLine
   public NUOPC_FreeFormatLog
   public NUOPC_FreeFormatPrint
-  
-  
+
 !==============================================================================
 ! 
 ! Constants
 !
 !==============================================================================
-  
+
   integer, parameter              :: NUOPC_FreeFormatLen = 800
 
 !==============================================================================
@@ -49,7 +49,7 @@ module NUOPC_FreeFormatDef
 ! DERIVED TYPES
 !
 !==============================================================================
-  
+
   type NUOPC_FreeFormat
     character(len=NUOPC_FreeFormatLen), pointer   :: stringList(:)
     integer                                       :: count
@@ -64,8 +64,6 @@ module NUOPC_FreeFormatDef
   interface NUOPC_FreeFormatCreate
     module procedure NUOPC_FreeFormatCreateDefault
     module procedure NUOPC_FreeFormatCreateRead
-    module procedure NUOPC_FreeFormatCreateReadFile
-    module procedure NUOPC_FreeFormatCreateReadYAML
   end interface
 
   !-----------------------------------------------------------------------------
@@ -411,10 +409,9 @@ module NUOPC_FreeFormatDef
 !BOPI
 ! !IROUTINE: NUOPC_FreeFormatCreate - Create a FreeFormat object from YAML
 ! !INTERFACE:
-  ! Private name; call using NUOPC_FreeFormatCreate()
-  function NUOPC_FreeFormatCreateReadYAML(ioyaml, rc)
+  function NUOPC_FreeFormatCreateFDReadYAML(ioyaml, rc)
 ! !RETURN VALUE:
-    type(NUOPC_FreeFormat) :: NUOPC_FreeFormatCreateReadYAML
+    type(NUOPC_FreeFormat) :: NUOPC_FreeFormatCreateFDReadYAML
 ! !ARGUMENTS:
     type(ESMF_IO_YAML)                           :: ioyaml
     integer,               intent(out), optional :: rc
@@ -432,8 +429,8 @@ module NUOPC_FreeFormatDef
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! initialize return members
-    NUOPC_FreeFormatCreateReadYAML%stringList => NULL()
-    NUOPC_FreeFormatCreateReadYAML%count      =  0;
+    NUOPC_FreeFormatCreateFDReadYAML%stringList => NULL()
+    NUOPC_FreeFormatCreateFDReadYAML%count      =  0;
 
     ! generate content for FreeFormat object
     call ESMF_IO_YAMLContentInit(ioyaml, cflag=ESMF_IOYAML_CONTENT_FREEFORM, &
@@ -462,7 +459,7 @@ module NUOPC_FreeFormatDef
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
     ! create new FreeFormat object using content from YAML parser
-    NUOPC_FreeFormatCreateReadYAML = &
+    NUOPC_FreeFormatCreateFDReadYAML = &
       NUOPC_FreeFormatCreateDefault(stringList=stringList, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
@@ -478,107 +475,55 @@ module NUOPC_FreeFormatDef
 
   !-----------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: NUOPC_FreeFormatCreate - Create a FreeFormat object from file
+! !IROUTINE: NUOPC_FreeFormatCreate - Create a FreeFormat object representing FD from YAML
 ! !INTERFACE:
-  ! Private name; call using NUOPC_FreeFormatCreate()
-  function NUOPC_FreeFormatCreateReadFile(fileName, iofmt, label, relaxedflag, rc)
+  function NUOPC_FreeFormatCreateFDYAML(fileName, rc)
 ! !RETURN VALUE:
-    type(NUOPC_FreeFormat) :: NUOPC_FreeFormatCreateReadFile
+    type(NUOPC_FreeFormat) :: NUOPC_FreeFormatCreateFDYAML
 ! !ARGUMENTS:
     character(len=*),      intent(in)            :: fileName
-    type(ESMF_IOFmt_flag), intent(in),  optional :: iofmt
-    character(len=*),      intent(in),  optional :: label
-    logical,               intent(in),  optional :: relaxedflag
     integer,               intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Create a new FreeFormat object from a file with given {\tt iofmt}.
-!   Supported values for {\tt iofmt} are: {\tt ESMF\_IOFMT\_CONFIG} 
-!   (ESMF Config file) and {\tt ESMF\_IOFMT\_YAML} (YAML file).
-!   If {\tt ESMF\_IOFMT\_CONFIG} is used, the optional argument {\tt label}
-!   must be provided, and {\tt relaxedflag} may be used.
-!   If I/O format is {\tt ESMF\_IOFMT\_YAML}, both {\tt label} and 
-!   {\tt relaxedflag} are ignored.
-!   If {\tt iofmt} is not provided, it defaults to {\tt ESMF\_IOFMT\_CONFIG}.
+!   Create a FreeFormat representation of a NUOPC Field Dictionary from
+!   YAML file
 !
 !EOPI
   !-----------------------------------------------------------------------------
     integer               :: localrc
-    type(ESMF_IOFmt_flag) :: iofmtOpt
-    type(ESMF_Config)     :: config
     type(ESMF_IO_YAML)    :: ioyaml
 
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! initialize return members
-    NUOPC_FreeFormatCreateReadFile%stringList => NULL()
-    NUOPC_FreeFormatCreateReadFile%count      =  0;
+    NUOPC_FreeFormatCreateFDYAML%stringList => NULL()
+    NUOPC_FreeFormatCreateFDYAML%count      =  0;
 
-    ! set defaults
-    iofmtOpt = ESMF_IOFMT_CONFIG
-    if (present(iofmt)) iofmtOpt = iofmt
+    ! create IO_YAML object
+    ioyaml = ESMF_IO_YAMLCreate(rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
-    if (iofmtOpt == ESMF_IOFMT_CONFIG) then
+    ! read YAML into IO_YAML object
+    call ESMF_IO_YAMLRead(ioyaml, fileName, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
-      ! create config object
-      config = ESMF_ConfigCreate(rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    ! parse YAML doc as NUOPC Field Dictionary
+    call ESMF_IO_YAMLParse(ioyaml, parseflag=ESMF_IOYAML_PARSE_NUOPCFD, &
+      rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
-      ! read config from file
-      call ESMF_ConfigLoadFile(config, fileName, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    ! create FreeFormat object from parsed content
+    NUOPC_FreeFormatCreateFDYAML = &
+      NUOPC_FreeFormatCreateFDReadYAML(ioyaml, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
-      ! create FreeFormat object by parsing config
-      NUOPC_FreeFormatCreateReadFile = &
-        NUOPC_FreeFormatCreateRead(config, label, &
-        relaxedflag=relaxedflag, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-
-      ! free up memory
-      call ESMF_ConfigDestroy(config, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-
-    else if (iofmtOpt == ESMF_IOFMT_YAML) then
-
-      ! create IO_YAML object
-      ioyaml = ESMF_IO_YAMLCreate(rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-
-      ! read YAML into IO_YAML object
-      call ESMF_IO_YAMLRead(ioyaml, fileName, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-
-      ! parse YAML doc as NUOPC Field Dictionary
-      call ESMF_IO_YAMLParse(ioyaml, parseflag=ESMF_IOYAML_PARSE_NUOPCFD, &
-        rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-
-      ! create FreeFormat object from parsed content
-      NUOPC_FreeFormatCreateReadFile = &
-        NUOPC_FreeFormatCreateReadYAML(ioyaml, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-
-      ! free up memory
-      call ESMF_IO_YAMLDestroy(ioyaml, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-
-    else
-
-      ! I/O format not implemented
-      call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-        msg="unsupported iofmt", &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)
-      return  ! bail out
-
-    end if
+    ! free up memory
+    call ESMF_IO_YAMLDestroy(ioyaml, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
   end function
   !-----------------------------------------------------------------------------
@@ -647,20 +592,23 @@ module NUOPC_FreeFormatDef
 !BOP
 ! !IROUTINE: NUOPC_FreeFormatGetLine - Get line info from a FreeFormat object
 ! !INTERFACE:
-  subroutine NUOPC_FreeFormatGetLine(freeFormat, line, lineString, tokenCount, &
-    tokenList, rc)
+  subroutine NUOPC_FreeFormatGetLine(freeFormat, line, commentChar, lineString, &
+    tokenCount, tokenList, rc)
 ! !ARGUMENTS:
     type(NUOPC_FreeFormat),                       intent(in)  :: freeFormat
     integer,                                      intent(in)  :: line
+    character,                          optional, intent(in)  :: commentChar
     character(len=NUOPC_FreeFormatLen), optional, intent(out) :: lineString
     integer,                            optional, intent(out) :: tokenCount
     character(len=NUOPC_FreeFormatLen), optional, intent(out) :: tokenList(:)
     integer,                            optional, intent(out) :: rc
 ! !DESCRIPTION:
-!   Get information about a specific line in a FreeFormat object.
+!   Get information about a specific line in a FreeFormat object. If
+!   {\tt commentChar} is specified, anything on the line, starting with
+!   {\tt commentChar} is considered a comment, and subsequently ignored.
 !EOP
   !-----------------------------------------------------------------------------
-    integer                               :: i, count, last
+    integer                               :: i, count, last, iComment
     character(len=NUOPC_FreeFormatLen)    :: string
     logical                               :: spaceFlag
     
@@ -676,9 +624,21 @@ module NUOPC_FreeFormatDef
         rcToReturn=rc)
       return  ! bail out
     endif
-    
+
     ! access the line string
-    string = trim(freeFormat%stringList(line))
+    iComment = 0
+    if (present(commentChar)) then
+      iComment = index(freeFormat%stringList(line),commentChar)
+    endif
+    if (iComment>0) then
+      if (iComment==1) then
+        string = "" ! the entire line was a comment
+      else
+        string = trim(freeFormat%stringList(line)(1:iComment-1))
+      endif
+    else
+      string = trim(freeFormat%stringList(line))
+    endif
 
     ! ouput: lineString
     if (present(lineString)) then

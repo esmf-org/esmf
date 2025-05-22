@@ -1,0 +1,26 @@
+% $Id$
+
+\subsubsection{ESMF\_GRIDMATCH}
+\label{const:gridmatch}
+
+{\sf DESCRIPTION:\\}
+ This type is used to indicate the level to which two grids match.
+
+The type of this flag is:
+
+{\tt type(ESMF\_GridMatch\_Flag)}
+
+The valid values are:
+\begin{description}
+\item [ESMF\_GRIDMATCH\_INVALID:] Indicates a non-valid matching level. Returned
+      if an error occurs in the matching function. If a higher matching level
+      is returned then no error occurred.
+\item [ESMF\_GRIDMATCH\_NONE:] The lowest level of grid matching. 
+      This indicates that the Grid's don't match at any of the higher levels. 
+\item [ESMF\_GRIDMATCH\_EXACT:] All the pieces of the Grid (e.g. distgrids, 
+      coordinates, etc.) except the name, match between the two Grids. 
+\item [ESMF\_GRIDMATCH\_ALIAS:] Both Grid variables are aliases to the exact
+      same Grid object in memory. 
+\end{description}
+
+

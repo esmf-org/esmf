@@ -127,7 +127,7 @@ Contains
     call PIO_closefile(pio_file)
 
     ! Try to enter define mode again
-    if(master_task) write(*,"(6x,A,1x)") "trying to enter define mode in closed file, error expected ... "
+    if(main_task) write(*,"(6x,A,1x)") "trying to enter define mode in closed file, error expected ... "
     call mpi_barrier(MPI_COMM_WORLD,ret_val)
     ret_val = PIO_redef(pio_file)
     if (ret_val .eq. PIO_NOERR) then
@@ -171,7 +171,7 @@ Contains
     end if
 
     ! Enter define mode
-    if(master_task) write(*,"(6x,A,1x)") "trying to enter define mode in read only file, error expected ... "
+    if(main_task) write(*,"(6x,A,1x)") "trying to enter define mode in read only file, error expected ... "
     call mpi_barrier(MPI_COMM_WORLD,ret_val)
     ret_val = PIO_redef(pio_file)
     if (ret_val .eq. PIO_NOERR) then
@@ -212,7 +212,7 @@ Contains
     end if
 
     ! Try to end define mode from data mode
-    if(master_task) write(*,"(6x,A,1x)") "trying to end define mode in data mode, error expected ... "
+    if(main_task) write(*,"(6x,A,1x)") "trying to end define mode in data mode, error expected ... "
     call mpi_barrier(MPI_COMM_WORLD,ret_val)
     ret_val = PIO_enddef(pio_file)
     if (ret_val .eq. PIO_NOERR) then
@@ -227,7 +227,7 @@ Contains
     call PIO_closefile(pio_file)
 
     ! Try to end define mode in un-opened file
-    if(master_task) write(*,"(6x,A,1x)") "trying to end define mode in closed file, error expected ... "
+    if(main_task) write(*,"(6x,A,1x)") "trying to end define mode in closed file, error expected ... "
     call mpi_barrier(MPI_COMM_WORLD,ret_val)
     ret_val = PIO_enddef(pio_file)
     if (ret_val .eq. PIO_NOERR) then

@@ -7,7 +7,7 @@ fi
 if [ $esmf_os = Linux ]; then
 # determine if this is Linux on Cray, i.e. Unicos
 which ftn > esmf_os.tmp 2>&1
-ftn_test=`grep cray esmf_os.tmp`
+ftn_test=`grep -e cray -e bin/ftn esmf_os.tmp`
 rm -f esmf_os.tmp
 if [ -n "$ftn_test" ]; then
 esmf_os=Unicos

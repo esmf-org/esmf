@@ -42,7 +42,7 @@ create_file(int file_num, int my_rank, int ntasks, int num_io_procs,
 
     /* Create a file with a 3D record var. */
     sprintf(file_name, "%s_file_%d.nc", TEST_NAME, file_num);
-    if (nc_create(file_name, NC_PIO|NC_NETCDF4, &ncid)) PERR;
+    if (nc_create(file_name, NC_PIO, &ncid)) PERR;
     if (nc_def_dim(ncid, DIM_NAME_UNLIMITED, dimlen[0], &dimid[0])) PERR;
     if (nc_def_dim(ncid, DIM_NAME_X, dimlen[1], &dimid[1])) PERR;
     if (nc_def_dim(ncid, DIM_NAME_Y, dimlen[2], &dimid[2])) PERR;

@@ -1,7 +1,7 @@
 % $Id$ 
 %
 % Earth System Modeling Framework
-% Copyright 2002-2022, University Corporation for Atmospheric Research, 
+% Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 % Laboratory, University of Michigan, National Centers for Environmental 
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -79,6 +79,7 @@
 \input{ESMF_VMDefaultBasicsEx_fapi}
 \input{ESMF_VMComponentEx_fapi}
 \input{ESMF_VMGetMPICommunicatorEx_fapi}
+\input{ESMF_VMGetMPICommunicatorF08Ex_fapi}
 \input{ESMF_VMUserMpiEx_fapi}
 \input{ESMF_VMUserMpiCommEx_fapi}
 \input{ESMF_VMUserMpiCommMultiEx_fapi}
@@ -92,6 +93,7 @@
 \input{../Infrastructure/VM/doc/ESMF_VMDefaultBasicsEx_fapi}
 \input{../Infrastructure/VM/doc/ESMF_VMComponentEx_fapi}
 \input{../Infrastructure/VM/doc/ESMF_VMGetMPICommunicatorEx_fapi}
+\input{../Infrastructure/VM/doc/ESMF_VMGetMPICommunicatorF08Ex_fapi}
 \input{../Infrastructure/VM/doc/ESMF_VMUserMpiEx_fapi}
 \input{../Infrastructure/VM/doc/ESMF_VMUserMpiCommEx_fapi}
 \input{../Infrastructure/VM/doc/ESMF_VMUserMpiCommMultiEx_fapi}

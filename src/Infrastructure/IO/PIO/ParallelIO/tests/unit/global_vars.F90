@@ -20,7 +20,7 @@ module global_vars
 
   ! MPI Variables
   integer :: my_rank, ntasks
-  logical :: master_task
+  logical :: main_task
 
   ! PIO Variables
   integer                     :: stride, niotasks

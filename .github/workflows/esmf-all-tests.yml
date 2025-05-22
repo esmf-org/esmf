@@ -1,0 +1,255 @@
+name: ESMF CI
+
+on:
+  schedule:
+    - cron: "15 8 * * 3"
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+  workflow_dispatch:
+
+jobs:
+  development-test:
+    name: ${{matrix.config.desc}}
+    runs-on: ${{matrix.config.osys}}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            desc: ubuntu@22.04-gfortran@11-mpiuni-netcdf,
+            osys: ubuntu-22.04,
+            cors: 4,
+            ropt: '',
+            exhs: ON,
+            cmpr: gfortran,
+            cvrs: 11,
+            bopt: 'O',
+            comm: mpiuni,
+            tlib: ON,
+            ncdf: nc-config
+          }
+        - {
+            desc: ubuntu@22.04-gfortran@12-mpich-netcdf,
+            osys: ubuntu-22.04,
+            cors: 4,
+            ropt: '',
+            exhs: OFF,
+            cmpr: gfortran,
+            cvrs: 12,
+            bopt: 'O',
+            comm: mpich,
+            tlib: ON,
+            ncdf: nc-config
+          }
+        - {
+            desc: macos@14-gfortran@13-mpiuni-netcdf,
+            osys: macos-14,
+            cors: 3,
+            ropt: '',
+            exhs: OFF,
+            cmpr: gfortran,
+            cvrs: 13,
+            bopt: 'O',
+            comm: mpiuni,
+            tlib: OFF,
+            ncdf: nc-config
+          }
+        - {
+            desc: macos@14-clang-gfortran@14-openmpi-netcdf,
+            osys: macos-14,
+            cors: 3,
+            ropt: '--oversubscribe',
+            exhs: ON,
+            cmpr: gfortranclang,
+            cvrs: 14,
+            bopt: 'g',
+            comm: openmpi,
+            tlib: ON,
+            ncdf: nc-config
+          }
+    steps:
+    - name: Set up system
+      run: |
+        if [[ "${{matrix.config.osys}}" == "ubuntu-"* ]]; then
+          sudo apt-get -qq update
+          sudo apt install -qq -y autoconf automake libtool
+        elif [[ "${{matrix.config.osys}}" == "macos-"* ]]; then
+          sudo systemsetup -setusingnetworktime off
+          sudo rm -rf /etc/ntp.conf
+          brew install autoconf automake libtool
+          brew unlink libevent || true
+        fi
+        export STACK_ROOT=${HOME}/stack
+        mkdir -p ${STACK_ROOT}/{include,lib,lib64,bin}
+        export ARTIFACTS=${{runner.temp}}/esmf_tests
+        mkdir -p ${ARTIFACTS}
+        export LD_LIBRARY_PATH=${STACK_ROOT}/lib64:${STACK_ROOT}/lib:${LD_LIBRARY_PATH}
+        echo "STACK_ROOT=${STACK_ROOT}" >> $GITHUB_ENV
+        echo "ARTIFACTS=${ARTIFACTS}" >> $GITHUB_ENV
+        echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> $GITHUB_ENV
+        echo "CPPFLAGS=-I${STACK_ROOT}/include" >> $GITHUB_ENV
+        echo "LDFLAGS=-L${STACK_ROOT}/lib" >> $GITHUB_ENV
+        echo "${STACK_ROOT}/bin" >> $GITHUB_PATH
+    - name: Cache Libraries
+      id: cache-libraries
+      uses: actions/cache@v4
+      with:
+        path: ${{env.STACK_ROOT}}
+        key: ${{matrix.config.desc}}
+    - name: Set up GFORTRAN
+      if: matrix.config.cmpr == 'gfortran'
+      run: |
+        command -v gcc-${{matrix.config.cvrs}} || { exit 1; }
+        command -v g++-${{matrix.config.cvrs}} || { exit 1; }
+        command -v gfortran-${{matrix.config.cvrs}} || { exit 1; }
+        ln -fs `which gcc-${{matrix.config.cvrs}}` /usr/local/bin/gcc
+        ln -fs `which g++-${{matrix.config.cvrs}}` /usr/local/bin/g++
+        ln -fs `which gfortran-${{matrix.config.cvrs}}` /usr/local/bin/gfortran
+        gcc --version; g++ --version; gfortran --version
+        echo "CC=gcc" >> $GITHUB_ENV
+        echo "CXX=g++" >> $GITHUB_ENV
+        echo "F77=gfortran" >> $GITHUB_ENV
+        echo "F90=gfortran" >> $GITHUB_ENV
+        echo "FC=gfortran" >> $GITHUB_ENV
+    - name: Set up GFORTRANCLANG
+      if: matrix.config.cmpr == 'gfortranclang'
+      run: |
+        command -v gfortran-${{matrix.config.cvrs}} || { exit 1; }
+        ln -fs `which gfortran-${{matrix.config.cvrs}}` /usr/local/bin/gfortran
+        clang --version; clang++ --version; gfortran --version
+        echo "CC=clang" >> $GITHUB_ENV
+        echo "CXX=clang++" >> $GITHUB_ENV
+        echo "F77=gfortran" >> $GITHUB_ENV
+        echo "F90=gfortran" >> $GITHUB_ENV
+        echo "FC=gfortran" >> $GITHUB_ENV
+    - name: Install MPICH (CACHED)
+      env:
+        CACHE_HIT: ${{steps.cache-libraries.outputs.cache-hit}}
+      if: matrix.config.comm == 'mpich'
+      run: |
+        if [[ "$CACHE_HIT" != 'true' ]]; then
+          MPICH_URL="https://www.mpich.org/static/downloads/4.2.2/mpich-4.2.2.tar.gz"
+          mkdir ${{runner.temp}}/mpich
+          cd ${{runner.temp}}/mpich
+          curl -L $MPICH_URL | tar --strip-components=1 -xz
+          ./configure --prefix=${{env.STACK_ROOT}}
+          make -j ${{matrix.config.cors}} install
+        fi
+        mpichversion
+        echo "CC=mpicc" >> $GITHUB_ENV
+        echo "CXX=mpicxx" >> $GITHUB_ENV
+        echo "F77=mpifort" >> $GITHUB_ENV
+        echo "F90=mpifort" >> $GITHUB_ENV
+        echo "FC=mpifort" >> $GITHUB_ENV
+    - name: Install OPENMPI (CACHED)
+      env:
+        CACHE_HIT: ${{steps.cache-libraries.outputs.cache-hit}}
+      if: matrix.config.comm == 'openmpi'
+      run: |
+        if [[ "$CACHE_HIT" != 'true' ]]; then
+          OPENMPI_URL="https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.6.tar.gz"
+          mkdir ${{runner.temp}}/openmpi
+          cd ${{runner.temp}}/openmpi
+          curl -L $OPENMPI_URL | tar --strip-components=1 -xz
+          ./configure --prefix=${{env.STACK_ROOT}}
+          make -j ${{matrix.config.cors}} install
+        fi
+        ompi_info
+        echo "CC=mpicc" >> $GITHUB_ENV
+        echo "CXX=mpicxx" >> $GITHUB_ENV
+        echo "F77=mpifort" >> $GITHUB_ENV
+        echo "F90=mpifort" >> $GITHUB_ENV
+        echo "FC=mpifort" >> $GITHUB_ENV
+    - name: Install HDF5 (CACHED)
+      env:
+        CACHE_HIT: ${{steps.cache-libraries.outputs.cache-hit}}
+      if: matrix.config.ncdf == 'nc-config'
+      run: |
+        if [[ "$CACHE_HIT" != 'true' ]]; then
+          HDF5_URL="https://github.com/HDFGroup/hdf5/archive/refs/tags/hdf5_1.14.4.3.tar.gz"
+          mkdir ${{runner.temp}}/hdf5
+          cd ${{runner.temp}}/hdf5
+          curl -L $HDF5_URL | tar --strip-components=1 -xz
+          ./configure --enable-fortran --prefix=${{env.STACK_ROOT}}
+          make -j ${{matrix.config.cors}} install
+        fi
+    - name: Install NetCDF-C and NetCDF-Fortran (CACHED)
+      env:
+        CACHE_HIT: ${{steps.cache-libraries.outputs.cache-hit}}
+      if: matrix.config.ncdf == 'nc-config'
+      run: |
+        if [[ "$CACHE_HIT" != 'true' ]]; then
+          NETCDF_URL="https://github.com/Unidata/netcdf-c/archive/v4.9.0.tar.gz"
+          NETCDFF_URL="https://github.com/Unidata/netcdf-fortran/archive/v4.5.4.tar.gz"
+          mkdir ${{runner.temp}}/netcdf-c
+          cd ${{runner.temp}}/netcdf-c
+          curl -L $NETCDF_URL | tar --strip-components=1 -xz
+          ./configure --enable-netcdf-4 --disable-dap --prefix=${{env.STACK_ROOT}}
+          make -j ${{matrix.config.cors}} install
+          mkdir ${{runner.temp}}/netcdf-fortran
+          cd ${{runner.temp}}/netcdf-fortran
+          curl -L $NETCDFF_URL | tar --strip-components=1 -xz
+          ./configure --prefix=${{env.STACK_ROOT}}
+          make -j ${{matrix.config.cors}} install
+        fi
+    - name: Checkout ESMF
+      uses: actions/checkout@v4
+    - name: ESMF Configuration
+      run: |
+        echo "ESMF_DIR=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
+        echo "ESMF_COMPILER=${{matrix.config.cmpr}}" >> $GITHUB_ENV
+        echo "ESMF_COMM=${{matrix.config.comm}}" >> $GITHUB_ENV
+        echo "ESMF_BOPT=${{matrix.config.bopt}}" >> $GITHUB_ENV
+        echo "ESMF_NETCDF=${{matrix.config.ncdf}}" >> $GITHUB_ENV
+        echo "ESMF_MPILAUNCHOPTIONS=${{matrix.config.ropt}}" >> $GITHUB_ENV
+        echo "ESMF_TESTEXHAUSTIVE=${{matrix.config.exhs}}" >> $GITHUB_ENV
+        echo "ESMF_TRACE_LIB_BUILD=${{matrix.config.tlib}}" >> $GITHUB_ENV
+    - name: ESMF Info
+      run: |
+        make info | tee ${ARTIFACTS}/info.log
+    - name: ESMF Build
+      run: |
+        make -j ${{matrix.config.cors}} > ${ARTIFACTS}/build.log 2>&1
+    - name: ESMF All Tests
+      timeout-minutes: 60
+      run: |
+        make all_tests > ${ARTIFACTS}/all_tests.log 2>&1
+        { grep "SYSTEM TESTS SUMMARY" -A1 ${ARTIFACTS}/all_tests.log > ${ARTIFACTS}/summary.log || true; }
+        { grep "EXAMPLES SUMMARY" -A1 ${ARTIFACTS}/all_tests.log >> ${ARTIFACTS}/summary.log || true; }
+        { grep "UNIT TESTS SUMMARY" -A1 ${ARTIFACTS}/all_tests.log >> ${ARTIFACTS}/summary.log || true; }
+        echo >> ${ARTIFACTS}/summary.log
+        { grep "PASS:" ${ARTIFACTS}/all_tests.log >> ${ARTIFACTS}/summary.log || true; }
+        echo >> ${ARTIFACTS}/summary.log
+        { grep "FAIL:" ${ARTIFACTS}/all_tests.log >> ${ARTIFACTS}/summary.log || true; }
+        echo >> ${ARTIFACTS}/summary.log
+        { grep "CRASHED:" ${ARTIFACTS}/all_tests.log >> ${ARTIFACTS}/summary.log || true; }
+        echo >> ${ARTIFACTS}/summary.log
+        cat ${ARTIFACTS}/summary.log
+        { grep "FAIL:\|CRASHED:" ${ARTIFACTS}/summary.log > ${ARTIFACTS}/failures.log || true; }
+        if [ -f ${ARTIFACTS}/failures.log ]; then
+          error=$(wc -l < ${ARTIFACTS}/failures.log)
+        else
+          error=0
+        fi
+        if [ ${error} -gt 0 ]; then
+          mkdir -p ${ARTIFACTS}/output
+          find test -type f -name "*.Log" \
+            -exec cp '{}' ${ARTIFACTS}/output/. ';'
+          find test -type f -name "*.stdout" \
+            -exec cp '{}' ${ARTIFACTS}/output/. ';'
+          echo "Test Failures:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          cat ${ARTIFACTS}/failures.log >> $GITHUB_STEP_SUMMARY
+          echo '::error::${{matrix.config.desc}} failed, check artifacts.'
+          exit 1
+        fi
+    - name: Archive Results
+      if: ${{ failure() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: logs-${{matrix.config.desc}}
+        path: ${{env.ARTIFACTS}}

@@ -3,10 +3,12 @@
 \subsection{Design and Implementation Notes}
 
 For data I/O, the ESMF I/O capability relies on the
-\htmladdnormallink{PIO}{https://github.com/NCAR/ParallelIO},
-\htmladdnormallink{NetCDF}{http://www.unidata.ucar.edu/software/netcdf}, 
+\htmladdnormallink{PIO}{https://github.com/NCAR/ParallelIO} and
+\htmladdnormallink{NetCDF}{http://www.unidata.ucar.edu/software/netcdf}
+libraries, and optionally the
 \htmladdnormallink{PNetCDF}{http://trac.mcs.anl.gov/projects/parallel-netcdf} 
-and MPI\_IO libraries.  For Info attribute I/O, the ESMF I/O capability uses
-the \htmladdnormallink{JSON for Modern C++}{https://github.com/nlohmann/json}
-library to perform reading of JSON files.  PIO is included with the ESMF
-distribution; the other libraries must be installed on the machine of interest.
+library.  For Info attribute I/O, the ESMF I/O capability uses the
+\htmladdnormallink{JSON for Modern C++}{https://github.com/nlohmann/json}
+library to perform reading of JSON files. PIO and JSON for Modern C++
+are included with the ESMF distribution; the other libraries must be
+installed on the machine of interest.

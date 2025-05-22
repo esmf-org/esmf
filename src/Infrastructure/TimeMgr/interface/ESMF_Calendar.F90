@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1800,7 +1800,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE:  ESMF_CalendarEQ - Compare two Calendars for equality
 !
 ! !INTERFACE:
-      function ESMF_CalendarEQ(calendar1, calendar2)
+      impure elemental function ESMF_CalendarEQ(calendar1, calendar2)
 ! 
 ! !RETURN VALUE:
       logical :: ESMF_CalendarEQ
@@ -1852,7 +1852,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE:  ESMF_CalendarKindEQ - Compare two Calendar kinds for equality
 !
 ! !INTERFACE:
-      function ESMF_CalendarKindEQ(calkindflag1, calkindflag2)
+      impure elemental function ESMF_CalendarKindEQ(calkindflag1, calkindflag2)
 ! 
 ! !RETURN VALUE:
       logical :: ESMF_CalendarKindEQ
@@ -1879,7 +1879,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE:  ESMF_CalendarCalAndKindEQ - Compare a Calendar and Calendar kind for equality
 !
 ! !INTERFACE:
-      function ESMF_CalendarCalAndKindEQ(calendar, calkindflag)
+      impure elemental function ESMF_CalendarCalAndKindEQ(calendar, calkindflag)
 ! 
 ! !RETURN VALUE:
       logical :: ESMF_CalendarCalAndKindEQ
@@ -1915,7 +1915,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE:  ESMF_CalendarKindAndCalEQ - Compare a Calendar kind and Calendar for equality
 !
 ! !INTERFACE:
-      function ESMF_CalendarKindAndCalEQ(calkindflag, calendar)
+      impure elemental function ESMF_CalendarKindAndCalEQ(calkindflag, calendar)
 ! 
 ! !RETURN VALUE:
       logical :: ESMF_CalendarKindAndCalEQ
@@ -1951,7 +1951,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE:  ESMF_CalendarNE - Compare two Calendars for inequality
 !
 ! !INTERFACE:
-      function ESMF_CalendarNE(calendar1, calendar2)
+      impure elemental function ESMF_CalendarNE(calendar1, calendar2)
 ! 
 ! !RETURN VALUE:
       logical :: ESMF_CalendarNE
@@ -2003,7 +2003,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE:  ESMF_CalendarKindNE - Compare two Calendar kinds for inequality
 !
 ! !INTERFACE:
-      function ESMF_CalendarKindNE(calkindflag1, calkindflag2)
+      impure elemental function ESMF_CalendarKindNE(calkindflag1, calkindflag2)
 ! 
 ! !RETURN VALUE:
       logical :: ESMF_CalendarKindNE
@@ -2030,7 +2030,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE:  ESMF_CalendarCalAndKindNE - Compare a Calendar and Calendar kind for inequality
 !
 ! !INTERFACE:
-      function ESMF_CalendarCalAndKindNE(calendar, calkindflag)
+      impure elemental function ESMF_CalendarCalAndKindNE(calendar, calkindflag)
 ! 
 ! !RETURN VALUE:
       logical :: ESMF_CalendarCalAndKindNE
@@ -2066,7 +2066,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE:  ESMF_CalendarKindAndCalNE - Compare a Calendar kind and Calendar for inequality
 !
 ! !INTERFACE:
-      function ESMF_CalendarKindAndCalNE(calkindflag, calendar)
+      impure elemental function ESMF_CalendarKindAndCalNE(calkindflag, calendar)
 ! 
 ! !RETURN VALUE:
       logical :: ESMF_CalendarKindAndCalNE

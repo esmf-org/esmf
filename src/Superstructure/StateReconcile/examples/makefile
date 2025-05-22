@@ -11,7 +11,7 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_StateReconcileEx
 
 EXAMPLES_RUN   = run_ESMF_StateReconcileEx
 
-EXAMPLES_RUN_UNI = run_ESMF_StateReconcileEx_uni
+EXAMPLES_RUN_UNI =
                    
 include $(ESMF_DIR)/makefile
 
@@ -27,6 +27,3 @@ DIRS =
 #
 run_ESMF_StateReconcileEx:
 	$(MAKE) EXNAME=StateReconcile NP=4 exfrun
-
-run_ESMF_StateReconcileEx_uni:
-	$(MAKE) EXNAME=StateReconcile NP=1 exfrun

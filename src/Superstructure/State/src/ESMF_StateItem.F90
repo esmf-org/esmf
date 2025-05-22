@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -226,8 +226,9 @@
       type(ESMF_StateIntent_Flag), parameter :: &
                 ESMF_STATEINTENT_IMPORT   = ESMF_StateIntent_Flag(1), &
                 ESMF_STATEINTENT_EXPORT   = ESMF_StateIntent_Flag(2), &
-                ESMF_STATEINTENT_UNSPECIFIED = ESMF_StateIntent_Flag(3), &
-                ESMF_STATEINTENT_INVALID  = ESMF_StateIntent_Flag(4)
+                ESMF_STATEINTENT_INTERNAL  = ESMF_StateIntent_Flag(3), &
+                ESMF_STATEINTENT_UNSPECIFIED = ESMF_StateIntent_Flag(4), &
+                ESMF_STATEINTENT_INVALID  = ESMF_StateIntent_Flag(5)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_StateClass
@@ -259,7 +260,6 @@
 #endif
         type(ESMF_Container):: stateContainer
         integer :: alloccount
-        logical :: reconcileneededflag
          ESMF_INIT_DECLARE
       end type
 
@@ -274,8 +274,9 @@
         ESMF_STATEITEM_NAME, &
 #endif
         ESMF_STATEITEM_NOTFOUND
-      public ESMF_StateItemConstruct
+      public ESMF_StateItemConstruct, ESMF_StateItemString
       public ESMF_StateIntent_Flag, ESMF_STATEINTENT_IMPORT, ESMF_STATEINTENT_EXPORT, &
+                                   ESMF_STATEINTENT_INTERNAL, &
                                    ESMF_STATEINTENT_UNSPECIFIED
 #if 0
       public ESMF_NeededFlag, ESMF_NEEDED, &
@@ -376,6 +377,72 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
 
   end function ESMF_StateItemConstruct
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateItemString()"
+!BOPI
+! !IROUTINE: ESMF_StateItemString - Return StateItem Flag as string
+
+! !INTERFACE:
+  function ESMF_StateItemString (itemtype, keywordEnforcer, rc) result (string)
+!
+! !RETURN VALUE:
+    character(len=:), allocatable    :: string
+!
+! !ARGUMENTS:
+    type(ESMF_StateItem_Flag), intent(in) :: itemtype
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                  intent(out), optional :: rc
+!         
+! !DESCRIPTION:
+!   String of StateItem Flag.
+!   \item[itemtype]
+!     State item type code
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                     :: localrc      ! local return code
+
+    ! Initialize return code; assume failure until success is certain
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    select case (itemtype%ot)
+    case (ESMF_STATEITEM_FIELD%ot)
+      string = "Field"
+    case (ESMF_STATEITEM_FIELDBUNDLE%ot)
+      string = "FieldBundle"
+    case (ESMF_STATEITEM_ARRAY%ot)
+      string = "Array"
+    case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
+      string = "ArrayBundle"
+    case (ESMF_STATEITEM_ROUTEHANDLE%ot)
+      string = "RouteHandle"
+    case (ESMF_STATEITEM_STATE%ot)
+      string = "State"
+    case (ESMF_STATEITEM_UNKNOWN%ot)
+      string = "Unknown"
+    case (ESMF_STATEITEM_NOTFOUND%ot)
+      string = "NotFound"
+    case default
+      string = ""
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_INTNRL_BAD, &
+        msg="- unsupported StateItemType", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return  ! bail out
+    end select
+    
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_StateItemString
+!------------------------------------------------------------------------------
+
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
@@ -445,11 +512,7 @@ contains
         return
     case (ESMF_STATEITEM_STATE%ot)
       if (present(name)) then
-        call ESMF_GetName(stateItem%datap%spp%base, name, localrc)
-        if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) &
-          return
+        name = stateItem%namep
       endif
     case default
       call ESMF_LogSetError(rcToCheck=ESMF_RC_INTNRL_BAD, &
@@ -543,7 +606,7 @@ contains
     case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
         outbuf = trim (outbuf) // " ArrayBundle"
     case (ESMF_STATEITEM_ROUTEHANDLE%ot)
-        outbuf = trim (outbuf) // " Route handle"
+        outbuf = trim (outbuf) // " RouteHandle"
     case (ESMF_STATEITEM_STATE%ot)
         outbuf = trim (outbuf) // " State"
 #if 0

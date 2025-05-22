@@ -118,18 +118,18 @@ all issues have been resolved.
 <ul>
 
 <li>Programmers begin work on a feature or fix by branching from
-master.
+main.
 
 <li>When a branch is ready, it is submitted to code review via pull
-request. A number of Github tests will be run automatically. 
+request. A number of Github tests will be run automatically.
 
 <li>When code review is complete, and the changes are approved, the PR
-is merged into the master branch.
+is merged into the main branch.
 
-<li>The master branch is tested periodically by CDash (every ~6
-hours). Any test failures and the merge to master may be rolled back.
+<li>The main branch is tested periodically by CDash (every ~6
+hours). Any test failures and the merge to main may be rolled back.
 
-<li>The branch is then deleted by whomever merged it to master.
+<li>The branch is then deleted by whomever merged it to main.
 
 </ul>
 

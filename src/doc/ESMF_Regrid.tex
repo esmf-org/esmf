@@ -21,7 +21,7 @@ supports three CF compliant file formats: the CF Single Tile grid file format(~\
 a logically rectangular grid, the UGRID file
 format(~\ref{sec:fileformat:ugrid}) for unstructured grid and the GRIDSPEC
 Mosaic file format(~\ref{sec:fileformat:mosaic}) for cubed-sphere grid.  For
-the GRIDSPEC Mosaic file format, the data are stored in seperate data files,
+the GRIDSPEC Mosaic file format, the data are stored in separate data files,
 one file per tile.   
 The SCRIP format(~\ref{sec:fileformat:scrip}) and the ESMF unstructured grid format(~\ref{sec:fileformat:esmf}) are not supported because there is no way to define a variable field using these two formats. Currently, the tool only works with 2D grids, the support for the 3D grid will be 
 made available in the future release.  The variable array can be up to four dimensions.  The
@@ -113,7 +113,7 @@ There are three variables defined in the above UGRID file - {\tt zeta} on the no
 
 The GRIDSPEC MOSAIC file(~\ref{sec:fileformat:mosaic}) can be identified by a dummy variable with {\tt
   standard\_name} attribute set to {\tt grid\_mosaic\_spec}.  The data for a
-GRIDSPEC Mosaic file are stored in seperate files, one tile per file.  The
+GRIDSPEC Mosaic file are stored in separate files, one tile per file.  The
 name of the data file is not specified in the mosaic file.  Therefore,
 additional optional argument {\tt --srcdatafile} or {\tt --dstdatafile} is
 required to provide the prefix of the datafile.  The datafile is also a CF
@@ -177,7 +177,7 @@ will fail with an error message.
 If the destination 
 variable exists in the destination grid file, it has to have the same number of dimensions and the same type as the source variable. Except for the latitude and longitude dimensions, the size of 
 the destination variable's extra dimensions (e.g., time and vertical layers) has to match with the 
-source variable.   If the destination varialbe does not exist in the destination grid file, a
+source variable.   If the destination variable does not exist in the destination grid file, a
 new variable will be created with the same type and matching dimensions as the source variable.
 All the attributes of the source variable will be copied to the destination variable except those
 related to the grid definition (i.e. {\tt coordinates} attribute if the destination file is in  
@@ -255,7 +255,7 @@ ESMF_Regrid
         [--dst_regional]
         [--check]
         [--no_log]
-	[--help]
+        [--help|-h]
         [--version]
         [-V]
 where
@@ -280,7 +280,7 @@ where
                         is srcdatafile.tilename.nc, where tilename is the tile 
                         name defined in the MOSAIC file.
 
-  --srcdatafile       - If the destination grid is a GRIDSPEC MOSAIC grid, the data 
+  --dstdatafile       - If the destination grid is a GRIDSPEC MOSAIC grid, the data 
                         is stored in separate files, one per tile. dstdatafile
                         is the prefix of the destination data file.  The filename
                         is dstdatafile.tilename.nc, where tilename is the tile 
@@ -380,7 +380,7 @@ where
 
      --no_log         - Turn off the ESMF error log.
 
-     --help           - Print the usage message and exit.
+     --help or -h     - Print the usage message and exit.
 
      --version        - Print ESMF version and license information and exit.
 

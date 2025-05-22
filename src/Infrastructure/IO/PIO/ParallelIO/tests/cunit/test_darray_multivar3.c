@@ -214,7 +214,7 @@ int test_multivar_darray(int iosysid, int ioid, int ioid_float, int num_flavors,
                     if (file_fv_int != custom_fillvalue_int)
                         return ERR_WRONG;
                 }
-                
+
                 /* Check the float fill value. */
                 if ((ret = PIOc_get_var1_float(ncid2, varid[2], idx, &file_fv_float)))
                     return ret;

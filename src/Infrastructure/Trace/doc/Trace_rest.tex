@@ -1,7 +1,7 @@
 % $Id$
 %
 % Earth System Modeling Framework
-% Copyright 2002-2022, University Corporation for Atmospheric Research, 
+% Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 % Laboratory, University of Michigan, National Centers for Environmental 
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -14,6 +14,11 @@
 \item{\bf Limited types of trace events.}
   Currently only a few trace event types are available. The tracer may
   be extended in the future to record additional types of events.
+\item{\bf MPI call profing not available for statically linked executables on Darwin.}
+  Currently the linker on Darwin systems does not support the wrapping of
+  symbols during static linking. In order to access MPI call profiling on Darwin,
+  executables should be linked dynamically in combination with the procedure
+  described in section \ref{sec:MPIProfiling}.
 \end{enumerate}
 
 

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -286,7 +286,7 @@ end subroutine
 ! !IROUTINE: ESMF_StaggerLocEqual - Equality of StaggerLoc statuses
 !
 ! !INTERFACE:
-      function ESMF_StaggerLocEqual(StaggerLoc1, StaggerLoc2)
+      impure elemental function ESMF_StaggerLocEqual(StaggerLoc1, StaggerLoc2)
 
 ! !RETURN VALUE:
       logical :: ESMF_StaggerLocEqual
@@ -320,7 +320,7 @@ end subroutine
 ! !IROUTINE: ESMF_StaggerLocNotEqual - Non-equality of StaggerLoc statuses
 !
 ! !INTERFACE:
-      function ESMF_StaggerLocNotEqual(StaggerLoc1, StaggerLoc2)
+      impure elemental function ESMF_StaggerLocNotEqual(StaggerLoc1, StaggerLoc2)
 
 ! !RETURN VALUE:
       logical :: ESMF_StaggerLocNotEqual

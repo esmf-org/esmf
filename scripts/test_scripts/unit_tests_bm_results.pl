@@ -182,7 +182,7 @@ use File::Find
                         push @all_files, "$File::Find::name\n" ;
         }
         # Get all source unit tests files
-        @st_ut_files=grep (/UTest.F90$|UTest.C$/, @all_files);
+        @st_ut_files=grep (/UTest.F90$|UTest.C$|UTest.c$/, @all_files);
         @ut_files = @st_ut_files;
         foreach ( @st_ut_files) {
                 s/\.\///; # Delete all the "./"

@@ -6,7 +6,7 @@ program dofcopy
   use mpi
 #endif
   use pio
-  
+
   implicit none
 #ifdef NO_MPIMOD
 #include <mpif.h>
@@ -36,7 +36,7 @@ program dofcopy
   endif
 
   CALL get_command_argument(1, infile)
-  
+
   call pio_readdof(trim(infile), ndims, gdims, compmap, MPI_COMM_WORLD)
 
   if(mype < npe) then
@@ -44,7 +44,7 @@ program dofcopy
 
      call PIO_InitDecomp(iosystem, PIO_INT, gdims, compmap, iodesc, rearr=rearr)
      write(outfile, *) trim(infile)//".nc"
-     call PIO_write_nc_dof(iosystem, outfile, PIO_64BIT_DATA, iodesc, ierr) 
+     call PIO_write_nc_dof(iosystem, outfile, PIO_64BIT_DATA, iodesc, ierr)
      call PIO_finalize(iosystem, ierr)
   endif
 

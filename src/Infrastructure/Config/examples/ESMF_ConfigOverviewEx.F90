@@ -1,6 +1,6 @@
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -59,6 +59,7 @@
       real          :: table(7,3)    ! an array to hold the table in the RF
 
       type(ESMF_Config)   :: cf      ! the Config itself
+      type(ESMF_HConfig)  :: hconfig ! HConfig variable
 !EOC
 
 !--------------------------------------------------------
@@ -389,18 +390,240 @@
 !BOE
 !\subsubsection{Destruction of a Config}
 
-! The work with the configuration file {\tt cf} is finalized by call to
-! {\tt ESMF\_ConfigDestroy()}:
+! The work with the Config object {\tt cf} is finalized by callling
+! {\tt ESMF\_ConfigDestroy()}.
 !EOE
 
 !BOC
-      call ESMF_ConfigDestroy(cf, rc=rc) ! Destroy the Config
+      call ESMF_ConfigDestroy(cf, rc=rc) ! Destroy the Config object
 !EOC
 
       if (rc .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
         print*, "*****'call ESMF_ConfigDestroy' failed"
       end if
+
+!----------------------------------------------------------------
+! YAML File
+!----------------------------------------------------------------
+!BOE
+!\subsubsection{Loading a YAML file}
+
+! The Config class supports loading of YAML files. As before, an empty Config
+! object is created with {\tt ESMF\_ConfigCreate()} and then populated via the
+! {\tt ESMF\_ConfigLoadFile()} method.
+!EOE
+
+!BOC
+      cf = ESMF_ConfigCreate(rc=rc)          ! Create the empty Config object
+!EOC
+
+      if (rc .ne. ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+        print*, "*****' call ESMF_ConfigCreate' failed"
+      endif
+!BOE
+! Files ending in {\tt .yaml}, {\tt .yml}, or any combination of upper and lower
+! case letters that can be mapped to these two options, are interpreted as YAML
+! files. All other names are interpreted as classic Config {\em RFs} as
+! documented earlier.
+!EOE
+
+!BOC
+      call ESMF_ConfigLoadFile(cf, "myResourceFile.yaml", & ! Load the YAML File
+        rc=rc)                                    ! into the empty Config object
+!EOC
+
+      if (rc .ne. ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+        print*, "*****' call ESMF_ConfigLoadFile' failed"
+      endif
+!BOE
+! Here the {\tt myResourceFile.yaml} contains a YAML version of the previously
+! used {\tt myResourceFile.rc} file contents:
+!
+! \begin{verbatim}
+!# YAML representation of the myResourceFile.rc RF
+!
+!# mapping to sequences
+!
+!my_file_names:      [jan87.dat, jan88.dat, jan89.dat]  # all strings
+!constants:          [3.1415, 25]                       # float and integer
+!my_favorite_colors: [green, blue, 022]
+!
+!# mapping to scalars
+!
+!radius_of_the_earth:   6.37E6
+!parameter_1:           89
+!parameter_2:           78.2
+!input_file_name:       dummy_input.nc
+!
+!# represent table as mapping to sequence of sequences
+!
+!my_table_name:
+!- [1000,    3000,    263.0]
+!- [ 925,    3000,    263.0]
+!- [ 850,    3000,    263.0]
+!- [ 700,    3000,    269.0]
+!- [ 500,    3000,    287.0]
+!- [ 400,    3000,    295.8]
+!- [ 300,    3000,    295.8]
+! \end{verbatim}
+!
+! Notice that YAML support is limited to a small subset of the full YAML
+! language specification, allowing access through the classic Config API.
+! Specifically, the top level in the YAML file is expected to be a mapping
+! (dictionary) of scalar keys to any of the following three value options:
+!  \begin{itemize}
+!  \item Scalars
+!  \item List of scalars
+!  \item List of lists of scalars
+!  \end{itemize}
+! All other YAML constructs are silently ignored when loaded through this
+! interface. Constructs successfully ingested become available in the
+! {\tt cf} object, and can be accessed via the regular {\tt ESMF\_Config}
+! methods as outlined in the previous sections.
+!
+! As an example, access the {\tt my\_table\_name} element:
+!EOE
+!BOC
+      call ESMF_ConfigFindLabel(cf, 'my_table_name::', &
+               rc=rc)        ! Step a) Set the label location to the 
+                             ! beginning of the table
+!EOC
+
+      if (rc .ne. ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+        print*, "*****' call ESMF_ConfigFindLabel' failed"
+      endif
+
+!BOE
+! When done, the resources held by the Config object are released by calling
+! the {\tt ESMF\_ConfigDestroy()} method.
+!EOE
+
+!BOC
+      call ESMF_ConfigDestroy(cf, rc=rc) ! Destroy the Config object
+!EOC
+
+      if (rc .ne. ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+        print*, "*****'call ESMF_ConfigDestroy' failed"
+      end if
+
+!----------------------------------------------------------------
+! YAML HConfig
+!----------------------------------------------------------------
+!BOE
+!\subsubsection{Creating from HConfig object}
+
+! The Config class supports creating a Config object from a HConfig object.
+! Here the HConfig object is created from the same YAML file as used before.
+!EOE
+
+!BOC
+      ! Create HConfig object
+      hconfig = ESMF_HConfigCreate(filename="myResourceFile.yaml", rc=rc)
+!EOC
+      if (rc .ne. ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+        print*, "*****' call ESMF_HConfigCreate' failed"
+      endif
+!BOE
+! The {\tt myResourceFile.yaml} contains the following YAML contents:
+!
+! \begin{verbatim}
+!# YAML representation of the myResourceFile.rc RF
+!
+!# mapping to sequences
+!
+!my_file_names:      [jan87.dat, jan88.dat, jan89.dat]  # all strings
+!constants:          [3.1415, 25]                       # float and integer
+!my_favorite_colors: [green, blue, 022]
+!
+!# mapping to scalars
+!
+!radius_of_the_earth:   6.37E6
+!parameter_1:           89
+!parameter_2:           78.2
+!input_file_name:       dummy_input.nc
+!
+!# represent table as mapping to sequence of sequences
+!
+!my_table_name:
+!- [1000,    3000,    263.0]
+!- [ 925,    3000,    263.0]
+!- [ 850,    3000,    263.0]
+!- [ 700,    3000,    269.0]
+!- [ 500,    3000,    287.0]
+!- [ 400,    3000,    295.8]
+!- [ 300,    3000,    295.8]
+! \end{verbatim}
+!
+! A Config object can be created from the HConfig object simply by passing
+! {\tt hconfig} into {\tt ESMF\_CreateConfig()} as argument.
+!EOE
+
+!BOC
+      ! Create Config object from HConfig
+      cf = ESMF_ConfigCreate(hconfig=hconfig, rc=rc)
+!EOC
+
+      if (rc .ne. ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+        print*, "*****'call ESMF_HConfigCreate' failed"
+      end if
+
+!BOE
+! Notice that {\tt cf} uses the specified {\tt hconfig} object via reference.
+! It remains the callers responsibility to destroy the {\tt hconfig} object
+! when finished. Care must be taken to {\em not} destroy until access via
+! {\tt cf} is complete.
+!
+! Here, as an example, access the {\tt my\_table\_name} element:
+!EOE
+!BOC
+      call ESMF_ConfigFindLabel(cf, 'my_table_name::', &
+               rc=rc)        ! Step a) Set the label location to the 
+                             ! beginning of the table
+!EOC
+
+      if (rc .ne. ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+        print*, "*****' call ESMF_ConfigFindLabel' failed"
+      endif
+!EOE
+
+! When done, the resources held by the Config object are released by calling
+! the {\tt ESMF\_ConfigDestroy()} method.
+!EOE
+
+!BOC
+      call ESMF_ConfigDestroy(cf, rc=rc) ! Destroy the Config object
+!EOC
+
+      if (rc .ne. ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+        print*, "*****'call ESMF_ConfigDestroy' failed"
+      end if
+
+!BOE
+! As discussed above, the {\tt hconfig} object requires its own destroy call
+! for a complete release.
+!EOE
+
+!BOC
+      call ESMF_HConfigDestroy(hconfig, rc=rc) ! Destroy the HConfig object
+!EOC
+
+      if (rc .ne. ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+        print*, "*****'call ESMF_HConfigDestroy' failed"
+      end if
+
+
+!----------------------------------------------------------------
+!----------------------------------------------------------------
 
       print*, "Final Word"
       print*,"---------------------------------------------------"

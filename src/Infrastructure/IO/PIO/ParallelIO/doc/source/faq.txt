@@ -1,14 +1,14 @@
-/*! \page faq Frequently Asked Questions 
+/*! \page faq Frequently Asked Questions
 
 Here is a list of frequently asked questions and their answers.
-   
+
 <dl>
 
 <dt>How do I specify which tasks perform IO?</dt>
 
 <dd>This is done in the call to \ref PIO_init which has two
 interfaces: init_intracom and init_intercom.
-    
+
   <ul>
 
     <li> In the init_intracom interface, use the num_iotasks and
@@ -32,7 +32,7 @@ the tunable blocksize parameter, \ref PIO_set_blocksize, determines
 the actual number of tasks used for a given IO operation.
 </dd>
 
-<dt>How do I test if PIO is installed and working correctly?</dt> 
+<dt>How do I test if PIO is installed and working correctly?</dt>
 
 <dd>The PIO Library distribution contains tests for PIO. They are run
 my 'make check'. The tests use mpiexec to run tests on 4, 8, or 16

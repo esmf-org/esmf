@@ -129,7 +129,7 @@ platforms is to go to the
 \htmladdnormallink{http://www.earthsystemmodeling.org/download/platforms/}
 {http://www.earthsystemmodeling.org/download/platforms/} web page and follow the link 
 for the platform of interest. Each test report contains the output of
-{\tt gmake info}, which lists the settings of the {\tt ESMF\_MPIxxx} 
+{\tt make info}, which lists the settings of the {\tt ESMF\_MPIxxx} 
 environment variables.
 \end{sloppypar}
 
@@ -154,8 +154,8 @@ a wide range of valid and non-valid arguments are evaluated for correct behavior
 The following commands are used to build and run the unit tests provided with 
 the ESMF:
 \begin{verbatim}
-        gmake [ESMF_TESTEXHAUSTIVE=<ON,OFF>] unit_tests
-        gmake [ESMF_TESTEXHAUSTIVE=<ON,OFF>] unit_tests_uni
+        make [ESMF_TESTEXHAUSTIVE=<ON,OFF>] unit_tests
+        make [ESMF_TESTEXHAUSTIVE=<ON,OFF>] unit_tests_uni
 \end{verbatim}
 
 The {\tt tests\_uni} target runs the tests on a single processor. 
@@ -189,7 +189,7 @@ then you use these commands from /usr/local/esmf:
 
 \begin{verbatim}
        setenv ESMF_DIR /usr/local/esmf
-       gmake ESMF_BOPT=g ESMF_SITE=lahey ESMF_TESTEXHAUSTIVE=OFF tests_uni
+       make ESMF_BOPT=g ESMF_SITE=lahey ESMF_TESTEXHAUSTIVE=OFF tests_uni
 \end{verbatim}
 
 
@@ -211,7 +211,7 @@ page \htmladdnormallink{http://www.earthsystemmodeling.org/download/releases.sht
 for your platform and compiler.
 If the failures are not listed please contact ESMF Support at \htmladdnormallink{esmf\_support@ucar.edu}
 {mailto:esmf\_support@ucar.edu}
-Please indicate which unit tests are failing, and attach the output of the "gmake info" command to the email.
+Please indicate which unit tests are failing, and attach the output of the "make info" command to the email.
 
 
 The script output indicates whether there are any unit test failures.
@@ -315,8 +315,8 @@ link on the navigation bar.
 The following commands are used to build and run the system tests:
 
 \begin{verbatim}
-        gmake [SYSTEM_TEST=xxx] system_tests
-        gmake [SYSTEM_TEST=xxx] system_tests_uni
+        make [SYSTEM_TEST=xxx] system_tests
+        make [SYSTEM_TEST=xxx] system_tests_uni
 \end{verbatim}
 
 The {\tt system\_tests\_uni} target runs the tests on a single processor. 
@@ -345,7 +345,7 @@ and you want to run an optimized version of system test SimpleCoupling,
 then you use these commands from the directory {\tt \~/esmf}. 
 \begin{verbatim}
        setenv ESMF_PROJECT <project_name>
-       gmake ESMF_DIR=`pwd` SYSTEM_TEST=ESMF_SimpleCoupling system_tests
+       make ESMF_DIR=`pwd` SYSTEM_TEST=ESMF_SimpleCoupling system_tests
 \end{verbatim}
 
 If you are using ksh then replace the setenv command with
@@ -369,7 +369,7 @@ page \htmladdnormallink{http://www.earthsystemmodeling.org/download/releases.sht
 for your platform and compiler.
 If the failures are not listed please contact ESMF Support at \htmladdnormallink{esmf\_support@ucar.edu}
 {mailto:esmf\_support@ucar.edu}
-Please indicate which system tests are failing, and attach the output of the "gmake info" command to the email.
+Please indicate which system tests are failing, and attach the output of the "make info" command to the email.
 
 
 

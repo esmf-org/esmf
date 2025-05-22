@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -45,7 +45,6 @@ void FTN_X(f_esmf_utilversionprint) (ESMC_Logical *Flag, ESMC_Logical *versionFl
 
 int ESMC_UtilGetArgIndex(int argc, char * const argv[], const char *value, int *rc){
   // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc) *rc = ESMC_RC_NOT_IMPL;         // final return code
   
   int argIndex = -1;  // initialize
@@ -63,7 +62,6 @@ int ESMC_UtilGetArgIndex(int argc, char * const argv[], const char *value, int *
 
 void ESMC_UtilVersionPrint (int vFlag, int versionFlag, int *rc) {
   // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc) *rc = ESMC_RC_NOT_IMPL;         // final return code
 
   fflush (stdout);

@@ -7,7 +7,7 @@ run: tree_run_system_tests
 LOCDIR	  = src/system_tests/ESMF_FieldRegridOverlap
 
 
-SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_FieldRegridOverlapSTest
+SYSTEM_TESTS_BUILD    = $(ESMF_TESTDIR)/ESMF_FieldRegridOverlapSTest
 
 # Object files other than SysTest%.o that the
 # system tests executable will depend on.

@@ -1,7 +1,7 @@
 !  $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -59,14 +59,16 @@
 
    end subroutine f_esmf_frameworkinitialize
 
-   subroutine f_esmf_frameworkfinalize(rc)
+   subroutine f_esmf_frameworkfinalize(rc, endFlag)
        use ESMF_CompMod
        use ESMF_InitMod
+       use ESMF_UtilTypesMod
 
        implicit none
 
        integer :: rc
+       type(ESMF_End_Flag) :: endFlag
 
-       call ESMF_Finalize(rc=rc)
+       call ESMF_Finalize(endflag=endFlag, rc=rc)
 
    end subroutine f_esmf_frameworkfinalize

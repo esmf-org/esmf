@@ -1,6 +1,6 @@
 
  type (iosystem_desc_t)     :: iosystem
- integer (i4)               :: dims(1) 
+ integer (i4)               :: dims(1)
  integer (i4)               :: compdof
  type (io_desc_t)           :: iodesc
  ...
@@ -10,4 +10,3 @@
  dims(1) = 8
  compdof = (/2,4,5/)
  call PIO_initdecomp(iosystem,PIO_double,dims,compdof,iodesc)
-

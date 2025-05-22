@@ -12,8 +12,8 @@
  ****************************************************************************/
 
 
-
-
+#define _XOPEN_SOURCE
+#include <stdlib.h>
 #include <limits.h>
 #include <ctype.h>
 #include "zoltan_mem.h"    

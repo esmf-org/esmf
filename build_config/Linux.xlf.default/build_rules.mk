@@ -8,6 +8,7 @@
 #
 ESMF_F90DEFAULT         = bgxlf90_r
 ESMF_CXXDEFAULT         = bgxlC_r
+ESMF_CXXLINKERDEFAULT   = $(ESMF_F90LINKER)
 ESMF_CDEFAULT           = bgxlc_r
 
 ############################################################
@@ -22,9 +23,7 @@ endif
 #
 ifeq ($(ESMF_COMM),mpiuni)
 # MPI stub library -----------------------------------------
-ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_CPPFLAGS          += -DESMF_MPIUNI -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpi)
@@ -47,11 +46,6 @@ endif
 ESMF_F90COMPILER_VERSION  = ${ESMF_F90COMPILER} -qversion
 ESMF_CXXCOMPILER_VERSION  = ${ESMF_CXXCOMPILER} -qversion
 ESMF_CCOMPILER_VERSION    = ${ESMF_CCOMPILER} -qversion
-
-############################################################
-# BlueGene/Q needs to link with F90 front end
-#
-ESMF_CXXLINKERDEFAULT = $(ESMF_F90LINKERDEFAULT)
 
 ############################################################
 # BlueGene/Q special flags

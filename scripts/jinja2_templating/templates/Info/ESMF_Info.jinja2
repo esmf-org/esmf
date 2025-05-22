@@ -33,6 +33,7 @@ use ESMF_InitMacrosMod    ! ESMF initializer macros
 use ESMF_BaseMod          ! ESMF base class
 use ESMF_LogErrMod        ! ESMF error handling
 use ESMF_VMMod
+use ESMF_HConfigMod
 use iso_c_binding
 
 implicit none
@@ -96,6 +97,7 @@ interface ESMF_InfoSet
   module procedure ESMF_InfoSetLG
   module procedure ESMF_InfoSetCH
   module procedure ESMF_InfoSetINFO
+  module procedure ESMF_InfoSetHConfig
   module procedure ESMF_InfoSetArrayI4
   module procedure ESMF_InfoSetArrayI8
   module procedure ESMF_InfoSetArrayR4
@@ -1041,7 +1043,9 @@ end subroutine ESMF_InfoGetArray{{ t.esmf_suffix }}{% if alloc %}Alloc{% endif %
 !       An integer index to use. This will index into an object type providing
 !       the primary mechanism for iteration.
 !     \item [{[typekind]}]
-!       Get the ESMF typekind for the target. The minimum typekind required to hold the value is returned.
+!       Get the ESMF typekind for the target. The minimum typekind required to
+!       hold the value is returned.
+!       See section \ref{const:typekind} for valid values.
 !     \item [{[ikey]}]
 !       If present, this will be set to the key's name for the current inquire.
 !       Useful when iterating using an index. This does \textit{not} return the full key
@@ -1353,7 +1357,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_TypeKind_Flag) :: typekind
 !
 ! !DESCRIPTION:
-!     Return a value's ESMF TypeKind using a \textit{key}.
+!     Return the ESMF TypeKind of the value associated with \textit{key}.
+!     See section \ref{const:typekind} for valid return values.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1939,6 +1944,267 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   {{ esmf_lfe }}
 
   if (present(rc)) rc = ESMF_SUCCESS
+end subroutine {{ method_name }}
+
+! -----------------------------------------------------------------------------
+
+{% set method_name = "ESMF_InfoSetHConfig" %}
+#undef  ESMF_METHOD
+#define ESMF_METHOD "{{ method_name }}()"
+!BOP
+! !IROUTINE: ESMF_InfoSet - Set contents from a HConfig object
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_InfoSet
+recursive subroutine {{ method_name }}(info, value, keywordEnforcer, keyPrefix, force, rc)
+! !ARGUMENTS:
+  type(ESMF_Info), intent(inout) :: info
+  type(ESMF_HConfig), intent(in) :: value
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  character(len=*), intent(in), optional :: keyPrefix
+  logical, intent(in), optional :: force
+  integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     The provided \texttt{ESMF\_HConfig} object is expected to be a {\em map}.
+!     An error is returned if this condition is not met. Each key-value pair
+!     held by the \texttt{ESMF\_HConfig} object is added to the
+!     \texttt{ESMF\_Info} object. A copy of the source contents is made.
+!
+!     Transfer of {\em scalar}, {\em sequence}, and {\em map} values
+!     from \texttt{ESMF\_HConfig} to \texttt{ESMF\_Info} are supported.
+!     Maps are treated recursively. Sequences are restricted to scalar elements
+!     of the same typekind.
+!
+!     The keys of any map provided by the \texttt{ESMF\_HConfig} object must
+!     be of scalar type. Keys are interpreted as strings when transferred to the
+!     \texttt{ESMF\_Info} object. YAML merge keys "<<" are supported.
+!
+!     When existing keys in {\tt info} are overridden by this operation, the
+!     typekind of the associated value element is allowed to change.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+{{ doc_info }}
+!     \item [value]
+!       The \texttt{ESMF\_HConfig} object to use as source data.
+!     \item [{[keyPrefix]}]
+!       If provided, prepend {\tt keyPrefix} to each of the keys found in the
+!       {\tt value} map.
+!     \item [{[force]}]
+{{ doc_force }}
+{{ doc_rc }}
+!     \end{description}
+!EOP
+
+  integer                             :: localrc
+  logical                             :: isFlag
+  type(ESMF_HConfigIter)              :: hconfigIterBegin, hconfigIterEnd
+  type(ESMF_HConfigIter)              :: hconfigIter
+  character(len=:), allocatable       :: key, tag, fullKey, msgString
+  character(len=:), allocatable       :: valueStr
+  integer(ESMF_KIND_I4)               :: valueInt
+  real(ESMF_KIND_R4)                  :: valueFloat
+  logical                             :: valueBool
+  type(ESMF_HConfig)                  :: valueHConfig
+  type(ESMF_Info)                     :: valueInfo
+  character(len=:), allocatable       :: valueStrSeq(:)
+  integer(ESMF_KIND_I4), allocatable  :: valueIntSeq(:)
+  real(ESMF_KIND_R4), allocatable     :: valueFloatSeq(:)
+  logical, allocatable                :: valueBoolSeq(:)
+
+  if (present(rc)) rc = ESMF_SUCCESS
+
+  isFlag = ESMF_HConfigIsNull(value, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (isFlag) return  ! noop for NULL value
+
+  isFlag = ESMF_HConfigIsDefined(value, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (.not.isFlag) return  ! noop for not defined value
+
+  isFlag = ESMF_HConfigIsMap(value, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (.not.isFlag) then
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+      msg="Value must be HConfig map", &
+      ESMF_CONTEXT, rcToReturn=rc)
+    return
+  endif
+
+  hconfigIterBegin = ESMF_HConfigIterBegin(value, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  hconfigIterEnd = ESMF_HConfigIterEnd(value, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  hconfigIter = hconfigIterBegin
+  do while (ESMF_HConfigIterLoop(hconfigIter, hconfigIterBegin, hconfigIterEnd, &
+    rc=localrc))
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    key = ESMF_HConfigAsStringMapKey(hconfigIter, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    tag = ESMF_HConfigGetTagMapVal(hconfigIter, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (key=="<<" .and. tag=="tag:yaml.org,2002:map") then
+      ! dealing with YAML merge key -> recursivey handle it
+
+      valueHConfig = ESMF_HConfigCreateAtMapVal(hconfigIter, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_InfoSet(info, valueHConfig, keyPrefix=keyPrefix, force=force, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! clean-up
+      call ESMF_HConfigDestroy(valueHConfig, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    else
+      ! regular key
+
+      ! determine full key to be used for adding into info
+      if (present(keyPrefix)) then
+        fullKey=trim(keyPrefix)//"/"//key
+      else
+        fullKey=key
+      endif
+
+      ! set entry at full key to null to prevent conflict if typekind changes
+      call ESMF_InfoSetNull(info, key=fullKey, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (tag=="tag:yaml.org,2002:str") then
+        valueStr = ESMF_HConfigAsStringMapVal(hconfigIter, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_InfoSet(info, key=fullKey, value=valueStr, force=force, &
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else if (tag=="tag:yaml.org,2002:bool") then
+        valueBool = ESMF_HConfigAsLogicalMapVal(hconfigIter, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_InfoSet(info, key=fullKey, value=valueBool, force=force, &
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else if (tag=="tag:yaml.org,2002:int") then
+        valueInt = ESMF_HConfigAsI4MapVal(hconfigIter, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_InfoSet(info, key=fullKey, value=valueInt, force=force, &
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else if (tag=="tag:yaml.org,2002:float") then
+        valueFloat = ESMF_HConfigAsR4MapVal(hconfigIter, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_InfoSet(info, key=fullKey, value=valueFloat, force=force, &
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else if (tag=="tag:yaml.org,2002:map") then
+        ! ESMF_Info supports maps recursively... go for it...
+        valueHConfig = ESMF_HConfigCreateAtMapVal(hconfigIter, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        valueInfo = ESMF_InfoCreate(rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! recursive call to set up the info object from hconfig
+        call ESMF_InfoSet(valueInfo, valueHConfig, force=force, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! insert info under the respective key
+        call ESMF_InfoSet(info, key=fullKey, value=valueInfo, force=force, &
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! clean-up
+        call ESMF_HConfigDestroy(valueHConfig, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_InfoDestroy(valueInfo, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else if (tag=="tag:yaml.org,2002:seq") then
+        ! ESMF_Info supports sequences only supported as 1d vectors same typekind
+        ! ...detect the typekind by looking at the first element
+        tag = ESMF_HConfigGetTagMapVal(hconfigIter, index=1, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        if (tag=="tag:yaml.org,2002:str") then
+          valueStrSeq = ESMF_HConfigAsStringSeqMapVal(hconfigIter, &
+            stringLen=ESMF_MAXSTR, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          call ESMF_InfoSet(info, key=fullKey, values=valueStrSeq, force=force, &
+            rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else if (tag=="tag:yaml.org,2002:bool") then
+          valueBoolSeq = ESMF_HConfigAsLogicalSeqMapVal(hconfigIter, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          call ESMF_InfoSet(info, key=fullKey, values=valueBoolSeq, force=force, &
+            rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else if (tag=="tag:yaml.org,2002:int") then
+          valueIntSeq = ESMF_HConfigAsI4SeqMapVal(hconfigIter, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          call ESMF_InfoSet(info, key=fullKey, values=valueIntSeq, force=force, &
+            rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else if (tag=="tag:yaml.org,2002:float") then
+          valueFloatSeq = ESMF_HConfigAsR4SeqMapVal(hconfigIter, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          call ESMF_InfoSet(info, key=fullKey, values=valueFloatSeq, force=force, &
+            rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else
+          msgString = "Unsupported typekind for sequence conversion, tag="//tag
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+            msg="Unsupported typekind for sequence conversion", &
+            ESMF_CONTEXT, rcToReturn=rc)
+          return
+        endif
+      else
+        msgString = "Unsupported typekind, tag="//tag
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+          msg=msgString, &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+
+    endif
+
+  enddo
+
 end subroutine {{ method_name }}
 
 !------------------------------------------------------------------------------

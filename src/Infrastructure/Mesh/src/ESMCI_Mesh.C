@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1689,6 +1689,32 @@ void Mesh::RemoveGhost() {
   ESMCI::Par::Init("MESHLOG", false, curr_comm);
 }
 
+
+// Function to communicate fields to ghost locations
+ void Mesh::GhostCommFields(UInt nfields, MEField<> *const *sfields, MEField<> *const *rfields) {
+
+  // Only do on the original comm that this mesh was committed on, so 
+  // leave if that's not set
+  if (orig_comm == MPI_COMM_NULL) return;
+
+   // Error check
+   if (!sghost) Throw()<<"Ghost communicator must be present for ghost communication.";
+   
+   // Save current comm
+   MPI_Comm curr_comm=Par::Comm();
+   
+   // Switch to orig comm
+   ESMCI::Par::Init("MESHLOG", false, orig_comm);
+
+   // Send Fields
+   sghost->SendFields(nfields, sfields, rfields);
+
+   // Switch back to curr comm
+   ESMCI::Par::Init("MESHLOG", false, curr_comm);
+ }
+
+
+ 
 // Convenience function to communicate all fields to ghost locations
  void Mesh::GhostCommAllFields() {
 
@@ -1725,6 +1751,8 @@ void Mesh::RemoveGhost() {
    // Switch back to curr comm
    ESMCI::Par::Init("MESHLOG", false, curr_comm);
  }
+
+
  
 
 void Mesh::build_sym_comm_rel(UInt obj_type) {
@@ -1888,25 +1916,34 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
 }
 
 // This method converts a Mesh to a PointList
- ESMCI::PointList *Mesh::MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<int> *maskValuesArg, int *rc) {
+ ESMCI::PointList *Mesh::MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<int> *maskValuesArg, bool add_orig_coords, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Mesh::MeshToPointList()"
-
+   
    ESMCI::PointList *plp = NULL;
 
    int localrc;
-   MEField<> *cfield;
+   MEField<> *cfield=NULL;
+   MEField<> *orig_cfield=NULL;
    MEField<> *src_mask_val;
    Mesh::MeshObjIDMap::const_iterator mb,mi,me;
    bool check_id=false;
    int max_ok_id=std::numeric_limits<int>::max();
-
+   int orig_coord_dim=0; // 0 indicates not to add orig. coordinates
+   ESMC_CoordSys_Flag orig_coord_sys=ESMC_COORDSYS_UNINIT;
+   
    // Initialize the parallel environment for mesh (if not already done)
    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,rc))
      throw localrc;  // bail out with exception
 
+   // If original coords requested, add information from Mesh
+   if (add_orig_coords) {
+     orig_coord_dim=orig_spatial_dim;
+     orig_coord_sys=coordsys;
+   }
 
+   
    // Set up based on whether nodes or elem
    if (meshLoc == ESMC_MESHLOC_NODE) {
      // Get coord field
@@ -1918,6 +1955,17 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
                                         ESMC_CONTEXT, &localrc)) throw localrc;
      }
 
+     // If requested, get orig coord field
+     if (add_orig_coords) {
+       orig_cfield = GetField("orig_coordinates");
+       if (orig_cfield == NULL) {
+         int localrc;
+         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                          "mesh node original coordinates unavailable",
+                                          ESMC_CONTEXT, &localrc)) throw localrc;
+       }
+     }
+     
      // Get Iterators
      mb = map_begin(MeshObj::NODE);
      me = map_end(MeshObj::NODE);
@@ -1938,6 +1986,17 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
                                         ESMC_CONTEXT, &localrc)) throw localrc;
      }
 
+     // If requested, get orig coord field
+     if (add_orig_coords) {
+       orig_cfield = GetField("elem_orig_coordinates");
+       if (orig_cfield == NULL) {
+         int localrc;
+         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                          "mesh elem original coordinates unavailable",
+                                          ESMC_CONTEXT, &localrc)) throw localrc;
+       }
+     }     
+     
      // Get Iterators
      mb = map_begin(MeshObj::ELEMENT);
      me = map_end(MeshObj::ELEMENT);
@@ -1977,7 +2036,7 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
      }
 
      // Create PointList
-     plp = new PointList(num_local_pts,spatial_dim());
+     plp = new PointList(num_local_pts,spatial_dim(),orig_coord_dim,orig_coord_sys);
 
      // Loop through adding local nodes
      for (mi=mb; mi != me; ++mi) {
@@ -2033,7 +2092,7 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
      }
 
      // Create PointList
-     plp = new PointList(num_local_pts,spatial_dim());
+     plp = new PointList(num_local_pts,spatial_dim(),orig_coord_dim,orig_coord_sys);
 
      // Loop through adding unmasked points
      for (mi=mb; mi != me; ++mi) {

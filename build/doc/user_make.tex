@@ -3,8 +3,18 @@
 % Text about GNU make  This file is 
 % meant to be included in a user doc.
 
-GNU make is required to build the library.  On some
-systems this will be just the command \texttt{make}.  On others 
-it might be installed as \texttt{gmake} or even \texttt{gnumake}.
-In any event, use the --version option with the make command
-to determine if it is GNU make.  
+GNU Make is required to build the ESMF library.  On some
+systems this will be just the command \texttt{make}.  On others
+it might be installed as \texttt{gmake} or \texttt{gnumake}.
+This document uses {\tt make} consistently to refer to GNU Make.
+
+Use the {\tt \verb+--+version} option with the locally available make commands
+to determine which variant corresponds to GNU Make on your system. Use the
+respective command when interacting with the ESMF build system, and
+where this documentation uses {\tt make}.
+
+Notice that ESMF does not utilize Autotools (configure or autoconf) or CMake.
+Instead, the selection of configuration options is done by setting environment
+variables before building the framework. The relevant environment variables
+all begin with prefix {\tt ESMF\_}, and are discussed in detail under section
+\ref{EnvironmentVariables}.

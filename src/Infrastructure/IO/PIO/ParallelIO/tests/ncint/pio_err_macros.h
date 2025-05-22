@@ -73,7 +73,7 @@ static int total_err = 0, err = 0;
     } while (0)
 
 /* This is also defined in tests/cunit/pio_tests.h. It will reduce
- * confusion to use the same value. */    
+ * confusion to use the same value. */
 #define ERR_WRONG 1112
 
 #endif /* _PIO_ERR_MACROS_H */

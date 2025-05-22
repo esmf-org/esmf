@@ -14,8 +14,8 @@ extern "C" {
   /**
    * Called into from ESMCI_Trace.C when the trace
    * is opened and can receive events.  The linker will preload
-   * this symbol when LD_PRELOAD is specified so we can
-   * catch this notification.
+   * this symbol when LD_PRELOAD (or DYLD_INSERT_LIBRARIES on Darwin)
+   * is specified so we can catch this notification.
    */
   int c_esmftrace_notify_wrappers(int initialized) {
     if (initialized == 1) {

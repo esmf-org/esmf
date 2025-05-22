@@ -235,7 +235,6 @@ contains
         implicit none
 
         class(pioExampleClass), intent(inout) :: this
-        integer :: ierr
 
         call PIO_initdecomp(this%pioIoSystem(1), PIO_int, this%dimLen, this%compdof(this%ista:this%isto), &
             this%iodescNCells)

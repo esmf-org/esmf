@@ -1,3 +1,4 @@
+#include "config.h"
 ! PIO Testing framework utilities module
 MODULE pio_tutil
   USE pio
@@ -66,6 +67,9 @@ MODULE pio_tutil
   PUBLIC  :: PIO_TF_Init_, PIO_TF_Finalize_, PIO_TF_Passert_
   PUBLIC  :: PIO_TF_Is_netcdf
   PUBLIC  :: PIO_TF_Get_nc_iotypes, PIO_TF_Get_undef_nc_iotypes
+#ifdef NC_HAS_MULTIFILTERS
+  public  :: pio_tf_get_nc4_filtertypes
+#endif
   PUBLIC  :: PIO_TF_Get_iotypes, PIO_TF_Get_undef_iotypes
   PUBLIC  :: PIO_TF_Get_data_types
   PUBLIC  :: PIO_TF_Check_val_
@@ -190,7 +194,7 @@ CONTAINS
   END SUBROUTINE PIO_TF_Init_
 
   ! Initialize Testing framework - Internal (Not directly used by unit tests)
-  SUBROUTINE  PIO_TF_Init_async_(rearr)
+  SUBROUTINE  PIO_TF_Init_async_()
 #ifdef TIMING
    use perf_mod
 #endif
@@ -199,7 +203,6 @@ CONTAINS
 #else
     include 'mpif.h'
 #endif
-    INTEGER, INTENT(IN) :: rearr
     INTEGER ierr
 
     CALL MPI_COMM_DUP(MPI_COMM_WORLD, pio_tf_comm_, ierr);
@@ -355,7 +358,6 @@ CONTAINS
       ! pnetcdf
       num_iotypes = num_iotypes + 1
 #endif
-
     ! ALLOCATE with 0 elements ok?
     ALLOCATE(iotypes(num_iotypes))
     ALLOCATE(iotype_descs(num_iotypes))
@@ -385,7 +387,59 @@ CONTAINS
       i = i + 1
 #endif
   END SUBROUTINE
+#ifdef PIO_HAS_PAR_FILTERS
+  ! Returns a list of defined netcdf4 filter types
+  ! pio_file : An open file to check
+  ! filtertypes : After the routine returns contains a list of defined
+  !             netcdf4 filter types
+  ! filtertype_descs : After the routine returns contains description of
+  !                 the netcdf4 filter types returned in filtertypes
+  ! num_filtertypes : After the routine returns contains the number of
+  !                 of defined netcdf4 types, i.e., size of filtertypes and
+  !                 filtertype_descs arrays
+  SUBROUTINE PIO_TF_Get_nc4_filtertypes(pio_file, filtertypes, filtertype_descs, num_filtertypes)
+    use pio, only : pio_inq_filter_avail
+    type(file_desc_t), intent(in) :: pio_file
+    INTEGER, DIMENSION(:), ALLOCATABLE, INTENT(OUT) :: filtertypes
+    CHARACTER(LEN=*), DIMENSION(:), ALLOCATABLE, INTENT(OUT) :: filtertype_descs
+    INTEGER, INTENT(OUT) :: num_filtertypes
+    INTEGER :: i
+    integer :: ierr
+    integer, parameter :: num_possible_filters = 6
+    INTEGER :: tmpfiltertypes(num_possible_filters)
 
+    num_filtertypes = 0
+    ! First find the number of filter types
+
+    do i=1,num_possible_filters
+       ierr = pio_inq_filter_avail(pio_file, i)
+       if(ierr == PIO_NOERR) then
+          num_filtertypes = num_filtertypes + 1
+          tmpfiltertypes(num_filtertypes) = i
+       endif
+    enddo
+    allocate(filtertypes(num_filtertypes))
+    allocate(filtertype_descs(num_filtertypes))
+
+    filtertypes = tmpfiltertypes(1:num_filtertypes)
+    do i=1,num_filtertypes
+       select case(filtertypes(i))
+       case (1)
+          filtertype_descs(i) = "DEFLATE"
+       case (2)
+          filtertype_descs(i) = "SHUFFLE"
+       case (3)
+          filtertype_descs(i) = "FLETCHER32"
+       case (4)
+          filtertype_descs(i) = "SZIP"
+       case (5)
+          filtertype_descs(i) = "NBIT"
+       case (6)
+          filtertype_descs(i) = "SCALEOFFSET"
+       end select
+    enddo
+  END SUBROUTINE PIO_TF_Get_nc4_filtertypes
+#endif
   ! Returns a list of undefined netcdf iotypes
   ! e.g. This list could be used by a test to make sure that PIO
   !       fails gracefully for undefined types

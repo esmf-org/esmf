@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -673,14 +673,8 @@ int ESMC_FieldPrint(
 //
 //  Read Field data from a file and put it into an {ESMF\_Field} object.
 //  For this API to be functional, the environment variable {\tt ESMF\_PIO}
-//  should be set to "internal" when the ESMF library is built.
+//  should be set to either "internal" or "external" when the ESMF library is built.
 //  Please see the section on Data I/O,~\ref{io:dataio}.
-//
-//  Limitations:
-//  \begin{itemize}
-//    \item Only 1 DE per PET supported.
-//    \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
-//  \end{itemize}
 //
 //  The arguments are:
 //  \begin{description}
@@ -750,6 +744,7 @@ int ESMC_FieldRegridStore(
     int *regridPoleNPnts,                          // in
     enum ESMC_LineType_Flag *lineType,             // in
     enum ESMC_NormType_Flag *normType,             // in
+    enum ESMC_Logical *vectorRegrid,               // in
     enum ESMC_ExtrapMethod_Flag *extrapMethod,     // in
     int *extrapNumSrcPnts,                         // in
     float *extrapDistExponent,                     // in
@@ -811,6 +806,19 @@ int ESMC_FieldRegridStore(
 //    This argument controls the type of normalization used when generating conservative weights.
 //    This option only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}.
 //    If not specified normType defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}.
+//  \item [{[vectorRegrid]}]
+//    If true, treat a single ungridded dimension in the source and destination Fields
+//    as the components of a vector. If true and there is more than one ungridded dimension in either
+//    the source or destination, then an error will be returned. Currently, only undistributed (vector) dimensions of
+//    size 2 are supported. In the vector dimension, the first entry is interpreted as the east component and the
+//    second as the north component.
+//    In addition, this functionality presently only
+//    works when both the source and destination Fields are build on a geometry (e.g. an ESMF Grid) with
+//    a spherical coordinate system (e.g. ESMF\_COORDSYS\_SPH\_DEG). Also, this functionality is not currently supported with conservative
+//    regrid methods (e.g. {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}). We expect these restrictions to be loosened over
+//    time as new requirements come in from users.
+//    For further information on this functionality, see the "Vector regridding" section in the ESMF Reference Manual for Fortran.
+//    If not specified, this argument defaults to false.
 //  \item [{[extrapMethod]}]
 //    The type of extrapolation. Please see Section~\ref{opt:cextrapmethod} 
 //    for a list of valid options. If not specified, defaults to 
@@ -881,10 +889,11 @@ int ESMC_FieldRegridStoreFile(
     int *regridPoleNPnts,                          // in
     enum ESMC_LineType_Flag *lineType,             // in
     enum ESMC_NormType_Flag *normType,             // in
+    enum ESMC_Logical *vectorRegrid,               // in
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
     enum ESMC_Logical *ignoreDegenerate,           // in
     enum ESMC_Logical *create_rh,                  // in
-    ESMC_FileMode_Flag *filemode,                  // in
+    enum ESMC_FileMode_Flag *filemode,                  // in
     const char *srcFile,                           // in
     const char *dstFile,                           // in
     enum ESMC_FileFormat_Flag *srcFileType,        // in
@@ -946,6 +955,19 @@ int ESMC_FieldRegridStoreFile(
 //    This argument controls the type of normalization used when generating conservative weights.
 //    This option only applies to weights generated with {\tt regridmethod=ESMC\_REGRIDMETHOD\_CONSERVE}.
 //    If not specified normType defaults to {\tt ESMC\_NORMTYPE\_DSTAREA}.
+//  \item [{[vectorRegrid]}]
+//    If true, treat a single ungridded dimension in the source and destination Fields
+//    as the components of a vector. If true and there is more than one ungridded dimension in either
+//    the source or destination, then an error will be returned. Currently, only undistributed (vector) dimensions of
+//    size 2 are supported. In the vector dimension, the first entry is interpreted as the east component and the
+//    second as the north component.
+//    In addition, this functionality presently only
+//    works when both the source and destination Fields are build on a geometry (e.g. an ESMF Grid) with
+//    a spherical coordinate system (e.g. ESMF\_COORDSYS\_SPH\_DEG). Also, this functionality is not currently supported with conservative
+//    regrid methods (e.g. {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}). We expect these restrictions to be loosened over
+//    time as new requirements come in from users.
+//    For further information on this functionality, see the "Vector regridding" section in the ESMF Reference Manual for Fortran.
+//    If not specified, this argument defaults to false.
 //  \item[{[unmappedaction]}]
 //    Specifies what should happen if there are destination points that can't
 //    be mapped to a source cell. Options are {\tt ESMC\_UNMAPPEDACTION\_ERROR} or
@@ -1192,15 +1214,9 @@ int ESMC_FieldSMMStore(
 //
 // !DESCRIPTION:
 //  Write Field data into a file.  For this API to be functional, the 
-//  environment variable {\tt ESMF\_PIO} should be set to "internal" when 
+//  environment variable {\tt ESMF\_PIO} should be set to either "internal" or "external" when
 //  the ESMF library is built.  Please see the section on 
 //  Data I/O,~\ref{io:dataio}.
-//
-//  Limitations:
-//  \begin{itemize}
-//    \item Only 1 DE per PET supported.
-//    \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
-//  \end{itemize}
 //
 //  The arguments are:
 //  \begin{description}

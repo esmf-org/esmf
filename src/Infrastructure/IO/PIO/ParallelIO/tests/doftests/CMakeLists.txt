@@ -16,4 +16,3 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "NAG")
   #    target_compile_options (gptl
   #        PRIVATE -mismatch_all)
 endif ()
-

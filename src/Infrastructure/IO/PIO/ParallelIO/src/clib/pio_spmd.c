@@ -364,12 +364,13 @@ int pio_swapm(void *sendbuf, int *sendcounts, int *sdispls, MPI_Datatype *sendty
      * them here. */
     if (steps > 0)
     {
-        PLOG((2, "Waiting for outstanding msgs"));
-        if ((mpierr = MPI_Waitall(steps, rcvids, MPI_STATUSES_IGNORE)))
-            return check_mpi(NULL, NULL, mpierr, __FILE__, __LINE__);
-        if (fc->isend)
-            if ((mpierr = MPI_Waitall(steps, sndids, MPI_STATUSES_IGNORE)))
-                return check_mpi(NULL, NULL, mpierr, __FILE__, __LINE__);
+      MPI_Status statuses[steps];
+      PLOG((2, "Waiting for outstanding msgs"));
+      if ((mpierr = MPI_Waitall(steps, rcvids, statuses)))
+	return check_mpi(NULL, NULL, mpierr, __FILE__, __LINE__);
+      if (fc->isend)
+	if ((mpierr = MPI_Waitall(steps, sndids, statuses)))
+	  return check_mpi(NULL, NULL, mpierr, __FILE__, __LINE__);
     }
 
     return PIO_NOERR;

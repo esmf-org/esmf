@@ -1,0 +1,141 @@
+description: 'Build the parallelio library using cmake'
+inputs:
+  parallelio_version:
+    description: 'Tag in the parallelio repository to use'
+    default: pio2_6_3
+    required: False
+    type: string
+  shared_libraries:
+    description: 'Build shared libraries'
+    default: True
+    required: False
+    type: boolean
+  enable_examples:
+    description: 'Build parallelio examples'
+    default: False
+    required: False
+    type: boolean
+  enable_logging:
+    description: 'Enable parallelio logging (for debugging)'
+    default: False
+    required: False
+    type: boolean
+  enable_timing:
+    description: 'Enable parallelio timing library (GPTL)'
+    default: False
+    required: False
+    type: boolean
+  enable_doc:
+    description: 'Build parallelio Documentation'
+    default: False
+    required: False
+    type: boolean
+  enable_coverage:
+    description: 'Enable parallelio code coverage'
+    default: False
+    required: False
+    type: boolean
+  enable_netcdf_integration:
+    description: 'Enable netcdf integration'
+    default: False
+    required: False
+    type: boolean
+  with_mpi-serial:
+    description: 'Build with mpi-serial library'
+    default:
+    required: False
+    type: string
+  with_valgrind:
+    description: 'Build the parallelio valgrind leak check '
+    default: False
+    required: False
+    type: boolean
+  enable_fortran:
+    description: 'Build the parallelio Fortran Library '
+    default: False
+    required: False
+    type: boolean
+  extra_cflags:
+    description: 'Additional cflags to use'
+    default:
+    required: False
+    type: string
+
+  extra_ldflags:
+    description: 'Additional ldflags to use'
+    default:
+    required: False
+    type: string
+
+  extra_fflags:
+    description: 'Additional fflags to use'
+    default:
+    required: False
+    type: string
+  mpiexec_flags:
+    description: 'extra mpiexec flags'
+    default:
+    required: False
+    type: string
+  netcdf_c_include_dir:
+    default: /usr/include
+    required: False
+    type: string
+  netcdf_c_library:
+    default: /usr/lib/x86_64-linux-gnu/libnetcdf.so
+    required: False
+    type: string
+  netcdf_fortran_include_dir:
+    default: /usr/include
+    required: False
+    type: string
+  netcdf_fortran_library:
+    default: /usr/lib/x86_64-linux-gnu/libnetcdff.so
+    required: False
+    type: string
+  pnetcdf_include_dir:
+    default: /usr/include
+    required: False
+    type: string
+  pnetcdf_library:
+    default: /usr/lib/x86_64-linux-gnu/libpnetcdf.so
+    required: False
+    type: string
+  install_prefix:
+    description: 'Install path of parallelio'
+    default: ${GITHUB_WORKSPACE}/parallelio
+    required: False
+    type: string
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: NCAR/ParallelIO
+        path: parallelio-src
+        ref: ${{ inputs.parallelio_version }}
+    - id: parallelio-build
+      shell: bash
+      run: |
+        mkdir build
+        cd build
+        export CFLAGS="$CFLAGS ${{ inputs.extra_cflags }}"
+        export FFLAGS="$FFLAGS ${{ inputs.extra_fflags }}"
+        export LDFLAGS="$LDFLAGS ${{ inputs.extra_ldflags }}"
+        cmake -Wno-dev -DPIO_ENABLE_LOGGING=${{ inputs.enable_logging }} \
+        -DPIO_ENABLE_FORTRAN=${{ inputs.enable_fortran }} \
+        -DPIO_ENABLE_EXAMPLES=${{ inputs.enable_examples }} \
+        -DPIO_ENABLE_TIMING=${{ inputs.enable_timing }} \
+        -DCMAKE_INSTALL_PREFIX=${{ inputs.install_prefix }} \
+        -DMPIEXEC_PREFLAGS="${{ inputs.mpiexec_flags }}" \
+        -DNetCDF_C_INCLUDE_DIR=${{ inputs.netcdf_c_include_dir }} \
+        -DNetCDF_C_LIBRARY=${{ inputs.netcdf_c_library }}  \
+        -DNetCDF_Fortran_INCLUDE_DIR=${{ inputs.netcdf_fortran_include_dir }} \
+        -DNetCDF_Fortran_LIBRARY=${{ inputs.netcdf_fortran_library }}  \
+        -DPnetCDF_C_INCLUDE_DIR=${{ inputs.pnetcdf_include_dir }} \
+        -DPnetCDF_C_LIBRARY=${{ inputs.pnetcdf_library }}  \
+        $GITHUB_WORKSPACE/parallelio-src
+        make VERBOSE=1
+        #make tests
+        make install

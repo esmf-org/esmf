@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -7416,7 +7416,7 @@ contains
         elemIds=(/5/)  
 
         ! Allocate and fill the element topology type array.
-        allocate(elemTypes(numElemConn))
+        allocate(elemTypes(numTotElems))
         elemTypes=(/5/) ! elem id 5
  
         ! Allocate and fill the element connection type array.
@@ -8146,7 +8146,7 @@ contains
         elemMask=(/0/) 
 
         ! Allocate and fill the element topology type array.
-        allocate(elemTypes(numElemConn))
+        allocate(elemTypes(numTotElems))
         elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 4
  
         ! Allocate and fill the element connection type array.
@@ -8504,7 +8504,7 @@ contains
         elemIds=(/5/)  
 
         ! Allocate and fill the element topology type array.
-        allocate(elemTypes(numElemConn))
+        allocate(elemTypes(numTotElems))
         elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 4
  
         ! Allocate and fill the element connection type array.
@@ -10406,7 +10406,7 @@ subroutine test_sph_csrv_w_frac_norm(itrp, csrv, rc)
         elemIds=(/5/)  
 
         ! Allocate and fill the element topology type array.
-        allocate(elemTypes(numElemConn))
+        allocate(elemTypes(numTotElems))
         elemTypes=(/5/) ! elem id 5
 
         ! Allocate and fill the element connection type array.

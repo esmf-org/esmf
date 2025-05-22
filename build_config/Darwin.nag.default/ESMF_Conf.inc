@@ -2,7 +2,7 @@
 $Id$
 
 Earth System Modeling Framework
-Copyright 2002-2022, University Corporation for Atmospheric Research,
+Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 Laboratory, University of Michigan, National Centers for Environmental
 Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -25,16 +25,6 @@ be one of the following:
 #if 0
 #define ESMF_IOFlushMacro(unit,status) call flush (unit, status)
 #endif
-
-#if 0
-In the ESMF_Config.F90 source file, if EOL is defined
-as achar(10) (which is the newline character), 
-the file cannot be compiled (it will not parse). 
-If a bug fix for this is released, the next #define can
-be removed.
-#endif
-
-#define ESMF_HAS_ACHAR_BUG 1
 
 #if 0
 NAG before v6.2, use sizeof work-around code instead of F2008 C_SIZEOF

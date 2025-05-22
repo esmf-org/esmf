@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -20,11 +20,12 @@ module ESMF_LocalArrayMod
 ! This file contains the sub modules for LocalArray class definition and methods
 !
 !------------------------------------------------------------------------------
-  use iso_c_binding
-  
+! INCLUDES
+#include "ESMF.h"
+
   use ESMF_LocalArrayCreateMod
   use ESMF_LocalArrayGetMod
-  
+
 #ifndef ESMF_NO_F2018ASSUMEDTYPE
   public c_esmf_f90ptrsizeprint
 #endif

@@ -36,6 +36,14 @@ extern "C" {
     ESMCI::TraceClose(rc);
   }
 
+#undef ESMC_METHOD
+#define ESMC_METHOD "c_esmftrace_getprofiletypeinfo()"
+  void FTN_X(c_esmftrace_getprofiletypeinfo)(int *type, int *profileTypeInfo)
+  {
+    *profileTypeInfo=TraceGetProfileTypeInfo(static_cast<ESMCI::ESMC_ProfileType>(*type));
+  }
+
+  
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmftrace_mapvmpid()"
   void FTN_X(c_esmftrace_mapvmid)(ESMCI::VMId **vmid, int *mappedId, int *rc)

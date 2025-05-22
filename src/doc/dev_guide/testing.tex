@@ -31,7 +31,7 @@ under the {\bf Development} link on the ESMF
 web site.  This web page includes:
 \begin{itemize}
 \item separate web pages for each system test and UTC;
-\item links to the {\it Developer's Guide}, SourceForge Tracker, Requirements 
+\item links to the {\it Developer's Guide}, GitHub Tracker, Requirements 
 Spreadsheet, and any other pertinent information; and
 \item separate web page for automated regression test information and results.
 \end{itemize}
@@ -220,7 +220,7 @@ change in the performance of the software. This capability is available to devel
 Developers can run the unit tests and save their execution
 times to be used as a benchmark for future unit test runs.
 
-The following section now appears in the output of "gmake info".
+The following section now appears in the output of "make info".
 
 \begin{verbatim}
  
@@ -238,9 +238,9 @@ The steps for using the benchmarking test tool are as follows:
 
 \begin{sloppypar}
 \begin{itemize}
-\item After building the unit tests, execute "gmake run\_unit\_tests" and 
+\item After building the unit tests, execute "make run\_unit\_tests" and 
 verify that all tests pass. It not recommended that failing tests be benchmarked.
-\item Set "BENCHMARKINSTALL = YES" and execute "gmake run\_unit\_tests\_benchmark".
+\item Set "BENCHMARKINSTALL = YES" and execute "make run\_unit\_tests\_benchmark".
 This will cause the unit tests stdout files to be copied to the "DEFAULTBENCHMARKDIR"
 directory. The elapsed times of these unit tests are the now the benchmark. 
 The default of DEFAULTBENCHMARKDIR is \$ESMF\_DIR/DEFAULTBENCHMARKDIR.
@@ -249,14 +249,14 @@ the developer to benchmark different versions of the software. The benchmark dir
 can be changed by setting ESMF\_BENCHMARK\_PREFIX.
 \item Run the unit test a second time.
 \item To compare the elapsed times of this unit test run to the benchmared run, set
-"BENCHMARKINSTALL = NO", and execute "gmake run\_unit\_tests\_benchmark".
+"BENCHMARKINSTALL = NO", and execute "make run\_unit\_tests\_benchmark".
 \end{itemize} 
 
 According to the default settings above, the benchmarking test will only analyze unit tests that run 
 500 msecs (ESMF\_BENCHMARK\_THRESHOLD\_MSEC)
 or longer. If a unit test runs 3 percent (ESMF\_BENCHMARK\_TOLERANCE) or more beyond the benchmarked
 unit test, it will be flagged as failing the benchmark test. The developer may change these parameters
-as desired. The following is an example of the output of running "gmake run\_unit\_tests\_benchmark":
+as desired. The following is an example of the output of running "make run\_unit\_tests\_benchmark":
 
 \end{sloppypar}
 \begin{verbatim} 
@@ -413,9 +413,7 @@ which is recorded on the {\bf Test and Validation} web page. The test
 log shall
 include: a test ID number, a software release ID number, testing environment
 descriptions, a list of test cases executed, results, and any unexpected
-events. Bugs should be documented in the \htmladdnormallink{{\it SourceForge Bug
-Tracker}}{https://sourceforge.net/tracker/?group\_id=38089&atid=421185} and
-any bug fixes shall be validated.
+events.
 
 \paragraph{Writing System Tests}
 
@@ -633,9 +631,6 @@ The following is the list of subjects that have been implemented:
 \item Build\_WRFHYRO\_NUOPC\_CAP\_Doc
 \end{itemize}
 
-A script checks for document build requests every quarter hour on the quarter hour. A document build is started and on successful completion the document is updated on the web and document build results is updated. An email will be sent to esmf\_test@cgd.ucar.edu and esmf-test@lists.sourceforge.net when the build is done.
-
-
 \subsubsection{Testing for Releases}
 
 We provide two types of tar files, the ESMF source and the shared
@@ -656,9 +651,9 @@ The {\bf Shared Libraries Test Procedure} is also followed on all supported
 platforms for a release.
 
 \begin{enumerate}
-\item Change to the {\tt CoupledFlowEx} directory and execute {\tt gmake}. Verify that the demo runs successfully.
-\item Change to the {\tt CoupledFlowSrc} directory and execute {\tt gmake} then {\tt gmake run}. Verify that the demo runs successfully.
-\item Change to the {\tt examples} directory and execute {\tt gmake} and {\tt gmake run}. Verify that the example runs successfully.
+\item Change to the {\tt CoupledFlowEx} directory and execute {\tt make}. Verify that the demo runs successfully.
+\item Change to the {\tt CoupledFlowSrc} directory and execute {\tt make} then {\tt make run}. Verify that the demo runs successfully.
+\item Change to the {\tt examples} directory and execute {\tt make} and {\tt make run}. Verify that the example runs successfully.
 \end{enumerate}
 
 

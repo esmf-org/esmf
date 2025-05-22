@@ -2,7 +2,7 @@
 $Id$
 
 Earth System Modeling Framework
-Copyright 2002-2022, University Corporation for Atmospheric Research,
+Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 Laboratory, University of Michigan, National Centers for Environmental
 Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -40,27 +40,4 @@ unmatched quotes confuse some preprocessors with delusions of grammar.)
 
 #define ESMF_SRCLINE ESMF_FILENAME, __LINE__
 
-#if 0
-Macros to allow structured early exits from blocks of Fortran code.
-These are typically when testing for errors.
-
-Eventually these macros can be rewritten or replaced using the F2008
-block/end block statements.
 #endif
-
-#ifdef OMPI_MAJOR_VERSION
-#if (OMPI_MAJOR_VERSION < 2)
-#if 0
-MPI-3 support was complete in OpenMPI v2
-#endif
-#define ESMF_NO_MPI3
-#endif
-#endif
-
-#ifdef MVAPICH2_NUMVERSION
-#if (MVAPICH2_NUMVERSION < 20000000)
-#define ESMF_NO_MPI3
-#endif
-#endif
-
-#endif 

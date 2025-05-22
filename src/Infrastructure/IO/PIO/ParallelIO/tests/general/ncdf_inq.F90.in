@@ -65,7 +65,7 @@ SUBROUTINE test_teardown(ret)
   integer, intent(out) :: ret
 
   ret = PIO_NOERR
-  call PIO_deletefile(pio_tf_iosystem_, tgv_fname)  
+  call PIO_deletefile(pio_tf_iosystem_, tgv_fname)
 END SUBROUTINE test_teardown
 
 SUBROUTINE test_inq_var(pio_file, ret)
@@ -118,7 +118,7 @@ SUBROUTINE test_inq_dim(pio_file, ret)
   PIO_TF_CHECK_ERR(ret, "Failed to inq dimid :"//trim(tgv_fname))
 
   ret = pio_inq_dimname(pio_file, dim_id, dim_name)
-  PIO_TF_PASSERT(dim_name .eq. tgv_dim_name, "Dim name is not the expected value") 
+  PIO_TF_PASSERT(dim_name .eq. tgv_dim_name, "Dim name is not the expected value")
 
   ret = pio_inq_dimlen(pio_file, dim_id, dim_len)
   PIO_TF_PASSERT(dim_len == TGV_DIM_LEN, "Dim length is not the expected value")
@@ -157,7 +157,7 @@ PIO_TF_AUTO_TEST_SUB_BEGIN test_inq
   character(len=PIO_TF_MAX_STR_LEN), dimension(:), allocatable :: iotype_descs
   integer :: num_iotypes
   integer :: i, ret
-  
+
   num_iotypes = 0
   call PIO_TF_Get_nc_iotypes(iotypes, iotype_descs, num_iotypes)
   do i=1,num_iotypes

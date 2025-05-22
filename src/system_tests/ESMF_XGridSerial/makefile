@@ -8,7 +8,7 @@ run_uni: tree_run_system_tests_uni
 LOCDIR	  = src/system_tests/ESMF_XGridSerial
 
 
-SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_XGridSerialSTest
+SYSTEM_TESTS_BUILD    = $(ESMF_TESTDIR)/ESMF_XGridSerialSTest
 
 # Object files other than SysTest%.o that the
 # system tests executable will depend on.

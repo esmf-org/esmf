@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -820,6 +820,7 @@ int getComputationalUBound(
   template <class TYPE> void getCartCoord(TYPE *coord);
   template <class TYPE> void getItem(int item, TYPE *value);
   template <class TYPE> void getArrayData(Array *array, TYPE *data);
+  template <class TYPE> void getArrayVecData(Array *array, TYPE *data);
   template <class TYPE> void setArrayData(Array *array, TYPE data);
   }; 
 

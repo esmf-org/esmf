@@ -7,4 +7,3 @@ set host = 'kraken'
 ./testpio_bench.pl --maxiter 10 --iofmt pnc --pecount 160 --bench POPB --numIO 24 --logfile-suffix trunk_close
 ./testpio_bench.pl --maxiter 10 --iofmt pnc --pecount 320 --bench POPB --numIO 48 --logfile-suffix trunk_close
 ./testpio_bench.pl --maxiter 10 --iofmt pnc --pecount 640 --bench POPB --numIO 96 --logfile-suffix trunk_close
-

@@ -1,7 +1,6 @@
 ! $Id$
 !
 ! System test code FieldRegridMulti
-!  Description on Sourceforge under System Test #xxxxx
 
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_removeTEST        String used by test script to count system tests.

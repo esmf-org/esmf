@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -59,8 +59,6 @@ module NUOPC_Base
   public NUOPC_IsAtTime                   ! method
   public NUOPC_IsConnected                ! method
   public NUOPC_IsUpdated                  ! method
-  public NUOPC_LogIntro                   ! method
-  public NUOPC_LogExtro                   ! method
   public NUOPC_NoOp                       ! method
   public NUOPC_Realize                    ! method
   public NUOPC_Reconcile                  ! method
@@ -70,6 +68,8 @@ module NUOPC_Base
   
   ! internal Utility API
   public NUOPC_ChopString                 ! method
+  public NUOPC_LogIntro                   ! method
+  public NUOPC_LogExtro                   ! method
   public NUOPC_LogPetList                 ! method
   public NUOPC_SetVM                      ! method
 
@@ -93,6 +93,11 @@ module NUOPC_Base
   interface NUOPC_InitAttributes
     module procedure NUOPC_InitAttributesField
     module procedure NUOPC_InitAttributesState
+  end interface
+
+  interface NUOPC_IngestPetList
+    module procedure NUOPC_IngestPetListFF
+    module procedure NUOPC_IngestPetListHC
   end interface
 
   interface NUOPC_IsAtTime
@@ -149,12 +154,13 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_AddNamespace - Add a nested state with Namespace to a State
 ! !INTERFACE:
   subroutine NUOPC_AddNamespace(state, Namespace, nestedStateName, &
-    nestedState, rc)
+    nestedState, vm, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)         :: state
     character(len=*), intent(in)            :: Namespace
     character(len=*), intent(in),  optional :: nestedStateName
     type(ESMF_State), intent(out), optional :: nestedState
+    type(ESMF_VM),    intent(in),  optional :: vm
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Add a Namespace to {\tt state}. Namespaces are implemented via nested 
@@ -173,6 +179,10 @@ module NUOPC_Base
 !     Name of the nested state. Defaults to {\tt Namespace}.
 !   \item[{[nestedState]}]
 !     Optional return of the newly created nested state.
+!   \item[{[vm]}]
+!     If present, the nested State created to hold the namespace is created on
+!     the specified {\tt ESMF\_VM} object. The default is to create the nested
+!     State on the VM of the current component context.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -184,9 +194,10 @@ module NUOPC_Base
     type(ESMF_State)            :: nestedS
     character(len=80)           :: nestedSName
     type(ESMF_StateIntent_Flag) :: stateIntent
-    
+    logical                     :: stateIsCreated
+
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
     call ESMF_StateGet(state, stateIntent=stateIntent, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
@@ -196,31 +207,39 @@ module NUOPC_Base
     else
       nestedSName = trim(Namespace)
     endif
-    
+
     nestedS = ESMF_StateCreate(name=nestedSName, stateIntent=stateIntent, &
-      rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      
-    call NUOPC_InitAttributes(nestedS, rc=localrc)
+      vm=vm, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
-    call NUOPC_SetAttribute(nestedS, name="Namespace", &
-      value=trim(Namespace), rc=localrc)
+    stateIsCreated = ESMF_StateIsCreated(nestedS, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-    
-    call ESMF_StateAdd(state, (/nestedS/), rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    if (stateIsCreated) then
+
+      call NUOPC_InitAttributes(nestedS, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+      call NUOPC_SetAttribute(nestedS, name="Namespace", &
+        value=trim(Namespace), rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+      call ESMF_StateAdd(state, (/nestedS/), rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    endif
 
     if (present(nestedState)) &
       nestedState = nestedS
-    
+
   end subroutine
-  !---------------------------------------------------------------------
-  
+  !-----------------------------------------------------------------------------
+
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_AddNestedState - Add a nested state to a state with NUOPC attributes
@@ -618,13 +637,14 @@ module NUOPC_Base
 ! !INTERFACE:
   ! Private name; call using NUOPC_Advertise() 
   subroutine NUOPC_AdvertiseFields(state, StandardNames, &
-    TransferOfferGeomObject, SharePolicyField, SharePolicyGeomObject, rc)
+    TransferOfferGeomObject, SharePolicyField, SharePolicyGeomObject, vm, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)         :: state
     character(*),     intent(in)            :: StandardNames(:)
     character(*),     intent(in),  optional :: TransferOfferGeomObject
     character(*),     intent(in),  optional :: SharePolicyField
     character(*),     intent(in),  optional :: SharePolicyGeomObject
+    type(ESMF_VM),    intent(in),  optional :: vm
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   \label{NUOPC_AdvertiseFields}
@@ -663,6 +683,10 @@ module NUOPC_Base
 !     controls the vocabulary of this attribute. Valid options are 
 !     "share", and "not share".
 !     If omitted, the default is equal to {\tt SharePolicyField}.
+!   \item[{[vm]}]
+!     If present, the Field objects used during advertising are created on the
+!     specified {\tt ESMF\_VM} object. The default is to create the Field
+!     objects on the VM of the current component context.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -677,8 +701,9 @@ module NUOPC_Base
 
     do i=1, size(StandardNames)
       call NUOPC_AdvertiseField(state, StandardName=StandardNames(i), &
-        TransferOfferGeomObject=TransferOfferGeomObject, SharePolicyField=SharePolicyField, &
-        SharePolicyGeomObject=SharePolicyGeomObject, rc=localrc)
+        TransferOfferGeomObject=TransferOfferGeomObject, &
+        SharePolicyField=SharePolicyField, &
+        SharePolicyGeomObject=SharePolicyGeomObject, vm=vm, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME, &
@@ -2035,7 +2060,7 @@ module NUOPC_Base
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)            :: attrList(20)
+    character(ESMF_MAXSTR)            :: attrList(24)
     character(ESMF_MAXSTR)            :: tempString
     logical                           :: accepted
     integer                           :: i
@@ -2047,35 +2072,36 @@ module NUOPC_Base
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! Set up a customized list of Attributes to be added to the Fields
-    attrList(1) = "Connected"  ! values: "true" or "false"
-    attrList(2) = "ProducerConnection"! values: "open", "targeted", "connected"
-    attrList(3) = "ConsumerConnection"! values: "open", "targeted", "connected"
-    attrList(4) = "Updated" ! values: "true" or "false"
-    attrList(5) = "ProducerTransferOffer"   ! values: "cannot provide",
+    attrList(1) = "StandardName"
+    attrList(2) = "Units"
+    attrList(3) = "LongName"
+    attrList(4) = "ShortName"
+    attrList(5) = "Connected"  ! values: "true" or "false"
+    attrList(6) = "ProducerConnection"! values: "open", "targeted", "connected"
+    attrList(7) = "ConsumerConnection"! values: "open", "targeted", "connected"
+    attrList(8) = "Updated" ! values: "true" or "false"
+    attrList(9) = "ProducerTransferOffer"   ! values: "cannot provide",
                                     !   "can provide", "will provide"
-    attrList(6) = "ProducerTransferAction"  ! values: "provide", "accept"
-    attrList(7) = "ConsumerTransferOffer"   ! values: "cannot provide",
+    attrList(10)= "ProducerTransferAction"  ! values: "provide", "accept"
+    attrList(11)= "ConsumerTransferOffer"   ! values: "cannot provide",
                                     !   "can provide", "will provide"
-    attrList(8) = "ConsumerTransferAction"  ! values: "provide", "accept"
-    attrList(9) = "SharePolicyField"       ! values: "share", "not share"
-    attrList(10)= "ShareStatusField"       ! values: "shared", "not shared"
-    attrList(11)= "SharePolicyGeomObject"  ! values: "share", "not share"
-    attrList(12)= "ShareStatusGeomObject"  ! values: "shared", "not shared"
-    attrList(13)= "UngriddedLBound"
-    attrList(14)= "UngriddedUBound"
-    attrList(15)= "GridToFieldMap"
-    attrList(16)= "ArbDimCount"
-    attrList(17)= "MinIndex"
-    attrList(18)= "MaxIndex"
-    attrList(19)= "TypeKind"
-    attrList(20)= "GeomLoc"   ! either staggerloc or meshloc
+    attrList(12)= "ConsumerTransferAction"  ! values: "provide", "accept"
+    attrList(13)= "SharePolicyField"       ! values: "share", "not share"
+    attrList(14)= "ShareStatusField"       ! values: "shared", "not shared"
+    attrList(15)= "SharePolicyGeomObject"  ! values: "share", "not share"
+    attrList(16)= "ShareStatusGeomObject"  ! values: "shared", "not shared"
+    attrList(17)= "UngriddedLBound"
+    attrList(18)= "UngriddedUBound"
+    attrList(19)= "GridToFieldMap"
+    attrList(20)= "ArbDimCount"
+    attrList(21)= "MinIndex"
+    attrList(22)= "MaxIndex"
+    attrList(23)= "TypeKind"
+    attrList(24)= "GeomLoc"   ! either staggerloc or meshloc
     
     ! add Attribute packages
-    call ESMF_AttributeAdd(field, convention="ESG", purpose="General", rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     call ESMF_AttributeAdd(field, convention="NUOPC", purpose="Instance",   &
-      attrList=attrList, nestConvention="ESG", nestPurpose="General", rc=localrc)
+      attrList=attrList, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
@@ -2329,13 +2355,14 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_IngestPetList - Ingest a petList from FreeFormat
 ! !INTERFACE:
-  subroutine NUOPC_IngestPetList(petList, freeFormat, rc)
+  ! Private name; call using NUOPC_IngestPetList()
+  subroutine NUOPC_IngestPetListFF(petList, freeFormat, rc)
 ! !ARGUMENTS:
     integer, allocatable,   intent(out)           :: petList(:)
     type(NUOPC_FreeFormat), intent(in),  target   :: freeFormat
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Construct a petList from a {\tt FreeFormat} object.
+!   Construct a petList from a FreeFormat object.
 !
 !   The arguments are:
 !   \begin{description}
@@ -2372,11 +2399,14 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     integer                 :: localrc
-    integer                 :: i, j, k
+    integer                 :: i, j, k, temp
     integer                 :: lineCount, tokenCount, blockCount, petCount
     integer, allocatable    :: lb(:), ub(:)
+    logical, allocatable    :: reverse(:)
     character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
     character(len=ESMF_MAXSTR), pointer :: chopStringList(:)
+
+    if (present(rc)) rc = ESMF_SUCCESS
 
     call NUOPC_FreeFormatGet(freeFormat, lineCount=lineCount, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2389,7 +2419,7 @@ module NUOPC_Base
       blockCount = blockCount + tokenCount
     enddo
 
-    allocate(lb(tokenCount),ub(tokenCount))
+    allocate(lb(blockCount),ub(blockCount),reverse(blockCount))
     petCount = 0
     k = 1
 
@@ -2426,12 +2456,13 @@ module NUOPC_Base
           read(chopStringList(1),*) lb(k)
           read(chopStringList(2),*) ub(k)
           deallocate(chopStringList)
+          reverse(k) = .false.
           if (ub(k)<lb(k)) then
-            call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-              msg="Upper bound must not be less than lower bound in "//& 
-              "petList block element.", line=__LINE__, file=FILENAME, &
-              rcToReturn=rc)
-            return  ! bail out
+            ! reverse range
+            reverse(k) = .true.
+            temp = ub(k)
+            ub(k) = lb(k)
+            lb(k) = temp
           endif
         else
           ! this is a single PET
@@ -2452,13 +2483,152 @@ module NUOPC_Base
     i = 1
 
     do k=1, blockCount
-      do j=lb(k), ub(k)
-        petList(i) = j
-        i = i+1
-      enddo
+      if (reverse(k)) then
+        do j=ub(k), lb(k), -1
+          petList(i) = j
+          i = i+1
+        enddo
+      else
+        do j=lb(k), ub(k)
+          petList(i) = j
+          i = i+1
+        enddo
+      endif
     enddo
 
-    deallocate(lb, ub)
+    deallocate(lb, ub, reverse)
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_IngestPetList - Ingest a petList from HConfig
+! !INTERFACE:
+  ! Private name; call using NUOPC_IngestPetList()
+  subroutine NUOPC_IngestPetListHC(petList, hconfig, rc)
+! !ARGUMENTS:
+    integer, allocatable,   intent(out)           :: petList(:)
+    type(ESMF_HConfig),     intent(in)            :: hconfig
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   Construct a petList from a HConfig object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[petList]
+!     The constructed petList. The size and content is set by this method.
+!   \item[hconfig]
+!     The incoming petList information as HConfig. The provided {\tt hconfig}
+!     must be a scalar, or a list of lists and scalars. The input is recursively
+!     processed, and each scalar fed into the FreeFormat version of the
+!     {\tt NUOPC\_IngestPetList()} interface as a single string. The resulting
+!     {\tt petList} is the union of all PETs determined by all of the elements
+!     contained in {\tt hconfig}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                 :: localrc
+    type(NUOPC_FreeFormat)  :: ff
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! create empty free format object
+    ff = NUOPC_FreeFormatCreate(rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    ! recursively process hconfig and add to free format object
+    call ProcessRecusive(ff, hconfig, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    ! ingest petList from free format object
+    call NUOPC_IngestPetList(petList, ff, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    ! clean-up
+    call NUOPC_FreeFormatDestroy(ff, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  recursive subroutine ProcessRecusive(freeFormat, hconfig, rc)
+    type(NUOPC_FreeFormat)                        :: freeFormat
+    type(ESMF_HConfig),     intent(in)            :: hconfig
+    integer,                intent(out), optional :: rc
+    ! local variables
+    integer                   :: localrc
+    logical                   :: isFlag
+    character(:), allocatable :: valueString
+    type(ESMF_HConfigIter)    :: hconfigIter, hconfigIterBegin, hconfigIterEnd
+    type(ESMF_HConfig)        :: hconfigNode
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    isFlag = ESMF_HConfigIsScalar(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    if (isFlag) then
+      ! scalar  -> terminal node
+      isFlag = ESMF_HConfigIsNull(hconfig, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      if (.not.isFlag) then
+        ! valid scalar
+        valueString = ESMF_HConfigAsString(hconfig, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        call NUOPC_FreeFormatAdd(freeFormat, [valueString], rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      endif
+    else
+      ! not scalar -> check for sequence
+      isFlag = ESMF_HConfigIsSequence(hconfig, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      if (.not.isFlag) then
+        ! error condition
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+          msg="Must be scalar or sequence.", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)
+        return  ! bail out
+      endif
+      ! iterate over the sequence elements
+      hconfigIterBegin = ESMF_HConfigIterBegin(hconfig, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      hconfigIterEnd = ESMF_HConfigIterEnd(hconfig, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      hconfigIter = hconfigIterBegin
+      do while ( &
+        ESMF_HConfigIterLoop(hconfigIter, hconfigIterBegin, hconfigIterEnd, &
+        rc=localrc))
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        ! recursive processing
+        hconfigNode = ESMF_HConfigCreateAt(hconfigIter, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        call ProcessRecusive(freeFormat, hconfigNode, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        call ESMF_HConfigDestroy(hconfigNode, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      enddo
+    endif
 
   end subroutine
   !-----------------------------------------------------------------------------
@@ -3016,151 +3186,6 @@ module NUOPC_Base
     endif
     
   end function
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: NUOPC_LogIntro - Log entering a method
-! !INTERFACE:
-  subroutine NUOPC_LogIntro(name, rName, verbosity, rc)
-! !ARGUMENTS:
-    character(len=*), intent(in)   :: name
-    character(len=*), intent(in)   :: rName
-    integer,          intent(in)   :: verbosity
-    integer,          intent(out)  :: rc
-! !DESCRIPTION:
-!   Write information into Log on entering a method, according to the verbosity
-!   aspects.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[name]
-!     Component name.
-!   \item[rName]
-!     Routine name.
-!   \item[verbosity]
-!     Bit field corresponding to verbosity aspects.
-!   \item[rc]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-  !-----------------------------------------------------------------------------
-    ! local variables
-    integer             :: indentCount
-    character(len=120)  :: msg
-    type(ESMF_VM)       :: vm
-    integer             :: localPet, ssiLocalPetCount, peCount, accDeviceCount
-    if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_LogGet(indentCount=indentCount, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_LogSet(indentCount=indentCount+2, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,1)) then
-      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,2)) then
-      call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" intro:", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,3)) then
-      call ESMF_VMGetCurrent(vm, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_VMGet(vm, localPet=localPet, &
-        ssiLocalPetCount=ssiLocalPetCount, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_VMGet(vm, pet=localPet, peCount=peCount, &
-        accDeviceCount=accDeviceCount, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      write (msg,"(A,I3)") trim(name)//": "//rName// &
-        " intro: local peCount=", peCount
-      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      write (msg,"(A,I3)") trim(name)//": "//rName// &
-        " intro: local accDeviceCount=", accDeviceCount
-      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      write (msg,"(A,I3)") trim(name)//": "//rName// &
-        " intro: ssiLocalPetCount=", ssiLocalPetCount
-      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    ! return successfully
-    rc = ESMF_SUCCESS
-  end subroutine
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: NUOPC_LogExtro - Log exiting a method
-! !INTERFACE:
-  subroutine NUOPC_LogExtro(name, rName, verbosity, rc)
-! !ARGUMENTS:
-    character(len=*), intent(in)   :: name
-    character(len=*), intent(in)   :: rName
-    integer,          intent(in)   :: verbosity
-    integer,          intent(out)  :: rc
-! !DESCRIPTION:
-!   Write information into Log on exiting a method, according to the verbosity
-!   aspects.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[name]
-!     Component name.
-!   \item[rName]
-!     Routine name.
-!   \item[verbosity]
-!     Bit field corresponding to verbosity aspects.
-!   \item[rc]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-  !-----------------------------------------------------------------------------
-    ! local variables
-    integer :: indentCount
-    if (btest(verbosity,2)) then
-      call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" extro:", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,1)) then
-      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,0)) then
-      call ESMF_LogGet(indentCount=indentCount, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_LogSet(indentCount=indentCount-2, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    ! return successfully
-    rc = ESMF_SUCCESS
-  end subroutine
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
@@ -5240,9 +5265,9 @@ module NUOPC_Base
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    integer               :: i, j, count
+    integer               :: i, j, count, countAlloc
     integer, allocatable  :: chopPos(:)
-    
+
     ! check the incoming pointer
     if (associated(chopStringList)) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
@@ -5252,13 +5277,13 @@ module NUOPC_Base
         rcToReturn=rc)
       return  ! bail out
     endif
-    
+
     ! determine how many times chopChar is found in string
     count=0 ! reset
     do i=1, len(trim(string))
       if (string(i:i)==chopChar) count=count+1
     enddo
-    
+
     ! record positions where chopChar is found in string
     allocate(chopPos(count))
     j=1 ! reset
@@ -5268,17 +5293,28 @@ module NUOPC_Base
         j=j+1
       endif
     enddo
-    
+
+    ! prepare chopStringList
+    countAlloc = count
+    if (count>0) then
+      if (chopPos(count)<len(trim(string))) countAlloc = count + 1
+    else
+      countAlloc = 1
+    endif
+    allocate(chopStringList(countAlloc))
+
     ! chop up the string
-    allocate(chopStringList(count+1))
     j=1 ! reset
     do i=1, count
       chopStringList(i) = string(j:chopPos(i)-1)
       j=chopPos(i)+1
     enddo
-    chopStringList(count+1) = trim(string(j:len(string)))
+    if (countAlloc>count) then
+      ! there is some part of string left after the last chopChar
+      chopStringList(count+1) = string(j:len(trim(string)))
+    endif
     deallocate(chopPos)
-    
+
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -5287,7 +5323,194 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: NUOPC_LogPetList - Chop a string into sub-strings
+! !IROUTINE: NUOPC_LogIntro - Log entering a method
+! !INTERFACE:
+  subroutine NUOPC_LogIntro(name, rName, verbosity, importState, exportState, rc)
+! !ARGUMENTS:
+    character(len=*), intent(in)   :: name
+    character(len=*), intent(in)   :: rName
+    integer,          intent(in)   :: verbosity
+    type(ESMF_State), intent(in)   :: importState, exportState
+    integer,          intent(out)  :: rc
+! !DESCRIPTION:
+!   Write information into Log on entering a method, according to the verbosity
+!   aspects.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[name]
+!     Component name.
+!   \item[rName]
+!     Routine name.
+!   \item[verbosity]
+!     Bit field corresponding to verbosity aspects.
+!   \item[importState]
+!     The importState of the component using this method.
+!   \item[exportState]
+!     The exportState of the component using this method.
+!   \item[rc]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer             :: indentCount
+    character(len=120)  :: msg
+    type(ESMF_VM)       :: vm
+    integer             :: localPet, ssiLocalPetCount, peCount, accDeviceCount
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_LogGet(indentCount=indentCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_LogSet(indentCount=indentCount+2, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" intro:", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,3)) then
+      call ESMF_VMGetCurrent(vm, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_VMGet(vm, localPet=localPet, &
+        ssiLocalPetCount=ssiLocalPetCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_VMGet(vm, pet=localPet, peCount=peCount, &
+        accDeviceCount=accDeviceCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      write (msg,"(A,I3)") trim(name)//": "//rName// &
+        " intro: local peCount=", peCount
+      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      write (msg,"(A,I3)") trim(name)//": "//rName// &
+        " intro: local accDeviceCount=", accDeviceCount
+      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      write (msg,"(A,I3)") trim(name)//": "//rName// &
+        " intro: ssiLocalPetCount=", ssiLocalPetCount
+      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,4)) then
+      call ESMF_StateLog(importState, &
+        prefix=trim(name)//": "//rName//" intro {IS}:", &
+        nestedFlag=.true., deepFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,5)) then
+      call ESMF_StateLog(exportState, &
+        prefix=trim(name)//": "//rName//" intro {ES}:", &
+        nestedFlag=.true., deepFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    ! return successfully
+    rc = ESMF_SUCCESS
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_LogExtro - Log exiting a method
+! !INTERFACE:
+  subroutine NUOPC_LogExtro(name, rName, verbosity, importState, exportState, rc)
+! !ARGUMENTS:
+    character(len=*),           intent(in)   :: name
+    character(len=*),           intent(in)   :: rName
+    integer,                    intent(in)   :: verbosity
+    type(ESMF_State), optional, intent(in)   :: importState, exportState
+    integer,                    intent(out)  :: rc
+! !DESCRIPTION:
+!   Write information into Log on exiting a method, according to the verbosity
+!   aspects.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[name]
+!     Component name.
+!   \item[rName]
+!     Routine name.
+!   \item[verbosity]
+!     Bit field corresponding to verbosity aspects.
+!   \item[{[importState]}]
+!     The importState of the component using this method.
+!   \item[{[exportState]}]
+!     The exportState of the component using this method.
+!   \item[rc]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer :: indentCount
+    if (btest(verbosity,4)) then
+      if (present(importState)) then
+        call ESMF_StateLog(importState, &
+          prefix=trim(name)//": "//rName//" extro {IS}:", &
+          nestedFlag=.true., deepFlag=.true., rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
+    endif
+    if (btest(verbosity,5)) then
+      if (present(exportState)) then
+        call ESMF_StateLog(exportState, &
+          prefix=trim(name)//": "//rName//" extro {ES}:", &
+          nestedFlag=.true., deepFlag=.true., rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" extro:", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,0)) then
+      call ESMF_LogGet(indentCount=indentCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_LogSet(indentCount=indentCount-2, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    ! return successfully
+    rc = ESMF_SUCCESS
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_LogPetList - Write a petList to log, max width 10
 ! !INTERFACE:
   subroutine NUOPC_LogPetList(petList, name, rc)
 ! !ARGUMENTS:
@@ -5295,6 +5518,7 @@ module NUOPC_Base
     character(*)                   :: name
     integer, intent(out), optional :: rc
 ! !DESCRIPTION:
+!   Write a petList to log, max width 10
 !
 !   The arguments are:
 !   \begin{description}
@@ -5363,6 +5587,7 @@ module NUOPC_Base
     character(80)             :: ikey2
     integer                   :: maxCount, pthreadMinStackSize, openMpNumThreads
     character(40)             :: msgString, openMpHandling
+    character(80)             :: stdfilename
 
     rc = ESMF_SUCCESS
 
@@ -5525,6 +5750,66 @@ module NUOPC_Base
               forceChildPthreads=forceChildPthreads, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+        else if (trim(ikey)=="stdout") then
+          ! iterate through the stdout hint
+          call ESMF_InfoGet(info, key="/NUOPC/Hint/stdout", &
+            isPresent=isPresent2, isStructured=isStructured2, size=size2, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (isPresent2 .and. isStructured2) then
+            do idx2=1, size2
+              call ESMF_InfoGet(info, key="/NUOPC/Hint/stdout", idx=idx2, &
+                ikey=ikey2, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              if (trim(ikey2)=="filename") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/stdout/filename", &
+                  value=stdfilename, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                call ESMF_GridCompSetVMStdRedirect(gcomp, stdout=stdfilename, &
+                  rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              else
+                call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                  msg="Unknown NUOPC Hint: "//trim(ikey)//"/"//trim(ikey2), &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+                return  ! bail out
+              endif
+            enddo
+          endif
+        else if (trim(ikey)=="stderr") then
+          ! iterate through the stderr hint
+          call ESMF_InfoGet(info, key="/NUOPC/Hint/stderr", &
+            isPresent=isPresent2, isStructured=isStructured2, size=size2, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (isPresent2 .and. isStructured2) then
+            do idx2=1, size2
+              call ESMF_InfoGet(info, key="/NUOPC/Hint/stderr", idx=idx2, &
+                ikey=ikey2, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              if (trim(ikey2)=="filename") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/stderr/filename", &
+                  value=stdfilename, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                call ESMF_GridCompSetVMStdRedirect(gcomp, stderr=stdfilename, &
+                  rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              else
+                call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                  msg="Unknown NUOPC Hint: "//trim(ikey)//"/"//trim(ikey2), &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+                return  ! bail out
+              endif
+            enddo
           endif
         else
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &

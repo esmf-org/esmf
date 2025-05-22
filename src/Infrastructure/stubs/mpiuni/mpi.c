@@ -4,6 +4,8 @@
       This provides a few of the MPI-uni functions that cannot be implemented
     with C macros
 */
+#include <stddef.h>
+
 #if !defined (ESMF_OS_MinGW)
 #include <sys/time.h>
 #else
@@ -53,8 +55,28 @@ static int      num_attr = 1,mpi_tag_ub = 100000000;
 
 /* 
    To avoid problems with prototypes to the system memcpy() it is duplicated here
+
+   This version also supports checking for MPI_IN_PLACE
 */
-int MPIUNI_Memcpy(void *a,const void* b,int n) {
+int MPIUNI_Memcpy(void *a,const void* b,int n,enum CheckForMPIInPlace_Flag check_flag) {
+  switch(check_flag) {
+  case CHECK_FOR_MPI_IN_PLACE_NONE:
+    // No pre-check in this case; proceed to the actual memcpy
+    break;
+  case CHECK_FOR_MPI_IN_PLACE_SOURCE:
+    if (b == MPI_IN_PLACE) {
+      // If the source is MPI_IN_PLACE, do nothing
+      return 0;
+    }
+    break;
+  case CHECK_FOR_MPI_IN_PLACE_DEST:
+    if (a == MPI_IN_PLACE) {
+      // If the dest is MPI_IN_PLACE, do nothing
+      return 0;
+    }
+    break;
+  }
+
   int  i;
   char *aa= (char*)a;
   char *bb= (char*)b;
@@ -177,15 +199,92 @@ int Petsc_MPI_Finalize(void)
   return 0;
 }
 
+int ESMC_MPI_Alltoallw(void *sendbuf, int *sendcounts, int *sdispls,
+                       MPI_Datatype *sendtypes, void *recvbuf, int *recvcounts,
+                       int *rdispls, MPI_Datatype *recvtypes, MPI_Comm comm)
+{
+  // Since we are only implementing this for the single-processor case, the counts, displs
+  // and types arguments should all have length 1. We assume that's the case in this
+  // implementation.
+
+  // Displacements are not implemented so return an error code if they are non-zero
+  if (sdispls[0] != 0 || rdispls[0] != 0) {
+    return MPI_ERR_INTERN;
+  }
+
+  MPIUNI_Memcpy(recvbuf, sendbuf, sendcounts[0]*sendtypes[0], CHECK_FOR_MPI_IN_PLACE_SOURCE);
+  return MPI_SUCCESS;
+}
+
+int ESMC_MPI_Scatterv(void *sendbuf, int *sendcounts, int *displs,
+                      MPI_Datatype sendtype, void *recvbuf, int recvcount,
+                      MPI_Datatype recvtype, int root, MPI_Comm comm)
+{
+  // Since we are only implementing this for the single-processor case, the sendcounts and
+  // displs arguments should have length 1. We assume that's the case in this
+  // implementation.
+
+  // Displacements are not implemented so return an error code if they are non-zero
+  if (displs[0] != 0) {
+    return MPI_ERR_INTERN;
+  }
+
+  MPIUNI_Memcpy(recvbuf, sendbuf, sendcounts[0]*sendtype, CHECK_FOR_MPI_IN_PLACE_DEST);
+  return MPI_SUCCESS;
+}
+
+int ESMC_MPI_Type_create_hvector(int count, int blocklength, MPI_Aint stride,
+                                 MPI_Datatype oldtype, MPI_Datatype *newtype)
+{
+  // Note mpiuni's definition of each datatype as sizeof(raw-type).
+  //
+  // From some experimentation with a real MPI library, the MPI_Type_size of newtype is
+  // independent of the value of stride. Since the MPI_Datatype in mpiuni is just the size
+  // of the datatype, we ignore the possible complexity of stride in this implementation.
+  *newtype = count*blocklength*oldtype;
+  return MPI_SUCCESS;
+}
+
+int ESMC_MPI_Type_create_indexed_block(int count, int blocklength,
+                                       const int array_of_displacements[],
+                                       MPI_Datatype oldtype,
+                                       MPI_Datatype *newtype)
+{
+  // Note mpiuni's definition of each datatype as sizeof(raw-type).
+  //
+  // From some experimentation with a real MPI library, the MPI_Type_size of newtype is
+  // independent of the values in array_of_displacements. Since the MPI_Datatype in mpiuni
+  // is just the size of the datatype, we ignore the possible complexity of
+  // array_of_displacements in this implementation.
+  *newtype = count*blocklength*oldtype;
+  return MPI_SUCCESS;
+}
+
+int ESMC_MPI_Type_hvector(int count, int blocklength, MPI_Aint stride,
+                          MPI_Datatype oldtype, MPI_Datatype *newtype)
+{
+  // MPI_Type_hvector is a deprecated version of MPI_Type_create_hvector; the only
+  // difference is in how stride is specified (bytes vs. elements); since we ignore stride
+  // in our implementation of MPI_Type_create_hvector, we can use the same implementation
+  // for both.
+  return ESMC_MPI_Type_create_hvector(count, blocklength, stride, oldtype, newtype);
+}
+
+int ESMC_MPI_Type_size(MPI_Datatype datatype, int *size)
+{
+  // Note that, conveniently, mpiuni defines each datatype as sizeof(raw-type)
+  *size = datatype;
+  return MPI_SUCCESS;
+}
+
 #if !defined (ESMF_OS_MinGW)
 // POSIX version
 double ESMC_MPI_Wtime(void)
 {
   struct timeval tv;
-  struct timezone tz;
   double seconds;
- 
-  gettimeofday(&tv, &tz);
+
+  gettimeofday(&tv, NULL);
   seconds = tv.tv_sec + tv.tv_usec * 0.000001;
   return seconds;
 }
@@ -402,7 +501,7 @@ void MPIUNI_STDCALL mpi_allreduce(void *sendbuf,void *recvbuf,int *count,int *da
     *ierr = MPI_ERR_OP;
     return;
   }
-  MPIUNI_Memcpy(recvbuf,sendbuf,(*count)*MPIUNI_DATASIZE[*datatype]);
+  MPIUNI_Memcpy(recvbuf,sendbuf,(*count)*MPIUNI_DATASIZE[*datatype],CHECK_FOR_MPI_IN_PLACE_SOURCE);
   *ierr = MPI_SUCCESS;
 } 
 void MPIUNI_STDCALL mpi_allreduce_(void *sendbuf,void *recvbuf,int *count,int *datatype,int *op,int *comm,int *ierr) 

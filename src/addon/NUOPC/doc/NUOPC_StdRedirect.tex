@@ -1,0 +1,26 @@
+% $Id$
+%
+
+\label{StdRedirect}
+
+NUOPC provides a standard mechanism that allows user controlled redirection of the {\tt stdout} and {\tt stderr} streams for output written by a component. Redirection is optional and set when the component is added to its parent component via the {\tt NUOPC\_DriverAddComp()}. The user interface of standard stream redirection is very similar to that of resource control discussed in the previous section.
+
+The standard stream redirection mechanism discussed here requires the use of the same generic {\tt SetVM} method provided by NUOPC discussed in the previous section. This method is specified as the {\tt compSetVMRoutine} argument during {\tt NUOPC\_DriverAddComp()}. Together with the {\tt info} argument it allows the user to pass component level hints into the NUOPC method.
+
+The relevant keys under {\tt info} are under {\tt /NUOPC/Hint/stdout} for {\tt stdout} and {\tt /NUOPC/Hint/stderr} for {\tt stderr}. The currently available keys are summarized in the table.
+
+\vspace*{2ex}
+\begin{longtable}[h]{|p{.30\textwidth}|p{.20\textwidth}|p{.50\textwidth}|}
+     \hline\hline
+     {\bf key} & {\bf value} & {\bf Meaning}\\
+     \hline\hline
+
+     {\tt filename}         & String    &
+        Name of the file to which the stream is redirected.
+        The last occurance of the asterisk symbol {\tt *} in {\tt filename}, if
+        present, is treated as a wildcard and replaced by the local PET number.
+        This allows redirection of the component output coming from different            PETs into separate files.
+     \\ \hline\hline
+
+\end{longtable}
+

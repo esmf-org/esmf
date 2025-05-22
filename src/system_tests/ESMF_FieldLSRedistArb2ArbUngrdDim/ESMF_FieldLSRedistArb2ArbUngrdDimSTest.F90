@@ -1,7 +1,6 @@
 ! $Id$
 !
 ! System test code FieldLSRedistArb2ArbUngrdDim
-!  Description on Sourceforge under System Test #?????
 
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.

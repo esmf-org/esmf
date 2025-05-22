@@ -17,6 +17,14 @@ else
   PIO_CMAKE_OPTS += -DPIO_ENABLE_LOGGING=OFF -DCMAKE_BUILD_TYPE=release
 endif
 
+ifeq ($(ESMF_COMM),mpiuni)
+  # Use ESMF's mpiuni as a stand-in for the mpi-serial library that PIO expects
+  PIO_CMAKE_OPTS += -DPIO_USE_MPISERIAL=ON -DMPISERIAL_PATH=$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+
+  # There are problems building PIO's tests with mpiuni; for now, just disable this internal testing
+  PIO_CMAKE_OPTS += -DPIO_ENABLE_TESTS=OFF
+endif
+
 ifdef ESMF_NETCDF_INCLUDE
   ifneq ("$(wildcard $(ESMF_NETCDF_LIBPATH)/libnetcdf.a)","")
     PIO_CMAKE_OPTS += -DNetCDF_C_INCLUDE_DIR=$(ESMF_NETCDF_INCLUDE) -DNetCDF_C_LIBRARY=$(ESMF_NETCDF_LIBPATH)/libnetcdf.a
@@ -39,6 +47,7 @@ ifndef PIO_AUTOTOOLS_BUILD
 # Use the PIO native cmake build system to build and install
 tree_lib:
 	cmake --version
+	rm -rf Build Install
 	mkdir -p Build
 	cd Build; \
 	env CC=$(ESMF_CCOMPILER) FC=$(ESMF_F90COMPILER) CFLAGS="$(ESMF_COPTFLAG) $(ESMF_SO_CCOMPILEOPTS)" cmake -DCMAKE_INSTALL_PREFIX=../Install $(PIO_CMAKE_OPTS) ../ParallelIO; \
@@ -49,6 +58,7 @@ tree_lib:
 else
 # Use the PIO native autoconf build system to build and install
 tree_lib:
+	rm -rf Install
 	mkdir -p Install
 	cd ParallelIO; \
 	cp -f ../configure . ;\

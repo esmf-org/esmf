@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -3294,8 +3294,6 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
       *num_out=0;
     }
 
-    // INSTEAD OF TMP USE T???
-
     // Copy q into tmp
     double *end_q=q+3*num_q;
     for (double *q_i=q, *tmp_i=tmp; q_i<end_q; q_i++, tmp_i++) {
@@ -3320,7 +3318,6 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
       // calc p_vec (vector along the current edge of p)
       double p_vec[3];
       p_vec[0]=p2[0]-p1[0]; p_vec[1]=p2[1]-p1[1]; p_vec[2]=p2[2]-p1[2];
-
       double p_norm=NORM(p_vec);
 
       // Set initial t1 (last point in tmp polygon)
@@ -3330,28 +3327,31 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
       double pt1_vec[3];
       pt1_vec[0]=t1[0]-p1[0]; pt1_vec[1]=t1[1]-p1[1]; pt1_vec[2]=t1[2]-p1[2];
 
-
-      // Make sure that we're not dealing with a zero length vector
-      bool inout1_same=false;
-      double inout1;
+      // Calc info for last point in t
+      bool last_t_inout_same=false;
+      double last_t_inout;
       if (CLOSE_TO_ZERO(pt1_vec)) {
-         inout1_same=true;
-         inout1=1000.0; // Set to a value so we know where to catch in point processing ifs
+         last_t_inout_same=true;
+         last_t_inout=1000.0; // Set to a value so we know where to catch in point processing ifs
       } else {
         // Normal vector which is the length of |p_vec||pt_vec|*the sin between them
         double n_vec[3];
         CROSS_PRODUCT3D(n_vec,p_vec,pt1_vec);
         
         // Get magnitude which is distance out * |p_vec| without sign to indicate direction
-        inout1=NORM(n_vec)/p_norm;
+        last_t_inout=NORM(n_vec)/p_norm;
         
         // Dot normal with normal to sphere at point (i.e. just p1 since origin of sphere is (0,0,0))
         // This gives angle with respect to surface of the sphere and hence allows us to assign
-        // a direction (i.e. a sign) to inout1
-        if (DOT_PRODUCT3D(n_vec,p1)<0.0) inout1=-inout1;
+        // a direction (i.e. a sign) to last_t_inout
+        if (DOT_PRODUCT3D(n_vec,p1)<0.0) last_t_inout=-last_t_inout;
 
       }
-
+      
+      // Use last point of t as first point in initial segment
+      bool inout1_same=last_t_inout_same;
+      double inout1=last_t_inout;
+      
       // Make sure we don't have a degenerate polygon after clipping
       bool in_but_not_on_p_vec=false;
 
@@ -3368,27 +3368,30 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
         double pt2_vec[3];
         pt2_vec[0]=t2[0]-p1[0]; pt2_vec[1]=t2[1]-p1[1]; pt2_vec[2]=t2[2]-p1[2];
         
-        // Make sure that we're not dealing with a zero length vector
+        // Calc info for current t point
         bool inout2_same=false;
         double inout2;
-        if (CLOSE_TO_ZERO(pt2_vec)) {
-          inout2_same=true;
-          inout2=1000.0; // Set to a value so we know where to catch in point processing ifs
+        if (it != (num_tmp-1)) { // Early interations, need to calculate
+          if (CLOSE_TO_ZERO(pt2_vec)) {
+            inout2_same=true;
+            inout2=1000.0; // Set to a value so we know where to catch in point processing ifs
+          } else {
+            //// Normal vector which is the length of |p_vec||pt2_vec|*the sin between them
+            double n2_vec[3];
+            CROSS_PRODUCT3D(n2_vec,p_vec,pt2_vec);
+            
+            //// Get magnitude which is distance out * |p_vec| without sign to indicate direction
+            inout2=NORM(n2_vec)/p_norm;
+            
+            //// Dot normal with normal to sphere at point (i.e. just p1 since origin of sphere is (0,0,0))
+            //// This gives angle with respect to surface of the sphere and hence allows us to assign
+            //// a direction (i.e. a sign) to inout1
+            if (DOT_PRODUCT3D(n2_vec,p1)<0.0) inout2=-inout2;
+          }
+        } else { // (it == num_tmp-1) Last iteration, use already calculated point
+          inout2_same=last_t_inout_same;
+          inout2=last_t_inout;
         }
-        else {
-          //// Normal vector which is the length of |p_vec||pt2_vec|*the sin between them
-          double n2_vec[3];
-          CROSS_PRODUCT3D(n2_vec,p_vec,pt2_vec);
-        
-          //// Get magnitude which is distance out * |p_vec| without sign to indicate direction
-          inout2=NORM(n2_vec)/p_norm;
-                
-          //// Dot normal with normal to sphere at point (i.e. just p1 since origin of sphere is (0,0,0))
-          //// This gives angle with respect to surface of the sphere and hence allows us to assign
-          //// a direction (i.e. a sign) to inout1
-          if (DOT_PRODUCT3D(n2_vec,p1)<0.0) inout2=-inout2;
-        }
-
         //      if (debug) printf("   it=%d t1=[%f %f %f] t2=[%f %f %f] inout1=%20.17f inout2=%20.17f \n ",it,t1[0],t1[1],t1[2],t2[0],t2[1],t2[2],inout1,inout2);
         
 

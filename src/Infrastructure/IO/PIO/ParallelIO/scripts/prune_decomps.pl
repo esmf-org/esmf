@@ -18,7 +18,7 @@ sub rem_dup_decomp_files
 {
     my($dirname) = @_;
     # Find files in current directory that are
-    # named *piodecomp* - these are the pio 
+    # named *piodecomp* - these are the pio
     # decomposition files
     opendir(F,$dirname);
     #my @decompfiles = grep(/^piodecomp/,readdir(F));
@@ -30,7 +30,7 @@ sub rem_dup_decomp_files
     #for(my $i=0; $i<$ndecompfile_info; $i++){
     #  print "File : $decompfile_info[$i]->{FNAME} , size = $decompfile_info[$i]->{SIZE}\n";
     #}
-    
+
     my $rmfile=0;
     # Compare the decomposition files to find
     # duplicates - and delete the dups
@@ -56,7 +56,7 @@ sub rem_dup_decomp_files
                     my $nline = shift (@file2);
                     # Ignore stack traces when comparing files
                     # The stack traces start with a line containing
-                    # "Obtained" 
+                    # "Obtained"
                     # Also, stack trace is the last line being
                     # compared
                     if(($line =~ /${BEGIN_STACK_TRACE}/)
@@ -67,7 +67,7 @@ sub rem_dup_decomp_files
                         last;
                     }
                     next if($line eq $nline);
-                    # Files are different, don't remove    
+                    # Files are different, don't remove
                     $rmfile = 0;
                     last;
                 }
@@ -158,5 +158,3 @@ if($exe ne ""){
     if($verbose){ print "Decoding stack traces for decomposition files from : \"", $rundir, "\"\n"; }
     &decode_stack_traces($rundir, $exe);
 }
-
-    

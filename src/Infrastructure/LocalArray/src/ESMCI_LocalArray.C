@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -52,19 +52,22 @@ extern "C" {
 
   void FTN_X(f_esmf_localarrayf90allocate)(ESMCI::LocalArray**, int *, 
     ESMC_TypeKind_Flag*, int *, int *, int *, int *);
- 
+
   void FTN_X(f_esmf_localarrayf90deallocate)(ESMCI::LocalArray**, int*, 
     ESMC_TypeKind_Flag *, int *);
- 
+
   void FTN_X(f_esmf_localarrayadjust)(ESMCI::LocalArray**, int *,
     ESMC_TypeKind_Flag*, const int *, const int *, const int *, int *);
 
-  void FTN_X(f_esmf_localarraycopyf90ptr)(const ESMCI::LocalArray** laIn, 
+  void FTN_X(f_esmf_localarrayslice)(ESMCI::LocalArray**,
+    ESMCI::InterArray<int> *, int *, int *, int *);
+
+    void FTN_X(f_esmf_localarraycopyf90ptr)(const ESMCI::LocalArray** laIn, 
     ESMCI::LocalArray** laOut, ESMCI::DataCopyFlag *copyflag, int *rc);
-  
-  void FTN_X(f_esmf_localarrayctof90)(ESMCI::LocalArray**, void *, int *, 
+
+  void FTN_X(f_esmf_localarrayctof90)(ESMCI::LocalArray**, void **, int *, 
     ESMC_TypeKind_Flag*, int *, int *, int *, int *);
- 
+
 #ifndef ESMF_NO_INTEGER_1_BYTE
   void FTN_X(f_esmf_fortrantkrptrcopy1di1)(void *dst, void *src);
   void FTN_X(f_esmf_fortrantkrptrcopy2di1)(void *dst, void *src);
@@ -208,7 +211,7 @@ int LocalArray::construct(
   }else if (docopy == DATACOPY_REFERENCE){
     // call into Fortran to cast ibase_addr to Fortran pointer
     LocalArray *aptr = this;
-    FTN_X(f_esmf_localarrayctof90)(&aptr, ibase_addr, &rank, &typekind, counts, 
+    FTN_X(f_esmf_localarrayctof90)(&aptr, &ibase_addr, &rank, &typekind, counts, 
       lbound, ubound, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
@@ -591,6 +594,64 @@ LocalArray *LocalArray::create(
     larrayOut->lOff +=currOff*(larrayOut->lbound[i]);
     currOff *=larrayOut->counts[i];
   }
+
+  // return successfully 
+  if (rc) *rc = ESMF_SUCCESS;
+  return larrayOut;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::LocalArray::create()"
+//BOPI
+// !IROUTINE:  ESMCI::LocalArray::create - create ESMCI::LocalArray as slice from existing object by reference
+//
+// !INTERFACE:
+LocalArray *LocalArray::create(
+//
+// !RETURN VALUE:
+//    pointer to newly allocated ESMCI::LocalArray object
+//
+// !ARGUMENTS:
+  const LocalArray *larrayIn,           // incoming object
+  InterArray<int> *trailingTensorSlice, // trailing tensor slice tuple
+  int *rc){                             // return code
+//
+// !DESCRIPTION:
+//  Return slice of {\tt larrayIn} by reference
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;
+
+  // allocate memory for new LocalArray object
+  LocalArray *larrayOut;
+  try{
+    larrayOut = new LocalArray;
+  }catch(...){
+    // allocation error
+    ESMC_LogDefault.AllocError(ESMC_CONTEXT, rc);
+    return ESMC_NULL_POINTER;
+  }
+  // copy the LocalArray members, including the _reference_ to its data alloc.
+  *larrayOut = *larrayIn;
+
+  // mark this copy not to be responsible for deallocation
+  larrayOut->dealloc = false;
+
+  // determine rankIn and rankOut
+  int rankIn = larrayIn->rank;
+  int rankOut = rankIn - trailingTensorSlice->extent[0];
+
+  // create new larrayOut with adjusted Fortran dope vector to reflect slicing
+  FTN_X(f_esmf_localarrayslice)(&larrayOut, trailingTensorSlice,
+    &rankIn, &rankOut, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    ESMC_CONTEXT, rc)) return NULL;
 
   // return successfully 
   if (rc) *rc = ESMF_SUCCESS;

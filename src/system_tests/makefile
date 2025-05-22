@@ -23,6 +23,7 @@ DIRS      = ESMF_CompCreate \
             ESMF_ArrayRedistOpenMP \
             ESMF_ArrayRedistOpenACC \
             ESMF_ArraySharedDeSSI \
+            ESMC_FieldRegrid \
             ESMF_ConcurrentComponent \
             ESMF_FieldConcurrentComp \
             ESMF_FieldBundleSMM \
@@ -44,6 +45,7 @@ DIRS      = ESMF_CompCreate \
             ESMF_FieldRegridMesh \
             ESMF_FieldRegridMeshToMesh \
             ESMF_FieldRegridLS \
+            ESMF_FieldRegridPatchDisjoint \
             ESMF_FieldSparseMatMul \
             ESMF_FieldSharedDeSSI \
             ESMF_FieldLSRedistArb2Arb \

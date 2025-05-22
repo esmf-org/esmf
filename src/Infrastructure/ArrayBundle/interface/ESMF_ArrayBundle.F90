@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -44,7 +44,8 @@ module ESMF_ArrayBundleMod
   use ESMF_IOUtilMod
   use ESMF_RHandleMod
   use ESMF_ArrayMod
-  
+  use ESMF_VMMod
+
   implicit none
 
 !------------------------------------------------------------------------------
@@ -61,9 +62,8 @@ module ESMF_ArrayBundleMod
 #ifndef ESMF_NO_SEQUENCE
   sequence
 #endif
-  private
     type(ESMF_Pointer) :: this
-    ESMF_INIT_DECLARE
+    ESMF_INIT_DECLARE_NAMED_ALIAS
   end type
 
 !------------------------------------------------------------------------------
@@ -90,6 +90,7 @@ module ESMF_ArrayBundleMod
   public ESMF_ArrayBundleHaloRelease
   public ESMF_ArrayBundleHaloStore
   public ESMF_ArrayBundleIsCreated
+  public ESMF_ArrayBundleLog
   public ESMF_ArrayBundlePrint
   public ESMF_ArrayBundleRead
   public ESMF_ArrayBundleRedist
@@ -370,7 +371,7 @@ contains
 ! !IROUTINE:  ESMF_ArrayBundleEQ - Compare two ArrayBundles for equality
 !
 ! !INTERFACE:
-  function ESMF_ArrayBundleEQ(arraybundle1, arraybundle2)
+  impure elemental function ESMF_ArrayBundleEQ(arraybundle1, arraybundle2)
 ! 
 ! !RETURN VALUE:
     logical :: ESMF_ArrayBundleEQ
@@ -421,7 +422,7 @@ contains
 ! !IROUTINE:  ESMF_ArrayBundleNE - Compare two ArrayBundles for non-equality
 !
 ! !INTERFACE:
-  function ESMF_ArrayBundleNE(arraybundle1, arraybundle2)
+    impure elemental function ESMF_ArrayBundleNE(arraybundle1, arraybundle2)
 ! 
 ! !RETURN VALUE:
     logical :: ESMF_ArrayBundleNE
@@ -883,9 +884,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_ArrayBundleGet - Get object-wide information from an ArrayBundle
 !
 ! !INTERFACE:
-    ! Private name; call using ESMF_ArrayBundleGet()   
+    ! Private name; call using ESMF_ArrayBundleGet()
     subroutine ESMF_ArrayBundleGetListAll(arraybundle, keywordEnforcer, &
-      itemorderflag, arrayCount, arrayList, arrayNameList, name, rc)
+      itemorderflag, arrayCount, arrayList, arrayNameList, name, vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle),    intent(in)            :: arraybundle
@@ -895,6 +896,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Array),          intent(out), optional :: arrayList(:)
     character(len=*),          intent(out), optional :: arrayNameList(:)
     character(len=*),          intent(out), optional :: name
+    type(ESMF_VM),             intent(out), optional :: vm
     integer,                   intent(out), optional :: rc
 !
 ! !STATUS:
@@ -905,6 +907,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[6.1.0] Added argument {\tt itemorderflag}.
 !              The new argument gives the user control over the order in which
 !              the items are returned.
+! \item[8.8.0] Added argument {\tt vm} in order to offer information about the
+!              VM on which the ArrayBundle was created.
 ! \end{description}
 ! \end{itemize}
 !
@@ -930,6 +934,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     size {\tt arrayCount}.
 !   \item [{[name]}]
 !     Name of the ArrayBundle object.
+!   \item [{[vm}]
+!     The VM on which the ArrayBundle object was created.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -991,7 +997,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
     endif
-    
+
     ! Fill arrayNameList
     if (present(arrayNameList)) then
       do i=1, min(size(arrayNameList), opt_arrayCount)
@@ -1000,20 +1006,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
     endif
-    
+
     ! Garbage collection
     deallocate(opt_arrayPtrList)
 
     ! Special call to get name out of Base class
     if (present(name)) then
-      call c_ESMC_GetName(arraybundle, name, localrc)
+      if (arraybundle%isNamedAlias) then
+        name = trim(arraybundle%name)
+      else
+        call c_ESMC_GetName(arraybundle, name, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+    endif
+
+    ! Special call to get vm out of Base class
+    if (present(vm)) then
+      call c_ESMC_GetVM(arraybundle, vm, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Set init code on the VM object before returning
+      call ESMF_VMSetInitCreated(vm, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-    
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
-  
+
   end subroutine ESMF_ArrayBundleGetListAll
 !------------------------------------------------------------------------------
 
@@ -1584,6 +1605,75 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 
+! -------------------------- ESMF-public method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleLog()"
+!BOP
+! !IROUTINE: ESMF_ArrayBundleLog - Log ArrayBundle information
+
+! !INTERFACE:
+  subroutine ESMF_ArrayBundleLog(arraybundle, keywordEnforcer, prefix, logMsgFlag, deepFlag, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle), intent(in)              :: arraybundle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(len=*),       intent(in),   optional  :: prefix
+    type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
+    logical,                intent(in),   optional  :: deepFlag
+    integer, intent(out),                 optional  :: rc
+!
+! !DESCRIPTION:
+!   Write information about {\tt arraybundle} to the ESMF default Log.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[arraybundle]
+!     {\tt ESMF\_ArrayBundle} object logged.
+!   \item [{[prefix]}]
+!     String to prefix the log message. Default is no prefix.
+!   \item [{[logMsgFlag]}]
+!     Type of log message generated. See section \ref{const:logmsgflag} for
+!     a list of valid message types. Default is {\tt ESMF\_LOGMSG\_INFO}.
+!   \item[{[deepFlag]}]
+!     When set to {\tt .false.} (default), only log top level information for
+!     each item contained in the ArrayBundle.
+!     When set to {\tt .true.}, additionally log information for each item.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_LogMsg_Flag)  :: logMsg
+    type(ESMF_Logical)      :: deep
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
+
+    ! deal with optional logMsgFlag
+    logMsg = ESMF_LOGMSG_INFO ! default
+    if (present(logMsgFlag)) logMsg = logMsgFlag
+
+    ! deal with optional deepFlag
+    deep = ESMF_FALSE ! default
+    if (present(deepFlag)) deep = deepFlag
+
+    ! Call into the C++ interface.
+    call c_esmc_arraybundlelog(arraybundle, prefix, logMsg, deep, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayBundleLog
+!------------------------------------------------------------------------------
+
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
@@ -1667,13 +1757,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !   Read Array data to an ArrayBundle object from file(s).
 !   For this API to be functional, the environment variable {\tt ESMF\_PIO} 
-!   should be set to "internal" when the ESMF library is built.
+!   should be set to either "internal" or "external" when the ESMF library is built.
 !   Please see the section on Data I/O,~\ref{io:dataio}.
 !
 !   Limitations:
 !   \begin{itemize}
-!     \item Only single tile Arrays are supported.
-!     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
+!     \item For multi-tile Arrays, all Arrays in the ArrayBundle must contain
+!     the same number of tiles.
 !   \end{itemize}
 !
 !   The arguments are:
@@ -1682,6 +1772,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     An {\tt ESMF\_ArrayBundle} object.
 !   \item[fileName]
 !     The name of the file from which ArrayBundle data is read.
+!     If the ArrayBundle contains multi-tile Arrays, then fileName must contain
+!     exactly one instance of "*"; this is a placeholder that will be replaced
+!     by the tile number, with each tile being read from a separate file. (For
+!     example, for a fileName of "myfile*.nc", tile 1 will be read from
+!     "myfile1.nc", tile 2 from "myfile2.nc", etc.)
+!     (This handling of the fileName for multi-tile I/O is subject to change.)
 !   \item[{[singleFile]}]
 !     A logical flag, the default is .true., i.e., all Arrays in the bundle 
 !     are stored in one single file. If .false., each Array is stored 
@@ -3805,7 +3901,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Write the Arrays into a file. For this API to be functional,
-!   the environment variable {\tt ESMF\_PIO} should be set to "internal"
+!   the environment variable {\tt ESMF\_PIO} should be set to either "internal" or "external"
 !   when the ESMF library is built. Please see the section on 
 !   Data I/O,~\ref{io:dataio}.
 !
@@ -3820,8 +3916,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   Limitations:
 !   \begin{itemize}
-!     \item Only single tile Arrays are supported.
-!     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
+!     \item For multi-tile Arrays,all Arrays in the ArrayBundle must contain
+!     the same number of tiles.
 !   \end{itemize}
 !
 !   The arguments are:
@@ -3830,6 +3926,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     An {\tt ESMF\_ArrayBundle} object.
 !   \item[fileName]
 !     The name of the output file to which array bundle data is written.
+!     If the ArrayBundle contains multi-tile Arrays, then fileName must contain
+!     exactly one instance of "*"; this is a placeholder that will be replaced
+!     by the tile number, with each tile being written to a separate file. (For
+!     example, for a fileName of "myfile*.nc", tile 1 will be written to
+!     "myfile1.nc", tile 2 to "myfile2.nc", etc.)
+!     (This handling of the fileName for multi-tile I/O is subject to change.)
 !   \item[{[convention]}]
 !     Specifies an Attribute package associated with the ArrayBundle, and the
 !     contained Arrays, used to create NetCDF dimension labels and attributes

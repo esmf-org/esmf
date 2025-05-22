@@ -1,0 +1,67 @@
+description: 'Build the netcdf fortran library'
+inputs:
+  netcdf_version:
+    description: 'Tag in the netcdf repository to use'
+    default: v4.9.0
+    required: False
+    type: string
+  shared_libraries:
+    description: 'Build shared libraries'
+    default: True
+    required: False
+    type: boolean
+  build_utilities:
+    description: 'Build netcdf utility tools'
+    default: False
+    required: False
+    type: boolean
+  enable_examples:
+    description: 'Build netcdf examples'
+    default: False
+    required: False
+    type: boolean
+  enable_netcdf4:
+    description: 'Build netcdf4 (hdf5) libraries'
+    default: True
+    required: False
+    type: boolean
+  enable_logging:
+    description: 'Enable netcdf logging (for debugging)'
+    default: False
+    required: False
+    type: boolean
+  enable_dap:
+    description: 'Enable netcdf DAP'
+    default: False
+    required: False
+    type: boolean
+
+  install_prefix:
+    description: 'Install path of netcdf'
+    default: $HOME/netcdf-c
+    required: False
+    type: string
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: Unidata/netcdf-c
+        path: netcdf-c-src
+        ref: ${{ inputs.NETCDF_VERSION }}
+    - id: netcdf-c-build
+      shell: bash
+      run: |
+        pushd $GITHUB_WORKSPACE/netcdf-c-src
+        autoreconf -i
+        config_args=--prefix=${{ inputs.install_prefix }}
+        if [ "${{ inputs.enable_dap }}" = "false" ];
+        then
+          config_args="$config_args --disable-dap"
+        fi
+        echo "config_args=$config_args"
+        ./configure $config_args
+        make
+        make install
+        popd

@@ -12,6 +12,7 @@ PET*.ESMF_LogFile
 # esmf build generated directories #
 ####################################
 /DEFAULTINSTALLDIR/
+/apps/
 /lib/
 /mod/
 /obj/
@@ -45,8 +46,8 @@ src/Infrastructure/FieldBundle/src/ESMF_FieldBundle.F90
 src/Infrastructure/LocalArray/interface/ESMF_LocalArrayCreate.F90
 src/Infrastructure/LocalArray/interface/ESMF_LocalArrayGet.F90
 src/Infrastructure/LocalArray/interface/ESMF_LocalArrayWrapperType.F90
-src/Infrastructure/Mesh/tests/ESMC_MeshCapGenUTest.C
-src/Infrastructure/Mesh/tests/ESMC_MeshCapRegridGenUTest.C
+src/Infrastructure/Mesh/tests/ESMCI_MeshCapGenUTest.C
+src/Infrastructure/Mesh/tests/ESMCI_MeshCapRegridGenUTest.C
 src/Infrastructure/IO/interface/ESMF_IO_NCPutGet.F90
 src/Infrastructure/Util/doc/ESMC_ReturnCodes.tex
 src/Infrastructure/Util/src/ESMF_FortranWordsize.F90
@@ -117,6 +118,8 @@ src/system_tests/ESMF_ArrayRedistMPMD/user_model2.mod
 src/system_tests/ESMF_ArrayRedistMPMD/user_model2.o
 src/system_tests/ESMF_ArrayRedistSharedObj/user_coupler.so
 src/system_tests/ESMF_ArrayRedistSharedObj/user_model1.so
+src/system_tests/ESMF_ArrayRedistSharedObj/user_coupler.dylib
+src/system_tests/ESMF_ArrayRedistSharedObj/user_model1.dylib
 
 src/Infrastructure/Trace/preload/preload.o
 src/Infrastructure/Trace/preload/preload_io.o

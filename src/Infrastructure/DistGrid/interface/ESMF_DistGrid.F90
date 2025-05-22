@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -139,6 +139,7 @@ module ESMF_DistGridMod
   
   public ESMF_DistGridGet
   public ESMF_DistGridIsCreated
+  public ESMF_DistGridLog
   public ESMF_DistGridMatch
   public ESMF_DistGridPrint
   public ESMF_DistGridSet
@@ -155,6 +156,7 @@ module ESMF_DistGridMod
   public ESMF_DistGridSetInitCreated
   public ESMF_DistGridSeqIndex
   public ESMF_DistGridGetThis
+  public ESMF_DistGridSetThis
   
 !EOPI
 !------------------------------------------------------------------------------
@@ -439,7 +441,7 @@ contains
 ! !IROUTINE:  ESMF_DistGridEQ - Compare two DistGrids for equality
 !
 ! !INTERFACE:
-  function ESMF_DistGridEQ(distgrid1, distgrid2)
+  impure elemental function ESMF_DistGridEQ(distgrid1, distgrid2)
 ! 
 ! !RETURN VALUE:
     logical :: ESMF_DistGridEQ
@@ -490,7 +492,7 @@ contains
 ! !IROUTINE:  ESMF_DistGridNE - Compare two DistGrids for non-equality
 !
 ! !INTERFACE:
-  function ESMF_DistGridNE(distgrid1, distgrid2)
+  impure elemental function ESMF_DistGridNE(distgrid1, distgrid2)
 ! 
 ! !RETURN VALUE:
     logical :: ESMF_DistGridNE
@@ -3944,6 +3946,76 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 
+! -------------------------- ESMF-public method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridLog()"
+!BOP
+! !IROUTINE: ESMF_DistGridLog - Log DistGrid information
+
+! !INTERFACE:
+  subroutine ESMF_DistGridLog(distgrid, keywordEnforcer, prefix, logMsgFlag, deepFlag, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DistGrid),    intent(in)              :: distgrid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(len=*),       intent(in),   optional  :: prefix
+    type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
+    logical,                intent(in),   optional  :: deepFlag
+    integer, intent(out),                 optional  :: rc
+!
+! !DESCRIPTION:
+!   Write information about {\tt DistGrid} to the ESMF default Log.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[distgrid]
+!     {\tt ESMF\_DistGrid} object logged.
+!   \item [{[prefix]}]
+!     String to prefix the log message. Default is no prefix.
+!   \item [{[logMsgFlag]}]
+!     Type of log message generated. See section \ref{const:logmsgflag} for
+!     a list of valid message types. Default is {\tt ESMF\_LOGMSG\_INFO}.
+!   \item[{[deepFlag]}]
+!     When set to {\tt .false.} (default), only log top level information about
+!     the DistGrid.
+!     When set to {\tt .true.}, additionally log deep information.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_LogMsg_Flag)  :: logMsg
+    type(ESMF_Logical)      :: deep
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
+
+    ! deal with optional logMsgFlag
+    logMsg = ESMF_LOGMSG_INFO ! default
+    if (present(logMsgFlag)) logMsg = logMsgFlag
+
+    ! deal with optional deepFlag
+    deep = ESMF_FALSE ! default
+    if (present(deepFlag)) deep = deepFlag
+
+    ! Call into the C++ interface.
+    call c_esmc_distgridlog(distgrid, prefix, logMsg, deep, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_DistGridLog
+!------------------------------------------------------------------------------
+
+
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridMatch()"
@@ -4526,6 +4598,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_DistGridGetThis
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridSetThis()"
+!BOPI
+! !IROUTINE: ESMF_DistGridSetThis - Set C++ pointer in DistGrid
+
+! !INTERFACE:
+  subroutine ESMF_DistGridSetThis(distgrid, this, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DistGrid),intent(inout)           :: distgrid
+    type(ESMF_Pointer), intent(in)              :: this
+    integer,            intent(out),  optional  :: rc
+!
+!
+! !DESCRIPTION:
+!     Set C++ pointer in DistGrid.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid]
+!          Specified {\tt ESMF\_DistGrid} object.
+!     \item[this]
+!          C++ pointer.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Copy C++ pointer
+    distgrid%this = this
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_DistGridSetThis
 !------------------------------------------------------------------------------
 
 

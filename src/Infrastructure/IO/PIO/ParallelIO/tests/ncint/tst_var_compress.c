@@ -76,10 +76,10 @@ run_var_compress_test(int my_rank, int ntasks, int iosysid)
 	int endian_in;
 	int d;
         /* int ret; */
-	
+
 	/* Open the file. */
 	if (nc_open(FILE_NAME, NC_PIO, &ncid)) PERR;
-	
+
 	/* Check the variable deflate. */
 	/* if ((ret = nc_inq_var_deflate(ncid, 0, &shuffle_in, &deflate_in, &deflate_level_in))) */
         /*     NCPERR(ret); */
@@ -95,15 +95,15 @@ run_var_compress_test(int my_rank, int ntasks, int iosysid)
 	/* Check the endianness. */
 	if (nc_inq_var_endian(ncid, 0, &endian_in)) PERR;
 	if (endian_in != NC_ENDIAN_BIG) PERR;
-	
+
 	/* Read distributed arrays. */
 	if (!(data_in = malloc(elements_per_pe * sizeof(int)))) PERR;
 	if (nc_get_vard_int(ncid, varid, ioid, 0, data_in)) PERR;
-	
+
 	/* Check results. */
 	for (i = 0; i < elements_per_pe; i++)
 	    if (data_in[i] != my_data[i]) PERR;
-	
+
 	/* Close file. */
 	if (nc_close(ncid)) PERR;
 
@@ -147,7 +147,7 @@ main(int argc, char **argv)
 
     /* Free the iosystem. */
     if (nc_free_iosystem(iosysid)) PERR;
-    
+
     PSUMMARIZE_ERR;
 #endif /* _NETCDF4 */
 

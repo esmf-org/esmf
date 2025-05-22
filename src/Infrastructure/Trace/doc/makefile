@@ -4,9 +4,9 @@ ALL: onedoc
 
 LOCDIR	  = src/Infrastructure/Trace/doc
 
-DVIFILES  = Trace_refdoc.dvi
-PDFFILES  = Trace_refdoc.pdf
-HTMLFILES = Trace_refdoc
+DVIFILES  = Trace_refdoc.dvi Trace_crefdoc.dvi
+PDFFILES  = Trace_refdoc.pdf Trace_crefdoc.pdf
+HTMLFILES = Trace_refdoc Trace_crefdoc
 
 #
 # Tex Files to make
@@ -28,18 +28,18 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f90))))
 
 #
-# Files that a doc depends on.  Do not list the the ctex file !  
+# Files that a doc depends on.  Do not list the the ctex file!
 # The ctex file is listed in the rule found in the build/common file.
-# These lists almost certainly will not be an exhastive list of 
-# all of the dependent files, but even a partial listing  will be helpfull.
+# These lists almost certainly will not be an exhaustive list of
+# all of the dependent files, but even a partial listing will be helpful.
 #
-REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
+REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) Trace_desc.tex Trace_rest.tex Trace_usage.tex
 
 include $(ESMF_DIR)/makefile
 
 DIRS	    = 
 
-CLEANDIRS   = Trace_refdoc $(HTMLFILES)
+CLEANDIRS   = Trace_refdoc Trace_crefdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              Trace_refdoc.tex $(PDFFILES) 
+              Trace_refdoc.tex Trace_crefdoc.tex $(PDFFILES) 
 CLOBBERDIRS =

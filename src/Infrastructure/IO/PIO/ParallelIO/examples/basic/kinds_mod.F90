@@ -2,7 +2,7 @@
 
  module kinds_mod
 
-!BOP
+!
 ! !MODULE: kinds_mod
 !
 ! !DESCRIPTION:
@@ -31,9 +31,9 @@
       r4        = selected_real_kind(6)  ,&
       r8        = selected_real_kind(13)
 
-!EOP
-!BOC
-!EOC
+!
+!
+!
 !***********************************************************************
 
  end module kinds_mod

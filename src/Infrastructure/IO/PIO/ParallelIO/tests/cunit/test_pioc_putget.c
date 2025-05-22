@@ -823,7 +823,7 @@ int test_read_att(int ncid, int *varid, int flavor)
       unsigned int uint_array_in[ATT_LEN];
       long long int64_array_in[ATT_LEN];
       unsigned long long uint64_array_in[ATT_LEN];
-      
+
         if ((ret = PIOc_get_att_uchar(ncid, varid[7], UCHAR_ATT_NAME, ubyte_array_in)))
             return ret;
         if ((ret = PIOc_get_att_ushort(ncid, varid[8], USHORT_ATT_NAME, ushort_array_in)))
@@ -2059,5 +2059,4 @@ int main(int argc, char **argv)
     return run_test_main(argc, argv, MIN_NTASKS, TARGET_NTASKS, -1,
                          TEST_NAME, dim_len, COMPONENT_COUNT, NUM_IO_PROCS);
 
-    return 0;
 }

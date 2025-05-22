@@ -1,0 +1,8 @@
+This is a dummy file needed to satisfy PIO's FindMPISERIAL.cmake.
+
+This is needed because, when building with mpiuni, we tell PIO that this
+mpiuni directory is the location of mpi-serial (since we use mpiuni for
+the same purpose as mpi-serial). But for FindMPISERIAL.cmake to succeed,
+it needs to find a libmpi-serial.a in the mpi-serial directory; hence,
+we put this file here to trick it into thinking that this is truly an
+mpi-serial installation.

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -24,6 +24,8 @@
 #include <Mesh/include/ESMCI_XGridUtil.h>
 #include <Mesh/include/Regridding/ESMCI_MeshRegrid.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
+#include <Mesh/include/Regridding/ESMCI_Search.h>
+
 
 #include <cassert>
 #include <cmath>
@@ -39,6 +41,7 @@
 
 #include <algorithm>
 #include <set>
+#include <map>
 
 #include <ESMCI_VM.h>
 #include "ESMCI_Macros.h"
@@ -134,6 +137,9 @@ double polygon::area(int sdim) const {
       // Sum
       ccw_sense += angle;
     }
+
+    // Free coordinate memory
+    delete [] coords;
 
 #if BOB_XGRID_DEBUG
     if (xgu_debug) {
@@ -726,6 +732,7 @@ bool disjoint(int pdim, int sdim, const std::vector<xpoint> & subject, const std
   s_contains_c = true;
   c_contains_s = true;
 
+  // Load polygons into coordinate arrays
   double * subject_cd = new double[sdim*subject.size()];
   polygon_to_coords(polygon(subject), sdim, subject_cd);
   double * clip_cd = new double[sdim*clip.size()];
@@ -769,7 +776,11 @@ bool disjoint(int pdim, int sdim, const std::vector<xpoint> & subject, const std
   if(c_contains_s) n_cond ++;
   if(n_cond > 1 && !(c_contains_s && s_contains_c)) Throw() << "Invalid spatial relation between subject and clip\n";
 
-  delete [] subject_cd, clip_cd;
+  // Free coordinate memory
+  delete [] subject_cd;
+  delete [] clip_cd;
+
+  // Return result
   return disjoint;
 }
 
@@ -2790,5 +2801,207 @@ void calc_wgts_from_xgrid_to_side_mesh(Mesh *src_xgrid_mesh, Mesh *dst_side_mesh
     }
 }
 
+  void srcXGridGatherOverlappingElems(Mesh &srcXGridMesh, Mesh &dstMesh, SearchResult &result) {
+
+    // Get dst side mesh info
+    int side=dstMesh.side;
+    int ind=dstMesh.ind;
+    
+    // Check side and ind info to make sure it's valid
+    if ((side != 1) && (side !=2)) Throw() << "side (for an xgrid side mesh) should be 1 or 2";
+    if (ind < 1) Throw() <<"ind (for an xgrid side mesh) should be >=1.";
+
+    // Get data fields corresponding to side
+    MEField<> *mesh_ind_field = NULL;
+    MEField<> *orig_elem_id_field = NULL;
+    if (side == 1) {
+      mesh_ind_field = srcXGridMesh.GetField("side1_mesh_ind");
+      orig_elem_id_field = srcXGridMesh.GetField("side1_orig_elem_id");
+    } else if (side ==2) {
+      mesh_ind_field = srcXGridMesh.GetField("side2_mesh_ind");
+      orig_elem_id_field = srcXGridMesh.GetField("side2_orig_elem_id");
+    } else {
+      Throw() << "Invalid mesh side: "<<side;
+    }
+
+    // Error check Mesh fields
+    if (mesh_ind_field == NULL) Throw() << "XGrid mesh doesn't contain mesh index information.";
+    if (orig_elem_id_field == NULL) Throw() << "XGrid mesh doesn't contain original element id information.";
+
+    
+    // Iterate through src XGrid Mesh
+    Mesh::iterator sxei = srcXGridMesh.elem_begin(), sxee = srcXGridMesh.elem_end();
+    for (; sxei != sxee; ++sxei) {
+      MeshObj &src_elem = *sxei;
+
+      // Skip non-active (e.g. ghostcell) elements
+      if (!GetAttr(src_elem).GetContext().is_set(Attr::ACTIVE_ID)) continue;      
+
+      // Get XGrid element ind
+      // (Round to nearest to take care of possible representation issues)
+      double *elem_mesh_ind_dbl = mesh_ind_field->data(src_elem);
+      int elem_mesh_ind = (int)(*elem_mesh_ind_dbl + 0.5);
+
+      // if the ind matches, then attempt to add entry
+      if (elem_mesh_ind == ind) {
+
+        // Get orig elem id
+        // (Round to nearest to take care of possible representation issues)
+        double *dst_orig_elem_id_dbl = orig_elem_id_field->data(src_elem);  
+        int dst_orig_elem_id = (int)(*dst_orig_elem_id_dbl+0.5);  
+        
+        // If the orig dst id is in the side mesh, then add it
+        Mesh::MeshObjIDMap::iterator mi =  dstMesh.map_find(MeshObj::ELEMENT, dst_orig_elem_id);
+        if (mi != dstMesh.map_end(MeshObj::ELEMENT)) {
+          MeshObj *dst_elem=&*mi;
+          
+          // Skip non-active (e.g. ghostcell) elements
+          if (!GetAttr(*dst_elem).GetContext().is_set(Attr::ACTIVE_ID)) continue;
+          
+          // Create Search result
+          Search_result *sr=new Search_result();
+          sr->elem=&src_elem; // Add src elem
+          sr->elems.push_back(dst_elem); // Add dst elem
+                    
+          // Add it to results list
+          result.push_back(sr);
+        }             
+      }
+    }
+
+  }
+
+  void dstXGridGatherOverlappingElems(Mesh &srcMesh, Mesh &dstXGridMesh, SearchResult &result) {
+
+    // Get dst side mesh info
+    int side=srcMesh.side;
+    int ind=srcMesh.ind;
+    
+    // Check side and ind info to make sure it's valid
+    if ((side != 1) && (side !=2)) Throw() << "side (for an xgrid side mesh) should be 1 or 2";
+    if (ind < 1) Throw() <<"ind (for an xgrid side mesh) should be >=1.";
+
+    // Get data fields corresponding to side
+    MEField<> *mesh_ind_field = NULL;
+    MEField<> *orig_elem_id_field = NULL;
+    if (side == 1) {
+      mesh_ind_field = dstXGridMesh.GetField("side1_mesh_ind");
+      orig_elem_id_field = dstXGridMesh.GetField("side1_orig_elem_id");
+    } else if (side ==2) {
+      mesh_ind_field = dstXGridMesh.GetField("side2_mesh_ind");
+      orig_elem_id_field = dstXGridMesh.GetField("side2_orig_elem_id");
+    } else {
+      Throw() << "Invalid mesh side: "<<side;
+    }
+
+    // Error check Mesh fields
+    if (mesh_ind_field == NULL) Throw() << "XGrid mesh doesn't contain mesh index information.";
+    if (orig_elem_id_field == NULL) Throw() << "XGrid mesh doesn't contain original element id information.";
+
+    // Set up map
+    std::map<int,Search_result *> id_to_sr_map;
+    
+    // Iterate through dst XGrid Mesh
+    Mesh::iterator dxei = dstXGridMesh.elem_begin(), dxee = dstXGridMesh.elem_end();
+    for (; dxei != dxee; ++dxei) {
+      MeshObj &dst_elem = *dxei;
+
+      /* XMRKX */
+      // Skip non-active (e.g. ghostcell) elements
+      if (!GetAttr(dst_elem).GetContext().is_set(Attr::ACTIVE_ID)) continue;
+      
+      // Get XGrid element ind
+      // (Round to nearest to take care of possible representation issues)
+      double *elem_mesh_ind_dbl = mesh_ind_field->data(dst_elem);
+      int elem_mesh_ind = (int)(*elem_mesh_ind_dbl + 0.5);
+
+      // if the ind matches, then attempt to add entry
+      if (elem_mesh_ind == ind) {
+
+        // Get orig elem id
+        // (Round to nearest to take care of possible representation issues)
+        double *src_orig_elem_id_dbl = orig_elem_id_field->data(dst_elem);  
+        int src_orig_elem_id = (int)(*src_orig_elem_id_dbl+0.5);  
+        
+        // If the orig dst id is in the side mesh, then add it
+        Mesh::MeshObjIDMap::iterator mi =  srcMesh.map_find(MeshObj::ELEMENT, src_orig_elem_id);
+        if (mi != srcMesh.map_end(MeshObj::ELEMENT)) {
+          MeshObj *src_elem=&*mi;
+
+          // Skip non-active (e.g. ghostcell) elements
+          if (!GetAttr(*src_elem).GetContext().is_set(Attr::ACTIVE_ID)) continue;
+          
+          // Find search result to add to
+          std::map<int,Search_result *>::iterator itsr=id_to_sr_map.find(src_elem->get_id());
+
+          // Get search result based on whether it was found
+          Search_result *sr;
+          if (itsr == id_to_sr_map.end()) {
+            // Create new Search_result
+            sr=new Search_result();
+            sr->elem=src_elem; // Add src elem
+
+            // Add to map
+            id_to_sr_map[src_elem->get_id()]=sr;
+
+            // Add to result
+            result.push_back(sr);
+            
+          } else {
+            // Get from map
+            sr=itsr->second;
+          }
+          
+          // Add dst element to search result
+          sr->elems.push_back(&dst_elem);
+                    
+        }             
+      }
+    }
+         
+  }
+
+  
+
+  // Used when one of src or dst Mesh is an XGrid. Uses XGrid
+  // information to gather elements of dstMesh that overlap with srcMesh
+  void XGridGatherOverlappingElems(Mesh &srcMesh, Mesh &dstMesh, SearchResult &result) {
+    
+    // Error check
+    if (srcMesh.spatial_dim() != dstMesh.spatial_dim()) {
+      Throw() << "Meshes must have same spatial dim for search";
+    }    
+    
+    // Branch depending on which is the XGrid
+    if (srcMesh.side==3) srcXGridGatherOverlappingElems(srcMesh, dstMesh, result);
+    else if (dstMesh.side==3) dstXGridGatherOverlappingElems(srcMesh, dstMesh, result);
+    else Throw() << "Unexpectedly neither src or dst Mesh is an XGrid.";
+    
+  }
+
+  // Detect if we should use XGrid information for regridding and how
+  XGRID_USE detect_xgrid_regrid_info_type(Mesh &srcmesh, Mesh &dstmesh) {
+    
+    XGRID_USE xgrid_use=XGRID_USE_NONE;
+    if (srcmesh.side==3) {
+      // Extra check to ensure that it's actually a side mesh going to XGrid
+      if ((dstmesh.side == 1) || (dstmesh.side == 2)) {
+        xgrid_use=XGRID_USE_SRC;
+      }
+    } else if (dstmesh.side==3) {
+      // Extra check to ensure that it's actually a side mesh going to XGrid
+      if ((srcmesh.side == 1) || (srcmesh.side == 2)) {
+        xgrid_use=XGRID_USE_DST;
+      }
+    }
+
+    return xgrid_use;
+  } 
+
+  
+ 
+
+
+  
 
 } //namespace

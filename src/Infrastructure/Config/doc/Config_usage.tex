@@ -3,11 +3,11 @@
  \subsubsection{Resource files}
 
    A {\em Resource File (RF)} is a text file consisting of list of 
-   {\em label}-{\em value} pairs. There is a limit of 1024 characters 
-   per line and the Resource File can contain a maximum of 200 records. 
-   Each {\em label} should be followed by some data, the {\em value}. 
-   An example Resource File follows.  It is the file used in the example 
-   below. 
+   {\em label}-{\em value} pairs. There is a buffer limit of 256,000 
+   characters for the entire Resource File. Each {\em label} is limited 
+   to 1,000 characters. Each label should be followed by some data, the 
+   {\em value}. An example Resource File follows. It is the file used 
+   in the example below. 
 
  \begin{verbatim}
  # This is an example Resource File.  
@@ -28,7 +28,7 @@
   radius_of_the_earth:   6.37E6         
   parameter_1:           89
   parameter_2:           78.2
-  input_file_name:       dummy_input.netcdf 
+  input_file_name:       dummy_input.nc
 
 
  # Or, the data can be located in a table using the following

@@ -35,7 +35,7 @@ BUILT_SOURCES = pio_tutil.mod pio_rearr_opts_tgv.mod
 # Build the test for make check.
 check_PROGRAMS = pio_init_finalize pio_file_simple_tests	\
 pio_file_fail ncdf_simple_tests ncdf_get_put ncdf_fail ncdf_inq	\
-pio_rearr pio_rearr_opts2 pio_decomp_tests	\
+pio_rearr pio_rearr_opts2 pio_decomp_tests pio_decomphalo_tests_2d \
 pio_decomp_tests_1d pio_decomp_tests_2d pio_decomp_tests_3d	\
 pio_decomp_frame_tests pio_decomp_fillval pio_iosystem_tests	\
 pio_iosystem_tests2 pio_iosystem_tests3 pio_iosystem_async_tests
@@ -53,6 +53,7 @@ pio_rearr_opts2_SOURCES = pio_rearr_opts2.F90
 pio_decomp_tests_SOURCES = pio_decomp_tests.F90
 pio_decomp_tests_1d_SOURCES = pio_decomp_tests_1d.F90
 pio_decomp_tests_2d_SOURCES = pio_decomp_tests_2d.F90
+pio_decomphalo_tests_2d_SOURCES = pio_decomphalo_tests_2d.F90
 pio_decomp_tests_3d_SOURCES = pio_decomp_tests_3d.F90
 pio_decomp_frame_tests_SOURCES = pio_decomp_frame_tests.F90
 pio_decomp_fillval_SOURCES = pio_decomp_fillval.F90
@@ -77,6 +78,7 @@ pio_decomp_fillval.F90:pio_decomp_fillval.F90.in
 pio_decomp_frame_tests.F90:pio_decomp_frame_tests.F90.in
 pio_decomp_tests_1d.F90:pio_decomp_tests_1d.F90.in
 pio_decomp_tests_2d.F90:pio_decomp_tests_2d.F90.in
+pio_decomphalo_tests_2d.F90:pio_decomphalo_tests_2d.F90.in
 pio_decomp_tests_3d.F90:pio_decomp_tests_3d.F90.in
 pio_decomp_tests.F90:pio_decomp_tests.F90.in
 pio_file_fail.F90:pio_file_fail.F90.in
@@ -95,6 +97,7 @@ EXTRA_DIST = CMakeLists.txt run_tests.sh.in ncdf_fail.F90.in		\
 ncdf_get_put.F90.in ncdf_inq.F90.in ncdf_simple_tests.F90.in		\
 pio_decomp_fillval.F90.in pio_decomp_frame_tests.F90.in			\
 pio_decomp_tests_1d.F90.in pio_decomp_tests_2d.F90.in			\
+pio_decomphalo_tests_2d.F90.in                                          \
 pio_decomp_tests_3d.F90.in pio_decomp_tests.F90.in pio_fail.F90.in	\
 pio_file_fail.F90.in pio_file_simple_tests.F90.in			\
 pio_init_finalize.F90.in pio_iosystem_tests2.F90.in			\

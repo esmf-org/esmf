@@ -14,4 +14,3 @@ set host = 'kraken'
 ./testpio_bench.pl --maxiter 10 --iofmt bin --pecount 4000 --bench POPD --numIO 640 --log ${host}.4000.bin.box.iotask_640.log.012211-2233
 
 #./testpio_bench.pl --maxiter 2 --iofmt pnc --pecount 8000 --bench POPD --numIO 640 --log ${host}.8000.pnc.iotask_640.log.${id}
-

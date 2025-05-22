@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -717,21 +717,21 @@ contains
 !------------------------------------------------------------------------------
 ! functions to compare two types to see if they're the same or not
 
-function ESMF_lmteq(mt1, mt2)
+impure elemental function ESMF_lmteq(mt1, mt2)
   logical ESMF_lmteq
   type(ESMF_LogMsg_Flag), intent(in) :: mt1,mt2
 
     ESMF_lmteq = (mt1%mtype == mt2%mtype)
 end function
 
-function ESMF_llteq(lt1, lt2)
+impure elemental function ESMF_llteq(lt1, lt2)
   logical ESMF_llteq
   type(ESMF_LogKind_Flag), intent(in) :: lt1,lt2
 
     ESMF_llteq = (lt1%ftype == lt2%ftype)
 end function
 
-function ESMF_lltne(lt1, lt2)
+impure elemental function ESMF_lltne(lt1, lt2)
   logical ESMF_lltne
   type(ESMF_LogKind_Flag), intent(in) :: lt1,lt2
 
@@ -1730,11 +1730,68 @@ end subroutine ESMF_LogGet
 !      \end{description}
 !
 !EOPI
+
+    integer                        :: localrc
+    integer                        :: msgAbortCnt
+    type(ESMF_LogMsg_Flag)         :: msgAbortLst(6)
+    character(ESMF_MAXSTR)         :: envRtAbort
+    integer                        :: idxRtAbort
+
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     call ESMF_LogOpen(ESMF_LogDefault, filename,  &
-        appendflag=logappendflag, logkindflag=logkindflag, rc=rc)
+      appendflag=logappendflag, logkindflag=logkindflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_ESMC_VMGetEnv("ESMF_RUNTIME_ABORT_LOGMSG_TYPES", envRtAbort, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    msgAbortCnt = 0
+    idxRtAbort = index (envRtAbort, "ESMF_LOGMSG_DEBUG")
+    if (idxRtAbort > 0) then
+      msgAbortCnt = msgAbortCnt + 1
+      msgAbortLst(msgAbortCnt) = ESMF_LOGMSG_DEBUG
+    endif
+    idxRtAbort = index (envRtAbort, "ESMF_LOGMSG_ERROR")
+    if (idxRtAbort > 0) then
+      msgAbortCnt = msgAbortCnt + 1
+      msgAbortLst(msgAbortCnt) = ESMF_LOGMSG_ERROR
+    endif
+    idxRtAbort = index (envRtAbort, "ESMF_LOGMSG_INFO")
+    if (idxRtAbort > 0) then
+      msgAbortCnt = msgAbortCnt + 1
+      msgAbortLst(msgAbortCnt) = ESMF_LOGMSG_INFO
+    endif
+    idxRtAbort = index (envRtAbort, "ESMF_LOGMSG_JSON")
+    if (idxRtAbort > 0) then
+      msgAbortCnt = msgAbortCnt + 1
+      msgAbortLst(msgAbortCnt) = ESMF_LOGMSG_JSON
+    endif
+    idxRtAbort = index (envRtAbort, "ESMF_LOGMSG_TRACE")
+    if (idxRtAbort > 0) then
+      msgAbortCnt = msgAbortCnt + 1
+      msgAbortLst(msgAbortCnt) = ESMF_LOGMSG_TRACE
+    endif
+    idxRtAbort = index (envRtAbort, "ESMF_LOGMSG_WARNING")
+    if (idxRtAbort > 0) then
+      msgAbortCnt = msgAbortCnt + 1
+      msgAbortLst(msgAbortCnt) = ESMF_LOGMSG_WARNING
+    endif
+    if (msgAbortCnt > 6) then
+      call ESMF_LogSetError(ESMF_RC_BUFFER_SHORT, &
+        msg="msgAbortLst overflow - ESMF_RUNTIME_ABORT_LOGMSG_TYPES", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    elseif (msgAbortCnt > 0) then
+      call ESMF_LogSet(ESMF_LogDefault, &
+        logmsgAbort=msgAbortLst(1:msgAbortCnt), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    if (present(rc)) rc=ESMF_SUCCESS
 
 end subroutine ESMF_LogInitialize
 
@@ -2825,7 +2882,7 @@ end subroutine ESMF_LogEntryCopy
 ! !IROUTINE:  ESMF_LogEQ - Compare two Logs for equality
 !
 ! !INTERFACE:
-  function ESMF_LogEQ(log1, log2)
+  impure elemental function ESMF_LogEQ(log1, log2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_LogEQ
@@ -2851,7 +2908,7 @@ end subroutine ESMF_LogEntryCopy
 ! !IROUTINE:  ESMF_LogEQ - Compare two Logs for inequality
 !
 ! !INTERFACE:
-  function ESMF_LogNE(log1, log2)
+  impure elemental function ESMF_LogNE(log1, log2)
 !
 ! !RETURN VALUE:
     logical :: ESMF_LogNE

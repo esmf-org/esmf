@@ -1,4 +1,4 @@
-/*! 
+/*!
 \page error Error Handling
 
 By default, PIO handles errors internally by printing a string

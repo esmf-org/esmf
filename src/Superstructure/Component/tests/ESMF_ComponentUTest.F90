@@ -52,7 +52,7 @@
     !NEX_UTest
     ! Verifing that a Gridded Component can be created
     cname = "Atmosphere - default context"
-    comp1 = ESMF_GridCompCreate(name=cname, configFile="comp.rc", rc=rc)  
+    comp1 = ESMF_GridCompCreate(name=cname, configFile="comp.yaml", rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Gridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -95,7 +95,7 @@
     ! Verifing that a Gridded Component can be created in parent VM context
     cname = "Atmosphere - child in parent VM context"
     comp1 = ESMF_GridCompCreate(name=cname, &
-      configFile="comp.rc", contextflag=ESMF_CONTEXT_PARENT_VM, rc=rc)  
+      configFile="comp.yaml", contextflag=ESMF_CONTEXT_PARENT_VM, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Gridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -178,7 +178,7 @@
     ! Verifing that a Gridded Component can be created in new VM context
     cname = "Atmosphere - child in new VM context"
     comp1 = ESMF_GridCompCreate(name=cname, &
-      configFile="comp.rc", contextflag=ESMF_CONTEXT_OWN_VM, rc=rc)  
+      configFile="comp.yaml", contextflag=ESMF_CONTEXT_OWN_VM, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Gridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

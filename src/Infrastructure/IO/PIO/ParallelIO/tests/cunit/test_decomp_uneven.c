@@ -128,7 +128,7 @@ int test_decomp_read_write(int iosysid, int ioid, int num_flavors, int *flavor, 
     for (int fmt = 0; fmt < 1; fmt++)
     {
         int ret;              /* Return code. */
-      
+
         /* Create the filename. */
         snprintf(filename, PIO_MAX_NAME, "decomp_%s_pio_type_%d_dims_%d_x_%d_x_%d.nc",
 		 TEST_NAME, pio_type, dim_len[0], dim_len[1], dim_len[2]);
@@ -329,7 +329,7 @@ int main(int argc, char **argv)
                 for (int dc = 0; dc < NUM_DIM_COMBOS_TO_TEST; dc++)
                 {
 		    int test_type[NUM_TYPES_TO_TEST] = {PIO_INT};
-		    
+
                     /* What is length of map for this combo? */
                     int full_maplen = 1;
                     for (int d = 0; d < NDIM3; d++)

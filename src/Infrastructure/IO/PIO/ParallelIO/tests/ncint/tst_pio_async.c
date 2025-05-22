@@ -9,6 +9,7 @@
 #include "config.h"
 #include <pio.h>
 #include "pio_err_macros.h"
+#include "ncint.h"
 
 #define FILE_NAME "tst_pio_async.nc"
 #define VAR_NAME "data_var"
@@ -41,7 +42,7 @@ main(int argc, char **argv)
     if (!my_rank)
         printf("\n*** Testing netCDF integration layer.\n");
     if (!my_rank)
-        printf("*** testing simple async use of netCDF integration layer...");
+        printf("*** testing simple async use of netCDF integration layer...\n");
     {
         int ncid, ioid;
         int dimid[NDIM3], varid;
@@ -69,8 +70,12 @@ main(int argc, char **argv)
 
         if (my_rank)
         {
+            int m;
             /* Create a file with a 3D record var. */
-            if (nc_create(FILE_NAME, NC_PIO|NC_NETCDF4, &ncid)) PERR;
+          for( m=0; m<NUM_MODES; m++){
+            if(my_rank==1)
+              printf("     cmode = %d\n", cmode[m]);
+            if (nc_create(FILE_NAME, cmode[m], &ncid)) PERR;
             if (nc_def_dim(ncid, DIM_NAME_UNLIMITED, dimlen[0], &dimid[0])) PERR;
             if (nc_def_dim(ncid, DIM_NAME_X, dimlen[1], &dimid[1])) PERR;
             if (nc_def_dim(ncid, DIM_NAME_Y, dimlen[2], &dimid[2])) PERR;
@@ -113,7 +118,7 @@ main(int argc, char **argv)
                 size_t dim_len_in;
 
                 /* Open the file. */
-                if (nc_open(FILE_NAME, NC_PIO, &ncid)) PERR;
+                if (nc_open(FILE_NAME, cmode[m], &ncid)) PERR;
 
                 /* Check the file. */
                 if (nc_inq(ncid, &ndims, &nvars, &ngatts, &unlimdimid)) PERR;
@@ -148,6 +153,7 @@ main(int argc, char **argv)
 
             free(my_data);
             if (nc_free_decomp(ioid)) PERR;
+          }
             if (nc_free_iosystem(iosysid)) PERR;
         }
     }

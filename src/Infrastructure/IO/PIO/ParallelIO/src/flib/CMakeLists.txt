@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.12)
+cmake_minimum_required (VERSION 3.5.2)
 project (PIOF Fortran)
 include (CheckFunctionExists)
 include (ExternalProject)
@@ -36,7 +36,12 @@ if (NETCDF_INTEGRATION)
   set (PIO_Fortran_MODS ${PIO_Fortran_MODS} ${CMAKE_CURRENT_BINARY_DIR}/ncint_mod.mod)
 endif ()
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 add_library (piof ${PIO_Fortran_SRCS} ${PIO_GenF90_SRCS})
+# Always use -fPIC
+set_property(TARGET piof PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 if (NOT PIO_ENABLE_FORTRAN)
   set_target_properties(piof PROPERTIES EXCLUDE_FROM_ALL TRUE)
 endif ()
@@ -195,6 +200,7 @@ else ()
     target_compile_definitions (gptl
       PUBLIC NO_MPIMOD)
   endif()
+  target_compile_definitions (piof PUBLIC NO_MPIMOD)
 endif ()
 
 #===== GPTL =====

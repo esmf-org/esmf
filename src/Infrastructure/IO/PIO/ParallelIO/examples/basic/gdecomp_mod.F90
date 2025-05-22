@@ -32,9 +32,9 @@ module gdecomp_mod
       character(len=128):: nml_file   ! namelist filename if used
       character(len=16) :: nml_var    ! namelist variable if used
    end type
-      
+
    character(len=*),parameter :: modname = 'gdecomp_mod'
-   integer(i4),parameter :: master_task = 0
+   integer(i4),parameter :: main_task = 0
 
 !==================================================================
 contains
@@ -51,7 +51,7 @@ contains
    type(gdecomp_type), intent(inout) :: gdecomp
 
 !  NOTE: not all of these are optional, but optional allows
-!        them to be called in arbitrary order 
+!        them to be called in arbitrary order
 
    integer(i4),optional :: nxg,nyg,nzg      ! global grid size
    integer(i4),optional :: gdx,gdy,gdz      ! block size
@@ -171,11 +171,11 @@ contains
    endif
 
    if (present(my_task)) then
-      if (my_task == master_task) call gdecomp_print(gdecomp)
+      if (my_task == main_task) call gdecomp_print(gdecomp)
    endif
 
    end subroutine gdecomp_set
-   
+
 !==================================================================
    subroutine gdecomp_read_nml(gdecomp,nml_file,nml_var,my_task,ntasks,gdims)
 
@@ -260,11 +260,11 @@ contains
    gdecomp%bdz = bdz
 
    if (present(my_task)) then
-      if (my_task == master_task) call gdecomp_print(gdecomp)
+      if (my_task == main_task) call gdecomp_print(gdecomp)
    endif
 
    end subroutine gdecomp_read_nml
-   
+
 !==================================================================
 
    subroutine gdecomp_print(gdecomp)
@@ -384,7 +384,7 @@ contains
 !DBG   print *,'IAM: ',my_task,'gdecomp_DOF: point #3 gsiz:',gsiz
 !DBG   print *,'IAM: ',my_task,'gdecomp_DOF: point #3 bsiz:',bsiz
 
-   if(wdecomp) then 
+   if(wdecomp) then
      allocate(blkid(gsiz(1),gsiz(2),gsiz(3)))
      allocate(tskid(gsiz(1),gsiz(2),gsiz(3)))
      blkid = -1
@@ -422,7 +422,7 @@ contains
             write(6,*) trim(subname),' ERROR: contval must be > 0 ',nbor
             call piodie(__FILE__,__LINE__)
          endif
-         if (my_task == master_task) &
+         if (my_task == main_task) &
             write(6,*) trim(subname),' blkdecomp1 = ',trim(gdecomp%blkdecomp1),' contval = ',contval
       case ('cont1dm')
          call pad_div(contval,nblks,gnpes)
@@ -430,7 +430,7 @@ contains
             write(6,*) trim(subname),' ERROR: contval must be > 0 ',nbor
             call piodie(__FILE__,__LINE__)
          endif
-         if (my_task == master_task) &
+         if (my_task == main_task) &
             write(6,*) trim(subname),' blkdecomp1 = ',trim(gdecomp%blkdecomp1),' contval = ',contval
       case default
          call calcdecomp(gdecomp%blkdecomp1,gnpes,nblk,nbor,ierr)
@@ -562,7 +562,7 @@ contains
 !     ii = (n3-1)*gsiz(2)*gsiz(1) + (n2-1)*gsiz(1) + n1
       nbxyz = ((n3-1)/bsiz(3))*nblk(2)*nblk(1) + ((n2-1)/bsiz(2))*nblk(1) + &
               ((n1-1)/bsiz(1)) + 1
-      if(wdecomp) then 
+      if(wdecomp) then
           blkid(n1,n2,n3) = bxyzbord(nbxyz)
           tskid(n1,n2,n3) = bxyzpord(nbxyz)
       endif
@@ -579,7 +579,7 @@ contains
    cntmax = maxval(cnta)
 
    ! --- map gridcells to dof ---
-   
+
    if (testonly) then
       allocate(testdof(cntmax,0:gnpes-1))
       testdof = 0
@@ -658,18 +658,18 @@ contains
          start(1:3) = pstart(1:3,my_task)
          count(1:3) = pend(1:3,my_task) - pstart(1:3,my_task) + 1
       endif
-      if (my_task == master_task) &
+      if (my_task == main_task) &
          write(6,*) trim(subname),' start and count were computed ',my_task,start,count
    else
       start = 1
       count = 0
-      if (my_task == master_task) &
+      if (my_task == main_task) &
          write(6,*) trim(subname),' start and count could NOT be computed '
    endif
 
-!------- MASTER TASK WRITE ------------------------------------- 
+!------- main TASK WRITE -------------------------------------
 
-   if (my_task == master_task) then
+   if (my_task == main_task) then
 
    ! --- write testdof ---
 
@@ -717,7 +717,7 @@ contains
    if (first_call) then
       rcode = nf90_create(ncname,nf90_clobber,ncid)
    else
-      rcode = nf90_open(ncname,nf90_write,ncid)      
+      rcode = nf90_open(ncname,nf90_write,ncid)
    endif
    rcode = nf90_redef(ncid)
    dname = trim(gdecomp%nml_var)//'_nx'
@@ -738,9 +738,9 @@ contains
 
    endif   ! testonly
 
-!------- END MASTER TASK WRITE --------------------------------- 
+!------- END main TASK WRITE ---------------------------------
 
-   if(wdecomp) then 
+   if(wdecomp) then
      deallocate(blkid,tskid)
    endif
    deallocate(cnta,cntb,bxyzbord,bxyzpord,bordpord)
@@ -944,7 +944,7 @@ contains
             npes2 = npes2/m
             bs = bs - 1
          else
-            write(6,*) trim(subname),' ERROR: bsiz not allowed ',n,gsiz(n),bsiz(n),m,npes,npes2 
+            write(6,*) trim(subname),' ERROR: bsiz not allowed ',n,gsiz(n),bsiz(n),m,npes,npes2
             call piodie(__FILE__,__LINE__)
          endif
       endif
@@ -1112,7 +1112,7 @@ contains
   subroutine mpas_decomp_generator(dim1,dim2,dim3,my_task,fname,dof)
     integer :: dim1, dim2, dim3
     integer, intent(in)          :: my_task         ! my MPI rank
-    character(len=*),intent(in)  :: fname           ! name of MPAS partition file 
+    character(len=*),intent(in)  :: fname           ! name of MPAS partition file
     integer(kind=pio_offset_kind), pointer             :: dof(:)
 
 !  Local variables
@@ -1132,7 +1132,7 @@ contains
     !   1st dimension:	vertical
     !   2nd dimension:  horizontal
 
-    gnz = dim1     
+    gnz = dim1
     nCellsGlobal = dim2*dim3
     call get_global_id_list(my_task,fname,nCellsSolve,nCellsGlobal,globalIDList)
 
@@ -1197,7 +1197,7 @@ contains
 
   subroutine camlike_decomp_generator(gnx, gny, gnz, myid, ntasks, npr_yz, dof)
     integer, intent(in) :: gnx, gny, gnz, myid, ntasks, npr_yz(4)
-    integer(kind=pio_offset_kind), pointer :: dof(:), tdof(:), tchk(:) 
+    integer(kind=pio_offset_kind), pointer :: dof(:), tdof(:), tchk(:)
     real, pointer :: rdof(:)
     integer(kind=pio_offset_kind) :: dofsize,tdofsize
 
@@ -1280,7 +1280,7 @@ contains
        end do
     end do
 
-    CALL qsRecursive(1_PIO_OFFSET_KIND, dofsize, dof) !kicks off the recursive 
+    CALL qsRecursive(1_PIO_OFFSET_KIND, dofsize, dof) !kicks off the recursive
 
     deallocate(tdof)
 
@@ -1323,7 +1323,7 @@ contains
           hi = hi - 1
        END DO
        IF (hi /= lo) then !move the entry indexed by hi to left side of partition
-          list(lo) = list(hi) 
+          list(lo) = list(hi)
           lo = lo + 1
        END IF
        DO !move in from the left
@@ -1331,7 +1331,7 @@ contains
           lo = lo + 1
        END DO
        IF (hi /= lo) then !move the entry indexed by hi to left side of partition
-          list(hi) = list(lo) 
+          list(hi) = list(lo)
           hi = hi - 1
        END IF
     END DO
