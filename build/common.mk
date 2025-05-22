@@ -1134,7 +1134,8 @@ endif
 
 ifeq ($(ESMF_COMPILER),fujitsu)
 # under Fujitsu the Fortran link libs are not compatible with C linker
-ESMF_CLINKLIBS     += $(ESMF_CXXLINKLIBS)
+# explicitly set here
+ESMF_CLINKLIBS     += $(ESMF_CXXLINKLIBS) -lstdc++
 else
 # but for other compilers the Fortran link libs are often needed by C linker
 ESMF_CLINKLIBS     += $(ESMF_CXXLINKLIBS) $(ESMF_F90LINKLIBS)
