@@ -149,7 +149,7 @@ program ESMF_HConfigEx
 !EOC
 !BOE
 ! One {\em major} concern with the above iterator loop implementation is when
-! Fortran {\tt cycle} statements are introduced. In orde to make the above loop
+! Fortran {\tt cycle} statements are introduced. In order to make the above loop
 ! {\tt cycle}--safe, each such {\tt cycle} statement needs to be matched with
 ! its own call to {\tt ESMF\_HConfigIterNext()}. This needs to be done to
 ! prevent endless-loop conditions, where the exit condition of the
