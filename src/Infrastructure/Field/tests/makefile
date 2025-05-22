@@ -253,7 +253,7 @@ RUN_ESMF_FieldArbGridUTestUNI:
 	$(MAKE) TNAME=FieldArbGrid NP=1 ftest
 
 RUN_ESMF_FieldRegridDynMaskPredefSrcUTestUNI:
-	$(MAKE) TNAME=FieldRegridDynMaskPredefDst NP=1 ftest
+	$(MAKE) TNAME=FieldRegridDynMaskPredefSrc NP=1 ftest
 
 RUN_ESMF_FieldRegridDynMaskPredefDstUTestUNI:
 	$(MAKE) TNAME=FieldRegridDynMaskPredefDst NP=1 ftest
@@ -262,7 +262,7 @@ RUN_ESMF_FieldRegridDynMaskPredefVoteUTestUNI:
 	$(MAKE) TNAME=FieldRegridDynMaskPredefVote NP=1 ftest
 
 RUN_ESMF_FieldRegridDynMaskPredefSrcUTest:
-	$(MAKE) TNAME=FieldRegridDynMaskPredefDst NP=4 ftest
+	$(MAKE) TNAME=FieldRegridDynMaskPredefSrc NP=4 ftest
 
 RUN_ESMF_FieldRegridDynMaskPredefDstUTest:
 	$(MAKE) TNAME=FieldRegridDynMaskPredefDst NP=4 ftest
