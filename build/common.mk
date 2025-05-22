@@ -1131,7 +1131,15 @@ endif
 ifeq ($(origin ESMF_CLINKLIBS_ENV), environment)
 ESMF_CLINKLIBS = $(ESMF_CLINKLIBS_ENV)
 endif
+
+ifeq ($(ESMF_COMPILER),fujitsu)
+# under Fujitsu the Fortran link libs are not compatible with C linker
+# explicitly set here
+ESMF_CLINKLIBS     += $(ESMF_CXXLINKLIBS) -lstdc++
+else
+# but for other compilers the Fortran link libs are often needed by C linker
 ESMF_CLINKLIBS     += $(ESMF_CXXLINKLIBS) $(ESMF_F90LINKLIBS)
+endif
 ESMF_CESMFLINKLIBS += -lesmf $(ESMF_CLINKLIBS)
 
 # - tools: AR + RANLIB + ...
