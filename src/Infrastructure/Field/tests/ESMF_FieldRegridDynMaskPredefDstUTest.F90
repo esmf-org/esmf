@@ -67,6 +67,7 @@
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !--------------------------------------
+    ! EX_UTest
     ! Test regridding using predefined DstMask R8R8R8
     write(failMsg, *) "Test unsuccessful"
     write(name, *) "Regrid between fields using predefined DstMask R8R8R8"
@@ -79,6 +80,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------
+    ! EX_UTest
     ! Test regridding using predefined DstMask R8R8R8V
     write(failMsg, *) "Test unsuccessful"
     write(name, *) "Regrid between fields using predefined DstMask R8R8R8V"
@@ -90,8 +92,8 @@
     ! return result
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-    !call ESMF_TestEnd(ESMF_SRCLINE) !bmaa
     !--------------------------------------
+    ! EX_UTest
     ! Test regridding using predefined SrcMask R4R8R4
     write(failMsg, *) "Test unsuccessful"
     write(name, *) "Regrid between fields using predefined DstMask R4R8R4"
@@ -104,6 +106,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------
+    ! EX_UTest
     ! Test regridding using predefined SrcMask R4R8R4V
     write(failMsg, *) "Test unsuccessful"
     write(name, *) "Regrid between fields using predefined DstMask R4R8R4V"
@@ -116,6 +119,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------
+    ! EX_UTest
     ! Test regridding using predefined SrcMask R4R8R4 and ungridded dim
     write(failMsg, *) "Test unsuccessful"
     write(name, *) "Regrid between fields with ungridded dim using predefined DstMask R4R8R4"
@@ -128,6 +132,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------
+    ! EX_UTest
     ! Test regridding using predefined SrcMask R4R8R4V and ungridded dim
     write(failMsg, *) "Test unsuccessful"
     write(name, *) "Regrid between fields with ungridded dim using predefined DstMask R4R8R4V"

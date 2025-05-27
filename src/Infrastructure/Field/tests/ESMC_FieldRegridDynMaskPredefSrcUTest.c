@@ -73,7 +73,7 @@ int main() {
   dx_dst = 360.0/(double)(dst_nx);
   dy_dst = 180.0/(double)(dst_ny);
 
-  ESMC_Initialize(NULL, ESMC_ArgLast);
+  ESMC_TestStart(__FILE__, __LINE__, 0);
   vm = ESMC_VMGetGlobal(&rc);
   rc = ESMC_VMGet(vm, &localPet, &petCount, NULL, NULL, NULL, NULL);
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -246,6 +246,7 @@ int main() {
 		  ++p;
 	  }
   }
+  // EX_UTest
   strcpy(name, "Test R8R8R8 dyanimic mask");
   strcpy(failMsg, "R8R8R8 src dynamic masking was not correctly applied");
   ESMC_Test((count_def+count_undef == dst_nx*dst_ny), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -278,6 +279,7 @@ int main() {
 		  ++p;
 	  }
   }
+  // EX_UTest
   strcpy(name, "Test R8R8R8V dyanimic mask");
   strcpy(failMsg, "R8R8R8V src dynamic masking was not correctly applied");
   ESMC_Test((count_def+count_undef == dst_nx*dst_ny), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -347,6 +349,7 @@ int main() {
 		  ++p;
 	  }
   }
+  // EX_UTest
   strcpy(name, "Test R4R8R4 dyanimic mask");
   strcpy(failMsg, "R4R8R4 src dynamic masking was not correctly applied");
   ESMC_Test((count_def+count_undef == dst_nx*dst_ny), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -377,10 +380,11 @@ int main() {
 		  ++p;
 	  }
   }
+  // EX_UTest
   strcpy(name, "Test R4R8R4V dyanimic mask");
   strcpy(failMsg, "R4R8R4V src dynamic masking was not correctly applied");
   ESMC_Test((count_def+count_undef == dst_nx*dst_ny), name, failMsg, &result, __FILE__, __LINE__, 0);
 
-  ESMC_Finalize();
+  ESMC_TestEnd(__FILE__, __LINE__, 0);
   return 0;
 }

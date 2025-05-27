@@ -67,6 +67,7 @@
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !--------------------------------------
+    !EX_UTest
     ! Test regridding using predefined voteMask R8R8R8
     write(failMsg, *) "Test unsuccessful"
     write(name, *) "Regrid between fields using predefined voteMask R8R8R8"
@@ -79,6 +80,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------
+    !EX_UTest
     ! Test regridding using predefined voteMask R8R8R8V
     write(failMsg, *) "Test unsuccessful"
     write(name, *) "Regrid between fields using predefined voteMask R8R8R8V"
@@ -103,6 +105,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------
+    !EX_UTest
     ! Test regridding using predefined voteMask R4R8R4V
     write(failMsg, *) "Test unsuccessful"
     write(name, *) "Regrid between fields using predefined voteMask R4R8R4V"
@@ -127,6 +130,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------
+    !EX_UTest
     ! Test regridding using predefined voteMask R4R8R4V and ungridded dim
     write(failMsg, *) "Test unsuccessful"
     write(name, *) "Regrid between fields with ungridded dim using predefined voteMask R4R8R4V"

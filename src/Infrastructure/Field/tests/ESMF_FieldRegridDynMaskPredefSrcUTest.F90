@@ -10,11 +10,11 @@
 !
 !==============================================================================
 !
-      program ESMF_FieldRegridDynMaskTest
+      program ESMF_FieldRegridDynMaskPredefSrcUTest
 
 !------------------------------------------------------------------------------
 
-#define FILENAME "ESMF_FieldRegridDynMaskTest.F90"
+#define FILENAME "ESMF_FieldRegridDynMaskPredefSrcUTest.F90"
 #define _VERIFY(A) if(A /= ESMF_SUCCESS) then; rc=ESMF_FAILURE; print*,__FILE__,__LINE__;return; endif
 #define _VERIFY_PASS(A) if(ESMF_LogFoundError(A, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rctoReturn=rc)) return
 
@@ -67,6 +67,7 @@
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !--------------------------------------
+    ! EX_UTest
     ! Test regridding using predefined SrcMask R8R8R8
     write(failMsg, *) "Test unsuccessful"
     write(name, *) "Regrid between fields using predefined SrcMask R8R8R8"
@@ -79,6 +80,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------
+    ! EX_UTest
     ! Test regridding using predefined SrcMask R8R8R8V
     write(failMsg, *) "Test unsuccessful"
     write(name, *) "Regrid between fields using predefined SrcMask R8R8R8V"
@@ -91,6 +93,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------
+    ! EX_UTest
     ! Test regridding using predefined SrcMask R4R8R4
     write(failMsg, *) "Test unsuccessful"
     write(name, *) "Regrid between fields using predefined SrcMask R4R8R4"
@@ -103,6 +106,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------
+    ! EX_UTest
     ! Test regridding using predefined SrcMask R4R8R4V
     write(failMsg, *) "Test unsuccessful"
     write(name, *) "Regrid between fields using predefined SrcMask R4R8R4V"
@@ -115,6 +119,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------
+    ! EX_UTest
     ! Test regridding using predefined SrcMask R4R8R4 and ungridded dim
     write(failMsg, *) "Test unsuccessful"
     write(name, *) "Regrid between fields with ungridded dim using predefined SrcMask R4R8R4"
@@ -127,6 +132,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------
+    ! EX_UTest
     ! Test regridding using predefined SrcMask R4R8R4V and ungridded dim
     write(failMsg, *) "Test unsuccessful"
     write(name, *) "Regrid between fields with ungridded dim using predefined SrcMask R4R8R4V"
@@ -865,4 +871,4 @@ contains
 
     end function create_grid
 
-end program ESMF_FieldRegridDynMaskTest
+end program ESMF_FieldRegridDynMaskPredefSrcUTest
