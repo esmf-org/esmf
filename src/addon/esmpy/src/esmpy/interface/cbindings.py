@@ -2490,9 +2490,6 @@ def ESMP_RouteHandleWrite(routehandle, filename):
 
 _ESMF.ESMC_DynamicMaskPredefinedSetR8R8R8.restype = ct.c_int
 _ESMF.ESMC_DynamicMaskPredefinedSetR8R8R8.argtypes = [ct.POINTER(ESMP_DynamicMask), ct.c_uint,
-                                               #ct.POINTER(ct.c_int),
-                                               #ct.POINTER(ct.c_double),
-                                               #ct.POINTER(ct.c_double)]
                                                OptionalInt,
                                                OptionalDouble,
                                                OptionalDouble]
@@ -2520,5 +2517,37 @@ def ESMP_DynamicMaskPredefinedSetR8R8R8(masktype=constants.PredefinedDynamicMask
                                                              srcMaskValue,
                                                              dstMaskValue)
     handle_esmf_error(rc, 'ESMC_DynamicMaskPredefinedSetR8R8R8')
+
+    return dynamic_mask
+
+_ESMF.ESMC_DynamicMaskPredefinedSetR4R8R4.restype = ct.c_int
+_ESMF.ESMC_DynamicMaskPredefinedSetR4R8R4.argtypes = [ct.POINTER(ESMP_DynamicMask), ct.c_uint,
+                                               OptionalInt,
+                                               OptionalFloat,
+                                               OptionalFloat]
+
+def ESMP_DynamicMaskPredefinedSetR4R8R4(masktype=constants.PredefinedDynamicMask.MASKSRC,
+                                           handleAllElements=None,
+                                           srcMaskValue=None,
+                                           dstMaskValue=None):
+
+    if not isinstance(handleAllElements, type(None)):
+        if (handleAllElements.dtype != np.int32):
+           raise TypeError('handleAllElements must have dtype=int32')
+
+    if not isinstance(srcMaskValue, type(None)):
+        if (srcMaskValue.dtype != np.float32):
+           raise TypeError('srcMaskValue must have dtype=float32')
+
+    if not isinstance(dstMaskValue, type(None)):
+        if (dstMaskValue.dtype != np.float32):
+           raise TypeError('dstMaskValue must have dtype=float32')
+     
+    dynamic_mask = ESMP_DynamicMask()
+    rc = _ESMF.ESMC_DynamicMaskPredefinedSetR4R8R4(ct.byref(dynamic_mask),masktype, 
+                                                             handleAllElements,
+                                                             srcMaskValue,
+                                                             dstMaskValue)
+    handle_esmf_error(rc, 'ESMC_DynamicMaskPredefinedSetR4R8R4')
 
     return dynamic_mask

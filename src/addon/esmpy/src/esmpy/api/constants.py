@@ -614,3 +614,8 @@ class PredefinedDynamicMask(IntEnum):
     MASKDEST = 1
     MASKSRCDEST = 2
     MASKVOTE = 3
+
+# DynamicMask
+class DynamicMaskPrecision(IntEnum):
+    R4R8R4 = 0
+    R8R8R8 = 1

@@ -9,12 +9,19 @@ from esmpy.api.esmpymanager import *
 class DynamicMask(object):
 
     @initialize
-    def __init__(self, mask_type=None, handle_all_elements=None, src_mask_value=None, dst_mask_value=None):
+    def __init__(self, mask_prec, mask_type, handle_all_elements=None, src_mask_value=None, dst_mask_value=None):
 
-        self._struct = ESMP_DynamicMaskPredefinedSetR8R8R8(masktype=mask_type, 
-                       handleAllElements=handle_all_elements, 
-                       srcMaskValue=src_mask_value,
-                       dstMaskValue=dst_mask_value)
+        if mask_prec == constants.DynamicMaskPrecision.R8R8R8:
+           self._struct = ESMP_DynamicMaskPredefinedSetR8R8R8(masktype=mask_type, 
+                          handleAllElements=handle_all_elements, 
+                          srcMaskValue=src_mask_value,
+                          dstMaskValue=dst_mask_value)
+
+        elif mask_prec == constants.DynamicMaskPrecision.R4R8R4:
+           self._struct = ESMP_DynamicMaskPredefinedSetR4R8R4(masktype=mask_type, 
+                          handleAllElements=handle_all_elements, 
+                          srcMaskValue=src_mask_value,
+                          dstMaskValue=dst_mask_value)
 
         import atexit; atexit.register(self.__del__)
         self._finalized = False
