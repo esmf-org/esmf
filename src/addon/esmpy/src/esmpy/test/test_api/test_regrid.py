@@ -36,6 +36,7 @@ from esmpy.util.grid_utilities import compute_mass_grid
 from esmpy.util.grid_utilities import grid_create_from_bounds
 from esmpy.util.grid_utilities import grid_create_from_bounds_3d
 from esmpy.util.grid_utilities import grid_create_from_bounds_periodic
+from esmpy.util.grid_utilities import grid_create_uneven_from_bounds_periodic
 from esmpy.util.grid_utilities import grid_create_from_bounds_periodic_3d
 from esmpy.util.grid_utilities import initialize_field_grid
 from esmpy.util.grid_utilities import initialize_field_grid_3d
@@ -1722,4 +1723,47 @@ class TestRegrid(TestBase):
                    count_def = count_def + 1
         
         self.assertEqual(total_points, count_undef+count_def)
+#
+
+    def test_field_regrid_votemask_R4R8R4(self):
+        # create a grid
+        srcgrid = grid_create_uneven_from_bounds_periodic(20, 20, corners=True, domask=False)
+        dstgrid = grid_create_from_bounds_periodic(10, 10, corners=True)
+        total_points = 10*10
+
+        # create the Fields
+        srcfield = esmpy.Field(srcgrid, name='srcfield', typekind=TypeKind.R4)
+        dstfield = esmpy.Field(dstgrid, name='dstfield', typekind=TypeKind.R4)
+
+        # initialize the Fields
+        v1=np.float32(170.0)
+        v2=np.float32(2000.0)
+        undef=np.float32(20000.0)
+        fbounds = srcfield.data.shape
+        for i in range(fbounds[0]):
+            for j in range(fbounds[1]):
+                srcfield.data[i,j] = v1 
+                if i%2 == 1:
+                   srcfield.data[i,j] = v2 
+          
+
+        # run the ESMF regridding
+        regridSrc2Dst = esmpy.Regrid(srcfield, dstfield,
+                                    src_mask_values=np.atleast_1d(np.array([0])),
+                                    regrid_method=esmpy.RegridMethod.BILINEAR,
+                                    unmapped_action=esmpy.UnmappedAction.ERROR,
+                                    src_term_processing=0)
+ 
+        handle_all = np.int32(1)
+        dyn_mask = esmpy.DynamicMask(DynamicMaskPrecision.R4R8R4, PredefinedDynamicMask.MASKVOTE,handle_all_elements=handle_all,src_mask_value=undef)
+        dstfield = regridSrc2Dst(srcfield, dstfield, dynamic_mask=dyn_mask)
+        fbounds = dstfield.data.shape
+        delta = 0.001
+        count_def = 0
+        for i in range(fbounds[0]):
+            for j in range(fbounds[1]):
+                if (v2-delta < dstfield.data[i,j]) & (dstfield.data[i,j] < v2+delta):
+                   count_def = count_def + 1
+        
+        self.assertEqual(total_points, count_def)
 #

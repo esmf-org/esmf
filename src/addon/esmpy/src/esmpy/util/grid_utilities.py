@@ -132,6 +132,42 @@ def grid_create_from_bounds_periodic(nlon, nlat, corners=False, domask=False):
 
     return grid
 
+def grid_create_uneven_from_bounds_periodic(nlon, nlat, corners=False, domask=False):
+    """
+    Create a 2 dimensional periodic Grid with `nlon` number of grid cells in the longitude domain [0, 360] and `nlat`
+    number of grid cells in the latitude domain [-90, 90].
+    :param nlons: number of longitude values at cell centers
+    :param nlats: number of latitude values at cell centers
+    :param corners: boolean to determine whether or not to add corner coordinates to this grid
+    :param domask: boolean to determine whether to set an arbitrary mask or not
+    :return: grid
+    """
+    [lon, lat] = [0, 1]
+
+    print("bmaaaaaaaaaaaaaaa")
+    # Create arrays of center and corner values to emulate what would be read from a standard CF-like file
+    # +1 because corners have one more than center
+    lons = np.linspace(-180, 180, nlon + 1)
+    loncorner = np.array([lons[0:-1], lons[1::]]).T
+    dx4 = (loncorner[0,1] - loncorner[0,0])/4.0
+    for i in range(len(loncorner)):
+        print(loncorner[i,0],loncorner[i,1])
+        if i%2 == 0:
+           loncorner[i,1] = loncorner[i,1]-dx4 
+        elif i%2 == 1:
+           loncorner[i,0] = loncorner[i,0]-dx4 
+
+    loncenter = (loncorner[:, 1] + loncorner[:, 0]) / 2
+
+    # +1 because corners have one more than center
+    lats = np.linspace(-90, 90, nlat + 1)
+    latcorner = np.array([lats[0:-1], lats[1::]]).T
+    latcenter = (latcorner[:, 1] + latcorner[:, 0]) / 2
+
+    grid = grid_create_from_coordinates_periodic(loncenter, latcenter, loncorner, latcorner, corners=corners, domask=domask)
+
+    return grid
+
 def grid_create_from_coordinates_periodic(longitudes, latitudes, lon_corners=False, lat_corners=False, corners=False, domask=False):
     """
     Create a 2 dimensional periodic Grid using the 'longitudes' and 'latitudes'.
