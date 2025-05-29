@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -27,8 +27,11 @@ program ESMF_HConfigEx
   type(ESMF_HConfig)              :: hconfig, hconfigTemp, hconfigTemp2
   type(ESMF_HConfigIter)          :: hconfigIter, hconfigIterBegin, hconfigIterEnd
   type(ESMF_Config)               :: config
+  type(ESMF_HConfigMatch_Flag)    :: match
   logical                         :: asOkay, valueL, isDefined
   logical                         :: isNull, isScalar, isSequence, isMap
+  logical                         :: isAlias, isNotAlias, isExact, isMatch
+  logical                         :: isNone
   logical, allocatable            :: valueLSeq(:)
   character(len=:), allocatable   :: string, stringKey, tag
   character(len=:), allocatable   :: valueSSeq(:)
@@ -146,7 +149,7 @@ program ESMF_HConfigEx
 !EOC
 !BOE
 ! One {\em major} concern with the above iterator loop implementation is when
-! Fortran {\tt cycle} statements are introduced. In orde to make the above loop
+! Fortran {\tt cycle} statements are introduced. In order to make the above loop
 ! {\tt cycle}--safe, each such {\tt cycle} statement needs to be matched with
 ! its own call to {\tt ESMF\_HConfigIterNext()}. This needs to be done to
 ! prevent endless-loop conditions, where the exit condition of the
@@ -966,6 +969,8 @@ program ESMF_HConfigEx
   call ESMF_HConfigFileLoad(hconfig, filename="exampleWithTags.yaml", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_HConfigLog(hconfig, prefix="WithTagsStart: ", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The file contains the following YAML:
 ! \begin{verbatim}
@@ -981,6 +986,8 @@ program ESMF_HConfigEx
 ! value_ten:              Null
 ! value_eleven:
 ! value_twelve:  !myStuff xyz
+! value_thirteen:         NO
+! value_fourteen:         "NO"
 ! \end{verbatim}
 !
 ! The value associated with {\em map key} "value\_ten" is explicitly set to
@@ -1120,9 +1127,72 @@ program ESMF_HConfigEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The Core schema tag resolves to {\tt{\bf tag:yaml.org,2002:bool}}. The
-! supported boolean values are {\tt true}, {\tt True}, {\tt TRUE},
-! {\tt false}, {\tt False}, and {\tt FALSE}.
+! supported boolean values are:
+! \begin{verbatim}
+!      true   |   false
+!      True   |   False
+!      TRUE   |   FALSE
+! \end{verbatim}
 !
+! \paragraph{Additional Boolean values and the "Norway problem"}
+! The YAMLCPP backend used by {\tt ESMF\_HConfig} interprets all of the values
+! recognized as such under  \htmladdnormallink{YAML 1.1}
+! {https://yaml.org/type/bool.html} as boolean. This extends the above list with
+! additional options:
+! \begin{verbatim}
+!      yes    |   no
+!      Yes    |   No
+!      YES    |   NO
+!      y      |   n
+!      Y      |   N
+!      on     |   off
+!      On     |   Off
+!      ON     |   OFF
+! \end{verbatim}
+! The interpretation of value {\tt NO} as a boolean, instead of a literal
+! string, can be problematic. It leads to the so-called {\em "Norway problem"},
+! because the same string is often used as country code instead. The underlying
+! problem is the misinterpretation of values by YAML.
+!EOE
+  tag = ESMF_HConfigGetTag(hconfig, keyString="value_thirteen", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("value_thirteen HConfig tag:    ", A30)') tag
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Strictly speaking this is not a YAML problem, but instead a schema specific
+! issue. Fortunately there are two simple solutions to ensure the correct and
+! intended interpretation of values by {\tt ESMF\_HConfig}:
+!
+! \begin{enumerate}
+! \item Explicit quotation of strings: See for instance the {\em map value}
+! for {\tt value\_fourteen} in the current example. Using explicit quotes for
+! {\tt "NO"}, the entry is safely interpreted as a literal string, and if
+! queried for its tag, will return {\tt tag:yaml.org,2002:str}.
+!
+! \item Explicit standard tags: This option allows explicit specificaiton of any
+! tag, e.g. the standard short-hand tag {\tt !str} for literal strings. This
+! approach is discussed in more detal below.
+! \end{enumerate}
+!EOE
+  tag = ESMF_HConfigGetTag(hconfig, keyString="value_fourteen", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("value_fourteen HConfig tag:    ", A30)') tag
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigAdd(hconfig, addKeyString="value_added",content="'NO'",rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  tag = ESMF_HConfigGetTag(hconfig, keyString="value_added", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("value_added HConfig tag:    ", A30)') tag
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigLog(hconfig, prefix="WithTagsFinish: ", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
 ! \paragraph{Explicit standard tags}
 ! Standard short-hand tags can be specified to change the default resolution.
 ! This is demonstrated for {\em map keys} "value\_four", "value\_six", and
@@ -1181,6 +1251,159 @@ program ESMF_HConfigEx
 !BOC
   ! Destroy hconfig when done with it.
   call ESMF_HConfigDestroy(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!-------------------------------------------------------------------------------
+!BOE
+! \subsubsection{Comparing HConfig objects}
+!
+! The HConfig class follows the standard behavior of ESMF deep classes as
+! described in section \ref{assignment_equality_copy_compare}. To demonstrate
+! the operations of assignment, equality, and comparison based on content, we
+! start by creating a simple HConfig object.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfig
+  hconfig = ESMF_HConfigCreate(content="{car: red, bike: 22, plane: TRUE}", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! A simple assignment results in an alias to the same deep HConfig object.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfigTemp
+  hconfigTemp = hconfig
+!EOC
+!BOE
+! The equality {\tt (==)} and inequality {\tt (/=)} operators are
+! overloaded to check for the alias condition when used between two
+! HConfig objects.
+!EOE
+!BOC
+  ! logical :: isAlias
+  isAlias = (hconfigTemp == hconfig)
+!EOC
+  write (msgString, '("isAlias: ", l2)') isAlias
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  ! logical :: isNotAlias
+  isNotAlias = (hconfigTemp /= hconfig)
+!EOC
+  write (msgString, '("isNotAlias: ", l2)') isNotAlias
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Alias equality can also be tested by using the {\tt ESMF\_HConfigMatch()}
+! function. The return value of this function is of type
+! {\tt ESMF\_HConfigMatch\_Flag}, which allows for a wider range of possible
+! comparison results. See section~\ref{const:hconfigmatch} for all the
+! implemented return values.
+!EOE
+!BOC
+  ! type(ESMF_HConfigMatch_Flag)  :: match
+  match = ESMF_HConfigMatch(hconfig, hconfigTemp, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! For the case of an alias match, the value of {\tt ESMF\_HCONFIGMATCH\_ALIAS}
+! is returned.
+!EOE
+!BOC
+  isAlias = (match == ESMF_HCONFIGMATCH_ALIAS)
+!EOC
+  write (msgString, '("isAlias from match: ", l2)') isAlias
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! To demonstrate content matching for HConfig objects that are not aliases, we
+! create a separate object with the same content as {\tt hconfig}.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfigTemp
+  hconfigTemp = ESMF_HConfigCreate(content="{car: red, bike: 22, plane: TRUE}", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The simple alias check now returns {\tt .false.}.
+!EOE
+!BOC
+  ! logical :: isAlias
+  isAlias = (hconfigTemp == hconfig)
+!EOC
+  write (msgString, '("isAlias for diff objects: ", l2)') isAlias
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! However, for two separate HConfig objects that have exactly matching
+! content, as is the case for {\tt hconfig} and {\tt hconfigTemp}, function
+! {\tt ESMF\_HConfigMatch()} returns value {\tt ESMF\_HCONFIGMATCH\_EXACT}.
+!EOE
+!BOC
+  ! type(ESMF_HConfigMatch_Flag)  :: match
+  match = ESMF_HConfigMatch(hconfig, hconfigTemp, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  ! logical :: isExact
+  isExact = (match == ESMF_HCONFIGMATCH_EXACT)
+!EOC
+  write (msgString, '("isExact: ", l2)') isExact
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The values returned by {\tt ESMF\_HConfigMatch()} are constructed in
+! a monotonically increasing manner to simplify general comparisons that
+! ensure two objects are either aliases of each other {\em or} their content
+! matches exactly. This common case is demonstrated in the following code that
+! sets {\tt isMatch} to {\tt .true.} for the alias or exact match condition,
+! and {\tt .false.} otherwise, using {\tt (>=)} logic.
+!EOE
+!BOC
+  ! logical :: isMatch
+  isMatch = (match >= ESMF_HCONFIGMATCH_EXACT)
+!EOC
+  write (msgString, '("isMatch: ", l2)') isMatch
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! While there is an exact match of the content of {\tt hconfig} and
+! {\tt hconfigTemp}, they are distinct objects in memory, which can be modified
+! independent of each other. E.g. another key-value pair can be added to
+! {\tt hconfigTemp} without affecting the content of {\tt hconfig}.
+!EOE
+!BOC
+  call ESMF_HConfigAdd(hconfigTemp, addKeyString="kNew", content=7, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Now that the content of {\tt hconfig} and {\tt hconfigTemp} differs, function
+! {\tt ESMF\_HConfigMatch()} returns value {\tt ESMF\_HCONFIGMATCH\_NONE}.
+!EOE
+!BOC
+  ! type(ESMF_HConfigMatch_Flag)  :: match
+  match = ESMF_HConfigMatch(hconfig, hconfigTemp, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  ! logical :: isNone
+  isNone = (match == ESMF_HCONFIGMATCH_NONE)
+!EOC
+  write (msgString, '("isNone: ", l2)') isNone
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Finally clean up both HConfig objects.
+!EOE
+!BOC
+  ! Destroy hconfig when done with it.
+  call ESMF_HConfigDestroy(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  ! Destroy hconfigTemp when done with it.
+  call ESMF_HConfigDestroy(hconfigTemp, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -1597,9 +1820,16 @@ program ESMF_HConfigEx
 ! ...
 ! \end{verbatim}
 !
-! The optional {\tt doc} argument can be specified when saving the
-! multi-document {\tt hconfig} to file. Only the specified document, by index,
-! is written to file.
+! The content of the {\tt hconfig} object can be written to the ESMF log file
+! as usual.
+!EOE
+!BOC
+  call ESMF_HConfigLog(hconfig, prefix="my-multi-doc: ", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The optional {\tt doc} argument can be specified to save or log a specific
+! document of the multi-document {\tt hconfig} object.
 !EOE
 !BOC
   call ESMF_HConfigFileSave(hconfig, filename="multi_01.yaml", doc=2, rc=rc)

@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -17,9 +17,12 @@
 #include <Mesh/include/Legacy/ESMCI_Sintdnode.h>
 #include <Mesh/include/Regridding/ESMCI_Interp.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
+#include <Mesh/include/Regridding/ESMCI_Search.h>
 
 namespace ESMCI {
 
+
+  
 /**
  *\brief generate a mesh based on the nodes and cells vector. The cells are unique and refer to the nodes.
  * @param[in] sintd_nodes vector to allocated intersecting nodal points
@@ -291,7 +294,7 @@ double gcdistance(double * v1, double * v2);
  void calc_wgts_from_side_mesh_to_xgrid(Mesh *src_side_mesh, Mesh *dst_xgrid_mesh, IWeights &wts);
  void calc_wgts_from_xgrid_to_side_mesh(Mesh *src_xgrid_mesh, Mesh *dst_side_mesh, IWeights &wts);
 
-
+void XGridGatherOverlappingElems(Mesh &srcMesh, Mesh &dstMesh, SearchResult &result);
 
 // Debugging apis
 void cart2sph(int num_p, const double *p, double *lonlat);
@@ -305,7 +308,12 @@ void test_clip3D(int pdim, int sdim, int num_s, double * s_coord, int num_c, dou
 void dump_sph_coords(int num, const double * coord);
 void dump_cart_coords(int num, const double * coord, bool only_sph=false);
  void dump_polygon(const polygon & poly, bool only_sph=false);
- 
+
+  // Whether XGrid is being used for regridding
+  enum XGRID_USE {XGRID_USE_NONE, XGRID_USE_SRC, XGRID_USE_DST};
+
+  // Deterimine if the input meshes have XGrid regridding information and if so what type
+  XGRID_USE detect_xgrid_regrid_info_type(Mesh &srcmesh, Mesh &dstmesh);
 
 
 } // namespace

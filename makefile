@@ -304,6 +304,18 @@ endif
 	    echo "ESMF_BABELTRACE_LIBPATH: $(ESMF_BABELTRACE_LIBPATH)" ; \
 	  fi; \
 	 fi
+	-@if [ -n "$(ESMF_NUMA)" ] ; then \
+	  echo "ESMF_NUMA:               $(ESMF_NUMA)" ; \
+	  if [ -n "$(ESMF_NUMA_INCLUDE)" ] ; then \
+	    echo "ESMF_NUMA_INCLUDE:       $(ESMF_NUMA_INCLUDE)" ; \
+	  fi; \
+	  if [ -n "$(ESMF_NUMA_LIBS)" ] ; then \
+	    echo "ESMF_NUMA_LIBS:          $(ESMF_NUMA_LIBS)" ; \
+	  fi; \
+	  if [ -n "$(ESMF_NUMA_LIBPATH)" ] ; then \
+	    echo "ESMF_NUMA_LIBPATH:       $(ESMF_NUMA_LIBPATH)" ; \
+	  fi; \
+	 fi
 	-@if [ -n "$(ESMF_NVML)" ] ; then \
 	  echo "ESMF_NVML:               $(ESMF_NVML)" ; \
 	  if [ -n "$(ESMF_NVML_INCLUDE)" ] ; then \
@@ -325,6 +337,7 @@ endif
 	-@echo "ESMF_INSTALL_LIBDIR:    $(ESMF_INSTALL_LIBDIR)"
 	-@echo "ESMF_INSTALL_BINDIR:    $(ESMF_INSTALL_BINDIR)"
 	-@echo "ESMF_INSTALL_DOCDIR:    $(ESMF_INSTALL_DOCDIR)"
+	-@echo "ESMF_INSTALL_CMAKEDIR:  $(ESMF_INSTALL_CMAKEDIR)"
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo " * ESMF Benchmark directory and parameters *"
@@ -467,6 +480,7 @@ endif
 	-@echo "ESMF_APPSDIR=$(ESMF_APPSDIR)" >> $(MKINFO)
 	-@echo "ESMF_LIBSDIR=$(ESMF_LIBDIR)" >> $(MKINFO)
 	-@echo "ESMF_ESMXDIR=$(ESMF_ESMXDIR)" >> $(MKINFO)
+	-@echo "ESMF_CMAKEDIR=$(ESMF_CMAKEDIR)" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "ESMF_F90COMPILER=$(ESMF_F90COMPILER)" >> $(MKINFO)
@@ -709,6 +723,18 @@ endif
 	    echo "# ESMF_BABELTRACE_LIBPATH:$(ESMF_BABELTRACE_LIBPATH)" >> $(MKINFO) ; \
 	  fi; \
 	 fi
+	-@if [ -n "$(ESMF_NUMA)" ] ; then \
+	  echo "# ESMF_NUMA:              $(ESMF_NUMA)" >> $(MKINFO) ; \
+	  if [ -n "$(ESMF_NUMA_INCLUDE)" ] ; then \
+	    echo "# ESMF_NUMA_INCLUDE:      $(ESMF_NUMA_INCLUDE)" >> $(MKINFO) ; \
+	  fi; \
+	  if [ -n "$(ESMF_NUMA_LIBS)" ] ; then \
+	    echo "# ESMF_NUMA_LIBS:         $(ESMF_NUMA_LIBS)" >> $(MKINFO) ; \
+	  fi; \
+	  if [ -n "$(ESMF_NUMA_LIBPATH)" ] ; then \
+	    echo "# ESMF_NUMA_LIBPATH:      $(ESMF_NUMA_LIBPATH)" >> $(MKINFO) ; \
+	  fi; \
+	 fi
 	-@if [ -n "$(ESMF_NVML)" ] ; then \
 	  echo "# ESMF_NVML:              $(ESMF_NVML)" >> $(MKINFO) ; \
 	  if [ -n "$(ESMF_NVML_INCLUDE)" ] ; then \
@@ -748,7 +774,7 @@ envdump:
 
 # Rewrite esmf.mk during installation to ensure correct installation paths are encoded
 install_info_mk:
-	$(MAKE) info_mk ESMF_APPSDIR=$(ESMF_INSTALL_BINDIR_ABSPATH) ESMF_LDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_LIBDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_ESMXDIR=$(ESMF_INSTALL_HEADERDIR_ABSPATH)/ESMX ESMF_MODDIR=$(ESMF_INSTALL_MODDIR_ABSPATH) ESMF_INCDIR=$(ESMF_INSTALL_HEADERDIR_ABSPATH)
+	$(MAKE) info_mk ESMF_APPSDIR=$(ESMF_INSTALL_BINDIR_ABSPATH) ESMF_LDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_LIBDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_ESMXDIR=$(ESMF_INSTALL_HEADERDIR_ABSPATH)/ESMX ESMF_CMAKEDIR=$(ESMF_INSTALL_CMAKEDIR_ABSPATH) ESMF_MODDIR=$(ESMF_INSTALL_MODDIR_ABSPATH) ESMF_INCDIR=$(ESMF_INSTALL_HEADERDIR_ABSPATH)
 
 # Relink apps during installation to ensure correct shared library location is encoded
 install_apps:
@@ -782,10 +808,13 @@ install: envdump
 	-@echo "Installing ESMF:"
 	-@echo " "
 	mkdir -p $(ESMF_INSTALL_HEADERDIR_ABSPATH)
+	cp -f $(ESMF_BUILD)/src/include/NUOPC.h $(ESMF_INSTALL_HEADERDIR_ABSPATH)
 	cp -f $(ESMF_BUILD)/src/include/ESMC.h $(ESMF_INSTALL_HEADERDIR_ABSPATH)
 	cp -f $(ESMF_BUILD)/src/include/ESMC_*.h $(ESMF_INSTALL_HEADERDIR_ABSPATH)
 	cp -f $(ESMF_DIR)/build_config/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_SITE)/ESMC_Conf.h $(ESMF_INSTALL_HEADERDIR_ABSPATH)
 	cp -fr $(ESMF_ESMXDIR) $(ESMF_INSTALL_HEADERDIR_ABSPATH)
+	mkdir -p $(ESMF_INSTALL_CMAKEDIR_ABSPATH)
+	cp -f $(ESMF_CMAKEDIR)/*.cmake $(ESMF_INSTALL_CMAKEDIR_ABSPATH)
 	mkdir -p $(ESMF_INSTALL_MODDIR_ABSPATH)
 	cp -f $(ESMF_MODDIR)/*.mod $(ESMF_INSTALL_MODDIR_ABSPATH)
 	mkdir -p $(ESMF_INSTALL_LIBDIR_ABSPATH)

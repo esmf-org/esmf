@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -497,7 +497,7 @@ namespace ESMCI {
 
   // Main Call
   void calc_2nd_order_weights_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield, MEField<> *src_mask_field,
-                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
+                                         std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field, XGRID_USE xgrid_use, 
                                            double *src_elem_area,
                                            std::vector<int> *valid,
                                            std::vector<HC_WGHT> *wgts,
@@ -507,17 +507,47 @@ namespace ESMCI {
                                            std::vector<NBR_ELEM> *nbrs
                                            ) {
 
-    // Create super mesh cells by intersecting src_elem and list of dst_elems
-    create_SM_cells_2D_2D_cart(src_elem, src_cfield,
-                              dst_elems, dst_cfield, dst_mask_field, dst_frac2_field,
-                              src_elem_area,
-                              valid, sintd_areas_out, dst_areas_out,
-                              tmp_valid, tmp_sintd_areas_out, tmp_dst_areas_out,
-                              sm_cells);
+    // Create super mesh cells depending on situation
+     switch(xgrid_use) {
+     case XGRID_USE_NONE:
+       // Create super mesh cells by intersecting src_elem and list of dst_elems
+       create_SM_cells_2D_2D_cart(src_elem, src_cfield,
+                                 dst_elems, dst_cfield, dst_mask_field, dst_frac2_field,
+                                 src_elem_area,
+                                 valid, sintd_areas_out, dst_areas_out,
+                                 tmp_valid, tmp_sintd_areas_out, tmp_dst_areas_out,
+                                 sm_cells);        
+       break;
 
+      case XGRID_USE_SRC:
+        // Create super mesh cells by getting src xgrid cell
+        create_src_xgrid_SM_cells_2D_2D_cart(src_elem, src_cfield, 
+                                            dst_elems, dst_cfield, dst_mask_field, dst_frac2_field,
+                                            src_elem_area,
+                                            valid, sintd_areas_out, dst_areas_out,
+                                            sm_cells);
+      break;
+        
+      case XGRID_USE_DST:
+        // Create super mesh cells by getting dst xgrid cells
+        create_dst_xgrid_SM_cells_2D_2D_cart(src_elem, src_cfield, 
+                                            dst_elems, dst_cfield, dst_mask_field, dst_frac2_field,
+                                            src_elem_area,
+                                            valid, sintd_areas_out, dst_areas_out,
+                                            sm_cells);
+        break;
+          
+        default:
+          Throw() << "Unrecognized xgrid use type.";
+    }
+  
+    
     // If there are no sm cells then leave
     if (sm_cells->empty()) return;
 
+    // Sort SM cells by dst id to keep things consistent
+    sort_SM_CELLS_by_dst_id(sm_cells, dst_elems);
+    
     // Get list of source elements surrounding this one
     _get_neighbor_elems_2D_2D_cart(src_elem, src_cfield, src_mask_field, nbrs);
 
@@ -1236,7 +1266,7 @@ namespace ESMCI {
 
   // Main Call
   void calc_2nd_order_weights_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, MEField<> *src_mask_field,
-                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
+                                        std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field, XGRID_USE xgrid_use, 
                                            double *src_elem_area,
                                            std::vector<int> *valid,
                                            std::vector<HC_WGHT> *wgts,
@@ -1245,17 +1275,47 @@ namespace ESMCI {
                                            std::vector<SM_CELL> *sm_cells,
                                            std::vector<NBR_ELEM> *nbrs
                                         ) {
-    // Create super mesh cells by intersecting src_elem and list of dst_elems
-    create_SM_cells_2D_3D_sph(src_elem, src_cfield,
-                              dst_elems, dst_cfield, dst_mask_field, dst_frac2_field,
-                              src_elem_area,
-                              valid, sintd_areas_out, dst_areas_out,
-                              tmp_valid, tmp_sintd_areas_out, tmp_dst_areas_out,
-                              sm_cells);
+    
+    // Create super mesh cells depending on situation
+     switch(xgrid_use) {
+     case XGRID_USE_NONE:
+       // Create super mesh cells by intersecting src_elem and list of dst_elems
+       create_SM_cells_2D_3D_sph(src_elem, src_cfield,
+                                 dst_elems, dst_cfield, dst_mask_field, dst_frac2_field,
+                                 src_elem_area,
+                                 valid, sintd_areas_out, dst_areas_out,
+                                 tmp_valid, tmp_sintd_areas_out, tmp_dst_areas_out,
+                                 sm_cells);        
+       break;
 
+      case XGRID_USE_SRC:
+        // Create super mesh cells by getting src xgrid cell
+        create_src_xgrid_SM_cells_2D_3D_sph(src_elem, src_cfield, 
+                                            dst_elems, dst_cfield, dst_mask_field, dst_frac2_field,
+                                            src_elem_area,
+                                            valid, sintd_areas_out, dst_areas_out,
+                                            sm_cells);
+      break;
+        
+      case XGRID_USE_DST:
+        // Create super mesh cells by getting dst xgrid cells
+        create_dst_xgrid_SM_cells_2D_3D_sph(src_elem, src_cfield, 
+                                            dst_elems, dst_cfield, dst_mask_field, dst_frac2_field,
+                                            src_elem_area,
+                                            valid, sintd_areas_out, dst_areas_out,
+                                            sm_cells);
+        break;
+          
+        default:
+          Throw() << "Unrecognized xgrid use type.";
+    }
+    
     // If there are no sm cells then leave
     if (sm_cells->empty()) return;
 
+    // Sort SM cells by dst id to keep things consistent
+    sort_SM_CELLS_by_dst_id(sm_cells, dst_elems);
+    
     // Get list of source elements surrounding this one
     _get_neighbor_elems_2D_3D_sph(src_elem, src_cfield, src_mask_field, nbrs);
 

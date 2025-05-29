@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1178,12 +1178,12 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
                       for(int npt=0; npt<clip_num_nodes; npt++) std::cout << clip_cd_sph[npt*2] << "  " << clip_cd_sph[npt*2+1] << std::endl; 
                       delete[] clip_cd_sph; 
                     }
-                    char msg[1024];
-                    sprintf(msg," - there was a problem (e.g. repeated points, clockwise poly, etc.) with the triangulation of the element:\n"); 
-                    sprintf(msg,"%selem Id: %d clip_elem Id: %d\n", msg, elem.get_id(), clip_elem.get_id());
+                    std::stringstream msg;
+                    msg << " - there was a problem (e.g. repeated points, clockwise poly, etc.) with the triangulation of the element:\n";
+                    msg << "elem Id: " << elem.get_id() << " clip_elem Id: " << clip_elem.get_id() << "\n";
                     {
-                      cd_sph = new double[num_p*2];   cart2sph(num_p, pts, cd_sph); 
-                      for(int npt=0; npt<num_p*2; npt++) sprintf(msg,"%s %g", msg, cd_sph[npt]); 
+                      cd_sph = new double[num_p*2];   cart2sph(num_p, pts, cd_sph);
+                      for(int npt=0; npt<num_p*2; npt++) msg << " " << cd_sph[npt];
                       delete[] cd_sph; 
                     }
                     if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg,

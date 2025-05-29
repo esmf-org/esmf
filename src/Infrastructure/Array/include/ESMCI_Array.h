@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -203,13 +203,6 @@ namespace ESMCI {
                                       // entry of 0 indicates replicated dim
                                       // distr. Array dims as 1, 2, 3, .. only
     int *contiguousFlag;              // [ssiLocalDeCount]
-    int *exclusiveElementCountPDe;    // [deCount] number of elements in
-                                      // exclusive region only considering
-                                      // DistGrid dims that are associated with
-                                      // the Array dims.
-                                      // Multiply with tensorElementCount to get
-                                      // total number of elements in exclusive
-                                      // Array region.
     int *totalElementCountPLocalDe;   // [ssiLocalDeCount] number of elements in
                                       // total region only considering
                                       // DistGrid dims that are associated with
@@ -272,7 +265,6 @@ namespace ESMCI {
       distgridToPackedArrayMap = NULL;
       contiguousFlag = NULL;
       tensorElementCount = 0;
-      exclusiveElementCountPDe = NULL;
       totalElementCountPLocalDe = NULL;
       sizeSuperUndist = NULL;
       sizeDist = NULL;
@@ -311,7 +303,6 @@ namespace ESMCI {
       distgridToPackedArrayMap = NULL;
       contiguousFlag = NULL;
       tensorElementCount = 0;
-      exclusiveElementCountPDe = NULL;
       totalElementCountPLocalDe = NULL;
       sizeSuperUndist = NULL;
       sizeDist = NULL;
@@ -392,8 +383,6 @@ namespace ESMCI {
     int getReplicatedDimCount()             const {return replicatedDimCount;}
     const int *getUndistLBound()            const {return undistLBound;}
     const int *getUndistUBound()            const {return undistUBound;}
-    const int *getExclusiveElementCountPDe()const
-      {return exclusiveElementCountPDe;}
     const int *getTotalElementCountPLocalDe()const
       {return totalElementCountPLocalDe;}
     int getTensorElementCount()             const {return tensorElementCount;}
@@ -439,6 +428,8 @@ namespace ESMCI {
          const std::string &convention, const std::string &purpose,
          bool *overwrite, ESMC_FileStatus_Flag *status,
          int *timeslice, ESMC_IOFmt_Flag *iofmt);
+    void log(std::string prefix,
+      ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO, bool deepFlag=false)const;
     int print() const;
     int sync();
     int validate() const;

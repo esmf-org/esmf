@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -560,7 +560,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: localrc, stat
     ! local variables
     integer :: i, j, k
-    integer :: contentLineCount, contentStringLen
+    integer :: contentLineCount, contentStringLen, contentLen
     character(len=1), allocatable :: buffer(:)
 !
 !   ! Assume failure until success
@@ -583,8 +583,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! setup receiving buffer for parsed content
       contentStringLen = len(content(1))
       contentLineCount = size(content)
-      allocate(buffer(contentStringLen * contentLineCount), &
-        stat=stat)
+      contentLen = contentStringLen * contentLineCount
+      allocate(buffer(contentLen), stat=stat)
       if (ESMF_LogFoundAllocError(statusToCheck=stat, &
         msg="Allocation of string buffer.", &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -592,7 +592,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! initialize buffer
       buffer = ""
 
-      call c_ESMC_IO_YAMLCGet(yaml, buffer, localrc)
+      call c_ESMC_IO_YAMLCGet(yaml, buffer, contentLen, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 

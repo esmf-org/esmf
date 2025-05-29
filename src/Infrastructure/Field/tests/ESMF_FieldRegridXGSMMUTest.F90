@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -143,7 +143,11 @@ contains
         real(ESMF_KIND_R8)                  :: centroidBX(2), centroidBY(2)
         real(ESMF_KIND_R8), pointer         :: coordX(:), coordY(:)
         character(len=16)                   :: gridNameA(2), gridNameB(1)
+        integer(ESMF_KIND_I4), pointer      :: factorIndexList(:,:)
+        real(ESMF_KIND_R8), pointer         :: factorList(:)
+        integer :: j,lbnd
 
+        ! Init return codes
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
@@ -404,6 +408,7 @@ contains
         B_area(1,2) = 9./4
         B_area(2,2) = 3./4
 
+
         ! Finally ready to do an flux exchange from A side to B side
         xgrid = ESMF_XGridCreateFromSparseMat(sideAGrid=sideA, sideBGrid=sideB, &
             area=xgrid_area, centroid=centroid, &
@@ -432,7 +437,9 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         !print *, eleCount, elb, eub
-
+       
+#if 0
+        ! Debug output
         call ESMF_DistGridPrint(distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -444,6 +451,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
+#endif
 
         call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRIDSIDE_A, gridIndex=1, &
             distgrid=distgrid, rc=localrc)
@@ -477,10 +485,13 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
+#if 0
+        ! Debug output
         call ESMF_FieldPrint(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
 
         ! setup and initialize src and dst Fields
         do i = 1, 2
@@ -541,10 +552,11 @@ contains
 
         !print *, '- B before SMM from X -> B'
         !print *, farrayPtr ! should be 0.
-
+     
         ! from X -> B
         do i = 1, 1
             call ESMF_FieldRegridStore(xgrid, field, dstField(i), routehandle=rh_xgrid2dst(i), &
+                factorList=factorList, factorIndexList=factorIndexList,  &
                 rc = localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -556,6 +568,48 @@ contains
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+            ! Compare weight sizes
+            if (size(factorList) /= size(sparseMatX2B(i)%factorList)) then
+                 if (ESMF_LogFoundError(ESMF_RC_VAL_WRONG, &
+                     msg="factorList sizes don't match", &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
+            if (size(factorIndexList,1) /=2) then
+                if (ESMF_LogFoundError(ESMF_RC_VAL_WRONG, &
+                     msg="factorIndexList size wrong", &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
+            if (size(factorIndexList,2) /= size(sparseMatX2B(i)%factorIndexList,2)) then
+                if (ESMF_LogFoundError(ESMF_RC_VAL_WRONG, &
+                     msg="factorIndexList sizes don't match", &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
+
+            ! Get lower bound so the indexing matches below
+            ! (I'm not sure why the lower bounds on the different PETs aren't all 1? As far as I know, there isn't a reason they couldn't be...)
+            lbnd=lbound(sparseMatX2B(i)%factorList,1)-1 ! -1 so that it starts at 1
+
+            ! Compare extracted weights
+            do j=1,size(factorList)
+                if (factorList(j) /= sparseMatX2B(i)%factorList(j+lbnd)) then
+                    if (ESMF_LogFoundError(ESMF_RC_VAL_WRONG, &
+                     msg="factorList values don't match", &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+                endif
+
+                if ((factorIndexList(1,j) /= sparseMatX2B(i)%factorIndexList(1,j+lbnd)) .or. &
+                    (factorIndexList(2,j) /= sparseMatX2B(i)%factorIndexList(2,j+lbnd))) then
+                    if (ESMF_LogFoundError(ESMF_RC_VAL_WRONG, &
+                     msg="factorIndexList values don't match", &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+                endif     
+            enddo
+
+            ! Get rid of weights
+            deallocate(factorList)
+            deallocate(factorIndexList)
+
         enddo
 
         !print *, '- B after SMM from X -> B'

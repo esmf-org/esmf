@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -85,6 +85,7 @@ end module
     type(ESMF_State) :: state2, state3, state4, state5
     type(ESMF_FieldBundle) :: bundle1, bundle2, bundle3, qbundle
     type(ESMF_FieldBundle) :: bundle5, bundle6, bundle7
+    type(ESMF_ArrayBundle) :: arraybundle1
     type(ESMF_VM) :: vm
     logical :: isNeeded
 
@@ -373,6 +374,22 @@ end module
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+      !EX_UTest 
+      ! Create an arraybundle to use in the subsequent tests
+      arraybundle1 = ESMF_ArrayBundleCreate(name="AB1", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating an empty arraybundle for State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest 
+      ! Test adding an arraybundle to a state
+      call ESMF_StateAdd(state2, (/arraybundle1/), rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Adding an ArrayBundle to a State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
       !EX_UTest      
       ! Test printing a State with 1 FieldBundle
       call ESMF_StatePrint(state2, rc=rc)
@@ -383,7 +400,8 @@ end module
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test logging a State with 1 FieldBundle
-      call ESMF_StateLog(state2, prefix="Log-1FB-State: ", rc=rc)
+      call ESMF_StateLog(state2, prefix="Log-1FB-State: ", deepFlag=.true., &
+        rc=rc)
       write(failMsg, *) ""
       write(name, *) "Logging a State with 1 FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &

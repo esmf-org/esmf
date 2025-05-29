@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -3207,7 +3207,7 @@ int DistGrid::destroy(
   }
   
   // optionally delete the complete object and remove from garbage collection
-  if (noGarbage){
+  if (noGarbage || VM::getCurrent()->isGarbageNone()){
     VM::rmObject(*distgrid); // remove object from garbage collection
     delete (*distgrid);      // completely delete the object, free heap
   }
@@ -3907,8 +3907,54 @@ int DistGrid::fillIndexListPDimPDe(
 
 //-----------------------------------------------------------------------------
 //
-// match, print and validation class methods
+// log, match, print and validation class methods
 //
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::log()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::log
+//
+// !INTERFACE:
+void DistGrid::log(
+//
+// !DESCRIPTION:
+//    Log details of DistGrid object
+//
+// !ARGUMENTS:
+//
+  std::string prefix,
+  ESMC_LogMsgType_Flag msgType,
+  bool deepFlag
+  )const{
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  std::stringstream msg;
+  msg << prefix << "--- DistGrid::log() start --------------------------------";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+
+  msg.str("");  // clear
+  msg << prefix << this;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY){
+    msg.str("");  // clear
+    msg << prefix << "DistGrid object is invalid! Not created or deleted!";
+    ESMC_LogDefault.Write(msg.str(), msgType);
+  }else{
+    msg.str("");  // clear
+    msg << prefix << "DistGrid object is valid!"
+      << "<name: " << getName() << ">";
+    ESMC_LogDefault.Write(msg.str(), msgType);
+  }
+  msg.str("");  // clear
+  msg << prefix << "--- DistGrid::log() end ----------------------------------";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+}
 //-----------------------------------------------------------------------------
 
 

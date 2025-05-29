@@ -1,0 +1,280 @@
+name: MAPL Test
+
+on:
+  schedule:
+    - cron: "15 9 * * 3"
+  workflow_dispatch:
+    inputs:
+      mapl-repo:
+        description: 'MAPL Repository'
+        required: true
+        default: 'GEOS-ESM/MAPL'
+      mapl-vers:
+        description: 'MAPL Branch/Tag'
+        required: true
+        default: 'develop'
+      enbl-artf:
+        description: 'Enable Artifacts'
+        required: true
+        type: boolean
+        default: false
+
+env:
+  esmf-sdir: 'esmf-sdir'
+  mapl-repo: 'GEOS-ESM/MAPL'
+  mapl-vers: 'develop'
+  mapl-sdir: 'mapl-sdir'
+  mapl-bdir: 'build'
+  mapl-btyp: 'DEBUG'
+  enbl-artf: false
+
+jobs:
+  mapl-test:
+    name: ${{matrix.config.desc}}
+    runs-on: ${{matrix.config.osys}}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            desc: mapl-ubuntu@24-gfortran@14,
+            osys: ubuntu-24.04,
+            cors: 4,
+            cmpr: gfortran,
+            cvrs: 14
+          }
+    steps:
+    - name: Workflow Dispatch Configuration
+      if: ${{github.event_name == 'workflow_dispatch'}}
+      run: |
+        echo "mapl-repo=${{github.event.inputs.mapl-repo}}" >> $GITHUB_ENV
+        echo "mapl-vers=${{github.event.inputs.mapl-vers}}" >> $GITHUB_ENV
+        echo "enbl-artf=${{github.event.inputs.enbl-artf}}" >> $GITHUB_ENV
+    - name: Set up system
+      run: |
+        if [[ "${{matrix.config.osys}}" == "ubuntu-"* ]]; then
+          sudo apt-get -qq update
+          sudo apt install -qq -y autoconf automake libtool
+        fi
+        export STACK_ROOT=${HOME}/stack
+        mkdir -p ${STACK_ROOT}/{include,lib,lib64,bin}
+        export ARTIFACTS=${{runner.temp}}/mapl_tests
+        mkdir -p ${ARTIFACTS}
+        export LD_LIBRARY_PATH=${STACK_ROOT}/lib64:${STACK_ROOT}/lib:${LD_LIBRARY_PATH}
+        echo "STACK_ROOT=${STACK_ROOT}" >> $GITHUB_ENV
+        echo "ARTIFACTS=${ARTIFACTS}" >> $GITHUB_ENV
+        echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> $GITHUB_ENV
+        echo "CPPFLAGS=-I${STACK_ROOT}/include" >> $GITHUB_ENV
+        echo "LDFLAGS=-L${STACK_ROOT}/lib" >> $GITHUB_ENV
+        echo "${STACK_ROOT}/bin" >> $GITHUB_PATH
+        echo "ESMF Version:    ${{github.ref}}" >> $GITHUB_STEP_SUMMARY
+        echo "MAPL Repository: ${{env.mapl-repo}}" >> $GITHUB_STEP_SUMMARY
+        echo "MAPL Version:    ${{env.mapl-vers}}" >> $GITHUB_STEP_SUMMARY
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+    - name: Install MEPO (PIP)
+      run: |
+        python -m pip install --upgrade pip
+        pip install mepo
+    - name: Cache Libraries
+      id: cache-libraries
+      uses: actions/cache@v4
+      with:
+        path: ${{env.STACK_ROOT}}
+        key: ${{matrix.config.desc}}
+    - name: Set up GFORTRAN
+      if: matrix.config.cmpr == 'gfortran'
+      run: |
+        command -v gcc-${{matrix.config.cvrs}} || { exit 1; }
+        command -v g++-${{matrix.config.cvrs}} || { exit 1; }
+        command -v gfortran-${{matrix.config.cvrs}} || { exit 1; }
+        ln -fs `which gcc-${{matrix.config.cvrs}}` /usr/local/bin/gcc
+        ln -fs `which g++-${{matrix.config.cvrs}}` /usr/local/bin/g++
+        ln -fs `which gfortran-${{matrix.config.cvrs}}` /usr/local/bin/gfortran
+        gcc --version; g++ --version; gfortran --version
+        echo "CC=gcc" >> $GITHUB_ENV
+        echo "CXX=g++" >> $GITHUB_ENV
+        echo "F77=gfortran" >> $GITHUB_ENV
+        echo "F90=gfortran" >> $GITHUB_ENV
+        echo "FC=gfortran" >> $GITHUB_ENV
+    - name: Install OPENMPI (CACHED)
+      env:
+        CACHE_HIT: ${{steps.cache-libraries.outputs.cache-hit}}
+      run: |
+        if [[ "$CACHE_HIT" != 'true' ]]; then
+          OPENMPI_URL="https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.6.tar.gz"
+          mkdir ${{runner.temp}}/openmpi
+          cd ${{runner.temp}}/openmpi
+          curl -L $OPENMPI_URL | tar --strip-components=1 -xz
+          ./configure --prefix=${{env.STACK_ROOT}}
+          make -j ${{matrix.config.cors}} install
+        fi
+        ompi_info
+        echo "CC=mpicc" >> $GITHUB_ENV
+        echo "CXX=mpicxx" >> $GITHUB_ENV
+        echo "F77=mpifort" >> $GITHUB_ENV
+        echo "F90=mpifort" >> $GITHUB_ENV
+        echo "FC=mpifort" >> $GITHUB_ENV
+    - name: Install HDF5 (CACHED)
+      env:
+        CACHE_HIT: ${{steps.cache-libraries.outputs.cache-hit}}
+      run: |
+        if [[ "$CACHE_HIT" != 'true' ]]; then
+          HDF5_URL="https://github.com/HDFGroup/hdf5/archive/refs/tags/hdf5_1.14.4.3.tar.gz"
+          mkdir ${{runner.temp}}/hdf5
+          cd ${{runner.temp}}/hdf5
+          curl -L $HDF5_URL | tar --strip-components=1 -xz
+          ./configure --enable-fortran --prefix=${{env.STACK_ROOT}}
+          make -j ${{matrix.config.cors}} install
+        fi
+        echo "HDF5_PLUGIN_PATH=${{env.STACK_ROOT}}/hdf5/lib/plugin" >> $GITHUB_ENV
+    - name: Install NetCDF-C and NetCDF-Fortran (CACHED)
+      env:
+        CACHE_HIT: ${{steps.cache-libraries.outputs.cache-hit}}
+      run: |
+        if [[ "$CACHE_HIT" != 'true' ]]; then
+          NETCDF_URL="https://github.com/Unidata/netcdf-c/archive/v4.9.3.tar.gz"
+          NETCDFF_URL="https://github.com/Unidata/netcdf-fortran/archive/v4.6.2.tar.gz"
+          mkdir ${{runner.temp}}/netcdf-c
+          cd ${{runner.temp}}/netcdf-c
+          curl -L $NETCDF_URL | tar --strip-components=1 -xz
+          ./configure --enable-netcdf-4 --disable-dap --prefix=${{env.STACK_ROOT}}
+          make -j ${{matrix.config.cors}} install
+          mkdir ${{runner.temp}}/netcdf-fortran
+          cd ${{runner.temp}}/netcdf-fortran
+          curl -L $NETCDFF_URL | tar --strip-components=1 -xz
+          ./configure --prefix=${{env.STACK_ROOT}}
+          make -j ${{matrix.config.cors}} install
+        fi
+    - name: Install Goddard Fortran Ecosystem GFE (CACHED)
+      env:
+        CACHE_HIT: ${{steps.cache-libraries.outputs.cache-hit}}
+      run: |
+        if [[ "$CACHE_HIT" != 'true' ]]; then
+          GFTL_URL="https://github.com/Goddard-Fortran-Ecosystem/gFTL/archive/refs/tags/v1.15.2.tar.gz"
+          GFTL_SHARED_URL="https://github.com/Goddard-Fortran-Ecosystem/gFTL-shared/archive/refs/tags/v1.10.0.tar.gz"
+          FARGPARSE_URL="https://github.com/Goddard-Fortran-Ecosystem/fArgParse/archive/refs/tags/v1.9.0.tar.gz"
+          PFUNIT_URL="https://github.com/Goddard-Fortran-Ecosystem/pFUnit/archive/refs/tags/v4.12.0.tar.gz"
+          YAFYAML_URL="https://github.com/Goddard-Fortran-Ecosystem/yaFyaml/archive/refs/tags/v1.5.1.tar.gz"
+          PFLOGGER_URL="https://github.com/Goddard-Fortran-Ecosystem/pFlogger/archive/refs/tags/v1.16.1.tar.gz"
+          mkdir ${{runner.temp}}/gftl && cd ${{runner.temp}}/gftl
+          curl -L $GFTL_URL | tar --strip-components=1 -xz
+          mkdir build && cd build
+          cmake .. -DCMAKE_INSTALL_PREFIX=${{env.STACK_ROOT}}
+          make -j ${{matrix.config.cors}}
+          make install
+          mkdir ${{runner.temp}}/gftl-shared && cd ${{runner.temp}}/gftl-shared
+          curl -L $GFTL_SHARED_URL | tar --strip-components=1 -xz
+          mkdir build && cd build
+          cmake .. -DCMAKE_INSTALL_PREFIX=${{env.STACK_ROOT}}
+          make -j ${{matrix.config.cors}}
+          make install
+          mkdir ${{runner.temp}}/fargparse && cd ${{runner.temp}}/fargparse
+          curl -L $FARGPARSE_URL | tar --strip-components=1 -xz
+          mkdir build && cd build
+          cmake .. -DCMAKE_INSTALL_PREFIX=${{env.STACK_ROOT}}
+          make -j ${{matrix.config.cors}}
+          make install
+          mkdir ${{runner.temp}}/pfunit && cd ${{runner.temp}}/pfunit
+          curl -L $PFUNIT_URL | tar --strip-components=1 -xz
+          mkdir build && cd build
+          cmake .. -DCMAKE_INSTALL_PREFIX=${{env.STACK_ROOT}}
+          make -j ${{matrix.config.cors}}
+          make install
+          mkdir ${{runner.temp}}/yafyaml && cd ${{runner.temp}}/yafyaml
+          curl -L $YAFYAML_URL | tar --strip-components=1 -xz
+          mkdir build && cd build
+          cmake .. -DCMAKE_INSTALL_PREFIX=${{env.STACK_ROOT}}
+          make -j ${{matrix.config.cors}}
+          make install
+          mkdir ${{runner.temp}}/pflogger && cd ${{runner.temp}}/pflogger
+          curl -L $PFLOGGER_URL | tar --strip-components=1 -xz
+          mkdir build && cd build
+          cmake .. -DCMAKE_INSTALL_PREFIX=${{env.STACK_ROOT}}
+          make -j ${{matrix.config.cors}}
+          make install
+        fi
+    - name: Install ECBUILD (CACHED)
+      env:
+        CACHE_HIT: ${{steps.cache-libraries.outputs.cache-hit}}
+      run: |
+        if [[ "$CACHE_HIT" != 'true' ]]; then
+          ECBUILD_URL="https://github.com/ecmwf/ecbuild/archive/refs/tags/3.10.0.tar.gz"
+          mkdir ${{runner.temp}}/ecbuild && cd ${{runner.temp}}/ecbuild
+          curl -L $ECBUILD_URL | tar --strip-components=1 -xz
+          mkdir bootstrap && cd bootstrap
+          ../bin/ecbuild --prefix=${{env.STACK_ROOT}} ..
+          ctest
+          make install
+        fi
+    - name: Install UDUNITS (CACHED)
+      env:
+        CACHE_HIT: ${{steps.cache-libraries.outputs.cache-hit}}
+      run: |
+        if [[ "$CACHE_HIT" != 'true' ]]; then
+          UDUNITS_URL="https://downloads.unidata.ucar.edu/udunits/2.2.28/udunits-2.2.28.tar.gz"
+          mkdir ${{runner.temp}}/udunits
+          cd ${{runner.temp}}/udunits
+          curl -L $UDUNITS_URL | tar --strip-components=1 -xz
+          ./configure --prefix=${{env.STACK_ROOT}}
+          make all install
+        fi
+    - name: Checkout ESMF
+      uses: actions/checkout@v4
+      with:
+        path: ${{env.esmf-sdir}}
+    - name: ESMF Install
+      working-directory: ./${{env.esmf-sdir}}
+      env:
+        ESMF_DIR: ${{github.workspace}}/${{env.esmf-sdir}}
+        ESMF_COMPILER: ${{matrix.config.cmpr}}
+        ESMF_COMM: 'openmpi'
+        ESMF_NETCDF: 'nc-config'
+        ESMF_INSTALL_MODDIR: 'mod'
+        ESMF_INSTALL_BINDIR: 'bin'
+        ESMF_INSTALL_LIBDIR: 'lib'
+        ESMF_INSTALL_PREFIX: '${{runner.temp}}/esmf-install'
+      run: |
+        make info > ${ARTIFACTS}/esmf-info.log 2>&1
+        make -j ${{matrix.config.cors}} > ${ARTIFACTS}/esmf-build.log 2>&1
+        make install > ${ARTIFACTS}/esmf-install.log 2>&1
+        echo "ESMF_ROOT=${ESMF_INSTALL_PREFIX}" >> $GITHUB_ENV
+        echo "ESMFMKFILE=${ESMF_INSTALL_PREFIX}/lib/esmf.mk" >> $GITHUB_ENV
+    - name: Checkout MAPL
+      uses: actions/checkout@v4
+      with:
+        repository: ${{env.mapl-repo}}
+        ref: ${{env.mapl-vers}}
+        path: ${{env.mapl-sdir}}
+    - name: MAPL Test
+      working-directory: ./${{env.mapl-sdir}}
+      run: |
+        mepo clone --partial blobless > ${ARTIFACTS}/mapl-mepo.log 2>&1
+        cmake -B build -S . \
+          -DCMAKE_PREFIX_PATH=${{env.STACK_ROOT}} \
+          -DCMAKE_INSTALL_PREFIX=install \
+          -DCMAKE_BUILD_TYPE=${{env.mapl-btyp}} \
+          -DUSE_F2PY=OFF \
+          -DCMAKE_Fortran_COMPILER=${FC} \
+          -DCMAKE_C_COMPILER=${CC} \
+          -DCMAKE_CXX_COMPILER=${CXX} \
+          -DMPIEXEC_PREFLAGS='--oversubscribe' \
+          > ${ARTIFACTS}/mapl-cmake.log 2>&1
+        cmake --build ${{env.mapl-bdir}} -j ${{matrix.config.cors}} \
+          > ${ARTIFACTS}/mapl-build.log 2>&1
+        cmake --install ${{env.mapl-bdir}} > ${ARTIFACTS}/mapl-install.log 2>&1
+        cmake --build ${{env.mapl-bdir}} --target tests \
+          -j ${{matrix.config.cors}} \
+          > ${ARTIFACTS}/mapl-build-tests.log 2>&1
+        ctest --test-dir ${{env.mapl-bdir}} -j 1 \
+          --output-on-failure -L 'ESSENTIAL' \
+          > ${ARTIFACTS}/mapl-tests-essential.log 2>&1
+    - name: Archive Results
+      if: ${{failure() || env.enbl-artf == 'true'}}
+      uses: actions/upload-artifact@v4
+      with:
+        name: logs-${{matrix.config.desc}}
+        path: ${{env.ARTIFACTS}}
+        if-no-files-found: 'ignore'

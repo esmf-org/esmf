@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -82,6 +82,8 @@
 
       type(ESMF_Grid)             :: gridxy
       type(ESMF_FieldBundle)      :: packedFB, packedFBDeserialized
+      type(ESMF_Geom)             :: geom
+      type(ESMF_GeomType_Flag)    :: geomType
       !real(ESMF_KIND_R8), pointer :: packedPtr(:,:,:,:,:) !fieldIdx,t,z,y,x
       real(ESMF_KIND_R8), pointer :: packedPtr(:,:,:,:)
       real(ESMF_KIND_R8), pointer :: packedPtr3D(:,:,:)
@@ -2021,6 +2023,21 @@
       call ESMF_FieldBundleAdd(bundle5, fields5(1:4), rc=rc)
       write(failMsg, *) "Add a list of Fields to FieldBundle"
       write(name, *) "Add a list of Fields to FieldBundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      call ESMF_FieldBundleGet(bundle5, geom=geom, rc=rc)
+      write(failMsg, *) "Could not get geom from FieldBundle"
+      write(name, *) "Get geom from FieldBundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+      !EX_UTest
+      call ESMF_GeomGet(geom, geomType=geomType, rc=rc)
+      if (geomType /= ESMF_GEOMTYPE_GRID) rc=ESMF_FAILURE
+      write(failMsg, *) "Geom has an incorrect type (i.e. not ESMF_GEOMTYPE_GRID)."
+      write(name, *) "Ensure geom has correct type"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -45,6 +45,7 @@ module ESMF_CompMod
   use ESMF_BaseMod
   use ESMF_VMMod
   use ESMF_ConfigMod
+  use ESMF_HConfigMod
   use ESMF_CalendarMod
   use ESMF_ClockMod
   use ESMF_GridMod
@@ -332,6 +333,7 @@ module ESMF_CompMod
   public ESMF_CompSetVMMaxPEs
   public ESMF_CompSetVMMaxThreads
   public ESMF_CompSetVMMinThreads
+  public ESMF_CompSetVMStdRedirect
   public ESMF_CompValidate
   public ESMF_CompWait
 
@@ -556,8 +558,8 @@ contains
 ! !IROUTINE: ESMF_CompConstruct - Internal routine to fill in a comp struct
 
 ! !INTERFACE:
-  recursive subroutine ESMF_CompConstruct(compp, compType, name, &
-    dirPath, configFile, config, clock, petlist, devlist, contextflag, rc)
+  recursive subroutine ESMF_CompConstruct(compp, compType, name, dirPath, &
+    configFile, config, hconfig, clock, petlist, devlist, contextflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass),     pointer               :: compp
@@ -566,6 +568,7 @@ contains
     character(len=*),         intent(in),  optional :: dirPath
     character(len=*),         intent(in),  optional :: configFile
     type(ESMF_Config),        intent(in),  optional :: config
+    type(ESMF_HConfig),       intent(in),  optional :: hconfig
     type(ESMF_Clock),         intent(in),  optional :: clock
     integer,                  intent(in),  optional :: petlist(:)
     integer,                  intent(in),  optional :: devlist(:)
@@ -590,7 +593,9 @@ contains
 !    File containing configuration information, either absolute filename
 !    or relative to {\tt dirPath}.
 !   \item[{[config]}]
-!    Already created {\tt config} object.
+!    Already created Config object.
+!   \item[{[hconfig]}]
+!    Already created HConfig object.
 !   \item[{[clock]}]
 !    Private {\tt clock} for this {\tt Component}.
 !   \item[{[petlist]}]
@@ -610,9 +615,9 @@ contains
     integer :: localrc                        ! local return code
     integer :: npets, mypet, i, petCount
     integer, pointer :: petlist_loc(:), devlist_loc(:)
-    character(len=ESMF_MAXPATHLEN) :: fullpath    ! config file + dirPath
-    character(len=ESMF_MAXSTR)     :: msgbuf
-    type(ESMF_VM):: vm
+    character(len=ESMF_MAXPATHLEN)  :: fullpath    ! config file + dirPath
+    character(len=ESMF_MAXSTR)      :: msgbuf
+    type(ESMF_VM)                   :: vm
 
     ! Assume not implemented until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -673,14 +678,29 @@ contains
     endif
 
     ! config handling
-    if (present(config)) then
+    if (present(hconfig)) then
+      if (present(config).or.present(configFile)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Must only specify one of: "// &
+          "'hconfig', 'config', or 'configFile' arguments!", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+      compp%config = ESMF_ConfigCreate(hconfig=hconfig, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      compp%compStatus%configIsPresent = .true.
+    else if (present(config)) then
+      if (present(configFile)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Must only specify one of: "// &
+          "'hconfig', 'config', or 'configFile' arguments!", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
       compp%config = config
       compp%compStatus%configIsPresent = .true.
-      if (present(configFile)) then
-        ! a config object gets priority over a name if both are specified.
-        call ESMF_LogWrite("Ignoring configFile because config object given.", &
-          ESMF_LOGMSG_WARNING)
-      endif
     else if (present(configFile)) then
       ! name of a specific config file.  open it and store the config object.
       compp%configFile = configFile
@@ -1325,8 +1345,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
   recursive subroutine ESMF_CompGet(compp, name, vm, vm_parent, vmplan, &
     vm_info, contextflag, grid, gridList, mesh, meshList, locstream, &
     locstreamList, xgrid, xgridList, importState, exportState, clock, dirPath, &
-    configFile, config, compType, currentMethod, currentPhase, timeout, &
-    localPet, petCount, petList, compStatus, compTunnel, rc)
+    configFile, config, hconfig, compType, currentMethod, currentPhase, &
+    timeout, localPet, petCount, petList, compStatus, compTunnel, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass),     pointer               :: compp
@@ -1350,6 +1370,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     character(len=*),         intent(out), optional :: dirPath
     character(len=*),         intent(out), optional :: configFile
     type(ESMF_Config),        intent(out), optional :: config
+    type(ESMF_HConfig),       intent(out), optional :: hconfig
     type(ESMF_CompType_Flag), intent(out), optional :: compType
     type(ESMF_Method_Flag),   intent(out), optional :: currentMethod
     integer,                  intent(out), optional :: currentPhase
@@ -1473,6 +1494,20 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
         return  ! bail out
       endif
       config = compp%config
+    endif
+
+    ! access hconfig
+    if (present(hconfig)) then
+      if (.not.compp%compStatus%configIsPresent) then
+        call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+          msg="requested HConfig object is not present.", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return  ! bail out
+      endif
+      call ESMF_ConfigGet(compp%config, hconfig=hconfig, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! access name
@@ -1867,7 +1902,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
 ! !INTERFACE:
   recursive subroutine ESMF_CompSet(compp, name, vm, vm_info, grid, gridList, &
     mesh, meshList, locstream, locstreamList, xgrid, xgridList, clock, &
-    dirPath, configFile, config, rc)
+    dirPath, configFile, config, hconfig, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass),    pointer               :: compp
@@ -1886,7 +1921,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     character(len=*),        intent(in),  optional :: dirPath
     character(len=*),        intent(in),  optional :: configFile
     type(ESMF_Config),       intent(in),  optional :: config
-    integer,                 intent(out), optional :: rc             
+    type(ESMF_HConfig),      intent(in),  optional :: hconfig
+    integer,                 intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -2038,14 +2074,29 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     endif
 
     ! config handling
-    if (present(config)) then
+    if (present(hconfig)) then
+      if (present(config).or.present(configFile)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Must only specify one of: "// &
+          "'hconfig', 'config', or 'configFile' arguments!", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+      compp%config = ESMF_ConfigCreate(hconfig=hconfig, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      compp%compStatus%configIsPresent = .true.
+    else if (present(config)) then
+      if (present(configFile)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Must only specify one of: "// &
+          "'hconfig', 'config', or 'configFile' arguments!", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
       compp%config = config
       compp%compStatus%configIsPresent = .true.
-      if (present(configFile)) then
-        ! a config object gets priority over a name if both are specified.
-        call ESMF_LogWrite("Ignoring configFile because config object given.", &
-          ESMF_LOGMSG_WARNING)
-      endif
     else if (present(configFile)) then
       ! name of a specific config file.  open it and store the config object.
       compp%configFile = configFile
@@ -2102,7 +2153,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Print VM internals
+!     Configure VM for this component.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2247,7 +2298,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Print VM internals
+!     Configure VM for this component.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2351,7 +2402,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Print VM internals
+!     Configure VM for this component.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2430,6 +2481,85 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_CompSetVMMinThreads
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompSetVMStdRedirect"
+!BOPI
+! !IROUTINE: ESMF_CompSetVMStdRedirect - Set stdout and stderr redirect in VM
+
+! !INTERFACE:
+  subroutine ESMF_CompSetVMStdRedirect(compp, stdout, stderr, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CompClass), pointer               :: compp
+    character(*),         intent(in),  optional :: stdout
+    character(*),         intent(in),  optional :: stderr
+    integer,              intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Configure VM for this component.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[compp]
+!          component object
+!     \item[{[stdout]}]
+!          Filename for the stdout redirect. By default do not redirect.
+!     \item[{[stderr]}]
+!          Filename for the stderr redirect. By default do not redirect.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! Initialize return code; assume not implemented until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Test incoming compp object
+    if (.not.associated(compp)) then
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+        msg="Not a valid pointer to ESMF Component object", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
+
+    ! ensure that this is not a child_in_parent_vm plan
+    if (compp%contextflag == ESMF_CONTEXT_PARENT_VM) then
+      call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+        msg="CompSetVM() calls are incompatible with CHILD_IN_PARENT_VM component", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+    
+    ! ensure that this component's VM wasn't already created
+    if (compp%vm_info /= ESMF_NULL_POINTER) then
+      call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+        msg="CompSetVM() calls cannot be called on components with existing VM", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    ! set stdout and stderr redirect
+    call ESMF_VMPlanSetStdRedirect(compp%vmplan, stdout=stdout, stderr=stderr, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_CompSetVMStdRedirect
 !------------------------------------------------------------------------------
 
 
@@ -2717,13 +2847,14 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
 !
 ! !INTERFACE:
   recursive subroutine ESMF_CompStatusGet(compStatus, clockIsPresent, &
-    configIsPresent, configFileIsPresent, vmIsPresent, isIsPresent, &
-    esIsPresent, gridIsPresent, meshIsPresent, locstreamIsPresent, &
-    xgridIsPresent, rc)
+    hconfigIsPresent, configIsPresent, configFileIsPresent, vmIsPresent, &
+    isIsPresent, esIsPresent, gridIsPresent, meshIsPresent, &
+    locstreamIsPresent, xgridIsPresent, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompStatus), intent(in)            :: compStatus
     logical,               intent(out), optional :: clockIsPresent
+    logical,               intent(out), optional :: hconfigIsPresent
     logical,               intent(out), optional :: configIsPresent
     logical,               intent(out), optional :: configFileIsPresent
     logical,               intent(out), optional :: vmIsPresent
@@ -2751,6 +2882,10 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     
     if (present(clockIsPresent)) then
       clockIsPresent = compStatus%clockIsPresent
+    endif
+
+    if (present(hconfigIsPresent)) then
+      hconfigIsPresent = compStatus%configIsPresent ! hconfig kept in config
     endif
 
     if (present(configIsPresent)) then

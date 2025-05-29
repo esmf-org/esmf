@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -32,6 +32,13 @@
 #include <cstring>
 #endif
 #include <map>
+
+#if !defined (ESMF_OS_MinGW)
+#include <unistd.h>
+#include <sys/time.h>
+#else
+#include <windows.h>
+#endif
 
 #ifndef ESMF_NO_OPENMP
 #include <omp.h>
@@ -292,12 +299,31 @@ class VMK{
     void reset(){
 #ifndef ESMF_NO_PTHREADS
 #if !defined(ESMF_OS_Darwin) && !defined(ESMF_OS_Cygwin)
+      // restore thread affinity
       pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
 #endif
 #ifndef ESMF_NO_OPENMP
+      // restore threading level
       omp_set_num_threads(omp_num_threads);
 #endif
 #endif
+    }
+  };
+
+  struct Redirects{
+    int oldStdout;
+    int oldStderr;
+   public:
+    void reset(){
+      // restore stdout and stderr
+      if (oldStdout > -1){
+        dup2(oldStdout, STDOUT_FILENO); // restore stdout
+        close(oldStdout); // free up file descriptor, file stays open
+      }
+      if (oldStderr > -1){
+        dup2(oldStderr, STDERR_FILENO); // restore stderr
+        close(oldStderr); // free up file descriptor, file stays open
+      }
     }
   };
 
@@ -313,21 +339,26 @@ class VMK{
     int *ncpet;     // number of cores this pet references
     int *nadevs;//TODO: to be removed // number of accelerator devices accessible from this pet
     int **cid;      // core id of the cores this pet references
+    // SSI
     int ssiCount;   // number of single system images in this VMK
     int ssiMinPetCount;   // minimum PETs on a single system image
     int ssiMaxPetCount;   // maximum PETs on a single system image
     int ssiLocalPetCount; // number of PETs on the same SSI as localPet (incl.)
     int ssiLocalPet;      // id of local PET in the local SSI
     int *ssiLocalPetList; // PETs that are on the same SSI as localPet (incl.)
+    // SSI DEV
     int devCount;   // number of devices associated with this VMK all SSI
     int ssiLocalDevCount;// number of devices associated with this VMK on local SSI
     int *ssiLocalDevList;// list of SSI-local device indices associated with this VMK
                     // Use this index to make local association calls (e.g. via
                     // acc_set_device_num() or omp_set_default_device()), and
                     // to look up global device index in ssidevs array.
+    // SSI NUMA
+    int ssiLocalNumaCount; // number of NUMA modes on the same SSI as localPet (incl.)
+    int *ssiLocalNumaList; // NUMA nodes
     // general information about this VMK
-    int mpionly;    // 0: there is multi-threading, 1: MPI-only
-    bool threadsflag; // threaded or none-threaded VM
+    bool mpionly;         // false: there is multi-threading, true: MPI-only
+    bool threadsflag;     // threaded or none-threaded VM
     // MPI Communicator handles
     MPI_Comm mpi_c;     // communicator across the entire VM
     MPI_Comm mpi_c_ssi; // communicator holding PETs on the same SSI
@@ -399,6 +430,10 @@ class VMK{
     static int argc_mpich;
     static char *argv_mpich_store[100];
     static char **argv_mpich;
+    // NVML support
+    static bool nvmlEnabled;     // NVML support enabled or disabled
+    // NUMA support
+    static bool numaEnabled;     // NUMA support enabled or disabled
 
   // methods
   private:
@@ -420,6 +455,9 @@ class VMK{
 
     Affinities setAffinities(void *ssarg);
       // set thread affinities, including OpenMP handling if configured
+
+    static Redirects setRedirects(void *ssarg);
+      // set stdout and stderr redirects
 
     void construct(void *sarg);
       // fill an already existing VMK object with info
@@ -514,6 +552,12 @@ class VMK{
 #else
       return false;
 #endif
+    }
+    static bool isNvmlEnabled(){
+      return nvmlEnabled;
+    }
+    static bool isNumaEnabled(){
+      return numaEnabled;
     }
 
 #define XSTR(X) STR(X)
@@ -656,6 +700,9 @@ class VMKPlan{
     // OpenMP handling
     int openmphandling; // 0-none, 1-setnumthreads, 2-initialize, 3-pinaffinity
     int openmpnumthreads; // -1 default: local peCount
+    // stdout and stderr redirect
+    char *stdoutName;
+    char *stderrName;
 
   public:
     VMKPlan(int _ndevlist=0, int *_devlist=NULL);
@@ -672,14 +719,14 @@ class VMKPlan{
       // set the mpi communicator for participating PETs
     void vmkplan_useparentvm(VMK &vm);
       // use the parent VM, don't create new context
-    void vmkplan_maxthreads(VMK &vm);  
+    void vmkplan_maxthreads(VMK &vm);
       // set up a VMKPlan that will maximize the number of thread-pets
-    void vmkplan_maxthreads(VMK &vm, int max);  
+    void vmkplan_maxthreads(VMK &vm, int max);
       // set up a VMKPlan that will max. number of thread-pets up to max
     void vmkplan_maxthreads(VMK &vm, int max, 
       int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi);
       // set up a VMKPlan that will max. number of thread-pets up to max
-    void vmkplan_maxthreads(VMK &vm, int max, int *plist, int nplist);  
+    void vmkplan_maxthreads(VMK &vm, int max, int *plist, int nplist);
       // set up a VMKPlan that will max. number of thread-pets up to max
       // but only allow PETs listed in plist to participate
     int vmkplan_maxthreads(VMK &vm, int max, int *plist, int nplist,
@@ -732,19 +779,22 @@ class VMKPlan{
 class ComPat{
  private:
   // pure virtual methods to be implemented by user
-     
+
   virtual int messageSize(int srcPet, int dstPet)                  const =0;
     // will be called on both sides, i.e. localPet==srcPet and localPet==dstPet
- 
+
   virtual void messagePrepare(int srcPet, int dstPet, char *buffer)const =0;
     // will be called only for localPet==srcPet
-  
+
+  virtual void messagePrepareSearch(VMK *vmk, int sendIndexOffset, int iiStart,
+    int iiEnd, std::vector<char *> &sendBuffer)                    const =0;
+
   virtual void messageProcess(int srcPet, int dstPet, char *buffer)      =0;
     // will be called only for localPet==dstPet
-  
+
   virtual void localPrepareAndProcess(int localPet)                      =0;
     // will be called for every localPet once
-  
+
  public:
   // communication patterns
   void totalExchange(VMK *vmk);
@@ -754,28 +804,28 @@ class ComPat{
 class ComPat2{
  private:
   // pure virtual methods to be implemented by user
-     
+
   virtual void handleLocal() =0;
     // called on every localPet exactly once, before any other method
 
   virtual void generateRequest(int responsePet,
     char* &requestBuffer, int &requestSize) =0;
     // called on every localPet for every responsePet != localPet
- 
+
   virtual void handleRequest(int requestPet,
     char *requestBuffer, int requestSize,
     char* &responseBuffer, int &responseSize)const =0;
     // called on every localPet for every requestPet != localPet
- 
+
   virtual void handleResponse(int responsePet,
     char const *responseBuffer, int responseSize)const =0;
     // called on every localPet for every responsePet != localPet
 
  public:
-     
+
   // communication patterns
   void totalExchange(VMK *vmk);
-  void selectiveExchange(VMK *vmk, std::vector<int>&responderPet, 
+  void selectiveExchange(VMK *vmk, std::vector<int>&responderPet,
     std::vector<int>&requesterPet);
 }; // ComPat2
 

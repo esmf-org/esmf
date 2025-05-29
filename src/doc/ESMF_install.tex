@@ -606,6 +606,41 @@ the application.
 
 \end{description}
 
+\subsubsection{NUMA}
+\label{sec:NUMA}
+
+The LibNUMA API for Non Uniform Memory Access
+(\htmladdnormallink{NUMA}{https://halobates.de/numaapi3.pdf})
+can be used to discover the NUMA architecture at run-time.
+
+\begin{description}
+
+\item[ESMF\_NUMA] Possible values: {\tt "ON"}, {\tt "standard"}, {\tt "OFF"} (default).
+
+\begin{description}
+\item[{\tt "ON"}/{\tt "standard"}] The NUMA dependent code inside of ESMF will
+be enabled.
+The {\tt ESMF\_NUMA\_LIBS} environment variable will be set to
+{\tt "-lnuma"}.
+
+\item[{\tt "OFF"} (default)] Disables NUMA dependent code.
+\end{description}
+
+\item[ESMF\_NUMA\_INCLUDE] Typically not needed. (no default).
+
+Specifies the path where the NUMA header files are located.
+
+\item[ESMF\_NUMA\_LIBPATH] Typically not needed. (no default).
+
+Specifies the path where the NUMA library file is located.
+
+\item[ESMF\_NUMA\_LIBS] Typical value: {\tt "-lnuma"}.
+
+Specifies the linker directives needed to link the NUMA library to
+the application.
+
+\end{description}
+
 \subsubsection{NVML}
 \label{sec:NVML}
 
@@ -634,7 +669,7 @@ Specifies the path where the NVML header files are located.
 
 Specifies the path where the NVML library file is located.
 
-\item[ESMF\_NVML\_LIBS] Typical value: {\tt "-lnvidia-ml"} (no default).
+\item[ESMF\_NVML\_LIBS] Typical value: {\tt "-lnvidia-ml"}.
 
 Specifies the linker directives needed to link the NVML library to
 the application.
@@ -680,6 +715,13 @@ default is {\tt O} (capital oh) which builds an optimized version of the
 library. If {\tt ESMF\_BOPT} is {\tt O}, {\tt ESMF\_OPTLEVEL} can also be set
 to a numeric value between 0 and 4 to select a specific optimization level.
 
+\item[ESMF\_C]
+Possible value: {\em executable}
+
+This variable can be used to override the default C compiler and linker
+front-end executables. The executable may be specified with absolute path
+overriding the location determined by default from the user's PATH variable.
+
 \item[ESMF\_COMM]
 Possible value: {\em system-dependent}
 
@@ -690,8 +732,9 @@ implementation.
 For other systems (e.g. Linux or Darwin) where a multitude of MPI
 implementations are available, {\tt ESMF\_COMM} must be set to indicate which
 implementation is used to build the ESMF library. Set {\tt ESMF\_COMM} according
-to your situation to: {\tt mpt, mpich, mpich1, mpich2, mpich3, mvapich2, lam, openmpi}
-or {\tt intelmpi}. {\tt ESMF\_COMM} may also be set to {\tt user} indicating
+to your situation to: {\tt mpt, mpich (version 3 and up), mpich1, mpich2,
+mvapich (all versions), lam, openmpi}, or {\tt intelmpi}.
+{\tt ESMF\_COMM} may also be set to {\tt user} indicating
 that the user will set all the required flags using advanced ESMF environment
 variables.  Some individual MPI builds may create additional libraries that
 need to be linked in, such as the legacy C++ bindings. These may be specified
@@ -921,6 +964,13 @@ location can be specified as absolute path (starting with "/") or relative to
 Possible value: {\em relative or absolute path}
 
 Location into which to install the F90 module files during installation. This
+location can be specified as absolute path (starting with "/") or relative to
+{\tt ESMF\_INSTALL\_PREFIX}.
+
+\item[ESMF\_INSTALL\_CMAKEDIR]
+Possible value: {\em relative or absolute path}
+
+Location into which to install the CMake module files during installation. This
 location can be specified as absolute path (starting with "/") or relative to
 {\tt ESMF\_INSTALL\_PREFIX}.
 
@@ -1287,6 +1337,7 @@ variables:
 \item {\tt ESMF\_INSTALL\_MODDIR} -- where to install Fortran module files.
 \item {\tt ESMF\_INSTALL\_BINDIR} -- where to install application files.
 \item {\tt ESMF\_INSTALL\_DOCDIR} -- where to install documentation files.
+\item {\tt ESMF\_INSTALL\_CMAKEDIR} -- where to install cmake module files.
 \end{itemize}
 
 Section~\ref{EnvironmentVariables} describes what each of these

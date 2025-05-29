@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -62,25 +62,27 @@ module ESMF_StateMod
 
       public ESMF_StateAdd, ESMF_StateAddReplace
       public ESMF_StateGet
-      public ESMF_StateIsReconcileNeeded
 
       public ESMF_StateLog
 
       public ESMF_StateRemove
       public ESMF_StateReplace
 
-
-      public ESMF_StateWriteRestart
-      public ESMF_StateReadRestart
-
-      public ESMF_StateRead
-      public ESMF_StateWrite
       public ESMF_StatePrint
       public ESMF_StateSet
 
       public ESMF_StateSerialize, ESMF_StateDeserialize
 
       public ESMF_StateClassFindData
+
+      ! These methods are broken and create Arrays in a bad configuration.
+      ! We are taking them out so no one uses them. Eventually, new correct 
+      ! versions will be implemented.
+      !      public ESMF_StateRead
+      !      public ESMF_StateWrite
+      !      public ESMF_StateWriteRestart
+      !      public ESMF_StateReadRestart
+
       
 !EOPI
 

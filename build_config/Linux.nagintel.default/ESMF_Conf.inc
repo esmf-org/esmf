@@ -2,7 +2,7 @@
 $Id$
 
 Earth System Modeling Framework
-Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 Laboratory, University of Michigan, National Centers for Environmental
 Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -28,12 +28,17 @@ be one of the following:
 
 #if 0
 NAG before v6.2, use sizeof work-around code instead of F2008 C_SIZEOF
+NAG before v7.2, does not support the F2018 assumed type feature
 #endif
 #ifndef __NAG_COMPILER_RELEASE
 #define ESMF_NO_C_SIZEOF
+#define ESMF_NO_F2018ASSUMEDTYPE
 #else
 #if (__NAG_COMPILER_RELEASE < 62)
 #define ESMF_NO_C_SIZEOF
+#endif
+#if (__NAG_COMPILER_RELEASE < 72)
+#define ESMF_NO_F2018ASSUMEDTYPE
 #endif
 #endif
 

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -195,7 +195,7 @@ const char *ESMC_LogicalString(ESMC_Logical tf);
 
 extern "C" {
 void FTN_X(esmf_pointertoint)(int *n, short *s, ESMC_POINTER *len);
-void FTN_X(esmf_pointerdifference)(long *n, short *s1, short *s2, int *len);
+void FTN_X(esmf_pointerdifference)(size_t *n, short *s1, short *s2, int *len);
 void FTN_X(c_esmc_getcwd)(char *pathname, int *rc, ESMCI_FortranStrLenArg pathname_l);
 void FTN_X(c_esmc_makedirectory)(const char *pathname, int *mode, ESMC_Logical *relaxedFlag,
       int *rc, ESMCI_FortranStrLenArg pathname_l);

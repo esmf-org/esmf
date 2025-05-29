@@ -7,7 +7,7 @@ as per the table below. E.g. "Verbosity" is accessed using {\tt key="/NUOPC/Inst
 Attribute name had to be broken into multiple lines. When that happens, a hyphen shows up to indicate the line break. The hyphen
 is {\em not} part of the Attribute name!
 
-\begin{longtable}{|p{.22\textwidth}|p{.5\textwidth}|p{.3\textwidth}|}
+\begin{longtable}{|p{.25\textwidth}|p{.4\textwidth}|p{.4\textwidth}|}
      \hline\hline
      {\bf Attribute name} & {\bf Definition} & {\bf Controlled vocabulary}\\
      \hline\hline
@@ -62,5 +62,6 @@ is {\em not} part of the Attribute name!
      {\tt Initialize\-DataComplete} & String value indicating whether all initialize data dependencies have been satisfied.& false, true\\ \hline
      {\tt Initialize\-DataProgress} & String value indicating whether progress is being made resolving initialize data dependencies.& false, true\\ \hline
      {\tt HierarchyProtocol} & String value specifying the hierarchy protocol.& "PushUpAllExportsAndUnsatisfiedImports" - activates field mirroring of all exports and unsatisfied imports. By default use reference sharing for the mirrored fields and geom objects. This is the default behavior without having {\tt HierarchyProtocol} set. "ConnectProvidedFields"- no field mirroring, only connect to externally provided fields in the import- and exportStates. "Explorer" - like the default, but do not use reference sharing. {\em All other values currently disable the hierarchy protocol.}\\ \hline
+     {\tt HierarchyConnectors} & String value specifying how hierarchy connectors are created.& "auto" (default), all of the connectors needed by "HierarchyProtocol" are created automatically. "manual", only connectors created manually will be used.\\ \hline
      \hline
 \end{longtable}

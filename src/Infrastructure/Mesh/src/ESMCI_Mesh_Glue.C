@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -471,9 +471,6 @@ void ESMCI_meshwritewarrays(Mesh **meshpp, char *fname, ESMCI_FortranStrLenArg n
 
     char *filename = ESMC_F90toCstring(fname, nlen);
 
-    //   printf("mg: nna=%d\n",num_nodeArrays);
-
-
     WriteMesh(**meshpp, filename, 
               num_nodeArrays, nodeArrays, 
               num_elemArrays, elemArrays);
@@ -738,7 +735,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
                            int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                            int *_areaPresent, double *elemArea,
                            int *_elemCoordsPresent, double *elemCoords,
-                           int *_num_elemConn, int *elemConn, 
+                           int *_elemConn_size, int *elemConn, 
                            ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                            int *rc)
 #undef  ESMC_METHOD
@@ -766,8 +763,6 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     Mesh &mesh = *meshp;
 
     int num_elems=*_num_elems;
-
-    int num_elemConn=*_num_elemConn;
 
     InterArray<int> *elemMaskII=_elemMaskII;
 
@@ -807,26 +802,28 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     }
 
 
-    //// Check size of connectivity list
-    int expected_conn_size=0;
+    //// Calc size of connectivity list
+    int num_elemConn=0;
     if (parametric_dim==2) {
       for (int i=0; i< num_elems; i++) {
-        expected_conn_size += elemType[i];
+        num_elemConn += elemType[i];
       }
     } else if (parametric_dim==3) {
       for (int i=0; i< num_elems; i++) {
-        if (elemType[i]==10) expected_conn_size += 4;
-        else if (elemType[i]==12) expected_conn_size += 8;
+        if (elemType[i]==10) num_elemConn += 4;
+        else if (elemType[i]==12) num_elemConn += 8;
        }
     }
 
-    if (expected_conn_size != num_elemConn) {
-      int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-        "- element connectivity list doesn't contain the right number of entries ",
-                                       ESMC_CONTEXT, &localrc)) throw localrc;
+    /// If size of array is available, make sure it matches
+    if (_elemConn_size != NULL) {
+      if (*_elemConn_size != num_elemConn) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                         "element connectivity list doesn't contain the right number of entries ",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
     }
-
 
     // Error check size of elements
     if (parametric_dim==2) {
@@ -865,8 +862,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         }
       }
      }
-
-
+    
     // Variable indicating if any of the elements on this PET are split
     bool is_split_local=false;
 
@@ -4926,10 +4922,8 @@ void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesA
     if ((elem_mask_val!=NULL) &&
         (elem_mask    !=NULL)) {
 
-      // Loop through elements setting values
-      // Here we depend on the fact that data index for elements
-      // is set as the position in the local array above
-      Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      // Loop through all elements setting values
+      Mesh::iterator ei = mesh.elem_begin_all(), ee = mesh.elem_end_all();
       for (; ei != ee; ++ei) {
         MeshObj &elem = *ei;
 
@@ -5025,10 +5019,8 @@ void ESMCI_meshturnoffcellmask(Mesh **meshpp, int *rc) {
     if ((elem_mask_val!=NULL) &&
         (elem_mask    !=NULL)) {
 
-      // Loop through elements setting values
-      // Here we depend on the fact that data index for elements
-      // is set as the position in the local array above
-      Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      // Loop through all elements setting values
+      Mesh::iterator ei = mesh.elem_begin_all(), ee = mesh.elem_end_all();
       for (; ei != ee; ++ei) {
         MeshObj &elem = *ei;
 
@@ -5125,8 +5117,8 @@ void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesA
     if ((node_mask_val!=NULL) &&
         (node_mask    !=NULL)) {
 
-      // Loop through nodes setting values
-      Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+      // Loop through all nodes setting values
+      Mesh::iterator ni = mesh.node_begin_all(), ne = mesh.node_end_all();
       for (; ni != ne; ++ni) {
         MeshObj &node = *ni;
 
@@ -5220,10 +5212,8 @@ void ESMCI_meshturnoffnodemask(Mesh **meshpp, int *rc) {
     if ((node_mask_val!=NULL) &&
         (node_mask    !=NULL)) {
 
-      // Loop through elements setting values
-      // Here we depend on the fact that data index for elements
-      // is set as the position in the local array above
-      Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+      // Loop through all nodes setting values
+      Mesh::iterator ni = mesh.node_begin_all(), ne = mesh.node_end_all();
       for (; ni != ne; ++ni) {
         MeshObj &node = *ni;
 

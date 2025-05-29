@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -837,6 +837,36 @@ extern "C" {
     localrc = (*array)->read(fileName, varName, timeslice, iofmt);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                   ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN_X(c_esmc_arraylog)(ESMCI::Array **array,
+    char *prefix, ESMC_LogMsgType_Flag *logMsgFlag, ESMC_Logical *deep, int *rc,
+    ESMCI_FortranStrLenArg prefix_l){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraylog()"
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // convert to bool
+    bool deepFlag = false;  // default
+    if (ESMC_NOT_PRESENT_FILTER(deep) != ESMC_NULL_POINTER)
+      if (*deep == ESMF_TRUE) deepFlag = true;
+    try{
+      std::string prefixStr(prefix, prefix_l);
+      (*array)->log(prefixStr, *logMsgFlag, deepFlag);
+    }catch(int localrc){
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc))
+        return; // bail out
+    }catch(std::exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return; // bail out
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception", 
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
   void FTN_X(c_esmc_arrayprint)(ESMCI::Array **ptr, int *rc){

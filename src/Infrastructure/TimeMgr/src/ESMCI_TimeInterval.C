@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -822,7 +822,7 @@ namespace ESMCI{
 
     // if requested, return time interval in string format
     if (tempTimeString != ESMC_NULL_POINTER && timeStringLen > 0) {
-      rc = TimeInterval::getString(tempTimeString);
+      rc = TimeInterval::getString(tempTimeString, timeStringLen);
       if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         &rc))
         return(rc);
@@ -831,7 +831,7 @@ namespace ESMCI{
     }
     if (tempTimeStringISOFrac != ESMC_NULL_POINTER &&
         timeStringLenISOFrac > 0) {
-      rc = TimeInterval::getString(tempTimeStringISOFrac, "isofrac");
+      rc = TimeInterval::getString(tempTimeStringISOFrac, timeStringLenISOFrac, "isofrac");
       if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         &rc))
         return(rc);
@@ -2885,7 +2885,7 @@ namespace ESMCI{
     if (options != ESMC_NULL_POINTER) {
       if (strncmp(options, "string", 6) == 0) {
         char timeString[160];
-        TimeInterval::getString(timeString, &options[6]);
+        TimeInterval::getString(timeString, sizeof(timeString)-1, &options[6]);
         printf("%s\n", timeString);
         // see also method TimeInterval::get()
       }
@@ -3075,9 +3075,9 @@ namespace ESMCI{
 //    int error return code
 //
 // !ARGUMENTS:
-      char *timeString, const char *options) const {    // out - time interval
-                                                        //       value in
-                                                        //       string format
+      char *timeString,               // out - time interval value in string format
+      int timeStringLen,              // in  - max number of characters that can be stored in timeString, not including the null terminator
+      const char *options) const {    // in  - format options
 //
 // !DESCRIPTION:
 //      Gets a {\tt ESMC\_TimeInterval}'s value in ISO 8601 string format
@@ -3122,14 +3122,26 @@ namespace ESMCI{
     if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
       return(rc);
 
+    int requiredLen;
+
     // format everything except seconds
-    sprintf(timeString, "P%lldY%lldM%lldDT%dH%dM", yy_i8, mm_i8, d_i8, h, m);
+    requiredLen = snprintf(timeString, timeStringLen+1, "P%lldY%lldM%lldDT%dH%dM", yy_i8, mm_i8, d_i8, h, m);
+    if (requiredLen > timeStringLen)
+    {
+       std::stringstream msg;
+       msg << "timeString too small for result: " << timeStringLen << " < " << requiredLen;
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE, msg, ESMC_CONTEXT, &rc);
+       return (rc);
+    }
 
     // format seconds according to specified options
     bool isofrac = false;
     if (options != ESMC_NULL_POINTER) {
       if (strstr(options, "isofrac") != ESMC_NULL_POINTER) isofrac = true;
     }
+
+    char timeStringTemp[timeStringLen+1];
+    strncpy(timeStringTemp, timeString, sizeof(timeStringTemp));
     if (isofrac) {
       // strict ISO 8601 format PyYmMdDThHmMs[.f]S 
 
@@ -3139,19 +3151,26 @@ namespace ESMCI{
 
       // if fractionalSeconds non-zero (>= 0.5 ns) append full fractional value
       if (fabs(fractionalSeconds) >= 5e-10) {
-        sprintf(timeString, "%s%.9fS", timeString, (s + fractionalSeconds));
+        requiredLen = snprintf(timeString, timeStringLen+1, "%s%.9fS", timeStringTemp, (s + fractionalSeconds));
       } else { // no fractional seconds, just append integer seconds
-        sprintf(timeString, "%s%dS", timeString, s);
+        requiredLen = snprintf(timeString, timeStringLen+1, "%s%dS", timeStringTemp, s);
       }
     } else { // not strict ISO fractional seconds format
       // hybrid ISO 8601 format PyYmMdDThHmMs[:n/d]S 
 
       // if fractionalSeconds non-zero (sN!=0) append full fractional value
       if (sN != 0) {
-        sprintf(timeString, "%s%d:%lld/%lldS", timeString, s, sN, sD);
+        requiredLen = snprintf(timeString, timeStringLen+1, "%s%d:%lld/%lldS", timeStringTemp, s, sN, sD);
       } else { // no fractional seconds, just append integer seconds
-        sprintf(timeString, "%s%dS", timeString, s);
+        requiredLen = snprintf(timeString, timeStringLen+1, "%s%dS", timeStringTemp, s);
       }
+    }
+    if (requiredLen > timeStringLen)
+    {
+      std::stringstream msg;
+      msg << "timeString too small for result: " << timeStringLen << " < " << requiredLen;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE, msg, ESMC_CONTEXT, &rc);
+      return (rc);
     }
 
     return(rc);

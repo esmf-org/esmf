@@ -1,7 +1,7 @@
 !  $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -735,9 +735,9 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     implicit none
 
     type(ESMF_Field)      :: field
-    integer, intent(out)  :: rc     
+    integer, intent(out)  :: rc
   
-    integer :: localrc              
+    integer :: localrc
   
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -751,15 +751,15 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-      ! deallocate actual FieldType allocation      
+      ! deallocate actual FieldType allocation
       !print *, "deallocate(field%ftypep)"
       deallocate(field%ftypep, stat=localrc)
-      if (ESMF_LogFoundAllocError(localrc, msg="Deallocating Field", &
+      if (ESMF_LogFoundDeallocError(localrc, msg="Deallocating Field", &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     nullify(field%ftypep)
 
-    ! return successfully  
+    ! return successfully
     rc = ESMF_SUCCESS
 
   end subroutine f_esmf_fieldcollectgarbage
@@ -1004,6 +1004,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                 regridPoleNPnts, &
                                 linetype, &
                                 normtype, &
+                                vectorRegrid, &
                                 extrapMethod, &
                                 extrapNumSrcPnts, &
                                 extrapDistExponent, &
@@ -1039,6 +1040,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
 
     type(ESMF_LineType_Flag),optional       :: linetype
     type(ESMF_NormType_Flag),optional       :: normtype
+    type(ESMF_Logical), optional            :: vectorRegrid
     type(ESMF_ExtrapMethod_Flag), optional  :: extrapMethod
     integer, optional                       :: extrapNumSrcPnts
     real(ESMF_KIND_R4), optional            :: extrapDistExponent
@@ -1058,6 +1060,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
 
     integer :: localrc
     type(ESMF_RouteHandle) :: l_routehandle
+    logical :: l_vectorRegrid
 
     real(ESMF_KIND_R8), pointer    :: factorListFPtr(:)
     integer(ESMF_KIND_I4), pointer :: factorIndexListFPtr(:,:)
@@ -1070,6 +1073,12 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
+
+    if (present(vectorRegrid)) then
+      l_vectorRegrid = vectorRegrid
+    else
+      l_vectorRegrid = .false.
+    end if
 
     ! Only return factors if numFactors is a specific integer. This circumvents
     ! odd behavior by C_ASSOCIATED when calling from Python. This may also
@@ -1085,6 +1094,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                 regridPoleNPnts=regridPoleNPnts, &
                                 lineType=linetype, &
                                 normType=normtype, &
+                                vectorRegrid=l_vectorRegrid, &
                                 extrapMethod=extrapMethod, &
                                 extrapNumSrcPnts=extrapNumSrcPnts, &
                                 extrapDistExponent=extrapDistExponent, &
@@ -1117,6 +1127,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                 regridPoleNPnts=regridPoleNPnts, &
                                 lineType=linetype, &
                                 normType=normtype, &
+                                vectorRegrid=l_vectorRegrid, &
                                 extrapMethod=extrapMethod, &
                                 extrapNumSrcPnts=extrapNumSrcPnts, &
                                 extrapDistExponent=extrapDistExponent, &
@@ -1161,6 +1172,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                     regridPoleNPnts, &
                                     linetype, &
                                     normtype, &
+                                    vectorRegrid, &
                                     unmappedaction, &
                                     ignoreDegenerate, &
                                     createRoutehandle, &
@@ -1201,14 +1213,15 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     integer,optional                        :: srcMaskValues(len1), &
                                                dstMaskValues(len2)
     type(ESMF_RouteHandle)                  :: routehandle
-    type(ESMF_RegridMethod_Flag)            :: regridmethod
-    type(ESMF_PoleMethod_Flag)              :: polemethod
-    integer                                 :: regridPoleNPnts
+    type(ESMF_RegridMethod_Flag),optional   :: regridmethod
+    type(ESMF_PoleMethod_Flag),optional     :: polemethod
+    integer,optional                        :: regridPoleNPnts
 
-    type(ESMF_LineType_Flag)                :: linetype
-    type(ESMF_NormType_Flag)                :: normtype
-    type(ESMF_UnmappedAction_Flag)          :: unmappedaction
-    logical                                 :: ignoreDegenerate
+    type(ESMF_LineType_Flag),optional       :: linetype
+    type(ESMF_NormType_Flag),optional       :: normtype
+    type(ESMF_Logical),optional             :: vectorRegrid
+    type(ESMF_UnmappedAction_Flag),optional :: unmappedaction
+    logical, optional                       :: ignoreDegenerate
     logical, optional                       :: createRoutehandle
 
     type(ESMF_FileMode_Flag),   optional    :: filemode
@@ -1219,6 +1232,13 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
 
     logical, optional                       :: largeFileFlag
 
+    type(ESMF_Field), optional              :: srcFracField
+    type(ESMF_Field), optional              :: dstFracField
+
+    integer                                 :: rc
+
+    !--------------------------------------------------------------------------
+
     real(ESMF_KIND_R8), pointer             :: srcArea(:), dstArea(:)
     type(ESMF_GeomType_Flag)                :: srcgt, dstgt
     type(ESMF_TypeKind_Flag)                :: srctk, dsttk
@@ -1227,25 +1247,29 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     integer                                 :: srcslc, dstslc
     logical                                 :: ecip
 
-    type(ESMF_Field)                        :: srcFracField
-    type(ESMF_Field)                        :: dstFracField
-
     type(ESMF_VM)                           :: vm
     integer                                 :: localPet, petCount
     
-    integer                                 :: rc
-
     integer :: localrc
     type(ESMF_RouteHandle) :: l_routehandle
+    logical :: l_vectorRegrid
 
     real(ESMF_KIND_R8), pointer :: localFactorList(:)
     integer(ESMF_KIND_I4), pointer :: localFactorIndexList(:,:)
     
     type(ESMF_FileMode_Flag) :: filemode_local
+
+    !--------------------------------------------------------------------------
     
     ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
+
+    if (present(vectorRegrid)) then
+      l_vectorRegrid = vectorRegrid
+    else
+      l_vectorRegrid = .false.
+    end if
     
     call ESMF_VMGetCurrent(vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1266,6 +1290,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    regridPoleNPnts=regridPoleNPnts, &
                                    lineType=linetype, &
                                    normType=normtype, &
+                                   vectorRegrid=l_vectorRegrid, &
                                    unmappedaction=unmappedaction, &
                                    ignoreDegenerate=ignoreDegenerate, &
                                    factorList=localFactorList, &
@@ -1284,6 +1309,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    regridPoleNPnts=regridPoleNPnts, &
                                    lineType=linetype, &
                                    normType=normtype, &
+                                   vectorRegrid=l_vectorRegrid, &
                                    unmappedaction=unmappedaction, &
                                    ignoreDegenerate=ignoreDegenerate, &
                                    routehandle=l_routehandle, &
@@ -1304,6 +1330,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                  regridPoleNPnts=regridPoleNPnts, &
                                  lineType=linetype, &
                                  normType=normtype, &
+                                 vectorRegrid=l_vectorRegrid, &
                                  unmappedaction=unmappedaction, &
                                  ignoreDegenerate=ignoreDegenerate, &
                                  routehandle=l_routehandle, &

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <vector>
 #ifndef ESMF_NO_DLFCN
 #include <dlfcn.h>
 #endif
@@ -43,6 +44,7 @@
 #include "ESMCI_Info.h"
 
 using std::string;
+using std::vector;
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -246,7 +248,16 @@ extern "C" {
     if (llen>0){
       string sharedObj(sharedObjArg, llen);
       sharedObj.resize(sharedObj.find_last_not_of(" ")+1);
-      lib = dlopen(sharedObj.c_str(), RTLD_LAZY);
+      if (sharedObj.back()=='*'){
+        vector<string> suffixes{"so", "dylib", "dll"};
+        for (auto it=suffixes.begin(); it!=suffixes.end(); ++it){
+          string sharedObjTemp = sharedObj;
+          sharedObjTemp.replace(sharedObjTemp.end()-1,sharedObjTemp.end(), *it);
+          lib = dlopen(sharedObjTemp.c_str(), RTLD_LAZY);
+          if (lib) break;
+        }
+      }else
+        lib = dlopen(sharedObj.c_str(), RTLD_LAZY);
     }else
       lib = dlopen(NULL, RTLD_LAZY);  // search in executable
     if (lib == NULL){
@@ -298,7 +309,16 @@ extern "C" {
     if (llen>0){
       string sharedObj(sharedObjArg, llen);
       sharedObj.resize(sharedObj.find_last_not_of(" ")+1);
-      lib = dlopen(sharedObj.c_str(), RTLD_LAZY);
+      if (sharedObj.back()=='*'){
+        vector<string> suffixes{"so", "dylib", "dll"};
+        for (auto it=suffixes.begin(); it!=suffixes.end(); ++it){
+          string sharedObjTemp = sharedObj;
+          sharedObjTemp.replace(sharedObjTemp.end()-1,sharedObjTemp.end(), *it);
+          lib = dlopen(sharedObjTemp.c_str(), RTLD_LAZY);
+          if (lib) break;
+        }
+      }else
+        lib = dlopen(sharedObj.c_str(), RTLD_LAZY);
     }else
       lib = dlopen(NULL, RTLD_LAZY);  // search in executable
     if (lib == NULL){
@@ -509,7 +529,8 @@ extern "C" {
 // These functions have no leading c_ and are ESMF and not ESMC because
 // they're intended to be called directly by F90 user code.
 //
-// The Fortran interfaces for these entry points are defined in ESMF_Comp.F90.
+// The Fortran interfaces for these entry points are defined in
+// ESMF_InternalState.F90
 //
 // These interface subroutine names MUST be in lower case.
 extern "C" {
@@ -522,6 +543,10 @@ extern "C" {
   //  ESMF_InternalStateAddReplace()
   //  ESMF_InternalStateGet()
   //  ESMF_InternalStateRemove()
+  //
+  // TODO: Change the back-end implementation of the InternalState feature to
+  // TODO: leverage ESMF_Container, analogous to how AttachableMethods are
+  // TODO: implemented!
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_internalstategetinfo"

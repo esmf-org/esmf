@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -334,21 +334,24 @@ module NUOPC_Auxiliary
     logical,                    intent(in),  optional :: relaxedflag
     integer,                    intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Write the data of the fields within a {\tt state} to NetCDF files. Each 
-!   field is written to an individual file using the "StandardName" attribute
-!   as NetCDF attribute.
+!   Write the data of the fields contained in {\tt state} to NetCDF files.
+!   Each field is written to an individual file using its "StandardName"
+!   attribute as its NetCDF attribute.
+!   FieldBundle objects that are encountered within {\tt state} are traversed,
+!   and the contained fields are handled in the same manner as fields directly
+!   held by the {\tt state} object.
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[state]
-!     The {\tt ESMF\_State} object containing the fields.
+!     The {\tt ESMF\_State} object containing the fields written.
 !   \item[{[fieldNameList]}]
 !     List of names of the fields to be written. By default write all the fields
 !     in {\tt state}.
 !   \item[{[fileNamePrefix]}]
 !     File name prefix, common to all the files written.
 !   \item[{[overwrite]}]
-!      A logical flag, the default is .false., i.e., existing Field data may
+!      A logical flag, the default is .false., i.e., existing file data may
 !      {\em not} be overwritten. If .true., the
 !      data corresponding to each field's name will be
 !      be overwritten. If the {\tt timeslice} option is given, only data for
@@ -356,7 +359,7 @@ module NUOPC_Auxiliary
 !      Note that it is always an error to attempt to overwrite a NetCDF
 !      variable with data which has a different shape.
 !   \item[{[status]}]
-!      The file status. Valid options are {\tt ESMF\_FILESTATUS\_NEW}, 
+!      The file status. Valid options are {\tt ESMF\_FILESTATUS\_NEW},
 !      {\tt ESMF\_FILESTATUS\_OLD}, {\tt ESMF\_FILESTATUS\_REPLACE}, and
 !      {\tt ESMF\_FILESTATUS\_UNKNOWN} (default).
 !   \item[{[timeslice]}]
@@ -386,33 +389,63 @@ module NUOPC_Auxiliary
   !-----------------------------------------------------------------------------
     ! local variables
     integer                         :: localrc
-    integer                         :: i, itemCount
+    integer                         :: i, itemCount, iF, iFB
+    integer                         :: fieldCount, fieldBundleCount
     type(ESMF_Field)                :: field
+    type(ESMF_FieldBundle)          :: fieldbundle
     type(ESMF_StateItem_Flag)       :: itemType
     character(len=160)              :: fileName
-    character(len=160), allocatable :: fieldNameList_loc(:)
+    character(len=160),        allocatable  :: fieldNameList_loc(:)
+    character(len=160),        allocatable  :: fieldBundleNameList_loc(:)
+    character(len=160),        allocatable  :: itemNameList(:)
+    type(ESMF_StateItem_Flag), allocatable  :: itemTypeList(:)
 
     if (present(rc)) rc = ESMF_SUCCESS
 
+    call ESMF_StateGet(state, itemCount=itemCount, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__, &
+      rcToReturn=rc)) &
+      return  ! bail out
+    allocate(itemNameList(itemCount), itemTypeList(itemCount))
+    call ESMF_StateGet(state, itemNameList=itemNameList, &
+      itemTypeList=itemTypeList, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__, &
+      rcToReturn=rc)) &
+      return  ! bail out
+
+    fieldCount = 0
+    fieldBundleCount = 0
+    do i=1, size(itemTypeList)
+      if (itemTypeList(i) == ESMF_STATEITEM_FIELD) &
+        fieldCount = fieldCount + 1
+      if (itemTypeList(i) == ESMF_STATEITEM_FIELDBUNDLE) &
+        fieldBundleCount = fieldBundleCount + 1
+    enddo
+    allocate(fieldNameList_loc(fieldCount))
+    allocate(fieldBundleNameList_loc(fieldBundleCount))
+    iF = 0
+    iFB = 0
+    do i=1, size(itemTypeList)
+      if (itemTypeList(i) == ESMF_STATEITEM_FIELD) then
+        iF = iF + 1
+        fieldNameList_loc(iF) = trim(itemNameList(i))
+      endif
+      if (itemTypeList(i) == ESMF_STATEITEM_FIELDBUNDLE) then
+        iFB = iFB + 1
+        fieldBundleNameList_loc(iFB) = trim(itemNameList(i))
+      endif
+    enddo
+
     if (present(fieldNameList)) then
+      deallocate(fieldNameList_loc)
       allocate(fieldNameList_loc(size(fieldNameList)))
       do i=1, size(fieldNameList)
         fieldNameList_loc(i) = trim(fieldNameList(i))
       enddo
-    else
-      call ESMF_StateGet(state, itemCount=itemCount, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__, &
-        rcToReturn=rc)) &
-        return  ! bail out
-      allocate(fieldNameList_loc(itemCount))
-      call ESMF_StateGet(state, itemNameList=fieldNameList_loc, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=__FILE__, &
-        rcToReturn=rc)) &
-        return  ! bail out
     endif
 
     do i=1, size(fieldNameList_loc)
@@ -424,7 +457,7 @@ module NUOPC_Auxiliary
         rcToReturn=rc)) &
         return  ! bail out
       if (itemType == ESMF_STATEITEM_FIELD) then
-        ! field is available in the state
+        ! field in the state
         call ESMF_StateGet(state, itemName=fieldNameList_loc(i), field=field, &
           rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -449,8 +482,39 @@ module NUOPC_Auxiliary
           return  ! bail out
       endif
     enddo
-    
-    deallocate(fieldNameList_loc)
+
+    do i=1, size(fieldBundleNameList_loc)
+      call ESMF_StateGet(state, itemName=fieldBundleNameList_loc(i), &
+        itemType=itemType, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+      if (itemType == ESMF_STATEITEM_FIELDBUNDLE) then
+        ! fieldbundle in the state
+        call ESMF_StateGet(state, itemName=fieldBundleNameList_loc(i), &
+          fieldbundle=fieldbundle, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+        ! -> output to file
+        call NUOPC_FieldBundleWrite(fieldbundle, fieldNameList=fieldNameList, &
+          fileNamePrefix=fileNamePrefix, overwrite=overwrite, status=status, &
+          timeslice=timeslice, iofmt=iofmt, relaxedflag=relaxedflag, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg="Failed writing file: "// &
+          trim(fileName), &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+      endif
+    enddo
+
+    deallocate(fieldNameList_loc, fieldBundleNameList_loc)
+    deallocate(itemNameList, itemTypeList)
 
   end subroutine
   !-----------------------------------------------------------------------------
@@ -473,9 +537,9 @@ module NUOPC_Auxiliary
     logical,                    intent(in),  optional :: relaxedflag
     integer,                    intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Write the data of the fields within a {\tt fieldbundle} to NetCDF files.
-!   Each field is written to an individual file using the "StandardName"
-!   attribute as NetCDF attribute.
+!   Write the data of the fields contained in {\tt fieldbundle} to NetCDF files.
+!   Each field is written to an individual file using its "StandardName"
+!   attribute as its NetCDF attribute.
 !
 !   The arguments are:
 !   \begin{description}
@@ -495,7 +559,7 @@ module NUOPC_Auxiliary
 !      Note that it is always an error to attempt to overwrite a NetCDF
 !      variable with data which has a different shape.
 !   \item[{[status]}]
-!      The file status. Valid options are {\tt ESMF\_FILESTATUS\_NEW}, 
+!      The file status. Valid options are {\tt ESMF\_FILESTATUS\_NEW},
 !      {\tt ESMF\_FILESTATUS\_OLD}, {\tt ESMF\_FILESTATUS\_REPLACE}, and
 !      {\tt ESMF\_FILESTATUS\_UNKNOWN} (default).
 !   \item[{[timeslice]}]
@@ -578,7 +642,7 @@ module NUOPC_Auxiliary
         rcToReturn=rc)) &
         return  ! bail out
     enddo
-    
+
     deallocate(fieldNameList_loc)
 
   end subroutine

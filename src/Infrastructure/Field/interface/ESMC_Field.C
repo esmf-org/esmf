@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -385,6 +385,7 @@ int ESMC_FieldGetBounds(ESMC_Field field,
                             int *regridPoleNPnts,
                             enum ESMC_LineType_Flag *lineType,
                             enum ESMC_NormType_Flag *normType,
+                            ESMC_Logical *vectorRegrid,
                             enum ESMC_ExtrapMethod_Flag *extrapMethod,
                             int *extrapNumSrcPnts,
                             float *extrapDistExponent,
@@ -435,6 +436,7 @@ int ESMC_FieldGetBounds(ESMC_Field field,
                                         regridPoleNPnts,
                                         lineType,
                                         normType,
+                                        vectorRegrid,
                                         extrapMethod,
                                         extrapNumSrcPnts,
                                         extrapDistExponent,
@@ -481,6 +483,7 @@ int ESMC_FieldGetBounds(ESMC_Field field,
                             int *regridPoleNPnts,
                             enum ESMC_LineType_Flag *lineType,
                             enum ESMC_NormType_Flag *normType,
+                            enum ESMC_Logical *vectorRegrid,
                             enum ESMC_UnmappedAction_Flag *unmappedaction,
                             enum ESMC_Logical *ignoreDegenerate,
                             enum ESMC_Logical *create_rh,
@@ -512,7 +515,7 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     // Invoke the C++ interface
     localrc = ESMCI::Field::regridstorefile(fieldpsrc, fieldpdst, filename,
       srcMaskValues, dstMaskValues, &rhPtr, regridmethod,
-      polemethod, regridPoleNPnts, lineType, normType, unmappedaction, 
+      polemethod, regridPoleNPnts, lineType, normType, vectorRegrid, unmappedaction,
       ignoreDegenerate, create_rh, filemode, srcFile, dstFile, 
       srcFileType, dstFileType, largeFileFlag, srcfracp, dstfracp);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,

@@ -19,7 +19,6 @@ program ESMX_App
 
   integer                   :: rc, urc
   type(ESMF_GridComp)       :: driver
-  type(ESMF_Config)         :: config
   type(ESMF_HConfig)        :: hconfig, hconfigNode
   character(:), allocatable :: configKey(:)
   character(:), allocatable :: valueString
@@ -32,13 +31,7 @@ program ESMX_App
   configKey = ["ESMX", "App "]
   call ESMF_Initialize(configFilenameFromArgNum=1, & ! arg 1 to spec alt. config
     configFileName="esmxRun.yaml", configKey=configKey, &
-    config=config, defaultDefaultCalKind=ESMF_CALKIND_GREGORIAN, rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, file=FILENAME)) &
-    call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  ! Access hconfig
-  call ESMF_ConfigGet(config, hconfig=hconfig, rc=rc)
+    hconfig=hconfig, defaultDefaultCalKind=ESMF_CALKIND_GREGORIAN, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -58,24 +51,29 @@ program ESMX_App
 
   ! Validate hconfigNode against ESMX/App controlled key vocabulary
   isFlag = ESMF_HConfigValidateMapKeys(hconfigNode, &
-    vocabulary=["defaultLogFilename          ", & ! ESMF_Initialize option
-                "logAppendFlag               ", & ! ESMF_Initialize option
-                "logKindFlag                 ", & ! ESMF_Initialize option
-                "defaultCalKind              ", & ! ESMF_Initialize option
-                "globalResourceControl       ", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_PROFILE        ", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_PROFILE_OUTPUT ", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_PROFILE_PETLIST", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_TRACE          ", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_TRACE_CLOCK    ", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_TRACE_PETLIST  ", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_TRACE_COMPONENT", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_TRACE_FLUSH    ", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_COMPLIANCECHECK", & ! ESMF_Initialize option
-                "startTime                   ", & ! ESMX_App option
-                "stopTime                    ", & ! ESMX_App option
-                "logFlush                    ", & ! ESMX_App option
-                "fieldDictionary             "  & ! ESMX_App option
+    vocabulary=["defaultLogFilename             ", & ! ESMF_Initialize option
+                "logAppendFlag                  ", & ! ESMF_Initialize option
+                "logKindFlag                    ", & ! ESMF_Initialize option
+                "defaultCalKind                 ", & ! ESMF_Initialize option
+                "globalResourceControl          ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_ABORT_ACTION      ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_ABORT_LOGMSG_TYPES", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_COMPLIANCECHECK   ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_GARBAGE           ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_GARBAGE_LOG       ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_PROFILE           ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_PROFILE_OUTPUT    ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_PROFILE_PETLIST   ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_PROFILE_REGRID    ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_TRACE             ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_TRACE_CLOCK       ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_TRACE_COMPONENT   ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_TRACE_FLUSH       ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_TRACE_PETLIST     ", & ! ESMF_Initialize option
+                "startTime                      ", & ! ESMX_App option
+                "stopTime                       ", & ! ESMX_App option
+                "logFlush                       ", & ! ESMX_App option
+                "fieldDictionary                "  & ! ESMX_App option
                 ], badKey=valueString, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &
@@ -140,7 +138,7 @@ program ESMX_App
   endif
 
   ! Create esmx driver
-  driver = ESMF_GridCompCreate(name="ESMX_Driver", config=config, rc=rc)
+  driver = ESMF_GridCompCreate(name="ESMX_Driver", hconfig=hconfig, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)

@@ -1,8 +1,7 @@
-
 // $Id: ESMCI_MeshRedist.C,v 1.23 2012/01/06 20:17:51 svasquez Exp $
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -51,15 +50,7 @@ static const char *const version = "$Id: ESMCI_MeshDual.C,v 1.23 2012/01/06 20:1
  
 namespace ESMCI {
 
-  const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype);
-
-  void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind, 
-                   double *tri_frac);
-  
-  void get_num_elems_around_node(MeshObj *node, int *_num_ids);
-
-  void add_ghost_elems_to_split_orig_id_map(Mesh *mesh);
-
+  // Struct used for organizing ids around center   
   struct MDSS {
     double angle;
     UInt id;
@@ -81,130 +72,129 @@ namespace ESMCI {
 
   };
 
-  void get_unique_elems_around_node(MeshObj *node, Mesh *mesh, MDSS *tmp_mdss,
-                                int *_num_ids, UInt *ids);
 
+  // Struct used for loop creation method below
+  struct PntS {
+    double pnt[3];
+    
+    enum Side {
+      Neither, Left, Right
+    };
+    Side side;
+    
+    PntS() {
+      pnt[0]=0.0;
+      pnt[1]=0.0;
+      pnt[2]=0.0;
+      side=Neither;
+    }
+  };
+
+
+  bool less_by_data_index(const MeshObj *a, const MeshObj *b) {
+    return (a->get_data_index() < b->get_data_index());
+  }
+
+
+  
+  void get_unique_elems_around_node(MeshObj *node, Mesh *mesh, std::vector<MDSS> &tmp_mdss, std::vector<PntS> &tmp_pntss,
+                                    std::vector<UInt> &ids);
+  
+  
+  void _fill_elem_fields(Mesh *dual_mesh, int sdim, int orig_sdim,
+                         double *elemCoords,  double *elemOrigCoords,
+                         double *elemMaskVal, double *elemMask);
+
+  
   void _change_owners_from_src_to_curr_comm(Mesh *dual_mesh, MPI_Comm src_comm);
 
+  void _set_elem_ownership_context_based_on_owned_pet(Mesh *dual_mesh);
 
+  void _set_node_ownership_context_based_on_owned_pet(Mesh *dual_mesh);
+
+
+  const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype);
+
+  void triangulate(int sdim, int elem_id,
+                   int num_p, double *p, double *td, int *ti, int *tri_ind, 
+                   double *tri_frac);
+  
+  void get_num_elems_around_node(MeshObj *node, int *_num_ids);
+
+  void add_ghost_elems_to_split_orig_id_map(Mesh *mesh);
+
+
+  
+  
   // Create a dual of the input Mesh 
   // This adds ghostcells to the input mesh, 
   // it also creates ghostcells for the dual mesh
   void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
-
-  Trace __trace("MeshDual(Mesh *src_mesh, Mesh **dual_mesh)");
-
-  // Don't currently support duals of 3D Meshes
-  if (src_mesh->parametric_dim()>2) {
-    Throw() <<" Creation of a dual mesh isn't supported for Meshes of parametric dim greater than 3.\n";
-  }
-
-  // Need element coordinates
-  if (!src_mesh->GetField("elem_coordinates")) {
-    Throw() <<" Creation of a dual mesh requires element coordinates. \n";
-  }
-
-
-  // Add ghostcells to source mesh, because we need the surrounding 
-  // cells
-   {
-
-  // BOB: Use convenience function to comm. all fields
-#if 0
-    int num_snd=0;
-    MEField<> *snd[10],*rcv[10];
     
-    // Load coord field
-    MEField<> *psc = src_mesh->GetCoordField();
-    snd[num_snd]=psc;
-    rcv[num_snd]=psc;
-    num_snd++;
-
-    // Load element mask value field
-    MEField<> *psm = src_mesh->GetField("elem_mask_val");
-    if (psm != NULL) {
-      snd[num_snd]=psm;
-      rcv[num_snd]=psm;
-      num_snd++;
+    Trace __trace("MeshDual(Mesh *src_mesh, Mesh **dual_mesh)");
+    
+    // Don't currently support duals of 3D Meshes
+    if (src_mesh->parametric_dim()>2) {
+      Throw() <<" Creation of a dual mesh isn't supported for Meshes of parametric dim greater than 2.\n";
     }
-
-    // Load element mask field
-    MEField<> *psem = src_mesh->GetField("elem_mask");
-    if (psem != NULL) {
-      snd[num_snd]=psem;
-      rcv[num_snd]=psem;
-      num_snd++;
+    
+    // Need element coordinates
+    if (!src_mesh->GetField("elem_coordinates")) {
+      Throw() <<" Creation of a dual mesh requires element coordinates. \n";
     }
-
-    // Load element coordinate field
-    MEField<> *psec = src_mesh->GetField("elem_coordinates");
-    if (psec != NULL) {
-      snd[num_snd]=psec;
-      rcv[num_snd]=psec;
-      num_snd++;
-    }
-
-    // Load frac2 field
-    MEField<> *psf = src_mesh->GetField("elem_frac2");
-    if (psf != NULL) {
-      snd[num_snd]=psf;
-      rcv[num_snd]=psf;
-      num_snd++;
-    }
-#endif
-
-
+    
+    
 #ifdef DEBUG_TRI
-{
-  int nn = 0;
-  int on = 0;
-  MeshDB::iterator ni = src_mesh->node_begin(), ne = src_mesh->node_end();
-  for (; ni != ne; ++ni) {
-    ++nn;
-    MeshObj &node=*ni;
-    if (node.get_owner() != Par::Rank()) on++;
-  }
-
-  int nee = 0;
-  int oe = 0;
-  MeshDB::iterator ei = src_mesh->elem_begin(), ee = src_mesh->elem_end();
-  for (; ei != ee; ++ei) {
-    ++nee;
-    MeshObj &elem=*ei;
-    if (elem.get_owner() != Par::Rank()) oe++;
-  }
-  
-  printf("%d# BEFORE GHOST nodes %d owned %d elems %d owned %d\n", Par::Rank(), nn, on, nee, oe);
-}
+    {
+      int nn = 0;
+      int on = 0;
+      MeshDB::iterator ni = src_mesh->node_begin(), ne = src_mesh->node_end();
+      for (; ni != ne; ++ni) {
+        ++nn;
+        MeshObj &node=*ni;
+        if (node.get_owner() != Par::Rank()) on++;
+      }
+      
+      int nee = 0;
+      int oe = 0;
+      MeshDB::iterator ei = src_mesh->elem_begin(), ee = src_mesh->elem_end();
+      for (; ei != ee; ++ei) {
+        ++nee;
+        MeshObj &elem=*ei;
+        if (elem.get_owner() != Par::Rank()) oe++;
+      }
+      
+      printf("%d# BEFORE GHOST nodes %d owned %d elems %d owned %d\n", Par::Rank(), nn, on, nee, oe);
+    }
 #endif
-
-
+    
+    
 #ifdef DEBUG_WRITE_MESH
-  {int *rc;
-  int len = 18; char fname[len];
-  sprintf(fname, "NativeBeforeGhost");
-  ESMCI_meshwrite(&src_mesh, fname, rc, len);}
+    {int *rc;
+      int len = 18; char fname[len];
+      sprintf(fname, "NativeBeforeGhost");
+      ESMCI_meshwrite(&src_mesh, fname, rc, len);}
 #endif
-
+    
+    //// Add ghostcells to source mesh, because we need the surrounding cells
+    
     // Create ghost cells
     src_mesh->CreateGhost();
-
+    
     // Communicate values to ghost cells
     src_mesh->GhostCommAllFields();
-
-    // BOB: Use convenince method to comm all fields 
-#if 0
-    src_mesh->GhostComm().SendFields(num_snd, snd, rcv);
-#endif
-
-
+    
+    // If src_mesh is split, add newly created ghost elements to split_to_orig map
+    if (src_mesh->is_split) add_ghost_elems_to_split_orig_id_map(src_mesh);
+    
+    
 #ifdef DEBUG_WRITE_MESH
-  {int *rc;
-  int len = 18; char fname[len];
-  sprintf(fname, "NativeAfterGhost");
-  ESMCI_meshwrite(&src_mesh, fname, rc, len);}
+    {int *rc;
+      int len = 18; char fname[len];
+      sprintf(fname, "NativeAfterGhost");
+      ESMCI_meshwrite(&src_mesh, fname, rc, len);}
 #endif
-
+    
 #ifdef DEBUG_TRI
 {
   int nn = 0;
@@ -226,35 +216,59 @@ namespace ESMCI {
   }
   
   printf("%d# AFTER GHOST nodes %d owned %d elems %d owned %d\n", Par::Rank(), nn, on, nee, oe);
-}
+ }
 #endif
 
 
-    // If src_mesh is split, add newly created ghost elements to split_to_orig map
-    if (src_mesh->is_split) add_ghost_elems_to_split_orig_id_map(src_mesh);
-  }
-
+// Get some useful info
+ int sdim=src_mesh->spatial_dim();
+ int orig_sdim=src_mesh->orig_spatial_dim;
+ int pdim=src_mesh->parametric_dim();
  
-  // Get some useful info
-  int sdim=src_mesh->spatial_dim();
-  int pdim=src_mesh->parametric_dim();
-
-  // Create Mesh
-  Mesh *dual_mesh=new Mesh();
-
-  // Set Mesh dimensions
-  dual_mesh->set_spatial_dimension(sdim);
-  dual_mesh->set_parametric_dimension(pdim);
-  dual_mesh->orig_spatial_dim=src_mesh->orig_spatial_dim;
-  dual_mesh->coordsys=src_mesh->coordsys;
-
+ // Create Mesh
+ Mesh *dual_mesh=new Mesh();
+ 
+ // Set Mesh dimensions
+ dual_mesh->set_spatial_dimension(sdim);
+ dual_mesh->set_parametric_dimension(pdim);
+ dual_mesh->orig_spatial_dim=orig_sdim;
+ dual_mesh->coordsys=src_mesh->coordsys;
+ 
+ 
   // Get element coordinates
-  MEField<> *elem_coords=src_mesh->GetField("elem_coordinates"); 
-  if (!elem_coords) {
+  MEField<> *src_elem_coords=src_mesh->GetField("elem_coordinates"); 
+  if (!src_elem_coords) {
     Throw() <<" Creation of a dual mesh requires element coordinates. \n";
   }
 
+  // Get original elem coordinates
+  MEField<> *src_elem_orig_coords=src_mesh->GetField("elem_orig_coordinates");
 
+  // Get node coordinates
+  MEField<> *src_node_coords=src_mesh->GetCoordField();
+  if (!src_node_coords) {
+    Throw() <<" Creation of a dual mesh requires node coordinates. \n";
+  }
+
+  // Get original node coordinates
+  MEField<> *src_node_orig_coords=src_mesh->GetField("orig_coordinates");
+
+  // Get node mask info
+  MEField<> *src_node_mask_val=src_mesh->GetField("node_mask_val");
+  MEField<> *src_node_mask=src_mesh->GetField("mask"); 
+
+
+  // Detect what optional fields should be present in the dual
+  bool dual_has_elemOrigCoords=false;
+  if (src_node_orig_coords) dual_has_elemOrigCoords=true;
+
+  bool dual_has_elemMaskVal=false;
+  if (src_node_mask_val) dual_has_elemMaskVal=true;
+
+  bool dual_has_elemMask=false;
+  if (src_node_mask) dual_has_elemMask=true;
+
+  
   // Iterate through all src elements counting the number and creating a map
   std::map<UInt,UInt> id_to_index;
    int pos=0;
@@ -296,15 +310,28 @@ namespace ESMCI {
     nodes_used[i]=0;
   }
 
+  // Save source nodes in a vector
+  std::vector<MeshObj *> src_nodes;
+  src_nodes.reserve(src_mesh->num_nodes());
+  MeshDB::iterator ni = src_mesh->node_begin(), ne = src_mesh->node_end();
+  for (; ni != ne; ++ni) {
+    MeshObj *node=&(*ni);
+    
+    src_nodes.push_back(node);    
+  }
+
+  // Sort src_nodes by data index, so the elements in the output dual mesh 
+  // will have the same order as the nodes in the source mesh
+  std::sort(src_nodes.begin(), src_nodes.end(), less_by_data_index);
+
+
   // Iterate through src nodes counting sizes
   // Note that the elems around the node are the maximum possible, it
   // could be less when actually counted and uniqued. 
   int max_num_elems=0;
   int max_num_elemConn=0;
   int max_num_node_elems=0;
-  MeshDB::iterator ni = src_mesh->node_begin(), ne = src_mesh->node_end();
-  for (; ni != ne; ++ni) {
-    MeshObj &node=*ni;
+  for (MeshObj *node: src_nodes) {
     
     // Only do local nodes
     // ALSO DO NON-LOCAL NODES, BECAUSE OTHERWISE YOU 
@@ -314,7 +341,7 @@ namespace ESMCI {
 
     // Get number of elems
     int num_node_elems=0;
-    get_num_elems_around_node(&node, &num_node_elems);    
+    get_num_elems_around_node(node, &num_node_elems);    
     
     // If less than 3 (a triangle) then don't make an element
     if (num_node_elems < 3) continue;
@@ -329,23 +356,35 @@ namespace ESMCI {
     max_num_elemConn += num_node_elems;
   }
  
+  // Vector to hold MDSS
+  std::vector<MDSS> tmp_mdss;
+  tmp_mdss.reserve(max_num_node_elems);
+  
+  // Vector to hold points
+  std::vector<PntS> tmp_pntss;
+  tmp_pntss.reserve(max_num_node_elems);
 
-  // Create temp arrays for getting ordered elem ids
-  MDSS *tmp_mdss=NULL;
-  UInt *elems_around_node_ids=NULL;
-  if (max_num_node_elems > 0) {
-    tmp_mdss=new MDSS[max_num_node_elems];
-    elems_around_node_ids=new UInt[max_num_node_elems];
-  }
+  // Vector to hold elem ids
+  std::vector<UInt> new_elem_ids;
+  new_elem_ids.reserve(max_num_node_elems);
+
 
   // Create element lists
   int *elemType=NULL;
   UInt *elemId=NULL;
   UInt *elemOwner=NULL;
+  double *elemCoords=NULL;
+  double *elemOrigCoords=NULL;
+  double *elemMaskVal=NULL;
+  double *elemMask=NULL;
   if (max_num_elems>0) {
     elemType=new int[max_num_elems];
     elemId=new UInt[max_num_elems];
     elemOwner=new UInt[max_num_elems];
+    elemCoords=new double[sdim*max_num_elems];
+    if (dual_has_elemOrigCoords) elemOrigCoords=new double[orig_sdim*max_num_elems];
+    if (dual_has_elemMaskVal) elemMaskVal=new double[max_num_elems];
+    if (dual_has_elemMask) elemMask=new double[max_num_elems];
   }
   int *elemConn=NULL;
   if (max_num_elemConn >0) {
@@ -355,9 +394,9 @@ namespace ESMCI {
   // Iterate through src nodes creating elements
   int num_elems=0;
   int conn_pos=0;
-  ni = src_mesh->node_begin();
-  for (; ni != ne; ++ni) {
-    MeshObj &node=*ni;
+  int ec_pos=0;
+  int eoc_pos=0;
+  for (MeshObj *node: src_nodes) {
     
     // Only do local nodes
     // ALSO DO NON-LOCAL NODES, BECAUSE OTHERWISE YOU 
@@ -372,43 +411,67 @@ namespace ESMCI {
 
        
     // Get list of element ids
-    int num_elems_around_node_ids=0;
-    get_unique_elems_around_node(&node, src_mesh, tmp_mdss,
-                          &num_elems_around_node_ids,
-                          elems_around_node_ids);
+    get_unique_elems_around_node(node, src_mesh, tmp_mdss, tmp_pntss, new_elem_ids);
 
 #ifdef DEBUG_UNIQUE_ELEMS
     {
-    printf("%d# mesh node id %d, unique elems %d [", Par::Rank(), node.get_id(), num_elems_around_node_ids);
-    for (int i=0; i<num_elems_around_node_ids; i++) {  
-      printf("%d, ", elems_around_node_ids[i]);
+    printf("%d# mesh node id %d, unique elems %d [", Par::Rank(), node.get_id(), num_new_elem_ids);
+    for (int i=0; i<num_new_elem_ids; i++) {  
+      printf("%d, ", new_elem_ids[i]);
     }
     printf("]\n");}
 #endif
+
     // If less than 3 (a triangle) then don't make an element
-    if (num_elems_around_node_ids < 3) continue;
+    if (new_elem_ids.size() < 3) continue;
     
     // Save elemType/number of connections 
-    elemType[num_elems]=num_elems_around_node_ids;
+    elemType[num_elems]=new_elem_ids.size();
     
     // Save elemId
-    elemId[num_elems]=node.get_id();
+    elemId[num_elems]=node->get_id();
 
     // Save owner
-    elemOwner[num_elems]=node.get_owner();
+    elemOwner[num_elems]=node->get_owner();
 
     // printf("%d# eId=%d eT=%d ::",Par::Rank(),elemId[num_elems],elemType[num_elems]);
+
+    // Save coordinates
+    double *coords=src_node_coords->data(*node);
+    for (auto d=0; d<sdim; d++) {
+      elemCoords[ec_pos]=coords[d];
+      ec_pos++;
+    }
+
+    // If present, save original coordinates
+    if (elemOrigCoords && src_node_orig_coords) {
+      double *orig_coords=src_node_orig_coords->data(*node);
+      for (auto od=0; od<orig_sdim; od++) {
+        elemOrigCoords[eoc_pos]=orig_coords[od];
+        eoc_pos++;
+      }
+    }
+
+    // If present, save element mask value
+    if (elemMaskVal && src_node_mask_val) {
+      double *nmv=src_node_mask_val->data(*node);
+      elemMaskVal[num_elems]=*nmv;
+    }
+
+    // If present, save element mask value
+    if (elemMask && src_node_mask) {
+      double *nm=src_node_mask->data(*node);
+      elemMask[num_elems]=*nm;
+    }
     
     // Next elem
     num_elems++;
 
-    //    printf("Elem id=%d max=%d num=%d :: ",node.get_id(),max_num_node_elems,num_elems_around_node_ids);
-
     // Loop elements attached to node and build connection list
-    for (int i=0; i<num_elems_around_node_ids; i++) {
+    for (int i=0; i<new_elem_ids.size(); i++) {
 
       // Get elem id
-      UInt elem_id=elems_around_node_ids[i];
+      UInt elem_id=new_elem_ids[i];
       
       // printf(" %d ",elem_id);
 
@@ -430,10 +493,6 @@ namespace ESMCI {
 
     // printf("\n");
   }
-
-  // Free tmp arrays
-  if (tmp_mdss != NULL) delete [] tmp_mdss;
-  if (elems_around_node_ids != NULL) delete [] elems_around_node_ids;
 
 
   // Iterate through all src elements creating nodes
@@ -499,6 +558,11 @@ namespace ESMCI {
 
     // Register Node fields
     IOField<NodalField> *dm_node_coord = dual_mesh->RegisterNodalField(*dual_mesh, "coordinates", sdim);
+    
+    IOField<NodalField> *dm_node_orig_coord=NULL;
+    if (src_elem_orig_coords) {      
+      dm_node_orig_coord = dual_mesh->RegisterNodalField(*dual_mesh, "orig_coordinates", orig_sdim);
+    }
 
     IOField<NodalField> *dm_node_mask_val=NULL;
     MEField<> *elem_mask_val=src_mesh->GetField("elem_mask_val"); 
@@ -528,7 +592,7 @@ namespace ESMCI {
         MeshObj &node=*(nodes[pos]);
 
         // Get elem coord pointer
-        double *ec=elem_coords->data(elem);
+        double *ec=src_elem_coords->data(elem);
 
         // Get node coord pointer
         double *nc=dm_node_coord->data(node);
@@ -539,6 +603,21 @@ namespace ESMCI {
         }
         // printf("%d# H1 id=%d pos=%d nc=%f %f ec=%f %f\n",Par::Rank(),node->get_id(),pos,nc[0],nc[1],ec[0],ec[1]);
 
+
+        // Copy original coords
+        if (src_elem_orig_coords && dm_node_orig_coord) {
+
+          // Get data pointers
+          double *eoc=src_elem_orig_coords->data(elem);
+          double *noc=dm_node_orig_coord->data(node);
+
+          // Copy coords from elem to node
+          for (int od=0; od<orig_sdim; od++) {
+            noc[od]=eoc[od];
+          }
+        }
+
+        
         // Copy mask 
         if ((elem_mask_val != NULL) && (dm_node_mask_val != NULL)) {
           double *emv=elem_mask_val->data(elem);
@@ -622,7 +701,11 @@ namespace ESMCI {
   int *elemType_wsplit=NULL;
   UInt *elemId_wsplit=NULL;
   UInt *elemOwner_wsplit=NULL;
-
+  double *elemCoords_wsplit=NULL;
+  double *elemOrigCoords_wsplit=NULL;
+  double *elemMaskVal_wsplit=NULL;
+  double *elemMask_wsplit=NULL;
+  
   //  int *elemMaskIIArray_wsplit=NULL;
   //InterArray *elemMaskII_wsplit=NULL;
 
@@ -635,7 +718,11 @@ namespace ESMCI {
     elemType_wsplit=new int[num_elems_wsplit];
     elemId_wsplit=new UInt[num_elems_wsplit];
     elemOwner_wsplit=new UInt[num_elems_wsplit];
-
+    elemCoords_wsplit=new double[sdim*num_elems_wsplit];
+    if (dual_has_elemOrigCoords) elemOrigCoords_wsplit=new double[orig_sdim*num_elems_wsplit];
+    if (dual_has_elemMaskVal) elemMaskVal_wsplit=new double[num_elems_wsplit];
+    if (dual_has_elemMask) elemMask_wsplit=new double[num_elems_wsplit];
+    
 #if 0
       //// Setup for split mask
       int *elemMaskIIArray=NULL;
@@ -682,6 +769,7 @@ namespace ESMCI {
         // More than 4 side, split
         if (elemType[e]>4) {
 
+          
           // Get coordinates
           int crd_pos=0;
           for (int i=0; i<elemType[e]; i++) {
@@ -693,11 +781,10 @@ namespace ESMCI {
             }
 
             //printf("%d# id=%d c=%d coord=%f %f \n",Par::Rank(),elemId[e],elemConn[conn_pos+i],polyCoords[crd_pos-2],polyCoords[crd_pos-1]);
-
           }
 
           // Triangulate polygon
-          triangulate(sdim, elemType[e], polyCoords, polyDblBuf, polyIntBuf, 
+          triangulate(sdim, elemId[e], elemType[e], polyCoords, polyDblBuf, polyIntBuf, 
                       triInd, triFrac); 
           
 
@@ -724,6 +811,32 @@ namespace ESMCI {
             // Set mask (if it exists)
             //  if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
 
+            // Set element coords.
+            double *elem_pnt=elemCoords+sdim*e;
+            double *elem_pnt_wsplit=elemCoords_wsplit+sdim*split_elem_pos;
+            for (int d=0; d<sdim; d++) {
+              elem_pnt_wsplit[d]=elem_pnt[d];
+            }
+
+            // Set orig element coords.
+            if (elemOrigCoords && elemOrigCoords_wsplit) {
+              double *elem_orig_pnt=elemOrigCoords+orig_sdim*e;
+              double *elem_orig_pnt_wsplit=elemOrigCoords_wsplit+orig_sdim*split_elem_pos;
+              for (int od=0; od<orig_sdim; od++) {
+                elem_orig_pnt_wsplit[od]=elem_orig_pnt[od];
+              }
+            }
+
+            // Set elem mask val
+            if (elemMaskVal && elemMaskVal_wsplit) {
+              elemMaskVal_wsplit[split_elem_pos]=elemMaskVal[e];
+            }
+
+            // Set elem mask
+            if (elemMask && elemMask_wsplit) {
+              elemMask_wsplit[split_elem_pos]=elemMask[e];
+            }
+            
             // Next split element
             split_elem_pos++;
 
@@ -765,24 +878,32 @@ namespace ESMCI {
 
 
       // Delete original element information
-    if (elemType !=NULL) delete [] elemType;
-    if (elemId !=NULL) delete [] elemId;
-    if (elemOwner !=NULL) delete [] elemOwner;
-    if (elemConn !=NULL) delete [] elemConn;
-
+      if (elemType !=NULL) delete [] elemType;
+      if (elemId !=NULL) delete [] elemId;
+      if (elemOwner !=NULL) delete [] elemOwner;
+      if (elemConn !=NULL) delete [] elemConn;
+      if (elemCoords !=NULL) delete [] elemCoords;
+      if (elemOrigCoords !=NULL) delete [] elemOrigCoords;
+      if (elemMaskVal !=NULL) delete [] elemMaskVal;
+      if (elemMask !=NULL) delete [] elemMask;
+      
       // Use the new split list for the connection lists below
       num_elems=num_elems_wsplit;
       elemConn=elemConn_wsplit;
       elemType=elemType_wsplit;
       elemId=elemId_wsplit;
       elemOwner=elemOwner_wsplit;
+      elemCoords=elemCoords_wsplit;
+      elemOrigCoords=elemOrigCoords_wsplit;
+      elemMaskVal=elemMaskVal_wsplit;
+      elemMask=elemMask_wsplit;
 
 #if 0
       if (elemMaskII != NULL) { 
         elemMaskII=elemMaskII_wsplit;
       }
 #endif
-    }   
+  }  
 
 
     // Build elements
@@ -798,10 +919,19 @@ namespace ESMCI {
       int nnodes = topo->num_nodes;
       std::vector<MeshObj*> nconnect(nnodes, static_cast<MeshObj*>(0));
 
+      // For dist fix:
+      // - e below is the data index
+      // - What should it be for split elems?
+      //   + A: It looks like in mesh create code, the split elems are just interleaved.
+      //        I guess that I should just mimic that, so that there aren't issues.
+      //        If you want to change it, then both should be changed. 
+
+      
       // The object
       UInt eid = elemId[e];
       MeshObj *elem = new MeshObj(MeshObj::ELEMENT, eid, e);
 
+      // Get connectivity
       for (int n = 0; n < nnodes; ++n) {
       
         // Get 0-based node index
@@ -819,7 +949,7 @@ namespace ESMCI {
 
     } // for e
 
-    // Clean up
+    // Clean up stuff we're finished with
     if (nodes_used !=NULL) delete [] nodes_used;
     if (elemType !=NULL) delete [] elemType;
     if (elemId !=NULL) delete [] elemId;
@@ -827,30 +957,142 @@ namespace ESMCI {
     if (elemConn !=NULL) delete [] elemConn;
     if (nodes !=NULL) delete [] nodes;
 
-    // The main goal for this is to use it for non-conserve on centers, so
-    // I'm not moving some of the node information to elem (e.g. masking)
-    // do that eventually for full generality. 
-    // However, I am registering thw elem frac field, because that's the one
-    // that should always be there. 
-    {
-      Context ctxt; ctxt.flip();
-      MEField<> *elem_frac = dual_mesh->RegisterField("elem_frac",
-                  MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+    // Assume Contexts
+    dual_mesh->AssumeContexts(*src_mesh);
+
+    // Register the elem Fields
+    Context ctxt; ctxt.flip();
+    dual_mesh->RegisterField("elem_frac",
+                             MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+    
+    dual_mesh->RegisterField("elem_frac2",
+                             MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+    dual_mesh->RegisterField("elem_coordinates",
+                             MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, sdim, true);
+
+    if (dual_has_elemOrigCoords) {
+      dual_mesh->RegisterField("elem_orig_coordinates",
+                               MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, orig_sdim, true);
     }
 
+    if (dual_has_elemMaskVal) {
+      dual_mesh->RegisterField("elem_mask_val",
+                               MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+    }
+
+    if (dual_has_elemMask) {
+      dual_mesh->RegisterField("elem_mask",
+                               MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+    }
+
+    
     // Change owners to be on the current communicator rather than the source mesh's communicator
     _change_owners_from_src_to_curr_comm(dual_mesh, src_mesh->orig_comm);
+
+    // Change context to match node PET ownership
+    _set_node_ownership_context_based_on_owned_pet(dual_mesh);
+
+    // Change context to match elem PET ownership
+    _set_elem_ownership_context_based_on_owned_pet(dual_mesh);
+    
 
     // Commit Mesh
     dual_mesh->build_sym_comm_rel(MeshObj::NODE);
     dual_mesh->Commit();
 
-
+    // Fill Elem Fields
+    _fill_elem_fields(dual_mesh, sdim, orig_sdim, elemCoords, elemOrigCoords, elemMaskVal, elemMask);
     
+    // Clean up remaining element info
+    if (elemCoords !=NULL) delete [] elemCoords;
+    if (elemOrigCoords !=NULL) delete [] elemOrigCoords;
+    if (elemMaskVal !=NULL) delete [] elemMaskVal;
+    if (elemMask !=NULL) delete [] elemMask;
+
     // Output 
     *_dual_mesh=dual_mesh;
 }
 
+   void _set_node_ownership_context_based_on_owned_pet(Mesh *dual_mesh) {
+
+     //// Need to keep list of nodes because order may change
+     
+     // Reserve memory for list
+     std::vector<MeshObj *> node_list;
+     node_list.reserve(dual_mesh->num_nodes());
+
+     // Copy into list
+     MeshDB::iterator ei = dual_mesh->node_begin(), ee = dual_mesh->node_end();
+     for (; ei != ee; ++ei) {
+       MeshObj &node=*ei;
+       
+       node_list.push_back(&node);
+     }
+
+     // Loop setting owner and OWNER_ID
+     for (MeshObj *node : node_list) {
+       
+       // Setup for changing attribute
+       const Context &ctxt = GetMeshObjContext(*node);
+       Context newctxt(ctxt);
+       
+       // Set OWNED_ID appropriately
+       if (node->get_owner() == Par::Rank()) {
+         newctxt.set(Attr::OWNED_ID);
+       } else {
+         newctxt.clear(Attr::OWNED_ID);
+       }
+       
+       // If attribute has changed change in node
+       if (newctxt != ctxt) {
+         Attr attr(GetAttr(*node), newctxt);
+         dual_mesh->update_obj(node, attr);
+       }
+     }     
+   }
+
+
+   void _set_elem_ownership_context_based_on_owned_pet(Mesh *dual_mesh) {
+
+     //// Need to keep list of elems because order may change
+     
+     // Reserve memory for list
+     std::vector<MeshObj *> elem_list;
+     elem_list.reserve(dual_mesh->num_elems());
+
+     // Copy into list
+     MeshDB::iterator ei = dual_mesh->elem_begin(), ee = dual_mesh->elem_end();
+     for (; ei != ee; ++ei) {
+       MeshObj &elem=*ei;
+       
+       elem_list.push_back(&elem);
+     }
+
+     // Loop setting owner and OWNER_ID
+     for (MeshObj *elem : elem_list) {
+       
+       // Setup for changing attribute
+       const Context &ctxt = GetMeshObjContext(*elem);
+       Context newctxt(ctxt);
+       
+       // Set OWNED_ID appropriately
+       if (elem->get_owner() == Par::Rank()) {
+         newctxt.set(Attr::OWNED_ID);
+       } else {
+         newctxt.clear(Attr::OWNED_ID);
+       }
+       
+       // If attribute has changed change in elem
+       if (newctxt != ctxt) {
+         Attr attr(GetAttr(*elem), newctxt);
+         dual_mesh->update_obj(elem, attr);
+       }
+     }     
+   }
+  
 
   void _change_owners_from_src_to_curr_comm(Mesh *dual_mesh, MPI_Comm src_comm) {
     
@@ -924,7 +1166,7 @@ const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype) {
 // ti    = temporary integer buffer size = num_p
 // tri_ind = output array  size = 3*(nump-2)
 // tri_frac = fraction each triangle is of whole poly size=(num_p-2)
-void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind, 
+  void triangulate(int sdim, int elem_id, int num_p, double *p, double *td, int *ti, int *tri_ind, 
                  double *tri_frac) {
           int localrc;
           
@@ -947,7 +1189,18 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
             if (ret == ESMCI_TP_DEGENERATE_POLY) {
               Throw() << " - can't triangulate a polygon with less than 3 sides"; 
             } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
-              Throw() <<" - there was a problem with triangulation (e.g. repeated points, clockwise poly, etc.)";
+#if 1
+              // Output bad poly to vtk file 
+              if (sdim==2) {
+                write_2D_poly_to_vtk("tri_bad_poly_", elem_id, num_p, p);    
+              } else if (sdim==3) {
+                write_3D_poly_to_vtk("tri_bad_poly_", elem_id, num_p, p);    
+              }              
+#endif
+
+              Throw() <<" there was a problem (e.g. repeated points, clockwise poly, etc.) with the triangulation of the new elem being created around node id="<<elem_id<<" in the orig. mesh";
+
+              
             } else {
               Throw() <<" - unknown error in triangulation";
             }
@@ -1023,13 +1276,196 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
   }
 
   // sort MDSS by id
-  bool less_by_ids(MDSS a, MDSS b) {
+  bool less_by_ids(const MDSS &a, const MDSS &b) {
     return (a.id < b.id);
   }
 
   bool equal_by_ids(MDSS a, MDSS b) {
     return (a.id == b.id);
   }
+
+
+/* XMRKX */
+
+
+
+  // Fill id array using sorted tmp_mdss
+  void make_id_loop_from_angle_ordered_pnts(Mesh *mesh, std::vector<MDSS> &tmp_mdss, std::vector<PntS> &tmp_pntss, std::vector<UInt> &ids) {
+    
+    // Clear ids vector so if we leave early it's empty
+    ids.clear();
+
+    // If no points, then leave
+    if (tmp_mdss.empty()) return;
+
+    // If a triangle or less, then just copy ids and leave
+    if (tmp_mdss.size() <= 3) {
+
+      // Fill ids
+      for (MDSS mdss: tmp_mdss) {
+        ids.push_back(mdss.id);
+      }
+      
+      // Leave
+      return;      
+    }
+
+    // From now on we can assume that we have >3 points.
+    
+    // Get the min and max angle
+    double min_angle=tmp_mdss[0].angle;
+    double max_angle=tmp_mdss[tmp_mdss.size()-1].angle;
+
+    // If points go more than half way around, then it's a loop, so fill and leave
+    if (max_angle-min_angle > M_PI) {
+
+      // Fill ids
+      for (MDSS mdss: tmp_mdss) {
+        ids.push_back(mdss.id);
+      }      
+
+      // Leave
+      return;
+    }
+
+  /* XMRKX */
+    
+    // Maybe in a more complicated situation with loop on one side of center, so
+    // check for that and fill appropriately
+
+    // Get useful info
+    int sdim=mesh->spatial_dim();
+
+    MEField<> *elem_coords=mesh->GetField("elem_coordinates"); 
+    if (!elem_coords) {
+      Throw() <<" Creation of a dual mesh requires element coordinates. \n";
+    }
+
+
+    // Clear point vector before using
+    tmp_pntss.clear();
+    
+    // Loop getting point for each id
+    for (MDSS mdss: tmp_mdss) {
+      
+      // Get pointer to elem corresponding to id
+      Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::ELEMENT, mdss.id);
+      if (mi == mesh->map_end(MeshObj::ELEMENT)) {
+        Throw() << "Element not in mesh";
+      }
+      const MeshObj *elem = &(*mi);
+
+      // Put information into struct
+      PntS pnts;
+      double *ec=elem_coords->data(*elem);
+      pnts.pnt[0]=ec[0];
+      pnts.pnt[1]=ec[1];
+      pnts.pnt[2]= sdim > 2 ? ec[2]:0.0;
+      pnts.side=PntS::Neither;
+
+      // Add to list
+      tmp_pntss.push_back(pnts);
+    }    
+
+    // Get first point
+    double *f_pnt=tmp_pntss[0].pnt;
+
+    // Get last point
+    double *l_pnt=tmp_pntss[tmp_pntss.size()-1].pnt;
+
+    // Get vector from first to last
+    double fl_vec[3];
+    MU_SUB_VEC3D(fl_vec,l_pnt,f_pnt);
+
+    // Normal out of surface
+    double srf_norm[3];
+    if (sdim > 2) {
+      MU_ASSIGN_VEC3D(srf_norm, f_pnt);
+    } else {
+      srf_norm[0]=0.0; srf_norm[1]=0.0; srf_norm[2]=1.0;
+    }
+    
+    // Loop over middle points marking direction
+    for (int i=1; i < tmp_pntss.size()-1; i++) {
+
+      // Get vector from first to point i
+      double fpi_vec[3];
+      MU_SUB_VEC3D(fpi_vec,tmp_pntss[i].pnt,f_pnt);
+      
+      // Cross product between vectors
+      double fpi_cross_fl_vec[3];
+      MU_CROSS_PRODUCT_VEC3D(fpi_cross_fl_vec,fpi_vec,fl_vec);
+      
+      // Dot with normal out of surface
+      double dot_w_norm=MU_DOT_VEC3D(fpi_cross_fl_vec,srf_norm);
+
+      // Assign direction based on whether it's the same direction as norm
+      if (dot_w_norm > 0.0) tmp_pntss[i].side=PntS::Right;
+      else if (dot_w_norm < 0.0) tmp_pntss[i].side=PntS::Left;
+      else tmp_pntss[i].side=PntS::Neither;             
+    }
+
+
+    // See where the points are
+    bool has_right=false;
+    bool has_left=false;
+    for (int i=1; i < tmp_pntss.size()-1; i++) {
+      if (tmp_pntss[i].side == PntS::Right) has_right=true;
+      if (tmp_pntss[i].side == PntS::Left) has_left=true;
+    }
+
+    
+    // If they are all on the right, then just fill and leave
+    if (!has_left) {
+
+      // Fill ids
+      for (MDSS mdss: tmp_mdss) {
+        ids.push_back(mdss.id);
+      } 
+
+      // Leave
+      return;
+    }
+
+    // If they are on right and left, then need to do something fancier.
+    // Start with the first point, then fill in the points on right. 
+    // Then do the last point and after that fill in the points on the left.
+
+    // Put in first point
+    ids.push_back(tmp_mdss[0].id);
+
+    // Add points on right
+    for (int i=1; i<tmp_pntss.size()-1; i++) {
+
+      // If on right or neither, add it
+      if (tmp_pntss[i].side != PntS::Left) {
+        ids.push_back(tmp_mdss[i].id);
+      }
+      
+    }
+    
+    // Put in last point
+    ids.push_back(tmp_mdss[tmp_mdss.size()-1].id);
+    
+    // Add points on left in reverse order
+    for (int i=tmp_pntss.size()-2; i>0; i--) {
+
+      // If on left, add it
+      if (tmp_pntss[i].side == PntS::Left) {
+        ids.push_back(tmp_mdss[i].id);
+      }
+      
+    }
+
+    // DEBUG OUTPUT
+    //    std::cout << "End ids=";
+    //for (UInt id: ids) {
+    //  std::cout << " " << id;
+    // }      
+    //std::cout <<"\n";
+    
+  }
+
 
   // Get the element ids around a node
   // the ids should be in order around the node
@@ -1044,9 +1480,12 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
   // tmp_mdss = temporary list of structures used to sort elems (needs to be allocated large enough to hold all the ids)
   // _num_ids = the number of ids
   // _ids = where the ids will be put (needs to be allocated large enough to hold all the ids)
-  void get_unique_elems_around_node(MeshObj *node, Mesh *mesh, MDSS *tmp_mdss,
-                                    int *_num_ids, UInt *ids) {
+  void get_unique_elems_around_node(MeshObj *node, Mesh *mesh, std::vector<MDSS> &tmp_mdss, std::vector<PntS> &tmp_pntss, 
+                                    std::vector<UInt> &ids) {
 
+    // Clear ids vector so if we leave early it's empty
+    ids.clear();
+    
     // Get useful info
     int sdim=mesh->spatial_dim();
     int pdim=mesh->parametric_dim();
@@ -1082,7 +1521,6 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
 
     // No elements so leave
     if (el == node->Relations.end() || el->obj->get_type() != MeshObj::ELEMENT){
-      *_num_ids=0;
       return;
     }
 
@@ -1167,8 +1605,10 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
     //  Throw() << " Can't order points in dual creation using a 0-vector";
     //}
 
+    // Clear tmp_mdss
+    tmp_mdss.clear();
+    
     // Start over looping through elems attached to node, calculating angles
-    int num_ids=0;
     el = MeshObjConn::find_relation(*node, MeshObj::ELEMENT);
     while (el != node->Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
       MeshObj *elem=el->obj;
@@ -1191,10 +1631,10 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
       double vcurr[3];
       double *ec=elem_coords->data(*elem);
       vcurr[0]=ec[0];
-        vcurr[1]=ec[1];
+      vcurr[1]=ec[1];
       vcurr[2]= sdim > 2 ? ec[2]:0.0;
       MU_SUB_VEC3D(vcurr,vcurr,center);
-
+      
       // Calculate angle 
       // Do differentiate between 2D and 3D here to prevent inaccuracies
       double angle;
@@ -1206,25 +1646,26 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
         Throw() <<" angle calc can't be used for vecs with spatial dimension not equal to 2 or 3";
       }
 
+      
       // Put this into the list
-      tmp_mdss[num_ids].id=elem_id;
-      tmp_mdss[num_ids].angle=angle;
-      num_ids++;
+      MDSS mdss;
+      mdss.id=elem_id;
+      mdss.angle=angle;
+      tmp_mdss.push_back(mdss);      
       
       // Next element
       ++el;
     }
 
 
-
     // Take out repeats due to split elements
      //// Sort by id
-    std::sort(tmp_mdss, tmp_mdss+num_ids, less_by_ids);
+    std::sort(tmp_mdss.begin(), tmp_mdss.end(), less_by_ids);
 
     //// Unique by id
     int prev_id=tmp_mdss[0].id;
     int new_num_ids=1;
-    for (int i=1; i<num_ids; i++) {
+    for (int i=1; i<tmp_mdss.size(); i++) {
  
       // if it has a different id, store it
       if (tmp_mdss[i].id != prev_id) {
@@ -1234,16 +1675,16 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
         new_num_ids++;
       }
     }
-    num_ids=new_num_ids;
 
-    // Now Sort the uniqued list by angle
-    std::sort(tmp_mdss, tmp_mdss+num_ids);
+    // Resize
+    tmp_mdss.resize(new_num_ids);
+    
+    // Now sort the uniqued list by angle
+    std::sort(tmp_mdss.begin(), tmp_mdss.end());
+    
+    // Using the angle sorted tmp_mdss points make a loop and fill ids with it
+    make_id_loop_from_angle_ordered_pnts(mesh, tmp_mdss, tmp_pntss, ids);
 
-    // Output
-    *_num_ids=num_ids;
-    for (int i=0; i< num_ids; i++) {
-      ids[i]=tmp_mdss[i].id;
-    }
   }
 
 
@@ -1395,6 +1836,104 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
   }
   
   }
+
+
+void _fill_elem_fields(Mesh *dual_mesh, int sdim, int orig_sdim,
+                       double *elemCoords,  double *elemOrigCoords,
+                       double *elemMaskVal, double *elemMask) {
+
+  
+  // Get end iterator
+  Mesh::const_iterator ee = dual_mesh->elem_end();
+  
+  // Init frac to 1.0
+  MEField<> *elem_frac=dual_mesh->GetField("elem_frac");
+  if (elem_frac) {
+    for (Mesh::const_iterator ei = dual_mesh->elem_begin(); ei != ee; ++ei) {
+      const MeshObj &elem = *ei;
+      double *f=elem_frac->data(elem);
+      *f=1.0;
+    }
+  }
+  
+  // Init frac2 to 1.0
+  MEField<> *elem_frac2=dual_mesh->GetField("elem_frac2");
+  if (elem_frac2) {
+    for (Mesh::const_iterator ei = dual_mesh->elem_begin(); ei != ee; ++ei) {
+      const MeshObj &elem = *ei;
+      double *f=elem_frac2->data(elem);
+      *f=1.0;
+    }
+  }
+  
+  // Set element coordinates
+  MEField<> *elem_coords=dual_mesh->GetField("elem_coordinates");
+  if (elem_coords && elemCoords) {
+    for (Mesh::const_iterator ei = dual_mesh->elem_begin(); ei != ee; ++ei) {
+      const MeshObj &elem = *ei;
+      
+      // Get data pointer to elem data
+      double *ecd =elem_coords->data(elem);
+      
+      // Get memory for input coord data
+      double *icd = elemCoords+sdim*elem.get_data_index();
+      
+      // Copy
+      for (int d=0; d<sdim; d++) {
+        ecd[d]=icd[d];
+      }      
+    }
+  }
+
+  // Set element original coordinates
+  MEField<> *elem_orig_coords=dual_mesh->GetField("elem_orig_coordinates");
+  if (elem_orig_coords && elemOrigCoords) {
+    for (Mesh::const_iterator ei = dual_mesh->elem_begin(); ei != ee; ++ei) {
+      const MeshObj &elem = *ei;
+      
+      // Get data pointer to elem data
+      double *eocd =elem_orig_coords->data(elem);
+      
+      // Get memory for input coord data
+      double *iocd = elemOrigCoords+orig_sdim*elem.get_data_index();
+      
+      // Copy
+      for (int od=0; od<orig_sdim; od++) {
+        eocd[od]=iocd[od];
+      }      
+    }
+  }
+
+  // Set elem mask val
+  MEField<> *elem_mask_val=dual_mesh->GetField("elem_mask_val");
+  if (elem_mask_val && elemMaskVal) {
+    for (Mesh::const_iterator ei = dual_mesh->elem_begin(); ei != ee; ++ei) {
+      const MeshObj &elem = *ei;
+      
+      // Get data pointer to elem data
+      double *emv = elem_mask_val->data(elem);
+      
+      // Set data from input
+      *emv=elemMaskVal[elem.get_data_index()];
+    }
+  }
+
+  // Set elem mask val
+  MEField<> *elem_mask=dual_mesh->GetField("elem_mask");
+  if (elem_mask && elemMask) {
+    for (Mesh::const_iterator ei = dual_mesh->elem_begin(); ei != ee; ++ei) {
+      const MeshObj &elem = *ei;
+      
+      // Get data pointer to elem data
+      double *em = elem_mask->data(elem);
+      
+      // Set data from input
+      *em = elemMask[elem.get_data_index()];
+    }
+  }
+  
+}
+
 
 
   } // namespace

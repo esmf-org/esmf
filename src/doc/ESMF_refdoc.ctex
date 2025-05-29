@@ -15,7 +15,7 @@
 \newcommand{\sreq}[1]{\subsection{\hspace{.2in}#1}}
 \newcommand{\ssreq}[1]{\subsubsection{\hspace{.2in}#1}}
 \newcommand{\mytitle}{\longname \docmttype ~~}
-\newcommand{\myversion}{Version 8.7.0 beta snapshot}
+\newcommand{\myversion}{Version 8.9.0 beta snapshot}
 
 \input{common_commands}
 
@@ -149,6 +149,8 @@
 #include "../Superstructure/Component/doc/Component_refdoc.ctex"
 
 #include "../Superstructure/State/doc/State_refdoc.ctex"
+
+#include "../Superstructure/InternalState/doc/InternalState_refdoc.ctex"
 
 #include "../Superstructure/AttachMethods/doc/AttachMethods_refdoc.ctex"
 

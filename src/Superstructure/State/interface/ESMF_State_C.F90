@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -476,16 +476,16 @@
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, &
         rcToReturn=rc)) return
-      ! deallocate actual StateClass allocation      
+      ! deallocate actual StateClass allocation
       deallocate(state%statep, stat=localrc)
       localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-      if (ESMF_LogFoundAllocError(localrc, msg="Deallocating State", &
+      if (ESMF_LogFoundDeallocError(localrc, msg="Deallocating State", &
         ESMF_CONTEXT, &
         rcToReturn=rc)) return
     endif
     nullify(state%statep)
 
-    ! return successfully  
+    ! return successfully
     rc = ESMF_SUCCESS
 
   end subroutine f_esmf_statecollectgarbage

@@ -1,0 +1,19 @@
+% $Id$
+%
+% Earth System Modeling Framework
+% Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+%\subsubsection{Restrictions and Future Work}
+
+There is currently no {\tt ESMF\_InternalStateAddReplace()} method implemented. However, the available {\tt ESMF\_InternalStateAdd()} method practically acts how {\tt ESMF\_InternalStateAddReplace()} should act: {\tt ESMF\_SUCCESS} is returned when calling repeatedly with the same {\tt label}, or empty {\tt label}), and the last InternalState added will be returned when queried by {\tt ESMF\_InternalStateGet()}.
+
+Furthermore, no {\tt ESMF\_InternalStateRemove()} method is available. InternalState references set once with {\tt ESMF\_InternalStateAdd()} are kept until the host component object is destroyed. However, references overridden by successive calls of {\tt ESMF\_InternalStateAdd()} are no longer accessible by the user via {\tt ESMF\_InternalStateGet()}.
+
+It is the user's responsibility to ensure data blocks accessed via the InternalState API are correctly allocated and valid.
+
+Future work will align the {\tt ESMF\_InternalState} API with the {\tt ESMF\_AttachableMethods} API.

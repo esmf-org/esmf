@@ -51,8 +51,8 @@ ESMF_CXXLINKLIBS       += $(shell $(ESMF_DIR)/scripts/libs.mpich3f90)
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
-ifeq ($(ESMF_COMM),mvapich2)
-# Mvapich2 ---------------------------------------------------
+ifeq ($(ESMF_COMM),mvapich)
+# Mvapich any version --------------------------------------
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
@@ -113,12 +113,6 @@ ESMF_CLANGSTR := $(findstring clang, $(shell $(ESMF_CXXCOMPILER) --version))
 ESMF_F90COMPILEOPTS += -DESMF_NAG_UNIX_MODULE
 
 ############################################################
-# Currently NAG does not support the Fortran2018 assumed type feature
-#
-ESMF_F90COMPILECPPFLAGS += -DESMF_NO_F2018ASSUMEDTYPE
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_F2018ASSUMEDTYPE
-
-############################################################
 # nag currently does not support OpenMP
 #
 ESMF_OPENMP := OFF
@@ -148,7 +142,7 @@ ESMF_F90LINKOPTS    += -thread_safe
 endif
 
 ############################################################
-# Need this until the file convention is fixed (then remove these two lines)
+# Explicit flags for handling specific format and cpp combos
 #
 ESMF_F90COMPILEFREECPP   = -free -fpp
 ESMF_F90COMPILEFREENOCPP = -free

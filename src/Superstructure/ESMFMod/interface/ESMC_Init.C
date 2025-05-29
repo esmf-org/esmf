@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -123,7 +123,33 @@ extern "C" {
   } // end ESMC_Initialize
 //-----------------------------------------------------------------------------
 
-  //-----------------------------------------------------------------------------
+ //-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Finalize - Finalize the ESMF Framework
+//
+// !INTERFACE:
+  int ESMC_FinalizeWithFlag(
+//
+// !RETURN VALUE:
+//  int return code
+//
+// !ARGUMENTS:
+    ESMC_End_Flag endFlag){
+//  
+// !DESCRIPTION:
+//
+//EOP
+
+    int localrc;
+
+    localrc = ESMCI_Finalize(endFlag);
+
+    return localrc;
+
+  } // end ESMC_FinalizeWithFlag
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_Finalize - Finalize the ESMF Framework
 //
