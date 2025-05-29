@@ -67,20 +67,8 @@ ZOLTAN_NUM_GEOM_FN get_num_geom;
 ZOLTAN_GEOM_MULTI_FN get_geom_multi;
 
   /* Function get_geom renamed as zoltan_get_geom in order to prevent
-   * get_geom from appearing in libesmf as a defined symbol.
-   *
-   * The reason for this is that it is not needed as part of the libesmf external
-   * interface, and there happens to be a function of the same name in shapely:
-   * https://github.com/shapely/shapely/blob/c3ddf310f108a7f589d763d613d755ac12ab5d4f/src/pygeom.c#L414
-   * and if these packages co-exist in the same conda environment, then at the point
-   * where the other get_geom is intended to be called from inside shapely, it can
-   * instead cause the one from Zoltan to be called, resulting in user code
-   * segfaulting.  Where this happens, the start of the call trace looks like this:
-   *
-   * (gdb) where
-   * #0  0x00007fe66dbb1428 in get_geom () from /path/to/env/lib/libesmf_fullylinked.so
-   * #1  0x00007fe66ab08e27 in Y_b_func () from /path/to/env/lib/python3.11/site-packages/shapely/lib.cpython-311-x86_64-linux-gnu.so
-   * #2  ...
+   * get_geom from appearing in libesmf as a defined symbol. Having a symbol named something generic like get_geom can
+   * cause clashes with other libraries that contain the same name (e.g. shapely).
    */
 
 ZOLTAN_GEOM_FN zoltan_get_geom;
