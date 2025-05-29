@@ -26,7 +26,10 @@ jobs:
     - name: Build Docker image  
       run: | 
         cd ${{ github.workspace }}/esmf-containers/build-esmf-docs/esmf
-        docker build . --tag esmf/build-esmf-docs --build-arg ESMF_BRANCH="${{ github.ref_name }}" --no-cache
+        docker build . --tag esmf/build-esmf-docs \
+          --build-arg "ESMF_REPOSITORY=${{github.server_url}}/${{github.repository}}" \
+          --build-arg "ESMF_BRANCH=${{github.ref_name}}" \
+          --no-cache
         
     - name: Extract artifacts
       run: |
@@ -43,6 +46,7 @@ jobs:
         path: ${{ github.workspace }}/artifacts
        
     - name: Checkout esmf-org.github.io
+      if: github.repository_owner == 'esmf-org'
       uses: actions/checkout@v4
       with:
           repository: esmf-org/esmf-org.github.io
@@ -50,6 +54,7 @@ jobs:
           ssh-key: ${{secrets.ESMF_WEB_DEPLOY_KEY}}
 
     - name: Copy docs
+      if: github.repository_owner == 'esmf-org'
       run: | 
         cd ${{ github.workspace }}/esmf-org.github.io        
         mkdir -p docs/nightly/${{ github.ref_name }}/dev_guide
@@ -66,6 +71,7 @@ jobs:
         cp -rf ./dev_guide/dev_guide/* ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/dev_guide/
         
     - name: Commit and publish docs
+      if: github.repository_owner == 'esmf-org'
       run: | 
         cd ${{ github.workspace }}/esmf-org.github.io
         git config user.name "github-actions[bot]"
