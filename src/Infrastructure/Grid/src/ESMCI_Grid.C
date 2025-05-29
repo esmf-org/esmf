@@ -93,12 +93,12 @@ void FTN_X(f_esmf_gridcreatefromfile)(ESMCI::Grid **grid,
     const char *filename, int *fileTypeFlag,
     int *regDecomp,
     int *decompflag,
-    int *isSphere, 
+    ESMC_Logical *isSphere,
     int *polekind, int *len1,
-    int *addCornerStagger,
-    int *addUserArea,
+    ESMC_Logical *addCornerStagger,
+    ESMC_Logical *addUserArea,
     ESMC_IndexFlag *indexflag,
-    int *addMask,
+    ESMC_Logical *addMask,
     const char *varname,
     const char *coordNames, int *rc,
     ESMCI_FortranStrLenArg len_filename,
@@ -575,21 +575,21 @@ int setDefaultsLUA(int dimCount,
     if (decompflag != NULL) {
       df_loc = decompflag;
     }
-    int is_loc = 1;
+    ESMC_Logical is_loc = ESMF_TRUE;
     if (isSphere != NULL) {
-      is_loc = *isSphere;
+      is_loc = (*isSphere != 0) ? ESMF_TRUE:ESMF_FALSE;
     }
-    int acs_loc = 0;
+    ESMC_Logical acs_loc = ESMF_FALSE;
     if (addCornerStagger != NULL) {
-      acs_loc = *addCornerStagger;
+      acs_loc = (*addCornerStagger != 0) ? ESMF_TRUE:ESMF_FALSE;
     }
-    int aua_loc = 0;
+    ESMC_Logical aua_loc = ESMF_FALSE;
     if (addUserArea != NULL) {
-      aua_loc = *addUserArea;
+      aua_loc = (*addUserArea != 0) ? ESMF_TRUE:ESMF_FALSE;
     }
-    int am_loc = 0;
+    ESMC_Logical am_loc = ESMF_FALSE;
     if (addMask != NULL) {
-      am_loc = *addMask;
+      am_loc = (*addMask != 0) ? ESMF_TRUE:ESMF_FALSE;
     }
     if (varname != NULL) {
       vn_len = strlen(varname);
