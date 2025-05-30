@@ -82,7 +82,6 @@ jobs:
           sudo rm -rf /etc/ntp.conf
           brew install autoconf automake libtool
           brew unlink libevent || true
-          sudo mkdir -p /usr/local/lib
         fi
         export STACK_ROOT=${HOME}/stack
         mkdir -p ${STACK_ROOT}/{include,lib,lib64,bin}
@@ -110,9 +109,6 @@ jobs:
         ln -fs `which gcc-${{matrix.config.cvrs}}` /usr/local/bin/gcc
         ln -fs `which g++-${{matrix.config.cvrs}}` /usr/local/bin/g++
         ln -fs `which gfortran-${{matrix.config.cvrs}}` /usr/local/bin/gfortran
-        if [[ "${{matrix.config.osys}}" == "macos-"* ]]; then
-          sudo ln -fs /opt/homebrew/opt/gcc/lib/gcc/current/libgfortran.* /usr/local/lib/.
-        fi
         gcc --version; g++ --version; gfortran --version
         echo "CC=gcc" >> $GITHUB_ENV
         echo "CXX=g++" >> $GITHUB_ENV
@@ -128,9 +124,6 @@ jobs:
         ln -fs `which gcc-${{matrix.config.cvrs}}` /usr/local/bin/gcc
         ln -fs `which g++-${{matrix.config.cvrs}}` /usr/local/bin/g++
         ln -fs `which gfortran-${{matrix.config.cvrs}}` /usr/local/bin/gfortran
-        if [[ "${{matrix.config.osys}}" == "macos-"* ]]; then
-          sudo ln -fs /opt/homebrew/opt/gcc/lib/gcc/current/libgfortran.* /usr/local/lib/.
-        fi
         clang --version; clang++ --version; gfortran --version
         echo "CC=clang" >> $GITHUB_ENV
         echo "CXX=clang++" >> $GITHUB_ENV
