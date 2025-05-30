@@ -52,6 +52,8 @@ using namespace ESMCI;
 
 void get_coordDim_from_ESMFMesh_file(int pioFileDesc, char *filename, PIO_Offset &coordDim);
 
+void add_coordDim_to_ESMFMesh_file(int pioFileDesc, char *filename, PIO_Offset &coordDim, int &coordDimId);
+
 void get_elementCount_from_ESMFMesh_file(int pioFileDesc, char *filename, PIO_Offset &elementCount);
 
 void get_nodeCount_from_ESMFMesh_file(int pioFileDesc, char *filename, PIO_Offset &nodeCount);

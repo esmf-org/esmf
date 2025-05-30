@@ -87,6 +87,23 @@ void get_coordDim_from_ESMFMesh_file(int pioFileDesc, char *filename, PIO_Offset
 
 }
 
+void add_coordDim_to_ESMFMesh_file(int pioFileDesc, char *filename, PIO_Offset &coordDim, int &coordDimId) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "add_coordDim_to_ESMFMesh_file()"
+
+  // Declare some useful vars
+  int dimid;
+  int localrc;
+  int piorc;
+
+  // Define coordDim
+  piorc = PIOc_def_dim(pioFileDesc, "coordDim", coordDim, &coordDimId);
+  if (!CHECKPIOERROR(piorc, std::string("Unable to add coordDim to file: ") + filename,
+                     ESMF_RC_FILE_WRITE, localrc)) throw localrc;
+}
+
+
+
 
 void get_elementCount_from_ESMFMesh_file(int pioFileDesc, char *filename, PIO_Offset &elementCount) {
 #undef ESMC_METHOD

@@ -214,13 +214,75 @@ void ESMCI_mesh_write_to_ESMFMesh_file(int pioSystemDesc,
 #else
     int pio_type = PIO_IOTYPE_NETCDF;
 #endif
+/* XMRKX */
+    
+    //// Get parallel information ESMF VM class 
+
+    // Get VM 
+    ESMCI::VM *vm=VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &localrc)) throw localrc;
+    
+    // Get info
+    int local_pet = vm->getLocalPet();  // I.e. the rank of this processor in the current mpi communicator
+    int pet_count = vm->getPetCount();  // I.e. the number of processors in the current mpi communicator
+
+
+    // For now, only support 1 PET
+    if (pet_count > 1) Throw() << "Writing to Mesh currently only supported on 1 PET.";
+    
+
+    printf("pio_type=%d NETCDF=%d\n",pio_type,PIO_IOTYPE_NETCDF);
 
     
-    /// Create new file via PIO?
+    /// Create new file via PIO
+    int pioFileDesc;
+    int mode = PIO_CLOBBER;
+    piorc = PIOc_createfile(pioSystemDesc, &pioFileDesc, &pio_type, filename, mode);
+    //  piorc = PIOc_create(pioSystemDesc, filename, mode,  &pioFileDesc);
+    // if the file was created with netcdf4, it cannot be opened with pnetcdf
+    if (piorc == PIO_EINVAL){
+        pio_type = PIO_IOTYPE_NETCDF;
+        piorc = PIOc_createfile(pioSystemDesc, &pioFileDesc, &pio_type, filename, mode);
+    }
+    if (!CHECKPIOERROR(piorc, std::string("Unable to create file ") + filename,
+                       ESMF_RC_FILE_CREATE, localrc)) throw localrc;
 
-    /// BILL: FILL IN HERE
+
+    // Get coordDim from mesh
+    PIO_Offset coordDim=mesh->orig_spatial_dim;
+
+    // Add coordDim to file
+    int coordDimId; 
+    add_coordDim_to_ESMFMesh_file(pioFileDesc, filename, coordDim, coordDimId); 
+   
 
 
+    
+    // End defintions 
+    piorc = PIOc_enddef(pioFileDesc);
+    if (!CHECKPIOERROR(piorc, std::string("Unable to open existing file: ") + filename,
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+#if 0
+    status = nc_def_dim(ncid2, "elementCount", nelmts, &celldimid);
+    if (status != NC_NOERR) handle_error(status,__LINE__);
+    status = nc_def_dim(ncid2, "maxNodePElement", maxconnection, & vpcdimid);
+    if (status != NC_NOERR) handle_error(status,__LINE__);
+    status = nc_def_dim(ncid2, "coordDim", 2L, &vdimid);
+    if (status != NC_NOERR) handle_error(status,__LINE__);
+#endif
+
+
+    
+#if 0
+    //// Close file using PIO
+    piorc = PIOc_closefile(pioFileDesc);
+    if (!CHECKPIOERROR(piorc, std::string("Error closing file ") + filename,
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+#endif
+    
+    
 #if 0
     //// BILL: I LEFT THE BELOW FROM THE READ BECAUSE YOU MIGHT NEED IT, BUT YOU MAY NEED TO MODIFY IT TO
     //// DO WRITE INSTEAD OF READ
@@ -242,16 +304,6 @@ void ESMCI_mesh_write_to_ESMFMesh_file(int pioSystemDesc,
 #endif
     
 
-    //// Get parallel information ESMF VM class 
-
-    // Get VM 
-    ESMCI::VM *vm=VM::getCurrent(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-                                      &localrc)) throw localrc;
-    
-    // Get info
-    int local_pet = vm->getLocalPet();  // I.e. the rank of this processor in the current mpi communicator
-    int pet_count = vm->getPetCount();  // I.e. the number of processors in the current mpi communicator
 
 
     /// BILL: FILL IN HERE TO PULL INFO OUT OF MESH AND WRITE TO FILE AS AN INVERSE EXAMPLE YOU CAN
@@ -261,15 +313,6 @@ void ESMCI_mesh_write_to_ESMFMesh_file(int pioSystemDesc,
 
 
     
-#if 0
-
-    //// BILL: Saved from before, you probably need this. 
-    
-    //// Close file using PIO
-    piorc = PIOc_closefile(pioFileDesc);
-    if (!CHECKPIOERROR(piorc, std::string("Error closing file ") + filename,
-                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
-#endif
 
 
   } catch(std::exception &x) {
