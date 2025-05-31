@@ -26,7 +26,10 @@ jobs:
     - name: Build Docker image  
       run: | 
         cd ${{ github.workspace }}/esmf-containers/build-esmf-docs/esmpy
-        docker build . --tag esmf/build-esmpy-docs --build-arg ESMF_BRANCH="${{ github.ref_name }}" --no-cache
+        docker build . --tag esmf/build-esmpy-docs \
+          --build-arg "ESMF_REPOSITORY=${{github.server_url}}/${{github.repository}}" \
+          --build-arg "ESMF_BRANCH=${{github.ref_name}}" \
+          --no-cache
         
     - name: Copy artifacts
       run: |
@@ -43,6 +46,7 @@ jobs:
         path: ${{ github.workspace }}/artifacts
     
     - name: Checkout esmpy_doc
+      if: github.repository_owner == 'esmf-org'
       uses: actions/checkout@v4
       with:
           repository: esmf-org/esmpy_doc
@@ -50,6 +54,7 @@ jobs:
           ssh-key: ${{secrets.ESMPY_WEB_DEPLOY_KEY}}
     
     - name: Copy docs
+      if: github.repository_owner == 'esmf-org'
       run: | 
         cd ${{ github.workspace }}/esmpy_doc
         mkdir -p docs/nightly/${{ github.ref_name }}
@@ -60,6 +65,7 @@ jobs:
         cp -rf latex/ESMPy.pdf ${{ github.workspace }}/esmpy_doc/docs/nightly/${{ github.ref_name }}/
 
     - name: Commit and publish docs
+      if: github.repository_owner == 'esmf-org'
       run: |
         cd ${{ github.workspace }}/esmpy_doc
         git config user.name "github-actions[bot]"
