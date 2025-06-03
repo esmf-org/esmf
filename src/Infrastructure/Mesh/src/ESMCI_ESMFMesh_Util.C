@@ -147,6 +147,21 @@ void get_nodeCount_from_ESMFMesh_file(int pioFileDesc, char *filename, PIO_Offse
   
 }
 
+void add_nodeCount_to_ESMFMesh_file(int pioFileDesc, char *filename, PIO_Offset nodeCount, int &nodeCountId) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "add_nodeCount_to_ESMFMesh_file()"
+
+  // Declare some useful vars
+  int dimid;
+  int localrc;
+  int piorc;
+
+  // Define coordDim
+  piorc = PIOc_def_dim(pioFileDesc, "nodeCount", nodeCount, &nodeCountId);
+  if (!CHECKPIOERROR(piorc, std::string("Unable to add nodeCount to file: ") + filename,
+                     ESMF_RC_FILE_WRITE, localrc)) throw localrc;
+}
+
 
 void get_coordsys_from_ESMFMesh_file(int pioFileDesc, char *filename, ESMC_CoordSys_Flag &coord_sys) {
 #undef ESMC_METHOD
@@ -807,6 +822,87 @@ void get_nodeCoords_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char 
 }
 
 
+// Add nodeCoords to ESMFMesh format file
+void add_nodeCoords_to_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char *filename, 
+                                     int nodeCountId, int coordDimId, int &nodeCoordsId) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "add_nodeCoords_to_ESMFMesh_file()"
+
+  // Declare some useful vars
+  int dimid[2];
+  int localrc;
+  int piorc;
+
+  // Set dimensions
+  dimid[0]=nodeCountId;
+  dimid[1]=coordDimId;
+  
+  // Define variable
+  piorc=PIOc_def_var(pioFileDesc, "nodeCoords", PIO_DOUBLE, 2, dimid, &nodeCoordsId);
+  if (!CHECKPIOERROR(piorc, std::string("Unable to add nodeCoords to file: ") + filename,
+                     ESMF_RC_FILE_WRITE, localrc)) throw localrc;  
+    
+}
+
+
+// Add nodeCoords to ESMFMesh format file
+void write_nodeCoords_to_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char *filename, 
+                                       int nodeCoordsId, PIO_Offset nodeCount, PIO_Offset coordDim,
+                                       double *nodeCoords) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "write_nodeCoords_to_ESMFMesh_file()"
+
+  // Declare some useful vars
+  int localrc;
+  int piorc;
+  int rearr = PIO_REARR_SUBSET;
+
+  // Define offsets for nodeCoord decomp (right now they are just all in order on PET 1)
+  PIO_Offset *node_offsets= new PIO_Offset[nodeCount*coordDim];
+  for (int i=0,pos=0; i<nodeCount; i++) {
+
+    // Debug output
+    // printf("i=%d coords=%f %f\n",i,nodeCoords[2*i],nodeCoords[2*i+1]);
+
+    for (int j=0; j<coordDim; j++) {
+      node_offsets[pos] = (PIO_Offset) (pos+1);
+      pos++;
+    }
+  }
+
+  
+  // Init Decomp
+  int nodeCoords_decomp;
+  int node_gdimlen2D[2]={(int)nodeCount, (int)coordDim};
+  piorc = PIOc_InitDecomp(pioSystemDesc, PIO_DOUBLE, 2, node_gdimlen2D, nodeCount*coordDim,
+                          node_offsets, &nodeCoords_decomp, 
+                          &rearr, NULL, NULL);
+
+  // Get rid of node offsets
+  delete [] node_offsets;
+
+  
+  // Write variable
+  piorc=PIOc_write_darray(pioFileDesc, nodeCoordsId, nodeCoords_decomp, nodeCount*coordDim, nodeCoords, NULL);
+  if (!CHECKPIOERROR(piorc, std::string("Unable to write to nodeCoords in file: ") + filename,
+                     ESMF_RC_FILE_WRITE, localrc)) throw localrc;  
+
+  // Sync??
+  piorc=PIOc_sync(pioFileDesc);
+  if (!CHECKPIOERROR(piorc, std::string("Unable to write to nodeCoords in file: ") + filename,
+                     ESMF_RC_FILE_WRITE, localrc)) throw localrc;  
+  
+
+  // Get rid of nodeCoords decomp
+  piorc = PIOc_freedecomp(pioSystemDesc, nodeCoords_decomp);
+  if (!CHECKPIOERROR(piorc, std::string("Error freeing nodeCoord decomp "),
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+  
+  
+}
+
+
+
 // Get nodeMask from ESMFMesh format file
 // if nodeMask isn't present in file, then it will be set to NULL
 void get_nodeMask_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char *filename, 
@@ -866,6 +962,8 @@ void get_nodeMask_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char *f
       if (!CHECKPIOERROR(piorc, std::string("Error freeing nodeMask decomp "),
                          ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
   }  
+
+  
 }
 
 

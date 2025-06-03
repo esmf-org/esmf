@@ -95,6 +95,9 @@ void ResolvePendingDelete();
  */
 void ResolvePendingCreate();
 
+// Get local node information sorted by id
+ void get_node_info_sorted_by_id(int &nodeCount, std::vector<double> &nodeOrigCoords) const;
+
 const CommRel &GetSymNodeRel() const;
 
 void CreateGhost();

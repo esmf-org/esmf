@@ -257,6 +257,20 @@ void ESMCI_mesh_write_to_ESMFMesh_file(int pioSystemDesc,
     add_coordDim_to_ESMFMesh_file(pioFileDesc, filename, coordDim, coordDimId); 
    
 
+    // Get node info
+    int nodeCount;
+    std::vector<double> nodeOrigCoords;
+    mesh->get_node_info_sorted_by_id(nodeCount, nodeOrigCoords);
+    
+    // Add nodeCount to file
+    int nodeCountId;
+    int nodeCountPIO=(PIO_Offset)nodeCount;
+    add_nodeCount_to_ESMFMesh_file(pioFileDesc, filename, nodeCountPIO, nodeCountId); 
+
+    // Add nodeCoords to file
+    int nodeCoordsId;
+    add_nodeCoords_to_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, 
+                                    nodeCountId, coordDimId, nodeCoordsId);
 
     
     // End defintions 
@@ -264,23 +278,18 @@ void ESMCI_mesh_write_to_ESMFMesh_file(int pioSystemDesc,
     if (!CHECKPIOERROR(piorc, std::string("Unable to open existing file: ") + filename,
                        ESMF_RC_FILE_OPEN, localrc)) throw localrc;
 
-#if 0
-    status = nc_def_dim(ncid2, "elementCount", nelmts, &celldimid);
-    if (status != NC_NOERR) handle_error(status,__LINE__);
-    status = nc_def_dim(ncid2, "maxNodePElement", maxconnection, & vpcdimid);
-    if (status != NC_NOERR) handle_error(status,__LINE__);
-    status = nc_def_dim(ncid2, "coordDim", 2L, &vdimid);
-    if (status != NC_NOERR) handle_error(status,__LINE__);
-#endif
 
 
+    // Write nodeCoords to file
+    write_nodeCoords_to_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, 
+                                      nodeCoordsId, nodeCountPIO, coordDim, nodeOrigCoords.data());
     
-#if 0
+
+
     //// Close file using PIO
     piorc = PIOc_closefile(pioFileDesc);
     if (!CHECKPIOERROR(piorc, std::string("Error closing file ") + filename,
                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
-#endif
     
     
 #if 0

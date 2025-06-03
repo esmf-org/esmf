@@ -2253,5 +2253,42 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
    orig_comm=new_comm;
  }
 
+void Mesh::get_node_info_sorted_by_id(int &nodeCount, std::vector<double> &nodeOrigCoords) const {
+  Trace __trace("Mesh::get_node_info_sorted_by_id()");
+
+  // Get the node map
+ const MeshObjIDMap &nmap = get_map(MeshObj::NODE);
+
+  // Clear the vector
+  nodeOrigCoords.clear();
+
+  // Reserve space
+  nodeOrigCoords.reserve(orig_spatial_dim*nmap.size()); 
+
+  // Get coord data field
+  MEField<> *node_coords=GetField("orig_coordinates");
+  if (!node_coords) node_coords=GetField("coordinates");
+
+  // Loop through the map and count local and fill vector
+  nodeCount=0;
+  for (MeshObjIDMap::const_iterator ni = nmap.begin(); ni != nmap.end(); ++ni) {
+     const MeshObj &node=*ni;
+
+     // Get just local nodes
+    if (!GetAttr(node).is_locally_owned()) continue;
+
+    // Get pointer to original coord. data
+     double *coords = node_coords->data(node);
+
+    // Copy to output array
+    for (int d=0; d<orig_spatial_dim; d++) {
+        nodeOrigCoords.push_back(coords[d]);
+    }
+
+    // Update counter 
+    nodeCount++;
+  }
+
+}
 
 } // namespace
