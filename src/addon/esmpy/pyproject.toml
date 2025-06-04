@@ -1,6 +1,9 @@
 [build-system]
 requires = [ "setuptools>=41", "wheel", "setuptools-git-versioning" ]
-build-backend = "setuptools.build_meta"
+# __legacy__ is required to have access to package during build step
+# (this is suggested in the setuptools-git-versioning documentation when using a callback
+# function)
+build-backend = "setuptools.build_meta:__legacy__"
 
 [project]
 name = "esmpy"
@@ -59,10 +62,7 @@ releasenotes = "https://earthsystemmodeling.org/static/releases.html"
 
 [tool.setuptools-git-versioning]
 enabled = true
-template = "{tag}"
-dev_template = "{tag}"
-dirty_template = "{tag}"
-starting_version = "8.9.0beta" # this is a backup for pip <= 22.0 where git-versioning doesn't work; it is also needed for the conda distribution of ESMPy; it is important that this does NOT include "beta" on release branches
+version_callback = "build_utils.version:get_source_esmf_version"
 
 [tool.dynamic]
 version = "placeholder" # this is a placeholder for the version pulled with git-versioning
@@ -73,6 +73,7 @@ exclude = [ "doc*" ]
 
 [tool.pytest.ini_options]
 testpaths = [
+    "src/esmpy/test/test_build_utils",
     "src/esmpy/test/test_api",
     "examples/test_examples.py", 
     "src/esmpy/test/regrid_from_file/test_regrid_from_file.py", 
