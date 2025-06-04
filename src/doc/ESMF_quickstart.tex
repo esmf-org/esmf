@@ -463,13 +463,13 @@ section of the {\it ESMF Reference Manual}.
 
 \subsection{Building ESMF with Spack}
 
-In addition to the manual installation, ESMF can be installed through use of \htmladdnormallink{{\it Spack}}{https://spack.io} package manager. Since there are several ways to install Spack packages, this section aims to demostrate creating new isolated Spack environment to install ESMF library.
+In addition to the manual installation, ESMF can be installed through use of the \htmladdnormallink{{\it Spack}}{https://spack.io} package manager. Since there are several ways to install Spack packages, this section aims to demonstrate creating a new, isolated Spack environment to install the ESMF library.
 
-The detailed documentation about Spack package manager can be found in \htmladdnormallink{{\it Spack documentation page}}{https://spack.readthedocs.io/en/latest/} and \htmladdnormallink{{\it ESMF Spack package}}{https://packages.spack.io/package.html?name=esmf} page includes ESMF package specific information.
+For a detailed documentation of the Spack package manager see the \htmladdnormallink{{\it Spack documentation}}{https://spack.readthedocs.io/en/latest/} page. The \htmladdnormallink{{\it ESMF Spack package}}{https://packages.spack.io/package.html?name=esmf} page provides ESMF package specific information.
 
 \subsubsection{Creating New Spack environment}
 
-The following set of commands can be used to clone Spack package manager, creating a new environment in the current directory and activating the environment for ESMF installation.
+The following set of commands can be used to clone the Spack package manager, create a new environment in the current directory, and to activate the environment for ESMF installation.
 
 \begin{verbatim}
 git clone -c feature.manyFiles=true --depth=2 https://github.com/spack/spack.git
@@ -487,13 +487,13 @@ spack compiler find
 spack external find
 \end{verbatim}
 
-This will include available compilers and external packages to environment specific {\tt spack.yaml} file. In general, these are useful commands for detecting a small set of commonly-used packages but for now this is generally limited to finding build-only dependencies. The environment specific {\tt spack.yaml} file can be manually editted to include missing compilers and external packages to the environment. More information can be found in the \htmladdnormallink{{\it Spack documentation}}{https://spack.readthedocs.io/en/latest/packages\_yaml.html}.
+This will include locally available compilers and external packages to the environment specific {\tt spack.yaml} file. In general, these are useful commands for detecting a small set of commonly-used packages but for now this is generally limited to finding build-only dependencies. The environment specific {\tt spack.yaml} file can also be edited manually to include missing compilers and external packages to the environment. More information can be found in the \htmladdnormallink{{\it Spack documentation}}{https://spack.readthedocs.io/en/latest/packages\_yaml.html}.
 
 \subsubsection{Installing ESMF Spack Package and Its Dependencies}
 
-Since, ESMF Spack package includes different options to install ESMF package, the following option just demostrate commonly used ESMF package configurations. The list of varianats that can be used to install ESMF Spack package can be found in the \htmladdnormallink{{\it ESMF Spack package}}{https://spack.readthedocs.io/en/latest/packages\_yaml.html} specific documentation.
+Since the ESMF Spack package includes different options to install the package, the following example just demonstrates commonly used ESMF package configurations. A full list of variants that can be used to install the ESMF Spack package can be found in the \htmladdnormallink{{\it ESMF Spack package}}{https://spack.readthedocs.io/en/latest/packages\_yaml.html} documentation.
 
-To install ESMF with external PIO package:
+To install ESMF with the external PIO package option, use the following commands:
 
 \begin{verbatim}
 spack add esmf@develop+external-parallelio
@@ -501,6 +501,8 @@ spack concretize --force --reuse
 spack install
 \end{verbatim}
 
-The given instructions are used to install ESMF development version ({\tt develop} branch). The specific version of the ESMF can be also installed by replacing {\tt develop} with desired version information like {\tt 8.8.1}. The user could also drectly use {\tt spack install} command with the package name and desired variants without concretize step. The specific ESMF tag that is not included into list of available versions can be also installed using {\tt @=} syntax when package version is specified such as {\tt esmf@=8.9.0b10}.
+This will install the ESMF development version from the {\tt develop} branch. A specific version of ESMF can be specified by replacing {\tt develop} with desired version information, e.g. {\tt 8.8.1}. The user can also directly use  the {\tt spack install} command with the package name and desired variants, skipping the concretize step.
+
+To install a specific ESMF tag that is not included in the official list of available versions can be installed using the {\tt @=} syntax. E.g. to install ESMF beta tag {\tt 8.9.0b10}, the version would be specified as {\tt esmf@=8.9.0b10}.
 
 More information about specifying specific compilers and passing argument to the Spack Package Manager build system can be also found in the \htmladdnormallink{{\it Spack documentation}}{https://spack.readthedocs.io/en/latest/basic\_usage.html}.
