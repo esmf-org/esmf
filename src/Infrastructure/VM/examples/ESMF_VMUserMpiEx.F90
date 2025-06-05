@@ -40,14 +40,14 @@ program ESMF_VMUserMpiEx
   use ESMF_TestMod
   
   implicit none
-#ifndef ESMF_MPIUNI     
+#ifndef ESMF_MPIUNI
   include 'mpif.h'
 #endif
   
   ! local variables
   integer:: rc
-#ifndef ESMF_MPIUNI     
-  integer:: ierr
+#ifndef ESMF_MPIUNI
+  integer:: ierr, provided
 #endif
   ! result code
   integer :: finalrc, result
@@ -73,10 +73,12 @@ program ESMF_VMUserMpiEx
 !EOC
   if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-#ifndef ESMF_MPIUNI     
+#ifndef ESMF_MPIUNI
 !BOC
-  ! User code initializes MPI.
-  call MPI_Init(ierr)
+  ! User code initializes MPI. In order to support the ESMF resource management
+  ! features, MPI must be initialized with {\tt MPI\_THREAD\_SERIALIZED} thread
+  ! support or higher.
+  call MPI_Init_thread(MPI_THREAD_SERIALIZED, provided, ierr)
 !EOC
   if (ierr/=0) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #endif
@@ -101,7 +103,7 @@ program ESMF_VMUserMpiEx
   call ESMF_Finalize(endflag=ESMF_END_KEEPMPI, rc=rc)
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
-#ifndef ESMF_MPIUNI     
+#ifndef ESMF_MPIUNI
 !BOC
   ! It is the responsibility of the outer user code to finalize MPI.
   call MPI_Finalize(ierr)

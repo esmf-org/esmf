@@ -409,6 +409,7 @@ class VMK{
     // static MPI Comm of the default VMK
     // and the thread level that the MPI implementation supports.
     static MPI_Comm default_mpi_c;
+    static int mpi_thread_level_requested;
     static int mpi_thread_level;
     static int mpi_init_outside_esmf;
     static int pre_mpi_init;
