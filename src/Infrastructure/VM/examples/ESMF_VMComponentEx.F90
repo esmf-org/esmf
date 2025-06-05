@@ -136,16 +136,20 @@ end module
 
 !BOC
 program ESMF_VMComponentEx
+!EOC
 #include "ESMF.h"
+!BOC
   use ESMF
+!EOC
   use ESMF_TestMod
+!BOC
   use ESMF_VMComponentEx_gcomp_mod
   implicit none
 
   ! local variables
+  integer             :: rc
+  type(ESMF_GridComp) :: gcomp
 !EOC
-  integer:: rc
-  type(ESMF_GridComp):: gcomp
   ! result code
   integer :: finalrc, result
   character(ESMF_MAXSTR) :: testname

@@ -19,7 +19,7 @@
 !
 ! \subsubsection{Global VM}
 !
-! This complete example program demonstrates the simplest ESMF application, 
+! This complete example program demonstrates the simplest ESMF application,
 ! consisting of only a main program without any Components. The global
 ! VM, which is automatically created during the {\tt ESMF\_Initialize()} call,
 ! is obtained using two different methods. First the global VM will be returned
@@ -34,13 +34,15 @@
 
 !BOC
 program ESMF_VMDefaultBasicsEx
+!EOC
 #include "ESMF.h"
-
+!BOC
   use ESMF
+!EOC
   use ESMF_TestMod
-  
+!BOC
   implicit none
-  
+
   ! local variables
   integer:: rc
   type(ESMF_VM):: vm
