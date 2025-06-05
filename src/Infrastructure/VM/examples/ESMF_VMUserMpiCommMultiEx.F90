@@ -17,7 +17,7 @@
 !------------------------------------------------------------------------------
 !BOE
 !
-! \subsubsection{Multiple concurrent instances of ESMF under separate MPI communicators}
+! \subsubsection{Nesting multiple concurrent instances of ESMF under separate MPI communicators}
 ! \label{vm_multi_instance_esmf}
 !
 ! \begin{sloppypar}

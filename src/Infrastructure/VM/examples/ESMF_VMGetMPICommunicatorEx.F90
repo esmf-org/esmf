@@ -17,7 +17,7 @@
 !------------------------------------------------------------------------------
 !BOE
 !
-! \subsubsection{Accessing the MPI Communicator from an VM object}
+! \subsubsection{Accessing the MPI Communicator from a VM object}
 !
 ! Sometimes user code requires access to the MPI communicator, e.g. to support
 ! legacy code that contains explict MPI communication calls. The correct way of

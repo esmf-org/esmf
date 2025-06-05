@@ -21,13 +21,14 @@
 ! \label{vm_inside_user_mpi}
 !
 ! \begin{sloppypar}
-! It is possible to nest an ESMF application inside a user application that 
-! explicitly calls {\tt MPI\_Init()} and {\tt MPI\_Finalize()}. The
-! {\tt ESMF\_Initialize()} call automatically checks whether MPI has already
-! been initialized, and if so does not call {\tt MPI\_Init()} internally. 
+! It is possible to nest an ESMF application inside a user application that
+! explicitly initializes MPI. This means that the user code calls
+! {\tt MPI\_Init()} or {\tt MPI\_Init\_thread()}.
+! The {\tt ESMF\_Initialize()} call automatically checks whether MPI has already
+! been initialized, and if so, does {\em not} initialize MPI internally.
 ! On the finalize side, {\tt ESMF\_Finalize()} can be instructed to {\em not}
-! call {\tt MPI\_Finalize()}, making it the responsibility of the outer code
-! to finalize MPI.
+! call {\tt MPI\_Finalize()}, making it the responsibility of the outer user
+! code to finalize MPI by explicitly by calling {\tt MPI\_Finalize()}.
 ! \end{sloppypar}
 !
 !EOE
@@ -83,7 +84,8 @@ program ESMF_VMUserMpiEx
   if (ierr/=0) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #endif
 !BOC
-  ! ESMF_Initialize() does not call MPI_Init() if it finds MPI initialized.
+  ! ESMF_Initialize() does not initialize MPI if it finds MPI initialized
+  ! already.
   call ESMF_Initialize(defaultlogfilename="VMUserMpiEx.Log", &
     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 !EOC
@@ -105,7 +107,7 @@ program ESMF_VMUserMpiEx
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 #ifndef ESMF_MPIUNI
 !BOC
-  ! It is the responsibility of the outer user code to finalize MPI.
+  ! It is now the responsibility of the outer user code to finalize MPI.
   call MPI_Finalize(ierr)
 !EOC
   if (ierr/=0) finalrc = ESMF_FAILURE
