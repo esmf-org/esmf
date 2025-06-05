@@ -552,3 +552,12 @@ class TestField(TestBase):
         assert type(field2) == np.ndarray
         assert field2.shape == (5,20)
         # self.examine_field_attributes(field2)
+
+    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
+    def test_field_grid_to_field_map(self):
+        grid = Grid(np.array([8,10]), coord_sys=CoordSys.CART, staggerloc=StaggerLoc.CENTER)
+        field1 = Field(grid, ndbounds=[3,2])
+        g2fm = np.array([3,4],dtype=np.int32)
+        field2 = Field(grid, ndbounds=[3,2], grid_to_field_map=g2fm)
+        assert field1.data.shape == (8,10,3,2)
+        assert field2.data.shape == (3,2,8,10)
