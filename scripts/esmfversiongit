@@ -2,12 +2,13 @@
 # return the ESMF version from Git if available, or empty string otherwise
 # test looks for .git directory or .git file (when esmf is a submodule)
 if [ -d $ESMF_DIR/.git ] || [ -s $ESMF_DIR/.git ] ; then \
-TAG=`git describe --tags 2>&1 | grep -v fatal`
+TAG=`git describe --tags --exact 2>&1 | grep -v fatal`
+BRCH=`git rev-parse --abbrev-ref HEAD 2>&1`
+SHA1=`git rev-parse --short HEAD 2>&1`
+if [ -z "$TAG" ] ; then TAG="$BRCH+g$SHA1" ; fi
 ORIG=`git config --get remote.origin.url 2>&1`
-if [ -z "$TAG" ] ; then TAG="no tag found" ; fi
-if [ -z "$ORIG" ] ; then ORIG="no origin found" ; fi
 case "$ORIG" in
-  *"esmf-org/esmf.git"*) echo $TAG ;;
-  *) echo $TAG "($ORIG)" ;;
+  *"esmf-org/esmf"*) echo $TAG ;;
+  *) echo $TAG"#"$ORIG ;;
 esac
 fi
