@@ -39,12 +39,12 @@ program ESMF_VMUserMpiEx
 
   use ESMF
   use ESMF_TestMod
-  
+
   implicit none
 #ifndef ESMF_MPIUNI
   include 'mpif.h'
 #endif
-  
+
   ! local variables
   integer:: rc
 #ifndef ESMF_MPIUNI
