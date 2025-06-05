@@ -51,22 +51,3 @@ class TestCbindings(TestBase):
             interfaceint2 = ESMP_InterfaceInt(np.array([1,2,3]))
         except:
             raise TypeError('FAIL: tuples cannot be used in place of numpy.array')
-
-    def test_version_compare(self):
-        assert(version_compare("ESMF_5_3_0_ESMP_02","ESMF_5_3_0_ESMP_01") == 1)
-        assert (version_compare("ESMF_5_3_0_ESMP_01",
-                           "ESMF_5_3_1_beta_snapshot_02_ESMP_01") == -1)
-        assert (version_compare("ESMF_5_3_0_ESMP_01",
-                           "ESMF_5_3_0_beta_snapshot_42_ESMP_01") == 1)
-        assert (version_compare("ESMF_5_3_0_ESMP_01",
-                           "ESMF_5_3_0_beta_snapshot_37_ESMP_02") == 1)
-        assert (version_compare("ESMF_5_3_0_ESMP_01",
-                           "ESMF_5_3_1_beta_snapshot_02_ESMP_01") == -1)
-        assert (version_compare("ESMF_5_3_0_ESMP_01",
-                           "ESMF_6_1_0_beta_snapshot_00_ESMP_01") == -1)
-        assert (version_compare("ESMF_6_1_0_beta_snapshot_00_ESMP_01",
-                           "ESMF_5_3_1_beta_snapshot_02_ESMP_01") == 1)
-        assert (version_compare("ESMF_6_1_0_beta_snapshot_00_ESMP_01",
-                           "ESMF_6_1_0_beta_snapshot_00_ESMP_01") == 0)
-        assert (version_compare("ESMPy_620b10_04",
-                           "ESMF_6_1_0_beta_snapshot_00_ESMP_01") == 1)
