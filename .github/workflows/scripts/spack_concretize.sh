@@ -138,7 +138,7 @@ fi
 if [[ "$comp" == *"gcc"* ]]; then
   echo "::group::Check gcc compiler"
   str=`echo $comp | awk -F\@ '{print $1}'`
-  comp_ver=`spack compiler list | grep "${str}@" | tr -d "${str}@" | sort -n | tail -n 1`
+  comp_ver=`spack compiler list | grep "${str}@" | tr -d "${str}@" | awk '{print $2}' | sort -n | tail -n 1`
 
   use_latest=0
   if [[ "$comp" == *"gcc@latest"* ]]; then
