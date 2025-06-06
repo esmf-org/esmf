@@ -75,16 +75,17 @@ class TestLoadESMFHelpers(TestBase):
         """
         Given an esmf beta version and an esmpy release version,
         when _check_version is called,
-        then a VersionWarning should be issued.
+        then a VersionMismatch exception should be raised.
         """
-        with pytest.warns(VersionWarning):
+        with pytest.raises(VersionMismatch):
             _check_version("8.9.0 beta snapshot", "8.9.0")
 
     def test_check_version_release_vs_beta(self):
         """
         Given an esmf release version and an esmpy beta version,
         when _check_version is called,
-        then a VersionWarning should be issued.
+        then a VersionMismatch exception should be raised.
         """
-        with pytest.warns(VersionWarning):
+        with pytest.raises(VersionMismatch):
             _check_version("8.9.0", "8.9.0b0")
+

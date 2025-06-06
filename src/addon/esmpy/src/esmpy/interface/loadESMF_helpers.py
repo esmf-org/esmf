@@ -10,6 +10,7 @@ loadESMF.py.
 """
 
 import re
+import warnings
 
 from esmpy.util.exceptions import VersionWarning, VersionMismatch
 
@@ -28,10 +29,25 @@ def _check_version(esmfversion, esmpyversion):
 
     # check if major, minor and patch version numbers are equivalent
     if esmfvs[0:3] != esmpyvs[0:3]:
-        raise VersionMismatch("ESMF installation version {}, ESMPy version {}".format(
-            esmfversion, esmpyversion))
-    # otherwise warn that beta versions may be in use
+        raise VersionMismatch(f"ESMF installation version {esmfversion} "
+                              f"differs from ESMPy version {esmpyversion}")
+
+    # Check for beta status in each version
+    esmf_is_beta = "beta" in esmfversion
+    esmpy_is_beta = bool(re.search(r"b\d+", esmpyversion))
+    if esmf_is_beta and not esmpy_is_beta:
+        raise VersionMismatch(f"Cannot use an ESMF development version ({esmfversion}) "
+                              f"with an ESMPy release version ({esmpyversion})")
+    elif esmpy_is_beta and not esmf_is_beta:
+        raise VersionMismatch(f"Cannot use an ESMF release version ({esmfversion}) "
+                              f"with an ESMPy development version ({esmpyversion})")
+    elif esmf_is_beta and esmpy_is_beta:
+        warnings.warn("You are using development versions of ESMF and ESMPy; "
+                      "we cannot verify if these versions are compatible",
+                      VersionWarning)
     else:
-        import warnings
-        warnings.warn("ESMF installation version {}, ESMPy version {}".format(
-            esmfversion, esmpyversion), VersionWarning)
+        # Versions don't match, but the version triplet is identical, and neither appears
+        # to be a beta version. This situation is unexpected, so handle it generically and
+        # cautiously.
+        raise VersionMismatch(f"ESMF installation version {esmfversion} "
+                              f"differs in an unexpected way from ESMPy version {esmpyversion} ")

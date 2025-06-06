@@ -78,7 +78,8 @@ with open(esmfmk, 'r') as MKFILE:
             if "gfortran" in line:
                 use_inmem_factors = True
 
-_check_version(esmfversion, constants._ESMPY_VERSION)
+_check_version(esmfversion=esmfversion,
+               esmpyversion=constants._ESMPY_VERSION)
 constants._ESMF_VERSION = esmfversion
 
 
