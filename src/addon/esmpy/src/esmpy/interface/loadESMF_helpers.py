@@ -27,7 +27,7 @@ def _check_version(esmfversion, esmpyversion):
     esmpyvs = re.split(r'\D+',esmpyversion)
 
     # check if major, minor and patch version numbers are equivalent
-    if esmfvs[0:2] != esmpyvs[0:2]:
+    if esmfvs[0:3] != esmpyvs[0:3]:
         raise VersionMismatch("ESMF installation version {}, ESMPy version {}".format(
             esmfversion, esmpyversion))
     # otherwise warn that beta versions may be in use

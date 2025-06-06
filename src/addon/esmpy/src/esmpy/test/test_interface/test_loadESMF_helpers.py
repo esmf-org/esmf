@@ -45,9 +45,9 @@ class TestLoadESMFHelpers(TestBase):
         """
         Given versions that differ in their patch version (3rd digit),
         when _check_version is called,
-        then a VersionWarning should be issued.
+        then a VersionMismatch exception should be raised.
         """
-        with pytest.warns(VersionWarning):
+        with pytest.raises(VersionMismatch):
             _check_version("8.8.0", "8.8.1")
 
     def test_check_version_betas_from_same_version(self):
