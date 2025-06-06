@@ -19,16 +19,19 @@ def _check_version(esmfversion, esmpyversion):
     ESMPy package version; if they differ, either raise an exception or give a warning,
     depending on how much they differ.
     """
+    if esmfversion == esmpyversion:
+        # Identical versions: we're all good: nothing to do here
+        return
+
     esmfvs = re.split(r'\D+',esmfversion)
     esmpyvs = re.split(r'\D+',esmpyversion)
 
-    if esmfversion != esmpyversion:
-        # check if major, minor and patch version numbers are equivalent
-        if esmfvs[0:2] != esmpyvs[0:2]:
-            raise VersionMismatch("ESMF installation version {}, ESMPy version {}".format(
-                esmfversion, esmpyversion))
-        # otherwise warn that beta versions may be in use
-        else:
-            import warnings
-            warnings.warn("ESMF installation version {}, ESMPy version {}".format(
-                esmfversion, esmpyversion), VersionWarning)
+    # check if major, minor and patch version numbers are equivalent
+    if esmfvs[0:2] != esmpyvs[0:2]:
+        raise VersionMismatch("ESMF installation version {}, ESMPy version {}".format(
+            esmfversion, esmpyversion))
+    # otherwise warn that beta versions may be in use
+    else:
+        import warnings
+        warnings.warn("ESMF installation version {}, ESMPy version {}".format(
+            esmfversion, esmpyversion), VersionWarning)
