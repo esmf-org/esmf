@@ -2967,6 +2967,17 @@ interp_method(imethod)
                 dstF.size(), (dstF.size()>0)?(&dstF[0]):NULL,
                 &zz, midmesh==0? true:false);
 
+    // Test GeomRend
+    GeomRend tst_grend(NULL, srcplist, NULL, dstplist, get_dst_config(interp_method), false, true);
+
+    // Build tst grend
+    struct Zoltan_Struct *tst_zz;
+    tst_grend.Build_NN(&tst_zz, true);
+
+
+    tst_grend.GetDstPlistRend().WriteVTK("dstRendPList");
+    
+    
     // Exit profile around geom redist
     if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
       ESMCI::TraceEventRegionExit("Regrid geometry redist", &localrc);

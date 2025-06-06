@@ -62,6 +62,9 @@ public:
   void Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF, Zoltan_Struct **zzp, bool free_zz);
   void Build_Merge(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF, Zoltan_Struct **zzp);
 
+  // Build rendezvous specifically for nearest neighbor regridding
+  void Build_NN(struct Zoltan_Struct **zzp, bool free_zz);
+
   struct ZoltanUD {
   ZoltanUD(UInt _sdim, MEField<> *_coord_src, MEField<> *_coord_dst,PointList *_src_pointlist, PointList *_dst_pointlist, bool _iter_is_obj) :
       coord_src(_coord_src),
