@@ -74,6 +74,7 @@ exclude = [ "doc*" ]
 [tool.pytest.ini_options]
 testpaths = [
     "src/esmpy/test/test_build_utils",
+    "src/esmpy/test/test_interface",
     "src/esmpy/test/test_api",
     "examples/test_examples.py", 
     "src/esmpy/test/regrid_from_file/test_regrid_from_file.py", 
