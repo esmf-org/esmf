@@ -2963,10 +2963,20 @@ interp_method(imethod)
     // Form the parallel rendezvous meshes/specs
    //  if (Par::Rank() == 0)
        //std::cout << "Building rendezvous..." << std::endl;
-    grend.Build(srcF.size(), (srcF.size()>0)?(&srcF[0]):NULL, 
-                dstF.size(), (dstF.size()>0)?(&dstF[0]):NULL,
-                &zz, midmesh==0? true:false);
 
+    // Build geomrend based on method
+    if (has_nearest_src_to_dst) {
+      grend.Build_NN(&zz, true);
+      grend.GetDstPlistRend().WriteVTK("dstRendPList");      
+      grend.GetSrcPlistRend().WriteVTK("srcRendPList");
+      grend.GetSrcPlistLocal().WriteVTK("srcLocalPList");
+    } else {
+      grend.Build(srcF.size(), (srcF.size()>0)?(&srcF[0]):NULL, 
+                  dstF.size(), (dstF.size()>0)?(&dstF[0]):NULL,
+                  &zz, midmesh==0? true:false);
+    }
+
+#if 0    
     // Test GeomRend
     GeomRend tst_grend(NULL, srcplist, NULL, dstplist, get_dst_config(interp_method), false, true);
 
@@ -2976,6 +2986,11 @@ interp_method(imethod)
 
 
     tst_grend.GetDstPlistRend().WriteVTK("dstRendPList");
+    
+    tst_grend.GetSrcPlistRend().WriteVTK("srcRendPList");
+
+    tst_grend.GetSrcPlistLocal().WriteVTK("srcLocalPList");
+#endif
     
     
     // Exit profile around geom redist
@@ -3017,8 +3032,14 @@ interp_method(imethod)
       }
       
       // Do search
+#if 1
+      ParSearchNearestSrcToDstOpt(grend.GetSrcPlistLocal(), grend.GetSrcLocalMin(), grend.GetSrcLocalMax(), 
+                                  grend.GetSrcPlistRend(), grend.GetDstPlistRend(),
+                                  unmappedaction, sres, set_dst_status, dst_status);
+#else      
       ParSearchNearestSrcToDst(grend.GetSrcPlistRend(), grend.GetDstPlistRend(), unmappedaction, sres, set_dst_status, dst_status);
-
+#endif
+      
       // Exit profile for search
       if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
         ESMCI::TraceEventRegionExit("Search", &localrc);

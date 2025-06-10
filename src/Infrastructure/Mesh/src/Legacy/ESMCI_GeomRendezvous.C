@@ -17,6 +17,7 @@
 #include <Mesh/include/Legacy/ESMCI_MeshRead.h>
 #include <Mesh/include/Legacy/ESMCI_MeshObjConn.h>
 #include <Mesh/include/Legacy/ESMCI_MeshVTK.h>
+#include <Mesh/include/Regridding/ESMCI_SpaceDir.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
 
 #include <Mesh/src/Zoltan/zoltan.h>
@@ -58,7 +59,7 @@ static int GetNumAssignedObj(void *user, int *err) {
   return num;
 }
 
-static int GetNumAssignedObjNN(void *user, int *err) {
+static int GetNumAssignedObjDst(void *user, int *err) {
   GeomRend::ZoltanUD &udata = *(static_cast<GeomRend::ZoltanUD*>(user));
   *err = 0;
 
@@ -70,6 +71,19 @@ static int GetNumAssignedObjNN(void *user, int *err) {
   return num;
 }
 
+
+static int GetNumAssignedObjSrc(void *user, int *err) {
+  GeomRend::ZoltanUD &udata = *(static_cast<GeomRend::ZoltanUD*>(user));
+  *err = 0;
+
+  int num=0;
+  if (udata.src_pointlist != NULL) {
+    num=udata.src_pointlist->get_curr_num_pts();;
+  }
+  
+  return num;
+}
+  
   
 static void GetObjList(void *user, int numGlobalIds, int numLids, ZOLTAN_ID_PTR gids, ZOLTAN_ID_PTR lids,
           int wgt_dim, float *obj_wghts, int *err)
@@ -124,7 +138,7 @@ static void GetObjList(void *user, int numGlobalIds, int numLids, ZOLTAN_ID_PTR 
 }
 
   
-static void GetObjListNN(void *user, int numGlobalIds, int numLids,
+static void GetObjListDst(void *user, int numGlobalIds, int numLids,
                          ZOLTAN_ID_PTR gids, ZOLTAN_ID_PTR lids,
                          int wgt_dim, float *obj_wghts, int *err)
 {
@@ -149,6 +163,31 @@ static void GetObjListNN(void *user, int numGlobalIds, int numLids,
   *err = 0;
 }
 
+static void GetObjListSrc(void *user, int numGlobalIds, int numLids,
+                         ZOLTAN_ID_PTR gids, ZOLTAN_ID_PTR lids,
+                         int wgt_dim, float *obj_wghts, int *err)
+{
+  GeomRend::ZoltanUD &udata = *(static_cast<GeomRend::ZoltanUD*>(user));
+
+  // Get just src list
+  UInt i = 0;
+  if (udata.src_pointlist != NULL) {
+    int pl_size=udata.src_pointlist->get_curr_num_pts();
+    
+    for (int loc=0; loc<pl_size; loc++) {
+      gids[2*i] = 0;
+      gids[2*i + 1] = loc;  //udata.dst_pointlist->get_id(loc);
+      
+      lids[i] = i;
+      
+      i++;
+    }
+  }
+
+  // Retun success
+  *err = 0;
+}
+  
 
   
 static int GetNumGeom(void *user, int *err) {
@@ -216,7 +255,7 @@ static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
 
 }
 
-static void GetObjectNN(void *user, int numGlobalIds, int numLids, int numObjs,
+static void GetObjectDst(void *user, int numGlobalIds, int numLids, int numObjs,
   ZOLTAN_ID_PTR gids, ZOLTAN_ID_PTR lids, int numDim, double *pts, int *err)
 {
   GeomRend::ZoltanUD &udata = *(static_cast<GeomRend::ZoltanUD*>(user));
@@ -230,6 +269,31 @@ static void GetObjectNN(void *user, int numGlobalIds, int numLids, int numObjs,
     // Get coords from pointlist
     int loc = gids[2*i+1];
     const double *c = udata.dst_pointlist->get_coord_ptr(loc);
+
+    // Copy into output pts list
+    // Opt. the below, once you have it working
+    for (UInt d = 0; d < (UInt) numDim; d++) {
+      pts[i*numDim + d] = c[d];
+    }
+  }
+
+}
+
+
+static void GetObjectSrc(void *user, int numGlobalIds, int numLids, int numObjs,
+  ZOLTAN_ID_PTR gids, ZOLTAN_ID_PTR lids, int numDim, double *pts, int *err)
+{
+  GeomRend::ZoltanUD &udata = *(static_cast<GeomRend::ZoltanUD*>(user));
+
+  // Return success
+  *err = 0;
+
+  // Get src PointList coords
+  for (UInt i = 0; i < (UInt) numObjs; i++) {    
+
+    // Get coords from pointlist
+    int loc = gids[2*i+1];
+    const double *c = udata.src_pointlist->get_coord_ptr(loc);
 
     // Copy into output pts list
     // Opt. the below, once you have it working
@@ -264,6 +328,7 @@ static void GetObjectNN(void *user, int numGlobalIds, int numLids, int numObjs,
                      freeze_src(freeze_src_),
                      srcplist_rend(NULL),
                      dstplist_rend(NULL),
+                     srcplist_local(NULL),
                      on_sph(_on_sph),
                      status(GEOMREND_STATUS_UNINIT)
 {
@@ -771,6 +836,136 @@ void GeomRend::build_src_mig_plist(ZoltanUD &zud, int numExport,
     }
   }
 
+}
+
+
+void build_mig_plist(PointList *plist,
+                      std::vector<int> &plist_snd_loc, std::vector<int> &plist_snd_pet, 
+                      PointList *&new_plist) {
+  
+  // Make sure plist vectors are of the same size
+  ThrowRequire(plist_snd_loc.size() == plist_snd_pet.size());
+
+  // Get parallel information
+  int num_procs=Par::Size();
+  int myrank=Par::Rank();
+
+  // Get coordinate dimension
+  int sdim=plist->get_coord_dim();
+  
+  // Calculate how many we're sending to each PET
+  std::vector<int> pet_counts;
+  pet_counts.resize(num_procs,0);
+  for (const int &pet: plist_snd_pet) {
+    pet_counts[pet]++;
+  }
+  
+  // Construct communication pattern information
+  int snd_size=(sdim+1)*sizeof(double);
+  int num_snd_procs=0;
+  std::vector<int> snd_pets;
+  std::vector<int> snd_sizes;
+  std::vector<int> snd_counts;
+  for (int i=0; i<num_procs; i++) {
+    if (pet_counts[i] > 0) {
+      num_snd_procs++;
+      snd_pets.push_back(i);
+      snd_sizes.push_back(pet_counts[i]*snd_size);
+      snd_counts.push_back(pet_counts[i]);
+    }
+  }
+
+  // Setup pattern and sizes
+  SparseMsg comm;
+  if (num_snd_procs >0) {
+    comm.setPattern(num_snd_procs, (const UInt *)&(snd_pets[0]));
+    comm.setSizes((UInt *)&(snd_sizes[0]));
+  } else {
+    comm.setPattern(0, (const UInt *)NULL);
+    comm.setSizes((UInt *)NULL);
+  }
+
+  // Reset buffers
+  comm.resetBuffers();
+
+  // Pack points into buffers
+  for (int i=0; i < plist_snd_pet.size(); i++) {
+
+    // Get which loc and where it's to be sent
+    int loc=plist_snd_loc[i];
+    int pet=plist_snd_pet[i];
+
+    // Get buffer
+    SparseMsg:: buffer *b=comm.getSendBuffer(pet);
+
+    // Get point coords and id
+    const double *pnt_coords = plist->get_coord_ptr(loc);
+    int pnt_id = plist->get_id(loc);
+
+    // pack buf
+    double buf[4]; // 4 is biggest this should be (i.e. 3D+id)
+    buf[0]=pnt_coords[0];
+    buf[1]=pnt_coords[1];
+    if (sdim < 3)
+      buf[2]=pnt_id;  //passing an int through a double...inefficient but ok?
+    else {
+      buf[2]=pnt_coords[2];
+      buf[3]=pnt_id;  //passing an int through a double...inefficient but ok?
+    }
+
+    // Push buf onto send struct
+    b->push((const UChar *)buf, (UInt)snd_size);
+  }
+
+  // Communicate point information
+  comm.communicate();
+
+  // Calculate the number of points received
+  int num_rcv_pnts=0;
+  for (std::vector<UInt>::iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {
+    UInt proc = *p;
+    SparseMsg::buffer *b = comm.getRecvBuffer(proc);
+
+    // num messages
+    int num_pnts_this_buf = b->msg_size()/snd_size;
+
+    // Add it to total
+    num_rcv_pnts += num_pnts_this_buf;    
+  }
+  
+
+  // Create new PointList 
+  new_plist = new ESMCI::PointList(num_rcv_pnts,sdim);
+
+  // Unpack recv'd information and add to pointlist
+  for (std::vector<UInt>::iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {
+    UInt pet = *p;
+    SparseMsg::buffer *b = comm.getRecvBuffer(pet);
+    
+    // Unpack everything from this processor
+    while (!b->empty()) {
+      double buf[4]; // 4 is biggest this should be
+      
+      // Get information
+      b->pop((UChar *)buf, (UInt)snd_size);
+      
+      // Unpack buf
+      double pnt_coords[3]={0.0,0.0,0.0};
+      int pnt_id;      
+      pnt_coords[0]=buf[0];
+      pnt_coords[1]=buf[1];
+      if (sdim < 3) {
+        pnt_id=(int)buf[2];
+      } else {
+        pnt_coords[2]=buf[2];
+        pnt_id=(int)buf[3];
+      }
+
+      // Add to pointlist
+      new_plist->add(pnt_id,pnt_coords);      
+    }   
+  }
+  
 }
 
 
@@ -1921,12 +2116,15 @@ printf("In Build_NN()!!!!\n");
 
   // Set up zoltan user structure
   ZoltanUD zud(sdim, NULL, NULL, srcplist, dstplist, iter_is_obj);
+
+
+  //// Create dst distribution
   
   // Set the mesh description callbacks
-  Zoltan_Set_Num_Obj_Fn(zz, GetNumAssignedObjNN, (void*) &zud);
-  Zoltan_Set_Obj_List_Fn(zz, GetObjListNN, (void*) &zud);
-  Zoltan_Set_Num_Geom_Fn(zz, GetNumGeom, (void*) &zud); // The same for NN
-  Zoltan_Set_Geom_Multi_Fn(zz, GetObjectNN, (void*) &zud);
+  Zoltan_Set_Num_Obj_Fn(zz, GetNumAssignedObjDst, (void*) &zud);
+  Zoltan_Set_Obj_List_Fn(zz, GetObjListDst, (void*) &zud);
+  Zoltan_Set_Num_Geom_Fn(zz, GetNumGeom, (void*) &zud); // The same for Dst
+  Zoltan_Set_Geom_Multi_Fn(zz, GetObjectDst, (void*) &zud);
 
   // Call zoltan to partition the dst pointlist
   rc = Zoltan_LB_Partition(zz, &changes, &numGidEntries, &numLidEntries,
@@ -1936,6 +2134,14 @@ printf("In Build_NN()!!!!\n");
   // Create dstplist_rend using the above information
   build_dst_mig_plist(zud, numExport, exportGlobalids, exportProcs, numImport, importGlobalids);
 
+  // Release zoltan memory
+  Zoltan_LB_Free_Part(&importGlobalids, &importLocalids,
+                      &importProcs, &importToPart);
+  Zoltan_LB_Free_Part(&exportGlobalids, &exportLocalids,
+                      &exportProcs, &exportToPart);
+
+
+  
   ////// Get local min/max of dst
 
   //// Use sqrt, so if it's squared it doesn't overflow
@@ -1965,178 +2171,70 @@ printf("In Build_NN()!!!!\n");
     MU_SET_MAX_VEC3D(dst_max,dst_pnt);
   }
 
-
   printf("dst_min=%f %f %f dst_max=%f %f %f\n",MU_LST_VEC3D(dst_min),MU_LST_VEC3D(dst_max));
 
+  // Expand box by a factor in each direction
+  
+  // Save min/max
+  MU_ASSIGN_VEC3D(src_local_min,dst_min);
+  MU_ASSIGN_VEC3D(src_local_max,dst_max);
+
+  
   // Create SpaceDir
   SpaceDir *spacedir=new SpaceDir(dst_min, dst_max, NULL, true);
 
   // Map src points to destination procs by min-max box
-  for (UInt p = 0; p < srcplist->get_curr_num_pts(); ++p) {
+  std::vector<int> pet_list;
+  std::vector<int> plist_snd_loc, plist_snd_pet;
+  for (UInt loc = 0; loc < srcplist->get_curr_num_pts(); ++loc) {
 
-    const point *pnt_ptr=srcplist->get_point(p);
-
+    const point *pnt_ptr=srcplist->get_point(loc);
+    
     // Set coord value in 3D point
     double src_pnt[3];
     src_pnt[0] = pnt_ptr->coords[0];
     src_pnt[1] = pnt_ptr->coords[1];
     src_pnt[2] = sdim == 3 ? pnt_ptr->coords[2] : 0.0;
 
+    // Expand by a tiny tol to give a small box
+    double src_pnt_min[3], src_pnt_max[3];
+    MU_SUB_SCALAR_VEC3D(src_pnt_min,src_pnt,1.0E-10);
+    MU_ADD_SCALAR_VEC3D(src_pnt_max,src_pnt,1.0E-10);
+    
+    // Init vector
+    pet_list.clear();
 
+    // Get PETs where src_pnt falls in dst min/max box
+    spacedir->get_procs(src_pnt_min, src_pnt_max, &(pet_list));
+
+    // Loop adding pets and loc to migration lists
+    for (const int &pet: pet_list) {
+      plist_snd_pet.push_back(pet);
+      plist_snd_loc.push_back(loc);    
+    } 
   }
+
+  // Build srcplist_local
+  build_mig_plist(srcplist,
+                  plist_snd_loc, plist_snd_pet, 
+                  srcplist_local);
+
+
+  //// Create src distribution
   
-  
-  
-#ifdef OLD_STUFF  
-  ZoltanUD zud(sdim, src_coordField_ptr, dst_coordField_ptr, srcplist, dstplist, iter_is_obj);
-
-  // Gather the destination points.  Also get a min/max
-  int num_dst_local=0;
-  double cmin[3], cmax[3];
-  if (dstplist != NULL)  {
-    build_dest_plist(cmin, cmax, dstplist);
-    num_dst_local=dstplist->get_curr_num_pts(); 
-  } else {
-    build_dest(cmin, cmax, zud);
-    num_dst_local=zud.dstObj.size();
-  }
-
-  BBox dstBound = BBoxParUnion(BBox(sdim, cmin, cmax));
-
-  // Get src mesh (within dst bounding box)
-  int num_src_local=0;
-  if (srcplist == NULL) {
-    build_src(dstBound, zud);
-    num_src_local = zud.srcObj.size();
-  } else {
-    num_src_local=srcplist->get_curr_num_pts(); 
-  }
-
-  // Compute global sums
-  int local[2];
-  int global_tot[2];
-  local[0]=num_dst_local;
-  local[1]=num_src_local;
-  MPI_Allreduce(local,global_tot,2,MPI_INT,MPI_SUM,Par::Comm());
-
-  // Leave if there are no destination points
-  if (global_tot[0] == 0) {
-    status=GEOMREND_STATUS_NO_DST;
-    std::vector<MeshObj*>().swap(zud.dstObj);
-    std::vector<MeshObj*>().swap(zud.srcObj);
-    return;
-  } else if (global_tot[1] == 0) {
-    status=GEOMREND_STATUS_DST_BUT_NO_SRC;
-    std::vector<MeshObj*>().swap(zud.dstObj);
-    std::vector<MeshObj*>().swap(zud.srcObj);
-    return;
-  }
-
-
-  float ver;
-  int rc = Zoltan_Initialize(0, NULL, &ver);
-
-  int rank = Par::Rank();
-  int csize = Par::Size();
-
-
-  struct Zoltan_Struct * zz = Zoltan_Create(Par::Comm());
-  *zzp = zz;
-
-  // Zoltan Parameters
-  set_zolt_param(zz);
-
-  // Local vars needed by zoltan
-  int changes;
-  int numGidEntries;
-  int numLidEntries;
-  int numImport;
-  ZOLTAN_ID_PTR importGlobalids;
-  ZOLTAN_ID_PTR importLocalids;
-  int *importProcs;
-  int *importToPart;
-  int numExport;
-  ZOLTAN_ID_PTR exportGlobalids;
-  ZOLTAN_ID_PTR exportLocalids;
-  int *exportProcs;
-  int *exportToPart;
-
-
   // Set the mesh description callbacks
-  Zoltan_Set_Num_Obj_Fn(zz, GetNumAssignedObj, (void*) &zud);
-  Zoltan_Set_Obj_List_Fn(zz, GetObjList, (void*) &zud);
-  Zoltan_Set_Num_Geom_Fn(zz, GetNumGeom, (void*) &zud);
-  Zoltan_Set_Geom_Multi_Fn(zz, GetObject, (void*) &zud);
+  Zoltan_Set_Num_Obj_Fn(zz, GetNumAssignedObjSrc, (void*) &zud);
+  Zoltan_Set_Obj_List_Fn(zz, GetObjListSrc, (void*) &zud);
+  Zoltan_Set_Num_Geom_Fn(zz, GetNumGeom, (void*) &zud); // The same for Dst
+  Zoltan_Set_Geom_Multi_Fn(zz, GetObjectSrc, (void*) &zud);
 
-  // Call zoltan
+  // Call zoltan to partition the dst pointlist
   rc = Zoltan_LB_Partition(zz, &changes, &numGidEntries, &numLidEntries,
     &numImport, &importGlobalids, &importLocalids, &importProcs, &importToPart,
     &numExport, &exportGlobalids, &exportLocalids, &exportProcs, &exportToPart);
 
-  //for (int xx=0; xx<numImport; xx++) {
-  //for (int xx=0; xx<numExport; xx++) {
-
-  // Set up the rendezvous mesh metadata
-  // for both src and dst
-  prep_meshes();
-
-  // Build up the source migration comm using the RCB cuts
-  if (zud.src_pointlist == NULL)
-    build_src_mig(zz, zud);
-  else {
-    build_src_mig_plist(zud, numExport, exportGlobalids, exportProcs, numImport, importGlobalids);
-  }
-
-  // Done with src zud lists, so free them in the intests of memory
-  std::vector<MeshObj*>().swap(zud.srcObj);
-
-  // Register the necessary fields (could put this in a function, but passing the args
-  // would be a pain)
-  for (UInt i = 0; i < nsrcF; i++) {
-    MEField<> *fptr = srcF[i];
-      src_rend_Fields.push_back(srcmesh_rend.RegisterField(fptr->name(), fptr->GetMEFamily(),
-                   fptr->ObjType(), fptr->GetContext(), fptr->dim(), true, false, fptr->FType()));
-  }
-
-  // Now migrate the src mesh.
-  src_migrate_meshes();
-
-  // Build the destination migration
-  if (dcfg.all_overlap_dst) {
-    // Here we need all the destination cells that overlap with each source cell on the same proc
-    build_dst_mig_all_overlap(zud);
-  } else {
-    if (zud.dst_pointlist == NULL)
-      build_dst_mig(zz, zud, numExport, exportLocalids, exportGlobalids, exportProcs);
-    else
-      build_dst_mig_plist(zud, numExport, exportGlobalids, exportProcs, numImport, importGlobalids);
-  }
-
-  // Slightly different for destination; use interp field if not 'conserv'
-  for (UInt i = 0; i < ndstF; i++) {
-    MEField<> *fptr = dstF[i];
-    if (iter_is_obj) {
-      dst_rend_Fields.push_back(dstmesh_rend.RegisterField(fptr->name(), fptr->GetMEFamily(),
-                   fptr->ObjType(), fptr->GetContext(), fptr->dim(), true, false, fptr->FType()));
-    } else {
-      _field *ifptr = fptr->is_nodal() ? fptr->GetNodalfield() : fptr->GetInterp();
-      ThrowRequire(ifptr);
-      dst_rend_fields.push_back(dstmesh_rend.Registerfield(ifptr->name(), ifptr->GetAttr(), fptr->FType(), fptr->dim()));
-    }
-  }
-
-  // Ok.  Done with dst zud lists, so free them in the intests of memory
-  std::vector<MeshObj*>().swap(zud.dstObj);
-
-  // Now migrate the dst mesh.
-  dst_migrate_meshes();
-
-  //WriteMesh(srcmesh_rend, "srcrend");
-
-  // Now, IMPORTANT: We transpose the destination comm since this is how is will be
-  // used until destruction.
-  if (dstplist == NULL)
-    dstComm.Transpose();
+  // Create dstplist_rend using the above information
+  build_src_mig_plist(zud, numExport, exportGlobalids, exportProcs, numImport, importGlobalids);
 
   // Release zoltan memory
   Zoltan_LB_Free_Part(&importGlobalids, &importLocalids,
@@ -2144,12 +2242,11 @@ printf("In Build_NN()!!!!\n");
   Zoltan_LB_Free_Part(&exportGlobalids, &exportLocalids,
                       &exportProcs, &exportToPart);
 
+
+  // Release Zoltan structure
   if(free_zz){
     Zoltan_Destroy(&zz);
   }
-
-#endif
-
   
   // Set status before leaving
   status=GEOMREND_STATUS_COMPLETE;

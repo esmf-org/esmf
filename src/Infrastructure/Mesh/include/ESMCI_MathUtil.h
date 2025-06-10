@@ -206,6 +206,26 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
   out[0]=a[0]/(s);                      \
   out[1]=a[1]/(s);
 
+#define MU_ADD_SCALAR_VEC3D(out,a,s) \
+  out[0]=a[0]+(s);                      \
+  out[1]=a[1]+(s);                      \
+  out[2]=a[2]+(s);
+
+#define MU_ADD_BY_SCALAR_VEC2D(out,a,s) \
+  out[0]=a[0]+(s);                      \
+  out[1]=a[1]+(s);
+
+
+#define MU_SUB_SCALAR_VEC3D(out,a,s)    \
+  out[0]=a[0]-(s);                      \
+  out[1]=a[1]-(s);                      \
+  out[2]=a[2]-(s);
+
+#define MU_SUB_BY_SCALAR_VEC2D(out,a,s) \
+  out[0]=a[0]-(s);                      \
+  out[1]=a[1]-(s);
+
+ 
 
 #define MU_EQUAL_PNT3D(p1,p2,tol) ((std::abs(p1[0]-p2[0]) < tol) && \
                                   (std::abs(p1[1]-p2[1]) < tol) && \
