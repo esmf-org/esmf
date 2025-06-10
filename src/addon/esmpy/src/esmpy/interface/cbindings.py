@@ -852,7 +852,8 @@ def ESMP_GridAddItem(grid, item,
                         constants._errmsg)
 
 _ESMF.ESMC_GridGetCoord.restype = ct.POINTER(ct.c_void_p)
-_ESMF.ESMC_GridGetCoord.argtypes = [ct.c_void_p, ct.c_int, ct.c_uint, ct.c_int,
+_ESMF.ESMC_GridGetCoord.argtypes = [ct.c_void_p, ct.c_int, ct.c_uint,
+                                    ct.POINTER(ct.c_int),
                                     np.ctypeslib.ndpointer(dtype=np.int32),
                                     np.ctypeslib.ndpointer(dtype=np.int32),
                                     ct.POINTER(ct.c_int)]
@@ -899,7 +900,7 @@ def ESMP_GridGetCoordPtr(grid, coordDim,
     exUB = np.array(np.zeros(grid.rank),dtype=np.int32)
 
     gridCoordPtr = _ESMF.ESMC_GridGetCoord(grid.struct.ptr, lcd, staggerloc,
-                                           lde, exLB, exUB, ct.byref(lrc))
+                                           ct.byref(lde), exLB, exUB, ct.byref(lrc))
 
     # adjust bounds to be 0 based, even though it's just a placeholder..
     exLB = exLB - 1
@@ -912,7 +913,8 @@ def ESMP_GridGetCoordPtr(grid, coordDim,
     return gridCoordPtr
 
 _ESMF.ESMC_GridGetCoordBounds.restype = ct.c_int
-_ESMF.ESMC_GridGetCoordBounds.argtypes = [ct.c_void_p, ct.c_uint, ct.c_int,
+_ESMF.ESMC_GridGetCoordBounds.argtypes = [ct.c_void_p, ct.c_uint,
+                                         ct.POINTER(ct.c_int),
                                          np.ctypeslib.ndpointer(dtype=np.int32),
                                          np.ctypeslib.ndpointer(dtype=np.int32),
                                          ct.POINTER(ct.c_int)]
@@ -953,7 +955,7 @@ def ESMP_GridGetCoordBounds(grid, staggerloc=constants.StaggerLoc.CENTER,
     exclusiveLBound = np.array(np.zeros(grid.rank),dtype=np.int32)
     exclusiveUBound = np.array(np.zeros(grid.rank),dtype=np.int32)
 
-    rc = _ESMF.ESMC_GridGetCoordBounds(grid.struct.ptr, staggerloc, lde,
+    rc = _ESMF.ESMC_GridGetCoordBounds(grid.struct.ptr, staggerloc, ct.byref(lde),
                                        exclusiveLBound, exclusiveUBound,
                                        ct.byref(lrc))
 
@@ -968,7 +970,8 @@ def ESMP_GridGetCoordBounds(grid, staggerloc=constants.StaggerLoc.CENTER,
     return exclusiveLBound, exclusiveUBound
 
 _ESMF.ESMC_GridGetItem.restype = ct.POINTER(ct.c_void_p)
-_ESMF.ESMC_GridGetItem.argtypes = [ct.c_void_p, ct.c_uint, ct.c_uint, ct.c_int,
+_ESMF.ESMC_GridGetItem.argtypes = [ct.c_void_p, ct.c_uint, ct.c_uint,
+                                   ct.POINTER(ct.c_int),
                                    ct.POINTER(ct.c_int)]
 
 def ESMP_GridGetItem(grid, item, staggerloc=constants.StaggerLoc.CENTER,
@@ -1010,7 +1013,8 @@ def ESMP_GridGetItem(grid, item, staggerloc=constants.StaggerLoc.CENTER,
     # localde
     lde = ct.c_int(localde)
 
-    gridItemPtr = _ESMF.ESMC_GridGetItem(grid.struct.ptr, item, staggerloc, lde,
+    gridItemPtr = _ESMF.ESMC_GridGetItem(grid.struct.ptr, item, staggerloc,
+                                         ct.byref(lde),
                                          ct.byref(lrc))
 
     rc = lrc.value
