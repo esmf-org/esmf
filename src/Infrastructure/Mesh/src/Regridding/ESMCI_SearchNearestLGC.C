@@ -296,18 +296,142 @@ struct CommDataOpt {
     Throw() << "src and dst must have same spatial dim for search";
   }
 
-  // Get some useful info
-  int dst_size = dst_pl.get_curr_num_pts();
-  int num_nodes_to_search=src_pl.get_curr_num_pts();
-
-  // Create search tree
-  OTree *tree=new OTree(num_nodes_to_search);
-
-  // Get universal min-max
+  // Get values to use to init min and max
   //// Use sqrt, so if it's squared it doesn't overflow
   double huge=sqrt(std::numeric_limits<double>::max());
   double min=-huge;
   double max=huge;
+
+  // Get size of dst
+  int dst_pl_num_pnts = dst_pl.get_curr_num_pts();
+
+
+  // Allocate space to hold information for dst points
+  vector<int> dst_closest_src_gid(dst_pl_num_pnts,SN_BAD_ID);
+  vector<double> dst_closest_dist2(dst_pl_num_pnts,huge);
+  vector<int> dst_done(dst_pl_num_pnts,0);
+
+  
+  //// First search tree of src points in local proximity ////
+
+  // Get size of src_pl point list
+  int src_pl_local_num_pnts = src_pl_local.get_curr_num_pts();
+
+  // Create search tree
+  OTree *src_pl_local_tree=new OTree(src_pl_local_num_pnts);
+
+  // Add points to search tree
+  for (UInt p = 0; p < src_pl_local_num_pnts; ++p) {
+
+    const point *point_ptr=src_pl_local.get_point(p);
+
+    // Set coord value in 3D point
+    double pnt[3];
+    pnt[0] = point_ptr->coords[0];
+    pnt[1] = point_ptr->coords[1];
+    pnt[2] = sdim == 3 ? point_ptr->coords[2] : 0.0;
+
+    src_pl_local_tree->add(pnt, pnt, (void*)point_ptr);
+  }
+
+
+  // Commit tree
+  src_pl_local_tree->commit();
+  
+  // Setup search structure
+  SearchData sd;
+  sd.sdim=sdim;
+  // sd.closest_src_node=NULL;
+  sd.closest_dist2=huge;
+  // sd.src_coord=NULL;
+  sd.closest_src_id=SN_BAD_ID;
+  sd.srcpointlist=&src_pl_local;
+
+  // Loop the destination points, find hosts.
+  for (UInt p = 0; p < dst_pl_num_pnts; ++p) {
+
+    const double *pnt_crd=dst_pl.get_coord_ptr(p);
+
+    // Set dst point coords in search structure
+    sd.dst_pnt[0] = pnt_crd[0];
+    sd.dst_pnt[1] = pnt_crd[1];
+    sd.dst_pnt[2] = (sdim == 3 ? pnt_crd[2] : 0.0);
+
+    // If a closest point exists from the last loop then use as initial guess
+    double pmin[3], pmax[3];
+    if (sd.closest_src_id != SN_BAD_ID) {
+    // Calculate distance
+      double dist2=(sd.dst_pnt[0]-sd.closest_coord[0])*(sd.dst_pnt[0]-sd.closest_coord[0])+
+                   (sd.dst_pnt[1]-sd.closest_coord[1])*(sd.dst_pnt[1]-sd.closest_coord[1])+
+                   (sd.dst_pnt[2]-sd.closest_coord[2])*(sd.dst_pnt[2]-sd.closest_coord[2]);
+
+      // set closest dist squared
+      sd.closest_dist2=dist2;
+
+      // Calc new search box
+      double dist=sqrt(dist2);
+
+      pmin[0]=sd.dst_pnt[0]-dist;
+      pmin[1]=sd.dst_pnt[1]-dist;
+      pmin[2]=sd.dst_pnt[2]-dist;
+
+      pmax[0]=sd.dst_pnt[0]+dist;
+      pmax[1]=sd.dst_pnt[1]+dist;
+      pmax[2]=sd.dst_pnt[2]+dist;
+    }
+
+    // Find closest source node to this destination node
+    src_pl_local_tree->runon_mm_chng(pmin, pmax, nearest_func, (void *)&sd);
+
+    // If we've found a nearest source point, then add to the search results list...
+    if (sd.closest_src_id != SN_BAD_ID) {
+      dst_closest_src_gid[p]=sd.closest_src_id;
+      dst_closest_dist2[p]=sd.closest_dist2;      
+    }
+  }
+
+  // Get rid of local tree
+  delete src_pl_local_tree;
+  
+  
+  // Check to see if we are done with any points
+  for (UInt p = 0; p < dst_pl_num_pnts; ++p) {
+
+    // If this has a closest point, see if it's within our mm box
+    if (dst_closest_src_gid[p] != SN_BAD_ID) {
+
+      // Get dst point
+      const double *pnt_crd=dst_pl.get_coord_ptr(p);
+
+      // Set dst point coords in search structure
+      double dst_pnt[3];
+      dst_pnt[0] = pnt_crd[0];
+      dst_pnt[1] = pnt_crd[1];
+      dst_pnt[2] = (sdim == 3 ? pnt_crd[2] : 0.0);
+
+      // Get closest dist
+      double dist=sqrt(dst_closest_dist2[p]);
+
+      // See if we are within box
+      bool within=true;
+      if ((dst_pnt[0] + dist) > src_local_max[0]) within=false;
+      if ((dst_pnt[1] + dist) > src_local_max[1]) within=false;
+      if ((dst_pnt[2] + dist) > src_local_max[2]) within=false;
+      if ((dst_pnt[0] - dist) < src_local_min[0]) within=false;
+      if ((dst_pnt[1] - dist) < src_local_min[1]) within=false;
+      if ((dst_pnt[2] - dist) < src_local_min[2]) within=false;
+
+      // If within, then we are done
+      dst_done[p]=1;
+    }
+  }
+  
+ 
+  // Get size of src_pl point list
+  int src_pl_num_pnts = src_pl.get_curr_num_pts();
+
+  // Create search tree
+  OTree *src_pl_tree=new OTree(src_pl_num_pnts);
 
   // Add unmasked nodes to search tree
   // and calculate proc min-max
@@ -319,7 +443,7 @@ struct CommDataOpt {
   proc_max[0]=min; proc_max[1]=min; proc_max[2]=min;
 
   // Add unmasked nodes to search tree
-  for (UInt p = 0; p < num_nodes_to_search; ++p) {
+  for (UInt p = 0; p < src_pl_num_pnts; ++p) {
 
     const point *point_ptr=src_pl.get_point(p);
 
@@ -328,7 +452,7 @@ struct CommDataOpt {
     pnt[1] = point_ptr->coords[1];
     pnt[2] = sdim == 3 ? point_ptr->coords[2] : 0.0;
 
-    tree->add(pnt, pnt, (void*)point_ptr);
+    src_pl_tree->add(pnt, pnt, (void*)point_ptr);
 
     // compute proc min max
     if (pnt[0] < proc_min[0]) proc_min[0]=pnt[0];
@@ -342,10 +466,11 @@ struct CommDataOpt {
 
 
   // Commit tree
-  tree->commit();
+  src_pl_tree->commit();
+
 
   // Create SpaceDir
-  SpaceDir *spacedir=new SpaceDir(proc_min, proc_max, tree, false);
+  SpaceDir *spacedir=new SpaceDir(proc_min, proc_max, src_pl_tree, false);
 
 
   //// Find the closest point locally ////
@@ -355,12 +480,8 @@ struct CommDataOpt {
   pmin[0] = min;  pmin[1] = min;  pmin[2] = min;
   pmax[0] = max;  pmax[1] = max;  pmax[2] = max;
 
-  // Allocate space to hold closest gids, dist
-  vector<int> closest_src_gid(dst_size,-1);
-  vector<double> closest_dist2(dst_size,huge);
-
   // Setup search structure
-  SearchData sd;
+  //  SearchData sd;
   sd.sdim=sdim;
   // sd.closest_src_node=NULL;
   sd.closest_dist2=huge;
@@ -369,8 +490,15 @@ struct CommDataOpt {
   sd.srcpointlist=&src_pl;
 
   // Loop the destination points, find hosts.
-  for (UInt p = 0; p < dst_size; ++p) {
+  for (UInt p = 0; p < dst_pl_num_pnts; ++p) {
 
+    // If we are done, then skip
+    if (dst_done[p]) continue;
+
+    // If we already have something, then skip
+    if (dst_closest_src_gid[p] != SN_BAD_ID) continue;
+    
+    // Get dst coords
     const double *pnt_crd=dst_pl.get_coord_ptr(p);
 
     // Set dst point coords in search structure
@@ -401,29 +529,33 @@ struct CommDataOpt {
     }
 
     // Find closest source node to this destination node
-    tree->runon_mm_chng(pmin, pmax, nearest_func, (void *)&sd);
+    src_pl_tree->runon_mm_chng(pmin, pmax, nearest_func, (void *)&sd);
 
     // If we've found a nearest source point, then add to the search results list...
     if (sd.closest_src_id != SN_BAD_ID) {
-      closest_src_gid[p]=sd.closest_src_id;
-      closest_dist2[p]=sd.closest_dist2;
+      dst_closest_src_gid[p]=sd.closest_src_id;
+      dst_closest_dist2[p]=sd.closest_dist2;
     }
   }
 
   // Get list of procs where a point can be located
   vector< vector<int> > proc_lists;  // List of procs
-  proc_lists.resize(dst_size);
+  proc_lists.resize(dst_pl_num_pnts);
 
-  for (int i=0; i<dst_size; i++) {
+  for (int i=0; i<dst_pl_num_pnts; i++) {
 
+    // If we are done, then skip
+    if (dst_done[i]) continue;
+
+    // Get dst coords
     const double *pnt_crd=dst_pl.get_coord_ptr(i);
 
     // Get search box based on what we've found so far
     double pnt_min[3], pnt_max[3];
 
     // If we've found a point, then search box is based on distance to it
-    if (closest_src_gid[i] != -1) {
-      double dist=sqrt(closest_dist2[i]);
+    if (dst_closest_src_gid[i] != -1) {
+      double dist=sqrt(dst_closest_dist2[i]);
 
       pnt_min[0] = pnt_crd[0]-dist;
       pnt_min[1] = pnt_crd[1]-dist;
@@ -468,7 +600,7 @@ struct CommDataOpt {
   // {
     vector< vector<int> > tmp_snd_inds;
     tmp_snd_inds.resize(num_procs);
-    for (int i=0; i<dst_size; i++) {
+    for (int i=0; i<dst_pl_num_pnts; i++) {
       for (int j=0; j<proc_lists[i].size(); j++) {
         tmp_snd_inds[proc_lists[i][j]].push_back(i);
       }
@@ -550,10 +682,10 @@ struct CommDataOpt {
       double buf[4]; // 4 is biggest this should be (i.e. 3D+dist2)
       buf[0]=pnt_crd[0];
       buf[1]=pnt_crd[1];
-      if (sdim < 3) buf[2]=closest_dist2[ind];
+      if (sdim < 3) buf[2]=dst_closest_dist2[ind];
       else {
         buf[2]=pnt_crd[2];
-        buf[3]=closest_dist2[ind];
+        buf[3]=dst_closest_dist2[ind];
       }
 
       // Push buf onto send struct
@@ -652,7 +784,7 @@ struct CommDataOpt {
       sd.srcpointlist=&src_pl;
 
       // Find closest source node to this destination node
-      tree->runon_mm_chng(pmin, pmax, nearest_func, (void *)&sd);
+      src_pl_tree->runon_mm_chng(pmin, pmax, nearest_func, (void *)&sd);
 
       // Fill in structure to be sent
       CommDataOpt cd;
@@ -745,15 +877,15 @@ struct CommDataOpt {
       if (cd.closest_src_gid > -1) {
         //      printf("#%d LAST c_s_g=%d \n", Par::Rank(),cd.closest_src_gid);
 
-        if (cd.closest_dist2 < closest_dist2[pnt_ind]) {
-          closest_dist2[pnt_ind]=cd.closest_dist2;
-          closest_src_gid[pnt_ind]=cd.closest_src_gid;
-        } else if (cd.closest_dist2 == closest_dist2[pnt_ind]) {
+        if (cd.closest_dist2 < dst_closest_dist2[pnt_ind]) {
+          dst_closest_dist2[pnt_ind]=cd.closest_dist2;
+          dst_closest_src_gid[pnt_ind]=cd.closest_src_gid;
+        } else if (cd.closest_dist2 == dst_closest_dist2[pnt_ind]) {
           // If exactly the same distance chose the point with the smallest id
           // (To make things consistent when running on different numbers of procs)
-          if (cd.closest_src_gid < closest_src_gid[pnt_ind]) {
-            closest_dist2[pnt_ind]=cd.closest_dist2;
-            closest_src_gid[pnt_ind]=cd.closest_src_gid;
+          if (cd.closest_src_gid < dst_closest_src_gid[pnt_ind]) {
+            dst_closest_dist2[pnt_ind]=cd.closest_dist2;
+            dst_closest_src_gid[pnt_ind]=cd.closest_src_gid;
           }
         }
       }
@@ -765,18 +897,18 @@ struct CommDataOpt {
 
   // Do output based on CommDataOpt
   result.clear();
-  for (int i=0; i<dst_size; i++) {
+  for (int i=0; i<dst_pl_num_pnts; i++) {
     // Get dst id of point
     int dst_id=dst_pl.get_id(i);
 
     // Do stuff depending on if nearest point was found
-    if (closest_src_gid[i] > -1) {
+    if (dst_closest_src_gid[i] > -1) {
 
       // We've found a nearest source point, so add to results list
       Search_result *sr=new Search_result();
 
       sr->dst_gid=dst_id;
-      sr->src_gid=closest_src_gid[i];
+      sr->src_gid=dst_closest_src_gid[i];
 
       result.push_back(sr);
 
