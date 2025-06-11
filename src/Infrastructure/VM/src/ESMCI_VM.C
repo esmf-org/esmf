@@ -3445,6 +3445,12 @@ VM *VM::initialize(
       esmfRuntimeEnv.push_back(esmfRuntimeVarName);
       esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
     }
+    esmfRuntimeVarName = "ESMF_RUNTIME_MPI_THREAD_SUPPORT";
+    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
+    if (esmfRuntimeVarValue){
+      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
+      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
+    }
     esmfRuntimeVarName = "ESMF_RUNTIME_PROFILE";
     esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
     if (esmfRuntimeVarValue){

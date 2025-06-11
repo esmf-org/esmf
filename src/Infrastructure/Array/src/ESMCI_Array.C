@@ -1814,9 +1814,19 @@ Array *Array::create(
   int *localDeToDeMapArg = NULL;          // default: use map from DELayout
   VM::memhandle *mh = NULL;               // default: no memory sharing
 
-  // branch on pinflag
+  // handle pinflag
   ESMC_Pin_Flag pinflag = ESMF_PIN_DE_TO_PET; // default
   if (pinflagArg) pinflag = *pinflagArg;
+  if (pinflag == ESMF_PIN_DE_TO_VAS){
+    VM *cvm = VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+    if (cvm->isMpiOnly()){
+      // all PETs of the current VM run as MPI processes -> each PET==VAS
+      pinflag = ESMF_PIN_DE_TO_PET;
+    }
+  }
+  // branch on pinflag
   if (pinflag == ESMF_PIN_DE_TO_PET){
     // regular case where each DE is only accessible from the local PET
     vector<int> temp_counts(rank);

@@ -1338,6 +1338,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call ingest_environment_variable("ESMF_RUNTIME_COMPLIANCECHECK")
         call ingest_environment_variable("ESMF_RUNTIME_GARBAGE")
         call ingest_environment_variable("ESMF_RUNTIME_GARBAGE_LOG")
+        call ingest_environment_variable("ESMF_RUNTIME_MPI_THREAD_SUPPORT")
         call ingest_environment_variable("ESMF_RUNTIME_PROFILE")
         call ingest_environment_variable("ESMF_RUNTIME_PROFILE_OUTPUT")
         call ingest_environment_variable("ESMF_RUNTIME_PROFILE_PETLIST")
@@ -1462,6 +1463,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_CONTEXT, rcToReturn=rc)) return
           endif
           if (isPresent) then
+            if (env_var_name == "ESMF_RUNTIME_MPI_THREAD_SUPPORT") then
+              ! error: ESMF_RUNTIME_MPI_THREAD_SUPPORT cannot be supported
+              ! error: through configuration file... since MPI has already
+              ! error: been initialized before ever getting here!
+              call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+                msg="Setting ESMF_RUNTIME_MPI_THREAD_SUPPORT inside "// &
+                "configuration file is not supported!", &
+                ESMF_CONTEXT, rcToReturn=rc)
+              return  ! bail out
+            endif
             if (validHConfigNode) then
               stringAlloc = ESMF_HConfigAsString(hconfigNode, &
                 keyString=env_var_name, rc=localrc)
@@ -1483,7 +1494,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_CONTEXT, rcToReturn=rc)) return
           endif
         end subroutine
-
 
       end subroutine ESMF_FrameworkInternalInit
 !------------------------------------------------------------------------------

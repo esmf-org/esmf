@@ -127,7 +127,7 @@ typedef DWORD pid_t;
 #define getpid GetCurrentProcessId
 #endif
 
-// Requested MPI thread level
+// Default requested MPI thread support level
 #ifdef ESMF_NO_PTHREADS
 #define VM_MPI_THREAD_LEVEL MPI_THREAD_SINGLE
 #else
@@ -143,6 +143,7 @@ namespace ESMCI {
 // Definition of class static data members
 std::vector<MPI_Datatype> VMK::customType(10);  // up to 2^10 = 1024 byte
 MPI_Comm VMK::default_mpi_c;
+int VMK::mpi_thread_level_requested;
 int VMK::mpi_thread_level;
 int VMK::mpi_init_outside_esmf;
 int VMK::pre_mpi_init = 0;
@@ -410,6 +411,31 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   // currently only obtain arguments for MPICH because it needs it!!!
   obtain_args();
 #endif
+  // determine mpi_thread_level_requested
+  mpi_thread_level_requested = VM_MPI_THREAD_LEVEL; // default
+  char const *esmfRuntimeVarValue =
+    std::getenv("ESMF_RUNTIME_MPI_THREAD_SUPPORT");
+  if (esmfRuntimeVarValue && strlen(esmfRuntimeVarValue) > 0) {
+    std::string mpi_thread_level_string(esmfRuntimeVarValue);
+    transform(mpi_thread_level_string.begin(), mpi_thread_level_string.end(),
+      mpi_thread_level_string.begin(), ::toupper);
+    if (mpi_thread_level_string == "MPI_THREAD_SINGLE"){
+      mpi_thread_level_requested = MPI_THREAD_SINGLE;
+    }else if (mpi_thread_level_string == "MPI_THREAD_FUNNELED"){
+      mpi_thread_level_requested = MPI_THREAD_FUNNELED;
+    }else if (mpi_thread_level_string == "MPI_THREAD_SERIALIZED"){
+      mpi_thread_level_requested = MPI_THREAD_SERIALIZED;
+    }else if (mpi_thread_level_string == "MPI_THREAD_MULTIPLE"){
+      mpi_thread_level_requested = MPI_THREAD_MULTIPLE;
+    }else{
+      // error: unknown MPI thread support level
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_VAL_WRONG,
+        "Unkown MPI thread support level requested (typo?): "
+        + mpi_thread_level_string, ESMC_CONTEXT, &localrc);
+      throw localrc;  // bail out with exception
+    }
+  }
   // next check is whether MPI has been initialized yet
   // there is a check in vmk_sigcatcher() to make sure signals between processes
   // are only used if ESMF initialized MPI to make sure all the threads
@@ -425,10 +451,10 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
     argc_mpich = argc;
     for (int k=0; k<100; k++)
       argv_mpich[k] = argv[k];
-    MPI_Init_thread(&argc_mpich, (char ***)&argv_mpich, VM_MPI_THREAD_LEVEL,
-      &mpi_thread_level);
+    MPI_Init_thread(&argc_mpich, (char ***)&argv_mpich,
+      mpi_thread_level_requested, &mpi_thread_level);
 #else
-    MPI_Init_thread(NULL, NULL, VM_MPI_THREAD_LEVEL, &mpi_thread_level);
+    MPI_Init_thread(NULL, NULL, mpi_thread_level_requested, &mpi_thread_level);
 #endif
   }else{
     // query the MPI thread support level as set by external MPI initialization
@@ -3367,8 +3393,9 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
   msg.str("");  // clear
   if (mpi_t_okay){
     int mpi_rc;
-    int provided_thread_level;
-    mpi_rc = MPI_T_init_thread(VM_MPI_THREAD_LEVEL, &provided_thread_level);
+    int mpi_thread_level_provided;
+    mpi_rc = MPI_T_init_thread(mpi_thread_level_requested,
+      &mpi_thread_level_provided);
     if (mpi_rc != MPI_SUCCESS){
       int localrc;
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
