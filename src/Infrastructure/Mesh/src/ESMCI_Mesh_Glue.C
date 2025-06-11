@@ -1991,8 +1991,7 @@ void ESMCI_MeshGetElemConnCount(Mesh *mesh, int *_elemConnCount, int *rc){
   // Doesn't work with split meshes right now
   if (mesh->is_split) {
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-       " Can't get elem connection count from mesh containing >4 elements.",
-                                       ESMC_CONTEXT, rc)) return;
+                                       "Getting elementConnCount isn't currently supported for a 2D Mesh containing elements with >4 nodes.",                                       ESMC_CONTEXT, rc)) return;
   }
 
   // Loop summing number of nodes per element
@@ -2126,7 +2125,7 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     if (mesh->is_split) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-         " Can't currently get element info from a mesh containing >4 elements.",
+                                       "Getting element information isn't currently supported for a 2D Mesh containing elements with >4 nodes.",
                                        ESMC_CONTEXT, &localrc)) throw localrc;
     }
     
@@ -2462,7 +2461,7 @@ void ESMCI_MeshSetElemInfo(Mesh *mesh,
     if (mesh->is_split && present(elemArea)) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  " element areas can't currently be set for a mesh containing >4 elements.",
+            "Setting element areas isn't currently supported for a 2D Mesh containing elements with >4 nodes.",
                           ESMC_CONTEXT, &localrc)) throw localrc;
     }
     
