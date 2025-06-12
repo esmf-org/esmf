@@ -1,4 +1,4 @@
-[![ESMF CI](https://github.com/esmf-org/esmf/actions/workflows/esmf-all-tests.yml/badge.svg?branch=develop&event=push)](https://github.com/esmf-org/esmf/actions/workflows/esmf-all-tests.yml)
+[![ESMF CI](https://github.com/esmf-org/esmf/actions/workflows/esmf-all-tests.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/esmf-all-tests.yml)
 [![NUOPC App Prototypes Test](https://github.com/esmf-org/nuopc-app-prototypes/actions/workflows/develop-nightly.yml/badge.svg)](https://github.com/esmf-org/nuopc-app-prototypes/actions/workflows/develop-nightly.yml)
 [![ESMF Spack Test](https://github.com/esmf-org/esmf/actions/workflows/test-build-spack.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/test-build-spack.yml)
 [![ESMF Docs](https://github.com/esmf-org/esmf/actions/workflows/build-esmf-docs.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/build-esmf-docs.yml)
