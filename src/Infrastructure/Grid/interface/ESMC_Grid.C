@@ -366,36 +366,14 @@ int ESMC_GridGetLocalDECount(ESMC_Grid grid,
   // convert the ESMC_Grid to an ESMCI::Grid
   ESMCI::Grid *gridp = reinterpret_cast<ESMCI::Grid *>(grid.ptr);
 
-  const ESMCI::DistGrid *distgrid;
-
-  switch (gridp->getStatus()) {
-  case ESMC_GRIDSTATUS_SHAPE_READY:
-    distgrid = gridp->getDistGrid();
-    break;
-  case ESMC_GRIDSTATUS_NOT_READY:
-    distgrid = gridp->getProtoGrid()->distgrid;
-    if (distgrid == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-          " distgrid hasn't been set, so localDECount not available",
-          ESMC_CONTEXT, &localrc);
-      return localrc;
-    }
-    break;
-  case ESMC_GRIDSTATUS_UNINIT:
-  case ESMC_GRIDSTATUS_INVALID:
+  if (gridp->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-        " grid hasn't been initialized, so localDECount not available",
-        ESMC_CONTEXT, &localrc);
-    return localrc;
-  default:
-    // We should never get here: we should explicitly handle all possible statuses above.
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-        " unhandled grid status",
+        " grid hasn't been fully initialized, so localDECount is not available",
         ESMC_CONTEXT, &localrc);
     return localrc;
   }
 
-  *localDECount = distgrid->getDELayout()->getLocalDeCount();
+  *localDECount = gridp->getDistGrid()->getDELayout()->getLocalDeCount();
 
   localrc = ESMF_SUCCESS;
   return localrc;
