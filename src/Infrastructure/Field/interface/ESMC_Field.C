@@ -316,6 +316,28 @@ int ESMC_FieldGetBounds(ESMC_Field field,
 }
 //--------------------------------------------------------------------------
 
+//--------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FieldGetLocalDECount()"
+int ESMC_FieldGetLocalDECount(ESMC_Field field, int *localDECount){
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;   // local return code
+  int rc = ESMC_RC_NOT_IMPL;        // final return code
+
+  ESMC_Array array = ESMC_FieldGetArray(field, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
+
+  localrc = ESMC_ArrayGetLocalDECount(array, localDECount);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//--------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------
 #undef  ESMC_METHOD
