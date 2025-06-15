@@ -361,7 +361,7 @@ int ESMC_GridGetLocalDECount(ESMC_Grid grid,
                              int *localDECount){
 
   // Initialize return code. Assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;
+  int rc = ESMC_RC_NOT_IMPL;
 
   // convert the ESMC_Grid to an ESMCI::Grid
   ESMCI::Grid *gridp = reinterpret_cast<ESMCI::Grid *>(grid.ptr);
@@ -369,14 +369,14 @@ int ESMC_GridGetLocalDECount(ESMC_Grid grid,
   if (gridp->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
         " grid hasn't been fully initialized, so localDECount is not available",
-        ESMC_CONTEXT, &localrc);
-    return localrc;
+        ESMC_CONTEXT, &rc);
+    return rc;
   }
 
   *localDECount = gridp->getDistGrid()->getDELayout()->getLocalDeCount();
 
-  localrc = ESMF_SUCCESS;
-  return localrc;
+  rc = ESMF_SUCCESS;
+  return rc;
 }
 //-----------------------------------------------------------------------------
 
