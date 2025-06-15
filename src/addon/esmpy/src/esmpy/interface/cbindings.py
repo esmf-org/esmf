@@ -800,8 +800,9 @@ def ESMP_GridAddCoord(grid, staggerloc=constants.StaggerLoc.CENTER):
     lbound = np.array(np.zeros(grid.rank),dtype=np.int32)
     ubound = np.array(np.zeros(grid.rank),dtype=np.int32)
     #TODO: this one will need better lde handling
+    lde = ct.c_int(0)
     gridCoordPtr = _ESMF.ESMC_GridGetCoord(grid.struct.ptr,
-                                           coordDim, staggerloc, 0,
+                                           coordDim, staggerloc, ct.byref(lde),
                                            lbound, ubound,
                                            ct.byref(lrc))
     rc = lrc.value
@@ -1023,6 +1024,27 @@ def ESMP_GridGetItem(grid, item, staggerloc=constants.StaggerLoc.CENTER,
                         constants._errmsg)
 
     return gridItemPtr
+
+_ESMF.ESMC_GridGetLocalDECount.restype = ct.c_int
+_ESMF.ESMC_GridGetLocalDECount.argtypes = [ct.c_void_p,
+                                           ct.POINTER(ct.c_int)]
+
+def ESMP_GridGetLocalDECount(grid):
+    """
+    Preconditions: An ESMP_Grid has been created\n
+    Postconditions: An integer specifying the number of DEs in this grid on this PET
+                    is returned\n
+    Arguments:\n
+        :RETURN: integer :: localDECount\n
+        ESMP_Grid        :: grid\n
+    """
+    lde_count = ct.c_int(0)
+    rc = _ESMF.ESMC_GridGetLocalDECount(grid.struct.ptr, ct.byref(lde_count))
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_GridGetLocalDECount() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+    de_count = lde_count.value
+    return de_count
 
 _ESMF.ESMC_GridWrite.restype = ct.c_int
 _ESMF.ESMC_GridWrite.argtypes = [ct.c_void_p, ct.c_uint,Py3Char]

@@ -164,8 +164,6 @@ class Grid(object):
         from_file = False
         cubed_sphere = False
 
-        self._decount = 1
-
         # in-memory grid
         if not isinstance(max_index, type(None)):
             # cast max_index if not already done
@@ -243,7 +241,6 @@ class Grid(object):
         elif not isinstance(tilesize, type(None)):
             # set the cubed_sphere flag to True
             cubed_sphere = True
-            self._decount = 6
             #raise errors for all in-memory grid options
             if not isinstance(max_index, type(None)):
                 warnings.warn("max_index is not used to create a cubed sphere grid, this argument will be ignored.")
@@ -433,6 +430,9 @@ class Grid(object):
         else:
             self._type = coord_typekind
 
+        # local DE count
+        self._local_de_count = ESMP_GridGetLocalDECount(self)
+
         # staggerloc
         self._staggerloc = [False for a in range(2**self.rank)]
 
@@ -502,8 +502,8 @@ class Grid(object):
         if pet_count() > 1:
             raise SerialMethod
 
-        if self.decount > 1:
-            raise SerialMethod
+        if self.local_de_count > 1:
+            raise SingleLocalDEMethod
 
         # format and copy
         slc = get_formatted_slice(slc, self.rank)
@@ -695,14 +695,14 @@ class Grid(object):
         return self._num_peri_dims
 
     @property
-    def decount(self):
+    def local_de_count(self):
         """
         :rtype: int
-        :return: The total number of tiles in the
-            :class:`~esmpy.api.grid.Grid`.
+        :return: The number of DEs in the
+            :class:`~esmpy.api.grid.Grid` on this PET.
         """
 
-        return self._decount
+        return self._local_de_count
 
     @property
     def periodic_dim(self):
