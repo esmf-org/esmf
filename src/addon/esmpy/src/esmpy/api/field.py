@@ -156,6 +156,9 @@ class Field(object):
 
         self._grid = grid
 
+        self._local_de_count = ESMP_FieldGetLocalDECount(struct)
+
+
         # for arbitrary metadata
         self._meta = {}
 
@@ -170,6 +173,9 @@ class Field(object):
     def __getitem__(self, slc):
         if pet_count() > 1:
             raise SerialMethod
+
+        if self.local_de_count > 1:
+            raise SingleLocalDEMethod
 
         slc = get_formatted_slice(slc, self.rank)
 
@@ -246,6 +252,15 @@ class Field(object):
             :class:`~esmpy.api.field.Field` is built.
         """
         return self._grid
+
+    @property
+    def local_de_count(self):
+        """
+        :rtype: int
+        :return: The number of DEs in the :class:`~esmpy.api.field.Field`
+            on this PET.
+        """
+        return self._local_de_count
 
     @property
     def lower_bounds(self):

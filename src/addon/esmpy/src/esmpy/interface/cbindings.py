@@ -1957,6 +1957,27 @@ def ESMP_FieldGetBounds(field, rank, localDe=0):
 
     return exLB, exUB
 
+_ESMF.ESMC_FieldGetLocalDECount.restype = ct.c_int
+_ESMF.ESMC_FieldGetLocalDECount.argtypes = [ct.c_void_p,
+                                            ct.POINTER(ct.c_int)]
+
+def ESMP_FieldGetLocalDECount(field):
+    """
+    Preconditions: An ESMP_Field has been created\n
+    Postconditions: An integer specifying the number of DEs in this field on this PET
+                    is returned\n
+    Arguments:\n
+        :RETURN: integer  :: localDECount\n
+        ESMP_Field        :: field\n
+    """
+    lde_count = ct.c_int(0)
+    rc = _ESMF.ESMC_FieldGetLocalDECount(field.ptr, ct.byref(lde_count))
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_FieldGetLocalDECount() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+    de_count = lde_count.value
+    return de_count
+
 _ESMF.ESMC_FieldPrint.restype = ct.c_int
 _ESMF.ESMC_FieldPrint.argtypes = [ct.c_void_p]
 
