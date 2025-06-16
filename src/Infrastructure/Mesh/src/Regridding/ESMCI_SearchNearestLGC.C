@@ -280,13 +280,13 @@ struct SearchData {
 
 
 
-  void create_OTree_from_plist(const PointList &plist, OTree *&otree) {
+  void create_OTree_from_plist(const PointList *plist, OTree *&otree) {
 
     // Get dimension
-    int sdim=plist.get_coord_dim();
+    int sdim=plist->get_coord_dim();
     
     // Get size point list
-   int plist_num_pnts = plist.get_curr_num_pts();
+   int plist_num_pnts = plist->get_curr_num_pts();
 
     // Create search tree
     otree=new OTree(plist_num_pnts);
@@ -294,7 +294,7 @@ struct SearchData {
     // Add points to search tree
     for (UInt p = 0; p < plist_num_pnts; ++p) {
       
-      const point *point_ptr=plist.get_point(p);
+      const point *point_ptr=plist->get_point(p);
       
       // Set coord value in 3D point
       double pnt[3];
@@ -503,14 +503,20 @@ struct CommDataOpt {
 };
 
   /* XMRKX */
-  void ParSearchNearestSrcToDstOpt(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status) {
+  void ParSearchNearestSrcToDstOpt(const PointList &src_pl_ref, const PointList &dst_pl_ref, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status) {
     Trace __trace("ParSearchNearestSrcToDst(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result)");
   //int FindPnts(const Mesh &mesh, int unmappedaction, int dim_pnts, int num_pnts, double *pnts, int *procs, int *gids) {
   //  Trace __trace("FindPnts()");
 
+
+  // Get pointers to keep things consistent until we switch everything to refs
+  const PointList *src_pl=&src_pl_ref;
+  const PointList *dst_pl=&dst_pl_ref;
+
+    
   // Get spatial dim and make sure both have the same
-  int sdim=src_pl.get_coord_dim();
-  if (sdim != dst_pl.get_coord_dim()) {
+  int sdim=src_pl->get_coord_dim();
+  if (sdim != dst_pl->get_coord_dim()) {
     Throw() << "src and dst must have same spatial dim for search";
   }
 
@@ -519,7 +525,7 @@ struct CommDataOpt {
   double neg_huge=-huge;
   
   // Get size of dst
-  int dst_pl_num_pnts = dst_pl.get_curr_num_pts();
+  int dst_pl_num_pnts = dst_pl->get_curr_num_pts();
 
   // Allocate space to hold information for dst points
   vector<int> dst_closest_src_gid(dst_pl_num_pnts,SN_BAD_ID);
@@ -533,9 +539,9 @@ struct CommDataOpt {
   double dst_max[3]={neg_huge,neg_huge,neg_huge};
 
   // Loop calculating local min/max
-  for (UInt p = 0; p < dst_pl.get_curr_num_pts(); ++p) {
+  for (UInt p = 0; p < dst_pl->get_curr_num_pts(); ++p) {
 
-    const point *pnt_ptr=dst_pl.get_point(p);
+    const point *pnt_ptr=dst_pl->get_point(p);
 
     // Set coord value in 3D point
     dst_pnt[0] = pnt_ptr->coords[0];
@@ -551,10 +557,11 @@ struct CommDataOpt {
 
   // TODO: Expand box by a factor in each direction
 
+
   // Create a new pointlist (src_pl_local) where
   // any point that lies within dst_min & dst_max is on this PET
   PointList *src_pl_local;
-  create_plist_using_minmax(&src_pl,
+  create_plist_using_minmax(src_pl,
                             dst_min, dst_max,
                             src_pl_local);
   
@@ -569,7 +576,7 @@ struct CommDataOpt {
 
   // Create tree
   OTree *src_pl_local_tree;
-  create_OTree_from_plist(*src_pl_local, src_pl_local_tree);
+  create_OTree_from_plist(src_pl_local, src_pl_local_tree);
 
  
   // Setup search structure
@@ -584,7 +591,7 @@ struct CommDataOpt {
   // Loop the destination points, find hosts.
   for (UInt p = 0; p < dst_pl_num_pnts; ++p) {
 
-    const double *pnt_crd=dst_pl.get_coord_ptr(p);
+    const double *pnt_crd=dst_pl->get_coord_ptr(p);
 
     // Set dst point coords in search structure
     sd.dst_pnt[0] = pnt_crd[0];
@@ -632,6 +639,108 @@ struct CommDataOpt {
   delete src_pl_local_tree;
   
   
+  // For debugging see if there are any unmapped points
+  bool has_unmapped=false;
+  for (UInt p = 0; p < dst_pl_num_pnts; ++p) {
+    if (dst_closest_src_gid[p] == SN_BAD_ID) {
+      has_unmapped=true;
+    }
+  }
+
+  if (has_unmapped) {
+    printf("%d# has unmapped dst_min=%f %f %f dst_max=%f %f %f\n",Par::Rank(),MU_LST_VEC3D(dst_min),MU_LST_VEC3D(dst_max));
+  }
+
+
+  // If there are still unmapped, then look further
+  if (has_unmapped) {
+    // Create tree
+    OTree *src_pl_tree;
+    create_OTree_from_plist(src_pl, src_pl_tree);
+
+    // Init search structure
+    //SearchData sd;
+    sd.sdim=sdim;
+    sd.closest_dist2=huge;
+    sd.closest_src_id=SN_BAD_ID;
+    sd.srcpointlist=src_pl;
+    MU_SET_TO_SCALAR_VEC3D(sd.dst_pnt,0.0);
+  
+    // Loop the destination points, find hosts.
+    for (UInt p = 0; p < dst_pl_num_pnts; ++p) {
+      
+      // Skip if done
+      if (dst_done[p]) continue;
+
+      // Get point
+      const double *pnt_crd=dst_pl->get_coord_ptr(p);
+      
+      // Set dst point coords in search structure
+      sd.dst_pnt[0] = pnt_crd[0];
+      sd.dst_pnt[1] = pnt_crd[1];
+      sd.dst_pnt[2] = (sdim == 3 ? pnt_crd[2] : 0.0);
+      
+      // Init search box to max possible and then maybe change below
+      double pmin[3]={-huge, -huge, -huge};
+      double pmax[3]={huge, huge, huge};
+      
+      // If we have a valid previous nearest point, then use that
+      if (dst_closest_src_gid[p] !=  SN_BAD_ID) {
+        // Fill search struct
+        sd.closest_dist2=dst_closest_dist2[p];
+        sd.closest_src_id=dst_closest_src_gid[p];
+        
+        // Calc pmin/pmax
+        double dist=sqrt(dst_closest_dist2[p]);
+        MU_SUB_SCALAR_VEC3D(pmin,sd.dst_pnt,dist);
+        MU_ADD_SCALAR_VEC3D(pmax,sd.dst_pnt,dist);      
+      } else {
+        // Use the last searched point as a guess
+        if (sd.closest_src_id != SN_BAD_ID) {
+          // Calculate distance        
+          double dist2=(sd.dst_pnt[0]-sd.closest_coord[0])*(sd.dst_pnt[0]-sd.closest_coord[0])+
+            (sd.dst_pnt[1]-sd.closest_coord[1])*(sd.dst_pnt[1]-sd.closest_coord[1])+
+            (sd.dst_pnt[2]-sd.closest_coord[2])*(sd.dst_pnt[2]-sd.closest_coord[2]);
+        
+          // set closest dist squared
+          sd.closest_dist2=dist2;
+          // The sd.closest_src_id is still set from last time
+          
+          // Calc new search box
+          double dist=sqrt(dist2);
+          MU_SUB_SCALAR_VEC3D(pmin,sd.dst_pnt,dist);
+          MU_ADD_SCALAR_VEC3D(pmax,sd.dst_pnt,dist);      
+        }
+      }
+
+      // Find closest source node to this destination node
+      src_pl_tree->runon_mm_chng(pmin, pmax, nearest_func, (void *)&sd);
+      
+      // If we've found a nearer source point, then add to the search results list...
+      if (sd.closest_src_id != SN_BAD_ID) {      
+        dst_closest_src_gid[p]=sd.closest_src_id;
+        dst_closest_dist2[p]=sd.closest_dist2;      
+      }
+    }
+
+    // Get rid of tree
+    delete src_pl_tree;
+  }
+  
+  // For debugging see if there are any unmapped points
+  bool still_has_unmapped=false;
+  for (UInt p = 0; p < dst_pl_num_pnts; ++p) {
+    if (dst_closest_src_gid[p] == SN_BAD_ID) {
+      still_has_unmapped=true;
+    }
+  }
+  
+  if (still_has_unmapped) {
+    printf("%d# still has unmapped src_pl num=%d\n",Par::Rank(),src_pl->get_curr_num_pts());
+  }
+  
+  
+  
   // Check to see if we are done with any points
   for (UInt p = 0; p < dst_pl_num_pnts; ++p) {
 
@@ -639,7 +748,7 @@ struct CommDataOpt {
     if (dst_closest_src_gid[p] != SN_BAD_ID) {
 
       // Get dst point
-      const double *pnt_crd=dst_pl.get_coord_ptr(p);
+      const double *pnt_crd=dst_pl->get_coord_ptr(p);
 
       // Set dst point coords in search structure
       double dst_pnt[3];
@@ -660,9 +769,12 @@ struct CommDataOpt {
       if ((dst_pnt[2] - dist) < dst_min[2]) within=false;
 
       // If within, then we are done
-      dst_done[p]=1;
+      if (within) dst_done[p]=1;
     }
   }
+
+
+
   
 
   //// Given the distances for the dst points, calculate a wider min/max
@@ -672,7 +784,7 @@ struct CommDataOpt {
   double dst_max_final[3]={neg_huge,neg_huge,neg_huge};
 
   // Loop calculating local min/max
-  for (UInt p = 0; p < dst_pl.get_curr_num_pts(); ++p) {
+  for (UInt p = 0; p < dst_pl->get_curr_num_pts(); ++p) {
 
     // Skip if already done
     // What happens if there's nothing...
@@ -683,7 +795,7 @@ struct CommDataOpt {
     if (dst_closest_src_gid[p] == SN_BAD_ID) Throw() << "Point "<<p<<" not mapped yet!";
     
     // Get dst_pnt
-    const point *pnt_ptr=dst_pl.get_point(p);
+    const point *pnt_ptr=dst_pl->get_point(p);
 
     // Set coord value in 3D point
     double dst_pnt[3]={0.0,0.0,0.0};
@@ -710,14 +822,14 @@ struct CommDataOpt {
   // Create a new pointlist (src_pl_final) where
   // any point that lies within dst_min_final & dst_max_final is on this PET
   PointList *src_pl_final;
-  create_plist_using_minmax(&src_pl,
+  create_plist_using_minmax(src_pl,
                             dst_min_final, dst_max_final,
                             src_pl_final);
  
   
   // Create tree for the final list
   OTree *src_pl_final_tree;
-  create_OTree_from_plist(*src_pl_final, src_pl_final_tree);
+  create_OTree_from_plist(src_pl_final, src_pl_final_tree);
 
   // Init search structure
   //SearchData sd;
@@ -734,7 +846,7 @@ struct CommDataOpt {
     if (dst_done[p]) continue;
 
     // Get point
-    const double *pnt_crd=dst_pl.get_coord_ptr(p);
+    const double *pnt_crd=dst_pl->get_coord_ptr(p);
 
     // Set dst point coords in search structure
     sd.dst_pnt[0] = pnt_crd[0];
@@ -788,7 +900,7 @@ struct CommDataOpt {
   result.clear();
   for (int i=0; i<dst_pl_num_pnts; i++) {
     // Get dst id of point
-    int dst_id=dst_pl.get_id(i);
+    int dst_id=dst_pl->get_id(i);
 
     // Do stuff depending on if nearest point was found
     if (dst_closest_src_gid[i] != SN_BAD_ID) {
