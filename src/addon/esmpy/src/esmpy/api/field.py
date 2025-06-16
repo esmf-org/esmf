@@ -369,9 +369,6 @@ class Field(object):
         Read data into an existing :class:`~esmpy.api.field.Field` from a
         CF-compliant NetCDF file.
 
-        :note: This interface is not supported when ESMF is built with
-            ``ESMF_COMM=mpiuni``.
-
         :note: This interface does not currently support reading ungridded 
                dimensions.
 
