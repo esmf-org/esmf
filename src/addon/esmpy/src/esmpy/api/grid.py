@@ -622,6 +622,16 @@ class Grid(object):
         return self._has_corners
 
     @property
+    def local_de_count(self):
+        """
+        :rtype: int
+        :return: The number of DEs in the
+            :class:`~esmpy.api.grid.Grid` on this PET.
+        """
+
+        return self._local_de_count
+
+    @property
     def lower_bounds(self):
         """
         :rtype: A list of numpy arrays with an entry for every stagger location
@@ -693,16 +703,6 @@ class Grid(object):
         """
 
         return self._num_peri_dims
-
-    @property
-    def local_de_count(self):
-        """
-        :rtype: int
-        :return: The number of DEs in the
-            :class:`~esmpy.api.grid.Grid` on this PET.
-        """
-
-        return self._local_de_count
 
     @property
     def periodic_dim(self):
