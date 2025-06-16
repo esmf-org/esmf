@@ -509,6 +509,8 @@ struct CommDataOpt {
   //  Trace __trace("FindPnts()");
 
 
+    printf("%d# Opt Beg\n",Par::Rank());
+    
   // Get pointers to keep things consistent until we switch everything to refs
   const PointList *src_pl=&src_pl_ref;
   const PointList *dst_pl=&dst_pl_ref;
@@ -553,10 +555,21 @@ struct CommDataOpt {
     MU_SET_MAX_VEC3D(dst_max,dst_pnt);
   }
 
-  //  printf("%d# dst_min=%f %f %f dst_max=%f %f %f\n",Par::Rank(),MU_LST_VEC3D(dst_min),MU_LST_VEC3D(dst_max));
 
-  // TODO: Expand box by a factor in each direction
-
+  // Expand box by a factor in each direction
+  double factor=0.1; // Expand by 10%
+  double d;
+  d=dst_max[0]-dst_min[0];
+  dst_min[0]=dst_min[0]-d*factor;
+  dst_max[0]=dst_max[0]+d*factor;
+  d=dst_max[1]-dst_min[1];
+  dst_min[1]=dst_min[1]-d*factor;
+  dst_max[1]=dst_max[1]+d*factor;
+  d=dst_max[2]-dst_min[2];
+  dst_min[2]=dst_min[2]-d*factor;
+  dst_max[2]=dst_max[2]+d*factor;
+  
+  
 
   // Create a new pointlist (src_pl_local) where
   // any point that lies within dst_min & dst_max is on this PET
@@ -566,11 +579,12 @@ struct CommDataOpt {
                             src_pl_local);
   
 
+#if 0
   // Check if we don't have any local points
   if (src_pl_local->get_curr_num_pts() == 0) {
     printf("BOB: WARNING proc %d has no src_pl_local points!!!\n",Par::Rank());
   }
- 
+#endif 
   
   //// First search tree of src points in local proximity ////
 
@@ -792,7 +806,7 @@ struct CommDataOpt {
     //    if (dst_done[p]) continue;
 
     // Error out if not found yet
-    if (dst_closest_src_gid[p] == SN_BAD_ID) Throw() << "Point "<<p<<" not mapped yet!";
+    //    if (dst_closest_src_gid[p] == SN_BAD_ID) Throw() << "Point "<<p<<" not mapped yet!";
     
     // Get dst_pnt
     const point *pnt_ptr=dst_pl->get_point(p);
@@ -818,6 +832,8 @@ struct CommDataOpt {
 
   //printf("%d# dst_min_final=%f %f %f dst_max_final=%f %f %f\n",Par::Rank(),MU_LST_VEC3D(dst_min_final),MU_LST_VEC3D(dst_max_final));
 
+  printf("%d# Opt Before final\n",Par::Rank());
+  
 
   // Create a new pointlist (src_pl_final) where
   // any point that lies within dst_min_final & dst_max_final is on this PET
@@ -951,6 +967,8 @@ struct CommDataOpt {
     }
   }
 
+  printf("%d# Opt End\n",Par::Rank());
+  
 #if 0
   for (int i=0; i<num_rcv_pets; i++) {
     printf(" %d# to %d pnt # = ",Par::Rank(),rcv_pets[i]);
