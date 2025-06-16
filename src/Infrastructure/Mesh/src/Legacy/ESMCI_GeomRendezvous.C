@@ -328,7 +328,6 @@ static void GetObjectSrc(void *user, int numGlobalIds, int numLids, int numObjs,
                      freeze_src(freeze_src_),
                      srcplist_rend(NULL),
                      dstplist_rend(NULL),
-                     srcplist_local(NULL),
                      on_sph(_on_sph),
                      status(GEOMREND_STATUS_UNINIT)
 {
@@ -838,135 +837,6 @@ void GeomRend::build_src_mig_plist(ZoltanUD &zud, int numExport,
 
 }
 
-
-void build_mig_plist(PointList *plist,
-                      std::vector<int> &plist_snd_loc, std::vector<int> &plist_snd_pet, 
-                      PointList *&new_plist) {
-  
-  // Make sure plist vectors are of the same size
-  ThrowRequire(plist_snd_loc.size() == plist_snd_pet.size());
-
-  // Get parallel information
-  int num_procs=Par::Size();
-  int myrank=Par::Rank();
-
-  // Get coordinate dimension
-  int sdim=plist->get_coord_dim();
-  
-  // Calculate how many we're sending to each PET
-  std::vector<int> pet_counts;
-  pet_counts.resize(num_procs,0);
-  for (const int &pet: plist_snd_pet) {
-    pet_counts[pet]++;
-  }
-  
-  // Construct communication pattern information
-  int snd_size=(sdim+1)*sizeof(double);
-  int num_snd_procs=0;
-  std::vector<int> snd_pets;
-  std::vector<int> snd_sizes;
-  std::vector<int> snd_counts;
-  for (int i=0; i<num_procs; i++) {
-    if (pet_counts[i] > 0) {
-      num_snd_procs++;
-      snd_pets.push_back(i);
-      snd_sizes.push_back(pet_counts[i]*snd_size);
-      snd_counts.push_back(pet_counts[i]);
-    }
-  }
-
-  // Setup pattern and sizes
-  SparseMsg comm;
-  if (num_snd_procs >0) {
-    comm.setPattern(num_snd_procs, (const UInt *)&(snd_pets[0]));
-    comm.setSizes((UInt *)&(snd_sizes[0]));
-  } else {
-    comm.setPattern(0, (const UInt *)NULL);
-    comm.setSizes((UInt *)NULL);
-  }
-
-  // Reset buffers
-  comm.resetBuffers();
-
-  // Pack points into buffers
-  for (int i=0; i < plist_snd_pet.size(); i++) {
-
-    // Get which loc and where it's to be sent
-    int loc=plist_snd_loc[i];
-    int pet=plist_snd_pet[i];
-
-    // Get buffer
-    SparseMsg:: buffer *b=comm.getSendBuffer(pet);
-
-    // Get point coords and id
-    const double *pnt_coords = plist->get_coord_ptr(loc);
-    int pnt_id = plist->get_id(loc);
-
-    // pack buf
-    double buf[4]; // 4 is biggest this should be (i.e. 3D+id)
-    buf[0]=pnt_coords[0];
-    buf[1]=pnt_coords[1];
-    if (sdim < 3)
-      buf[2]=pnt_id;  //passing an int through a double...inefficient but ok?
-    else {
-      buf[2]=pnt_coords[2];
-      buf[3]=pnt_id;  //passing an int through a double...inefficient but ok?
-    }
-
-    // Push buf onto send struct
-    b->push((const UChar *)buf, (UInt)snd_size);
-  }
-
-  // Communicate point information
-  comm.communicate();
-
-  // Calculate the number of points received
-  int num_rcv_pnts=0;
-  for (std::vector<UInt>::iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {
-    UInt proc = *p;
-    SparseMsg::buffer *b = comm.getRecvBuffer(proc);
-
-    // num messages
-    int num_pnts_this_buf = b->msg_size()/snd_size;
-
-    // Add it to total
-    num_rcv_pnts += num_pnts_this_buf;    
-  }
-  
-
-  // Create new PointList 
-  new_plist = new ESMCI::PointList(num_rcv_pnts,sdim);
-
-  // Unpack recv'd information and add to pointlist
-  for (std::vector<UInt>::iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {
-    UInt pet = *p;
-    SparseMsg::buffer *b = comm.getRecvBuffer(pet);
-    
-    // Unpack everything from this processor
-    while (!b->empty()) {
-      double buf[4]; // 4 is biggest this should be
-      
-      // Get information
-      b->pop((UChar *)buf, (UInt)snd_size);
-      
-      // Unpack buf
-      double pnt_coords[3]={0.0,0.0,0.0};
-      int pnt_id;      
-      pnt_coords[0]=buf[0];
-      pnt_coords[1]=buf[1];
-      if (sdim < 3) {
-        pnt_id=(int)buf[2];
-      } else {
-        pnt_coords[2]=buf[2];
-        pnt_id=(int)buf[3];
-      }
-
-      // Add to pointlist
-      new_plist->add(pnt_id,pnt_coords);      
-    }   
-  }
-  
-}
 
 
 void GeomRend::build_dst_mig(Zoltan_Struct *zz, ZoltanUD &zud, int numExport,
@@ -2053,9 +1923,6 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
 // Build a rendezvous distribution for nearest neighor specifically
 void GeomRend::Build_NN(struct Zoltan_Struct **zzp, bool free_zz) {
   Trace __trace("GeomRend::Build_NN()");
-
-printf("In Build_NN()!!!!\n");
-
   
   // Make sure that it's not already built
   ThrowRequire(built == false);
@@ -2139,85 +2006,6 @@ printf("In Build_NN()!!!!\n");
                       &importProcs, &importToPart);
   Zoltan_LB_Free_Part(&exportGlobalids, &exportLocalids,
                       &exportProcs, &exportToPart);
-
-
-  
-  ////// Get local min/max of dst
-
-  //// Use sqrt, so if it's squared it doesn't overflow
-  double huge=sqrt(std::numeric_limits<double>::max());
-  double min=-huge;
-  double max=huge;
-
-  double dst_pnt[3];
-  double dst_min[3];
-  double dst_max[3];
-
-  dst_min[0]=max; dst_min[1]=max; dst_min[2]=max;
-  dst_max[0]=min; dst_max[1]=min; dst_max[2]=min;
-
-  // Loop calculating local min/max
-  for (UInt p = 0; p < dstplist_rend->get_curr_num_pts(); ++p) {
-
-    const point *pnt_ptr=dstplist_rend->get_point(p);
-
-    // Set coord value in 3D point
-    dst_pnt[0] = pnt_ptr->coords[0];
-    dst_pnt[1] = pnt_ptr->coords[1];
-    dst_pnt[2] = sdim == 3 ? pnt_ptr->coords[2] : 0.0;
-
-    // compute proc min max
-    MU_SET_MIN_VEC3D(dst_min,dst_pnt);
-    MU_SET_MAX_VEC3D(dst_max,dst_pnt);
-  }
-
-  printf("dst_min=%f %f %f dst_max=%f %f %f\n",MU_LST_VEC3D(dst_min),MU_LST_VEC3D(dst_max));
-
-  // Expand box by a factor in each direction
-  
-  // Save min/max
-  MU_ASSIGN_VEC3D(src_local_min,dst_min);
-  MU_ASSIGN_VEC3D(src_local_max,dst_max);
-
-  
-  // Create SpaceDir
-  SpaceDir *spacedir=new SpaceDir(dst_min, dst_max, NULL, true);
-
-  // Map src points to destination procs by min-max box
-  std::vector<int> pet_list;
-  std::vector<int> plist_snd_loc, plist_snd_pet;
-  for (UInt loc = 0; loc < srcplist->get_curr_num_pts(); ++loc) {
-
-    const point *pnt_ptr=srcplist->get_point(loc);
-    
-    // Set coord value in 3D point
-    double src_pnt[3];
-    src_pnt[0] = pnt_ptr->coords[0];
-    src_pnt[1] = pnt_ptr->coords[1];
-    src_pnt[2] = sdim == 3 ? pnt_ptr->coords[2] : 0.0;
-
-    // Expand by a tiny tol to give a small box
-    double src_pnt_min[3], src_pnt_max[3];
-    MU_SUB_SCALAR_VEC3D(src_pnt_min,src_pnt,1.0E-10);
-    MU_ADD_SCALAR_VEC3D(src_pnt_max,src_pnt,1.0E-10);
-    
-    // Init vector
-    pet_list.clear();
-
-    // Get PETs where src_pnt falls in dst min/max box
-    spacedir->get_procs(src_pnt_min, src_pnt_max, &(pet_list));
-
-    // Loop adding pets and loc to migration lists
-    for (const int &pet: pet_list) {
-      plist_snd_pet.push_back(pet);
-      plist_snd_loc.push_back(loc);    
-    } 
-  }
-
-  // Build srcplist_local
-  build_mig_plist(srcplist,
-                  plist_snd_loc, plist_snd_pet, 
-                  srcplist_local);
 
 
   //// Create src distribution

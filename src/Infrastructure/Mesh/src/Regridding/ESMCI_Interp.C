@@ -2967,9 +2967,11 @@ interp_method(imethod)
     // Build geomrend based on method
     if (has_nearest_src_to_dst) {
       grend.Build_NN(&zz, true);
+#if 0      
       grend.GetDstPlistRend().WriteVTK("dstRendPList");      
       grend.GetSrcPlistRend().WriteVTK("srcRendPList");
       grend.GetSrcPlistLocal().WriteVTK("srcLocalPList");
+#endif      
     } else {
       grend.Build(srcF.size(), (srcF.size()>0)?(&srcF[0]):NULL, 
                   dstF.size(), (dstF.size()>0)?(&dstF[0]):NULL,
@@ -3033,8 +3035,7 @@ interp_method(imethod)
       
       // Do search
 #if 1
-      ParSearchNearestSrcToDstOpt(grend.GetSrcPlistLocal(), grend.GetSrcLocalMin(), grend.GetSrcLocalMax(), 
-                                  grend.GetSrcPlistRend(), grend.GetDstPlistRend(),
+      ParSearchNearestSrcToDstOpt(grend.GetSrcPlistRend(), grend.GetDstPlistRend(),
                                   unmappedaction, sres, set_dst_status, dst_status);
 #else      
       ParSearchNearestSrcToDst(grend.GetSrcPlistRend(), grend.GetDstPlistRend(), unmappedaction, sres, set_dst_status, dst_status);

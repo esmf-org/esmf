@@ -89,10 +89,6 @@ public:
 
   PointList &GetDstPlistRend() { return *dstplist_rend; }
   PointList &GetSrcPlistRend() { return *srcplist_rend; }
-  PointList &GetSrcPlistLocal() { return *srcplist_local; }
-  
-  double *GetSrcLocalMin() { return src_local_min; }
-  double *GetSrcLocalMax() { return src_local_max; }
   
 
   CommReg &GetSrcComm() { return srcComm; }
@@ -158,11 +154,6 @@ private:
 
   Mesh srcmesh_rend;
   Mesh dstmesh_rend;
-
-  // Build by Build_NN() for nearest neighbor only
-  double src_local_min[3];
-  double src_local_max[3];
-  PointList *srcplist_local; 
 
   PointList *srcplist_rend;
   PointList *dstplist_rend;
