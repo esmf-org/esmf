@@ -492,8 +492,194 @@ void build_mig_plist(const PointList *plist,
                   plist_snd_loc, plist_snd_pet, 
                   new_plist);
 }
+
+
+  double calc_dist2_between_mm(double *mm1, double *mm2) {
+
+    // Dim distance
+    double ddim=0.0;
+    double tot_dist2=0.0;
+    
+    //// Dim 0
+    
+    // If min1 is lower than min2
+    if (mm1[0] < mm2[0]) {
+
+      // If max1 is lower than min2
+      if (mm1[3] < mm2[0]) {
+        ddim=mm2[0]-mm1[3];
+      } else {
+        ddim=0.0;
+      }      
+    } else {
+      // If min1 is lower than max2
+      if (mm1[0] < mm2[3]) {
+        ddim=0.0;
+      } else {
+        ddim=mm1[0]-mm2[3];
+      }      
+    }
+
+    tot_dist2 += ddim*ddim;
+
+    //// Dim 1
+    
+    // If min1 is lower than min2
+    if (mm1[1] < mm2[1]) {
+
+      // If max1 is lower than min2
+      if (mm1[4] < mm2[1]) {
+        ddim=mm2[1]-mm1[4];
+      } else {
+        ddim=0.0;
+      }      
+    } else {
+      // If min1 is lower than max2
+      if (mm1[1] < mm2[4]) {
+        ddim=0.0;
+      } else {
+        ddim=mm1[1]-mm2[4];
+      }      
+    }
+
+    tot_dist2 += ddim*ddim;
+
+    //// Dim 2
+    
+    // If min1 is lower than min2
+    if (mm1[2] < mm2[2]) {
+
+      // If max1 is lower than min2
+      if (mm1[5] < mm2[2]) {
+        ddim=mm2[2]-mm1[5];
+      } else {
+        ddim=0.0;
+      }      
+    } else {
+      // If min1 is lower than max2
+      if (mm1[2] < mm2[5]) {
+        ddim=0.0;
+      } else {
+        ddim=mm1[2]-mm2[5];
+      }      
+    }
+
+    tot_dist2 += ddim*ddim;
+
+    // Output dist2
+    return tot_dist2;        
+  }
   
 
+
+  /// Create a new point list of points closest to each minmax
+  void create_plist_closest_to_minmax(const PointList *plist,
+                               double *local_min, double *local_max,
+                               PointList *&new_plist) {
+
+  // Get dimension
+  int sdim=plist->get_coord_dim();
+
+  // Get huge values to use to init min and max   
+  double huge=sqrt(std::numeric_limits<double>::max()); //// Use sqrt, so if it's squared it doesn't overflow
+  double neg_huge=-huge;
+  
+
+   // Distribute min-max box of each proc
+   // Pack up local minmax
+   vector<double> local_minmax(6,0.0);
+   local_minmax[0]=local_min[0];
+   local_minmax[1]=local_min[1];
+   if (sdim > 2) local_minmax[2]=local_min[2];
+   local_minmax[3]=local_max[0];
+   local_minmax[4]=local_max[1];
+   if (sdim > 2) local_minmax[5]=local_max[2];
+
+   
+   // Number of procs
+   int num_procs = Par::Size();
+   if (num_procs <1)     Throw() << "Error: number of procs is less than 1";
+
+   // Allocate buffer for global minmax list
+   vector<double> dst_minmax(6*num_procs, 0.0);
+
+   // Do all gather to get info from all procs
+   MPI_Allgather(&local_minmax[0], 6, MPI_DOUBLE, &dst_minmax[0], 6, MPI_DOUBLE, Par::Comm());
+
+
+  // Get min/max of plist
+  ////// Get local min/max of plist
+  double plist_pnt[3]={0.0,0.0,0.0};
+  double plist_min[3]={huge,huge,huge};
+  double plist_max[3]={neg_huge,neg_huge,neg_huge};
+
+  // Loop calculating local min/max
+  for (UInt p = 0; p < plist->get_curr_num_pts(); ++p) {
+
+    const point *pnt_ptr=plist->get_point(p);
+
+    // Set coord value in 3D point
+    plist_pnt[0] = pnt_ptr->coords[0];
+    plist_pnt[1] = pnt_ptr->coords[1];
+    plist_pnt[2] = sdim == 3 ? pnt_ptr->coords[2] : 0.0;
+
+    // compute proc min max
+    MU_SET_MIN_VEC3D(plist_min,plist_pnt);
+    MU_SET_MAX_VEC3D(plist_max,plist_pnt);
+  }
+
+  // Set plist min and max in buffer
+  local_minmax[0]=plist_min[0];
+  local_minmax[1]=plist_min[1];
+  if (sdim > 2) local_minmax[2]=plist_min[2];
+  local_minmax[3]=plist_max[0];
+  local_minmax[4]=plist_max[1];
+  if (sdim > 2) local_minmax[5]=plist_max[2];
+  
+  // Allocate buffer for global minmax list
+  vector<double> plist_minmax(6*num_procs, 0.0);
+  
+  // Do all gather to get info from all procs
+  MPI_Allgather(&local_minmax[0], 6, MPI_DOUBLE, &plist_minmax[0], 6, MPI_DOUBLE, Par::Comm());
+  
+  // Loop figuring out if I'm the closest
+  std::vector<int> plist_snd_loc, plist_snd_pet;
+  for (int dp=0; dp<num_procs; dp++) {
+
+    // get minmax
+    double *dp_minmax=(&dst_minmax[0])+6*dp;
+    
+    // Init variables
+    double min_dist2=huge;
+    int min_proc=-1;
+    
+    for (int pp=0; pp<num_procs; pp++) {
+
+      // get minmax
+      double *pp_minmax=(&plist_minmax[0])+6*pp;
+
+      // get dist
+      double dist2=calc_dist2_between_mm(pp_minmax, dp_minmax);      
+
+      // If less than min, then save
+      if (dist2 < min_dist2) {
+        min_dist2=dist2;
+        min_proc=pp;
+      }
+    }
+
+    // If I'm the closest, then add a point to the list
+    if (min_proc == Par::Rank()) {
+      plist_snd_pet.push_back(dp);
+      plist_snd_loc.push_back(0);    // Just send 0 for now
+    }
+  }
+ 
+  // Build new plist
+  build_mig_plist(plist,
+                  plist_snd_loc, plist_snd_pet, 
+                  new_plist);
+}
   
   
 struct CommDataOpt {
@@ -666,80 +852,50 @@ struct CommDataOpt {
   }
 
 
-  // If there are still unmapped, then look further
-  if (has_unmapped) {
-    // Create tree
-    OTree *src_pl_tree;
-    create_OTree_from_plist(src_pl, src_pl_tree);
+  // Get a nearest point, just to cover our bases
+  PointList *src_pl_near;
+  create_plist_closest_to_minmax(src_pl,
+                                 dst_min, dst_max,
+                                 src_pl_near);
 
-    // Init search structure
-    //SearchData sd;
-    sd.sdim=sdim;
-    sd.closest_dist2=huge;
-    sd.closest_src_id=SN_BAD_ID;
-    sd.srcpointlist=src_pl;
-    MU_SET_TO_SCALAR_VEC3D(sd.dst_pnt,0.0);
-  
-    // Loop the destination points, find hosts.
+
+  // Use this point to update dst information
+  if (src_pl_near->get_curr_num_pts() > 0) {
+
+    // Get point
+    const double *near_pnt_crd=src_pl_near->get_coord_ptr(0);
+    double near_pnt[3];
+    near_pnt[0] = near_pnt_crd[0];
+    near_pnt[1] = near_pnt_crd[1];
+    near_pnt[2] = (sdim == 3 ? near_pnt_crd[2] : 0.0);
+
+    // Get id
+    int near_id=src_pl_near->get_id(0);
+
+    // Loop updating
     for (UInt p = 0; p < dst_pl_num_pnts; ++p) {
-      
-      // Skip if done
-      if (dst_done[p]) continue;
+      // If not filled
+      if (dst_closest_src_gid[p] == SN_BAD_ID) {
 
-      // Get point
-      const double *pnt_crd=dst_pl->get_coord_ptr(p);
-      
-      // Set dst point coords in search structure
-      sd.dst_pnt[0] = pnt_crd[0];
-      sd.dst_pnt[1] = pnt_crd[1];
-      sd.dst_pnt[2] = (sdim == 3 ? pnt_crd[2] : 0.0);
-      
-      // Init search box to max possible and then maybe change below
-      double pmin[3]={-huge, -huge, -huge};
-      double pmax[3]={huge, huge, huge};
-      
-      // If we have a valid previous nearest point, then use that
-      if (dst_closest_src_gid[p] !=  SN_BAD_ID) {
-        // Fill search struct
-        sd.closest_dist2=dst_closest_dist2[p];
-        sd.closest_src_id=dst_closest_src_gid[p];
-        
-        // Calc pmin/pmax
-        double dist=sqrt(dst_closest_dist2[p]);
-        MU_SUB_SCALAR_VEC3D(pmin,sd.dst_pnt,dist);
-        MU_ADD_SCALAR_VEC3D(pmax,sd.dst_pnt,dist);      
-      } else {
-        // Use the last searched point as a guess
-        if (sd.closest_src_id != SN_BAD_ID) {
-          // Calculate distance        
-          double dist2=(sd.dst_pnt[0]-sd.closest_coord[0])*(sd.dst_pnt[0]-sd.closest_coord[0])+
-            (sd.dst_pnt[1]-sd.closest_coord[1])*(sd.dst_pnt[1]-sd.closest_coord[1])+
-            (sd.dst_pnt[2]-sd.closest_coord[2])*(sd.dst_pnt[2]-sd.closest_coord[2]);
-        
-          // set closest dist squared
-          sd.closest_dist2=dist2;
-          // The sd.closest_src_id is still set from last time
-          
-          // Calc new search box
-          double dist=sqrt(dist2);
-          MU_SUB_SCALAR_VEC3D(pmin,sd.dst_pnt,dist);
-          MU_ADD_SCALAR_VEC3D(pmax,sd.dst_pnt,dist);      
-        }
-      }
+        // Get dst point coords
+        const double *pnt_crd=dst_pl->get_coord_ptr(p);
+        double dst_pont[3];
+        dst_pnt[0] = pnt_crd[0];
+        dst_pnt[1] = pnt_crd[1];
+        dst_pnt[2] = (sdim == 3 ? pnt_crd[2] : 0.0);
+                
+        // Calculate distance        
+        double dist2=(dst_pnt[0]-near_pnt[0])*(dst_pnt[0]-near_pnt[0])+
+          (dst_pnt[1]-near_pnt[1])*(dst_pnt[1]-near_pnt[1])+
+          (dst_pnt[2]-near_pnt[2])*(dst_pnt[2]-near_pnt[2]);
 
-      // Find closest source node to this destination node
-      src_pl_tree->runon_mm_chng(pmin, pmax, nearest_func, (void *)&sd);
-      
-      // If we've found a nearer source point, then add to the search results list...
-      if (sd.closest_src_id != SN_BAD_ID) {      
-        dst_closest_src_gid[p]=sd.closest_src_id;
-        dst_closest_dist2[p]=sd.closest_dist2;      
+        // Update list
+        dst_closest_src_gid[p]=near_id;
+        dst_closest_dist2[p]=dist2;
       }
     }
+  }  
 
-    // Get rid of tree
-    delete src_pl_tree;
-  }
   
   // For debugging see if there are any unmapped points
   bool still_has_unmapped=false;
@@ -786,8 +942,6 @@ struct CommDataOpt {
       if (within) dst_done[p]=1;
     }
   }
-
-
 
   
 
