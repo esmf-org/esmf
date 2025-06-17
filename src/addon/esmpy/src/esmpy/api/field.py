@@ -64,10 +64,11 @@ class Field(object):
         single value, a list or a tuple containing the number of entries for
         each desired extra dimension of the :class:`~esmpy.api.field.Field`. The
         time dimension must be last, following Fortran indexing conventions.
-    :param list grid_to_field_map: Controls mapping of the grid dimension 
-        :class:`~esmpy.api.field.Field` index to the field dimension index. 
-        if ``None``, defaults to maping grid indices to the first available
-        field indices. List must be equal size to the grid rank
+    :param ndarray grid_to_field_map: numpy array mapping the grid dimension 
+        :class:`~esmpy.api.field.Field` index to the field dimension index.
+        Array length must be equal to the grid rank; uses 1-based indexing.
+        If ``None``, defaults to mapping grid indices to the first available
+        field indices.
     """
 
     @initialize
