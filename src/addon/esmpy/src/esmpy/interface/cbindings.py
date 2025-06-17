@@ -794,25 +794,6 @@ def ESMP_GridAddCoord(grid, staggerloc=constants.StaggerLoc.CENTER):
         raise ValueError('ESMC_GridAddCoord() failed with rc = '+str(rc)+'.    '+
                         constants._errmsg)
 
-    # now we have to get the coordinate array bounds to set the grid.size
-    coordDim = ct.c_int(1)
-    lrc = ct.c_int(0)
-    lbound = np.array(np.zeros(grid.rank),dtype=np.int32)
-    ubound = np.array(np.zeros(grid.rank),dtype=np.int32)
-    #TODO: this one will need better lde handling
-    lde = ct.c_int(0)
-    gridCoordPtr = _ESMF.ESMC_GridGetCoord(grid.struct.ptr,
-                                           coordDim, staggerloc, ct.byref(lde),
-                                           lbound, ubound,
-                                           ct.byref(lrc))
-    rc = lrc.value
-    if rc != constants._ESMP_SUCCESS:
-        raise ValueError('ESMC_GridGetCoord() failed with rc = '+str(rc)+'.    '+
-                        constants._errmsg)
-
-    # adjust for 0 based bounds
-    lbound = lbound - 1
-
 _ESMF.ESMC_GridAddItem.restype = ct.c_int
 _ESMF.ESMC_GridAddItem.argtypes = [ct.c_void_p, ct.c_uint, ct.c_uint]
 
