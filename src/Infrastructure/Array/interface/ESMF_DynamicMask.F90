@@ -140,7 +140,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DynamicMaskSetR8R8R8()"
 !BOP
-! !IROUTINE: ESMF_DynamicMaskSetR8R8R8 - Set DynamicMask for R8R8R8
+! !IROUTINE: ESMF_DynamicMaskPredefinedSetR8R8R8 - Set PredefinedDynamicMask for R8R8R8
 ! !INTERFACE:
   subroutine ESMF_DynamicMaskPredefinedSetR8R8R8(dynamicMask, maskType, &
     keywordEnforcer, handleAllElements, dynamicSrcMaskValue, &
@@ -156,7 +156,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
-!   \label{api:DynamicMaskSetR8R8R8}
+!   \label{api:DynamicMaskPredefinedSetR8R8R8}
 !   Set an {\tt ESMF\_DynamicMask} object suitable for 
 !   destination element typekind {\tt ESMF\_TYPEKIND\_R8},
 !   factor typekind {\tt ESMF\_TYPEKIND\_R8}, and
@@ -245,9 +245,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DynamicMaskSetR8R8R8()"
+#define ESMF_METHOD "ESMF_DynamicMaskPredefinedSetR8R8R8()"
 !BOP
-! !IROUTINE: ESMF_DynamicMaskSetR8R8R8 - Set DynamicMask for R8R8RV8
+! !IROUTINE: ESMF_DynamicMaskPredefinedSetR8R8R8 - Set PredefinedDynamicMask for R8R8RV8
 ! !INTERFACE:
   subroutine ESMF_DynamicMaskPredefinedSetR8R8R8V(dynamicMask, maskType, &
     keywordEnforcer, handleAllElements, dynamicSrcMaskValue, &
@@ -263,7 +263,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
-!   \label{api:DynamicMaskSetR8R8R8}
+!   \label{api:DynamicMaskPredefinedSetR8R8R8}
 !   Set an {\tt ESMF\_DynamicMask} object suitable for 
 !   destination element typekind {\tt ESMF\_TYPEKIND\_R8},
 !   factor typekind {\tt ESMF\_TYPEKIND\_R8}, and
@@ -352,9 +352,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DynamicMaskSetR4R8R4()"
+#define ESMF_METHOD "ESMF_DynamicMaskPredefinedSetR4R8R4()"
 !BOP
-! !IROUTINE: ESMF_DynamicMaskSetR4R8R4 - Set DynamicMask for R4R8R4
+! !IROUTINE: ESMF_DynamicMaskPrefinedSetR4R8R4 - Set PredefinedDynamicMask for R4R8R4
 ! !INTERFACE:
   subroutine ESMF_DynamicMaskPredefinedSetR4R8R4(dynamicMask, maskType, &
     keywordEnforcer, handleAllElements, dynamicSrcMaskValue, &
@@ -370,7 +370,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
-!   \label{api:DynamicMaskSetR4R8R4}
+!   \label{api:DynamicMaskPredefinedSetR4R8R4}
 !   Set an {\tt ESMF\_DynamicMask} object suitable for 
 !   destination element typekind {\tt ESMF\_TYPEKIND\_R8},
 !   factor typekind {\tt ESMF\_TYPEKIND\_R8}, and
@@ -459,9 +459,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DynamicMaskSetR4R8R4()"
+#define ESMF_METHOD "ESMF_DynamicMaskPredefinedSetR4R8R4()"
 !BOP
-! !IROUTINE: ESMF_DynamicMaskSetR4R8R4 - Set DynamicMask for R8R8R8V
+! !IROUTINE: ESMF_DynamicMaskPredefinedSetR4R8R4 - Set PredefinedDynamicMask for R8R8R8V
 ! !INTERFACE:
   subroutine ESMF_DynamicMaskPredefinedSetR4R8R4V(dynamicMask, maskType, &
     keywordEnforcer, handleAllElements, dynamicSrcMaskValue, &
@@ -477,7 +477,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
-!   \label{api:DynamicMaskSetR4R8R4}
+!   \label{api:DynamicMaskPredefinedSetR4R8R4}
 !   Set an {\tt ESMF\_DynamicMask} object suitable for 
 !   destination element typekind {\tt ESMF\_TYPEKIND\_R8},
 !   factor typekind {\tt ESMF\_TYPEKIND\_R8}, and
