@@ -65,6 +65,11 @@ else()
   set(ESMX_EXE_NAME ${ESMX_EXE_NAME} PARENT_SCOPE)
 endif()
 
+# define ESMX_SDIR
+if(NOT DEFINED ESMX_SDIR)
+  set(ESMX_SDIR ${CMAKE_SOURCE_DIR})
+endif()
+
 # test options
 if(ESMX_TEST)
   enable_testing()
@@ -133,7 +138,7 @@ endif()
 
 # generate component config file(s)
 execute_process(COMMAND ${Python_EXECUTABLE}
-  ${CMAKE_CURRENT_LIST_DIR}/esmx_comp_config.py --ifile ${ESMX_BUILD_FILE} --odir ${CMAKE_CURRENT_BINARY_DIR} --sdir ${CMAKE_SOURCE_DIR} ${ESMX_DISABLE_COMPS}
+  ${CMAKE_CURRENT_LIST_DIR}/esmx_comp_config.py --ifile ${ESMX_BUILD_FILE} --odir ${CMAKE_CURRENT_BINARY_DIR} --sdir ${ESMX_SDIR} ${ESMX_DISABLE_COMPS}
   RESULT_VARIABLE ret)
 esmx_check_ret(${ret} "esmx_comp_config.py failed processing ${ESMX_BUILD_FILE}")
 
