@@ -344,6 +344,8 @@ This section affects the application level.
 | `defaultCalKind`          | ESMF calendar kind used by default, see ESMF RefDoc for options | `ESMF_CALKIND_GREGORIAN`|
 | `logFlush`                | enable/disable log flush for each write: `true` or `false`| `false`         |
 | `fieldDictionary`         | name of the NUOPC field dictionary file to be loaded      | *None*          |
+| `ESMF_RUNTIME_ABORT_ACTION`| set ESMF abort action: `MPI_ABORT` `SIGABRT` or `SIGQUIT`| `MPI_ABORT`     |
+| `ESMF_RUNTIME_ABORT_LOGMSG_TYPES`| type(s) of log messages causing abort (e.g. `ESMF_LOGMSG_ERROR,ESMF_LOGMSG_WARNING`) | *None* |
 | `ESMF_RUNTIME_COMPLIANCECHECK`| enable/disable NUOPC compliance checking: `ON` or `OFF` with `DEPTH` | `OFF`|
 | `ESMF_RUNTIME_GARBAGE`    | ESMF garbage collection setting: `NONE`, `FULL`,`SAFE`     | `SAFE`          |
 | `ESMF_RUNTIME_GARBAGE_LOG`| enable/disable logging of ESMF garbage collection: `ON` or `OFF`         | `OFF`|

@@ -64,6 +64,11 @@ class Field(object):
         single value, a list or a tuple containing the number of entries for
         each desired extra dimension of the :class:`~esmpy.api.field.Field`. The
         time dimension must be last, following Fortran indexing conventions.
+    :param ndarray grid_to_field_map: numpy array mapping the grid dimension 
+        :class:`~esmpy.api.field.Field` index to the field dimension index.
+        Array length must be equal to the grid rank; uses 1-based indexing.
+        If ``None``, defaults to mapping grid indices to the first available
+        field indices.
     """
 
     @initialize
@@ -71,7 +76,8 @@ class Field(object):
                 typekind=None,
                 staggerloc=None,
                 meshloc=None,
-                ndbounds=None):
+                ndbounds=None,
+                grid_to_field_map=None):
         # optional arguments
         if isinstance(staggerloc, type(None)):
             staggerloc = StaggerLoc.CENTER
@@ -81,7 +87,6 @@ class Field(object):
             meshloc = MeshLoc.NODE
 
         # extra levels?
-        grid_to_field_map = None
         ungridded_lower_bound = None
         ungridded_upper_bound = None
         rank = grid.rank
@@ -94,6 +99,9 @@ class Field(object):
 
         # TODO: flip ndbounds
         #     also, will have to verify that everything is switched back
+        if isinstance(grid_to_field_map, type(None)):
+            # set this to put gridded dimension in the first available dimensions of the field, dependent on grid rank
+           grid_to_field_map = np.array([i+1 for i in range(grid.rank)], dtype=np.int32)
 
         xd = 0
         if local_ndbounds:
@@ -101,8 +109,6 @@ class Field(object):
             lb = [1 for a in range(len(local_ndbounds))]
             ungridded_lower_bound = np.array(lb, dtype=np.int32)
             ungridded_upper_bound = np.array(local_ndbounds, dtype=np.int32)
-            # set this to put gridded dimension in the first available dimensions of the field, dependent on grid rank
-            grid_to_field_map = np.array([i+1 for i in range(grid.rank)], dtype=np.int32)
             rank += len(local_ndbounds)
 
         if isinstance(grid, Grid):
@@ -368,9 +374,6 @@ class Field(object):
         """
         Read data into an existing :class:`~esmpy.api.field.Field` from a
         CF-compliant NetCDF file.
-
-        :note: This interface is not supported when ESMF is built with
-            ``ESMF_COMM=mpiuni``.
 
         :note: This interface does not currently support reading ungridded 
                dimensions.

@@ -12783,7 +12783,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigSetMapKey - Set <Type> content in HConfig MapKey object
 
 ! !INTERFACE:
-!  subroutine ESMF_HConfigSet(hconfig, content, keywordEnforcer, &
+!  subroutine ESMF_HConfigSetMapKey(hconfig, content, keywordEnforcer, &
 !    index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
@@ -13448,7 +13448,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigSetMapVal - Set <Type> content in HConfig MapVal object
 
 ! !INTERFACE:
-!  subroutine ESMF_HConfigSet(hconfig, content, keywordEnforcer, &
+!  subroutine ESMF_HConfigSetMapVal(hconfig, content, keywordEnforcer, &
 !    index, keyString, doc, rc)
 !
 ! !ARGUMENTS:

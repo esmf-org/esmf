@@ -155,3 +155,27 @@ is a problem in the library code. In this example user code is visible at the
 very top of the stack {\tt esmApp.F90}, and at the very bottom {\tt ocn.F90}.
 In fact the location of the division by zero is correctly identified by the
 runtime library at line 149 in file {\tt ocn.F90}.
+
+It is possible to force a hard crash within the ESMF library while logging
+ERRORS or WARNINGS to the {\tt PET<nnn>.ESMF\_LogFile}. Doing so can be
+advantageous because it may produce a code dump and/or backtrace at the
+initial point of error without ESMF return code handling. There are two
+settings controlling log message error handling. The first setting,
+{\tt ESMF\_RUNTIME\_ABORT\_LOGMSG\_TYPES}, configures the ESMF library to abort
+during specified log message types, such as {\tt ESMF\_LOGMSG\_ERROR}. When
+setting {\tt ESMF\_RUNTIME\_ABORT\_LOGMSG\_TYPES}, multiple log message types
+can be listed, such as {\tt ESMF\_LOGMSG\_ERROR,ESMF\_LOGMSG\_WARNING}. The
+second setting, {\tt ESMF\_RUNTIME\_ABORT\_ACTION}, configures the ESMF library
+abort action. By default, the ESMF library abort handler will call
+{\tt MPI\_Abort}. This can be changed to {\tt SIGABRT} or {\tt SIGQUIT}, which
+will raise their respective exceptions. These two settings can be configured in
+the user environment before initializing ESMF or set in the configuration file
+passed to {\tt ESMF\_Initialize}.
+
+An example configuration file configuring ESMF to raise {\tt SIGABRT} during
+{\tt ESMF\_LOGMSG\_ERROR} or {\tt ESMF\_LOGMSG\_WARNING}.
+
+\begin{verbatim}
+ESMF_RUNTIME_ABORT_ACTION: "SIGABRT"
+ESMF_RUNTIME_ABORT_LOGMSG_TYPES: "ESMF_LOGMSG_ERROR,ESMF_LOGMSG_WARNING"
+\end{verbatim}

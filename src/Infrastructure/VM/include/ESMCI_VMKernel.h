@@ -357,8 +357,10 @@ class VMK{
     int ssiLocalNumaCount; // number of NUMA modes on the same SSI as localPet (incl.)
     int *ssiLocalNumaList; // NUMA nodes
     // general information about this VMK
-    bool mpionly;         // false: there is multi-threading, true: MPI-only
-    bool threadsflag;     // threaded or none-threaded VM
+    bool mpionly;         // true:  all PETs are MPI processes, separate VASs
+                          // false: some are threads under the same process VAS
+    bool threadsflag;     // true:  VM uses threads, e.g. for resource control
+                          // false: no threads are used under this VM
     // MPI Communicator handles
     MPI_Comm mpi_c;     // communicator across the entire VM
     MPI_Comm mpi_c_ssi; // communicator holding PETs on the same SSI
@@ -407,6 +409,7 @@ class VMK{
     // static MPI Comm of the default VMK
     // and the thread level that the MPI implementation supports.
     static MPI_Comm default_mpi_c;
+    static int mpi_thread_level_requested;
     static int mpi_thread_level;
     static int mpi_init_outside_esmf;
     static int pre_mpi_init;
@@ -516,6 +519,8 @@ class VMK{
     int getSsiLocalDevCount() const {return ssiLocalDevCount;}
     const int *getSsiLocalDevList() const {return ssiLocalDevList;}
     int getDevCount() const {return devCount;}
+    bool isMpiOnly() const {return mpionly;}
+    bool isUsingThreads() const {return threadsflag;}
     esmf_pthread_t getLocalPthreadId() const {return mypthid;}
     static bool isPthreadsEnabled(){
 #ifdef ESMF_NO_PTHREADS
