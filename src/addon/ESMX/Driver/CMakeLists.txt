@@ -69,6 +69,7 @@ endif()
 if(NOT DEFINED ESMX_SDIR)
   set(ESMX_SDIR ${CMAKE_SOURCE_DIR})
 endif()
+set(ENV{ESMX_SDIR} "${ESMX_SDIR}")
 
 # test options
 if(ESMX_TEST)
