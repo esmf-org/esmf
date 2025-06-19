@@ -43,7 +43,8 @@ def create_compList(cmpCfg: ESMXCmpCfg, odir, sdir):
                         for i in range(len(dirs)):
                             dirs[i] = dirs[i].strip()
                             if not dirs[i].startswith('$'):
-                                dirs[i] = os.path.abspath(sdir + "/" + dirs[i])
+                                if not os.path.isabs(dirs[i]):
+                                    dirs[i] = os.path.abspath(sdir + "/" + dirs[i])
                         val = ';'.join(dirs)
                 f.write('set({}-{} {})\n'.format(cmp, opt.upper(), val))
                 if opt.option == "link_into_app":
