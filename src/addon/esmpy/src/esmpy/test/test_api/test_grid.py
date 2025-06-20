@@ -21,6 +21,10 @@ class TestGrid(TestBase):
     mg.test_exhaustive = False
     
     def examine_grid_attributes(self, grid):
+        # ~~~~~~~~~~~~~~~~~~~~~~  LOCAL DE COUNT ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # For now we assume 1 DE per PET
+        assert grid.local_de_count == 1
+
         # ~~~~~~~~~~~~~~~~~~~~~~  STAGGER LOCATIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # grid.staggerloc returns a boolean list of the activated stagger locations
         assert (type(grid.staggerloc) is list)

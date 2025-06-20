@@ -35,6 +35,10 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
     if esmpy.pet_count() > 1:
         parallel = True
 
+    # TODO: The retrieval of data below will currently fail for multiple DEs per PET.
+    # Consider extending this to work with multiple DEs per PET (if we need this to work
+    # for that use case).
+
     correct = False
     # verify that the fields are the same size
     assert field1.data.shape == field2.data.shape, 'compare_fields: Fields must be the same size!'

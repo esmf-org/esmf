@@ -28,6 +28,10 @@ class TestField(TestBase):
         return field
 
     def examine_field_attributes(self, field):
+        # ~~~~~~~~~~~~~~~~~~~~~~  LOCAL DE COUNT ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # For now we assume 1 DE per PET
+        assert field.local_de_count == 1
+
         # ~~~~~~~~~~~~~~~~~~~~~~  STAGGER LOCATION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         assert (type(field.staggerloc) in [MeshLoc, StaggerLoc, int])
 

@@ -164,8 +164,6 @@ class Grid(object):
         from_file = False
         cubed_sphere = False
 
-        self._decount = 1
-
         # in-memory grid
         if not isinstance(max_index, type(None)):
             # cast max_index if not already done
@@ -243,7 +241,6 @@ class Grid(object):
         elif not isinstance(tilesize, type(None)):
             # set the cubed_sphere flag to True
             cubed_sphere = True
-            self._decount = 6
             #raise errors for all in-memory grid options
             if not isinstance(max_index, type(None)):
                 warnings.warn("max_index is not used to create a cubed sphere grid, this argument will be ignored.")
@@ -317,24 +314,8 @@ class Grid(object):
         else:
             self._pole_kind = None
 
-        # size, type and rank of the grid for bookeeping of coordinates 
-        self._size = [None]
-
-        # public facing
-
         # placeholder for staggerlocs, True if present, False if not
         self._staggerloc = [None]
-
-        # placeholder for the list of numpy arrays which holds the grid bounds
-        self._lower_bounds = [None]
-        self._upper_bounds = [None]
-
-        # placeholder for the list of numpy arrays which hold the grid coords
-        self._coords = [None]
-
-        # mask and area
-        self._mask = np.zeros(())
-        self._area = np.zeros(())
 
         # create the correct grid
         self._struct = None
@@ -433,46 +414,33 @@ class Grid(object):
         else:
             self._type = coord_typekind
 
+        # local DE count
+        self._local_de_count = ESMP_GridGetLocalDECount(self)
+
         # staggerloc
-        self._staggerloc = [False for a in range(2**self.rank)]
+        self._staggerloc = [False for _ in range(2**self.rank)]
 
-        # bounds
-        # lower_bounds[staggerLoc]
-        self._lower_bounds = [None for a in range(2**self.rank)]
-        # upper_bounds[staggerLoc]
-        self._upper_bounds = [None for a in range(2**self.rank)]
-        # size[staggerloc]
-        self._size = [None for a in range(2**self.rank)]
-        # coords[staggerLoc][coord_dim]
-        self._coords = [[None for a in range(self.rank)] \
-                        for b in range(2**self.rank)]
-        # mask[staggerloc]
-        self._mask = [None for a in range(2**self.rank)]
-        # area[staggerloc]
-        self._area = [None for a in range(2**self.rank)]
-
-        # if self.decount == 1:
-        # elif self.decount > 1:
-        #     # lower_bounds[de][staggerLoc]
-        #     self._lower_bounds = [[None for a in range(2**self.rank)] \
-        #                            for b in range(self.decount)]
-        #     # upper_bounds[de][staggerLoc]
-        #     self._upper_bounds = [[None for a in range(2**self.rank)] \
-        #                            for b in range(self.decount)]
-        #     # size[de][staggerloc]
-        #     self._size = [[None for a in range(2**self.rank)] \
-        #                   for b in range(self.decount)]
-        #     # coords[de][staggerLoc][coord_dim]
-        #     self._coords = [[[None for a in range(self.rank)] \
-        #                      for b in range(2**self.rank)] \
-        #                     for c in range(self.decount)]
-        #     # mask[de][staggerloc]
-        #     self._mask = [[None for a in range(2**self.rank)] \
-        #                   for b in range(self.decount)]
-        #     # area[de][staggerloc]
-        #     self._area = [[None for a in range(2**self.rank)] \
-        #                   for b in range(self.decount)]
-        # else: raise IndexError
+        # The "all" prefix in the following variables refers to the list over all local DEs.
+        # In the typical case of 1 DE per PET, these local DE lists will be of length 1.
+        # all_lower_bounds[de][staggerLoc]
+        self._all_lower_bounds = [[None for _ in range(2**self.rank)]
+                                  for _ in range(self.local_de_count)]
+        # all_upper_bounds[de][staggerLoc]
+        self._all_upper_bounds = [[None for _ in range(2**self.rank)]
+                                  for _ in range(self.local_de_count)]
+        # all_sizes[de][staggerloc]
+        self._all_sizes = [[None for _ in range(2**self.rank)]
+                           for _ in range(self.local_de_count)]
+        # all_coords[de][staggerLoc][coord_dim]
+        self._all_coords = [[[None for _ in range(self.rank)]
+                             for _ in range(2**self.rank)]
+                             for _ in range(self.local_de_count)]
+        # all_masks[de][staggerloc]
+        self._all_masks = [[None for _ in range(2**self.rank)]
+                           for _ in range(self.local_de_count)]
+        # all_areas[de][staggerloc]
+        self._all_areas = [[None for _ in range(2**self.rank)]
+                           for _ in range(self.local_de_count)]
 
         # Add coordinates if a staggerloc is specified
         if not isinstance(staggerloc, type(None)):
@@ -502,23 +470,31 @@ class Grid(object):
         if pet_count() > 1:
             raise SerialMethod
 
-        if self.decount > 1:
-            raise SerialMethod
+        if self.local_de_count > 1:
+            raise SingleLocalDEMethod
 
         # format and copy
         slc = get_formatted_slice(slc, self.rank)
         ret = self.copy()
 
+        # Note for the following slicing operations: Since this method only works for a
+        # single local DE, we can just operate on the 0th list element (which should be
+        # the only list element).
+        #
+        # Further, note that we make new lists here; this is important to avoid modifying
+        # the original lists (as would happen if we simply assigned to ret._all_coords[0],
+        # for example, since the copy method is a shallow copy).
+
         # coords, mask and area
-        ret._coords = [[get_none_or_ssslice(get_none_or_slice(get_none_or_slice(self.coords, stagger), coorddim), slc,
-                                            stagger, self.rank)
-                        for coorddim in range(self.rank)] for stagger in range(2 ** self.rank)]
-        ret._mask = [get_none_or_slice(get_none_or_slice(self.mask, stagger), slc) for stagger in range(2 ** self.rank)]
-        ret._area = [get_none_or_slice(get_none_or_slice(self.area, stagger), slc) for stagger in range(2 ** self.rank)]
+        ret._all_coords = [[[get_none_or_ssslice(get_none_or_slice(get_none_or_slice(self._all_coords[0], stagger), coorddim), slc,
+                                                 stagger, self.rank)
+                                                 for coorddim in range(self.rank)] for stagger in range(2 ** self.rank)]]
+        ret._all_masks = [[get_none_or_slice(get_none_or_slice(self._all_masks[0], stagger), slc) for stagger in range(2 ** self.rank)]]
+        ret._all_areas = [[get_none_or_slice(get_none_or_slice(self._all_areas[0], stagger), slc) for stagger in range(2 ** self.rank)]]
 
         # upper bounds are "sliced" by taking the shape of the coords
-        ret._upper_bounds = [get_none_or_bound(get_none_or_slice(ret.coords, stagger), 0) for stagger in
-                             range(2 ** self.rank)]
+        ret._all_upper_bounds = [[get_none_or_bound(get_none_or_slice(ret._all_coords[0], stagger), 0) for stagger in
+                                  range(2 ** self.rank)]]
         # lower bounds do not need to be sliced yet because slicing is not yet enabled in parallel
 
         return ret
@@ -549,13 +525,85 @@ class Grid(object):
                    self.pole_kind,
                    self.coord_sys,
                    self.staggerloc,
-                   self.lower_bounds,
-                   self.upper_bounds,
-                   self.coords,
-                   self.mask,
-                   self.area))
+                   self.all_lower_bounds,
+                   self.all_upper_bounds,
+                   self.all_coords,
+                   self.all_masks,
+                   self.all_areas))
 
         return string
+
+    @property
+    def all_areas(self):
+        """
+        :rtype: 2D list of numpy arrays, where the first index represents the
+            local DE and the second index represents the stagger locations of
+            the :class:`~esmpy.api.grid.Grid`.
+        :return: The :class:`~esmpy.api.grid.Grid` cell areas represented as
+            numpy arrays of floats of size given by
+            ``upper_bounds - lower_bounds``.
+        """
+        return self._all_areas
+
+    @property
+    def all_coords(self):
+        """
+        :rtype: 3D list of numpy arrays of size given by
+            ``upper_bounds - lower_bounds``, where the first index represents
+            the local DE, the second index represents the stagger locations of
+            the :class:`~esmpy.api.grid.Grid` and the third index represents
+            the coordinate dimensions of the :class:`~esmpy.api.grid.Grid`.
+        :return: The coordinates of the :class:`~esmpy.api.grid.Grid`.
+        """
+        return self._all_coords
+
+    @property
+    def all_lower_bounds(self):
+        """
+        :rtype: 2D list of numpy arrays, where the first index represents the
+            local DE and the second index represents the stagger locations of
+            the :class:`~esmpy.api.grid.Grid`.
+        :return: The lower bounds of the :class:`~esmpy.api.grid.Grid`
+            represented as numpy arrays of ints of size given by
+            ``upper_bounds - lower_bounds``.
+        """
+        return self._all_lower_bounds
+
+    @property
+    def all_masks(self):
+        """
+        :rtype: 2D list of numpy arrays, where the first index represents the
+            local DE and the second index represents the stagger locations of
+            the :class:`~esmpy.api.grid.Grid`.
+        :return: The masks of the :class:`~esmpy.api.grid.Grid` represented as
+            numpy arrays of ints of size given by `
+            `upper_bounds - lower_bounds``.
+        """
+        return self._all_masks
+
+    @property
+    def all_sizes(self):
+        """
+        :rtype: 2D list of numpy arrays, where the first index represents the
+            local DE and the second index represents the stagger locations of
+            the :class:`~esmpy.api.grid.Grid`.
+        :return: The sizes of the :class:`~esmpy.api.grid.Grid` represented as
+            numpy arrays of ints of size given by
+            ``upper_bounds - lower_bounds``.
+        """
+        return self._all_sizes
+
+    @property
+    def all_upper_bounds(self):
+        """
+        :rtype: 2D list of numpy arrays, where the first index represents the
+            local DE and the second index represents the stagger locations of
+            the :class:`~esmpy.api.grid.Grid`.
+        :return: The upper bounds of the :class:`~esmpy.api.grid.Grid`
+            represented as numpy arrays of ints of size given by
+            ``upper_bounds - lower_bounds``.
+        """
+        return self._all_upper_bounds
 
     @property
     def area(self):
@@ -565,9 +613,14 @@ class Grid(object):
         :return: The :class:`~esmpy.api.grid.Grid` cell areas represented as
             numpy arrays of floats of size given by
             ``upper_bounds - lower_bounds``.
+            (It is an error to use this property in the uncommon case
+            where there are multiple DEs per PET. In that case, use
+            :meth:`~esmpy.api.grid.all_areas`.)
         """
 
-        return self._area
+        if self.local_de_count > 1:
+            raise SingleLocalDEMethod
+        return self._all_areas[0]
 
     @property
     def areatype(self):
@@ -585,12 +638,17 @@ class Grid(object):
         :rtype: 2D list of numpy arrays of size given by
             ``upper_bounds - lower_bounds``, where the first index represents
             the stagger locations of the :class:`~esmpy.api.grid.Grid` and the
-            second index represent the coordinate dimensions of the
+            second index represents the coordinate dimensions of the
             :class:`~esmpy.api.grid.Grid`.
         :return: The coordinates of the :class:`~esmpy.api.grid.Grid`.
+            (It is an error to use this property in the uncommon case
+            where there are multiple DEs per PET. In that case, use
+            :meth:`~esmpy.api.grid.all_coords`.)
         """
 
-        return self._coords
+        if self.local_de_count > 1:
+            raise SingleLocalDEMethod
+        return self._all_coords[0]
 
     @property
     def coord_sys(self):
@@ -622,6 +680,16 @@ class Grid(object):
         return self._has_corners
 
     @property
+    def local_de_count(self):
+        """
+        :rtype: int
+        :return: The number of DEs in the
+            :class:`~esmpy.api.grid.Grid` on this PET.
+        """
+
+        return self._local_de_count
+
+    @property
     def lower_bounds(self):
         """
         :rtype: A list of numpy arrays with an entry for every stagger location
@@ -629,9 +697,14 @@ class Grid(object):
         :return: The lower bounds of the :class:`~esmpy.api.grid.Grid`
             represented as numpy arrays of ints of size given by
             ``upper_bounds - lower_bounds``.
+            (It is an error to use this property in the uncommon case
+            where there are multiple DEs per PET. In that case, use
+            :meth:`~esmpy.api.grid.all_lower_bounds`.)
         """
 
-        return self._lower_bounds
+        if self.local_de_count > 1:
+            raise SingleLocalDEMethod
+        return self._all_lower_bounds[0]
 
     @property
     def mask(self):
@@ -641,9 +714,14 @@ class Grid(object):
         :return: The mask of the :class:`~esmpy.api.grid.Grid` represented as
             numpy arrays of ints of size given by `
             `upper_bounds - lower_bounds``.
+            (It is an error to use this property in the uncommon case
+            where there are multiple DEs per PET. In that case, use
+            :meth:`~esmpy.api.grid.all_masks`.)
         """
 
-        return self._mask
+        if self.local_de_count > 1:
+            raise SingleLocalDEMethod
+        return self._all_masks[0]
 
     @property
     def max_index(self):
@@ -695,16 +773,6 @@ class Grid(object):
         return self._num_peri_dims
 
     @property
-    def decount(self):
-        """
-        :rtype: int
-        :return: The total number of tiles in the
-            :class:`~esmpy.api.grid.Grid`.
-        """
-
-        return self._decount
-
-    @property
     def periodic_dim(self):
         """
         :rtype: int
@@ -753,9 +821,14 @@ class Grid(object):
         :return: The size of the :class:`~esmpy.api.grid.Grid` represented as
             numpy arrays of ints of size given by
             ``upper_bounds - lower_bounds``.
+            (It is an error to use this property in the uncommon case
+            where there are multiple DEs per PET. In that case, use
+            :meth:`~esmpy.api.grid.all_sizes`.)
         """
 
-        return self._size
+        if self.local_de_count > 1:
+            raise SingleLocalDEMethod
+        return self._all_sizes[0]
 
     @property
     def staggerloc(self):
@@ -794,8 +867,13 @@ class Grid(object):
         :return: The upper bounds of the :class:`~esmpy.api.grid.Grid`
             represented as numpy arrays of ints of size given by
             ``upper_bounds - lower_bounds``.
+            (It is an error to use this property in the uncommon case
+            where there are multiple DEs per PET. In that case, use
+            :meth:`~esmpy.api.grid.all_upper_bounds`.)
         """
-        return self._upper_bounds
+        if self.local_de_count > 1:
+            raise SingleLocalDEMethod
+        return self._all_upper_bounds[0]
 
     def add_coords(self, staggerloc=None, coord_dim=None, from_file=False):
         """
@@ -814,8 +892,9 @@ class Grid(object):
         :param bool from_file: Boolean for internal use to determine whether the
             :class:`~esmpy.api.grid.Grid` has already been created from file.
 
-        :return: A numpy array of coordinate values if staggerloc and
-            coord_dim are specified, otherwise return None.
+        :return: A numpy array of coordinate values if a single staggerloc is given,
+            coord_dim is specified and there is a single local DE,
+            otherwise return None.
         """
         if isinstance(staggerloc, type(None)):
             staggerloc = [StaggerLoc.CENTER]
@@ -826,7 +905,7 @@ class Grid(object):
                 staggerloc = [staggerloc]
 
         for stagger in staggerloc:
-            if not isinstance(self.coords[stagger][0], type(None)):
+            if not isinstance(self.all_coords[0][stagger][0], type(None)):
                 warnings.warn("This coordinate has already been added.")
             else:
                 # request that ESMF allocate space for the coordinates
@@ -834,12 +913,16 @@ class Grid(object):
                     ESMP_GridAddCoord(self, staggerloc=stagger)
 
                 # and now for Python
-                self._allocate_coords_(stagger, from_file=from_file)
+                for de in range(self.local_de_count):
+                    self._allocate_coords_(stagger, de, from_file=from_file)
 
                 # set the staggerlocs to be done
                 self.staggerloc[stagger] = True
 
-        if len(staggerloc) == 1 and not isinstance(coord_dim, type(None)):
+        if (len(staggerloc) == 1 and not isinstance(coord_dim, type(None))
+            and self.local_de_count == 1):
+            # Note that we can use self.coords here (as opposed to all_coords) because we
+            # have ensured that self.local_de_count == 1
             return self.coords[staggerloc[0]][coord_dim]
 
     def add_item(self, item, staggerloc=None, from_file=False):
@@ -863,7 +946,8 @@ class Grid(object):
             :class:`~esmpy.api.grid.Grid` has already been created from file.
 
         :return: A numpy array of the mask or area values if a single
-            staggerloc is given, otherwise return None.
+            staggerloc is given and there is a single local DE,
+            otherwise return None.
         """
         if isinstance(staggerloc, type(None)):
             staggerloc = [StaggerLoc.CENTER]
@@ -877,11 +961,11 @@ class Grid(object):
         for stagger in staggerloc:
             # check to see if they are done
             if item == GridItem.MASK:
-                if not isinstance(self.mask[stagger], type(None)):
+                if not isinstance(self.all_masks[0][stagger], type(None)):
                     raise GridItemAlreadyLinked
                 done = False
             elif item == GridItem.AREA:
-                if not isinstance(self.area[stagger], type(None)):
+                if not isinstance(self.all_areas[0][stagger], type(None)):
                     raise GridItemAlreadyLinked
                 done = False
             else:
@@ -893,9 +977,13 @@ class Grid(object):
                     ESMP_GridAddItem(self, item, staggerloc=stagger)
 
                 # and now for Python..
-                self._allocate_items_(item, stagger, from_file=from_file)
+                for de in range(self.local_de_count):
+                    self._allocate_items_(item, stagger, de, from_file=from_file)
 
-        if len(staggerloc) == 1:
+        if len(staggerloc) == 1 and self.local_de_count == 1:
+            # Note that we can use self.mask and self.area here (as opposed to
+            # self.all_masks and self.all_areas) because we have ensured that
+            # self.local_de_count == 1
             if item == GridItem.MASK:
                 return self.mask[staggerloc[0]]
             elif item == GridItem.AREA:
@@ -925,11 +1013,11 @@ class Grid(object):
                 ESMP_GridDestroy(self)
                 self._finalized = True
 
-    def get_coords(self, coord_dim, staggerloc=None):
+    def get_coords(self, coord_dim, staggerloc=None, localde=0):
         """
         Return a numpy array of coordinates at a specified stagger 
-        location. The returned array is NOT a copy, it is
-        directly aliased to the underlying memory allocated by esmpy.
+        location, for a single local DE. The returned array is NOT a copy,
+        it is directly aliased to the underlying memory allocated by esmpy.
 
         *REQUIRED:*
 
@@ -945,6 +1033,8 @@ class Grid(object):
             :attr:`~esmpy.api.constants.StaggerLoc.CENTER`
             in 2D and :attr:`~esmpy.api.constants.StaggerLoc.CENTER_VCENTER` in
             3D.
+        :param int localde: The local decompositional element (DE). This is
+            relevant in the uncommon case where there are multiple DEs per PET.
 
         :return: A numpy array of coordinate values at the specified staggerloc.
         """
@@ -958,16 +1048,16 @@ class Grid(object):
         elif isinstance(type(staggerloc), tuple):
             raise GridSingleStaggerloc
 
-        assert (self.coords[staggerloc][coord_dim] is not None)
-        ret = self.coords[staggerloc][coord_dim]
+        assert (self.all_coords[localde][staggerloc][coord_dim] is not None)
+        ret = self.all_coords[localde][staggerloc][coord_dim]
 
         return ret
 
-    def get_item(self, item, staggerloc=None):
+    def get_item(self, item, staggerloc=None, localde=0):
         """
         Return a numpy array of item values at a specified stagger
-        location.  The returned array is NOT a copy, it is
-        directly aliased to the underlying memory allocated by esmpy.
+        location, for a single local DE. The returned array is NOT a copy,
+        it is directly aliased to the underlying memory allocated by esmpy.
 
         *REQUIRED:*
 
@@ -980,6 +1070,8 @@ class Grid(object):
             values. If ``None``, defaults to
             :attr:`~esmpy.api.constants.StaggerLoc.CENTER` in 2D and
             :attr:`~esmpy.api.constants.StaggerLoc.CENTER_VCENTER` in 3D.
+        :param int localde: The local decompositional element (DE). This is
+            relevant in the uncommon case where there are multiple DEs per PET.
 
         :return: A numpy array of mask or area values at the specified staggerloc.
         """
@@ -993,13 +1085,13 @@ class Grid(object):
         elif isinstance(type(staggerloc), tuple):
             raise GridSingleStaggerloc
 
-        # selec the grid item
+        # select the grid item
         if item == GridItem.MASK:
-            assert (self.mask[staggerloc] is not None)
-            ret = self.mask[staggerloc]
+            assert (self.all_masks[localde][staggerloc] is not None)
+            ret = self.all_masks[localde][staggerloc]
         elif item == GridItem.AREA:
-            assert (self.area[staggerloc] is not None)
-            ret = self.area[staggerloc]
+            assert (self.all_areas[localde][staggerloc] is not None)
+            ret = self.all_areas[localde][staggerloc]
         else:
             raise GridItemNotSupported
 
@@ -1007,6 +1099,13 @@ class Grid(object):
 
     def set_coords(self, staggerloc, item_data):
         raise MethodNotImplemented
+        # Note that the commented-out code below pre-dated the extension of Grid to handle
+        # multiple DEs per PET. To make this work with multiple DEs per PET, we'd probably
+        # need to:
+        # - Add a localde argument (defaulting to 0)
+        # - Change references to self.coords[...][...] to instead be
+        #   self.all_coords[localde][...][...]
+
         # check sizes
         # assert (self.coords[staggerloc][:,:,coord_dim].shape == 
         #         coord_data.shape)
@@ -1015,6 +1114,12 @@ class Grid(object):
 
     def set_item(self, item, staggerloc, item_data):
         raise MethodNotImplemented
+        # Note that the commented-out code below pre-dated the extension of Grid to handle
+        # multiple DEs per PET. To make this work with multiple DEs per PET, we'd probably
+        # need to:
+        # - Add a localde argument (defaulting to 0)
+        # - Add a [localde] index in setting self.item (e.g., indexing into all_masks or all_areas)
+
         # check sizes
         # set item_out = item_data.copy()
         # set the item as a grid property and return this pointer
@@ -1023,37 +1128,37 @@ class Grid(object):
     ################ Helper functions ##########################################
 
     def _verify_grid_bounds_(self, stagger, localde):
-        if isinstance(self.lower_bounds[stagger], type(None)):
+        if isinstance(self.all_lower_bounds[localde][stagger], type(None)):
             try:
                 lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger, localde=localde)
             except:
                 raise GridBoundsNotCreated
 
-            self._lower_bounds[stagger] = np.copy(lb)
-            self._upper_bounds[stagger] = np.copy(ub)
+            self._all_lower_bounds[localde][stagger] = np.copy(lb)
+            self._all_upper_bounds[localde][stagger] = np.copy(ub)
 
             # find the local size of this stagger
-            self._size[stagger] = np.array(self.upper_bounds[stagger] -
-                                       self.lower_bounds[stagger])
+            self._all_sizes[localde][stagger] = np.array(self.all_upper_bounds[localde][stagger] -
+                                                         self.all_lower_bounds[localde][stagger])
         else:
             lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger, localde=localde)
-            assert(self.lower_bounds[stagger].all() == lb.all())
-            assert(self.upper_bounds[stagger].all() == ub.all())
-            assert(self.size[stagger].all() == np.array(ub-lb).all())
+            assert(self.all_lower_bounds[localde][stagger].all() == lb.all())
+            assert(self.all_upper_bounds[localde][stagger].all() == ub.all())
+            assert(self.all_sizes[localde][stagger].all() == np.array(ub-lb).all())
 
-    def _allocate_coords_(self, stagger, localde=0, from_file=False):
+    def _allocate_coords_(self, stagger, localde, from_file=False):
         # this could be one of several entry points to the grid,
         # verify that bounds and other necessary data are available
         self._verify_grid_bounds_(stagger, localde)
 
         # allocate space for the coordinates on the Python side
-        self._coords[stagger][0] = np.zeros(shape = (self.size[stagger]),
-                                            dtype = constants._ESMF2PythonType[self.type])
-        self._coords[stagger][1] = np.zeros(shape = (self.size[stagger]),
-                                            dtype = constants._ESMF2PythonType[self.type])
+        self._all_coords[localde][stagger][0] = np.zeros(shape = (self.all_sizes[localde][stagger]),
+                                                         dtype = constants._ESMF2PythonType[self.type])
+        self._all_coords[localde][stagger][1] = np.zeros(shape = (self.all_sizes[localde][stagger]),
+                                                         dtype = constants._ESMF2PythonType[self.type])
         if self.rank == 3:
-            self._coords[stagger][2] = np.zeros(shape = (self.size[stagger]),
-                                                dtype = constants._ESMF2PythonType[self.type])
+            self._all_coords[localde][stagger][2] = np.zeros(shape = (self.all_sizes[localde][stagger]),
+                                                             dtype = constants._ESMF2PythonType[self.type])
 
         # link the ESMF allocations to the Python grid properties
         # first if number of coordinate dimensions is equivalent to the grid rank
@@ -1069,25 +1174,25 @@ class Grid(object):
 
         # initialize to zeros, because ESMF doesn't handle that
         if not from_file:
-            self._coords[stagger][0][...] = 0
-            self._coords[stagger][1][...] = 0
+            self._all_coords[localde][stagger][0][...] = 0
+            self._all_coords[localde][stagger][1][...] = 0
             if self.rank == 3:
-               self._coords[stagger][2][...] = 0
+               self._all_coords[localde][stagger][2][...] = 0
 
-    def _allocate_items_(self, item, stagger, localde=0, from_file=False):
+    def _allocate_items_(self, item, stagger, localde, from_file=False):
         # this could be one of several entry points to the grid,
         # verify that bounds and other necessary data are available
         self._verify_grid_bounds_(stagger, localde)
 
         # if the item is a mask it is of type I4
         if item == GridItem.MASK:
-            self._mask[stagger] = np.zeros(
-                shape=(self.size[stagger]),
+            self._all_masks[localde][stagger] = np.zeros(
+                shape=(self.all_sizes[localde][stagger]),
                 dtype=constants._ESMF2PythonType[TypeKind.I4])
         # if the item is area then it is of type R8
         elif item == GridItem.AREA:
-            self._area[stagger] = np.zeros(
-                shape=(self.size[stagger]),
+            self._all_areas[localde][stagger] = np.zeros(
+                shape=(self.all_sizes[localde][stagger]),
                 dtype=constants._ESMF2PythonType[TypeKind.R8])
         else:
             raise GridItemNotSupported
@@ -1098,9 +1203,9 @@ class Grid(object):
         # initialize to zeros, because ESMF doesn't handle that
         if not from_file:
             if item == GridItem.MASK:
-                self._mask[stagger][...] = 1
+                self._all_masks[localde][stagger][...] = 1
             elif item == GridItem.AREA:
-                self._area[stagger][...] = 0
+                self._all_areas[localde][stagger][...] = 0
             else:
                 raise GridItemNotSupported
 
@@ -1112,7 +1217,7 @@ class Grid(object):
         gridCoordP = ndarray_from_esmf(data, self.type, ub-lb)
 
         # alias the coordinates to a grid property
-        self._coords[stagger][coord_dim] = gridCoordP
+        self._all_coords[localde][stagger][coord_dim] = gridCoordP
 
         if stagger in (StaggerLoc.CORNER, StaggerLoc.CORNER_VFACE):
             self._has_corners = True
@@ -1132,10 +1237,10 @@ class Grid(object):
             raise ValueError("Grid rank must be 2 or 3")
 
         # alias the coordinates to a grid property
-        self._coords[stagger][0] = gc00
-        self._coords[stagger][1] = gc11
+        self._all_coords[localde][stagger][0] = gc00
+        self._all_coords[localde][stagger][1] = gc11
         if self.rank == 3:
-            self._coords[stagger][2] = gc22
+            self._all_coords[localde][stagger][2] = gc22
 
         if stagger in (StaggerLoc.CORNER, StaggerLoc.CORNER_VFACE):
             self._has_corners = True
@@ -1144,10 +1249,10 @@ class Grid(object):
 
         # # check to see if they are done
         # if item == GridItem.MASK:
-        #     if not isinstance(self.mask[stagger], type(None)):
+        #     if not isinstance(self.all_masks[localde][stagger], type(None)):
         #         raise GridItemAlreadyLinked
         # elif item == GridItem.AREA:
-        #     if not isinstance(self.area[stagger], type(None)):
+        #     if not isinstance(self.all_areas[localde][stagger], type(None)):
         #         raise GridItemAlreadyLinked
         # else:
         #     raise GridItemNotSupported
@@ -1158,9 +1263,9 @@ class Grid(object):
 
         # create Array of the appropriate type the appropriate type
         if item == GridItem.MASK:
-            self._mask[stagger] = ndarray_from_esmf(data, TypeKind.I4, ub-lb)
+            self._all_masks[localde][stagger] = ndarray_from_esmf(data, TypeKind.I4, ub-lb)
         elif item == GridItem.AREA:
-            self._area[stagger] = ndarray_from_esmf(data, TypeKind.R8, ub-lb)
+            self._all_areas[localde][stagger] = ndarray_from_esmf(data, TypeKind.R8, ub-lb)
         else:
             raise GridItemNotSupported
 
