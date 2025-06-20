@@ -443,7 +443,7 @@ void * ESMC_GridGetItem(ESMC_Grid grid,
   arrayPtr.ptr = reinterpret_cast<void *>(itemArray);
 
   // get the Array pointer to return
-  void *itemPtr = ESMC_ArrayGetPtr(arrayPtr, 0, &localrc);
+  void *itemPtr = ESMC_ArrayGetPtr(arrayPtr, localDE_l, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return NULL; // bail out
 
