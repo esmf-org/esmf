@@ -3,7 +3,7 @@ import sys
 import argparse
 from esmx_tools import *
 
-def create_compList(cmpCfg: ESMXCmpCfg, odir):
+def create_compList(cmpCfg: ESMXCmpCfg, odir, sdir):
     # open file
     with open(os.path.join(odir, 'compList.txt'), 'w') as f:
         # loop through components and create use statements
@@ -43,7 +43,8 @@ def create_compList(cmpCfg: ESMXCmpCfg, odir):
                         for i in range(len(dirs)):
                             dirs[i] = dirs[i].strip()
                             if not dirs[i].startswith('$'):
-                                dirs[i] = os.path.abspath(dirs[i])
+                                if not os.path.isabs(dirs[i]):
+                                    dirs[i] = os.path.abspath(sdir + "/" + dirs[i])
                         val = ';'.join(dirs)
                 f.write('set({}-{} {})\n'.format(cmp, opt.upper(), val))
                 if opt.option == "link_into_app":
@@ -81,12 +82,14 @@ def main(argv):
 
     # default value
     odir = '.'
+    sdir = '.'
     disable_comps = []
 
     # read input arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('--ifile' , help='Input driver yaml file', required=True)
     parser.add_argument('--odir'  , help='Output directory for generated code')
+    parser.add_argument('--sdir'  , help='Component source root directory')
     parser.add_argument('--disable_comps' , help='List of components to disable')
     args = parser.parse_args()
 
@@ -94,6 +97,8 @@ def main(argv):
         ifile = args.ifile
     if args.odir:
         odir = args.odir
+    if args.sdir:
+        sdir = args.sdir
     if args.disable_comps:
         disable_comps = list(args.disable_comps.lower().split(","))
 
@@ -115,7 +120,7 @@ def main(argv):
         comps.remove_ci(dis)
 
     # create compList.txt for CMake, and remove unlinked components from list
-    create_compList(comps, odir)
+    create_compList(comps, odir, sdir)
 
     # create compUse.inc
     create_compUse(comps, odir)

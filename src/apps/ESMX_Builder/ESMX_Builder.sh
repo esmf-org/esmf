@@ -279,7 +279,7 @@ if [ "${VERBOSE}" = true ] ; then
   echo --- CMake Configuring ---
   set -x
 fi
-cmake -S${ESMF_ESMXDIR} -B${BUILD_DIR} ${CMAKE_SETTINGS[@]}
+cmake -S${ESMF_ESMXDIR} -B${BUILD_DIR} -DESMX_SDIR=`pwd` ${CMAKE_SETTINGS[@]}
 RC=$?
 { set +x; } 2>/dev/null
 if [ $RC -ne 0 ]; then
