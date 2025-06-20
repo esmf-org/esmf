@@ -613,11 +613,11 @@ def ESMP_GridCreateNoPeriDim(maxIndex, coordSys=None, coordTypeKind=None):
 #TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
 _ESMF.ESMC_GridCreateCubedSphere.restype = ESMP_GridStruct
 _ESMF.ESMC_GridCreateCubedSphere.argtypes = [ct.POINTER(ct.c_int),
-                                             ct.POINTER(ESMP_InterfaceInt),
-                                             #ct.POINTER(ESMP_InterfaceInt),
-                                             #ct.POINTER(ESMP_InterfaceInt),
-                                             ct.POINTER(ESMP_InterfaceInt),
-                                             ct.c_void_p,
+                                             OptionalStructPointer,
+                                             #OptionalStructPointer,
+                                             #OptionalStructPointer,
+                                             OptionalStructPointer,
+                                             Py3Char,
                                              ct.POINTER(ct.c_int)]
 def ESMP_GridCreateCubedSphere(tilesize, regDecompPTile=None,
                                #decompFlagPTile=None, deLabelList=None,
@@ -668,7 +668,7 @@ def ESMP_GridCreateCubedSphere(tilesize, regDecompPTile=None,
         staggerLocList_i = ESMP_InterfaceInt(staggerLocList)
 
     # create the ESMF Grid and retrieve a ctypes pointer to it
-    gridstruct = _ESMF.ESMC_GridCreateCubedSphere(lts, regDecompPTile_i,
+    gridstruct = _ESMF.ESMC_GridCreateCubedSphere(ct.byref(lts), regDecompPTile_i,
                                                   #decompFlagPTile_i,
                                                   #deLabelList_i,
                                                   staggerLocList_i,
