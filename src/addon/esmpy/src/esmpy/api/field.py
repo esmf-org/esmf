@@ -206,8 +206,8 @@ class Field(object):
         # 0th list element (which should be the only list element)
         #
         # note that we make a new list here; this is important to avoid modifying the
-        # original self._all_data list (as would happen if we simply assigned to
-        # ret._all_data[0] since the copy method is a shallow copy)
+        # original self._all_upper_bounds list (as would happen if we simply assigned to
+        # ret._all_upper_bounds[0] since the copy method is a shallow copy)
         ret._all_upper_bounds = [np.array(ret.data.shape, dtype=np.int32)]
         # lower bounds do not need to be sliced yet because slicing is not yet enabled in parallel
 
