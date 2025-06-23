@@ -682,10 +682,12 @@ void build_mig_plist(const PointList *plist,
 }
   
   
-struct CommDataOpt {
-  double closest_dist2;
-  int closest_src_gid;
-  int proc;
+struct ClosestInfo {
+  int closest_src_gid;  // gid of closest point, SN_BAD_ID if we haven't found any yet
+  double closest_dist2;  // dist2 of closest point so far
+  int done;     // 0 if still need to search, 1 if we've found closest point
+
+  ClosestInfo(int _closest_src_gid, double _closest_dist2, int _done): closest_src_gid(_closest_src_gid), closest_dist2(_closest_dist2), done(_done) {}
 };
 
   /* XMRKX */
@@ -716,9 +718,12 @@ struct CommDataOpt {
   int dst_pl_num_pnts = dst_pl->get_curr_num_pts();
 
   // Allocate space to hold information for dst points
-  vector<int> dst_closest_src_gid(dst_pl_num_pnts,SN_BAD_ID);
-  vector<double> dst_closest_dist2(dst_pl_num_pnts,huge);
-  vector<int> dst_done(dst_pl_num_pnts,0);
+  ClosestInfo InitCI(SN_BAD_ID,huge,0);
+  vector<ClosestInfo> dst_info(dst_pl_num_pnts, InitCI);
+
+  //  vector<int> dst_closest_src_gid(dst_pl_num_pnts,SN_BAD_ID);
+  //vector<double> dst_closest_dist2(dst_pl_num_pnts,huge);
+  //vector<int> dst_done(dst_pl_num_pnts,0);
 
   // Get min/max of dst
   ////// Get local min/max of dst
@@ -830,8 +835,8 @@ struct CommDataOpt {
 
     // If we've found a nearest source point, then add to the search results list...
     if (sd.closest_src_id != SN_BAD_ID) {
-      dst_closest_src_gid[p]=sd.closest_src_id;
-      dst_closest_dist2[p]=sd.closest_dist2;      
+      dst_info[p].closest_src_gid=sd.closest_src_id;
+      dst_info[p].closest_dist2=sd.closest_dist2;      
     }
   }
 
@@ -842,7 +847,7 @@ struct CommDataOpt {
   // For debugging see if there are any unmapped points
   bool has_unmapped=false;
   for (UInt p = 0; p < dst_pl_num_pnts; ++p) {
-    if (dst_closest_src_gid[p] == SN_BAD_ID) {
+    if (dst_info[p].closest_src_gid == SN_BAD_ID) {
       has_unmapped=true;
     }
   }
@@ -875,7 +880,7 @@ struct CommDataOpt {
     // Loop updating
     for (UInt p = 0; p < dst_pl_num_pnts; ++p) {
       // If not filled
-      if (dst_closest_src_gid[p] == SN_BAD_ID) {
+      if (dst_info[p].closest_src_gid == SN_BAD_ID) {
 
         // Get dst point coords
         const double *pnt_crd=dst_pl->get_coord_ptr(p);
@@ -890,8 +895,8 @@ struct CommDataOpt {
           (dst_pnt[2]-near_pnt[2])*(dst_pnt[2]-near_pnt[2]);
 
         // Update list
-        dst_closest_src_gid[p]=near_id;
-        dst_closest_dist2[p]=dist2;
+        dst_info[p].closest_src_gid=near_id;
+        dst_info[p].closest_dist2=dist2;
       }
     }
   }  
@@ -900,7 +905,7 @@ struct CommDataOpt {
   // For debugging see if there are any unmapped points
   bool still_has_unmapped=false;
   for (UInt p = 0; p < dst_pl_num_pnts; ++p) {
-    if (dst_closest_src_gid[p] == SN_BAD_ID) {
+    if (dst_info[p].closest_src_gid == SN_BAD_ID) {
       still_has_unmapped=true;
     }
   }
@@ -915,7 +920,7 @@ struct CommDataOpt {
   for (UInt p = 0; p < dst_pl_num_pnts; ++p) {
 
     // If this has a closest point, see if it's within our mm box
-    if (dst_closest_src_gid[p] != SN_BAD_ID) {
+    if (dst_info[p].closest_src_gid != SN_BAD_ID) {
 
       // Get dst point
       const double *pnt_crd=dst_pl->get_coord_ptr(p);
@@ -927,7 +932,7 @@ struct CommDataOpt {
       dst_pnt[2] = (sdim == 3 ? pnt_crd[2] : 0.0);
 
       // Get closest dist
-      double dist=sqrt(dst_closest_dist2[p]);
+      double dist=sqrt(dst_info[p].closest_dist2);
 
       // See if we are within box
       bool within=true;
@@ -939,7 +944,7 @@ struct CommDataOpt {
       if ((dst_pnt[2] - dist) < dst_min[2]) within=false;
 
       // If within, then we are done
-      if (within) dst_done[p]=1;
+      if (within) dst_info[p].done=1;
     }
   }
 
@@ -957,10 +962,10 @@ struct CommDataOpt {
     // Skip if already done
     // What happens if there's nothing...
     // TODO: Detect if there is nothing and have a way to tell SpaceDir to not add a box for this PET
-    //    if (dst_done[p]) continue;
+    //    if (dst_info[p].done) continue;
 
     // Error out if not found yet
-    //    if (dst_closest_src_gid[p] == SN_BAD_ID) Throw() << "Point "<<p<<" not mapped yet!";
+    //    if (dst_info[p].closest_src_gid == SN_BAD_ID) Throw() << "Point "<<p<<" not mapped yet!";
     
     // Get dst_pnt
     const point *pnt_ptr=dst_pl->get_point(p);
@@ -972,7 +977,7 @@ struct CommDataOpt {
     dst_pnt[2] = sdim == 3 ? pnt_ptr->coords[2] : 0.0;
 
     // Get closest dist
-    double dist=sqrt(dst_closest_dist2[p]);
+    double dist=sqrt(dst_info[p].closest_dist2);
 
     // Get min max box necessary to search that distance
     double dst_pnt_min[3], dst_pnt_max[3];
@@ -1013,7 +1018,7 @@ struct CommDataOpt {
   for (UInt p = 0; p < dst_pl_num_pnts; ++p) {
 
     // Skip if done
-    if (dst_done[p]) continue;
+    if (dst_info[p].done) continue;
 
     // Get point
     const double *pnt_crd=dst_pl->get_coord_ptr(p);
@@ -1028,13 +1033,13 @@ struct CommDataOpt {
     double pmax[3]={huge, huge, huge};
     
     // If we have a valid previous nearest point, then use that
-    if (dst_closest_src_gid[p] !=  SN_BAD_ID) {
+    if (dst_info[p].closest_src_gid !=  SN_BAD_ID) {
       // Fill search struct
-      sd.closest_dist2=dst_closest_dist2[p];
-      sd.closest_src_id=dst_closest_src_gid[p];
+      sd.closest_dist2=dst_info[p].closest_dist2;
+      sd.closest_src_id=dst_info[p].closest_src_gid;
 
       // Calc pmin/pmax
-      double dist=sqrt(dst_closest_dist2[p]);
+      double dist=sqrt(dst_info[p].closest_dist2);
       MU_SUB_SCALAR_VEC3D(pmin,sd.dst_pnt,dist);
       MU_ADD_SCALAR_VEC3D(pmax,sd.dst_pnt,dist);      
     } else {
@@ -1061,8 +1066,8 @@ struct CommDataOpt {
 
     // If we've found a nearer source point, then add to the search results list...
     if (sd.closest_src_id != SN_BAD_ID) {      
-      dst_closest_src_gid[p]=sd.closest_src_id;
-      dst_closest_dist2[p]=sd.closest_dist2;      
+      dst_info[p].closest_src_gid=sd.closest_src_id;
+      dst_info[p].closest_dist2=sd.closest_dist2;      
     }
   }
   
@@ -1073,13 +1078,13 @@ struct CommDataOpt {
     int dst_id=dst_pl->get_id(i);
 
     // Do stuff depending on if nearest point was found
-    if (dst_closest_src_gid[i] != SN_BAD_ID) {
+    if (dst_info[i].closest_src_gid != SN_BAD_ID) {
 
       // We've found a nearest source point, so add to results list
       Search_result *sr=new Search_result();
 
       sr->dst_gid=dst_id;
-      sr->src_gid=dst_closest_src_gid[i];
+      sr->src_gid=dst_info[i].closest_src_gid;
 
       result.push_back(sr);
 
