@@ -13,8 +13,9 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
                    regrid_method=esmpy.RegridMethod.CONSERVE, 
                    uninitval=422397696., mask_values=[0]):
     """
-    Compare the values of two fields to verify the accuracy of a Regrid.  The
-    Fields should be the same size and have rank = 2 or 3.
+    Compare the values of two fields to verify the accuracy of a Regrid. The Fields should
+    be the same size and have rank = 2 or 3. This only works if the Fields are set up with
+    1 DE per PET (which is typically the case).
     :param field1: The Field that received the interpolation values.
     :param field2: The Field holding the values of the exact solution.
     :param itrp_mean_tol: The mean relative error tolerance.
