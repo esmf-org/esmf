@@ -267,39 +267,64 @@ class TestGrid(TestBase):
                 "The following combinations of Grid parameters failed to create a proper Grid: " + str(fail))
 
     def test_grid_create_cubed_sphere(self):
+        """
+        Test creation of a cubed-sphere grid with the default decomposition.
+        """
         # keywords = dict(
-            # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
-            # periodic=[[None, None, None], [None, None, 0], [None, None, 1], [None, None, 2],
-            #           [0, None, None], [0, None, 0], [0, None, 1], [0, None, 2],
-            #           [1, None, None], [1, 0, 1], [1, 0, 2], [1, 1, 0], [1, 1, 2], [1, 2, 0], [1, 2, 1]],
-            # staggerloc=[None, StaggerLoc.CENTER_VCENTER, StaggerLoc.EDGE1_VCENTER, StaggerLoc.EDGE2_VCENTER,
-            #             StaggerLoc.CORNER_VCENTER, StaggerLoc.CENTER_VFACE, StaggerLoc.EDGE1_VFACE,
-            #             StaggerLoc.EDGE2_VFACE, StaggerLoc.CORNER_VFACE],
-            # coord_sys=[None, CoordSys.CART, CoordSys.SPH_DEG, CoordSys.SPH_RAD],
-            # typekind=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8])
+        # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
+        # periodic=[[None, None, None], [None, None, 0], [None, None, 1], [None, None, 2],
+        #           [0, None, None], [0, None, 0], [0, None, 1], [0, None, 2],
+        #           [1, None, None], [1, 0, 1], [1, 0, 2], [1, 1, 0], [1, 1, 2], [1, 2, 0], [1, 2, 1]],
+        # staggerloc=[None, StaggerLoc.CENTER_VCENTER, StaggerLoc.EDGE1_VCENTER, StaggerLoc.EDGE2_VCENTER,
+        #             StaggerLoc.CORNER_VCENTER, StaggerLoc.CENTER_VFACE, StaggerLoc.EDGE1_VFACE,
+        #             StaggerLoc.EDGE2_VFACE, StaggerLoc.CORNER_VFACE],
+        # coord_sys=[None, CoordSys.CART, CoordSys.SPH_DEG, CoordSys.SPH_RAD],
+        # typekind=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8])
 
-            regDecompPTile = np.array([[2,2],[2,2],[1,2],[1,2],[1,2],[1,2]], dtype=np.int32)
-            regDecompPTile = np.array([[2,2,1,1,1,1],[2,2,2,2,2,2]], dtype=np.int32)
-            # decompFlagPTile = np.array([[DecompFlag.DEFAULT, 1],
-            #                           [DecompFlag.BALANCED, 2],
-            #                           [DecompFlag.RESTFIRST, 3],
-            #                           [DecompFlag.RESTLAST, 4],
-            #                           [DecompFlag.CYCLIC, 5],
-            #                           [DecompFlag.DEFAULT, 6]], dtype=np.int32)
-            # deLabelList = np.array([11,12,13,14,15,16], dtype=np.int32)
+        # decompFlagPTile = np.array([[DecompFlag.DEFAULT, 1],
+        #                           [DecompFlag.BALANCED, 2],
+        #                           [DecompFlag.RESTFIRST, 3],
+        #                           [DecompFlag.RESTLAST, 4],
+        #                           [DecompFlag.CYCLIC, 5],
+        #                           [DecompFlag.DEFAULT, 6]], dtype=np.int32)
+        # deLabelList = np.array([11,12,13,14,15,16], dtype=np.int32)
 
-            grid = Grid(tilesize = 45, regDecompPTile = regDecompPTile,
-                                     #decompFlagPTile = decompFlagPTile,
-                                     #deLabelList = deLabelList,
-                                     name = "cubed_sphere")
-            grid.add_item(GridItem.MASK)
-            grid.add_item(GridItem.AREA)
-            # # slicing just the first de (slicing doesn't work for multiple des)
-            # grid2 = grid[2:10, 4:7]
-            # self.examine_grid_attributes(grid)
-            # self.examine_grid_attributes(grid2)
-            grid.destroy()
-            # grid2.destroy()
+        grid = Grid(tilesize = 45,
+                    # decompFlagPTile = decompFlagPTile,
+                    # deLabelList = deLabelList,
+                    name = "cubed_sphere")
+        grid.add_item(GridItem.MASK)
+        grid.add_item(GridItem.AREA)
+        # # slicing just the first de (slicing doesn't work for multiple des)
+        # grid2 = grid[2:10, 4:7]
+        if grid.local_de_count == 1:
+            # examine_grid_attributes currently requires 1 DE per PET. In practice, this
+            # means that we can call examine_grid_attributes on all PETs when testing with
+            # 6 PETs, or on 2 out of the 4 PETs when testing with 4 PETs (and not at all
+            # when testing with 1 PET).
+            self.examine_grid_attributes(grid)
+        # self.examine_grid_attributes(grid2)
+        grid.destroy()
+        # grid2.destroy()
+
+    def test_grid_create_cubed_sphere_reg_decomp_p_tile(self):
+        """
+        Test the creation of cubed-sphere grids when specifying regDecompPTile
+
+        Note that the examine_grid_attributes function currently doesn't work with this
+        test case, because we typically have more than 1 DE per PET and
+        examine_grid_attributes only works with 1 DE per PET.
+        """
+        regDecompPTile = np.array([[2,2,1,1,1,1],[2,2,2,2,2,2]], dtype=np.int32)
+
+        grid = Grid(tilesize = 45, regDecompPTile = regDecompPTile,
+                    name = "cubed_sphere")
+        grid.add_item(GridItem.MASK)
+        grid.add_item(GridItem.AREA)
+        # Note the lack of a call to examine_grid_attributes here, because that function
+        # currently requires 1 DE per PET, which won't typically be the case in this test.
+        # So this test just confirms that it works to create the grid.
+        grid.destroy()
 
     @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_grid_slice_2d(self):
