@@ -109,6 +109,7 @@ class TestGrid(TestBase):
         """
         assert grid.coords[staggerloc][0].shape == expected_shape
         assert grid.upper_bounds[staggerloc].tolist() == list(expected_shape)
+        assert grid.size[staggerloc].tolist() == list(expected_shape)
 
     def make_grid_2d(self):
         typekind = TypeKind.R8
