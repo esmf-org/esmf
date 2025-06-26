@@ -186,8 +186,8 @@ namespace ESMCI {
 
     int myPet = vm->getLocalPet();
     int petCount = vm->getPetCount();
-    int64_t ret;
-    
+    int64_t ret = 0;  // initialize to ensure valid return for all conditions
+
     for (int peer = 1; peer < petCount; peer++) {
       vm->barrier();
       if (myPet == 0 || myPet == peer) {
