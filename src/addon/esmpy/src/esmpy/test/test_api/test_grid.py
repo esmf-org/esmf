@@ -98,6 +98,19 @@ class TestGrid(TestBase):
                     assert (
                         grid.area[i].shape == tuple(np.array(grid.upper_bounds[i]) - np.array(grid.lower_bounds[i])))
 
+    def assert_expected_grid_shape(self, grid, staggerloc, expected_shape):
+        """
+        Assert that various properties of the given :class:`~esmpy.api.grid.Grid` at the
+        given stagger location match the given expected shape.
+
+        :param Grid grid: The Grid to check
+        :param StaggerLoc staggerloc: The stagger location to check
+        :param tuple expected_shape: The expected shape of the Grid
+        """
+        assert grid.coords[staggerloc][0].shape == expected_shape
+        assert grid.upper_bounds[staggerloc].tolist() == list(expected_shape)
+        assert grid.size[staggerloc].tolist() == list(expected_shape)
+
     def make_grid_2d(self):
         typekind = TypeKind.R8
         grid = Grid(np.array([100, 100]), coord_sys=CoordSys.CART,
@@ -333,18 +346,13 @@ class TestGrid(TestBase):
         grid2 = grid[1:21, 3:17]
         grid3 = grid2[4:6, 5:6]
 
-        assert grid.coords[StaggerLoc.CENTER][0].shape == (100, 100)
-        assert grid.upper_bounds[StaggerLoc.CENTER].tolist() == [100, 100]
-
+        self.assert_expected_grid_shape(grid, StaggerLoc.CENTER, (100, 100))
         del grid
 
-        assert grid2.coords[StaggerLoc.CENTER][0].shape == (20, 14)
-        assert grid2.upper_bounds[StaggerLoc.CENTER].tolist() == [20, 14]
-
+        self.assert_expected_grid_shape(grid2, StaggerLoc.CENTER, (20, 14))
         del grid2
 
-        assert grid3.coords[StaggerLoc.CENTER][0].shape == (2, 1)
-        assert grid3.upper_bounds[StaggerLoc.CENTER].tolist() == [2, 1]
+        self.assert_expected_grid_shape(grid3, StaggerLoc.CENTER, (2, 1))
 
     @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_grid_slice_2d_corners(self):
@@ -363,19 +371,13 @@ class TestGrid(TestBase):
         grid2 = grid[1:21, 3:17]
         grid3 = grid2[4:6, 5:6]
 
-        assert grid.coords[StaggerLoc.CORNER][0].shape == (101, 101)
-        assert grid.upper_bounds[StaggerLoc.CORNER].tolist() == [101, 101]
-
+        self.assert_expected_grid_shape(grid, StaggerLoc.CORNER, (101, 101))
         del grid
 
-        assert grid2.coords[StaggerLoc.CORNER][0].shape == (21, 15)
-        assert grid2.upper_bounds[StaggerLoc.CORNER].tolist() == [21, 15]
-
+        self.assert_expected_grid_shape(grid2, StaggerLoc.CORNER, (21, 15))
         del grid2
 
-        assert grid3.coords[StaggerLoc.CORNER][0].shape == (3, 2)
-        assert grid3.upper_bounds[StaggerLoc.CORNER].tolist() == [3, 2]
-
+        self.assert_expected_grid_shape(grid3, StaggerLoc.CORNER, (3, 2))
 
     @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_grid_slice_3d(self):
@@ -384,18 +386,13 @@ class TestGrid(TestBase):
         grid2 = grid[1:21, 3:17, 7:47]
         grid3 = grid[4:6, 5:6, 0:2]
 
-        assert grid.coords[StaggerLoc.CENTER][0].shape == (100, 100, 100)
-        assert grid.upper_bounds[StaggerLoc.CENTER].tolist() == [100, 100, 100]
-
+        self.assert_expected_grid_shape(grid, StaggerLoc.CENTER, (100, 100, 100))
         del grid
 
-        assert grid2.coords[StaggerLoc.CENTER][0].shape == (20, 14, 40)
-        assert grid2.upper_bounds[StaggerLoc.CENTER].tolist() == [20, 14, 40]
-
+        self.assert_expected_grid_shape(grid2, StaggerLoc.CENTER, (20, 14, 40))
         del grid2
 
-        assert grid3.coords[StaggerLoc.CENTER][0].shape == (2, 1, 2)
-        assert grid3.upper_bounds[StaggerLoc.CENTER].tolist() == [2, 1, 2]
+        self.assert_expected_grid_shape(grid3, StaggerLoc.CENTER, (2, 1, 2))
 
     @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_grid_slice_3d_corners(self):
@@ -419,18 +416,13 @@ class TestGrid(TestBase):
         grid2 = grid[1:21, 3:17, 7:47]
         grid3 = grid[4:6, 5:6, 0:2]
 
-        assert grid.coords[cvf][0].shape == (101, 101, 101)
-        assert grid.upper_bounds[cvf].tolist() == [101, 101, 101]
-
+        self.assert_expected_grid_shape(grid, cvf, (101, 101, 101))
         del grid
 
-        assert grid2.coords[cvf][0].shape == (21, 15, 41)
-        assert grid2.upper_bounds[cvf].tolist() == [21, 15, 41]
-
+        self.assert_expected_grid_shape(grid2, cvf, (21, 15, 41))
         del grid2
 
-        assert grid3.coords[cvf][0].shape == (3, 2, 3)
-        assert grid3.upper_bounds[cvf].tolist() == [3, 2, 3]
+        self.assert_expected_grid_shape(grid3, cvf, (3, 2, 3))
 
     @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_grid_slice_periodic(self):
@@ -439,24 +431,16 @@ class TestGrid(TestBase):
         grid2 = grid[1:21, 3:17]
         grid3 = grid2[4:6, 5:6]
 
-        assert grid.coords[StaggerLoc.CENTER][0].shape == (x, y)
-        assert grid.upper_bounds[StaggerLoc.CENTER].tolist() == [x, y]
-        assert grid.coords[StaggerLoc.CORNER][0].shape == (x, y + 1)
-        assert grid.upper_bounds[StaggerLoc.CORNER].tolist() == [x, y + 1]
-
+        self.assert_expected_grid_shape(grid, StaggerLoc.CENTER, (x, y))
+        self.assert_expected_grid_shape(grid, StaggerLoc.CORNER, (x, y + 1))
         del grid
 
-        assert grid2.coords[StaggerLoc.CENTER][0].shape == (20, 14)
-        assert grid2.upper_bounds[StaggerLoc.CENTER].tolist() == [20, 14]
-        assert grid2.coords[StaggerLoc.CORNER][0].shape == (21, 15)
-        assert grid2.upper_bounds[StaggerLoc.CORNER].tolist() == [21, 15]
-
+        self.assert_expected_grid_shape(grid2, StaggerLoc.CENTER, (20, 14))
+        self.assert_expected_grid_shape(grid2, StaggerLoc.CORNER, (21, 15))
         del grid2
 
-        assert grid3.coords[StaggerLoc.CENTER][0].shape == (2, 1)
-        assert grid3.upper_bounds[StaggerLoc.CENTER].tolist() == [2, 1]
-        assert grid3.coords[StaggerLoc.CORNER][0].shape == (3, 2)
-        assert grid3.upper_bounds[StaggerLoc.CORNER].tolist() == [3, 2]
+        self.assert_expected_grid_shape(grid3, StaggerLoc.CENTER, (2, 1))
+        self.assert_expected_grid_shape(grid3, StaggerLoc.CORNER, (3, 2))
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
@@ -477,13 +461,10 @@ class TestGrid(TestBase):
 
         grid2 = grid[0:5, 0:5]
 
-        assert grid.coords[0][0].shape == (128, 64)
-        assert grid.upper_bounds[0].tolist() == [128, 64]
-
+        self.assert_expected_grid_shape(grid, StaggerLoc.CENTER, (128, 64))
         del grid
 
-        assert grid2.coords[0][0].shape == (5, 5)
-        assert grid2.upper_bounds[0].tolist() == [5, 5]
+        self.assert_expected_grid_shape(grid2, StaggerLoc.CENTER, (5, 5))
 
     def test_grid_copy(self):
         grid = self.make_grid_2d()

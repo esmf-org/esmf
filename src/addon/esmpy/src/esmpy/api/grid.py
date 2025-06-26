@@ -428,9 +428,6 @@ class Grid(object):
         # all_upper_bounds[de][staggerLoc]
         self._all_upper_bounds = [[None for _ in range(2**self.rank)]
                                   for _ in range(self.local_de_count)]
-        # all_sizes[de][staggerloc]
-        self._all_sizes = [[None for _ in range(2**self.rank)]
-                           for _ in range(self.local_de_count)]
         # all_coords[de][staggerLoc][coord_dim]
         self._all_coords = [[[None for _ in range(self.rank)]
                              for _ in range(2**self.rank)]
@@ -591,7 +588,11 @@ class Grid(object):
             numpy arrays of ints of size given by
             ``upper_bounds - lower_bounds``.
         """
-        return self._all_sizes
+        return [[(None if self.all_upper_bounds[localde][stagger] is None
+                  or self.all_lower_bounds[localde][stagger] is None
+                  else self.all_upper_bounds[localde][stagger] - self.all_lower_bounds[localde][stagger])
+                  for stagger in range(2 ** self.rank)]
+                  for localde in range(self.local_de_count)]
 
     @property
     def all_upper_bounds(self):
@@ -828,7 +829,7 @@ class Grid(object):
 
         if self.local_de_count > 1:
             raise SingleLocalDEMethod
-        return self._all_sizes[0]
+        return self.all_sizes[0]
 
     @property
     def staggerloc(self):
@@ -1136,10 +1137,6 @@ class Grid(object):
 
             self._all_lower_bounds[localde][stagger] = np.copy(lb)
             self._all_upper_bounds[localde][stagger] = np.copy(ub)
-
-            # find the local size of this stagger
-            self._all_sizes[localde][stagger] = np.array(self.all_upper_bounds[localde][stagger] -
-                                                         self.all_lower_bounds[localde][stagger])
         else:
             lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger, localde=localde)
             assert(self.all_lower_bounds[localde][stagger].all() == lb.all())
