@@ -19,84 +19,96 @@ class TestGrid(TestBase):
     # prefer TestBase.mg, but in this case required for test_exhaustive in pytest markers
     mg = Manager(debug=True)
     mg.test_exhaustive = False
-    
-    def examine_grid_attributes(self, grid):
-        # ~~~~~~~~~~~~~~~~~~~~~~  LOCAL DE COUNT ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # For now we assume 1 DE per PET
-        assert grid.local_de_count == 1
 
+    def examine_grid_attributes(self, grid):
+        for de in range(grid.local_de_count):
+            self.examine_grid_attributes_one_de(grid, de)
+
+    def examine_grid_attributes_one_de(self, grid, localde):
         # ~~~~~~~~~~~~~~~~~~~~~~  STAGGER LOCATIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # grid.staggerloc returns a boolean list of the activated stagger locations
         assert (type(grid.staggerloc) is list)
         assert (len(grid.staggerloc) is 2 ** grid.rank)
 
         # ~~~~~~~~~~~~~~~~~~~~~~  SIZE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # grid.size returns a list of the local (processor specific) sizes of grid coordinates in each stagger location
-        assert (type(grid.size) is list)
-        assert (len(grid.size) is 2 ** grid.rank)
+        # grid.all_sizes[localde] returns a list of the local (processor specific) sizes
+        # of grid coordinates in each stagger location
+        assert (type(grid.all_sizes[localde]) is list)
+        assert (len(grid.all_sizes[localde]) is 2 ** grid.rank)
 
         # ~~~~~~~~~~~~~~~~~~~~~~  BOUNDS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # grid.lower_bounds or grid.upper_bounds returns a list of numpy arrays containing the bounds of all coordinate dimensions in the grid
-        assert (type(grid.lower_bounds) is list)
-        assert (len(grid.lower_bounds) is 2 ** grid.rank)
-        assert (type(grid.upper_bounds) is list)
-        assert (len(grid.upper_bounds) is 2 ** grid.rank)
+        # grid.all_lower_bounds[localde] or grid.all_upper_bounds[localde] returns a list
+        # of numpy arrays containing the bounds of all coordinate dimensions in the grid
+        assert (type(grid.all_lower_bounds[localde]) is list)
+        assert (len(grid.all_lower_bounds[localde]) is 2 ** grid.rank)
+        assert (type(grid.all_upper_bounds[localde]) is list)
+        assert (len(grid.all_upper_bounds[localde]) is 2 ** grid.rank)
 
         # ~~~~~~~~~~~~~~~~~~~~~~  COORDINATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # grid.coords returns a list of lists of numpy arrays for coordinates of all stagger locations and coordinate dimensions
-        assert (type(grid.coords) is list)
-        assert (len(grid.coords) is 2 ** grid.rank)
+        # grid.all_coords[localde] returns a list of lists of numpy arrays for coordinates
+        # of all stagger locations and coordinate dimensions
+        assert (type(grid.all_coords[localde]) is list)
+        assert (len(grid.all_coords[localde]) is 2 ** grid.rank)
 
         # ~~~~~~~~~~~~~~~~~~~~~~  MASK ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # grid.mask returns a list of numpy arrays containing the grid mask at each stagger location
-        assert (type(grid.mask) is list)
-        assert (len(grid.mask) is 2 ** grid.rank)
+        # grid.all_masks[localde] returns a list of numpy arrays containing the grid mask
+        # at each stagger location
+        assert (type(grid.all_masks[localde]) is list)
+        assert (len(grid.all_masks[localde]) is 2 ** grid.rank)
 
         # ~~~~~~~~~~~~~~~~~~~~~~  AREA ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # grid.area returns a list of numpy arrays containing the grid cell areas at each stagger location
-        assert (type(grid.mask) is list)
-        assert (len(grid.mask) is 2 ** grid.rank)
+        # grid.all_areas[localde] returns a list of numpy arrays containing the grid cell
+        # areas at each stagger location
+        assert (type(grid.all_areas[localde]) is list)
+        assert (len(grid.all_areas[localde]) is 2 ** grid.rank)
 
         # stagger specific attributes
         for i in range(len(grid.staggerloc)):
             if grid.staggerloc[i]:
 
                 # ~~~~~~~~~~~~~~~~~~~~~~  SIZE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                # grid.size[i] returns a numpy array of the local (processor specific) size of the grid coordinates at the i'th stagger location
-                assert (type(grid.size[i]) is np.ndarray)
-                assert (grid.size[i].shape == tuple([grid.rank]))
+                # grid.all_sizes[localde][i] returns a numpy array of the local (processor
+                # specific) size of the grid coordinates at the i'th stagger location
+                assert (type(grid.all_sizes[localde][i]) is np.ndarray)
+                assert (grid.all_sizes[localde][i].shape == tuple([grid.rank]))
 
                 # ~~~~~~~~~~~~~~~~~~~~~~  BOUNDS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                # grid.lower_bounds[i] or grid.upper_bounds[i] returns a numpy array containing the bounds of all coordinate dimensions at the i'th stagger location
-                assert (type(grid.lower_bounds[i] is np.ndarray))
-                assert (grid.lower_bounds[i].shape == tuple([grid.rank]))
-                assert (type(grid.upper_bounds[i] is np.ndarray))
-                assert (grid.upper_bounds[i].shape == tuple([grid.rank]))
+                # grid.all_lower_bounds[localde][i] or grid.all_upper_bounds[localde][i]
+                # returns a numpy array containing the bounds of all coordinate dimensions
+                # at the i'th stagger location
+                assert (type(grid.all_lower_bounds[localde][i] is np.ndarray))
+                assert (grid.all_lower_bounds[localde][i].shape == tuple([grid.rank]))
+                assert (type(grid.all_upper_bounds[localde][i] is np.ndarray))
+                assert (grid.all_upper_bounds[localde][i].shape == tuple([grid.rank]))
 
                 # ~~~~~~~~~~~~~~~~~~~~~~  COORDINATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                # grid.coords[i] returns a list of length=rank containing numpy arrays for each coordinate dimension
-                assert (type(grid.coords[i]) is list)
-                assert (len(grid.coords[i]) is grid.rank)
+                # grid.all_coords[localde][i] returns a list of length=rank containing
+                # numpy arrays for each coordinate dimension
+                assert (type(grid.all_coords[localde][i]) is list)
+                assert (len(grid.all_coords[localde][i]) is grid.rank)
 
-                # grid.coords[i][j] returns a numpy array containing coordinates of i'th stagger location and j'th coordinate dimension
+                # grid.all_coords[localde][i][j] returns a numpy array containing
+                # coordinates of i'th stagger location and j'th coordinate dimension
                 for j in range(grid.rank):
-                    assert (type(grid.coords[i][j] is np.ndarray))
+                    assert (type(grid.all_coords[localde][i][j] is np.ndarray))
                     assert (
-                        grid.coords[i][j].shape == tuple(np.array(grid.upper_bounds[i]) - np.array(grid.lower_bounds[i])))
+                        grid.all_coords[localde][i][j].shape == tuple(np.array(grid.all_upper_bounds[localde][i]) - np.array(grid.all_lower_bounds[localde][i])))
 
                 # ~~~~~~~~~~~~~~~~~~~~~~  MASK ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                # grid.mask[i] returns a numpy array containing the grid mask at the i'th stagger location
-                if not isinstance(grid.mask[i], type(None)):
-                    assert (type(grid.mask[i]) is np.ndarray)
+                # grid.all_masks[localde][i] returns a numpy array containing the grid
+                # mask at the i'th stagger location
+                if not isinstance(grid.all_masks[localde][i], type(None)):
+                    assert (type(grid.all_masks[localde][i]) is np.ndarray)
                     assert (
-                        grid.mask[i].shape == tuple(np.array(grid.upper_bounds[i]) - np.array(grid.lower_bounds[i])))
+                        grid.all_masks[localde][i].shape == tuple(np.array(grid.all_upper_bounds[localde][i]) - np.array(grid.all_lower_bounds[localde][i])))
 
                 # ~~~~~~~~~~~~~~~~~~~~~~  AREA ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                # grid.area[i] returns a numpy array containing the grid cell areas at the i'th stagger location
-                if not isinstance(grid.area[i], type(None)):
-                    assert (type(grid.area[i]) is np.ndarray)
+                # grid.all_areas[localde][i] returns a numpy array containing the grid
+                # cell areas at the i'th stagger location
+                if not isinstance(grid.all_areas[localde][i], type(None)):
+                    assert (type(grid.all_areas[localde][i]) is np.ndarray)
                     assert (
-                        grid.area[i].shape == tuple(np.array(grid.upper_bounds[i]) - np.array(grid.lower_bounds[i])))
+                        grid.all_areas[localde][i].shape == tuple(np.array(grid.all_upper_bounds[localde][i]) - np.array(grid.all_lower_bounds[localde][i])))
 
     def assert_expected_grid_shape(self, grid, staggerloc, expected_shape):
         """
@@ -310,12 +322,7 @@ class TestGrid(TestBase):
         grid.add_item(GridItem.AREA)
         # # slicing just the first de (slicing doesn't work for multiple des)
         # grid2 = grid[2:10, 4:7]
-        if grid.local_de_count == 1:
-            # examine_grid_attributes currently requires 1 DE per PET. In practice, this
-            # means that we can call examine_grid_attributes on all PETs when testing with
-            # 6 PETs, or on 2 out of the 4 PETs when testing with 4 PETs (and not at all
-            # when testing with 1 PET).
-            self.examine_grid_attributes(grid)
+        self.examine_grid_attributes(grid)
         # self.examine_grid_attributes(grid2)
         grid.destroy()
         # grid2.destroy()
@@ -323,10 +330,6 @@ class TestGrid(TestBase):
     def test_grid_create_cubed_sphere_reg_decomp_p_tile(self):
         """
         Test the creation of cubed-sphere grids when specifying regDecompPTile
-
-        Note that the examine_grid_attributes function currently doesn't work with this
-        test case, because we typically have more than 1 DE per PET and
-        examine_grid_attributes only works with 1 DE per PET.
         """
         regDecompPTile = np.array([[2,2,1,1,1,1],[2,2,2,2,2,2]], dtype=np.int32)
 
@@ -334,9 +337,7 @@ class TestGrid(TestBase):
                     name = "cubed_sphere")
         grid.add_item(GridItem.MASK)
         grid.add_item(GridItem.AREA)
-        # Note the lack of a call to examine_grid_attributes here, because that function
-        # currently requires 1 DE per PET, which won't typically be the case in this test.
-        # So this test just confirms that it works to create the grid.
+        self.examine_grid_attributes(grid)
         grid.destroy()
 
     @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
