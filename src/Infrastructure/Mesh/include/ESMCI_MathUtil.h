@@ -247,6 +247,10 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 
 #define MU_LENSQ_VEC2D(a) (a[0]*a[0]+a[1]*a[1])
 
+#define MU_DISTSQ_VEC3D(pnt1,pnt2) ( ( (pnt1)[0]-(pnt2)[0] )*( (pnt1)[0]-(pnt2)[0] ) + ( (pnt1)[1]-(pnt2)[1] )*( (pnt1)[1]-(pnt2)[1] ) + ( (pnt1)[2]-(pnt2)[2] )*( (pnt1)[2]-(pnt2)[2] ) )
+
+#define MU_DISTSQ_VEC2D(pnt1,pnt2) ( ( (pnt1)[0]-(pnt2)[0] )*( (pnt1)[0]-(pnt2)[0] ) + ( (pnt1)[1]-(pnt2)[1] )*( (pnt1)[1]-(pnt2)[1] ) )
+  
 #define MU_DOT_VEC3D(a,b) (a[0]*b[0]+a[1]*b[1]+a[2]*b[2])
 
 #define MU_DOT_VEC2D(a,b) (a[0]*b[0]+a[1]*b[1])
@@ -255,6 +259,8 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 
 #define MU_LST_VEC2D(a) (a)[0],(a)[1]
 
+
+  
 
   // STUFF FOR TRIANGULATION
 

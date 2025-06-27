@@ -204,10 +204,8 @@ struct SearchData {
 
     // If a closest point exists from the last loop then use as initial guess
     if (sd.closest_src_id != SN_BAD_ID) {
-    // Calculate distance squared
-      double dist2=(sd.dst_pnt[0]-sd.closest_coord[0])*(sd.dst_pnt[0]-sd.closest_coord[0])+
-                   (sd.dst_pnt[1]-sd.closest_coord[1])*(sd.dst_pnt[1]-sd.closest_coord[1])+
-                   (sd.dst_pnt[2]-sd.closest_coord[2])*(sd.dst_pnt[2]-sd.closest_coord[2]);
+      // Calculate distance squared from new point to old closest
+      double dist2=MU_DISTSQ_VEC3D(sd.dst_pnt,sd.closest_coord);
 
       // set closest dist squared
       sd.closest_dist2=dist2;
@@ -818,10 +816,9 @@ struct ClosestInfo {
     
     // If a closest point exists from the last loop then use as initial guess
     if (sd.closest_src_id != SN_BAD_ID) {
-    // Calculate distance
-      double dist2=(sd.dst_pnt[0]-sd.closest_coord[0])*(sd.dst_pnt[0]-sd.closest_coord[0])+
-                   (sd.dst_pnt[1]-sd.closest_coord[1])*(sd.dst_pnt[1]-sd.closest_coord[1])+
-                   (sd.dst_pnt[2]-sd.closest_coord[2])*(sd.dst_pnt[2]-sd.closest_coord[2]);
+      
+      // Calculate distance between new point and closest src point from last search
+      double dist2=MU_DISTSQ_VEC3D(sd.dst_pnt,sd.closest_coord);
 
       // set closest dist squared
       sd.closest_dist2=dist2;
@@ -891,11 +888,9 @@ struct ClosestInfo {
       // If not filled
       if (dst_ci.closest_src_gid == SN_BAD_ID) {
 
-        // Calculate distance        
-        double dist2=(dst_ci.dst_pnt[0]-near_pnt[0])*(dst_ci.dst_pnt[0]-near_pnt[0])+
-                     (dst_ci.dst_pnt[1]-near_pnt[1])*(dst_ci.dst_pnt[1]-near_pnt[1])+
-                     (dst_ci.dst_pnt[2]-near_pnt[2])*(dst_ci.dst_pnt[2]-near_pnt[2]);
-
+        // Calculate distance between dst point and closest src point from nearest PET
+        double dist2=MU_DISTSQ_VEC3D(dst_ci.dst_pnt,near_pnt);
+        
         // Update list
         dst_ci.closest_src_gid=near_id;
         dst_ci.closest_dist2=dist2;
@@ -1027,10 +1022,9 @@ struct ClosestInfo {
     } else {
       // Use the last searched point as a guess
       if (sd.closest_src_id != SN_BAD_ID) {
-        // Calculate distance        
-        double dist2=(sd.dst_pnt[0]-sd.closest_coord[0])*(sd.dst_pnt[0]-sd.closest_coord[0])+
-                     (sd.dst_pnt[1]-sd.closest_coord[1])*(sd.dst_pnt[1]-sd.closest_coord[1])+
-                     (sd.dst_pnt[2]-sd.closest_coord[2])*(sd.dst_pnt[2]-sd.closest_coord[2]);
+
+        // Calculate distance between new dst point and closest src point from last search
+        double dist2=MU_DISTSQ_VEC3D(sd.dst_pnt,sd.closest_coord);
         
         // set closest dist squared
         sd.closest_dist2=dist2;
