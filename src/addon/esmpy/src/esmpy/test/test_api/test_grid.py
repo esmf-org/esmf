@@ -71,6 +71,8 @@ class TestGrid(TestBase):
                 # specific) size of the grid coordinates at the i'th stagger location
                 assert (type(grid.all_sizes[localde][i]) is np.ndarray)
                 assert (grid.all_sizes[localde][i].shape == tuple([grid.rank]))
+                assert np.array_equal(grid.all_sizes[localde][i],
+                                      grid.all_upper_bounds[localde][i] - grid.all_lower_bounds[localde][i])
 
                 # ~~~~~~~~~~~~~~~~~~~~~~  BOUNDS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 # grid.all_lower_bounds[localde][i] or grid.all_upper_bounds[localde][i]
