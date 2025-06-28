@@ -104,6 +104,13 @@ class TestGrid(TestBase):
                     assert (
                         grid.all_masks[localde][i].shape == tuple(np.array(grid.all_upper_bounds[localde][i]) - np.array(grid.all_lower_bounds[localde][i])))
 
+                    # Confirm that the Python data matches the internal ESMF data; if not,
+                    # the linkage between the Python data and the internal data may not
+                    # have been set up correctly
+                    masks_from_esmf = ESMP_GridGetItem(grid, GridItem.MASK, staggerloc=i, localde=localde)
+                    assert(np.array_equal(grid.all_masks[localde][i],
+                                          ndarray_from_esmf(masks_from_esmf, TypeKind.I4, grid.all_sizes[localde][i])))
+
                 # ~~~~~~~~~~~~~~~~~~~~~~  AREA ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 # grid.all_areas[localde][i] returns a numpy array containing the grid
                 # cell areas at the i'th stagger location
@@ -111,6 +118,13 @@ class TestGrid(TestBase):
                     assert (type(grid.all_areas[localde][i]) is np.ndarray)
                     assert (
                         grid.all_areas[localde][i].shape == tuple(np.array(grid.all_upper_bounds[localde][i]) - np.array(grid.all_lower_bounds[localde][i])))
+
+                    # Confirm that the Python data matches the internal ESMF data; if not,
+                    # the linkage between the Python data and the internal data may not
+                    # have been set up correctly
+                    areas_from_esmf = ESMP_GridGetItem(grid, GridItem.AREA, staggerloc=i, localde=localde)
+                    assert(np.array_equal(grid.all_areas[localde][i],
+                                          ndarray_from_esmf(areas_from_esmf, TypeKind.R8, grid.all_sizes[localde][i])))
 
     def assert_expected_grid_shape(self, grid, staggerloc, expected_shape):
         """
@@ -518,6 +532,82 @@ class TestGrid(TestBase):
         for i in range(gridYCoord_check.shape[x]):
             for j in range(gridYCoord_check.shape[y]):
                 assert(gridYCoord_check[i, j] == float(j))
+
+    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
+    def test_grid_with_multiple_des_per_pet(self):
+        """
+        Test a grid's coordinates, areas and masks with multiple DEs per PET
+        """
+
+        def set_areas_and_masks(grid):
+            grid.add_item(GridItem.AREA)
+            grid.add_item(GridItem.MASK)
+            for de in range(grid.local_de_count):
+                # Do an initial assertion that area and mask have been set up properly for
+                # all DEs
+                assert type(grid.all_areas[de][StaggerLoc.CENTER]) is np.ndarray
+                assert grid.all_areas[de][StaggerLoc.CENTER].shape == tuple(grid.all_sizes[de][StaggerLoc.CENTER])
+                assert type(grid.all_masks[de][StaggerLoc.CENTER]) is np.ndarray
+                assert grid.all_masks[de][StaggerLoc.CENTER].shape == tuple(grid.all_sizes[de][StaggerLoc.CENTER])
+
+                # Create arbitrary, spatially-varying areas and masks:
+                grid.all_areas[de][StaggerLoc.CENTER][...] = np.cos(np.radians(
+                    grid.all_coords[de][StaggerLoc.CENTER][1]))
+                grid.all_masks[de][StaggerLoc.CENTER][...] = (
+                    (grid.all_coords[de][StaggerLoc.CENTER][0] > 90) &
+                    (grid.all_coords[de][StaggerLoc.CENTER][1] > 0)).astype(int)
+
+        def assert_areas_and_masks(grid):
+            for de in range(grid.local_de_count):
+                lons = grid.get_coords(0, localde=de)
+                lats = grid.get_coords(1, localde=de)
+                areas = grid.get_item(GridItem.AREA, localde=de)
+                masks = grid.get_item(GridItem.MASK, localde=de)
+                assert(np.array_equal(areas, np.cos(np.radians(lats))))
+                assert(np.array_equal(masks, ((lons > 90) & (lats > 0)).astype(int)))
+
+            mask_sum = np.sum(np.concatenate([np.ravel(grid.all_masks[de][StaggerLoc.CENTER])
+                                              for de in range(grid.local_de_count)]))
+            # 6 tiles, each 8x8; masks are 1 in 3/8 of the points (1/2 of the latitudes
+            # and 3/4 of the longitudes)
+            assert mask_sum == 6*8*8*(3/8)
+
+        # Set up two grids with the same coordinates but different decompositions:
+        regDecompPTile1 = np.array([[1,1,1,1,1,1],[1,1,1,1,1,1]], dtype=np.int32)
+        grid1 = Grid(tilesize = 8, regDecompPTile=regDecompPTile1)
+        set_areas_and_masks(grid1)
+        regDecompPTile2 = np.array([[2,2,1,1,1,1],[2,2,2,2,2,2]], dtype=np.int32)
+        grid2 = Grid(tilesize = 8, regDecompPTile=regDecompPTile2)
+        set_areas_and_masks(grid2)
+
+        # Do some basic checks
+        self.examine_grid_attributes(grid1)
+        self.examine_grid_attributes(grid2)
+
+        # Make 1-d arrays of x and y coordinates, containing coordinates for all DEs. Note
+        # that we use get_coords rather than all_coords in order to test the get_coords
+        # function.
+        grid1_x_coords = np.concatenate([np.ravel(grid1.get_coords(0, localde=de))
+                                        for de in range(grid1.local_de_count)])
+        grid1_y_coords = np.concatenate([np.ravel(grid1.get_coords(1, localde=de))
+                                        for de in range(grid1.local_de_count)])
+        grid2_x_coords = np.concatenate([np.ravel(grid2.get_coords(0, localde=de))
+                                        for de in range(grid2.local_de_count)])
+        grid2_y_coords = np.concatenate([np.ravel(grid2.get_coords(1, localde=de))
+                                        for de in range(grid2.local_de_count)])
+
+        # Check the coordinates by comparing the two grids. The following assertions don't
+        # definitively confirm that the coordinates are correct with multiple DEs per PET,
+        # but they catch some potential errors with multiple DEs per PET.
+        #
+        # Note that this only works with a single PET: For this to work with multiple
+        # PETs, we would need to merge the arrays across PETs.
+        assert(np.array_equal(np.sort(grid1_x_coords), np.sort(grid2_x_coords)))
+        assert(np.array_equal(np.sort(grid1_y_coords), np.sort(grid2_y_coords)))
+
+        # Check the areas and masks of both grids
+        assert_areas_and_masks(grid1)
+        assert_areas_and_masks(grid2)
 
     def test_grid_coords_3D(self):
 
