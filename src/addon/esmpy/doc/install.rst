@@ -149,10 +149,7 @@ to ESMF offline and integrated regridding capabilities.
   :class:`~esmpy.api.field.Field` values on a source :class:`~esmpy.api.mesh.Mesh`
   created from file when using conservative regridding.
 - Multi-tile :class:`~esmpy.api.grid.Grid` support is limited to cubed-sphere 
-  grids created on 6 processors. A cubed-sphere grid can be created on any
-  number of processors, but only when it is created on 6 processors will the
-  coordinates be retrievable for the entire object. A 
-  :class:`~esmpy.api.field.Field` created from a cubed-sphere 
+  grids. A :class:`~esmpy.api.field.Field` created from a cubed-sphere
   :class:`~esmpy.api.grid.Grid` cannot be written to file in parallel.
 - There is no ``FieldBundle`` class, only single :class:`Fields <esmpy.api.field.Field>`.
 
