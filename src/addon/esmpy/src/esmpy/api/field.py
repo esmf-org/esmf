@@ -183,7 +183,7 @@ class Field(object):
         if pet_count() > 1:
             raise SerialMethod
 
-        if self.local_de_count > 1:
+        if self.local_de_count != 1:
             raise SingleLocalDEMethod
 
         slc = get_formatted_slice(slc, self.rank)
@@ -286,10 +286,10 @@ class Field(object):
         :rtype: ndarray
         :return: The data of the :class:`~esmpy.api.field.Field`.
                  (It is an error to use this property in the uncommon case
-                 where there are multiple DEs per PET. In that case,
+                 where there is something other than 1 DE per PET; in that case,
                  use :meth:`~esmpy.api.field.all_data`.)
         """
-        if self.local_de_count > 1:
+        if self.local_de_count != 1:
             raise SingleLocalDEMethod
         return self._all_data[0]
 
@@ -328,10 +328,10 @@ class Field(object):
         :rtype: ndarray
         :return: The lower bounds of the :class:`~esmpy.api.field.Field`.
                  (It is an error to use this property in the uncommon case
-                 where there are multiple DEs per PET. In that case,
+                 where there is something other than 1 DE per PET; in that case,
                  use :meth:`~esmpy.api.field.all_lower_bounds`.)
         """
-        if self.local_de_count > 1:
+        if self.local_de_count != 1:
             raise SingleLocalDEMethod
         return self._all_lower_bounds[0]
 
@@ -401,10 +401,10 @@ class Field(object):
         :rtype: ndarray
         :return: The upper bounds of the :class:`~esmpy.api.field.Field`.
                  (It is an error to use this property in the uncommon case
-                 where there are multiple DEs per PET. In that case,
+                 where there is something other than 1 DE per PET; in that case,
                  use :meth:`~esmpy.api.field.all_upper_bounds`.)
         """
-        if self.local_de_count > 1:
+        if self.local_de_count != 1:
             raise SingleLocalDEMethod
         return self._all_upper_bounds[0]
 

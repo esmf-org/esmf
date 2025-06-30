@@ -473,7 +473,7 @@ class Grid(object):
         if pet_count() > 1:
             raise SerialMethod
 
-        if self.local_de_count > 1:
+        if self.local_de_count != 1:
             raise SingleLocalDEMethod
 
         # format and copy
@@ -621,11 +621,11 @@ class Grid(object):
             numpy arrays of floats of size given by
             ``upper_bounds - lower_bounds``.
             (It is an error to use this property in the uncommon case
-            where there are multiple DEs per PET. In that case, use
+            where there is something other than 1 DE per PET; in that case, use
             :meth:`~esmpy.api.grid.all_areas`.)
         """
 
-        if self.local_de_count > 1:
+        if self.local_de_count != 1:
             raise SingleLocalDEMethod
         return self._all_areas[0]
 
@@ -649,11 +649,11 @@ class Grid(object):
             :class:`~esmpy.api.grid.Grid`.
         :return: The coordinates of the :class:`~esmpy.api.grid.Grid`.
             (It is an error to use this property in the uncommon case
-            where there are multiple DEs per PET. In that case, use
+            where there is something other than 1 DE per PET; in that case, use
             :meth:`~esmpy.api.grid.all_coords`.)
         """
 
-        if self.local_de_count > 1:
+        if self.local_de_count != 1:
             raise SingleLocalDEMethod
         return self._all_coords[0]
 
@@ -705,11 +705,11 @@ class Grid(object):
             represented as numpy arrays of ints of size given by
             ``upper_bounds - lower_bounds``.
             (It is an error to use this property in the uncommon case
-            where there are multiple DEs per PET. In that case, use
+            where there is something other than 1 DE per PET; in that case, use
             :meth:`~esmpy.api.grid.all_lower_bounds`.)
         """
 
-        if self.local_de_count > 1:
+        if self.local_de_count != 1:
             raise SingleLocalDEMethod
         return self._all_lower_bounds[0]
 
@@ -722,11 +722,11 @@ class Grid(object):
             numpy arrays of ints of size given by `
             `upper_bounds - lower_bounds``.
             (It is an error to use this property in the uncommon case
-            where there are multiple DEs per PET. In that case, use
+            where there is something other than 1 DE per PET; in that case, use
             :meth:`~esmpy.api.grid.all_masks`.)
         """
 
-        if self.local_de_count > 1:
+        if self.local_de_count != 1:
             raise SingleLocalDEMethod
         return self._all_masks[0]
 
@@ -829,11 +829,11 @@ class Grid(object):
             numpy arrays of ints of size given by
             ``upper_bounds - lower_bounds``.
             (It is an error to use this property in the uncommon case
-            where there are multiple DEs per PET. In that case, use
+            where there is something other than 1 DE per PET; in that case, use
             :meth:`~esmpy.api.grid.all_sizes`.)
         """
 
-        if self.local_de_count > 1:
+        if self.local_de_count != 1:
             raise SingleLocalDEMethod
         return self.all_sizes[0]
 
@@ -875,10 +875,10 @@ class Grid(object):
             represented as numpy arrays of ints of size given by
             ``upper_bounds - lower_bounds``.
             (It is an error to use this property in the uncommon case
-            where there are multiple DEs per PET. In that case, use
+            where there is something other than 1 DE per PET; in that case, use
             :meth:`~esmpy.api.grid.all_upper_bounds`.)
         """
-        if self.local_de_count > 1:
+        if self.local_de_count != 1:
             raise SingleLocalDEMethod
         return self._all_upper_bounds[0]
 
