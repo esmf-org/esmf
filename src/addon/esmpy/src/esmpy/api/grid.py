@@ -439,6 +439,12 @@ class Grid(object):
         self._all_areas = [[None for _ in range(2**self.rank)]
                            for _ in range(self.local_de_count)]
 
+        # coords_added[staggerloc]
+        self._coords_added = [False for _ in range(2**self.rank)]
+        # item_added is a dictionary mapping the possible items to lists of length staggerloc
+        self._item_added = {GridItem.MASK: [False for _ in range(2**self.rank)],
+                            GridItem.AREA: [False for _ in range(2**self.rank)]}
+
         # Add coordinates if a staggerloc is specified
         if not isinstance(staggerloc, type(None)):
             self.add_coords(staggerloc=staggerloc, from_file=from_file)
@@ -906,7 +912,7 @@ class Grid(object):
                 staggerloc = [staggerloc]
 
         for stagger in staggerloc:
-            if not isinstance(self.all_coords[0][stagger][0], type(None)):
+            if self._coords_added[stagger]:
                 warnings.warn("This coordinate has already been added.")
             else:
                 # request that ESMF allocate space for the coordinates
@@ -919,6 +925,7 @@ class Grid(object):
 
                 # set the staggerlocs to be done
                 self.staggerloc[stagger] = True
+                self._coords_added[stagger] = True
 
         if (len(staggerloc) == 1 and not isinstance(coord_dim, type(None))
             and self.local_de_count == 1):
@@ -961,12 +968,8 @@ class Grid(object):
         done = True
         for stagger in staggerloc:
             # check to see if they are done
-            if item == GridItem.MASK:
-                if not isinstance(self.all_masks[0][stagger], type(None)):
-                    raise GridItemAlreadyLinked
-                done = False
-            elif item == GridItem.AREA:
-                if not isinstance(self.all_areas[0][stagger], type(None)):
+            if item in (GridItem.MASK, GridItem.AREA):
+                if self._item_added[item][stagger]:
                     raise GridItemAlreadyLinked
                 done = False
             else:
@@ -980,6 +983,8 @@ class Grid(object):
                 # and now for Python..
                 for de in range(self.local_de_count):
                     self._allocate_items_(item, stagger, de, from_file=from_file)
+
+                self._item_added[item][stagger] = True
 
         if len(staggerloc) == 1 and self.local_de_count == 1:
             # Note that we can use self.mask and self.area here (as opposed to
