@@ -156,4 +156,4 @@ to ESMF offline and integrated regridding capabilities.
 Testing related:
 
 - Nightly regression testing is limited to a small subset of the ESMF test platforms,
-  including Darwin and Linux running gfortran with openMPI.
+  including Darwin and Linux with the gfortran and intel compilers.
