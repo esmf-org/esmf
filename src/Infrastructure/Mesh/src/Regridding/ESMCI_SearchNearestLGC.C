@@ -1072,31 +1072,44 @@ struct ClosestInfo {
                                  src_pl_near);
 
 
-  // Use this point to update dst information
-  if (src_pl_near->get_curr_num_pts() > 0) {
+  // Loop over the small set of near points from other PETs
+  // updating points
+  for (int p=0; p<src_pl_near->get_curr_num_pts(); p++) {
 
     // Get point
-    const double *near_pnt_crd=src_pl_near->get_coord_ptr(0);
+    const double *near_pnt_crd=src_pl_near->get_coord_ptr(p);
     double near_pnt[3];
     near_pnt[0] = near_pnt_crd[0];
     near_pnt[1] = near_pnt_crd[1];
     near_pnt[2] = (sdim == 3 ? near_pnt_crd[2] : 0.0);
 
     // Get id
-    int near_id=src_pl_near->get_id(0);
+    int near_id=src_pl_near->get_id(p);
 
     // Loop updating
     for (ClosestInfo &dst_ci: dst_info) {
+
+      // Calculate distance between dst point and closest src point from nearest PET
+      double dist2=MU_DISTSQ_VEC3D(dst_ci.dst_pnt,near_pnt);
+
       // If not filled
       if (dst_ci.closest_src_gid == SN_BAD_ID) {
-
-        // Calculate distance between dst point and closest src point from nearest PET
-        double dist2=MU_DISTSQ_VEC3D(dst_ci.dst_pnt,near_pnt);
         
         // Update list
         dst_ci.closest_src_gid=near_id;
         dst_ci.closest_dist2=dist2;
+
+      } else {
+        
+        // If this point is closer, than update
+        if ((dist2 < dst_ci.closest_dist2) ||
+            ((dist2 == dst_ci.closest_dist2) &&
+             (near_id < dst_ci.closest_src_gid))) {
+          dst_ci.closest_src_gid=near_id;
+          dst_ci.closest_dist2=dist2;      
+        }
       }
+      
     }
   }  
 
