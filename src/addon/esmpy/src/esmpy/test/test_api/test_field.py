@@ -58,7 +58,10 @@ class TestField(TestBase):
 
         mask = grid.add_item(GridItem.MASK)
         mask[:] = 1
-        mask[0, 1] = 0
+        if mask.shape[0] > 0 and mask.shape[1] > 1:
+            # (This conditional guards against an out-of-bounds error for small grids
+            # relative to the PET count)
+            mask[0, 1] = 0
 
         if ndbounds:
             field = Field(grid, ndbounds=[5, 2])
