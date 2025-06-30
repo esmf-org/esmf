@@ -492,6 +492,177 @@ void build_mig_plist(const PointList *plist,
 }
 
 
+
+  double calc_dist2_between_pnt_and_mm(double *pnt, double *mm) {
+
+    // Dim distance
+    double ddim=0.0;
+    double tot_dist2=0.0;
+    
+    //// Dim 0
+    
+    // If pnt is less than min, dist is diff
+    if (pnt[0] < mm[0]) {
+      ddim=mm[0]-pnt[0];
+    } else if (pnt[0] > mm[3]) { // If pnt is greater than max, dist is diff
+       ddim=pnt[0]-mm[3];
+    } else { // Point is inside box in this dimension, so 0.0 distance
+      ddim=0.0; 
+    }
+
+    tot_dist2 += ddim*ddim;
+
+    
+    //// Dim 1
+    
+    // If pnt is less than min, dist is diff
+    if (pnt[1] < mm[1]) {
+      ddim=mm[1]-pnt[1];
+    } else if (pnt[1] > mm[4]) { // If pnt is greater than max, dist is diff
+       ddim=pnt[1]-mm[4];
+    } else { // Point is inside box in this dimension, so dist is 0.0
+      ddim=0.0; 
+    }
+
+    tot_dist2 += ddim*ddim;
+
+    
+    //// Dim 2
+    
+    // If pnt is less than min, dist is diff
+    if (pnt[2] < mm[2]) {
+      ddim=mm[2]-pnt[2];
+    } else if (pnt[2] > mm[5]) { // If pnt is greater than max, dist is diff
+       ddim=pnt[2]-mm[5];
+    } else { // Point is inside box in this dimension, so dist is 0.0
+      ddim=0.0; 
+    }
+
+    tot_dist2 += ddim*ddim;
+    
+    // Output dist2
+    return tot_dist2;        
+  }
+
+
+
+  // Class that holds a point,gid, and location data for a pointlist. 
+  struct PntGidLoc {
+    int loc;
+    int gid;
+    double pnt[3];    
+  };
+
+  void create_PGL_OTree_from_plist(const PointList *plist, PntGidLoc *&pgl_array, OTree *&otree) {
+
+    // Get dimension
+    int sdim=plist->get_coord_dim();
+    
+    // Get size point list
+   int plist_num_pnts = plist->get_curr_num_pts();
+
+   // List of structures
+   pgl_array=new PntGidLoc[plist_num_pnts];
+
+    // Create search tree
+    otree=new OTree(plist_num_pnts);
+
+    // Add points to search tree
+    for (UInt l = 0; l < plist_num_pnts; ++l) {
+
+      // Get pointer to struct
+      PntGidLoc *pgl=pgl_array+l;
+
+      // Set loc
+      pgl->loc=l;
+
+      // Set gid
+      pgl->gid=plist->get_id(l);
+      
+      // Get point
+      const point *point_ptr=plist->get_point(l);
+      
+      // Set coord value in 3D point
+      double pnt[3];
+      pnt[0] = point_ptr->coords[0];
+      pnt[1] = point_ptr->coords[1];
+      pnt[2] = sdim == 3 ? point_ptr->coords[2] : 0.0;
+
+      // Set point in struct
+      MU_ASSIGN_VEC3D(pgl->pnt,pnt);
+      
+      // Add to tree
+      otree->add(pnt, pnt, (void*)pgl);
+    }
+    
+    // Commit tree
+    otree->commit();
+  }
+  
+struct MMSearchData {
+  int sdim;
+
+  double dst_mm[6]; // MM box we're trying to find closest point to
+
+  double closest_dist2;  // closest distance squared
+  double closest_coord[3];
+  int closest_src_id;
+  int closest_src_loc;
+};
+
+
+  static int mm_nearest_func(void *n, void *y, double *min, double *max) {
+
+    // Get input data
+    PntGidLoc *this_pgl = static_cast<PntGidLoc *>(n);
+    MMSearchData *msd = static_cast<MMSearchData*>(y);
+
+    // Calculate squared distance
+    double dist2=calc_dist2_between_pnt_and_mm(this_pgl->pnt, msd->dst_mm);
+    
+    // If this node is closer then make it the closest node
+    if (dist2 < msd->closest_dist2) {
+
+      // Assign new closest information
+      msd->closest_dist2=dist2;
+      MU_ASSIGN_VEC3D(msd->closest_coord,this_pgl->pnt);
+      msd->closest_src_id=this_pgl->gid;      
+      msd->closest_src_loc=this_pgl->loc;
+      
+      // compute a new min-max box
+      double dist=sqrt(dist2);
+      
+      min[0]=msd->dst_mm[0]-dist;
+      min[1]=msd->dst_mm[1]-dist;
+      min[2]=msd->dst_mm[2]-dist;
+      
+      max[0]=msd->dst_mm[3]+dist;
+      max[1]=msd->dst_mm[4]+dist;
+      max[2]=msd->dst_mm[5]+dist;
+      
+    } else if (dist2 == msd->closest_dist2) {
+
+      // If there wasn't a closer point or if the new point has a smaller id, 
+      // then use the new point instead
+      if ((msd->closest_src_id == SN_BAD_ID) ||
+          (this_pgl->gid < msd->closest_src_id))  {
+        
+        // Assign new closest information
+        // msd->closest_dist2=dist2; Don't need to change the closest_dist2  because at exactly the same dist   
+        MU_ASSIGN_VEC3D(msd->closest_coord,this_pgl->pnt);
+        msd->closest_src_id=this_pgl->gid;      
+        msd->closest_src_loc=this_pgl->loc;
+        
+        // Don't need to adjust the min-max box because at exactly the same dist
+      }
+    }
+
+    // Don't know if this is the closest, so search further
+    return 0;
+  }
+
+
+  
   double calc_dist2_between_mm(double *mm1, double *mm2) {
 
     // Dim distance
@@ -567,10 +738,9 @@ void build_mig_plist(const PointList *plist,
     // Output dist2
     return tot_dist2;        
   }
-  
 
 
-  /// Create a new point list of points closest to each minmax
+  /// Create a new point list of points closest to the local min/max on each PET
   void create_plist_closest_to_minmax(const PointList *plist,
                                double *local_min, double *local_max,
                                PointList *&new_plist) {
@@ -582,7 +752,6 @@ void build_mig_plist(const PointList *plist,
   double huge=sqrt(std::numeric_limits<double>::max()); //// Use sqrt, so if it's squared it doesn't overflow
   double neg_huge=-huge;
   
-
    // Distribute min-max box of each proc
    // Pack up local minmax
    vector<double> local_minmax(6,0.0);
@@ -639,6 +808,12 @@ void build_mig_plist(const PointList *plist,
   
   // Do all gather to get info from all procs
   MPI_Allgather(&local_minmax[0], 6, MPI_DOUBLE, &plist_minmax[0], 6, MPI_DOUBLE, Par::Comm());
+
+
+  // Create search tree of pointlist in case I'm the closest and need to find closest point
+  OTree *plist_tree=NULL;
+  PntGidLoc *pgl_array=NULL;
+  create_PGL_OTree_from_plist(plist, pgl_array, plist_tree);
   
   // Loop figuring out if I'm the closest
   std::vector<int> plist_snd_loc, plist_snd_pet;
@@ -668,15 +843,42 @@ void build_mig_plist(const PointList *plist,
 
     // If I'm the closest, then add a point to the list
     if (min_proc == Par::Rank()) {
-      plist_snd_pet.push_back(dp);
-      plist_snd_loc.push_back(0);    // Just send 0 for now
+
+      //// Find the closest point to the minmax box
+      
+      // Set initial search box to the largest possible
+      double pmin[3]={neg_huge,neg_huge,neg_huge};
+      double pmax[3]={huge,huge,huge};
+
+      // Setup search structure
+      MMSearchData msd;
+      msd.sdim=sdim;
+      msd.dst_mm[0]=dp_minmax[0]; msd.dst_mm[1]=dp_minmax[1]; msd.dst_mm[2]=dp_minmax[2];
+      msd.dst_mm[3]=dp_minmax[3]; msd.dst_mm[4]=dp_minmax[4]; msd.dst_mm[5]=dp_minmax[5];
+      msd.closest_dist2=huge;
+      msd.closest_src_id=SN_BAD_ID;
+             
+      // Search in tree for closest point to box
+      plist_tree->runon_mm_chng(pmin, pmax, mm_nearest_func, (void *)&msd);
+      
+      // If we found one, add it to the list
+      if (msd.closest_src_id != SN_BAD_ID) {
+        plist_snd_pet.push_back(dp);
+        plist_snd_loc.push_back(msd.closest_src_loc);
+      }
     }
   }
- 
+
+  // Get rid of search tree and list of items in it
+  delete plist_tree;
+  delete [] pgl_array;
+
+  
   // Build new plist
   build_mig_plist(plist,
                   plist_snd_loc, plist_snd_pet, 
                   new_plist);
+  
 }
   
   
