@@ -901,7 +901,7 @@ struct ClosestInfo {
   //  Trace __trace("FindPnts()");
 
 
-    printf("%d# Opt Beg\n",Par::Rank());
+    //    printf("%d# Opt Beg\n",Par::Rank());
     
   // Get pointers to keep things consistent until we switch everything to refs
   const PointList *src_pl=&src_pl_ref;
@@ -1051,7 +1051,8 @@ struct ClosestInfo {
   // Get rid of local tree
   delete src_pl_local_tree;
   
-  
+
+#if 0  
   // For debugging see if there are any unmapped points
   bool has_unmapped=false;
   for (ClosestInfo &dst_ci: dst_info) {
@@ -1063,8 +1064,9 @@ struct ClosestInfo {
   if (has_unmapped) {
     printf("%d# has unmapped dst_min=%f %f %f dst_max=%f %f %f\n",Par::Rank(),MU_LST_VEC3D(dst_min),MU_LST_VEC3D(dst_max));
   }
+#endif
 
-
+  
   // Get a nearest point, just to cover our bases
   PointList *src_pl_near;
   create_plist_closest_to_minmax(src_pl,
@@ -1113,7 +1115,8 @@ struct ClosestInfo {
     }
   }  
 
-  
+
+#if 0  
   // For debugging see if there are any unmapped points
   bool still_has_unmapped=false;
   for (ClosestInfo &dst_ci: dst_info) {
@@ -1125,7 +1128,7 @@ struct ClosestInfo {
   if (still_has_unmapped) {
     printf("%d# still has unmapped src_pl num=%d\n",Par::Rank(),src_pl->get_curr_num_pts());
   }
-
+#endif
   
   
   // Check to see if we are done with any points
@@ -1186,7 +1189,7 @@ struct ClosestInfo {
 
   //printf("%d# dst_min_final=%f %f %f dst_max_final=%f %f %f\n",Par::Rank(),MU_LST_VEC3D(dst_min_final),MU_LST_VEC3D(dst_max_final));
 
-  printf("%d# Opt Before final\n",Par::Rank());
+  //  printf("%d# Opt Before final\n",Par::Rank());
   
 
   // Create a new pointlist (src_pl_final) where
@@ -1318,7 +1321,7 @@ struct ClosestInfo {
     }
   }
 
-  printf("%d# Opt End\n",Par::Rank());
+  //  printf("%d# Opt End\n",Par::Rank());
   
 #if 0
   for (int i=0; i<num_rcv_pets; i++) {
