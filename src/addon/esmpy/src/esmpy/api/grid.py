@@ -439,6 +439,12 @@ class Grid(object):
         self._all_areas = [[None for _ in range(2**self.rank)]
                            for _ in range(self.local_de_count)]
 
+        # coords_added[staggerloc]
+        self._coords_added = [False for _ in range(2**self.rank)]
+        # item_added is a dictionary mapping the possible items to lists of length staggerloc
+        self._item_added = {GridItem.MASK: [False for _ in range(2**self.rank)],
+                            GridItem.AREA: [False for _ in range(2**self.rank)]}
+
         # Add coordinates if a staggerloc is specified
         if not isinstance(staggerloc, type(None)):
             self.add_coords(staggerloc=staggerloc, from_file=from_file)
@@ -467,7 +473,7 @@ class Grid(object):
         if pet_count() > 1:
             raise SerialMethod
 
-        if self.local_de_count > 1:
+        if self.local_de_count != 1:
             raise SingleLocalDEMethod
 
         # format and copy
@@ -615,11 +621,11 @@ class Grid(object):
             numpy arrays of floats of size given by
             ``upper_bounds - lower_bounds``.
             (It is an error to use this property in the uncommon case
-            where there are multiple DEs per PET. In that case, use
+            where there is something other than 1 DE per PET; in that case, use
             :meth:`~esmpy.api.grid.all_areas`.)
         """
 
-        if self.local_de_count > 1:
+        if self.local_de_count != 1:
             raise SingleLocalDEMethod
         return self._all_areas[0]
 
@@ -643,11 +649,11 @@ class Grid(object):
             :class:`~esmpy.api.grid.Grid`.
         :return: The coordinates of the :class:`~esmpy.api.grid.Grid`.
             (It is an error to use this property in the uncommon case
-            where there are multiple DEs per PET. In that case, use
+            where there is something other than 1 DE per PET; in that case, use
             :meth:`~esmpy.api.grid.all_coords`.)
         """
 
-        if self.local_de_count > 1:
+        if self.local_de_count != 1:
             raise SingleLocalDEMethod
         return self._all_coords[0]
 
@@ -699,11 +705,11 @@ class Grid(object):
             represented as numpy arrays of ints of size given by
             ``upper_bounds - lower_bounds``.
             (It is an error to use this property in the uncommon case
-            where there are multiple DEs per PET. In that case, use
+            where there is something other than 1 DE per PET; in that case, use
             :meth:`~esmpy.api.grid.all_lower_bounds`.)
         """
 
-        if self.local_de_count > 1:
+        if self.local_de_count != 1:
             raise SingleLocalDEMethod
         return self._all_lower_bounds[0]
 
@@ -716,11 +722,11 @@ class Grid(object):
             numpy arrays of ints of size given by `
             `upper_bounds - lower_bounds``.
             (It is an error to use this property in the uncommon case
-            where there are multiple DEs per PET. In that case, use
+            where there is something other than 1 DE per PET; in that case, use
             :meth:`~esmpy.api.grid.all_masks`.)
         """
 
-        if self.local_de_count > 1:
+        if self.local_de_count != 1:
             raise SingleLocalDEMethod
         return self._all_masks[0]
 
@@ -823,11 +829,11 @@ class Grid(object):
             numpy arrays of ints of size given by
             ``upper_bounds - lower_bounds``.
             (It is an error to use this property in the uncommon case
-            where there are multiple DEs per PET. In that case, use
+            where there is something other than 1 DE per PET; in that case, use
             :meth:`~esmpy.api.grid.all_sizes`.)
         """
 
-        if self.local_de_count > 1:
+        if self.local_de_count != 1:
             raise SingleLocalDEMethod
         return self.all_sizes[0]
 
@@ -869,10 +875,10 @@ class Grid(object):
             represented as numpy arrays of ints of size given by
             ``upper_bounds - lower_bounds``.
             (It is an error to use this property in the uncommon case
-            where there are multiple DEs per PET. In that case, use
+            where there is something other than 1 DE per PET; in that case, use
             :meth:`~esmpy.api.grid.all_upper_bounds`.)
         """
-        if self.local_de_count > 1:
+        if self.local_de_count != 1:
             raise SingleLocalDEMethod
         return self._all_upper_bounds[0]
 
@@ -906,7 +912,7 @@ class Grid(object):
                 staggerloc = [staggerloc]
 
         for stagger in staggerloc:
-            if not isinstance(self.all_coords[0][stagger][0], type(None)):
+            if self._coords_added[stagger]:
                 warnings.warn("This coordinate has already been added.")
             else:
                 # request that ESMF allocate space for the coordinates
@@ -919,6 +925,7 @@ class Grid(object):
 
                 # set the staggerlocs to be done
                 self.staggerloc[stagger] = True
+                self._coords_added[stagger] = True
 
         if (len(staggerloc) == 1 and not isinstance(coord_dim, type(None))
             and self.local_de_count == 1):
@@ -961,12 +968,8 @@ class Grid(object):
         done = True
         for stagger in staggerloc:
             # check to see if they are done
-            if item == GridItem.MASK:
-                if not isinstance(self.all_masks[0][stagger], type(None)):
-                    raise GridItemAlreadyLinked
-                done = False
-            elif item == GridItem.AREA:
-                if not isinstance(self.all_areas[0][stagger], type(None)):
+            if item in (GridItem.MASK, GridItem.AREA):
+                if self._item_added[item][stagger]:
                     raise GridItemAlreadyLinked
                 done = False
             else:
@@ -980,6 +983,8 @@ class Grid(object):
                 # and now for Python..
                 for de in range(self.local_de_count):
                     self._allocate_items_(item, stagger, de, from_file=from_file)
+
+                self._item_added[item][stagger] = True
 
         if len(staggerloc) == 1 and self.local_de_count == 1:
             # Note that we can use self.mask and self.area here (as opposed to
