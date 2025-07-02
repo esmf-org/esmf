@@ -46,6 +46,8 @@ dstfracfield = esmpy.Field(dstgrid, name='dstfracfield', staggerloc=esmpy.Stagge
 
 deg2rad = 3.14/180.
 
+# Since the source grid and field (on the cubed sphere grid) have multiple DEs per PET,
+# working with the data on that grid/field requires looping over the local DEs on each PET
 for de in range(srcfield.local_de_count):
     gridLon = srcfield.grid.get_coords(lon, esmpy.StaggerLoc.CENTER, localde=de)
     gridLat = srcfield.grid.get_coords(lat, esmpy.StaggerLoc.CENTER, localde=de)
