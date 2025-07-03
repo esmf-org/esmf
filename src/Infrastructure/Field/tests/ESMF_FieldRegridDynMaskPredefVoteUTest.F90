@@ -10,11 +10,11 @@
 !
 !==============================================================================
 !
-      program ESMF_FieldRegridDynMaskTest
+      program ESMF_FieldRegridDynMaskPredefVoteUTest
 
 !------------------------------------------------------------------------------
 
-#define FILENAME "ESMF_FieldRegridDynMaskTest.F90"
+#define FILENAME "ESMF_FieldRegridDynMaskPredefVoteUTest.F90"
 #define _VERIFY(A) if(A /= ESMF_SUCCESS) then; rc=ESMF_FAILURE; print*,__FILE__,__LINE__;return; endif
 #define _VERIFY_PASS(A) if(ESMF_LogFoundError(A, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rctoReturn=rc)) return
 
@@ -866,4 +866,4 @@ contains
 
     end function create_grid
 
-end program ESMF_FieldRegridDynMaskTest
+end program ESMF_FieldRegridDynMaskPredefVoteUTest
