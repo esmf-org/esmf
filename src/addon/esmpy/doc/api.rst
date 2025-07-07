@@ -860,6 +860,8 @@ Dimension Ordering
         In [8]: field.data.shape
         Out[8]: (3, 4, 10)
 
+.. _des:
+
 ----------------------------
 Decomposition Elements (DEs)
 ----------------------------

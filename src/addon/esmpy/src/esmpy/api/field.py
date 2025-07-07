@@ -250,8 +250,8 @@ class Field(object):
     @property
     def all_data(self):
         """
-        :rtype: A list of ndarrays with an entry for each local DE.
-                (In the typical case of 1 DE per PET, this is a single-element list
+        :rtype: A list of ndarrays with an entry for each local :ref:`DE <des>`.
+                (In the typical case of 1 :ref:`DE <des>` per PET, this is a single-element list
                 containing a single ndarray. For this case, see also
                 :attr:`~esmpy.api.field.Field.data`.)
         :return: The data of the :class:`~esmpy.api.field.Field`
@@ -261,8 +261,8 @@ class Field(object):
     @property
     def all_lower_bounds(self):
         """
-        :rtype: A list of ndarrays with an entry for each local DE.
-                (In the typical case of 1 DE per PET, this is a single-element list
+        :rtype: A list of ndarrays with an entry for each local :ref:`DE <des>`.
+                (In the typical case of 1 :ref:`DE <des>` per PET, this is a single-element list
                 containing a single ndarray. For this case, see also
                 :attr:`~esmpy.api.field.Field.lower_bounds`.)
         :return: The lower bounds of the :class:`~esmpy.api.field.Field`.
@@ -272,8 +272,8 @@ class Field(object):
     @property
     def all_upper_bounds(self):
         """
-        :rtype: A list of ndarrays with an entry for each local DE.
-                (In the typical case of 1 DE per PET, this is a single-element list
+        :rtype: A list of ndarrays with an entry for each local :ref:`DE <des>`.
+                (In the typical case of 1 :ref:`DE <des>` per PET, this is a single-element list
                 containing a single ndarray. For this case, see also
                 :attr:`~esmpy.api.field.Field.upper_bounds`.)
         :return: The upper bounds of the :class:`~esmpy.api.field.Field`.
@@ -286,8 +286,8 @@ class Field(object):
         :rtype: ndarray
         :return: The data of the :class:`~esmpy.api.field.Field`.
                  (It is an error to use this property in the uncommon case
-                 where there is something other than 1 DE per PET; in that case,
-                 use :attr:`~esmpy.api.field.Field.all_data`.)
+                 where there is something other than 1 :ref:`DE <des>` per PET;
+                 in that case, use :attr:`~esmpy.api.field.Field.all_data`.)
         """
         if self.local_de_count != 1:
             raise SingleLocalDEMethod
@@ -317,7 +317,7 @@ class Field(object):
     def local_de_count(self):
         """
         :rtype: int
-        :return: The number of DEs in the :class:`~esmpy.api.field.Field`
+        :return: The number of :ref:`DEs <des>` in the :class:`~esmpy.api.field.Field`
             on this PET.
         """
         return self._local_de_count
@@ -328,8 +328,8 @@ class Field(object):
         :rtype: ndarray
         :return: The lower bounds of the :class:`~esmpy.api.field.Field`.
                  (It is an error to use this property in the uncommon case
-                 where there is something other than 1 DE per PET; in that case,
-                 use :attr:`~esmpy.api.field.Field.all_lower_bounds`.)
+                 where there is something other than 1 :ref:`DE <des>` per PET;
+                 in that case, use :attr:`~esmpy.api.field.Field.all_lower_bounds`.)
         """
         if self.local_de_count != 1:
             raise SingleLocalDEMethod
@@ -401,8 +401,8 @@ class Field(object):
         :rtype: ndarray
         :return: The upper bounds of the :class:`~esmpy.api.field.Field`.
                  (It is an error to use this property in the uncommon case
-                 where there is something other than 1 DE per PET; in that case,
-                 use :attr:`~esmpy.api.field.Field.all_upper_bounds`.)
+                 where there is something other than 1 :ref:`DE <des>` per PET;
+                 in that case, use :attr:`~esmpy.api.field.Field.all_upper_bounds`.)
         """
         if self.local_de_count != 1:
             raise SingleLocalDEMethod
