@@ -542,6 +542,8 @@ class Grid(object):
         :rtype: 2D list of numpy arrays, where the first index represents the
             local DE and the second index represents the stagger locations of
             the :class:`~esmpy.api.grid.Grid`.
+            (In the typical case of 1 DE per PET, see also
+            :attr:`~esmpy.api.grid.Grid.area`.)
         :return: The :class:`~esmpy.api.grid.Grid` cell areas represented as
             numpy arrays of floats of size given by
             ``upper_bounds - lower_bounds``.
@@ -556,6 +558,8 @@ class Grid(object):
             the local DE, the second index represents the stagger locations of
             the :class:`~esmpy.api.grid.Grid` and the third index represents
             the coordinate dimensions of the :class:`~esmpy.api.grid.Grid`.
+            (In the typical case of 1 DE per PET, see also
+            :attr:`~esmpy.api.grid.Grid.coords`.)
         :return: The coordinates of the :class:`~esmpy.api.grid.Grid`.
         """
         return self._all_coords
@@ -566,6 +570,8 @@ class Grid(object):
         :rtype: 2D list of numpy arrays, where the first index represents the
             local DE and the second index represents the stagger locations of
             the :class:`~esmpy.api.grid.Grid`.
+            (In the typical case of 1 DE per PET, see also
+            :attr:`~esmpy.api.grid.Grid.lower_bounds`.)
         :return: The lower bounds of the :class:`~esmpy.api.grid.Grid`
             represented as numpy arrays of ints of size given by
             ``upper_bounds - lower_bounds``.
@@ -578,6 +584,8 @@ class Grid(object):
         :rtype: 2D list of numpy arrays, where the first index represents the
             local DE and the second index represents the stagger locations of
             the :class:`~esmpy.api.grid.Grid`.
+            (In the typical case of 1 DE per PET, see also
+            :attr:`~esmpy.api.grid.Grid.mask`.)
         :return: The masks of the :class:`~esmpy.api.grid.Grid` represented as
             numpy arrays of ints of size given by `
             `upper_bounds - lower_bounds``.
@@ -590,6 +598,8 @@ class Grid(object):
         :rtype: 2D list of numpy arrays, where the first index represents the
             local DE and the second index represents the stagger locations of
             the :class:`~esmpy.api.grid.Grid`.
+            (In the typical case of 1 DE per PET, see also
+            :attr:`~esmpy.api.grid.Grid.size`.)
         :return: The sizes of the :class:`~esmpy.api.grid.Grid` represented as
             numpy arrays of ints of size given by
             ``upper_bounds - lower_bounds``.
@@ -606,6 +616,8 @@ class Grid(object):
         :rtype: 2D list of numpy arrays, where the first index represents the
             local DE and the second index represents the stagger locations of
             the :class:`~esmpy.api.grid.Grid`.
+            (In the typical case of 1 DE per PET, see also
+            :attr:`~esmpy.api.grid.Grid.upper_bounds`.)
         :return: The upper bounds of the :class:`~esmpy.api.grid.Grid`
             represented as numpy arrays of ints of size given by
             ``upper_bounds - lower_bounds``.
@@ -622,7 +634,7 @@ class Grid(object):
             ``upper_bounds - lower_bounds``.
             (It is an error to use this property in the uncommon case
             where there is something other than 1 DE per PET; in that case, use
-            :meth:`~esmpy.api.grid.all_areas`.)
+            :attr:`~esmpy.api.grid.Grid.all_areas`.)
         """
 
         if self.local_de_count != 1:
@@ -650,7 +662,7 @@ class Grid(object):
         :return: The coordinates of the :class:`~esmpy.api.grid.Grid`.
             (It is an error to use this property in the uncommon case
             where there is something other than 1 DE per PET; in that case, use
-            :meth:`~esmpy.api.grid.all_coords`.)
+            :attr:`~esmpy.api.grid.Grid.all_coords`.)
         """
 
         if self.local_de_count != 1:
@@ -706,7 +718,7 @@ class Grid(object):
             ``upper_bounds - lower_bounds``.
             (It is an error to use this property in the uncommon case
             where there is something other than 1 DE per PET; in that case, use
-            :meth:`~esmpy.api.grid.all_lower_bounds`.)
+            :attr:`~esmpy.api.grid.Grid.all_lower_bounds`.)
         """
 
         if self.local_de_count != 1:
@@ -723,7 +735,7 @@ class Grid(object):
             `upper_bounds - lower_bounds``.
             (It is an error to use this property in the uncommon case
             where there is something other than 1 DE per PET; in that case, use
-            :meth:`~esmpy.api.grid.all_masks`.)
+            :attr:`~esmpy.api.grid.Grid.all_masks`.)
         """
 
         if self.local_de_count != 1:
@@ -830,7 +842,7 @@ class Grid(object):
             ``upper_bounds - lower_bounds``.
             (It is an error to use this property in the uncommon case
             where there is something other than 1 DE per PET; in that case, use
-            :meth:`~esmpy.api.grid.all_sizes`.)
+            :attr:`~esmpy.api.grid.Grid.all_sizes`.)
         """
 
         if self.local_de_count != 1:
@@ -876,7 +888,7 @@ class Grid(object):
             ``upper_bounds - lower_bounds``.
             (It is an error to use this property in the uncommon case
             where there is something other than 1 DE per PET; in that case, use
-            :meth:`~esmpy.api.grid.all_upper_bounds`.)
+            :attr:`~esmpy.api.grid.Grid.all_upper_bounds`.)
         """
         if self.local_de_count != 1:
             raise SingleLocalDEMethod

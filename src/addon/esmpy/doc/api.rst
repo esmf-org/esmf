@@ -878,9 +878,9 @@ size 0.)
 For ESMPy classes that support multiple DEs per PET (:class:`~esmpy.api.grid.Grid` and
 :class:`~esmpy.api.field.Field`), there are two versions of data accessor properties for
 any data that is decomposed across DEs. Examples are a :class:`~esmpy.api.field.Field`'s
-:class:`esmpy.api.field.Field.data` vs. :class:`esmpy.api.field.Field.all_data` and a
-:class:`~esmpy.api.grid.Grid`'s :class:`esmpy.api.grid.Grid.area` vs.
-:class:`esmpy.api.grid.Grid.all_areas`. Versions of these properties *without* the
+:attr:`~esmpy.api.field.Field.data` vs. :attr:`~esmpy.api.field.Field.all_data` and a
+:class:`~esmpy.api.grid.Grid`'s :attr:`~esmpy.api.grid.Grid.area` vs.
+:attr:`~esmpy.api.grid.Grid.all_areas`. Versions of these properties *without* the
 ``all_`` prefix can only be used in the common case where there is exactly one DE per PET;
 these properties return the data on the single DE for the current PET. Versions of these
 properties *with* the ``all_`` prefix return lists indexed by DE. For example, to work
@@ -894,7 +894,7 @@ DEs per PET, user code should loop over DEs like:
        # operate on this_data
 
 Some methods, such as a :class:`~esmpy.api.grid.Grid`'s
-:class:`esmpy.api.grid.Grid.get_item`, default to retrieving values for the first DE
+:meth:`~esmpy.api.grid.Grid.get_item`, default to retrieving values for the first DE
 (``localde=0``). Thus, for the common case with 1 DE per PET, these can be called without
 a ``localde`` argument. But in cases where there may be multiple DEs per PET, these should
 be called in a loop like in the above example. Furthermore, these methods with an optional

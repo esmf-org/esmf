@@ -253,7 +253,7 @@ class Field(object):
         :rtype: A list of ndarrays with an entry for each local DE.
                 (In the typical case of 1 DE per PET, this is a single-element list
                 containing a single ndarray. For this case, see also
-                :meth:`~esmpy.api.field.data`.)
+                :attr:`~esmpy.api.field.Field.data`.)
         :return: The data of the :class:`~esmpy.api.field.Field`
         """
         return self._all_data
@@ -264,7 +264,7 @@ class Field(object):
         :rtype: A list of ndarrays with an entry for each local DE.
                 (In the typical case of 1 DE per PET, this is a single-element list
                 containing a single ndarray. For this case, see also
-                :meth:`~esmpy.api.field.lower_bounds`.)
+                :attr:`~esmpy.api.field.Field.lower_bounds`.)
         :return: The lower bounds of the :class:`~esmpy.api.field.Field`.
         """
         return self._all_lower_bounds
@@ -275,7 +275,7 @@ class Field(object):
         :rtype: A list of ndarrays with an entry for each local DE.
                 (In the typical case of 1 DE per PET, this is a single-element list
                 containing a single ndarray. For this case, see also
-                :meth:`~esmpy.api.field.upper_bounds`.)
+                :attr:`~esmpy.api.field.Field.upper_bounds`.)
         :return: The upper bounds of the :class:`~esmpy.api.field.Field`.
         """
         return self._all_upper_bounds
@@ -287,7 +287,7 @@ class Field(object):
         :return: The data of the :class:`~esmpy.api.field.Field`.
                  (It is an error to use this property in the uncommon case
                  where there is something other than 1 DE per PET; in that case,
-                 use :meth:`~esmpy.api.field.all_data`.)
+                 use :attr:`~esmpy.api.field.Field.all_data`.)
         """
         if self.local_de_count != 1:
             raise SingleLocalDEMethod
@@ -329,7 +329,7 @@ class Field(object):
         :return: The lower bounds of the :class:`~esmpy.api.field.Field`.
                  (It is an error to use this property in the uncommon case
                  where there is something other than 1 DE per PET; in that case,
-                 use :meth:`~esmpy.api.field.all_lower_bounds`.)
+                 use :attr:`~esmpy.api.field.Field.all_lower_bounds`.)
         """
         if self.local_de_count != 1:
             raise SingleLocalDEMethod
@@ -402,7 +402,7 @@ class Field(object):
         :return: The upper bounds of the :class:`~esmpy.api.field.Field`.
                  (It is an error to use this property in the uncommon case
                  where there is something other than 1 DE per PET; in that case,
-                 use :meth:`~esmpy.api.field.all_upper_bounds`.)
+                 use :attr:`~esmpy.api.field.Field.all_upper_bounds`.)
         """
         if self.local_de_count != 1:
             raise SingleLocalDEMethod
