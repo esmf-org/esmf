@@ -1177,7 +1177,14 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
      ! cartesian points in the local domain.
      do j = lbound(lambda,2), ubound(lambda,2)
         do i = lbound(lambda,1), ubound(lambda,1)
+#if defined(__INTEL_LLVM_COMPILER) && (__INTEL_LLVM_COMPILER == 20250000)
+           ! work around for IFX bug in version 2025.0.0
+           pp(1,i,j) = -rsq3
+           pp(2,i,j) = -b(i)
+           pp(3,i,j) = b(j)
+#else
            pp(:,i,j) = [-rsq3, -b(i), b(j)]
+#endif
         end do
      end do
 
