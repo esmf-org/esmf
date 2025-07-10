@@ -208,14 +208,28 @@
     enddo
 
 
-    grid = ESMF_GridCreateCubedSphere(tilesize, &
-                                      regDecompPTile=regDecompPTile, &
-                                      !decompFlagPTile=decompFlagPTile_local, &
-                                      !deLabelList=deLabelList, &
-                                      !delayout=delayout, &
-                                      staggerLocList=staggerLocList_local, &
-                                      name=name, &
-                                      rc=rc)
+    ! Because decompFlagPTile and deLabelList are currently commented-out in this call, we
+    ! don't need to handle dfpresent or llpresent. If we wanted to enable those arguments,
+    ! then we'd need a combinatoric set of conditionals as is found in some other Fortran
+    ! interface routines.
+    if (rdpresent == 1) then
+       grid = ESMF_GridCreateCubedSphere(tilesize, &
+                                         regDecompPTile=regDecompPTile, &
+                                         !decompFlagPTile=decompFlagPTile_local, &
+                                         !deLabelList=deLabelList, &
+                                         !delayout=delayout, &
+                                         staggerLocList=staggerLocList_local, &
+                                         name=name, &
+                                         rc=rc)
+    else
+       grid = ESMF_GridCreateCubedSphere(tilesize, &
+                                         !decompFlagPTile=decompFlagPTile_local, &
+                                         !deLabelList=deLabelList, &
+                                         !delayout=delayout, &
+                                         staggerLocList=staggerLocList_local, &
+                                         name=name, &
+                                         rc=rc)
+    end if
 
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
