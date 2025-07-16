@@ -93,6 +93,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------
+    !EX_UTest
     ! Test regridding using predefined voteMask R4R8R4
     write(failMsg, *) "Test unsuccessful"
     write(name, *) "Regrid between fields using predefined voteMask R4R8R4"
@@ -114,10 +115,11 @@
     ! do test
     call test_regridPredefinedvoteMaskR4R8R4V(rc)
 
-    !!return result
-    !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !return result
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------
+    !EX_UTest
     ! Test regridding using predefined voteMask R4R8R4 and ungridded dim
     write(failMsg, *) "Test unsuccessful"
     write(name, *) "Regrid between fields with ungridded dim using predefined voteMask R4R8R4"
@@ -442,14 +444,13 @@ contains
        def_value2 = 47.0
        undef_value = 20000.0
        zero_value = 0.d0
-       lm = 3
        srcGrid = create_grid(src_nx,src_ny, 1, .true., localrc)
        _VERIFY(localrc)
        dstGrid = create_grid(dst_nx,dst_ny, 2, .false., localrc)
        _VERIFY(localrc)
-       srcField = ESMF_FieldCreate(srcGrid, ESMF_TYPEKIND_R4, gridToFieldMap=[2,3], ungriddedLBound=[1], ungriddedUBound=[lm], rc=localrc)
+       srcField = ESMF_FieldCreate(srcGrid, ESMF_TYPEKIND_R4, rc=localrc)
        _VERIFY(localrc)
-       dstField = ESMF_FieldCreate(dstGrid, ESMF_TYPEKIND_R4, gridToFieldMap=[2,3], ungriddedLBound=[1], ungriddedUBound=[lm], rc=localrc)
+       dstField = ESMF_FieldCreate(dstGrid, ESMF_TYPEKIND_R4, rc=localrc)
        _VERIFY(localrc)
        call ESMF_FieldFill(srcField, dataFillScheme="const", const1=real(def_value1,kind=ESMF_KIND_R8), rc=localrc)
        _VERIFY(localrc)
@@ -461,11 +462,9 @@ contains
           call ESMF_GridGet(srcGrid, ESMF_STAGGERLOC_CENTER, lDE, computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
           call ESMF_FieldGet(srcField, lde, farrayPtr=srcPtr, rc=localrc)
           _VERIFY(localrc)
-          do i0=1,lm
-             do i1=clbnd(1),cubnd(1)
-                do i2=clbnd(2),cubnd(2)
-                   if (mod(i1,2) == 0)  srcPtr(i1,i2)= def_value2
-                enddo
+          do i1=clbnd(1),cubnd(1)
+             do i2=clbnd(2),cubnd(2)
+                if (mod(i1,2) == 0)  srcPtr(i1,i2)= def_value2
              enddo
           enddo
        enddo
@@ -483,7 +482,7 @@ contains
 
        call ESMF_GridGet(dstGrid, localDECount=localDECount, rc=localrc)
        _VERIFY(localrc)
-       def_count = count_value_in_field_r4_3d(dstField, def_value2, 0.001, rc=localrc)
+       def_count = count_value_in_field_r4_2d(dstField, def_value2, 0.001, rc=localrc)
        _VERIFY(localrc)
 
 
@@ -777,7 +776,7 @@ contains
        integer :: clbnd(2),cubnd(2), i1, i2, i0
        integer :: val_count, global_val_count(1) 
        type(ESMF_VM) :: vm
-       real(ESMF_KIND_R4), pointer :: ptr(:,:,:)
+       real(ESMF_KIND_R4), pointer :: ptr(:,:)
 
        call ESMF_VMGetGlobal(vm, rc=localrc)
        _VERIFY_PASS(localrc)
@@ -793,7 +792,7 @@ contains
           do i0=1,size(ptr,1)
              do i1=clbnd(1),cubnd(1)
                 do i2=clbnd(2),cubnd(2)
-                   if (value - tolerance < ptr(i0,i1,i2) .and. ptr(i0,i1,i2) < value + tolerance) val_count=val_count+1
+                   if (value - tolerance < ptr(i1,i2) .and. ptr(i1,i2) < value + tolerance) val_count=val_count+1
                 enddo 
              enddo
           enddo
