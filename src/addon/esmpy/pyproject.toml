@@ -52,6 +52,7 @@ dynamic = [ "version" ]
 testing = [
     "pytest",
     "pytest-json-report",
+    "scipy",
 ]
 
 [project.urls]
