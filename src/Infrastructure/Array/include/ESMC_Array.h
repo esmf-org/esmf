@@ -138,6 +138,34 @@ const char *ESMC_ArrayGetName(
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE: ESMC_ArrayGetLocalDECount - Get the number of DEs in an Array associated with the local PET
+//
+// !INTERFACE:
+int ESMC_ArrayGetLocalDECount(
+  ESMC_Array array,           // in
+  int *localDECount           // out
+);
+
+// !RETURN VALUE:
+//  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Get the number of DEs in the specified {\tt ESMC\_Array} object on the local PET.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[array]
+//    {\tt ESMC\_Array} object to be queried.
+//  \item[localDECount]
+//    The number of DEs in the Array on the local PET.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE: ESMC_ArrayGetPtr - Get pointer to Array data.
 //
 // !INTERFACE:

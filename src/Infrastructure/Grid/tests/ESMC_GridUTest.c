@@ -133,7 +133,13 @@ int main(void){
   char namecs[18] = "cubed sphere grid";
 
   //NEX_UTest
-  strcpy(name, "GridCreateCubedSphere");
+  strcpy(name, "GridCreateCubedSphere without regDecompPTile");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  grid_cs = ESMC_GridCreateCubedSphere(&tilesize, NULL, &i_sl, namecs, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //NEX_UTest
+  strcpy(name, "GridCreateCubedSphere with regDecompPTile");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   grid_cs = ESMC_GridCreateCubedSphere(&tilesize, &i_rd, &i_sl, namecs, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -692,6 +698,19 @@ int main(void){
 
   // free memory
   free(maxIndex);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //  GridGetLocalDECount
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "GridGetLocalDECount");
+  strcpy(failMsg, "Did not return correct localDECount");
+  int localDECount;
+  rc = ESMC_GridGetLocalDECount(grid_np, &localDECount);
+  ESMC_Test((rc==ESMF_SUCCESS && localDECount==1), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------

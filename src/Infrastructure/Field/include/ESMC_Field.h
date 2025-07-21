@@ -631,6 +631,34 @@ int ESMC_FieldGetBounds(
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE: ESMC_FieldGetLocalDECount - Get the number of DEs in a Field associated with the local PET
+//
+// !INTERFACE:
+int ESMC_FieldGetLocalDECount(
+  ESMC_Field field,           // in
+  int *localDECount           // out
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Get the number of DEs in the specified {\tt ESMC\_Field} object on the local PET.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[field]
+//    Get the local DE count for this {\tt ESMC\_Field}.
+//  \item[localDECount]
+//    The number of DEs in the Field on the local PET.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE: ESMC_FieldPrint - Print the internal information of a Field
 //
 // !INTERFACE:

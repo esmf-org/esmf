@@ -95,6 +95,15 @@ int main(void){
   array = ESMC_ArrayCreate(arrayspec, distgrid, "array1", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Get localDECount from ESMC_Array object");
+  strcpy(failMsg, "Did not return correct localDECount");
+  int localDECount;
+  rc = ESMC_ArrayGetLocalDECount(array, &localDECount);
+  ESMC_Test((rc==ESMF_SUCCESS && localDECount==1), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
   //NEX_UTest

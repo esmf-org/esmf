@@ -1,5 +1,7 @@
 """
 Utilities for regridding with Grids
+
+These utilities currently assume Grids and Fields with a single DE per PET
 """
 
 import sys

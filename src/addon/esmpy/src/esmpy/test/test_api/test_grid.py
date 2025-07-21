@@ -19,80 +19,125 @@ class TestGrid(TestBase):
     # prefer TestBase.mg, but in this case required for test_exhaustive in pytest markers
     mg = Manager(debug=True)
     mg.test_exhaustive = False
-    
+
     def examine_grid_attributes(self, grid):
+        for de in range(grid.local_de_count):
+            self.examine_grid_attributes_one_de(grid, de)
+
+    def examine_grid_attributes_one_de(self, grid, localde):
         # ~~~~~~~~~~~~~~~~~~~~~~  STAGGER LOCATIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # grid.staggerloc returns a boolean list of the activated stagger locations
         assert (type(grid.staggerloc) is list)
         assert (len(grid.staggerloc) is 2 ** grid.rank)
 
         # ~~~~~~~~~~~~~~~~~~~~~~  SIZE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # grid.size returns a list of the local (processor specific) sizes of grid coordinates in each stagger location
-        assert (type(grid.size) is list)
-        assert (len(grid.size) is 2 ** grid.rank)
+        # grid.all_sizes[localde] returns a list of the local (processor specific) sizes
+        # of grid coordinates in each stagger location
+        assert (type(grid.all_sizes[localde]) is list)
+        assert (len(grid.all_sizes[localde]) is 2 ** grid.rank)
 
         # ~~~~~~~~~~~~~~~~~~~~~~  BOUNDS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # grid.lower_bounds or grid.upper_bounds returns a list of numpy arrays containing the bounds of all coordinate dimensions in the grid
-        assert (type(grid.lower_bounds) is list)
-        assert (len(grid.lower_bounds) is 2 ** grid.rank)
-        assert (type(grid.upper_bounds) is list)
-        assert (len(grid.upper_bounds) is 2 ** grid.rank)
+        # grid.all_lower_bounds[localde] or grid.all_upper_bounds[localde] returns a list
+        # of numpy arrays containing the bounds of all coordinate dimensions in the grid
+        assert (type(grid.all_lower_bounds[localde]) is list)
+        assert (len(grid.all_lower_bounds[localde]) is 2 ** grid.rank)
+        assert (type(grid.all_upper_bounds[localde]) is list)
+        assert (len(grid.all_upper_bounds[localde]) is 2 ** grid.rank)
 
         # ~~~~~~~~~~~~~~~~~~~~~~  COORDINATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # grid.coords returns a list of lists of numpy arrays for coordinates of all stagger locations and coordinate dimensions
-        assert (type(grid.coords) is list)
-        assert (len(grid.coords) is 2 ** grid.rank)
+        # grid.all_coords[localde] returns a list of lists of numpy arrays for coordinates
+        # of all stagger locations and coordinate dimensions
+        assert (type(grid.all_coords[localde]) is list)
+        assert (len(grid.all_coords[localde]) is 2 ** grid.rank)
 
         # ~~~~~~~~~~~~~~~~~~~~~~  MASK ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # grid.mask returns a list of numpy arrays containing the grid mask at each stagger location
-        assert (type(grid.mask) is list)
-        assert (len(grid.mask) is 2 ** grid.rank)
+        # grid.all_masks[localde] returns a list of numpy arrays containing the grid mask
+        # at each stagger location
+        assert (type(grid.all_masks[localde]) is list)
+        assert (len(grid.all_masks[localde]) is 2 ** grid.rank)
 
         # ~~~~~~~~~~~~~~~~~~~~~~  AREA ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # grid.area returns a list of numpy arrays containing the grid cell areas at each stagger location
-        assert (type(grid.mask) is list)
-        assert (len(grid.mask) is 2 ** grid.rank)
+        # grid.all_areas[localde] returns a list of numpy arrays containing the grid cell
+        # areas at each stagger location
+        assert (type(grid.all_areas[localde]) is list)
+        assert (len(grid.all_areas[localde]) is 2 ** grid.rank)
 
         # stagger specific attributes
         for i in range(len(grid.staggerloc)):
             if grid.staggerloc[i]:
 
                 # ~~~~~~~~~~~~~~~~~~~~~~  SIZE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                # grid.size[i] returns a numpy array of the local (processor specific) size of the grid coordinates at the i'th stagger location
-                assert (type(grid.size[i]) is np.ndarray)
-                assert (grid.size[i].shape == tuple([grid.rank]))
+                # grid.all_sizes[localde][i] returns a numpy array of the local (processor
+                # specific) size of the grid coordinates at the i'th stagger location
+                assert (type(grid.all_sizes[localde][i]) is np.ndarray)
+                assert (grid.all_sizes[localde][i].shape == tuple([grid.rank]))
+                assert np.array_equal(grid.all_sizes[localde][i],
+                                      grid.all_upper_bounds[localde][i] - grid.all_lower_bounds[localde][i])
 
                 # ~~~~~~~~~~~~~~~~~~~~~~  BOUNDS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                # grid.lower_bounds[i] or grid.upper_bounds[i] returns a numpy array containing the bounds of all coordinate dimensions at the i'th stagger location
-                assert (type(grid.lower_bounds[i] is np.ndarray))
-                assert (grid.lower_bounds[i].shape == tuple([grid.rank]))
-                assert (type(grid.upper_bounds[i] is np.ndarray))
-                assert (grid.upper_bounds[i].shape == tuple([grid.rank]))
+                # grid.all_lower_bounds[localde][i] or grid.all_upper_bounds[localde][i]
+                # returns a numpy array containing the bounds of all coordinate dimensions
+                # at the i'th stagger location
+                assert (type(grid.all_lower_bounds[localde][i] is np.ndarray))
+                assert (grid.all_lower_bounds[localde][i].shape == tuple([grid.rank]))
+                assert (type(grid.all_upper_bounds[localde][i] is np.ndarray))
+                assert (grid.all_upper_bounds[localde][i].shape == tuple([grid.rank]))
 
                 # ~~~~~~~~~~~~~~~~~~~~~~  COORDINATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                # grid.coords[i] returns a list of length=rank containing numpy arrays for each coordinate dimension
-                assert (type(grid.coords[i]) is list)
-                assert (len(grid.coords[i]) is grid.rank)
+                # grid.all_coords[localde][i] returns a list of length=rank containing
+                # numpy arrays for each coordinate dimension
+                assert (type(grid.all_coords[localde][i]) is list)
+                assert (len(grid.all_coords[localde][i]) is grid.rank)
 
-                # grid.coords[i][j] returns a numpy array containing coordinates of i'th stagger location and j'th coordinate dimension
+                # grid.all_coords[localde][i][j] returns a numpy array containing
+                # coordinates of i'th stagger location and j'th coordinate dimension
                 for j in range(grid.rank):
-                    assert (type(grid.coords[i][j] is np.ndarray))
+                    assert (type(grid.all_coords[localde][i][j] is np.ndarray))
                     assert (
-                        grid.coords[i][j].shape == tuple(np.array(grid.upper_bounds[i]) - np.array(grid.lower_bounds[i])))
+                        grid.all_coords[localde][i][j].shape == tuple(np.array(grid.all_upper_bounds[localde][i]) - np.array(grid.all_lower_bounds[localde][i])))
 
                 # ~~~~~~~~~~~~~~~~~~~~~~  MASK ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                # grid.mask[i] returns a numpy array containing the grid mask at the i'th stagger location
-                if not isinstance(grid.mask[i], type(None)):
-                    assert (type(grid.mask[i]) is np.ndarray)
+                # grid.all_masks[localde][i] returns a numpy array containing the grid
+                # mask at the i'th stagger location
+                if not isinstance(grid.all_masks[localde][i], type(None)):
+                    assert (type(grid.all_masks[localde][i]) is np.ndarray)
                     assert (
-                        grid.mask[i].shape == tuple(np.array(grid.upper_bounds[i]) - np.array(grid.lower_bounds[i])))
+                        grid.all_masks[localde][i].shape == tuple(np.array(grid.all_upper_bounds[localde][i]) - np.array(grid.all_lower_bounds[localde][i])))
+
+                    # Confirm that the Python data matches the internal ESMF data; if not,
+                    # the linkage between the Python data and the internal data may not
+                    # have been set up correctly
+                    masks_from_esmf = ESMP_GridGetItem(grid, GridItem.MASK, staggerloc=i, localde=localde)
+                    assert(np.array_equal(grid.all_masks[localde][i],
+                                          ndarray_from_esmf(masks_from_esmf, TypeKind.I4, grid.all_sizes[localde][i])))
 
                 # ~~~~~~~~~~~~~~~~~~~~~~  AREA ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                # grid.area[i] returns a numpy array containing the grid cell areas at the i'th stagger location
-                if not isinstance(grid.area[i], type(None)):
-                    assert (type(grid.area[i]) is np.ndarray)
+                # grid.all_areas[localde][i] returns a numpy array containing the grid
+                # cell areas at the i'th stagger location
+                if not isinstance(grid.all_areas[localde][i], type(None)):
+                    assert (type(grid.all_areas[localde][i]) is np.ndarray)
                     assert (
-                        grid.area[i].shape == tuple(np.array(grid.upper_bounds[i]) - np.array(grid.lower_bounds[i])))
+                        grid.all_areas[localde][i].shape == tuple(np.array(grid.all_upper_bounds[localde][i]) - np.array(grid.all_lower_bounds[localde][i])))
+
+                    # Confirm that the Python data matches the internal ESMF data; if not,
+                    # the linkage between the Python data and the internal data may not
+                    # have been set up correctly
+                    areas_from_esmf = ESMP_GridGetItem(grid, GridItem.AREA, staggerloc=i, localde=localde)
+                    assert(np.array_equal(grid.all_areas[localde][i],
+                                          ndarray_from_esmf(areas_from_esmf, TypeKind.R8, grid.all_sizes[localde][i])))
+
+    def assert_expected_grid_shape(self, grid, staggerloc, expected_shape):
+        """
+        Assert that various properties of the given :class:`~esmpy.api.grid.Grid` at the
+        given stagger location match the given expected shape.
+
+        :param Grid grid: The Grid to check
+        :param StaggerLoc staggerloc: The stagger location to check
+        :param tuple expected_shape: The expected shape of the Grid
+        """
+        assert grid.coords[staggerloc][0].shape == expected_shape
+        assert grid.upper_bounds[staggerloc].tolist() == list(expected_shape)
+        assert grid.size[staggerloc].tolist() == list(expected_shape)
 
     def make_grid_2d(self):
         typekind = TypeKind.R8
@@ -263,39 +308,53 @@ class TestGrid(TestBase):
                 "The following combinations of Grid parameters failed to create a proper Grid: " + str(fail))
 
     def test_grid_create_cubed_sphere(self):
+        """
+        Test creation of a cubed-sphere grid with the default decomposition.
+        """
         # keywords = dict(
-            # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
-            # periodic=[[None, None, None], [None, None, 0], [None, None, 1], [None, None, 2],
-            #           [0, None, None], [0, None, 0], [0, None, 1], [0, None, 2],
-            #           [1, None, None], [1, 0, 1], [1, 0, 2], [1, 1, 0], [1, 1, 2], [1, 2, 0], [1, 2, 1]],
-            # staggerloc=[None, StaggerLoc.CENTER_VCENTER, StaggerLoc.EDGE1_VCENTER, StaggerLoc.EDGE2_VCENTER,
-            #             StaggerLoc.CORNER_VCENTER, StaggerLoc.CENTER_VFACE, StaggerLoc.EDGE1_VFACE,
-            #             StaggerLoc.EDGE2_VFACE, StaggerLoc.CORNER_VFACE],
-            # coord_sys=[None, CoordSys.CART, CoordSys.SPH_DEG, CoordSys.SPH_RAD],
-            # typekind=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8])
+        # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
+        # periodic=[[None, None, None], [None, None, 0], [None, None, 1], [None, None, 2],
+        #           [0, None, None], [0, None, 0], [0, None, 1], [0, None, 2],
+        #           [1, None, None], [1, 0, 1], [1, 0, 2], [1, 1, 0], [1, 1, 2], [1, 2, 0], [1, 2, 1]],
+        # staggerloc=[None, StaggerLoc.CENTER_VCENTER, StaggerLoc.EDGE1_VCENTER, StaggerLoc.EDGE2_VCENTER,
+        #             StaggerLoc.CORNER_VCENTER, StaggerLoc.CENTER_VFACE, StaggerLoc.EDGE1_VFACE,
+        #             StaggerLoc.EDGE2_VFACE, StaggerLoc.CORNER_VFACE],
+        # coord_sys=[None, CoordSys.CART, CoordSys.SPH_DEG, CoordSys.SPH_RAD],
+        # typekind=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8])
 
-            regDecompPTile = np.array([[2,2],[2,2],[1,2],[1,2],[1,2],[1,2]], dtype=np.int32)
-            regDecompPTile = np.array([[2,2,1,1,1,1],[2,2,2,2,2,2]], dtype=np.int32)
-            # decompFlagPTile = np.array([[DecompFlag.DEFAULT, 1],
-            #                           [DecompFlag.BALANCED, 2],
-            #                           [DecompFlag.RESTFIRST, 3],
-            #                           [DecompFlag.RESTLAST, 4],
-            #                           [DecompFlag.CYCLIC, 5],
-            #                           [DecompFlag.DEFAULT, 6]], dtype=np.int32)
-            # deLabelList = np.array([11,12,13,14,15,16], dtype=np.int32)
+        # decompFlagPTile = np.array([[DecompFlag.DEFAULT, 1],
+        #                           [DecompFlag.BALANCED, 2],
+        #                           [DecompFlag.RESTFIRST, 3],
+        #                           [DecompFlag.RESTLAST, 4],
+        #                           [DecompFlag.CYCLIC, 5],
+        #                           [DecompFlag.DEFAULT, 6]], dtype=np.int32)
+        # deLabelList = np.array([11,12,13,14,15,16], dtype=np.int32)
 
-            grid = Grid(tilesize = 45, regDecompPTile = regDecompPTile,
-                                     #decompFlagPTile = decompFlagPTile,
-                                     #deLabelList = deLabelList,
-                                     name = "cubed_sphere")
-            grid.add_item(GridItem.MASK)
-            grid.add_item(GridItem.AREA)
-            # # slicing just the first de (slicing doesn't work for multiple des)
-            # grid2 = grid[2:10, 4:7]
-            # self.examine_grid_attributes(grid)
-            # self.examine_grid_attributes(grid2)
-            grid.destroy()
-            # grid2.destroy()
+        grid = Grid(tilesize = 45,
+                    # decompFlagPTile = decompFlagPTile,
+                    # deLabelList = deLabelList,
+                    name = "cubed_sphere")
+        grid.add_item(GridItem.MASK)
+        grid.add_item(GridItem.AREA)
+        # # slicing just the first de (slicing doesn't work for multiple des)
+        # grid2 = grid[2:10, 4:7]
+        self.examine_grid_attributes(grid)
+        # self.examine_grid_attributes(grid2)
+        grid.destroy()
+        # grid2.destroy()
+
+    def test_grid_create_cubed_sphere_reg_decomp_p_tile(self):
+        """
+        Test the creation of cubed-sphere grids when specifying regDecompPTile
+        """
+        regDecompPTile = np.array([[2,2,1,1,1,1],[2,2,2,2,2,2]], dtype=np.int32)
+
+        grid = Grid(tilesize = 45, regDecompPTile = regDecompPTile,
+                    name = "cubed_sphere")
+        grid.add_item(GridItem.MASK)
+        grid.add_item(GridItem.AREA)
+        self.examine_grid_attributes(grid)
+        grid.destroy()
 
     @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_grid_slice_2d(self):
@@ -304,18 +363,13 @@ class TestGrid(TestBase):
         grid2 = grid[1:21, 3:17]
         grid3 = grid2[4:6, 5:6]
 
-        assert grid.coords[StaggerLoc.CENTER][0].shape == (100, 100)
-        assert grid.upper_bounds[StaggerLoc.CENTER].tolist() == [100, 100]
-
+        self.assert_expected_grid_shape(grid, StaggerLoc.CENTER, (100, 100))
         del grid
 
-        assert grid2.coords[StaggerLoc.CENTER][0].shape == (20, 14)
-        assert grid2.upper_bounds[StaggerLoc.CENTER].tolist() == [20, 14]
-
+        self.assert_expected_grid_shape(grid2, StaggerLoc.CENTER, (20, 14))
         del grid2
 
-        assert grid3.coords[StaggerLoc.CENTER][0].shape == (2, 1)
-        assert grid3.upper_bounds[StaggerLoc.CENTER].tolist() == [2, 1]
+        self.assert_expected_grid_shape(grid3, StaggerLoc.CENTER, (2, 1))
 
     @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_grid_slice_2d_corners(self):
@@ -334,19 +388,13 @@ class TestGrid(TestBase):
         grid2 = grid[1:21, 3:17]
         grid3 = grid2[4:6, 5:6]
 
-        assert grid.coords[StaggerLoc.CORNER][0].shape == (101, 101)
-        assert grid.upper_bounds[StaggerLoc.CORNER].tolist() == [101, 101]
-
+        self.assert_expected_grid_shape(grid, StaggerLoc.CORNER, (101, 101))
         del grid
 
-        assert grid2.coords[StaggerLoc.CORNER][0].shape == (21, 15)
-        assert grid2.upper_bounds[StaggerLoc.CORNER].tolist() == [21, 15]
-
+        self.assert_expected_grid_shape(grid2, StaggerLoc.CORNER, (21, 15))
         del grid2
 
-        assert grid3.coords[StaggerLoc.CORNER][0].shape == (3, 2)
-        assert grid3.upper_bounds[StaggerLoc.CORNER].tolist() == [3, 2]
-
+        self.assert_expected_grid_shape(grid3, StaggerLoc.CORNER, (3, 2))
 
     @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_grid_slice_3d(self):
@@ -355,18 +403,13 @@ class TestGrid(TestBase):
         grid2 = grid[1:21, 3:17, 7:47]
         grid3 = grid[4:6, 5:6, 0:2]
 
-        assert grid.coords[StaggerLoc.CENTER][0].shape == (100, 100, 100)
-        assert grid.upper_bounds[StaggerLoc.CENTER].tolist() == [100, 100, 100]
-
+        self.assert_expected_grid_shape(grid, StaggerLoc.CENTER, (100, 100, 100))
         del grid
 
-        assert grid2.coords[StaggerLoc.CENTER][0].shape == (20, 14, 40)
-        assert grid2.upper_bounds[StaggerLoc.CENTER].tolist() == [20, 14, 40]
-
+        self.assert_expected_grid_shape(grid2, StaggerLoc.CENTER, (20, 14, 40))
         del grid2
 
-        assert grid3.coords[StaggerLoc.CENTER][0].shape == (2, 1, 2)
-        assert grid3.upper_bounds[StaggerLoc.CENTER].tolist() == [2, 1, 2]
+        self.assert_expected_grid_shape(grid3, StaggerLoc.CENTER, (2, 1, 2))
 
     @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_grid_slice_3d_corners(self):
@@ -390,18 +433,13 @@ class TestGrid(TestBase):
         grid2 = grid[1:21, 3:17, 7:47]
         grid3 = grid[4:6, 5:6, 0:2]
 
-        assert grid.coords[cvf][0].shape == (101, 101, 101)
-        assert grid.upper_bounds[cvf].tolist() == [101, 101, 101]
-
+        self.assert_expected_grid_shape(grid, cvf, (101, 101, 101))
         del grid
 
-        assert grid2.coords[cvf][0].shape == (21, 15, 41)
-        assert grid2.upper_bounds[cvf].tolist() == [21, 15, 41]
-
+        self.assert_expected_grid_shape(grid2, cvf, (21, 15, 41))
         del grid2
 
-        assert grid3.coords[cvf][0].shape == (3, 2, 3)
-        assert grid3.upper_bounds[cvf].tolist() == [3, 2, 3]
+        self.assert_expected_grid_shape(grid3, cvf, (3, 2, 3))
 
     @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_grid_slice_periodic(self):
@@ -410,24 +448,16 @@ class TestGrid(TestBase):
         grid2 = grid[1:21, 3:17]
         grid3 = grid2[4:6, 5:6]
 
-        assert grid.coords[StaggerLoc.CENTER][0].shape == (x, y)
-        assert grid.upper_bounds[StaggerLoc.CENTER].tolist() == [x, y]
-        assert grid.coords[StaggerLoc.CORNER][0].shape == (x, y + 1)
-        assert grid.upper_bounds[StaggerLoc.CORNER].tolist() == [x, y + 1]
-
+        self.assert_expected_grid_shape(grid, StaggerLoc.CENTER, (x, y))
+        self.assert_expected_grid_shape(grid, StaggerLoc.CORNER, (x, y + 1))
         del grid
 
-        assert grid2.coords[StaggerLoc.CENTER][0].shape == (20, 14)
-        assert grid2.upper_bounds[StaggerLoc.CENTER].tolist() == [20, 14]
-        assert grid2.coords[StaggerLoc.CORNER][0].shape == (21, 15)
-        assert grid2.upper_bounds[StaggerLoc.CORNER].tolist() == [21, 15]
-
+        self.assert_expected_grid_shape(grid2, StaggerLoc.CENTER, (20, 14))
+        self.assert_expected_grid_shape(grid2, StaggerLoc.CORNER, (21, 15))
         del grid2
 
-        assert grid3.coords[StaggerLoc.CENTER][0].shape == (2, 1)
-        assert grid3.upper_bounds[StaggerLoc.CENTER].tolist() == [2, 1]
-        assert grid3.coords[StaggerLoc.CORNER][0].shape == (3, 2)
-        assert grid3.upper_bounds[StaggerLoc.CORNER].tolist() == [3, 2]
+        self.assert_expected_grid_shape(grid3, StaggerLoc.CENTER, (2, 1))
+        self.assert_expected_grid_shape(grid3, StaggerLoc.CORNER, (3, 2))
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
@@ -448,13 +478,10 @@ class TestGrid(TestBase):
 
         grid2 = grid[0:5, 0:5]
 
-        assert grid.coords[0][0].shape == (128, 64)
-        assert grid.upper_bounds[0].tolist() == [128, 64]
-
+        self.assert_expected_grid_shape(grid, StaggerLoc.CENTER, (128, 64))
         del grid
 
-        assert grid2.coords[0][0].shape == (5, 5)
-        assert grid2.upper_bounds[0].tolist() == [5, 5]
+        self.assert_expected_grid_shape(grid2, StaggerLoc.CENTER, (5, 5))
 
     def test_grid_copy(self):
         grid = self.make_grid_2d()
@@ -505,6 +532,82 @@ class TestGrid(TestBase):
         for i in range(gridYCoord_check.shape[x]):
             for j in range(gridYCoord_check.shape[y]):
                 assert(gridYCoord_check[i, j] == float(j))
+
+    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
+    def test_grid_with_multiple_des_per_pet(self):
+        """
+        Test a grid's coordinates, areas and masks with multiple DEs per PET
+        """
+
+        def set_areas_and_masks(grid):
+            grid.add_item(GridItem.AREA)
+            grid.add_item(GridItem.MASK)
+            for de in range(grid.local_de_count):
+                # Do an initial assertion that area and mask have been set up properly for
+                # all DEs
+                assert type(grid.all_areas[de][StaggerLoc.CENTER]) is np.ndarray
+                assert grid.all_areas[de][StaggerLoc.CENTER].shape == tuple(grid.all_sizes[de][StaggerLoc.CENTER])
+                assert type(grid.all_masks[de][StaggerLoc.CENTER]) is np.ndarray
+                assert grid.all_masks[de][StaggerLoc.CENTER].shape == tuple(grid.all_sizes[de][StaggerLoc.CENTER])
+
+                # Create arbitrary, spatially-varying areas and masks:
+                grid.all_areas[de][StaggerLoc.CENTER][...] = np.cos(np.radians(
+                    grid.all_coords[de][StaggerLoc.CENTER][1]))
+                grid.all_masks[de][StaggerLoc.CENTER][...] = (
+                    (grid.all_coords[de][StaggerLoc.CENTER][0] > 90) &
+                    (grid.all_coords[de][StaggerLoc.CENTER][1] > 0)).astype(int)
+
+        def assert_areas_and_masks(grid):
+            for de in range(grid.local_de_count):
+                lons = grid.get_coords(0, localde=de)
+                lats = grid.get_coords(1, localde=de)
+                areas = grid.get_item(GridItem.AREA, localde=de)
+                masks = grid.get_item(GridItem.MASK, localde=de)
+                assert(np.array_equal(areas, np.cos(np.radians(lats))))
+                assert(np.array_equal(masks, ((lons > 90) & (lats > 0)).astype(int)))
+
+            mask_sum = np.sum(np.concatenate([np.ravel(grid.all_masks[de][StaggerLoc.CENTER])
+                                              for de in range(grid.local_de_count)]))
+            # 6 tiles, each 8x8; masks are 1 in 3/8 of the points (1/2 of the latitudes
+            # and 3/4 of the longitudes)
+            assert mask_sum == 6*8*8*(3/8)
+
+        # Set up two grids with the same coordinates but different decompositions:
+        regDecompPTile1 = np.array([[1,1,1,1,1,1],[1,1,1,1,1,1]], dtype=np.int32)
+        grid1 = Grid(tilesize = 8, regDecompPTile=regDecompPTile1)
+        set_areas_and_masks(grid1)
+        regDecompPTile2 = np.array([[2,2,1,1,1,1],[2,2,2,2,2,2]], dtype=np.int32)
+        grid2 = Grid(tilesize = 8, regDecompPTile=regDecompPTile2)
+        set_areas_and_masks(grid2)
+
+        # Do some basic checks
+        self.examine_grid_attributes(grid1)
+        self.examine_grid_attributes(grid2)
+
+        # Make 1-d arrays of x and y coordinates, containing coordinates for all DEs. Note
+        # that we use get_coords rather than all_coords in order to test the get_coords
+        # function.
+        grid1_x_coords = np.concatenate([np.ravel(grid1.get_coords(0, localde=de))
+                                        for de in range(grid1.local_de_count)])
+        grid1_y_coords = np.concatenate([np.ravel(grid1.get_coords(1, localde=de))
+                                        for de in range(grid1.local_de_count)])
+        grid2_x_coords = np.concatenate([np.ravel(grid2.get_coords(0, localde=de))
+                                        for de in range(grid2.local_de_count)])
+        grid2_y_coords = np.concatenate([np.ravel(grid2.get_coords(1, localde=de))
+                                        for de in range(grid2.local_de_count)])
+
+        # Check the coordinates by comparing the two grids. The following assertions don't
+        # definitively confirm that the coordinates are correct with multiple DEs per PET,
+        # but they catch some potential errors with multiple DEs per PET.
+        #
+        # Note that this only works with a single PET: For this to work with multiple
+        # PETs, we would need to merge the arrays across PETs.
+        assert(np.array_equal(np.sort(grid1_x_coords), np.sort(grid2_x_coords)))
+        assert(np.array_equal(np.sort(grid1_y_coords), np.sort(grid2_y_coords)))
+
+        # Check the areas and masks of both grids
+        assert_areas_and_masks(grid1)
+        assert_areas_and_masks(grid2)
 
     def test_grid_coords_3D(self):
 

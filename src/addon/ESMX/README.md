@@ -42,7 +42,7 @@ The `ESMX_EXE_NAME` executable for a project that leverages ESMX can be build di
 
 Assuming the ESMX build configuration file `esmxBuild.yaml` (discussed later in the text) is located in the current working directory.
 ```
-cmake [-DCMAKE_INSTALL_PREFIX=<your-install-location>] -S $ESMF_ESMXDIR -B build
+cmake [-DCMAKE_INSTALL_PREFIX=<your-install-location>] -S $ESMF_ESMXDIR -B build -DESMX_SDIR=`pwd`
 ```
 Here the shell variable `ESMF_ESMXDIR` is assumed to be set according to your ESMF installation. The correct value can be looked up in the file `esmf.mk` associated with the ESMF installation.
 

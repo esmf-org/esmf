@@ -9,6 +9,6 @@ if [ -z "$TAG" ] ; then TAG="$BRCH+g$SHA1" ; fi
 ORIG=`git config --get remote.origin.url 2>&1`
 case "$ORIG" in
   *"esmf-org/esmf"*) echo $TAG ;;
-  *) echo $TAG"#"$ORIG ;;
+  *) echo $TAG":"$ORIG ;;
 esac
 fi

@@ -1785,8 +1785,7 @@ end subroutine ESMF_LogGet
         ESMF_CONTEXT, rcToReturn=rc)
       return
     elseif (msgAbortCnt > 0) then
-      call ESMF_LogSet(ESMF_LogDefault, &
-        logmsgAbort=msgAbortLst(1:msgAbortCnt), rc=localrc)
+      call ESMF_LogSet(logmsgAbort=msgAbortLst(1:msgAbortCnt), rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif

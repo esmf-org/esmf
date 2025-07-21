@@ -356,6 +356,32 @@ int ESMC_GridGetCoordBounds(ESMC_Grid grid,
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_GridGetLocalDECount()"
+int ESMC_GridGetLocalDECount(ESMC_Grid grid,
+                             int *localDECount){
+
+  // Initialize return code. Assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+  // convert the ESMC_Grid to an ESMCI::Grid
+  ESMCI::Grid *gridp = reinterpret_cast<ESMCI::Grid *>(grid.ptr);
+
+  if (gridp->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+        " grid hasn't been fully initialized, so localDECount is not available",
+        ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  *localDECount = gridp->getDistGrid()->getDELayout()->getLocalDeCount();
+
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridAddItem()"
 int ESMC_GridAddItem(ESMC_Grid grid, enum ESMC_GridItem_Flag itemflag, 
                                       enum ESMC_StaggerLoc staggerloc){
@@ -417,7 +443,7 @@ void * ESMC_GridGetItem(ESMC_Grid grid,
   arrayPtr.ptr = reinterpret_cast<void *>(itemArray);
 
   // get the Array pointer to return
-  void *itemPtr = ESMC_ArrayGetPtr(arrayPtr, 0, &localrc);
+  void *itemPtr = ESMC_ArrayGetPtr(arrayPtr, localDE_l, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return NULL; // bail out
 

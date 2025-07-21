@@ -35,6 +35,7 @@
 #include <algorithm> //find_if
 #include <fstream>
 #include <ctime>
+#include <array>
 
 struct FindAnyPair {
     FindAnyPair (std::string a, std::string b, std::string c, std::string d, 

@@ -499,6 +499,33 @@ int ESMC_GridGetCoordBounds(
 //-----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_GridGetLocalDECount - Get the number of DEs in this grid on this PET
+//
+// !INTERFACE:
+int ESMC_GridGetLocalDECount(
+  ESMC_Grid grid,                   // in
+  int *localDECount                 // out
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//  Get the number of DEs in this grid on this PET.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[grid]
+//    Grid object from which to obtain the local DE count.
+//  \item[localDECount]
+//    The number of DEs in this grid on this PET.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 //BOPI
 // !IROUTINE: ESMC_GridWrite - Write a Grid to a VTK file
 //

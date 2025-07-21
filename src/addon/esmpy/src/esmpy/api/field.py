@@ -143,24 +143,30 @@ class Field(object):
         else:
             raise FieldDOError
 
-        # get data and bounds to create a new instance of this object
-        lbounds, ubounds = ESMP_FieldGetBounds(struct, rank)
-
-        # initialize field data
-        # TODO: MaskedArray gives better interpolation values than Array (171128 removed .copy from .data below
-        # self._data = MaskedArray(ESMP_FieldGetPtr(struct), None, typekind, ubounds-lbounds).data
-        self._data = ndarray_from_esmf(ESMP_FieldGetPtr(struct), typekind, ubounds-lbounds)
         self._name = name
         self._type = typekind
         self._rank = rank
         self._struct = struct
         self._xd = xd
         self._staggerloc = staggerloc
-        self._lower_bounds = lbounds
-        self._upper_bounds = ubounds
         self._ndbounds = local_ndbounds
-
         self._grid = grid
+
+        self._local_de_count = ESMP_FieldGetLocalDECount(struct)
+
+        # The "all" prefix here refers to the list over all local DEs. In the typical case
+        # of 1 DE per PET, these local DE lists will be of length 1.
+        self._all_data = [None] * self._local_de_count
+        self._all_lower_bounds = [None] * self._local_de_count
+        self._all_upper_bounds = [None] * self._local_de_count
+        for de in range(self._local_de_count):
+            lbounds, ubounds = ESMP_FieldGetBounds(struct, rank, localDe=de)
+            self._all_lower_bounds[de] = lbounds
+            self._all_upper_bounds[de] = ubounds
+            # TODO: MaskedArray gives better interpolation values than Array (171128 removed .copy from .data below
+            # self._all_data[de] = MaskedArray(ESMP_FieldGetPtr(struct, localDe=de), None, typekind, ubounds-lbounds).data
+            self._all_data[de] = ndarray_from_esmf(
+                ESMP_FieldGetPtr(struct, localDe=de), typekind, ubounds-lbounds)
 
         # for arbitrary metadata
         self._meta = {}
@@ -177,11 +183,20 @@ class Field(object):
         if pet_count() > 1:
             raise SerialMethod
 
+        if self.local_de_count != 1:
+            raise SingleLocalDEMethod
+
         slc = get_formatted_slice(slc, self.rank)
 
         ret = self.copy()
 
-        ret._data = self._data.__getitem__(slc)
+        # since this method only works for a single local DE, we can just operate on the
+        # 0th list element (which should be the only list element)
+        #
+        # note that we make a new list here; this is important to avoid modifying the
+        # original self._all_data list (as would happen if we simply assigned to
+        # ret._all_data[0] since the copy method is a shallow copy)
+        ret._all_data = [self._all_data[0].__getitem__(slc)]
 
         # set grid to the first two dims of the slice (this will change to last when we get dimension ordering set to python conventions)
         if self.xd > 0:
@@ -192,7 +207,14 @@ class Field(object):
         ret._grid = self.grid.__getitem__(slc_grid)
 
         # upper bounds are "sliced" by taking the shape of the data
-        ret._upper_bounds = np.array(ret.data.shape, dtype=np.int32)
+        #
+        # since this method only works for a single local DE, we can just operate on the
+        # 0th list element (which should be the only list element)
+        #
+        # note that we make a new list here; this is important to avoid modifying the
+        # original self._all_upper_bounds list (as would happen if we simply assigned to
+        # ret._all_upper_bounds[0] since the copy method is a shallow copy)
+        ret._all_upper_bounds = [np.array(ret.data.shape, dtype=np.int32)]
         # lower bounds do not need to be sliced yet because slicing is not yet enabled in parallel
 
         return ret
@@ -216,22 +238,60 @@ class Field(object):
                    self.rank,
                    self.xd,
                    self.staggerloc,
-                   self.lower_bounds,
-                   self.upper_bounds,
+                   self.all_lower_bounds,
+                   self.all_upper_bounds,
                    self.ndbounds,
-                   self.data,
+                   self.all_data,
                    self.grid,
                    ))
 
         return string
 
     @property
-    def data(self):
+    def all_data(self):
         """
-        :rtype: :attr:`~esmpy.api.constants.TypeKind`
+        :rtype: A list of ndarrays with an entry for each local :ref:`DE <des>`.
+                (In the typical case of 1 :ref:`DE <des>` per PET, this is a single-element list
+                containing a single ndarray. For this case, see also
+                :attr:`~esmpy.api.field.Field.data`.)
         :return: The data of the :class:`~esmpy.api.field.Field`
         """
-        return self._data
+        return self._all_data
+
+    @property
+    def all_lower_bounds(self):
+        """
+        :rtype: A list of ndarrays with an entry for each local :ref:`DE <des>`.
+                (In the typical case of 1 :ref:`DE <des>` per PET, this is a single-element list
+                containing a single ndarray. For this case, see also
+                :attr:`~esmpy.api.field.Field.lower_bounds`.)
+        :return: The lower bounds of the :class:`~esmpy.api.field.Field`.
+        """
+        return self._all_lower_bounds
+
+    @property
+    def all_upper_bounds(self):
+        """
+        :rtype: A list of ndarrays with an entry for each local :ref:`DE <des>`.
+                (In the typical case of 1 :ref:`DE <des>` per PET, this is a single-element list
+                containing a single ndarray. For this case, see also
+                :attr:`~esmpy.api.field.Field.upper_bounds`.)
+        :return: The upper bounds of the :class:`~esmpy.api.field.Field`.
+        """
+        return self._all_upper_bounds
+
+    @property
+    def data(self):
+        """
+        :rtype: ndarray
+        :return: The data of the :class:`~esmpy.api.field.Field`.
+                 (It is an error to use this property in the uncommon case
+                 where there is something other than 1 :ref:`DE <des>` per PET;
+                 in that case, use :attr:`~esmpy.api.field.Field.all_data`.)
+        """
+        if self.local_de_count != 1:
+            raise SingleLocalDEMethod
+        return self._all_data[0]
 
     @property
     def finalized(self):
@@ -254,12 +314,26 @@ class Field(object):
         return self._grid
 
     @property
+    def local_de_count(self):
+        """
+        :rtype: int
+        :return: The number of :ref:`DEs <des>` in the :class:`~esmpy.api.field.Field`
+            on this PET.
+        """
+        return self._local_de_count
+
+    @property
     def lower_bounds(self):
         """
         :rtype: ndarray
         :return: The lower bounds of the :class:`~esmpy.api.field.Field`.
+                 (It is an error to use this property in the uncommon case
+                 where there is something other than 1 :ref:`DE <des>` per PET;
+                 in that case, use :attr:`~esmpy.api.field.Field.all_lower_bounds`.)
         """
-        return self._lower_bounds
+        if self.local_de_count != 1:
+            raise SingleLocalDEMethod
+        return self._all_lower_bounds[0]
 
     @property
     def meta(self):
@@ -326,8 +400,13 @@ class Field(object):
         """
         :rtype: ndarray
         :return: The upper bounds of the :class:`~esmpy.api.field.Field`.
+                 (It is an error to use this property in the uncommon case
+                 where there is something other than 1 :ref:`DE <des>` per PET;
+                 in that case, use :attr:`~esmpy.api.field.Field.all_upper_bounds`.)
         """
-        return self._upper_bounds
+        if self.local_de_count != 1:
+            raise SingleLocalDEMethod
+        return self._all_upper_bounds[0]
 
     @property
     def xd(self):

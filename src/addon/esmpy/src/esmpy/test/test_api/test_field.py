@@ -28,6 +28,10 @@ class TestField(TestBase):
         return field
 
     def examine_field_attributes(self, field):
+        # ~~~~~~~~~~~~~~~~~~~~~~  LOCAL DE COUNT ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # For now we assume 1 DE per PET
+        assert field.local_de_count == 1
+
         # ~~~~~~~~~~~~~~~~~~~~~~  STAGGER LOCATION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         assert (type(field.staggerloc) in [MeshLoc, StaggerLoc, int])
 
@@ -54,7 +58,10 @@ class TestField(TestBase):
 
         mask = grid.add_item(GridItem.MASK)
         mask[:] = 1
-        mask[0, 1] = 0
+        if mask.shape[0] > 0 and mask.shape[1] > 1:
+            # (This conditional guards against an out-of-bounds error for small grids
+            # relative to the PET count)
+            mask[0, 1] = 0
 
         if ndbounds:
             field = Field(grid, ndbounds=[5, 2])
