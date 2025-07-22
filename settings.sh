@@ -1,17 +1,113 @@
-module load mpi/mpich-x86_64
-export ESMF_DIR=/home/ilcentro/Work/NASA/ALI/ESMF
-export ESMF_COMM=mpich
-export ESMF_PIO=internal
-export ESMF_NETCDF=nc-config
-export ESMF_NETCDF_INCLUDE=/usr/lib64/gfortran/modules
-export ESMF_NETCDFF_INCLUDE=/usr/lib64/gfortran/modules
-export ESMF_GDAL=true
-#export ESMF_GDAL_INCLUDE=/usr/include/gdal
-export ESMF_GDAL_INCLUDE=/home/ilcentro/tools/gdal/include
-#export ESMF_SHAPEFILE_INCLUDE=/usr/include
-#export ESMF_GDAL_LIBPATH=/usr/lib64
-export ESMF_GDAL_LIBPATH=/home/ilcentro/tools/gdal/lib64
-#export ESMF_SHAPEFILE_LIBS=-lshp
-export ESMF_GDAL_LIBS=-lgdal
-export ESMF_BOPT=g
-export ESMF_CXXCOMPILEOPTS="-DESMFIO_DEBUG -DESMF_REGRID_DEBUG_WRITE_MESH"
+#module load mpi/mpich-x86_64
+#export ESMF_DIR=/home/ilcentro/Work/NASA/ALI/ESMF
+#export ESMF_COMM=mpich
+#export ESMF_PIO=internal
+#export ESMF_NETCDF=nc-config
+#export ESMF_NETCDF_INCLUDE=/usr/lib64/gfortran/modules
+#export ESMF_NETCDFF_INCLUDE=/usr/lib64/gfortran/modules
+#export ESMF_GDAL=true
+##export ESMF_GDAL_INCLUDE=/usr/include/gdal
+#export ESMF_GDAL_INCLUDE=/home/ilcentro/tools/gdal/include
+##export ESMF_SHAPEFILE_INCLUDE=/usr/include
+##export ESMF_GDAL_LIBPATH=/usr/lib64
+#export ESMF_GDAL_LIBPATH=/home/ilcentro/tools/gdal/lib64
+##export ESMF_SHAPEFILE_LIBS=-lshp
+#export ESMF_GDAL_LIBS=-lgdal
+#export ESMF_BOPT=g
+#export ESMF_CXXCOMPILEOPTS="-DESMFIO_DEBUG -DESMF_REGRID_DEBUG_WRITE_MESH"
+
+
+export ESMF_VERSION_STRING=8.7.0 beta snapshot
+export ESMF_VERSION_STRING_GIT=v8.7.0b14-50-gd55ca711a0
+#----------------------------------------------
+
+export ESMF_VERSION_MAJOR=8
+export ESMF_VERSION_MINOR=7
+export ESMF_VERSION_REVISION=0
+export ESMF_VERSION_PATCHLEVEL=0
+export ESMF_VERSION_PUBLIC='F'
+export ESMF_VERSION_BETASNAPSHOT='T'
+
+export ESMF_APPSDIR=/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/bin
+export ESMF_LIBSDIR=/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib
+export ESMF_ESMXDIR=/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/include/esmf/ESMX
+export ESMF_CMAKEDIR=/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/cmake
+
+export ESMF_F90COMPILER=mpiifort
+export ESMF_F90LINKER=mpiifort
+
+export ESMF_F90COMPILEOPTS=" -g -traceback -check arg_temp_created,bounds,format,output_conversion,stack -fPIC -debug minimal -assume realloc_lhs -m64 -mcmodel=small -pthread -threads  -qopenmp"
+export ESMF_F90COMPILEPATHS="-I/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/include/esmf -I/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/include/esmf -I/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/include/netcdf -I/usr/local/other/GEOSpyD/23.5.2-0_py3.11/2023-11-02/include/"
+export ESMF_F90COMPILECPPFLAGS="-DESMF_NO_INTEGER_1_BYTE -DESMF_NO_INTEGER_2_BYTE -DESMF_VERSION_STRING_GIT='v8.7.0b14-50-gd55ca711a0' -DESMF_MOAB=1 -DESMF_LAPACK=1 -DESMF_LAPACK_INTERNAL=1 -DESMF_NO_ACC_SOFTWARE_STACK=1 -DESMF_NETCDF=1 -DESMF_GDAL=1 -DESMF_YAMLCPP=1 -DESMF_YAML=1 -DESMF_PIO=1 -DESMF_NO_OPENACC -DESMF_BOPT_g -DESMF_TESTPERFORMANCE -DESMF_TESTCOMPTUNNEL -DSx86_64_small=1 -DESMF_OS_Linux=1 -DESMF_COMM=intelmpi -DESMF_DIR=/gpfsm/dnb34/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/src/esmf"
+export ESMF_F90COMPILEFREECPP=
+export ESMF_F90COMPILEFREENOCPP=
+export ESMF_F90COMPILEFIXCPP=
+export ESMF_F90COMPILEFIXNOCPP=
+
+export ESMF_F90LINKOPTS="  -m64 -mcmodel=small -pthread -threads -cxxlib -Wl,--no-as-needed  -qopenmp"
+export ESMF_F90LINKPATHS="-L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -L/usr/local/other/GEOSpyD/23.5.2-0_py3.11/2023-11-02/lib/ "
+export ESMF_F90ESMFLINKPATHS="-L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib"
+export ESMF_F90LINKRPATHS="-Wl,-rpath,/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -Wl,-rpath,/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib  -Wl,-rpath,/usr/local/other/GEOSpyD/23.5.2-0_py3.11/2023-11-02/lib/ "
+export ESMF_F90ESMFLINKRPATHS="-Wl,-rpath,/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib"
+export ESMF_F90LINKLIBS=" -lrt -ldl -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdff -lnetcdf -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdff -lnetcdf -lm -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdf -ljpeg -lmfhdf -ldf -ljpeg -lhdf5_hl -lhdf5 -lm -lbz2 -lxml2 -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lsz -ljpeg -lgpfs -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lcurl -lssl -lcrypto -lssl -lcrypto -lzstd -lbrotlidec -lz -lm -pthread -ldl -lm -ltirpc -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lcurl -lssl -lcrypto -lssl -lcrypto -lzstd -lbrotlidec -lz -lm -pthread -lgdal -lpioc"
+export ESMF_F90ESMFLINKLIBS="-lesmf  -lrt -ldl -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdff -lnetcdf -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdff -lnetcdf -lm -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdf -ljpeg -lmfhdf -ldf -ljpeg -lhdf5_hl -lhdf5 -lm -lbz2 -lxml2 -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lsz -ljpeg -lgpfs -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lcurl -lssl -lcrypto -lssl -lcrypto -lzstd -lbrotlidec -lz -lm -pthread -ldl -lm -ltirpc -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lcurl -lssl -lcrypto -lssl -lcrypto -lzstd -lbrotlidec -lz -lm -pthread -lgdal -lpioc"
+
+export ESMF_CXXCOMPILER=mpiicpc
+export ESMF_CXXLINKER=mpiicpc
+
+export ESMF_CXXCOMPILEOPTS="-DESMFIO_DEBUG -std=c++11 -g -traceback -Wcheck -fPIC -debug minimal -m64 -mcmodel=small -pthread  -qopenmp"
+export ESMF_CXXCOMPILEPATHS=" -I/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/include/esmf  -I/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/include/netcdf -I/usr/local/other/GEOSpyD/23.5.2-0_py3.11/2023-11-02/include/ -I/gpfsm/dnb34/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/src/esmf/src/prologue/yaml-cpp/include"
+export ESMF_CXXCOMPILECPPFLAGS="-DESMF_NO_INTEGER_1_BYTE -DESMF_NO_INTEGER_2_BYTE -DESMF_VERSION_STRING_GIT='v8.7.0b14-50-gd55ca711a0' -DESMF_MOAB=1 -DESMF_LAPACK=1 -DESMF_LAPACK_INTERNAL=1 -DESMF_NO_ACC_SOFTWARE_STACK=1 -DESMF_NETCDF=1 -DESMF_GDAL=1 -DESMF_YAMLCPP=1 -DESMF_YAML=1 -DESMF_PIO=1 -DESMF_NO_OPENACC -DESMF_BOPT_g -DESMF_TESTPERFORMANCE -DESMF_TESTCOMPTUNNEL -DSx86_64_small=1 -DESMF_OS_Linux=1 -DESMF_COMM=intelmpi -DESMF_DIR=/gpfsm/dnb34/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/src/esmf -D__SDIR__='' -DESMF_CXXSTD=11"
+
+export ESMF_CXXLINKOPTS="  -m64 -mcmodel=small -pthread -Wl,--no-as-needed  -qopenmp"
+export ESMF_CXXLINKPATHS="-L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -L/usr/local/other/GEOSpyD/23.5.2-0_py3.11/2023-11-02/lib/ -L/gpfsm/dulocal15/sles15/intel/oneapi/2021/compiler/2022.1.0/linux/bin/intel64/../../compiler/lib/intel64_lin/"
+export ESMF_CXXESMFLINKPATHS="-L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib"
+export ESMF_CXXLINKRPATHS="-Wl,-rpath,/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -Wl,-rpath,/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib  -Wl,-rpath,/usr/local/other/GEOSpyD/23.5.2-0_py3.11/2023-11-02/lib/  -Wl,-rpath,/gpfsm/dulocal15/sles15/intel/oneapi/2021/compiler/2022.1.0/linux/bin/intel64/../../compiler/lib/intel64_lin/"
+export ESMF_CXXESMFLINKRPATHS="-Wl,-rpath,/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib"
+export ESMF_CXXLINKLIBS=" -ldl -lrt -lpthread -lifport -lifcoremt -limf -lsvml -lm -lipgo -liomp5 -lintlc -lpthread -lsvml -ldl -lgcc -lgcc_s -lirc_s -ldl -lrt -ldl -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdff -lnetcdf -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdff -lnetcdf -lm -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdf -ljpeg -lmfhdf -ldf -ljpeg -lhdf5_hl -lhdf5 -lm -lbz2 -lxml2 -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lsz -ljpeg -lgpfs -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lcurl -lssl -lcrypto -lssl -lcrypto -lzstd -lbrotlidec -lz -lm -pthread -ldl -lm -ltirpc -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lcurl -lssl -lcrypto -lssl -lcrypto -lzstd -lbrotlidec -lz -lm -pthread -lgdal -lpioc"
+export ESMF_CXXESMFLINKLIBS="-lesmf  -ldl -lrt -lpthread -lifport -lifcoremt -limf -lsvml -lm -lipgo -liomp5 -lintlc -lpthread -lsvml -ldl -lgcc -lgcc_s -lirc_s -ldl -lrt -ldl -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdff -lnetcdf -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdff -lnetcdf -lm -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdf -ljpeg -lmfhdf -ldf -ljpeg -lhdf5_hl -lhdf5 -lm -lbz2 -lxml2 -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lsz -ljpeg -lgpfs -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lcurl -lssl -lcrypto -lssl -lcrypto -lzstd -lbrotlidec -lz -lm -pthread -ldl -lm -ltirpc -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lcurl -lssl -lcrypto -lssl -lcrypto -lzstd -lbrotlidec -lz -lm -pthread -lgdal -lpioc"
+
+export ESMF_CCOMPILER=mpiicc
+export ESMF_CLINKER=mpiicc
+
+export ESMF_CCOMPILEOPTS="-std=c99 -g -fPIC -debug minimal  -qopenmp"
+export ESMF_CCOMPILEPATHS=" -I/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/include/esmf  "
+export ESMF_CCOMPILECPPFLAGS="-DESMF_NO_INTEGER_1_BYTE -DESMF_NO_INTEGER_2_BYTE -DESMF_VERSION_STRING_GIT='v8.7.0b14-50-gd55ca711a0' -DESMF_MOAB=1 -DESMF_LAPACK=1 -DESMF_LAPACK_INTERNAL=1 -DESMF_NO_ACC_SOFTWARE_STACK=1 -DESMF_NETCDF=1 -DESMF_GDAL=1 -DESMF_YAMLCPP=1 -DESMF_YAML=1 -DESMF_PIO=1 -DESMF_NO_OPENACC -DESMF_BOPT_g -DESMF_TESTPERFORMANCE -DESMF_TESTCOMPTUNNEL -DSx86_64_small=1 -DESMF_OS_Linux=1 -DESMF_COMM=intelmpi -DESMF_DIR=/gpfsm/dnb34/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/src/esmf -D__SDIR__='' -DESMF_CSTD=99"
+
+export ESMF_CLINKOPTS="   -qopenmp"
+export ESMF_CLINKPATHS="-L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -L/usr/local/other/GEOSpyD/23.5.2-0_py3.11/2023-11-02/lib/ -L/gpfsm/dulocal15/sles15/intel/oneapi/2021/compiler/2022.1.0/linux/bin/intel64/../../compiler/lib/intel64_lin/ -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -L/usr/local/other/GEOSpyD/23.5.2-0_py3.11/2023-11-02/lib/ "
+export ESMF_CESMFLINKPATHS="-L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib"
+export ESMF_CLINKRPATHS="-Wl,-rpath,/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -Wl,-rpath,/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -Wl,-rpath,/usr/local/other/GEOSpyD/23.5.2-0_py3.11/2023-11-02/lib/ -Wl,-rpath,/gpfsm/dulocal15/sles15/intel/oneapi/2021/compiler/2022.1.0/linux/bin/intel64/../../compiler/lib/intel64_lin/ -Wl,-rpath,/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -Wl,-rpath,/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -Wl,-rpath,/usr/local/other/GEOSpyD/23.5.2-0_py3.11/2023-11-02/lib/"
+export ESMF_CESMFLINKRPATHS="-Wl,-rpath,/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib"
+export ESMF_CLINKLIBS=" -ldl -lrt -lpthread -lifport -lifcoremt -limf -lsvml -lm -lipgo -liomp5 -lintlc -lpthread -lsvml -ldl -lgcc -lgcc_s -lirc_s -ldl -lrt -ldl -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdff -lnetcdf -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdff -lnetcdf -lm -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdf -ljpeg -lmfhdf -ldf -ljpeg -lhdf5_hl -lhdf5 -lm -lbz2 -lxml2 -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lsz -ljpeg -lgpfs -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lcurl -lssl -lcrypto -lssl -lcrypto -lzstd -lbrotlidec -lz -lm -pthread -ldl -lm -ltirpc -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lcurl -lssl -lcrypto -lssl -lcrypto -lzstd -lbrotlidec -lz -lm -pthread -lgdal -lpioc  -lrt -ldl -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdff -lnetcdf -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdff -lnetcdf -lm -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdf -ljpeg -lmfhdf -ldf -ljpeg -lhdf5_hl -lhdf5 -lm -lbz2 -lxml2 -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lsz -ljpeg -lgpfs -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lcurl -lssl -lcrypto -lssl -lcrypto -lzstd -lbrotlidec -lz -lm -pthread -ldl -lm -ltirpc -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lcurl -lssl -lcrypto -lssl -lcrypto -lzstd -lbrotlidec -lz -lm -pthread -lgdal -lpioc"
+export ESMF_CESMFLINKLIBS="-lesmf  -ldl -lrt -lpthread -lifport -lifcoremt -limf -lsvml -lm -lipgo -liomp5 -lintlc -lpthread -lsvml -ldl -lgcc -lgcc_s -lirc_s -ldl -lrt -ldl -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdff -lnetcdf -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdff -lnetcdf -lm -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdf -ljpeg -lmfhdf -ldf -ljpeg -lhdf5_hl -lhdf5 -lm -lbz2 -lxml2 -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lsz -ljpeg -lgpfs -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lcurl -lssl -lcrypto -lssl -lcrypto -lzstd -lbrotlidec -lz -lm -pthread -ldl -lm -ltirpc -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lcurl -lssl -lcrypto -lssl -lcrypto -lzstd -lbrotlidec -lz -lm -pthread -lgdal -lpioc  -lrt -ldl -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdff -lnetcdf -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdff -lnetcdf -lm -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdf -ljpeg -lmfhdf -ldf -ljpeg -lhdf5_hl -lhdf5 -lm -lbz2 -lxml2 -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lsz -ljpeg -lgpfs -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lcurl -lssl -lcrypto -lssl -lcrypto -lzstd -lbrotlidec -lz -lm -pthread -ldl -lm -ltirpc -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lcurl -lssl -lcrypto -lssl -lcrypto -lzstd -lbrotlidec -lz -lm -pthread -lgdal -lpioc"
+
+export ESMF_SO_F90COMPILEOPTS="-fPIC -debug minimal"
+export ESMF_SO_F90LINKOPTS="-shared"
+export ESMF_SO_F90LINKOPTSEXE="-Wl,-export-dynamic"
+export ESMF_SO_CXXCOMPILEOPTS="-fPIC -debug minimal"
+export ESMF_SO_CXXLINKOPTS="-shared"
+export ESMF_SO_CXXLINKOPTSEXE="-Wl,-export-dynamic"
+export ESMF_SO_CCOMPILEOPTS="-fPIC -debug minimal"
+export ESMF_SO_CLINKOPTS="-shared"
+export ESMF_SO_CLINKOPTSEXE="-Wl,-export-dynamic"
+
+export ESMF_OPENMP_F90COMPILEOPTS=" -qopenmp"
+export ESMF_OPENMP_F90LINKOPTS=" -qopenmp"
+export ESMF_OPENMP_CXXCOMPILEOPTS=" -qopenmp"
+export ESMF_OPENMP_CXXLINKOPTS=" -qopenmp"
+
+export ESMF_OPENACC_F90COMPILEOPTS=
+export ESMF_OPENACC_F90LINKOPTS=
+export ESMF_OPENACC_CXXCOMPILEOPTS=
+export ESMF_OPENACC_CXXLINKOPTS=
+
+# ESMF Tracing compile/link options
+export ESMF_TRACE_LDPRELOAD=/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib/libesmftrace_preload.so
+export ESMF_TRACE_STATICLINKOPTS="-static -Wl,--wrap=c_esmftrace_notify_wrappers -Wl,--wrap=c_esmftrace_isinitialized -Wl,--wrap=write -Wl,--wrap=writev -Wl,--wrap=pwrite -Wl,--wrap=read -Wl,--wrap=open -Wl,--wrap=MPI_Allgather -Wl,--wrap=MPI_Allgatherv -Wl,--wrap=MPI_Allreduce -Wl,--wrap=MPI_Alltoall -Wl,--wrap=MPI_Alltoallv -Wl,--wrap=MPI_Alltoallw -Wl,--wrap=MPI_Barrier -Wl,--wrap=MPI_Bcast -Wl,--wrap=MPI_Bsend -Wl,--wrap=MPI_Gather -Wl,--wrap=MPI_Gatherv -Wl,--wrap=MPI_Iprobe -Wl,--wrap=MPI_Irecv -Wl,--wrap=MPI_Irsend -Wl,--wrap=MPI_Isend -Wl,--wrap=MPI_Issend -Wl,--wrap=MPI_Probe -Wl,--wrap=MPI_Recv -Wl,--wrap=MPI_Reduce -Wl,--wrap=MPI_Rsend -Wl,--wrap=MPI_Scan -Wl,--wrap=MPI_Scatter -Wl,--wrap=MPI_Scatterv -Wl,--wrap=MPI_Send -Wl,--wrap=MPI_Sendrecv -Wl,--wrap=MPI_Test -Wl,--wrap=MPI_Testall -Wl,--wrap=MPI_Testany -Wl,--wrap=MPI_Testsome -Wl,--wrap=MPI_Wait -Wl,--wrap=MPI_Waitall -Wl,--wrap=MPI_Waitany -Wl,--wrap=MPI_Waitsome -Wl,--wrap=mpi_allgather_ -Wl,--wrap=mpi_allgather__ -Wl,--wrap=mpi_allgatherv_ -Wl,--wrap=mpi_allgatherv__ -Wl,--wrap=mpi_allreduce_ -Wl,--wrap=mpi_allreduce__ -Wl,--wrap=mpi_alltoall_ -Wl,--wrap=mpi_alltoall__ -Wl,--wrap=mpi_alltoallv_ -Wl,--wrap=mpi_alltoallv__ -Wl,--wrap=mpi_alltoallw_ -Wl,--wrap=mpi_alltoallw__ -Wl,--wrap=mpi_barrier_ -Wl,--wrap=mpi_barrier__ -Wl,--wrap=mpi_bcast_ -Wl,--wrap=mpi_bcast__ -Wl,--wrap=mpi_bsend_ -Wl,--wrap=mpi_bsend__ -Wl,--wrap=mpi_exscan_ -Wl,--wrap=mpi_exscan__ -Wl,--wrap=mpi_gather_ -Wl,--wrap=mpi_gather__ -Wl,--wrap=mpi_gatherv_ -Wl,--wrap=mpi_gatherv__ -Wl,--wrap=mpi_iprobe_ -Wl,--wrap=mpi_iprobe__ -Wl,--wrap=mpi_irecv_ -Wl,--wrap=mpi_irecv__ -Wl,--wrap=mpi_irsend_ -Wl,--wrap=mpi_irsend__ -Wl,--wrap=mpi_isend_ -Wl,--wrap=mpi_isend__ -Wl,--wrap=mpi_issend_ -Wl,--wrap=mpi_issend__ -Wl,--wrap=mpi_probe_ -Wl,--wrap=mpi_probe__ -Wl,--wrap=mpi_recv_ -Wl,--wrap=mpi_recv__ -Wl,--wrap=mpi_reduce_ -Wl,--wrap=mpi_reduce__ -Wl,--wrap=mpi_reduce_scatter_ -Wl,--wrap=mpi_reduce_scatter__ -Wl,--wrap=mpi_rsend_ -Wl,--wrap=mpi_rsend__ -Wl,--wrap=mpi_scatter_ -Wl,--wrap=mpi_scatter__ -Wl,--wrap=mpi_scatterv_ -Wl,--wrap=mpi_scatterv__ -Wl,--wrap=mpi_scan_ -Wl,--wrap=mpi_scan__ -Wl,--wrap=mpi_send_ -Wl,--wrap=mpi_send__ -Wl,--wrap=mpi_sendrecv_ -Wl,--wrap=mpi_sendrecv__ -Wl,--wrap=mpi_test_ -Wl,--wrap=mpi_test__ -Wl,--wrap=mpi_testall_ -Wl,--wrap=mpi_testall__ -Wl,--wrap=mpi_testany_ -Wl,--wrap=mpi_testany__ -Wl,--wrap=mpi_testsome_ -Wl,--wrap=mpi_testsome__ -Wl,--wrap=mpi_wait_ -Wl,--wrap=mpi_wait__ -Wl,--wrap=mpi_waitall_ -Wl,--wrap=mpi_waitall__ -Wl,--wrap=mpi_waitany_ -Wl,--wrap=mpi_waitany__"
+export ESMF_TRACE_STATICLINKLIBS="-lesmftrace_static"
+export ESMF_TRACE_DYNAMICLINKLIBS="-lesmftrace_preload"
+export ESMF_F90ESMFPRELOADLINKLIBS="-lesmf -lesmftrace_preload  -lrt -ldl -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdff -lnetcdf -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdff -lnetcdf -lm -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lnetcdf -ljpeg -lmfhdf -ldf -ljpeg -lhdf5_hl -lhdf5 -lm -lbz2 -lxml2 -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lsz -ljpeg -lgpfs -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lcurl -lssl -lcrypto -lssl -lcrypto -lzstd -lbrotlidec -lz -lm -pthread -ldl -lm -ltirpc -L/home/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/x86_64-pc-linux-gnu/ifort_2021.6.0-intelmpi_2021.13/Linux/lib -lcurl -lssl -lcrypto -lssl -lcrypto -lzstd -lbrotlidec -lz -lm -pthread -lgdal -lpioc"
+
+export ESMF_INTERNAL_DIR=/gpfsm/dnb34/mslong1/BASELIBS/ESMA-Baselibs-7.24.0-gis-milan/src/esmf
+export ESMF_INTERNAL_MPIRUN="mpirun "

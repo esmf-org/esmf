@@ -534,7 +534,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          ESMF_CONTEXT, rcToReturn=rc)) return
 
    ! Add key to structure
-   write(*,*) '<<>> adding key: ', trim(keyName),localkeytypekind,keytypekind
+!   write(*,*) '<<>> adding key: ', trim(keyName),localkeytypekind,keytypekind
    call ESMF_LocStreamAddKeyArray(locstream, keyName, keyArray=array, destroyKey=.true., &
                keyUnits=keyUnits, keyLongName=keyLongName, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
@@ -1815,7 +1815,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            currMin=deBlockList(1,2,i)+1
       enddo
 
-      !! Create DistGrid
+      !! Create DistGrid                                                                                                                                                                                
+      write(*,*) '<<>> DistGridCreate: ', minIndex, maxIndex
       distgrid=ESMF_DistGridCreate(minIndex=minIndex, &
                                                       maxIndex=maxIndex, &
                                                       deBlockList=deBlockList, &
@@ -2407,7 +2408,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call c_ESMC_GDAL_ShpInquire(trim(filename)//c_null_char, 1, petNo, petCnt, localpoints, totaldims, featureIDs, numFeatures, localrc)
        endif
        coordSys = ESMF_COORDSYS_SPH_RAD ! Fixed for now!
-    endif             
+       !if (localpoints .ge. 0)
+       totalpoints = numFeatures !localpoints
+       print *, "ShpInquire: ", localpoints, numFeatures, petNo, petCnt
+    endif
 
     localcount = totalpoints/PetCnt
     remain = totalpoints - (localcount*PetCnt)
@@ -2495,7 +2499,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
           localcount = localpoints
-          print *, "Got coords on pet ", petNo
+          print *, "Got coords on pet ", petNo, localcount, localpoints, coordx, coordy
+          
        endif
     endif
     ! create Location Stream
@@ -3194,7 +3199,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! get the pointer to the locstream
     lstypep => locstream%lstypep
 
-    write(*,*) '<<>> keyName: ', keyName, keyIndex
+!    write(*,*) '<<>> keyName: ', keyName, keyIndex
     ! find the index of the key
     keyIndex=0
     do i=1,lstypep%keyCount

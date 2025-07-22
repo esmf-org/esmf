@@ -101,14 +101,19 @@ void FTN_X(c_esmc_gdal_shpinquire)(
   std::vector<int> feature_ids_vec;
   get_ids_divided_evenly_across_pets(nFeatures, *local_pet, *pet_count, feature_ids_vec);
   
-//  printf("--- info: %d\n", feature_ids_vec.size());
+  printf("--- info: %d\n", feature_ids_vec.size());
+  for (int id : feature_ids_vec) {
+    std::cout << "FID " << id << " ";
+  }
+  std::cout << std::endl;
 
   // Assign vector info to pointer
   *num_features = 0;
+  *localpoints = 0;
   if (!feature_ids_vec.empty()) {
-    *num_features=feature_ids_vec.size(); // local to this pet
+    *num_features=nFeatures; // local to this pet
     if (*toggle == 1) {
-      for (int i=0; i<*num_features; i++) {
+      for (int i=0; i<feature_ids_vec.size(); i++) {
 	feature_IDs[i] = globalFeature_IDs[feature_ids_vec[i]-1];
       }
       // Get the total points in features on local PET (I don't wanna do this here, but I will and then will add it to things to fix)
@@ -180,6 +185,7 @@ void FTN_X(c_esmc_gdal_shpgetcoords)(
   int *elem_IDs;
 
   if (*numFeatures == 0) {
+    *localcount = 0;
     return;
   }
 
@@ -188,7 +194,7 @@ void FTN_X(c_esmc_gdal_shpgetcoords)(
 					   elemConn,elemCoords,numElemConn,
 					   &totNumElemConn, localcount, &num_elems);
 
-  printf("<<>> Pet/localcounts: %d/%d\n", *local_pet, *localcount);
+  //  printf("<<>> Pet/localcounts: %d/%d\n", *local_pet, *localcount);
 
   int j = 0;
   printf("NOTE: ASSUMING DEG. CONVERTING TO RADIANS!!!\n");

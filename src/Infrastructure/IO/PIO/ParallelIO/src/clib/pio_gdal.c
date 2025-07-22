@@ -202,7 +202,10 @@ GDALc_inq_fieldid(int fileid, const char *name, int *fieldidp)
         if ((mpierr = MPI_Bcast(fieldidp, 1, MPI_INT, ios->ioroot, ios->my_comm)))
             check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
 
-    return fieldidp;
+    if (*fieldidp != 0)
+      return PIO_NOERR;
+    else
+      return -1;    
 }
 
 int
