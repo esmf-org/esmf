@@ -265,6 +265,7 @@ void ESMCI_GDAL_process_shapefile_distributed(
 
     // Cleanup
     OGR_F_Destroy( hFeature );
+    
   }
 
 //  printf("--- wtf %d %d\n", localpoints,nodeIDs.size());

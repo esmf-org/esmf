@@ -102,10 +102,10 @@ void FTN_X(c_esmc_gdal_shpinquire)(
   get_ids_divided_evenly_across_pets(nFeatures, *local_pet, *pet_count, feature_ids_vec);
   
   printf("--- info: %d\n", feature_ids_vec.size());
-  for (int id : feature_ids_vec) {
-    std::cout << "FID " << id << " ";
-  }
-  std::cout << std::endl;
+//  for (int id : feature_ids_vec) {
+//    std::cout << "FID " << id << " ";
+//  }
+//  std::cout << std::endl;
 
   // Assign vector info to pointer
   *num_features = 0;
@@ -118,7 +118,7 @@ void FTN_X(c_esmc_gdal_shpinquire)(
       }
       // Get the total points in features on local PET (I don't wanna do this here, but I will and then will add it to things to fix)
       *localpoints = 0;
-      for (int i=0;i<*num_features;i++) {
+      for (int i=0;i<feature_ids_vec.size();i++) {
 	OGRFeatureH hFeature = OGR_L_GetFeature(hLayer,feature_IDs[i]-1);
 	OGRGeometryH hGeom = OGR_F_GetGeometryRef(hFeature);
 	*localpoints += OGR_G_GetPointCount(hGeom);
@@ -160,7 +160,7 @@ void FTN_X(c_esmc_gdal_shpgetcoords)(
   OGRDataSourceH hDS;
   if (access(filename, F_OK) == 0) {
     OGRRegisterAll(); // register all the drivers
-    hDS = OGROpen( filename, FALSE, NULL );
+    hDS = GDALOpenEx( filename, GDAL_OF_VECTOR, NULL, NULL, NULL ); //OGROpen( filename, FALSE, NULL );
     if( hDS == NULL )
       {
 	printf( "Open failed on pet %d: %s, %d\n", *local_pet, CPLGetLastErrorMsg(), CPLGetLastErrorNo() );
@@ -168,7 +168,9 @@ void FTN_X(c_esmc_gdal_shpgetcoords)(
     } else if (*local_pet == 0) {
     printf("Cannot access shapefile %s\n",filename);
     return;
-  }
+    } else
+    printf("hDS open\n");
+//  }
   
   // GET DA DEETS!
   int num_nodes;
@@ -189,24 +191,31 @@ void FTN_X(c_esmc_gdal_shpgetcoords)(
     return;
   }
 
+  printf("localcount before: %d\n", *localcount);
   ESMCI_GDAL_process_shapefile_distributed(hDS,numFeatures,feature_IDs,globalFeature_IDs,
 					   nodeCoords,nodeIDs,elemIDs,
 					   elemConn,elemCoords,numElemConn,
 					   &totNumElemConn, localcount, &num_elems);
 
-  //  printf("<<>> Pet/localcounts: %d/%d\n", *local_pet, *localcount);
-
+//  //  printf("<<>> Pet/localcounts: %d/%d\n", *local_pet, *localcount);
+//
   int j = 0;
   printf("NOTE: ASSUMING DEG. CONVERTING TO RADIANS!!!\n");
   for (int i=0;i<*localcount;i++) {
     coordX[i]=nodeCoords[j]*ESMC_CoordSys_Deg2Rad;
     coordY[i]=nodeCoords[j+1]*ESMC_CoordSys_Deg2Rad;
     j+=2;
-//    printf("coord check: ind %d X %f Y %f\n",i,coordX[i],coordY[i]);
+//    printf("coord check: ind %d X %f Y %f (%f %f)\n",i,coordX[i],coordY[i],nodeCoords[j],nodeCoords[j+1]);
   }
 
+  if( hDS == NULL ) 
+    printf("hDS closed\n");
+  else
+    printf("hDS open\n");
+
   // Cleanup
-  GDALClose( hDS );
+  if( hDS != NULL ) GDALClose( hDS );
+  printf("hDS close ok\n");
 #endif
 
   // return success

@@ -62,12 +62,11 @@ program ESMF_IO_LocStreamRegrid
   integer :: dims(ESMF_MAXDIM)
   integer :: ndims
 
-!  character(len=*), parameter :: shapefileName = "data/esmf_3x3_multimesh.shp"
-!  character(len=*), parameter :: shapefileName = "data/esmf_3x3_mesh.shp"
-!  character(len=*), parameter :: shapefileName = "data/cb_2018_us_region_20m.shp"
-  character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/CROSSWALK/unzipped/oilandgas_18_2024_point_DEG.shp" 
-!  character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/CROSSWALK/unzipped/combined_oilandgas_2024_points_DEG.shp" 
-!  character(len=*), parameter :: shapefileName = "data/test3_simple.shp"
+!  character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/CROSSWALK/unzipped/oilandgas_18_2024_point_DEG.shp" 
+!  character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/CROSSWALK/unzipped/oilandgas_02_2024_point_DEG.shp" 
+  character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/CROSSWALK/unzipped/combined_oilandgas_2024_points_DEG.shp" 
+!  character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/CROSSWALK/unzipped/oag_2X_DEG.shp"
+!  character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/CROSSWALK/unzipped/oag_spread_DEG.shp"
 
   ! NetCDF stuff
   integer :: ncid, xdimid, ydimid, xvarid, yvarid, varid, dimids

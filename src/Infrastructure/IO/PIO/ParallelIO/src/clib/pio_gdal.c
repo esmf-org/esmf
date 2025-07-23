@@ -291,12 +291,12 @@ GDALc_openfile(int iosysid, int *fileIDp, GDALDatasetH *hDSp,int *iotype, const 
     }
 
     /* If this is an IO task, then call the netCDF function. */
-    if (ios->ioproc)
+    if (1) //ios->ioproc)
     {
         switch (file->iotype)
         {
         case PIO_IOTYPE_GDAL:
-            if (ios->io_rank == 0)
+            if (1)//ios->io_rank == 0)
             {
 	      *hDSp = OGROpen( filename, mode, NULL );
 	      if( hDSp != NULL )
@@ -723,10 +723,10 @@ pio_read_darray_shp(file_desc_t *file, io_desc_t *iodesc, int vid,
                         ierr = GDALc_shp_get_int_field(file->pio_ncid);
                         break;
                     case PIO_FLOAT:
-                        ierr = GDALc_shp_get_float_field(file->pio_ncid, vid, start, count, (float *)bufptr);
+                        ierr = GDALc_shp_get_float_field(file->pio_ncid, vid, start, count, (float *)bufptr, ios->io_rank);
                         break;
                     case PIO_DOUBLE:
-                        ierr = GDALc_shp_get_double_field(file->pio_ncid, vid, start, count, (double *)bufptr);
+                        ierr = GDALc_shp_get_double_field(file->pio_ncid, vid, start, count, (double *)bufptr, ios->io_rank);
                         break;
                     default:
                         return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);
@@ -766,7 +766,7 @@ GDALc_shp_get_int_field(int fileid)
 }
 int
 GDALc_shp_get_double_field(int fileid, int varid, const size_t *startp,
-                           const size_t *countp, double *ip)
+                           const size_t *countp, double *ip, int rank)
 {
   OGRFeatureH hF;
   file_desc_t *file;         /* Pointer to file information. */
@@ -786,12 +786,15 @@ GDALc_shp_get_double_field(int fileid, int varid, const size_t *startp,
     
     hF     = OGR_L_GetFeature(hL,i);
     ip[i] = OGR_F_GetFieldAsDouble(hF,varid);
+    PLOG((3,"gdal get_double %f", ip[i]));
   }
 
   return PIO_NOERR;
 }
+
+int
 GDALc_shp_get_float_field(int fileid, int varid, const size_t *startp,
-                           const size_t *countp, float *ip)
+                           const size_t *countp, float *ip, int rank)
 {
   OGRFeatureH hF;
   file_desc_t *file;         /* Pointer to file information. */
@@ -811,11 +814,14 @@ GDALc_shp_get_float_field(int fileid, int varid, const size_t *startp,
     
     hF     = OGR_L_GetFeature(hL,i);
     ip[i] = (float)OGR_F_GetFieldAsDouble(hF,varid);
+    PLOG((3,"gdal get_float %f", ip[i]));
     //printf("<<>> ip[%d]=%f\n",i,ip[i]);
   }
 
   return PIO_NOERR;
 }
+
+int
 GDALc_shp_write_float_field(int fileid, int varid, const size_t *startp,
                            const size_t *countp, float *ip)
 {
@@ -1011,6 +1017,225 @@ GDALc_def_field(int ncid, const char *name, nc_type xtype, int ndims, int *varid
 
     return PIO_NOERR;
 }
+/**
+ * Read decomposed features from a shapefile using GDAL.
+ *
+ * @param fileid The PIO file ID.
+ * @param varid Variable ID (not used here but included for consistency).
+ * @param ddesc Decomposition descriptor (defines the data layout per rank).
+ * @param ip Pointer to the buffer to fill (should be of size ddesc->ndof).
+ * @returns PIO_NOERR on success or error code.
+ */
+int pio_gdal_read_features_par(int fileid, int varid, io_desc_t *ddesc, float *ip)
+{
+    file_desc_t *file;
+    int ierr;
+
+    PLOG((3, "in read features, fileid is %d, io size is %d", fileid, sizeof(ip)));
+    // Lookup the file descriptor
+    if ((ierr = pio_get_file(fileid, &file)))
+        return pio_err(NULL, NULL, ierr, __FILE__, __LINE__);
+
+    // Ensure GDAL dataset is open
+    if (file->hDS == NULL)
+        return pio_err(NULL, NULL, PIO_EINVAL, __FILE__, __LINE__);
+
+    // Get the first layer (assumes 1 layer per shapefile)
+    OGRLayerH hLayer = OGR_DS_GetLayer(file->hDS, 0);
+    if (hLayer == NULL)
+        return pio_err(NULL, NULL, PIO_EINVAL, __FILE__, __LINE__);
+
+    // Loop over the decomposition indices for this rank
+    for (int i = 0; i < ddesc->ndof; i++)
+    {
+        // Global feature index assigned to this position
+        PIO_Offset gindex = ddesc->sindex[i];
+
+        OGRFeatureH hFeature = OGR_L_GetFeature(hLayer, gindex);
+        if (!hFeature)
+            return pio_err(NULL, NULL, PIO_EINVAL, __FILE__, __LINE__);
+
+        // Extract first field value as float
+        OGRFieldDefnH hField = OGR_F_GetFieldDefnRef(hFeature, 0);
+        if (hField && OGR_Fld_GetType(hField) == OFTReal)
+            ip[i] = (float)OGR_F_GetFieldAsDouble(hFeature, 0);
+        else
+            ip[i] = 0.0;  // Default fallback
+
+        OGR_F_Destroy(hFeature);
+    }
+
+    return PIO_NOERR;
+}
+
+int
+pio_read_darray_shp_par(file_desc_t *file, io_desc_t *iodesc, int vid, void *iobuf)
+{
+    iosystem_desc_t *ios;  /* Pointer to io system information. */
+    var_desc_t *vdesc;     /* Information about the variable. */
+    int ndims;             /* Number of dims in decomposition. */
+    int fndims;            /* Number of dims for this var in file. */
+    int ierr;              /* Return code from netCDF functions. */
+#ifdef USE_VARD_READ
+    MPI_Offset gdim0;
+    gdim0 = 0;
+#endif
+
+    /* Check inputs. */
+    pioassert(file && file->iosystem && iodesc && vid <= PIO_MAX_VARS, "invalid input",
+              __FILE__, __LINE__);
+
+    /* Get the IO system info. */
+    ios = file->iosystem;
+    PLOG((3, "pio_read_darray_shp_par ios->ioproc %d", ios->ioproc));
+
+#ifdef TIMING
+    /* Start timer if desired. */
+    if ((ierr = pio_start_timer("PIO:read_darray_shp_par")))
+        return pio_err(ios, NULL, ierr, __FILE__, __LINE__);
+#endif /* TIMING */
+
+    /* Get the variable info. */
+    if ((ierr = get_var_desc(vid, &file->varlist, &vdesc)))
+        return pio_err(NULL, file, ierr, __FILE__, __LINE__);
+
+    /* Get the number of dimensions in the decomposition. */
+    ndims = iodesc->ndims;
+
+    /* Get the number of dims for this var in the file. */
+    fndims = vdesc->ndims;
+    PLOG((4, "fndims %d ndims %d", fndims, ndims));
+
+    /* ??? */
+#if USE_VARD_READ
+    if(!ios->async || !ios->ioproc)
+        ierr = get_gdim0(file, iodesc, vid, fndims, &gdim0);
+#endif
+
+    /* IO procs will read the data. */
+    if (ios->ioproc)
+    {
+        io_region *region;
+        size_t start[fndims];
+        size_t count[fndims];
+        void *bufptr;
+#ifdef _PNETCDF
+        size_t tmp_bufsize = 1;
+        int rrlen = 0;
+        PIO_Offset *startlist[iodesc->maxregions];
+        PIO_Offset *countlist[iodesc->maxregions];
+#endif
+
+        /* buffer is incremented by byte and loffset is in terms of
+           the iodessc->mpitype so we need to multiply by the size of
+           the mpitype. */
+        region = iodesc->firstregion;
+
+        /* There are different numbers of dims in the decomposition
+         * and the file. */
+        if (fndims > ndims)
+        {
+            /* If the user did not call setframe, use a default frame
+             * of 0. This is required for backward compatibility. */
+            if (vdesc->record < 0)
+                vdesc->record = 0;
+        }
+
+        /* For each regions, read the data. */
+        for (int regioncnt = 0; regioncnt < iodesc->maxregions; regioncnt++)
+        {
+            if (region == NULL || iodesc->llen == 0)
+            {
+                /* No data for this region. */
+                for (int i = 0; i < fndims; i++)
+                {
+                    start[i] = 0;
+                    count[i] = 0;
+                }
+                bufptr = NULL;
+            }
+            else
+            {
+                /* Get a pointer where we should put the data we read. */
+                if (regioncnt == 0 || region == NULL)
+                    bufptr = iobuf;
+                else
+                    bufptr=(void *)((char *)iobuf + iodesc->mpitype_size * region->loffset);
+
+                PLOG((2, "iodesc->llen - region->loffset %d, iodesc->llen %d, region->loffset  %d vdesc->record %d",
+                      iodesc->llen - region->loffset, iodesc->llen, region->loffset, vdesc->record));
+
+                /* Get the start/count arrays. */
+                if (vdesc->record >= 0 && fndims > 1)
+                {
+                    /* This is a record var. The unlimited dimension
+                     * (0) is handled specially. */
+                    start[0] = vdesc->record;
+                    for (int i = 1; i < fndims; i++)
+                    {
+                        start[i] = region->start[i-1];
+                        count[i] = region->count[i-1];
+                    }
+
+                    /* Read one record. */
+                    if (count[1] > 0)
+                        count[0] = 1;
+                }
+                else
+                {
+                    /* Non-time dependent array */
+                    for (int i = 0; i < fndims; i++)
+                    {
+                        start[i] = region->start[i];
+                        count[i] = region->count[i];
+                    }
+                }
+            }
+
+#ifdef PIO_ENABLE_LOGGING
+            for (int i = 1; i < ndims; i++)
+                PLOG((3, "start[%d] %d count[%d] %d", i, start[i], i, count[i]));
+	        PLOG((3, "piotype: %d (%d, %d)", iodesc->piotype, PIO_FLOAT, PIO_DOUBLE));
+#endif /* LOGGING */
+            /* Do the read. */
+                switch (iodesc->piotype)
+                {
+		case PIO_BYTE:
+		  return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);
+		case PIO_CHAR:
+		  return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);
+		case PIO_SHORT:
+		  return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);
+		case PIO_INT:
+		  ierr = GDALc_shp_get_int_field(file->pio_ncid);
+		  break;
+		case PIO_FLOAT:
+		  ierr = GDALc_shp_get_float_field(file->pio_ncid, vid, start, count, (float *)bufptr, ios->io_rank);
+		  break;
+		case PIO_DOUBLE:
+		  ierr = GDALc_shp_get_double_field(file->pio_ncid, vid, start, count, (double *)bufptr, ios->io_rank);
+		  break;
+		default:
+		  return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);
+                }
+            /* Check return code. */
+            if (ierr)
+                return check_netcdf(file, ierr, __FILE__,__LINE__);
+
+            /* Move to next region. */
+            if (region)
+                region = region->next;
+        } /* next regioncnt */
+    }
+
+#ifdef TIMING
+    if ((ierr = pio_stop_timer("PIO:read_darray_shp_par")))
+        return pio_err(ios, NULL, ierr, __FILE__, __LINE__);
+#endif /* TIMING */
+
+    return PIO_NOERR;
+}
+
 /**
  * @}
  */

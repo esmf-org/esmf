@@ -1816,7 +1816,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       enddo
 
       !! Create DistGrid                                                                                                                                                                                
-      write(*,*) '<<>> DistGridCreate: ', minIndex, maxIndex
+      write(*,*) '<<>> DistGridCreate: ', minIndex, maxIndex, deBlockList
       distgrid=ESMF_DistGridCreate(minIndex=minIndex, &
                                                       maxIndex=maxIndex, &
                                                       deBlockList=deBlockList, &
@@ -2493,13 +2493,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           ! localpoints is the number of points associated with this pet's features
           allocate(coordX(localpoints),coordY(localpoints))
-
+          print *, 'slocal: ', localpoints
           ! Here we get the coordinates from the features specified by numFeatures and featureIDs
           call c_ESMC_GDAL_ShpGetCoords(trim(filename)//c_null_char, petNo, numFeatures, featureIDs, localpoints, coordX, coordY, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
-          localcount = localpoints
-          print *, "Got coords on pet ", petNo, localcount, localpoints, coordx, coordy
+!          localcount = localpoints
+          print *, "Got coords on pet ", petNo, localcount, localpoints
           
        endif
     endif

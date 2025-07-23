@@ -960,8 +960,10 @@ PIOc_read_darray(int ncid, int varid, int ioid, PIO_Offset arraylen,
             return pio_err(ios, file, ierr, __FILE__, __LINE__);
         break;
     case PIO_IOTYPE_GDAL:
-        if ((ierr = pio_read_darray_shp(file, iodesc, varid, iobuf)))
+        if ((ierr = pio_read_darray_shp_par(file, iodesc, varid, iobuf)))
             return pio_err(ios, file, ierr, __FILE__, __LINE__);
+//        if ((ierr = pio_gdal_read_features_par(file->pio_ncid, varid, iodesc, iobuf)))
+//            return pio_err(ios, file, ierr, __FILE__, __LINE__);
         break;
     default:
         return pio_err(NULL, NULL, PIO_EBADIOTYPE, __FILE__, __LINE__);
