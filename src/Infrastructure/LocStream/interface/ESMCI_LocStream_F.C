@@ -57,7 +57,7 @@ void FTN_X(c_esmc_gdal_shpinquire)(
                                          int *pet_count,
                                          int *localpoints,
                                          int *totaldims,
-					 int *feature_IDs,
+					 int *FIDs,
 					 int *num_features,
                                          int *rc,
                                          ESMCI_FortranStrLenArg filename_l) {
@@ -94,8 +94,8 @@ void FTN_X(c_esmc_gdal_shpinquire)(
   //*totalpoints = npoints;
 
   int nFeatures;
-  int *globalFeature_IDs=NULL;
-  ESMCI_GDAL_SHP_get_feature_info(hDS, &nFeatures, globalFeature_IDs);
+  int *globalFIDs=NULL;
+  ESMCI_GDAL_SHP_get_feature_info(hDS, &nFeatures, globalFIDs);
   
   // Get positions at which to read element information
   std::vector<int> feature_ids_vec;
@@ -114,12 +114,12 @@ void FTN_X(c_esmc_gdal_shpinquire)(
     *num_features=nFeatures; // local to this pet
     if (*toggle == 1) {
       for (int i=0; i<feature_ids_vec.size(); i++) {
-	feature_IDs[i] = globalFeature_IDs[feature_ids_vec[i]-1];
+	FIDs[i] = globalFIDs[feature_ids_vec[i]-1];
       }
       // Get the total points in features on local PET (I don't wanna do this here, but I will and then will add it to things to fix)
       *localpoints = 0;
       for (int i=0;i<feature_ids_vec.size();i++) {
-	OGRFeatureH hFeature = OGR_L_GetFeature(hLayer,feature_IDs[i]-1);
+	OGRFeatureH hFeature = OGR_L_GetFeature(hLayer,FIDs[i]-1);
 	OGRGeometryH hGeom = OGR_F_GetGeometryRef(hFeature);
 	*localpoints += OGR_G_GetPointCount(hGeom);
 	OGR_F_Destroy( hFeature );
@@ -141,7 +141,7 @@ void FTN_X(c_esmc_gdal_shpgetcoords)(
                                          char *filename,
                                          int *local_pet,
                                          int *numFeatures,
-					 int *feature_IDs,
+					 int *FIDs,
                                          int *localcount,
 					 double *coordX,
 					 double *coordY,
@@ -165,57 +165,73 @@ void FTN_X(c_esmc_gdal_shpgetcoords)(
       {
 	printf( "Open failed on pet %d: %s, %d\n", *local_pet, CPLGetLastErrorMsg(), CPLGetLastErrorNo() );
       }
-    } else if (*local_pet == 0) {
+  } else if (*local_pet == 0) {
     printf("Cannot access shapefile %s\n",filename);
     return;
-    } else
+  } else
     printf("hDS open\n");
-//  }
   
   // GET DA DEETS!
   int num_nodes;
   int num_elems=0;
   int totNumElemConn=0;
-//  int *feature_IDs=NULL; // local PET
-  int *globalFeature_IDs=NULL;
-  double *nodeCoords=NULL;
-  std::vector<int> nodeIDs, elemIDs, elemConn, numElemConn;
-  std::vector<double> elemCoords;
-  int *num_ElemConn=NULL;
-  int *elem_Conn=NULL;
-  int *node_IDs=NULL; // Pointer. Will point to vector.
-  int *elem_IDs;
+//  int *FIDs=NULL; // local PET
+//  int *globalFIDs=NULL;
+//  double *nodeCoords=NULL;
+//  std::vector<int> nodeIDs, elemIDs, elemConn, numElemConn;
+//  std::vector<double> elemCoords;
+//  int *num_ElemConn=NULL;
+//  int *elem_Conn=NULL;
+//  int *node_IDs=NULL; // Pointer. Will point to vector.
+//  int *elem_IDs;
 
   if (*numFeatures == 0) {
     *localcount = 0;
     return;
   }
 
-  printf("localcount before: %d\n", *localcount);
-  ESMCI_GDAL_process_shapefile_distributed(hDS,numFeatures,feature_IDs,globalFeature_IDs,
-					   nodeCoords,nodeIDs,elemIDs,
-					   elemConn,elemCoords,numElemConn,
-					   &totNumElemConn, localcount, &num_elems);
+//  printf("localcount & numFeatures before: %d & %d\n", *localcount, *numFeatures);
+//  ESMCI_GDAL_process_shapefile_distributed(hDS,numFeatures,FIDs,globalFIDs,
+//					   nodeCoords,nodeIDs,elemIDs,
+//					   elemConn,elemCoords,numElemConn,
+//					   &totNumElemConn, localcount, &num_elems);
 
-//  //  printf("<<>> Pet/localcounts: %d/%d\n", *local_pet, *localcount);
-//
-  int j = 0;
+  std::vector<double> XCoords;
+  std::vector<double> YCoords;
+  OGRLayerH    hLayer = OGR_DS_GetLayer( hDS, 0 );
+  for (int f = 0; f < *localcount; f++) {
+    OGRFeatureH hFeature = OGR_L_GetFeature(hLayer, FIDs[f]-1);
+    if( hFeature == NULL )
+	printf( "NULL Feature on PET %d with ID %: : %s, %d\n", *local_pet, FIDs[f]-1, CPLGetLastErrorMsg(), CPLGetLastErrorNo() );
+    OGRGeometryH   hGeom = OGR_F_GetGeometryRef(hFeature);
+    OGRGeometryH  Cpoint = OGR_G_CreateGeometry(wkbPoint);
+    if (wkbFlatten(OGR_G_GetGeometryType(hGeom)) == wkbPoint){ // just in case
+      int nFTRpoints    = OGR_G_GetPointCount(hGeom);
+      
+      for (int i = nFTRpoints-1; i >=0; i--) {
+	XCoords.push_back( OGR_G_GetX(hGeom, i) );
+	YCoords.push_back( OGR_G_GetY(hGeom, i) );
+      }
+      OGR_G_DestroyGeometry(Cpoint); 
+    }
+    OGR_F_Destroy( hFeature );
+  }
+//  printf("<<>> Pet/localcounts: %d/%d\n", *local_pet, *localcount);
+
+//  int j = 0;
   printf("NOTE: ASSUMING DEG. CONVERTING TO RADIANS!!!\n");
   for (int i=0;i<*localcount;i++) {
-    coordX[i]=nodeCoords[j]*ESMC_CoordSys_Deg2Rad;
-    coordY[i]=nodeCoords[j+1]*ESMC_CoordSys_Deg2Rad;
-    j+=2;
-//    printf("coord check: ind %d X %f Y %f (%f %f)\n",i,coordX[i],coordY[i],nodeCoords[j],nodeCoords[j+1]);
-  }
+    coordX[i]=XCoords[i]*ESMC_CoordSys_Deg2Rad;
+    coordY[i]=YCoords[i]*ESMC_CoordSys_Deg2Rad;
 
-  if( hDS == NULL ) 
-    printf("hDS closed\n");
-  else
-    printf("hDS open\n");
+//    coordX[i]=nodeCoords[j]*ESMC_CoordSys_Deg2Rad;
+//    coordY[i]=nodeCoords[j+1]*ESMC_CoordSys_Deg2Rad;
+//    j+=2;
+    printf("coord check: ind %d X %f Y %f\n",i,coordX[i],coordY[i]);
+  }
 
   // Cleanup
   if( hDS != NULL ) GDALClose( hDS );
-  printf("hDS close ok\n");
 #endif
 
   // return success
