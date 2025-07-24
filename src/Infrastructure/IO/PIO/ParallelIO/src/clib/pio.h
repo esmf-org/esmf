@@ -1375,7 +1375,7 @@ extern "C" {
     int GDALc_openfile(int iosysid, int *fileIDp, GDALDatasetH *hDSp, int *iotype, const char *fname, bool mode);
     int GDALc_sync(int fileid);
     int GDALc_shp_get_int_field(int fileid);
-    int GDALc_shp_get_float_field(int fileid, int varid, const size_t *startp, const size_t *countp, float *ip, int rank);
+    int GDALc_shp_get_float_field(int fileid, int varid, const size_t *startp, const size_t *countp, io_desc_t *iodesc, float *ip, int rank);
     int GDALc_shp_get_double_field(int fileid, int varid, const size_t *startp, const size_t *countp, double *ip, int rank);
     int GDALc_shp_write_float_field(int fileid, int varid, const size_t *startp, const size_t *countp, float *ip);
     int GDALc_def_field(int ncid, const char *name, nc_type xtype, int ndims, int *varidp);

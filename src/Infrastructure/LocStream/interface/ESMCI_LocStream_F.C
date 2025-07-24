@@ -227,7 +227,7 @@ void FTN_X(c_esmc_gdal_shpgetcoords)(
 //    coordX[i]=nodeCoords[j]*ESMC_CoordSys_Deg2Rad;
 //    coordY[i]=nodeCoords[j+1]*ESMC_CoordSys_Deg2Rad;
 //    j+=2;
-    printf("coord check: ind %d X %f Y %f\n",i,coordX[i],coordY[i]);
+//    printf("coord check: ind %d X %f Y %f\n",i,coordX[i],coordY[i]);
   }
 
   // Cleanup

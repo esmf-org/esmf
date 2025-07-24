@@ -723,7 +723,7 @@ pio_read_darray_shp(file_desc_t *file, io_desc_t *iodesc, int vid,
                         ierr = GDALc_shp_get_int_field(file->pio_ncid);
                         break;
                     case PIO_FLOAT:
-                        ierr = GDALc_shp_get_float_field(file->pio_ncid, vid, start, count, (float *)bufptr, ios->io_rank);
+                        ierr = GDALc_shp_get_float_field(file->pio_ncid, vid, start, count, iodesc ,(float *)bufptr, ios->io_rank);
                         break;
                     case PIO_DOUBLE:
                         ierr = GDALc_shp_get_double_field(file->pio_ncid, vid, start, count, (double *)bufptr, ios->io_rank);
@@ -793,8 +793,10 @@ GDALc_shp_get_double_field(int fileid, int varid, const size_t *startp,
 }
 
 int
+//GDALc_shp_get_float_field(int fileid, int varid, const size_t *startp,
+//                           const size_t *countp, float *ip, int rank)
 GDALc_shp_get_float_field(int fileid, int varid, const size_t *startp,
-                           const size_t *countp, float *ip, int rank)
+                           const size_t *countp, io_desc_t *iodesc, float *ip, int rank)
 {
   OGRFeatureH hF;
   file_desc_t *file;         /* Pointer to file information. */
@@ -810,9 +812,10 @@ GDALc_shp_get_float_field(int fileid, int varid, const size_t *startp,
 
   // here, we have to assume start and count are only one dimension, and have
   // only one assigned value.
-  for (size_t i = startp[0]; i<countp[0]; i++) {
-    
-    hF     = OGR_L_GetFeature(hL,i);
+//  for (size_t i = startp[0]; i<countp[0]; i++) {
+for (int i = 0; i < iodesc->llen; i++) {
+    int feat_id = iodesc->sindex[i];    
+    hF     = OGR_L_GetFeature(hL,feat_id);
     ip[i] = (float)OGR_F_GetFieldAsDouble(hF,varid);
     PLOG((3,"gdal get_float %f", ip[i]));
     //printf("<<>> ip[%d]=%f\n",i,ip[i]);
@@ -1210,7 +1213,8 @@ pio_read_darray_shp_par(file_desc_t *file, io_desc_t *iodesc, int vid, void *iob
 		  ierr = GDALc_shp_get_int_field(file->pio_ncid);
 		  break;
 		case PIO_FLOAT:
-		  ierr = GDALc_shp_get_float_field(file->pio_ncid, vid, start, count, (float *)bufptr, ios->io_rank);
+		  PLOG((2, "calling get_float_field"));
+		  ierr = GDALc_shp_get_float_field(file->pio_ncid, vid, start, count, iodesc, (float *)bufptr, ios->io_rank);
 		  break;
 		case PIO_DOUBLE:
 		  ierr = GDALc_shp_get_double_field(file->pio_ncid, vid, start, count, (double *)bufptr, ios->io_rank);

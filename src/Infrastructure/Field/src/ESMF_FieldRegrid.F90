@@ -732,6 +732,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         real(ESMF_KIND_R8) :: beg_time, end_time
         logical :: addOrigCoordsToPointList
                   
+        real(ESMF_KIND_R4), pointer :: ptr1d(:), ptr2d(:,:)
+        integer :: lDE1, lDE2, nd
+
         ! Debug Timing stuff
         ! call ESMF_VMWtime(beg_time)
         ! ESMF_METHOD_ENTER(localrc)
@@ -1172,6 +1175,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
+! <<>>
+        call ESMF_FieldGet(srcField, dimCount=nd, rc=rc)
+        if (nd .eq. 1) then
+           call ESMF_FieldGet(srcField,  farrayPtr=ptr1d, rc=rc)
+           write(*,*) '<<>> FieldRegridStore srcField: ',  minval(ptr1d), maxval(ptr1d)
+           nullify(ptr1d)
+        endif
+        if (nd .eq. 2) then
+           call ESMF_FieldGet(srcField,  farrayPtr=ptr2d, rc=rc)
+           write(*,*) '<<>> FieldRegridStore srcField: ',  minval(ptr2d), maxval(ptr2d)
+           nullify(ptr2d)
+        endif
+        call ESMF_FieldGet(dstField, dimCount=nd, rc=rc)
+        if (nd .eq. 1) then
+           call ESMF_FieldGet(dstField,  farrayPtr=ptr1d, rc=rc)
+           write(*,*) '<<>> FieldRegridStore dstField: ',  minval(ptr1d), maxval(ptr1d)
+           nullify(ptr1d)
+        endif
+        if (nd .eq. 2) then
+           call ESMF_FieldGet(dstField,  farrayPtr=ptr2d, rc=rc)
+           write(*,*) '<<>> FieldRegridStore dstField: ',  minval(ptr2d), maxval(ptr2d)
+           nullify(ptr2d)
+        endif
 
         ! Get statusArray information
         hasStatusArray=.false.

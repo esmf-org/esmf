@@ -1815,8 +1815,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            currMin=deBlockList(1,2,i)+1
       enddo
 
-      !! Create DistGrid                                                                                                                                                                                
-      write(*,*) '<<>> DistGridCreate: ', minIndex, maxIndex, deBlockList
+      !! Create DistGrid
       distgrid=ESMF_DistGridCreate(minIndex=minIndex, &
                                                       maxIndex=maxIndex, &
                                                       deBlockList=deBlockList, &

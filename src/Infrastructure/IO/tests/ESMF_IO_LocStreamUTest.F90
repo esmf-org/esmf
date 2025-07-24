@@ -62,6 +62,8 @@ program ESMF_IO_LocStreamRegrid
   integer :: dims(ESMF_MAXDIM)
   integer :: ndims
 
+  real :: start, finish
+
 !  character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/CROSSWALK/unzipped/oilandgas_18_2024_point_DEG.shp" 
 !  character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/CROSSWALK/unzipped/oilandgas_02_2024_point_DEG.shp" 
   character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/CROSSWALK/unzipped/combined_oilandgas_2024_points_DEG.shp" 
@@ -96,6 +98,7 @@ program ESMF_IO_LocStreamRegrid
   decomptile(:,5)=(/1,2/) ! Tile 5
   decomptile(:,6)=(/1,2/) ! Tile 6
   ! Create cubed sphere grid
+  call cpu_time(start)
   write(name, *) "Creating a cubed-sphere grid"
   Grid = ESMF_GridCreateCubedSphere(               &
                                      tileSize=180, &
@@ -110,18 +113,23 @@ program ESMF_IO_LocStreamRegrid
 
   write(failMsg, *) "ESMF_GridCreateCubedSphere did not return ESMF_SUCCESS"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call cpu_time(finish)
+  write(*,*) 'timer - ESMF_GridCreateCubedSphere = ', finish-start
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !------------------------------------------------------------------------
   ! 3. Initialize & create the shapefile mesh
   !------------------------------------------------------------------------
+  call cpu_time(start)
   write(name, *) "Creating a SHP LocStream to use in Field Tests"
   locstream = ESMF_LocStreamCreate(filename=trim(filename),fileformat=ESMF_FILEFORMAT_SHAPEFILE, name='co2',rc=rc)
   call ESMF_ArraySpecSet(arraySpec, 1, typekind=ESMF_TYPEKIND_R4, rc=rc)
   
   write(failMsg, *) "ESMF_MeshCreate did not return ESMF_SUCCESS"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call cpu_time(finish)
+  write(*,*) 'timer - ESMF_LocStreamCreate = ', finish-start
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -145,6 +153,9 @@ program ESMF_IO_LocStreamRegrid
   ! -- Mesh field
   call ESMF_ArraySpecSet(arraySpec, 1, typekind=ESMF_TYPEKIND_R4, rc=rc)
   LocStrField  = ESMF_FieldCreate(locstream, arrayspec, name='co2', rc=rc)
+  call ESMF_FieldGet(LocStrField, farrayPtr=mptr, rc=rc)
+  write(*,*) 'Initialized LocStrField: ', minval(mptr), maxval(mptr)
+  mptr => null()
 
   if (rc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -154,30 +165,27 @@ program ESMF_IO_LocStreamRegrid
 
   !------------------------------------------------------------------------
   ! 4a. Access the field pointers and give them some data
-!  call ESMF_FieldGet( Locstrfield, farrayPtr=mptr, rc=rc)
-!  mptr    = 0.0
-!  mptr(1) = 11.5
-!  mptr = 11.5
-!  write(*,*) "pet: ", localpet, " mptr: ", shape(mptr)
-!  mptr => null()
-
   ! Get localDECount for GridField
   call ESMF_FieldGet(GridField, localDECount=localDECount, rc=rc)
 
   ! Loop over DEs setting them to a value
+  if (localPet .eq. 0) then
   do lDE=0,localDECount-1
      call ESMF_FieldGet(GridField, localDE=lDE, farrayPtr=gptr, rc=rc)
-     gptr=0. ! Set the value
-!     gptr = 18.
-     write(*,*) 'SET DE: ', lDE, maxval(gptr)
+!     gptr=0. ! Set the value
+     localGridMax=maxval(gptr)
+     if (localGridMax>gridMax) gridMax=localGridMax
+     write(*,*) 'set grid DE: ', lDE, localGridMax, gridMax, shape(gptr)
      gptr => null()
   enddo
+  endif
   
   !------------------------------------------------------------------------
   !------------------------------------------------------------------------
   ! 5. Create the regrid route handle
   !------------------------------------------------------------------------
   ! Regrid store
+  call cpu_time(start)
   call ESMF_FieldRegridStore( srcField=LocStrField, &
                               dstField=GridField, &
                               routeHandle=routeHandle2, &
@@ -188,28 +196,36 @@ program ESMF_IO_LocStreamRegrid
   write(name, *) "REGRIDSTORE"
   write(failMsg, *) "RegridStore failed"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call cpu_time(finish)
+  write(*,*) 'timer - ESMF_FieldRegridStore = ', finish-start
 
   !------------------------------------------------------------------------
   !------------------------------------------------------------------------
   ! 6. Read the mesh data
   !------------------------------------------------------------------------
-   call ESMF_FieldRead( LocStrField, &
-                        fileName=fileName, &
-                        iofmt=ESMF_IOFMT_SHP, &
-                        rc=rc)
-   write(name,*) 'FieldRead'
-   write(failMsg, *) "LocStream ESMF_FieldRead failed"
-   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call cpu_time(start)
+  call ESMF_FieldRead( LocStrField, &
+       fileName=fileName, &
+       iofmt=ESMF_IOFMT_SHP, &
+       rc=rc)
+  write(name,*) 'FieldRead'
+  write(failMsg, *) "LocStream ESMF_FieldRead failed"
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call cpu_time(finish)
+  write(*,*) 'timer - ESMF_FieldRead = ', finish-start
   !------------------------------------------------------------------------
 
   gridMax=-10000.00
+  if (localPet .eq. 0) then
   do lDE=0,localDECount-1
      call ESMF_FieldGet(GridField, localDE=lDE, farrayPtr=gptr, rc=rc)
      localGridMax=maxval(gptr)
      if (localGridMax>gridMax) gridMax=localGridMax
+!     gptr = 0.
      gptr => null()
-     write(*,*) 'pre grid DE: ', lDE, localGridMax, gridMax
+     write(*,*) 'pre grid DE: ', lDE, localGridMax, gridMax, shape(gptr)
   enddo
+  endif
 
   !------------------------------------------------------------------------
   !------------------------------------------------------------------------
@@ -220,10 +236,13 @@ program ESMF_IO_LocStreamRegrid
   !------------------------------------------------------------------------
   ! 7b. OR regrid the grid onto the mesh
   !------------------------------------------------------------------------
+  call cpu_time(start)
   call ESMF_FieldRegrid(LocStrField,GridField,routeHandle2,rc=rc)
   write(name, *) "REGRID"
   write(failMsg, *) "Regrid failed"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call cpu_time(finish)
+  write(*,*) 'timer - ESMF_FieldRegrid = ', finish-start
 
   !------------------------------------------------------------------------
   !------------------------------------------------------------------------
@@ -234,7 +253,7 @@ program ESMF_IO_LocStreamRegrid
   !------------------------------------------------------------------------
   ! 9. Write the gridded data from grid to NetCDF
   !------------------------------------------------------------------------
-  call ESMF_FieldWrite(GridField, fileName="test.nc",  &
+  call ESMF_FieldWrite(GridField, fileName="test*.nc",  &
 !       iofmt=ESMF_IOFMT_NETCDF,  &
        overwrite=.true.,  &
 !       timeslice=1, &
@@ -244,6 +263,7 @@ program ESMF_IO_LocStreamRegrid
 
   ! Loop over GridField getting max value
   gridMax=-10000.00
+  if (localPet .eq. 0) then
   do lDE=0,localDECount-1
      call ESMF_FieldGet(GridField, localDE=lDE, farrayPtr=gptr, rc=rc)
      localGridMax=maxval(gptr)
@@ -251,8 +271,10 @@ program ESMF_IO_LocStreamRegrid
      gptr => null()
      write(*,*) 'post grid DE: ', lDE, localGridMax, gridMax
   enddo
+  endif
 
   call ESMF_FieldGet(LocStrField, localDECount=localDECount, rc=rc)
+  if (localPet .eq. 0) then
   do lDE=0,localDECount-1
      call ESMF_FieldGet( Locstrfield, farrayPtr=mptr, rc=rc)
      localLocStrMax=maxval(mptr)
@@ -260,10 +282,7 @@ program ESMF_IO_LocStreamRegrid
      mptr => null()
      write(*,*) 'locstr DE: ', lDE, localLocStrMax, locstrMax
   enddo
-
-  !  write(*,*) 'SHP to Gridfield: ', maxval(gptr), maxval(mptr)
-!  write(*,*) 'Src (SHP) LocStr maxval=', locstrMax
-!  write(*,*) 'Dst Grid maxval=', gridMax
+  endif
 
   !------------------------------------------------------------------------
   !------------------------------------------------------------------------
