@@ -9,6 +9,8 @@ on:
   pull_request:
     branches:
       - develop
+      - release/*
+      - patch/*
   workflow_dispatch:
 
 jobs:
