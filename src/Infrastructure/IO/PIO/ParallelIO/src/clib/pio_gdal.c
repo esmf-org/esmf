@@ -814,10 +814,11 @@ GDALc_shp_get_float_field(int fileid, int varid, const size_t *startp,
   // only one assigned value.
 //  for (size_t i = startp[0]; i<countp[0]; i++) {
 for (int i = 0; i < iodesc->llen; i++) {
-    int feat_id = iodesc->sindex[i];    
+    int feat_id = iodesc->rindex[i];    
     hF     = OGR_L_GetFeature(hL,feat_id);
+    PLOG((3,"%d: get_float i %d of %d feat_id %d", rank, i, iodesc->llen-1, feat_id));
     ip[i] = (float)OGR_F_GetFieldAsDouble(hF,varid);
-    PLOG((3,"gdal get_float %f", ip[i]));
+//    PLOG((3,"gdal get_float %f", ip[i]));
     //printf("<<>> ip[%d]=%f\n",i,ip[i]);
   }
 

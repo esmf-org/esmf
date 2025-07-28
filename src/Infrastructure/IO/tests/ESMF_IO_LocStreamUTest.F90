@@ -66,8 +66,8 @@ program ESMF_IO_LocStreamRegrid
 
 !  character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/CROSSWALK/unzipped/oilandgas_18_2024_point_DEG.shp" 
 !  character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/CROSSWALK/unzipped/oilandgas_02_2024_point_DEG.shp" 
-  character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/CROSSWALK/unzipped/combined_oilandgas_2024_points_DEG.shp" 
-!  character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/CROSSWALK/unzipped/oag_2X_DEG.shp"
+!  character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/CROSSWALK/unzipped/combined_oilandgas_2024_points_DEG.shp" 
+  character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/CROSSWALK/unzipped/oag_2X_DEG.shp"
 !  character(ESMF_MAXSTR) :: filename = "/home/ilcentro/Work/NASA/ALI/data/CROSSWALK/unzipped/oag_spread_DEG.shp"
 
   ! NetCDF stuff
