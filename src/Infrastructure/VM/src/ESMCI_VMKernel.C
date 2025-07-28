@@ -2597,7 +2597,12 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
     if (pos != string::npos){
       // found wildcard -> replace with local pet number
       int digits = (int) log10(new_npets);    // always safe
-      if (digits * 10 != new_npets) ++digits; // correct number of digits
+      // correct the number of digits
+      int test_npets = 1;
+      for (int j=0; j<digits; j++)
+        test_npets *= 10;
+      if (test_npets != new_npets) ++digits;
+      else if (test_npets == 1) ++digits;
       std::stringstream label;                    // fill with zeros from left
       label << setw(digits) << setfill('0') << to_string(sarg[i].mypet);
       sarg[i].stdoutName = stdTemp.substr(0, pos) + label.str()
@@ -2614,7 +2619,12 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
     if (pos != string::npos){
       // found wildcard -> replace with local pet number
       int digits = (int) log10(new_npets);    // always safe
-      if (digits * 10 != new_npets) ++digits; // correct number of digits
+      // correct the number of digits
+      int test_npets = 1;
+      for (int j=0; j<digits; j++)
+        test_npets *= 10;
+      if (test_npets != new_npets) ++digits;
+      else if (test_npets == 1) ++digits;
       std::stringstream label;                    // fill with zeros from left
       label << setw(digits) << setfill('0') << to_string(sarg[i].mypet);
       sarg[i].stderrName = stdTemp.substr(0, pos) + label.str()
