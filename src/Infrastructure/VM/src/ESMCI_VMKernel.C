@@ -1874,7 +1874,9 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
 #endif
   // next, determine new_npets and new_mypet_base ...
   int new_mypet_base=0;
-  int new_npets=0;
+  volatile int new_npets=0;   // volatile to prevent precompute of log10() below
+                              // in optimized mode or else might trigger SIGFPE
+                              // for new_npets==1 if user code sets FPE trapping
   int found_my_pet_flag = 0;
   for (int ii=0; ii<npets; ii++){
     int i = vmp->petlist[ii];   // indirection to preserve petlist order
