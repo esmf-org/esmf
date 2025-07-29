@@ -263,26 +263,26 @@ program ESMF_IO_LocStreamRegrid
 
   ! Loop over GridField getting max value
   gridMax=-10000.00
-  if (localPet .eq. 0) then
+  !if (localPet .eq. 0) then
   do lDE=0,localDECount-1
      call ESMF_FieldGet(GridField, localDE=lDE, farrayPtr=gptr, rc=rc)
      localGridMax=maxval(gptr)
      if (localGridMax>gridMax) gridMax=localGridMax
+     write(*,*) 'post grid DE: ', lDE, minval(gptr), maxval(gptr), sum(gptr)
      gptr => null()
-     write(*,*) 'post grid DE: ', lDE, localGridMax, gridMax
   enddo
-  endif
+  !endif
 
   call ESMF_FieldGet(LocStrField, localDECount=localDECount, rc=rc)
-  if (localPet .eq. 0) then
+  !if (localPet .eq. 0) then
   do lDE=0,localDECount-1
      call ESMF_FieldGet( Locstrfield, farrayPtr=mptr, rc=rc)
      localLocStrMax=maxval(mptr)
      if (localLocStrMax>locstrMax) locstrMax=localLocStrMax
+     write(*,*) 'locstr DE: ', lDE, minval(mptr), maxval(mptr), sum(mptr), shape(mptr)
      mptr => null()
-     write(*,*) 'locstr DE: ', lDE, localLocStrMax, locstrMax
   enddo
-  endif
+  !endif
 
   !------------------------------------------------------------------------
   !------------------------------------------------------------------------

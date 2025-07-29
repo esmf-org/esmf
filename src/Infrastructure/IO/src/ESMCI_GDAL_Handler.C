@@ -181,7 +181,7 @@ void GDAL_Handler::initialize (
   try {
 
 #ifdef ESMFIO_DEBUG
-    PIOc_set_log_level(3);
+    //PIOc_set_log_level(3);
 #endif // ESMFIO_DEBUG
     if (!instanceFound) {
       PRINTMSG("Before GDALc_Init_Intracomm, num_iotasks = " << num_iotasks);

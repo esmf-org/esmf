@@ -784,7 +784,8 @@ GDALc_shp_get_double_field(int fileid, int varid, const size_t *startp,
   // here, we have to assume start and count are only one dimension, and have
   // only one assigned value.
   for (size_t i = startp[0]; i<countp[0]; i++) {
-    
+    // This ASSUMES that FIDs start at 0 and are sequential
+    // This is NOT guaranteed. So this is a major TBD -- MSL
     hF     = OGR_L_GetFeature(hL,i);
     ip[i] = OGR_F_GetFieldAsDouble(hF,varid);
     PLOG((3,"gdal get_double %f", ip[i]));
@@ -812,6 +813,8 @@ GDALc_shp_get_float_field(int fileid, int varid, const size_t *startp,
   OGRLayerH hL = OGR_DS_GetLayer( file->hDS, 0 );
   OGR_L_ResetReading(hL);
 
+  float total = 0.;
+
   // here, we have to assume start and count are only one dimension, and have
   // only one assigned value.
   // This is NOT efficient. We need to pre-read the FIDs and make them
@@ -820,7 +823,10 @@ GDALc_shp_get_float_field(int fileid, int varid, const size_t *startp,
     int feat_id = OGR_F_GetFID(OGR_L_GetFeature(hL,i+startp[0]));
     hF     = OGR_L_GetFeature(hL,feat_id);
     ip[i] = (float)OGR_F_GetFieldAsDouble(hF,varid);
+    total += ip[i];
   }
+
+  printf("%d: total %f\n",rank,total);
 
   return PIO_NOERR;
 }

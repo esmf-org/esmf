@@ -2255,9 +2255,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical :: localcenterflag, haveface
     character(len=16) :: units, location
 #ifdef ESMF_GDAL
-    integer :: numFeatures, localpoints
-    integer(c_int), pointer :: featureIDs(:)
-    type(c_ptr) :: fids
+    integer :: nFeatures, locFeatures, localpoints, maxid, minid
+    integer(c_int), pointer :: lFIDs(:), gFIDs(:)
 #endif
 
     if (present(indexflag)) then
@@ -2399,17 +2398,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ! Inquire totalpoints and total dims
        ! -- this is a C routine using GDAL
        ! -- -- this is also SLOPPY (<<>> MSL)
-       featureIDs => NULL()
-       ! Godda run it once to get the numFeatures so we can allocate featureIDs
-       call c_ESMC_GDAL_ShpInquire(trim(filename)//c_null_char, 0, petNo, petCnt, localpoints, totaldims, featureIDs, numFeatures, localrc)
-       if (numFeatures .gt. 0) then
-          allocate(featureIDs(numFeatures)) ! This is local to this PET
-          call c_ESMC_GDAL_ShpInquire(trim(filename)//c_null_char, 1, petNo, petCnt, localpoints, totaldims, featureIDs, numFeatures, localrc)
+       lFIDs => NULL()
+       gFIDs => NULL()
+       ! Godda run it once to get the number of features so we can allocate FIDs
+       call c_ESMC_GDAL_getnfeatures(trim(filename)//c_null_char, petNo, petCnt, nFeatures, locfeatures, maxid, minid, localrc)
+       print *, "getnfeatures: ", nFeatures, locfeatures
+       allocate(gFIDs(nFeatures))
+
+       if (petNo .eq. 0) then
+          call c_ESMC_GDAL_getglobal_fids(trim(filename)//c_null_char, nFeatures, gFIDs, localrc)
+       endif
+       call ESMF_VMBroadcast(vm, bcstData=gFIDs, count=nFeatures, rootPet=0, rc=rc)
+
+       print *, 'gFIDs: ', petNo, gFIDs(1:3)
+
+       if (locFeatures .gt. 0) then
+          allocate(lFIDs(nFeatures)) ! This is local to this PET
+          call c_ESMC_GDAL_ShpInquire(trim(filename)//c_null_char, petNo, petCnt, localpoints, totaldims, nfeatures, gFIDs, locFeatures, lFIDs, localrc)
        endif
        coordSys = ESMF_COORDSYS_SPH_RAD ! Fixed for now!
        !if (localpoints .ge. 0)
-       totalpoints = numFeatures !localpoints
-       print *, "ShpInquire: ", localpoints, numFeatures, petNo, petCnt
+       totalpoints = nfeatures !localpoints
+       print *, "ShpInquire: ", localpoints, nfeatures, petNo, petCnt, lFIDs(1),lFIDs(locfeatures)
     endif
 
     localcount = totalpoints/PetCnt
@@ -2420,6 +2430,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
        starti = localcount*PetNo+1+remain
     endif
+
+    print *, "localcount locfeatures", localcount, locfeatures
 
     allocate(coordX(localcount), coordY(localcount),imask(localcount))
     if (localcount > 0) then 
@@ -2492,9 +2504,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           ! localpoints is the number of points associated with this pet's features
           allocate(coordX(localpoints),coordY(localpoints))
-          print *, 'slocal: ', localpoints
-          ! Here we get the coordinates from the features specified by numFeatures and featureIDs
-          call c_ESMC_GDAL_ShpGetCoords(trim(filename)//c_null_char, petNo, numFeatures, featureIDs, localpoints, coordX, coordY, localrc)
+          ! Here we get the coordinates from the features specified by nfeatures and lFIDs
+          call c_ESMC_GDAL_ShpGetCoords(trim(filename)//c_null_char, petNo, nfeatures, lFIDs, localpoints, coordX, coordY, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
 !          localcount = localpoints
