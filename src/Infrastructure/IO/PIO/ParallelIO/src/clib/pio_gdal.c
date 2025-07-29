@@ -298,7 +298,8 @@ GDALc_openfile(int iosysid, int *fileIDp, GDALDatasetH *hDSp,int *iotype, const 
         case PIO_IOTYPE_GDAL:
             if (1)//ios->io_rank == 0)
             {
-	      *hDSp = OGROpen( filename, mode, NULL );
+	      *hDSp = GDALOpenEx(filename, GDAL_OF_VECTOR | GDAL_OF_READONLY, NULL, NULL, NULL);
+	      //*hDSp = OGROpen( filename, mode, NULL );
 	      if( hDSp != NULL )
                 ierr = GDALc_inq_file_metadata(file, *hDSp, PIO_IOTYPE_GDAL,
                                          &nvars, &rec_var, &pio_type,
@@ -809,17 +810,16 @@ GDALc_shp_get_float_field(int fileid, int varid, const size_t *startp,
     return pio_err(NULL, NULL, ierr, __FILE__, __LINE__);
 
   OGRLayerH hL = OGR_DS_GetLayer( file->hDS, 0 );
+  OGR_L_ResetReading(hL);
 
   // here, we have to assume start and count are only one dimension, and have
   // only one assigned value.
-//  for (size_t i = startp[0]; i<countp[0]; i++) {
-for (int i = 0; i < iodesc->llen; i++) {
-    int feat_id = iodesc->rindex[i];    
+  // This is NOT efficient. We need to pre-read the FIDs and make them
+  // available here. MSL
+  for (size_t i = 0; i<countp[0]; i++) {
+    int feat_id = OGR_F_GetFID(OGR_L_GetFeature(hL,i+startp[0]));
     hF     = OGR_L_GetFeature(hL,feat_id);
-    PLOG((3,"%d: get_float i %d of %d feat_id %d", rank, i, iodesc->llen-1, feat_id));
     ip[i] = (float)OGR_F_GetFieldAsDouble(hF,varid);
-//    PLOG((3,"gdal get_float %f", ip[i]));
-    //printf("<<>> ip[%d]=%f\n",i,ip[i]);
   }
 
   return PIO_NOERR;
@@ -1198,7 +1198,7 @@ pio_read_darray_shp_par(file_desc_t *file, io_desc_t *iodesc, int vid, void *iob
 
 #ifdef PIO_ENABLE_LOGGING
             for (int i = 1; i < ndims; i++)
-                PLOG((3, "start[%d] %d count[%d] %d", i, start[i], i, count[i]));
+                PLOG((3, "gdal: start[%d] %d count[%d] %d", i, start[i], i, count[i]));
 	        PLOG((3, "piotype: %d (%d, %d)", iodesc->piotype, PIO_FLOAT, PIO_DOUBLE));
 #endif /* LOGGING */
             /* Do the read. */
@@ -1214,7 +1214,6 @@ pio_read_darray_shp_par(file_desc_t *file, io_desc_t *iodesc, int vid, void *iob
 		  ierr = GDALc_shp_get_int_field(file->pio_ncid);
 		  break;
 		case PIO_FLOAT:
-		  PLOG((2, "calling get_float_field"));
 		  ierr = GDALc_shp_get_float_field(file->pio_ncid, vid, start, count, iodesc, (float *)bufptr, ios->io_rank);
 		  break;
 		case PIO_DOUBLE:
