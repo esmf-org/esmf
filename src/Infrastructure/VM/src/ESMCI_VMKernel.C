@@ -1874,7 +1874,9 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
 #endif
   // next, determine new_npets and new_mypet_base ...
   int new_mypet_base=0;
-  int new_npets=0;
+  volatile int new_npets=0;   // volatile to prevent precompute of log10() below
+                              // in optimized mode or else might trigger SIGFPE
+                              // for new_npets==1 if user code sets FPE trapping
   int found_my_pet_flag = 0;
   for (int ii=0; ii<npets; ii++){
     int i = vmp->petlist[ii];   // indirection to preserve petlist order
@@ -2596,8 +2598,8 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
     pos = stdTemp.rfind('*');  // right most asterisk
     if (pos != string::npos){
       // found wildcard -> replace with local pet number
-      int digits = (int) log10(new_npets);    // always safe
-      if (digits * 10 != new_npets) ++digits; // correct number of digits
+      int digits = 1; // default number of digits needed
+      if (new_npets>1) digits = (int) log10(new_npets-1) + 1;
       std::stringstream label;                    // fill with zeros from left
       label << setw(digits) << setfill('0') << to_string(sarg[i].mypet);
       sarg[i].stdoutName = stdTemp.substr(0, pos) + label.str()
@@ -2613,8 +2615,8 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
     pos = stdTemp.rfind('*');  // right most asterisk
     if (pos != string::npos){
       // found wildcard -> replace with local pet number
-      int digits = (int) log10(new_npets);    // always safe
-      if (digits * 10 != new_npets) ++digits; // correct number of digits
+      int digits = 1; // default number of digits needed
+      if (new_npets>1) digits = (int) log10(new_npets-1) + 1;
       std::stringstream label;                    // fill with zeros from left
       label << setw(digits) << setfill('0') << to_string(sarg[i].mypet);
       sarg[i].stderrName = stdTemp.substr(0, pos) + label.str()
