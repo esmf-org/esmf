@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -19,9 +19,9 @@ module NUOPC_Comp
   use NUOPC_Base
 
   implicit none
-  
+
   private
-  
+
   ! public module interfaces
   public NUOPC_CompAreServicesSet
   public NUOPC_CompAttributeAdd
@@ -35,6 +35,8 @@ module NUOPC_Comp
   public NUOPC_CompDerive
   public NUOPC_CompFilterPhaseMap
   public NUOPC_CompGet
+  public NUOPC_CompHandleVerbosityIntro
+  public NUOPC_CompHandleVerbosityExtro
   public NUOPC_CompSearchPhaseMap
   public NUOPC_CompSearchRevPhaseMap
   public NUOPC_CompSetClock
@@ -1610,7 +1612,10 @@ module NUOPC_Comp
 !   Important: Attributes ingested by this method are stored as type character
 !   strings, and must be accessed accordingly. Conversion from string into a
 !   different data type, e.g. {\tt integer} or {\tt real}, is the user's
-!   responsibility.
+!   responsibility. This method does not support value lists. Attribute values
+!   ingested by this method must not contain whitespace within the value. If
+!   whitespace is found within the value the attribute will not be added to
+!   the comp.
 !
 !   If {\tt addFlag} is {\tt .false.} (default), an error will be returned if 
 !   an attribute is to be ingested that was not previously added to the 
@@ -1643,6 +1648,20 @@ module NUOPC_Comp
 !   \end{verbatim}
 !   specifies a user-level Attribute, which is not part of the pre-defined 
 !   Attributes of any of the standard NUOPC component kinds.
+!
+!   Currently, whitespace is not supported in the attribute value and
+!   the following attributeName fails to be added.
+!
+!   \begin{verbatim}
+!     attributeName = attributeValue1 attributeValue2 attributedValue3
+!   \end{verbatim}
+!
+!   If a list is needed then a comma can be used as a delimiter. The
+!   attribute value list must then be parsed in user code.
+!
+!   \begin{verbatim}
+!     attributeName = attributeValue1,attributeValue2,attributedValue3
+!   \end{verbatim}
 !
 !EOP
   !-----------------------------------------------------------------------------
@@ -2099,7 +2118,7 @@ module NUOPC_Comp
     endif
 
     ! Add NUOPC/Driver, NUOPC/Model, NUOPC/Mediator Attributes
-    allocate(attrList(9))
+    allocate(attrList(10))
     attrList(1) = "InternalInitializePhaseMap"  ! list of strings to map str to phase #
     attrList(2) = "InternalRunPhaseMap"  ! list of strings to map str to phase #
     attrList(3) = "InternalFinalizePhaseMap"  ! list of strings to map str to phase #
@@ -2108,7 +2127,11 @@ module NUOPC_Comp
     attrList(6) = "InitializeDataResolution"! values: strings "false"/"true"
     attrList(7) = "InitializeDataComplete"  ! values: strings "false"/"true"
     attrList(8) = "InitializeDataProgress"  ! values: strings "false"/"true"
-    attrList(9) = "HierarchyProtocol"       ! strings
+    attrList(9) = "HierarchyProtocol"       ! values: strings
+                                            ! "PushUpAllExportsAndUnsatisfiedImports"
+                                            ! "ConnectProvidedFields"
+                                            ! "Explorer" and "off"
+    attrList(10)= "HierarchyConnectors"     ! values: strings "auto"/"manual"
     ! add Attribute packages
     call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
       attrList=attrList, rc=localrc)
@@ -2171,6 +2194,11 @@ module NUOPC_Comp
       rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    call NUOPC_CompAttributeSet(comp, &
+      name="HierarchyConnectors", value="auto", &
+      rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
   end subroutine
   !-----------------------------------------------------------------------------
@@ -2219,13 +2247,16 @@ module NUOPC_Comp
       line=__LINE__, &
       file=FILENAME, &
       rcToReturn=rc)) return  ! bail out
-    
+
     ! The NUOPC/Connector Attributes
-    allocate(attrList(4))
+    allocate(attrList(7))
     attrList(1) = "CplList"
     attrList(2) = "CplSetList"
     attrList(3) = "ConnectionOptions"
-    attrList(4) = "EpochThrottle"
+    attrList(4) = "EpochEnable"
+    attrList(5) = "EpochEnterKeepAlloc"
+    attrList(6) = "EpochExitKeepAlloc"
+    attrList(7) = "EpochThrottle"
     call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
       attrList=attrList, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2255,6 +2286,8 @@ module NUOPC_Comp
     call NUOPC_CompAttributeSet(comp, &
       name="Diagnostic", value="0", &
       rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
   end subroutine
   !-----------------------------------------------------------------------------
@@ -3158,6 +3191,152 @@ module NUOPC_Comp
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
     
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_CompHandleVerbosityIntro - Handle verbosity on method intro
+! !INTERFACE:
+  subroutine NUOPC_CompHandleVerbosityIntro(gcomp, verbosity, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp), intent(in)   :: gcomp
+    integer,             intent(in)   :: verbosity
+    integer,             intent(out)  :: rc
+! !DESCRIPTION:
+!   Handle verbosity on method intro
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[gcomp]
+!     Component.
+!   \item[verbosity]
+!     Bit field corresponding to verbosity aspects.
+!   \item[rc]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)    :: name
+    character(ESMF_MAXSTR)    :: msgString, pLabel
+    integer                   :: phase
+    type(ESMF_Clock)          :: internalClock
+    logical                   :: clockIsPresent
+
+    ! handle verbosity
+    if (btest(verbosity,8)) then
+      call ESMF_GridCompGet(gcomp, name=name, currentPhase=phase, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      call NUOPC_CompSearchRevPhaseMap(gcomp, ESMF_METHOD_INITIALIZE, &
+        phaseIndex=phase, phaseLabel=pLabel, rc=rc)
+      if (len_trim(pLabel)==0) pLabel="<none>"
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_GridCompGet(gcomp, clockIsPresent=clockIsPresent, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      if (clockIsPresent) then
+        call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) &
+          return  ! bail out
+        call ESMF_ClockPrint(internalClock, options="currTime", &
+          preString=">>>"//trim(name)//&
+          ": entered Initialize (phase="//trim(adjustl(pLabel))// &
+          ") with current time: ", unit=msgString, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      else
+        write(msgString,"(A)") ">>>"//trim(name)//&
+          ": entered Initialize (phase="//trim(adjustl(pLabel))// &
+          ") without valid internal Clock."
+      endif
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
+    ! return successfully
+    rc = ESMF_SUCCESS
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_CompHandleVerbosityExtro - Handle verbosity on method extro
+! !INTERFACE:
+  subroutine NUOPC_CompHandleVerbosityExtro(gcomp, verbosity, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp), intent(in)   :: gcomp
+    integer,             intent(in)   :: verbosity
+    integer,             intent(out)  :: rc
+! !DESCRIPTION:
+!   Handle verbosity on method extro
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[gcomp]
+!     Component.
+!   \item[verbosity]
+!     Bit field corresponding to verbosity aspects.
+!   \item[rc]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)    :: name
+    character(ESMF_MAXSTR)    :: msgString, pLabel
+    integer                   :: phase
+    type(ESMF_Clock)          :: internalClock
+    logical                   :: clockIsPresent
+
+    ! handle verbosity
+    if (btest(verbosity,8)) then
+      call ESMF_GridCompGet(gcomp, name=name, currentPhase=phase, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      call NUOPC_CompSearchRevPhaseMap(gcomp, ESMF_METHOD_INITIALIZE, &
+        phaseIndex=phase, phaseLabel=pLabel, rc=rc)
+      if (len_trim(pLabel)==0) pLabel="<none>"
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_GridCompGet(gcomp, clockIsPresent=clockIsPresent, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      if (clockIsPresent) then
+        call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) &
+          return  ! bail out
+        call ESMF_ClockPrint(internalClock, options="currTime", &
+          preString="<<<"//trim(name)//&
+          ": leaving Initialize (phase="//trim(adjustl(pLabel))// &
+          ") with current time: ", unit=msgString, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      else
+        write(msgString,"(A)") "<<<"//trim(name)//&
+          ": leaving Initialize (phase="//trim(adjustl(pLabel))// &
+          ") without valid internal Clock."
+      endif
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
+    ! return successfully
+    rc = ESMF_SUCCESS
   end subroutine
   !-----------------------------------------------------------------------------
 

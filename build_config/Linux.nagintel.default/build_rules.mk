@@ -105,12 +105,6 @@ ESMF_CXXOPTFLAG_G       += -traceback
 ESMF_F90COMPILEOPTS += -DESMF_NAG_UNIX_MODULE
 
 ############################################################
-# Currently NAG does not support the Fortran2018 assumed type feature
-#
-ESMF_F90COMPILECPPFLAGS += -DESMF_NO_F2018ASSUMEDTYPE
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_F2018ASSUMEDTYPE
-
-############################################################
 # Some ESMF tests fail for NAG with -O -> turn optimization off by default
 #
 ESMF_OPTLEVELDEFAULT  = 0
@@ -149,7 +143,7 @@ ESMF_OPENMP_CXXLINKOPTS    += -openmp
 endif
 
 ############################################################
-# Need this until the file convention is fixed (then remove these two lines)
+# Explicit flags for handling specific format and cpp combos
 #
 ESMF_F90COMPILEFREENOCPP = -free
 ESMF_F90COMPILEFIXCPP    = -fixed -fpp

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -493,6 +493,33 @@ int ESMC_GridGetCoordBounds(
 //    must be allocated to be of size equal to the coord dimCount.  
 //  \item[rc]
 //  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_GridGetLocalDECount - Get the number of DEs in this grid on this PET
+//
+// !INTERFACE:
+int ESMC_GridGetLocalDECount(
+  ESMC_Grid grid,                   // in
+  int *localDECount                 // out
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//  Get the number of DEs in this grid on this PET.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[grid]
+//    Grid object from which to obtain the local DE count.
+//  \item[localDECount]
+//    The number of DEs in this grid on this PET.
 //  \end{description}
 //
 //EOP

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -315,6 +315,14 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Get localDECount from ESMC_Field object");
+  strcpy(failMsg, "Did not return correct localDECount");
+  int localDECount;
+  rc = ESMC_FieldGetLocalDECount(field, &localDECount);
+  ESMC_Test((rc==ESMF_SUCCESS && localDECount==1), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
 
   //---------------------------- LOCSTREAM -------------------------------------
 

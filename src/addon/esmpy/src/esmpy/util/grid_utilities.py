@@ -1,5 +1,7 @@
 """
 Utilities for regridding with Grids
+
+These utilities currently assume Grids and Fields with a single DE per PET
 """
 
 import sys
@@ -95,8 +97,8 @@ def grid_create_from_coordinates(xcoords, ycoords, xcorners=False, ycorners=Fals
     if domask:
         mask = grid.add_item(esmpy.GridItem.MASK)
         mask[:] = 1
-        mask[np.where((1.75 <= gridXCenter.any() < 2.25) &
-                      (1.75 <= gridYCenter.any() < 2.25))] = 0
+        mask[np.where((1.75 <= gridXCenter) & (gridXCenter < 2.25) &
+                      (1.75 <= gridYCenter) & (gridYCenter < 2.25))] = 0
 
     # add arbitrary areas values
     if doarea:
@@ -180,8 +182,8 @@ def grid_create_from_coordinates_periodic(longitudes, latitudes, lon_corners=Fal
     if domask:
         mask = grid.add_item(esmpy.GridItem.MASK)
         mask[:] = 1
-        mask[np.where((1.75 <= gridXCenter.any() < 2.25) &
-                      (1.75 <= gridYCenter.any() < 2.25))] = 0
+        mask[np.where((1.75 <= gridXCenter) & (gridXCenter < 2.25) &
+                      (1.75 <= gridYCenter) & (gridYCenter < 2.25))] = 0
 
     return grid
 
@@ -286,9 +288,9 @@ def grid_create_from_coordinates_3d(xcoords, ycoords, zcoords, xcorners=False, y
     if domask:
         mask = grid.add_item(esmpy.GridItem.MASK)
         mask[:] = 1
-        mask[np.where((1.75 < gridXCenter.data < 2.25) &
-                      (1.75 < gridYCenter.data < 2.25) &
-                      (1.75 < gridZCenter.data < 2.25))] = 0
+        mask[np.where((1.75 <= gridXCenter) & (gridXCenter < 2.25) &
+                      (1.75 <= gridYCenter) & (gridYCenter < 2.25) &
+                      (1.75 <= gridZCenter) & (gridZCenter < 2.25))] = 0
 
     # add arbitrary areas values
     if doarea:
@@ -394,9 +396,9 @@ def grid_create_from_coordinates_periodic_3d(longitudes, latitudes, heights,
     if domask:
         mask = grid.add_item(esmpy.GridItem.MASK)
         mask[:] = 1
-        mask[np.where((1.75 <= gridXCenter.data < 2.25) &
-                      (1.75 <= gridYCenter.data < 2.25) &
-                      (1.75 <= gridZCenter.data < 2.25))] = 0
+        mask[np.where((1.75 <= gridXCenter) & (gridXCenter < 2.25) &
+                      (1.75 <= gridYCenter) & (gridYCenter < 2.25) &
+                      (1.75 <= gridZCenter) & (gridZCenter < 2.25))] = 0
 
     return grid
 

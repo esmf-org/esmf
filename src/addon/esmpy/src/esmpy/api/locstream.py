@@ -125,10 +125,17 @@ class LocStream(dict):
             # re-initialize slc_ls
             slc_ls = get_formatted_slice(slc, self.rank)
 
-        # slice at will
-        try:
+        if not isinstance(slc_ls, slice):
+            # This handles the case where slc is a str, and so slc_ls remains equal to
+            # slc, and thus is also a str. In theory, we could enter this block with
+            # slc_ls being various other types emerging from get_formatted_slice; these
+            # cases are not currently handled (they will generally lead to exceptions in
+            # `__getitem__`).
+
             ret = super(LocStream, self).__getitem__(slc_ls)
-        except TypeError:
+        else:
+            # slc_ls is a slice
+
             ret = self.copy()
 
             # upper bounds and size

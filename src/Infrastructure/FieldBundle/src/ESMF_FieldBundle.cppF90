@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -297,6 +297,7 @@ module ESMF_FieldBundleMod
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
+    module procedure ESMF_FieldBundleSetGeom
     module procedure ESMF_FieldBundleSetGrid
     module procedure ESMF_FieldBundleSetLS
     module procedure ESMF_FieldBundleSetMesh
@@ -1704,14 +1705,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
     ! Private name; call using ESMF_FieldBundleGet()   
     subroutine ESMF_FieldBundleGetListAll(fieldbundle, keywordEnforcer, &
-      itemorderflag, geomtype, grid, locstream, mesh, xgrid, &
-      fieldCount, fieldList, fieldNameList, isPacked, name, rc)
+      itemorderflag, geomtype, geom, grid, locstream, mesh, xgrid, &
+      fieldCount, fieldList, fieldNameList, isPacked, name, vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle),    intent(in)            :: fieldbundle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_ItemOrder_Flag), intent(in),  optional :: itemorderflag
     type(ESMF_GeomType_Flag),  intent(out), optional :: geomtype
+    type(ESMF_Geom),           intent(out), optional :: geom
     type(ESMF_Grid),           intent(out), optional :: grid
     type(ESMF_LocStream),      intent(out), optional :: locstream
     type(ESMF_Mesh),           intent(out), optional :: mesh
@@ -1721,6 +1723,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),          intent(out), optional :: fieldNameList(:)
     logical,                   intent(out), optional :: isPacked
     character(len=*),          intent(out), optional :: name
+    type(ESMF_VM),             intent(out), optional :: vm
     integer,                   intent(out), optional :: rc
 !
 ! !STATUS:
@@ -1733,6 +1736,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              the items are returned.
 ! \item[8.0.0] Added argument {\tt isPacked}.
 !              The new argument allows the user to query if this is a packed FieldBundle.
+! \item[8.8.0] Added argument {\tt vm} in order to offer information about the
+!              VM on which the FieldBundle was created.
+! \item[8.9.0] Added argument {\tt geom} to allow the user to retrieve a generic representation of
+!              the FieldBundle's geometry.
 ! \end{description}
 ! \end{itemize}
 !
@@ -1751,6 +1758,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Flag that indicates what type of geometry this FieldBundle object holds. 
 !      Can be {\tt ESMF\_GEOMTYPE\_GRID}, {\tt ESMF\_GEOMTYPE\_MESH}, {\tt ESMF\_GEOMTYPE\_LOCSTREAM},
 !      {\tt ESMF\_GEOMTYPE\_XGRID}
+!   \item[{[geom]}]
+!      The Geom object that this FieldBundle object holds. 
 !   \item[{[grid]}]
 !      The Grid object that this FieldBundle object holds. 
 !   \item[{[locstream]}]
@@ -1771,7 +1780,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [{[isPacked]}]
 !         Upon return holds the information if this FieldBundle is packed.
 !   \item [{[name]}]
-!         Name of the fieldbundle object.
+!         Name of the FieldBundle object.
+!   \item [{[vm}]
+!         The VM on which the FieldBundle object was created.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1802,7 +1813,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     this => fieldbundle%this
 
-    ! geom
+    ! geomtype
     if(present(geomtype)) then
       if(this%status /= ESMF_FBSTATUS_GRIDSET) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
@@ -1816,6 +1827,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
+    ! Get Geom
+    if (present(geom)) then
+       geom=this%geom
+    endif
+
+    ! Get Grid
     if(present(grid)) then
       if(this%status /= ESMF_FBSTATUS_GRIDSET) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
@@ -1960,7 +1977,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
     endif
-    
+
+    if (present(vm)) then
+      call ESMF_GetVM(fieldbundle%this%base, vm, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   
@@ -2183,7 +2206,7 @@ msg="This call does not work with packed FieldBundle.",&
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldBundleGetIndex()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldBundleGet - Access the Field at a specific index in a FieldBundle
 !
 ! !INTERFACE:
@@ -2214,7 +2237,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
     integer                       :: l_fieldCount, i         ! helper variable
@@ -2823,7 +2846,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !   \begin{itemize}
 !     \item For multi-tile Fields, all Fields in the FieldBundle must contain
 !     the same number of tiles.
-!     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
 !   The arguments are:
@@ -6886,7 +6908,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !   \begin{itemize}
 !     \item For multi-tile Fields, all Fields in the FieldBundle must contain
 !     the same number of tiles.
-!     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
 !   The arguments are:

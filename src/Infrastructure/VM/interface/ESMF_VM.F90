@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -458,6 +458,7 @@ module ESMF_VMMod
   public ESMF_VMInitializePreMPI
   public ESMF_VMInitialize
   public ESMF_VMSet
+  public ESMF_VMGetEnv
   public ESMF_VMSetEnv
   public ESMF_VMFinalize
   public ESMF_VMAbort
@@ -473,6 +474,7 @@ module ESMF_VMMod
   public ESMF_VMPlanSetThis
   public ESMF_VMPlanSetMinStackSize
   public ESMF_VMPlanSetOpenMP
+  public ESMF_VMPlanSetStdRedirect
   public ESMF_VMPlanMaxPEs
   public ESMF_VMPlanMaxThreads
   public ESMF_VMPlanMinThreads
@@ -480,6 +482,7 @@ module ESMF_VMMod
   public ESMF_VMIdCopy
   public ESMF_VMIdCreate
   public ESMF_VMIdDestroy
+  public ESMF_VMIdGet
   public ESMF_VMIdLog
   public ESMF_VMIdPrint
   public ESMF_VMSendVMId
@@ -9399,6 +9402,49 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGetEnv()"
+!BOPI
+! !IROUTINE: ESMF_VMGetEnv - Get environment variable cached in the Global VM
+
+! !INTERFACE:
+  subroutine ESMF_VMGetEnv(name, value, rc)
+!
+! !ARGUMENTS:
+    character(*), intent(in)            :: name
+    character(*), intent(out)           :: value
+    integer,      intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Get environment variable cached in the Global VM.
+!
+!   The arguments are:
+!   \begin{description}
+!     \item [name]
+!        The name of the environment variable.
+!     \item [value]
+!        The value of the environment variable.
+!   \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMGetEnv(name, value, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMGetEnv
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMSetEnv()"
 !BOPI
 ! !IROUTINE: ESMF_VMSetEnv - Set environment variable cached in the Global VM
@@ -10103,6 +10149,68 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMPlanSetStdRedirect()"
+!BOPI
+! !IROUTINE: ESMF_VMPlanSetStdRedirect - Set stdout and stderr redirect
+
+! !INTERFACE:
+  subroutine ESMF_VMPlanSetStdRedirect(vmplan, stdout, stderr, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VMPlan), intent(inout)         :: vmplan
+    character(*),      intent(in),  optional :: stdout
+    character(*),      intent(in),  optional :: stderr
+    integer,           intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Set stdout redirect.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vmplan]
+!        VMPlan
+!   \item[{[stdout]}]
+!        Filename for the stdout redirect. By default do not redirect.
+!   \item[{[stderr]}]
+!        Filename for the stderr redirect. By default do not redirect.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMPlanGetInit, vmplan, rc)
+
+    ! Call into the C++ interface,
+
+    if (present(stdout)) then
+      call c_ESMC_VMPlanSetStdout(vmplan, trim(stdout), localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    if (present(stderr)) then
+      call c_ESMC_VMPlanSetStderr(vmplan, trim(stderr), localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMPlanSetStdRedirect
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMPlanMaxPEs()"
 !BOPI
 ! !IROUTINE: ESMF_VMPlanMaxPEs - Set up a MaxPEs vmplan
@@ -10353,7 +10461,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMIdCompare - Compare two ESMF_VMId objects
 
 ! !INTERFACE:
-  function ESMF_VMIdCompare(vmId1, vmId2, rc)
+  function ESMF_VMIdCompare(vmId1, vmId2, keyOnly, keySuper, rc)
 !
 ! !RETURN VALUE:
     logical :: ESMF_VMIdCompare
@@ -10361,6 +10469,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(in)            :: vmId1
     type(ESMF_VMId),   intent(in)            :: vmId2
+    logical,           intent(in),  optional :: keyOnly
+    logical,           intent(in),  optional :: keySuper
     integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -10372,6 +10482,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        ESMF_VMId object 1
 !   \item[vmId2]
 !        ESMF_VMId object 2
+!   \item[{[keyOnly]}]
+!        For {\tt .true.} only compare the vmKey parts. Default is
+!        {\tt .false.}.
+!   \item[{[keySuper]}]
+!        Only considered when {\tt keyOnly=.true.}!!!
+!        For {\tt .true.} return {\tt .true.} for {\tt vmId1} keys whose active
+!        bits are a superset (not necessarily strict) of bits active in
+!        {\tt vmId2}. Return {\tt .false.} otherwise.
+!        Default is {\tt .false.}, i.e. an exact key match is needed to return
+!        {\tt .true.}.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -10379,14 +10499,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    type(ESMF_Logical)      :: tf
+    type(ESMF_Logical)      :: tf, keyOnlyOpt, keySuperOpt
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    keyOnlyOpt = ESMF_FALSE
+    if (present(keyOnly)) then
+      if (keyOnly) keyOnlyOpt = ESMF_TRUE
+    endif
+
+    keySuperOpt = ESMF_FALSE
+    if (present(keySuper)) then
+      if (keySuper) keySuperOpt = ESMF_TRUE
+    endif
+
     ! Call into the C++ interface
-    call c_ESMC_VMIdCompare(vmId1, vmId2, tf, localrc)
+    call c_ESMC_VMIdCompare(vmId1, vmId2, keyOnlyOpt, keySuperOpt, tf, localrc)
     ESMF_VMIdCompare = tf == ESMF_TRUE
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -10456,6 +10586,68 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end subroutine ESMF_VMIdCopy
 !------------------------------------------------------------------------------
 
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMIdGet()"
+!BOPI
+! !IROUTINE: ESMF_VMIdGet - Get information about a VMId object
+
+! !INTERFACE:
+  subroutine ESMF_VMIdGet(vmId, leftMostOnBit, isLocalPetActive, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VMId),   intent(in)            :: vmId
+    integer,           intent(out), optional :: leftMostOnBit
+    logical,           intent(out), optional :: isLocalPetActive
+    integer,           intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Copy the contents of ESMF_VMId objects.  Note that the destination
+!   objects must have been (deeply) allocated prior to calling this
+!   copy.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vmId]
+!        VMId to get information from.
+!   \item[{[leftMostOnBit]}]
+!        The index (base 0) of the leftmost on bit in {\tt vmId}. If the index
+!        is -1, then there were no on bits.
+!   \item[{[isLocalPetActive]}]
+!        Set to {\tt .true.} if the local PET is indicated as active in
+!        {\tt vmId}.
+!   \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_Logical)      :: tf
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Call into the C++ interface
+    if (present(leftMostOnBit)) then
+       call c_ESMCI_VMIdGetLeftMostOnBit(vmId, leftMostOnBit, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    if (present(isLocalPetActive)) then
+       call c_ESMCI_VMIdGetIsLocalPetActive(vmId, tf, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       isLocalPetActive = tf == ESMF_TRUE
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMIdGet
+!------------------------------------------------------------------------------  
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -17,6 +17,7 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
+#include <string>
 #include <cstdio>
 
 #include "ESMCI_F90Interface.h"
@@ -362,10 +363,11 @@ extern "C" {
                                          const char *name,
                                          int *status,
                                          ESMCI_FortranStrLenArg name_l) {
+          std::string nameStr(name, ESMC_F90lentrim(name, name_l));
           *ptr = ESMCI_ClockReadRestart(
                                            *nameLen,  // always present
                                                       //   internal argument.
-                                            name,     // required.
+                                            nameStr.c_str(),    // required.
                     ESMC_NOT_PRESENT_FILTER(status) );
        }
 
@@ -380,8 +382,8 @@ extern "C" {
                                       int *status,
                                       ESMCI_FortranStrLenArg options_l) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->Clock::validate(
-                      ESMC_NOT_PRESENT_FILTER(options) );
+          std::string optionsStr(options, ESMC_F90lentrim(options, options_l));
+          int rc = (*ptr)->Clock::validate(optionsStr.c_str());
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
@@ -389,8 +391,8 @@ extern "C" {
                                    int *status,
                                    ESMCI_FortranStrLenArg options_l) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->Clock::print(
-                   ESMC_NOT_PRESENT_FILTER(options) );
+          std::string optionsStr(options, ESMC_F90lentrim(options, options_l));
+          int rc = (*ptr)->Clock::print(optionsStr.c_str());
           fflush (stdout);
           if (ESMC_PRESENT(status)) *status = rc;
        }

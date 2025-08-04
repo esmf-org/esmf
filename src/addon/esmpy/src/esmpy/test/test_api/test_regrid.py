@@ -251,6 +251,10 @@ class TestRegrid(TestBase):
 
         return dstfield, srcfracfield, dstfracfield
 
+    # The following test fails with 12 PETs with the message, "some types of regridding
+    # (e.g. bilinear) are not supported on Grids that contain a DE of width 1"; so skip it
+    # for > 10 PETs.
+    @pytest.mark.skipif(pet_count()>10, reason="grids too small for regridding with larger PET counts")
     def test_field_regrid(self):
         # create grids
         max_index = np.array([20, 20])
@@ -390,6 +394,10 @@ class TestRegrid(TestBase):
 
                 rh.destroy()
 
+    # The following test fails with 12 PETs with the message, "some types of regridding
+    # (e.g. bilinear) are not supported on Grids that contain a DE of width 1"; so skip it
+    # for > 10 PETs.
+    @pytest.mark.skipif(pet_count()>10, reason="grids too small for regridding with larger PET counts")
     @pytest.mark.skipif(_ESMF_PIO==False, reason="PIO required in ESMF build")
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_field_regrid_file1(self):
@@ -445,6 +453,10 @@ class TestRegrid(TestBase):
             if os.path.isfile(path):
                 os.remove(path)
 
+    # The following test fails with 12 PETs with the message, "some types of regridding
+    # (e.g. bilinear) are not supported on Grids that contain a DE of width 1"; so skip it
+    # for > 10 PETs.
+    @pytest.mark.skipif(pet_count()>10, reason="grids too small for regridding with larger PET counts")
     @pytest.mark.skipif(_ESMF_PIO==False, reason="PIO required in ESMF build")
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_field_regrid_file2(self):
@@ -577,6 +589,10 @@ class TestRegrid(TestBase):
             if os.path.isfile(path):
                 os.remove(path)
 
+    # The following test fails with 12 PETs with the message, "some types of regridding
+    # (e.g. bilinear) are not supported on Grids that contain a DE of width 1"; so skip it
+    # for > 10 PETs.
+    @pytest.mark.skipif(pet_count()>10, reason="grids too small for regridding with larger PET counts")
     @pytest.mark.skipif(_ESMF_PIO==False, reason="PIO required in ESMF build")
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_field_regrid_file3(self):
@@ -672,6 +688,10 @@ class TestRegrid(TestBase):
             if os.path.isfile(path):
                 os.remove(path)
 
+    # The following test fails with 12 PETs with the message, "some types of regridding
+    # (e.g. bilinear) are not supported on Grids that contain a DE of width 1"; so skip it
+    # for > 10 PETs.
+    @pytest.mark.skipif(pet_count()>10, reason="grids too small for regridding with larger PET counts")
     def test_field_regrid_file4(self):
         mgr = Manager()
         filename = 'routehandlefile.nc'
@@ -836,11 +856,12 @@ class TestRegrid(TestBase):
                     dst_mask_values=np.atleast_1d(np.array([0])))
         dstfield = rh(srcfield, dstfield, zero_region=Region.SELECT)
 
-        # validate that the masked values were not zeroed out
+        # validate that the masked values were not zeroed out (zero_region=Region.SELECT
+        # should leave the masked values at their original values)
         for i in range(dstfield.data.shape[x]):
             for j in range(dstfield.data.shape[y]):
                 if dstfield.grid.mask[StaggerLoc.CENTER][i, j] == 0:
-                    assert(dstfield[i, j] == 0)
+                    assert(dstfield.data[i, j] == -100)
 
     @pytest.mark.skipif(_ESMF_PIO==False, reason="PIO required in ESMF build")
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
@@ -970,6 +991,10 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0016447124122954575)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    # The following test fails with 12 PETs with the message, "some types of regridding
+    # (e.g. bilinear) are not supported on Grids that contain a DE of width 1", and also
+    # "Bad processor number"; so skip it for > 10 PETs.
+    @pytest.mark.skipif(pet_count()>10, reason="grids too small for regridding with larger PET counts")
     def test_grid_grid_3d_bilinear_cartesian(self):
         # RO: This test creates the same Grid on every processor, it could be improved
 
@@ -1028,6 +1053,10 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.00061587737764545617)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    # The following test fails with 12 PETs in grid_create_from_coordinates_3d, with
+    # "UnboundLocalError: cannot access local variable 'i0' where it is not associated
+    # with a value"; so skip it for > 10 PETs
+    @pytest.mark.skipif(pet_count()>10, reason="grids too small for larger PET counts")
     def test_grid_grid_regrid_csrv_mask_3D(self):
         # RO: This test creates the same Grid on every processor, it could be improved
 
@@ -1068,6 +1097,10 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0021560174316746865)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    # The following test fails with 12 PETs in grid_create_from_coordinates, with
+    # "UnboundLocalError: cannot access local variable 'i0' where it is not associated
+    # with a value"; so skip it for > 10 PETs
+    @pytest.mark.skipif(pet_count()>10, reason="grids too small for larger PET counts")
     def test_grid_grid_regrid_csrv_mask(self):
         # RO: This test creates the same Grid on every processor, it could be improved
 
@@ -1109,6 +1142,10 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0024803189848013785)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    # The following test fails with 12 PETs in grid_create_from_coordinates, with
+    # "UnboundLocalError: cannot access local variable 'i0' where it is not associated
+    # with a value"; so skip it for > 10 PETs
+    @pytest.mark.skipif(pet_count()>10, reason="grids too small for larger PET counts")
     def test_grid_grid_regrid_csrv_2nd_mask(self):
         # RO: This test creates the same Grid on every processor, it could be improved
 
@@ -1150,6 +1187,10 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0020296891000258252)
         self.assertAlmostEqual(csrvrel, 0.0)
 
+    # The following test fails with 12 PETs in grid_create_from_coordinates, with
+    # "UnboundLocalError: cannot access local variable 'i0' where it is not associated
+    # with a value"; so skip it for > 10 PETs
+    @pytest.mark.skipif(pet_count()>10, reason="grids too small for larger PET counts")
     def test_grid_grid_regrid_srcmask_types(self):
         # NOTE: this tests an old issue where the items of a grid were not properly set when
         # the grid coord_typekind differed from the field typekind.

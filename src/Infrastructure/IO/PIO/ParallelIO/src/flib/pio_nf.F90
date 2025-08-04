@@ -140,7 +140,7 @@ module pio_nf
        pio_def_var_quantize                                 , &
        pio_inq_var_quantize                                 , &
 #endif
-#ifdef NC_HAS_MULTIFILTERS
+!!#ifdef NC_HAS_MULTIFILTERS
 #ifdef NC_HAS_BZ
        pio_inq_var_bzip2                                    , &
        pio_def_var_bzip2                                    , &
@@ -154,7 +154,7 @@ module pio_nf
        pio_inq_var_filter_info                              , &
        pio_inq_filter_avail                                 , &
 #endif
-#endif
+!!#endif
        pio_set_fill
   !       pio_copy_att    to be done
 
@@ -400,19 +400,19 @@ module pio_nf
 #ifdef NC_HAS_QUANTIZE
   interface pio_def_var_quantize
      module procedure &
-          def_var_quantize_desc                          , &
+          def_var_quantize_desc, &
           def_var_quantize_id
   end interface pio_def_var_quantize
   interface pio_inq_var_quantize
      module procedure &
-          inq_var_quantize_desc                          , &
+          inq_var_quantize_desc, &
           inq_var_quantize_id
   end interface pio_inq_var_quantize
 #endif
 #ifdef PIO_HAS_PAR_FILTERS
   interface pio_inq_var_filter_ids
      module procedure &
-          inq_var_filter_ids_desc                          , &
+          inq_var_filter_ids_desc , &
           inq_var_filter_ids_id
   end interface pio_inq_var_filter_ids
   interface pio_inq_var_filter_info

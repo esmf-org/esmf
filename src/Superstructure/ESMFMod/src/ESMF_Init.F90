@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -57,6 +57,9 @@ module ESMF_InitMod
 !     ! Main program source
 !     !   ESMF_Initialize is called from what language?
       integer, parameter :: ESMF_MAIN_C=1, ESMF_MAIN_F90=2
+
+      logical :: already_init = .false.
+      logical :: already_final = .false.
 
 !------------------------------------------------------------------------------
 ! !PUBLIC SYMBOLS
@@ -293,15 +296,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           value is set, potentially overriding the value defined within the
 !           user environment for the same variable.
 !           \begin{itemize}
+!              \item {\tt ESMF\_RUNTIME\_ABORT\_ACTION}
+!              \item {\tt ESMF\_RUNTIME\_ABORT\_LOGMSG\_TYPES}
+!              \item {\tt ESMF\_RUNTIME\_COMPLIANCECHECK}
+!              \item {\tt ESMF\_RUNTIME\_GARBAGE}
+!              \item {\tt ESMF\_RUNTIME\_GARBAGE\_LOG}
 !              \item {\tt ESMF\_RUNTIME\_PROFILE}
 !              \item {\tt ESMF\_RUNTIME\_PROFILE\_OUTPUT}
 !              \item {\tt ESMF\_RUNTIME\_PROFILE\_PETLIST}
+!              \item {\tt ESMF\_RUNTIME\_PROFILE\_REGRID}
 !              \item {\tt ESMF\_RUNTIME\_TRACE}
 !              \item {\tt ESMF\_RUNTIME\_TRACE\_CLOCK}
-!              \item {\tt ESMF\_RUNTIME\_TRACE\_PETLIST}
-!              \item {\tt ESMF\_RUNTIME\_TRACE\_COMPONENT}
 !              \item {\tt ESMF\_RUNTIME\_TRACE\_FLUSH}
-!              \item {\tt ESMF\_RUNTIME\_COMPLIANCECHECK}
+!              \item {\tt ESMF\_RUNTIME\_TRACE\_COMPONENT}
+!              \item {\tt ESMF\_RUNTIME\_TRACE\_PETLIST}
 !           \end{itemize}
 !     \item [{[configKey]}]
 !           If present, use {\tt configKey} to find the map of predefined
@@ -618,7 +626,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       logical :: rcpresent                       ! Return code present
       integer :: localrc
-      logical, save :: already_init = .false.    ! Static, maintains state.
       logical :: openflag, isPresent
       integer :: complianceCheckIsOn
       integer :: traceIsOn, profileIsOn, profileToLog
@@ -651,6 +658,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         rcpresent = .TRUE.
         rc = ESMF_RC_NOT_IMPL
       endif
+
+      if (already_final) then
+          ! If we have already finalized ESMF then it won't work to write to the ESMF
+          ! Logs, so instead write directly to stderr
+          if (rcpresent) rc = ESMF_RC_OBJ_DELETED
+          write(ESMF_UtilIOStderr,*) ESMF_METHOD, ": Cannot reinitialize ESMF after it has been finalized"
+          return
+      end if
 
       if (already_init) then
           if (rcpresent) rc = ESMF_SUCCESS
@@ -1107,6 +1122,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
         endif
 
+        ! Ingest ESMF_RUNTIME_* log variables before initializing the log
+        call ingest_environment_variable("ESMF_RUNTIME_ABORT_ACTION")
+        call ingest_environment_variable("ESMF_RUNTIME_ABORT_LOGMSG_TYPES")
+
       endif ! have a default Config
 
       if (present(configFilenameFromArgNum).or.present(configFilename)) &
@@ -1316,15 +1335,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (haveConfig) then
         ! Ingest ESMF_RUNTIME_* settings from config -> possibly override environment
+        call ingest_environment_variable("ESMF_RUNTIME_COMPLIANCECHECK")
+        call ingest_environment_variable("ESMF_RUNTIME_GARBAGE")
+        call ingest_environment_variable("ESMF_RUNTIME_GARBAGE_LOG")
+        call ingest_environment_variable("ESMF_RUNTIME_MPI_THREAD_SUPPORT")
         call ingest_environment_variable("ESMF_RUNTIME_PROFILE")
         call ingest_environment_variable("ESMF_RUNTIME_PROFILE_OUTPUT")
         call ingest_environment_variable("ESMF_RUNTIME_PROFILE_PETLIST")
+        call ingest_environment_variable("ESMF_RUNTIME_PROFILE_REGRID")
         call ingest_environment_variable("ESMF_RUNTIME_TRACE")
         call ingest_environment_variable("ESMF_RUNTIME_TRACE_CLOCK")
-        call ingest_environment_variable("ESMF_RUNTIME_TRACE_PETLIST")
-        call ingest_environment_variable("ESMF_RUNTIME_TRACE_COMPONENT")
         call ingest_environment_variable("ESMF_RUNTIME_TRACE_FLUSH")
-        call ingest_environment_variable("ESMF_RUNTIME_COMPLIANCECHECK")
+        call ingest_environment_variable("ESMF_RUNTIME_TRACE_COMPONENT")
+        call ingest_environment_variable("ESMF_RUNTIME_TRACE_PETLIST")
         ! optionally destroy the HConfigNode
         if (validHConfigNode) then
           call ESMF_HConfigDestroy(hconfigNode, rc=localrc)
@@ -1440,6 +1463,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_CONTEXT, rcToReturn=rc)) return
           endif
           if (isPresent) then
+            if (env_var_name == "ESMF_RUNTIME_MPI_THREAD_SUPPORT") then
+              ! error: ESMF_RUNTIME_MPI_THREAD_SUPPORT cannot be supported
+              ! error: through configuration file... since MPI has already
+              ! error: been initialized before ever getting here!
+              call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+                msg="Setting ESMF_RUNTIME_MPI_THREAD_SUPPORT inside "// &
+                "configuration file is not supported!", &
+                ESMF_CONTEXT, rcToReturn=rc)
+              return  ! bail out
+            endif
             if (validHConfigNode) then
               stringAlloc = ESMF_HConfigAsString(hconfigNode, &
                 keyString=env_var_name, rc=localrc)
@@ -1461,7 +1494,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_CONTEXT, rcToReturn=rc)) return
           endif
         end subroutine
-
 
       end subroutine ESMF_FrameworkInternalInit
 !------------------------------------------------------------------------------
@@ -1612,7 +1644,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc
       character(ESMF_MAXSTR) :: errmsg, msgStr
       integer :: errmsg_l
-      logical, save :: already_final = .false.    ! Static, maintains state.
 
       integer :: traceIsOn, profileIsOn
 

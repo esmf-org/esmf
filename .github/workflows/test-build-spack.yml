@@ -1,4 +1,4 @@
-name: Build ESMF Using Spack
+name: ESMF Spack Test
 
 env:
   compiler: gcc@latest
@@ -74,7 +74,7 @@ jobs:
     steps:
     # check out base repo
     - name: Checkout Base Repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     # prepare core environment
     - name: Install Core Development Tools
@@ -84,10 +84,11 @@ jobs:
         sudo apt-get -qq install build-essential binutils-dev gfortran gdb
         sudo apt-get -qq install gfortran-12 gfortran-13
         sudo apt-get -qq install python3-dev
+        sudo apt-get -qq install curl libcurl4-openssl-dev
 
     # restore Intel oneAPI compiler installation from cache
     - name: Restore Intel oneAPI Compiler Installation
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       if: ${{ startsWith(matrix.compiler, 'oneapi') }}
       with:
         path: /opt/intel/oneapi
@@ -120,7 +121,7 @@ jobs:
 
     # checkout NUOPC app prototypes
     - name: Checkout NUOPC App Prototypes
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: esmf-org/nuopc-app-prototypes
         path: ${{ github.workspace }}/nuopc-app-prototypes
@@ -143,7 +144,7 @@ jobs:
 
    # push test results to artifacts
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Artifacts for ${{ matrix.compiler }} ${{ matrix.esmf }}
         path: ${{ github.workspace }}/nuopc-app-prototypes/Artifacts

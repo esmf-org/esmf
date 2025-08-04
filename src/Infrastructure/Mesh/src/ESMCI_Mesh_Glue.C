@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -471,9 +471,6 @@ void ESMCI_meshwritewarrays(Mesh **meshpp, char *fname, ESMCI_FortranStrLenArg n
 
     char *filename = ESMC_F90toCstring(fname, nlen);
 
-    //   printf("mg: nna=%d\n",num_nodeArrays);
-
-
     WriteMesh(**meshpp, filename, 
               num_nodeArrays, nodeArrays, 
               num_elemArrays, elemArrays);
@@ -865,8 +862,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         }
       }
      }
-
-
+    
     // Variable indicating if any of the elements on this PET are split
     bool is_split_local=false;
 
@@ -1995,8 +1991,7 @@ void ESMCI_MeshGetElemConnCount(Mesh *mesh, int *_elemConnCount, int *rc){
   // Doesn't work with split meshes right now
   if (mesh->is_split) {
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-       " Can't get elem connection count from mesh containing >4 elements.",
-                                       ESMC_CONTEXT, rc)) return;
+                                       "Getting elementConnCount isn't currently supported for a 2D Mesh containing elements with >4 nodes.",                                       ESMC_CONTEXT, rc)) return;
   }
 
   // Loop summing number of nodes per element
@@ -2130,7 +2125,7 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     if (mesh->is_split) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-         " Can't currently get element info from a mesh containing >4 elements.",
+                                       "Getting element information isn't currently supported for a 2D Mesh containing elements with >4 nodes.",
                                        ESMC_CONTEXT, &localrc)) throw localrc;
     }
     
@@ -2466,7 +2461,7 @@ void ESMCI_MeshSetElemInfo(Mesh *mesh,
     if (mesh->is_split && present(elemArea)) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  " element areas can't currently be set for a mesh containing >4 elements.",
+            "Setting element areas isn't currently supported for a 2D Mesh containing elements with >4 nodes.",
                           ESMC_CONTEXT, &localrc)) throw localrc;
     }
     
@@ -4926,10 +4921,8 @@ void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesA
     if ((elem_mask_val!=NULL) &&
         (elem_mask    !=NULL)) {
 
-      // Loop through elements setting values
-      // Here we depend on the fact that data index for elements
-      // is set as the position in the local array above
-      Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      // Loop through all elements setting values
+      Mesh::iterator ei = mesh.elem_begin_all(), ee = mesh.elem_end_all();
       for (; ei != ee; ++ei) {
         MeshObj &elem = *ei;
 
@@ -5025,10 +5018,8 @@ void ESMCI_meshturnoffcellmask(Mesh **meshpp, int *rc) {
     if ((elem_mask_val!=NULL) &&
         (elem_mask    !=NULL)) {
 
-      // Loop through elements setting values
-      // Here we depend on the fact that data index for elements
-      // is set as the position in the local array above
-      Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      // Loop through all elements setting values
+      Mesh::iterator ei = mesh.elem_begin_all(), ee = mesh.elem_end_all();
       for (; ei != ee; ++ei) {
         MeshObj &elem = *ei;
 
@@ -5125,8 +5116,8 @@ void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesA
     if ((node_mask_val!=NULL) &&
         (node_mask    !=NULL)) {
 
-      // Loop through nodes setting values
-      Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+      // Loop through all nodes setting values
+      Mesh::iterator ni = mesh.node_begin_all(), ne = mesh.node_end_all();
       for (; ni != ne; ++ni) {
         MeshObj &node = *ni;
 
@@ -5220,10 +5211,8 @@ void ESMCI_meshturnoffnodemask(Mesh **meshpp, int *rc) {
     if ((node_mask_val!=NULL) &&
         (node_mask    !=NULL)) {
 
-      // Loop through elements setting values
-      // Here we depend on the fact that data index for elements
-      // is set as the position in the local array above
-      Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+      // Loop through all nodes setting values
+      Mesh::iterator ni = mesh.node_begin_all(), ne = mesh.node_end_all();
       for (; ni != ne; ++ni) {
         MeshObj &node = *ni;
 

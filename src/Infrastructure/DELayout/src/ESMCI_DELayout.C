@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -456,7 +456,7 @@ int DELayout::destroy(
   }
 
   // optionally delete the complete object and remove from garbage collection
-  if (noGarbage){
+  if (noGarbage || VM::getCurrent()->isGarbageNone()){
     VM::rmObject(*delayout); // remove object from garbage collection
     delete (*delayout);      // completely delete the object, free heap
   }

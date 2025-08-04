@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -11629,7 +11629,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_HConfig[Iter]), intent(in)      :: hconfig
+!    type(ESMF_HConfig[Iter]), intent(inout)   :: hconfig
 !    <Type>,             intent(in)            :: content[(:)]
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,            intent(in),  optional :: index
@@ -11687,7 +11687,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetHConfig(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfig), intent(inout)         :: hconfig
     type(ESMF_HConfig), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -11739,7 +11739,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigIterSetHConfig(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     type(ESMF_HConfig), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -11777,7 +11777,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetI4(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfig),     intent(in)            :: hconfig
+    type(ESMF_HConfig),     intent(inout)         :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -11823,7 +11823,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigIterSetI4(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(inout)         :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -11861,7 +11861,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetI4Seq(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfig),     intent(in)            :: hconfig
+    type(ESMF_HConfig),     intent(inout)         :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -11907,7 +11907,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigIterSetI4Seq(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(inout)         :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -11944,7 +11944,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetI8(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfig),     intent(in)            :: hconfig
+    type(ESMF_HConfig),     intent(inout)         :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -11990,7 +11990,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigIterSetI8(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(inout)         :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -12028,7 +12028,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetI8Seq(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfig),     intent(in)            :: hconfig
+    type(ESMF_HConfig),     intent(inout)         :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -12074,7 +12074,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigIterSetI8Seq(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(inout)         :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -12112,7 +12112,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetLogical(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfig), intent(inout)         :: hconfig
     logical,            intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -12158,7 +12158,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigIterSetLogical(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     logical,            intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -12196,7 +12196,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetLogicalSeq(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfig),     intent(in)            :: hconfig
+    type(ESMF_HConfig),     intent(inout)         :: hconfig
     logical,                intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -12242,7 +12242,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigIterSetLogicalSeq(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(inout)         :: hconfig
     logical,                intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -12279,7 +12279,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetR4(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfig), intent(inout)         :: hconfig
     real(ESMF_KIND_R4), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -12325,7 +12325,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigIterSetR4(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     real(ESMF_KIND_R4), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -12363,7 +12363,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetR4Seq(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfig), intent(inout)         :: hconfig
     real(ESMF_KIND_R4), intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -12409,7 +12409,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigIterSetR4Seq(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     real(ESMF_KIND_R4), intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -12447,7 +12447,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetR8(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfig), intent(inout)         :: hconfig
     real(ESMF_KIND_R8), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -12493,7 +12493,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigIterSetR8(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     real(ESMF_KIND_R8), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -12532,7 +12532,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfig), intent(inout)         :: hconfig
     real(ESMF_KIND_R8), intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -12579,7 +12579,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     real(ESMF_KIND_R8), intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -12617,7 +12617,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetString(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfig), intent(inout)         :: hconfig
     character(*),       intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -12663,7 +12663,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigIterSetString(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     character(*),       intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -12701,7 +12701,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetStringSeq(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfig),     intent(in)            :: hconfig
+    type(ESMF_HConfig),     intent(inout)         :: hconfig
     character(len=*),       intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -12747,7 +12747,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigIterSetStringSeq(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(inout)         :: hconfig
     character(len=*),       intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -12783,11 +12783,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigSetMapKey - Set <Type> content in HConfig MapKey object
 
 ! !INTERFACE:
-!  subroutine ESMF_HConfigSet(hconfig, content, keywordEnforcer, &
+!  subroutine ESMF_HConfigSetMapKey(hconfig, content, keywordEnforcer, &
 !    index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_HConfigIter), intent(in)        :: hconfig
+!    type(ESMF_HConfigIter), intent(inout)     :: hconfig
 !    <Type>,             intent(in)            :: content[(:)]
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,            intent(in),  optional :: index
@@ -12845,7 +12845,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyHConfig(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     type(ESMF_HConfig), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -12897,7 +12897,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyI4(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(inout)         :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -12943,7 +12943,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyI4Seq(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(inout)         :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -12989,7 +12989,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyI8(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(inout)         :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -13035,7 +13035,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyI8Seq(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(inout)         :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -13081,7 +13081,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyLogical(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     logical,            intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13127,7 +13127,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyLogicalSeq(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     logical,            intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13173,7 +13173,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyR4(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     real(ESMF_KIND_R4), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13219,7 +13219,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyR4Seq(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     real(ESMF_KIND_R4), intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13265,7 +13265,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyR8(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     real(ESMF_KIND_R8), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13311,7 +13311,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyR8Seq(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     real(ESMF_KIND_R8), intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13357,7 +13357,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyString(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     character(*),       intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13404,7 +13404,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     character(*),       intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13448,11 +13448,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigSetMapVal - Set <Type> content in HConfig MapVal object
 
 ! !INTERFACE:
-!  subroutine ESMF_HConfigSet(hconfig, content, keywordEnforcer, &
+!  subroutine ESMF_HConfigSetMapVal(hconfig, content, keywordEnforcer, &
 !    index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_HConfigIter), intent(in)        :: hconfig
+!    type(ESMF_HConfigIter), intent(inout)     :: hconfig
 !    <Type>,             intent(in)            :: content[(:)]
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,            intent(in),  optional :: index
@@ -13510,7 +13510,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValHConfig(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     type(ESMF_HConfig), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13562,7 +13562,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValI4(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter),     intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(inout)         :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -13608,7 +13608,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValI4Seq(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(inout)         :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -13655,7 +13655,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfigIter),     intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(inout)         :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -13701,7 +13701,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValI8Seq(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(inout)         :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -13747,7 +13747,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValLogical(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     logical,            intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13794,7 +13794,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     logical,            intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13840,7 +13840,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValR4(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     real(ESMF_KIND_R4), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13886,7 +13886,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValR4Seq(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     real(ESMF_KIND_R4), intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13932,7 +13932,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValR8(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     real(ESMF_KIND_R8), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13978,7 +13978,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValR8Seq(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     real(ESMF_KIND_R8), intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -14024,7 +14024,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValString(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     character(*),       intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -14070,7 +14070,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValStringSeq(hconfig, content, keywordEnforcer, &
     index, keyString, doc, rc)
 
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
     character(*),       intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index

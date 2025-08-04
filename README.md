@@ -1,12 +1,13 @@
-[![ESMF Doc Build](https://github.com/esmf-org/esmf/actions/workflows/build-esmf-docs.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/build-esmf-docs.yml)
-[![ESMPy Doc Build](https://github.com/esmf-org/esmf/actions/workflows/build-esmpy-docs.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/build-esmpy-docs.yml)
-[![Build ESMF Using Spack](https://github.com/esmf-org/esmf/actions/workflows/test-build-spack.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/test-build-spack.yml)
+[![ESMF CI](https://github.com/esmf-org/esmf/actions/workflows/esmf-all-tests.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/esmf-all-tests.yml)
+[![NUOPC App Prototypes Test](https://github.com/esmf-org/nuopc-app-prototypes/actions/workflows/develop-nightly.yml/badge.svg)](https://github.com/esmf-org/nuopc-app-prototypes/actions/workflows/develop-nightly.yml)
+[![ESMF Spack Test](https://github.com/esmf-org/esmf/actions/workflows/test-build-spack.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/test-build-spack.yml)
+[![ESMF Docs](https://github.com/esmf-org/esmf/actions/workflows/build-esmf-docs.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/build-esmf-docs.yml)
 
 # Earth System Modeling Framework (ESMF)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11205526.svg)](https://doi.org/10.5281/zenodo.11205526)
 
->Copyright (c) 2002-2024 University Corporation for Atmospheric Research, Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory, University of Michigan, National Centers for Environmental Prediction, Los Alamos National Laboratory, Argonne National Laboratory, NASA Goddard Space Flight Center. All rights reserved.
+>Copyright (c) 2002-2025 University Corporation for Atmospheric Research, Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory, University of Michigan, National Centers for Environmental Prediction, Los Alamos National Laboratory, Argonne National Laboratory, NASA Goddard Space Flight Center. All rights reserved.
 
 Hello and welcome to ESMF.
 
@@ -34,7 +35,7 @@ Pre-built binaries for ESMF and ESMPy are available through a number of channels
    ```
    docker run -it --rm esmf/esmf-build-release:latest
    ```
-   Replace `latest` in the above command with a valid version, like `8.6.0`, in order to access a specific ESMF version.
+   Replace `latest` in the above command with a valid version, like `9.0.0`, in order to access a specific ESMF version.
    
  * [Anaconda Conda-Forge](https://anaconda.org/conda-forge/): Under [conda-forge/esmpy](https://anaconda.org/conda-forge/esmpy). To install locally (_note Windows is not supported_), run:
    ```

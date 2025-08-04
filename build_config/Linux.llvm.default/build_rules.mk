@@ -6,7 +6,7 @@
 ############################################################
 # Default compiler setting.
 #
-ESMF_F90DEFAULT         = flang-new
+ESMF_F90DEFAULT         = flang
 ESMF_CXXDEFAULT         = clang++
 ESMF_CDEFAULT           = clang
 ESMF_CPPDEFAULT		= clang -E -P -x c
@@ -70,19 +70,10 @@ ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
-ifeq ($(ESMF_COMM),mvapich2)
-# Mvapich2 ---------------------------------------------------
+ifeq ($(ESMF_COMM),mvapich)
+# Mvapich any version --------------------------------------
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
-ESMF_CDEFAULT           = mpicc
-ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
-ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-else
-ifeq ($(ESMF_COMM),lam)
-# LAM (assumed to be built with flang-new) -----------------------
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
-ESMF_F90DEFAULT         = mpif77
-ESMF_CXXDEFAULT         = mpic++
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
@@ -114,7 +105,6 @@ endif
 endif
 endif
 endif
-endif
 
 ############################################################
 # Print compiler version string
@@ -126,7 +116,7 @@ ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -v --version
 ############################################################
 # Special debug flags
 #
-ESMF_F90OPTFLAG_G       += 
+ESMF_F90OPTFLAG_G       +=
 
 ############################################################
 # Fortran symbol convention
@@ -178,31 +168,31 @@ ESMF_CXXCOMPILEOPTS       += -m32
 ESMF_CXXLINKOPTS          += -m32
 ESMF_CCOMPILEOPTS         += -m32
 ESMF_CLINKOPTS            += -m32
-ESMF_F90COMPILEOPTS       += -m32
-ESMF_F90LINKOPTS          += -m32
+ESMF_F90COMPILEOPTS       += 
+ESMF_F90LINKOPTS          += 
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_small)
 ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=small
 ESMF_CXXLINKOPTS          += -m64 -mcmodel=small
 ESMF_CCOMPILEOPTS         += -m64 -mcmodel=small
 ESMF_CLINKOPTS            += -m64 -mcmodel=small
-ESMF_F90COMPILEOPTS       += -m64 -mcmodel=small
-ESMF_F90LINKOPTS          += -m64 -mcmodel=small
+ESMF_F90COMPILEOPTS       += 
+ESMF_F90LINKOPTS          += 
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_medium)
 ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=medium
 ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
 ESMF_CCOMPILEOPTS         += -m64 -mcmodel=medium
 ESMF_CLINKOPTS            += -m64 -mcmodel=medium
-ESMF_F90COMPILEOPTS       += -m64 -mcmodel=medium
-ESMF_F90LINKOPTS          += -m64 -mcmodel=medium
+ESMF_F90COMPILEOPTS       += 
+ESMF_F90LINKOPTS          += 
 endif
 
 ############################################################
 # Conditionally add pthread compiler and linker flags
 #
 ifeq ($(ESMF_PTHREADS),ON)
-ESMF_F90COMPILEOPTS += -pthread
+ESMF_F90COMPILEOPTS +=
 ESMF_CXXCOMPILEOPTS += -pthread
 ESMF_CCOMPILEOPTS   += -pthread
 ESMF_F90LINKOPTS    += -pthread
@@ -213,22 +203,26 @@ endif
 ############################################################
 # OpenMP compiler and linker flags
 #
-ESMF_OPENMP=OFF
-# ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
-# ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
-# ESMF_OPENMP_F90LINKOPTS    += -fopenmp
-# ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
+ESMF_OPENMPDEFAULT = OFF
+ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
+ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
+ESMF_OPENMP_F90LINKOPTS    += -fopenmp
+ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 
 ############################################################
-# Need this until the file convention is fixed (then remove these two lines)
+# OpenACC compiler and linker flags
+#
+ESMF_OPENACCDEFAULT = OFF
+ESMF_OPENACC_F90COMPILEOPTS += -fopenacc
+ESMF_OPENACC_CXXCOMPILEOPTS += -fopenacc
+ESMF_OPENACC_F90LINKOPTS    += -fopenacc
+ESMF_OPENACC_CXXLINKOPTS    += -fopenacc
+
+############################################################
+# Explicit flags for handling specific format and cpp combos
 #
 ESMF_F90COMPILEFREENOCPP = -ffree-form
 ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
-
-############################################################
-# Set unlimited line length limit for free format files
-#
-ESMF_F90COMPILEOPTS += -ffree-line-length-none
 
 ############################################################
 # Set rpath syntax
@@ -238,30 +232,6 @@ ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
 ESMF_CRPATHPREFIX           = -Wl,-rpath,
 
 ############################################################
-# Determine where gcc's libraries are located
-#
-# Note that the result of -print-file-name will be the full path to the file if it is found
-# within the compiler installation, and simply the file name verbatim if it is NOT found.
-ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS) -print-file-name=libstdc++.so)
-ifeq ($(ESMF_LIBSTDCXX),libstdc++.so)
-ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS) -print-file-name=libstdc++.a)
-endif
-ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
-ESMF_F90LINKRPATHS += $(ESMF_F90RPATHPREFIX)$(dir $(ESMF_LIBSTDCXX))
-
-############################################################
-# Determine where flang-new's libraries are located
-#
-# Note that the result of -print-file-name will be the full path to the file if it is found
-# within the compiler installation, and simply the file name verbatim if it is NOT found.
-ESMF_LIBFLANG := $(shell $(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS) -print-file-name=libflang.so)
-ifeq ($(ESMF_LIBFLANG),libflang.so)
-ESMF_LIBFLANG := $(shell $(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS) -print-file-name=libflang.a)
-endif
-ESMF_CXXLINKPATHS += -L$(dir $(ESMF_LIBFLANG))
-ESMF_CXXLINKRPATHS += $(ESMF_CXXRPATHPREFIX)$(dir $(ESMF_LIBFLANG))
-
-############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
 ESMF_F90LINKLIBS += -lrt -lstdc++ -ldl
@@ -269,7 +239,7 @@ ESMF_F90LINKLIBS += -lrt -lstdc++ -ldl
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lrt -lflang -lstdc++ -lm -ldl
+ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.llvm $(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)) -lrt -lstdc++ -lm -ldl
 
 ############################################################
 # Linker option that ensures that the specified libraries are 

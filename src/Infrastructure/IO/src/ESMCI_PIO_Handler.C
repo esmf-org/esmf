@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -43,6 +43,7 @@
 #include "ESMCI_Info.h"
 #include "json.hpp"
 #include "ESMCI_TraceMacros.h"
+#include "ESMCI_IO_NetCDF_Utils.h"
 
 // Define PIO NetCDF and Parallel NetCDF flags
 #ifdef ESMF_PNETCDF
@@ -1471,6 +1472,11 @@ void PIO_Handler::attPackPut (
     ESMC_CATCH_ERRPASSTHRU
 
     ESMC_TypeKind_Flag att_type = ESMCI::json_type_to_esmf_typekind(jcurr, true, is_32bit);
+    nc_type att_nc_type = esmcToNcType(att_type);
+    // We deliberately don't do error checking here on att_nc_type (checking whether it's
+    // NC_UNSPECIFIED): we only use att_nc_type in certain cases, and don't want to raise
+    // an error in situations where we don't need its value anyway.
+
     switch (att_type) {
       case ESMC_TYPEKIND_CHARACTER: {
         if (size > 1) {
@@ -1487,7 +1493,7 @@ void PIO_Handler::attPackPut (
       case ESMC_TYPEKIND_I8: {
         const std::vector<long> value = jcurr.get<std::vector<long>>();
         piorc = PIOc_put_att_long (filedesc, vardesc,
-                                   it.key().c_str(), att_type, size, value.data());
+                                   it.key().c_str(), att_nc_type, size, value.data());
         if (!CHECKPIOERROR(piorc, "Attempting to set I8 Attribute: " + it.key(),
                            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
@@ -1495,7 +1501,7 @@ void PIO_Handler::attPackPut (
       case ESMC_TYPEKIND_R8: {
         const std::vector<double> value = jcurr.get<std::vector<double>>();
         piorc = PIOc_put_att_double (filedesc, vardesc,
-                                     it.key().c_str(), att_type, size, value.data());
+                                     it.key().c_str(), att_nc_type, size, value.data());
         if (!CHECKPIOERROR(piorc, "Attempting to set R8 Attribute: " + it.key(),
                            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
@@ -1503,7 +1509,7 @@ void PIO_Handler::attPackPut (
       case ESMC_TYPEKIND_I4: {
         const std::vector<int> value = jcurr.get<std::vector<int>>();
         piorc = PIOc_put_att_int (filedesc, vardesc,
-                                  it.key().c_str(), att_type, size, value.data());
+                                  it.key().c_str(), att_nc_type, size, value.data());
         if (!CHECKPIOERROR(piorc, "Attempting to set I4 Attribute: " + it.key(),
                            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
@@ -1511,7 +1517,7 @@ void PIO_Handler::attPackPut (
       case ESMC_TYPEKIND_R4: {
         const std::vector<float> value = jcurr.get<std::vector<float>>();
         piorc = PIOc_put_att_float (filedesc, vardesc,
-                                    it.key().c_str(), att_type, size, value.data());
+                                    it.key().c_str(), att_nc_type, size, value.data());
         if (!CHECKPIOERROR(piorc, "Attempting to set R4 Attribute: " + it.key(),
                            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;

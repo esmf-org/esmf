@@ -430,7 +430,7 @@ write_darray_multi_par(file_desc_t *file, int nvars, int fndims, const int *vari
 
         ierr = ncmpi_wait_all(file->fh, NC_REQ_ALL, NULL, NULL);
 #endif /* _PNETCDF */
-
+	MPI_Offset chkcnt2=0;
         /* Process each region of data to be written. */
         for (int regioncnt = 0; regioncnt < num_regions; regioncnt++)
         {
@@ -438,6 +438,11 @@ write_darray_multi_par(file_desc_t *file, int nvars, int fndims, const int *vari
             if ((ierr = find_start_count(iodesc->ndims, fndims, vdesc, region, frame,
                                          start, count)))
                 return pio_err(ios, file, ierr, __FILE__, __LINE__);
+	    size_t cnt = 1;
+	    for(int i=0; i<fndims; i++){
+		cnt *= count[i];
+	    }
+	    chkcnt2 += cnt;
 
             /* IO tasks will run the netCDF/pnetcdf functions to write the data. */
             switch (file->iotype)
@@ -490,10 +495,10 @@ write_darray_multi_par(file_desc_t *file, int nvars, int fndims, const int *vari
                     for (int i = 0; i < fndims; i++)
                     {
                         startlist[rrcnt][i] = start[i];
-                        countlist[rrcnt][i] = count[i];
-                        PLOG((3, "startlist[%d][%d] = %d countlist[%d][%d] = %d", rrcnt, i,
+                        countlist[rrcnt][i] = count[i]; 
+                        PLOG((3, "startlist[%d][%d] = %lld countlist[%d][%d] = %lld", rrcnt, i,
                               startlist[rrcnt][i], rrcnt, i, countlist[rrcnt][i]));
-                    }
+                   }
                     rrcnt++;
                 }
 
@@ -645,11 +650,22 @@ write_darray_multi_par(file_desc_t *file, int nvars, int fndims, const int *vari
                         else /* don't flush yet, accumulate the request size */
                             vard_llen += llen;
 #else
-
                         ierr = ncmpi_iput_varn(file->fh, varids[nv], rrcnt, startlist, countlist,
-                                               bufptr, llen, iodesc->mpitype, NULL);
+                                               bufptr, chkcnt2, iodesc->mpitype, NULL);
+//                                               bufptr, llen, iodesc->mpitype, NULL);
 
 
+			if (ierr){
+			    MPI_Offset chksize=0;
+			    for (int j = 0; j < rrcnt; j++)
+			    {
+/*				printf("%d: nv=%d startlist[%d][%d] = %lld countlist[%d][%d] = %lld\n", ios->io_rank, nv, j, i,
+				       startlist[j][i], j, i, countlist[j][i]);
+*/
+				chksize += countlist[j][0]*countlist[j][1]*countlist[j][2];
+			    }
+			    printf("llen = %lld chksize = %lld chkcnt2 = %lld\n",llen, chksize, chkcnt2);
+			}
                         vdesc->nreqs++;
 #endif
                     }

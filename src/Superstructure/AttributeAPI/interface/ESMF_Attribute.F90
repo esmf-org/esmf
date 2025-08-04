@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -870,8 +870,8 @@ contains  !====================================================================
 !     integer,             intent(inout), optional :: rc
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Add an ESMF Attribute package.
@@ -920,8 +920,8 @@ contains  !====================================================================
 !     integer,             intent(inout), optional :: rc
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Add an ESMF Attribute package containing a nested Attribute package.
@@ -982,8 +982,8 @@ contains  !====================================================================
 !     integer,                 intent(out), optional :: rc
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Copy an Attribute hierarchy from \texttt{src} to \texttt{dst}.
@@ -1040,8 +1040,8 @@ contains  !====================================================================
 !     integer,                intent(inout), optional :: rc
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt value} from the \texttt{target}, or from an Attribute
@@ -1121,8 +1121,8 @@ contains  !====================================================================
 !     integer,                intent(inout), optional :: rc
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt valueList} from the \texttt{target}, or from an
@@ -1208,8 +1208,8 @@ contains  !====================================================================
 !     \end{itemize}
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt value} from the \texttt{target}, or from an Attribute
@@ -1297,8 +1297,8 @@ contains  !====================================================================
 !     \end{itemize}
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt valueList} from the \texttt{target}, or from an
@@ -1379,8 +1379,8 @@ contains  !====================================================================
 !     integer,                    intent(inout), optional :: rc
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Return the Attribute count for \texttt{target}.
@@ -1449,8 +1449,8 @@ contains  !====================================================================
 !     \end{itemize}
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Return the Attribute count for \texttt{target}.
@@ -1517,8 +1517,8 @@ contains  !====================================================================
 !     integer,                  intent(inout), optional :: rc
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Return information associated with an Attribute in an Attribute package,
@@ -1594,8 +1594,8 @@ contains  !====================================================================
 !     \end{itemize}
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Return information associated with the named Attribute,
@@ -1666,8 +1666,8 @@ contains  !====================================================================
 !     integer,                  intent(out), optional :: rc
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Returns information associated with the indexed Attribute,
@@ -1747,8 +1747,8 @@ contains  !====================================================================
 !     \end{itemize}
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Returns information associated with the indexed Attribute,
@@ -1827,8 +1827,8 @@ contains  !====================================================================
 !     \end{itemize}
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Get an ESMF Attribute package object.
@@ -1892,8 +1892,8 @@ contains  !====================================================================
 !     \end{itemize}
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Read Attributes for \texttt{target} from \texttt{fileName}, whose format is JSON.
@@ -1942,8 +1942,8 @@ contains  !====================================================================
 !     integer,                 intent(inout), optional :: rc
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Remove an Attribute, or Attribute package on \texttt{target}.
@@ -2013,8 +2013,8 @@ contains  !====================================================================
 !     \end{itemize}
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Remove an Attribute, or Attribute package on \texttt{target}.
@@ -2082,8 +2082,8 @@ contains  !====================================================================
 !     integer,                 intent(inout), optional :: rc
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Attach an Attribute to \texttt{target}, or set an Attribute in an
@@ -2158,8 +2158,8 @@ contains  !====================================================================
 !     integer,                 intent(inout), optional :: rc
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Attach an Attribute to \texttt{target}, or set an Attribute in an
@@ -2241,8 +2241,8 @@ contains  !====================================================================
 !     \end{itemize}
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Attach an Attribute to \texttt{target}, or set an Attribute in an
@@ -2324,8 +2324,8 @@ contains  !====================================================================
 !     \end{itemize}
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Attach an Attribute to \texttt{target}, or set an Attribute in an
@@ -2403,8 +2403,8 @@ contains  !====================================================================
 !     \end{itemize}
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Update an Attribute hierarchy during runtime. The information from
@@ -2456,8 +2456,8 @@ contains  !====================================================================
 !     integer,                 intent(out), optional :: rc
 !
 ! !STATUS:
-! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
-! {ESMF\_Info}{esmf_info_class}
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}
+! {in a future ESMF release}{ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Write the Attribute package to file for \texttt{target}. JSON is the

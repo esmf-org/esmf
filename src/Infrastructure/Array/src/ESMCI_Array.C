@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1814,9 +1814,19 @@ Array *Array::create(
   int *localDeToDeMapArg = NULL;          // default: use map from DELayout
   VM::memhandle *mh = NULL;               // default: no memory sharing
 
-  // branch on pinflag
+  // handle pinflag
   ESMC_Pin_Flag pinflag = ESMF_PIN_DE_TO_PET; // default
   if (pinflagArg) pinflag = *pinflagArg;
+  if (pinflag == ESMF_PIN_DE_TO_VAS){
+    VM *cvm = VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+    if (cvm->isMpiOnly()){
+      // all PETs of the current VM run as MPI processes -> each PET==VAS
+      pinflag = ESMF_PIN_DE_TO_PET;
+    }
+  }
+  // branch on pinflag
   if (pinflag == ESMF_PIN_DE_TO_PET){
     // regular case where each DE is only accessible from the local PET
     vector<int> temp_counts(rank);
@@ -2694,7 +2704,7 @@ int Array::destroy(
   }
 
   // optionally delete the complete object and remove from garbage collection
-  if (noGarbage){
+  if (noGarbage || VM::getCurrent()->isGarbageNone()){
     VM::rmObject(*array); // remove object from garbage collection
     delete (*array);      // completely delete the object, free heap
   }
@@ -4151,13 +4161,17 @@ void Array::log(
   msg << prefix << "--- Array::log() start -----------------------------------";
   ESMC_LogDefault.Write(msg.str(), msgType);
 
+  msg.str("");  // clear
+  msg << prefix << this;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+
   if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY){
     msg.str("");  // clear
     msg << prefix << "Array object is invalid! Not created or deleted!";
     ESMC_LogDefault.Write(msg.str(), msgType);
   }else{
     msg.str("");  // clear
-    msg << prefix << " <name: " << getName() << ">";
+    msg << prefix << "<name: " << getName() << ">";
     ESMC_LogDefault.Write(msg.str(), msgType);
     if (deepFlag) getDistGrid()->log(prefix+"! ", msgType, deepFlag);
   }

@@ -3,7 +3,7 @@ The Connector Component metadata is implemented through ESMF\_Info. It can be ac
 using the JSON Pointer "/NUOPC/Instance/" prefix followed by the "Attribute name"
 as per the table below. E.g. "Verbosity" is accessed using {\tt key="/NUOPC/Instance/Verbosity"}.
 
-\begin{longtable}{|p{.22\textwidth}|p{.6\textwidth}|p{.2\textwidth}|}
+\begin{longtable}{|p{.25\textwidth}|p{.4\textwidth}|p{.4\textwidth}|}
      \hline\hline
      {\bf Attribute name} & {\bf Definition} & {\bf Controlled vocabulary}\\
      \hline\hline
@@ -69,6 +69,9 @@ as per the table below. E.g. "Verbosity" is accessed using {\tt key="/NUOPC/Inst
      {\tt CplList} & List of StandardNames of the connected Fields. Each StandardName entry may be followed by a colon separated list of connection options. The details are discussed in section \ref{connection_options} & {\em Standard names} as per field dictionary, followed by {\em connection options} defined in section \ref{connection_options}.\\ \hline
      {\tt CplSetList} & List of coupling sets. Each coupling set is identified by a string value.& {\em no restriction}\\ \hline
      {\tt ConnectionOptions} & String value specifying the connection options to be applied to all the fields in the {\tt CplList} by default.& {\em Connection options} defined in section \ref{connection_options}.\\ \hline
-     {\tt EpochThrottle} & Integer specifying the maximum number of outstanding EPOCH messages between any two PETs. The ESMF level default is 10. & Any positive integer.\\ \hline
+     {\tt EpochEnable} & String value specifying whether EPOCH support is enabled inside the Connector. The default setting is "true". & false, true\\ \hline
+     {\tt EpochEnterKeepAlloc} & String value specifying whether to keep internal allocations when entering the EPOCH for reuse. The default setting is "true". & false, true\\ \hline
+     {\tt EpochExitKeepAlloc} & String value specifying whether to keep internal allocations when exiting the EPOCH for reuse. The default setting is "true". & false, true\\ \hline
+     {\tt EpochThrottle} & Integer specifying the maximum number of outstanding EPOCH messages between any two PETs. The default throttle level is 10. & Any positive integer.\\ \hline
      \hline
 \end{longtable}

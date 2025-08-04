@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -148,8 +148,8 @@ ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<i
  ESMC_CoordSys_Flag coordsys;
 
  // Temp XGrid info
- int side; // 1=A, 2=B, 3= middle
- int ind; // which number grid on the side
+ int side; // 1=A, 2=B, 3= middle  -1=unused
+ int ind; // which number grid on the side (-1 unused)
 
  // Original comm where this mesh was commited               
  MPI_Comm orig_comm;

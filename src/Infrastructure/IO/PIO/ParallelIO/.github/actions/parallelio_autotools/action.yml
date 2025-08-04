@@ -2,7 +2,7 @@ description: 'Build the parallelio library using cmake'
 inputs:
   parallelio_version:
     description: 'Tag in the parallelio repository to use'
-    default: pio2_5_10
+    default: pio2_6_3
     required: False
     type: string
   shared_libraries:
@@ -101,12 +101,12 @@ runs:
   using: composite
   steps:
     - name: Check if already present
-      uses: andstor/file-existence-action@v2
+      uses: andstor/file-existence-action@v3
       with:
        files: ${{ inputs.src_path }}
     - name: get parallelio
       if: ${{ steps.check_files.outputs.files_exists != 'true' }}
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: NCAR/ParallelIO
         path: ${{ inputs.src_path }}

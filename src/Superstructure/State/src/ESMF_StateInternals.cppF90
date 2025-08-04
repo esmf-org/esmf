@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -377,7 +377,6 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
         else
           stypep%st = ESMF_STATEINTENT_UNSPECIFIED
         endif
-        stypep%reconcileneededflag = .false.
 
         stypep%stateContainer = ESMF_ContainerCreate (rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -698,7 +697,6 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
 ^if defined(stateversion) @\
 !        TODO: This needs to be verified... @\
          sip%datap%spp => mname(i)%statep ! State version @\
-         sip%datap%spp%reconcileneededFlag = .false. @\
 ^else @\
         sip%datap%mtypecomponent = mname(i) @\
 ^endif @\
@@ -725,8 +723,6 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
         end if @\
  @\
       end do @\
- @\
-      stypep%reconcileneededFlag = .true. @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -25,7 +25,7 @@ module NUOPC
   use NUOPC_Comp
 
   implicit none
-  
+
   private
 
   ! public
@@ -65,6 +65,8 @@ module NUOPC
   public NUOPC_CompCheckSetClock          ! method
   public NUOPC_CompDerive                 ! method
   public NUOPC_CompGet                    ! method
+  public NUOPC_CompHandleVerbosityIntro   ! method
+  public NUOPC_CompHandleVerbosityExtro   ! method
   public NUOPC_CompFilterPhaseMap         ! method
   public NUOPC_CompSearchPhaseMap         ! method
   public NUOPC_CompSearchRevPhaseMap      ! method

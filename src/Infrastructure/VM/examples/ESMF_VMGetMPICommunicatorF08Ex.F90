@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -17,13 +17,13 @@
 !------------------------------------------------------------------------------
 !BOE
 !
-! \subsubsection{Using the MPI Communicator with the Fortran 2008 MPI binding}
+! \subsubsection{Using the MPI Communicator returned by ESMF with the Fortran 2008 MPI binding}
 !
 ! The Fortran 2008 MPI language binding defines {\tt type MPI\_Comm} to
 ! represent the MPI communicator. The following example demonstrates
-! how the MPI communicator queried from the VM object can be used with the
+! how the MPI communicator queried from the ESMF VM object can be used with the
 ! Fortran 2008 MPI binding.
-! 
+!
 !EOE
 !------------------------------------------------------------------------------
 

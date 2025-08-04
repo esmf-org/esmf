@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -216,7 +216,7 @@ namespace ESMCI {
     }
 
     //--------------------------------------------------------------------
-    void FTN_X(c_esmc_io_yamlcget)(IO_YAML **ptr, char *data, int *rc) {
+    void FTN_X(c_esmc_io_yamlcget)(IO_YAML **ptr, char *data, int *dataLen, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlcget()"
       // Initialize return code; assume routine not implemented
@@ -228,7 +228,7 @@ namespace ESMCI {
       if (data) {
         const std::string buffer = (*ptr)->cget();
         if (!buffer.empty()) {
-          size_t len = buffer.copy(data, std::strlen(data));
+          size_t len = buffer.copy(data, *dataLen);
           data[len] = '\0';
         }
       }

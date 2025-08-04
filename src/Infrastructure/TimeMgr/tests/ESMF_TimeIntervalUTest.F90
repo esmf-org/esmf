@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -68,7 +68,13 @@
       logical :: bool
 
       ! to retrieve time in string format
-      character(ESMF_MAXSTR) :: timeString
+      !
+      ! note that this string is just barely long enough to hold the result string (to
+      ! ensure we don't have off-by-one errors in the string building and going back and
+      ! forth between Fortran and C strings)
+      character(15) :: timeString15
+      ! and this one is just barely too short:
+      character(14) :: timeString14
 
       ! instantiate timestep, start and stop times
       type(ESMF_Time) :: time1, time2
@@ -503,12 +509,19 @@
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet(timeStep, d=60, rc=rc)
       call ESMF_TimeIntervalGet(timeStep, mm=months, startTimeIn=startTime, &
-                                timeString=timeString, rc=rc)
-      call ESMF_Test((months==2 .and. timeString=="P0Y0M60DT0H0M0S" .and. &
+                                timeString=timeString15, rc=rc)
+      call ESMF_Test((months==2 .and. timeString15=="P0Y0M60DT0H0M0S" .and. &
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !print *, "months = ", months
-      !print *, "timeStep = ", timeString
+      !print *, "timeStep = ", timeString15
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Get TimeInterval Test - too short string"
+      write(failMsg, *) " Did not return ESMC_RC_ARG_SIZE"
+      call ESMF_TimeIntervalGet(timeStep, startTimeIn=startTime, timeString=timeString14, rc=rc)
+      call ESMF_Test((rc==ESMC_RC_ARG_SIZE), name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -1766,12 +1779,12 @@
                         calendar=julianCalendar, rc=rc)
       call ESMF_TimeIntervalSet(timeStep, d=60, rc=rc)
       call ESMF_TimeIntervalGet(timeStep, mm=months, startTimeIn=startTime, &
-                                timeString=timeString, rc=rc)
-      call ESMF_Test((months==2 .and. timeString=="P0Y0M60DT0H0M0S" .and. &
+                                timeString=timeString15, rc=rc)
+      call ESMF_Test((months==2 .and. timeString15=="P0Y0M60DT0H0M0S" .and. &
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !print *, "months = ", months
-      !print *, "timeStep = ", timeString
+      !print *, "timeStep = ", timeString15
 
       ! ----------------------------------------------------------------------------
       !EX_UTest

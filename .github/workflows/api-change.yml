@@ -6,7 +6,7 @@ on:
       tag1:
         description: 'First ESMF Tag'
         required: true
-        default: 'v8.6.0'
+        default: 'v8.9.0'
       tag2:
         description: 'Second ESMF Tag'
         required: true
@@ -21,7 +21,7 @@ jobs:
     steps:
     
     - name: Checkout Dockerfiles
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
           repository: esmf-org/esmf-containers
           path: esmf-containers
@@ -41,7 +41,7 @@ jobs:
         docker rm ${CID}
             
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: api-change
         path: ${{ github.workspace }}/artifacts

@@ -50,8 +50,8 @@ ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
-ifeq ($(ESMF_COMM),mvapich2)
-# Mvapich2 ---------------------------------------------------
+ifeq ($(ESMF_COMM),mvapich)
+# Mvapich any version --------------------------------------
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
@@ -104,24 +104,13 @@ ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} --version
 ############################################################
 # Special debug flags
 #
-# Activate to turn on UBSan:
-#ESMF_LINKOPTFLAG_G      += -fsanitize=undefined
-# Also set environment variable UBSAN_OPTIONS="print_stacktrace=1"
-# for stacktrace at runtime.
-#
 ESMF_F90OPTFLAG_G       += -C=array
-ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused $(ESMF_LINKOPTFLAG_G)
+ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused
 
 ############################################################
 # Set NAG unix modules when certain non-Standard system calls
 # (e.g., ABORT) are made.
 ESMF_F90COMPILEOPTS += -DESMF_NAG_UNIX_MODULE
-
-############################################################
-# Currently NAG does not support the Fortran2018 assumed type feature
-#
-ESMF_F90COMPILECPPFLAGS += -DESMF_NO_F2018ASSUMEDTYPE
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_F2018ASSUMEDTYPE
 
 ############################################################
 # Some ESMF tests fail for NAG with -O -> turn optimization off by default
@@ -158,7 +147,7 @@ ESMF_OPENMP_F90LINKOPTS    += -openmp
 ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 
 ############################################################
-# Need this until the file convention is fixed (then remove these two lines)
+# Explicit flags for handling specific format and cpp combos
 #
 ESMF_F90COMPILEFREENOCPP = -free
 ESMF_F90COMPILEFIXCPP    = -fixed -fpp

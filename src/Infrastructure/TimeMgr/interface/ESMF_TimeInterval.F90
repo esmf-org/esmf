@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1086,6 +1086,10 @@
 !       {\tt days = 1}, {\tt seconds = 0},
 !     whereas {\tt ESMF\_TimeIntervalGet(s = seconds)} would return
 !       {\tt seconds = 86400}.
+!     However, double precision time units are not considered in this normalization:
+!     Double precision time units are still bound by units of a day or larger, but double
+!     precision time units of an hour or smaller neither bind nor are bound by other time
+!     units of an hour or smaller (either integer or double precision).
 !
 !     For timeString, converts {\tt ESMF\_TimeInterval}'s value into
 !     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO} and
@@ -1313,6 +1317,10 @@
 !       {\tt days = 1}, {\tt seconds = 0},
 !     whereas {\tt ESMF\_TimeIntervalGet(s = seconds)} would return
 !       {\tt seconds = 86400}.
+!     However, double precision time units are not considered in this normalization:
+!     Double precision time units are still bound by units of a day or larger, but double
+!     precision time units of an hour or smaller neither bind nor are bound by other time
+!     units of an hour or smaller (either integer or double precision).
 !
 !     For timeString, converts {\tt ESMF\_TimeInterval}'s value into
 !     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO} and
@@ -1548,6 +1556,10 @@
 !       {\tt days = 1}, {\tt seconds = 0},
 !     whereas {\tt ESMF\_TimeIntervalGet(s = seconds)} would return
 !       {\tt seconds = 86400}.
+!     However, double precision time units are not considered in this normalization:
+!     Double precision time units are still bound by units of a day or larger, but double
+!     precision time units of an hour or smaller neither bind nor are bound by other time
+!     units of an hour or smaller (either integer or double precision).
 !
 !     For timeString, converts {\tt ESMF\_TimeInterval}'s value into
 !     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO} and
@@ -1785,6 +1797,10 @@
 !       {\tt days = 1}, {\tt seconds = 0},
 !     whereas {\tt ESMF\_TimeIntervalGet(s = seconds)} would return
 !       {\tt seconds = 86400}.
+!     However, double precision time units are not considered in this normalization:
+!     Double precision time units are still bound by units of a day or larger, but double
+!     precision time units of an hour or smaller neither bind nor are bound by other time
+!     units of an hour or smaller (either integer or double precision).
 !
 !     For timeString, converts {\tt ESMF\_TimeInterval}'s value into
 !     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO} and
@@ -3135,7 +3151,7 @@ end subroutine ESMF_ParseDurString
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TimeIntervalSetStr()"
 !BOP
-! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval from an ISO format string
+! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval from an ISO 8601 format string
 ! \label{API:TimeIntervalSetStr}
 
 ! !INTERFACE:
@@ -3151,8 +3167,8 @@ end subroutine ESMF_ParseDurString
 !
 !
 ! !DESCRIPTION:
-!     Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
-!     string in ISO duration format P[y]Y[mm]M[d]DT[h]H[m]M[s]S. See ~\cite{ISO} and ~\cite{ISOnotes} for information about the format. In ESMF's implementation the time values can have the following types: 
+!     Sets the value of an {\tt ESMF\_TimeInterval} using a
+!     string in ISO 8601 duration format P[y]Y[mm]M[d]DT[h]H[m]M[s]S. See ~\cite{ISO} and ~\cite{ISOnotes} for information about the format. In ESMF's implementation the time values can have the following types: 
 !     \begin{description}
 !      \item[y] - the number of years expressed in up to a 64-bit integer
 !      \item[mm] - the number of months expressed in up to a 64-bit integer
@@ -3170,7 +3186,7 @@ end subroutine ESMF_ParseDurString
 !     \item[timeinterval]
 !          The object instance to initialize.
 !     \item[timeIntervalString]
-!          ISO format duration string (e.g. P[y]Y[mm]M[d]DT[h]H[m]M[s]S).
+!          ISO 8601 format duration string (e.g. P[y]Y[mm]M[d]DT[h]H[m]M[s]S).
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3229,7 +3245,7 @@ end subroutine ESMF_ParseDurString
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TimeIntervalSetStrCal()"
 !BOP
-! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval from an ISO format string and calendar
+! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval from an ISO 8601 format string and calendar
 
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalSet()
@@ -3245,8 +3261,8 @@ end subroutine ESMF_ParseDurString
 !
 !
 ! !DESCRIPTION:
-!  Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
-!  string in ISO duration format P[y]Y[mm]M[d]DT[h]H[m]M[s]S. See ~\cite{ISO} and ~\cite{ISOnotes} for
+!  Sets the value of an {\tt ESMF\_TimeInterval} using a
+!  string in ISO 8601 duration format P[y]Y[mm]M[d]DT[h]H[m]M[s]S. See ~\cite{ISO} and ~\cite{ISOnotes} for
 !  information about the format. Also, see the description for the method
 ! {\tt ESMF\_TimeIntervalSetStr()}~\ref{API:TimeIntervalSetStr}
 ! for the specific types supported by ESMF for the values in the duration string. 
@@ -3265,7 +3281,7 @@ end subroutine ESMF_ParseDurString
 !          it contains a calendar.  Alternate to, and mutually exclusive with, 
 !          calkindflag below.  Primarily for specifying a custom calendar kind.
 !     \item[timeIntervalString]
-!          ISO format duration string (e.g. P[y]Y[mm]M[d]DT[h]H[m]M[s]S).
+!          ISO 8601 format duration string (e.g. P[y]Y[mm]M[d]DT[h]H[m]M[s]S).
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3325,7 +3341,7 @@ end subroutine ESMF_ParseDurString
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TimeIntervalSetStrCalTyp()"
 !BOP
-! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval from an ISO format string and calendar kind
+! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval from an ISO 8601 format string and calendar kind
 
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalSet()
@@ -3341,8 +3357,8 @@ end subroutine ESMF_ParseDurString
 !
 !
 ! !DESCRIPTION:
-!  Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
-!  string in ISO duration format P[y]Y[mm]M[d]DT[h]H[m]M[s]S. See ~\cite{ISO} and ~\cite{ISOnotes} for
+!  Sets the value of an {\tt ESMF\_TimeInterval} using a
+!  string in ISO 8601 duration format P[y]Y[mm]M[d]DT[h]H[m]M[s]S. See ~\cite{ISO} and ~\cite{ISOnotes} for
 !  information about the format. Also, see the description for the method
 ! {\tt ESMF\_TimeIntervalSetStr()}~\ref{API:TimeIntervalSetStr}
 ! for the specific types supported by ESMF for the values in the duration string. 
@@ -3356,7 +3372,7 @@ end subroutine ESMF_ParseDurString
 !          calendar above.  More convenient way of specifying a built-in 
 !          calendar kind.
 !     \item[timeIntervalString]
-!          ISO format duration string (e.g. P[y]Y[mm]M[d]DT[h]H[m]M[s]S).
+!          ISO 8601 format duration string (e.g. P[y]Y[mm]M[d]DT[h]H[m]M[s]S).
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3414,7 +3430,7 @@ end subroutine ESMF_ParseDurString
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TimeIntervalSetStrStart()"
 !BOP
-! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval from an ISO format string and start time
+! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval from an ISO 8601 format string and start time
 
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalSet()
@@ -3430,8 +3446,8 @@ end subroutine ESMF_ParseDurString
 !
 !
 ! !DESCRIPTION:
-!  Sets the value of the {\tt ESMF\_TimeInterval} using a user specified
-!  string in ISO duration format P[y]Y[mm]M[d]DT[h]H[m]M[s]S. See ~\cite{ISO} and ~\cite{ISOnotes} for
+!  Sets the value of an {\tt ESMF\_TimeInterval} using a
+!  string in ISO 8601 duration format P[y]Y[mm]M[d]DT[h]H[m]M[s]S. See ~\cite{ISO} and ~\cite{ISOnotes} for
 !  information about the format. Also, see the description for the method
 ! {\tt ESMF\_TimeIntervalSetStr()}~\ref{API:TimeIntervalSetStr}
 ! for the specific types supported by ESMF for the values in the duration string. 
@@ -3446,7 +3462,7 @@ end subroutine ESMF_ParseDurString
 !          in time.  If not set, and calendar also not set, calendar interval 
 !          "floats" across all calendars and times.
 !     \item[timeIntervalString]
-!          ISO format duration string (e.g. P[y]Y[mm]M[d]DT[h]H[m]M[s]S).
+!          ISO 8601 format duration string (e.g. P[y]Y[mm]M[d]DT[h]H[m]M[s]S).
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

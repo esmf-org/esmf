@@ -2,7 +2,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -112,9 +112,10 @@ program ESMF_RegridApp
   !   then broadcast the results to the rest of the Pets
   !
   if (PetNo == 0) then
-    call ESMF_UtilGetArgIndex('--help', argindex=ind)
+    call ESMF_UtilGetArgIndex('-h', argindex=ind)
+    if (ind == -1) call ESMF_UtilGetArgIndex('--help', argindex=ind)
     if (ind /= -1) then
-            call PrintUsage()
+      call PrintUsage()
       terminateProg=.true.
     endif
     call ESMF_UtilGetArgIndex('--version', argindex=ind)
@@ -526,7 +527,7 @@ contains
     print *, "                      [--dst_regional]"
     print *, "                      [--check]"
     print *, "                      [--no_log]"
-    print *, "                      [--help]"
+    print *, "                      [--help|-h]"
     print *, "                      [--version]"
     print *, "                      [-V]"
     print *, "where"
@@ -547,7 +548,7 @@ contains
     print *, "              where tilename is the tile name defined in the source grid file"
     print *, "--dstdatafile - If the destination grid is of type MOSAIC, the data is stored"
     print *, "              in separated files, one per tile. dstdatafile is the prefix of"
-    print *, "              the destination data file.  The filename is srcdatafile.tilename.nc,"
+    print *, "              the destination data file.  The filename is dstdatafile.tilename.nc,"
     print *, "               where tilename is the tile name defined in the destination grid file"
     print *, "--tilefile_path - The alternative file path for the tile files and mosaic data files"
     print *, "              when either srcFile or dstFile is a GRIDSPEC MOSAIC grid.  The path"
@@ -578,7 +579,7 @@ contains
     print *, "             data(i,j,k,l)=2.0+(k-1)+2*(l-1)+cos(lat(i,j))**2*cos(2*lon(i,j)), assuming"
     print *, "             it is a 2D grid " 
     print *, "--no_log    - Turn off the ESMF error log."
-    print *, "--help     - Print this help message and exit."
+    print *, "--help or -h - Print this help message and exit."
     print *, "--version  - Print ESMF version and license information and exit."
     print *, "-V        - Print ESMF version number and exit."
     print *, ""
