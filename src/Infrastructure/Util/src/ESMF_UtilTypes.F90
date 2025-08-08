@@ -558,7 +558,8 @@
                            ESMF_IOFMT_NETCDF4P            = ESMF_IOFmt_Flag(5), &
                            ESMF_IOFMT_NETCDF4C            = ESMF_IOFmt_Flag(6), &
                            ESMF_IOFMT_CONFIG              = ESMF_IOFmt_Flag(7), &
-                           ESMF_IOFMT_YAML                = ESMF_IOFmt_Flag(8)
+                           ESMF_IOFMT_YAML                = ESMF_IOFmt_Flag(8), &
+                           ESMF_IOFMT_SHP                 = ESMF_IOFmt_Flag(9) ! GDAL/Shapefile format (MSL)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_Index_Flag
@@ -912,10 +913,11 @@
         ESMF_FILEFORMAT_ESMFGRID = ESMF_FileFormat_Flag(4), &
         ESMF_FILEFORMAT_UGRID = ESMF_FileFormat_Flag(5), &
         ESMF_FILEFORMAT_CFGRID = ESMF_FileFormat_Flag(6), &
-        ESMF_FILEFORMAT_GRIDSPEC = ESMF_FileFormat_Flag(6), &
-        ESMF_FILEFORMAT_MOSAIC = ESMF_FileFormat_Flag(7), &
-        ESMF_FILEFORMAT_TILE = ESMF_FileFormat_Flag(8)
-
+        ESMF_FILEFORMAT_GRIDSPEC = ESMF_FileFormat_Flag(7), &
+        ESMF_FILEFORMAT_MOSAIC = ESMF_FileFormat_Flag(8), &
+        ESMF_FILEFORMAT_TILE = ESMF_FileFormat_Flag(9), &
+        ESMF_FILEFORMAT_SHAPEFILE = ESMF_FileFormat_Flag(10)
+        
 
 !------------------------------------------------------------------------------
 !
@@ -1074,7 +1076,8 @@
              ESMF_IOFMT_NETCDF4P, &
              ESMF_IOFMT_NETCDF4C, &
              ESMF_IOFMT_CONFIG, &
-             ESMF_IOFMT_YAML
+             ESMF_IOFMT_YAML, &
+             ESMF_IOFMT_SHP
 
       public ESMF_Index_Flag, &
              ESMF_INDEX_DELOCAL, &
@@ -1238,7 +1241,8 @@
              ESMF_FILEFORMAT_ESMFMESH, ESMF_FILEFORMAT_ESMFGRID, &
              ESMF_FILEFORMAT_UGRID, ESMF_FILEFORMAT_GRIDSPEC, &
              ESMF_FILEFORMAT_CFGRID, ESMF_FILEFORMAT_MOSAIC, &
-             ESMF_FILEFORMAT_UNKNOWN, ESMF_FILEFORMAT_TILE
+             ESMF_FILEFORMAT_UNKNOWN, ESMF_FILEFORMAT_TILE, &
+             ESMF_FILEFORMAT_SHAPEFILE
 
       public ESMF_FileMode_Flag, ESMF_FILEMODE_BASIC, ESMF_FILEMODE_WITHAUX
 

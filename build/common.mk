@@ -1709,6 +1709,38 @@ endif
 endif
 
 #-------------------------------------------------------------------------------
+# GDAL C++ API
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_GDAL),standard)
+ifneq ($(origin ESMF_GDAL_LIBS), environment)
+# BOB: LEAVE BLANK UNTIL I KNOW NAME OF GDAL LIB
+#ESMF_GDAL_LIBS = -lxerces-c
+ESMF_GDAL_LIBS = 
+endif
+endif
+
+ifdef ESMF_GDAL
+ESMF_CPPFLAGS                += -DESMF_GDAL=1
+ifdef ESMF_GDAL_INCLUDE
+ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_GDAL_INCLUDE)
+ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_GDAL_INCLUDE)
+endif
+ifdef ESMF_GDAL_LIBS
+ESMF_CXXLINKLIBS          += $(ESMF_GDAL_LIBS)
+ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_GDAL_LIBS))))
+ESMF_F90LINKLIBS          += $(ESMF_GDAL_LIBS)
+ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_GDAL_LIBS))))
+endif
+ifdef ESMF_GDAL_LIBPATH
+ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_GDAL_LIBPATH)
+ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_GDAL_LIBPATH)
+ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_GDAL_LIBPATH)
+ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_GDAL_LIBPATH)
+endif
+endif
+
+
+#-------------------------------------------------------------------------------
 # XERCES C++ XML API
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_XERCES),standard)

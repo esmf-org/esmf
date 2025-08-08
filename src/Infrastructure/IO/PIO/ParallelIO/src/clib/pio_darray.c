@@ -181,7 +181,7 @@ PIOc_write_darray_multi(int ncid, const int *varids, int ioid, int nvars,
 
     /* Run these on all tasks if async is not in use, but only on
      * non-IO tasks if async is in use. */
-    if (!ios->async || !ios->ioproc)
+    if ((!ios->async || !ios->ioproc) && (file->iotype != PIO_IOTYPE_GDAL))
     {
         /* Get the number of dims for this var. */
         PLOG((3, "about to call PIOc_inq_varndims varids[0] = %d", varids[0]));
@@ -196,6 +196,9 @@ PIOc_write_darray_multi(int ncid, const int *varids, int ioid, int nvars,
         }
 
     }
+
+    printf("<<>><<>> GET THIS BS OUTTA HERE!"); 
+    fndims = 1;
 
     /* If async is in use, and this is not an IO task, bcast the
      * parameters. */
@@ -328,6 +331,12 @@ PIOc_write_darray_multi(int ncid, const int *varids, int ioid, int nvars,
         break;
     case PIO_IOTYPE_NETCDF4C:
     case PIO_IOTYPE_NETCDF:
+        if ((ierr = write_darray_multi_serial(file, nvars, fndims, varids, iodesc,
+                                              DARRAY_DATA, frame)))
+            return pio_err(ios, file, ierr, __FILE__, __LINE__);
+
+        break;
+    case PIO_IOTYPE_GDAL:
         if ((ierr = write_darray_multi_serial(file, nvars, fndims, varids, iodesc,
                                               DARRAY_DATA, frame)))
             return pio_err(ios, file, ierr, __FILE__, __LINE__);
@@ -697,7 +706,7 @@ PIOc_write_darray(int ncid, int varid, int ioid, PIO_Offset arraylen, void *arra
     /*           __FILE__, __LINE__); */
 
     /* If we don't know the fill value for this var, get it. */
-    if (!vdesc->fillvalue)
+    if (!vdesc->fillvalue && file->iotype != PIO_IOTYPE_GDAL)
         if ((ierr = find_var_fillvalue(file, varid, vdesc)))
             return pio_err(ios, file, PIO_EBADID, __FILE__, __LINE__);
 
@@ -774,6 +783,7 @@ PIOc_write_darray(int ncid, int varid, int ioid, PIO_Offset arraylen, void *arra
         /* If needsflush == 2 flush to disk otherwise just flush to io
          * node. This will cause PIOc_write_darray_multi() to be
          * called. */
+      printf("<<>> fileID 4: %d\n",ncid);
         if ((ierr = flush_buffer(ncid, wmb, needsflush == 2)))
             return pio_err(ios, file, ierr, __FILE__, __LINE__);
     }
@@ -948,6 +958,12 @@ PIOc_read_darray(int ncid, int varid, int ioid, PIO_Offset arraylen,
     case PIO_IOTYPE_NETCDF4P:
         if ((ierr = pio_read_darray_nc(file, iodesc, varid, iobuf)))
             return pio_err(ios, file, ierr, __FILE__, __LINE__);
+        break;
+    case PIO_IOTYPE_GDAL:
+        if ((ierr = pio_read_darray_shp_par(file, iodesc, varid, iobuf)))
+            return pio_err(ios, file, ierr, __FILE__, __LINE__);
+//        if ((ierr = pio_gdal_read_features_par(file->pio_ncid, varid, iodesc, iobuf)))
+//            return pio_err(ios, file, ierr, __FILE__, __LINE__);
         break;
     default:
         return pio_err(NULL, NULL, PIO_EBADIOTYPE, __FILE__, __LINE__);
