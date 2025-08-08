@@ -39,6 +39,7 @@
 #include "ESMC_Grid.h"
 #include "ESMC_Util.h"
 #include "ESMC_LocStream.h"
+#include "ESMC_DynamicMask.h"
 
 #if defined (__cplusplus)
 extern "C" {
@@ -779,6 +780,7 @@ int ESMC_FieldRegridStore(
     int *extrapNumLevels,                          // in
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
     enum ESMC_Logical *ignoreDegenerate,           // in
+    int *srcTermProcessing,                        // in
     double **factorList,                           // inout
     int **factorIndexList,                         // inout
     int *numFactors,                               // inout
@@ -920,6 +922,7 @@ int ESMC_FieldRegridStoreFile(
     enum ESMC_Logical *vectorRegrid,               // in
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
     enum ESMC_Logical *ignoreDegenerate,           // in
+    int *srcTermProcessing,                        // in
     enum ESMC_Logical *create_rh,                  // in
     enum ESMC_FileMode_Flag *filemode,                  // in
     const char *srcFile,                           // in
@@ -1042,7 +1045,8 @@ int ESMC_FieldRegridStoreFile(
     ESMC_Field srcField,                  // in
     ESMC_Field dstField,                  // inout
     ESMC_RouteHandle routehandle,         // in
-    enum ESMC_Region_Flag *zeroregion);   // in
+    enum ESMC_Region_Flag *zeroregion,    // in
+    ESMC_DynamicMask *dynamicmask);        // in
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.

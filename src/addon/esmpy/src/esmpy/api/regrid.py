@@ -5,6 +5,7 @@ The Regrid API
 """
 from esmpy.api import constants
 from esmpy.api.field import *
+#from esmpy.api.dynamicmask import *
 
 
 class Regrid(object):
@@ -130,7 +131,7 @@ class Regrid(object):
                  unmapped_action=None, ignore_degenerate=None, create_rh=None, filemode=None, 
                  src_file=None, dst_file=None, src_file_type=None, dst_file_type=None, 
                  factors=False, large_file=None,
-                 src_frac_field=None, dst_frac_field=None):
+                 src_frac_field=None, dst_frac_field=None, src_term_processing=None):
 
         # Confirm the ESMF compiler will suport in-memory factor retrieval
         if factors and not constants._ESMF_USE_INMEM_FACTORS:
@@ -171,6 +172,7 @@ class Regrid(object):
                 vectorRegrid=vector_regrid,
                 unmappedaction=unmapped_action,
                 ignoreDegenerate=ignore_degenerate,
+                srcTermProcessing=src_term_processing,
                 createRH=create_rh,
                 filemode=filemode,
                 srcFile=src_file,
@@ -208,6 +210,7 @@ class Regrid(object):
                 extrapNumLevels=extrap_num_levels,
                 unmappedaction=unmapped_action,
                 ignoreDegenerate=ignore_degenerate,
+                srcTermProcessing=src_term_processing,
                 factorList=fl,
                 factorIndexList=fil,
                 numFactors=num_factors,
@@ -237,6 +240,7 @@ class Regrid(object):
         self._extrap_dist_exponent = extrap_dist_exponent
         self._unmapped_action = unmapped_action
         self._ignore_degenerate = ignore_degenerate
+        self._src_term_processing = src_term_processing
         self._Print = filemode
         self._src_file = src_file
         self._dst_file = dst_file
@@ -253,7 +257,7 @@ class Regrid(object):
         import atexit; atexit.register(self.__del__)
         self._finalized = False
 
-    def __call__(self, srcfield, dstfield, zero_region=None):
+    def __call__(self, srcfield, dstfield, zero_region=None, dynamic_mask=None):
         """
         Call a regridding operation from srcfield to dstfield.
 
@@ -271,9 +275,15 @@ class Regrid(object):
 
         :return: dstfield
         """
+      
+        
         # call into the ctypes layer
-        ESMP_FieldRegrid(srcfield, dstfield,
+        if (dynamic_mask == None):
+            ESMP_FieldRegrid(srcfield, dstfield,
                          self._routehandle, zeroregion=zero_region)
+        else:
+            ESMP_FieldRegrid(srcfield, dstfield,
+                         self._routehandle, zeroregion=zero_region, dynamicMask=dynamic_mask._struct)
         return dstfield
 
     def __del__(self):

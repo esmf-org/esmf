@@ -351,14 +351,14 @@ int main(void){
                              &routehandle,
                              &regridmethod, NULL, NULL, NULL,
                              &normtype, NULL, NULL, NULL, NULL, NULL, &unmappedaction, NULL,
-                             NULL, NULL, NULL, &srcFracField, &dstFracField);
+                             NULL, NULL, NULL, NULL, &srcFracField, &dstFracField);
 #else
   rc = ESMC_FieldRegridStore(srcfield, dstfield, 
                              NULL, NULL,
                              &routehandle,
                              &regridmethod, NULL, NULL, NULL,
-                             &normtype, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                             NULL, NULL, &srcFracField, &dstFracField);
+                             &normtype, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                             NULL, NULL, NULL, NULL, &srcFracField, &dstFracField);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -367,7 +367,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Execute ESMC_FieldRegrid()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, NULL);
+  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, NULL, NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

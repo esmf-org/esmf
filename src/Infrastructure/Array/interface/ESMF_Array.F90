@@ -715,6 +715,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
     type(ESMF_Logical)          :: handleAllElements
     type(ESMF_Pointer)          :: this
+    type(c_funptr) :: c_ptr_func
+    integer(c_intptr_t) :: faddress
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -748,7 +750,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-    
+   
     ! prepare for passing of dynamic masking
     if (present(dynamicMask)) then
       ! check for valid input
@@ -932,7 +934,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)
         return
     endif
-        
+       
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMM(opt_srcArray, opt_dstArray, routehandle, &
       opt_routesyncflag, opt_finishedflag, opt_cancelledflag, opt_zeroregion, &
@@ -944,7 +946,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(finishedflag)) then
       finishedflag = opt_finishedflag
     endif
-    
+   
     ! translate back cancelledflag
     if (present(cancelledflag)) then
       cancelledflag = opt_cancelledflag

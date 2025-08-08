@@ -45,6 +45,7 @@
 #include "ESMCI_Util.h"
 #include "ESMC_Grid.h"
 #include "ESMC_LocStream.h"
+#include "ESMC_DynamicMask.h"
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -112,6 +113,7 @@ namespace ESMCI{
                            int *extrapNumLevels,
                            ESMC_UnmappedAction_Flag *unmappedAction,
                            ESMC_Logical *ignoreDegenerate,
+                           int *srcTermProcessing,
                            double **factorList,
                            int **factorIndexList,
                            int *numFactors,
@@ -129,6 +131,7 @@ namespace ESMCI{
                            ESMC_Logical *vectorRegrid,
                            ESMC_UnmappedAction_Flag *unmappedAction,
                            ESMC_Logical *ignoreDegenerate,
+                           int *srcTermProcessing,
                            ESMC_Logical *create_rh,
                            ESMC_FileMode_Flag *filemode,
                            const char *srcFile,
@@ -139,7 +142,7 @@ namespace ESMCI{
                            Field *srcFracField, 
                            Field *dstFracField);
     static int regrid(Field *fieldsrc, Field *fielddst,
-                      RouteHandle *routehandle, ESMC_Region_Flag *zeroRegion);
+                      RouteHandle *routehandle, ESMC_Region_Flag *zeroRegion, ESMC_DynamicMask *dynamicmask);
     static int regridrelease(RouteHandle *routehandle);
     static int regridreleasefactors(double **factorList, int **factorIndexList, int* numFactors);
     static int smmstore(Field *fieldsrc, Field *fielddst,

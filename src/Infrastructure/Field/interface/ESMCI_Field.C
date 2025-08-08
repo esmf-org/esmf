@@ -150,6 +150,7 @@ void FTN_X(f_esmf_regridstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   int *extrapNumLevels,
   ESMC_UnmappedAction_Flag *unmappedaction,
   ESMC_Logical *ignoreDegenerate,
+  int *srcTermProcessing,
   double **factorList,
   int **factorIndexList,
   int *numFactors,
@@ -170,6 +171,7 @@ void FTN_X(f_esmf_regridstorefile)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldp
   ESMC_Logical *vectorRegrid,
   ESMC_UnmappedAction_Flag *unmappedaction,
   ESMC_Logical *ignoreDegenerate,
+  int *srcTermProcessing,
   ESMC_Logical *create_rh,
   ESMC_FileMode_Flag *filemode,
   const char *srcFile,
@@ -187,7 +189,7 @@ void FTN_X(f_esmf_regridstorefile)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldp
 
 void FTN_X(f_esmf_regrid)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   ESMCI::RouteHandle **routehandlep, ESMC_Region_Flag *zeroregion, int *zr_present,
-  int *rc);
+  ESMC_DynamicMask *dynamicmask, int *dynmask_present, int *rc);
 
 void FTN_X(f_esmf_regridrelease)(ESMCI::RouteHandle **routehandlep, int *rc);
 
@@ -1388,6 +1390,7 @@ namespace ESMCI {
     int *extrapNumLevels,
     ESMC_UnmappedAction_Flag *unmappedAction,
     ESMC_Logical *ignoreDegenerate,
+    int *srcTermProcessing,
     double **factorList,
     int **factorIndexList,
     int *numFactors,
@@ -1464,6 +1467,7 @@ namespace ESMCI {
                               extrapNumLevels,
                               unmappedAction,
                               ignoreDegenerate,
+                              srcTermProcessing,
                               factorList, factorIndexList,
                               numFactors,
                               srcFracField, dstFracField,
@@ -1511,6 +1515,7 @@ namespace ESMCI {
     ESMC_Logical *vectorRegrid,
     ESMC_UnmappedAction_Flag *unmappedAction,
     ESMC_Logical *ignoreDegenerate,
+    int *srcTermProcessing, 
     ESMC_Logical *create_rh,
     ESMC_FileMode_Flag *filemode,
     const char *srcFile,
@@ -1591,6 +1596,7 @@ namespace ESMCI {
                               vectorRegrid,
                               unmappedAction,
                               ignoreDegenerate,
+                              srcTermProcessing,
                               create_rh,
                               filemode,
                               srcFile,
@@ -1634,7 +1640,8 @@ namespace ESMCI {
     Field *fieldpsrc, 
     Field *fieldpdst, 
     RouteHandle *routehandlep,
-    ESMC_Region_Flag *zeroRegion) {
+    ESMC_Region_Flag *zeroRegion,
+    ESMC_DynamicMask *dynamicmask) {
 //
 // !DESCRIPTION:
 //
@@ -1643,15 +1650,18 @@ namespace ESMCI {
     // Initialize return code. Assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    int zr_present;
+    int zr_present, dynmask_present;
     
     zr_present = 0;
     if (zeroRegion != NULL)
       zr_present = 1;
+    dynmask_present = 0;
+    if (dynamicmask != NULL)
+      dynmask_present = 1; 
 
     // TODO: why are fields.ptr and routehandle by reference??  from create.. 
     FTN_X(f_esmf_regrid)(fieldpsrc, fieldpdst, &routehandlep, 
-                         zeroRegion, &zr_present, &localrc);
+                         zeroRegion, &zr_present, dynamicmask, &dynmask_present, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
 

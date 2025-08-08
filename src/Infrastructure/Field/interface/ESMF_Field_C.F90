@@ -873,7 +873,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_regrid"
-  subroutine f_esmf_regrid(srcField, dstField, routehandle, zeroregion, zrpresent, rc)
+  subroutine f_esmf_regrid(srcField, dstField, routehandle, zeroregion, zrpresent, dynamicMask, dmpresent, rc)
 
     use ESMF_UtilTypesMod
     use ESMF_BaseMod
@@ -881,6 +881,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     use ESMF_RHandleMod
     use ESMF_FieldRegridMod
     use ESMF_FieldMod
+    use ESMF_DynamicMaskMod
 
     implicit none
 
@@ -888,11 +889,15 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     type(ESMF_Field)        :: dstField
     type(ESMF_RouteHandle)  :: routehandle
     type(ESMF_Region_Flag)  :: zeroregion
-    integer, intent(in)     :: zrpresent
+    integer                 :: zrpresent
+    type(ESMF_DynamicMask)  :: dynamicMask
+    integer                 :: dmpresent
     integer                 :: rc 
 
     integer :: localrc
     type(ESMF_RouteHandle)  :: l_routehandle
+    type(ESMF_DynamicMask), allocatable :: dynamicMask_
+    type(ESMF_Region_Flag), allocatable :: zeroregion_
   
     ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
@@ -909,14 +914,10 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! handle the zeroregion flag
-    if (zrpresent == 0) then
-      call ESMF_FieldRegrid(srcField, dstField, routehandle=l_routehandle, &
-        rc=localrc)
-    elseif (zrpresent == 1) then
-      call ESMF_FieldRegrid(srcField, dstField, routehandle=l_routehandle, &
-        zeroregion=zeroregion, rc=localrc)
-    endif
+    if (zrpresent==1) allocate(zeroregion_, source=zeroregion) 
+    if (dmpresent==1) allocate(dynamicMask_, source=DynamicMask)
+    call ESMF_FieldRegrid(srcField, dstField, routehandle=l_routehandle, &
+      zeroregion=zeroregion, DynamicMask=dynamicMask, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
   
@@ -1014,6 +1015,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                 extrapNumLevels, &
                                 unmappedaction, &
                                 ignoreDegenerate, &
+                                srcTermProcessing, &
                                 factorList, &
                                 factorIndexList, &
                                 numFactors, &
@@ -1049,6 +1051,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     real(ESMF_KIND_R4), optional            :: extrapDistExponent
     integer, optional                       :: extrapNumLevels
     type(ESMF_UnmappedAction_Flag),optional :: unmappedaction
+    integer,optional                        :: srcTermProcessing
     type(ESMF_Logical), optional            :: ignoreDegenerate
 
     type(C_PTR), optional                   :: factorList
@@ -1110,6 +1113,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                 extrapNumLevels=extrapNumLevels, &
                                 unmappedaction=unmappedaction, &
                                 ignoreDegenerate=l_ignoreDegenerate, &
+                                srcTermProcessing=srcTermProcessing, & 
                                 factorList=factorListFPtr, &
                                 factorIndexList=factorIndexListFPtr, &
                                 srcFracField=srcFracField, &
@@ -1143,6 +1147,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                 extrapNumLevels=extrapNumLevels, &
                                 unmappedaction=unmappedaction, &
                                 ignoreDegenerate=l_ignoreDegenerate, &
+                                srcTermProcessing=srcTermProcessing, &
                                 srcFracField=srcFracField, &
                                 dstFracField=dstFracField, &
                                 rc=localrc)
@@ -1184,6 +1189,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                     vectorRegrid, &
                                     unmappedaction, &
                                     ignoreDegenerate, &
+                                    srcTermProcessing, &
                                     createRoutehandle, &
                                     filemode, &
                                     srcFile, &
@@ -1226,12 +1232,13 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     type(ESMF_PoleMethod_Flag),optional     :: polemethod
     integer,optional                        :: regridPoleNPnts
 
-    type(ESMF_LineType_Flag),optional       :: linetype
-    type(ESMF_NormType_Flag),optional       :: normtype
+    type(ESMF_LineType_Flag)                :: linetype
+    type(ESMF_NormType_Flag)                :: normtype
     type(ESMF_Logical),optional             :: vectorRegrid
     type(ESMF_UnmappedAction_Flag),optional :: unmappedaction
     type(ESMF_Logical), optional            :: ignoreDegenerate
     type(ESMF_Logical), optional            :: createRoutehandle  ! Note that createRoutehandle defaults to true
+    integer                                 :: srcTermProcessing
 
     type(ESMF_FileMode_Flag),   optional    :: filemode
     character(len=*),           optional    :: srcFile
@@ -1308,6 +1315,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+
     if (.not. l_createRoutehandle) then
       call ESMF_FieldRegridStore(srcField, dstField, &
                                  srcMaskValues=srcMaskValues, &
@@ -1320,6 +1328,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                  vectorRegrid=l_vectorRegrid, &
                                  unmappedaction=unmappedaction, &
                                  ignoreDegenerate=l_ignoreDegenerate, &
+                                 srcTermProcessing=srcTermProcessing, &
                                  factorList=localFactorList, &
                                  factorIndexList=localFactorIndexList, &
                                  srcFracField=srcFracField, &
@@ -1339,6 +1348,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                  vectorRegrid=l_vectorRegrid, &
                                  unmappedaction=unmappedaction, &
                                  ignoreDegenerate=l_ignoreDegenerate, &
+                                 srcTermProcessing=srcTermProcessing, &
                                  routehandle=l_routehandle, &
                                  factorList=localFactorList, &
                                  factorIndexList=localFactorIndexList, &
