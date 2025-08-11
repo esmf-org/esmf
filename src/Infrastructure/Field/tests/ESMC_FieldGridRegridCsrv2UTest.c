@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -513,25 +513,25 @@ int main(void){
   enum ESMC_RegridMethod_Flag regridmethod = ESMC_REGRIDMETHOD_CONSERVE;
 #ifdef meshmasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, NULL, &routehandle, 
-                             &regridmethod, NULL, NULL, NULL, NULL, NULL, NULL,
+                             &regridmethod, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
                              &srcFracField, &dstFracField);
 #endif
 #ifdef gridmasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, &i_maskValues, &routehandle, 
-                             &regridmethod, NULL, NULL, NULL, NULL, NULL, NULL,
+                             &regridmethod, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
                              &srcFracField, &dstFracField);
 #endif
 #ifdef bothmasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, &i_maskValues, &routehandle, 
-                             &regridmethod, NULL, NULL, NULL, NULL, NULL, NULL,
+                             &regridmethod, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
                              &srcFracField, &dstFracField);
 #endif
 #ifdef nomasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, NULL, &routehandle, 
-                             &regridmethod, NULL, NULL, NULL, NULL, NULL, NULL,
+                             &regridmethod, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
                              &srcFracField, &dstFracField);
 #endif

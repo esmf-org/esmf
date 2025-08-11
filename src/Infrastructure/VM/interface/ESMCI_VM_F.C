@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1205,6 +1205,39 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
+  void FTN_X(c_esmc_vmgetenv)(char *name, char *value, int *rc,
+    ESMCI_FortranStrLenArg name_l, ESMCI_FortranStrLenArg value_l){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmgetenv()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    try{
+      std::string nameStr(name, ESMC_F90lentrim(name, name_l));
+      std::string envVarStr;
+      char const *envVar = ESMCI::VM::getenv(nameStr.c_str());
+      if (envVar != NULL && strlen(envVar) > 0) {
+        envVarStr.assign(envVar);
+      }else{
+        envVarStr.assign("");
+      }
+      std::strncpy (value, envVarStr.c_str(), value_l);
+    }catch(int localrc){
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc))
+        return; // bail out
+    }catch(std::exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return; // bail out
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
   void FTN_X(c_esmc_vmsetenv)(char *name, char *value, int *rc,
     ESMCI_FortranStrLenArg name_l, ESMCI_FortranStrLenArg value_l){
 #undef  ESMC_METHOD
@@ -1212,8 +1245,8 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     try{
-      std::string nameStr(name, name_l);
-      std::string valueStr(value, value_l);
+      std::string nameStr(name, ESMC_F90lentrim(name, name_l));
+      std::string valueStr(value, ESMC_F90lentrim(value, value_l));
       ESMCI::VM::setenv(nameStr.c_str(), valueStr.c_str());
     }catch(int localrc){
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -1426,7 +1459,41 @@ extern "C" {
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
-   
+
+  void FTN_X(c_esmc_vmplansetstdout)(ESMCI::VMPlan **ptr,
+    char *filename, int *rc, ESMCI_FortranStrLenArg len){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmplansetstdout()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    // set the stdoutName
+    std::string filenameStr(filename, len);
+    (*ptr)->stdoutName = new char[len+1];
+    strcpy((*ptr)->stdoutName, filenameStr.c_str());
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_vmplansetstderr)(ESMCI::VMPlan **ptr,
+    char *filename, int *rc, ESMCI_FortranStrLenArg len){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmplansetstderr()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    // set the stderrName
+    std::string filenameStr(filename, len);
+    (*ptr)->stderrName = new char[len+1];
+    strcpy((*ptr)->stderrName, filenameStr.c_str());
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
   void FTN_X(c_esmc_vmplanmaxpes)(ESMCI::VMPlan **ptr, ESMCI::VM **vm,
     int *max, int *pref_intra_process, int *pref_intra_ssi, int *pref_inter_ssi,
     int *npetlist, int *petlist, ESMC_Logical *forceEachChildPetOwnPthread,

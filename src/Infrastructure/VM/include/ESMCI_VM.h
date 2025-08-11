@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -110,8 +110,10 @@ class VMTimer {
 // class definition
 class VM : public VMK {   // inherits from ESMCI::VMK class
   // This is the ESMF derived virtual machine class.
-    // performance timers
-    std::map<std::string, VMTimer> timers;
+  private:
+    enum GarbageMode{garbageNone, garbageFull, garbageSafe};
+    GarbageMode garbageMode = garbageSafe;  // default use safe garbage mode
+    std::map<std::string, VMTimer> timers;  // performance timers
   public:
     // initialize(), finalize() and abort() of global VM
     static VM *initialize(MPI_Comm mpiCommunicator, bool globalResourceControl,
@@ -136,6 +138,9 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     static bool isThreadKnown(int *rc=NULL);  // is thread known under any VM
     static VMId *getCurrentID(int *rc=NULL);  // VMId of current VM
     static void getCurrentGarbageInfo(int *, int *); // garbage info current VM
+    bool isGarbageNone() const{
+      return (garbageMode==garbageNone);
+    }
     static void logGarbageInfo(std::string prefix, bool current=false,
       ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO); // garbage log current VM
     static void getMemInfo(int *virtMemPet, int *physMemPet);   // memory info

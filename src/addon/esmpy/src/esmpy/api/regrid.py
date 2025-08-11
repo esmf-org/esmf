@@ -61,6 +61,19 @@ class Regrid(object):
     :param NormType norm_type: control which type of normalization to do when
         generating conservative regridding weights. If ``None``, defaults to
         :attr:`~esmpy.api.constants.NormType.DSTAREA`.
+    :param bool vector_regrid: Treat a single ungridded dimension in the source and destination
+        Fields as the components of a vector. If true and there is more than one ungridded
+        dimension in either the source or destination, then an error will be returned.
+        Currently, only undistributed (vector) dimensions of size 2 are supported.
+        In the vector dimension, the first entry is interpreted as the east component
+        and the second as the north component.
+        In addition, this functionality presently only works when both the source and destination
+        Fields are built on a geometry (e.g., an ESMF Grid) with a spherical coordinate system
+        (e.g., :attr:`~esmpy.api.constants.CoordSys.SPH_DEG`). Also, this functionality
+        is not currently supported with conservative regrid methods
+        (e.g., :attr:`~esmpy.api.constants.RegridMethod.CONSERVE`). We expect these
+        restrictions to be loosened over time as new requirements come in from users.
+        If ``None``, defaults to ``False``.
     :param ExtrapMethod extrap_method: Specify which extrapolation method to use on 
         unmapped destination points after regridding.
     :param int extrap_num_src_pnts: The number of source points to use for the 
@@ -111,7 +124,8 @@ class Regrid(object):
     def __init__(self, srcfield=None, dstfield=None, filename=None, rh_filename=None, 
                  src_mask_values=None,
                  dst_mask_values=None, regrid_method=None, pole_method=None,
-                 regrid_pole_npoints=None, line_type=None, norm_type=None, extrap_method=None,
+                 regrid_pole_npoints=None, line_type=None, norm_type=None, vector_regrid=None,
+                 extrap_method=None,
                  extrap_num_src_pnts=None, extrap_dist_exponent=None, extrap_num_levels=None,
                  unmapped_action=None, ignore_degenerate=None, create_rh=None, filemode=None, 
                  src_file=None, dst_file=None, src_file_type=None, dst_file_type=None, 
@@ -154,6 +168,7 @@ class Regrid(object):
                 regridPoleNPnts=regrid_pole_npoints,
                 lineType=line_type,
                 normType=norm_type,
+                vectorRegrid=vector_regrid,
                 unmappedaction=unmapped_action,
                 ignoreDegenerate=ignore_degenerate,
                 createRH=create_rh,
@@ -186,6 +201,7 @@ class Regrid(object):
                 regridPoleNPnts=regrid_pole_npoints,
                 lineType=line_type,
                 normType=norm_type,
+                vectorRegrid=vector_regrid,
                 extrapMethod=extrap_method,
                 extrapNumSrcPnts=extrap_num_src_pnts,
                 extrapDistExponent=extrap_dist_exponent,
@@ -215,6 +231,7 @@ class Regrid(object):
         self._pole_method = pole_method
         self._regrid_pole_npoints = regrid_pole_npoints
         self._norm_type = norm_type
+        self._vector_regrid = vector_regrid
         self._extrap_method = extrap_method
         self._extrap_num_src_pnts = extrap_num_src_pnts
         self._extrap_dist_exponent = extrap_dist_exponent
@@ -343,6 +360,10 @@ class Regrid(object):
     @property
     def norm_type(self):
         return self._norm_type
+
+    @property
+    def vector_regrid(self):
+        return self._vector_regrid
 
     @property
     def pole_method(self):

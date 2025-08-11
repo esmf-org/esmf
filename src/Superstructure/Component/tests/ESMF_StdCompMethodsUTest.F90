@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -33,7 +33,8 @@ module ESMF_StdCompMethods_mod
     type(ESMF_VM) :: vm
     logical :: pthreadsEnabled
 #endif
-    
+    character(len=40) :: compName
+
     ! Initialize
     rc = ESMF_SUCCESS
 
@@ -46,11 +47,20 @@ module ESMF_StdCompMethods_mod
 
     ! First test whether ESMF-threading is supported on this machine
     call ESMF_VMGetGlobal(vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     if (pthreadsEnabled) then
       call ESMF_GridCompSetVMMinThreads(gcomp, rc=rc)
+      if (rc/=ESMF_SUCCESS) return ! bail out
     endif
 #endif
+    call ESMF_GridCompGet(gcomp, name=compName, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_GridCompSetVMStdRedirect(gcomp, &
+      stdout=trim(compName)//"_*.stdout", &
+      stderr=trim(compName)//"_*.stderr", rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine !--------------------------------------------------------------
 
@@ -154,7 +164,8 @@ module ESMF_StdCompMethods_mod
     type(ESMF_VM) :: vm
     logical :: pthreadsEnabled
 #endif
-    
+    character(len=40) :: compName
+
     ! Initialize
     rc = ESMF_SUCCESS
 
@@ -167,11 +178,20 @@ module ESMF_StdCompMethods_mod
 
     ! First test whether ESMF-threading is supported on this machine
     call ESMF_VMGetGlobal(vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     if (pthreadsEnabled) then
       call ESMF_CplCompSetVMMaxThreads(cplcomp, maxPetCountPerVas=1, rc=rc)
+      if (rc/=ESMF_SUCCESS) return ! bail out
     endif
 #endif
+    call ESMF_CplCompGet(cplcomp, name=compName, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_CplCompSetVMStdRedirect(cplcomp, &
+      stdout=trim(compName)//"_*.stdout", &
+      stderr=trim(compName)//"_*.stderr", rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine !--------------------------------------------------------------
 
@@ -183,7 +203,8 @@ module ESMF_StdCompMethods_mod
     type(ESMF_VM) :: vm
     logical :: pthreadsEnabled
 #endif
-    
+    character(len=40) :: compName
+
     ! Initialize
     rc = ESMF_SUCCESS
 
@@ -196,11 +217,20 @@ module ESMF_StdCompMethods_mod
 
     ! First test whether ESMF-threading is supported on this machine
     call ESMF_VMGetGlobal(vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     if (pthreadsEnabled) then
       call ESMF_CplCompSetVMMaxPEs(cplcomp, maxPeCountPerPet=1, rc=rc)
+      if (rc/=ESMF_SUCCESS) return ! bail out
     endif
 #endif
+    call ESMF_CplCompGet(cplcomp, name=compName, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_CplCompSetVMStdRedirect(cplcomp, &
+      stdout=trim(compName)//"_*.stdout", &
+      stderr=trim(compName)//"_*.stderr", rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine !--------------------------------------------------------------
 

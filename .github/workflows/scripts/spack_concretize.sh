@@ -95,12 +95,12 @@ fi
 # find compilers
 . spack/share/spack/setup-env.sh
 spack compiler find
-cat ~/.spack/linux/compilers.yaml
+cat ~/.spack/packages.yaml
 echo "::endgroup::"
 
-# find external tools
+# find external tools, excluding cmake since runner uses 4.0 which is not compatible with some libraries
 echo "::group::Find Externals"
-spack external find
+spack external find --exclude cmake
 echo "::endgroup::"
 
 # create config file (to fix FetchError issue)
@@ -137,15 +137,14 @@ fi
 # check given gcc compiler is found or not? If not, use newer version
 if [[ "$comp" == *"gcc"* ]]; then
   echo "::group::Check gcc compiler"
-  comp_str=${comp/@/@=}
-  str=`echo $comp_str | awk -F\@ '{print $1}'`
-  comp_ver=`grep -ir "${str}@=" ~/.spack/linux/compilers.yaml | tr -d "spec: ${str}@=" | sort -n | tail -n 1`
+  str=`echo $comp | awk -F\@ '{print $1}'`
+  comp_ver=`spack compiler list | grep "${str}@" | tr -d "${str}@" | awk '{print $2}' | sort -n | tail -n 1`
 
   use_latest=0
   if [[ "$comp" == *"gcc@latest"* ]]; then
      echo "The gcc@latest is set. Trying to find latest available gcc compiler ..."
      use_latest=1
-  elif [ -z "$(cat ~/.spack/linux/compilers.yaml | grep $comp_str)" ]; then
+  elif [ -z "$(cat ~/.spack/packages.yaml | grep $comp)" ]; then
      echo "Given compiler ($comp) is not found! Exiting ..."
      exit 1
   fi
@@ -168,12 +167,11 @@ echo "  specs:" >> spack.yaml
 IFS=', ' read -r -a array <<< "$deps"
 for d in "${array[@]}"
 do
-  echo "  - $d %$comp target=$arch" >> spack.yaml
+  echo "  - $d target=$arch %$comp" >> spack.yaml
 done
 echo "  packages:" >> spack.yaml
 echo "    all:" >> spack.yaml
 echo "      target: ['$arch']" >> spack.yaml
-echo "      compiler: [$comp]" >> spack.yaml
 echo "      providers:" >> spack.yaml
 if [[ "$comp" == *"oneapi"* ]]; then
 echo "        mpi: [intel-${mpi}]" >> spack.yaml

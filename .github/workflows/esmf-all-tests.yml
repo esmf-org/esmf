@@ -1,11 +1,16 @@
-name: Development Tests
+name: ESMF CI
 
 on:
   schedule:
     - cron: "15 8 * * 3"
+  push:
+    branches:
+      - develop
   pull_request:
     branches:
       - develop
+      - release/*
+      - patch/*
   workflow_dispatch:
 
 jobs:
@@ -115,7 +120,11 @@ jobs:
     - name: Set up GFORTRANCLANG
       if: matrix.config.cmpr == 'gfortranclang'
       run: |
+        command -v gcc-${{matrix.config.cvrs}} || { exit 1; }
+        command -v g++-${{matrix.config.cvrs}} || { exit 1; }
         command -v gfortran-${{matrix.config.cvrs}} || { exit 1; }
+        ln -fs `which gcc-${{matrix.config.cvrs}}` /usr/local/bin/gcc
+        ln -fs `which g++-${{matrix.config.cvrs}}` /usr/local/bin/g++
         ln -fs `which gfortran-${{matrix.config.cvrs}}` /usr/local/bin/gfortran
         clang --version; clang++ --version; gfortran --version
         echo "CC=clang" >> $GITHUB_ENV

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -711,11 +711,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   For this API to be functional, the environment variable {\tt ESMF\_PIO}
 !   should be set to either "internal" or "external" when the ESMF library is built.
 !   Please see the section on Data I/O,~\ref{io:dataio}.
-! 
-!   Limitations:
-!   \begin{itemize}
-!     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
-!   \end{itemize}
 !
 !  The arguments are:
 !  \begin{description}

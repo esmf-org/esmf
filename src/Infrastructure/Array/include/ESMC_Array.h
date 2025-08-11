@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -131,6 +131,34 @@ const char *ESMC_ArrayGetName(
 //    {\tt ESMC\_Array} object to be queried.
 //  \item[{[rc]}]
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_ArrayGetLocalDECount - Get the number of DEs in an Array associated with the local PET
+//
+// !INTERFACE:
+int ESMC_ArrayGetLocalDECount(
+  ESMC_Array array,           // in
+  int *localDECount           // out
+);
+
+// !RETURN VALUE:
+//  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Get the number of DEs in the specified {\tt ESMC\_Array} object on the local PET.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[array]
+//    {\tt ESMC\_Array} object to be queried.
+//  \item[localDECount]
+//    The number of DEs in the Array on the local PET.
 //  \end{description}
 //
 //EOP

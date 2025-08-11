@@ -17,7 +17,7 @@
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{\Large {\bf NUOPC Layer Reference}}
 \newcommand{\myauthors}{\large {\it Content Standards Committee (CSC) Members}}
-\newcommand{\myversion}{ESMF 8.8.0}
+\newcommand{\myversion}{ESMF 8.9.0}
 % set a standard paragraph style
 \setlength{\parskip}{0pt}
 \setlength{\parindent}{0pt}
@@ -219,6 +219,13 @@
 \input{NUOPC_ResourceControl}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_ResourceControl}
+#endif
+
+\subsection{Redirection of Component {\tt stdout} and {\tt stderr}}
+#ifdef STANDALONE
+\input{NUOPC_StdRedirect}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_StdRedirect}
 #endif
 
 \subsection{External NUOPC Interface}

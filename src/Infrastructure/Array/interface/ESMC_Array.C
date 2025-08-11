@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -150,6 +150,26 @@ const char *ESMC_ArrayGetName(ESMC_Array array, int *rc){
 } 
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayGetLocalDECount()"
+int ESMC_ArrayGetLocalDECount(ESMC_Array array, int *localDECount){
+
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // typecast into ESMCI type
+  ESMCI::Array *ap = (ESMCI::Array *)(array.ptr);
+  // test for NULL pointer via macro before calling any class methods
+  ESMCI_NULL_CHECK_RC(ap, rc)
+
+  // call into ESMCI method
+  *localDECount = ap->getDELayout()->getLocalDeCount();
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
 
 //-----------------------------------------------------------------------------
 #undef ESMC_METHOD

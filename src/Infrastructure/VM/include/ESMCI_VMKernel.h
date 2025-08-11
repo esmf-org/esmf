@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -32,6 +32,13 @@
 #include <cstring>
 #endif
 #include <map>
+
+#if !defined (ESMF_OS_MinGW)
+#include <unistd.h>
+#include <sys/time.h>
+#else
+#include <windows.h>
+#endif
 
 #ifndef ESMF_NO_OPENMP
 #include <omp.h>
@@ -292,12 +299,31 @@ class VMK{
     void reset(){
 #ifndef ESMF_NO_PTHREADS
 #if !defined(ESMF_OS_Darwin) && !defined(ESMF_OS_Cygwin)
+      // restore thread affinity
       pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
 #endif
 #ifndef ESMF_NO_OPENMP
+      // restore threading level
       omp_set_num_threads(omp_num_threads);
 #endif
 #endif
+    }
+  };
+
+  struct Redirects{
+    int oldStdout;
+    int oldStderr;
+   public:
+    void reset(){
+      // restore stdout and stderr
+      if (oldStdout > -1){
+        dup2(oldStdout, STDOUT_FILENO); // restore stdout
+        close(oldStdout); // free up file descriptor, file stays open
+      }
+      if (oldStderr > -1){
+        dup2(oldStderr, STDERR_FILENO); // restore stderr
+        close(oldStderr); // free up file descriptor, file stays open
+      }
     }
   };
 
@@ -331,8 +357,10 @@ class VMK{
     int ssiLocalNumaCount; // number of NUMA modes on the same SSI as localPet (incl.)
     int *ssiLocalNumaList; // NUMA nodes
     // general information about this VMK
-    bool mpionly;         // false: there is multi-threading, true: MPI-only
-    bool threadsflag;     // threaded or none-threaded VM
+    bool mpionly;         // true:  all PETs are MPI processes, separate VASs
+                          // false: some are threads under the same process VAS
+    bool threadsflag;     // true:  VM uses threads, e.g. for resource control
+                          // false: no threads are used under this VM
     // MPI Communicator handles
     MPI_Comm mpi_c;     // communicator across the entire VM
     MPI_Comm mpi_c_ssi; // communicator holding PETs on the same SSI
@@ -381,6 +409,7 @@ class VMK{
     // static MPI Comm of the default VMK
     // and the thread level that the MPI implementation supports.
     static MPI_Comm default_mpi_c;
+    static int mpi_thread_level_requested;
     static int mpi_thread_level;
     static int mpi_init_outside_esmf;
     static int pre_mpi_init;
@@ -429,6 +458,9 @@ class VMK{
 
     Affinities setAffinities(void *ssarg);
       // set thread affinities, including OpenMP handling if configured
+
+    static Redirects setRedirects(void *ssarg);
+      // set stdout and stderr redirects
 
     void construct(void *sarg);
       // fill an already existing VMK object with info
@@ -487,6 +519,8 @@ class VMK{
     int getSsiLocalDevCount() const {return ssiLocalDevCount;}
     const int *getSsiLocalDevList() const {return ssiLocalDevList;}
     int getDevCount() const {return devCount;}
+    bool isMpiOnly() const {return mpionly;}
+    bool isUsingThreads() const {return threadsflag;}
     esmf_pthread_t getLocalPthreadId() const {return mypthid;}
     static bool isPthreadsEnabled(){
 #ifdef ESMF_NO_PTHREADS
@@ -671,6 +705,9 @@ class VMKPlan{
     // OpenMP handling
     int openmphandling; // 0-none, 1-setnumthreads, 2-initialize, 3-pinaffinity
     int openmpnumthreads; // -1 default: local peCount
+    // stdout and stderr redirect
+    char *stdoutName;
+    char *stderrName;
 
   public:
     VMKPlan(int _ndevlist=0, int *_devlist=NULL);
@@ -687,14 +724,14 @@ class VMKPlan{
       // set the mpi communicator for participating PETs
     void vmkplan_useparentvm(VMK &vm);
       // use the parent VM, don't create new context
-    void vmkplan_maxthreads(VMK &vm);  
+    void vmkplan_maxthreads(VMK &vm);
       // set up a VMKPlan that will maximize the number of thread-pets
-    void vmkplan_maxthreads(VMK &vm, int max);  
+    void vmkplan_maxthreads(VMK &vm, int max);
       // set up a VMKPlan that will max. number of thread-pets up to max
     void vmkplan_maxthreads(VMK &vm, int max, 
       int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi);
       // set up a VMKPlan that will max. number of thread-pets up to max
-    void vmkplan_maxthreads(VMK &vm, int max, int *plist, int nplist);  
+    void vmkplan_maxthreads(VMK &vm, int max, int *plist, int nplist);
       // set up a VMKPlan that will max. number of thread-pets up to max
       // but only allow PETs listed in plist to participate
     int vmkplan_maxthreads(VMK &vm, int max, int *plist, int nplist,

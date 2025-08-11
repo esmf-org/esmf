@@ -1,57 +1,83 @@
-name: Build ESMF Docs
+name: ESMF Docs
 
 on:
   workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish Documentation'
+        required: true
+        type: boolean
+        default: true
+      enable-esmf-docs:
+        description: 'Enable ESMF Docs'
+        required: true
+        type: boolean
+        default: true
+      enable-esmpy-docs:
+        description: 'Enable ESMPy Docs'
+        required: true
+        type: boolean
+        default: true
   push:
+  pull_request:
+    branches:
+      - develop
 
-concurrency: 
+concurrency:
   group: build-esmf-docs-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
 
-  build:
-
+  esmf-docs:
+    if: ${{github.event_name != 'workflow_dispatch' || inputs.enable-esmf-docs}}
     runs-on: ubuntu-latest
-
     steps:
-    
     - name: Checkout Dockerfiles
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
           repository: esmf-org/esmf-containers
           path: esmf-containers
           ref: main
-    
-    - name: Build Docker image  
-      run: | 
+    - name: Build Docker image
+      env:
+        PR: ${{contains(fromJSON('["pull_request","pull_request_target"]'), github.event_name)}}
+      run: |
         cd ${{ github.workspace }}/esmf-containers/build-esmf-docs/esmf
-        docker build . --tag esmf/build-esmf-docs --build-arg ESMF_BRANCH="${{ github.ref_name }}" --no-cache
-        
+        if ${PR} ; then
+          docker build . --tag esmf/build-esmf-docs \
+            --build-arg "ESMF_REPOSITORY=${{github.server_url}}/${{github.repository}}" \
+            --build-arg "ESMF_BRANCH=${{github.ref}}" \
+            --no-cache
+        else
+          docker build . --tag esmf/build-esmf-docs \
+            --build-arg "ESMF_REPOSITORY=${{github.server_url}}/${{github.repository}}" \
+            --build-arg "ESMF_BRANCH=${{github.ref_name}}" \
+            --no-cache
+        fi
     - name: Extract artifacts
       run: |
         mkdir -p ${{ github.workspace }}/artifacts
         CID=$(docker run -dit --name runner esmf/build-esmf-docs)
         docker cp ${CID}:/artifacts/doc-artifacts.zip ${{ github.workspace }}/artifacts
         docker stop ${CID}
-        docker rm ${CID}        
-            
+        docker rm ${CID}
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: esmf-docs
         path: ${{ github.workspace }}/artifacts
-       
     - name: Checkout esmf-org.github.io
-      uses: actions/checkout@v3
+      if: ${{github.repository_owner == 'esmf-org' && (github.event_name == 'push' || inputs.publish)}}
+      uses: actions/checkout@v4
       with:
           repository: esmf-org/esmf-org.github.io
           path: ${{github.workspace}}/esmf-org.github.io
           ssh-key: ${{secrets.ESMF_WEB_DEPLOY_KEY}}
-
-    - name: Copy docs
-      run: | 
-        cd ${{ github.workspace }}/esmf-org.github.io        
+    - name: Prepare docs for publication
+      if: ${{github.repository_owner == 'esmf-org' && (github.event_name == 'push' || inputs.publish)}}
+      run: |
+        cd ${{ github.workspace }}/esmf-org.github.io
         mkdir -p docs/nightly/${{ github.ref_name }}/dev_guide
         cd ${{ github.workspace }}/artifacts
         unzip doc-artifacts.zip
@@ -62,14 +88,79 @@ jobs:
         cp -rf NUOPC_refdoc.pdf ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/
         cp -rf NUOPC_howtodoc ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/
         cp -rf NUOPC_howtodoc.pdf ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/
-        cd ${{ github.workspace }}/artifacts/artifacts/doc-dev_guide        
+        cd ${{ github.workspace }}/artifacts/artifacts/doc-dev_guide
         cp -rf ./dev_guide/dev_guide/* ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/dev_guide/
-        
     - name: Commit and publish docs
-      run: | 
+      if: ${{github.repository_owner == 'esmf-org' && (github.event_name == 'push' || inputs.publish)}}
+      run: |
         cd ${{ github.workspace }}/esmf-org.github.io
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         git add .
         git diff-index --quiet HEAD || git commit --message "Publish ESMF Docs"
+        git push origin
+
+  esmpy-docs:
+    if: ${{github.event_name != 'workflow_dispatch' || inputs.enable-esmpy-docs}}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Dockerfiles
+      uses: actions/checkout@v4
+      with:
+          repository: esmf-org/esmf-containers
+          path: esmf-containers
+          ref: main
+    - name: Build Docker image
+      env:
+        PR: ${{contains(fromJSON('["pull_request","pull_request_target"]'), github.event_name)}}
+      run: |
+        cd ${{ github.workspace }}/esmf-containers/build-esmf-docs/esmpy
+        if ${PR} ; then
+          docker build . --tag esmf/build-esmpy-docs \
+            --build-arg "ESMF_REPOSITORY=${{github.server_url}}/${{github.repository}}" \
+            --build-arg "ESMF_BRANCH=${{github.ref}}" \
+            --no-cache
+        else
+          docker build . --tag esmf/build-esmpy-docs \
+            --build-arg "ESMF_REPOSITORY=${{github.server_url}}/${{github.repository}}" \
+            --build-arg "ESMF_BRANCH=${{github.ref_name}}" \
+            --no-cache
+        fi
+    - name: Copy artifacts
+      run: |
+        mkdir -p ${{ github.workspace }}/artifacts
+        CID=$(docker run -dit --name runner esmf/build-esmpy-docs)
+        docker cp ${CID}:/artifacts/doc-esmpy.zip ${{ github.workspace }}/artifacts
+        docker stop ${CID}
+        docker rm ${CID}
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: esmpy-docs
+        path: ${{ github.workspace }}/artifacts
+    - name: Checkout esmpy_doc
+      if: ${{github.repository_owner == 'esmf-org' && (github.event_name == 'push' || inputs.publish)}}
+      uses: actions/checkout@v4
+      with:
+          repository: esmf-org/esmpy_doc
+          path: ${{github.workspace}}/esmpy_doc
+          ssh-key: ${{secrets.ESMPY_WEB_DEPLOY_KEY}}
+    - name: Prepare docs for publication
+      if: ${{github.repository_owner == 'esmf-org' && (github.event_name == 'push' || inputs.publish)}}
+      run: |
+        cd ${{ github.workspace }}/esmpy_doc
+        mkdir -p docs/nightly/${{ github.ref_name }}
+        cd ${{ github.workspace }}/artifacts
+        unzip doc-esmpy.zip
+        cd ${{ github.workspace }}/artifacts/doc-esmpy/esmpy_doc
+        cp -rf html ${{ github.workspace }}/esmpy_doc/docs/nightly/${{ github.ref_name }}/
+        cp -rf latex/ESMPy.pdf ${{ github.workspace }}/esmpy_doc/docs/nightly/${{ github.ref_name }}/
+    - name: Commit and publish docs
+      if: ${{github.repository_owner == 'esmf-org' && (github.event_name == 'push' || inputs.publish)}}
+      run: |
+        cd ${{ github.workspace }}/esmpy_doc
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add .
+        git diff-index --quiet HEAD || git commit --message "Publish ESMPy Docs"
         git push origin

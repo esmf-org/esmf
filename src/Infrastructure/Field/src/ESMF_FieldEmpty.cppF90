@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -487,7 +487,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: localrc                          !  Local error code
     type(ESMF_ArraySpec) :: arrayspec
     integer :: rank, ungridded_dimcount, ungridded_ldimcount, ungridded_udimcount
-    integer :: memDimCount
+    integer :: i, memDimCount, grid_repdimcount
     type(ESMF_Geom)       :: geom
     type(ESMF_GeomType_Flag)       :: geomtype
     type(ESMF_Grid)           :: grid
@@ -514,12 +514,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     endif
 
-    geom=field%ftypep%geom
-    call ESMF_GeomGet(geom, geomtype=geomtype, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
     ! compute arrayspec rank, distgrid dimcount is 1 for Mesh, LocStream and XGrid
     ! arrayspec rank = distgrid_dimcount + ungridded_dimcount
     ungridded_dimcount = 0
@@ -539,27 +533,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
+   endif
+   
+    ! Get geom
+    geom=field%ftypep%geom
+   
+    ! Get number of replicated dims
+    grid_repdimcount = 0
+    if (present(gridToFieldMap)) then
+       do i = 1, size(gridToFieldMap)
+           if(gridToFieldMap(i) == 0) grid_repdimcount = grid_repdimcount + 1
+       enddo
     endif
-    rank = ungridded_dimcount + 1
-    if(geomtype == ESMF_GEOMTYPE_GRID) then
 
-      call ESMF_GeomGet(geom, grid=grid, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-      call ESMF_GridGet(grid, rank=memDimCount, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-      rank = ungridded_dimcount + memDimCount
-    endif  ! Grid
+    ! Get rank of geom
+    call ESMF_GeomGet(geom, rank=memDimCount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Calculate rank from dimension information
+    rank = ungridded_dimcount + memDimCount - grid_repdimcount
 
     ! Set ArraySpec from rank and typekind input
     call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Complete Field
     call ESMF_FieldEmptyComplete(field, arrayspec, &
       indexflag=indexflag, gridToFieldMap=gridToFieldMap, &
       ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
@@ -4403,14 +4403,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Get pointer to internal Field
   ftypep => field%ftypep
 
-  ! Get field's current status
+  ! Get current status of field
   currStatus=ftypep%status
 
   ! Change Field based on current status and new status
   if (currStatus == ESMF_FIELDSTATUS_EMPTY) then
 
      if (setStatus == ESMF_FIELDSTATUS_EMPTY) then
-         ! Don't do anything, since no change in status
+         ! Do not do anything, since no change in status
      else if (setStatus == ESMF_FIELDSTATUS_GRIDSET) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
              msg="a Field can't be reset to be more complete than its current status.", &
@@ -4437,11 +4437,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
 
-        ! Set flag back to it's inital setting
+        ! Set flag back to its inital setting
         ftypep%geomb_internal = .false.
 
      else if (setStatus == ESMF_FIELDSTATUS_GRIDSET) then
-         ! Don't do anything, since no change in status
+         ! Do not do anything, since no change in status
      else if (setStatus == ESMF_FIELDSTATUS_COMPLETE) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
              msg="a Field can't be reset to be more complete than its current status.", &
@@ -4463,7 +4463,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
 
-        ! Set Array internal flag back to it's inital setting
+        ! Set Array internal flag back to its inital setting
         ftypep%array_internal = .false.
 
         ! Destroy Geometry
@@ -4471,7 +4471,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
 
-        ! Set geom internal flag back to it's inital setting
+        ! Set geom internal flag back to its inital setting
         ftypep%geomb_internal = .false.
 
      else if (setStatus == ESMF_FIELDSTATUS_GRIDSET) then
@@ -4481,11 +4481,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
 
-        ! Set Array internal flag back to it's inital setting
+        ! Set Array internal flag back to its inital setting
         ftypep%array_internal = .false.
 
      else if (setStatus == ESMF_FIELDSTATUS_COMPLETE) then
-         ! Don't do anything, since no change in status
+         ! Do not do anything, since no change in status
      else
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
              msg="unknown status type", &

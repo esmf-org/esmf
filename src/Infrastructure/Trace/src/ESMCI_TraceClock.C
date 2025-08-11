@@ -3,7 +3,7 @@
  * Functions to get the timestamps from the system for trace events
  *
  * Earth System Modeling Framework
- * Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+ * Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
  * Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
  * Laboratory, University of Michigan, National Centers for Environmental 
  * Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -186,8 +186,8 @@ namespace ESMCI {
 
     int myPet = vm->getLocalPet();
     int petCount = vm->getPetCount();
-    int64_t ret;
-    
+    int64_t ret = 0;  // initialize to ensure valid return for all conditions
+
     for (int peer = 1; peer < petCount; peer++) {
       vm->barrier();
       if (myPet == 0 || myPet == peer) {

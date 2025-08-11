@@ -1308,7 +1308,6 @@ PIOc_get_var_chunk_cache(int ncid, int varid, PIO_Offset *sizep, PIO_Offset *nel
 }
 /* use this variable in the NETCDF library (introduced in v4.9.0) to determine if the following
    functions are available */
-#ifdef NC_HAS_MULTIFILTERS
 /**
  * Set the variable filter ids
  *
@@ -1337,8 +1336,8 @@ PIOc_def_var_filter(int ncid, int varid, unsigned int id, size_t nparams, unsign
 
     PLOG((1, "PIOc_def_var_filter ncid = %d varid = %d id = %d nparams = %d", ncid, varid, id, nparams));
 #ifdef DEBUG
-    for(i=0; i<nparams; i++)
-        PLOG(1, "  param %d %d\n",i, params[i]);
+    for(int i=0; i<nparams; i++)
+        PLOG((1, "  param %d %d\n",i, params[i]));
 #endif
 
     /* Get the file info. */
@@ -1878,8 +1877,6 @@ PIOc_inq_filter_avail(int ncid, unsigned int id )
 }
 // PIO_HAS_PAR_FILTERS
 #endif 
-// NC_HAS_MULTIFILTERS
-#endif
 #ifdef NC_HAS_QUANTIZE
 /**
  * Turn on quantization for a variable

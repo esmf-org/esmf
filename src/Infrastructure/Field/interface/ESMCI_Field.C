@@ -1,7 +1,7 @@
 //$1.10 2007/04/26 16:13:59 rosalind Exp $
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -143,6 +143,7 @@ void FTN_X(f_esmf_regridstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   int *regridPoleNPnts,
   ESMC_LineType_Flag *linetype,
   ESMC_NormType_Flag *normtype,
+  ESMC_Logical *vectorRegrid,
   ESMC_ExtrapMethod_Flag *extrapMethod,
   int *extrapNumSrcPnts,
   float *extrapDistExponent,
@@ -166,6 +167,7 @@ void FTN_X(f_esmf_regridstorefile)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldp
   int *regridPoleNPnts,
   ESMC_LineType_Flag *linetype,
   ESMC_NormType_Flag *normtype,
+  ESMC_Logical *vectorRegrid,
   ESMC_UnmappedAction_Flag *unmappedaction,
   ESMC_Logical *ignoreDegenerate,
   ESMC_Logical *create_rh,
@@ -1379,6 +1381,7 @@ namespace ESMCI {
     int *regridPoleNPnts,
     ESMC_LineType_Flag *lineType,
     ESMC_NormType_Flag *normType,
+    ESMC_Logical *vectorRegrid,
     ESMC_ExtrapMethod_Flag *extrapMethod,
     int *extrapNumSrcPnts,
     float *extrapDistExponent,
@@ -1456,6 +1459,7 @@ namespace ESMCI {
                               regridPoleNPnts,
                               lineType,
                               normType,
+                              vectorRegrid,
                               extrapMethod, extrapNumSrcPnts, extrapDistExponent,
                               extrapNumLevels,
                               unmappedAction,
@@ -1504,6 +1508,7 @@ namespace ESMCI {
     int *regridPoleNPnts,
     ESMC_LineType_Flag *lineType,
     ESMC_NormType_Flag *normType,
+    ESMC_Logical *vectorRegrid,
     ESMC_UnmappedAction_Flag *unmappedAction,
     ESMC_Logical *ignoreDegenerate,
     ESMC_Logical *create_rh,
@@ -1583,6 +1588,7 @@ namespace ESMCI {
                               regridPoleNPnts,
                               lineType,
                               normType,
+                              vectorRegrid,
                               unmappedAction,
                               ignoreDegenerate,
                               create_rh,

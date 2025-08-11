@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -716,7 +716,7 @@ extern "C" {
 //  2 ^ 32 apart so the result fits in to a standard integer return val.
 //
 // !ARGUMENTS:
-    long *n,           // in - number of expected bytes in a pointer
+    size_t *n,         // in - number of expected bytes in a pointer
     short *s1,         // in - F90 pointer of some kind
     short *s2,         // in - F90 pointer of some kind
     int *len) {        // out - that same value cast to an int

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -458,6 +458,7 @@ module ESMF_VMMod
   public ESMF_VMInitializePreMPI
   public ESMF_VMInitialize
   public ESMF_VMSet
+  public ESMF_VMGetEnv
   public ESMF_VMSetEnv
   public ESMF_VMFinalize
   public ESMF_VMAbort
@@ -473,6 +474,7 @@ module ESMF_VMMod
   public ESMF_VMPlanSetThis
   public ESMF_VMPlanSetMinStackSize
   public ESMF_VMPlanSetOpenMP
+  public ESMF_VMPlanSetStdRedirect
   public ESMF_VMPlanMaxPEs
   public ESMF_VMPlanMaxThreads
   public ESMF_VMPlanMinThreads
@@ -9400,6 +9402,49 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGetEnv()"
+!BOPI
+! !IROUTINE: ESMF_VMGetEnv - Get environment variable cached in the Global VM
+
+! !INTERFACE:
+  subroutine ESMF_VMGetEnv(name, value, rc)
+!
+! !ARGUMENTS:
+    character(*), intent(in)            :: name
+    character(*), intent(out)           :: value
+    integer,      intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Get environment variable cached in the Global VM.
+!
+!   The arguments are:
+!   \begin{description}
+!     \item [name]
+!        The name of the environment variable.
+!     \item [value]
+!        The value of the environment variable.
+!   \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMGetEnv(name, value, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMGetEnv
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMSetEnv()"
 !BOPI
 ! !IROUTINE: ESMF_VMSetEnv - Set environment variable cached in the Global VM
@@ -10099,6 +10144,68 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMPlanSetOpenMP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMPlanSetStdRedirect()"
+!BOPI
+! !IROUTINE: ESMF_VMPlanSetStdRedirect - Set stdout and stderr redirect
+
+! !INTERFACE:
+  subroutine ESMF_VMPlanSetStdRedirect(vmplan, stdout, stderr, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VMPlan), intent(inout)         :: vmplan
+    character(*),      intent(in),  optional :: stdout
+    character(*),      intent(in),  optional :: stderr
+    integer,           intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Set stdout redirect.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vmplan]
+!        VMPlan
+!   \item[{[stdout]}]
+!        Filename for the stdout redirect. By default do not redirect.
+!   \item[{[stderr]}]
+!        Filename for the stderr redirect. By default do not redirect.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMPlanGetInit, vmplan, rc)
+
+    ! Call into the C++ interface,
+
+    if (present(stdout)) then
+      call c_ESMC_VMPlanSetStdout(vmplan, trim(stdout), localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    if (present(stderr)) then
+      call c_ESMC_VMPlanSetStderr(vmplan, trim(stderr), localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMPlanSetStdRedirect
 !------------------------------------------------------------------------------
 
 

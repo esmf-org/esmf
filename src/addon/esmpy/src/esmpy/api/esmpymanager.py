@@ -16,19 +16,6 @@ import re
 
 #### UTILITIES ################################################################
 
-def _preprocess(v, separator, ignorecase):
-    if ignorecase: v = v.lower()
-    return [int(x) if x.isdigit() else [int(y) if y.isdigit() else y for y in
-        re.findall(r"\d+|[a-zA-Z]+", x)] for x in v.split(separator)]
-
-def version_compare(a, b, separator = '.', ignorecase = True):
-    a = _preprocess(a, separator, ignorecase)
-    b = _preprocess(b, separator, ignorecase)
-    try:
-        return (a > b) - (a < b)
-    except:
-        return False
-
 @initialize
 def local_pet():
     vm = ESMP_VMGetGlobal()

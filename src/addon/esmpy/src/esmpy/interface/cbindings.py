@@ -613,11 +613,11 @@ def ESMP_GridCreateNoPeriDim(maxIndex, coordSys=None, coordTypeKind=None):
 #TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
 _ESMF.ESMC_GridCreateCubedSphere.restype = ESMP_GridStruct
 _ESMF.ESMC_GridCreateCubedSphere.argtypes = [ct.POINTER(ct.c_int),
-                                             ct.POINTER(ESMP_InterfaceInt),
-                                             #ct.POINTER(ESMP_InterfaceInt),
-                                             #ct.POINTER(ESMP_InterfaceInt),
-                                             ct.POINTER(ESMP_InterfaceInt),
-                                             ct.c_void_p,
+                                             OptionalStructPointer,
+                                             #OptionalStructPointer,
+                                             #OptionalStructPointer,
+                                             OptionalStructPointer,
+                                             Py3Char,
                                              ct.POINTER(ct.c_int)]
 def ESMP_GridCreateCubedSphere(tilesize, regDecompPTile=None,
                                #decompFlagPTile=None, deLabelList=None,
@@ -668,7 +668,7 @@ def ESMP_GridCreateCubedSphere(tilesize, regDecompPTile=None,
         staggerLocList_i = ESMP_InterfaceInt(staggerLocList)
 
     # create the ESMF Grid and retrieve a ctypes pointer to it
-    gridstruct = _ESMF.ESMC_GridCreateCubedSphere(lts, regDecompPTile_i,
+    gridstruct = _ESMF.ESMC_GridCreateCubedSphere(ct.byref(lts), regDecompPTile_i,
                                                   #decompFlagPTile_i,
                                                   #deLabelList_i,
                                                   staggerLocList_i,
@@ -794,24 +794,6 @@ def ESMP_GridAddCoord(grid, staggerloc=constants.StaggerLoc.CENTER):
         raise ValueError('ESMC_GridAddCoord() failed with rc = '+str(rc)+'.    '+
                         constants._errmsg)
 
-    # now we have to get the coordinate array bounds to set the grid.size
-    coordDim = ct.c_int(1)
-    lrc = ct.c_int(0)
-    lbound = np.array(np.zeros(grid.rank),dtype=np.int32)
-    ubound = np.array(np.zeros(grid.rank),dtype=np.int32)
-    #TODO: this one will need better lde handling
-    gridCoordPtr = _ESMF.ESMC_GridGetCoord(grid.struct.ptr,
-                                           coordDim, staggerloc, 0,
-                                           lbound, ubound,
-                                           ct.byref(lrc))
-    rc = lrc.value
-    if rc != constants._ESMP_SUCCESS:
-        raise ValueError('ESMC_GridGetCoord() failed with rc = '+str(rc)+'.    '+
-                        constants._errmsg)
-
-    # adjust for 0 based bounds
-    lbound = lbound - 1
-
 _ESMF.ESMC_GridAddItem.restype = ct.c_int
 _ESMF.ESMC_GridAddItem.argtypes = [ct.c_void_p, ct.c_uint, ct.c_uint]
 
@@ -852,7 +834,8 @@ def ESMP_GridAddItem(grid, item,
                         constants._errmsg)
 
 _ESMF.ESMC_GridGetCoord.restype = ct.POINTER(ct.c_void_p)
-_ESMF.ESMC_GridGetCoord.argtypes = [ct.c_void_p, ct.c_int, ct.c_uint, ct.c_int,
+_ESMF.ESMC_GridGetCoord.argtypes = [ct.c_void_p, ct.c_int, ct.c_uint,
+                                    ct.POINTER(ct.c_int),
                                     np.ctypeslib.ndpointer(dtype=np.int32),
                                     np.ctypeslib.ndpointer(dtype=np.int32),
                                     ct.POINTER(ct.c_int)]
@@ -899,7 +882,7 @@ def ESMP_GridGetCoordPtr(grid, coordDim,
     exUB = np.array(np.zeros(grid.rank),dtype=np.int32)
 
     gridCoordPtr = _ESMF.ESMC_GridGetCoord(grid.struct.ptr, lcd, staggerloc,
-                                           lde, exLB, exUB, ct.byref(lrc))
+                                           ct.byref(lde), exLB, exUB, ct.byref(lrc))
 
     # adjust bounds to be 0 based, even though it's just a placeholder..
     exLB = exLB - 1
@@ -912,7 +895,8 @@ def ESMP_GridGetCoordPtr(grid, coordDim,
     return gridCoordPtr
 
 _ESMF.ESMC_GridGetCoordBounds.restype = ct.c_int
-_ESMF.ESMC_GridGetCoordBounds.argtypes = [ct.c_void_p, ct.c_uint, ct.c_int,
+_ESMF.ESMC_GridGetCoordBounds.argtypes = [ct.c_void_p, ct.c_uint,
+                                         ct.POINTER(ct.c_int),
                                          np.ctypeslib.ndpointer(dtype=np.int32),
                                          np.ctypeslib.ndpointer(dtype=np.int32),
                                          ct.POINTER(ct.c_int)]
@@ -953,7 +937,7 @@ def ESMP_GridGetCoordBounds(grid, staggerloc=constants.StaggerLoc.CENTER,
     exclusiveLBound = np.array(np.zeros(grid.rank),dtype=np.int32)
     exclusiveUBound = np.array(np.zeros(grid.rank),dtype=np.int32)
 
-    rc = _ESMF.ESMC_GridGetCoordBounds(grid.struct.ptr, staggerloc, lde,
+    rc = _ESMF.ESMC_GridGetCoordBounds(grid.struct.ptr, staggerloc, ct.byref(lde),
                                        exclusiveLBound, exclusiveUBound,
                                        ct.byref(lrc))
 
@@ -968,7 +952,8 @@ def ESMP_GridGetCoordBounds(grid, staggerloc=constants.StaggerLoc.CENTER,
     return exclusiveLBound, exclusiveUBound
 
 _ESMF.ESMC_GridGetItem.restype = ct.POINTER(ct.c_void_p)
-_ESMF.ESMC_GridGetItem.argtypes = [ct.c_void_p, ct.c_uint, ct.c_uint, ct.c_int,
+_ESMF.ESMC_GridGetItem.argtypes = [ct.c_void_p, ct.c_uint, ct.c_uint,
+                                   ct.POINTER(ct.c_int),
                                    ct.POINTER(ct.c_int)]
 
 def ESMP_GridGetItem(grid, item, staggerloc=constants.StaggerLoc.CENTER,
@@ -1010,7 +995,8 @@ def ESMP_GridGetItem(grid, item, staggerloc=constants.StaggerLoc.CENTER,
     # localde
     lde = ct.c_int(localde)
 
-    gridItemPtr = _ESMF.ESMC_GridGetItem(grid.struct.ptr, item, staggerloc, lde,
+    gridItemPtr = _ESMF.ESMC_GridGetItem(grid.struct.ptr, item, staggerloc,
+                                         ct.byref(lde),
                                          ct.byref(lrc))
 
     rc = lrc.value
@@ -1019,6 +1005,27 @@ def ESMP_GridGetItem(grid, item, staggerloc=constants.StaggerLoc.CENTER,
                         constants._errmsg)
 
     return gridItemPtr
+
+_ESMF.ESMC_GridGetLocalDECount.restype = ct.c_int
+_ESMF.ESMC_GridGetLocalDECount.argtypes = [ct.c_void_p,
+                                           ct.POINTER(ct.c_int)]
+
+def ESMP_GridGetLocalDECount(grid):
+    """
+    Preconditions: An ESMP_Grid has been created\n
+    Postconditions: An integer specifying the number of DEs in this grid on this PET
+                    is returned\n
+    Arguments:\n
+        :RETURN: integer :: localDECount\n
+        ESMP_Grid        :: grid\n
+    """
+    lde_count = ct.c_int(0)
+    rc = _ESMF.ESMC_GridGetLocalDECount(grid.struct.ptr, ct.byref(lde_count))
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_GridGetLocalDECount() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+    de_count = lde_count.value
+    return de_count
 
 _ESMF.ESMC_GridWrite.restype = ct.c_int
 _ESMF.ESMC_GridWrite.argtypes = [ct.c_void_p, ct.c_uint,Py3Char]
@@ -1931,6 +1938,27 @@ def ESMP_FieldGetBounds(field, rank, localDe=0):
 
     return exLB, exUB
 
+_ESMF.ESMC_FieldGetLocalDECount.restype = ct.c_int
+_ESMF.ESMC_FieldGetLocalDECount.argtypes = [ct.c_void_p,
+                                            ct.POINTER(ct.c_int)]
+
+def ESMP_FieldGetLocalDECount(field):
+    """
+    Preconditions: An ESMP_Field has been created\n
+    Postconditions: An integer specifying the number of DEs in this field on this PET
+                    is returned\n
+    Arguments:\n
+        :RETURN: integer  :: localDECount\n
+        ESMP_Field        :: field\n
+    """
+    lde_count = ct.c_int(0)
+    rc = _ESMF.ESMC_FieldGetLocalDECount(field.ptr, ct.byref(lde_count))
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_FieldGetLocalDECount() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+    de_count = lde_count.value
+    return de_count
+
 _ESMF.ESMC_FieldPrint.restype = ct.c_int
 _ESMF.ESMC_FieldPrint.argtypes = [ct.c_void_p]
 
@@ -2044,6 +2072,7 @@ _ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p,              # srcField
                                         ct.POINTER(ct.c_void_p),  # regridPoleNPnts
                                         OptionalNamedConstant,    # lineType
                                         OptionalNamedConstant,    # normType
+                                        OptionalBool,             # vectorRegrid
                                         OptionalNamedConstant,    # extrapMethod
                                         OptionalInt,              # extrapNumSrcPnts
                                         OptionalFloat,            # extrapDistExponent
@@ -2067,6 +2096,7 @@ def ESMP_FieldRegridStore(srcField,
                           regridPoleNPnts=None,
                           lineType=None,
                           normType=None,
+                          vectorRegrid=None,
                           extrapMethod=None, 
                           extrapNumSrcPnts=None,
                           extrapDistExponent=None,
@@ -2128,6 +2158,7 @@ def ESMP_FieldRegridStore(srcField,
                                      regridPoleNPnts_ct,
                                      lineType,
                                      normType,
+                                     vectorRegrid,
                                      extrapMethod, 
                                      extrapNumSrcPnts,
                                      extrapDistExponent,
@@ -2161,6 +2192,7 @@ _ESMF.ESMC_FieldRegridStoreFile.argtypes = [ct.c_void_p, ct.c_void_p,
                                             ct.POINTER(ct.c_void_p),
                                             OptionalNamedConstant,
                                             OptionalNamedConstant,
+                                            OptionalBool,
                                             OptionalNamedConstant,
                                             OptionalBool,
                                             OptionalBool,
@@ -2178,7 +2210,7 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
                           srcMaskValues=None, dstMaskValues=None,
                           regridmethod=None,
                           polemethod=None, regridPoleNPnts=None,
-                          lineType=None, normType=None, unmappedaction=None,
+                          lineType=None, normType=None, vectorRegrid=None, unmappedaction=None,
                           ignoreDegenerate=None, createRH=None,
                           filemode=None, srcFile=None, dstFile=None,
                           srcFileType=None, dstFileType=None,
@@ -2225,6 +2257,7 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
             Argument values:\n
                 (default) NormType.DSTAREA \n
                 NormType.DSTFRAC \n
+        boolean (optional)                  :: vectorRegrid\n
         unmappedAction (optional)           :: unmappedaction\n
             Argument values:\n
                 (default) UnmappedAction.ERROR\n
@@ -2298,6 +2331,7 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
                                      regridPoleNPnts_ct,
                                      lineType,
                                      normType,
+                                     vectorRegrid,
                                      unmappedaction,
                                      ignoreDegenerate,
                                      createRH,

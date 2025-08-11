@@ -66,9 +66,7 @@ class TestExamples(TestBase):
     def test_ungridded_dimension_regrid(self):
         from . import ungridded_dimension_regrid
 
-    # this will currently never run because it isn't yet possible to run pytest with mpiexec
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
-    @pytest.mark.skipif(mg.pet_count!=6, reason="test must be run with 6 cores")
     def test_cubed_sphere_to_mesh_regrid(self):
         from . import cubed_sphere_to_mesh_regrid
 

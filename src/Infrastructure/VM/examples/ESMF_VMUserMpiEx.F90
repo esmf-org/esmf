@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -21,13 +21,14 @@
 ! \label{vm_inside_user_mpi}
 !
 ! \begin{sloppypar}
-! It is possible to nest an ESMF application inside a user application that 
-! explicitly calls {\tt MPI\_Init()} and {\tt MPI\_Finalize()}. The
-! {\tt ESMF\_Initialize()} call automatically checks whether MPI has already
-! been initialized, and if so does not call {\tt MPI\_Init()} internally. 
+! It is possible to nest an ESMF application inside a user application that
+! explicitly initializes MPI. This means that the user code calls
+! {\tt MPI\_Init()} or {\tt MPI\_Init\_thread()}.
+! The {\tt ESMF\_Initialize()} call automatically checks whether MPI has already
+! been initialized, and if so, does {\em not} initialize MPI internally.
 ! On the finalize side, {\tt ESMF\_Finalize()} can be instructed to {\em not}
-! call {\tt MPI\_Finalize()}, making it the responsibility of the outer code
-! to finalize MPI.
+! call {\tt MPI\_Finalize()}, making it the responsibility of the outer user
+! code to finalize MPI by explicitly by calling {\tt MPI\_Finalize()}.
 ! \end{sloppypar}
 !
 !EOE
@@ -38,16 +39,16 @@ program ESMF_VMUserMpiEx
 
   use ESMF
   use ESMF_TestMod
-  
+
   implicit none
-#ifndef ESMF_MPIUNI     
+#ifndef ESMF_MPIUNI
   include 'mpif.h'
 #endif
-  
+
   ! local variables
   integer:: rc
-#ifndef ESMF_MPIUNI     
-  integer:: ierr
+#ifndef ESMF_MPIUNI
+  integer:: ierr, provided
 #endif
   ! result code
   integer :: finalrc, result
@@ -73,15 +74,18 @@ program ESMF_VMUserMpiEx
 !EOC
   if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-#ifndef ESMF_MPIUNI     
+#ifndef ESMF_MPIUNI
 !BOC
-  ! User code initializes MPI.
-  call MPI_Init(ierr)
+  ! User code initializes MPI. In order to support the ESMF resource management
+  ! features, MPI must be initialized with {\tt MPI\_THREAD\_SERIALIZED} thread
+  ! support or higher.
+  call MPI_Init_thread(MPI_THREAD_SERIALIZED, provided, ierr)
 !EOC
   if (ierr/=0) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #endif
 !BOC
-  ! ESMF_Initialize() does not call MPI_Init() if it finds MPI initialized.
+  ! ESMF_Initialize() does not initialize MPI if it finds MPI initialized
+  ! already.
   call ESMF_Initialize(defaultlogfilename="VMUserMpiEx.Log", &
     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 !EOC
@@ -101,9 +105,9 @@ program ESMF_VMUserMpiEx
   call ESMF_Finalize(endflag=ESMF_END_KEEPMPI, rc=rc)
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
-#ifndef ESMF_MPIUNI     
+#ifndef ESMF_MPIUNI
 !BOC
-  ! It is the responsibility of the outer user code to finalize MPI.
+  ! It is now the responsibility of the outer user code to finalize MPI.
   call MPI_Finalize(ierr)
 !EOC
   if (ierr/=0) finalrc = ESMF_FAILURE

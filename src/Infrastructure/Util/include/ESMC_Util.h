@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2024, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -21,6 +21,7 @@
 #define ESMC_UTIL_H
 
 #include "ESMC_Conf.h"
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,13 +41,7 @@ extern "C" {
   typedef char      ESMC_I1;
   typedef double    ESMC_R8;
   typedef float     ESMC_R4;
-#if (ESMC_POINTER_SIZE == 4)
-  // 32-bit machine
-  typedef unsigned long ESMC_POINTER;
-#else
-  // 64-bit machine
-  typedef unsigned long long ESMC_POINTER;
-#endif
+  typedef size_t    ESMC_POINTER;
 
 enum ESMC_CoordSys_Flag {ESMC_COORDSYS_INVALID=-2,
                     ESMC_COORDSYS_UNINIT,

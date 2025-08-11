@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2024, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -347,11 +347,74 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_FieldRegridRelease
 !------------------------------------------------------------------------------
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "fillProfileStr"    
+    subroutine fillProfileStr(srcField, dstField, regridmethod, profileStr, rc)
+      type(ESMF_Field),               intent(in)              :: srcField
+      type(ESMF_Field),               intent(inout)           :: dstField
+      type(ESMF_RegridMethod_Flag),   intent(in),optional     :: regridmethod
+      character (len=*),              intent(out)             :: profileStr
+      integer,                        intent(out),   optional :: rc
+
+      integer :: localrc
+      character (len=ESMF_MAXSTR) :: tmpStr 
+
+      
+      ! Set string
+      profileStr="ESMF_FieldRegridStore("
+
+      ! Get srcField name
+      call ESMF_FieldGet(srcField, name=tmpStr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return                 
+
+      ! Add to profileStr
+      profileStr=trim(profileStr)//"src="//trim(tmpStr)
+
+      
+      ! Get dstField name
+      call ESMF_FieldGet(dstField, name=tmpStr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return                 
+
+      ! Add to profileStr
+      profileStr=trim(profileStr)//" dst="//trim(tmpStr)
+
+      ! Get method name
+      if (present(regridmethod)) then
+         if (regridMethod == ESMF_REGRIDMETHOD_BILINEAR) then
+            tmpStr="bilinear"
+         else if (regridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+            tmpStr="conserve"
+         else if (regridMethod == ESMF_REGRIDMETHOD_CONSERVE_2ND) then
+            tmpStr="conserve2nd"
+         else if (regridMethod == ESMF_REGRIDMETHOD_PATCH) then
+            tmpStr="patch"
+         else if (regridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD) then
+            tmpStr="neareststod"
+         else if (regridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS) then
+            tmpStr="nearestdtos"
+         else
+            tmpStr="unknown"
+         endif
+      else
+         tmpStr="bilinear" ! Default to bilinear if not present
+      endif
+         
+      ! Add to profileStr
+      profileStr=trim(profileStr)//" method="//trim(tmpStr)         
+      
+      ! end it
+      profileStr=trim(profileStr)//")"
+ 
+      ! Return success !
+      if(present(rc)) rc = ESMF_SUCCESS      
+      
+    end subroutine fillProfileStr
 
 
-
+     
 #ifndef FRS_OLDWAY
-
     
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -739,17 +802,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         real(ESMF_KIND_R8),          pointer :: tmp_weights(:)
         real(ESMF_KIND_R8) :: beg_time, end_time
         logical :: addOrigCoordsToPointList
-                  
+        character (len=ESMF_MAXSTR) :: profileStr="<Not Set>"
+        
         ! Debug Timing stuff
         ! call ESMF_VMWtime(beg_time)
         ! ESMF_METHOD_ENTER(localrc)
-
 
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 
+        ! Profiling
+        if (ESMF_TraceGetProfileTypeInfo(ESMF_PROFILETYPE_REGRID) > 0) then
+           ! Fill profile string
+           call fillProfileStr(srcField, dstField, regridMethod, profileStr, localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return 
+
+           ! Start profile region
+           call ESMF_TraceRegionEnter(profileStr, localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return                 
+        endif
+
+        
 
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         !!!! Warnings for deprecated arguments !!!!
@@ -1342,6 +1419,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            call ESMF_MeshDestroy(dstMesh, noGarbage=.true., rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
+
+        ! Profiling
+        if (ESMF_TraceGetProfileTypeInfo(ESMF_PROFILETYPE_REGRID) > 0) then
+           call ESMF_TraceRegionExit(profileStr, localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return                 
         endif
 
         
@@ -3322,6 +3407,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     regridmethod, &
                     srcTermProcessing, pipeLineDepth, &
                     routehandle, &
+                    factorList, factorIndexList, & 
                     srcFracField, dstFracField, &
                     srcMergeFracField, dstMergeFracField, rc)
 !      
@@ -3334,6 +3420,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                        intent(inout), optional :: srcTermProcessing
       integer,                        intent(inout), optional :: pipeLineDepth
       type(ESMF_RouteHandle), intent(inout), optional         :: routehandle
+      real(ESMF_KIND_R8),             pointer,       optional :: factorList(:)
+      integer(ESMF_KIND_I4),          pointer,       optional :: factorIndexList(:,:)
       type(ESMF_Field),       intent(inout), optional         :: srcFracField
       type(ESMF_Field),       intent(inout), optional         :: dstFracField
       type(ESMF_Field),       intent(inout), optional         :: srcMergeFracField
@@ -3353,6 +3441,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              provide access to the tuning parameters affecting the sparse matrix
 !              execution. See the text for details on the impact
 !              {\tt srcTermProcessing} can have on bit-for-bit reproducibility.
+! \item[8.9.0] Added arguments {\tt factorList} and {\tt factorIndexList} to allow user
+!              to retrieve regridding weights.
+!
 ! \end{description}
 ! \end{itemize}
 !
@@ -3498,6 +3589,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         type(ESMF_PointList) :: dstPointList, srcPointList
         type(ESMF_Array)     :: statusArray
+        integer(ESMF_KIND_I4),       pointer :: tmpFactorIndexList(:,:)
+        real(ESMF_KIND_R8),          pointer :: tmpFactorList(:)
+
         
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
@@ -3983,15 +4077,39 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 dstSide, dstIdx, sparseMat=sparseMat, rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-           
-           ! call FieldSMMStore
-           call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
-                sparseMat%factorList, sparseMat%factorIndexList, &
-                srcTermProcessing=srcTermProcessing, &
-                pipeLineDepth=pipeLineDepth, &
-                rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
+
+           ! If routeHandle requested, create that
+           if (present(routeHandle)) then
+              ! call FieldSMMStore           
+              call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
+                   sparseMat%factorList, sparseMat%factorIndexList, &
+                   srcTermProcessing=srcTermProcessing, &
+                   pipeLineDepth=pipeLineDepth, &
+                   rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
+
+           ! If factorList requested, copy that
+           if (present(factorList)) then
+
+              ! Allocate space
+              allocate(factorList(size(sparseMat%factorList)))
+              
+              ! Copy
+              factorList=sparseMat%factorList
+           endif
+
+           ! If factorIndexList requested, copy that
+           if (present(factorIndexList)) then
+
+              ! Allocate space
+              allocate(factorIndexList(size(sparseMat%factorIndexList,1),size(sparseMat%factorIndexList,2)))
+              
+              ! Copy
+              factorIndexList=sparseMat%factorIndexList
+           endif
+
            
         else if (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE_2ND) then
 
@@ -4150,29 +4268,65 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
          
          ! Generate routehandle for 2nd order conservative
-         call ESMF_RegridStore(srcMesh, srcArray, &
-              srcPointList, .false., &
-              dstMesh, dstArray, &
-              dstPointList, .false. , &
-              regridMethod=ESMF_REGRIDMETHOD_CONSERVE_2ND, &
-              lineType=ESMF_LINETYPE_GREAT_CIRCLE, &
-              normType=ESMF_NORMTYPE_DSTAREA, &
-              vectorRegrid=.false., &
-              polemethod=ESMF_POLEMETHOD_NONE, regridPoleNPnts=4, &
-              hasStatusArray=.false., statusArray=statusArray, &
-              extrapMethod=ESMF_EXTRAPMETHOD_NONE, &
-              extrapNumSrcPnts=8, extrapDistExponent=2.0_ESMF_KIND_R8, &
-              extrapNumLevels=2, extrapNumInputLevels=2, &
-              unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, & ! Otherwise, dst = sideMesh will often lead to unmapped errors
-              ignoreDegenerate=.true., &
-              srcTermProcessing=srcTermProcessing, &
-              pipeLineDepth=pipeLineDepth, &
-              routehandle=routeHandle, &
-              checkFlag=.false., &
-              rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
+         if (present(factorList) .or. present(factorIndexList)) then  ! Do weight matrix and maybe rh
+            call ESMF_RegridStore(srcMesh, srcArray, &
+                 srcPointList, .false., &
+                 dstMesh, dstArray, &
+                 dstPointList, .false. , &
+                 regridMethod=ESMF_REGRIDMETHOD_CONSERVE_2ND, &
+                 lineType=ESMF_LINETYPE_GREAT_CIRCLE, &
+                 normType=ESMF_NORMTYPE_DSTAREA, &
+                 vectorRegrid=.false., &
+                 polemethod=ESMF_POLEMETHOD_NONE, regridPoleNPnts=4, &
+                 hasStatusArray=.false., statusArray=statusArray, &
+                 extrapMethod=ESMF_EXTRAPMETHOD_NONE, &
+                 extrapNumSrcPnts=8, extrapDistExponent=2.0_ESMF_KIND_R8, &
+                 extrapNumLevels=2, extrapNumInputLevels=2, &
+                 unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, & ! Otherwise, dst = sideMesh will often lead to unmapped errors
+                 ignoreDegenerate=.true., &
+                 srcTermProcessing=srcTermProcessing, &
+                 pipeLineDepth=pipeLineDepth, &
+                 routehandle=routeHandle, &
+                 indices=tmpFactorIndexList, &
+                 weights=tmpFactorList, &
+                 checkFlag=.false., &
+                 rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
 
+            ! attach sparse matrix to appropriate output variable
+           if (present(factorList)) factorList=>tmpFactorList
+           if (present(factorIndexList)) factorIndexList=>tmpFactorIndexList
+
+           ! deallocate if not being passed out
+           if (.not. present(factorList)) deallocate(tmpfactorList)
+           if (.not. present(factorIndexList)) deallocate(tmpfactorIndexList)
+
+         else  ! Just do routeHandle
+            call ESMF_RegridStore(srcMesh, srcArray, &
+                 srcPointList, .false., &
+                 dstMesh, dstArray, &
+                 dstPointList, .false. , &
+                 regridMethod=ESMF_REGRIDMETHOD_CONSERVE_2ND, &
+                 lineType=ESMF_LINETYPE_GREAT_CIRCLE, &
+                 normType=ESMF_NORMTYPE_DSTAREA, &
+                 vectorRegrid=.false., &
+                 polemethod=ESMF_POLEMETHOD_NONE, regridPoleNPnts=4, &
+                 hasStatusArray=.false., statusArray=statusArray, &
+                 extrapMethod=ESMF_EXTRAPMETHOD_NONE, &
+                 extrapNumSrcPnts=8, extrapDistExponent=2.0_ESMF_KIND_R8, &
+                 extrapNumLevels=2, extrapNumInputLevels=2, &
+                 unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, & ! Otherwise, dst = sideMesh will often lead to unmapped errors
+                 ignoreDegenerate=.true., &
+                 srcTermProcessing=srcTermProcessing, &
+                 pipeLineDepth=pipeLineDepth, &
+                 routehandle=routeHandle, &
+                 checkFlag=.false., &
+                 rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+         endif
+            
            ! The fraction information should be the same as stored in the XGrid. However,
            ! use the version actually calculated during 2nd order calc, so that it matches more
            ! precisely the values used during that calculation. 
