@@ -773,7 +773,6 @@ The valid values are:
       The empty region contains no elements.
 \end{description}
 
-
 \subsection{ESMF\_REGRIDMETHOD}
 \label{opt:regridmethod}
 
@@ -801,6 +800,26 @@ The valid values are:
       Second-order conservative interpolation. As with first-order, preserves the integral of the value between the source and destination. However, typically produces a smoother more accurate result than first-order. Also like first-order, the value of a destination cell is calculated as the weighted sum of the values of the source cells that it overlaps. However, second-order also includes additional terms to take into account the gradient of the field across the source cell. Needs corner coordinate values to be provided in the Grid. Currently only works for Fields created on the Grid center stagger or the Mesh element location. 
 
 
+\end{description}
+
+\subsection{ESMF\_PREDEFINEDDYNAMICMASK\_FLAG}
+\label{opt:maskType}
+
+{\sf DESCRIPTION:\\}  
+Specify which interpolation method to use during regridding. For a more detailed discussion of these methods, as well as ESMF regridding in general, see Section~\ref{sec:regrid}.
+
+The type of this flag is:
+
+{\tt type(ESMF\_PredefinedDynamicMask\_Flag)}
+
+The valid values are:
+\begin{description}
+\item [ESMF\_PREDEFINEDDYNAMICMASK\_MASKDEST]
+      Mask the destination values using the provided dstMaskValue
+\item [ESMF\_PREDEFINEDDYNAMICMASK\_MASKSRC]
+      Mask the source values using the provided srcMaskValue. The weights are renormalized based on the the number of source points that are missing.
+\item [ESMF\_PREDEFINEDDYNAMICMASK\_MASKVOTE]
+      This mask assigns to the destination point, the source value with the largest contributing weight. Any source values that match the provided srcMaskValue are ignored when making this determination.
 \end{description}
 
 

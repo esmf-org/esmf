@@ -164,7 +164,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   
 !   All values in {\tt dynamicMask} will be reset by this call.
 !
-!   See section \ref{RH:DynMask} for a general discussion of dynamic masking.
+!   See section \ref{RH:DynMask} for a general discussion of dynamic masking
+!   and section \ref{RH:PredefinedDynMask} for a discussion of the predefined masks
 !
 !   The arguments are:
 !   \begin{description}
@@ -172,7 +173,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     DynamicMask object.
 !   \item [maskType]
 !     The use a predefined mask for handling dynamically masked source and 
-!     destination elements. See section \ref{RH:DynMask} for the available
+!     destination elements. See section \ref{RH:PredefinedDynMask} for the available
 !     {\tt ESMF\_PredefinedDynamicMask\_Flag} flags.
 !     The routine is only called on PETs where {\em at least one} interpolation 
 !     element is identified for special handling.
@@ -245,9 +246,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DynamicMaskPredefinedSetR8R8R8()"
+#define ESMF_METHOD "ESMF_DynamicMaskPredefinedSetR8R8R8V()"
 !BOP
-! !IROUTINE: ESMF_DynamicMaskPredefinedSetR8R8R8 - Set PredefinedDynamicMask for R8R8RV8
+! !IROUTINE: ESMF_DynamicMaskPredefinedSetR8R8R8V - Set PredefinedDynamicMask for R8R8RV8V
 ! !INTERFACE:
   subroutine ESMF_DynamicMaskPredefinedSetR8R8R8V(dynamicMask, maskType, &
     keywordEnforcer, handleAllElements, dynamicSrcMaskValue, &
@@ -263,7 +264,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
-!   \label{api:DynamicMaskPredefinedSetR8R8R8}
+!   \label{api:DynamicMaskPredefinedSetR8R8R8V}
 !   Set an {\tt ESMF\_DynamicMask} object suitable for 
 !   destination element typekind {\tt ESMF\_TYPEKIND\_R8},
 !   factor typekind {\tt ESMF\_TYPEKIND\_R8}, and
@@ -272,6 +273,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   All values in {\tt dynamicMask} will be reset by this call.
 !
 !   See section \ref{RH:DynMask} for a general discussion of dynamic masking.
+!   and section \ref{RH:PredefinedDynMask} for a discussion of the predefined masks
 !
 !   The arguments are:
 !   \begin{description}
@@ -279,7 +281,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     DynamicMask object.
 !   \item [maskType]
 !     The use a predefined mask for handling dynamically masked source and 
-!     destination elements. See section \ref{RH:DynMask} for the available
+!     destination elements. See section \ref{RH:PredefinedDynMask} for the available
 !     {\tt ESMF\_PredefinedDynamicMask\_Flag} flags.
 !     The routine is only called on PETs where {\em at least one} interpolation 
 !     element is identified for special handling.
@@ -354,7 +356,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DynamicMaskPredefinedSetR4R8R4()"
 !BOP
-! !IROUTINE: ESMF_DynamicMaskPrefinedSetR4R8R4 - Set PredefinedDynamicMask for R4R8R4
+! !IROUTINE: ESMF_DynamicMaskPredefinedSetR4R8R4 - Set PredefinedDynamicMask for R4R8R4
 ! !INTERFACE:
   subroutine ESMF_DynamicMaskPredefinedSetR4R8R4(dynamicMask, maskType, &
     keywordEnforcer, handleAllElements, dynamicSrcMaskValue, &
@@ -378,7 +380,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   
 !   All values in {\tt dynamicMask} will be reset by this call.
 !
-!   See section \ref{RH:DynMask} for a general discussion of dynamic masking.
+!   See section \ref{RH:DynMask} for a general discussion of dynamic masking
+!   and section \ref{RH:PredefinedDynMask} for a discussion of the predefined masks
 !
 !   The arguments are:
 !   \begin{description}
@@ -386,7 +389,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     DynamicMask object.
 !   \item [maskType]
 !     The use a predefined mask for handling dynamically masked source and 
-!     destination elements. See section \ref{RH:DynMask} for the available
+!     destination elements. See section \ref{RH:PredefinedDynMask} for the available
 !     {\tt ESMF\_PredefinedDynamicMask\_Flag} flags.
 !     The routine is only called on PETs where {\em at least one} interpolation 
 !     element is identified for special handling.
@@ -459,9 +462,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DynamicMaskPredefinedSetR4R8R4()"
+#define ESMF_METHOD "ESMF_DynamicMaskPredefinedSetR4R8R4V()"
 !BOP
-! !IROUTINE: ESMF_DynamicMaskPredefinedSetR4R8R4 - Set PredefinedDynamicMask for R8R8R8V
+! !IROUTINE: ESMF_DynamicMaskPredefinedSetR4R8R4V - Set PredefinedDynamicMask for R8R8R8V
 ! !INTERFACE:
   subroutine ESMF_DynamicMaskPredefinedSetR4R8R4V(dynamicMask, maskType, &
     keywordEnforcer, handleAllElements, dynamicSrcMaskValue, &
@@ -477,15 +480,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
-!   \label{api:DynamicMaskPredefinedSetR4R8R4}
+!   \label{api:DynamicMaskPredefinedSetR4R8R4V}
 !   Set an {\tt ESMF\_DynamicMask} object suitable for 
 !   destination element typekind {\tt ESMF\_TYPEKIND\_R8},
 !   factor typekind {\tt ESMF\_TYPEKIND\_R8}, and
 !   source element typekind {\tt ESMF\_TYPEKIND\_R8}.
-!   
+!   using an available predefined mask
 !   All values in {\tt dynamicMask} will be reset by this call.
 !
-!   See section \ref{RH:DynMask} for a general discussion of dynamic masking.
+!   See section \ref{RH:DynMask} for a general discussion of dynamic masking
+!   and section \ref{RH:PredefinedDynMask} for a discussion of the predefined masks
 !
 !   The arguments are:
 !   \begin{description}
@@ -493,7 +497,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     DynamicMask object.
 !   \item [maskType]
 !     The use a predefined mask for handling dynamically masked source and 
-!     destination elements. See section \ref{RH:DynMask} for the available
+!     destination elements. See section \ref{RH:PredefinedDynMask} for the available
 !     {\tt ESMF\_PredefinedDynamicMask\_Flag} flags.
 !     The routine is only called on PETs where {\em at least one} interpolation 
 !     element is identified for special handling.

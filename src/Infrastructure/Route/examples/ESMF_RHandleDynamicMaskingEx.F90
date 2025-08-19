@@ -1123,4 +1123,13 @@ program ESMF_RHandleDynamicMaskingEx
     print *, "FAIL: ESMF_RHandleDynamicMaskingEx.F90"
   endif
 
+!BOE
+! \subsubsection{Predefined Dynamic Masking}
+! \label{RH:PredefinedDynMask}
+!
+! Several predefined dynamic masks can be created for the convience of the user
+! using the {\tt PredefinedDynamicMaskSet} procedures.
+!
+!EOE
+
 end program
