@@ -772,7 +772,7 @@ program ESMF_RHandleDynamicMaskingEx
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
-! The same {\tt dynamicMaskRoutine} as before can be used when setting up
+! The same {\tt dynamicMaskRoutine} as before can be usGed when setting up
 ! the {\tt ESMF\_DynamicMask} object. However, the source and destination
 ! Fields now contain 20 undistributed elements at each distributed location,
 ! and the dynamic mask routine will handle all elements that are affected
@@ -1127,8 +1127,24 @@ program ESMF_RHandleDynamicMaskingEx
 ! \subsubsection{Predefined Dynamic Masking}
 ! \label{RH:PredefinedDynMask}
 !
-! Several predefined dynamic masks can be created for the convience of the user
-! using the {\tt PredefinedDynamicMaskSet} procedures.
+! Several predefined dynamic masks can be created for the convenience of the user
+! using the {\tt PredefinedDynamicMaskSet} procedures and passing the appripriate mask type. 
+! By using these procedures the
+! user is returned a {\tt ESMF\_DynamicMask} object that can be used in a regrid
+! operation without having to supply their own procedure. The created {\tt ESMF\_DynamicMask} is controlled
+! by the mask argument which has type of 
+!
+!\tt type(ESMF\_PREDEFINEDDYNAMICMASK\_FLAG)
+!
+!The valid values are:
+!\begin{description}
+!\item [ESMF\_PREDEFINEDDYNAMICMASK\_MASKDEST]
+!      Mask the destination values using the provided dstMaskValue
+!\item [ESMF\_PREDEFINEDDYNAMICMASK\_MASKSRC]
+!      Mask the source values using the provided srcMaskValue. The weights are renormalized based on the the number of source points that are missing. If all source points are the srcMaskValue, the result is set to the srcMaskValue
+!\item [ESMF\_PREDEFINEDDYNAMICMASK\_MASKVOTE]
+!      This mask assigns to the destination point, the source value with the largest contributing weight. Any source values that match the provided srcMaskValue are ignored when making this determination.
+!\end{description}
 !
 !EOE
 
