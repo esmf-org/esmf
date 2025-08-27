@@ -25,7 +25,6 @@ module esmx_data
     real(ESMF_KIND_R8)          :: dflt        = filv
     character(len=6)            :: scheme      = "const"
     integer                     :: member      = 1
-    integer                     :: step        = 1
     logical                     :: rlze        = .false.
     real(ESMF_KIND_R8)          :: minv        = filv
     real(ESMF_KIND_R8)          :: maxv        = filv
@@ -252,8 +251,7 @@ module esmx_data
     ! advertise export fields
     xfield => xstate%exp_flds_head
     do while (associated(xfield))
-      call NUOPC_Advertise(exportState, xfield%stdn, &
-        TransferOfferGeomObject='will provide', rc=rc)
+      call NUOPC_Advertise(exportState, xfield%stdn, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
       xfield => xfield%nfld
@@ -384,9 +382,23 @@ module esmx_data
     do while (associated(xfield))
       if (xfield%rlze) then
         call ESMF_FieldFill(xfield%efld, dataFillScheme=trim(xfield%scheme), &
-          const1=xfield%dflt, member=xfield%member, step=xfield%step, rc=rc)
+          const1=xfield%dflt, member=xfield%member, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return
+        if (xfield%minv .ne. filv .and. xfield%maxv .ne. filv) then
+          if (xfield%fdim .eq. 3) then
+            xfield%ptr3 = (((xfield%maxv-xfield%minv)/2.0_ESMF_KIND_R8)*xfield%ptr3)+ &
+              ((xfield%maxv+xfield%minv)/2.0_ESMF_KIND_R8)
+          elseif (xfield%fdim .eq. 2) then
+            xfield%ptr2 = (((xfield%maxv-xfield%minv)/2.0_ESMF_KIND_R8)*xfield%ptr2)+ &
+              ((xfield%maxv+xfield%minv)/2.0_ESMF_KIND_R8)
+          else
+            call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+              msg=trim(xstate%cname)//": field dimension - "//trim(xfield%stdn), &
+              line=__LINE__, file=__FILE__, rcToReturn=rc)
+            return
+          endif
+        end if
       endif
       xfield => xfield%nfld
     enddo
@@ -396,9 +408,23 @@ module esmx_data
     do while (associated(xfield))
       if (xfield%rlze) then
         call ESMF_FieldFill(xfield%efld, dataFillScheme=trim(xfield%scheme), &
-          const1=xfield%dflt, member=xfield%member, step=xfield%step, rc=rc)
+          const1=xfield%dflt, member=xfield%member, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return
+        if (xfield%minv .ne. filv .and. xfield%maxv .ne. filv) then
+          if (xfield%fdim .eq. 3) then
+            xfield%ptr3 = (((xfield%maxv-xfield%minv)/2.0_ESMF_KIND_R8)*xfield%ptr3)+ &
+              ((xfield%maxv+xfield%minv)/2.0_ESMF_KIND_R8)
+          elseif (xfield%fdim .eq. 2) then
+            xfield%ptr2 = (((xfield%maxv-xfield%minv)/2.0_ESMF_KIND_R8)*xfield%ptr2)+ &
+              ((xfield%maxv+xfield%minv)/2.0_ESMF_KIND_R8)
+          else
+            call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+              msg=trim(xstate%cname)//": field dimension - "//trim(xfield%stdn), &
+              line=__LINE__, file=__FILE__, rcToReturn=rc)
+            return
+          endif
+        end if
         call NUOPC_SetAttribute(xfield%efld, &
           name="Updated", value="true", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1095,9 +1121,10 @@ module esmx_data
           line=__LINE__, file=__FILE__)) return
         check = ESMF_HConfigValidateMapKeys(fieldcfg, &
           vocabulary=["dim   ", &
+                      "min   ", &
+                      "max   ", &
                       "scheme", &
                       "member", &
-                      "step  ", &
                       "val   "  &
                      ], badKey=badKey, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1129,8 +1156,14 @@ module esmx_data
         xfield%gmin = filv
         xfield%gmax = filv
         xfield%gavg = filv
-        xfield%minv = 0.0_ESMF_KIND_R8
-        xfield%maxv = 0.0_ESMF_KIND_R8
+        xfield%minv = x_comp_hconfig_r8(fieldcfg, "min", &
+          defaultValue=filv, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        xfield%maxv = x_comp_hconfig_r8(fieldcfg, "max", &
+          defaultValue=filv, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
         xfield%dflt = x_comp_hconfig_r8(fieldcfg, "val", &
           defaultValue=0.0_ESMF_KIND_R8, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1140,10 +1173,6 @@ module esmx_data
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return
         xfield%member = x_comp_hconfig_i4(fieldcfg, "member", &
-           defaultValue=1, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=__FILE__)) return
-        xfield%step = x_comp_hconfig_i4(fieldcfg, "step", &
            defaultValue=1, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return
