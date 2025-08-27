@@ -385,7 +385,8 @@ module esmx_data
           const1=xfield%dflt, member=xfield%member, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return
-        if (xfield%minv .ne. filv .and. xfield%maxv .ne. filv) then
+        if (trim(xfield%scheme) == "sincos" .and. &
+            (xfield%minv .ne. filv .and. xfield%maxv .ne. filv)) then
           if (xfield%fdim .eq. 3) then
             xfield%ptr3 = (((xfield%maxv-xfield%minv)/2.0_ESMF_KIND_R8)*xfield%ptr3)+ &
               ((xfield%maxv+xfield%minv)/2.0_ESMF_KIND_R8)
@@ -411,7 +412,8 @@ module esmx_data
           const1=xfield%dflt, member=xfield%member, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return
-        if (xfield%minv .ne. filv .and. xfield%maxv .ne. filv) then
+        if (trim(xfield%scheme) == "sincos" .and. &
+            (xfield%minv .ne. filv .and. xfield%maxv .ne. filv)) then
           if (xfield%fdim .eq. 3) then
             xfield%ptr3 = (((xfield%maxv-xfield%minv)/2.0_ESMF_KIND_R8)*xfield%ptr3)+ &
               ((xfield%maxv+xfield%minv)/2.0_ESMF_KIND_R8)
