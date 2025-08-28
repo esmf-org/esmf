@@ -46,6 +46,7 @@ program ESMF_AttPackCplCompUTest
 
   ! local variables
   type(ESMF_CplComp) :: cplcomp
+  type(ESMF_Info)    :: info
 
   AttPackTestVariablesMacro()
 
@@ -63,7 +64,15 @@ program ESMF_AttPackCplCompUTest
   !-----------------------------------------------------------------------------
 
   cplcomp = ESMF_CplCompCreate(name="cplcomp", petList=(/0/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+  ! remove the ESMF JSON root - because AttPack testing cannot handle it
+  call ESMF_InfoGetFromHost(cplcomp, info=info, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_InfoRemove(info, keyParent="ESMF", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! now start testing...
   AttPackTestMacro(cplcomp, "a CplComp", EX_UTest, "cplcomp")
 
   AttPackStandardTestMacro(cplcomp, "a CplComp", "ESMF   ", "General", EX_UTest)
@@ -77,6 +86,7 @@ program ESMF_AttPackCplCompUTest
   AttPackStandardTestMacro(cplcomp, "a CplComp", "ISO 19115", "Citation ", EX_disabledUTest)
 ^endif
   call ESMF_CplCompDestroy(cplcomp, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE)

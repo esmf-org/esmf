@@ -1834,7 +1834,7 @@
       ! Verify Attribute count Test
       write(failMsg, *) "Incorrect count"
       write(name, *) "Verify Attribute count from a FieldBundle "
-      call ESMF_Test((count.eq.1), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((count.eq.2), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest

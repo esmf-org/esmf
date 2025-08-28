@@ -46,6 +46,7 @@ program ESMF_AttPackDistGridUTest
 
   ! local variables
   type(ESMF_DistGrid) :: distgrid
+  type(ESMF_Info)     :: info
 
   AttPackTestVariablesMacro()
 
@@ -64,10 +65,19 @@ program ESMF_AttPackDistGridUTest
 
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
                                  regDecomp=(/2,3/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+  ! remove the ESMF JSON root - because AttPack testing cannot handle it
+  call ESMF_InfoGetFromHost(distgrid, info=info, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_InfoRemove(info, keyParent="ESMF", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! now start testing...
   AttPackTestMacro(distgrid, "a DistGrid", EX_UTest, "DistGrid000")
 
   call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE)
