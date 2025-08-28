@@ -1072,11 +1072,11 @@ module esmx_data
         xfield%gmax = filv
         xfield%gavg = filv
         xfield%minv = x_comp_hconfig_r8(fieldcfg, "min", &
-          defaultValue=0.0_ESMF_KIND_R8, rc=rc)
+          defaultValue=filv, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return
         xfield%maxv = x_comp_hconfig_r8(fieldcfg, "max", &
-          defaultValue=0.0_ESMF_KIND_R8, rc=rc)
+          defaultValue=filv, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return
         xfield%dflt = filv
