@@ -497,6 +497,11 @@ foreach(CMP IN ITEMS ${COMPS})
       endif()
       message(STATUS "ESMX Found link library for ${CMP}: ${FND_LIBRARY}")
       target_link_libraries(esmx_driver PUBLIC ${FND_LIBRARY})
+      if (FND_LIBRARY MATCHES "\\.so$|\\.dylib$|\\.dll$")
+        # shared libaries must be installed in the final install location
+        # to be accessible by the installed executable
+        install(FILES ${FND_LIBRARY} DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+      endif()
       unset(FND_LIBRARY)
     endforeach()
   endif()
