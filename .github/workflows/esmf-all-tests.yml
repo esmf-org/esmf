@@ -48,8 +48,8 @@ jobs:
             ncdf: nc-config
           }
         - {
-            desc: macos@15-gfortran@13-mpiuni-netcdf,
-            osys: macos-15,
+            desc: macos@14-gfortran@13-mpiuni-netcdf,
+            osys: macos-14,
             cors: 3,
             ropt: '',
             exhs: OFF,
@@ -61,8 +61,8 @@ jobs:
             ncdf: nc-config
           }
         - {
-            desc: macos@15-clang-gfortran@14-openmpi-netcdf,
-            osys: macos-15,
+            desc: macos@14-clang-gfortran@14-openmpi-netcdf,
+            osys: macos-14,
             cors: 3,
             ropt: '--oversubscribe',
             exhs: ON,
@@ -157,7 +157,7 @@ jobs:
       if: matrix.config.comm == 'openmpi'
       run: |
         if [[ "$CACHE_HIT" != 'true' ]]; then
-          OPENMPI_URL="https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.6.tar.gz"
+          OPENMPI_URL="https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-5.0.8.tar.gz"
           mkdir ${{runner.temp}}/openmpi
           cd ${{runner.temp}}/openmpi
           curl -L $OPENMPI_URL | tar --strip-components=1 -xz
