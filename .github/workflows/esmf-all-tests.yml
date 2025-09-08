@@ -48,8 +48,8 @@ jobs:
             ncdf: nc-config
           }
         - {
-            desc: macos@14-gfortran@13-mpiuni-netcdf,
-            osys: macos-14,
+            desc: macos@15-gfortran@13-mpiuni-netcdf,
+            osys: macos-15,
             cors: 3,
             ropt: '',
             exhs: OFF,
@@ -61,8 +61,8 @@ jobs:
             ncdf: nc-config
           }
         - {
-            desc: macos@14-clang-gfortran@14-openmpi-netcdf,
-            osys: macos-14,
+            desc: macos@15-clang-gfortran@14-openmpi-netcdf,
+            osys: macos-15,
             cors: 3,
             ropt: '--oversubscribe',
             exhs: ON,
