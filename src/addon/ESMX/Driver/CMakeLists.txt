@@ -501,6 +501,7 @@ foreach(CMP IN ITEMS ${COMPS})
         # shared libaries must be installed in the final install location
         # to be accessible by the installed executable
         install(FILES ${FND_LIBRARY} DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+        install(FILES ${FND_LIBRARY} DESTINATION "lib")
       endif()
       unset(FND_LIBRARY)
     endforeach()
