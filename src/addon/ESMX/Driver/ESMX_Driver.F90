@@ -148,10 +148,15 @@ module ESMX_Driver
     if (isFlag) then
       ! Validate hconfigNode against ESMX/Driver controlled key vocabulary
       isFlag = ESMF_HConfigValidateMapKeys(hconfigNode, &
-        vocabulary=["attributes   ", &  ! ESMX_Driver option
-                    "componentList", &  ! ESMX_Driver option
-                    "runSequence  ", &  ! ESMX_Driver option
-                    "logSystem    "  &  ! ESMX_Driver option
+        vocabulary=["petList      ", &  ! ESMX_App handled option
+                    "devList      ", &  ! ESMX_App handled option
+                    "ompNumThreads", &  ! ESMX_App handled option
+                    "stdout       ", &  ! ESMX_App handled option
+                    "stderr       ", &  ! ESMX_App handled option
+                    "attributes   ", &  ! ESMX_App handled option
+                    "componentList", &  ! ESMX_Driver handled option
+                    "runSequence  ", &  ! ESMX_Driver handled option
+                    "logSystem    "  &  ! ESMX_Driver handled option
                     ], badKey=string1, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) &
@@ -525,13 +530,21 @@ module ESMX_Driver
       call ESMF_Finalize(endflag=ESMF_END_ABORT)
     foundFlag = .true.
     do i=1, size(configKey)
-      isFlag = ESMF_HConfigIsMap(HConfigCreateFoundNode, &
+      isFlag = ESMF_HConfigIsDefined(HConfigCreateFoundNode, &
         keyString=configKey(i), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) &
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      if (i<size(configKey)) then
+        ! must be map again if not the last iteration yet
+        isFlag = ESMF_HConfigIsMap(HConfigCreateFoundNode, &
+          keyString=configKey(i), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) &
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      endif
       if (.not.isFlag) then
-        ! configKey must be a map
+        ! unsuccessful search 
         foundFlag = .false.
         exit  ! break out of loop
       endif

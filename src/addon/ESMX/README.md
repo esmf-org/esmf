@@ -313,16 +313,20 @@ ATM:
   model:            Tawas     # model value is case insensitive to match Fortran
   ompNumThreads:    4
   attributes:
-    Verbosity:  low
+    Verbosity:      low
   petList:          [3, [2-0]]  # petList is list of scalars and lists.
                                 # each list again can be of scalars and lists
                                 # recursively.
+  stdout:
+    filename:       atm.out
 
 OCN:
   model:            lumo
   petList:          [0-1, 3]
   attributes:
-    Verbosity:  low
+    Verbosity:      low
+  stdout:           {filename: lumo.out}
+  stderr:           {filename: lumo.err}
 ```
 
 On the highest level, `ESMX Run Configuration` is expected to define the `ESMX` key, as well as a key for every component that is listed in the `componentList` found under the `Driver` level. The `ESMX` key is associated with a map containing the `App` and `Driver` keys. The `App` key must be present if `ESMX Run Configuration` is read by the `ESMX_EXE_NAME` executable, but is optional (and will be ignored) in case `esmfRun.yaml` is read by the `esmx_driver`.
@@ -363,27 +367,32 @@ This section affects the application level.
 
 This section affects the driver level.
 
-| Option key      | Description / Value options                                          | Default         |
-| --------------- | -------------------------------------------------------------------- | --------------- |
-| `componentList` | list of component labels, each matching a top level key in this file | *Empty*         |
-| `runSequence`   | block literal string defining the run sequence                       | *NUOPC default* |
-| `logSystem`     | enable/disable ESMF_VMLogSystem() during Driver SetModelServices(): `true` or `false`| `false`         |
-| `attributes`    | map of key value pairs, each defining a driver attribute             | *None*          |
+| Option key            | Description / Value options                                                         | Default         |
+| --------------------- | ----------------------------------------------------------------------------------- | --------------- |
+| `componentList`       | list of component labels, each matching a top level key in this file                | *Empty*         |
+| `runSequence`         | block literal string defining the run sequence                                      | *NUOPC default* |
+| `logSystem`           | system information logging in SetModelServices(): `true` or `false`                 | `false`         |
+| `petList`             | list of PETs on which the driver executes                                           | *None*          |
+| `devList`             | list of DEVs (accelerator devices) to be associated with the driver                 | *None*          |
+| `ompNumThreads`       | setting of /NUOPC/Hint/PePerPet/MaxCount (see NUOPC ref doc)                        | *None*          |
+| `stdout`              | stdout redirection into `filename` provided as subkey                               | *None*          |
+| `stderr`              | stderr redirection into `filename` provided as subkey                               | *None*          |
+| `attributes`          | map of key value pairs, each defining a driver attribute                            | *None*          |
 
 #### Component Label Options
 
 This section affects the specific component instance.
 
-| Option key            | Description / Value options                                           | Default         |
-| --------------------- | --------------------------------------------------------------------- | --------------- |
+| Option key            | Description / Value options                                                         | Default         |
+| --------------------- | ----------------------------------------------------------------------------------- | --------------- |
 | `model`               | string associating the instance with a *component-name* defined in `esmxBuild.yaml` | *non-optional*  |
-| `petList`             | list of PETs on which the component executes                          | *None*          |
-| `devList`             | list of DEVs (accelerator devices) to be associated with the component| *None*          |
-| `ompNumThreads`       | setting of /NUOPC/Hint/PePerPet/MaxCount (see NUOPC ref doc)          | *None*          |
-| `stdout`              | stdout redirection into `filename` provided as subkey                 | *None*          |
-| `stderr`              | stderr redirection into `filename` provided as subkey                 | *None*          |
-| `attributes`          | map of key value pairs, each defining a component attribute           | *None*          |
-| *model specific yaml* | each model can define its own YAML section, e.g. with key value pairs, etc. | *None*          |
+| `petList`             | list of PETs on which the component executes                                        | *None*          |
+| `devList`             | list of DEVs (accelerator devices) to be associated with the component              | *None*          |
+| `ompNumThreads`       | setting of /NUOPC/Hint/PePerPet/MaxCount (see NUOPC ref doc)                        | *None*          |
+| `stdout`              | stdout redirection into `filename` provided as subkey                               | *None*          |
+| `stderr`              | stderr redirection into `filename` provided as subkey                               | *None*          |
+| `attributes`          | map of key value pairs, each defining a component attribute                         | *None*          |
+| *model specific yaml* | each model can define its own YAML section, e.g. with key value pairs, etc.         | *None*          |
 
 ### Dynamically loading components from shared objects at run-time
 
