@@ -278,7 +278,8 @@ program ESMX_App
     endif
     call ESMF_HConfigDestroy(hconfigNode, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+      line=__LINE__, file=FILENAME)) &
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
 
   ! Set stderr redirect hints in info
@@ -307,7 +308,8 @@ program ESMX_App
     endif
     call ESMF_HConfigDestroy(hconfigNode, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+      line=__LINE__, file=FILENAME)) &
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
 
   ! SetVM esmx driver

@@ -159,13 +159,12 @@ module ESMX_Driver
                     "logSystem    "  &  ! ESMX_Driver handled option
                     ], badKey=string1, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) &
-        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+        line=__LINE__, file=FILENAME)) return  ! bail out
       if (.not.isFlag) then
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
           msg="An invalid key was found in config under ESMX/Driver (maybe a typo?): "//string1, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)
-        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+        return  ! bail out
       endif
       ! Ingest logSystem logical
       isFlag = ESMF_HConfigIsDefined(hconfigNode, keyString="logSystem", &
@@ -526,22 +525,19 @@ module ESMX_Driver
 
     HConfigCreateFoundNode = ESMF_HConfigCreate(hconfig, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) &
-      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      line=__LINE__, file=FILENAME)) return  ! bail out
     foundFlag = .true.
     do i=1, size(configKey)
       isFlag = ESMF_HConfigIsDefined(HConfigCreateFoundNode, &
         keyString=configKey(i), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) &
-        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+        line=__LINE__, file=FILENAME)) return  ! bail out
       if (i<size(configKey)) then
         ! must be map again if not the last iteration yet
         isFlag = ESMF_HConfigIsMap(HConfigCreateFoundNode, &
           keyString=configKey(i), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=FILENAME)) &
-          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+          line=__LINE__, file=FILENAME)) return  ! bail out
       endif
       if (.not.isFlag) then
         ! unsuccessful search 
@@ -552,12 +548,10 @@ module ESMX_Driver
       HConfigCreateFoundNode = ESMF_HConfigCreateAt(hconfigNodePrev, &
         keyString=configKey(i),rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) &
-        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+        line=__LINE__, file=FILENAME)) return  ! bail out
       call ESMF_HConfigDestroy(hconfigNodePrev, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) &
-        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+        line=__LINE__, file=FILENAME)) return  ! bail out
     enddo
 
   end function
