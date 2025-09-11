@@ -11,7 +11,7 @@
 //==============================================================================
 #define ESMC_FILENAME "ESMCI_VM.C"
 //==============================================================================
-#define TRANSLATE_VMID_LOG_off
+#define TRANSLATE_VMID_LOG_on
 //==============================================================================
 //
 // VM class implementation (body) file
@@ -2022,6 +2022,15 @@ int VM::translateVMId(
       MPI_Group subGroup;
       MPI_Group_incl(mpiGroup, petList.size(), &(petList[0]), &subGroup);
       MPI_Comm_create_group(mpiComm, subGroup, 99, &(helper2[i].subComm));
+#ifdef TRANSLATE_VMID_LOG_on
+      // development log
+      for (unsigned k=0; k<petList.size(); k++){
+        std::stringstream msg;
+        msg << "subGroup: " << &subGroup << " subComm: " << &(helper2[i].subComm)
+          << " petList[" << k << "] =" << petList[k];
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
       if (helper2[i].subComm == MPI_COMM_NULL){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
           "This VMId's key does not have this PET's VAS bit set. Unsupported!",
@@ -2086,6 +2095,11 @@ int VM::translateVMId(
       msg << "localId=" << localId;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
+    {
+      std::stringstream msg;
+      msg << "helper2.size()=" << helper2.size();
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
 #endif
 
     // determine globally unique integer indices for all the entries in helper2
@@ -2106,17 +2120,24 @@ int VM::translateVMId(
       // clean-up
       MPI_Comm_free(&(helper2[i].subComm));
     }
-    
+
     // finish up by filling the globally unique integer id into the idsArray
     for (int i=0; i<elementCount; i++){
       idsArray[i] = helper1[idsArray[i]].id;
     }
-    
+
+#ifdef TRANSLATE_VMID_LOG_on
+    // development log
+    {
+      ESMC_LogDefault.Write("done", ESMC_LOGMSG_DEBUG);
+    }
+#endif
+
   } // elementCount > 0
-  
+
   // clean-up
   MPI_Group_free(&mpiGroup);
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
