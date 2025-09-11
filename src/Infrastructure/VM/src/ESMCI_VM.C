@@ -2117,9 +2117,19 @@ int VM::translateVMId(
       for (unsigned k=0; k<helper2[i].count; k++){
         helper1[helper2[i].indexH1+k].id = localIdTemp+k;
       }
+#define WORKAROUND_INTELLLVM_HANG
+#ifndef WORKAROUND_INTELLLVM_HANG
+      // clean-up
+      MPI_Comm_free(&(helper2[i].subComm));
+#endif
+    }
+
+#ifdef WORKAROUND_INTELLLVM_HANG
+    for (unsigned i=0; i<helper2.size(); i++){
       // clean-up
       MPI_Comm_free(&(helper2[i].subComm));
     }
+#endif
 
     // finish up by filling the globally unique integer id into the idsArray
     for (int i=0; i<elementCount; i++){
