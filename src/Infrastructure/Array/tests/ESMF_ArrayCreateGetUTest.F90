@@ -354,9 +354,9 @@ program ESMF_ArrayCreateGetUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Verify Attribute count from an Array"
+  write(name, *) "Verify Attribute count on newly created Array"
   write(failMsg, *) "Incorrect count"
-  call ESMF_Test((count.eq.0), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((count.eq.1), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only

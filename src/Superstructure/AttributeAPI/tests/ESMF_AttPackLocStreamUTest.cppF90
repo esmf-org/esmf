@@ -46,6 +46,7 @@ program ESMF_AttPackLocStreamUTest
 
   ! local variables
   type(ESMF_LocStream) :: locStream
+  type(ESMF_Info)      :: info
 
   AttPackTestVariablesMacro()
 
@@ -63,11 +64,19 @@ program ESMF_AttPackLocStreamUTest
   !-----------------------------------------------------------------------------
 
   locstream = ESMF_LocStreamCreate(20, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+  ! remove the ESMF JSON root - because AttPack testing cannot handle it
+  call ESMF_InfoGetFromHost(locstream, info=info, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_InfoRemove(info, keyParent="ESMF", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! now start testing...
   AttPackTestMacro(locStream, "a LocStream", EX_UTest, "LocStream002")
 
   call ESMF_LocStreamDestroy(locStream, rc=rc)
-  if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE)

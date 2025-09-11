@@ -126,7 +126,8 @@ esmc_error::esmc_error (const std::string &code_name, int esmc_rc, const std::st
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMC_Base::constructInfo()"
 void ESMC_Base::constructInfo(ESMC_Base& base) {
-  base.info = new ESMCI::Info();
+  base.info = new ESMCI::Info(
+    std::string("{\"ESMF\":{\"Instance\":{\"NamedAliasCount\":0}}}"));
   base.infoalias = false;
 }
 
