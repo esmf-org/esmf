@@ -2124,6 +2124,17 @@ int VM::translateVMId(
 #endif
     }
 
+    // There is a bizzare issue that has been observed with versions of
+    // IntelLLVM:
+    // The call into the above MPI_Bcast() on subComm hangs intermittendly.
+    // The issue might be MPI thread support related, because the hanging
+    // seemed to go away when running with MPI_THREAD_SERIALIZED or lower.
+    // Another work-around that was found was to move the MPI_Comm_free() call
+    // for subComm to its separate loop below.
+    // For now just enable this work-around, since it is code that should work
+    // just fine. But also keep the original implementation with this comment
+    // in case it might be helpful in the future.
+
 #ifdef WORKAROUND_INTELLLVM_HANG
     for (unsigned i=0; i<helper2.size(); i++){
       // clean-up
