@@ -495,8 +495,10 @@ foreach(CMP IN ITEMS ${COMPS})
       if(NOT FND_LIBRARY)
         message(FATAL_ERROR "Cannot find libraries ${CMP_LIBRARY} for ${CMP} in ${CMP_INSTALL_PREFIX}")
       endif()
-      message(STATUS "ESMX Found link library for ${CMP}: ${FND_LIBRARY}")
-      target_link_libraries(esmx_driver PUBLIC ${FND_LIBRARY})
+      if(${CMP_LINK_INTO_APP} STREQUAL "True")
+        message(STATUS "ESMX Found link library for ${CMP}: ${FND_LIBRARY}")
+        target_link_libraries(esmx_driver PUBLIC ${FND_LIBRARY})
+      endif()
       if (FND_LIBRARY MATCHES "\\.so$|\\.dylib$|\\.dll$")
         # shared libaries must be installed in the final install location
         # to be accessible by the installed executable
