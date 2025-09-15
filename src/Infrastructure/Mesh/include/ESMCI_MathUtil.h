@@ -248,6 +248,22 @@ struct GEOM_CART2D {
   // based on cross product
   static double turn(double *a, double *b, double *p) {return a[0]*b[1]-a[1]*b[0];}
 
+   // Give the cos of the angle at p2 made by 3 points in a row
+  static double cos_3pnts(double *p1, double *p2, double *p3) {
+    double v1[2], len_v1;
+    MU_SUB_VEC2D(v1,p1,p2);
+    len_v1=MU_LEN_VEC2D(v1);
+    len_v1=(len_v1 == 0.0)? 1.0 : len_v1; // If len=0, then don't divide by it
+    
+    double v2[2],len_v2;
+    MU_SUB_VEC2D(v2,p3,p2);
+    len_v2=MU_LEN_VEC2D(v2);
+    len_v2=(len_v2 == 0.0)? 1.0 : len_v2; // If len=0, then don't divide by it
+
+    return MU_DOT_VEC2D(v1,v2)/(len_v1*len_v2);
+  }
+ 
+  
   // Used as an approximation of sharpness of angle between two vectors
   static double dot(double *a, double *b) {return a[0]*b[0]+a[1]*b[1];}
 
@@ -281,7 +297,7 @@ struct GEOM_SPH2D3D {
   static const int pnt_size=3;
 
   static double *getPntAt(double *a, int i) {return a+3*i;}
-
+  
   // direction of turn between vectors a and b, starting both starting from point p
   // based on cross product
   static double turn(double *a, double *b, double *p) {return p[0]*(a[1]*b[2]-a[2]*b[1])+p[1]*(a[2]*b[0]-a[0]*b[2])+p[2]*(a[0]*b[1]-a[1]*b[0]);}
@@ -289,6 +305,22 @@ struct GEOM_SPH2D3D {
   // Bob 7/24/19: This was used in XGrid debugging work, I don't think that it made much of a difference, but left it here in case we need to switch to it. 
   //  static double turn(double *a, double *b, double *p) {return (p[0]*a[1]*b[2]+p[1]*a[2]*b[0]+p[2]*a[0]*b[1])-(p[0]*a[2]*b[1]+p[1]*a[0]*b[2]+p[2]*a[1]*b[0]);}
 
+   // Give the cos of the angle at p2 made by 3 points in a row
+  static double cos_3pnts(double *p1, double *p2, double *p3) {
+    double v1[3], len_v1;
+    MU_SUB_VEC3D(v1,p1,p2);
+    len_v1=MU_LEN_VEC3D(v1);
+    len_v1=(len_v1 == 0.0)? 1.0 : len_v1; // If len=0, then don't divide by it
+    
+    double v2[3],len_v2;
+    MU_SUB_VEC3D(v2,p3,p2);
+    len_v2=MU_LEN_VEC3D(v2);
+    len_v2=(len_v2 == 0.0)? 1.0 : len_v2; // If len=0, then don't divide by it
+
+    return MU_DOT_VEC3D(v1,v2)/(len_v1*len_v2);
+  }
+
+  
   // Used as an approximation of sharpness of angle between two vectors
   static double dot(double *a, double *b) {return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}
 

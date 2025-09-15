@@ -53,13 +53,18 @@
 //-----------------------------------------------------------------------------
 
 
+namespace ESMCI{
+
+ extern bool mathutil_debug;
+
+}
+
 using namespace ESMCI;
 
 // #define DEBUG_OWNED
 
 
 extern "C" void FTN_X(f_esmf_getmeshdistgrid)(DistGrid**, int*, int*, int*);
-
 
 
 void ESMCI_meshcreate(Mesh **meshpp,
@@ -648,7 +653,6 @@ static void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int
 }
 
 
-
 // triangulate > 4 sided
 // sdim = spatial dim
 // num_p = number of points in poly
@@ -666,6 +670,8 @@ static void triangulate_warea(int sdim, int num_p, double *p, int oeid,
 
           int localrc;
 
+          //if (oeid==23516) mathutil_debug=true;
+          
           // Call into triagulation routines
           int ret;
           if (sdim==2) {
@@ -680,6 +686,8 @@ static void triangulate_warea(int sdim, int num_p, double *p, int oeid,
                                               ESMC_CONTEXT, &localrc)) throw localrc;
           }
 
+          //mathutil_debug=false;
+          
           // Check return code
           if (ret != ESMCI_TP_SUCCESS) {
             if (ret == ESMCI_TP_DEGENERATE_POLY) {
@@ -687,6 +695,16 @@ static void triangulate_warea(int sdim, int num_p, double *p, int oeid,
                    " - can't triangulate a polygon with less than 3 sides",
                                                 ESMC_CONTEXT, &localrc)) throw localrc;
             } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
+
+#if 0
+              // Output bad poly to vtk file 
+              if (sdim==2) {
+                write_2D_poly_to_vtk("tri_bad_poly_", oeid, num_p, p);    
+              } else if (sdim==3) {
+                write_3D_poly_to_vtk("tri_bad_poly_", oeid, num_p, p);    
+              }              
+#endif
+             
               char msg[1024];
               sprintf(msg," - there was a problem (e.g. repeated points, clockwise poly, etc.) with the triangulation of the element with id=%d ",oeid);
               if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg,
