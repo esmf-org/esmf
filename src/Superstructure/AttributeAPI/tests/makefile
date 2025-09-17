@@ -135,133 +135,89 @@ CLOBBERDIRS =
 # --- AttPackArray
 
 RUN_ESMF_AttPackArrayUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_Array002.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_Array002.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackArray NP=4 ftest
 
 RUN_ESMF_AttPackArrayUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_Array002.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_Array002.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackArray NP=1 ftest
 
 # --- AttPackABundle
 
 RUN_ESMF_AttPackABundleUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_MyArrayBundle.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_MyArrayBundle.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackABundle NP=4 ftest
 
 RUN_ESMF_AttPackABundleUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_MyArrayBundle.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_MyArrayBundle.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackABundle NP=1 ftest
 
 # --- AttPackCplComp
 
 RUN_ESMF_AttPackCplCompUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_cplcomp.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_cplcomp.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackCplComp NP=4 ftest
 
 RUN_ESMF_AttPackCplCompUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_cplcomp.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_cplcomp.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackCplComp NP=1 ftest
 
 # --- AttPackDistGrid
 
 RUN_ESMF_AttPackDistGridUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_DistGrid000.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_DistGrid000.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackDistGrid NP=4 ftest
 
 RUN_ESMF_AttPackDistGridUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_DistGrid000.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_DistGrid000.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackDistGrid NP=1 ftest
 
 # --- AttPackFBundle
 
 RUN_ESMF_AttPackFBundleUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_fieldbundle.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_fieldbundle.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackFBundle NP=4 ftest
 
 RUN_ESMF_AttPackFBundleUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_fieldbundle.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_fieldbundle.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackFBundle NP=1 ftest
 
 # --- AttPackField
 
 RUN_ESMF_AttPackFieldUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_field.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_field.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackField NP=4 ftest
 
 RUN_ESMF_AttPackFieldUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_field.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_field.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackField NP=1 ftest
 
 # --- AttPackGridComp
 
 RUN_ESMF_AttPackGridCompUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridcomp.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridcomp.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackGridComp NP=4 ftest
 
 RUN_ESMF_AttPackGridCompUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridcomp.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridcomp.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackGridComp NP=1 ftest
 
 # --- AttPackGrid
 
 RUN_ESMF_AttPackGridUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_unnamed000grid.xml $(ESMF_TESTDIR)/baseline_unnamed000.xml
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_unnamed000grid.stdout $(ESMF_TESTDIR)/baseline_unnamed000.stdout
 	$(MAKE) TNAME=AttPackGrid NP=4 ftest
 
 RUN_ESMF_AttPackGridUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_unnamed000grid.xml $(ESMF_TESTDIR)/baseline_unnamed000.xml
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_unnamed000grid.stdout $(ESMF_TESTDIR)/baseline_unnamed000.stdout
 	$(MAKE) TNAME=AttPackGrid NP=1 ftest
 
 # --- AttPackLocStream
 
 RUN_ESMF_AttPackLocStreamUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_LocStream002.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_LocStream002.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackLocStream NP=4 ftest
 
 RUN_ESMF_AttPackLocStreamUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_LocStream002.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_LocStream002.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackLocStream NP=1 ftest
 
 # --- AttPackSciComp
 
 RUN_ESMF_AttPackSciCompUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_scicomp.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_scicomp.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackSciComp NP=4 ftest
 
 RUN_ESMF_AttPackSciCompUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_scicomp.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_scicomp.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackSciComp NP=1 ftest
 
 # --- AttPackState
 
 RUN_ESMF_AttPackStateUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_state.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_state.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackState NP=4 ftest
 
 RUN_ESMF_AttPackStateUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_state.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_state.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttPackState NP=1 ftest
 
 # --- Array
