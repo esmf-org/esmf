@@ -447,9 +447,27 @@ foreach(CMP IN ITEMS ${COMPS})
     endif()
   elseif(${CMP_BUILD_TYPE} STREQUAL "cmake")
     message(STATUS "ESMX Found CMake subdirectory for ${CMP}: ${CMP_SOURCE_DIR}")
+    # optionally set CMake variables according to CMP_BUILD_ARGS
+    foreach(ASSIGNMENT_PAIR IN LISTS CMP_BUILD_ARGS)
+      # separate at "=" sign
+      string(REGEX MATCH "^([^=]+)=(.+)$" DUMMY_VAR ${ASSIGNMENT_PAIR})
+      # capturing groups from the last REGEX MATCH are stored in
+      # CMAKE_MATCH_N variables
+      message(STATUS "ESMX Set CMake variable for ${CMP}: ${CMAKE_MATCH_1}=${CMAKE_MATCH_2}")
+      set(${CMAKE_MATCH_1} ${CMAKE_MATCH_2})
+    endforeach()
     # add source subdirectory with explicit binary directory path. This works for
     # internal as well as external component source directories
+    message(STATUS "ESMX Use add_subdirectory() for ${CMP}")
     add_subdirectory(${CMP_SOURCE_DIR} ${CMAKE_BINARY_DIR}/${CMP})
+    # optionally unset CMake variables according to CMP_BUILD_ARGS
+    foreach(ASSIGNMENT_PAIR IN LISTS CMP_BUILD_ARGS)
+      # separate at "=" sign
+      string(REGEX MATCH "^([^=]+)=(.+)$" DUMMY_VAR ${ASSIGNMENT_PAIR})
+      # capturing groups from the last REGEX MATCH are stored in
+      # CMAKE_MATCH_N variables
+      unset(${CMAKE_MATCH_1})
+    endforeach()
     if(TARGET ${CMP_CMAKE_TARGET})
       if(${CMP_LINK_INTO_APP} STREQUAL "True")
         message(STATUS "ESMX Found CMake target dependency for ${CMP}: ${CMP_CMAKE_TARGET}")
