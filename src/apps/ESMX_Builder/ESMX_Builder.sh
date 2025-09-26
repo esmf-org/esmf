@@ -276,7 +276,7 @@ INSTALL_SETTINGS=("")
 # build and install
 set +e
 if [ "${VERBOSE}" = true ] ; then
-  echo --- CMake Configuring ---
+  echo --- ESMX_Builder: CMake Configuring ---
   set -x
 fi
 cmake -S${ESMF_ESMXDIR} -B${BUILD_DIR} -DESMX_SDIR=`pwd` ${CMAKE_SETTINGS[@]}
@@ -288,7 +288,7 @@ if [ $RC -ne 0 ]; then
 fi
 echo
 if [ "${VERBOSE}" = true ] ; then
-  echo --- CMake Building ---
+  echo --- ESMX_Builder: CMake Building ---
   set -x
 fi
 cmake --build ${BUILD_DIR} ${BUILD_SETTINGS[@]}
@@ -300,7 +300,7 @@ if [ $RC -ne 0 ]; then
 fi
 echo
 if [ "${VERBOSE}" = true ] ; then
-  echo --- CMake Installing ---
+  echo --- ESMX_Builder: CMake Installing ---
   set -x
 fi
 cmake --install ${BUILD_DIR} ${INSTALL_SETTINGS[@]}
