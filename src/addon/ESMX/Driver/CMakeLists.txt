@@ -496,6 +496,52 @@ foreach(CMP IN ITEMS ${COMPS})
       PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
       NO_CACHE NO_DEFAULT_PATH
     )
+    if(NOT FND_FORT_MODULE)
+      string(REGEX REPLACE "(.*)\\.[^.]*$" "\\1" BASENAME ${CMP_FORT_MODULE})
+      string(REGEX REPLACE ".*(\\.[^.]*)$" "\\1" SUFFIX ${CMP_FORT_MODULE})
+      string(TOLOWER "${BASENAME}" BASENAME)
+      string(TOLOWER "${SUFFIX}" SUFFIX)
+      set(CMP_FORT_MODULE "${BASENAME}${SUFFIX}")
+      find_path(FND_FORT_MODULE
+        NAMES ${CMP_FORT_MODULE}
+        HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
+        PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
+        NO_CACHE NO_DEFAULT_PATH
+      )
+    endif()
+    if(NOT FND_FORT_MODULE)
+      string(TOUPPER "${BASENAME}" BASENAME)
+      string(TOLOWER "${SUFFIX}" SUFFIX)
+      set(CMP_FORT_MODULE "${BASENAME}${SUFFIX}")
+      find_path(FND_FORT_MODULE
+        NAMES ${CMP_FORT_MODULE}
+        HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
+        PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
+        NO_CACHE NO_DEFAULT_PATH
+      )
+    endif()
+    if(NOT FND_FORT_MODULE)
+      string(TOLOWER "${BASENAME}" BASENAME)
+      string(TOUPPER "${SUFFIX}" SUFFIX)
+      set(CMP_FORT_MODULE "${BASENAME}${SUFFIX}")
+      find_path(FND_FORT_MODULE
+        NAMES ${CMP_FORT_MODULE}
+        HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
+        PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
+        NO_CACHE NO_DEFAULT_PATH
+      )
+    endif()
+    if(NOT FND_FORT_MODULE)
+      string(TOUPPER "${BASENAME}" BASENAME)
+      string(TOUPPER "${SUFFIX}" SUFFIX)
+      set(CMP_FORT_MODULE "${BASENAME}${SUFFIX}")
+      find_path(FND_FORT_MODULE
+        NAMES ${CMP_FORT_MODULE}
+        HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
+        PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
+        NO_CACHE NO_DEFAULT_PATH
+      )
+    endif()
     if(FND_FORT_MODULE)
       message(STATUS "ESMX Found Fortran module ${CMP_FORT_MODULE} for ${CMP} in: ${FND_FORT_MODULE}")
       target_include_directories(esmx_driver PUBLIC ${FND_FORT_MODULE})
