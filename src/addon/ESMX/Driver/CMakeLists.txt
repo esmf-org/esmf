@@ -12,7 +12,7 @@ include(FetchContent)
 # esmx functions
 function(esmx_check_ret RETVAL MESSAGE)
   if(NOT RETVAL EQUAL "0")
-    message(FATAL_ERROR ${MESSAGE})
+    message(FATAL_ERROR "ESMX Error: ${MESSAGE}")
   endif()
 endfunction()
 
@@ -168,7 +168,7 @@ foreach(ESMX_LINK_LIBRARY IN ITEMS ${ESMX_LINK_LIBRARIES})
       NO_CACHE
     )
     if(NOT FND_LINK_LIBRARY)
-      message(FATAL_ERROR "Cannot find link_libraries ${ESMX_LINK_LIBRARY} in ${ESMX_LINK_PATHS}")
+      message(FATAL_ERROR "ESMX Error: Cannot find link_libraries ${ESMX_LINK_LIBRARY} in ${ESMX_LINK_PATHS}")
     endif()
     target_link_libraries(esmx_driver PUBLIC ${FND_LINK_LIBRARY})
     unset(FND_LINK_LIBRARY)
@@ -238,7 +238,7 @@ foreach(CMP IN ITEMS ${COMPS})
   if(NOT CMP_GIT_REPOSITORY STREQUAL "")
     message(STATUS "Fetching content ... ${CMP}")
     if(CMP_GIT_TAG STREQUAL "")
-      message(FATAL_ERROR "Git tag required for ${CMP}")
+      message(FATAL_ERROR "ESMX Error: Git tag required for ${CMP}")
     endif()
     if(NOT EXISTS ${CMP_SOURCE_DIR})
       set(CMP_GIT_TAG -b ${CMP_GIT_TAG})
@@ -326,7 +326,7 @@ foreach(CMP IN ITEMS ${COMPS})
     elseif(FND_CMAKE_CONFIG OR FND_LIBRARIES)
       set(CMP_BUILD_TYPE "none")
     else()
-      message(FATAL_ERROR "Cannot find build configuration for ${CMP}"
+      message(FATAL_ERROR "ESMX Error: Cannot find build configuration for ${CMP}"
         " in ${CMP_SOURCE_DIR}")
     endif()
     unset(FND_CMAKE_LISTS)
@@ -349,7 +349,7 @@ foreach(CMP IN ITEMS ${COMPS})
       NO_CACHE NO_DEFAULT_PATH
     )
     if(NOT FND_CMAKE_LISTS)
-      message(FATAL_ERROR "Could not find CMakeLists.txt"
+      message(FATAL_ERROR "ESMX Error: Could not find CMakeLists.txt"
         " in ${CMP_SOURCE_DIR}."
         " Check source_dir in build configuration."
       )
@@ -391,7 +391,7 @@ foreach(CMP IN ITEMS ${COMPS})
       NO_CACHE NO_DEFAULT_PATH
     )
     if(NOT FND_MAKE_FILE)
-      message(FATAL_ERROR "Could not find Makefile"
+      message(FATAL_ERROR "ESMX Error: Could not find Makefile"
         " in ${CMP_SOURCE_DIR}."
         " Check source_dir in build configuration."
       )
@@ -417,7 +417,7 @@ foreach(CMP IN ITEMS ${COMPS})
       NO_CACHE NO_DEFAULT_PATH
     )
     if(NOT FND_BUILD_SCRIPT)
-      message(FATAL_ERROR "Could not find ${CMP_BUILD_SCRIPT}"
+      message(FATAL_ERROR "ESMX Error: Could not find ${CMP_BUILD_SCRIPT}"
         " in ${CMP_SOURCE_DIR}."
         " Check source_dir in build configuration."
       )
@@ -436,7 +436,7 @@ foreach(CMP IN ITEMS ${COMPS})
   elseif(${CMP_BUILD_TYPE} STREQUAL "none")
     # No Op
   else()
-    message(FATAL_ERROR "Invalid BUILD_TYPE: ${CMP_BUILD_TYPE} for ${CMP}")
+    message(FATAL_ERROR "ESMX Error: Invalid BUILD_TYPE: ${CMP_BUILD_TYPE} for ${CMP}")
   endif()
 
   # look for CMake target and conditionally include config, modules, link libs
@@ -474,7 +474,7 @@ foreach(CMP IN ITEMS ${COMPS})
         target_link_libraries(esmx_driver PUBLIC ${CMP_CMAKE_TARGET})
       endif()
     else()
-      message(FATAL_ERROR "ESMX Did not find expected CMake target dependency for ${CMP} after adding subdirectory: ${CMP_CMAKE_TARGET}")
+      message(FATAL_ERROR "ESMX Error: Did not find expected CMake target dependency for ${CMP} after adding subdirectory: ${CMP_CMAKE_TARGET}")
     endif()
   else()
     # not a known CMake target -> find the config file
@@ -496,6 +496,52 @@ foreach(CMP IN ITEMS ${COMPS})
       PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
       NO_CACHE NO_DEFAULT_PATH
     )
+    if(NOT FND_FORT_MODULE)
+      string(REGEX REPLACE "(.*)\\.[^.]*$" "\\1" BASENAME ${CMP_FORT_MODULE})
+      string(REGEX REPLACE ".*(\\.[^.]*)$" "\\1" SUFFIX ${CMP_FORT_MODULE})
+      string(TOLOWER "${BASENAME}" BASENAME)
+      string(TOLOWER "${SUFFIX}" SUFFIX)
+      set(CMP_FORT_MODULE "${BASENAME}${SUFFIX}")
+      find_path(FND_FORT_MODULE
+        NAMES ${CMP_FORT_MODULE}
+        HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
+        PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
+        NO_CACHE NO_DEFAULT_PATH
+      )
+    endif()
+    if(NOT FND_FORT_MODULE)
+      string(TOUPPER "${BASENAME}" BASENAME)
+      string(TOLOWER "${SUFFIX}" SUFFIX)
+      set(CMP_FORT_MODULE "${BASENAME}${SUFFIX}")
+      find_path(FND_FORT_MODULE
+        NAMES ${CMP_FORT_MODULE}
+        HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
+        PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
+        NO_CACHE NO_DEFAULT_PATH
+      )
+    endif()
+    if(NOT FND_FORT_MODULE)
+      string(TOLOWER "${BASENAME}" BASENAME)
+      string(TOUPPER "${SUFFIX}" SUFFIX)
+      set(CMP_FORT_MODULE "${BASENAME}${SUFFIX}")
+      find_path(FND_FORT_MODULE
+        NAMES ${CMP_FORT_MODULE}
+        HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
+        PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
+        NO_CACHE NO_DEFAULT_PATH
+      )
+    endif()
+    if(NOT FND_FORT_MODULE)
+      string(TOUPPER "${BASENAME}" BASENAME)
+      string(TOUPPER "${SUFFIX}" SUFFIX)
+      set(CMP_FORT_MODULE "${BASENAME}${SUFFIX}")
+      find_path(FND_FORT_MODULE
+        NAMES ${CMP_FORT_MODULE}
+        HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
+        PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
+        NO_CACHE NO_DEFAULT_PATH
+      )
+    endif()
     if(FND_FORT_MODULE)
       message(STATUS "ESMX Found Fortran module ${CMP_FORT_MODULE} for ${CMP} in: ${FND_FORT_MODULE}")
       target_include_directories(esmx_driver PUBLIC ${FND_FORT_MODULE})
@@ -510,7 +556,7 @@ foreach(CMP IN ITEMS ${COMPS})
         NO_CACHE NO_DEFAULT_PATH
       )
       if(NOT FND_LIBRARY)
-        message(FATAL_ERROR "Cannot find libraries ${CMP_LIBRARY} for ${CMP} in ${CMP_INSTALL_PREFIX}")
+        message(FATAL_ERROR "ESMX Error: Cannot find libraries ${CMP_LIBRARY} for ${CMP} in ${CMP_INSTALL_PREFIX}")
       endif()
       if(${CMP_LINK_INTO_APP} STREQUAL "True")
         message(STATUS "ESMX Found link library for ${CMP}: ${FND_LIBRARY}")
@@ -540,7 +586,7 @@ foreach(CMP IN ITEMS ${COMPS})
           NO_CACHE
         )
         if(NOT FND_LINK_LIBRARY)
-          message(FATAL_ERROR "Cannot find link_libraries ${CMP_LINK_LIBRARY} for ${CMP} in ${CMP_LINK_PATHS}")
+          message(FATAL_ERROR "ESMX Error: Cannot find link_libraries ${CMP_LINK_LIBRARY} for ${CMP} in ${CMP_LINK_PATHS}")
         endif()
         message(STATUS "ESMX Found external link library for ${CMP}: ${FND_LINK_LIBRARY}")
         target_link_libraries(esmx_driver PUBLIC ${FND_LINK_LIBRARY})
@@ -554,7 +600,7 @@ foreach(CMP IN ITEMS ${COMPS})
     if(CMP_TEST_DIR STREQUAL "")
       message(WARNING "No test directory provided for ${CMP}")
     elseif(NOT EXISTS ${CMP_TEST_DIR})
-      message(FATAL_ERROR "Cannot find test directory for ${CMP}: ${CMP_TEST_DIR}")
+      message(FATAL_ERROR "ESMX Error: Cannot find test directory for ${CMP}: ${CMP_TEST_DIR}")
     else()
       if(CMP_TEST_EXE STREQUAL "")
         set(CMP_TEST_EXE ${ESMX_TEST_EXE})
@@ -578,7 +624,7 @@ foreach(CMP IN ITEMS ${COMPS})
         NO_CACHE
       )
       if(NOT FND_TEST_EXE)
-        message(FATAL_ERROR "Cannot find test executable for ${CMP}: ${CMP_TEST_EXE}")
+        message(FATAL_ERROR "ESMX Error: Cannot find test executable for ${CMP}: ${CMP_TEST_EXE}")
       endif()
 
       # add test
@@ -611,7 +657,7 @@ if(ESMX_TEST)
     if(TST_DIR STREQUAL "")
       message(WARNING "No test directory provided for: ${TST}")
     elseif(NOT EXISTS ${TST_DIR})
-      message(FATAL_ERROR "Cannot find test directory: ${TST_DIR}")
+      message(FATAL_ERROR "ESMX Error: Cannot find test directory: ${TST_DIR}")
     endif()
     if(TST_EXE STREQUAL "")
       set(TST_EXE ${ESMX_TEST_EXE})
@@ -635,7 +681,7 @@ if(ESMX_TEST)
       NO_CACHE
     )
     if(NOT FND_TST_EXE)
-      message(FATAL_ERROR "Cannot find test executable: ${TST_EXE}")
+      message(FATAL_ERROR "ESMX Error: Cannot find test executable: ${TST_EXE}")
     endif()
 
     # add test
