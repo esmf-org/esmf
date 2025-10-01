@@ -197,4 +197,8 @@ ESMF_SL_LIBOPTS  += -shared
 # Shared object options
 #
 ESMF_SO_F90COMPILEOPTS  = -pic
+ESMF_SO_F90LINKOPTS     = -shared
+ESMF_SO_F90LINKOPTSEXE  = -Wl,-export-dynamic
 ESMF_SO_CXXCOMPILEOPTS  = -fPIC
+ESMF_SO_CXXLINKOPTS     = -shared
+ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic
