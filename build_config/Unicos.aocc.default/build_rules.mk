@@ -9,6 +9,12 @@
 ESMF_F90DEFAULT         = ftn
 ESMF_CXXDEFAULT         = CC
 ESMF_CDEFAULT           = cc
+ESMF_CPPDEFAULT         = gcc -E -P -x c
+
+ESMF_CXXCOMPILECPPFLAGS += -x c++
+
+# Need this until __aocc__ macro shows up in Fortran preprocessing
+ESMF_CPPFLAGS          += -DESMF_COMPILER_AOCC
 
 ############################################################
 # Default MPI setting.
@@ -92,8 +98,10 @@ ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
 ifeq ($(ESMF_PTHREADS),ON)
 ESMF_F90COMPILEOPTS += -pthread
 ESMF_CXXCOMPILEOPTS += -pthread
+ESMF_CCOMPILEOPTS   += -pthread
 ESMF_F90LINKOPTS    += -pthread
 ESMF_CXXLINKOPTS    += -pthread
+ESMF_CLINKOPTS      += -pthread
 endif
 
 ############################################################
@@ -104,15 +112,6 @@ ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
 ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
 ESMF_OPENMP_F90LINKOPTS    += -fopenmp
 ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
-
-############################################################
-# OpenACC compiler and linker flags
-#
-ESMF_OPENACCDEFAULT = OFF
-ESMF_OPENACC_F90COMPILEOPTS += -fopenacc
-ESMF_OPENACC_CXXCOMPILEOPTS += -fopenacc
-ESMF_OPENACC_F90LINKOPTS    += -fopenacc
-ESMF_OPENACC_CXXLINKOPTS    += -fopenacc
 
 ############################################################
 # Explicit flags for handling specific format and cpp combos
@@ -138,6 +137,13 @@ ESMF_F90LINKLIBS += -lrt -lstdc++ -ldl
 ESMF_CXXLINKLIBS += -lrt -lflang -lflangrti -lpgmath -ldl
 
 ############################################################
+# Linker option that ensures that the specified libraries are 
+# used to also resolve symbols needed by other libraries.
+#
+ESMF_F90LINKOPTS          += -Wl,--no-as-needed
+ESMF_CXXLINKOPTS          += -Wl,--no-as-needed
+
+############################################################
 # Shared library options
 #
 ESMF_SL_LIBOPTS  += -shared
@@ -159,8 +165,3 @@ ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic
 # TODO: WebService testing is robust enough to work on all systems.
 #
 ESMF_NOWEBSERVTESTING = TRUE
-
-############################################################
-# Override default C preprocessor on this platform
-#
-ESMF_CPPDEFAULT       = gcc -E -P -x c
