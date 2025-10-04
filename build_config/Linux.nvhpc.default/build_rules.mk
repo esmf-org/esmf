@@ -92,7 +92,6 @@ else
 ifeq ($(ESMF_COMM),openmpi)
 # OpenMPI --------------------------------------------------
 ESMF_F90DEFAULT         = mpifort
-ESMF_F90LINKLIBS       += $(shell $(ESMF_DIR)/scripts/libs.openmpif90 $(ESMF_F90DEFAULT))
 ESMF_CXXDEFAULT         = mpic++
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_CDEFAULT           = mpicc
