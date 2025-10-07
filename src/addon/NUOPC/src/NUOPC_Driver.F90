@@ -34,7 +34,9 @@ module NUOPC_Driver
   public &
     SetVM, &
     SetServices, &
-    routine_Run
+    routine_Run, &
+    SetServicesInterfaceGridComp, SetVMInterfaceGridComp, &
+    SetServicesInterfaceCplComp, SetVMInterfaceCplComp
 
   public &
     label_PreChildrenAdvertise, &
@@ -80,6 +82,33 @@ module NUOPC_Driver
   character(*), parameter :: &
     label_SetRunClock = "Driver_SetRunClock"
 
+  abstract interface
+    recursive subroutine SetServicesInterfaceGridComp(gridcomp, rc)
+      use ESMF
+      implicit none
+      type(ESMF_GridComp)        :: gridcomp ! must not be optional
+      integer, intent(out)       :: rc       ! must not be optional
+    end subroutine
+    recursive subroutine SetVMInterfaceGridComp(gridcomp, rc)
+      use ESMF
+      implicit none
+      type(ESMF_GridComp)        :: gridcomp ! must not be optional
+      integer, intent(out)       :: rc       ! must not be optional
+    end subroutine
+    recursive subroutine SetServicesInterfaceCplComp(cplcomp, rc)
+      use ESMF
+      implicit none
+      type(ESMF_CplComp)         :: cplcomp  ! must not be optional
+      integer, intent(out)       :: rc       ! must not be optional
+    end subroutine
+    recursive subroutine SetVMInterfaceCplComp(cplcomp, rc)
+      use ESMF
+      implicit none
+      type(ESMF_CplComp)         :: cplcomp  ! must not be optional
+      integer, intent(out)       :: rc       ! must not be optional
+    end subroutine
+  end interface
+
   type type_InternalStateStruct
     integer                           :: modelCount
     ! - static references to child components
@@ -119,6 +148,7 @@ module NUOPC_Driver
 
   ! Generic methods
   public NUOPC_DriverAddComp
+  public NUOPC_DriverAddCompHACK    !TODO: remove once compliers are fixed
 #if defined (__INTEL_LLVM_COMPILER) || defined (__NVCOMPILER) || defined (NAGFOR)
   public NUOPC_DriverAddGridCompPtr !TODO: remove once compliers are fixed
 #endif
@@ -4598,7 +4628,7 @@ module NUOPC_Driver
 ! !ARGUMENTS:
     type(ESMF_GridComp)                               :: driver
     character(len=*),    intent(in)                   :: compLabel
-#if defined (__NVCOMPILER) || defined (__PGI) || defined (ESMF_COMPILER_AOCC)
+#if defined (__NVCOMPILER) || defined (__PGI)
     interface
       recursive subroutine compSetServicesRoutine(gridcomp, rc)
         use ESMF
@@ -4616,6 +4646,229 @@ module NUOPC_Driver
       end subroutine
     end interface
     optional                                          :: compSetVMRoutine
+#elif defined (ESMF_COMPILER_AOCC)
+    procedure(SetServicesInterfaceGridComp)           :: compSetServicesRoutine
+    procedure(SetVMInterfaceGridComp),       optional :: compSetVMRoutine
+#else
+    abstract interface
+      recursive subroutine SetServicesRoutine(gridcomp, rc)
+        use ESMF
+        implicit none
+        type(ESMF_GridComp)        :: gridcomp ! must not be optional
+        integer, intent(out)       :: rc       ! must not be optional
+      end subroutine
+      recursive subroutine SetVMRoutine(gridcomp, rc)
+        use ESMF
+        implicit none
+        type(ESMF_GridComp)        :: gridcomp ! must not be optional
+        integer, intent(out)       :: rc       ! must not be optional
+      end subroutine
+    end interface
+    procedure(SetServicesRoutine)                     :: compSetServicesRoutine
+    procedure(SetVMRoutine),                 optional :: compSetVMRoutine
+#endif
+    integer,             intent(in),         optional :: petList(:)
+    integer,             intent(in),         optional :: devList(:)
+    type(ESMF_Info),     intent(in),         optional :: info
+    type(ESMF_Config),   intent(in),         optional :: config
+    type(ESMF_HConfig),  intent(in),         optional :: hconfig
+    type(ESMF_GridComp), intent(out),        optional :: comp
+    integer,             intent(out),        optional :: rc
+!
+! !DESCRIPTION:
+! Create and add a GridComp (i.e. Model, Mediator, or Driver) as a child
+! component to a Driver. The component is created on the provided {\tt petList},
+! or by default across all of the Driver PETs.
+!
+! The specified {\tt compSetServicesRoutine()} is called back immediately after
+! the new child component has been created internally.
+! Very little around the component is set up at that time (e.g. NUOPC component
+! attributes are not yet available at this stage). The routine should therefore
+! be very light weight, with the sole purpose of setting the entry points of
+! the component -- typically by deriving from a generic component followed by
+! the appropriate specilizations.
+!
+! If provided, the {\tt compSetVMRoutine()} is called back before the
+! {\tt compSetServicesRoutine()}. This allows the child component to set
+! aspects of its own VM, such as threading or the PE distribution among PETs.
+!
+! The {\tt info} argument can be used to pass custom attributes to the child
+! component. These attributes are available on the component when
+! {\tt compSetVMRoutine()} and {\tt compSetServicesRoutine()} are called.
+! The attributes provided in {\tt info} are {\em copied} onto the child
+! component. This allows the same {\tt info} object to be used for multiple
+! child components without conflict.
+!
+! The {\tt compLabel} must uniquely identify the child component within the
+! context of the Driver component.
+!
+! If the {\tt comp} argument is specified, it will reference the newly created
+! component on return.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                         :: localrc
+    integer                         :: userrc
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+    type(ComponentMapEntry)         :: cmEntry
+    integer                         :: stat, i
+    character(ESMF_MAXSTR)          :: msgString, lString
+    integer                         :: verbosity
+    type(ESMF_Info)                 :: infoh
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the component for info
+    call NUOPC_CompGet(driver, name=name, verbosity=verbosity, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! query Component for the internal State
+    nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, localrc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=localrc)
+#endif
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! Add another component to the componentMap with associated compLabel
+    allocate(cmEntry%wrap, stat=stat)
+    if (ESMF_LogFoundAllocError(stat, msg="allocating cmEntry", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    is%wrap%modelCount = is%wrap%modelCount + 1
+    i = is%wrap%modelCount
+    cmEntry%wrap%label = trim(compLabel)
+    cmEntry%wrap%component = ESMF_GridCompCreate(name=trim(compLabel), &
+      config=config, hconfig=hconfig, petList=petList, devList=devList, &
+      rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    nullify(cmEntry%wrap%petList) ! invalidate the petList
+    if (present(petList)) then
+      if (size(petList)>0) then
+        ! a usable petList was provided
+        allocate(cmEntry%wrap%petList(size(petList)))
+        cmEntry%wrap%petList = petList  ! copy the petList elements
+      endif
+    endif
+
+    if (btest(verbosity,13)) then
+      if (associated(cmEntry%wrap%petList)) then
+        write (lString, *) size(cmEntry%wrap%petList)
+        write (msgString,"(A)") trim(name)//&
+          " - Creating model component "//trim(cmEntry%wrap%label)//&
+          " with petList of size "//trim(adjustl(lString))//" :"
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+        call NUOPC_LogPetList(cmEntry%wrap%petList, name=name, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      else
+        write (msgString,"(A)") trim(name)//" - Creating model component "//&
+          trim(cmEntry%wrap%label)//" without petList."
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
+    endif
+
+    call ESMF_ContainerAddUDT(is%wrap%componentMap, trim(compLabel), &
+      cmEntry, localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! optionally copy Attributes from info object to the newly created component
+    if (present(info)) then
+      call ESMF_InfoGetFromHost(cmEntry%wrap%component, infoh, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_InfoSet(infoh, "", info, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
+    ! optionally call the SetVM on the added component
+    if (present(compSetVMRoutine)) then
+      call ESMF_GridCompSetVM(cmEntry%wrap%component, &
+        compSetVMRoutine, userRc=userrc, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
+    ! Call the SetServices on the added component
+    call ESMF_GridCompSetServices(cmEntry%wrap%component, &
+      compSetServicesRoutine, userRc=userrc, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! Set the CompLabel attribute
+    call NUOPC_CompAttributeSet(cmEntry%wrap%component, &
+      name="CompLabel", value=trim(cmEntry%wrap%label), rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! Optionally return the added component
+    if (present(comp)) comp = cmEntry%wrap%component
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_DriverAddComp - Add a GridComp child to a Driver
+!
+! !INTERFACE:
+  recursive subroutine NUOPC_DriverAddCompHACK(driver, compLabel, &
+    compSetServicesRoutine, compSetVMRoutine, petList, devList, info, config, &
+    hconfig, comp, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                               :: driver
+    character(len=*),    intent(in)                   :: compLabel
+#if defined (__NVCOMPILER) || defined (__PGI)
+    interface
+      recursive subroutine compSetServicesRoutine(gridcomp, rc)
+        use ESMF
+        implicit none
+        type(ESMF_GridComp)        :: gridcomp ! must not be optional
+        integer, intent(out)       :: rc       ! must not be optional
+      end subroutine
+    end interface
+    interface
+      recursive subroutine compSetVMRoutine(gridcomp, rc)
+        use ESMF
+        implicit none
+        type(ESMF_GridComp)        :: gridcomp ! must not be optional
+        integer, intent(out)       :: rc       ! must not be optional
+      end subroutine
+    end interface
+    optional                                          :: compSetVMRoutine
+#elif defined (ESMF_COMPILER_AOCC)
+    procedure(SetServicesInterfaceGridComp)           :: compSetServicesRoutine
+    procedure(SetVMInterfaceGridComp),       optional :: compSetVMRoutine
 #else
     abstract interface
       recursive subroutine SetServicesRoutine(gridcomp, rc)
@@ -5001,7 +5254,7 @@ module NUOPC_Driver
     type(ESMF_GridComp)                               :: driver
     character(len=*),    intent(in)                   :: srcCompLabel
     character(len=*),    intent(in)                   :: dstCompLabel
-#if defined (__NVCOMPILER) || defined (__PGI) || defined (ESMF_COMPILER_AOCC)
+#if defined (__NVCOMPILER) || defined (__PGI)
     interface
       recursive subroutine compSetServicesRoutine(cplcomp, rc)
         use ESMF
@@ -5019,6 +5272,9 @@ module NUOPC_Driver
       end subroutine
     end interface
     optional                                          :: compSetVMRoutine
+#elif defined (ESMF_COMPILER_AOCC)
+    procedure(SetServicesInterfaceCplComp)            :: compSetServicesRoutine
+    procedure(SetVMInterfaceCplComp),        optional :: compSetVMRoutine
 #else
     abstract interface
       recursive subroutine SetServicesRoutine(cplcomp, rc)

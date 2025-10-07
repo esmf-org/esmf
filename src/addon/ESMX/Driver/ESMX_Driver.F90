@@ -396,7 +396,8 @@ module ESMX_Driver
             "' to driver via Fortran module.", &
           line=__LINE__, file=FILENAME)) return  ! bail out
 #else
-        call NUOPC_DriverAddComp(driver, trim(compLabel), hconfig=hconfig, &
+!TODO: replaced with non-HACK version once issues with AOCC resolved
+        call NUOPC_DriverAddCompHACK(driver, trim(compLabel), hconfig=hconfig, &
           compSetServicesRoutine=CompDef(j)%ssPtr, compSetVMRoutine=CompDef(j)%svPtr, &
           info=info, petList=petList, devList=devList, comp=comp, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, &
