@@ -219,7 +219,7 @@ endif
 ############################################################
 # OpenMP compiler and linker flags
 #
-ESMF_OPENMP=OFF
+ESMF_OPENMPDEFAULT=OFF
 # ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
 # ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
 # ESMF_OPENMP_F90LINKOPTS    += -fopenmp

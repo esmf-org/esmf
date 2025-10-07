@@ -168,7 +168,7 @@ endif
 ############################################################
 # OpenMP compiler and linker flags
 #
-ESMF_OPENMP=OFF
+ESMF_OPENMPDEFAULT=OFF
 
 ############################################################
 # Set rpath syntax
