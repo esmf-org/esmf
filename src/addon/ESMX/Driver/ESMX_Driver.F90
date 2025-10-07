@@ -45,8 +45,8 @@ module ESMX_Driver
 
 #else
   type type_CompDef
-    procedure(SetServices), pointer, nopass :: ssPtr => null()
-    procedure(SetVM),       pointer, nopass :: svPtr => null()
+    procedure(SetServicesInterfaceGridComp), pointer, nopass :: ssPtr => null()
+    procedure(SetVMInterfaceGridComp),       pointer, nopass :: svPtr => null()
     character(ESMF_MAXSTR)                  :: name = "__uninitialized__"
   end type
 #endif
@@ -396,8 +396,8 @@ module ESMX_Driver
             "' to driver via Fortran module.", &
           line=__LINE__, file=FILENAME)) return  ! bail out
 #else
-!TODO: replaced with non-HACK version once issues with AOCC resolved
-        call NUOPC_DriverAddCompHACK(driver, trim(compLabel), hconfig=hconfig, &
+!TODO: call through generic NUOPC_DriverAddComp() once AOCC issues resolved
+        call NUOPC_DriverAddGridComp(driver, trim(compLabel), hconfig=hconfig, &
           compSetServicesRoutine=CompDef(j)%ssPtr, compSetVMRoutine=CompDef(j)%svPtr, &
           info=info, petList=petList, devList=devList, comp=comp, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, &
