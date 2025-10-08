@@ -149,7 +149,7 @@ module NUOPC_Driver
   ! Generic methods
   public NUOPC_DriverAddComp
   public NUOPC_DriverAddGridComp  !TODO: remove public once compliers are fixed
-#if defined (__INTEL_LLVM_COMPILER) || defined (__NVCOMPILER) || defined (NAGFOR)
+#if defined (__INTEL_LLVM_COMPILER) || defined (NAGFOR)
   public NUOPC_DriverAddGridCompPtr !TODO: remove once compliers are fixed
 #endif
   public NUOPC_DriverAddRunElement
@@ -4553,7 +4553,7 @@ module NUOPC_Driver
   !-----------------------------------------------------------------------------
   !-----------------------------------------------------------------------------
 
-#if defined (__INTEL_LLVM_COMPILER) || defined (__NVCOMPILER) || defined (NAGFOR)
+#if defined (__INTEL_LLVM_COMPILER) || defined (NAGFOR)
   !-----------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: NUOPC_DriverAddComp - Add a GridComp child to a Driver using procedure pointers
@@ -4628,25 +4628,7 @@ module NUOPC_Driver
 ! !ARGUMENTS:
     type(ESMF_GridComp)                               :: driver
     character(len=*),    intent(in)                   :: compLabel
-#if defined (__NVCOMPILER) || defined (__PGI)
-    interface
-      recursive subroutine compSetServicesRoutine(gridcomp, rc)
-        use ESMF
-        implicit none
-        type(ESMF_GridComp)        :: gridcomp ! must not be optional
-        integer, intent(out)       :: rc       ! must not be optional
-      end subroutine
-    end interface
-    interface
-      recursive subroutine compSetVMRoutine(gridcomp, rc)
-        use ESMF
-        implicit none
-        type(ESMF_GridComp)        :: gridcomp ! must not be optional
-        integer, intent(out)       :: rc       ! must not be optional
-      end subroutine
-    end interface
-    optional                                          :: compSetVMRoutine
-#elif defined (ESMF_COMPILER_AOCC)
+#if defined (ESMF_COMPILER_AOCC) || defined (__NVCOMPILER)
     procedure(SetServicesInterfaceGridComp)           :: compSetServicesRoutine
     procedure(SetVMInterfaceGridComp),       optional :: compSetVMRoutine
 #else
@@ -5034,25 +5016,7 @@ module NUOPC_Driver
     type(ESMF_GridComp)                               :: driver
     character(len=*),    intent(in)                   :: srcCompLabel
     character(len=*),    intent(in)                   :: dstCompLabel
-#if defined (__NVCOMPILER) || defined (__PGI)
-    interface
-      recursive subroutine compSetServicesRoutine(cplcomp, rc)
-        use ESMF
-        implicit none
-        type(ESMF_CplComp)         :: cplcomp  ! must not be optional
-        integer, intent(out)       :: rc       ! must not be optional
-      end subroutine
-    end interface
-    interface
-      recursive subroutine compSetVMRoutine(cplcomp, rc)
-        use ESMF
-        implicit none
-        type(ESMF_CplComp)         :: cplcomp  ! must not be optional
-        integer, intent(out)       :: rc       ! must not be optional
-      end subroutine
-    end interface
-    optional                                          :: compSetVMRoutine
-#elif defined (ESMF_COMPILER_AOCC)
+#if defined (ESMF_COMPILER_AOCC) || defined (__NVCOMPILER)
     procedure(SetServicesInterfaceCplComp)            :: compSetServicesRoutine
     procedure(SetVMInterfaceCplComp),        optional :: compSetVMRoutine
 #else
