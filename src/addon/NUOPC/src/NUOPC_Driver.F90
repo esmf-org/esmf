@@ -4628,10 +4628,7 @@ module NUOPC_Driver
 ! !ARGUMENTS:
     type(ESMF_GridComp)                               :: driver
     character(len=*),    intent(in)                   :: compLabel
-#if defined (ESMF_COMPILER_AOCC) || defined (__NVCOMPILER)
-    procedure(SetServicesInterfaceGridComp)           :: compSetServicesRoutine
-    procedure(SetVMInterfaceGridComp),       optional :: compSetVMRoutine
-#else
+#if defined (NAGFOR)
     abstract interface
       recursive subroutine SetServicesRoutine(gridcomp, rc)
         use ESMF
@@ -4648,6 +4645,9 @@ module NUOPC_Driver
     end interface
     procedure(SetServicesRoutine)                     :: compSetServicesRoutine
     procedure(SetVMRoutine),                 optional :: compSetVMRoutine
+#else
+    procedure(SetServicesInterfaceGridComp)           :: compSetServicesRoutine
+    procedure(SetVMInterfaceGridComp),       optional :: compSetVMRoutine
 #endif
     integer,             intent(in),         optional :: petList(:)
     integer,             intent(in),         optional :: devList(:)
@@ -5016,10 +5016,7 @@ module NUOPC_Driver
     type(ESMF_GridComp)                               :: driver
     character(len=*),    intent(in)                   :: srcCompLabel
     character(len=*),    intent(in)                   :: dstCompLabel
-#if defined (ESMF_COMPILER_AOCC) || defined (__NVCOMPILER)
-    procedure(SetServicesInterfaceCplComp)            :: compSetServicesRoutine
-    procedure(SetVMInterfaceCplComp),        optional :: compSetVMRoutine
-#else
+#if defined (NAGFOR)
     abstract interface
       recursive subroutine SetServicesRoutine(cplcomp, rc)
         use ESMF
@@ -5036,6 +5033,9 @@ module NUOPC_Driver
     end interface
     procedure(SetServicesRoutine)                     :: compSetServicesRoutine
     procedure(SetVMRoutine),                 optional :: compSetVMRoutine
+#else
+    procedure(SetServicesInterfaceCplComp)            :: compSetServicesRoutine
+    procedure(SetVMInterfaceCplComp),        optional :: compSetVMRoutine
 #endif
     integer, target,     intent(in),         optional :: petList(:)
     integer, target,     intent(in),         optional :: devList(:)
