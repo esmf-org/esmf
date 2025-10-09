@@ -149,7 +149,7 @@ module NUOPC_Driver
   ! Generic methods
   public NUOPC_DriverAddComp
   public NUOPC_DriverAddGridComp  !TODO: remove public once compliers are fixed
-#if defined (__INTEL_LLVM_COMPILER) || defined (NAGFOR)
+#if defined (NAGFOR)
   public NUOPC_DriverAddGridCompPtr !TODO: remove once compliers are fixed
 #endif
   public NUOPC_DriverAddRunElement
@@ -4553,7 +4553,7 @@ module NUOPC_Driver
   !-----------------------------------------------------------------------------
   !-----------------------------------------------------------------------------
 
-#if defined (__INTEL_LLVM_COMPILER) || defined (NAGFOR)
+#if defined (NAGFOR)
   !-----------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: NUOPC_DriverAddComp - Add a GridComp child to a Driver using procedure pointers

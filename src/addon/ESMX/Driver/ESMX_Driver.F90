@@ -360,8 +360,8 @@ module ESMX_Driver
 
       if (inCompDef) then
         ! add child component with SetVM and SetServices in CompDef
-#if defined (__INTEL_LLVM_COMPILER) || defined (NAGFOR)
-!TODO: remove once IFX and NAG compilers work correctly w/o work-around
+#if defined (NAGFOR)
+!TODO: remove once NAG compiler works correctly w/o work-around
         call NUOPC_DriverAddGridCompPtr(driver, trim(compLabel), hconfig=hconfig, &
           compSetServicesRoutine=CompDef(j)%ssPtr, compSetVMRoutine=CompDef(j)%svPtr, &
           info=info, petList=petList, devList=devList, comp=comp, rc=rc)
