@@ -148,9 +148,9 @@ module NUOPC_Driver
 
   ! Generic methods
   public NUOPC_DriverAddComp
-  public NUOPC_DriverAddGridComp  !TODO: remove public once compliers are fixed
+  public NUOPC_DriverAddGridComp    !TODO: remove public once all compilers work
 #if defined (NAGFOR)
-  public NUOPC_DriverAddGridCompPtr !TODO: remove once compliers are fixed
+  public NUOPC_DriverAddGridCompPtr !TODO: remove once NAG complier is fixed
 #endif
   public NUOPC_DriverAddRunElement
   public NUOPC_DriverEgestRunSequence
@@ -4628,27 +4628,8 @@ module NUOPC_Driver
 ! !ARGUMENTS:
     type(ESMF_GridComp)                               :: driver
     character(len=*),    intent(in)                   :: compLabel
-#if defined (NAGFOR)
-    abstract interface
-      recursive subroutine SetServicesRoutine(gridcomp, rc)
-        use ESMF
-        implicit none
-        type(ESMF_GridComp)        :: gridcomp ! must not be optional
-        integer, intent(out)       :: rc       ! must not be optional
-      end subroutine
-      recursive subroutine SetVMRoutine(gridcomp, rc)
-        use ESMF
-        implicit none
-        type(ESMF_GridComp)        :: gridcomp ! must not be optional
-        integer, intent(out)       :: rc       ! must not be optional
-      end subroutine
-    end interface
-    procedure(SetServicesRoutine)                     :: compSetServicesRoutine
-    procedure(SetVMRoutine),                 optional :: compSetVMRoutine
-#else
     procedure(SetServicesInterfaceGridComp)           :: compSetServicesRoutine
     procedure(SetVMInterfaceGridComp),       optional :: compSetVMRoutine
-#endif
     integer,             intent(in),         optional :: petList(:)
     integer,             intent(in),         optional :: devList(:)
     type(ESMF_Info),     intent(in),         optional :: info
@@ -5016,27 +4997,8 @@ module NUOPC_Driver
     type(ESMF_GridComp)                               :: driver
     character(len=*),    intent(in)                   :: srcCompLabel
     character(len=*),    intent(in)                   :: dstCompLabel
-#if defined (NAGFOR)
-    abstract interface
-      recursive subroutine SetServicesRoutine(cplcomp, rc)
-        use ESMF
-        implicit none
-        type(ESMF_CplComp)         :: cplcomp  ! must not be optional
-        integer, intent(out)       :: rc       ! must not be optional
-      end subroutine
-      recursive subroutine SetVMRoutine(cplcomp, rc)
-        use ESMF
-        implicit none
-        type(ESMF_CplComp)         :: cplcomp  ! must not be optional
-        integer, intent(out)       :: rc       ! must not be optional
-      end subroutine
-    end interface
-    procedure(SetServicesRoutine)                     :: compSetServicesRoutine
-    procedure(SetVMRoutine),                 optional :: compSetVMRoutine
-#else
     procedure(SetServicesInterfaceCplComp)            :: compSetServicesRoutine
     procedure(SetVMInterfaceCplComp),        optional :: compSetVMRoutine
-#endif
     integer, target,     intent(in),         optional :: petList(:)
     integer, target,     intent(in),         optional :: devList(:)
     type(ESMF_Info),     intent(in),         optional :: info
