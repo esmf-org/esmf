@@ -842,7 +842,6 @@ void GDAL_Handler::arrayWriteOneTileFile(
     }
   }
 
-  printf("<<>> fileID 3: %d\n",fileID);
   PRINTMSG("calling write_darray, gdal type = " << basegdaltype << ", address = " << baseAddress);
   // Write the array
   ESMCI_IOREGION_ENTER("GDALc_write_darray");

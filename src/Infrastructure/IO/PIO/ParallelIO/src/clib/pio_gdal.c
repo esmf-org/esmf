@@ -298,7 +298,8 @@ GDALc_openfile(int iosysid, int *fileIDp, GDALDatasetH *hDSp,int *iotype, const 
         case PIO_IOTYPE_GDAL:
             if (1)//ios->io_rank == 0)
             {
-	      *hDSp = GDALOpenEx(filename, GDAL_OF_VECTOR | GDAL_OF_READONLY, NULL, NULL, NULL);
+	      *hDSp = GDALOpenEx(filename, GDAL_OF_VECTOR | GDAL_OF_UPDATE, NULL, NULL, NULL);
+	      printf( "%s opened.\n", filename );
 	      //*hDSp = OGROpen( filename, mode, NULL );
 	      if( hDSp != NULL )
                 ierr = GDALc_inq_file_metadata(file, *hDSp, PIO_IOTYPE_GDAL,
@@ -863,7 +864,7 @@ GDALc_shp_write_float_field(int fileid, int varid, const size_t *startp,
     OGR_F_SetFieldDouble(hF,varid,(float)ip[i]);
     OGR_L_SetFeature(hL,hF);
     OGR_F_Destroy( hF );
-    printf("<<>> ip[%d]=%f\n",i,ip[i]);
+//    printf("<<>> ip[%d]=%f\n",i,ip[i]);
   }
 
   return PIO_NOERR;

@@ -245,7 +245,7 @@ program ESMF_IO_GDALUTest
   !------------------------------------------------------------------------
   ! 9. Write the gridded data from grid to NetCDF
   !------------------------------------------------------------------------
-  call ESMF_FieldWrite(MeshField, fileName="cb_2018_us_county_20m.shp",  &
+  call ESMF_FieldWrite(MeshField, fileName="data/cb_2018_us_county_20m.shp",  &
        iofmt=ESMF_IOFMT_SHP,  &
        overwrite=.true.,  &
        timeslice=1, &

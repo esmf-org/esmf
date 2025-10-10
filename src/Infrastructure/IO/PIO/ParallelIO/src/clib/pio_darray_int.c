@@ -1000,7 +1000,6 @@ recv_and_write_data(file_desc_t *file, const int *varids, const int *frame,
                         if ((ierr = nc_put_vara(file->fh, varids[nv], start, count, bufptr)))
                             return check_netcdf2(ios, NULL, ierr, __FILE__, __LINE__);
 		      if (file->iotype == PIO_IOTYPE_GDAL)
-			printf("<<>> fileID X: %d\n",file->pio_ncid);
                         ierr = GDALc_shp_write_float_field(file->pio_ncid, varids[nv], start, count, bufptr);
 		      }
 
@@ -1838,7 +1837,6 @@ flush_buffer(int ncid, wmulti_buffer *wmb, bool flushtodisk)
     if (wmb->num_arrays > 0)
     {
         /* Write any data in the buffer. */
-        printf("<<>> fileID 5: %d\n",ncid);
         ret = PIOc_write_darray_multi(ncid, wmb->vid,  wmb->ioid, wmb->num_arrays,
                                       wmb->arraylen, wmb->data, wmb->frame,
                                       wmb->fillvalue, flushtodisk);

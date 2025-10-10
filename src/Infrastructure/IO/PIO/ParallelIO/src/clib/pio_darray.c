@@ -197,8 +197,11 @@ PIOc_write_darray_multi(int ncid, const int *varids, int ioid, int nvars,
 
     }
 
-    printf("<<>><<>> GET THIS BS OUTTA HERE!"); 
-    fndims = 1;
+    if ((!ios->async || !ios->ioproc) && (file->iotype = PIO_IOTYPE_GDAL))
+    {
+      // Do we even need to sort out fndims here? (MSL<<>>)
+      fndims = 1;
+    }
 
     /* If async is in use, and this is not an IO task, bcast the
      * parameters. */
@@ -783,7 +786,6 @@ PIOc_write_darray(int ncid, int varid, int ioid, PIO_Offset arraylen, void *arra
         /* If needsflush == 2 flush to disk otherwise just flush to io
          * node. This will cause PIOc_write_darray_multi() to be
          * called. */
-      printf("<<>> fileID 4: %d\n",ncid);
         if ((ierr = flush_buffer(ncid, wmb, needsflush == 2)))
             return pio_err(ios, file, ierr, __FILE__, __LINE__);
     }
