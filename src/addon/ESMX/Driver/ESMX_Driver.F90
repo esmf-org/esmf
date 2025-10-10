@@ -19,37 +19,11 @@ module ESMX_Driver
 
   public SetServices, SetVM, HConfigCreateFoundNode
 
-#if defined (__NVCOMPILER)
-!TODO: remove once NVHPC and PGI compilers work correctly w/o work-around
-
-  abstract interface
-    recursive subroutine SetServicesRoutine(gridcomp, rc)
-      use ESMF
-      implicit none
-      type(ESMF_GridComp)        :: gridcomp ! must not be optional
-      integer, intent(out)       :: rc       ! must not be optional
-    end subroutine
-    recursive subroutine SetVMRoutine(gridcomp, rc)
-      use ESMF
-      implicit none
-      type(ESMF_GridComp)        :: gridcomp ! must not be optional
-      integer, intent(out)       :: rc       ! must not be optional
-    end subroutine
-  end interface
-
   type type_CompDef
-    procedure(SetServicesRoutine), pointer, nopass :: ssPtr => null()
-    procedure(SetVMRoutine),       pointer, nopass :: svPtr => null()
+    procedure(SetServicesInterfaceGridComp), pointer, nopass :: ssPtr => null()
+    procedure(SetVMInterfaceGridComp),       pointer, nopass :: svPtr => null()
     character(ESMF_MAXSTR)                  :: name = "__uninitialized__"
   end type
-
-#else
-  type type_CompDef
-    procedure(SetServices), pointer, nopass :: ssPtr => null()
-    procedure(SetVM),       pointer, nopass :: svPtr => null()
-    character(ESMF_MAXSTR)                  :: name = "__uninitialized__"
-  end type
-#endif
 
   include "compCnt.inc"
 
@@ -386,8 +360,8 @@ module ESMX_Driver
 
       if (inCompDef) then
         ! add child component with SetVM and SetServices in CompDef
-#if defined (__INTEL_LLVM_COMPILER) || defined (__NVCOMPILER) || defined (NAGFOR)
-!TODO: remove once IFX, NVHPC, and NAG compilers work correctly w/o work-around
+#if defined (NAGFOR)
+!TODO: remove once NAG compiler works correctly w/o work-around
         call NUOPC_DriverAddGridCompPtr(driver, trim(compLabel), hconfig=hconfig, &
           compSetServicesRoutine=CompDef(j)%ssPtr, compSetVMRoutine=CompDef(j)%svPtr, &
           info=info, petList=petList, devList=devList, comp=comp, rc=rc)
@@ -396,7 +370,8 @@ module ESMX_Driver
             "' to driver via Fortran module.", &
           line=__LINE__, file=FILENAME)) return  ! bail out
 #else
-        call NUOPC_DriverAddComp(driver, trim(compLabel), hconfig=hconfig, &
+!TODO: call through generic NUOPC_DriverAddComp() once AOCC issues resolved
+        call NUOPC_DriverAddGridComp(driver, trim(compLabel), hconfig=hconfig, &
           compSetServicesRoutine=CompDef(j)%ssPtr, compSetVMRoutine=CompDef(j)%svPtr, &
           info=info, petList=petList, devList=devList, comp=comp, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, &

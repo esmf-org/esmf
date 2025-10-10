@@ -172,7 +172,7 @@ endif
 # OpenMP compiler and linker flags
 #
 ifeq ($(ESMF_CLANGSTR), clang)
-ESMF_OPENMP=OFF
+ESMF_OPENMPDEFAULT=OFF
 else
 ifeq ($(shell [ $(ESMF_F90MAJORVERSION) -ge 16 ] && echo true), true)
 ESMF_OPENMP_F90COMPILEOPTS += -qopenmp
