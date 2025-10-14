@@ -823,11 +823,14 @@ GDALc_shp_get_float_field(int fileid, int varid, const size_t *startp,
   for (size_t i = 0; i<countp[0]; i++) {
     int feat_id = OGR_F_GetFID(OGR_L_GetFeature(hL,i+startp[0]));
     hF     = OGR_L_GetFeature(hL,feat_id);
+    //    if (hF == NULL )
+    // PLOG((3,"NULL at FID: %d  i: %d  start %d count %d",feat_id,i,startp[0],countp[0]));
     ip[i] = (float)OGR_F_GetFieldAsDouble(hF,varid);
     total += ip[i];
+    printf("%d: i: %d index: %d feat_id: %d countp %d value %f total %f\n",rank,i,i+startp[0],feat_id,countp[0],ip[i],total);
   }
 
-  printf("%d: total %f\n",rank,total);
+  printf("%d: total %f (count %d)\n",rank,total,countp[0]);
 
   return PIO_NOERR;
 }
