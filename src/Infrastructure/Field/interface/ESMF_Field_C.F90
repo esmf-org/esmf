@@ -1356,9 +1356,9 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     endif
     
     if (filemode_local == ESMF_FILEMODE_BASIC) then
-#ifndef OLDWAY
+#ifndef OLDWAY_102325
        call ESMF_OutputSimpleWeightFile (fileName, localFactorList, localFactorIndexList, &
-            title="Weight file created by the ESMPy Regrid Class", &
+            title="ESMPy Regrid Class Weight File", &
             method=regridmethod, &
             largeFileFlag=l_largeFileFlag, &
             ! TODO: Support this  netcdf4FileFlag, &
