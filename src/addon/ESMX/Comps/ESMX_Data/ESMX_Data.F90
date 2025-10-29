@@ -399,7 +399,7 @@ module esmx_data
               line=__LINE__, file=__FILE__, rcToReturn=rc)
             return
           endif
-        end if
+        endif
       endif
       xfield => xfield%nfld
     enddo
@@ -426,7 +426,7 @@ module esmx_data
               line=__LINE__, file=__FILE__, rcToReturn=rc)
             return
           endif
-        end if
+        endif
         call NUOPC_SetAttribute(xfield%efld, &
           name="Updated", value="true", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1499,7 +1499,6 @@ module esmx_data
         else
           xfield%gavg = xfield%gsum(1) / xfield%gsum(2)
         endif
-        ! check
         if((xfield%gmin(1) .lt. xfield%minv) .or. &
            (xfield%gmax(1) .gt. xfield%maxv)) then
           xfield%okay = .false.
