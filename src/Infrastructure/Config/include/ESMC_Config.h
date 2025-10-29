@@ -113,7 +113,7 @@ int ESMC_ConfigDestroy(
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_ConfigCreate - Create a Config object from a section of an existing Config object
+// !IROUTINE: ESMC_ConfigCreateFromSection - Create a Config object from a section of an existing Config object
 //
 // !INTERFACE:
 ESMC_Config ESMC_ConfigCreateFromSection(

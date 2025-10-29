@@ -72,9 +72,7 @@ ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 #
 ESMF_OPENACCDEFAULT = OFF
 ESMF_OPENACC_F90COMPILEOPTS += -hacc
-ESMF_OPENACC_CXXCOMPILEOPTS += -hacc
 ESMF_OPENACC_F90LINKOPTS    += -hacc
-ESMF_OPENACC_CXXLINKOPTS    += -hacc
 
 ############################################################
 # How to specify module directories

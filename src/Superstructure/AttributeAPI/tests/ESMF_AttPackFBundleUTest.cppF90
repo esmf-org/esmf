@@ -46,6 +46,7 @@ program ESMF_AttPackFieldBundleUTest
 
   ! local variables
   type(ESMF_FieldBundle) :: fieldbundle
+  type(ESMF_Info)        :: info
 
   AttPackTestVariablesMacro()
 
@@ -63,10 +64,19 @@ program ESMF_AttPackFieldBundleUTest
   !-----------------------------------------------------------------------------
 
   fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+  ! remove the ESMF JSON root - because AttPack testing cannot handle it
+  call ESMF_InfoGetFromHost(fieldbundle, info=info, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_InfoRemove(info, keyParent="ESMF", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! now start testing...
   AttPackTestMacro(fieldbundle, "a FieldBundle", EX_UTest, "fieldbundle")
 
   call ESMF_FieldBundleDestroy(fieldbundle, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE)

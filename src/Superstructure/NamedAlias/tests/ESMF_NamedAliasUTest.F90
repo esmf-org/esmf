@@ -100,6 +100,7 @@ contains !======================================================================
     integer, intent(out)  :: rc
     type(ESMF_State)      :: object1, object2
     type(ESMF_State)      :: state
+    integer               :: id
 
     object1 = ESMF_StateCreate(name="Test Name 1", rc=rc)
     if (rc /= ESMF_SUCCESS) return
@@ -117,6 +118,38 @@ contains !======================================================================
     write(name, *) "NamedAlias is an Alias State Test"
     write(failMsg, *) "Incorrect result"
     testFlag = (object1 == object2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias State Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object1, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for Alias State Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 0)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for NamedAlias State Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias State Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 1)
     call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
 
@@ -275,6 +308,70 @@ contains !======================================================================
 
     !------------------------------------------------------------------------
     !NEX_UTest
+    write(name, *) "NamedAlias() from NamedAlias for State Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object2, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for NamedAlias from NamedAlias State Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias State Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias unchanged State Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object1, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for Alias unchanged State Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 0)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias() from Alias again for State Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object1, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias again State Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias again State Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 3)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
     write(name, *) "Destroy object through NamedAlias State Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_StateDestroy(object2, rc=rc)
@@ -299,6 +396,7 @@ contains !======================================================================
   subroutine TestGridCompNamedAlias(rc)
     integer, intent(out)  :: rc
     type(ESMF_GridComp)   :: object1, object2
+    integer               :: id
 
     object1 = ESMF_GridCompCreate(name="Test Name 1", rc=rc)
     if (rc /= ESMF_SUCCESS) return
@@ -316,6 +414,38 @@ contains !======================================================================
     write(name, *) "NamedAlias is an Alias GridComp Test"
     write(failMsg, *) "Incorrect result"
     testFlag = (object1 == object2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias GridComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object1, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for Alias GridComp Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 0)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for NamedAlias GridComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias GridComp Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 1)
     call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
 
@@ -414,6 +544,70 @@ contains !======================================================================
 
     !------------------------------------------------------------------------
     !NEX_UTest
+    write(name, *) "NamedAlias() from NamedAlias for GridComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object2, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for NamedAlias from NamedAlias GridComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias GridComp Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias unchanged GridComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object1, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for Alias unchanged GridComp Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 0)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias() from Alias again for GridComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object1, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias again GridComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias again GridComp Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 3)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
     write(name, *) "Destroy object through NamedAlias GridComp Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_GridCompDestroy(object2, rc=rc)
@@ -438,6 +632,7 @@ contains !======================================================================
   subroutine TestCplCompNamedAlias(rc)
     integer, intent(out)  :: rc
     type(ESMF_CplComp)    :: object1, object2
+    integer               :: id
 
     object1 = ESMF_CplCompCreate(name="Test Name 1", rc=rc)
     if (rc /= ESMF_SUCCESS) return
@@ -455,6 +650,38 @@ contains !======================================================================
     write(name, *) "NamedAlias is an Alias CplComp Test"
     write(failMsg, *) "Incorrect result"
     testFlag = (object1 == object2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias CplComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object1, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for Alias CplComp Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 0)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for NamedAlias CplComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias CplComp Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 1)
     call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
 
@@ -553,6 +780,70 @@ contains !======================================================================
 
     !------------------------------------------------------------------------
     !NEX_UTest
+    write(name, *) "NamedAlias() from NamedAlias for CplComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object2, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for NamedAlias from NamedAlias CplComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias CplComp Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias unchanged CplComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object1, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for Alias unchanged CplComp Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 0)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias() from Alias again for CplComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object1, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias again CplComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias again CplComp Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 3)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
     write(name, *) "Destroy object through NamedAlias CplComp Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_CplCompDestroy(object2, rc=rc)
@@ -577,6 +868,7 @@ contains !======================================================================
   subroutine TestSciCompNamedAlias(rc)
     integer, intent(out)  :: rc
     type(ESMF_SciComp)    :: object1, object2
+    integer               :: id
 
     object1 = ESMF_SciCompCreate(name="Test Name 1", rc=rc)
     if (rc /= ESMF_SUCCESS) return
@@ -594,6 +886,38 @@ contains !======================================================================
     write(name, *) "NamedAlias is an Alias SciComp Test"
     write(failMsg, *) "Incorrect result"
     testFlag = (object1 == object2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias SciComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object1, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for Alias SciComp Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 0)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for NamedAlias SciComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias SciComp Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 1)
     call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
 
@@ -692,6 +1016,70 @@ contains !======================================================================
 
     !------------------------------------------------------------------------
     !NEX_UTest
+    write(name, *) "NamedAlias() from NamedAlias for SciComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object2, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for NamedAlias from NamedAlias SciComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias SciComp Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias unchanged SciComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object1, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for Alias unchanged SciComp Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 0)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias() from Alias again for SciComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object1, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias again SciComp Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias again SciComp Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 3)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
     write(name, *) "Destroy object through NamedAlias SciComp Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_SciCompDestroy(object2, rc=rc)
@@ -717,6 +1105,7 @@ contains !======================================================================
     integer, intent(out)  :: rc
     type(ESMF_FieldBundle):: object1, object2
     type(ESMF_State)      :: state
+    integer               :: id
 
     object1 = ESMF_FieldBundleCreate(name="Test Name 1", rc=rc)
     if (rc /= ESMF_SUCCESS) return
@@ -734,6 +1123,38 @@ contains !======================================================================
     write(name, *) "NamedAlias is an Alias FieldBundle Test"
     write(failMsg, *) "Incorrect result"
     testFlag = (object1 == object2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias FieldBundle Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object1, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for Alias FieldBundle Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 0)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for NamedAlias FieldBundle Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias FieldBundle Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 1)
     call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
 
@@ -830,6 +1251,70 @@ contains !======================================================================
 
     !------------------------------------------------------------------------
     !NEX_UTest
+    write(name, *) "NamedAlias() from NamedAlias for FieldBundle Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object2, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for NamedAlias from NamedAlias FieldBundle Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias FieldBundle Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias unchanged FieldBundle Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object1, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for Alias unchanged FieldBundle Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 0)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias() from Alias again for FieldBundle Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object1, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias again FieldBundle Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias again FieldBundle Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 3)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
     write(name, *) "Destroy object through NamedAlias FieldBundle Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_FieldBundleDestroy(object2, rc=rc)
@@ -852,10 +1337,11 @@ contains !======================================================================
   !============================================================================
 
   subroutine TestFieldNamedAlias(rc)
-    integer, intent(out)        :: rc
-    type(ESMF_Field)            :: object1, object2
-    type(ESMF_Grid)             :: grid
-    type(ESMF_State)            :: state
+    integer, intent(out)  :: rc
+    type(ESMF_Field)      :: object1, object2
+    type(ESMF_Grid)       :: grid
+    type(ESMF_State)      :: state
+    integer               :: id
 
     grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/16,20/), rc=rc)
     if (rc /= ESMF_SUCCESS) return
@@ -876,6 +1362,38 @@ contains !======================================================================
     write(name, *) "NamedAlias is an Alias Field Test"
     write(failMsg, *) "Incorrect result"
     testFlag = (object1 == object2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias Field Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object1, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for Alias Field Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 0)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for NamedAlias Field Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias Field Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 1)
     call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
 
@@ -1035,6 +1553,70 @@ contains !======================================================================
 
     !------------------------------------------------------------------------
     !NEX_UTest
+    write(name, *) "NamedAlias() from NamedAlias for Field Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object2, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for NamedAlias from NamedAlias Field Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias Field Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias unchanged Field Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object1, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for Alias unchanged Field Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 0)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias() from Alias again for Field Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object1, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias again Field Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias again Field Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 3)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
     write(name, *) "Destroy object through NamedAlias Field Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_FieldDestroy(object2, rc=rc)
@@ -1060,6 +1642,7 @@ contains !======================================================================
     integer, intent(out)  :: rc
     type(ESMF_ArrayBundle):: object1, object2
     type(ESMF_State)      :: state
+    integer               :: id
 
     object1 = ESMF_ArrayBundleCreate(name="Test Name 1", rc=rc)
     if (rc /= ESMF_SUCCESS) return
@@ -1077,6 +1660,38 @@ contains !======================================================================
     write(name, *) "NamedAlias is an Alias ArrayBundle Test"
     write(failMsg, *) "Incorrect result"
     testFlag = (object1 == object2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias ArrayBundle Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object1, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for Alias ArrayBundle Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 0)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for NamedAlias ArrayBundle Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias ArrayBundle Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 1)
     call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
 
@@ -1173,6 +1788,70 @@ contains !======================================================================
 
     !------------------------------------------------------------------------
     !NEX_UTest
+    write(name, *) "NamedAlias() from NamedAlias for ArrayBundle Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object2, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for NamedAlias from NamedAlias ArrayBundle Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias ArrayBundle Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias unchanged ArrayBundle Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object1, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for Alias unchanged ArrayBundle Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 0)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias() from Alias again for ArrayBundle Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object1, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias again ArrayBundle Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias again ArrayBundle Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 3)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
     write(name, *) "Destroy object through NamedAlias ArrayBundle Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_ArrayBundleDestroy(object2, rc=rc)
@@ -1195,10 +1874,11 @@ contains !======================================================================
   !============================================================================
 
   subroutine TestArrayNamedAlias(rc)
-    integer, intent(out)        :: rc
-    type(ESMF_Array)            :: object1, object2
-    type(ESMF_DistGrid)         :: distgrid
-    type(ESMF_State)            :: state
+    integer, intent(out)  :: rc
+    type(ESMF_Array)      :: object1, object2
+    type(ESMF_DistGrid)   :: distgrid
+    type(ESMF_State)      :: state
+    integer               :: id
 
     distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/16,20/), rc=rc)
     if (rc /= ESMF_SUCCESS) return
@@ -1219,6 +1899,38 @@ contains !======================================================================
     write(name, *) "NamedAlias is an Alias Array Test"
     write(failMsg, *) "Incorrect result"
     testFlag = (object1 == object2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias Array Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object1, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for Alias Array Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 0)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for NamedAlias Array Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias Array Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 1)
     call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
 
@@ -1375,6 +2087,70 @@ contains !======================================================================
 
     call ESMF_StateDestroy(state, rc=rc)
     if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias() from NamedAlias for Array Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object2, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for NamedAlias from NamedAlias Array Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias Array Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias unchanged Array Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object1, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for Alias unchanged Array Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 0)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias() from Alias again for Array Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object1, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAliasGet() for Alias again Array Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_NamedAliasGet(object2, id=id, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ID for NamedAlias again Array Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (id == 3)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
     !NEX_UTest

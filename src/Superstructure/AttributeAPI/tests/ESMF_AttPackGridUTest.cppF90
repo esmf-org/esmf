@@ -46,6 +46,7 @@ character(*), parameter :: version = '$Id$'
 
   ! local variables
   type(ESMF_Grid) :: grid
+  type(ESMF_Info) :: info
 
   AttPackTestVariablesMacro()
 
@@ -63,12 +64,21 @@ character(*), parameter :: version = '$Id$'
   !-----------------------------------------------------------------------------
 
   grid = ESMF_GridEmptyCreate(rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+  ! remove the ESMF JSON root - because AttPack testing cannot handle it
+  call ESMF_InfoGetFromHost(grid, info=info, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_InfoRemove(info, keyParent="ESMF", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! now start testing...
   AttPackTestMacro(grid, "a Grid", EX_UTest, "unnamed000")
   AttPackStandardTestMacro(grid, "a Grid", "CIM 1.5.1", "grids    ", EX_UTest)
   AttPackStandardTestMacro(grid, "a Grid", "ESMF   ", "General", EX_UTest)
 
   call ESMF_GridDestroy(grid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE)

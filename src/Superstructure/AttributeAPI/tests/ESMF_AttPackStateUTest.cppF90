@@ -46,6 +46,7 @@ character(*), parameter :: version = '$Id$'
 
   ! local variables
   type(ESMF_State) :: state
+  type(ESMF_Info)  :: info
 
   AttPackTestVariablesMacro()
 
@@ -64,11 +65,20 @@ character(*), parameter :: version = '$Id$'
 
   state = ESMF_StateCreate(name="state",  &
                            stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+  ! remove the ESMF JSON root - because AttPack testing cannot handle it
+  call ESMF_InfoGetFromHost(state, info=info, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_InfoRemove(info, keyParent="ESMF", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! now start testing...
   AttPackTestMacro(state, "a State", EX_UTest, "state")
   AttPackStandardTestMacro(state, "a State", "ESMF   ", "General", EX_UTest)
 
   call ESMF_StateDestroy(state, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE)

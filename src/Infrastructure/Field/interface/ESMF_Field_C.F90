@@ -1356,10 +1356,21 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     endif
     
     if (filemode_local == ESMF_FILEMODE_BASIC) then
+#ifndef OLDWAY_102325
+       call ESMF_OutputSimpleWeightFile (fileName, localFactorList, localFactorIndexList, &
+            title="ESMPy Regrid Class Weight File", &
+            method=regridmethod, &
+            largeFileFlag=l_largeFileFlag, &
+            ! TODO: Support this  netcdf4FileFlag, &
+            rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return       
+#else       
       call ESMF_SparseMatrixWrite(localFactorList, localFactorIndexList, &
                                   fileName, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+           ESMF_CONTEXT, rcToReturn=rc)) return
+#endif      
     elseif (filemode_local == ESMF_FILEMODE_WITHAUX) then
       ! query field for geom type
       call ESMF_FieldGet(srcField, geomType=srcgt, typekind=srctk, rc=localrc)
