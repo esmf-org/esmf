@@ -167,7 +167,7 @@ BBox &BBox::operator=(const BBox &rhs) {
     const Mapping<> *mp = GetMapping(obj)(MPTraits<>());
     mp->normal(1,&cd[0], &pc[0], &nr[0]);
    
-    double ns = std::sqrt(nr[0]*nr[0]+nr[1]*nr[1]+nr[2]*nr[2]);
+    volatile double ns = std::sqrt(nr[0]*nr[0]+nr[1]*nr[1]+nr[2]*nr[2]);
 
     // Only normalize if bigger than 0.0
     if (ns >1.0E-19) {
@@ -294,7 +294,7 @@ BBox &BBox::operator=(const BBox &rhs) {
     const Mapping<> *mp = GetMapping(obj)(MPTraits<>());
     mp->normal(1,&cd[0], &pc[0], &nr[0]);
    
-    double ns = std::sqrt(nr[0]*nr[0]+nr[1]*nr[1]+nr[2]*nr[2]);
+    volatile double ns = std::sqrt(nr[0]*nr[0]+nr[1]*nr[1]+nr[2]*nr[2]);
 
     // Only normalize if bigger than 0.0
     if (ns >1.0E-19) {
