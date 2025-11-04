@@ -92,7 +92,10 @@ program ESMF_MeshUTest
   type(ESMF_MESHSTATUS_FLAG) :: status
   character(len=80)      :: meshName, meshNameOut
   logical :: isMOABOn
-
+  integer, pointer :: elemIdsTst(:),elemMaskTst(:)
+  real(ESMF_KIND_R8), pointer :: elemCoordsTst(:)
+  integer :: elementCount
+  
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
 ! always run. When the environment variable, EXHAUSTIVE, is set to ON then
@@ -1981,13 +1984,13 @@ endif
 
   ! Get element coords to make sure that that works
   call ESMF_MeshGet(mesh, numOwnedElements=numOwnedElems, &
-       spatialDim=spatialDim, rc=localrc)
+       spatialDim=spatialDim, elementCount=elementCount, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Allocate
   allocate(ownedElemCoords(spatialDim*numOwnedElems))
 
-  ! Get coords
+  ! Get owned coords
   call ESMF_MeshGet(mesh, ownedElemCoords=ownedElemCoords, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1995,6 +1998,25 @@ endif
 
   ! Deallocate
   deallocate(ownedElemCoords)
+  
+  ! Allocate
+  allocate(elemIdsTst(elementCount))
+  allocate(elemCoordsTst(spatialDim*elementCount))
+  allocate(elemMaskTst(elementCount))
+
+  ! Get info
+  call ESMF_MeshGet(mesh, elementIds=elemIdsTst, &
+       elementCoords=elemCoordsTst, elementMask=elemMaskTst, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  !write(*,*) localPet,"elementIds=",elemIdsTst
+  !write(*,*) localPet,"elementCoords=",elemCoordsTst
+  !write(*,*) localPet,"elementMask=",elemMaskTst
+
+  ! Deallocate
+  deallocate(elemIdsTst)
+  deallocate(elemCoordsTst)
+  deallocate(elemMaskTst)
 
   ! Get rid of Mesh
   call ESMF_MeshDestroy(mesh, rc=localrc)
@@ -3620,7 +3642,7 @@ subroutine createTestMeshPH(mesh, rc)
   real(ESMF_KIND_R8), pointer :: ownedNodeCoords(:)
    integer :: numNodes, numOwnedNodes, numOwnedNodesTst
   integer :: numElems,numOwnedElemsTst
-  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:),elemMask(:)
   real(ESMF_KIND_R8), pointer :: elemCoords(:)
   integer :: petCount, localPet
   type(ESMF_VM) :: vm
@@ -3683,6 +3705,9 @@ subroutine createTestMeshPH(mesh, rc)
      allocate(elemIds(numTotElems))
      elemIds=(/1,2,3,4,5/)
 
+     ! Allocate and fill the element mask array.
+     allocate(elemMask(numTotElems))
+     elemMask=elemIds ! Set to ids for test
 
      ! Allocate and fill the element topology type array.
      allocate(elemTypes(numTotElems))
@@ -3758,6 +3783,10 @@ subroutine createTestMeshPH(mesh, rc)
         allocate(elemIds(numTotElems))
         elemIds=(/1/)
 
+        ! Allocate and fill the element mask array.
+        allocate(elemMask(numTotElems))
+        elemMask=elemIds ! Set to ids for test
+        
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
        elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! elem id 1
@@ -3811,6 +3840,10 @@ subroutine createTestMeshPH(mesh, rc)
        allocate(elemIds(numTotElems))
        elemIds=(/2,3/)
 
+        ! Allocate and fill the element mask array.
+        allocate(elemMask(numTotElems))
+        elemMask=elemIds ! Set to ids for test
+       
         ! Allocate and fill the element topology type array.
        allocate(elemTypes(numTotElems))
        elemTypes=(/ESMF_MESHELEMTYPE_TRI, & ! elem id 2
@@ -3868,6 +3901,10 @@ subroutine createTestMeshPH(mesh, rc)
           allocate(elemIds(numTotElems))
         elemIds=(/4/)
 
+        ! Allocate and fill the element mask array.
+        allocate(elemMask(numTotElems))
+        elemMask=elemIds ! Set to ids for test
+        
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
         elemTypes=(/5/) ! elem id 4
@@ -3925,6 +3962,10 @@ subroutine createTestMeshPH(mesh, rc)
         allocate(elemIds(numTotElems))
         elemIds=(/5/)
 
+        ! Allocate and fill the element mask array.
+        allocate(elemMask(numTotElems))
+        elemMask=elemIds ! Set to ids for test
+        
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
         elemTypes=(/6/) ! elem id 5
@@ -3948,7 +3989,7 @@ subroutine createTestMeshPH(mesh, rc)
         nodeIds=nodeIds, nodeCoords=nodeCoords, &
         nodeOwners=nodeOwners, elementIds=elemIds,&
         elementTypes=elemTypes, elementConn=elemConn, &
-        elementCoords=elemCoords, &
+        elementCoords=elemCoords, elementMask=elemMask,&
         rc=rc)
    if (rc /= ESMF_SUCCESS) return
 
@@ -3961,6 +4002,7 @@ subroutine createTestMeshPH(mesh, rc)
    deallocate(elemIds)
    deallocate(elemTypes)
    deallocate(elemConn)
+   deallocate(elemMask)
 
 end subroutine createTestMeshPH
 

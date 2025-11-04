@@ -2138,20 +2138,40 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
 
   // Try-catch block around main part of method
   try {
-
-    // Doesn't work with split meshes right now
-    if (mesh->is_split) {
-      int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                                       "Getting element information isn't currently supported for a 2D Mesh containing elements with >4 nodes.",
-                                       ESMC_CONTEXT, &localrc)) throw localrc;
-    }
     
+
+    ////// Get ordered list of elems ////// 
+    std::vector<std::pair<int,MeshObj *> > sorted_elems;
+    sorted_elems.reserve(mesh->num_elems());
+
+    // Loop over elems
+    Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj *elem = &(*ei);
+
+      // Only do local
+      if (!GetAttr(*elem).is_locally_owned()) continue;
+
+      // Don't do split elements
+      if (mesh->is_split && elem->get_id() > mesh->max_non_split_id) continue;
+      
+      // get data index
+      int index = elem->get_data_index();
+      
+      // Add to list
+      sorted_elems.push_back(std::make_pair(index, elem));      
+    }
+
+    // sort by data index
+    std::sort(sorted_elems.begin(), sorted_elems.end());
+ 
+
     ////// Get some handy information //////
-    int num_elems=mesh->num_elems();
     int orig_sdim=mesh->orig_spatial_dim;
+    int num_elems=sorted_elems.size();  // The number of elements is the number in the list
 
 
+       
     ////// Error check input arrays //////
 
     // If elemIds array exists, error check
@@ -2172,6 +2192,16 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
 
     // If elemTypes array exists, error check
     if (present(elemTypes)) {
+      
+      // Not supported for a split mesh right now
+      if (mesh->is_split) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                         "Getting element type information isn't currently supported for a 2D Mesh containing elements with >4 nodes.",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+
+      
       // Error checking
       if (elemTypes->dimCount !=1) {
         int localrc;
@@ -2189,6 +2219,16 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
 
     // If elemConn array exists, error check
     if (present(elemConn)) {
+
+      // Not supported for a split mesh right now
+      if (mesh->is_split) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                         "Getting element connection information isn't currently supported for a 2D Mesh containing elements with >4 nodes.",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+
+      
       // Error checking
       if (elemConn->dimCount !=1) {
         int localrc;
@@ -2247,6 +2287,15 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     // If elemArea array exists, error check
     if (present(elemArea)) {
 
+      // Not supported for a split mesh right now
+      if (mesh->is_split) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                         "Getting element area information isn't currently supported for a 2D Mesh containing elements with >4 nodes.",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+
+      
       // Mask sure element mask is present
       MEField<> *elem_area=mesh->GetField("elem_area");
       if (!elem_area) {
@@ -2294,26 +2343,6 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
       }
     }
 
-
-
-    ////// Get ordered list of elems ////// 
-    std::vector<std::pair<int,MeshObj *> > sorted_elems;
-    sorted_elems.reserve(num_elems);
-
-    // Loop over elems
-    Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
-    for (; ei != ee; ++ei) {
-      MeshObj *elem = &(*ei);
-      
-      // get data index
-      int index = elem->get_data_index();
-      
-      // Add to list
-      sorted_elems.push_back(std::make_pair(index, elem));      
-    }
-
-    // sort by data index
-    std::sort(sorted_elems.begin(), sorted_elems.end());
 
     
     ////// Fill info in arrays using sorted_elems //////
