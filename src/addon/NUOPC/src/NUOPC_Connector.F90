@@ -6435,8 +6435,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! conditional profiling for src/dst PETs
-    if (btest(profiling,3) .and. &
-      (is%wrap%epochEnable.and. .not.is%wrap%srcDstOverlap)) then
+    if (btest(profiling,3) .and. .not.is%wrap%srcDstOverlap) then
       if (is%wrap%srcFlag) then
         call ESMF_TraceRegionEnter(rName//"-srcPETs", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -6479,6 +6478,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       ! Conditionally enter VMEpoch
       if (is%wrap%epochEnable.and. .not.is%wrap%srcDstOverlap) then
         call ESMF_VMEpochEnter(epoch=ESMF_VMEPOCH_BUFFER, &
+          keepAlloc=is%wrap%epochEnterKeepAlloc, &
           throttle=is%wrap%epochThrottle, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -6501,7 +6501,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
         enddo
-      else;
+      else
         routeHandleIsCreated = ESMF_RouteHandleIsCreated(is%wrap%rh, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -6520,7 +6520,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       ! Conditionally exit VMEpoch
       if (is%wrap%epochEnable.and. .not.is%wrap%srcDstOverlap) then
-        call ESMF_VMEpochExit(rc=rc)
+        call ESMF_VMEpochExit(keepAlloc=is%wrap%epochExitKeepAlloc, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       endif
@@ -6585,8 +6585,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! conditional profiling for src/dst PETs
-    if (btest(profiling,3) .and. &
-      (is%wrap%epochEnable.and. .not.is%wrap%srcDstOverlap)) then
+    if (btest(profiling,3) .and. .not.is%wrap%srcDstOverlap) then
       if (is%wrap%srcFlag) then
         call ESMF_TraceRegionExit(rName//"-srcPETs", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
