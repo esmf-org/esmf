@@ -259,7 +259,8 @@ contains
         logical                             :: xgridBool
         
         type(ESMF_CoordSys_Flag)            :: coordSys
-
+        integer :: i1,i2
+        
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
@@ -411,6 +412,22 @@ contains
         B_area(1,2) = 9./4
         B_area(2,2) = 3./4
 
+        ! Set up centroids to test XGridGet()
+        ! Since these are just for testing the get, make something up
+        centroid(1,:) = (/1.0,1.5/)
+        centroid(2,:) = (/2.0,2.5/)
+        centroid(3,:) = (/3.0,3.5/)
+        centroid(4,:) = (/4.0,4.5/)
+        centroid(5,:) = (/5.0,5.5/)
+        centroid(6,:) = (/6.0,6.5/)
+        centroid(7,:) = (/7.0,7.5/)
+        centroid(8,:) = (/8.0,8.5/)
+        centroid(9,:) = (/9.0,9.5/)
+        centroid(10,:) =(/10.0,10.5/)
+        centroid(11,:) =(/11.0,11.5/)
+        centroid(12,:) =(/12.0,12.5/)
+
+        
         ! Finally ready to do an flux exchange from A side to B side
         xgrid = ESMF_XGridCreateFromSparseMat(sideAGrid=sideA, sideBGrid=sideB, &
             area=xgrid_area, centroid=centroid, &
@@ -471,6 +488,26 @@ contains
         !        ESMF_CONTEXT, rcToReturn=rc)) return
         !enddo
 
+        ! Check centroids
+        if ((size(centroid,1) /= size(l_centroid,1)) .or. &
+             (size(centroid,2) /= size(l_centroid,2))) then
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+                msg="creation centroids and retrieved centroids sizes don't match.", &
+                ESMF_CONTEXT, rcToReturn=rc) 
+           return
+        endif
+        
+        do i2=1,size(centroid,2)
+           do i1=1,size(centroid,1)   
+              if (centroid(i1,i2) /= l_centroid(i1,i2)) then
+                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+                      msg="creation centroids and retrieved centroids don't match.", &
+                      ESMF_CONTEXT, rcToReturn=rc) 
+                 return
+              endif
+           enddo
+        enddo
+        
         call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRIDSIDE_A, gridIndex=1, &
             distgrid=distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
