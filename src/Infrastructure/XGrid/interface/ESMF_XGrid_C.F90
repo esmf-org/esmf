@@ -489,7 +489,7 @@
     type(ESMF_XGrid)               :: xgrid
     integer, intent(in)            :: elemCount
     integer, intent(in)            :: dimCount
-    real(ESMF_KIND_R8)             :: centroid(1:elemCount,1:dimCount)
+    real(ESMF_KIND_R8)             :: centroid(1:elemCount*dimCount)
     integer, intent(out)           :: rc              
 
     ! Init rc

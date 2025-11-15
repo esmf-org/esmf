@@ -1161,7 +1161,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
        return
     endif
 
-    allocate(xgtype%area(localElemCount), xgtype%centroid(localElemCount, sdim), stat=localrc)
+    allocate(xgtype%area(localElemCount), xgtype%centroid(localElemCount*sdim), stat=localrc)
     if(localrc /= 0) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
          msg="- Failed to allocate area or centroid", &
@@ -1648,7 +1648,7 @@ type(ESMF_XGridSpec), intent(in), optional :: sparseMatX2A(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatB2X(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatX2B(:)
 real(ESMF_KIND_R8),   intent(in), optional :: area(:)
-real(ESMF_KIND_R8),   intent(in), optional :: centroid(:,:)
+real(ESMF_KIND_R8),   intent(in), optional :: centroid(:)
 character (len=*),    intent(in), optional :: name
 integer,              intent(out),optional :: rc 
 
@@ -1716,7 +1716,13 @@ integer,              intent(out),optional :: rc
 !     \item [{[area]}]
 !           area of the xgrid cells.
 !     \item [{[centroid]}]
-!           coordinates at the area weighted center of the xgrid cells.
+!           Coordinates at the center of the xgrid cells. This input consists of a 1D array the size of
+!           the number of XGrid cells on this PET times the
+!           spatial dimension of the XGrid (currently only 2 spatial dims are supported for XGrid).
+!           The coordinates in this array are ordered                           
+!           so that the coordinates lie in sequence in memory. (e.g. for an  
+!           XGrid with spatial dimension 2, the coordinates for cell 1 are in centroid(1) and                        
+!           centroid(2), the coordinates for cell 2 are in centroid(3) and centroid(4),  
 !     \item [{[name]}]
 !           name of the xgrid object.
 !     \item [{[rc]}]
@@ -1727,7 +1733,7 @@ integer,              intent(out),optional :: rc
 !EOP
 
     integer :: localrc, ngrid_a, ngrid_b
-    integer :: i, j, ncells, ndim
+    integer :: i, j, ncells, sizeCentroid
     type(ESMF_XGridType), pointer :: xgtype
 
     ! Initialize
@@ -2088,9 +2094,8 @@ integer,              intent(out),optional :: rc
     endif
 
     if(present(centroid)) then
-        ncells = size(centroid, 1)
-        ndim = size(centroid, 2)
-        allocate(xgtype%centroid(ncells, ndim), stat=localrc)
+        sizeCentroid = size(centroid)
+        allocate(xgtype%centroid(sizeCentroid), stat=localrc)
         if (ESMF_LogFoundAllocError(localrc, &
             msg="- Allocating xgtype%centroid ", &
             ESMF_CONTEXT, rcToReturn=rc)) return

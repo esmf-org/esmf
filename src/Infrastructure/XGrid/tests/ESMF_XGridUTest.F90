@@ -233,12 +233,12 @@ contains
         type(ESMF_XGrid)                    :: xgrid
         type(ESMF_Grid)                     :: sideA(2), sideB(1)
         type(ESMF_DistGrid)                 :: sideAdg(2), sideBdg(1), distgrid
-        real(ESMF_KIND_R8)                  :: centroid(12,2), area(12)
+        real(ESMF_KIND_R8)                  :: centroid(12*2), area(12)
         type(ESMF_XGridSpec)                :: sparseMatA2X(2), sparseMatX2B(1)
 
         type(ESMF_Grid)                     :: l_sideA(2), l_sideB(1)
         type(ESMF_DistGrid)                 :: l_sideAdg(2), l_sideBdg(1)
-        real(ESMF_KIND_R8)                  :: l_centroid(12,2), l_area(12)
+        real(ESMF_KIND_R8)                  :: l_centroid(12*2), l_area(12)
         type(ESMF_XGridSpec)                :: l_sparseMatA2X(2), l_sparseMatX2B(1)
         type(ESMF_Field)                    :: field, srcField(2), dstField(1)
 
@@ -414,18 +414,30 @@ contains
 
         ! Set up centroids to test XGridGet()
         ! Since these are just for testing the get, make something up
-        centroid(1,:) = (/1.0,1.5/)
-        centroid(2,:) = (/2.0,2.5/)
-        centroid(3,:) = (/3.0,3.5/)
-        centroid(4,:) = (/4.0,4.5/)
-        centroid(5,:) = (/5.0,5.5/)
-        centroid(6,:) = (/6.0,6.5/)
-        centroid(7,:) = (/7.0,7.5/)
-        centroid(8,:) = (/8.0,8.5/)
-        centroid(9,:) = (/9.0,9.5/)
-        centroid(10,:) =(/10.0,10.5/)
-        centroid(11,:) =(/11.0,11.5/)
-        centroid(12,:) =(/12.0,12.5/)
+        centroid(1)= 1.0
+        centroid(2)= 2.0
+        centroid(3) = 3.0
+        centroid(4)= 4.0
+        centroid(5) = 5.0
+        centroid(6)= 6.0
+        centroid(7) = 7.0
+        centroid(8)= 8.0
+        centroid(9) = 9.0
+        centroid(10)= 10.0
+        centroid(11) = 11.0
+        centroid(12)= 12.0
+        centroid(13) = 13.0
+        centroid(14)= 14.0
+        centroid(15) = 15.0
+        centroid(16)= 16.0
+        centroid(17) = 17.0
+        centroid(18)= 18.0
+        centroid(19) = 19.0
+        centroid(20)= 20.0
+        centroid(21) = 21.0
+        centroid(22)= 22.0
+        centroid(23) = 23.0
+        centroid(24) = 24.0
 
         
         ! Finally ready to do an flux exchange from A side to B side
@@ -489,23 +501,20 @@ contains
         !enddo
 
         ! Check centroids
-        if ((size(centroid,1) /= size(l_centroid,1)) .or. &
-             (size(centroid,2) /= size(l_centroid,2))) then
+        if ((size(centroid) /= size(l_centroid))) then
            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
                 msg="creation centroids and retrieved centroids sizes don't match.", &
                 ESMF_CONTEXT, rcToReturn=rc) 
            return
         endif
         
-        do i2=1,size(centroid,2)
-           do i1=1,size(centroid,1)   
-              if (centroid(i1,i2) /= l_centroid(i1,i2)) then
-                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-                      msg="creation centroids and retrieved centroids don't match.", &
-                      ESMF_CONTEXT, rcToReturn=rc) 
-                 return
-              endif
-           enddo
+        do i1=1,size(centroid)   
+           if (centroid(i1) /= l_centroid(i1)) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+                   msg="creation centroids and retrieved centroids don't match.", &
+                   ESMF_CONTEXT, rcToReturn=rc) 
+              return
+           endif
         enddo
         
         call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRIDSIDE_A, gridIndex=1, &
