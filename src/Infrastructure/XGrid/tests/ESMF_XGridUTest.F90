@@ -59,13 +59,20 @@
 #if 1
   !------------------------------------------------------------------------
   !NEX_UTest
-  ! Don't know if I should keep this turned on as an actual unit test, but it's useful for debugging
   write(name, *) "Testing XGrid side and elem info."
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call test_side_and_elem_info(rc)  
   call ESMF_Test((rc .eq. ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing XGrid getting centroids."
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call test_xgrid_get_centroids(rc)  
+  call ESMF_Test((rc .eq. ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+  
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Testing XGrid IsCreated for uncreated object"
@@ -7591,5 +7598,163 @@ end subroutine test_CSGridToGrid_2nd
 
 end subroutine test_side_and_elem_info
 
+  ! This is a test that creates a small xgrid from a couple of small grids.
+  ! It's useful for debugging simple issues because everything is easy to look through.
+subroutine test_XGrid_get_centroids(rc)
+#undef ESMF_METHOD 
+#define ESMF_METHOD "test_XGrid_get_centroids"
+  integer, intent(out)  :: rc
+  integer :: localrc
+  type(ESMF_VM) :: vm
+  type(ESMF_Grid) :: aGrid
+  type(ESMF_Grid) :: bGrid
+  type(ESMF_XGrid) :: xgrid
+  type(ESMF_Mesh) :: xgridMesh
+  integer :: localPet, petCount
+  integer :: i,elementCount,dimCount
+  real(ESMF_KIND_R8),allocatable :: centroidCoords(:)
+  real(ESMF_KIND_R8) :: lon,lat
+  
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! get pet info
+  call ESMF_VMGetGlobal(vm, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+  ! Create small 4 x 4 Grid for side A
+  aGrid=ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/4,4/), &
+       minCornerCoord=(/0.0_ESMF_KIND_R8,10.0_ESMF_KIND_R8/), &
+       maxCornerCoord=(/8.0_ESMF_KIND_R8,14.0_ESMF_KIND_R8/), &
+       coordSys=ESMF_COORDSYS_SPH_DEG, &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
+       rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Debug output
+#if 0
+  call ESMF_GridWriteVTK(a1Grid,staggerloc=ESMF_STAGGERLOC_CORNER, &
+        filename="a1GridCnr", &
+        rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
+  
+  ! Create small 4 x 4 Grid for side A
+  bGrid=ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/4,4/), &
+       minCornerCoord=(/0.0_ESMF_KIND_R8,10.0_ESMF_KIND_R8/), &
+       maxCornerCoord=(/8.0_ESMF_KIND_R8,14.0_ESMF_KIND_R8/), &
+       coordSys=ESMF_COORDSYS_SPH_DEG, &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
+       rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+  
+  ! Debug output
+#if 0
+  call ESMF_GridWriteVTK(bGrid,staggerloc=ESMF_STAGGERLOC_CORNER, &
+        filename="bGridCnr", &
+        rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
+
+  ! Create XGrid
+  xgrid = ESMF_XGridCreate(sideAGrid=(/aGrid/), &
+       sideBGrid=(/bGrid/), &
+       storeOverlay = .true., &
+       rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+  
+
+  ! Get Number of centroids
+  call ESMF_XGridGet(xgrid, dimCount=dimCount, elementCount=elementCount, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Allocate space
+  allocate(centroidCoords(dimCount*elementCount))
+
+  ! Get centroids
+  call ESMF_XGridGet(xgrid, centroid=centroidCoords, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Ensure the centroids are at least reasonable
+  ! TODO: Add element id output, so you can check each one more precisely
+  do i=1,elementCount
+    
+     lon=centroidCoords(i*dimCount-1)
+     if ((lon < 0.0) .or. (lon > 8.0)) then
+        rc=ESMF_FAILURE
+        return
+     endif
+       
+     lat=centroidCoords(i*dimCount)
+     if ((lat < 10.0) .or. (lat > 14.0)) then
+        rc=ESMF_FAILURE
+        return
+     endif
+  enddo
+
+  ! Debug output
+#if 0
+  write(*,*) "Centroids=",centroidCoords
+#endif  
+
+  ! Get rid of centroid array
+  deallocate(centroidCoords)
+  
+  ! Debug output
+#if 0
+  call ESMF_XGridGet(xgrid, mesh=xgridMesh, rc=localrc)
+   if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+   call ESMF_MeshWriteVTK(xgridMesh, "xgridMesh", rc=localrc)
+   if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
+
+  ! Free the XGrid
+  call ESMF_XGridDestroy(xgrid, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Free the grids
+  call ESMF_GridDestroy(aGrid, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_GridDestroy(bGrid, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Return success
+  rc=ESMF_SUCCESS
+
+end subroutine
 
 end program ESMF_XGridUTest
