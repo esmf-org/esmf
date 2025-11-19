@@ -34,12 +34,12 @@
     type(ESMF_XGrid)                    :: xgrid
     type(ESMF_Grid)                     :: sideA(2), sideB(1)
     type(ESMF_DistGrid)                 :: sideAdg(2), sideBdg(1), distgrid
-    real*8                              :: centroid(12,2), area(12)
+    real*8                              :: centroid(12*2), area(12)
     type(ESMF_XGridSpec)                :: sparseMatA2X(2), sparseMatX2B(1)
 
     type(ESMF_Grid)                     :: l_sideA(2), l_sideB(1)
     type(ESMF_DistGrid)                 :: l_sideAdg(2), l_sideBdg(1)
-    real(ESMF_KIND_R8)                  :: l_centroid(12,2), l_area(12)
+    real(ESMF_KIND_R8)                  :: l_centroid(12*2), l_area(12)
     type(ESMF_XGridSpec)                :: l_sparseMatA2X(2), l_sparseMatX2B(1)
     type(ESMF_Field)                    :: field, srcField(2), dstField(1)
 
