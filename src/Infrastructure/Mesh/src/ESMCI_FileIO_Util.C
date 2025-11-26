@@ -199,11 +199,17 @@ void get_ids_divided_evenly_across_pets(int num_ids, int local_pet, int pet_coun
 #undef ESMC_METHOD
 #define ESMC_METHOD "get_ids_divided_evenly_across_pets()"
 
+  // Clear vector
+  ids.clear();
+  
   // No distgrid provided so divide things up equally
   int min_id, max_id;
   divide_ids_evenly_as_possible(num_ids, local_pet, pet_count, min_id, max_id);
   
   //printf("%d# min,max ids=%d %d num=%d\n",local_pet,min_id,max_id,max_id-min_id+1);
+
+  // If this PET is empty, then leave vector empty
+  if (min_id > max_id) return;
   
   // Reserve space for ids
   ids.reserve(max_id-min_id+1);

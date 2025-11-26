@@ -449,13 +449,15 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
     int dimid;
     get_elementCount_from_ESMFMesh_file(pioFileDesc, filename, elementCount);
 
+#if 0    
     // Don't currently support more pets than elements
     if (pet_count > elementCount) {
       if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           " Can't create a Mesh from a file in a VM when that VM contains more PETs than elements in the file.",
                            ESMC_CONTEXT, &localrc)) throw localrc;
     }
-
+#endif
+    
     // Get positions at which to read element information
     std::vector<int> elem_ids_vec;
     if (elem_distgrid == NULL) {
