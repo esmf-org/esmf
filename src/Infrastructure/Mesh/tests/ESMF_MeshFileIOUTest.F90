@@ -97,14 +97,14 @@ program ESMF_MeshFileIOUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test Mesh create from ESMFMesh file with petCount < elementCount."
+  write(name, *) "Test Mesh create from ESMFMesh file with petCount > elementCount."
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! initialize check variables
   correct=.true.
   rc=ESMF_SUCCESS
        
-  call test_mesh_create_from_PCLEC_EM_file(correct, rc)
+  call test_mesh_create_from_PCGEC_EM_file(correct, rc)
 
 #ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
@@ -463,7 +463,7 @@ end subroutine test_mesh_create_from_med_EM_file
 
 ! Create a Mesh from an ESMFMesh file with only 2 elements so that
 ! when run on 4 PETs it'll have petCount less than elementCount
-subroutine  test_mesh_create_from_PCLEC_EM_file(correct, rc)
+subroutine  test_mesh_create_from_PCGEC_EM_file(correct, rc)
   logical :: correct
   integer :: rc
   type(ESMF_Mesh) :: mesh
@@ -503,7 +503,7 @@ subroutine  test_mesh_create_from_PCLEC_EM_file(correct, rc)
    ! Return success
    rc=ESMF_SUCCESS
 
-end subroutine test_mesh_create_from_PCLEC_EM_file
+end subroutine test_mesh_create_from_PCGEC_EM_file
 
 
 
