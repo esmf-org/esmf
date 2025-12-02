@@ -17,18 +17,20 @@
 #define MPICH_IGNORE_CXX_SEEK
 #endif
 
-#define EPOCH_BUFFER_OPTION (2) //  0: std::strstream
-                                //  1: std::stringstream
-                                //  2: std::vector<char>
+#define EPOCH_SEND_BUFFER_OPTION (2)  //  0: std::strstream
+                                      //  1: std::stringstream
+                                      //  2: std::vector<char>
+#define EPOCH_RECV_BUFFER_OPTION (2)  //  1: std::stringstream
+                                      //  2: std::vector<char>
 
 #include <mpi.h>
 #include <vector>
 #include <string>
 #include <sstream>
 #include <queue>
-#if (EPOCH_BUFFER_OPTION == 0)
+#if (EPOCH_SEND_BUFFER_OPTION == 0)
 #include <strstream>
-#elif (EPOCH_BUFFER_OPTION == 2)
+#elif (EPOCH_SEND_BUFFER_OPTION == 2)
 #include <cstring>
 #endif
 #include <map>
@@ -54,7 +56,7 @@ typedef pthread_t       esmf_pthread_t;
 #endif
 
 // define NULL
-#include <cstddef> 
+#include <cstddef>
 
 #include "ESMCI_LogErr.h"
 
@@ -135,11 +137,11 @@ namespace ESMCI {
 template<typename T> void append(std::stringstream &streami, T value){
   streami.write((char*)&value, sizeof(T));
 }
-#if (EPOCH_BUFFER_OPTION == 0)
+#if (EPOCH_SEND_BUFFER_OPTION == 0)
 template<typename T> void append(std::strstream &streami, T value){
   streami.write((char*)&value, sizeof(T));
 }
-#elif (EPOCH_BUFFER_OPTION == 2)
+#elif (EPOCH_SEND_BUFFER_OPTION == 2)
 template<typename T> void append(std::vector<char> &charBuffer, T value){
   unsigned long long int size = charBuffer.size();
   charBuffer.resize(size+sizeof(T));
@@ -256,12 +258,12 @@ class VMK{
   };
 
   struct sendBuffer{
-#if (EPOCH_BUFFER_OPTION == 0)
+#if (EPOCH_SEND_BUFFER_OPTION == 0)
     std::strstream stream;
-#elif (EPOCH_BUFFER_OPTION == 1)
+#elif (EPOCH_SEND_BUFFER_OPTION == 1)
     std::stringstream stream;
     std::string streamBuffer;
-#elif (EPOCH_BUFFER_OPTION == 2)
+#elif (EPOCH_SEND_BUFFER_OPTION == 2)
     std::vector<char> charBuffer;
 #endif
     MPI_Request mpireq;
@@ -274,9 +276,13 @@ class VMK{
     }
     bool clear(bool justTest=false);
   };
-    
+
   struct recvBuffer{
+#if (EPOCH_RECV_BUFFER_OPTION == 1)
     std::string streamBuffer;
+#else
+    std::vector<char> charBuffer;
+#endif
     void *buffer;
     bool firstFlag;
    public:
