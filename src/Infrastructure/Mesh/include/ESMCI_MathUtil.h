@@ -120,6 +120,22 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
                                double *tmp,
                                int *num_out, double *out);
 
+#pragma intel optimization_level 1 
+  inline void norm_vec3D(double *v3d) {
+
+    // Calc length
+    double len_v3d = std::sqrt(v3d[0]*v3d[0]+v3d[1]*v3d[1]+v3d[2]*v3d[2]);
+
+    // Only normalize if bigger than 0.0
+    double inv_len_v3d = (len_v3d > 1.0E-19)?(1.0/len_v3d):0.0;
+
+    // Normalize
+    v3d[0] *= inv_len_v3d;
+    v3d[1] *= inv_len_v3d;
+    v3d[2] *= inv_len_v3d;
+  }
+  
+  
 //// Handy macros ////
 
 // Do it this way because some compilers don't support isfinite (e.g. pgi)

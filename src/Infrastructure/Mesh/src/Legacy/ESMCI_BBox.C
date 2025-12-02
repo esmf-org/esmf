@@ -166,7 +166,14 @@ BBox &BBox::operator=(const BBox &rhs) {
     double pc[] = {0,0};
     const Mapping<> *mp = GetMapping(obj)(MPTraits<>());
     mp->normal(1,&cd[0], &pc[0], &nr[0]);
-   
+
+
+#ifndef DONT_USE_FUNC
+
+    // Normalize vector
+    norm_vec3D(nr);
+
+#else    
     double ns = std::sqrt(nr[0]*nr[0]+nr[1]*nr[1]+nr[2]*nr[2]);
 
     // Only normalize if bigger than 0.0
@@ -175,7 +182,9 @@ BBox &BBox::operator=(const BBox &rhs) {
     } else {
       nr[0] =0.0; nr[1] =0.0; nr[2] =0.0;
     }
+#endif
 
+    
     /*
     if (obj.get_id() == 2426) {
       std::cout << "elem 2426 coords:";
