@@ -69,6 +69,7 @@ module ESMF_ArrayHaMod
   public ESMF_ArrayHaloStore
   public ESMF_ArrayIsCreated
   public ESMF_ArrayLog
+  public ESMF_ArrayMemAdvice
   public ESMF_ArrayPrint
   public ESMF_ArrayRead
   public ESMF_ArrayRedist
@@ -625,6 +626,58 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArrayLog
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayMemAdvice()"
+!BOP
+! !IROUTINE: ESMF_ArrayMemAdvice - Advice Array about memory usage pattern
+
+! !INTERFACE:
+  subroutine ESMF_ArrayMemAdvice(array, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),       intent(in)              :: array
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer, intent(out),                 optional  :: rc
+!
+! !DESCRIPTION:
+!   Advice Array about current memory usage pattern. This advice informs the
+!   OS kernel how the Array memory should be managed at this moment in time.
+!
+!   The current version of this method is hardcoded to pass the
+!   {\tt MADV\_DONTNEED} advice to the OS.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[array]
+!     The {\tt ESMF\_Array} object for which memory advice is given.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
+
+    ! Call into the C++ interface.
+    call c_esmc_arraymemadvice(array, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayMemAdvice
 !------------------------------------------------------------------------------
 
 

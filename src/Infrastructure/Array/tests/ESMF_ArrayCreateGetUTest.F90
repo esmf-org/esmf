@@ -165,6 +165,13 @@ program ESMF_ArrayCreateGetUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Testing ArrayMemAdvice for created object"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayMemAdvice(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Destroy test Array for IsCreated"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
@@ -354,9 +361,9 @@ program ESMF_ArrayCreateGetUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Verify Attribute count on newly created Array"
+  write(name, *) "Verify Attribute count from an Array"
   write(failMsg, *) "Incorrect count"
-  call ESMF_Test((count.eq.1), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((count.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only

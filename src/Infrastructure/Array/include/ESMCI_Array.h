@@ -430,6 +430,7 @@ namespace ESMCI {
          int *timeslice, ESMC_IOFmt_Flag *iofmt);
     void log(std::string prefix,
       ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO, bool deepFlag=false)const;
+    void memAdvice();
     int print() const;
     int sync();
     int validate() const;

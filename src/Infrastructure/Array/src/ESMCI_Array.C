@@ -71,6 +71,8 @@
 #include <malloc.h>
 #endif
 
+#include <sys/mman.h>
+
 // include ESMF headers
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
@@ -4178,6 +4180,39 @@ void Array::log(
   msg.str("");  // clear
   msg << prefix << "--- Array::log() end -------------------------------------";
   ESMC_LogDefault.Write(msg.str(), msgType);
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::memAdvice()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::memAdvice
+//
+// !INTERFACE:
+void Array::memAdvice(
+//
+// !DESCRIPTION:
+//    Advice Array about memory usage pattern.
+//
+// !ARGUMENTS:
+//
+  ){
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int const localDeCount = delayout->getLocalDeCount();
+  size_t tensorDataSize = tensorElementCount * ESMC_TypeKind_FlagSize(typekind);
+  for (int i=0; i<localDeCount; i++){
+    size_t len = totalElementCountPLocalDe[i] * tensorDataSize; // bytes
+    if (posix_madvise(larrayBaseAddrList[i], len, POSIX_MADV_DONTNEED)){
+      // error returned
+      int rc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "posix_madvise() return error", ESMC_CONTEXT, &rc);
+      throw rc;  // bail out with exception
+    }
+  }
 }
 //-----------------------------------------------------------------------------
 
