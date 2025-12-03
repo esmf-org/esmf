@@ -1531,9 +1531,9 @@ ErrorCode ParallelComm::pack_entities( Range& entities, Buffer* buff, const bool
 
         // Pre-fetch sharedp and pstatus
         std::vector< int > sharedp_vals( entities.size() );
-        result = mbImpl->tag_get_data( sharedp_tag(), entities, &sharedp_vals[0] );MB_CHK_SET_ERR( result, "Failed to get sharedp tag data" );
+        result = mbImpl->tag_get_data( sharedp_tag(), entities, sharedp_vals.data() );MB_CHK_SET_ERR( result, "Failed to get sharedp tag data" );
         std::vector< char > pstatus_vals( entities.size() );
-        result = mbImpl->tag_get_data( pstatus_tag(), entities, &pstatus_vals[0] );MB_CHK_SET_ERR( result, "Failed to get pstatus tag data" );
+        result = mbImpl->tag_get_data( pstatus_tag(), entities, pstatus_vals.data() );MB_CHK_SET_ERR( result, "Failed to get pstatus tag data" );
 
         unsigned int i;
         int tmp_procs[MAX_SHARING_PROCS];
@@ -1586,8 +1586,8 @@ ErrorCode ParallelComm::pack_entities( Range& entities, Buffer* buff, const bool
         PACK_INT( buff->buff_ptr, ( (int)num_ents ) );
 
         std::vector< double > tmp_coords( 3 * num_ents );
-        result = mbImpl->get_coords( these_ents, &tmp_coords[0] );MB_CHK_SET_ERR( result, "Failed to get vertex coordinates" );
-        PACK_DBLS( buff->buff_ptr, &tmp_coords[0], 3 * num_ents );
+        result = mbImpl->get_coords( these_ents, tmp_coords.data() );MB_CHK_SET_ERR( result, "Failed to get vertex coordinates" );
+        PACK_DBLS( buff->buff_ptr, tmp_coords.data(), 3 * num_ents );
 
         myDebug->tprintf( 4, "Packed %lu ents of type %s\n", (unsigned long)these_ents.size(),
                           CN::EntityTypeName( TYPE_FROM_HANDLE( *these_ents.begin() ) ) );
@@ -4884,7 +4884,7 @@ ErrorCode ParallelComm::create_interface_sets( std::map< std::vector< int >, std
         pstatus.resize( verts.size(), pval );
         if( !verts.empty() )
         {
-            result = mbImpl->tag_set_data( pstat_tag, &verts[0], verts.size(), &pstatus[0] );MB_CHK_SET_ERR( result, "Failed to tag interface set vertices with pstatus" );
+            result = mbImpl->tag_set_data( pstat_tag, verts.data(), verts.size(), pstatus.data() );MB_CHK_SET_ERR( result, "Failed to tag interface set vertices with pstatus" );
         }
     }
 
@@ -4916,7 +4916,7 @@ ErrorCode ParallelComm::create_iface_pc_links()
 
         tag_vals.resize( iface_ents.size() );
         std::fill( tag_vals.begin(), tag_vals.end(), *rit );
-        result = mbImpl->tag_set_data( tmp_iface_tag, iface_ents, &tag_vals[0] );MB_CHK_SET_ERR( result, "Failed to tag iface entities with interface set" );
+        result = mbImpl->tag_set_data( tmp_iface_tag, iface_ents, tag_vals.data() );MB_CHK_SET_ERR( result, "Failed to tag iface entities with interface set" );
     }
 
     // Now go back through interface sets and add parent/child links
@@ -4933,7 +4933,7 @@ ErrorCode ParallelComm::create_iface_pc_links()
             // Get higher-dimensional entities and their interface sets
             result = mbImpl->get_adjacencies( &( *iface_ents.begin() ), 1, d + 1, false, tmp_ents2 );MB_CHK_SET_ERR( result, "Failed to get adjacencies for interface sets" );
             tag_vals.resize( tmp_ents2.size() );
-            result = mbImpl->tag_get_data( tmp_iface_tag, tmp_ents2, &tag_vals[0] );MB_CHK_SET_ERR( result, "Failed to get tmp iface tag for interface sets" );
+            result = mbImpl->tag_get_data( tmp_iface_tag, tmp_ents2, tag_vals.data() );MB_CHK_SET_ERR( result, "Failed to get tmp iface tag for interface sets" );
 
             // Go through and for any on interface make it a parent
             EntityHandle last_set = 0;

@@ -675,7 +675,7 @@ int ArrayBundle::haloStore(
     }
     int arrayCount = arraybundle->getCount();
     vector<int> arrayCountList(petCount);
-    vm->allgather(&arrayCount, &(arrayCountList[0]), sizeof(int));
+    vm->allgather(&arrayCount, arrayCountList.data(), sizeof(int));
     arrayCount = *min_element(arrayCountList.begin(), arrayCountList.end());
     if (arrayCount != 
       *max_element(arrayCountList.begin(), arrayCountList.end())){
@@ -711,7 +711,7 @@ int ArrayBundle::haloStore(
     // communicate to construct global matchList
     vector<int> matchPetList(petCount);
     for (int i=0; i<arrayCount; i++){
-      vm->allgather(&(matchList[i]), &(matchPetList[0]), sizeof(int));
+      vm->allgather(&(matchList[i]), matchPetList.data(), sizeof(int));
       int match = *min_element(matchPetList.begin(), matchPetList.end());
       if (match == *max_element(matchPetList.begin(), matchPetList.end()))
         matchList[i] = match;        
@@ -942,7 +942,7 @@ int ArrayBundle::redistStore(
       return rc;
     }
     vector<int> arrayCountList(petCount);
-    vm->allgather(&arrayCount, &(arrayCountList[0]), sizeof(int));
+    vm->allgather(&arrayCount, arrayCountList.data(), sizeof(int));
     arrayCount = *min_element(arrayCountList.begin(), arrayCountList.end());
     if (arrayCount != 
       *max_element(arrayCountList.begin(), arrayCountList.end())){
@@ -1000,7 +1000,7 @@ int ArrayBundle::redistStore(
     // communicate to construct global matchList
     vector<int> matchPetList(petCount);
     for (int i=0; i<arrayCount; i++){
-      vm->allgather(&(matchList[i]), &(matchPetList[0]), sizeof(int));
+      vm->allgather(&(matchList[i]), matchPetList.data(), sizeof(int));
       int match = *min_element(matchPetList.begin(), matchPetList.end());
       if (match == *max_element(matchPetList.begin(), matchPetList.end()))
         matchList[i] = match;        
@@ -1246,7 +1246,7 @@ int ArrayBundle::sparseMatMulStore(
       return rc;
     }
     vector<int> arrayCountList(petCount);
-    vm->allgather(&arrayCount, &(arrayCountList[0]), sizeof(int));
+    vm->allgather(&arrayCount, arrayCountList.data(), sizeof(int));
     arrayCount = *min_element(arrayCountList.begin(), arrayCountList.end());
     if (arrayCount != 
       *max_element(arrayCountList.begin(), arrayCountList.end())){
@@ -1336,10 +1336,10 @@ int ArrayBundle::sparseMatMulStore(
     // communicate to construct global matchList
     vector<int> matchPetList(petCount);
     for (int i=0; i<arrayCount; i++){
-      vm->allgather(&(matchList[i]), &(matchPetList[0]), sizeof(int));
+      vm->allgather(&(matchList[i]), matchPetList.data(), sizeof(int));
       int match = *min_element(matchPetList.begin(), matchPetList.end());
       if (match == *max_element(matchPetList.begin(), matchPetList.end()))
-        matchList[i] = match;        
+        matchList[i] = match;
       else
         matchList[i] = i;
     }
@@ -1731,10 +1731,10 @@ int ArrayBundle::sparseMatMul(
       if (zeroRegion[0]!=ESMC_REGION_SELECT)
         filterBitField |= XXE::filterBitRegionSelectZero; // filter reg. select zero
       // execute XXE stream
-      localrc = xxe->exec(rraCount, &(rraList[0]), &(vectorLength[0]), 
+      localrc = xxe->exec(rraCount, rraList.data(), vectorLength.data(),
         filterBitField, NULL, NULL, NULL, -1, -1,
         // following are super-vectorization parameters
-        &(srcLocalDeCountList[0]), &(superVectPList[0]));
+        srcLocalDeCountList.data(), superVectPList.data());
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
       // garbage collection

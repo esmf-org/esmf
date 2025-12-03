@@ -308,7 +308,7 @@ namespace ESMCI {
     }
     
     // Get mapping of split ids to original ids
-    id_map_dir.RemoteGID(num_src_split_gids, &src_split_gids[0], src_split_gids_proc, src_split_gids_orig);
+    id_map_dir.RemoteGID(num_src_split_gids, src_split_gids.data(), src_split_gids_proc, src_split_gids_orig);
     
     // Loop setting new ids
     for (int i=0; i<num_src_split_gids; i++) {
