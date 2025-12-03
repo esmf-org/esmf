@@ -4645,22 +4645,29 @@ void VMK::epochExit(bool keepAlloc){
 #ifdef VM_EPOCHMEMLOG_on
       VM::logMemInfo(std::string("VMK::epochExit(send-side):1.0"));
 #endif
+      void *buffer = NULL;  // init NULL to trigger error if accidentally used
 #if (EPOCH_SEND_BUFFER_OPTION == 0)
       // use strstream
-      void *buffer = (void *)sm->stream.str();  // access the buffer -> freeze
       unsigned long long size = sm->stream.pcount(); // bytes in stream buffer
-      sm->stream.seekp(0);  // reset stream to the beginning (not affect buff)
+      if (size > 0){
+        buffer = (void *)sm->stream.str();  // access the buffer -> freeze
+        sm->stream.seekp(0);  // reset stream to the beginning (not affect buff)
+      }
 #elif (EPOCH_SEND_BUFFER_OPTION == 1)
       // use stringstream
-      sm->streamBuffer = sm->stream.str();  // copy data into contiguous buffer
-      sm->stream.str("");                   // clear out stream
-      void *buffer = (void *)sm->streamBuffer.data(); // access contig. buffer
       unsigned long long size = sm->streamBuffer.size();
+      if (size > 0){
+        sm->streamBuffer = sm->stream.str();  // copy data into contiguous buffer
+        sm->stream.str("");                   // clear out stream
+        buffer = (void *)sm->streamBuffer.data(); // access contig. buffer
+      }
 #elif (EPOCH_SEND_BUFFER_OPTION == 2)
       // use vector<char>
-      void *buffer = (void *)&(sm->charBuffer[0]);  // access the buffer
       unsigned long long int size = sm->charBuffer.size(); // bytes in buffer
-      sm->charBuffer.resize(0); // reset buffer, without affecting allocation
+      if (size > 0){
+        buffer = (void *)&(sm->charBuffer[0]);  // access the buffer
+        sm->charBuffer.resize(0); // reset buffer, without affecting allocation
+      }
 #endif
 #ifdef VM_EPOCHMEMLOG_on
       VM::logMemInfo(std::string("VMK::epochExit(send-side):2.0"));
