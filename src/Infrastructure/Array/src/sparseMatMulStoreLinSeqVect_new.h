@@ -137,7 +137,7 @@
       // point the requestBuffer to the already precomputed request
       requestSize = request.size() * sizeof(MsgRequElement<DIT>);
       requestBuffer = NULL;
-      if (requestSize) requestBuffer = (char *)&(request[0]);
+      if (requestSize) requestBuffer = (char *)request.data();
     }
     
     virtual void handleRequest(int requestPet,
@@ -191,7 +191,7 @@
         responseBuffer = new char[responseSize];
       else
         responseBuffer = requestBuffer;
-      memcpy(responseBuffer, (char *)&(response[0]), responseSize);
+      memcpy(responseBuffer, (char *)response.data(), responseSize);
     }
     
     virtual void handleResponse(int responsePet,
@@ -372,7 +372,7 @@
       }
       requestSize = size * sizeof(MsgElement<DIT,SIT,T>);
       requestBuffer = NULL;
-      if (requestSize) requestBuffer = (char *)&(request[0]);
+      if (requestSize) requestBuffer = (char *)request.data();
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("Exit FillLinSeqVect.generateRequest()"));
 #endif
@@ -570,10 +570,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   }
   // communicate srcSeqIndexMinMax across all Pets
   vector<SIT> srcSeqIndexMinMaxList(2*petCount);
-  vm->allgather(srcSeqIndexMinMax, &(srcSeqIndexMinMaxList[0]), 2*sizeof(SIT));
+  vm->allgather(srcSeqIndexMinMax, srcSeqIndexMinMaxList.data(), 2*sizeof(SIT));
   // find global srcSeqIndex min/max
   vector<int> srcElementCountList(petCount);
-  vm->allgather(&srcElementCount, &(srcElementCountList[0]), sizeof(int));
+  vm->allgather(&srcElementCount, srcElementCountList.data(), sizeof(int));
   SIT srcSeqIndexMinGlobal, srcSeqIndexMaxGlobal;
   bool pastInitFlag = false; // reset
   for (int i=0; i<petCount; i++){
@@ -683,7 +683,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
 #endif
   // transpose haveInfo -> hasInfo
   vector<int> hasInfo(petCount);
-  localrc = vm->alltoall(&(haveInfo[0]), 1, &(hasInfo[0]), 1, vmI4);
+  localrc = vm->alltoall(haveInfo.data(), 1, hasInfo.data(), 1, vmI4);
   // compact hasInfo -> hasInfoList
   vector<int> hasInfoList;
   for (int i=0; i<petCount; i++)
@@ -704,7 +704,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   // every PET to know all other hasInfoListCount's
   unsigned hasInfoListCount = hasInfoList.size();
   vector<int> hasInfoListCounts(petCount);
-  localrc = vm->allgather(&hasInfoListCount, &(hasInfoListCounts[0]), 
+  localrc = vm->allgather(&hasInfoListCount, hasInfoListCounts.data(),
     sizeof(int));
   
 #ifdef STORELINSEQVECT_NEW_LOG_on
@@ -739,8 +739,8 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   
   // gather all of the hasInfoList's on all of the PETs
   vector<int> hasInfoLists(totalHasInfoListCount);
-  localrc = vm->allgatherv(&(hasInfoList[0]), hasInfoListCount,
-    &(hasInfoLists[0]), &(hasInfoListCounts[0]), &(hasInfoListsOffsets[0]), 
+  localrc = vm->allgatherv(hasInfoList.data(), hasInfoListCount,
+    hasInfoLists.data(), hasInfoListCounts.data(), hasInfoListsOffsets.data(),
     vmI4);
   
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
@@ -860,8 +860,8 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     vm->timerStart("reduce_scatter");
 #endif
     
-    localrc = vm->reduce_scatter(&(responderPet[0]), &nrecvs, &(requesterPet[0]), 
-      vmI4, vmSUM);
+    localrc = vm->reduce_scatter(responderPet.data(), &nrecvs,
+      requesterPet.data(), vmI4, vmSUM);
     
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
     vm->timerStop("reduce_scatter");
@@ -888,7 +888,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
 #endif
     
     // transpose responderPet -> requesterPet
-    localrc = vm->alltoall(&(responderPet[0]), 1, &(requesterPet[0]), 1, vmI4);
+    localrc = vm->alltoall(responderPet.data(), 1, requesterPet.data(), 1, vmI4);
     
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
     vm->timerStop("alltoall");
