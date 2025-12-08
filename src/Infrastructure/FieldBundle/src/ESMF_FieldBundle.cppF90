@@ -7575,7 +7575,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_DEBUG, rc=rc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc))  return
 
-    if(fstatus == ESMF_FIELDSTATUS_GRIDSET .or. &
+    if(fstatus == ESMF_FIELDSTATUS_GEOMSET .or. &
        fstatus == ESMF_FIELDSTATUS_COMPLETE) then
       call ESMF_FieldGet(field, geomtype=geomtype, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
