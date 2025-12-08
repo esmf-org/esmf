@@ -399,19 +399,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
+    ! Get the Field status
     if(present(status)) then
       status = ftype%status
     endif
 
     ! Get the geometry type
     if (present(geomtype)) then
+       if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
+            ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
+          if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
+               msg="No Geom or invalid Geom attached to Field", &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+       endif
+
         call ESMF_GeomGet(ftype%geom, geomtype=geomtype, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
+    ! Get the Geom
     if (present(geom)) then
+        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
+            ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
+            if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
+              msg="No Geom or invalid Geom attached to Field", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif       
       geom = ftype%geom
     endif
 
@@ -617,6 +632,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(geomDimCount)) then
+       if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
+            ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
+          if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
+               msg="No Geom or invalid Geom attached to Field", &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+       endif
       call ESMF_GeomGet(ftype%geom, dimCount=geomDimCount, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
