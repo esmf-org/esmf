@@ -406,7 +406,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Get the geometry type
     if (present(geomtype)) then
-       if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
+       if (ftype%status .ne. ESMF_FIELDSTATUS_GEOMSET .and. &
             ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
           if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                msg="No Geom or invalid Geom attached to Field", &
@@ -421,7 +421,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Get the Geom
     if (present(geom)) then
-        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
+        if (ftype%status .ne. ESMF_FIELDSTATUS_GEOMSET .and. &
             ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
               msg="No Geom or invalid Geom attached to Field", &
@@ -431,7 +431,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(grid)) then
-        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
+        if (ftype%status .ne. ESMF_FIELDSTATUS_GEOMSET .and. &
             ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
               msg="No Grid or invalid Grid attached to Field", &
@@ -445,7 +445,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(staggerloc)) then
-        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
+        if (ftype%status .ne. ESMF_FIELDSTATUS_GEOMSET .and. &
             ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
               msg="No Grid or invalid Grid attached to Field", &
@@ -459,7 +459,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(meshloc)) then
-        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
+        if (ftype%status .ne. ESMF_FIELDSTATUS_GEOMSET .and. &
             ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
               msg="No Mesh or invalid Mesh attached to Field", &
@@ -473,7 +473,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(mesh)) then
-        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
+        if (ftype%status .ne. ESMF_FIELDSTATUS_GEOMSET .and. &
             ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
               msg="No Mesh or invalid Mesh attached to Field", &
@@ -487,7 +487,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(locstream)) then
-        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
+        if (ftype%status .ne. ESMF_FIELDSTATUS_GEOMSET .and. &
             ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
               msg="No LocStream or invalid LocStream attached to Field", &
@@ -501,7 +501,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(xgrid)) then
-        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
+        if (ftype%status .ne. ESMF_FIELDSTATUS_GEOMSET .and. &
             ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
               msg="No XGrid or invalid XGrid attached to Field", &
@@ -515,7 +515,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(xgridSide)) then
-        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
+        if (ftype%status .ne. ESMF_FIELDSTATUS_GEOMSET .and. &
             ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
               msg="No XGrid or invalid XGrid attached to Field", &
@@ -529,7 +529,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(gridIndex)) then
-        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
+        if (ftype%status .ne. ESMF_FIELDSTATUS_GEOMSET .and. &
             ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
               msg="No XGrid or invalid XGrid attached to Field", &
@@ -632,7 +632,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(geomDimCount)) then
-       if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
+       if (ftype%status .ne. ESMF_FIELDSTATUS_GEOMSET .and. &
             ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
           if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                msg="No Geom or invalid Geom attached to Field", &

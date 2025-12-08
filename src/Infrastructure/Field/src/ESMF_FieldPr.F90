@@ -173,7 +173,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     write(ESMF_UtilIOStdout,*)  "Field status = ", fp%status
-    if (fp%status .eq. ESMF_FIELDSTATUS_GRIDSET .or. &
+    if (fp%status .eq. ESMF_FIELDSTATUS_GEOMSET .or. &
          fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
 !      call ESMF_GeomPrint(fp%geom, "", localrc)
 !      if (ESMF_LogFoundError(localrc, &

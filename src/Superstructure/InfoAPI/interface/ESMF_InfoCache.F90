@@ -357,7 +357,7 @@ subroutine ESMF_InfoCacheReassembleField(target, state, rc)
 
   rc = ESMF_FAILURE
 
-  if (target%ftypep%status .eq. ESMF_FIELDSTATUS_GRIDSET .or. &
+  if (target%ftypep%status .eq. ESMF_FIELDSTATUS_GEOMSET .or. &
       target%ftypep%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
     call ESMF_InfoGetFromBase(target%ftypep%base, infoh, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return

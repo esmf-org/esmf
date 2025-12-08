@@ -525,8 +525,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (fieldStatus==ESMF_FIELDSTATUS_EMPTY) then
         tempString = "ESMF_FIELDSTATUS_EMPTY"
-      else if (fieldStatus==ESMF_FIELDSTATUS_GRIDSET) then
-        tempString = "ESMF_FIELDSTATUS_GRIDSET"
+      else if (fieldStatus==ESMF_FIELDSTATUS_GEOMSET) then
+        tempString = "ESMF_FIELDSTATUS_GEOMSET"
       else if (fieldStatus==ESMF_FIELDSTATUS_COMPLETE) then
         tempString = "ESMF_FIELDSTATUS_COMPLETE"
       else
