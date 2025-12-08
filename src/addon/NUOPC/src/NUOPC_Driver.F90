@@ -6331,6 +6331,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! the {\tt driver} will be added automatically. The default
 ! {\tt NUOPC\_Connector} implementation is used for all automatically added
 ! connector instances.
+! Automatically added connector instances inherit the Verbosity and Profiling
+! settings from {\tt driver}.
 !
 ! Lines that contain a {\bf time loop} definition have the general format:
 !
