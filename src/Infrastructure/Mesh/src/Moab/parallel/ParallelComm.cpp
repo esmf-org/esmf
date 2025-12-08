@@ -6997,11 +6997,11 @@ ErrorCode ParallelComm::check_sent_ents( Range& allsent )
     // Check entities to make sure there are no zero-valued remote handles
     // where they shouldn't be
     std::vector< unsigned char > pstat( allsent.size() );
-    ErrorCode result = mbImpl->tag_get_data( pstatus_tag(), allsent, &pstat[0] );MB_CHK_SET_ERR( result, "Failed to get pstatus tag data" );
+    ErrorCode result = mbImpl->tag_get_data( pstatus_tag(), allsent, pstat.data() );MB_CHK_SET_ERR( result, "Failed to get pstatus tag data" );
     std::vector< EntityHandle > handles( allsent.size() );
-    result = mbImpl->tag_get_data( sharedh_tag(), allsent, &handles[0] );MB_CHK_SET_ERR( result, "Failed to get sharedh tag data" );
+    result = mbImpl->tag_get_data( sharedh_tag(), allsent, handles.data() );MB_CHK_SET_ERR( result, "Failed to get sharedh tag data" );
     std::vector< int > procs( allsent.size() );
-    result = mbImpl->tag_get_data( sharedp_tag(), allsent, &procs[0] );MB_CHK_SET_ERR( result, "Failed to get sharedp tag data" );
+    result = mbImpl->tag_get_data( sharedp_tag(), allsent, procs.data() );MB_CHK_SET_ERR( result, "Failed to get sharedp tag data" );
 
     Range bad_entities;
 
@@ -7050,11 +7050,11 @@ ErrorCode ParallelComm::pack_remote_handles( std::vector< EntityHandle >& L1hloc
 
     // Should be in pairs of handles
     PACK_INT( buff->buff_ptr, L1hloc.size() );
-    PACK_INTS( buff->buff_ptr, &L1p[0], L1p.size() );
+    PACK_INTS( buff->buff_ptr, L1p.data(), L1p.size() );
     // Pack handles in reverse order, (remote, local), so on destination they
     // are ordered (local, remote)
-    PACK_EH( buff->buff_ptr, &L1hrem[0], L1hrem.size() );
-    PACK_EH( buff->buff_ptr, &L1hloc[0], L1hloc.size() );
+    PACK_EH( buff->buff_ptr, L1hrem.data(), L1hrem.size() );
+    PACK_EH( buff->buff_ptr, L1hloc.data(), L1hloc.size() );
 
     buff->set_stored_size();
 
