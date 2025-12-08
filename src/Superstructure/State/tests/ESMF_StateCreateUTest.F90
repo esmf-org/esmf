@@ -92,6 +92,7 @@ end module
     integer :: itemcount, itemcountnested
     character(ESMF_MAXSTR), allocatable :: itemlist(:)
     type(ESMF_StateItem_Flag), allocatable :: itemtypelist(:)
+    type(ESMF_StateItem_Flag) :: itemtype
 #endif
 
 !-------------------------------------------------------------------------------
@@ -765,7 +766,17 @@ end module
       write(failMsg, *) ""
       write(name, *) "Getting nested FieldBundle from a nested State using path style"
       call ESMF_Test((rc == ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+           name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest      
+      ! Test getting a nested State type using path style
+      call ESMF_StateGet(state=state5,  &
+           itemName="Atmosphere Import/Temperature", itemType=itemType, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting itemType from a nested State using path style"
+      !write(*,*) "type=",itemType%ot
+      call ESMF_Test(((rc == ESMF_SUCCESS) .and. (itemType == ESMF_STATEITEM_FIELDBUNDLE)), &
+           name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_UTest      
       ! Test getting a non-existant nested State object
