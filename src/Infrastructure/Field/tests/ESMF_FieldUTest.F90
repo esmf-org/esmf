@@ -904,8 +904,8 @@
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only 
       write(failMsg, *) ""
-      write(name, *) "test the returned gridset Field status"
-      call ESMF_Test((fstatus == ESMF_FIELDSTATUS_GRIDSET), name, failMsg, result, ESMF_SRCLINE)
+      write(name, *) "test the returned GEOMSET Field status"
+      call ESMF_Test((fstatus == ESMF_FIELDSTATUS_GEOMSET), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only 
       call ESMF_FieldEmptySet(f7, grid=grid, rc=rc)
