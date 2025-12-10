@@ -167,15 +167,12 @@ BBox &BBox::operator=(const BBox &rhs) {
     const Mapping<> *mp = GetMapping(obj)(MPTraits<>());
     mp->normal(1,&cd[0], &pc[0], &nr[0]);
    
+    // Normalize ns, but only if not close to 0.
     double ns = std::sqrt(nr[0]*nr[0]+nr[1]*nr[1]+nr[2]*nr[2]);
+    double inv_ns=(ns>1.0E-19) ? (1.0/ns) : 0.0;
+    nr[0] *= inv_ns; nr[1] *= inv_ns; nr[2] *= inv_ns; 
 
-    // Only normalize if bigger than 0.0
-    if (ns >1.0E-19) {
-       nr[0] /= ns; nr[1] /= ns; nr[2] /= ns;
-    } else {
-      nr[0] =0.0; nr[1] =0.0; nr[2] =0.0;
-    }
-
+    
     /*
     if (obj.get_id() == 2426) {
       std::cout << "elem 2426 coords:";
