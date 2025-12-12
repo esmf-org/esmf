@@ -746,7 +746,7 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
     int pet_count = vm->getPetCount();
 
 
-    // Get id of mesh topo varaible
+    // Get id of mesh topo variable
     int mesh_topo_id;
     get_mesh_topo_id_from_UGRID_file(pioFileDesc, filename, mesh_topo_id);
 
