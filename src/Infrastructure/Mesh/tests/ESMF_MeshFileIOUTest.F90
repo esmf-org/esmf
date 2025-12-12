@@ -513,8 +513,8 @@ subroutine  test_mesh_create_from_PCGEC_EM_file(correct, rc)
 
 
   !! Write mesh for debugging
-  ! call ESMF_MeshWrite(mesh,"test_mesh",rc=rc)
-  ! if (rc /= ESMF_SUCCESS) return
+  !call ESMF_MeshWrite(mesh,"test_mesh",rc=rc)
+  !if (rc /= ESMF_SUCCESS) return
 
   ! Get rid of Mesh
   call ESMF_MeshDestroy(mesh, rc=rc)
@@ -551,14 +551,14 @@ subroutine  test_mesh_create_from_PCGEC_UG_file(correct, rc)
   
   ! Create Mesh from file
   mesh=ESMF_MeshCreate("data/test_sph_2x1_ugrid.nc", &
-       fileformat=ESMF_FILEFORMAT_ESMFMESH, &
+       fileformat=ESMF_FILEFORMAT_UGRID, &
        rc=rc)
   if (rc /= ESMF_SUCCESS) return
 
 
   !! Write mesh for debugging
-  ! call ESMF_MeshWrite(mesh,"test_mesh",rc=rc)
-  ! if (rc /= ESMF_SUCCESS) return
+  !call ESMF_MeshWrite(mesh,"test_mesh_ugrid",rc=rc)
+  !if (rc /= ESMF_SUCCESS) return
 
   ! Get rid of Mesh
   call ESMF_MeshDestroy(mesh, rc=rc)

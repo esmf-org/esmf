@@ -768,13 +768,6 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
     PIO_Offset elementCount;
     get_elementCount_from_UGRID_file(pioFileDesc, filename, elementConn_id, elementCount);
 
-    // Don't currently support more pets than elements
-    if (pet_count > elementCount) {
-      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-          " Can't create a Mesh from a file in a VM when that VM contains more PETs than elements in the file.",
-                           ESMC_CONTEXT, &localrc)) throw localrc;
-    }
-
     // Get positions at which to read element information
     std::vector<int> elem_ids_vec;
     if (elem_distgrid == NULL) {
