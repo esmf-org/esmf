@@ -2149,8 +2149,10 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     for (; ei != ee; ++ei) {
       MeshObj *elem = &(*ei);
 
-      // Only do local
-      if (!GetAttr(*elem).is_locally_owned()) continue;
+      // DON'T ONLY DO LOCAL, BECAUSE WE NEED TO BE ABLE TO OUTPUT
+      // NON-LOCAL/GHOST ELEMS
+      // // Only do local
+      // // if (!GetAttr(*elem).is_locally_owned()) continue;
 
       // Don't do split elements
       if (mesh->is_split && elem->get_id() > mesh->max_non_split_id) continue;
