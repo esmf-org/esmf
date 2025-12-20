@@ -2114,6 +2114,24 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Mesh get element information with >4 sided elements"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Create Test mesh
+  call MeshGetElemInfoWGT4SidesTest(correct, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Mesh Create and then Redist with a pentagon and hexagon element"
@@ -9924,6 +9942,65 @@ subroutine exhaustiveMeshDualTest(correct, rc)
    
    
 end subroutine exhaustiveMeshDualTest
+
+subroutine MeshGetElemInfoWGT4SidesTest(correct, rc)
+  logical :: correct
+  integer :: rc
+  
+  type(ESMF_Mesh):: mesh, dualMesh
+  integer, pointer :: nodeIds(:),nodeOwners(:),nodeMask(:),nodeIdsTst(:)
+  real(ESMF_KIND_R8), pointer :: nodeCoords(:), nodeCoordsTst(:)
+  real(ESMF_KIND_R8), pointer :: ownedNodeCoords(:)
+  integer :: numNodes, numOwnedNodes, numOwnedNodesTst
+  integer :: numElems,numOwnedElemsTst
+  integer :: numElemConns, numTriElems, numQuadElems
+  real(ESMF_KIND_R8), pointer :: elemCoords(:), elemCoordsTst(:)
+  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:),elemMask(:), elemIdsTst(:)
+  integer :: petCount, localPet
+  type(ESMF_VM) :: vm
+  integer :: numOwnedElems
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! return with an error if not 1 or 4 PETs
+  if ((petCount /= 1) .and. (petCount /=4)) then
+     rc=ESMF_FAILURE
+     return
+  endif
+
+  ! Create Mesh with >sided elements
+  call createTestMeshPH(mesh, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  
+  ! call ESMF_MeshWrite(dualMesh, "dualMesh", rc=rc)
+
+   ! Init correct
+   correct=.true.
+   
+   ! Get count info from dual
+   call ESMF_MeshGet(mesh, &
+        elementConnCount=numElemConns, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! ! DEBUG OUTPUT
+   write(*,*) localPEt,"# numElemConns=",numElemConns
+   ! write(*,*) localPEt,"# numOwnedNodes=",numOwnedNodes
+   ! write(*,*) localPEt,"# numOwnedElems=",numOwnedElems
+   
+   ! Get rid of Mesh
+   call ESMF_MeshDestroy(mesh, rc=rc)
+   if (rc /= ESMF_SUCCESS) return   
+
+   ! Return success
+   rc=ESMF_SUCCESS
+   
+end subroutine MeshGetElemInfoWGT4SidesTest
 
 
 
