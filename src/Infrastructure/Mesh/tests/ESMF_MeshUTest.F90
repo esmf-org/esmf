@@ -9989,7 +9989,7 @@ subroutine MeshGetElemInfoWGT4SidesTest(correct, rc)
    if (rc /= ESMF_SUCCESS) return
 
    ! ! DEBUG OUTPUT
-   write(*,*) localPEt,"# numElemConns=",numElemConns
+   ! write(*,*) localPEt,"# numElemConns=",numElemConns
    ! write(*,*) localPEt,"# numOwnedNodes=",numOwnedNodes
    ! write(*,*) localPEt,"# numOwnedElems=",numOwnedElems
    

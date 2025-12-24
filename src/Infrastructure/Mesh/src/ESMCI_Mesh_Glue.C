@@ -880,6 +880,11 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         }
       }
      }
+
+
+    //// Record some of the information in the Mesh that we know at this point
+    mesh.setOrigElemConnCount(*_elemConn_size);
+
     
     // Variable indicating if any of the elements on this PET are split
     bool is_split_local=false;
@@ -1086,6 +1091,17 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       all_nodes[seq] = &*ni;
     }
 
+
+    // If split, store original connectivity of elements that will be split
+    if (is_split_local) {
+
+          // USE all_nodes and elemConn to add store original connectivity in terms of node pointers
+
+
+    }
+    
+
+    
 
     // Generate connectivity list with split elements
     // TODO: MAYBE EVENTUALLY PUT EXTRA SPLIT ONES AT END
@@ -2006,28 +2022,35 @@ void ESMCI_MeshGetElemConnCount(Mesh *mesh, int *_elemConnCount, int *rc){
   // Init output
   *_elemConnCount = 0;
 
-  // Doesn't work with split meshes right now
-  if (mesh->is_split) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                                       "Getting elementConnCount isn't currently supported for a 2D Mesh containing elements with >4 nodes.",                                       ESMC_CONTEXT, rc)) return;
+  // Get info from Mesh
+  try {
+
+    *_elemConnCount = mesh->getOrigElemConnCount();
+    
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
   }
 
-  // Loop summing number of nodes per element
-  int elemConnCount=0;
-  Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
-  for (; ei != ee; ++ei) {
-    MeshObj &elem = *ei;
-
-    // Get topology of element
-    const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(elem);
-
-    // Add number of nodes for this elem to connection count
-    elemConnCount += topo->num_nodes;
-  }
-
-  // Output
-  *_elemConnCount = elemConnCount;
-  if(rc != NULL) *rc = ESMF_SUCCESS;
+  // Set return code
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  
 }
 
 void ESMCI_MeshGetOwnedNodeCount(Mesh *mesh, int *nodeCount, int *rc){

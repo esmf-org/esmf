@@ -62,6 +62,8 @@ Mesh::Mesh() : MeshDB(), FieldReg(), CommReg(),
                sghost(NULL),
                committed(false),
                is_split(false),
+               has_orig_info(false),
+               origElemConnCount(-1),
 	       ind(-1), side(-1),
                orig_comm(MPI_COMM_NULL)
 {
@@ -72,6 +74,39 @@ Mesh::Mesh() : MeshDB(), FieldReg(), CommReg(),
    GetCommRel(MeshObj::ELEMENT).Init("elem_sym", *this, *this, true);
 }
 
+  void Mesh::setOrigElemConnCount(int _origElemConnCount) {origElemConnCount=_origElemConnCount;}
+  
+  int Mesh::getOrigElemConnCount() {
+
+    // If it's not the default, then use it
+    if (origElemConnCount > -1) return origElemConnCount;
+    else { 
+
+      // It wasn't set, so regenerate it
+      // TODO: Get rid of this when you're sure it's set for everyplace that creates a Mesh      
+      
+      // Doesn't work with split meshes right now
+      if (this->is_split) Throw() << "Getting elementConnCount isn't currently supported for a 2D Mesh containing elements with >4 nodes.";                 
+       
+      // Loop summing number of nodes per element
+      int elemConnCount=0;
+      Mesh::iterator ei = this->elem_begin(), ee = this->elem_end();
+      for (; ei != ee; ++ei) {
+        MeshObj &elem = *ei;
+        
+        // Get topology of element
+        const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(elem);
+        
+        // Add number of nodes for this elem to connection count
+        elemConnCount += topo->num_nodes;
+      }
+
+      // Return calculated number
+      return elemConnCount;
+    }
+  }
+
+  
 Mesh::~Mesh() {
   // Get rid of ghost communication structure
   if (sghost != NULL) delete sghost;
