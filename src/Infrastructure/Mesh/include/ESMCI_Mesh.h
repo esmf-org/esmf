@@ -160,6 +160,13 @@ ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<i
   void setOrigElemConnCount(int _origElemConnCount);
   int getOrigElemConnCount();
 
+
+  // Information for regenerating original creation info
+  //// TODO: make private with accessors
+  bool has_orig_info;
+  std::map<UInt,std::vector<MeshObj *> > orig_id_to_conn; // nullptr -> MESH_POLYBREAK_IND
+  std::map<UInt,double> orig_id_to_area;
+
   
   private:
 
@@ -168,11 +175,7 @@ ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<i
 
    int origElemConnCount; // The original element connection count
  
-  // Information for regenerating original creation info
 
-  bool has_orig_info;
-  std::map<UInt,std::vector<MeshObj *> > orig_id_to_conn;
-  std::map<UInt,double> orig_id_to_area;
   
 
 void assign_new_ids();

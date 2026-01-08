@@ -9982,12 +9982,28 @@ subroutine MeshGetElemInfoWGT4SidesTest(correct, rc)
    ! Init correct
    correct=.true.
    
-   ! Get count info from dual
+   ! Get count info
    call ESMF_MeshGet(mesh, &
         elementConnCount=numElemConns, &
+        elementCount=numElems, &
         rc=rc)
    if (rc /= ESMF_SUCCESS) return
 
+   ! Allocate space
+   allocate(elemConn(numElemConns))
+   allocate(elemTypes(numElems))
+
+   ! Get conn info
+   call ESMF_MeshGet(mesh, &
+        elementConn=elemConn, &
+        elementTypes=elemTypes, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   write(*,*) localPet,"# elemConnCount=",numElemConns
+   write(*,*) localPet,"# elemTypes=",elemTypes
+   write(*,*) localPet,"# elemConn=",elemConn
+   
    ! ! DEBUG OUTPUT
    ! write(*,*) localPEt,"# numElemConns=",numElemConns
    ! write(*,*) localPEt,"# numOwnedNodes=",numOwnedNodes
