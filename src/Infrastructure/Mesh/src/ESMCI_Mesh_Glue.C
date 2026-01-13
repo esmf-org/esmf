@@ -1094,8 +1094,12 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
 
      // If split, record original element connections for split elements
-     if (is_split_local) {
+     if (mesh.is_split) {
 
+       // Record that we're adding information
+       mesh.has_orig_info=true;
+
+       // Set connection information
        int conn_pos=0;
        for (int e = 0; e < num_elems; ++e) {
 
@@ -1132,9 +1136,6 @@ void ESMCI_meshaddelements(Mesh **meshpp,
           conn_pos += elemType[e];
         }
        }
-
-       // Record that we put the information in
-       mesh.has_orig_info=true;
      }
          
 
