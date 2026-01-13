@@ -882,10 +882,6 @@ void ESMCI_meshaddelements(Mesh **meshpp,
      }
 
 
-    // Record original element count
-    mesh.setOrigElemConnCount(*_elemConn_size);
-
-
     // Variable indicating if any of the elements on this PET are split
     bool is_split_local=false;
 
@@ -1093,8 +1089,11 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     }
 
 
-     // If split, record original element connections for split elements
-     if (mesh.is_split) {
+    // Record original element count
+    mesh.setOrigElemConnCount(num_elemConn);
+
+    // If split, record original element connections for split elements
+    if (mesh.is_split) {
 
        // Record that we're adding information
        mesh.has_orig_info=true;
