@@ -880,7 +880,12 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         }
       }
      }
-    
+
+
+    // Record original element count
+    mesh.setOrigElemConnCount(*_elemConn_size);
+
+
     // Variable indicating if any of the elements on this PET are split
     bool is_split_local=false;
 
@@ -938,10 +943,11 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       } else {
          mesh.is_split=false;
       }
-    } else {
-      mesh.is_split=false;
-    }
+     } else {
+       mesh.is_split=false;
+     }
 
+     
     // Compute the extra element ranges
     int beg_extra_ids=0;
     if (mesh.is_split) {
@@ -1086,6 +1092,54 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       all_nodes[seq] = &*ni;
     }
 
+
+     // If split, record original element connections for split elements
+     if (mesh.is_split) {
+
+       // Record that we're adding information
+       mesh.has_orig_info=true;
+
+       // Set connection information
+       int conn_pos=0;
+       for (int e = 0; e < num_elems; ++e) {
+
+         // Only add split elements
+         // (other element connections can be recovered from the mesh info)
+         if (elemType[e] > 4) {
+
+           // Add new vector of size 0
+           auto emplace_out=mesh.orig_id_to_conn.emplace(elemId[e],0);
+           
+           // If it wasn't added, then throw an error
+           if (!emplace_out.second) Throw() << "elem with id=",elemId[e]," could not be added because of an error (e.g. it is a duplicate of a previous id).";
+           
+           // Get reference to new vector
+           std::vector<MeshObj *> &conn_vec=emplace_out.first->second;
+           
+           // Reserve slots
+           conn_vec.reserve(elemType[e]);
+
+           // Loop through element connections recording information
+           for (int i=0; i<elemType[e]; i++) {
+
+             // If polybreak, add NULL
+             if (elemConn[conn_pos] == MESH_POLYBREAK_IND) {
+               conn_vec.push_back(nullptr);
+             } else { // Add node pointer
+               conn_vec.push_back(all_nodes[elemConn[conn_pos]-1]);
+             }
+
+             // next connection
+             conn_pos++;
+           }
+        } else {
+          conn_pos += elemType[e];
+        }
+       }
+     }
+         
+
+    
 
     // Generate connectivity list with split elements
     // TODO: MAYBE EVENTUALLY PUT EXTRA SPLIT ONES AT END
@@ -2006,28 +2060,35 @@ void ESMCI_MeshGetElemConnCount(Mesh *mesh, int *_elemConnCount, int *rc){
   // Init output
   *_elemConnCount = 0;
 
-  // Doesn't work with split meshes right now
-  if (mesh->is_split) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                                       "Getting elementConnCount isn't currently supported for a 2D Mesh containing elements with >4 nodes.",                                       ESMC_CONTEXT, rc)) return;
+  // Get info from Mesh
+  try {
+
+    *_elemConnCount = mesh->getOrigElemConnCount();
+    
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
   }
 
-  // Loop summing number of nodes per element
-  int elemConnCount=0;
-  Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
-  for (; ei != ee; ++ei) {
-    MeshObj &elem = *ei;
-
-    // Get topology of element
-    const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(elem);
-
-    // Add number of nodes for this elem to connection count
-    elemConnCount += topo->num_nodes;
-  }
-
-  // Output
-  *_elemConnCount = elemConnCount;
-  if(rc != NULL) *rc = ESMF_SUCCESS;
+  // Set return code
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  
 }
 
 void ESMCI_MeshGetOwnedNodeCount(Mesh *mesh, int *nodeCount, int *rc){
@@ -2196,7 +2257,7 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     if (present(elemTypes)) {
       
       // Not supported for a split mesh right now
-      if (mesh->is_split) {
+      if (mesh->is_split && !mesh->has_orig_info) {
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                          "Getting element type information isn't currently supported for a 2D Mesh containing elements with >4 nodes.",
@@ -2223,13 +2284,12 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     if (present(elemConn)) {
 
       // Not supported for a split mesh right now
-      if (mesh->is_split) {
+      if (mesh->is_split && !mesh->has_orig_info) {
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                          "Getting element connection information isn't currently supported for a 2D Mesh containing elements with >4 nodes.",
                                          ESMC_CONTEXT, &localrc)) throw localrc;
       }
-
       
       // Error checking
       if (elemConn->dimCount !=1) {
@@ -2238,19 +2298,11 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
           " elementConn array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
       }
 
-      // Loop summing number of nodes per element
-      int num_elem_conn=0;
-      Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
-      for (; ei != ee; ++ei) {
-        MeshObj &elem = *ei;
-        
-        // Get topology of element
-        const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(elem);
-        
-        // Add number of nodes for this elem to connection count
-        num_elem_conn += topo->num_nodes;
-      }
+      
+      // Get element conn count
+      int num_elem_conn=mesh->getOrigElemConnCount();
 
+      // Make sure input array is the correct size
       if (elemConn->extent[0] != num_elem_conn) {
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
@@ -2368,20 +2420,51 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
 
       // Get array into which to put types
       int *elemTypes_array=elemTypes->array;
-      
-      // Loop through elems
-      for (int i=0; i<sorted_elems.size(); i++) {
-        // get element
-        MeshObj *elem=sorted_elems[i].second;
 
-        // Get topology of elem
-        const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
+      // Loop through elems
+      if (mesh->is_split) {
         
-        // Convert parametric dim and number of nodes to element type
-        elemTypes_array[i]=_num_nodes_to_elem_type(pdim, topo->num_nodes);
+        for (int i=0; i<sorted_elems.size(); i++) {
+          // get element
+          MeshObj *elem=sorted_elems[i].second;
+          
+          // Look for element id in map
+          auto oitc =  mesh->orig_id_to_conn.find(elem->get_id());
+
+          // If it's not there use the usual method
+          if (oitc == mesh->orig_id_to_conn.end()) {
+            // Get topology of elem
+            const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
+            
+            // Convert parametric dim and number of nodes to element type
+            elemTypes_array[i]=_num_nodes_to_elem_type(pdim, topo->num_nodes);
+            
+          } else { // If it is get info from conn_vec
+            
+            // Get reference to conn vector
+            std::vector<MeshObj *> &conn_vec=oitc->second;
+
+            // Get size
+            elemTypes_array[i]=conn_vec.size();
+            
+          }
+        }
+      } else {
+      
+        // Loop through elems
+        for (int i=0; i<sorted_elems.size(); i++) {
+          // get element
+          MeshObj *elem=sorted_elems[i].second;
+          
+          // Get topology of elem
+          const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
+          
+          // Convert parametric dim and number of nodes to element type
+          elemTypes_array[i]=_num_nodes_to_elem_type(pdim, topo->num_nodes);
+        }
       }
     }
-
+      
  /* XMRKX */    
 
     // If it was passed in, fill elementIds array
@@ -2390,19 +2473,61 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
       int *elemConn_array=elemConn->array;
       
       // Loop through elems
-      int j=0;
-      for (int i=0; i<sorted_elems.size(); i++) {
-        // get element
-        MeshObj *elem=sorted_elems[i].second;
+      if (mesh->is_split) {
+        int j=0;
+        for (int i=0; i<sorted_elems.size(); i++) {
+          // get element
+          MeshObj *elem=sorted_elems[i].second;
+          
+          // See if element conn is in map
+          auto oitc =  mesh->orig_id_to_conn.find(elem->get_id());
+          if (oitc == mesh->orig_id_to_conn.end()) {
+            // Get topology of elem
+            const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
+            
+            // Loop getting the indices of the nodes surrouding elem
+            for (int n = 0; n < topo->num_nodes; n++){
+              const MeshObj *node = elem->Relations[n].obj;
+              elemConn_array[j]=node->get_data_index()+1; // Add one because F90 node indices are base 1
+              j++;
+            }
+            
+          } else {
+            // Get reference to conn vector
+            std::vector<MeshObj *> &conn_vec=oitc->second;
 
-        // Get topology of elem
-        const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
+            // Loop seetting the indices of the nodes surrouding elem
+            for (int n = 0; n < conn_vec.size(); n++){
+              MeshObj *node = conn_vec[n];
 
-        // Loop getting the indices of the nodes surrouding elem
-        for (int n = 0; n < topo->num_nodes; n++){
-          const MeshObj *node = elem->Relations[n].obj;
-          elemConn_array[j]=node->get_data_index()+1; // Add one because F90 node indices are base 1
-          j++;
+              if (node == nullptr) {
+                elemConn_array[j]=MESH_POLYBREAK_IND;
+              } else {
+                elemConn_array[j]=node->get_data_index()+1; // Add one because F90 node indices are base 1
+              }
+
+              // Go to next pos
+              j++;
+            }
+            
+          }
+
+        }
+      } else {
+        int j=0;
+        for (int i=0; i<sorted_elems.size(); i++) {
+          // get element
+          MeshObj *elem=sorted_elems[i].second;
+          
+          // Get topology of elem
+          const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
+          
+          // Loop getting the indices of the nodes surrouding elem
+          for (int n = 0; n < topo->num_nodes; n++){
+            const MeshObj *node = elem->Relations[n].obj;
+            elemConn_array[j]=node->get_data_index()+1; // Add one because F90 node indices are base 1
+            j++;
+          }
         }
       }
     }

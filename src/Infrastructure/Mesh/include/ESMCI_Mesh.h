@@ -135,14 +135,16 @@ ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<i
 
   
   public:
-// STUFF FOR SPLIT MESH
-// TODO: MOVE TO MESHCXX AND CALL THAT FROM F90
- bool is_split;
- int max_non_split_id;
- IOField<NodalField> *node_coord;
- std::map<UInt,UInt> split_to_orig_id;
- std::map<UInt,double> split_id_to_frac;
 
+
+  // STUFF FOR SPLIT MESH
+  bool is_split;
+  int max_non_split_id;
+  IOField<NodalField> *node_coord;
+  std::map<UInt,UInt> split_to_orig_id;
+  std::map<UInt,double> split_id_to_frac;
+
+  
  // Save original dimension
  int orig_spatial_dim;
  ESMC_CoordSys_Flag coordsys;
@@ -154,7 +156,28 @@ ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<i
  // Original comm where this mesh was commited               
  MPI_Comm orig_comm;
 
+  // Accessors for original creation information
+  void setOrigElemConnCount(int _origElemConnCount);
+  int getOrigElemConnCount();
+
+
+  // Information for regenerating original creation info
+  //// TODO: make private with accessors
+  bool has_orig_info;
+  std::map<UInt,std::vector<MeshObj *> > orig_id_to_conn; // nullptr -> MESH_POLYBREAK_IND
+  std::map<UInt,double> orig_id_to_area;
+
+  
   private:
+
+  // Information for regenerating what was originally used to create the Mesh
+  // (E.g. before things were split into triangles)  
+
+   int origElemConnCount; // The original element connection count
+ 
+
+  
+
 void assign_new_ids();
 CommReg *sghost;
 bool committed;
