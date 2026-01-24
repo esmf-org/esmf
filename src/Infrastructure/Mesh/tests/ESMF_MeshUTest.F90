@@ -10065,6 +10065,7 @@ subroutine MeshGetElemInfoWGT4SidesTest(correct, rc)
   integer :: numTriElems, numQuadElems, numPentElems,numHexElems
   integer :: numElemConns, numElemConnsTst
   real(ESMF_KIND_R8), pointer :: elemCoords(:), elemCoordsTst(:)
+  real(ESMF_KIND_R8), pointer :: elemArea(:), elemAreaTst(:)
   integer, pointer :: elemIds(:), elemIdsTst(:), elemTypes(:), elemTypesTst(:)
   integer, pointer :: elemConn(:), elemConnTst(:), elemMask(:), elemMaskTst(:)
   integer :: petCount, localPet
@@ -10141,6 +10142,10 @@ subroutine MeshGetElemInfoWGT4SidesTest(correct, rc)
      ! Allocate and fill the element mask array.
      allocate(elemMask(numElems))
      elemMask=elemIds ! Set to ids for test
+
+     ! Allocate and fill the element area array.
+     allocate(elemArea(numElems))
+     elemArea=REAL(elemIds,ESMF_KIND_R8)/7.0 ! Set to ids/7 for test
 
      ! Allocate and fill the element topology type array.
      allocate(elemTypes(numElems))
@@ -10230,6 +10235,10 @@ subroutine MeshGetElemInfoWGT4SidesTest(correct, rc)
         ! Allocate and fill the element mask array.
         allocate(elemMask(numElems))
         elemMask=elemIds ! Set to ids for test
+
+        ! Allocate and fill the element area array.
+        allocate(elemArea(numElems))
+        elemArea=REAL(elemIds,ESMF_KIND_R8)/7.0 ! Set to ids/7 for test
         
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -10298,6 +10307,10 @@ subroutine MeshGetElemInfoWGT4SidesTest(correct, rc)
         ! Allocate and fill the element mask array.
         allocate(elemMask(numElems))
         elemMask=elemIds ! Set to ids for test
+
+        ! Allocate and fill the element area array.
+        allocate(elemArea(numElems))
+        elemArea=REAL(elemIds,ESMF_KIND_R8)/7.0 ! Set to ids/7 for test
        
         ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
@@ -10370,6 +10383,10 @@ subroutine MeshGetElemInfoWGT4SidesTest(correct, rc)
         ! Allocate and fill the element mask array.
         allocate(elemMask(numElems))
         elemMask=elemIds ! Set to ids for test
+
+        ! Allocate and fill the element area array.
+        allocate(elemArea(numElems))
+        elemArea=REAL(elemIds,ESMF_KIND_R8)/7.0 ! Set to ids/7 for test
         
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numElems))
@@ -10441,6 +10458,10 @@ subroutine MeshGetElemInfoWGT4SidesTest(correct, rc)
         ! Allocate and fill the element mask array.
         allocate(elemMask(numElems))
         elemMask=elemIds ! Set to ids for test
+
+        ! Allocate and fill the element area array.
+        allocate(elemArea(numElems))
+        elemArea=REAL(elemIds,ESMF_KIND_R8)/7.0 ! Set to ids/7 for test
         
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numElems))
@@ -10467,7 +10488,7 @@ subroutine MeshGetElemInfoWGT4SidesTest(correct, rc)
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, nodeMask=nodeMask, &
          elementIds=elemIds, elementTypes=elemTypes, elementConn=elemConn, &
-        elementCoords=elemCoords, elementMask=elemMask, &
+        elementCoords=elemCoords, elementMask=elemMask, elementArea=elemArea, &
         rc=rc)
    if (rc /= ESMF_SUCCESS) return
 
@@ -10514,7 +10535,8 @@ subroutine MeshGetElemInfoWGT4SidesTest(correct, rc)
    allocate(elemConnTst(numElemConns))
    allocate(elemMaskTst(numElems))
    allocate(elemCoordsTst(2*numElems))
-
+   allocate(elemAreaTst(numElems))
+   
    ! Get count info from dual
    call ESMF_MeshGet(mesh, &
         nodeIds=nodeIdsTst, &
@@ -10525,6 +10547,7 @@ subroutine MeshGetElemInfoWGT4SidesTest(correct, rc)
         elementConn=elemConnTst, & 
         elementMask=elemMaskTst, & 
         elementCoords=elemCoordsTst, &
+        elementArea=elemAreaTst, &
         rc=rc)
    if (rc /= ESMF_SUCCESS) return
 
@@ -10533,6 +10556,8 @@ subroutine MeshGetElemInfoWGT4SidesTest(correct, rc)
     ! write(*,*) localPet,"# nodeCoords=",nodeCoords
     ! write(*,*) localPet,"# elemIds=",elemIds
     ! write(*,*) localPet,"# elemCoords=",elemCoords
+    ! write(*,*) localPet,"# elemArea=   ",elemArea
+    ! write(*,*) localPet,"# elemAreaTst=",elemAreaTst
    
    ! Check node info
    do i=1,numNodes
@@ -10547,6 +10572,7 @@ subroutine MeshGetElemInfoWGT4SidesTest(correct, rc)
       if (elemIdsTst(i) /= elemIds(i)) correct=.false.
       if (elemTypesTst(i) /= elemTypes(i)) correct=.false.
       if (elemMaskTst(i) /= elemMask(i)) correct=.false.
+      if (elemAreaTst(i) /= elemArea(i)) correct=.false.
       if (elemCoordsTst(2*i-1) /= elemCoords(2*i-1)) correct=.false.
       if (elemCoordsTst(2*i) /= elemCoords(2*i)) correct=.false.
    enddo

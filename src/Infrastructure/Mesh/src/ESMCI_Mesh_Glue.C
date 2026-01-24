@@ -1135,7 +1135,25 @@ void ESMCI_meshaddelements(Mesh **meshpp,
           conn_pos += elemType[e];
         }
        }
-     }
+
+       // If present, set area information
+       if (areaPresent == 1) {
+         for (int e = 0; e < num_elems; ++e) {
+           
+           // Only add split elements
+           // (other element area can be recovered from the mesh info)
+           if (elemType[e] > 4) {
+             
+             // Add new vector of size 0
+             auto emplace_out=mesh.orig_id_to_area.emplace(elemId[e],elemArea[e]);
+             
+             // If it wasn't added, then throw an error
+             if (!emplace_out.second) Throw() << "elem with id=",elemId[e]," could not be added because of an error (e.g. it is a duplicate of a previous id).";
+             
+           }
+         }
+       }
+    }
          
 
     
@@ -2282,7 +2300,7 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     // If elemConn array exists, error check
     if (present(elemConn)) {
 
-      // Not supported for a split mesh right now
+      // Not supported for a split mesh when orig info not present
       if (mesh->is_split && !mesh->has_orig_info) {
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -2340,8 +2358,8 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     // If elemArea array exists, error check
     if (present(elemArea)) {
 
-      // Not supported for a split mesh right now
-      if (mesh->is_split) {
+      // Not supported for a split mesh when orig info not present
+      if (mesh->is_split && !mesh->has_orig_info) {
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                          "Getting element area information isn't currently supported for a 2D Mesh containing elements with >4 nodes.",
@@ -2561,18 +2579,40 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
 
       // Get array into which to put types
       ESMC_R8 *elemArea_array=elemArea->array;
-      
-      // Loop through elems
-      for (int i=0; i<sorted_elems.size(); i++) {
-        // get element
-        MeshObj *elem=sorted_elems[i].second;
 
-        // Get elem's mask value
-        double *area=elem_area->data(*elem);
-        
-        // Set elem area in output array
-        elemArea_array[i]=*area;
-      }
+      // Depending on if mesh is split, get information in different ways
+      if (mesh->is_split) {
+
+        for (int i=0; i<sorted_elems.size(); i++) {
+          // get element
+          MeshObj *elem=sorted_elems[i].second;
+
+          // Get elem's area value
+          double *area=elem_area->data(*elem);
+          
+          // See if element conn is in map
+          auto oita =  mesh->orig_id_to_area.find(elem->get_id());
+          if (oita == mesh->orig_id_to_area.end()) {
+            // Not in map, so just set elem area from mesh field in output array
+            elemArea_array[i]=*area;            
+          } else {
+            // In map, so just set elem area using value from map
+            elemArea_array[i]=oita->second;
+          }
+        }
+      } else {
+        // Loop through elems
+        for (int i=0; i<sorted_elems.size(); i++) {
+          // get element
+          MeshObj *elem=sorted_elems[i].second;
+          
+          // Get elem's area value
+          double *area=elem_area->data(*elem);
+          
+          // Set elem area in output array
+          elemArea_array[i]=*area;
+        }
+      }      
     }
 
 
