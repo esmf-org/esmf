@@ -736,27 +736,30 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
 
     type(ESMF_Field)      :: field
     integer, intent(out)  :: rc
-  
+
+    type(ESMF_FieldType), pointer :: ftypepp
     integer :: localrc
-  
+
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     rc = ESMF_RC_NOT_IMPL
-  
+
     !print *, "collecting Field garbage"
 
-    if (associated(field%ftypep)) then
+    ftypepp => field%ftypep ! LLVM workaround for deallocate() runtime error!
+
+    if (associated(ftypepp)) then
       ! destruct internal data allocations
-      call ESMF_FieldDestruct(field%ftypep, rc=localrc)
+      call ESMF_FieldDestruct(ftypepp, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! deallocate actual FieldType allocation
-      !print *, "deallocate(field%ftypep)"
-      deallocate(field%ftypep, stat=localrc)
+      deallocate(ftypepp, stat=localrc)
       if (ESMF_LogFoundDeallocError(localrc, msg="Deallocating Field", &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+
     nullify(field%ftypep)
 
     ! return successfully
