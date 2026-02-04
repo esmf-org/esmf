@@ -1093,12 +1093,16 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     mesh.setOrigElemConnCount(num_elemConn);
 
     // If split, record original element connections for split elements
+    // I have this if-split here for efficicies sake, since internally the orig
+    // connections for a non-split mesh don't need this. However, when you've
+    // rearranged to use this information for mesh creation, then get rid of this
     if (mesh.is_split) {
 
-       // Record that we're adding information
-       mesh.has_orig_info=true;
+      // Set that we're recording the original nodes
+      mesh.setHasOrigElemNodes();
 
        // Set connection information
+      std::vector<MeshObj *> tmp_vec;
        int conn_pos=0;
        for (int e = 0; e < num_elems; ++e) {
 
@@ -1106,50 +1110,47 @@ void ESMCI_meshaddelements(Mesh **meshpp,
          // (other element connections can be recovered from the mesh info)
          if (elemType[e] > 4) {
 
-           // Add new vector of size 0
-           auto emplace_out=mesh.orig_id_to_conn.emplace(elemId[e],0);
-           
-           // If it wasn't added, then throw an error
-           if (!emplace_out.second) Throw() << "elem with id=",elemId[e]," could not be added because of an error (e.g. it is a duplicate of a previous id).";
-           
-           // Get reference to new vector
-           std::vector<MeshObj *> &conn_vec=emplace_out.first->second;
+           // Clear temp vector
+           tmp_vec.clear();
            
            // Reserve slots
-           conn_vec.reserve(elemType[e]);
-
+           tmp_vec.reserve(elemType[e]);
+           
            // Loop through element connections recording information
            for (int i=0; i<elemType[e]; i++) {
-
+             
              // If polybreak, add NULL
              if (elemConn[conn_pos] == MESH_POLYBREAK_IND) {
-               conn_vec.push_back(nullptr);
+               tmp_vec.push_back(nullptr);
              } else { // Add node pointer
-               conn_vec.push_back(all_nodes[elemConn[conn_pos]-1]);
+               tmp_vec.push_back(all_nodes[elemConn[conn_pos]-1]);
              }
-
+       
              // next connection
              conn_pos++;
-           }
-        } else {
-          conn_pos += elemType[e];
-        }
+           }     
+
+           // Add to mesh
+           mesh.setOrigElemNodes(elemId[e],tmp_vec);
+           
+         } else {
+           conn_pos += elemType[e];
+         }
        }
 
-       // If present, set area information
+       // If present, set original information
        if (areaPresent == 1) {
+         // Mark that we are setting this information
+         mesh.setHasOrigElemArea();
+
+         // Loop adding area just for split elements 
+         // (The rest can be retrieved from the mesh)
          for (int e = 0; e < num_elems; ++e) {
-           
+
            // Only add split elements
-           // (other element area can be recovered from the mesh info)
+           // (other element connections can be recovered from the mesh info)
            if (elemType[e] > 4) {
-             
-             // Add new vector of size 0
-             auto emplace_out=mesh.orig_id_to_area.emplace(elemId[e],elemArea[e]);
-             
-             // If it wasn't added, then throw an error
-             if (!emplace_out.second) Throw() << "elem with id=",elemId[e]," could not be added because of an error (e.g. it is a duplicate of a previous id).";
-             
+             mesh.setOrigElemArea(elemId[e],elemArea[e]);
            }
          }
        }
@@ -2272,16 +2273,7 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
 
     // If elemTypes array exists, error check
     if (present(elemTypes)) {
-      
-      // Not supported for a split mesh right now
-      if (mesh->is_split && !mesh->has_orig_info) {
-        int localrc;
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                                         "Getting element type information isn't currently supported for a 2D Mesh containing elements with >4 nodes.",
-                                         ESMC_CONTEXT, &localrc)) throw localrc;
-      }
-
-      
+            
       // Error checking
       if (elemTypes->dimCount !=1) {
         int localrc;
@@ -2299,14 +2291,6 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
 
     // If elemConn array exists, error check
     if (present(elemConn)) {
-
-      // Not supported for a split mesh when orig info not present
-      if (mesh->is_split && !mesh->has_orig_info) {
-        int localrc;
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                                         "Getting element connection information isn't currently supported for a 2D Mesh containing elements with >4 nodes.",
-                                         ESMC_CONTEXT, &localrc)) throw localrc;
-      }
       
       // Error checking
       if (elemConn->dimCount !=1) {
@@ -2357,15 +2341,6 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
 
     // If elemArea array exists, error check
     if (present(elemArea)) {
-
-      // Not supported for a split mesh when orig info not present
-      if (mesh->is_split && !mesh->has_orig_info) {
-        int localrc;
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                                         "Getting element area information isn't currently supported for a 2D Mesh containing elements with >4 nodes.",
-                                         ESMC_CONTEXT, &localrc)) throw localrc;
-      }
-
       
       // Mask sure element mask is present
       MEField<> *elem_area=mesh->GetField("elem_area");
@@ -2389,6 +2364,7 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
       }
     }
 
+    
     // If elemCoords array exists, error check
     if (present(elemCoords)) {
 
@@ -2439,113 +2415,41 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
       int *elemTypes_array=elemTypes->array;
 
       // Loop through elems
-      if (mesh->is_split) {
+      for (int i=0; i<sorted_elems.size(); i++) {
+
+        // get element
+        MeshObj *elem=sorted_elems[i].second;
+
+        // Get number of nodes around element
+        int num_nodes=mesh->getOrigElemNodesCount(elem);
         
-        for (int i=0; i<sorted_elems.size(); i++) {
-          // get element
-          MeshObj *elem=sorted_elems[i].second;
-          
-          // Look for element id in map
-          auto oitc =  mesh->orig_id_to_conn.find(elem->get_id());
-
-          // If it's not there use the usual method
-          if (oitc == mesh->orig_id_to_conn.end()) {
-            // Get topology of elem
-            const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
-            
-            // Convert parametric dim and number of nodes to element type
-            elemTypes_array[i]=_num_nodes_to_elem_type(pdim, topo->num_nodes);
-            
-          } else { // If it is get info from conn_vec
-            
-            // Get reference to conn vector
-            std::vector<MeshObj *> &conn_vec=oitc->second;
-
-            // Get size
-            elemTypes_array[i]=conn_vec.size();
-            
-          }
-        }
-      } else {
-      
-        // Loop through elems
-        for (int i=0; i<sorted_elems.size(); i++) {
-          // get element
-          MeshObj *elem=sorted_elems[i].second;
-          
-          // Get topology of elem
-          const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
-          
-          // Convert parametric dim and number of nodes to element type
-          elemTypes_array[i]=_num_nodes_to_elem_type(pdim, topo->num_nodes);
-        }
+        // Convert parametric dim and number of nodes to element type
+        elemTypes_array[i]=_num_nodes_to_elem_type(pdim, num_nodes);          
       }
     }
       
- /* XMRKX */    
-
-    // If it was passed in, fill elementIds array
+    // If it was passed in, fill elemConn array
     if (present(elemConn)) {
-      // Get array into which to put ids
+
+      // Get array into which to put connection indices
       int *elemConn_array=elemConn->array;
-      
+            
       // Loop through elems
-      if (mesh->is_split) {
-        int j=0;
-        for (int i=0; i<sorted_elems.size(); i++) {
-          // get element
-          MeshObj *elem=sorted_elems[i].second;
-          
-          // See if element conn is in map
-          auto oitc =  mesh->orig_id_to_conn.find(elem->get_id());
-          if (oitc == mesh->orig_id_to_conn.end()) {
-            // Get topology of elem
-            const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
-            
-            // Loop getting the indices of the nodes surrouding elem
-            for (int n = 0; n < topo->num_nodes; n++){
-              const MeshObj *node = elem->Relations[n].obj;
-              elemConn_array[j]=node->get_data_index()+1; // Add one because F90 node indices are base 1
-              j++;
-            }
-            
-          } else {
-            // Get reference to conn vector
-            std::vector<MeshObj *> &conn_vec=oitc->second;
+      std::vector<MeshObj *> tmp_nodes;
+      int j=0;
+      for (int i=0; i<sorted_elems.size(); i++) {
 
-            // Loop seetting the indices of the nodes surrouding elem
-            for (int n = 0; n < conn_vec.size(); n++){
-              MeshObj *node = conn_vec[n];
+        // Get element
+        MeshObj *elem=sorted_elems[i].second;
 
-              if (node == nullptr) {
-                elemConn_array[j]=MESH_POLYBREAK_IND;
-              } else {
-                elemConn_array[j]=node->get_data_index()+1; // Add one because F90 node indices are base 1
-              }
+        // Fill temporary vector with node connections
+        mesh->getOrigElemNodes(elem, tmp_nodes);
 
-              // Go to next pos
-              j++;
-            }
-            
-          }
-
-        }
-      } else {
-        int j=0;
-        for (int i=0; i<sorted_elems.size(); i++) {
-          // get element
-          MeshObj *elem=sorted_elems[i].second;
-          
-          // Get topology of elem
-          const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
-          
-          // Loop getting the indices of the nodes surrouding elem
-          for (int n = 0; n < topo->num_nodes; n++){
-            const MeshObj *node = elem->Relations[n].obj;
-            elemConn_array[j]=node->get_data_index()+1; // Add one because F90 node indices are base 1
-            j++;
-          }
-        }
+        // Loop adding connection indices to array
+        for (MeshObj *node: tmp_nodes) {
+          elemConn_array[j]=node->get_data_index()+1; // Add one because F90 node indices are base 1
+          j++;
+        }        
       }
     }
 
@@ -2574,51 +2478,22 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     // If it was passed in, fill elementArea array
     if (present(elemArea)) {
 
-      // Get element mask value field (presence of this is checked above)
-      MEField<> *elem_area=mesh->GetField("elem_area");
-
       // Get array into which to put types
       ESMC_R8 *elemArea_array=elemArea->array;
 
-      // Depending on if mesh is split, get information in different ways
-      if (mesh->is_split) {
+      // Loop through elements setting area
+      for (int i=0; i<sorted_elems.size(); i++) {
+        // get element
+        MeshObj *elem=sorted_elems[i].second;
 
-        for (int i=0; i<sorted_elems.size(); i++) {
-          // get element
-          MeshObj *elem=sorted_elems[i].second;
-
-          // Get elem's area value
-          double *area=elem_area->data(*elem);
-          
-          // See if element conn is in map
-          auto oita =  mesh->orig_id_to_area.find(elem->get_id());
-          if (oita == mesh->orig_id_to_area.end()) {
-            // Not in map, so just set elem area from mesh field in output array
-            elemArea_array[i]=*area;            
-          } else {
-            // In map, so just set elem area using value from map
-            elemArea_array[i]=oita->second;
-          }
-        }
-      } else {
-        // Loop through elems
-        for (int i=0; i<sorted_elems.size(); i++) {
-          // get element
-          MeshObj *elem=sorted_elems[i].second;
-          
-          // Get elem's area value
-          double *area=elem_area->data(*elem);
-          
-          // Set elem area in output array
-          elemArea_array[i]=*area;
-        }
-      }      
+        // Set area in array
+        elemArea_array[i]=mesh->getOrigElemArea(elem);
+      }
     }
-
 
     // If it was passed in, fill elemCoords array
     if (present(elemCoords)) {
-/* XMRKX */
+
       // Get pointer to mesh elem coords data
       MEField<> *elem_coords=mesh->GetField("elem_orig_coordinates");
       if (!elem_coords) {
@@ -2645,13 +2520,24 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
       }
     }
 
-  }catch(int localrc){
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  } catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-          " Caught unknown exception", ESMC_CONTEXT, rc);
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
   
