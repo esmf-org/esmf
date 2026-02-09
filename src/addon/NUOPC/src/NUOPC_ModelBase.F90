@@ -2392,6 +2392,7 @@ module NUOPC_ModelBase
     type(ESMF_Clock)          :: internalClock
     integer                   :: verbosity, diagnostic, profiling
     type(type_InternalState)  :: is
+    type(type_InternalStateStruct), pointer :: wrap
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
 
@@ -2519,7 +2520,8 @@ module NUOPC_ModelBase
       deallocate(is%wrap%cachedExportFieldList)
 
     ! deallocate internal state memory
-    deallocate(is%wrap, stat=stat)
+    wrap => is%wrap
+    deallocate(wrap, stat=stat)
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
       msg="Deallocation of internal state memory failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &

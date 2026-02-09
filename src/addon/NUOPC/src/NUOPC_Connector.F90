@@ -5290,10 +5290,10 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! prepare FieldBundles to store src and dst Fields
-    is%wrap%srcFields = ESMF_FieldBundleCreate(rc=rc)
+    is%wrap%srcFields = ESMF_FieldBundleCreate(name="srcFields", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    is%wrap%dstFields = ESMF_FieldBundleCreate(rc=rc)
+    is%wrap%dstFields = ESMF_FieldBundleCreate(name="dstFields", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
@@ -6621,6 +6621,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     character(*), parameter   :: rName="Finalize"
     integer                   :: stat
     type(type_InternalState)  :: is
+    type(type_InternalStateStruct), pointer :: wrap
     integer                   :: localrc
     logical                   :: existflag
     logical                   :: routeHandleIsCreated
@@ -6867,14 +6868,15 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-    
+
     ! deallocate internal state memory
-    deallocate(is%wrap, stat=stat)
+    wrap => is%wrap
+    deallocate(wrap, stat=stat)
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
       msg="Deallocation of internal state memory failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-      
+
     ! handle diagnostic
     if (btest(diagnostic,10)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
