@@ -201,18 +201,21 @@ module user_modelA
     type(ESMF_State) :: importState, exportState
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
-    type(dataWrapper)   :: intStatePtr
 
     ! Local variables
-    type(ESMF_DistGrid) :: distgrid
-    type(ESMF_Array) :: array
+    type(dataWrapper)     :: intStatePtr
+    type(dblock), pointer :: p
+    type(ESMF_DistGrid)   :: distgrid
+    type(ESMF_Array)      :: array
 
     ! Initialize return code
     rc = ESMF_SUCCESS
 
     call ESMF_GridCompGetInternalState(comp, intStatePtr, rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    deallocate(intStatePtr%p)
+
+    p => intStatePtr%p  ! LLVM workaround for deallocate() runtime error!
+    deallocate(p)
 
     call ESMF_StateGet(exportState, "array data", array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
