@@ -720,7 +720,7 @@ module esmx_data
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
 
-    deallocate(is%ptr, stat=stat)
+    deallocate(xstate, stat=stat)
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
       msg='XDATA: Memory deallocation failed.', &
       line=__LINE__, &
