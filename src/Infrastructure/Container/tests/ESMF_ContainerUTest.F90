@@ -81,7 +81,8 @@ program ESMF_ContainerUTest
   integer                         :: garbageCount, itemCount
   logical                         :: isPresent, loopResult
   type(TestType)                  :: tt
-  
+  type(TestTypeStruct), pointer   :: wrap
+
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
 ! always run. When the environment variable, EXHAUSTIVE, is set to ON then 
@@ -1100,7 +1101,8 @@ program ESMF_ContainerUTest
       loopResult = .false.
       exit
     endif
-    deallocate(tt%wrap, stat=stat)
+    wrap => tt%wrap ! LLVM workaround for deallocate() runtime error!
+    deallocate(wrap, stat=stat)
     if (stat/=0) then
       loopResult = .false.
       exit
