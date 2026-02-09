@@ -4221,7 +4221,7 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      cmWrap => cmEntry%wrap
+      cmWrap => cmEntry%wrap  ! LLVM workaround for deallocate() runtime error!
       deallocate(cmWrap, stat=stat)
       if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
         msg="Deallocation of cmEntry failed.", &
@@ -4243,7 +4243,7 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      cnWrap => cnEntry%wrap
+      cnWrap => cnEntry%wrap  ! LLVM workaround for deallocate() runtime error!
       deallocate(cnWrap, stat=stat)
       if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
         msg="Deallocation of cnEntry failed.", &
@@ -4299,7 +4299,7 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! deallocate internal state memory
-    wrap => is%wrap
+    wrap => is%wrap ! LLVM workaround for deallocate() runtime error!
     deallocate(wrap, stat=stat)
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
       msg="Deallocation of internal state memory failed.", &

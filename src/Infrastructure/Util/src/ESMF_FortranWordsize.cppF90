@@ -289,8 +289,8 @@ subroutine f_esmf_fortranudtpointercompare(ptr1, ptr2, flag)
   type (wrapper):: ptr2
   integer       :: flag
   type(simple_udt), pointer:: udt1, udt2
-  udt1 => ptr1%udt
-  udt2 => ptr2%udt
+  udt1 => ptr1%udt  ! LLVM workaround, require local pointer variable!
+  udt2 => ptr2%udt  ! LLVM workaround, require local pointer variable!
   flag = 0
   if (associated(udt1,udt2)) flag = 1
 end subroutine

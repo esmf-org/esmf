@@ -6870,7 +6870,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     endif
 
     ! deallocate internal state memory
-    wrap => is%wrap
+    wrap => is%wrap ! LLVM workaround for deallocate() runtime error!
     deallocate(wrap, stat=stat)
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
       msg="Deallocation of internal state memory failed.", &
