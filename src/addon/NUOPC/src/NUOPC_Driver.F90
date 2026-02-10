@@ -3939,10 +3939,13 @@ module NUOPC_Driver
     character(*), parameter   :: rName="Finalize"
     integer                   :: urc, stat
     type(type_InternalState)  :: is
+    type(type_InternalStateStruct), pointer :: wrap
     type(ESMF_Clock)          :: internalClock
     integer                   :: i, j, itemCount
     type(ComponentMapEntry)   :: cmEntry
+    type(ComponentMapEntryT), pointer :: cmWrap
     type(ConnectorMapEntry)   :: cnEntry
+    type(ConnectorMapEntryT), pointer :: cnWrap
     character(ESMF_MAXSTR)    :: iString, jString
     logical                   :: existflag
     logical                   :: areServicesSet
@@ -4218,7 +4221,8 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      deallocate(cmEntry%wrap, stat=stat)
+      cmWrap => cmEntry%wrap  ! LLVM workaround for deallocate() runtime error!
+      deallocate(cmWrap, stat=stat)
       if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
         msg="Deallocation of cmEntry failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -4239,7 +4243,8 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      deallocate(cnEntry%wrap, stat=stat)
+      cnWrap => cnEntry%wrap  ! LLVM workaround for deallocate() runtime error!
+      deallocate(cnWrap, stat=stat)
       if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
         msg="Deallocation of cnEntry failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -4294,7 +4299,8 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! deallocate internal state memory
-    deallocate(is%wrap, stat=stat)
+    wrap => is%wrap ! LLVM workaround for deallocate() runtime error!
+    deallocate(wrap, stat=stat)
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
       msg="Deallocation of internal state memory failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &

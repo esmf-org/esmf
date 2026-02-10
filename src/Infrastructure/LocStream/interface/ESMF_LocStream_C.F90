@@ -195,28 +195,32 @@
     implicit none
 
     type(ESMF_LocStream) :: locstream
-    integer, intent(out) :: rc     
-  
-    integer :: localrc              
-  
+    integer, intent(out) :: rc
+
+    type(ESMF_LocStreamType), pointer :: lspp
+    integer :: localrc
+
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     rc = ESMF_RC_NOT_IMPL
-  
+
     !print *, "collecting LocStream garbage"
-  
+
+    lspp => locstream%lstypep ! LLVM workaround for deallocate() runtime error!
+
     ! destruct internal data allocations
-    call ESMF_LocStreamDestruct(locstream%lstypep, rc=localrc)
+    call ESMF_LocStreamDestruct(lspp, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! deallocate actual LocStreamType allocation
-    if (associated(locstream%lstypep)) then
-      deallocate(locstream%lstypep, stat=localrc)
+    if (associated(lspp)) then
+      deallocate(lspp, stat=localrc)
       if (ESMF_LogFoundDeallocError(localrc, msg="Deallocating LocStream", &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+
     nullify(locstream%lstypep)
 
     ! return successfully

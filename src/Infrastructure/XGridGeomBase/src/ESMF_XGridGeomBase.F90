@@ -1362,6 +1362,7 @@ end module ESMF_XGridGeomBaseMod
     type(ESMF_XGridGeomBase)  :: gb
     integer, intent(out) :: rc
 
+    type(ESMF_XGridGeomBaseClass), pointer :: gbcpp
     integer :: localrc
 
     ! initialize return code; assume routine not implemented
@@ -1370,12 +1371,15 @@ end module ESMF_XGridGeomBaseMod
 
     !print *, "collecting GeomBase garbage"
 
+    gbcpp => gb%gbcp  ! LLVM workaround for deallocate() runtime error!
+
     ! deallocate actual GeomBaseClass allocation
-    if (associated(gb%gbcp)) then
-      deallocate(gb%gbcp, stat=localrc)
+    if (associated(gbcpp)) then
+      deallocate(gbcpp, stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, msg="Deallocating GeomBase", &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+
     nullify(gb%gbcp)
 
     ! return successfully
