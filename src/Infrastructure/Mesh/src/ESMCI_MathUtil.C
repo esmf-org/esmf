@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1198,7 +1198,8 @@ bool is_ear(int num_p, double *p, int *ind) {
 template bool is_ear<GEOM_CART2D>(int num_p, double *p, int *ind);
 template bool is_ear<GEOM_SPH2D3D>(int num_p, double *p, int *ind);
 
-
+  bool debug_tri=false;
+  
 // Triangulate a 2D polygon using the ear clip method.
 // This method works on both concave and convex polygons.
 // As usual in ESMF Mesh this assumes the polygon is counter-clockwise.
@@ -1207,7 +1208,8 @@ template bool is_ear<GEOM_SPH2D3D>(int num_p, double *p, int *ind);
 // td should be the same size as p, ti should be of size num_p.
 template <class GEOM>
 int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind) {
-
+#define FLAT_TOL -0.99
+  
   // Error check
   if (num_p < 3) {
     return ESMCI_TP_DEGENERATE_POLY;
@@ -1230,6 +1232,7 @@ int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind) {
     ti[i]=i;
   }
 
+  int tri_num=1;
 
   // Loop until we've broken everything up
   int pos_tri_ind=0;
@@ -1247,6 +1250,7 @@ int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind) {
     int max_clip_ind[3];
     double max_clip_dot=-std::numeric_limits<double>::max();
     bool found_clip=false;
+    bool do_flatfeet=false;
     for (int i=0; i<num_t; i++) {
       // indices which make up triangle to potentially clip
       int clip_ind[3];
@@ -1258,7 +1262,7 @@ int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind) {
       double *pntip0=GEOM::getPntAt(td,clip_ind[0]);
       double *pntip1=GEOM::getPntAt(td,clip_ind[1]);
       double *pntip2=GEOM::getPntAt(td,clip_ind[2]);
-
+      
       // vector from pntip1 to pnti0
       double v10[GEOM::pnt_size];
       GEOM::sub(v10,pntip0,pntip1);
@@ -1266,22 +1270,64 @@ int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind) {
       // vector from pntip1 to pnti2
       double v12[GEOM::pnt_size];
       GEOM::sub(v12,pntip2,pntip1);
-
+            
       // Calc cross product
       double cross;
       cross=GEOM::turn(v12,v10,pntip1);
 
-      // Find the maximum left turn to clip
-      // to give good triangles
+      // Just clip left turns
+      // TODO: should we also do max rights, to handle polygons in the other direction? 
       if (cross > 0.0) {
+
+        // Get other points for detecting flat places
+        int prev_ind=(i+num_t-1)%num_t;
+        double *pnt_prev=GEOM::getPntAt(td,prev_ind);
+        
+        int after_ind=(i+3)%num_t;
+        double *pnt_after=GEOM::getPntAt(td,after_ind);
+        
+        // See if the first point of tri is in the middle of a flat place
+        bool flat_prev=(GEOM::cos_3pnts(pnt_prev, pntip0, pntip1) < FLAT_TOL);
+
+        // See if the middle point of tri is in the middle of a flat place
+        bool flat_tri=(GEOM::cos_3pnts(pntip0, pntip1, pntip2) < FLAT_TOL);
+        
+        // See if the last point of tri is in the middle of a flat place
+        bool flat_after=(GEOM::cos_3pnts(pntip1, pntip2, pnt_after) < FLAT_TOL);
+        
+        //if (mathutil_debug) printf("%d flat_prev=%d flat_after=%d flat_tri=%d\n",tri_num,flat_prev,flat_after,flat_tri);
+        
+        // if just ends flat, then mark as flat footed
+        bool tri_flatfeet=(flat_prev || flat_after) && !flat_tri;
+
+        //if (mathutil_debug) printf("%d tri_flatfeet=%d\n",tri_num,tri_flatfeet);
+        
+        // If we're doing flat feet and this one isn't, then continue to next iteration
+        if (do_flatfeet && !tri_flatfeet) continue;
+
+        // See if we should switch to doing flat feet and if so switch and then go on to
+        // the next iteration since we've reset things to just be flat feet
+        if (!do_flatfeet && tri_flatfeet) {
+         bool is_ear_b=is_ear<GEOM>(num_t, td, clip_ind);
+          if (is_ear_b) {
+            do_flatfeet=true; // Start just doing tris with flat feet
+
+            // Reset the other information since this flat foot tri is now the best candidate so far
+            max_clip_dot=GEOM::dot(v12,v10);
+            max_clip_ind[0]=clip_ind[0];
+            max_clip_ind[1]=clip_ind[1];
+            max_clip_ind[2]=clip_ind[2];
+            found_clip=true;
+            continue;
+          }
+        }          
+        
+        // Update to the best tri to clip so far
         double dot;
         dot=GEOM::dot(v12,v10);
-        //printf("%d dot=%f max=%f \n",i,dot,max_clip_dot);
         if (dot > max_clip_dot) {
           bool is_ear_b=is_ear<GEOM>(num_t, td, clip_ind);
-          //printf("%d  is_ear_b=%d \n",i,is_ear_b);
           if (is_ear_b) {
-          //          if (is_ear<GEOM>(num_t, td, clip_ind)) {
             max_clip_dot=dot;
             max_clip_ind[0]=clip_ind[0];
             max_clip_ind[1]=clip_ind[1];
@@ -1308,7 +1354,10 @@ int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind) {
 
       // shrink size by 1
       num_t--;
-
+      
+      // if (mathutil_debug) write_3D_poly_to_vtk("tri_poly",tri_num, num_t, td);
+      //tri_num++;
+      
       // Loop back to beginning
       continue;
     } else {
@@ -1316,6 +1365,7 @@ int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind) {
     }
   } // Loop back to top before triangle detection
 
+#undef FLAT_TOL  
 }
 
 // Create instances for supported geometries, otherwise would have to put template

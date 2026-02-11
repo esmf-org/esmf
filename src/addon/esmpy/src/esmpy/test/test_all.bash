@@ -21,7 +21,7 @@ if [ "$MPIEXEC_END_OF_PATH" = "mpiuni/mpirun" ]
 then
     PE_COUNTS=(1)
 else
-    PE_COUNTS=(1 4 6)
+    PE_COUNTS=(1 4 6 8)
 fi
 
 for NP in ${PE_COUNTS[@]}

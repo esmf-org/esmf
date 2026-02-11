@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1467,6 +1467,13 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !     whether or not they are expected to be there.   The error code will
 !     be set in case of other errors, for example if the {\tt ESMF\_State}
 !     itself is invalid.
+!      
+!      If the {\tt state} contains nested {\tt ESMF\_State}s,
+!      the {\tt itemName} argument may specify a fully qualified name
+!      to access the desired item's type with a single call.  This is performed
+!      using the '/' character to separate the names of the intermediate
+!      State names leading to the desired item.  (E.g.,
+!      {\tt itemName='state1/state12/item'}).
 !
 !     The arguments are:
 !     \begin{description}
@@ -1487,9 +1494,8 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !
 !EOP
       integer :: localrc
-      type(ESMF_Container), pointer :: scp
-      type(ESMF_StateItemWrap) :: siwrap
-      logical :: foundflag
+      logical :: found
+      type(ESMF_StateItem), pointer :: dataitem      
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -1498,28 +1504,26 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
+      ! Validate State
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-      scp => state%statep%stateContainer
-
-      ! Find the object which matches this name
-      call ESMF_ContainerGet (scp, itemname=itemName, &
-          isPresent=foundflag, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-      if (foundflag) then
-        call ESMF_ContainerGet (scp, itemName=itemName,  &
-            item=siwrap, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ! Look for object
+      found = ESMF_StateClassFindData(state%statep, &
+                 dataname=itemName, expected=.false., &
+                 dataitem=dataitem,  &
+                 rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-
-        itemtype = siwrap%si%otype
+      
+      ! Return item type based on whether it was found
+      if (found) then
+         itemType=dataitem%otype
       else
-        itemtype = ESMF_STATEITEM_NOTFOUND
+         itemType = ESMF_STATEITEM_NOTFOUND
       end if
 
       if (present(rc)) rc = ESMF_SUCCESS

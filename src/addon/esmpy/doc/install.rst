@@ -9,7 +9,7 @@ Requirements
 The following packages are *required* to work with ESMPy:
 
 * `ESMF installation <http://earthsystemmodeling.org/docs/release/latest/ESMF_usrdoc/>`_
-* `python <http://python.org/>`_, minimum version 3.8
+* `python <http://python.org/>`_, minimum version 3.8, with pip at version 21.3 or newer
 * `numpy <http://www.numpy.org/>`_, minimum version 1.19
 
 The following packages are *optional*:
@@ -19,6 +19,7 @@ The following packages are *optional*:
 * ESMF installation with PIO (the Parallel IO library) - required to create :class:`Meshes <esmpy.api.mesh.Mesh>` and :class:`Fields <esmpy.api.field.Field>` from file, and to write regridding weights to file
 * `mpi4py <https://mpi4py.readthedocs.io/en/stable/>`_- python bindings to MPI, needed to run some of the parallel regridding examples
 * `pytest <https://docs.pytest.org/en/7.1.x/>`_ - for testing
+* `scipy <https://scipy.org/>`_ - for testing (for reading NetCDF files in Python tests)
 
 ----------------
 Getting the code
@@ -78,14 +79,35 @@ Please contact esmf_support@ucar.edu with any questions.
 Importing ESMPy
 ---------------
 
-To use ESMPy in an external program, import it with:
+ESMPy relies on a build of the underlying ESMF library. When using a conda package, this
+is made available automatically. However, when installing ESMPy from source, the
+corresponding ESMF library must also be built, per the `ESMF documentation
+<http://earthsystemmodeling.org/docs/release/latest/ESMF_usrdoc/>`_.
 
-.. code::
+Before importing ESMPy, the environment variable ``ESMFMKFILE`` must be set, pointing to
+the location of the ``esmf.mk`` file from the ESMF installation. (If this environment
+variable is not found, the package will try to guess a few common locations, but we
+recommend correctly setting the variable nonetheless.) The location of this file is:
+
+.. code:: shell
+
+    <ESMF_INSTALL_DIR>/lib/lib<g<or>O>/<platform>/esmf.mk
+
+For example, with the bash shell on a Mac, where an optimized version of ESMF has been
+built with the gfortran+clang compilers and the OpenMPI MPI library, ``ESMFMKFILE`` can be
+set with the following (replacing the ``<ESMF_INSTALL_DIR>`` placeholder with the
+appropriate path):
+
+.. code:: bash
+
+   export ESMFMKFILE=<ESMF_INSTALL_DIR>/lib/libO/Darwin.gfortranclang.64.openmpi.default/esmf.mk
+
+After ``ESMFMKFILE`` has been set appropriately, to use ESMPy in an external program,
+import it with:
+
+.. code:: python
 
     import esmpy
-
-The environment variable ``ESMFMKFILE`` should be set when using ESMPy. If it is not found, the package will
-try to guess a few very common locations, but we recommend correctly setting the variable nonetheless.
 
 .. Note::
 
@@ -149,14 +171,11 @@ to ESMF offline and integrated regridding capabilities.
   :class:`~esmpy.api.field.Field` values on a source :class:`~esmpy.api.mesh.Mesh`
   created from file when using conservative regridding.
 - Multi-tile :class:`~esmpy.api.grid.Grid` support is limited to cubed-sphere 
-  grids created on 6 processors. A cubed-sphere grid can be created on any
-  number of processors, but only when it is created on 6 processors will the
-  coordinates be retrievable for the entire object. A 
-  :class:`~esmpy.api.field.Field` created from a cubed-sphere 
+  grids. A :class:`~esmpy.api.field.Field` created from a cubed-sphere
   :class:`~esmpy.api.grid.Grid` cannot be written to file in parallel.
 - There is no ``FieldBundle`` class, only single :class:`Fields <esmpy.api.field.Field>`.
 
 Testing related:
 
 - Nightly regression testing is limited to a small subset of the ESMF test platforms,
-  including Darwin and Linux running gfortran with openMPI.
+  including Darwin and Linux with the gfortran and intel compilers.

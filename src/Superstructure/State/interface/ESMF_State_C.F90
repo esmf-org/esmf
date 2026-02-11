@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -455,34 +455,38 @@
     use ESMF_LogErrMod
     use ESMF_StateTypesMod
     use ESMF_StateMod
-    
+
     implicit none
-    
+
     type(ESMF_State)     :: state
     integer, intent(out) :: rc
-  
+
+    type(ESMF_StateClass), pointer :: statepp
     integer :: localrc
-  
+
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     rc = ESMF_RC_NOT_IMPL
-  
+
     !print *, "collecting State garbage"
 
-    if (associated(state%statep)) then
+    statepp => state%statep ! LLVM workaround for deallocate() runtime error!
+
+    if (associated(statepp)) then
       ! destruct internal data allocations
-      call ESMF_StateDestruct(state%statep, rc=localrc)
+      call ESMF_StateDestruct(statepp, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, &
         rcToReturn=rc)) return
       ! deallocate actual StateClass allocation
-      deallocate(state%statep, stat=localrc)
+      deallocate(statepp, stat=localrc)
       localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
       if (ESMF_LogFoundDeallocError(localrc, msg="Deallocating State", &
         ESMF_CONTEXT, &
         rcToReturn=rc)) return
     endif
+
     nullify(state%statep)
 
     ! return successfully

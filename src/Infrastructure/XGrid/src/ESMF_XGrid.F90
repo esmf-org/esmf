@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -100,7 +100,7 @@ module ESMF_XGridMod
     type(ESMF_XGridGeomBase), pointer      :: sideB(:) => null()        ! geometric types
     type(ESMF_Mesh)                        :: mesh                      ! overlay mesh, not always stored
     real(ESMF_KIND_R8), pointer            :: area(:)         => null() ! area of xgrid
-    real(ESMF_KIND_R8), pointer            :: centroid(:,:)   => null() ! centroids of xgrid
+    real(ESMF_KIND_R8), pointer            :: centroid(:)   => null() ! centroids of xgrid
     type(ESMF_XGridSpec), pointer          :: sparseMatA2X(:) => null() ! descriptors of mapping sparsemat
     type(ESMF_XGridSpec), pointer          :: sparseMatX2A(:) => null() 
     type(ESMF_XGridSpec), pointer          :: sparseMatB2X(:) => null()
@@ -639,14 +639,6 @@ contains
       if(associated(xgtypep%sideA)) ngridA = size(xgtypep%sideA, 1)
       if(associated(xgtypep%sideB)) ngridB = size(xgtypep%sideB, 1)
 
-      if(associated(xgtypep%area) .and. associated(xgtypep%centroid)) then
-        if(size(xgtypep%area, 1) /= size(xgtypep%centroid, 1)) then
-           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-             msg="number of area cells differs from number of centroid cells", &
-             ESMF_CONTEXT, rcToReturn=rc)
-           return
-        endif
-      endif
 
       if(associated(xgtypep%sparseMatA2X) .or. associated(xgtypep%sparseMatX2A)) then
         if(associated(xgtypep%distgridA)) then

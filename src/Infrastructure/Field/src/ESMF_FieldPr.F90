@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -173,7 +173,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     write(ESMF_UtilIOStdout,*)  "Field status = ", fp%status
-    if (fp%status .eq. ESMF_FIELDSTATUS_GRIDSET .or. &
+    if (fp%status .eq. ESMF_FIELDSTATUS_GEOMSET .or. &
          fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
 !      call ESMF_GeomPrint(fp%geom, "", localrc)
 !      if (ESMF_LogFoundError(localrc, &

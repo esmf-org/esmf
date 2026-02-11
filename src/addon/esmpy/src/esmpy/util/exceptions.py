@@ -39,6 +39,9 @@ class SerialMethod(ESMPyException):
     """This method is not safe to run in parallel!"""
     pass
 
+class SingleLocalDEMethod(ESMPyException):
+    """This method only works with one DE per PET."""
+
 class RequiredArgs(ESMPyException):
     """Required arguments were not specified."""
     pass

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1021,7 +1021,7 @@ void get_centerCoords_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, cha
   if (piorc == PIO_NOERR) {
     
     // Define offsets for centerCoords decomp
-    PIO_Offset cc_offsets[num_elems*coordDim];
+    PIO_Offset *cc_offsets = new PIO_Offset[num_elems*coordDim];
     for (int i=0,pos=0; i<num_elems; i++) {
       int elem_start_ind=(elem_ids[i]-1)*coordDim+1;
       for (int j=0; j<coordDim; j++) {
@@ -1037,7 +1037,7 @@ void get_centerCoords_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, cha
                             &rearr, NULL, NULL);
     if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for centerCoords ") + filename,
                        ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
-    
+
     // Record the centerCoords present
     centerCoordsPresent=1;
     piorc = PIOc_setframe(pioFileDesc, varid, -1);
@@ -1056,6 +1056,9 @@ void get_centerCoords_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, cha
     piorc = PIOc_freedecomp(pioSystemDesc, cc_iodesc);
     if (!CHECKPIOERROR(piorc, std::string("Error freeing centerCoords decomp "),
                        ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
+    // Free cc_offsets memory
+    delete [] cc_offsets;
     
     // DEEBUG: output centerCoords
     //     for(int i=0; i<num_elems; i++) {

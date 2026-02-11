@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -83,9 +83,10 @@ module ESMF_FieldMod
   end type
 
   type(ESMF_FieldStatus_Flag), parameter :: ESMF_FIELDSTATUS_UNINIT = ESMF_FieldStatus_Flag(1), &
-                                  ESMF_FIELDSTATUS_EMPTY = ESMF_FieldStatus_Flag(2), &
-                                  ESMF_FIELDSTATUS_GRIDSET = ESMF_FieldStatus_Flag(3), &
-                                  ESMF_FIELDSTATUS_COMPLETE = ESMF_FieldStatus_Flag(4)
+       ESMF_FIELDSTATUS_EMPTY = ESMF_FieldStatus_Flag(2), &
+       ESMF_FIELDSTATUS_GEOMSET = ESMF_FieldStatus_Flag(3), &
+       ESMF_FIELDSTATUS_GRIDSET = ESMF_FIELDSTATUS_GEOMSET, & ! Keep for backward compatibility
+       ESMF_FIELDSTATUS_COMPLETE = ESMF_FieldStatus_Flag(4)
 
 !------------------------------------------------------------------------------
 ! ! ESMF_FieldType
@@ -137,7 +138,7 @@ module ESMF_FieldMod
   public ESMF_FieldType ! For internal use only
 
   public ESMF_FIELDSTATUS_UNINIT, ESMF_FIELDSTATUS_EMPTY, &
-    ESMF_FIELDSTATUS_GRIDSET, ESMF_FIELDSTATUS_COMPLETE
+    ESMF_FIELDSTATUS_GEOMSET, ESMF_FIELDSTATUS_GRIDSET, ESMF_FIELDSTATUS_COMPLETE
 
 !------------------------------------------------------------------------------
 !
@@ -322,7 +323,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif 
 
       ! make sure there is a grid before asking it questions.
-      if (ftypep%status .eq. ESMF_FIELDSTATUS_GRIDSET .or. &
+      if (ftypep%status .eq. ESMF_FIELDSTATUS_GEOMSET .or. &
           ftypep%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
           call ESMF_GeomValidate(ftypep%geom, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
@@ -571,7 +572,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Field only has Geom if complete or gridset
-    if ((ftype%status .eq. ESMF_FIELDSTATUS_GRIDSET) .or. &
+    if ((ftype%status .eq. ESMF_FIELDSTATUS_GEOMSET) .or. &
          (ftype%status .eq. ESMF_FIELDSTATUS_COMPLETE)) then
        
        if (ftype%is_proxy .or. ftype%geomb_internal) then
@@ -764,7 +765,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
-      if (fp%status .eq. ESMF_FIELDSTATUS_GRIDSET .or. &
+      if (fp%status .eq. ESMF_FIELDSTATUS_GEOMSET .or. &
           fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
 
         call ESMF_FieldGetSerializeFlag(fp, should_serialize_geom, localrc)
@@ -890,7 +891,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
-      if (fp%status .eq. ESMF_FIELDSTATUS_GRIDSET .or. &
+      if (fp%status .eq. ESMF_FIELDSTATUS_GEOMSET .or. &
           fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
 
         call ESMF_FieldGetSerializeFlag(fp, should_serialize_geom, localrc)

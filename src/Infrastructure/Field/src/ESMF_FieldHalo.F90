@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -525,8 +525,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (fieldStatus==ESMF_FIELDSTATUS_EMPTY) then
         tempString = "ESMF_FIELDSTATUS_EMPTY"
-      else if (fieldStatus==ESMF_FIELDSTATUS_GRIDSET) then
-        tempString = "ESMF_FIELDSTATUS_GRIDSET"
+      else if (fieldStatus==ESMF_FIELDSTATUS_GEOMSET) then
+        tempString = "ESMF_FIELDSTATUS_GEOMSET"
       else if (fieldStatus==ESMF_FIELDSTATUS_COMPLETE) then
         tempString = "ESMF_FIELDSTATUS_COMPLETE"
       else

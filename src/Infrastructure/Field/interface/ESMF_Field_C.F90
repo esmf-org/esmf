@@ -1,7 +1,7 @@
 !  $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -736,27 +736,30 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
 
     type(ESMF_Field)      :: field
     integer, intent(out)  :: rc
-  
+
+    type(ESMF_FieldType), pointer :: ftypepp
     integer :: localrc
-  
+
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     rc = ESMF_RC_NOT_IMPL
-  
+
     !print *, "collecting Field garbage"
 
-    if (associated(field%ftypep)) then
+    ftypepp => field%ftypep ! LLVM workaround for deallocate() runtime error!
+
+    if (associated(ftypepp)) then
       ! destruct internal data allocations
-      call ESMF_FieldDestruct(field%ftypep, rc=localrc)
+      call ESMF_FieldDestruct(ftypepp, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! deallocate actual FieldType allocation
-      !print *, "deallocate(field%ftypep)"
-      deallocate(field%ftypep, stat=localrc)
+      deallocate(ftypepp, stat=localrc)
       if (ESMF_LogFoundDeallocError(localrc, msg="Deallocating Field", &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+
     nullify(field%ftypep)
 
     ! return successfully
@@ -814,23 +817,26 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     type(ESMF_Field), intent(inout)   :: field
     character(*),     intent(in)      :: file
     character(*),     intent(in), optional :: variableName
-    logical,          intent(in)      :: overwrite
+    type(ESMF_Logical), intent(in)    :: overwrite
     type(ESMF_FileStatus_Flag), intent(in) :: status
     integer,          intent(in)      :: timeSlice
     type(ESMF_IOFmt_Flag), intent(in) :: iofmt
     integer,          intent(out)     :: rc
 
     integer :: localrc
+    logical :: l_overwrite
+
+    l_overwrite = overwrite
 
 ! if (present (variableName)) then
 ! print *, ESMF_METHOD, ': file = ', file, ', variableName = ', variableName
 ! else
 ! print *, ESMF_METHOD, ': file = ', file, ', variableName not present'
 ! end if
-! print *, ESMF_METHOD, ': overwrite = ', overwrite, ', timeSlice =', timeSlice
+! print *, ESMF_METHOD, ': overwrite = ', l_overwrite, ', timeSlice =', timeSlice
     call ESMF_FieldWrite (field, fileName=file,  &
         variableName=variablename,  &
-        overwrite=overwrite, status=status, timeSlice=timeSlice, iofmt=iofmt,  &
+        overwrite=l_overwrite, status=status, timeSlice=timeSlice, iofmt=iofmt,  &
         rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1048,8 +1054,8 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     real(ESMF_KIND_R4), optional            :: extrapDistExponent
     integer, optional                       :: extrapNumLevels
     type(ESMF_UnmappedAction_Flag),optional :: unmappedaction
-    logical,optional                        :: ignoreDegenerate
-    integer,optional                        :: srcTermProcessing
+    type(ESMF_Logical), optional            :: ignoreDegenerate
+    integer, optional                       :: srcTermProcessing
 
     type(C_PTR), optional                   :: factorList
     type(C_PTR), optional                   :: factorIndexList
@@ -1064,6 +1070,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     integer :: localrc
     type(ESMF_RouteHandle) :: l_routehandle
     logical :: l_vectorRegrid
+    logical :: l_ignoreDegenerate
 
     real(ESMF_KIND_R8), pointer    :: factorListFPtr(:)
     integer(ESMF_KIND_I4), pointer :: factorIndexListFPtr(:,:)
@@ -1081,6 +1088,11 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
       l_vectorRegrid = vectorRegrid
     else
       l_vectorRegrid = .false.
+    end if
+    if (present(ignoreDegenerate)) then
+      l_ignoreDegenerate = ignoreDegenerate
+    else
+      l_ignoreDegenerate = .false.
     end if
 
     ! Only return factors if numFactors is a specific integer. This circumvents
@@ -1103,7 +1115,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                 extrapDistExponent=extrapDistExponent, &
                                 extrapNumLevels=extrapNumLevels, &
                                 unmappedaction=unmappedaction, &
-                                ignoreDegenerate=ignoreDegenerate, &
+                                ignoreDegenerate=l_ignoreDegenerate, &
                                 srcTermProcessing=srcTermProcessing, & 
                                 factorList=factorListFPtr, &
                                 factorIndexList=factorIndexListFPtr, &
@@ -1137,7 +1149,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                 extrapDistExponent=extrapDistExponent, &
                                 extrapNumLevels=extrapNumLevels, &
                                 unmappedaction=unmappedaction, &
-                                ignoreDegenerate=ignoreDegenerate, &
+                                ignoreDegenerate=l_ignoreDegenerate, &
                                 srcTermProcessing=srcTermProcessing, &
                                 srcFracField=srcFracField, &
                                 dstFracField=dstFracField, &
@@ -1226,10 +1238,10 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     type(ESMF_LineType_Flag)                :: linetype
     type(ESMF_NormType_Flag)                :: normtype
     type(ESMF_Logical),optional             :: vectorRegrid
-    type(ESMF_UnmappedAction_Flag)          :: unmappedaction
-    logical                                 :: ignoreDegenerate
-    integer                                 :: srcTermProcessing
-    logical, optional                       :: createRoutehandle
+    type(ESMF_UnmappedAction_Flag),optional :: unmappedaction
+    type(ESMF_Logical),            optional :: ignoreDegenerate
+    integer,                       optional :: srcTermProcessing
+    type(ESMF_Logical),            optional :: createRoutehandle  ! Note that createRoutehandle defaults to true
 
     type(ESMF_FileMode_Flag),   optional    :: filemode
     character(len=*),           optional    :: srcFile
@@ -1237,7 +1249,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     type(ESMF_FileFormat_Flag), optional    :: srcFileType
     type(ESMF_FileFormat_Flag), optional    :: dstFileType
 
-    logical, optional                       :: largeFileFlag
+    type(ESMF_Logical), optional            :: largeFileFlag
 
     type(ESMF_Field), optional              :: srcFracField
     type(ESMF_Field), optional              :: dstFracField
@@ -1260,6 +1272,9 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     integer :: localrc
     type(ESMF_RouteHandle) :: l_routehandle
     logical :: l_vectorRegrid
+    logical :: l_ignoreDegenerate
+    logical :: l_createRoutehandle
+    logical :: l_largeFileFlag
 
     real(ESMF_KIND_R8), pointer :: localFactorList(:)
     integer(ESMF_KIND_I4), pointer :: localFactorIndexList(:,:)
@@ -1277,6 +1292,22 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     else
       l_vectorRegrid = .false.
     end if
+    if (present(ignoreDegenerate)) then
+      l_ignoreDegenerate = ignoreDegenerate
+    else
+      l_ignoreDegenerate = .false.
+    end if
+    if (present(createRoutehandle)) then
+      l_createRoutehandle = createRoutehandle
+    else
+      ! Note that createRoutehandle defaults to true
+      l_createRoutehandle = .true.
+    end if
+    if (present(largeFileFlag)) then
+      l_largeFileFlag = largeFileFlag
+    else
+      l_largeFileFlag = .false.
+    end if
     
     call ESMF_VMGetCurrent(vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1287,50 +1318,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if (present (createRoutehandle)) then
-      if (createRoutehandle .eqv. .false.) then  
-        call ESMF_FieldRegridStore(srcField, dstField, &
-                                   srcMaskValues=srcMaskValues, &
-                                   dstMaskValues=dstMaskValues, &
-                                   regridmethod=regridmethod, &
-                                   polemethod=polemethod, &
-                                   regridPoleNPnts=regridPoleNPnts, &
-                                   lineType=linetype, &
-                                   normType=normtype, &
-                                   vectorRegrid=l_vectorRegrid, &
-                                   unmappedaction=unmappedaction, &
-                                   ignoreDegenerate=ignoreDegenerate, &
-                                   srcTermProcessing=srcTermProcessing, &
-                                   factorList=localFactorList, &
-                                   factorIndexList=localFactorIndexList, &
-                                   srcFracField=srcFracField, &
-                                   dstFracField=dstFracField, &
-                                   rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-      else
-        call ESMF_FieldRegridStore(srcField, dstField, &
-                                   srcMaskValues=srcMaskValues, &
-                                   dstMaskValues=dstMaskValues, &
-                                   regridmethod=regridmethod, &
-                                   polemethod=polemethod, &
-                                   regridPoleNPnts=regridPoleNPnts, &
-                                   lineType=linetype, &
-                                   normType=normtype, &
-                                   vectorRegrid=l_vectorRegrid, &
-                                   unmappedaction=unmappedaction, &
-                                   ignoreDegenerate=ignoreDegenerate, &
-                                   srcTermProcessing=srcTermProcessing, &
-                                   routehandle=l_routehandle, &
-                                   factorList=localFactorList, &
-                                   factorIndexList=localFactorIndexList, &
-                                   srcFracField=srcFracField, &
-                                   dstFracField=dstFracField, &
-                                   rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
-    else
+    if (.not. l_createRoutehandle) then
       call ESMF_FieldRegridStore(srcField, dstField, &
                                  srcMaskValues=srcMaskValues, &
                                  dstMaskValues=dstMaskValues, &
@@ -1341,8 +1329,28 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                  normType=normtype, &
                                  vectorRegrid=l_vectorRegrid, &
                                  unmappedaction=unmappedaction, &
-                                 ignoreDegenerate=ignoreDegenerate, &
-                                  srcTermProcessing=srcTermProcessing, &
+                                 ignoreDegenerate=l_ignoreDegenerate, &
+                                 srcTermProcessing=srcTermProcessing, &
+                                 factorList=localFactorList, &
+                                 factorIndexList=localFactorIndexList, &
+                                 srcFracField=srcFracField, &
+                                 dstFracField=dstFracField, &
+                                 rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    else  ! l_createRoutehandle is .true.
+      call ESMF_FieldRegridStore(srcField, dstField, &
+                                 srcMaskValues=srcMaskValues, &
+                                 dstMaskValues=dstMaskValues, &
+                                 regridmethod=regridmethod, &
+                                 polemethod=polemethod, &
+                                 regridPoleNPnts=regridPoleNPnts, &
+                                 lineType=linetype, &
+                                 normType=normtype, &
+                                 vectorRegrid=l_vectorRegrid, &
+                                 unmappedaction=unmappedaction, &
+                                 ignoreDegenerate=l_ignoreDegenerate, &
+                                 srcTermProcessing=srcTermProcessing, &
                                  routehandle=l_routehandle, &
                                  factorList=localFactorList, &
                                  factorIndexList=localFactorIndexList, &
@@ -1350,7 +1358,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                  dstFracField=dstFracField, &
                                  rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return        
+          ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! write the weights to file
@@ -1360,10 +1368,21 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     endif
     
     if (filemode_local == ESMF_FILEMODE_BASIC) then
+#ifndef OLDWAY_102325
+       call ESMF_OutputSimpleWeightFile (fileName, localFactorList, localFactorIndexList, &
+            title="ESMPy Regrid Class Weight File", &
+            method=regridmethod, &
+            largeFileFlag=l_largeFileFlag, &
+            ! TODO: Support this  netcdf4FileFlag, &
+            rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return       
+#else       
       call ESMF_SparseMatrixWrite(localFactorList, localFactorIndexList, &
                                   fileName, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+           ESMF_CONTEXT, rcToReturn=rc)) return
+#endif      
     elseif (filemode_local == ESMF_FILEMODE_WITHAUX) then
       ! query field for geom type
       call ESMF_FieldGet(srcField, geomType=srcgt, typekind=srctk, rc=localrc)
@@ -1485,7 +1504,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                         dstFileType=dstFileType, &
                                         srcArea=srcArea, &
                                         dstArea=dstArea, &
-                                        largeFileFlag=largeFileFlag, &
+                                        largeFileFlag=l_largeFileFlag, &
                                         rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1496,7 +1515,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                         srcFileType=srcFileType, &
                                         dstFileType=dstFileType, &
                                         srcArea=srcArea, &
-                                        largeFileFlag=largeFileFlag, &
+                                        largeFileFlag=l_largeFileFlag, &
                                         rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1507,7 +1526,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                         srcFileType=srcFileType, &
                                         dstFileType=dstFileType, &
                                         dstArea=dstArea, &
-                                        largeFileFlag=largeFileFlag, &
+                                        largeFileFlag=l_largeFileFlag, &
                                         rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1517,7 +1536,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                         srcFile=srcFile, dstFile=dstFile, &
                                         srcFileType=srcFileType, &
                                         dstFileType=dstFileType, &
-                                        largeFileFlag=largeFileFlag, &
+                                        largeFileFlag=l_largeFileFlag, &
                                         rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1539,13 +1558,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     ! we use the public interface to do the ptr copy;
     ! the RouteHandle object returned to the C interface must consist only of
     ! the 'this' pointer. It must not contain the isInit member.
-    if (present (createRoutehandle)) then
-      if (createRoutehandle .eqv. .true.) then
-        call ESMF_RoutehandleCopyThis(l_routehandle, routehandle, localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
-    else 
+    if (l_createRoutehandle) then
       call ESMF_RoutehandleCopyThis(l_routehandle, routehandle, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1582,21 +1595,28 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     type(ESMF_Field)                                :: dstField
     character(len=*)                                :: filename
     type(ESMF_RouteHandle)                          :: routehandle
-    logical,                               optional :: ignoreUnmatchedIndices
+    type(ESMF_Logical),                    optional :: ignoreUnmatchedIndices
     integer,                               optional :: srcTermProcessing
     integer,                               optional :: pipeLineDepth
     integer,                               optional :: rc
 
     integer :: localrc
     type(ESMF_RouteHandle) :: l_routehandle
+    logical :: l_ignoreUnmatchedIndices
 
     ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
+
+    if (present(ignoreUnmatchedIndices)) then
+      l_ignoreUnmatchedIndices = ignoreUnmatchedIndices
+    else
+      l_ignoreUnmatchedIndices = .false.
+    end if
     
     call ESMF_FieldSMMStore(srcField, dstField, &
                             filename, l_routehandle, &
-                            ignoreUnmatchedIndices=ignoreUnmatchedIndices, &
+                            ignoreUnmatchedIndices=l_ignoreUnmatchedIndices, &
                             srcTermProcessing=srcTermProcessing, &
                             pipeLineDepth=pipeLineDepth, &
                             rc=localrc)

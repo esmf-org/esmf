@@ -1,7 +1,7 @@
 !  $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -491,6 +491,7 @@ recursive subroutine f_esmf_compcollectgarbage2(comp, rc)
   type(ESMF_CWrap)     :: comp
   integer, intent(out) :: rc
 
+  type(ESMF_CompClass), pointer :: comppp
   integer :: localrc
   integer :: timeout
   logical :: timeoutFlag
@@ -501,22 +502,25 @@ recursive subroutine f_esmf_compcollectgarbage2(comp, rc)
 
   !print *, "collecting Component garbage #2"
 
+  comppp => comp%compp  ! LLVM workaround for deallocate() runtime error!
+
   ! destruct internal data allocations and perform full shut down, making this
   ! call collective on some MPI implementations
   timeout = 10  ! allow for 10s timeout
   ! calling with 'timeoutFlag' prevents timeout to propagate as error condition
-  call ESMF_CompDestruct(comp%compp, interCompComm=.false., &
+  call ESMF_CompDestruct(comppp, interCompComm=.false., &
     fullShutdown=.true., timeout=timeout, timeoutFlag=timeoutFlag, rc=localrc)
   if (ESMF_LogFoundError(localrc, &
     ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! deallocate actual CompClass allocation
-  if (associated(comp%compp)) then
-    deallocate(comp%compp, stat=localrc)
+  if (associated(comppp)) then
+    deallocate(comppp, stat=localrc)
     if (ESMF_LogFoundDeallocError(localrc, msg="Deallocating Comp", &
       ESMF_CONTEXT, rcToReturn=rc)) return
   endif
+
   nullify(comp%compp)
 
   ! return successfully

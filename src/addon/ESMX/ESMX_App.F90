@@ -13,7 +13,10 @@ program ESMX_App
 
   use ESMF
   use NUOPC
-  use ESMX_Driver, only: driverSS => SetServices, HConfigCreateFoundNode
+  use ESMX_Driver, only: &
+    driverSV => SetVM, &
+    driverSS => SetServices, &
+    HConfigCreateFoundNode
 
   implicit none
 
@@ -21,11 +24,14 @@ program ESMX_App
   type(ESMF_GridComp)       :: driver
   type(ESMF_HConfig)        :: hconfig, hconfigNode
   character(:), allocatable :: configKey(:)
-  character(:), allocatable :: valueString
-  logical                   :: isFlag, logFlush
+  character(:), allocatable :: valueString, fname
+  logical                   :: isFlag, isFlag2, logFlush
   type(ESMF_Time)           :: startTime, stopTime
   type(ESMF_TimeInterval)   :: timeStep
   type(ESMF_Clock)          :: clock
+  integer, allocatable      :: petList(:), devList(:)
+  integer                   :: ompNumThreads
+  type(ESMF_Info)           :: info
 
   ! Initialize ESMF
   configKey = ["ESMX", "App "]
@@ -51,27 +57,29 @@ program ESMX_App
 
   ! Validate hconfigNode against ESMX/App controlled key vocabulary
   isFlag = ESMF_HConfigValidateMapKeys(hconfigNode, &
-    vocabulary=["defaultLogFilename          ", & ! ESMF_Initialize option
-                "logAppendFlag               ", & ! ESMF_Initialize option
-                "logKindFlag                 ", & ! ESMF_Initialize option
-                "defaultCalKind              ", & ! ESMF_Initialize option
-                "globalResourceControl       ", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_COMPLIANCECHECK", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_GARBAGE        ", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_GARBAGE_LOG    ", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_PROFILE        ", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_PROFILE_OUTPUT ", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_PROFILE_PETLIST", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_PROFILE_REGRID ", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_TRACE          ", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_TRACE_CLOCK    ", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_TRACE_COMPONENT", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_TRACE_FLUSH    ", & ! ESMF_Initialize option
-                "ESMF_RUNTIME_TRACE_PETLIST  ", & ! ESMF_Initialize option
-                "startTime                   ", & ! ESMX_App option
-                "stopTime                    ", & ! ESMX_App option
-                "logFlush                    ", & ! ESMX_App option
-                "fieldDictionary             "  & ! ESMX_App option
+    vocabulary=["defaultLogFilename             ", & ! ESMF_Initialize option
+                "logAppendFlag                  ", & ! ESMF_Initialize option
+                "logKindFlag                    ", & ! ESMF_Initialize option
+                "defaultCalKind                 ", & ! ESMF_Initialize option
+                "globalResourceControl          ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_ABORT_ACTION      ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_ABORT_LOGMSG_TYPES", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_COMPLIANCECHECK   ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_GARBAGE           ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_GARBAGE_LOG       ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_PROFILE           ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_PROFILE_OUTPUT    ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_PROFILE_PETLIST   ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_PROFILE_REGRID    ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_TRACE             ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_TRACE_CLOCK       ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_TRACE_COMPONENT   ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_TRACE_FLUSH       ", & ! ESMF_Initialize option
+                "ESMF_RUNTIME_TRACE_PETLIST     ", & ! ESMF_Initialize option
+                "startTime                      ", & ! ESMX_App option
+                "stopTime                       ", & ! ESMX_App option
+                "logFlush                       ", & ! ESMX_App option
+                "fieldDictionary                "  & ! ESMX_App option
                 ], badKey=valueString, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &
@@ -135,21 +143,6 @@ program ESMX_App
       call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
 
-  ! Create esmx driver
-  driver = ESMF_GridCompCreate(name="ESMX_Driver", hconfig=hconfig, rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, file=FILENAME)) &
-    call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  ! SetServices esmx driver
-  call ESMF_GridCompSetServices(driver, driverSS, userRc=urc, rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, file=FILENAME)) &
-    call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  if (ESMF_LogFoundError(rcToCheck=urc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, file=FILENAME)) &
-    call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
   ! Set run clock
   valueString = ESMF_HConfigAsString(hconfigNode, keyString="startTime", rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -180,6 +173,160 @@ program ESMX_App
   ! Destroy the hconfigNode
   call ESMF_HConfigDestroy(hconfigNode, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! set up petList
+  configKey = ["ESMX   ", "Driver ", "petList"]
+  hconfigNode = HConfigCreateFoundNode(hconfig, configKey=configKey, &
+    foundFlag=isFlag, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  if (isFlag) then
+    call NUOPC_IngestPetList(petList, hconfigNode, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) &
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_HConfigDestroy(hconfigNode, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) &
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  else
+    allocate(petList(0))
+  endif
+
+  ! set up devList
+  configKey = ["ESMX   ", "Driver ", "devList"]
+  hconfigNode = HConfigCreateFoundNode(hconfig, configKey=configKey, &
+    foundFlag=isFlag, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  if (isFlag) then
+    call NUOPC_IngestPetList(devList, hconfigNode, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) &
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_HConfigDestroy(hconfigNode, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) &
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  else
+    allocate(devList(0))
+  endif
+
+  ! Create esmx driver
+  driver = ESMF_GridCompCreate(name="ESMX_Driver", hconfig=hconfig, &
+    petList=petList, devList=devList, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! Access the info object
+  call ESMF_InfoGetFromHost(driver, info=info, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! Set OpenMP hints on info
+  configKey = ["ESMX         ", "Driver       ", "ompNumThreads"]
+  hconfigNode = HConfigCreateFoundNode(hconfig, configKey=configKey, &
+    foundFlag=isFlag, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  if (isFlag) then
+    ompNumThreads = ESMF_HConfigAsI4(hconfigNode, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) &
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_InfoSet(info, key="/NUOPC/Hint/PePerPet/MaxCount", &
+      value=ompNumThreads, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) &
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_HConfigDestroy(hconfigNode, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) &
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  endif
+
+  ! Set stdout redirect hints on info
+  configKey = ["ESMX  ", "Driver", "stdout"]
+  hconfigNode = HConfigCreateFoundNode(hconfig, configKey=configKey, &
+    foundFlag=isFlag, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  if (isFlag) then
+    isFlag2 = ESMF_HConfigIsDefined(hconfigNode, keyString="filename", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) &
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    if (isFlag2) then
+      fname = ESMF_HConfigAsString(hconfigNode, keyString="filename", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) &
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      call ESMF_InfoSet(info, key="/NUOPC/Hint/stdout/filename", &
+        value=fname, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) &
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    endif
+    call ESMF_HConfigDestroy(hconfigNode, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) &
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  endif
+
+  ! Set stderr redirect hints in info
+  configKey = ["ESMX  ", "Driver", "stderr"]
+  hconfigNode = HConfigCreateFoundNode(hconfig, configKey=configKey, &
+    foundFlag=isFlag, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  if (isFlag) then
+    isFlag2 = ESMF_HConfigIsDefined(hconfigNode, keyString="filename", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) &
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    if (isFlag2) then
+      fname = ESMF_HConfigAsString(hconfigNode, keyString="filename", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) &
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      call ESMF_InfoSet(info, key="/NUOPC/Hint/stderr/filename", &
+        value=fname, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) &
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    endif
+    call ESMF_HConfigDestroy(hconfigNode, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) &
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  endif
+
+  ! SetVM esmx driver
+  call ESMF_GridCompSetVM(driver, driverSV, userRc=urc, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  if (ESMF_LogFoundError(rcToCheck=urc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! SetServices esmx driver
+  call ESMF_GridCompSetServices(driver, driverSS, userRc=urc, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  if (ESMF_LogFoundError(rcToCheck=urc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2026, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -59,23 +59,28 @@ static const char *const version = "$Id$";
 
 using namespace ESMCI;
 
-
-void pcoord_2d(vector<double> &p, vector<double> &a) {
-    a[0] = (1.0 - p[0]) * (1.0 - p[1]);
-    a[1] = p[0] * (1.0 - p[1]);
-    a[2] = p[0] * p[1];
-    a[3] = (1.0 - p[0]) * p[1];
+void pcoord_to_wgts_tri_2d(double *p, vector<double> &w) {
+  w.push_back(1-p[0]-p[1]);
+  w.push_back(p[0]);
+  w.push_back(p[1]);
 }
 
-void pcoord_3d(vector<double> &p, vector<double> &a) {
-    a[0] = (1.0 - p[0]) * (1.0 - p[1]) * (1.0 - p[2]);
-    a[1] = p[0] * (1.0 - p[1]) * (1.0 - p[2]);
-    a[2] = p[0] * p[1] * (1.0 - p[2]);
-    a[3] = (1.0 - p[0]) * p[1] * (1.0 - p[2]);
-    a[4] = (1.0 - p[0]) * (1.0 - p[1]) * p[2];
-    a[5] = p[0] * (1.0 - p[1]) * p[2];
-    a[6] = p[0] * p[1] * p[2];
-    a[7] = (1.0 - p[0]) * p[1] * p[2];
+void pcoord_to_wgts_quad_2d(double *p, vector<double> &w) {
+  w.push_back((1.0 - p[0]) * (1.0 - p[1]));
+  w.push_back(p[0] * (1.0 - p[1]));
+  w.push_back(p[0] * p[1]);
+  w.push_back((1.0 - p[0]) * p[1]);
+}
+
+void pcoord_to_wgts_hex_3d(double *p, vector<double> &w) {
+  w.push_back((1.0 - p[0]) * (1.0 - p[1]) * (1.0 - p[2]));
+  w.push_back(p[0] * (1.0 - p[1]) * (1.0 - p[2]));
+  w.push_back(p[0] * p[1] * (1.0 - p[2]));
+  w.push_back((1.0 - p[0]) * p[1] * (1.0 - p[2]));
+  w.push_back((1.0 - p[0]) * (1.0 - p[1]) * p[2]);
+  w.push_back(p[0] * (1.0 - p[1]) * p[2]);
+  w.push_back(p[0] * p[1] * p[2]);
+  w.push_back((1.0 - p[0]) * p[1] * p[2]);
 }
 
 void calc_bilinear_mat(MBMesh *srcmb, PointList *dstpl,
@@ -89,6 +94,14 @@ void calc_bilinear_mat(MBMesh *srcmb, PointList *dstpl,
 
     // Get MOAB mesh
     Interface *mesh = srcmb->mesh;
+
+    // Set up a vector to hold the weights
+    vector<double> w;
+    w.reserve(8);
+
+    // Set up a vector to hold the gids
+    vector<int> gids;
+    gids.reserve(8);
 
     // Find maximum number of dst nodes in search results
     unsigned int max_num_dst_nodes = 0;
@@ -138,6 +151,9 @@ void calc_bilinear_mat(MBMesh *srcmb, PointList *dstpl,
 }
 #endif
 
+      // Prepare vector to hold gids
+      gids.clear();
+ 
 #ifdef MOAB_UNORDERED_CONNECTIVITY
       // Get the nodes on this element (only corners)
       // note: other get_connectivity calls return ordered sets of nodes, which
@@ -149,9 +165,6 @@ void calc_bilinear_mat(MBMesh *srcmb, PointList *dstpl,
       }
 
       // get the ids of the nodes of the elements and count them
-      vector<double> gids;
-      gids.reserve(8);
-      int num_nodes = 0;
       for(Range::iterator it=nodes.begin(); it !=nodes.end(); it++) {
         const EntityHandle *ent=(&*it);
         int gid;
@@ -168,59 +181,48 @@ void calc_bilinear_mat(MBMesh *srcmb, PointList *dstpl,
       }
 
       // get the ids of the nodes of the elements and count them
-      vector<double> gids;
-      gids.reserve(8);
-      int num_nodes = 0;
       for(int i = 0; i < nodes.size(); ++i) {
         int gid;
         MBMesh_get_gid(srcmb, nodes[i], &gid);
         gids.push_back(gid);
-        ++num_nodes;
       }
 
 #endif
-      // put the pcoords into a vector
-      vector<double> p;
-      p.push_back(db->pcoord[0]);
-      p.push_back(db->pcoord[1]);
-      if (num_nodes > 4)
-        p.push_back(db->pcoord[2]);
 
-      // set up a vector to hold the weights
-      vector<double> a;
-      a.reserve(8);
-
+      // Prepare vector to hold weights
+      w.clear();
+      
       // weight generation
-      if (num_nodes == 3) {
-        a.push_back(1-db->pcoord[0]-db->pcoord[1]);
-        a.push_back(db->pcoord[0]);
-        a.push_back(db->pcoord[1]);
-        // pcoord_2d(p, a);
-      }
-      else if (num_nodes == 4)
-        pcoord_2d(p, a);
-      else if (num_nodes == 8)
-        pcoord_3d(p, a);
-      else
+      if (gids.size() == 3) {
+        pcoord_to_wgts_tri_2d(db->pcoord, w);
+      } else if (gids.size() == 4) {
+        pcoord_to_wgts_quad_2d(db->pcoord, w);
+      } else if (gids.size() == 8) {
+        pcoord_to_wgts_hex_3d(db->pcoord, w);
+      } else {
         Throw() << "invalid number of nodes";
-
+      }
+      
+      // Make sure we have the same number of weights as ids
+      ThrowRequire(w.size() == gids.size());
+      
       // build row of weight matrix
       int gid; MBMesh_get_gid(srcmb, sr.src_elem, &gid);
       IWeights::Entry row(db->dst_gid, 0, 0.0, gid);
       vector<IWeights::Entry> col;
-      col.reserve(num_nodes);
+      col.reserve(gids.size());
 #ifdef DEBUG_WEIGHTS
       printf("%d# row [%d, 0, 0.0, %d]\n", Par::Rank(), db->dst_gid, gid);
 
-      printf("%d# num nodes %d [%d] gids [", Par::Rank(), num_nodes, gids.size());
+      printf("%d# num nodes %d [%d] gids [", Par::Rank(), gids.size(), gids.size());
       for(int i = 0; i < gids.size(); ++i) {
         printf("%d, ", gids[i]);
       }
       printf("]\n");
 #endif
       // Loop over nodes of the element
-      for(int i = 0; i<num_nodes; ++i) {
-        col.push_back(IWeights::Entry(gids[i], 0, a[i], db->dst_gid));
+      for(int i = 0; i<gids.size(); ++i) {
+        col.push_back(IWeights::Entry(gids[i], 0, w[i], db->dst_gid));
 #ifdef DEBUG_WEIGHTS
       printf("%d# col [%d, 0, %f, %d]\n", Par::Rank(), gids[i], a[i], db->dst_gid);
 #endif

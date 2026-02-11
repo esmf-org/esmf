@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -94,6 +94,47 @@ program ESMF_MeshFileIOUTest
 #endif
   !-----------------------------------------------------------------------------
 
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test Mesh create from ESMFMesh file with petCount > elementCount."
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+       
+  call test_mesh_create_from_PCGEC_EM_file(correct, rc)
+
+#ifdef ESMF_PIO
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMC_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMC_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+#endif
+  !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test Mesh create from UGRID file with petCount > elementCount."
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+       
+  call test_mesh_create_from_PCGEC_UG_file(correct, rc)
+
+#ifdef ESMF_PIO
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMC_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMC_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+#endif
+  !-----------------------------------------------------------------------------
+
+   
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
@@ -439,6 +480,97 @@ subroutine  test_mesh_create_from_med_EM_file(correct, rc)
    rc=ESMF_SUCCESS
 
 end subroutine test_mesh_create_from_med_EM_file
+
+! Create a Mesh from an ESMFMesh file with only 2 elements so that
+! when run on 4 PETs it'll have petCount less than elementCount
+subroutine  test_mesh_create_from_PCGEC_EM_file(correct, rc)
+  logical :: correct
+  integer :: rc
+  type(ESMF_Mesh) :: mesh
+  integer :: petCount, localPet
+  type(ESMF_VM) :: vm
+  type(ESMF_DistGrid) :: nodeDistgrid, elemDistgrid
+  integer, allocatable :: elemIds(:)
+  integer :: numElems, numPerPet, numThisPet
+  integer :: minId,maxId
+  integer :: i, pos
+
+  ! Init correct
+  correct=.true.
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  
+  
+  ! Create Mesh from file
+  mesh=ESMF_MeshCreate("data/test_sph_2x1_esmf.nc", &
+       fileformat=ESMF_FILEFORMAT_ESMFMESH, &
+       rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+
+  !! Write mesh for debugging
+  !call ESMF_MeshWrite(mesh,"test_mesh",rc=rc)
+  !if (rc /= ESMF_SUCCESS) return
+
+  ! Get rid of Mesh
+  call ESMF_MeshDestroy(mesh, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+   ! Return success
+   rc=ESMF_SUCCESS
+
+end subroutine test_mesh_create_from_PCGEC_EM_file
+
+! Create a Mesh from a UGRID file with only 2 elements so that
+! when run on 4 PETs it'll have petCount less than elementCount
+subroutine  test_mesh_create_from_PCGEC_UG_file(correct, rc)
+  logical :: correct
+  integer :: rc
+  type(ESMF_Mesh) :: mesh
+  integer :: petCount, localPet
+  type(ESMF_VM) :: vm
+  type(ESMF_DistGrid) :: nodeDistgrid, elemDistgrid
+  integer, allocatable :: elemIds(:)
+  integer :: numElems, numPerPet, numThisPet
+  integer :: minId,maxId
+  integer :: i, pos
+
+  ! Init correct
+  correct=.true.
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  
+  
+  ! Create Mesh from file
+  mesh=ESMF_MeshCreate("data/test_sph_2x1_ugrid.nc", &
+       fileformat=ESMF_FILEFORMAT_UGRID, &
+       rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+
+  !! Write mesh for debugging
+  !call ESMF_MeshWrite(mesh,"test_mesh_ugrid",rc=rc)
+  !if (rc /= ESMF_SUCCESS) return
+
+  ! Get rid of Mesh
+  call ESMF_MeshDestroy(mesh, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+   ! Return success
+   rc=ESMF_SUCCESS
+
+end subroutine test_mesh_create_from_PCGEC_UG_file
+
+
+
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !

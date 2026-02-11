@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -449,13 +449,6 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
     int dimid;
     get_elementCount_from_ESMFMesh_file(pioFileDesc, filename, elementCount);
 
-    // Don't currently support more pets than elements
-    if (pet_count > elementCount) {
-      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-          " Can't create a Mesh from a file in a VM when that VM contains more PETs than elements in the file.",
-                           ESMC_CONTEXT, &localrc)) throw localrc;
-    }
-
     // Get positions at which to read element information
     std::vector<int> elem_ids_vec;
     if (elem_distgrid == NULL) {
@@ -753,7 +746,7 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
     int pet_count = vm->getPetCount();
 
 
-    // Get id of mesh topo varaible
+    // Get id of mesh topo variable
     int mesh_topo_id;
     get_mesh_topo_id_from_UGRID_file(pioFileDesc, filename, mesh_topo_id);
 
@@ -774,13 +767,6 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
     // Get global elementCount
     PIO_Offset elementCount;
     get_elementCount_from_UGRID_file(pioFileDesc, filename, elementConn_id, elementCount);
-
-    // Don't currently support more pets than elements
-    if (pet_count > elementCount) {
-      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-          " Can't create a Mesh from a file in a VM when that VM contains more PETs than elements in the file.",
-                           ESMC_CONTEXT, &localrc)) throw localrc;
-    }
 
     // Get positions at which to read element information
     std::vector<int> elem_ids_vec;

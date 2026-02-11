@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -54,6 +54,7 @@ program ESMF_InternalStateEx
   end type
 
   type(dataWrapper)             :: wrap
+  type(testData), pointer       :: p
   character(len=:), allocatable :: labelList(:)
 !EOC
   integer :: result
@@ -129,7 +130,8 @@ program ESMF_InternalStateEx
   endif
 
   ! Deallocate the private data block
-  deallocate(wrap%p)
+  p => wrap%p  ! LLVM workaround for deallocate() runtime error!
+  deallocate(p)
 
 !EOC
 !-------------------------------------------------------------------------
@@ -192,7 +194,8 @@ program ESMF_InternalStateEx
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
   ! Deallocate the private data block
-  deallocate(wrap%p)
+  p => wrap%p  ! LLVM workaround for deallocate() runtime error!
+  deallocate(p)
 
   ! Get Internal State
   call ESMF_InternalStateGet(comp, internalState=wrap, &
@@ -200,7 +203,8 @@ program ESMF_InternalStateEx
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
   ! Deallocate the private data block
-  deallocate(wrap%p)
+  p => wrap%p  ! LLVM workaround for deallocate() runtime error!
+  deallocate(p)
 
 !EOC
 

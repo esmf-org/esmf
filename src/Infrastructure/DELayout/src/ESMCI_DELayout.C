@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -15,6 +15,7 @@
 #define XXE_STORAGEDELETE_LOG_off
 #define XXE_EXEC_LOG_off
 #define XXE_EXEC_MEMLOG_off
+#define XXE_EXEC_LOOP_MEMLOG_off
 #define XXE_EXEC_BUFFLOG_off
 #define XXE_EXEC_OPSLOG_off
 #define XXE_EXEC_RECURSLOG_off
@@ -4034,7 +4035,7 @@ int XXE::exec(
       break;
     case sendnb:
       {
-#ifdef XXE_EXEC_MEMLOG_on
+#ifdef XXE_EXEC_LOOP_MEMLOG_on
   VM::logMemInfo(std::string("XXE::exec():sendnb1.0"));
 #endif
         xxeSendnbInfo = (SendnbInfo *)xxeElement;
@@ -4056,12 +4057,12 @@ int XXE::exec(
           ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
-#ifdef XXE_EXEC_MEMLOG_on
+#ifdef XXE_EXEC_LOOP_MEMLOG_on
   VM::logMemInfo(std::string("XXE::exec():sendnb2.0"));
 #endif
         vm->send(buffer, size, xxeSendnbInfo->dstPet, xxeSendnbInfo->commhandle,
           xxeSendnbInfo->tag);
-#ifdef XXE_EXEC_MEMLOG_on
+#ifdef XXE_EXEC_LOOP_MEMLOG_on
   VM::logMemInfo(std::string("XXE::exec():sendnb3.0"));
 #endif
         xxeSendnbInfo->activeFlag = true;     // set
@@ -5478,7 +5479,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
     default:
       break;
     }
-#ifdef XXE_EXEC_MEMLOG_on
+#ifdef XXE_EXEC_LOOP_MEMLOG_on
     VM::logMemInfo(std::string("XXE::exec(): op-loop"));
 #endif
   }

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -638,10 +638,14 @@ HConfig HConfig::createAt(
 
 
 //-----------------------------------------------------------------------------
-template <typename T> inline YAML::Node HConfig::find(T self, HConfig *key){
+template <typename T> inline YAML::Node HConfig::find(const T self, HConfig *key){
   if ((*key->doc)[0].IsScalar()){
-    // handle scalar key as simple string direct indexing
-    return (self)[(*key->doc)[0].as<std::string>()];
+    // Handle scalar key as simple string direct indexing
+    // If key is found by [], it'll return an invalid Node that evaluates as true,
+    // so return that.
+    // Otherwise, return an undefined Node.
+    if (YAML::Node tmp = (self)[(*key->doc)[0].as<std::string>()]) return tmp;
+    else return YAML::Node(YAML::NodeType::Undefined);
   }else{
     // handle complex key by iteration and comparing serialized node
     std::stringstream ss_key;

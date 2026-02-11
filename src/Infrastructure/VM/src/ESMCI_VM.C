@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -2022,6 +2022,15 @@ int VM::translateVMId(
       MPI_Group subGroup;
       MPI_Group_incl(mpiGroup, petList.size(), &(petList[0]), &subGroup);
       MPI_Comm_create_group(mpiComm, subGroup, 99, &(helper2[i].subComm));
+#ifdef TRANSLATE_VMID_LOG_on
+      // development log
+      for (unsigned k=0; k<petList.size(); k++){
+        std::stringstream msg;
+        msg << "subGroup: " << &subGroup << " subComm: " << &(helper2[i].subComm)
+          << " petList[" << k << "] =" << petList[k];
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
       if (helper2[i].subComm == MPI_COMM_NULL){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
           "This VMId's key does not have this PET's VAS bit set. Unsupported!",
@@ -2086,6 +2095,11 @@ int VM::translateVMId(
       msg << "localId=" << localId;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
+    {
+      std::stringstream msg;
+      msg << "helper2.size()=" << helper2.size();
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
 #endif
 
     // determine globally unique integer indices for all the entries in helper2
@@ -2103,20 +2117,48 @@ int VM::translateVMId(
       for (unsigned k=0; k<helper2[i].count; k++){
         helper1[helper2[i].indexH1+k].id = localIdTemp+k;
       }
+#define WORKAROUND_INTELLLVM_HANG
+#ifndef WORKAROUND_INTELLLVM_HANG
+      // clean-up
+      MPI_Comm_free(&(helper2[i].subComm));
+#endif
+    }
+
+    // There is a bizzare issue that has been observed with versions of
+    // IntelLLVM:
+    // The call into the above MPI_Bcast() on subComm hangs intermittendly.
+    // The issue might be MPI thread support related, because the hanging
+    // seemed to go away when running with MPI_THREAD_SERIALIZED or lower.
+    // Another work-around that was found was to move the MPI_Comm_free() call
+    // for subComm to its separate loop below.
+    // For now just enable this work-around, since it is code that should work
+    // just fine. But also keep the original implementation with this comment
+    // in case it might be helpful in the future.
+
+#ifdef WORKAROUND_INTELLLVM_HANG
+    for (unsigned i=0; i<helper2.size(); i++){
       // clean-up
       MPI_Comm_free(&(helper2[i].subComm));
     }
-    
+#endif
+
     // finish up by filling the globally unique integer id into the idsArray
     for (int i=0; i<elementCount; i++){
       idsArray[i] = helper1[idsArray[i]].id;
     }
-    
+
+#ifdef TRANSLATE_VMID_LOG_on
+    // development log
+    {
+      ESMC_LogDefault.Write("done", ESMC_LOGMSG_DEBUG);
+    }
+#endif
+
   } // elementCount > 0
-  
+
   // clean-up
   MPI_Group_free(&mpiGroup);
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -3403,8 +3445,20 @@ VM *VM::initialize(
 
   // obtain ESMF runtime environment
   if (GlobalVM->getLocalPet() == 0){
-    char const *esmfRuntimeVarName = "ESMF_RUNTIME_COMPLIANCECHECK";
+    char const *esmfRuntimeVarName = "ESMF_RUNTIME_ABORT_ACTION";
     char const *esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
+    if (esmfRuntimeVarValue){
+      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
+      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
+    }
+    esmfRuntimeVarName = "ESMF_RUNTIME_ABORT_LOGMSG_TYPES";
+    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
+    if (esmfRuntimeVarValue){
+      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
+      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
+    }
+    esmfRuntimeVarName = "ESMF_RUNTIME_COMPLIANCECHECK";
+    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
     if (esmfRuntimeVarValue){
       esmfRuntimeEnv.push_back(esmfRuntimeVarName);
       esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
@@ -3428,6 +3482,12 @@ VM *VM::initialize(
       esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
     }
     esmfRuntimeVarName = "ESMF_RUNTIME_GARBAGE_LOG";
+    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
+    if (esmfRuntimeVarValue){
+      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
+      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
+    }
+    esmfRuntimeVarName = "ESMF_RUNTIME_MPI_THREAD_SUPPORT";
     esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
     if (esmfRuntimeVarValue){
       esmfRuntimeEnv.push_back(esmfRuntimeVarName);

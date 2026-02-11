@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -5290,10 +5290,10 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! prepare FieldBundles to store src and dst Fields
-    is%wrap%srcFields = ESMF_FieldBundleCreate(rc=rc)
+    is%wrap%srcFields = ESMF_FieldBundleCreate(name="srcFields", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    is%wrap%dstFields = ESMF_FieldBundleCreate(rc=rc)
+    is%wrap%dstFields = ESMF_FieldBundleCreate(name="dstFields", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
@@ -6435,8 +6435,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! conditional profiling for src/dst PETs
-    if (btest(profiling,3) .and. &
-      (is%wrap%epochEnable.and. .not.is%wrap%srcDstOverlap)) then
+    if (btest(profiling,3) .and. .not.is%wrap%srcDstOverlap) then
       if (is%wrap%srcFlag) then
         call ESMF_TraceRegionEnter(rName//"-srcPETs", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -6479,6 +6478,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       ! Conditionally enter VMEpoch
       if (is%wrap%epochEnable.and. .not.is%wrap%srcDstOverlap) then
         call ESMF_VMEpochEnter(epoch=ESMF_VMEPOCH_BUFFER, &
+          keepAlloc=is%wrap%epochEnterKeepAlloc, &
           throttle=is%wrap%epochThrottle, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -6501,7 +6501,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
         enddo
-      else;
+      else
         routeHandleIsCreated = ESMF_RouteHandleIsCreated(is%wrap%rh, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -6520,7 +6520,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       ! Conditionally exit VMEpoch
       if (is%wrap%epochEnable.and. .not.is%wrap%srcDstOverlap) then
-        call ESMF_VMEpochExit(rc=rc)
+        call ESMF_VMEpochExit(keepAlloc=is%wrap%epochExitKeepAlloc, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       endif
@@ -6585,8 +6585,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! conditional profiling for src/dst PETs
-    if (btest(profiling,3) .and. &
-      (is%wrap%epochEnable.and. .not.is%wrap%srcDstOverlap)) then
+    if (btest(profiling,3) .and. .not.is%wrap%srcDstOverlap) then
       if (is%wrap%srcFlag) then
         call ESMF_TraceRegionExit(rName//"-srcPETs", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -6622,6 +6621,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     character(*), parameter   :: rName="Finalize"
     integer                   :: stat
     type(type_InternalState)  :: is
+    type(type_InternalStateStruct), pointer :: wrap
     integer                   :: localrc
     logical                   :: existflag
     logical                   :: routeHandleIsCreated
@@ -6868,14 +6868,15 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-    
+
     ! deallocate internal state memory
-    deallocate(is%wrap, stat=stat)
+    wrap => is%wrap ! LLVM workaround for deallocate() runtime error!
+    deallocate(wrap, stat=stat)
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
       msg="Deallocation of internal state memory failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-      
+
     ! handle diagnostic
     if (btest(diagnostic,10)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&

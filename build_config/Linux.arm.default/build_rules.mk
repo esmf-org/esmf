@@ -95,7 +95,6 @@ else
 ESMF_F90DEFAULT         = mpif90
 endif
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
-ESMF_F90LINKLIBS       += $(shell $(ESMF_DIR)/scripts/libs.openmpif90 $(ESMF_F90DEFAULT))
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
@@ -219,7 +218,7 @@ endif
 ############################################################
 # OpenMP compiler and linker flags
 #
-ESMF_OPENMP=OFF
+ESMF_OPENMPDEFAULT=OFF
 # ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
 # ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
 # ESMF_OPENMP_F90LINKOPTS    += -fopenmp

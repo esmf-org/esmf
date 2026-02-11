@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -34,7 +34,9 @@ module NUOPC_Driver
   public &
     SetVM, &
     SetServices, &
-    routine_Run
+    routine_Run, &
+    SetServicesInterfaceGridComp, SetVMInterfaceGridComp, &
+    SetServicesInterfaceCplComp, SetVMInterfaceCplComp
 
   public &
     label_PreChildrenAdvertise, &
@@ -80,6 +82,33 @@ module NUOPC_Driver
   character(*), parameter :: &
     label_SetRunClock = "Driver_SetRunClock"
 
+  abstract interface
+    recursive subroutine SetServicesInterfaceGridComp(gridcomp, rc)
+      use ESMF
+      implicit none
+      type(ESMF_GridComp)        :: gridcomp ! must not be optional
+      integer, intent(out)       :: rc       ! must not be optional
+    end subroutine
+    recursive subroutine SetVMInterfaceGridComp(gridcomp, rc)
+      use ESMF
+      implicit none
+      type(ESMF_GridComp)        :: gridcomp ! must not be optional
+      integer, intent(out)       :: rc       ! must not be optional
+    end subroutine
+    recursive subroutine SetServicesInterfaceCplComp(cplcomp, rc)
+      use ESMF
+      implicit none
+      type(ESMF_CplComp)         :: cplcomp  ! must not be optional
+      integer, intent(out)       :: rc       ! must not be optional
+    end subroutine
+    recursive subroutine SetVMInterfaceCplComp(cplcomp, rc)
+      use ESMF
+      implicit none
+      type(ESMF_CplComp)         :: cplcomp  ! must not be optional
+      integer, intent(out)       :: rc       ! must not be optional
+    end subroutine
+  end interface
+
   type type_InternalStateStruct
     integer                           :: modelCount
     ! - static references to child components
@@ -119,8 +148,9 @@ module NUOPC_Driver
 
   ! Generic methods
   public NUOPC_DriverAddComp
-#if defined (__INTEL_LLVM_COMPILER) || defined (__NVCOMPILER) || defined (NAGFOR)
-  public NUOPC_DriverAddGridCompPtr !TODO: remove once compliers are fixed
+  public NUOPC_DriverAddGridComp    !TODO: remove public once all compilers work
+#if defined (NAGFOR)
+  public NUOPC_DriverAddGridCompPtr !TODO: remove once NAG complier is fixed
 #endif
   public NUOPC_DriverAddRunElement
   public NUOPC_DriverEgestRunSequence
@@ -3909,10 +3939,13 @@ module NUOPC_Driver
     character(*), parameter   :: rName="Finalize"
     integer                   :: urc, stat
     type(type_InternalState)  :: is
+    type(type_InternalStateStruct), pointer :: wrap
     type(ESMF_Clock)          :: internalClock
     integer                   :: i, j, itemCount
     type(ComponentMapEntry)   :: cmEntry
+    type(ComponentMapEntryT), pointer :: cmWrap
     type(ConnectorMapEntry)   :: cnEntry
+    type(ConnectorMapEntryT), pointer :: cnWrap
     character(ESMF_MAXSTR)    :: iString, jString
     logical                   :: existflag
     logical                   :: areServicesSet
@@ -4188,7 +4221,8 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      deallocate(cmEntry%wrap, stat=stat)
+      cmWrap => cmEntry%wrap  ! LLVM workaround for deallocate() runtime error!
+      deallocate(cmWrap, stat=stat)
       if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
         msg="Deallocation of cmEntry failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -4209,7 +4243,8 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      deallocate(cnEntry%wrap, stat=stat)
+      cnWrap => cnEntry%wrap  ! LLVM workaround for deallocate() runtime error!
+      deallocate(cnWrap, stat=stat)
       if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
         msg="Deallocation of cnEntry failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -4264,7 +4299,8 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! deallocate internal state memory
-    deallocate(is%wrap, stat=stat)
+    wrap => is%wrap ! LLVM workaround for deallocate() runtime error!
+    deallocate(wrap, stat=stat)
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
       msg="Deallocation of internal state memory failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -4523,7 +4559,7 @@ module NUOPC_Driver
   !-----------------------------------------------------------------------------
   !-----------------------------------------------------------------------------
 
-#if defined (__INTEL_LLVM_COMPILER) || defined (__NVCOMPILER) || defined (NAGFOR)
+#if defined (NAGFOR)
   !-----------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: NUOPC_DriverAddComp - Add a GridComp child to a Driver using procedure pointers
@@ -4598,42 +4634,8 @@ module NUOPC_Driver
 ! !ARGUMENTS:
     type(ESMF_GridComp)                               :: driver
     character(len=*),    intent(in)                   :: compLabel
-#if defined (__NVCOMPILER) || defined (__PGI) || defined (ESMF_COMPILER_AOCC)
-    interface
-      recursive subroutine compSetServicesRoutine(gridcomp, rc)
-        use ESMF
-        implicit none
-        type(ESMF_GridComp)        :: gridcomp ! must not be optional
-        integer, intent(out)       :: rc       ! must not be optional
-      end subroutine
-    end interface
-    interface
-      recursive subroutine compSetVMRoutine(gridcomp, rc)
-        use ESMF
-        implicit none
-        type(ESMF_GridComp)        :: gridcomp ! must not be optional
-        integer, intent(out)       :: rc       ! must not be optional
-      end subroutine
-    end interface
-    optional                                          :: compSetVMRoutine
-#else
-    abstract interface
-      recursive subroutine SetServicesRoutine(gridcomp, rc)
-        use ESMF
-        implicit none
-        type(ESMF_GridComp)        :: gridcomp ! must not be optional
-        integer, intent(out)       :: rc       ! must not be optional
-      end subroutine
-      recursive subroutine SetVMRoutine(gridcomp, rc)
-        use ESMF
-        implicit none
-        type(ESMF_GridComp)        :: gridcomp ! must not be optional
-        integer, intent(out)       :: rc       ! must not be optional
-      end subroutine
-    end interface
-    procedure(SetServicesRoutine)                     :: compSetServicesRoutine
-    procedure(SetVMRoutine),                 optional :: compSetVMRoutine
-#endif
+    procedure(SetServicesInterfaceGridComp)           :: compSetServicesRoutine
+    procedure(SetVMInterfaceGridComp),       optional :: compSetVMRoutine
     integer,             intent(in),         optional :: petList(:)
     integer,             intent(in),         optional :: devList(:)
     type(ESMF_Info),     intent(in),         optional :: info
@@ -5001,42 +5003,8 @@ module NUOPC_Driver
     type(ESMF_GridComp)                               :: driver
     character(len=*),    intent(in)                   :: srcCompLabel
     character(len=*),    intent(in)                   :: dstCompLabel
-#if defined (__NVCOMPILER) || defined (__PGI) || defined (ESMF_COMPILER_AOCC)
-    interface
-      recursive subroutine compSetServicesRoutine(cplcomp, rc)
-        use ESMF
-        implicit none
-        type(ESMF_CplComp)         :: cplcomp  ! must not be optional
-        integer, intent(out)       :: rc       ! must not be optional
-      end subroutine
-    end interface
-    interface
-      recursive subroutine compSetVMRoutine(cplcomp, rc)
-        use ESMF
-        implicit none
-        type(ESMF_CplComp)         :: cplcomp  ! must not be optional
-        integer, intent(out)       :: rc       ! must not be optional
-      end subroutine
-    end interface
-    optional                                          :: compSetVMRoutine
-#else
-    abstract interface
-      recursive subroutine SetServicesRoutine(cplcomp, rc)
-        use ESMF
-        implicit none
-        type(ESMF_CplComp)         :: cplcomp  ! must not be optional
-        integer, intent(out)       :: rc       ! must not be optional
-      end subroutine
-      recursive subroutine SetVMRoutine(cplcomp, rc)
-        use ESMF
-        implicit none
-        type(ESMF_CplComp)         :: cplcomp  ! must not be optional
-        integer, intent(out)       :: rc       ! must not be optional
-      end subroutine
-    end interface
-    procedure(SetServicesRoutine)                     :: compSetServicesRoutine
-    procedure(SetVMRoutine),                 optional :: compSetVMRoutine
-#endif
+    procedure(SetServicesInterfaceCplComp)            :: compSetServicesRoutine
+    procedure(SetVMInterfaceCplComp),        optional :: compSetVMRoutine
     integer, target,     intent(in),         optional :: petList(:)
     integer, target,     intent(in),         optional :: devList(:)
     type(ESMF_Info),     intent(in),         optional :: info
@@ -6369,6 +6337,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! the {\tt driver} will be added automatically. The default
 ! {\tt NUOPC\_Connector} implementation is used for all automatically added
 ! connector instances.
+! Automatically added connector instances inherit the Verbosity and Profiling
+! settings from {\tt driver}.
 !
 ! Lines that contain a {\bf time loop} definition have the general format:
 !

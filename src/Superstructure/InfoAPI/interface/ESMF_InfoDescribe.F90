@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -946,7 +946,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  localrc = ESMF_FAILURE
  if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
- if (field%ftypep%status .eq. ESMF_FIELDSTATUS_GRIDSET .or. &
+ if (field%ftypep%status .eq. ESMF_FIELDSTATUS_GEOMSET .or. &
      field%ftypep%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
    call ESMF_FieldGet(field, geomtype=geomtype, rc=localrc)
    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return

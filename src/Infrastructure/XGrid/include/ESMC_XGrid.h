@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2026, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -512,7 +512,7 @@ void ESMC_XGridGetSparseMatA2X(
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_XGridGetSparseMatA2X - Get the sparse matrix that goes from the exchange grid to a side A grid.
+// !IROUTINE: ESMC_XGridGetSparseMatX2A - Get the sparse matrix that goes from the exchange grid to a side A grid.
 
 //
 // !INTERFACE:
@@ -617,7 +617,7 @@ void ESMC_XGridGetSparseMatB2X(
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_XGridGetSparseMatB2X - Get the sparse matrix that goes from the exchange grid to a side B grid.
+// !IROUTINE: ESMC_XGridGetSparseMatX2B - Get the sparse matrix that goes from the exchange grid to a side B grid.
 
 //
 // !INTERFACE:

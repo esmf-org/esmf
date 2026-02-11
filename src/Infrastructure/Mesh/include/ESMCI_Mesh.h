@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -135,14 +135,16 @@ ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<i
 
   
   public:
-// STUFF FOR SPLIT MESH
-// TODO: MOVE TO MESHCXX AND CALL THAT FROM F90
- bool is_split;
- int max_non_split_id;
- IOField<NodalField> *node_coord;
- std::map<UInt,UInt> split_to_orig_id;
- std::map<UInt,double> split_id_to_frac;
 
+
+  // STUFF FOR SPLIT MESH
+  bool is_split;
+  int max_non_split_id;
+  IOField<NodalField> *node_coord;
+  std::map<UInt,UInt> split_to_orig_id;
+  std::map<UInt,double> split_id_to_frac;
+
+  
  // Save original dimension
  int orig_spatial_dim;
  ESMC_CoordSys_Flag coordsys;
@@ -154,7 +156,51 @@ ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<i
  // Original comm where this mesh was commited               
  MPI_Comm orig_comm;
 
+  // Accessors for original creation information
+  void setOrigElemConnCount(int _origElemConnCount);
+  int getOrigElemConnCount();
+
+
+  // Set has orig nodes
+  void setHasOrigElemNodes() {has_orig_elem_nodes=true;}
+  
+  // Set original element nodes
+  // Uses elem_id, so it can be done before mesh is created and eventually
+  // can be a more direct method of mesh creation
+  void setOrigElemNodes(UInt elem_id, std::vector<MeshObj *> &nodes);
+
+  // Get element original connection information for an element
+  // TODO: wrap these with a version that takes an elem id
+  int getOrigElemNodesCount(MeshObj *elem);
+  void getOrigElemNodes(MeshObj *elem, std::vector<MeshObj *> &nodes);
+
+  // Set has original area
+  void setHasOrigElemArea() {has_orig_elem_area=true;}
+  
+  // Set original element area
+  // Uses elem_id, so it can be done before mesh is created and eventually
+  // can be a more direct method of mesh creation
+  void setOrigElemArea(UInt elem_id, double area);
+
+  // Get element original area information for an element
+  // TODO: wrap these with a version that takes an elem id
+  double getOrigElemArea(MeshObj *elem);
+
+  
   private:
+
+  // Information for regenerating what was originally used to create the Mesh
+  // (E.g. before things were split into triangles)  
+  int origElemConnCount; // The original element connection count
+ 
+  bool has_orig_elem_nodes;
+  std::map<UInt,std::vector<MeshObj *> > orig_id_to_conn; // nullptr -> MESH_POLYBREAK_IND
+
+  bool has_orig_elem_area;
+  std::map<UInt,double> orig_id_to_area;
+
+  
+
 void assign_new_ids();
 CommReg *sghost;
 bool committed;

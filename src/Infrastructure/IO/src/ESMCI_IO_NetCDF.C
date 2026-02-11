@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1016,6 +1016,7 @@ void IO_NetCDF::destruct(void) {
     }
     for (json::const_iterator it_info=j.cbegin(); it_info!=j.cend(); it_info++) {
       auto attrname = it_info.key().c_str();
+      if (attrname == string("ESMF")) continue; // skip over ESMF JSON root
       if (it_info.value().is_string()) {
         string value_string = it_info.value().get<string>();
         ncerror = nc_put_att_text(netCdfFile, thisVar, attrname, value_string.size(), value_string.c_str());

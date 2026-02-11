@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -458,6 +458,7 @@ module ESMF_VMMod
   public ESMF_VMInitializePreMPI
   public ESMF_VMInitialize
   public ESMF_VMSet
+  public ESMF_VMGetEnv
   public ESMF_VMSetEnv
   public ESMF_VMFinalize
   public ESMF_VMAbort
@@ -9401,6 +9402,49 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGetEnv()"
+!BOPI
+! !IROUTINE: ESMF_VMGetEnv - Get environment variable cached in the Global VM
+
+! !INTERFACE:
+  subroutine ESMF_VMGetEnv(name, value, rc)
+!
+! !ARGUMENTS:
+    character(*), intent(in)            :: name
+    character(*), intent(out)           :: value
+    integer,      intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Get environment variable cached in the Global VM.
+!
+!   The arguments are:
+!   \begin{description}
+!     \item [name]
+!        The name of the environment variable.
+!     \item [value]
+!        The value of the environment variable.
+!   \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMGetEnv(name, value, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMGetEnv
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMSetEnv()"
 !BOPI
 ! !IROUTINE: ESMF_VMSetEnv - Set environment variable cached in the Global VM
@@ -11231,12 +11275,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VMId), allocatable  :: localVmIds(:)  ! local list of vmIDs root
     integer                 :: i, petCount, totalRootCount
     integer, allocatable    :: rootCounts(:), recvOffsets(:)  ! gatherV vars
-    
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
@@ -11244,17 +11287,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! StateReconcile which is the primary client for this subroutine.
     if (lbound(vmIds,1)/=0) then
       if (ESMF_LogFoundError(ESMF_FAILURE, msg="lbound must be 0 for vmIds", &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     end if
 
     ! Allocate ids(:) array, ensuring matching bounds with vmIDs(:) array
     allocate(ids(lbound(vmIds,1):ubound(vmIds,1)))
-    
+
     ! Deal with integer array argument
     idsAux = ESMF_InterArrayCreate(ids, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     ! Prepare rootVMId helper arrays
     allocate(rootVMIdI(size(vmIds)))  ! large enough
     rootVmIds = ESMF_InterArrayCreate(rootVMIdI, rc=localrc)
@@ -11266,12 +11309,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
     ! Shift integer ids from base 0 to base 1 for more standard Fortran use
     do i=lbound(ids,1),ubound(ids,1)
       ids(i) = ids(i) + 1
     enddo
-    
+
     if (present(vmIdMap)) then
       ! Must construct vmIdMap
 
@@ -11296,20 +11339,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         count=1, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
       ! Determine totalRootCount across all PETs, and offsets for AllGatherV
       totalRootCount = 0
       do i=1, petCount
         recvOffsets(i) = totalRootCount
         totalRootCount = totalRootCount + rootCounts(i)
       enddo
-      
+
       ! Prepare final vmIdMap to hold totalRootCount many vmIDs
       allocate(vmIdMap(totalRootCount))
       call ESMF_VMIdCreate(vmIdMap, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
       ! Finally AllGatherV the vmIDs
       call ESMF_VMAllGatherV(vm, &
         sendData=localVmIds, sendCount=size(localVmIds), &
@@ -11317,14 +11360,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
       ! Local clean-up
       call ESMF_VMIdDestroy(localVmIds, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       deallocate(localVmIds, rootCounts)
     endif
-    
+
     ! Garbage collection
     call ESMF_InterArrayDestroy(idsAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

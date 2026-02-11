@@ -28,6 +28,10 @@ class TestField(TestBase):
         return field
 
     def examine_field_attributes(self, field):
+        # ~~~~~~~~~~~~~~~~~~~~~~  LOCAL DE COUNT ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # For now we assume 1 DE per PET
+        assert field.local_de_count == 1
+
         # ~~~~~~~~~~~~~~~~~~~~~~  STAGGER LOCATION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         assert (type(field.staggerloc) in [MeshLoc, StaggerLoc, int])
 
@@ -54,7 +58,10 @@ class TestField(TestBase):
 
         mask = grid.add_item(GridItem.MASK)
         mask[:] = 1
-        mask[0, 1] = 0
+        if mask.shape[0] > 0 and mask.shape[1] > 1:
+            # (This conditional guards against an out-of-bounds error for small grids
+            # relative to the PET count)
+            mask[0, 1] = 0
 
         if ndbounds:
             field = Field(grid, ndbounds=[5, 2])
@@ -552,3 +559,12 @@ class TestField(TestBase):
         assert type(field2) == np.ndarray
         assert field2.shape == (5,20)
         # self.examine_field_attributes(field2)
+
+    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
+    def test_field_grid_to_field_map(self):
+        grid = Grid(np.array([8,10]), coord_sys=CoordSys.CART, staggerloc=StaggerLoc.CENTER)
+        field1 = Field(grid, ndbounds=[3,2])
+        g2fm = np.array([3,4],dtype=np.int32)
+        field2 = Field(grid, ndbounds=[3,2], grid_to_field_map=g2fm)
+        assert field1.data.shape == (8,10,3,2)
+        assert field2.data.shape == (3,2,8,10)

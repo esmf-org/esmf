@@ -79,27 +79,25 @@ class TestBase(unittest.TestCase):
             self.assertEqual(set(d1.keys()), set(d2.keys()))
 
     def assertWeightFileIsRational(self, filename, src_size, dst_size):
-        try:
-            from netCDF4 import Dataset
-        except ImportError:
-            pass
-        else:
-            ds = Dataset(filename)
-            try:
-                S = ds.variables['S'][:]
-                row = ds.variables['row'][:]
-                col = ds.variables['col'][:]
-                actual_col_max = col.max()
-                actual_row_max = row.max()
+        from scipy.io import netcdf_file
 
-                self.assertEqual(actual_col_max, src_size)
-                self.assertEqual(actual_row_max, dst_size)
+        # Set mmap=False to allow closing the file without either (a) needing to
+        # explicitly copy each variable that we access, or (b) needing to explicitly
+        # delete each variable that we access.
+        with netcdf_file(filename, mmap=False) as f:
+            S = f.variables['S'][:]
+            row = f.variables['row'][:]
+            col = f.variables['col'][:]
 
-                for urow in np.unique(row):
-                    select = row == urow
-                    self.assertAlmostEqual(S[select].sum(), 1.0)
-            finally:
-                ds.close()
+        actual_col_max = col.max()
+        actual_row_max = row.max()
+
+        self.assertEqual(actual_col_max, src_size)
+        self.assertEqual(actual_row_max, dst_size)
+
+        for urow in np.unique(row):
+            select = row == urow
+            self.assertAlmostEqual(S[select].sum(), 1.0)
 
 
     @staticmethod

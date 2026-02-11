@@ -61,8 +61,8 @@ ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_F2018ASSUMEDTYPE
 ############################################################
 # Special debug flags
 #
-ESMF_F90OPTFLAG_G       += -Nquickdbg 
-ESMF_CXXOPTFLAG_G       += -Nquickdbg
+ESMF_F90OPTFLAG_G       += -Nquickdbg
+ESMF_CXXOPTFLAG_G       +=
 
 ############################################################
 # Enable TR15581/F2003 Allocatable array resizing
@@ -133,7 +133,7 @@ ESMF_F90LINKLIBS += --linkstl=libstdc++
 ESMF_CXXLINKLIBS += --linkfortran
 
 ############################################################
-# Linker option that ensures that the specified libraries are 
+# Linker option that ensures that the specified libraries are
 # used to also resolve symbols needed by other libraries.
 #
 ESMF_F90LINKOPTS          += -Wl,--no-as-needed

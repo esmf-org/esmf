@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -17,18 +17,20 @@
 #define MPICH_IGNORE_CXX_SEEK
 #endif
 
-#define EPOCH_BUFFER_OPTION (2) //  0: std::strstream
-                                //  1: std::stringstream
-                                //  2: std::vector<char>
+#define EPOCH_SEND_BUFFER_OPTION (2)  //  0: std::strstream
+                                      //  1: std::stringstream
+                                      //  2: std::vector<char>
+#define EPOCH_RECV_BUFFER_OPTION (2)  //  1: std::stringstream
+                                      //  2: std::vector<char>
 
 #include <mpi.h>
 #include <vector>
 #include <string>
 #include <sstream>
 #include <queue>
-#if (EPOCH_BUFFER_OPTION == 0)
+#if (EPOCH_SEND_BUFFER_OPTION == 0)
 #include <strstream>
-#elif (EPOCH_BUFFER_OPTION == 2)
+#elif (EPOCH_SEND_BUFFER_OPTION == 2)
 #include <cstring>
 #endif
 #include <map>
@@ -54,7 +56,7 @@ typedef pthread_t       esmf_pthread_t;
 #endif
 
 // define NULL
-#include <cstddef> 
+#include <cstddef>
 
 #include "ESMCI_LogErr.h"
 
@@ -135,11 +137,11 @@ namespace ESMCI {
 template<typename T> void append(std::stringstream &streami, T value){
   streami.write((char*)&value, sizeof(T));
 }
-#if (EPOCH_BUFFER_OPTION == 0)
+#if (EPOCH_SEND_BUFFER_OPTION == 0)
 template<typename T> void append(std::strstream &streami, T value){
   streami.write((char*)&value, sizeof(T));
 }
-#elif (EPOCH_BUFFER_OPTION == 2)
+#elif (EPOCH_SEND_BUFFER_OPTION == 2)
 template<typename T> void append(std::vector<char> &charBuffer, T value){
   unsigned long long int size = charBuffer.size();
   charBuffer.resize(size+sizeof(T));
@@ -256,12 +258,12 @@ class VMK{
   };
 
   struct sendBuffer{
-#if (EPOCH_BUFFER_OPTION == 0)
+#if (EPOCH_SEND_BUFFER_OPTION == 0)
     std::strstream stream;
-#elif (EPOCH_BUFFER_OPTION == 1)
+#elif (EPOCH_SEND_BUFFER_OPTION == 1)
     std::stringstream stream;
     std::string streamBuffer;
-#elif (EPOCH_BUFFER_OPTION == 2)
+#elif (EPOCH_SEND_BUFFER_OPTION == 2)
     std::vector<char> charBuffer;
 #endif
     MPI_Request mpireq;
@@ -274,9 +276,13 @@ class VMK{
     }
     bool clear(bool justTest=false);
   };
-    
+
   struct recvBuffer{
+#if (EPOCH_RECV_BUFFER_OPTION == 1)
     std::string streamBuffer;
+#else
+    std::vector<char> charBuffer;
+#endif
     void *buffer;
     bool firstFlag;
    public:
@@ -357,8 +363,10 @@ class VMK{
     int ssiLocalNumaCount; // number of NUMA modes on the same SSI as localPet (incl.)
     int *ssiLocalNumaList; // NUMA nodes
     // general information about this VMK
-    bool mpionly;         // false: there is multi-threading, true: MPI-only
-    bool threadsflag;     // threaded or none-threaded VM
+    bool mpionly;         // true:  all PETs are MPI processes, separate VASs
+                          // false: some are threads under the same process VAS
+    bool threadsflag;     // true:  VM uses threads, e.g. for resource control
+                          // false: no threads are used under this VM
     // MPI Communicator handles
     MPI_Comm mpi_c;     // communicator across the entire VM
     MPI_Comm mpi_c_ssi; // communicator holding PETs on the same SSI
@@ -407,6 +415,7 @@ class VMK{
     // static MPI Comm of the default VMK
     // and the thread level that the MPI implementation supports.
     static MPI_Comm default_mpi_c;
+    static int mpi_thread_level_requested;
     static int mpi_thread_level;
     static int mpi_init_outside_esmf;
     static int pre_mpi_init;
@@ -516,6 +525,8 @@ class VMK{
     int getSsiLocalDevCount() const {return ssiLocalDevCount;}
     const int *getSsiLocalDevList() const {return ssiLocalDevList;}
     int getDevCount() const {return devCount;}
+    bool isMpiOnly() const {return mpionly;}
+    bool isUsingThreads() const {return threadsflag;}
     esmf_pthread_t getLocalPthreadId() const {return mypthid;}
     static bool isPthreadsEnabled(){
 #ifdef ESMF_NO_PTHREADS

@@ -341,57 +341,16 @@ endif
 endif
 
 ifeq ($(ESMF_ABI),default)
-# start with 64-bit default for all architectures
+# start with 64-bit default
 export ESMF_ABI = 64
-
-ifeq ($(ESMF_OS),Linux)
-# default on Linux is 32-bit
+ifeq ($(ESMF_MACHINE),ia32)
+# ia32 is 32-bit
 export ESMF_ABI = 32
-ifeq ($(ESMF_MACHINE),ia64)
-# except for IA64
-export ESMF_ABI = 64
 endif
-ifeq ($(ESMF_MACHINE),x86_64)
-# and x86_64
-export ESMF_ABI = 64
-endif
-ifeq ($(ESMF_MACHINE),ppc64)
-# and ppc64
-export ESMF_ABI = 64
-endif
-ifeq ($(ESMF_MACHINE),ppc64le)
-# and ppc64 little endian
-export ESMF_ABI = 64
-endif
-endif
-
-ifeq ($(ESMF_OS),Darwin)
-# default on Darwin is 32-bit
+ifeq ($(ESMF_MACHINE),x86)
+# x86 is 32-bit
 export ESMF_ABI = 32
-ifeq ($(ESMF_MACHINE),x86_64)
-# except x86_64
-export ESMF_ABI = 64
 endif
-ifeq ($(ESMF_MACHINE),arm64)
-# and arm64
-export ESMF_ABI = 64
-endif
-endif
-
-ifeq ($(ESMF_OS),Cygwin)
-# default on Cygwin is 32-bit
-export ESMF_ABI = 32
-ifeq ($(ESMF_MACHINE),x86_64)
-# and x86_64
-export ESMF_ABI = 64
-endif
-endif
-
-ifeq ($(ESMF_OS),MinGW)
-# default on MinGW is 64-bit
-export ESMF_ABI = 64
-endif
-
 endif
 
 # by default ABISTRING is simply ABI
@@ -1131,7 +1090,15 @@ endif
 ifeq ($(origin ESMF_CLINKLIBS_ENV), environment)
 ESMF_CLINKLIBS = $(ESMF_CLINKLIBS_ENV)
 endif
+
+ifeq ($(ESMF_COMPILER),fujitsu)
+# under Fujitsu the Fortran link libs are not compatible with C linker
+# explicitly set here
+ESMF_CLINKLIBS     += $(ESMF_CXXLINKLIBS) -lstdc++
+else
+# but for other compilers the Fortran link libs are often needed by C linker
 ESMF_CLINKLIBS     += $(ESMF_CXXLINKLIBS) $(ESMF_F90LINKLIBS)
+endif
 ESMF_CESMFLINKLIBS += -lesmf $(ESMF_CLINKLIBS)
 
 # - tools: AR + RANLIB + ...

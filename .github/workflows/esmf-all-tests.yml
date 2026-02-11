@@ -9,6 +9,8 @@ on:
   pull_request:
     branches:
       - develop
+      - release/*
+      - patch/*
   workflow_dispatch:
 
 jobs:
@@ -118,7 +120,11 @@ jobs:
     - name: Set up GFORTRANCLANG
       if: matrix.config.cmpr == 'gfortranclang'
       run: |
+        command -v gcc-${{matrix.config.cvrs}} || { exit 1; }
+        command -v g++-${{matrix.config.cvrs}} || { exit 1; }
         command -v gfortran-${{matrix.config.cvrs}} || { exit 1; }
+        ln -fs `which gcc-${{matrix.config.cvrs}}` /usr/local/bin/gcc
+        ln -fs `which g++-${{matrix.config.cvrs}}` /usr/local/bin/g++
         ln -fs `which gfortran-${{matrix.config.cvrs}}` /usr/local/bin/gfortran
         clang --version; clang++ --version; gfortran --version
         echo "CC=clang" >> $GITHUB_ENV
@@ -151,7 +157,7 @@ jobs:
       if: matrix.config.comm == 'openmpi'
       run: |
         if [[ "$CACHE_HIT" != 'true' ]]; then
-          OPENMPI_URL="https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.6.tar.gz"
+          OPENMPI_URL="https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-5.0.8.tar.gz"
           mkdir ${{runner.temp}}/openmpi
           cd ${{runner.temp}}/openmpi
           curl -L $OPENMPI_URL | tar --strip-components=1 -xz

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1362,6 +1362,7 @@ end module ESMF_XGridGeomBaseMod
     type(ESMF_XGridGeomBase)  :: gb
     integer, intent(out) :: rc
 
+    type(ESMF_XGridGeomBaseClass), pointer :: gbcpp
     integer :: localrc
 
     ! initialize return code; assume routine not implemented
@@ -1370,12 +1371,15 @@ end module ESMF_XGridGeomBaseMod
 
     !print *, "collecting GeomBase garbage"
 
+    gbcpp => gb%gbcp  ! LLVM workaround for deallocate() runtime error!
+
     ! deallocate actual GeomBaseClass allocation
-    if (associated(gb%gbcp)) then
-      deallocate(gb%gbcp, stat=localrc)
+    if (associated(gbcpp)) then
+      deallocate(gbcpp, stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, msg="Deallocating GeomBase", &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+
     nullify(gb%gbcp)
 
     ! return successfully

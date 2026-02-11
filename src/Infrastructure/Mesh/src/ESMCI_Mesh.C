@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -40,8 +40,8 @@ static const char *const version = "$Id$";
 extern "C" {
   void FTN_X(f_esmf_meshcreatefromfile)(ESMCI::Mesh **meshp,
                                         const char *filename, int *fileTypeFlag,
-                                        int *convertToDual, int *ctodpresent,
-                                        int *addUserArea, int *auapresent,
+                                        ESMC_Logical *convertToDual,
+                                        ESMC_Logical *addUserArea,
                                         const char *meshname, int *mnpresent,
                                         int *maskFlag, int *mfpresent,
                                         const char *varname, int *vnpresent,
@@ -62,6 +62,9 @@ Mesh::Mesh() : MeshDB(), FieldReg(), CommReg(),
                sghost(NULL),
                committed(false),
                is_split(false),
+               has_orig_elem_nodes(false),
+               has_orig_elem_area(false),
+               origElemConnCount(-1),
 	       ind(-1), side(-1),
                orig_comm(MPI_COMM_NULL)
 {
@@ -72,6 +75,39 @@ Mesh::Mesh() : MeshDB(), FieldReg(), CommReg(),
    GetCommRel(MeshObj::ELEMENT).Init("elem_sym", *this, *this, true);
 }
 
+  void Mesh::setOrigElemConnCount(int _origElemConnCount) {origElemConnCount=_origElemConnCount;}
+  
+  int Mesh::getOrigElemConnCount() {
+
+    // If it's not the default, then use it
+    if (origElemConnCount > -1) return origElemConnCount;
+    else { 
+
+      // It wasn't set, so regenerate it
+      // TODO: Get rid of this when you're sure it's set for everyplace that creates a Mesh      
+      
+      // Doesn't work with split meshes right now
+      if (this->is_split) Throw() << "Getting elementConnCount isn't currently supported for a 2D Mesh containing elements with >4 nodes.";                 
+       
+      // Loop summing number of nodes per element
+      int elemConnCount=0;
+      Mesh::iterator ei = this->elem_begin(), ee = this->elem_end();
+      for (; ei != ee; ++ei) {
+        MeshObj &elem = *ei;
+        
+        // Get topology of element
+        const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(elem);
+        
+        // Add number of nodes for this elem to connection count
+        elemConnCount += topo->num_nodes;
+      }
+
+      // Return calculated number
+      return elemConnCount;
+    }
+  }
+
+  
 Mesh::~Mesh() {
   // Get rid of ghost communication structure
   if (sghost != NULL) delete sghost;
@@ -95,9 +131,15 @@ Mesh *Mesh::createfromfile(const char *filename, int fileTypeFlag,
     if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
 
     // handle the optional arguments
-    int ctodpresent, auapresent, mnpresent, mfpresent, vnpresent;
-    ctodpresent = convertToDual != NULL;
-    auapresent = addUserArea != NULL;
+    int mnpresent, mfpresent, vnpresent;
+    ESMC_Logical ctod_loc = ESMF_FALSE;
+    if (convertToDual != NULL) {
+      ctod_loc = (*convertToDual != 0) ? ESMF_TRUE:ESMF_FALSE;
+    }
+    ESMC_Logical aua_loc = ESMF_FALSE;
+    if (addUserArea != NULL) {
+      aua_loc = (*addUserArea != 0) ? ESMF_TRUE:ESMF_FALSE;
+    }
     mnpresent = strlen(meshname) > 0;
     mfpresent = maskFlag != NULL;
     vnpresent = strlen(varname) > 0;
@@ -107,8 +149,8 @@ Mesh *Mesh::createfromfile(const char *filename, int fileTypeFlag,
 
     FTN_X(f_esmf_meshcreatefromfile)(&mesh,
                                      filename, &fileTypeFlag,
-                                     convertToDual, &ctodpresent,
-                                     addUserArea, &auapresent,
+                                     &ctod_loc,
+                                     &aua_loc,
                                      meshname, &mnpresent,
                                      maskFlag, &mfpresent,
                                      varname, &vnpresent,
@@ -2253,5 +2295,177 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
    orig_comm=new_comm;
  }
 
+ // Records the set of original nodes used for this element
+ // Note that this copies the input vector, so the same vector can be used repreatedly
+ // TODO: eventually the mesh should just be created using these
+ void Mesh::setOrigElemNodes(UInt elem_id, std::vector<MeshObj *> &nodes) {
+
+   // Only record >4 sided, because the others can be retrieved from the mesh
+   if (nodes.size() > 4) {
+     
+     // Add new vector of size 0
+     auto emplace_out=orig_id_to_conn.emplace(elem_id,0);
+           
+     // If it wasn't added, then throw an error
+     if (!emplace_out.second) Throw() << "elem with id=",elem_id," could not be added because of an error (e.g. it is a duplicate of a previous id).";
+           
+     // Get reference to new vector
+     std::vector<MeshObj *> &conn_vec=emplace_out.first->second;
+           
+     // Set to input vector
+     conn_vec=nodes;
+   }
+ }
+
+
+ // Gets the original element node count (even if the mesh is split)
+ int Mesh::getOrigElemNodesCount(MeshObj *elem) {
+
+   // Error if split and we haven't recorded original elem conn.
+   if (is_split && !has_orig_elem_nodes) Throw() << "Original element connection information has not been set in this Mesh.";
+
+   // Get information depending on split status
+   if (is_split) {
+     
+     // Look for element id in map
+     auto oitc =  orig_id_to_conn.find(elem->get_id());
+
+     // If it's not there use the usual method
+     if (oitc == orig_id_to_conn.end()) {
+
+       // Get topology of elem
+       const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
+
+       // Return the number of nodes
+       return topo->num_nodes;
+       
+     } else { // If it is get info from vec
+            
+       // Get reference to conn vector
+       std::vector<MeshObj *> &conn_vec=oitc->second;
+
+       // Return size
+       return conn_vec.size();            
+     }
+     
+   } else {
+     // Get topology of elem
+     const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
+     
+     // Return the number of nodes
+     return topo->num_nodes;     
+   }
+   
+ }
+
+
+  // Copies the nodes attached to the original element into a vector
+  // The nodes are put into the vector in the order that they were originally specified (e.g. first node is first).
+ void Mesh::getOrigElemNodes(MeshObj *elem, std::vector<MeshObj *> &nodes) {
+
+   // Clear input vector
+   nodes.clear();
+   
+   // Error if split and we haven't recorded original elem conn.
+   if (is_split && !has_orig_elem_nodes) Throw() << "Original element connection information has not been set in this Mesh.";
+
+   // Get information depending on split status
+   if (is_split) {
+     
+     // Look for element id in map
+     auto oitc =  orig_id_to_conn.find(elem->get_id());
+
+     // If it's not there use the usual method
+     if (oitc == orig_id_to_conn.end()) {
+
+       // Get topology of elem
+       const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
+
+       // Reserve space
+       nodes.reserve(topo->num_nodes);
+       
+       // Loop getting the indices of the nodes surrouding elem
+       for (int n = 0; n < topo->num_nodes; n++){
+         MeshObj *node = elem->Relations[n].obj;
+         nodes.push_back(node);
+       }
+       
+     } else { // If it is get info from vec
+            
+       // Get reference to conn vector
+       std::vector<MeshObj *> &conn_vec=oitc->second;
+
+       // Set return vector
+       nodes=conn_vec;            
+     }
+     
+   } else {
+     
+      // Get topology of elem
+     const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
+     
+     // Reserve space
+     nodes.reserve(topo->num_nodes);
+
+     // Loop getting the indices of the nodes surrouding elem
+     for (int n = 0; n < topo->num_nodes; n++){
+       MeshObj *node = elem->Relations[n].obj;
+       nodes.push_back(node);
+     }    
+   }   
+ }
+
+ // Records the original area for the element
+ void Mesh::setOrigElemArea(UInt elem_id, double area) {
+
+   // Add new entry with area
+   auto emplace_out=orig_id_to_area.emplace(elem_id, area);
+   
+   // If it wasn't added, then throw an error
+   if (!emplace_out.second) Throw() << "elem with id=",elem_id," could not be added because of an error (e.g. it is a duplicate of a previous id).";
+
+ }
+
+ // Gets the original element area (even if the mesh is split)
+ double Mesh::getOrigElemArea(MeshObj *elem) {
+
+   // Get element area field
+   MEField<> *elem_area=GetField("elem_area");
+
+   // Error if elements don't have areas
+   if (!elem_area) Throw() << "Element area information has not been set in this Mesh.";
+
+   // Error if split and we haven't recorded original elem area
+   if (is_split && !has_orig_elem_area) Throw() << "Original element area information has not been set in this Mesh.";
+   
+   // Get information depending on split status
+   if (is_split) {
+     
+     // Look for element id in map
+     auto oita =  orig_id_to_area.find(elem->get_id());
+
+     // If it's not there use the usual method
+     if (oita == orig_id_to_area.end()) {
+
+       // Return the element's area
+       return elem_area->data(*elem);
+       
+     } else { // If it is get info from map
+            
+       // Return area from map
+       return oita->second;            
+     }
+     
+   } else {
+
+     // Return the element's area
+     return elem_area->data(*elem);
+   }
+   
+ }
+
+ 
+ 
+ 
 
 } // namespace

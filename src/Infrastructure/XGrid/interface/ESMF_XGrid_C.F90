@@ -1,7 +1,7 @@
 !  $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -489,7 +489,7 @@
     type(ESMF_XGrid)               :: xgrid
     integer, intent(in)            :: elemCount
     integer, intent(in)            :: dimCount
-    real(ESMF_KIND_R8)             :: centroid(1:elemCount,1:dimCount)
+    real(ESMF_KIND_R8)             :: centroid(1:elemCount*dimCount)
     integer, intent(out)           :: rc              
 
     ! Init rc

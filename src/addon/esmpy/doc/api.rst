@@ -860,6 +860,53 @@ Dimension Ordering
         In [8]: field.data.shape
         Out[8]: (3, 4, 10)
 
+.. _des:
+
+----------------------------
+Decomposition Elements (DEs)
+----------------------------
+
+In ESMF, data classes are distributed over DEs, or Decomposition Elements. DEs are virtual
+units, not necessarily having a 1-to-1 correspondence to the Persistent Execution Threads
+(PETs) of a VM or the physical Processing Elements (PEs) in the underlying physical
+machine. In ESMPy data classes, there is typically exactly one DE per PET. The main
+exception to this is cubed-sphere grids that are represented as multi-tile grids; for
+these, there can be multiple DEs on a single PET (with the default decomposition, this
+occurs for < 6 PETs) or zero DEs on a PET (with the default decomposition, this occurs for
+> 6 PETs). (In the case of a non-cubed-sphere grid that is simply too small to decompose
+across the PETs, there is still 1 DE on each PET but some of these DEs will have data with
+size 0.)
+
+For ESMPy classes that support multiple DEs per PET (:class:`~esmpy.api.grid.Grid` and
+:class:`~esmpy.api.field.Field`), there are two versions of data accessor properties for
+any data that is decomposed across DEs. Examples are a :class:`~esmpy.api.field.Field`'s
+:attr:`~esmpy.api.field.Field.data` vs. :attr:`~esmpy.api.field.Field.all_data` and a
+:class:`~esmpy.api.grid.Grid`'s :attr:`~esmpy.api.grid.Grid.area` vs.
+:attr:`~esmpy.api.grid.Grid.all_areas`. Versions of these properties *without* the
+``all_`` prefix can only be used in the common case where there is exactly one DE per PET;
+these properties return the data on the single DE for the current PET. Versions of these
+properties *with* the ``all_`` prefix return lists indexed by DE. For example, to work
+with a :class:`~esmpy.api.field.Field`'s data in the situation where there may be multiple
+DEs per PET, user code should loop over DEs like:
+
+.. code::
+
+   for de in range(myfield.local_de_count):
+       this_data = myfield.all_data[de]
+       # operate on this_data
+
+Some methods, such as a :class:`~esmpy.api.grid.Grid`'s
+:meth:`~esmpy.api.grid.Grid.get_item`, default to retrieving values for the first DE
+(``localde=0``). Thus, for the common case with 1 DE per PET, these can be called without
+a ``localde`` argument. But in cases where there may be multiple DEs per PET, these should
+be called in a loop like in the above example. Furthermore, these methods with an optional
+``localde`` argument should not be called in cases where there are zero DEs on a given
+PET; this can be handled via the same looping structure, or if it is known that the only
+possible cases are zero or one DE per PET, then via a conditional like ``if
+grid.local_de_count == 1``.
+
+Finally, note that slicing of a :class:`~esmpy.api.field.Field` or
+:class:`~esmpy.api.grid.Grid` is currently not supported with multiple DEs per PET.
 
 ------------------
 Parallel Execution

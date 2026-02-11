@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1814,9 +1814,19 @@ Array *Array::create(
   int *localDeToDeMapArg = NULL;          // default: use map from DELayout
   VM::memhandle *mh = NULL;               // default: no memory sharing
 
-  // branch on pinflag
+  // handle pinflag
   ESMC_Pin_Flag pinflag = ESMF_PIN_DE_TO_PET; // default
   if (pinflagArg) pinflag = *pinflagArg;
+  if (pinflag == ESMF_PIN_DE_TO_VAS){
+    VM *cvm = VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+    if (cvm->isMpiOnly()){
+      // all PETs of the current VM run as MPI processes -> each PET==VAS
+      pinflag = ESMF_PIN_DE_TO_PET;
+    }
+  }
+  // branch on pinflag
   if (pinflag == ESMF_PIN_DE_TO_PET){
     // regular case where each DE is only accessible from the local PET
     vector<int> temp_counts(rank);
@@ -2540,7 +2550,7 @@ Array *Array::create(
           counts.push_back(dimSize);
         }
         arrayOut->larrayList[i] =
-          LocalArray::create(typekind, rank, &(counts[0]),
+          LocalArray::create(typekind, rank, counts.data(),
             NULL, NULL, NULL, DATACOPY_NONE, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)){
@@ -2889,7 +2899,7 @@ template<typename IT> int Array::getSequenceIndexExclusive(
   }
   // determine the sequentialized index for decomposed dimensions
   vector<IT> decompSeqIndex;
-  localrc = distgrid->getSequenceIndexLocalDe(localDe, &(decompIndex[0]),
+  localrc = distgrid->getSequenceIndexLocalDe(localDe, decompIndex.data(),
     decompSeqIndex, recursive, canonical);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
@@ -4893,7 +4903,7 @@ int Array::gather(
             // -> obtain indexList for this DE and dim
             indexList[j].resize(indexCountPDimPDe[de*dimCount+j]);
             commhList[commhListCount] = NULL; // prime for later test
-            localrc = distgrid->fillIndexListPDimPDe(&(indexList[j][0]), de,
+            localrc = distgrid->fillIndexListPDimPDe(indexList[j].data(), de,
               j+1, &(commhList[commhListCount]), localPet, vm);
             if (commhList[commhListCount] != NULL)
               ++commhListCount;
@@ -5256,7 +5266,7 @@ int Array::scatter(
             // -> obtain indexList for this DE and dim
             indexList[j].resize(indexCountPDimPDe[de*dimCount+j]);
             commhList[commhListCount] = NULL; // prime for later test
-            localrc = distgrid->fillIndexListPDimPDe(&(indexList[j][0]), de,
+            localrc = distgrid->fillIndexListPDimPDe(indexList[j].data(), de,
               j+1, &(commhList[commhListCount]), localPet, vm);
             if (commhList[commhListCount] != NULL)
               ++commhListCount;
@@ -5881,7 +5891,7 @@ template<typename IT>
     // prepare SparseMatrix vector with the constructed sparse matrix
     vector<SparseMatrix<IT,IT> > sparseMatrix;
     void *factorIndexListPtr = NULL; // initialize
-    if (factorListCount>0) factorIndexListPtr = (void *)&(factorIndexList[0]);
+    if (factorListCount>0) factorIndexListPtr = (void *)factorIndexList.data();
     sparseMatrix.push_back(SparseMatrix<IT,IT>(typekindFactor, factorList,
 #ifdef HALOTENSORMIX_on
       factorListCount, 2, 2, factorIndexListPtr));
@@ -6613,7 +6623,7 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
         SeqIndex<SIT> srcSeqIndex =
           srcArray->getSequenceIndexTile<SIT>(i+1, srcTuple);
         SeqIndex<DIT> dstSeqIndex =
-          dstArray->getSequenceIndexTile<DIT>(i+1, &(dstTuple[0]));
+          dstArray->getSequenceIndexTile<DIT>(i+1, dstTuple.data());
         // fill this info into factorIndexList
         int fili = 4*factorIndexListIndex;
         factorIndexList[fili]   = srcSeqIndex.decompSeqIndex;
@@ -9123,7 +9133,7 @@ template<typename SIT, typename DIT>
 
   // communicate typekindFactors across all Pets
   vector<ESMC_TypeKind_Flag> typekindList(petCount);
-  vm->allgather(&typekindFactors, &(typekindList[0]),
+  vm->allgather(&typekindFactors, typekindList.data(),
     sizeof(ESMC_TypeKind_Flag));
   // communicate tensorMixFlag across all Pets
   bool *tensorMixFlagList = new bool[petCount]; // cannot use vector<bool> here
@@ -12886,7 +12896,7 @@ ArrayElement::ArrayElement(
   if (!isWithin()) return;
 
   // set the linIndex member
-  linIndex = array->getLinearIndexExclusive(localDe, &indexTuple[0]);
+  linIndex = array->getLinearIndexExclusive(localDe, indexTuple.data());
 
   // deal with seqIndex support
   if (seqIndexEnabled){
@@ -13028,7 +13038,7 @@ ArrayElement::ArrayElement(
   if (!isWithin()) return;
 
   // set the linIndex member
-  linIndex = array->getLinearIndexExclusive(localDe, &indexTuple[0]);
+  linIndex = array->getLinearIndexExclusive(localDe, indexTuple.data());
 
   // deal with seqIndex support
   if (seqIndexEnabled){

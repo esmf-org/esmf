@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -55,6 +55,7 @@
     end type
 
     type(dataWrapper)             :: wrapAdd, wrapGet
+    type(testData), pointer       :: p
     character(len=:), allocatable :: labelList(:)
     logical                       :: isValid
 
@@ -232,7 +233,8 @@
     call ESMF_Test((isValid), name, failMsg, result, ESMF_SRCLINE)
 
     ! deallocate InternalState data
-    deallocate(wrapGet%p)
+    p => wrapGet%p  ! LLVM workaround for deallocate() runtime error!
+    deallocate(p)
 
     !------------------------------------------------------------------------
     !NEX_UTest
@@ -250,7 +252,8 @@
     call ESMF_Test((isValid), name, failMsg, result, ESMF_SRCLINE)
 
     ! deallocate InternalState data
-    deallocate(wrapGet%p)
+    p => wrapGet%p  ! LLVM workaround for deallocate() runtime error!
+    deallocate(p)
 
     !------------------------------------------------------------------------
     !NEX_UTest
@@ -268,7 +271,8 @@
     call ESMF_Test((isValid), name, failMsg, result, ESMF_SRCLINE)
 
     ! deallocate InternalState data
-    deallocate(wrapGet%p)
+    p => wrapGet%p  ! LLVM workaround for deallocate() runtime error!
+    deallocate(p)
 
     !------------------------------------------------------------------------
     !NEX_UTest

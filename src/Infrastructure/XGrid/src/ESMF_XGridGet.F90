@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -141,7 +141,7 @@ type(ESMF_Grid),      intent(out), optional :: sideAGrid(:), sideBGrid(:)
 type(ESMF_Mesh),      intent(out), optional :: sideAMesh(:), sideBMesh(:)
 type(ESMF_Mesh),      intent(out), optional :: mesh
 real(ESMF_KIND_R8),   intent(out), optional :: area(:)
-real(ESMF_KIND_R8),   intent(out), optional :: centroid(:,:)
+real(ESMF_KIND_R8),   intent(out), optional :: centroid(:)
 type(ESMF_DistGrid),  intent(out), optional :: distgridA(:)
 type(ESMF_DistGrid),  intent(out), optional :: distgridB(:)
 type(ESMF_DistGrid),  intent(out), optional :: distgridM
@@ -186,7 +186,7 @@ integer,              intent(out), optional :: rc
 !     \item [{[area]}]
 !           Area of the xgrid cells on this PET. Must enter with shape(area)=(/elementCount/).
 !     \item [{[centroid]}]
-!           Coordinates at the area weighted center of the xgrid cells on this PET. Must enter with shape(centroid)=(/elementCount, dimCount/).
+!           Coordinates at the area weighted center of the xgrid cells on this PET. Must enter with shape(centroid)=(/dimCount*elementCount/).
 !     \item [{[distgridA]}]
 !           List of distgrids whose sequence index list is an overlap between a Grid
 !           on sideA and the xgrid object. Must enter with shape(distgridA)=(/sideAGridCount+sideAMeshCount/).
@@ -420,23 +420,20 @@ integer,              intent(out), optional :: rc
         area = xgtypep%area
     endif 
     if(present(centroid)) then
-        ndim = size(centroid, 1)
-        ncells = size(centroid, 2)
         if(.not. associated(xgtypep%centroid)) then
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
                msg="- uninitialized centroid in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc)
             return
         endif    
-        if(ncells /= size(xgtypep%centroid, 2) .or. &
-           ndim  /= size(xgtypep%centroid, 1)) then
-            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-               msg="- size of centroid doesn't match the size of centroid in the XGrid", &
-               ESMF_CONTEXT, rcToReturn=rc)
-            return
+        if(size(centroid) /= size(xgtypep%centroid)) then
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+                msg="- size of centroid doesn't match the size of centroid in the XGrid", &
+                ESMF_CONTEXT, rcToReturn=rc)
+           return
         endif
         centroid = xgtypep%centroid
-    endif 
+     endif
 
     if(present(distgridA)) then
         ngrid_a = size(distgridA)

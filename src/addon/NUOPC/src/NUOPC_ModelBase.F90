@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -2392,6 +2392,7 @@ module NUOPC_ModelBase
     type(ESMF_Clock)          :: internalClock
     integer                   :: verbosity, diagnostic, profiling
     type(type_InternalState)  :: is
+    type(type_InternalStateStruct), pointer :: wrap
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
 
@@ -2519,7 +2520,8 @@ module NUOPC_ModelBase
       deallocate(is%wrap%cachedExportFieldList)
 
     ! deallocate internal state memory
-    deallocate(is%wrap, stat=stat)
+    wrap => is%wrap ! LLVM workaround for deallocate() runtime error!
+    deallocate(wrap, stat=stat)
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
       msg="Deallocation of internal state memory failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &

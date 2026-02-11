@@ -20,19 +20,16 @@ from esmpy.util.exceptions import DataMissing
 # This call enables debug logging when debug=True
 mg = esmpy.Manager(debug=True)
 
-# if esmpy.pet_count() != 6:
-#     print ("ESMPy cubed sphere regridding example requires 6 processors")
-#     import sys; sys.exit(0)
-
 grid1 = os.path.join(DATA_DIR, "ll1deg_grid.nc")
 if not os.path.exists(grid1):
     raise DataMissing("Data not available, try 'make download'.")
 
-# Create a cubed sphere grid with 20 elements per tile
+# Create a cubed sphere grid with 20 elements per tile; note that the decomposition here
+# means that this will typically use multiple DEs per PET, even with 6 PETs
 regDecompPTile = numpy.array([[2,2,1,1,1,1],[2,2,2,2,2,2]], dtype=numpy.int32)
 srcgrid = esmpy.Grid(tilesize=20, regDecompPTile = regDecompPTile, name="cubed_sphere")
 
-# create an regular lat lon grid from file
+# create a regular lat lon grid from file
 dstgrid = esmpy.Grid(filename=grid1, filetype=esmpy.FileFormat.SCRIP)
 
 # create a field on the center stagger locations of the source grid
@@ -49,14 +46,17 @@ dstfracfield = esmpy.Field(dstgrid, name='dstfracfield', staggerloc=esmpy.Stagge
 
 deg2rad = 3.14/180.
 
-gridLon = srcfield.grid.get_coords(lon, esmpy.StaggerLoc.CENTER)
-gridLat = srcfield.grid.get_coords(lat, esmpy.StaggerLoc.CENTER)
+# Since the source grid and field (on the cubed sphere grid) have multiple DEs per PET,
+# working with the data on that grid/field requires looping over the local DEs on each PET
+for de in range(srcfield.local_de_count):
+    gridLon = srcfield.grid.get_coords(lon, esmpy.StaggerLoc.CENTER, localde=de)
+    gridLat = srcfield.grid.get_coords(lat, esmpy.StaggerLoc.CENTER, localde=de)
+    x = numpy.cos(numpy.radians(gridLon))*numpy.sin(numpy.radians(90-gridLat))
+    y = numpy.sin(numpy.radians(gridLon))*numpy.sin(numpy.radians(90-gridLat))
+    z = numpy.cos(numpy.radians(90-gridLat))
 
-x = numpy.cos(numpy.radians(gridLon))*numpy.sin(numpy.radians(90-gridLat))
-y = numpy.sin(numpy.radians(gridLon))*numpy.sin(numpy.radians(90-gridLat))
-z = numpy.cos(numpy.radians(90-gridLat))
-
-srcfield.data[...] = 200.0 + x + y + z
+    thisData = srcfield.all_data[de]
+    thisData[...] = 200.0 + x + y + z
 
 gridLon = xctfield.grid.get_coords(lon, esmpy.StaggerLoc.CENTER)
 gridLat = xctfield.grid.get_coords(lat, esmpy.StaggerLoc.CENTER)
@@ -89,13 +89,11 @@ mg.barrier()
 dstfield = regrid(srcfield, dstfield)
 
 # compute the mean relative error
-from operator import mul
 num_nodes = numpy.prod(xctfield.data.shape[:])
 relerr = 0
 maxrelerr = 0
 meanrelerr = 0
 if num_nodes != 0:
-    # ind = numpy.where((dstfield.data != 1e20) & (xctfield.data != 0))[0]
     relerr = numpy.sum(numpy.abs(dstfield.data - xctfield.data) / numpy.abs(xctfield.data))
     maxrelerr = numpy.max(numpy.abs(dstfield.data - xctfield.data) / numpy.abs(xctfield.data))
 
@@ -115,5 +113,6 @@ if esmpy.local_pet() == 0:
     if os.path.isfile(os.path.join(os.getcwd(), filename)):
         os.remove(os.path.join(os.getcwd(), filename))
 
-    # assert (meanrelerr < 3e-3)
-    # assert (maxrelerr < 4e-4)
+    # (2025-06-20) These tolerances are an order of magnitude bigger than the current errors
+    assert (meanrelerr < 4e-5)
+    assert (maxrelerr < 1e-4)

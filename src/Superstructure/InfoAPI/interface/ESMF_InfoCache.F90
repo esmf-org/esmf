@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -357,7 +357,7 @@ subroutine ESMF_InfoCacheReassembleField(target, state, rc)
 
   rc = ESMF_FAILURE
 
-  if (target%ftypep%status .eq. ESMF_FIELDSTATUS_GRIDSET .or. &
+  if (target%ftypep%status .eq. ESMF_FIELDSTATUS_GEOMSET .or. &
       target%ftypep%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
     call ESMF_InfoGetFromBase(target%ftypep%base, infoh, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return

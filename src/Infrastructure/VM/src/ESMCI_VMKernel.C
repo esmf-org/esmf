@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -127,7 +127,7 @@ typedef DWORD pid_t;
 #define getpid GetCurrentProcessId
 #endif
 
-// Requested MPI thread level
+// Default requested MPI thread support level
 #ifdef ESMF_NO_PTHREADS
 #define VM_MPI_THREAD_LEVEL MPI_THREAD_SINGLE
 #else
@@ -143,6 +143,7 @@ namespace ESMCI {
 // Definition of class static data members
 std::vector<MPI_Datatype> VMK::customType(10);  // up to 2^10 = 1024 byte
 MPI_Comm VMK::default_mpi_c;
+int VMK::mpi_thread_level_requested;
 int VMK::mpi_thread_level;
 int VMK::mpi_init_outside_esmf;
 int VMK::pre_mpi_init = 0;
@@ -410,6 +411,31 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   // currently only obtain arguments for MPICH because it needs it!!!
   obtain_args();
 #endif
+  // determine mpi_thread_level_requested
+  mpi_thread_level_requested = VM_MPI_THREAD_LEVEL; // default
+  char const *esmfRuntimeVarValue =
+    std::getenv("ESMF_RUNTIME_MPI_THREAD_SUPPORT");
+  if (esmfRuntimeVarValue && strlen(esmfRuntimeVarValue) > 0) {
+    std::string mpi_thread_level_string(esmfRuntimeVarValue);
+    transform(mpi_thread_level_string.begin(), mpi_thread_level_string.end(),
+      mpi_thread_level_string.begin(), ::toupper);
+    if (mpi_thread_level_string == "MPI_THREAD_SINGLE"){
+      mpi_thread_level_requested = MPI_THREAD_SINGLE;
+    }else if (mpi_thread_level_string == "MPI_THREAD_FUNNELED"){
+      mpi_thread_level_requested = MPI_THREAD_FUNNELED;
+    }else if (mpi_thread_level_string == "MPI_THREAD_SERIALIZED"){
+      mpi_thread_level_requested = MPI_THREAD_SERIALIZED;
+    }else if (mpi_thread_level_string == "MPI_THREAD_MULTIPLE"){
+      mpi_thread_level_requested = MPI_THREAD_MULTIPLE;
+    }else{
+      // error: unknown MPI thread support level
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_VAL_WRONG,
+        "Unkown MPI thread support level requested (typo?): "
+        + mpi_thread_level_string, ESMC_CONTEXT, &localrc);
+      throw localrc;  // bail out with exception
+    }
+  }
   // next check is whether MPI has been initialized yet
   // there is a check in vmk_sigcatcher() to make sure signals between processes
   // are only used if ESMF initialized MPI to make sure all the threads
@@ -425,10 +451,10 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
     argc_mpich = argc;
     for (int k=0; k<100; k++)
       argv_mpich[k] = argv[k];
-    MPI_Init_thread(&argc_mpich, (char ***)&argv_mpich, VM_MPI_THREAD_LEVEL,
-      &mpi_thread_level);
+    MPI_Init_thread(&argc_mpich, (char ***)&argv_mpich,
+      mpi_thread_level_requested, &mpi_thread_level);
 #else
-    MPI_Init_thread(NULL, NULL, VM_MPI_THREAD_LEVEL, &mpi_thread_level);
+    MPI_Init_thread(NULL, NULL, mpi_thread_level_requested, &mpi_thread_level);
 #endif
   }else{
     // query the MPI thread support level as set by external MPI initialization
@@ -901,6 +927,28 @@ struct SpawnArg{
 void VMK::abort(){
   // abort default (all MPI) virtual machine
   int finalized;
+
+  char const *envRTabort = VM::getenv("ESMF_RUNTIME_ABORT_ACTION");
+  if (envRTabort != NULL && strlen(envRTabort) > 0) {
+    std::string RTabort(envRTabort);
+    transform(RTabort.begin(), RTabort.end(), RTabort.begin(), ::toupper);
+    if (RTabort == "MPI_ABORT") {
+      ; // no-op, do not raise signal
+    } else if (RTabort == "SIGABRT") {
+      raise (SIGABRT);
+    } else if (RTabort == "SIGQUIT") {
+#ifdef SIGQUIT
+      raise (SIGQUIT);
+#else
+      fprintf(stderr, "SIGQUIT not defined for ESMF_RUNTIME_ABORT_ACTION\n"
+        "-> default to MPI_Abort.\n");
+#endif
+    } else {
+      fprintf(stderr, "Invalid ESMF_RUNTIME_ABORT_ACTION setting - %s\n"
+        "-> default to MPI_Abort.\n", RTabort.c_str());
+    }
+  }
+  // signal may be caught therefore call MPI_Abort if code gets here
   MPI_Finalized(&finalized);
   if (!finalized)
     MPI_Abort(default_mpi_c, EXIT_FAILURE);
@@ -1826,7 +1874,9 @@ void *VMK::startup(class VMKPlan *vmp, void *(fctp)(void *, void *),
 #endif
   // next, determine new_npets and new_mypet_base ...
   int new_mypet_base=0;
-  int new_npets=0;
+  volatile int new_npets=0;   // volatile to prevent precompute of log10() below
+                              // in optimized mode or else might trigger SIGFPE
+                              // for new_npets==1 if user code sets FPE trapping
   int found_my_pet_flag = 0;
   for (int ii=0; ii<npets; ii++){
     int i = vmp->petlist[ii];   // indirection to preserve petlist order
@@ -3345,8 +3395,9 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
   msg.str("");  // clear
   if (mpi_t_okay){
     int mpi_rc;
-    int provided_thread_level;
-    mpi_rc = MPI_T_init_thread(VM_MPI_THREAD_LEVEL, &provided_thread_level);
+    int mpi_thread_level_provided;
+    mpi_rc = MPI_T_init_thread(mpi_thread_level_requested,
+      &mpi_thread_level_provided);
     if (mpi_rc != MPI_SUCCESS){
       int localrc;
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -4497,15 +4548,15 @@ void VMK::epochFinal(){
   for (its=sendMap.begin(); its!=sendMap.end(); ++its){
     sendBuffer *sm = &(its->second);
 #ifdef VM_EPOCHLOG_on
-#if (EPOCH_BUFFER_OPTION == 0)
+#if (EPOCH_SEND_BUFFER_OPTION == 0)
     // use strstream
     void *buffer = (void *)sm->stream.str();  // access the buffer -> freeze
     unsigned long long int size = sm->stream.pcount(); // bytes in stream buffer
-#elif (EPOCH_BUFFER_OPTION == 1)
+#elif (EPOCH_SEND_BUFFER_OPTION == 1)
     // use stringstream
     void *buffer = (void *)sm->streamBuffer.data(); // access contig. buffer
     unsigned long long int size = sm->streamBuffer.size(); // bytes in stream buffer
-#elif (EPOCH_BUFFER_OPTION == 2)
+#elif (EPOCH_SEND_BUFFER_OPTION == 2)
     // use vector<char>
     void *buffer = (void *)&(sm->charBuffer[0]);  // access the buffer
     unsigned long long int size = sm->charBuffer.size(); // bytes in buffer
@@ -4554,6 +4605,9 @@ void VMK::epochExit(bool keepAlloc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VMK::epochExit()"
   if (epoch==epochBuffer){
+#ifdef VM_EPOCHMEMLOG_on
+      VM::logMemInfo(std::string("VMK::epochExit:0.0"));
+#endif
     // loop over the sendMap and post non-blocking sends
     std::map<int, sendBuffer>:: iterator its;
     for (its=sendMap.begin(); its!=sendMap.end(); ++its){
@@ -4589,27 +4643,34 @@ void VMK::epochExit(bool keepAlloc){
       }
       bool needAck = false;
 #ifdef VM_EPOCHMEMLOG_on
-      VM::logMemInfo(std::string("VMK::epochExit:1.0"));
+      VM::logMemInfo(std::string("VMK::epochExit(send-side):1.0"));
 #endif
-#if (EPOCH_BUFFER_OPTION == 0)
+      void *buffer = NULL;  // init NULL to trigger error if accidentally used
+#if (EPOCH_SEND_BUFFER_OPTION == 0)
       // use strstream
-      void *buffer = (void *)sm->stream.str();  // access the buffer -> freeze
       unsigned long long size = sm->stream.pcount(); // bytes in stream buffer
-      sm->stream.seekp(0);  // reset stream to the beginning (not affect buff)
-#elif (EPOCH_BUFFER_OPTION == 1)
+      if (size > 0){
+        buffer = (void *)sm->stream.str();  // access the buffer -> freeze
+        sm->stream.seekp(0);  // reset stream to the beginning (not affect buff)
+      }
+#elif (EPOCH_SEND_BUFFER_OPTION == 1)
       // use stringstream
-      sm->streamBuffer = sm->stream.str();  // copy data into contiguous buffer
-      sm->stream.str("");                   // clear out stream
-      void *buffer = (void *)sm->streamBuffer.data(); // access contig. buffer
       unsigned long long size = sm->streamBuffer.size();
-#elif (EPOCH_BUFFER_OPTION == 2)
+      if (size > 0){
+        sm->streamBuffer = sm->stream.str();  // copy data into contiguous buffer
+        sm->stream.str("");                   // clear out stream
+        buffer = (void *)sm->streamBuffer.data(); // access contig. buffer
+      }
+#elif (EPOCH_SEND_BUFFER_OPTION == 2)
       // use vector<char>
-      void *buffer = (void *)&(sm->charBuffer[0]);  // access the buffer
       unsigned long long int size = sm->charBuffer.size(); // bytes in buffer
-      sm->charBuffer.resize(0); // reset buffer, without affecting allocation
+      if (size > 0){
+        buffer = (void *)&(sm->charBuffer[0]);  // access the buffer
+        sm->charBuffer.resize(0); // reset buffer, without affecting allocation
+      }
 #endif
 #ifdef VM_EPOCHMEMLOG_on
-      VM::logMemInfo(std::string("VMK::epochExit:2.0"));
+      VM::logMemInfo(std::string("VMK::epochExit(send-side):2.0"));
 #endif
       if (size > 0){
 #if (defined VM_EPOCHLOG_on || defined VM_SIZELOG_on)
@@ -4626,7 +4687,7 @@ void VMK::epochExit(bool keepAlloc){
           MPI_Isend(buffer, size, MPI_BYTE, lpid[its->first], tag, mpi_c,
             &sm->mpireq);
         else{
-#if (EPOCH_BUFFER_OPTION == 2)
+#if (EPOCH_SEND_BUFFER_OPTION == 2)
           // large message
           // - determine smallest customType to keep count < VM_MPI_SIZE_LIMIT
           int byteCount = 1;
@@ -4656,7 +4717,7 @@ void VMK::epochExit(bool keepAlloc){
           // large messages not supported
           int localrc;
           ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-            "Message larger than 2GiB only supported for EPOCH_BUFFER_OPTION 2.",
+            "Message larger than 2GiB only supported for EPOCH_SEND_BUFFER_OPTION 2.",
             ESMC_CONTEXT, &localrc);
           throw localrc;  // bail out with exception
 #endif
@@ -4671,7 +4732,7 @@ void VMK::epochExit(bool keepAlloc){
 #endif
       }
 #ifdef VM_EPOCHMEMLOG_on
-      VM::logMemInfo(std::string("VMK::epochExit:3.0"));
+      VM::logMemInfo(std::string("VMK::epochExit(send-side):3.0"));
 #endif
       if (needAck){
         // post the receive of the acknowledge message from receiver for throttle
@@ -4688,14 +4749,20 @@ void VMK::epochExit(bool keepAlloc){
 #endif
       }
 #ifdef VM_EPOCHMEMLOG_on
-      VM::logMemInfo(std::string("VMK::epochExit:4.0"));
+      VM::logMemInfo(std::string("VMK::epochExit(send-side):4.0"));
 #endif
     }
+#ifdef VM_EPOCHMEMLOG_on
+    VM::logMemInfo(std::string("VMK::epochExit:5.0"));
+#endif
     if (!keepAlloc){
       // clear the recvMap, freeing all receive buffers held
       // use this option in case the receiving side is tight on memory
       recvMap.clear();
     }
+#ifdef VM_EPOCHMEMLOG_on
+    VM::logMemInfo(std::string("VMK::epochExit:6.0"));
+#endif
   }
   // reset the epoch member
   epoch=epochNone;
@@ -4804,13 +4871,13 @@ bool VMK::sendBuffer::clear(bool justTest){
 #ifdef VM_EPOCHMEMLOG_on
   VM::logMemInfo(std::string("VMK::sendBuffer::clear():2.0"));
 #endif
-#if (EPOCH_BUFFER_OPTION == 0)
+#if (EPOCH_SEND_BUFFER_OPTION == 0)
   // use strstream
   stream.freeze(false); // unfreeze the persistent buffer for deallocation
-#elif (EPOCH_BUFFER_OPTION == 1)
+#elif (EPOCH_SEND_BUFFER_OPTION == 1)
   // use stringstream
   streamBuffer.clear(); // done with buffer
-#elif (EPOCH_BUFFER_OPTION == 2)
+#elif (EPOCH_SEND_BUFFER_OPTION == 2)
   // use vector<char>
   std::vector<char>().swap(charBuffer); // done with buffer swap out of scope
 #endif
@@ -5059,11 +5126,11 @@ int VMK::send(const void *message, unsigned long long int size, int dest,
         sm->clear();  // wait for outstanding comm and clear out.
       }
       // append the message into the epoch buffer stream
-#if (EPOCH_BUFFER_OPTION == 0 || EPOCH_BUFFER_OPTION == 1)
+#if (EPOCH_SEND_BUFFER_OPTION == 0 || EPOCH_SEND_BUFFER_OPTION == 1)
       append(sm->stream, size);
       append(sm->stream, tag);
       sm->stream.write((const char*)message, size);
-#elif (EPOCH_BUFFER_OPTION == 2)
+#elif (EPOCH_SEND_BUFFER_OPTION == 2)
       append(sm->charBuffer, size);
       append(sm->charBuffer, tag);
       append(sm->charBuffer, (const char*)message, size);
@@ -5072,11 +5139,11 @@ int VMK::send(const void *message, unsigned long long int size, int dest,
       msg.str(""); // clear
       msg << "epochBuffer:" << __LINE__ << " non-blocking send write complete"<<
       ", current stream size=" <<
-#if (EPOCH_BUFFER_OPTION == 0)
+#if (EPOCH_SEND_BUFFER_OPTION == 0)
       sm->stream.pcount();
-#elif (EPOCH_BUFFER_OPTION == 1)
+#elif (EPOCH_SEND_BUFFER_OPTION == 1)
       sm->stream.tellp();
-#elif (EPOCH_BUFFER_OPTION == 2)
+#elif (EPOCH_SEND_BUFFER_OPTION == 2)
       sm->charBuffer.size();
 #endif
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
@@ -5477,6 +5544,9 @@ int VMK::recv(void *message, unsigned long long int size, int source,
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         double t0; wtime(&t0);
 #endif
+#ifdef VM_EPOCHMEMLOG_on
+        VM::logMemInfo(std::string("VMK::recv() epoch start"));
+#endif
         int defaultTag = getDefaultTag(source,mypet);
         MPI_Status mpistat;
         MPI_Probe(lpid[source], defaultTag, mpi_c, &mpistat);
@@ -5501,8 +5571,29 @@ int VMK::recv(void *message, unsigned long long int size, int source,
           byteCount *= count;
         }
         // prepare the receive buffer
+#ifdef VM_EPOCHMEMLOG_on
+        {
+          std::stringstream prefix;
+          prefix << "VMK::recv() epoch before charBuffer.resize("<<byteCount<<")";
+          VM::logMemInfo(prefix.str());
+        }
+#endif
+#if (EPOCH_RECV_BUFFER_OPTION == 1)
         rm->streamBuffer.resize(byteCount);
         rm->buffer = (void *)rm->streamBuffer.data();
+#else
+        std::vector<char>().swap(rm->charBuffer);   // drop previous allocation
+        rm->charBuffer.resize(byteCount);           // correctly size allocation
+        rm->buffer = (void *)&(rm->charBuffer[0]);  // access the buffer
+#endif
+
+#ifdef VM_EPOCHMEMLOG_on
+        {
+          std::stringstream prefix;
+          prefix << "VMK::recv() epoch after charBuffer.resize("<<byteCount<<")";
+          VM::logMemInfo(prefix.str());
+        }
+#endif
 
 #ifdef VM_EPOCHLOG_on
         double t1; wtime(&t1);
@@ -5512,7 +5603,11 @@ int VMK::recv(void *message, unsigned long long int size, int source,
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         msg.str(""); // clear
         msg << "epochBuffer:" << __LINE__ << " incoming message of size="
+#if (EPOCH_RECV_BUFFER_OPTION == 1)
           << rm->streamBuffer.size();
+#else
+          << rm->charBuffer.size();
+#endif
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
 
@@ -5526,8 +5621,12 @@ int VMK::recv(void *message, unsigned long long int size, int source,
         msg.str(""); // clear
         msg << "epochBuffer:" << __LINE__ << " ready to post blocking recv:"
         << " src=" << getVas(lpid[source])
+#if (EPOCH_RECV_BUFFER_OPTION == 1)
         << " size=" << rm->streamBuffer.size()
-        << " streamBuffer=" << (void *)rm->streamBuffer.data();
+#else
+        << " size=" << rm->charBuffer.size()
+#endif
+        << " buffer=" << (void *)rm->buffer;
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         double t2; wtime(&t2);
 #endif
@@ -5535,10 +5634,22 @@ int VMK::recv(void *message, unsigned long long int size, int source,
           // small message
           MPI_Recv(rm->buffer, count, MPI_BYTE,
             lpid[source], defaultTag, mpi_c, MPI_STATUS_IGNORE);
+#if (defined VM_EPOCHLOG_on || defined VM_SIZELOG_on)
+        msg.str(""); // clear
+        msg << "epochBuffer:" << __LINE__ << " posted blocking recv small."
+          << " i=" << i;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
         }else{
           // large message
           MPI_Recv(rm->buffer, count, customType[i],
             lpid[source], defaultTag, mpi_c, MPI_STATUS_IGNORE);
+#if (defined VM_EPOCHLOG_on || defined VM_SIZELOG_on)
+        msg.str(""); // clear
+        msg << "epochBuffer:" << __LINE__ << " posted blocking recv large."
+          << " i=" << i;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
         }
 #ifdef VM_EPOCHLOG_on
         double t3; wtime(&t3);
@@ -5546,6 +5657,9 @@ int VMK::recv(void *message, unsigned long long int size, int source,
         msg << "epochBuffer:" << __LINE__ << " time in blocking recv: "
           << t3 - t2 << " seconds";
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
+#ifdef VM_EPOCHMEMLOG_on
+        VM::logMemInfo(std::string("VMK::recv() epoch done"));
 #endif
       }
       // now service the specific receive call with chunk of data from buffer

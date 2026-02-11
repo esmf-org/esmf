@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -288,8 +288,11 @@ subroutine f_esmf_fortranudtpointercompare(ptr1, ptr2, flag)
   type (wrapper):: ptr1
   type (wrapper):: ptr2
   integer       :: flag
+  type(simple_udt), pointer:: udt1, udt2
+  udt1 => ptr1%udt  ! LLVM workaround, require local pointer variable!
+  udt2 => ptr2%udt  ! LLVM workaround, require local pointer variable!
   flag = 0
-  if (associated(ptr1%udt,ptr2%udt)) flag = 1
+  if (associated(udt1,udt2)) flag = 1
 end subroutine
 
 

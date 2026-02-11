@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -114,11 +114,14 @@ void testSerializeDeserialize(int& rc, char failMsg[]) {
     try {
       std::string dump = infod->dump();
       if (arflag == ESMC_ATTRECONCILE_OFF) {
-        if (dump != "{}") {
+        const std::string desired = "{\"ESMF\":{\"Instance\":{\"NamedAliasCount\":0}}}";
+        if (dump != desired) {
           return finalizeFailure(rc, failMsg, "if not reconciling info, then object should be empty");
         }
       } else {
-        const std::string desired = "{\"a-string-key\":\"some-data\",\"key1\":44,\"key123\":3.146789}";
+cout << dump << "\n";
+        const std::string desired = "{\"ESMF\":{\"Instance\":{\"NamedAliasCount\":0}},"
+          "\"a-string-key\":\"some-data\",\"key1\":44,\"key123\":3.146789}";
         if (dump != desired) {
           return finalizeFailure(rc, failMsg, "if reconciling info, then object should have data");
         }

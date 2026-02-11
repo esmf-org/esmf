@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -53,13 +53,18 @@
 //-----------------------------------------------------------------------------
 
 
+namespace ESMCI{
+
+ extern bool mathutil_debug;
+
+}
+
 using namespace ESMCI;
 
 // #define DEBUG_OWNED
 
 
 extern "C" void FTN_X(f_esmf_getmeshdistgrid)(DistGrid**, int*, int*, int*);
-
 
 
 void ESMCI_meshcreate(Mesh **meshpp,
@@ -648,7 +653,6 @@ static void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int
 }
 
 
-
 // triangulate > 4 sided
 // sdim = spatial dim
 // num_p = number of points in poly
@@ -666,6 +670,8 @@ static void triangulate_warea(int sdim, int num_p, double *p, int oeid,
 
           int localrc;
 
+          //if (oeid==23516) mathutil_debug=true;
+          
           // Call into triagulation routines
           int ret;
           if (sdim==2) {
@@ -680,6 +686,8 @@ static void triangulate_warea(int sdim, int num_p, double *p, int oeid,
                                               ESMC_CONTEXT, &localrc)) throw localrc;
           }
 
+          //mathutil_debug=false;
+          
           // Check return code
           if (ret != ESMCI_TP_SUCCESS) {
             if (ret == ESMCI_TP_DEGENERATE_POLY) {
@@ -687,6 +695,16 @@ static void triangulate_warea(int sdim, int num_p, double *p, int oeid,
                    " - can't triangulate a polygon with less than 3 sides",
                                                 ESMC_CONTEXT, &localrc)) throw localrc;
             } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
+
+#if 0
+              // Output bad poly to vtk file 
+              if (sdim==2) {
+                write_2D_poly_to_vtk("tri_bad_poly_", oeid, num_p, p);    
+              } else if (sdim==3) {
+                write_3D_poly_to_vtk("tri_bad_poly_", oeid, num_p, p);    
+              }              
+#endif
+             
               char msg[1024];
               sprintf(msg," - there was a problem (e.g. repeated points, clockwise poly, etc.) with the triangulation of the element with id=%d ",oeid);
               if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg,
@@ -862,7 +880,8 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         }
       }
      }
-    
+
+
     // Variable indicating if any of the elements on this PET are split
     bool is_split_local=false;
 
@@ -920,10 +939,11 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       } else {
          mesh.is_split=false;
       }
-    } else {
-      mesh.is_split=false;
-    }
+     } else {
+       mesh.is_split=false;
+     }
 
+     
     // Compute the extra element ranges
     int beg_extra_ids=0;
     if (mesh.is_split) {
@@ -1068,6 +1088,76 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       all_nodes[seq] = &*ni;
     }
 
+
+    // Record original element count
+    mesh.setOrigElemConnCount(num_elemConn);
+
+    // If split, record original element connections for split elements
+    // I have this if-split here for efficicies sake, since internally the orig
+    // connections for a non-split mesh don't need this. However, when you've
+    // rearranged to use this information for mesh creation, then get rid of this
+    if (mesh.is_split) {
+
+      // Set that we're recording the original nodes
+      mesh.setHasOrigElemNodes();
+
+       // Set connection information
+      std::vector<MeshObj *> tmp_vec;
+       int conn_pos=0;
+       for (int e = 0; e < num_elems; ++e) {
+
+         // Only add split elements
+         // (other element connections can be recovered from the mesh info)
+         if (elemType[e] > 4) {
+
+           // Clear temp vector
+           tmp_vec.clear();
+           
+           // Reserve slots
+           tmp_vec.reserve(elemType[e]);
+           
+           // Loop through element connections recording information
+           for (int i=0; i<elemType[e]; i++) {
+             
+             // If polybreak, add NULL
+             if (elemConn[conn_pos] == MESH_POLYBREAK_IND) {
+               tmp_vec.push_back(nullptr);
+             } else { // Add node pointer
+               tmp_vec.push_back(all_nodes[elemConn[conn_pos]-1]);
+             }
+       
+             // next connection
+             conn_pos++;
+           }     
+
+           // Add to mesh
+           mesh.setOrigElemNodes(elemId[e],tmp_vec);
+           
+         } else {
+           conn_pos += elemType[e];
+         }
+       }
+
+       // If present, set original information
+       if (areaPresent == 1) {
+         // Mark that we are setting this information
+         mesh.setHasOrigElemArea();
+
+         // Loop adding area just for split elements 
+         // (The rest can be retrieved from the mesh)
+         for (int e = 0; e < num_elems; ++e) {
+
+           // Only add split elements
+           // (other element connections can be recovered from the mesh info)
+           if (elemType[e] > 4) {
+             mesh.setOrigElemArea(elemId[e],elemArea[e]);
+           }
+         }
+       }
+    }
+         
+
+    
 
     // Generate connectivity list with split elements
     // TODO: MAYBE EVENTUALLY PUT EXTRA SPLIT ONES AT END
@@ -1988,29 +2078,35 @@ void ESMCI_MeshGetElemConnCount(Mesh *mesh, int *_elemConnCount, int *rc){
   // Init output
   *_elemConnCount = 0;
 
-  // Doesn't work with split meshes right now
-  if (mesh->is_split) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-       " Can't get elem connection count from mesh containing >4 elements.",
-                                       ESMC_CONTEXT, rc)) return;
+  // Get info from Mesh
+  try {
+
+    *_elemConnCount = mesh->getOrigElemConnCount();
+    
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
   }
 
-  // Loop summing number of nodes per element
-  int elemConnCount=0;
-  Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
-  for (; ei != ee; ++ei) {
-    MeshObj &elem = *ei;
-
-    // Get topology of element
-    const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(elem);
-
-    // Add number of nodes for this elem to connection count
-    elemConnCount += topo->num_nodes;
-  }
-
-  // Output
-  *_elemConnCount = elemConnCount;
-  if(rc != NULL) *rc = ESMF_SUCCESS;
+  // Set return code
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  
 }
 
 void ESMCI_MeshGetOwnedNodeCount(Mesh *mesh, int *nodeCount, int *rc){
@@ -2121,20 +2217,42 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
 
   // Try-catch block around main part of method
   try {
-
-    // Doesn't work with split meshes right now
-    if (mesh->is_split) {
-      int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-         " Can't currently get element info from a mesh containing >4 elements.",
-                                       ESMC_CONTEXT, &localrc)) throw localrc;
-    }
     
+
+    ////// Get ordered list of elems ////// 
+    std::vector<std::pair<int,MeshObj *> > sorted_elems;
+    sorted_elems.reserve(mesh->num_elems());
+
+    // Loop over elems
+    Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj *elem = &(*ei);
+
+      // DON'T ONLY DO LOCAL, BECAUSE WE NEED TO BE ABLE TO OUTPUT
+      // NON-LOCAL/GHOST ELEMS
+      // // Only do local
+      // // if (!GetAttr(*elem).is_locally_owned()) continue;
+
+      // Don't do split elements
+      if (mesh->is_split && elem->get_id() > mesh->max_non_split_id) continue;
+      
+      // get data index
+      int index = elem->get_data_index();
+      
+      // Add to list
+      sorted_elems.push_back(std::make_pair(index, elem));      
+    }
+
+    // sort by data index
+    std::sort(sorted_elems.begin(), sorted_elems.end());
+ 
+
     ////// Get some handy information //////
-    int num_elems=mesh->num_elems();
     int orig_sdim=mesh->orig_spatial_dim;
+    int num_elems=sorted_elems.size();  // The number of elements is the number in the list
 
 
+       
     ////// Error check input arrays //////
 
     // If elemIds array exists, error check
@@ -2155,6 +2273,7 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
 
     // If elemTypes array exists, error check
     if (present(elemTypes)) {
+            
       // Error checking
       if (elemTypes->dimCount !=1) {
         int localrc;
@@ -2172,6 +2291,7 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
 
     // If elemConn array exists, error check
     if (present(elemConn)) {
+      
       // Error checking
       if (elemConn->dimCount !=1) {
         int localrc;
@@ -2179,19 +2299,11 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
           " elementConn array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
       }
 
-      // Loop summing number of nodes per element
-      int num_elem_conn=0;
-      Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
-      for (; ei != ee; ++ei) {
-        MeshObj &elem = *ei;
-        
-        // Get topology of element
-        const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(elem);
-        
-        // Add number of nodes for this elem to connection count
-        num_elem_conn += topo->num_nodes;
-      }
+      
+      // Get element conn count
+      int num_elem_conn=mesh->getOrigElemConnCount();
 
+      // Make sure input array is the correct size
       if (elemConn->extent[0] != num_elem_conn) {
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
@@ -2229,7 +2341,7 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
 
     // If elemArea array exists, error check
     if (present(elemArea)) {
-
+      
       // Mask sure element mask is present
       MEField<> *elem_area=mesh->GetField("elem_area");
       if (!elem_area) {
@@ -2252,6 +2364,7 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
       }
     }
 
+    
     // If elemCoords array exists, error check
     if (present(elemCoords)) {
 
@@ -2278,26 +2391,6 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     }
 
 
-
-    ////// Get ordered list of elems ////// 
-    std::vector<std::pair<int,MeshObj *> > sorted_elems;
-    sorted_elems.reserve(num_elems);
-
-    // Loop over elems
-    Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
-    for (; ei != ee; ++ei) {
-      MeshObj *elem = &(*ei);
-      
-      // get data index
-      int index = elem->get_data_index();
-      
-      // Add to list
-      sorted_elems.push_back(std::make_pair(index, elem));      
-    }
-
-    // sort by data index
-    std::sort(sorted_elems.begin(), sorted_elems.end());
-
     
     ////// Fill info in arrays using sorted_elems //////
 
@@ -2320,42 +2413,43 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
 
       // Get array into which to put types
       int *elemTypes_array=elemTypes->array;
-      
+
       // Loop through elems
       for (int i=0; i<sorted_elems.size(); i++) {
+
         // get element
         MeshObj *elem=sorted_elems[i].second;
 
-        // Get topology of elem
-        const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
+        // Get number of nodes around element
+        int num_nodes=mesh->getOrigElemNodesCount(elem);
         
         // Convert parametric dim and number of nodes to element type
-        elemTypes_array[i]=_num_nodes_to_elem_type(pdim, topo->num_nodes);
+        elemTypes_array[i]=_num_nodes_to_elem_type(pdim, num_nodes);          
       }
     }
-
- /* XMRKX */    
-
-    // If it was passed in, fill elementIds array
-    if (present(elemConn)) {
-      // Get array into which to put ids
-      int *elemConn_array=elemConn->array;
       
+    // If it was passed in, fill elemConn array
+    if (present(elemConn)) {
+
+      // Get array into which to put connection indices
+      int *elemConn_array=elemConn->array;
+            
       // Loop through elems
+      std::vector<MeshObj *> tmp_nodes;
       int j=0;
       for (int i=0; i<sorted_elems.size(); i++) {
-        // get element
+
+        // Get element
         MeshObj *elem=sorted_elems[i].second;
 
-        // Get topology of elem
-        const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
+        // Fill temporary vector with node connections
+        mesh->getOrigElemNodes(elem, tmp_nodes);
 
-        // Loop getting the indices of the nodes surrouding elem
-        for (int n = 0; n < topo->num_nodes; n++){
-          const MeshObj *node = elem->Relations[n].obj;
+        // Loop adding connection indices to array
+        for (MeshObj *node: tmp_nodes) {
           elemConn_array[j]=node->get_data_index()+1; // Add one because F90 node indices are base 1
           j++;
-        }
+        }        
       }
     }
 
@@ -2384,29 +2478,22 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     // If it was passed in, fill elementArea array
     if (present(elemArea)) {
 
-      // Get element mask value field (presence of this is checked above)
-      MEField<> *elem_area=mesh->GetField("elem_area");
-
       // Get array into which to put types
       ESMC_R8 *elemArea_array=elemArea->array;
-      
-      // Loop through elems
+
+      // Loop through elements setting area
       for (int i=0; i<sorted_elems.size(); i++) {
         // get element
         MeshObj *elem=sorted_elems[i].second;
 
-        // Get elem's mask value
-        double *area=elem_area->data(*elem);
-        
-        // Set elem area in output array
-        elemArea_array[i]=*area;
+        // Set area in array
+        elemArea_array[i]=mesh->getOrigElemArea(elem);
       }
     }
 
-
     // If it was passed in, fill elemCoords array
     if (present(elemCoords)) {
-/* XMRKX */
+
       // Get pointer to mesh elem coords data
       MEField<> *elem_coords=mesh->GetField("elem_orig_coordinates");
       if (!elem_coords) {
@@ -2433,13 +2520,24 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
       }
     }
 
-  }catch(int localrc){
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  } catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-          " Caught unknown exception", ESMC_CONTEXT, rc);
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
   
@@ -2462,7 +2560,7 @@ void ESMCI_MeshSetElemInfo(Mesh *mesh,
     if (mesh->is_split && present(elemArea)) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  " element areas can't currently be set for a mesh containing >4 elements.",
+            "Setting element areas isn't currently supported for a 2D Mesh containing elements with >4 nodes.",
                           ESMC_CONTEXT, &localrc)) throw localrc;
     }
     

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -119,12 +119,12 @@ contains
         type(ESMF_XGrid)                    :: xgrid
         type(ESMF_Grid)                     :: sideA(2), sideB(1)
         type(ESMF_DistGrid)                 :: distgrid
-        real(ESMF_KIND_R8)                  :: centroid(12,2), area(12)
+        real(ESMF_KIND_R8)                  :: area(12)
         type(ESMF_XGridSpec)                :: sparseMatA2X(2), sparseMatX2B(1)
 
         type(ESMF_Grid)                     :: l_sideA(2), l_sideB(1)
         type(ESMF_DistGrid)                 :: l_sideAdg(2), l_sideBdg(1)
-        real(ESMF_KIND_R8)                  :: l_centroid(12,2), l_area(12)
+        real(ESMF_KIND_R8)                  :: l_area(12)
         type(ESMF_XGridSpec)                :: l_sparseMatA2X(2), l_sparseMatX2B(1)
         type(ESMF_Field)                    :: field, srcField(2), dstField(1)
 
@@ -411,7 +411,7 @@ contains
 
         ! Finally ready to do an flux exchange from A side to B side
         xgrid = ESMF_XGridCreateFromSparseMat(sideAGrid=sideA, sideBGrid=sideB, &
-            area=xgrid_area, centroid=centroid, &
+            area=xgrid_area, &
             sparseMatA2X=sparseMatA2X, sparseMatX2B=sparseMatX2B, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -421,7 +421,7 @@ contains
             sideAGridCount=sideAGC, sideBGridCount=sideBGC, &
             sideAMeshCount=sideAMC, sideBMeshCount=sideBMC, &
             sideAGrid=l_sideA, sideBGrid=l_sideB, area=l_area, &
-            centroid=l_centroid, distgridA=l_sideAdg, &
+            distgridA=l_sideAdg, &
             distgridM = distgrid, sparseMatA2X=l_sparseMatA2X, &
             sparseMatX2B=l_sparseMatX2B, &
             rc=localrc)
@@ -659,12 +659,12 @@ contains
         type(ESMF_XGrid)                    :: xgrid
         type(ESMF_Grid)                     :: sideA(2), sideB(1)
         type(ESMF_DistGrid)                 :: distgrid
-        real(ESMF_KIND_R8)                  :: centroid(12,2), area(12)
+        real(ESMF_KIND_R8)                  :: area(12)
         type(ESMF_XGridSpec)                :: sparseMatA2X(2), sparseMatX2B(1)
 
         type(ESMF_Grid)                     :: l_sideA(2), l_sideB(1)
         type(ESMF_DistGrid)                 :: l_sideAdg(2), l_sideBdg(1)
-        real(ESMF_KIND_R8)                  :: l_centroid(12,2), l_area(12)
+        real(ESMF_KIND_R8)                  :: l_area(12)
         type(ESMF_XGridSpec)                :: l_sparseMatA2X(2), l_sparseMatX2B(1)
         type(ESMF_Field)                    :: field, srcField(2), dstField(1)
 
@@ -940,7 +940,7 @@ contains
 
         ! Finally ready to do an flux exchange from A side to B side
         xgrid = ESMF_XGridCreateFromSparseMat(sideAGrid=sideA, sideBGrid=sideB, &
-            area=xgrid_area, centroid=centroid, &
+            area=xgrid_area, & 
             sparseMatA2X=sparseMatA2X, sparseMatX2B=sparseMatX2B, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -950,7 +950,7 @@ contains
             sideAGridCount=sideAGC, sideBGridCount=sideBGC, &
             sideAMeshCount=sideAMC, sideBMeshCount=sideBMC, &
             sideAGrid=l_sideA, sideBGrid=l_sideB, area=l_area, &
-            centroid=l_centroid, distgridA=l_sideAdg, &
+            distgridA=l_sideAdg, &
             distgridM = distgrid, sparseMatA2X=l_sparseMatA2X, &
             sparseMatX2B=l_sparseMatX2B, &
             rc=localrc)

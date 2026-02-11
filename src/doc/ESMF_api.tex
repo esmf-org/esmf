@@ -1,7 +1,7 @@
 % $Id$
 %
 % Earth System Modeling Framework
-% Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
+% Copyright (c) 2002-2026, University Corporation for Atmospheric Research, 
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 % Laboratory, University of Michigan, National Centers for Environmental 
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -149,22 +149,38 @@ ESMF provides the concept of a {\bf named alias}. A named alias behaves just
 like an alias in all aspects, except when it comes to setting and getting the
 {\em name} of the deep object it is associated with. While regular aliases
 all access the same name string in the actual deep object, a named alias keeps
-its private name string. This allows the same deep object to be known under a
-different name in different contexts.
+its private name string. Usage of named aliases allows the same deep object to
+be known under a different name in different contexts. To further facilitate the
+use of named aliases, each instance is identified by a unique {\em id} that can
+be queried from the alias itself.
 
 The assignment
 \begin{verbatim}
-deep2 = ESMF_NamedAlias(deep1)
+deep2 = ESMF_NamedAlias(deep1, [name])
 \end{verbatim}
-makes {\tt deep2} a {\bf named alias} of {\tt deep1}. Any {\em name} changes on
-{\tt deep2} only affect {\tt deep2}. However, the {\em name} retrieved from
-{\tt deep1}, or from any regular aliases created from {\tt deep1}, is
-unaffected.
+makes {\tt deep2} a {\bf named alias} of {\tt deep1}. By default, i.e. without
+providing the optional {\tt name} argument, {\tt deep2} starts out with the
+same name as {\tt deep1}. However, providing the {\tt name} argument, or
+subsequently changing the name on {\tt deep2}, only affects {\tt deep2}.
+The name retrieved from {\tt deep1}, or any {\em regular} alias created from it,
+remains unaffected.
 
-Notice that aliases generated from a named alias are again named aliases. This
-is true even when using the regular assignment operator with a named alias on
-the right hand side. Named aliases own their unique name string that cannot
-be accessed or altered through any other alias.
+Notice that with {\tt deep2} a named alias, the assignment
+\begin{verbatim}
+deep3 = deep2
+\end{verbatim}
+automatically makes {\tt deep3} a named alias that starts out with
+its {\em name} and {\em id} identical to that of {\tt deep2}. This is typically
+the expected behavior for simple assignments, but technically {\tt deep3} is a
+new and separate named alias! Specifically this means that name changes made on
+{\tt deep2} only affect {\tt deep2}, and name changes made on {\tt deep3} only
+affect {\tt deep3}. There is no link between the two named aliases, and the fact
+that they both report the same {\em id} is strictly speaking incorrect, yet
+convenient for most use cases. It is therefore best practice to use
+{\tt ESMF\_NamedAlias()} when a new named alias is needed and to set its
+{\em name} as part of this call. Further name changes on named aliases,
+especially after the first use of direct assignments involving it, are
+discouraged.
 
 \input{../Superstructure/NamedAlias/doc/ESMF_NamedAlias_fapi}
 

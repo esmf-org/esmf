@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -53,7 +53,7 @@ program ESMF_AttributeUtilUTest
 
   type(ESMF_FieldBundle) :: src_fb, dst_fb, src_fb2, dst_fb2, src_fb3, dst_fb3, &
                             fb_idx
-  type(ESMF_Info) :: infoh, infoh2
+  type(ESMF_Info) :: infoh, infoh2, info
   character(:), allocatable :: actual
   type(ESMF_Grid) :: grid
   type(ESMF_Field) :: field,field2,field3,field4
@@ -146,6 +146,12 @@ program ESMF_AttributeUtilUTest
   field=ESMF_FieldCreate(grid,typekind=ESMF_TYPEKIND_R4,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+  ! remove the ESMF JSON root - because access by index cannot handle it
+  call ESMF_InfoGetFromHost(field, info=info, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_InfoRemove(info, keyParent="ESMF", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   field2=ESMF_FieldCreate(grid,typekind=ESMF_TYPEKIND_R4,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -190,6 +196,12 @@ program ESMF_AttributeUtilUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   field3=ESMF_FieldCreate(grid,typekind=ESMF_TYPEKIND_R4,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! remove the ESMF JSON root - because access by index cannot handle it
+  call ESMF_InfoGetFromHost(field3, info=info, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_InfoRemove(info, keyParent="ESMF", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field4=ESMF_FieldCreate(grid,typekind=ESMF_TYPEKIND_R4,rc=rc)
@@ -390,6 +402,12 @@ program ESMF_AttributeUtilUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   fb_idx = ESMF_FieldBundleCreate(name="fb_idx", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! remove the ESMF JSON root - because access by index cannot handle it
+  call ESMF_InfoGetFromHost(fb_idx, info=info, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_InfoRemove(info, keyParent="ESMF", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_AttributeSet(fb_idx, "is_32bit", actual_value, convention="NetCDF", &

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -48,6 +48,7 @@ program ESMF_AttPackArrayUTest
   type(ESMF_Array)     :: array
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_DistGrid)  :: distgrid
+  type(ESMF_Info)      :: info
 
   AttPackTestVariablesMacro()
 
@@ -65,10 +66,20 @@ program ESMF_AttPackArrayUTest
   !-----------------------------------------------------------------------------
 
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
     regDecomp=(/2,3/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+  ! remove the ESMF JSON root - because AttPack testing cannot handle it
+  call ESMF_InfoGetFromHost(array, info=info, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_InfoRemove(info, keyParent="ESMF", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! now start testing...
   AttPackTestMacro(array, "an Array", EX_UTest, "Array002")
 
   AttPackStandardTestMacro(array, "an Array", "ESMF   ", "General", EX_UTest)
@@ -77,7 +88,9 @@ program ESMF_AttPackArrayUTest
   AttPackStandardTestMacro(array, "an Array", "CF     ", "General", EX_UTest)
 
   call ESMF_ArrayDestroy(array, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE)

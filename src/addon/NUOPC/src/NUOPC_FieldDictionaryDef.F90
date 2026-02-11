@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -144,6 +144,7 @@ module NUOPC_FieldDictionaryDef
     integer :: localrc
     integer :: garbageCount, item
     type(NUOPC_FieldDictionaryEntry) :: fdEntry
+    type(NUOPC_FieldDictionaryEntryS), pointer :: wrap
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -173,7 +174,8 @@ module NUOPC_FieldDictionaryDef
         file=FILENAME, &
         rcToReturn=rc)) &
         return  ! bail out
-      deallocate(fdEntry % wrap, stat=localrc)
+      wrap => fdEntry%wrap  ! LLVM workaround for deallocate() runtime error!
+      deallocate(wrap, stat=localrc)
       if (ESMF_LogFoundDeallocError(statusToCheck=localrc, &
         msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &

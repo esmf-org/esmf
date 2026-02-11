@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -317,7 +317,8 @@
 !     current time.  In either case, {\tt timeStep} can be positive or negative.
 !     See the "direction" argument in method {\tt ESMF\_ClockSet()}.
 !     {\tt ESMF\_ClockAdvance()} optionally returns a list and number of ringing
-!     {\tt ESMF\_Alarm}s.  See also method {\tt ESMF\_ClockGetRingingAlarms()}.
+!     {\tt ESMF\_Alarm}s.  See also method {\tt ESMF\_ClockGetAlarmList()}, which
+!     includes an {\tt ESMF\_ALARMLIST\_RINGING} option for {\tt alarmlistflag}.
 !     \end{sloppypar}
 !
 !     The arguments are:

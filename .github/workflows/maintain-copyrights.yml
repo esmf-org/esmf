@@ -1,0 +1,79 @@
+name: Maintain Copyright Date
+
+on:
+  schedule:
+    - cron: '0 14 1 1 *'
+  workflow_dispatch:
+    inputs:
+      year:
+        description: 'Year for copyright update (optional)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  maintain-copyrights:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Update Copyright Dates
+        id: update-copyright-dates
+        run: |
+          CMD="python scripts/maintain_copyrights.py -uaw"
+          if [ -n "${{ inputs.year }}" ]; then
+            CMD="$CMD -y ${{ inputs.year }}"
+          fi
+          OUTPUT=$(eval $CMD)
+          echo "$OUTPUT" >> $GITHUB_STEP_SUMMARY
+          OUTDATED=$(echo "$OUTPUT" | sed -n 's/^Total outdated copyright years: \([0-9]*\).*/\1/p' || echo "0")
+          UPDATED=$(echo "$OUTPUT" | sed -n 's/^Total updated copyright years: \([0-9]*\).*/\1/p' || echo "0")
+          WARNINGS=$(echo "$OUTPUT" | sed -n 's/^Total warnings: \([0-9]*\).*/\1/p' || echo "0")
+          echo "outdated_count=$OUTDATED" >> $GITHUB_OUTPUT
+          echo "updated_count=$UPDATED" >> $GITHUB_OUTPUT
+          echo "warning_count=$WARNINGS" >> $GITHUB_OUTPUT
+      - name: Generate Patch
+        run: git diff --cached > ${{ runner.temp }}/copyright_update.patch
+      - name: Upload Patch
+        if: steps.update-copyright-dates.outputs.updated_count > 0
+        uses: actions/upload-artifact@v4
+        with:
+          name: esmf_copyright_update
+          path: ${{ runner.temp }}/copyright_update.patch
+      - name: Create Branch and Commit
+        if: steps.update-copyright-dates.outputs.updated_count > 0
+        run: |
+          git config user.name "esmf-actions[bot]"
+          git config user.email "esmf_support@ucar.edu"
+          git checkout -b esmf-bot/copyright/${{ github.run_id }}
+          git commit -m "Update copyright year to ${{ inputs.year || 'current year' }}"
+          git push origin esmf-bot/copyright/${{ github.run_id }}
+      - name: Create Pull Request
+        if: steps.update-copyright-dates.outputs.updated_count > 0
+        run: |
+          cat <<EOF > ${{ runner.temp }}/pr_body.md
+          This PR was created automatically by
+          [${{ github.workflow }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/workflow)
+          
+          See warnings and details in
+          [GitHub Actions Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          
+          Outdated copyrights: ${{ steps.update-copyright-dates.outputs.outdated_count }}
+          Updated copyrights: ${{ steps.update-copyright-dates.outputs.updated_count }}
+          Warnings: ${{ steps.update-copyright-dates.outputs.warning_count }}
+          EOF
+          gh pr create \
+            --base develop \
+            --head esmf-bot/copyright/${{ github.run_id }} \
+            --title "Update copyright year to ${{ inputs.year || 'current year' }}" \
+            --reviewer @esmf-org/esmf-reviewers \
+            --body-file ${{ runner.temp }}/pr_body.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

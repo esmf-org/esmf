@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -46,6 +46,7 @@ program ESMF_AttPackFieldUTest
 
   ! local variables
   type(ESMF_Field) :: field
+  type(ESMF_Info)  :: info
 
   AttPackTestVariablesMacro()
 
@@ -63,7 +64,15 @@ program ESMF_AttPackFieldUTest
   !-----------------------------------------------------------------------------
 
   field = ESMF_FieldEmptyCreate(name="field", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+  ! remove the ESMF JSON root - because AttPack testing cannot handle it
+  call ESMF_InfoGetFromHost(field, info=info, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_InfoRemove(info, keyParent="ESMF", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! now start testing...
   AttPackTestMacro(field, "an Field", EX_UTest, "field")
   AttPackStandardTestMacro(field, "a Field", "ESMF   ", "General", EX_UTest)
   AttPackStandardTestMacro(field, "a Field", "CIM 1.5", "Inputs ", EX_UTest)
@@ -71,6 +80,7 @@ program ESMF_AttPackFieldUTest
   AttPackStandardTestMacro(field, "a Field", "CF     ", "General", EX_UTest)
 
   call ESMF_FieldDestroy(field, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE)

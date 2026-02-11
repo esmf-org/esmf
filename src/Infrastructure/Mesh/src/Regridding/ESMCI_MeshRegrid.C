@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -308,7 +308,7 @@ namespace ESMCI {
     }
     
     // Get mapping of split ids to original ids
-    id_map_dir.RemoteGID(num_src_split_gids, &src_split_gids[0], src_split_gids_proc, src_split_gids_orig);
+    id_map_dir.RemoteGID(num_src_split_gids, src_split_gids.data(), src_split_gids_proc, src_split_gids_orig);
     
     // Loop setting new ids
     for (int i=0; i<num_src_split_gids; i++) {

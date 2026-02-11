@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2025, University Corporation for Atmospheric Research, 
+// Copyright (c) 2002-2026, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -624,6 +624,34 @@ int ESMC_FieldGetBounds(
 //    The exclusive upper bounds of the {\tt ESMC\_Field}
 //  \item[rank]
 //    The rank of the {\tt ESMC\_Field}, to size the bounds arrays
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_FieldGetLocalDECount - Get the number of DEs in a Field associated with the local PET
+//
+// !INTERFACE:
+int ESMC_FieldGetLocalDECount(
+  ESMC_Field field,           // in
+  int *localDECount           // out
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Get the number of DEs in the specified {\tt ESMC\_Field} object on the local PET.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[field]
+//    Get the local DE count for this {\tt ESMC\_Field}.
+//  \item[localDECount]
+//    The number of DEs in the Field on the local PET.
 //  \end{description}
 //
 //EOP

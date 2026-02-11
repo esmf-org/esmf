@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2025, University Corporation for Atmospheric Research,
+// Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -126,7 +126,8 @@ esmc_error::esmc_error (const std::string &code_name, int esmc_rc, const std::st
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMC_Base::constructInfo()"
 void ESMC_Base::constructInfo(ESMC_Base& base) {
-  base.info = new ESMCI::Info();
+  base.info = new ESMCI::Info(
+    std::string("{\"ESMF\":{\"Instance\":{\"NamedAliasCount\":0}}}"));
   base.infoalias = false;
 }
 
