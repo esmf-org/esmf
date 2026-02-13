@@ -852,17 +852,6 @@
 
 
 !------------------------------------------------------------------------------
-!
-!
-      integer, parameter :: ESMF_REGRID_SCHEME_FULL3D = 0, &
-                            ESMF_REGRID_SCHEME_NATIVE = 1, &
-                            ESMF_REGRID_SCHEME_REGION3D = 2, &
-                            ESMF_REGRID_SCHEME_FULLTOREG3D=3, &
-                            ESMF_REGRID_SCHEME_REGTOFULL3D=4, &
-                            ESMF_REGRID_SCHEME_DCON3D=5, &
-                            ESMF_REGRID_SCHEME_DCON3DWPOLE=6
-
-
       type ESMF_PredefinedDynamicMask_Flag
 #ifndef ESMF_NO_SEQUENCE
       sequence
@@ -873,10 +862,25 @@
 
 
       type(ESMF_PredefinedDynamicMask_Flag), parameter :: &
-           ESMF_PREDEFINEDDYNAMICMASK_MASKSRC  =  ESMF_PredefinedDynamicMask_Flag(0), &
-           ESMF_PREDEFINEDDYNAMICMASK_MASKDEST   =  ESMF_PredefinedDynamicMask_Flag(1), &
-           ESMF_PREDEFINEDDYNAMICMASK_MASKSRCDEST  =  ESMF_PredefinedDynamicMask_Flag(2), &
-           ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE  =  ESMF_PredefinedDynamicMask_Flag(3)
+           ESMF_PREDEFINEDDYNAMICMASK_MASKSRC     =  ESMF_PredefinedDynamicMask_Flag(0), &
+           ESMF_PREDEFINEDDYNAMICMASK_MASKDEST    =  ESMF_PredefinedDynamicMask_Flag(1), &
+           ESMF_PREDEFINEDDYNAMICMASK_MASKSRCDEST =  ESMF_PredefinedDynamicMask_Flag(2), &
+           ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE    =  ESMF_PredefinedDynamicMask_Flag(3)
+
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+!
+!
+      integer, parameter :: ESMF_REGRID_SCHEME_FULL3D = 0, &
+                            ESMF_REGRID_SCHEME_NATIVE = 1, &
+                            ESMF_REGRID_SCHEME_REGION3D = 2, &
+                            ESMF_REGRID_SCHEME_FULLTOREG3D=3, &
+                            ESMF_REGRID_SCHEME_REGTOFULL3D=4, &
+                            ESMF_REGRID_SCHEME_DCON3D=5, &
+                            ESMF_REGRID_SCHEME_DCON3DWPOLE=6
+
 
 !------------------------------------------------------------------------------
 ! ! ESMF_CoordSys_Flag
@@ -1174,12 +1178,6 @@
              ESMF_EXTRAPMETHOD_CREEP, &
              ESMF_EXTRAPMETHOD_CREEP_NRST_D
 
-      public ESMF_PredefinedDynamicMask_Flag, &
-             ESMF_PREDEFINEDDYNAMICMASK_MASKDEST, &
-             ESMF_PREDEFINEDDYNAMICMASK_MASKSRC, &
-             ESMF_PREDEFINEDDYNAMICMASK_MASKSRCDEST, &
-             ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE
-
       public ESMF_CubedSphereCalc_Flag, &
              ESMF_CUBEDSPHERECALC_1TILE, &
              ESMF_CUBEDSPHERECALC_LOCAL 
@@ -1286,6 +1284,12 @@
 
       public ESMF_NormType_Flag
       public ESMF_NORMTYPE_DSTAREA, ESMF_NORMTYPE_FRACAREA
+
+      public ESMF_PredefinedDynamicMask_Flag, &
+             ESMF_PREDEFINEDDYNAMICMASK_MASKDEST, &
+             ESMF_PREDEFINEDDYNAMICMASK_MASKSRC, &
+             ESMF_PREDEFINEDDYNAMICMASK_MASKSRCDEST, &
+             ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE
 
       public ESMF_MESH_POLYBREAK
 
@@ -2306,7 +2310,6 @@ end function
 
       end function ESMF_LineTypeNotEqual
 
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RWGCheckMethodEqual"
@@ -2341,6 +2344,7 @@ end function
                                   CheckMethod2%flag)
 
       end function ESMF_RWGCheckMethodEqual
+
 !-------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RWGCheckMethodNotEqual"
@@ -2375,7 +2379,6 @@ end function
                                      CheckMethod2%flag)
 
       end function ESMF_RWGCheckMethodNotEqual
-!-------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2411,10 +2414,11 @@ end function
 
       end function ESMF_TermOrderEq
 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_TermOrderEq"
+#define ESMF_METHOD "ESMF_PredefinedDynamicMask_FlagEq"
 !BOPI
-! !IROUTINE: ESMF_TermOrderEq - Equality of TermOrder Flag
+! !IROUTINE: ESMF_PredefinedDynamicMask_FlagEq - Equality of PredefinedDynamicMask Flag
 !
 ! !INTERFACE:
       impure elemental function ESMF_PredefinedDynamicMask_FlagEq(flag1, flag2)
@@ -2444,7 +2448,7 @@ end function
 
       end function ESMF_PredefinedDynamicMask_FlagEq
 
-!------------------------------------------------------------------------- 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_UtilVersionPrint"
 !BOPI
