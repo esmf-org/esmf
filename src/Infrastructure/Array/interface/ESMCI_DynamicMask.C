@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright (c) 2002-2026, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -23,25 +23,29 @@
 
 // include ESMF headers
 #include "ESMCI_Macros.h"
-#include "ESMCI_LogErr.h" 
+#include "ESMCI_LogErr.h"
 
 extern "C" {
-  
+
 // Prototypes of the Fortran interface functions.
-void FTN_X(f_esmf_dynamicmaskpredefinedsetr8r8r8)(ESMCI::DynamicMask *DynamicMask, ESMC_PredefinedDynamicMask_Flag *maskType, int *handleAllElements, int *haepresent, 
-  ESMC_R8 *dynamicSrcMaskValue, int *dsmpresent, 
+void FTN_X(f_esmf_dynamicmaskpredefinedsetr8r8r8)(ESMCI::DynamicMask *DynamicMask,
+  ESMC_PredefinedDynamicMask_Flag *maskType, int *handleAllElements, int *haepresent,
+  ESMC_R8 *dynamicSrcMaskValue, int *dsmpresent,
   ESMC_R8 *dynamicDstMaskValue, int *ddmpresent, int *rc);
 
-void FTN_X(f_esmf_dynamicmaskpredefinedsetr8r8r8v)(ESMCI::DynamicMask *DynamicMask, ESMC_PredefinedDynamicMask_Flag *maskType, int *handleAllElements, int *haepresent, 
-  ESMC_R8 *dynamicSrcMaskValue, int *dsmpresent, 
+void FTN_X(f_esmf_dynamicmaskpredefinedsetr8r8r8v)(ESMCI::DynamicMask *DynamicMask,
+  ESMC_PredefinedDynamicMask_Flag *maskType, int *handleAllElements, int *haepresent,
+  ESMC_R8 *dynamicSrcMaskValue, int *dsmpresent,
   ESMC_R8 *dynamicDstMaskValue, int *ddmpresent, int *rc);
 
-void FTN_X(f_esmf_dynamicmaskpredefinedsetr4r8r4)(ESMCI::DynamicMask *DynamicMask, ESMC_PredefinedDynamicMask_Flag *maskType, int *handleAllElements, int *haepresent, 
-  ESMC_R4 *dynamicSrcMaskValue, int *dsmpresent, 
+void FTN_X(f_esmf_dynamicmaskpredefinedsetr4r8r4)(ESMCI::DynamicMask *DynamicMask,
+  ESMC_PredefinedDynamicMask_Flag *maskType, int *handleAllElements, int *haepresent,
+  ESMC_R4 *dynamicSrcMaskValue, int *dsmpresent,
   ESMC_R4 *dynamicDstMaskValue, int *ddmpresent, int *rc);
 
-void FTN_X(f_esmf_dynamicmaskpredefinedsetr4r8r4v)(ESMCI::DynamicMask *DynamicMask, ESMC_PredefinedDynamicMask_Flag *maskType, int *handleAllElements, int *haepresent, 
-  ESMC_R4 *dynamicSrcMaskValue, int *dsmpresent, 
+void FTN_X(f_esmf_dynamicmaskpredefinedsetr4r8r4v)(ESMCI::DynamicMask *DynamicMask,
+  ESMC_PredefinedDynamicMask_Flag *maskType, int *handleAllElements, int *haepresent,
+  ESMC_R4 *dynamicSrcMaskValue, int *dsmpresent,
   ESMC_R4 *dynamicDstMaskValue, int *ddmpresent, int *rc);
 
 }; // extern "C"

@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#define ESMF_FILENAME "ESMF_dynamicmask_C.F90"
+#define ESMF_FILENAME "ESMF_DynamicMask_C.F90"
 !==============================================================================
 !
 ! F77 interface files for C layer calling into F90 implementation layer.
@@ -33,8 +33,8 @@
 !  !DESCRIPTION:
 !
 ! The code in this file implements the interface code between C and F90
-!  for the {\tt dynamicmask} entry points.  When the user calls an
-!  ESMC_dynamicmaskXXX method, that code calls these functions, which
+!  for the {\tt DynamicMask} entry points.  When the user calls an
+!  ESMC_DynamicMaskXXX method, that code calls these functions, which
 !  in turn call the F90 module code.  C cannot call directly into an
 !  F90 module because the module routine names are altered in a similar
 !  fashion as C++ name mangling.
@@ -50,7 +50,7 @@
     use ESMF_DynamicMaskMod
     use ESMF_UtilTypesMod
     use ESMF_LogErrMod
-    
+
     implicit none
 
     type(ESMF_DynamicMask) :: dynamicmask
@@ -66,7 +66,6 @@
     integer                 :: localrc      ! local return code
     real(ESMF_KIND_R8), allocatable :: dynamicSrcMaskValue_, dynamicDstMaskValue_
     logical, allocatable :: handleAllElements_
-    
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -91,7 +90,7 @@
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
       rcToReturn=rc)) return
-      
+
     ! return successfully
     rc = ESMF_SUCCESS
 
@@ -105,7 +104,7 @@
     use ESMF_DynamicMaskMod
     use ESMF_UtilTypesMod
     use ESMF_LogErrMod
-    
+
     implicit none
 
     type(ESMF_DynamicMask) :: dynamicmask
@@ -121,7 +120,6 @@
     integer                 :: localrc      ! local return code
     real(ESMF_KIND_R8), allocatable :: dynamicSrcMaskValue_, dynamicDstMaskValue_
     logical, allocatable :: handleAllElements_
-    
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -146,7 +144,7 @@
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
       rcToReturn=rc)) return
-      
+
     ! return successfully
     rc = ESMF_SUCCESS
 
@@ -160,7 +158,7 @@
     use ESMF_DynamicMaskMod
     use ESMF_UtilTypesMod
     use ESMF_LogErrMod
-    
+
     implicit none
 
     type(ESMF_DynamicMask) :: dynamicmask
@@ -176,7 +174,6 @@
     integer                 :: localrc      ! local return code
     real(ESMF_KIND_R4), allocatable :: dynamicSrcMaskValue_, dynamicDstMaskValue_
     logical, allocatable :: handleAllElements_
-    
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -201,7 +198,7 @@
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
       rcToReturn=rc)) return
-      
+
     ! return successfully
     rc = ESMF_SUCCESS
 
@@ -215,7 +212,7 @@
     use ESMF_DynamicMaskMod
     use ESMF_UtilTypesMod
     use ESMF_LogErrMod
-    
+
     implicit none
 
     type(ESMF_DynamicMask) :: dynamicmask
@@ -231,7 +228,6 @@
     integer                 :: localrc      ! local return code
     real(ESMF_KIND_R4), allocatable :: dynamicSrcMaskValue_, dynamicDstMaskValue_
     logical, allocatable :: handleAllElements_
-    
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -256,7 +252,7 @@
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
       rcToReturn=rc)) return
-      
+
     ! return successfully
     rc = ESMF_SUCCESS
 
