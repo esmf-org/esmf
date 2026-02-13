@@ -28,23 +28,31 @@
 extern "C" {
 
 // Prototypes of the Fortran interface functions.
-void FTN_X(f_esmf_dynamicmaskpredefinedsetr8r8r8)(ESMCI::DynamicMask *DynamicMask,
-  ESMC_PredefinedDynamicMask_Flag *maskType, int *handleAllElements, int *haepresent,
+void FTN_X(f_esmf_dynamicmaskpredefinedsetr8r8r8)(
+  ESMCI::DynamicMask *DynamicMask,
+  ESMC_PredefinedDynamicMask_Flag *maskType,
+  int *handleAllElements, int *haepresent,
   ESMC_R8 *dynamicSrcMaskValue, int *dsmpresent,
   ESMC_R8 *dynamicDstMaskValue, int *ddmpresent, int *rc);
 
-void FTN_X(f_esmf_dynamicmaskpredefinedsetr8r8r8v)(ESMCI::DynamicMask *DynamicMask,
-  ESMC_PredefinedDynamicMask_Flag *maskType, int *handleAllElements, int *haepresent,
+void FTN_X(f_esmf_dynamicmaskpredefinedsetr8r8r8v)(
+  ESMCI::DynamicMask *DynamicMask,
+  ESMC_PredefinedDynamicMask_Flag *maskType,
+  int *handleAllElements, int *haepresent,
   ESMC_R8 *dynamicSrcMaskValue, int *dsmpresent,
   ESMC_R8 *dynamicDstMaskValue, int *ddmpresent, int *rc);
 
-void FTN_X(f_esmf_dynamicmaskpredefinedsetr4r8r4)(ESMCI::DynamicMask *DynamicMask,
-  ESMC_PredefinedDynamicMask_Flag *maskType, int *handleAllElements, int *haepresent,
+void FTN_X(f_esmf_dynamicmaskpredefinedsetr4r8r4)(
+  ESMCI::DynamicMask *DynamicMask,
+  ESMC_PredefinedDynamicMask_Flag *maskType,
+  int *handleAllElements, int *haepresent,
   ESMC_R4 *dynamicSrcMaskValue, int *dsmpresent,
   ESMC_R4 *dynamicDstMaskValue, int *ddmpresent, int *rc);
 
-void FTN_X(f_esmf_dynamicmaskpredefinedsetr4r8r4v)(ESMCI::DynamicMask *DynamicMask,
-  ESMC_PredefinedDynamicMask_Flag *maskType, int *handleAllElements, int *haepresent,
+void FTN_X(f_esmf_dynamicmaskpredefinedsetr4r8r4v)(
+  ESMCI::DynamicMask *DynamicMask,
+  ESMC_PredefinedDynamicMask_Flag *maskType,
+  int *handleAllElements, int *haepresent,
   ESMC_R4 *dynamicSrcMaskValue, int *dsmpresent,
   ESMC_R4 *dynamicDstMaskValue, int *ddmpresent, int *rc);
 
@@ -82,8 +90,9 @@ int DynamicMask::setR8R8R8(
   if (dynamicDstMaskValue != ESMC_NULL_POINTER) {
      ddmpresent = 1;
   }
-  FTN_X(f_esmf_dynamicmaskpredefinedsetr8r8r8)(this, &maskType, handleAllElements, &haepresent,
-  dynamicSrcMaskValue, &dsmpresent, dynamicDstMaskValue, &ddmpresent, &localrc);
+  FTN_X(f_esmf_dynamicmaskpredefinedsetr8r8r8)(this, &maskType,
+    handleAllElements, &haepresent, dynamicSrcMaskValue, &dsmpresent,
+    dynamicDstMaskValue, &ddmpresent, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
   // return successfully
@@ -115,8 +124,9 @@ int DynamicMask::setR8R8R8V(
   if (dynamicDstMaskValue != ESMC_NULL_POINTER) {
      ddmpresent = 1;
   }
-  FTN_X(f_esmf_dynamicmaskpredefinedsetr8r8r8v)(this, &maskType, handleAllElements, &haepresent,
-  dynamicSrcMaskValue, &dsmpresent, dynamicDstMaskValue, &ddmpresent, &localrc);
+  FTN_X(f_esmf_dynamicmaskpredefinedsetr8r8r8v)(this, &maskType,
+    handleAllElements, &haepresent, dynamicSrcMaskValue, &dsmpresent,
+    dynamicDstMaskValue, &ddmpresent, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
   // return successfully
@@ -148,8 +158,9 @@ int DynamicMask::setR4R8R4(
   if (dynamicDstMaskValue != ESMC_NULL_POINTER) {
      ddmpresent = 1;
   }
-  FTN_X(f_esmf_dynamicmaskpredefinedsetr4r8r4)(this, &maskType, handleAllElements, &haepresent,
-  dynamicSrcMaskValue, &dsmpresent, dynamicDstMaskValue, &ddmpresent, &localrc);
+  FTN_X(f_esmf_dynamicmaskpredefinedsetr4r8r4)(this, &maskType,
+    handleAllElements, &haepresent, dynamicSrcMaskValue, &dsmpresent,
+    dynamicDstMaskValue, &ddmpresent, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
   // return successfully
@@ -181,8 +192,9 @@ int DynamicMask::setR4R8R4V(
   if (dynamicDstMaskValue != ESMC_NULL_POINTER) {
      ddmpresent = 1;
   }
-  FTN_X(f_esmf_dynamicmaskpredefinedsetr4r8r4v)(this, &maskType, handleAllElements, &haepresent,
-  dynamicSrcMaskValue, &dsmpresent, dynamicDstMaskValue, &ddmpresent, &localrc);
+  FTN_X(f_esmf_dynamicmaskpredefinedsetr4r8r4v)(this, &maskType,
+    handleAllElements, &haepresent, dynamicSrcMaskValue, &dsmpresent,
+    dynamicDstMaskValue, &ddmpresent, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
   // return successfully

@@ -20,7 +20,7 @@
 
 //-----------------------------------------------------------------------------
 //BOPI
-// !CLASS:  ESMCI::DynamicMask - dynamic masking
+// !CLASS:  ESMCI::DynamicMask - dynamic masking object
 //
 // !DESCRIPTION:
 //
