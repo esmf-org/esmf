@@ -114,8 +114,8 @@
     ! do test
     call test_regridPredefinedvoteMaskR4R8R4V(rc)
 
-    !!return result
-    !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !return result
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------
     ! Test regridding using predefined voteMask R4R8R4 and ungridded dim
@@ -444,23 +444,23 @@ contains
        zero_value = 0.d0
        lm = 3
        srcGrid = create_grid(src_nx,src_ny, 1, .true., localrc)
-       _VERIFY(localrc)
+       _VERIFY_PASS(localrc)
        dstGrid = create_grid(dst_nx,dst_ny, 2, .false., localrc)
-       _VERIFY(localrc)
-       srcField = ESMF_FieldCreate(srcGrid, ESMF_TYPEKIND_R4, gridToFieldMap=[2,3], ungriddedLBound=[1], ungriddedUBound=[lm], rc=localrc)
-       _VERIFY(localrc)
-       dstField = ESMF_FieldCreate(dstGrid, ESMF_TYPEKIND_R4, gridToFieldMap=[2,3], ungriddedLBound=[1], ungriddedUBound=[lm], rc=localrc)
-       _VERIFY(localrc)
+       _VERIFY_PASS(localrc)
+       srcField = ESMF_FieldCreate(srcGrid, ESMF_TYPEKIND_R4, rc=localrc)
+       _VERIFY_PASS(localrc)
+       dstField = ESMF_FieldCreate(dstGrid, ESMF_TYPEKIND_R4, rc=localrc)
+       _VERIFY_PASS(localrc)
        call ESMF_FieldFill(srcField, dataFillScheme="const", const1=real(def_value1,kind=ESMF_KIND_R8), rc=localrc)
-       _VERIFY(localrc)
+       _VERIFY_PASS(localrc)
        call ESMF_FieldFill(dstField, dataFillScheme="const", const1=real(zero_value,kind=ESMF_KIND_R8), rc=localrc)
-       _VERIFY(localrc)
+       _VERIFY_PASS(localrc)
        call ESMF_GridGet(srcGrid, localDECount=localDECount, rc=localrc)
-       _VERIFY(localrc)
+       _VERIFY_PASS(localrc)
        do lde = 0,localDECount-1
           call ESMF_GridGet(srcGrid, ESMF_STAGGERLOC_CENTER, lDE, computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
           call ESMF_FieldGet(srcField, lde, farrayPtr=srcPtr, rc=localrc)
-          _VERIFY(localrc)
+          _VERIFY_PASS(localrc)
           do i0=1,lm
              do i1=clbnd(1),cubnd(1)
                 do i2=clbnd(2),cubnd(2)
@@ -472,31 +472,31 @@ contains
 
        call ESMF_DynamicMaskSetPredefR4R8R4V(dyn_mask, ESMF_DYNAMICMASKPREDEF_VOTE, &
         & handleAllElements=.true., dynamicSrcMaskValue=undef_value, rc=localrc)
-       _VERIFY(localrc)
+       _VERIFY_PASS(localrc)
  
        srcTermProcessing=0 
        call ESMF_FieldRegridStore(srcField, dstField, regridMethod=ESMF_REGRIDMETHOD_CONSERVE, &
             linetype=ESMF_LINETYPE_GREAT_CIRCLE, srcTermProcessing=srcTermProcessing, routeHandle=rh, rc=localrc)
-       _VERIFY(localrc) 
+       _VERIFY_PASS(localrc) 
         call ESMF_FieldRegrid(srcField, dstField, routeHandle=rh, dynamicMask=dyn_mask, rc=localrc)
-       _VERIFY(localrc) 
+       _VERIFY_PASS(localrc) 
 
        call ESMF_GridGet(dstGrid, localDECount=localDECount, rc=localrc)
-       _VERIFY(localrc)
-       def_count = count_value_in_field_r4_3d(dstField, def_value2, 0.001, rc=localrc)
-       _VERIFY(localrc)
+       _VERIFY_PASS(localrc)
+       def_count = count_value_in_field_r4_2d(dstField, def_value2, 0.001, rc=localrc)
+       _VERIFY_PASS(localrc)
 
 
        call ESMF_FieldDestroy(srcField, noGarbage=.true., rc=localrc)
-       _VERIFY(localrc)
+       _VERIFY_PASS(localrc)
        call ESMF_FieldDestroy(dstField, noGarbage=.true., rc=localrc)
-       _VERIFY(localrc)
+       _VERIFY_PASS(localrc)
        call ESMF_GridDestroy(srcGrid, noGarbage=.true., rc=localrc)
-       _VERIFY(localrc)
+       _VERIFY_PASS(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
-       _VERIFY(localrc)
+       _VERIFY_PASS(localrc)
        call ESMF_RouteHandleDestroy(rh, noGarbage=.true., rc=localrc)
-       _VERIFY(localrc)
+       _VERIFY_PASS(localrc)
 
        correct = (dst_ny*dst_nx) == def_count
        if (correct) then
