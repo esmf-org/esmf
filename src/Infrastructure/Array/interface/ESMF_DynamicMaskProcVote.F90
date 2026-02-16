@@ -10,7 +10,7 @@
 !
 #include "ESMF.h"
 
-module ESMF_voteDynamicMaskMod
+module ESMF_DynamicMaskProcVoteMod
 
   ! !USES:
   use ESMF_UtilTypesMod     ! ESMF utility types
@@ -19,15 +19,15 @@ module ESMF_voteDynamicMaskMod
   implicit none
   private
 
-  public :: voteDynMaskProcR4R8R4V
-  public :: voteDynMaskProcR8R8R8V
-  public :: voteDynMaskProcR4R8R4
-  public :: voteDynMaskProcR8R8R8
+  public :: ESMF_DynamicMaskProcVoteR4R8R4V
+  public :: ESMF_DynamicMaskProcVoteR8R8R8V
+  public :: ESMF_DynamicMaskProcVoteR4R8R4
+  public :: ESMF_DynamicMaskProcVoteR8R8R8
 
 
   contains
 
-  subroutine voteDynMaskProcR4R8R4V(dynamicMaskList, dynamicSrcMaskValue, dynamicDstMaskValue, rc)
+  subroutine ESMF_DynamicMaskProcVoteR4R8R4V(dynamicMaskList, dynamicSrcMaskValue, dynamicDstMaskValue, rc)
     type(ESMF_DynamicMaskElementR4R8R4V), pointer              :: dynamicMaskList(:)
     real(ESMF_KIND_R4),            intent(in), optional :: dynamicSrcMaskValue
     real(ESMF_KIND_R4),            intent(in), optional :: dynamicDstMaskValue
@@ -61,9 +61,9 @@ module ESMF_voteDynamicMaskMod
       enddo
     endif
     rc = ESMF_SUCCESS
-  end subroutine voteDynMaskProcR4R8R4V
+  end subroutine ESMF_DynamicMaskProcVoteR4R8R4V
 
-  subroutine voteDynMaskProcR8R8R8V(dynamicMaskList, dynamicSrcMaskValue, dynamicDstMaskValue, rc)
+  subroutine ESMF_DynamicMaskProcVoteR8R8R8V(dynamicMaskList, dynamicSrcMaskValue, dynamicDstMaskValue, rc)
     type(ESMF_DynamicMaskElementR8R8R8V), pointer              :: dynamicMaskList(:)
     real(ESMF_KIND_R8),            intent(in), optional :: dynamicSrcMaskValue
     real(ESMF_KIND_R8),            intent(in), optional :: dynamicDstMaskValue
@@ -97,9 +97,9 @@ module ESMF_voteDynamicMaskMod
       enddo
     endif
     rc = ESMF_SUCCESS
-  end subroutine voteDynMaskProcR8R8R8V
+  end subroutine ESMF_DynamicMaskProcVoteR8R8R8V
 
-  subroutine voteDynMaskProcR8R8R8(dynamicMaskList, dynamicSrcMaskValue, &
+  subroutine ESMF_DynamicMaskProcVoteR8R8R8(dynamicMaskList, dynamicSrcMaskValue, &
     dynamicDstMaskValue, rc)
     type(ESMF_DynamicMaskElementR8R8R8), pointer        :: dynamicMaskList(:)
     real(ESMF_KIND_R8),            intent(in), optional :: dynamicSrcMaskValue
@@ -131,9 +131,9 @@ module ESMF_voteDynamicMaskMod
     endif
     ! return successfully
     rc = ESMF_SUCCESS
-  end subroutine voteDynMaskProcR8R8R8
+  end subroutine ESMF_DynamicMaskProcVoteR8R8R8
 
-  subroutine voteDynMaskProcR4R8R4(dynamicMaskList, dynamicSrcMaskValue, &
+  subroutine ESMF_DynamicMaskProcVoteR4R8R4(dynamicMaskList, dynamicSrcMaskValue, &
     dynamicDstMaskValue, rc)
     type(ESMF_DynamicMaskElementR4R8R4), pointer        :: dynamicMaskList(:)
     real(ESMF_KIND_R4),            intent(in), optional :: dynamicSrcMaskValue
@@ -165,7 +165,7 @@ module ESMF_voteDynamicMaskMod
     endif
     ! return successfully
     rc = ESMF_SUCCESS
-  end subroutine voteDynMaskProcR4R8R4
+  end subroutine ESMF_DynamicMaskProcVoteR4R8R4
 
   logical function match_r4(missing,b)
     real(ESMF_KIND_R4), intent(in) :: missing, b
@@ -177,5 +177,5 @@ module ESMF_voteDynamicMaskMod
     match_r8 = (missing==b)
   end function match_r8
 
-end module ESMF_voteDynamicMaskMod
+end module ESMF_DynamicMaskProcVoteMod
 

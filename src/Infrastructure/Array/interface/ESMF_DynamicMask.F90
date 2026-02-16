@@ -35,9 +35,9 @@ module ESMF_DynamicMaskMod
   use ESMF_LogErrMod              ! ESMF error handling
   use ESMF_RHandleMod
   use ESMF_F90InterfaceMod        ! ESMF F90-C++ interface helper
-  use ESMF_srcDynamicMaskMod
-  use ESMF_dstDynamicMaskMod
-  use ESMF_voteDynamicMaskMod
+  use ESMF_DynamicMaskProcDstMod
+  use ESMF_DynamicMaskProcSrcMod
+  use ESMF_DynamicMaskProcVoteMod
 
   implicit none
 
@@ -70,6 +70,10 @@ module ESMF_DynamicMaskMod
   public ESMF_DynamicMask, ESMF_DynamicMaskGet, ESMF_DynamicMaskGetInit
   public ESMF_DynamicMaskSetR8R8R8
   public ESMF_DynamicMaskPredefinedSetR8R8R8
+  public ESMF_DynamicMaskProcDstR8R8R8
+  public ESMF_DynamicMaskProcSrcR8R8R8
+  public ESMF_DynamicMaskProcVoteR8R8R8
+
 #ifndef ESMF_NO_DYNMASKOVERLOAD
   public ESMF_DynamicMaskSetR8R8R8V
   public ESMF_DynamicMaskSetR4R8R4
@@ -80,6 +84,18 @@ module ESMF_DynamicMaskMod
   public ESMF_DynamicMaskPredefinedSetR8R8R8V
   public ESMF_DynamicMaskPredefinedSetR4R8R4
   public ESMF_DynamicMaskPredefinedSetR4R8R4V
+
+  public ESMF_DynamicMaskProcDstR8R8R8V
+  public ESMF_DynamicMaskProcDstR4R8R4
+  public ESMF_DynamicMaskProcDstR4R8R4V
+
+  public ESMF_DynamicMaskProcSrcR8R8R8V
+  public ESMF_DynamicMaskProcSrcR4R8R4
+  public ESMF_DynamicMaskProcSrcR4R8R4V
+
+  public ESMF_DynamicMaskProcVoteR8R8R8V
+  public ESMF_DynamicMaskProcVoteR4R8R4
+  public ESMF_DynamicMaskProcVoteR4R8R4V
 #endif
 
 
@@ -211,11 +227,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     dynamicMask%typeKey           =   "R8R8R8"
     dynamicMask%dmsR8R8R8%typeKey =   dynamicMask%typeKey
     if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKSRC) then
-      dynamicMask%dmsR8R8R8%routine =>  srcDynMaskProcR8R8R8
+      dynamicMask%dmsR8R8R8%routine =>  ESMF_DynamicMaskProcSrcR8R8R8
     else if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKDEST) then
-      dynamicMask%dmsR8R8R8%routine =>  dstDynMaskProcR8R8R8
+      dynamicMask%dmsR8R8R8%routine =>  ESMF_DynamicMaskProcDstR8R8R8
     else if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE) then
-      dynamicMask%dmsR8R8R8%routine =>  voteDynMaskProcR8R8R8
+      dynamicMask%dmsR8R8R8%routine =>  ESMF_DynamicMaskProcVoteR8R8R8
     end if
     dynamicMask%dmsR8R8R8%dynamicSrcMaskIsPresent = present(dynamicSrcMaskValue)
     if (present(dynamicSrcMaskValue)) then
@@ -316,11 +332,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     dynamicMask%typeKey           =   "R8R8R8V"
     dynamicMask%dmsR8R8R8V%typeKey =   dynamicMask%typeKey
     if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKSRC) then
-      dynamicMask%dmsR8R8R8V%routine =>  srcDynMaskProcR8R8R8V
+      dynamicMask%dmsR8R8R8V%routine =>  ESMF_DynamicMaskProcSrcR8R8R8V
     else if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKDEST) then
-      dynamicMask%dmsR8R8R8V%routine =>  dstDynMaskProcR8R8R8V
+      dynamicMask%dmsR8R8R8V%routine =>  ESMF_DynamicMaskProcDstR8R8R8V
     else if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE) then
-      dynamicMask%dmsR8R8R8V%routine =>  voteDynMaskProcR8R8R8V
+      dynamicMask%dmsR8R8R8V%routine =>  ESMF_DynamicMaskProcVoteR8R8R8V
     end if
     dynamicMask%dmsR8R8R8V%dynamicSrcMaskIsPresent = present(dynamicSrcMaskValue)
     if (present(dynamicSrcMaskValue)) then
@@ -421,11 +437,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     dynamicMask%typeKey           =   "R4R8R4"
     dynamicMask%dmsR4R8R4%typeKey =   dynamicMask%typeKey
     if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKSRC) then
-      dynamicMask%dmsR4R8R4%routine =>  srcDynMaskProcR4R8R4
+      dynamicMask%dmsR4R8R4%routine =>  ESMF_DynamicMaskProcSrcR4R8R4
     else if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKDEST) then
-      dynamicMask%dmsR4R8R4%routine =>  dstDynMaskProcR4R8R4
+      dynamicMask%dmsR4R8R4%routine =>  ESMF_DynamicMaskProcDstR4R8R4
     else if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE) then
-      dynamicMask%dmsR4R8R4%routine =>  voteDynMaskProcR4R8R4
+      dynamicMask%dmsR4R8R4%routine =>  ESMF_DynamicMaskProcVoteR4R8R4
     end if
     dynamicMask%dmsR4R8R4%dynamicSrcMaskIsPresent = present(dynamicSrcMaskValue)
     if (present(dynamicSrcMaskValue)) then
@@ -526,11 +542,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     dynamicMask%typeKey           =   "R4R8R4V"
     dynamicMask%dmsR4R8R4V%typeKey =   dynamicMask%typeKey
     if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKSRC) then
-      dynamicMask%dmsR4R8R4V%routine =>  srcDynMaskProcR4R8R4V
+      dynamicMask%dmsR4R8R4V%routine =>  ESMF_DynamicMaskProcSrcR4R8R4V
     else if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKDEST) then
-      dynamicMask%dmsR4R8R4V%routine =>  dstDynMaskProcR4R8R4V
+      dynamicMask%dmsR4R8R4V%routine =>  ESMF_DynamicMaskProcDstR4R8R4V
     else if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE) then
-      dynamicMask%dmsR4R8R4V%routine =>  voteDynMaskProcR4R8R4V
+      dynamicMask%dmsR4R8R4V%routine =>  ESMF_DynamicMaskProcVoteR4R8R4V
     end if
     dynamicMask%dmsR4R8R4V%dynamicSrcMaskIsPresent = present(dynamicSrcMaskValue)
     if (present(dynamicSrcMaskValue)) then

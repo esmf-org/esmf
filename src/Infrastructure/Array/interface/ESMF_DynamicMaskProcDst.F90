@@ -10,7 +10,7 @@
 !
 #include "ESMF.h"
 
-module ESMF_dstDynamicMaskMod
+module ESMF_DynamicMaskProcDstMod
 
   ! !USES:
   use ESMF_UtilTypesMod     ! ESMF utility types
@@ -19,15 +19,14 @@ module ESMF_dstDynamicMaskMod
   implicit none
   private
 
-  public :: dstDynMaskProcR4R8R4V
-  public :: dstDynMaskProcR8R8R8V
-  public :: dstDynMaskProcR4R8R4
-  public :: dstDynMaskProcR8R8R8
-
+  public :: ESMF_DynamicMaskProcDstR4R8R4V
+  public :: ESMF_DynamicMaskProcDstR8R8R8V
+  public :: ESMF_DynamicMaskProcDstR4R8R4
+  public :: ESMF_DynamicMaskProcDstR8R8R8
 
   contains
 
-  subroutine dstDynMaskProcR4R8R4V(dynamicMaskList, dynamicSrcMaskValue, dynamicDstMaskValue, rc)
+  subroutine ESMF_DynamicMaskProcDstR4R8R4V(dynamicMaskList, dynamicSrcMaskValue, dynamicDstMaskValue, rc)
     type(ESMF_DynamicMaskElementR4R8R4V), pointer              :: dynamicMaskList(:)
     real(ESMF_KIND_R4),            intent(in), optional :: dynamicSrcMaskValue
     real(ESMF_KIND_R4),            intent(in), optional :: dynamicDstMaskValue
@@ -42,15 +41,15 @@ module ESMF_dstDynamicMaskMod
              do j=1, size(dynamicMaskList(i)%factor)
                  dynamicMaskList(i)%dstElement(k) = dynamicMaskList(i)%dstElement(k) &
                  + dynamicMaskList(i)%factor(j) * dynamicMaskList(i)%srcElement(j)%ptr(k)
-             enddo  
+             enddo
           end if
         end do
       enddo
     endif
     rc = ESMF_SUCCESS
-  end subroutine dstDynMaskProcR4R8R4V
+  end subroutine ESMF_DynamicMaskProcDstR4R8R4V
 
-  subroutine dstDynMaskProcR8R8R8V(dynamicMaskList, dynamicSrcMaskValue, dynamicDstMaskValue, rc)
+  subroutine ESMF_DynamicMaskProcDstR8R8R8V(dynamicMaskList, dynamicSrcMaskValue, dynamicDstMaskValue, rc)
     type(ESMF_DynamicMaskElementR8R8R8V), pointer              :: dynamicMaskList(:)
     real(ESMF_KIND_R8),            intent(in), optional :: dynamicSrcMaskValue
     real(ESMF_KIND_R8),            intent(in), optional :: dynamicDstMaskValue
@@ -65,15 +64,15 @@ module ESMF_dstDynamicMaskMod
              do j=1, size(dynamicMaskList(i)%factor)
                  dynamicMaskList(i)%dstElement(k) = dynamicMaskList(i)%dstElement(k) &
                  + dynamicMaskList(i)%factor(j) * dynamicMaskList(i)%srcElement(j)%ptr(k)
-             enddo  
+             enddo
           end if
         end do
       enddo
     endif
     rc = ESMF_SUCCESS
-  end subroutine dstDynMaskProcR8R8R8V
+  end subroutine ESMF_DynamicMaskProcDstR8R8R8V
 
-  subroutine dstDynMaskProcR8R8R8(dynamicMaskList, dynamicSrcMaskValue, &
+  subroutine ESMF_DynamicMaskProcDstR8R8R8(dynamicMaskList, dynamicSrcMaskValue, &
     dynamicDstMaskValue, rc)
     type(ESMF_DynamicMaskElementR8R8R8), pointer        :: dynamicMaskList(:)
     real(ESMF_KIND_R8),            intent(in), optional :: dynamicSrcMaskValue
@@ -94,9 +93,9 @@ module ESMF_dstDynamicMaskMod
     endif
     ! return successfully
     rc = ESMF_SUCCESS
-  end subroutine dstDynMaskProcR8R8R8
+  end subroutine ESMF_DynamicMaskProcDstR8R8R8
 
-  subroutine dstDynMaskProcR4R8R4(dynamicMaskList, dynamicSrcMaskValue, &
+  subroutine ESMF_DynamicMaskProcDstR4R8R4(dynamicMaskList, dynamicSrcMaskValue, &
     dynamicDstMaskValue, rc)
     type(ESMF_DynamicMaskElementR4R8R4), pointer        :: dynamicMaskList(:)
     real(ESMF_KIND_R4),            intent(in), optional :: dynamicSrcMaskValue
@@ -117,7 +116,7 @@ module ESMF_dstDynamicMaskMod
     endif
     ! return successfully
     rc = ESMF_SUCCESS
-  end subroutine dstDynMaskProcR4R8R4
+  end subroutine ESMF_DynamicMaskProcDstR4R8R4
 
   logical function match_r4(missing,b)
     real(ESMF_KIND_R4), intent(in) :: missing, b
@@ -129,5 +128,5 @@ module ESMF_dstDynamicMaskMod
     match_r8 = (missing==b)
   end function match_r8
 
-end module ESMF_dstDynamicMaskMod
+end module ESMF_DynamicMaskProcDstMod
 
