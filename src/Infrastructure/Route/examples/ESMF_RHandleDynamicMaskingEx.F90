@@ -336,11 +336,14 @@ program ESMF_RHandleDynamicMaskingEx
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
+! {\bf Construct a RouteHandle compatible with Dynamic Masking}
+!
 ! Note that since the intention is to later use the generated RouteHandle for
 ! dynamic masking, it is important to provide the {\tt srcTermProcessing}
-! argument, which must be set equal to 0. Doing this ensures that all
-! of the multiplying with interpolation weights, and summing of terms, is
-! carried out on the destination side. This is critical for dynamic masking.
+! argument, which {\bf must be set equal to 0}. Doing this ensures that all
+! of the multiplying with interpolation weights and summing of terms is
+! carried out on the destination side. This is critical for correct functioning
+! of dynamic masking!
 !EOE
 
 !BOC
@@ -356,7 +359,8 @@ program ESMF_RHandleDynamicMaskingEx
 
 !BOE
 ! Now that {\tt routehandle} is available, it can be used to execute the
-! regrid operation over and over during the course of the simualtion run.
+! regrid operation over and over during the course of the simualtion run, by
+! calling the {\tt ESMF\_FieldRegrid()} method.
 !EOE
 
 !BOC
@@ -369,14 +373,19 @@ program ESMF_RHandleDynamicMaskingEx
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
+! {\bf Source Side Dynamic Masking}
+!
 ! Assume that during the course of the simulation the {\tt srcField} becomes
 ! partially masked. This masking may be dynamically changing, as would be the
-! case for the ice cover over the arctic ocean. Then the regrid operation
-! represented by {\tt routehandle} should dynamically adjust to only use
-! unmasked source elements.
+! case e.g. for the changing ice cover over the arctic ocean. Then the regrid
+! operation represented by {\tt routehandle} should dynamically adjust to
+! only use unmasked source elements at the time of operation.
 !
-! The dynamic masking behavior can be achieved in ESMF by setting {\tt srcField}
-! elements to a special value.
+! This dynamic masking behavior can be achieved in ESMF by setting the
+! {\tt srcField} elements to a special value, and constructing an appropriate
+! {\tt ESMF\_DynamicMask} object.
+!
+! Obtain a Fortran pointer to the local array segment.
 !EOE
 
 !BOC
@@ -386,16 +395,19 @@ program ESMF_RHandleDynamicMaskingEx
     line=__LINE__, &
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Then set the desired local source element(s) to a custom value, here
+! {\tt srcMaskValue}.
+!EOE
 !BOC
-  ! setting an arbitrary local source element to special value 'srcMaskValue'
   farrayPtr(lbound(farrayPtr,1)+3,lbound(farrayPtr,2)+3) = srcMaskValue
 !EOC
 
 !BOE
-! Then set up an {\tt ESMF\_DynamicMask} object that holds information about
-! the special mask value. The dynamic mask object
-! further holds a pointer to the routine that will be called in order to handle
-! dynamically masked elements.
+! Finally set up an {\tt ESMF\_DynamicMask} object that holds information about
+! the special mask value, and what action to take for elements that hold this
+! special value during RouteHandle execution. Both pieces of information are
+! set using one of the available {\tt ESMF\_DynamicMaskSet*()} methods.
 !EOE
 
 !BOC
@@ -411,14 +423,16 @@ program ESMF_RHandleDynamicMaskingEx
 
 !BOE
 ! The names of the specific {\tt DynamicMaskSet} methods all carry a
-! typekind-triplet suffix. Here the suffix is {\tt R8R8R8}.
-! This indicates that the {\tt dynamicMaskRoutine} argument
-! provided is expected to deal with {\tt real(ESMF\_KIND\_R8)} destination data
-! (first R8 typekind), {\tt real(ESMF\_KIND\_R8)} factors (second R8 typekind),
-! and {\tt real(ESMF\_KIND\_R8)} source data (third R8 typekind).
-!
-! Now when the {\tt routehandle} is executed, and the {\tt dynamicMask} object
-! is passed into the {\tt ESMF\_FieldRegrid()} call,
+! typekind-triplet suffix. Here the suffix is {\tt R8R8R8}, which
+! indicates that the {\tt dynamicMaskRoutine} argument
+! provided is expected to deal with
+! \begin{itemize}
+! \item {\tt real(ESMF\_KIND\_R8)} destination data (the first R8 typekind),
+! \item {\tt real(ESMF\_KIND\_R8)} interpolation weights (the second R8 typekind), and
+! \item {\tt real(ESMF\_KIND\_R8)} source data (the third R8 typekind).
+! \end{itemize}
+! Now when the {\tt routehandle} is executed again, and the {\tt dynamicMask}
+! object is passed into the {\tt ESMF\_FieldRegrid()} call,
 !EOE
 
 !BOC
@@ -432,9 +446,10 @@ program ESMF_RHandleDynamicMaskingEx
 
 !BOE
 ! ESMF will scan the {\tt srcField} for elements that have data equal to
-! that set by {\tt dynamicSrcMaskValue}. If any are found, they
-! are passed into the routine provided via the {\tt dynamicMaskRoutine}
-! argument.
+! that set by {\tt dynamicSrcMaskValue = srcMaskValue}. If any matching elements
+! are found, they are passed into the routine that was provided via the
+! {\tt dynamicMaskRoutine} argument, i.e. {\tt simpleDynMaskProc} in this
+! example.
 !EOE
 
 #if 0
@@ -447,8 +462,8 @@ program ESMF_RHandleDynamicMaskingEx
 #endif
 
 !BOE
-! The procedure passed through the {\tt dynamicMaskRoutine} argument must
-! satisfy exactly the following predefined interface:
+! The procedure provided through the {\tt dynamicMaskRoutine} argument must
+! {\em exactly} satisfy the following prescribed interface:
 !
 ! \begin{verbatim}
 !  interface
@@ -464,7 +479,7 @@ program ESMF_RHandleDynamicMaskingEx
 !  end interface
 ! \end{verbatim}
 !
-! The first argument accepted according to this interface is an array of type
+! The first argument, per the interface, is an array of type
 ! {\tt ESMF\_DynamicMaskElement}. Each element of this array corresponds to a
 ! single element in the {\tt dstField} that is affected by dynamic masking.
 ! For each such {\tt dstElement} the complete interpolation stencile is
@@ -478,11 +493,11 @@ program ESMF_RHandleDynamicMaskingEx
 !  end type
 ! \end{verbatim}
 !
-! Here the {\tt dstElement} is a pointer to the actual element in the
+! Here the {\tt dstElement} is a pointer to the actual element in
 ! {\tt dstField}. Thus, assigning {\tt dstElement} to a value, immediately
 ! results in a value change of the element inside the {\tt dstField} object.
-! Further, the size of the {\tt factor(:)} and {\tt srcElement(:)} arrays is
-! identical to each other and corresponds to the number of source elements in
+! Further, the {\tt factor(:)} and {\tt srcElement(:)} arrays have the same
+! number of elements, corresponding to the number of source elements in
 ! the interpolation stencile. Without dynamic masking, the {\tt dstElement}
 ! would simply be calculated as the scalar product of {\tt factor(:)} and
 ! {\tt srcElement(:)}.
@@ -493,7 +508,8 @@ program ESMF_RHandleDynamicMaskingEx
 ! a special masking value, a simple scheme could be to only use non-masked
 ! source elements to calculate destination elements. The result then needs to
 ! be renormalized in order to account for the missing source elements. This
-! could be implemented similar to the following subroutine:
+! could be implemented similar to the following subroutine, which satisfies the
+! prescribed interface from above:
 !
 ! \begin{verbatim}
 !  subroutine simpleDynMaskProc(dynamicMaskList, dynamicSrcMaskValue, &
@@ -531,14 +547,20 @@ program ESMF_RHandleDynamicMaskingEx
 !    rc = ESMF_SUCCESS
 !  end subroutine
 ! \end{verbatim}
+!EOE
+
+
+!BOE
+! {\bf Destination Side Dynamic Masking}
 !
-! So far in the example only the {\tt srcField} had been dynamically masked.
-! However, elements in the {\tt dstField} can be masked as well, following
-! exactly the same manner.
+! So far only special values in {\tt srcField} have been
+! considered for dynamic masking. However, elements in the {\tt dstField}
+! can also be considered for dynamic masking when setting up the
+! {\tt ESMF\_DynamicMask} object.
 !
-! First ensure that the {\tt dstField} is in a well defined condition. This can
-! be achived by reseting it, e.g. to zero, using the {\tt ESMF\_FieldFill()}
-! method.
+! First ensure that the {\tt dstField} is in a well defined state. This can
+! be achived, for example, by using the {\tt ESMF\_FieldFill()} method. Here set the
+! entire {\tt dstField} to zero:
 !EOE
 
 !BOC
@@ -550,10 +572,12 @@ program ESMF_RHandleDynamicMaskingEx
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
-! Now some of the destination elements are set to a defined masking value.
+! Now some of the destination elements are set to a custom masking value
+! of {\tt dstMaskValue}.
 !EOE
 
 !BOC
+  ! obtain pointer to field data
   call ESMF_FieldGet(dstField, farrayPtr=farrayPtr, rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -561,14 +585,16 @@ program ESMF_RHandleDynamicMaskingEx
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-  ! setting an arbitrary local destination element to special value 'dstMaskValue'
+  ! set an element to custom value 'dstMaskValue'
   farrayPtr(lbound(farrayPtr,1)+1,lbound(farrayPtr,2)+1) = dstMaskValue
 !EOC
 
 !BOE
-! The {\tt dynamicMask} is reset using the same {\tt DynamicMaskSet} method as
-! before, but in addition to the previous arguments, {\tt dynamicDstMaskValue}
-! is also specified.
+! Now reset the {\tt dynamicMask} object using the same
+! {\tt ESMF\_DynamicMaskSetR8R8R8()} method as before, but in addition to
+! the previous arguments also specify {\tt dynamicDstMaskValue = dstMaskValue}.
+! Again an adequate procedure, matching the prescribed interface, must be
+! supplied through the {\tt dynamicMaskRoutine} argument.
 !EOE
 
 !BOC
@@ -584,8 +610,8 @@ program ESMF_RHandleDynamicMaskingEx
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
-! Passing the reset {\tt dynamicMask} object into {\tt ESMF\_FieldRegrid()}
-! causes ESMF to not only look for source elements that match
+! When using this {\tt dynamicMask} object in a {\tt ESMF\_FieldRegrid()}
+! call, ESMF not only looks for source elements that match
 ! {\tt dynamicSrcMaskValue}, but also destination elements that
 ! match {\tt dynamicDstMaskValue}.
 !EOE
@@ -610,33 +636,36 @@ program ESMF_RHandleDynamicMaskingEx
 #endif
 
 !BOE
-! Again an adequate procedure is supplied through
-! {\tt dynamicMaskRoutine}. For the current case, however, a suitable procedure
-! would be inspecting the {\tt dstElement} as well as all the {\tt dstElement}s
-! provided via the {\tt dynMaskList} argument.
-!
 ! Notice the {\tt zeroregion = ESMF\_REGION\_EMPTY} specification in the
-! {\tt ESMF\_FieldRegrid()} call. This setting ensures that values in the
+! {\tt ESMF\_FieldRegrid()} call! This setting ensures that values in the
 ! {\tt dstField} remain unchanged until they are checked for
-! {\tt dynamicDstMaskValue}.
+! {\tt dynamicDstMaskValue}. This is critical for correct behavior of
+! destination side dynamic masking.
+!
+! During the execution of {\tt ESMF\_FieldRegrid()}, the supplied procedure
+! {\tt simpleDynMaskProc} is called with a {\tt dynMaskList} that contains
+! all of the elements affected by source or destination side masking. A
+! suitable procedure would be inspecting the {\tt dstElement} as well as
+! all of the elements of {\tt srcElement(:)}, for each element in the
+! provided {\tt dynMaskList(:)} argument, comparing them against
+! {\tt dynamicDstMaskValue} and {\tt dynamicSrcMaskValue}, respectively.
+! Then take the appropriate action to implement the desired masked iterpolation.
 !EOE
 
 ! ----------------------------------------------------------------------
 
 !BOE
-! The {\tt DynamicMaskSet} methods provide an argument of {\tt logical} type,
-! called {\tt handleAllElements}. By default it is set to {\tt .false.},
-! which means that only elements affected by dynamic masking -- as described
-! above -- are passed to the {\tt dynamicMaskRoutine}. However, when
-! {\tt handleAllElements} is set to {\tt .true.}, {\em all} local
-! elements on each PET are made available to the {\tt dynamicMaskRoutine}.
-! This allows the user supplied procedure to implement fully customized
+! {\bf Handle all Elements}
+!
+! The {\tt ESMF\_DynamicMaskSet*()} methods provide an optional argument,
+! {\tt handleAllElements}, of {\tt logical} type. By default it is
+! {\tt .false.}, which means that only elements affected by source or
+! destination side dynamic masking, as described previously, are passed to
+! the supplied {\tt dynamicMaskRoutine}. However, when set to {\tt .true.},
+! {\em all} local elements on each PET are made available to the
+! {\tt dynamicMaskRoutine}. This allows implemention of fully customized
 ! handling of the interpolation from source to destination, using the
 ! information supplied by ESMF.
-!
-! To demonstrate this, a custom routine {\tt simpleHandleAllProc()} is
-! passed in as {\tt dynamicMaskRoutine}, and {\tt handleAllElements} is
-! set to {\tt .true.}. All other aspects of the user interface remain unchanged.
 !EOE
 
 !BOC
@@ -692,20 +721,24 @@ program ESMF_RHandleDynamicMaskingEx
 ! ----------------------------------------------------------------------
 
 !BOE
+! {\bf Leading Undistributed Dimensions - Scalar Handling}
+!
 ! Dynamic masking is also available for source and destination fields that
 ! contain leading undistributed dimensions. When ESMF applies the regridding
 ! weights, it interprets the product space of leading undistributed dimensions
 ! of a Field or Array as the elements of a vector. In this approach the
-! interpolation becomes a vector operation.  When applying the concept
-! of dynamic masking to such a vector operation, without making further
-! assumptions, it must be assumed that different vector elements may be
-! affected differently by the dynamic mask. ESMF therefore unrolls the vector
-! dimension when constructing the information passed to the
+! interpolation becomes a vector operation.
+!
+! When applying the concept of dynamic masking to such a vector operation,
+! without making further assumptions, it is likely that different vector
+! elements are affected differently by the dynamic mask. ESMF therefore unrolls
+! the vector dimension when constructing the information passed to the
 ! {\tt dynamicMaskRoutine}. As a consequence of this, masking routines
-! do not generally have to consider vectorization explicitly.
+! do not generally have to consider vectorization explicitly, but can be used
+! directly in their scalar form for the unrolled vector case.
 !
 ! The concept is demonstrated by creating source and destination fields
-! with one leading undistributed dimension.
+! with one leading undistributed dimension. Each of 20 elements.
 !EOE
 
   ! create srcField
@@ -747,10 +780,8 @@ program ESMF_RHandleDynamicMaskingEx
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
-! A regrid operation is computed in the usual manner. In order to make the
-! resulting RouteHandle object suitable for dynamic masking, computations are
-! pushed completely onto the destination PETs, as in previous examples, by
-! setting the {\tt srcTermProcessing} argument to zero.
+! A regrid operation is computed in the usual manner with
+! {\tt srcTermProcessing = 0}.
 !EOE
 
 !BOC
@@ -775,7 +806,7 @@ program ESMF_RHandleDynamicMaskingEx
 ! the {\tt ESMF\_DynamicMask} object. However, the source and destination
 ! Fields now contain 20 undistributed elements at each distributed location,
 ! and the dynamic mask routine will handle all elements that are affected
-! by the dynamic mask conditions.
+! by the dynamic mask conditions individually.
 !EOE
 
 !BOC
@@ -810,11 +841,10 @@ program ESMF_RHandleDynamicMaskingEx
 #endif
 
 !BOE
-! Setting the {\tt handleAllElements} to {\tt .true.} will pass all elements
-! to the {\tt dynamicMaskRoutine}. There are 20 times as many elements
-! on the source and destination side, and therefore the dynamic masking routine
-! will handle exactly 20 times as many elements compared to the case without
-! undistributed dimension.
+! Again {\tt handleAllElements} can be set to {\tt .true.} in order to handle
+! all of the elements via {\tt dynamicMaskRoutine} regardless of data values.
+! There are now 20 times as many elements on the source and destination side,
+! therefore leading to exactly 20 times as many elements to be handled.
 !EOE
 
 !BOC
@@ -850,13 +880,18 @@ program ESMF_RHandleDynamicMaskingEx
 #endif
 
 !BOE
+! {\bf Leading Undistributed Dimensions - Vector Handling}
+!
 ! For the case with {\tt handleAllElements=.true.}, where the entire
 ! vector of undistributed elements is passed to {\tt dynamicMaskRoutine} at
-! every distributed location, an alternative implementation option exists for
-! the dynamic masking routine. In some cases this alternative may result in
-! more efficient code because it allows to vectorize over the undistributed
-! elements when summing up the interpolation terms. The alternative interface
-! for {\tt dynamicMaskRoutine} is:
+! every distributed location regardless of data values, an alternative
+! implementation option exists for the dynamic masking routine. In some cases
+! this alternative may result in more efficient code because it allows to
+! vectorize over the undistributed elements when summing up the interpolation
+! terms.
+!
+! The vector version of the {\tt dynamicMaskRoutine} interfaces have a trailing
+! {\tt V} in the name and look like this:
 !
 ! \begin{verbatim}
 !  interface
@@ -872,9 +907,10 @@ program ESMF_RHandleDynamicMaskingEx
 !  end interface
 ! \end{verbatim}
 !
-! The difference compared to the previously used interface is that the first
-! argument now is of type {\tt ESMF\_DynamicMaskElementR8R8R8V}. This type is
-! declared as follows:
+! The difference compared to the previously discussed scalar interface is that
+! the first argument of the vector version is of type
+! {\tt ESMF\_DynamicMaskElementR8R8R8V} - again notice the trailing {\tt V} in
+! the type name. The vector element type is declared as follows:
 !
 ! \begin{verbatim}
 !  type ESMF_DynamicMaskElementR8R8R8V
@@ -888,6 +924,10 @@ program ESMF_RHandleDynamicMaskingEx
 ! identical to the vector size, i.e. the number of undistributed elements to
 ! be handled. The same is true for {\tt size(srcElement(j)\%ptr))}, for every
 ! element {\tt j} of the interpolation stencile.
+!
+! Providing a suitable vector routine through the {\tt dynamicMaskRoutine}
+! argument, the {\tt ESMF\_DynamicMask} object is set using one of the
+! {\tt ESMF\_DynamicMaskSet*V()} methods:
 !EOE
 
 #ifndef ESMF_NO_DYNMASKOVERLOAD
@@ -947,8 +987,10 @@ program ESMF_RHandleDynamicMaskingEx
 ! ----------------------------------------------------------------------
 
 !BOE
-! Applying dynamic masking to source and destination fields of other typekind
-! than R8 only requires that the correct {\tt DynamicMaskSet} method is chosen.
+! {\bf Source and Destination TypeKind}
+!
+! Applying dynamic masking to source and destination fields of other typekinds
+! than R8 requires that the correct {\tt DynamicMaskSet} method is chosen.
 ! Here we create {\tt real(ESMF\_KIND\_R4)} source and destination fields.
 !EOE
 
