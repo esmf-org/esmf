@@ -69,7 +69,7 @@ module ESMF_DynamicMaskMod
 
   public ESMF_DynamicMask, ESMF_DynamicMaskGet, ESMF_DynamicMaskGetInit
   public ESMF_DynamicMaskSetR8R8R8
-  public ESMF_DynamicMaskPredefinedSetR8R8R8
+  public ESMF_DynamicMaskSetPredefR8R8R8
   public ESMF_DynamicMaskProcDstR8R8R8
   public ESMF_DynamicMaskProcSrcR8R8R8
   public ESMF_DynamicMaskProcVoteR8R8R8
@@ -81,9 +81,9 @@ module ESMF_DynamicMaskMod
   public ESMF_DynamicMaskSetR4R4R4
   public ESMF_DynamicMaskSetR4R4R4V
 
-  public ESMF_DynamicMaskPredefinedSetR8R8R8V
-  public ESMF_DynamicMaskPredefinedSetR4R8R4
-  public ESMF_DynamicMaskPredefinedSetR4R8R4V
+  public ESMF_DynamicMaskSetPredefR8R8R8V
+  public ESMF_DynamicMaskSetPredefR4R8R4
+  public ESMF_DynamicMaskSetPredefR4R8R4V
 
   public ESMF_DynamicMaskProcDstR8R8R8V
   public ESMF_DynamicMaskProcDstR4R8R4
@@ -153,17 +153,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DynamicMaskPredefinedSetR8R8R8()"
+#define ESMF_METHOD "ESMF_DynamicMaskSetPredefR8R8R8()"
 !BOP
-! !IROUTINE: ESMF_DynamicMaskPredefinedSetR8R8R8 - Set DynamicMask with predefined routine for R8R8R8
+! !IROUTINE: ESMF_DynamicMaskSetPredefR8R8R8 - Set DynamicMask with predefined routine for R8R8R8
 ! !INTERFACE:
-  subroutine ESMF_DynamicMaskPredefinedSetR8R8R8(dynamicMask, maskType, &
+  subroutine ESMF_DynamicMaskSetPredefR8R8R8(dynamicMask, predefFlag, &
     keywordEnforcer, handleAllElements, dynamicSrcMaskValue, &
     dynamicDstMaskValue, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DynamicMask), intent(out)           :: dynamicMask
-    type(ESMF_PredefinedDynamicMask_Flag), intent(in) :: maskType
+    type(ESMF_DynamicMaskPredef_Flag), intent(in) :: predefFlag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional :: handleAllElements
     real(ESMF_KIND_R8),     intent(in),  optional :: dynamicSrcMaskValue
@@ -185,7 +185,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item[dynamicMask]
 !     DynamicMask object.
-!   \item [maskType]
+!   \item [predefFlag]
 !     Use a predefined dynamic mask routine. See section \ref{RH:DynMask} for
 !     a complete list of available {\tt ESMF\_PredefinedDynamicMask\_Flag} options.
 !     The routine is only called on PETs where {\em at least one} interpolation
@@ -226,11 +226,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! set the internals
     dynamicMask%typeKey           =   "R8R8R8"
     dynamicMask%dmsR8R8R8%typeKey =   dynamicMask%typeKey
-    if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKSRC) then
+    if (predefFlag == ESMF_DYNAMICMASKPREDEF_SRC) then
       dynamicMask%dmsR8R8R8%routine =>  ESMF_DynamicMaskProcSrcR8R8R8
-    else if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKDEST) then
+    else if (predefFlag == ESMF_DYNAMICMASKPREDEF_DST) then
       dynamicMask%dmsR8R8R8%routine =>  ESMF_DynamicMaskProcDstR8R8R8
-    else if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE) then
+    else if (predefFlag == ESMF_DYNAMICMASKPREDEF_VOTE) then
       dynamicMask%dmsR8R8R8%routine =>  ESMF_DynamicMaskProcVoteR8R8R8
     end if
     dynamicMask%dmsR8R8R8%dynamicSrcMaskIsPresent = present(dynamicSrcMaskValue)
@@ -253,22 +253,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_DynamicMaskPredefinedSetR8R8R8
+  end subroutine ESMF_DynamicMaskSetPredefR8R8R8
 !------------------------------------------------------------------------------
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DynamicMaskPredefinedSetR8R8R8V()"
+#define ESMF_METHOD "ESMF_DynamicMaskSetPredefR8R8R8V()"
 !BOP
-! !IROUTINE: ESMF_DynamicMaskPredefinedSetR8R8R8V - Set DynamicMask with predefined routine for R8R8R8 with vectorization
+! !IROUTINE: ESMF_DynamicMaskSetPredefR8R8R8V - Set DynamicMask with predefined routine for R8R8R8 with vectorization
 ! !INTERFACE:
-  subroutine ESMF_DynamicMaskPredefinedSetR8R8R8V(dynamicMask, maskType, &
+  subroutine ESMF_DynamicMaskSetPredefR8R8R8V(dynamicMask, predefFlag, &
     keywordEnforcer, handleAllElements, dynamicSrcMaskValue, &
     dynamicDstMaskValue, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DynamicMask), intent(out)           :: dynamicMask
-    type(ESMF_PredefinedDynamicMask_Flag), intent(in) :: maskType
+    type(ESMF_DynamicMaskPredef_Flag), intent(in) :: predefFlag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional :: handleAllElements
     real(ESMF_KIND_R8),     intent(in),  optional :: dynamicSrcMaskValue
@@ -290,7 +290,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item[dynamicMask]
 !     DynamicMask object.
-!   \item [maskType]
+!   \item [predefFlag]
 !     Use a predefined dynamic mask routine. See section \ref{RH:DynMask} for
 !     a complete list of available {\tt ESMF\_PredefinedDynamicMask\_Flag} options.
 !     The routine is only called on PETs where {\em at least one} interpolation
@@ -331,11 +331,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! set the internals
     dynamicMask%typeKey           =   "R8R8R8V"
     dynamicMask%dmsR8R8R8V%typeKey =   dynamicMask%typeKey
-    if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKSRC) then
+    if (predefFlag == ESMF_DYNAMICMASKPREDEF_SRC) then
       dynamicMask%dmsR8R8R8V%routine =>  ESMF_DynamicMaskProcSrcR8R8R8V
-    else if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKDEST) then
+    else if (predefFlag == ESMF_DYNAMICMASKPREDEF_DST) then
       dynamicMask%dmsR8R8R8V%routine =>  ESMF_DynamicMaskProcDstR8R8R8V
-    else if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE) then
+    else if (predefFlag == ESMF_DYNAMICMASKPREDEF_VOTE) then
       dynamicMask%dmsR8R8R8V%routine =>  ESMF_DynamicMaskProcVoteR8R8R8V
     end if
     dynamicMask%dmsR8R8R8V%dynamicSrcMaskIsPresent = present(dynamicSrcMaskValue)
@@ -358,22 +358,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_DynamicMaskPredefinedSetR8R8R8V
+  end subroutine ESMF_DynamicMaskSetPredefR8R8R8V
 !------------------------------------------------------------------------------
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DynamicMaskPredefinedSetR4R8R4()"
+#define ESMF_METHOD "ESMF_DynamicMaskSetPredefR4R8R4()"
 !BOP
-! !IROUTINE: ESMF_DynamicMaskPredefinedSetR4R8R4 - Set DynamicMask with predefined routine for R4R8R4
+! !IROUTINE: ESMF_DynamicMaskSetPredefR4R8R4 - Set DynamicMask with predefined routine for R4R8R4
 ! !INTERFACE:
-  subroutine ESMF_DynamicMaskPredefinedSetR4R8R4(dynamicMask, maskType, &
+  subroutine ESMF_DynamicMaskSetPredefR4R8R4(dynamicMask, predefFlag, &
     keywordEnforcer, handleAllElements, dynamicSrcMaskValue, &
     dynamicDstMaskValue, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DynamicMask), intent(out)           :: dynamicMask
-    type(ESMF_PredefinedDynamicMask_Flag), intent(in) :: maskType
+    type(ESMF_DynamicMaskPredef_Flag), intent(in) :: predefFlag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional :: handleAllElements
     real(ESMF_KIND_R4),     intent(in),  optional :: dynamicSrcMaskValue
@@ -395,7 +395,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item[dynamicMask]
 !     DynamicMask object.
-!   \item [maskType]
+!   \item [predefFlag]
 !     Use a predefined dynamic mask routine. See section \ref{RH:DynMask} for
 !     a complete list of available {\tt ESMF\_PredefinedDynamicMask\_Flag} options.
 !     The routine is only called on PETs where {\em at least one} interpolation
@@ -436,11 +436,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! set the internals
     dynamicMask%typeKey           =   "R4R8R4"
     dynamicMask%dmsR4R8R4%typeKey =   dynamicMask%typeKey
-    if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKSRC) then
+    if (predefFlag == ESMF_DYNAMICMASKPREDEF_SRC) then
       dynamicMask%dmsR4R8R4%routine =>  ESMF_DynamicMaskProcSrcR4R8R4
-    else if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKDEST) then
+    else if (predefFlag == ESMF_DYNAMICMASKPREDEF_DST) then
       dynamicMask%dmsR4R8R4%routine =>  ESMF_DynamicMaskProcDstR4R8R4
-    else if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE) then
+    else if (predefFlag == ESMF_DYNAMICMASKPREDEF_VOTE) then
       dynamicMask%dmsR4R8R4%routine =>  ESMF_DynamicMaskProcVoteR4R8R4
     end if
     dynamicMask%dmsR4R8R4%dynamicSrcMaskIsPresent = present(dynamicSrcMaskValue)
@@ -463,22 +463,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_DynamicMaskPredefinedSetR4R8R4
+  end subroutine ESMF_DynamicMaskSetPredefR4R8R4
 !------------------------------------------------------------------------------
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DynamicMaskPredefinedSetR4R8R4V()"
+#define ESMF_METHOD "ESMF_DynamicMaskSetPredefR4R8R4V()"
 !BOP
-! !IROUTINE: ESMF_DynamicMaskPredefinedSetR4R8R4V - Set DynamicMask with predefined routine for R4R8R4 with vectorization
+! !IROUTINE: ESMF_DynamicMaskSetPredefR4R8R4V - Set DynamicMask with predefined routine for R4R8R4 with vectorization
 ! !INTERFACE:
-  subroutine ESMF_DynamicMaskPredefinedSetR4R8R4V(dynamicMask, maskType, &
+  subroutine ESMF_DynamicMaskSetPredefR4R8R4V(dynamicMask, predefFlag, &
     keywordEnforcer, handleAllElements, dynamicSrcMaskValue, &
     dynamicDstMaskValue, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DynamicMask), intent(out)           :: dynamicMask
-    type(ESMF_PredefinedDynamicMask_Flag), intent(in) :: maskType
+    type(ESMF_DynamicMaskPredef_Flag), intent(in) :: predefFlag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional :: handleAllElements
     real(ESMF_KIND_R4),     intent(in),  optional :: dynamicSrcMaskValue
@@ -500,7 +500,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item[dynamicMask]
 !     DynamicMask object.
-!   \item [maskType]
+!   \item [predefFlag]
 !     Use a predefined dynamic mask routine. See section \ref{RH:DynMask} for
 !     a complete list of available {\tt ESMF\_PredefinedDynamicMask\_Flag} options.
 !     The routine is only called on PETs where {\em at least one} interpolation
@@ -541,11 +541,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! set the internals
     dynamicMask%typeKey           =   "R4R8R4V"
     dynamicMask%dmsR4R8R4V%typeKey =   dynamicMask%typeKey
-    if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKSRC) then
+    if (predefFlag == ESMF_DYNAMICMASKPREDEF_SRC) then
       dynamicMask%dmsR4R8R4V%routine =>  ESMF_DynamicMaskProcSrcR4R8R4V
-    else if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKDEST) then
+    else if (predefFlag == ESMF_DYNAMICMASKPREDEF_DST) then
       dynamicMask%dmsR4R8R4V%routine =>  ESMF_DynamicMaskProcDstR4R8R4V
-    else if (maskType == ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE) then
+    else if (predefFlag == ESMF_DYNAMICMASKPREDEF_VOTE) then
       dynamicMask%dmsR4R8R4V%routine =>  ESMF_DynamicMaskProcVoteR4R8R4V
     end if
     dynamicMask%dmsR4R8R4V%dynamicSrcMaskIsPresent = present(dynamicSrcMaskValue)
@@ -568,7 +568,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_DynamicMaskPredefinedSetR4R8R4V
+  end subroutine ESMF_DynamicMaskSetPredefR4R8R4V
 !------------------------------------------------------------------------------
 
 

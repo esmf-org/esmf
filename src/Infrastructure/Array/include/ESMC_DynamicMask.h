@@ -53,7 +53,7 @@ typedef struct{
 // !INTERFACE:
 int ESMC_DynamicMaskPredefinedSetR8R8R8(
   ESMC_DynamicMask *DynamicMask,         // inout
-  enum  ESMC_PredefinedDynamicMask_Flag mask_flag,  // in
+  enum  ESMC_DynamicMaskPredef_Flag predefFlag,  // in
   int *handleAllElements,
   ESMC_R8 *dynamicSrcMaskValue,
   ESMC_R8 *dynamicDstMaskValue
@@ -69,7 +69,7 @@ int ESMC_DynamicMaskPredefinedSetR8R8R8(
 //  \begin{description}
 //  \item[DynamicMask]
 //    The {\tt ESMC\_DynamicMask} to set.
-//  \item[mask_flag]
+//  \item[predefFlag]
 //    Predefined dynamic mask routine.
 //  \item[handleAllElements]
 //    Make all elements available to the dynamic mask routine.
@@ -89,7 +89,7 @@ int ESMC_DynamicMaskPredefinedSetR8R8R8(
 // !INTERFACE:
 int ESMC_DynamicMaskPredefinedSetR8R8R8V(
   ESMC_DynamicMask *DynamicMask,         // inout
-  enum  ESMC_PredefinedDynamicMask_Flag mask_flag,  // in
+  enum  ESMC_DynamicMaskPredef_Flag predefFlag,  // in
   int *handleAllElements,
   ESMC_R8 *dynamicSrcMaskValue,
   ESMC_R8 *dynamicDstMaskValue
@@ -105,7 +105,7 @@ int ESMC_DynamicMaskPredefinedSetR8R8R8V(
 //  \begin{description}
 //  \item[DynamicMask]
 //    The {\tt ESMC\_DynamicMask} to set.
-//  \item[mask_flag]
+//  \item[predefFlag]
 //    Predefined dynamic mask routine.
 //  \item[handleAllElements]
 //    Make all elements available to the dynamic mask routine.
@@ -125,7 +125,7 @@ int ESMC_DynamicMaskPredefinedSetR8R8R8V(
 // !INTERFACE:
 int ESMC_DynamicMaskPredefinedSetR4R8R4(
   ESMC_DynamicMask *DynamicMask,         // inout
-  enum  ESMC_PredefinedDynamicMask_Flag mask_flag,  // in
+  enum  ESMC_DynamicMaskPredef_Flag predefFlag,  // in
   int *handleAllElements,
   ESMC_R4 *dynamicSrcMaskValue,
   ESMC_R4 *dynamicDstMaskValue
@@ -141,7 +141,7 @@ int ESMC_DynamicMaskPredefinedSetR4R8R4(
 //  \begin{description}
 //  \item[DynamicMask]
 //    The {\tt ESMC\_DynamicMask} to set.
-//  \item[mask_flag]
+//  \item[predefFlag]
 //    Predefined dynamic mask routine.
 //  \item[handleAllElements]
 //    Make all elements available to the dynamic mask routine.
@@ -161,7 +161,7 @@ int ESMC_DynamicMaskPredefinedSetR4R8R4(
 // !INTERFACE:
 int ESMC_DynamicMaskPredefinedSetR4R8R4V(
   ESMC_DynamicMask *DynamicMask,         // inout
-  enum  ESMC_PredefinedDynamicMask_Flag mask_flag,  // in
+  enum  ESMC_DynamicMaskPredef_Flag predefFlag,  // in
   int *handleAllElements,
   ESMC_R4 *dynamicSrcMaskValue,
   ESMC_R4 *dynamicDstMaskValue
@@ -177,7 +177,7 @@ int ESMC_DynamicMaskPredefinedSetR4R8R4V(
 //  \begin{description}
 //  \item[DynamicMask]
 //    The {\tt ESMC\_DynamicMask} to set.
-//  \item[mask_flag]
+//  \item[predefFlag]
 //    Predefined dynamic mask routine.
 //  \item[handleAllElements]
 //    Make all elements available to the dynamic mask routine.

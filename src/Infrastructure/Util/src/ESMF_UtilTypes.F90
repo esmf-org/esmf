@@ -852,20 +852,20 @@
 
 
 !------------------------------------------------------------------------------
-      type ESMF_PredefinedDynamicMask_Flag
+      type ESMF_DynamicMaskPredef_Flag
 #ifndef ESMF_NO_SEQUENCE
       sequence
 #endif
 !  private
-         integer :: PredefinedDynamicMask
+         integer :: predefFlag
       end type
 
 
-      type(ESMF_PredefinedDynamicMask_Flag), parameter :: &
-           ESMF_PREDEFINEDDYNAMICMASK_MASKSRC     =  ESMF_PredefinedDynamicMask_Flag(0), &
-           ESMF_PREDEFINEDDYNAMICMASK_MASKDEST    =  ESMF_PredefinedDynamicMask_Flag(1), &
-           ESMF_PREDEFINEDDYNAMICMASK_MASKSRCDEST =  ESMF_PredefinedDynamicMask_Flag(2), &
-           ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE    =  ESMF_PredefinedDynamicMask_Flag(3)
+      type(ESMF_DynamicMaskPredef_Flag), parameter :: &
+           ESMF_DYNAMICMASKPREDEF_DST     =  ESMF_DynamicMaskPredef_Flag(0), &
+           ESMF_DYNAMICMASKPREDEF_SRC     =  ESMF_DynamicMaskPredef_Flag(1), &
+           ESMF_DYNAMICMASKPREDEF_SRCDST  =  ESMF_DynamicMaskPredef_Flag(2), &
+           ESMF_DYNAMICMASKPREDEF_VOTE    =  ESMF_DynamicMaskPredef_Flag(3)
 
 !------------------------------------------------------------------------------
 
@@ -1285,11 +1285,11 @@
       public ESMF_NormType_Flag
       public ESMF_NORMTYPE_DSTAREA, ESMF_NORMTYPE_FRACAREA
 
-      public ESMF_PredefinedDynamicMask_Flag, &
-             ESMF_PREDEFINEDDYNAMICMASK_MASKDEST, &
-             ESMF_PREDEFINEDDYNAMICMASK_MASKSRC, &
-             ESMF_PREDEFINEDDYNAMICMASK_MASKSRCDEST, &
-             ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE
+      public ESMF_DynamicMaskPredef_Flag,   &
+             ESMF_DYNAMICMASKPREDEF_DST,    &
+             ESMF_DYNAMICMASKPREDEF_SRC,    &
+             ESMF_DYNAMICMASKPREDEF_SRCDST, &
+             ESMF_DYNAMICMASKPREDEF_VOTE
 
       public ESMF_MESH_POLYBREAK
 
@@ -1334,7 +1334,7 @@ interface operator (==)
   module procedure ESMF_NormTypeEqual
   module procedure ESMF_RWGCheckMethodEqual
   module procedure ESMF_TermOrderEq
-  module procedure ESMF_PredefinedDynamicMask_FlagEq
+  module procedure ESMF_DynamicMaskPredef_FlagEq
 end interface
 
 interface operator (/=)
@@ -2416,37 +2416,37 @@ end function
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_PredefinedDynamicMask_FlagEq"
+#define ESMF_METHOD "ESMF_DynamicMaskPredef_FlagEq"
 !BOPI
-! !IROUTINE: ESMF_PredefinedDynamicMask_FlagEq - Equality of PredefinedDynamicMask Flag
+! !IROUTINE: ESMF_DynamicMaskPredef_FlagEq - Equality of Predef_Flag
 !
 ! !INTERFACE:
-      impure elemental function ESMF_PredefinedDynamicMask_FlagEq(flag1, flag2)
+      impure elemental function ESMF_DynamicMaskPredef_FlagEq(flag1, flag2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_PredefinedDynamicMask_FlagEq
+      logical :: ESMF_DynamicMaskPredef_FlagEq
 
 ! !ARGUMENTS:
 
-      type (ESMF_PredefinedDynamicMask_Flag), intent(in) :: &
+      type (ESMF_DynamicMaskPredef_Flag), intent(in) :: &
          flag1,      &
          flag2 
 
 ! !DESCRIPTION:
-!     This routine compares two ESMF PredefinedDynamicMask flags to see if
+!     This routine compares two ESMF DynamicMaskPredef flags to see if
 !     they are equivalent.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[flag1, flag2]
-!          PredefinedDynamicMask flags
+!          DynamicMaskPredef flags
 !     \end{description}
 !
 !EOPI
 
-      ESMF_PredefinedDynamicMask_FlagEq = (flag1%PredefinedDynamicMask == flag2%PredefinedDynamicMask)
+      ESMF_DynamicMaskPredef_FlagEq = (flag1%predefFlag == flag2%predefFlag)
 
-      end function ESMF_PredefinedDynamicMask_FlagEq
+      end function ESMF_DynamicMaskPredef_FlagEq
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

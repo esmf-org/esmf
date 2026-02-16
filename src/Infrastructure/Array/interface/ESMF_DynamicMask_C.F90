@@ -42,7 +42,7 @@
 !EOP
 !------------------------------------------------------------------------------
 
-  subroutine f_esmf_dynamicmaskpredefinedsetr8r8r8(dynamicmask, maskType, &
+  subroutine f_esmf_dynamicmaskpredefinedsetr8r8r8(dynamicmask, predefFlag, &
       handleAllElements, haePresent, dynamicSrcMaskValue, dsmPresent, &
       dynamicDstMaskValue, ddmPresent, rc)
 #undef  ESMF_METHOD
@@ -54,7 +54,7 @@
     implicit none
 
     type(ESMF_DynamicMask) :: dynamicmask
-    type(ESMF_PredefinedDynamicMask_Flag) :: maskType
+    type(ESMF_DynamicMaskPredef_Flag) :: predefFlag
     integer  :: handleAllElements
     integer  :: haePresent
     real(ESMF_KIND_R8) :: dynamicSrcMaskValue
@@ -83,7 +83,7 @@
     end if
     if (ddmPresent==1) allocate(dynamicDstMaskValue_,source= dynamicdstMaskValue)
 
-     call ESMF_DynamicMaskPredefinedSetR8R8R8(dynamicmask=dynamicmask, maskType=maskType, &
+     call ESMF_DynamicMaskSetPredefR8R8R8(dynamicmask=dynamicmask, predefFlag=predefFlag, &
        handleAllElements=handleAllElements_, dynamicSrcMaskValue=dynamicSrcMaskValue_, &
        dynamicDstMaskValue=dynamicDstMaskValue_, rc=localrc)
 
@@ -96,7 +96,7 @@
 
   end subroutine f_esmf_dynamicmaskpredefinedsetr8r8r8
 
-  subroutine f_esmf_dynamicmaskpredefinedsetr8r8r8v(dynamicmask, maskType, &
+  subroutine f_esmf_dynamicmaskpredefinedsetr8r8r8v(dynamicmask, predefFlag, &
       handleAllElements, haePresent, dynamicSrcMaskValue, dsmPresent, &
       dynamicDstMaskValue, ddmPresent, rc)
 #undef  ESMF_METHOD
@@ -108,7 +108,7 @@
     implicit none
 
     type(ESMF_DynamicMask) :: dynamicmask
-    type(ESMF_PredefinedDynamicMask_Flag) :: maskType
+    type(ESMF_DynamicMaskPredef_Flag) :: predefFlag
     integer  :: handleAllElements
     integer  :: haePresent
     real(ESMF_KIND_R8) :: dynamicSrcMaskValue
@@ -137,7 +137,7 @@
     end if
     if (ddmPresent==1) allocate(dynamicDstMaskValue_,source= dynamicdstMaskValue)
 
-     call ESMF_DynamicMaskPredefinedSetR8R8R8V(dynamicmask=dynamicmask, maskType=maskType, &
+     call ESMF_DynamicMaskSetPredefR8R8R8V(dynamicmask=dynamicmask, predefFlag=predefFlag, &
        handleAllElements=handleAllElements_, dynamicSrcMaskValue=dynamicSrcMaskValue_, &
        dynamicDstMaskValue=dynamicDstMaskValue_, rc=localrc)
 
@@ -150,7 +150,7 @@
 
   end subroutine f_esmf_dynamicmaskpredefinedsetr8r8r8v
 
-  subroutine f_esmf_dynamicmaskpredefinedsetr4r8r4(dynamicmask, maskType, &
+  subroutine f_esmf_dynamicmaskpredefinedsetr4r8r4(dynamicmask, predefFlag, &
       handleAllElements, haePresent, dynamicSrcMaskValue, dsmPresent, &
       dynamicDstMaskValue, ddmPresent, rc)
 #undef  ESMF_METHOD
@@ -162,7 +162,7 @@
     implicit none
 
     type(ESMF_DynamicMask) :: dynamicmask
-    type(ESMF_PredefinedDynamicMask_Flag) :: maskType
+    type(ESMF_DynamicMaskPredef_Flag) :: predefFlag
     integer  :: handleAllElements
     integer  :: haePresent
     real(ESMF_KIND_R4) :: dynamicSrcMaskValue
@@ -191,7 +191,7 @@
     end if
     if (ddmPresent==1) allocate(dynamicDstMaskValue_,source= dynamicdstMaskValue)
 
-     call ESMF_DynamicMaskPredefinedSetR4R8R4(dynamicmask=dynamicmask, maskType=maskType, &
+     call ESMF_DynamicMaskSetPredefR4R8R4(dynamicmask=dynamicmask, predefFlag=predefFlag, &
        handleAllElements=handleAllElements_, dynamicSrcMaskValue=dynamicSrcMaskValue_, &
        dynamicDstMaskValue=dynamicDstMaskValue_, rc=localrc)
 
@@ -204,7 +204,7 @@
 
   end subroutine f_esmf_dynamicmaskpredefinedsetr4r8r4
 
-  subroutine f_esmf_dynamicmaskpredefinedsetr4r8r4v(dynamicmask, maskType, &
+  subroutine f_esmf_dynamicmaskpredefinedsetr4r8r4v(dynamicmask, predefFlag, &
       handleAllElements, haePresent, dynamicSrcMaskValue, dsmPresent, &
       dynamicDstMaskValue, ddmPresent, rc)
 #undef  ESMF_METHOD
@@ -216,7 +216,7 @@
     implicit none
 
     type(ESMF_DynamicMask) :: dynamicmask
-    type(ESMF_PredefinedDynamicMask_Flag) :: maskType
+    type(ESMF_DynamicMaskPredef_Flag) :: predefFlag
     integer  :: handleAllElements
     integer  :: haePresent
     real(ESMF_KIND_R4) :: dynamicSrcMaskValue
@@ -245,7 +245,7 @@
     end if
     if (ddmPresent==1) allocate(dynamicDstMaskValue_,source= dynamicdstMaskValue)
 
-     call ESMF_DynamicMaskPredefinedSetR4R8R4V(dynamicmask=dynamicmask, maskType=maskType, &
+     call ESMF_DynamicMaskSetPredefR4R8R4V(dynamicmask=dynamicmask, predefFlag=predefFlag, &
        handleAllElements=handleAllElements_, dynamicSrcMaskValue=dynamicSrcMaskValue_, &
        dynamicDstMaskValue=dynamicDstMaskValue_, rc=localrc)
 

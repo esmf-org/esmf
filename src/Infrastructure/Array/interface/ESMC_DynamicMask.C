@@ -40,7 +40,7 @@ static const char *const version =
 extern "C" {
 
 int ESMC_DynamicMaskPredefinedSetR8R8R8(ESMC_DynamicMask *DynamicMask,
-  ESMC_PredefinedDynamicMask_Flag mask_flag, int *handleAllElements,
+  ESMC_DynamicMaskPredef_Flag predefFlag, int *handleAllElements,
   ESMC_R8 *dynamicSrcMaskValue, ESMC_R8 *dynamicDstMaskValue) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_DynamicMaskPredefinedSetR8R8R8()"
@@ -50,7 +50,7 @@ int ESMC_DynamicMaskPredefinedSetR8R8R8(ESMC_DynamicMask *DynamicMask,
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // call into ESMCI interface
-  localrc = ((ESMCI::DynamicMask *)DynamicMask)->setR8R8R8(mask_flag,
+  localrc = ((ESMCI::DynamicMask *)DynamicMask)->setR8R8R8(predefFlag,
     handleAllElements, dynamicSrcMaskValue, dynamicDstMaskValue);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
@@ -61,7 +61,7 @@ int ESMC_DynamicMaskPredefinedSetR8R8R8(ESMC_DynamicMask *DynamicMask,
 }
 
 int ESMC_DynamicMaskPredefinedSetR8R8R8V(ESMC_DynamicMask *DynamicMask,
-  ESMC_PredefinedDynamicMask_Flag mask_flag, int *handleAllElements,
+  ESMC_DynamicMaskPredef_Flag predefFlag, int *handleAllElements,
   ESMC_R8 *dynamicSrcMaskValue, ESMC_R8 *dynamicDstMaskValue) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_DynamicMaskPredefinedSetR8R8R8V()"
@@ -71,7 +71,7 @@ int ESMC_DynamicMaskPredefinedSetR8R8R8V(ESMC_DynamicMask *DynamicMask,
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // call into ESMCI interface
-  localrc = ((ESMCI::DynamicMask *)DynamicMask)->setR8R8R8V(mask_flag,
+  localrc = ((ESMCI::DynamicMask *)DynamicMask)->setR8R8R8V(predefFlag,
     handleAllElements, dynamicSrcMaskValue, dynamicDstMaskValue);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
@@ -82,7 +82,7 @@ int ESMC_DynamicMaskPredefinedSetR8R8R8V(ESMC_DynamicMask *DynamicMask,
 }
 
 int ESMC_DynamicMaskPredefinedSetR4R8R4(ESMC_DynamicMask *DynamicMask,
-  ESMC_PredefinedDynamicMask_Flag mask_flag, int *handleAllElements,
+  ESMC_DynamicMaskPredef_Flag predefFlag, int *handleAllElements,
   ESMC_R4 *dynamicSrcMaskValue, ESMC_R4 *dynamicDstMaskValue) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_DynamicMaskPredefinedSetR4R4R4()"
@@ -92,7 +92,7 @@ int ESMC_DynamicMaskPredefinedSetR4R8R4(ESMC_DynamicMask *DynamicMask,
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // call into ESMCI interface
-  localrc = ((ESMCI::DynamicMask *)DynamicMask)->setR4R8R4(mask_flag,
+  localrc = ((ESMCI::DynamicMask *)DynamicMask)->setR4R8R4(predefFlag,
     handleAllElements, dynamicSrcMaskValue, dynamicDstMaskValue);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
@@ -103,7 +103,7 @@ int ESMC_DynamicMaskPredefinedSetR4R8R4(ESMC_DynamicMask *DynamicMask,
 }
 
 int ESMC_DynamicMaskPredefinedSetR4R8R4V(ESMC_DynamicMask *DynamicMask,
-  ESMC_PredefinedDynamicMask_Flag mask_flag, int *handleAllElements,
+  ESMC_DynamicMaskPredef_Flag predefFlag, int *handleAllElements,
   ESMC_R4 *dynamicSrcMaskValue, ESMC_R4 *dynamicDstMaskValue) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_DynamicMaskPredefinedSetR4R4R4V()"
@@ -113,7 +113,7 @@ int ESMC_DynamicMaskPredefinedSetR4R8R4V(ESMC_DynamicMask *DynamicMask,
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // call into ESMCI interface
-  localrc = ((ESMCI::DynamicMask *)DynamicMask)->setR4R8R4V(mask_flag,
+  localrc = ((ESMCI::DynamicMask *)DynamicMask)->setR4R8R4V(predefFlag,
     handleAllElements, dynamicSrcMaskValue, dynamicDstMaskValue);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
