@@ -200,7 +200,7 @@ contains
           enddo
        enddo
 
-       call ESMF_DynamicMaskPredefinedSetR8R8R8(dyn_mask, ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE, &
+       call ESMF_DynamicMaskSetPredefR8R8R8(dyn_mask, ESMF_DYNAMICMASKPREDEF_VOTE, &
         & handleAllElements=.true., dynamicSrcMaskValue=undef_value, rc=localrc)
        _VERIFY(localrc)
  
@@ -289,7 +289,7 @@ contains
           enddo
        enddo
 
-       call ESMF_DynamicMaskPredefinedSetR8R8R8V(dyn_mask, ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE, &
+       call ESMF_DynamicMaskSetPredefR8R8R8V(dyn_mask, ESMF_DYNAMICMASKPREDEF_VOTE, &
         & handleAllElements=.true., dynamicSrcMaskValue=undef_value, rc=localrc)
        _VERIFY(localrc)
  
@@ -378,7 +378,7 @@ contains
           enddo
        enddo
 
-       call ESMF_DynamicMaskPredefinedSetR4R8R4(dyn_mask, ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE, &
+       call ESMF_DynamicMaskSetPredefR4R8R4(dyn_mask, ESMF_DYNAMICMASKPREDEF_VOTE, &
         & handleAllElements=.true., dynamicSrcMaskValue=undef_value, rc=localrc)
        _VERIFY(localrc)
  
@@ -470,7 +470,7 @@ contains
           enddo
        enddo
 
-       call ESMF_DynamicMaskPredefinedSetR4R8R4V(dyn_mask, ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE, &
+       call ESMF_DynamicMaskSetPredefR4R8R4V(dyn_mask, ESMF_DYNAMICMASKPREDEF_VOTE, &
         & handleAllElements=.true., dynamicSrcMaskValue=undef_value, rc=localrc)
        _VERIFY(localrc)
  
@@ -559,7 +559,7 @@ contains
           enddo
        enddo
 
-       call ESMF_DynamicMaskPredefinedSetR4R8R4(dyn_mask, ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE, &
+       call ESMF_DynamicMaskSetPredefR4R8R4(dyn_mask, ESMF_DYNAMICMASKPREDEF_VOTE, &
         & handleAllElements=.true., dynamicSrcMaskValue=undef_value, rc=localrc)
        _VERIFY(localrc)
  
@@ -648,7 +648,7 @@ contains
           enddo
        enddo
 
-       call ESMF_DynamicMaskPredefinedSetR4R8R4V(dyn_mask, ESMF_PREDEFINEDDYNAMICMASK_MASKVOTE, &
+       call ESMF_DynamicMaskSetPredefR4R8R4V(dyn_mask, ESMF_DYNAMICMASKPREDEF_VOTE, &
         & handleAllElements=.true., dynamicSrcMaskValue=undef_value, rc=localrc)
        _VERIFY(localrc)
  

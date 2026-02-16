@@ -60,7 +60,7 @@ int main() {
   ESMC_Field field_src, field_dst;
   ESMC_RouteHandle routehandle;
   ESMC_DynamicMask dynamicMask;
-  enum ESMC_PredefinedDynamicMask_Flag maskFlag= ESMC_PREDEFINEDDYNAMICMASK_MASKSRC;
+  enum ESMC_DynamicMaskPredef_Flag predefFlag = ESMC_DYNAMICMASKPREDEF_SRC;
   int src_nx = 20;
   int src_ny = 20;
   int dst_nx = 27;
@@ -207,7 +207,7 @@ int main() {
   }
 
   int handleAllElem = 1;
-  rc = ESMC_DynamicMaskPredefinedSetR8R8R8(&dynamicMask, maskFlag, &handleAllElem, &srcMaskValue_r8, NULL);
+  rc = ESMC_DynamicMaskPredefinedSetR8R8R8(&dynamicMask, predefFlag, &handleAllElem, &srcMaskValue_r8, NULL);
 
   int srcTermProcessing = 0;
   enum ESMC_RegridMethod_Flag regridmethod = ESMC_REGRIDMETHOD_BILINEAR;
@@ -266,7 +266,7 @@ int main() {
 		++p;
     }
   }
-  rc = ESMC_DynamicMaskPredefinedSetR8R8R8V(&dynamicMask, maskFlag, &handleAllElem, &srcMaskValue_r8, NULL);
+  rc = ESMC_DynamicMaskPredefinedSetR8R8R8V(&dynamicMask, predefFlag, &handleAllElem, &srcMaskValue_r8, NULL);
   rc = ESMC_FieldRegrid(field_src,field_dst,routehandle,NULL,&dynamicMask);
 
   dstfieldptr_r8 = (double *)ESMC_FieldGetPtr(field_dst, 0, &rc);
@@ -317,7 +317,7 @@ int main() {
     }
   }
   
-  rc = ESMC_DynamicMaskPredefinedSetR4R8R4(&dynamicMask, maskFlag, &handleAllElem, &srcMaskValue_r4, NULL);
+  rc = ESMC_DynamicMaskPredefinedSetR4R8R4(&dynamicMask, predefFlag, &handleAllElem, &srcMaskValue_r4, NULL);
 
   rc = ESMC_FieldRegridStore(field_src, field_dst, NULL, NULL, &routehandle,
                              &regridmethod, &polemethod, NULL, NULL, NULL,
@@ -357,7 +357,7 @@ int main() {
   strcpy(failMsg, "R4R8R4 src dynamic masking was not correctly applied");
   ESMC_Test((count_def+count_undef == dst_nx*dst_ny), name, failMsg, &result, __FILE__, __LINE__, 0);
 
-  rc = ESMC_DynamicMaskPredefinedSetR4R8R4V(&dynamicMask, maskFlag, &handleAllElem, &srcMaskValue_r4, NULL);
+  rc = ESMC_DynamicMaskPredefinedSetR4R8R4V(&dynamicMask, predefFlag, &handleAllElem, &srcMaskValue_r4, NULL);
   p = 0;
   for (int i1=exLBound_src[1]; i1<=exUBound_src[1]; ++i1) {
     for (int i0=exLBound_src[0]; i0<=exUBound_src[0]; ++i0) {

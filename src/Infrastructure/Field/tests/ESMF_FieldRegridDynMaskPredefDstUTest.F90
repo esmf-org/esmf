@@ -192,7 +192,7 @@ contains
        _VERIFY(localrc)
        undef_count_before = 0
 
-       call ESMF_DynamicMaskPredefinedSetR8R8R8(dyn_mask, ESMF_PREDEFINEDDYNAMICMASK_MASKDEST, handleAllElements=.true., &
+       call ESMF_DynamicMaskSetPredefR8R8R8(dyn_mask, ESMF_DYNAMICMASKPREDEF_DST, handleAllElements=.true., &
 			  & dynamicDstMaskValue=undef_value, rc=localrc)
        _VERIFY(localrc)
  
@@ -285,7 +285,7 @@ contains
        _VERIFY(localrc)
        undef_count_before = 0
 
-       call ESMF_DynamicMaskPredefinedSetR8R8R8V(dyn_mask, ESMF_PREDEFINEDDYNAMICMASK_MASKDEST, handleAllElements=.true., &
+       call ESMF_DynamicMaskSetPredefR8R8R8V(dyn_mask, ESMF_DYNAMICMASKPREDEF_DST, handleAllElements=.true., &
 			  & dynamicDstMaskValue=undef_value, rc=localrc)
        _VERIFY(localrc)
  
@@ -378,7 +378,7 @@ contains
        _VERIFY(localrc)
        undef_count_before = 0
 
-       call ESMF_DynamicMaskPredefinedSetR4R8R4(dyn_mask, ESMF_PREDEFINEDDYNAMICMASK_MASKDEST, handleAllElements=.true., &
+       call ESMF_DynamicMaskSetPredefR4R8R4(dyn_mask, ESMF_DYNAMICMASKPREDEF_DST, handleAllElements=.true., &
 			  & dynamicDstMaskValue=undef_value, rc=localrc)
        _VERIFY(localrc)
  
@@ -472,7 +472,7 @@ contains
        _VERIFY(localrc)
        undef_count_before = 0
 
-       call ESMF_DynamicMaskPredefinedSetR4R8R4V(dyn_mask, ESMF_PREDEFINEDDYNAMICMASK_MASKDEST, handleAllElements=.true., &
+       call ESMF_DynamicMaskSetPredefR4R8R4V(dyn_mask, ESMF_DYNAMICMASKPREDEF_DST, handleAllElements=.true., &
 			  & dynamicDstMaskValue=undef_value, rc=localrc)
        _VERIFY(localrc)
  
@@ -567,7 +567,7 @@ contains
        _VERIFY(localrc)
        undef_count_before = 0
 
-       call ESMF_DynamicMaskPredefinedSetR4R8R4(dyn_mask, ESMF_PREDEFINEDDYNAMICMASK_MASKDEST, handleAllElements=.true., &
+       call ESMF_DynamicMaskSetPredefR4R8R4(dyn_mask, ESMF_DYNAMICMASKPREDEF_DST, handleAllElements=.true., &
 			  & dynamicDstMaskValue=undef_value, rc=localrc)
        _VERIFY(localrc)
  
@@ -660,7 +660,7 @@ contains
        _VERIFY(localrc)
        undef_count_before = 0
 
-       call ESMF_DynamicMaskPredefinedSetR4R8R4V(dyn_mask, ESMF_PREDEFINEDDYNAMICMASK_MASKDEST, handleAllElements=.true., &
+       call ESMF_DynamicMaskSetPredefR4R8R4V(dyn_mask, ESMF_DYNAMICMASKPREDEF_DST, handleAllElements=.true., &
 			  & dynamicDstMaskValue=undef_value, rc=localrc)
        _VERIFY(localrc)
  
