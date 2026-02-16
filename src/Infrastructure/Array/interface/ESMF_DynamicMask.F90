@@ -68,8 +68,10 @@ module ESMF_DynamicMaskMod
 ! - ESMF-public methods:
 
   public ESMF_DynamicMask, ESMF_DynamicMaskGet, ESMF_DynamicMaskGetInit
+
   public ESMF_DynamicMaskSetR8R8R8
   public ESMF_DynamicMaskSetPredefR8R8R8
+
   public ESMF_DynamicMaskProcDstR8R8R8
   public ESMF_DynamicMaskProcSrcR8R8R8
   public ESMF_DynamicMaskProcVoteR8R8R8

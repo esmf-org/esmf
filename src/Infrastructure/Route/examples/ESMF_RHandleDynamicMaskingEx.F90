@@ -1072,7 +1072,7 @@ program ESMF_RHandleDynamicMaskingEx
 !BOE
 ! Setting up the {\tt ESMF\_DynamicMask} object is practically the same as
 ! before, just that the correct typekind-triplet suffix for the
-! {\tt DynamicMaskSet} method must be selected, indicating that the
+! {\tt ESMF\_DynamicMaskSet*()} method must be selected, indicating that the
 ! destination data is of typekind R4, the factors are still of typekind R8,
 ! and the source data is of typekind R4.
 !EOE
@@ -1115,6 +1115,118 @@ program ESMF_RHandleDynamicMaskingEx
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #endif
 
+#endif
+
+! ----------------------------------------------------------------------
+
+!BOE
+! {\bf Predefined Dynamic Masking Routines}
+!
+! ESMF currently provides three flavors of predefined public dynamic masking
+! routines that can be used for dynamic masking:
+! \begin{itemize}
+! \item TODO: Need a description of DynamicMaskProcDst here!!!
+!   \begin{itemize}
+!   \item {\tt ESMF\_DynamicMaskProcDstR8R8R8}
+!   \item {\tt ESMF\_DynamicMaskProcDstR4R8R4}
+!   \item {\tt ESMF\_DynamicMaskProcDstR8R8R8V}
+!   \item {\tt ESMF\_DynamicMaskProcDstR4R8R4V}
+!   \end{itemize}
+! \item TODO: Need a description of DynamicMaskProcSrc here!!!
+!   \begin{itemize}
+!   \item {\tt ESMF\_DynamicMaskProcSrcR8R8R8}
+!   \item {\tt ESMF\_DynamicMaskProcSrcR4R8R4}
+!   \item {\tt ESMF\_DynamicMaskProcSrcR8R8R8V}
+!   \item {\tt ESMF\_DynamicMaskProcSrcR4R8R4V}
+!   \end{itemize}
+! \item TODO: Need a description of DynamicMaskProcVote here!!!
+!   \begin{itemize}
+!   \item {\tt ESMF\_DynamicMaskProcVoteR8R8R8}
+!   \item {\tt ESMF\_DynamicMaskProcVoteR4R8R4}
+!   \item {\tt ESMF\_DynamicMaskProcVoteR8R8R8V}
+!   \item {\tt ESMF\_DynamicMaskProcVoteR4R8R4V}
+!   \end{itemize}
+! \end{itemize}
+!
+! One way to utilize the predefined public routines is by passing them into
+! the usual {\tt ESMF\_DynamicMaskSet*()} methods through the
+! {\tt dynamicMaskRoutine} argument:
+!EOE
+
+#ifndef ESMF_NO_DYNMASKOVERLOAD
+
+!BOC
+  call ESMF_DynamicMaskSetR4R8R4(dynamicMask, &
+    dynamicSrcMaskValue=srcMaskValueR4, &
+    dynamicDstMaskValue=dstMaskValueR4, &
+    dynamicMaskRoutine=ESMF_DynamicMaskProcVoteR4R8R4, &
+    rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! This dynamic mask can then be used with the {\tt srcField}, {\tt dstField},
+! and {\tt routehandle} objects from the previous section when calling into
+! {\tt ESMF\_FieldRegrid()}:
+!EOE
+
+!BOC
+  call ESMF_FieldRegrid(srcField=srcField, dstField=dstField, &
+    routehandle=routehandle, zeroregion=ESMF_REGION_EMPTY, &
+    dynamicMask=dynamicMask, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! There exists an alternative set of {\tt ESMF\_DynamicMaskSetPredef*()}
+! methods for convenience that take arument {\tt predefFlag} instead of
+! the {\tt dynamicMaskRoutine} agument. The {\tt predefFlag} argument is of
+! {\tt type ESMF\_DynamicMaskPredef\_Flag} with the following named constant
+! values:
+! \begin{itemize}
+! \item {\tt ESMF\_DYNAMICMASKPREDEF\_DST}
+! \item {\tt ESMF\_DYNAMICMASKPREDEF\_SRC}
+! \item {\tt ESMF\_DYNAMICMASKPREDEF\_VOTE}
+! \end{itemize}
+!
+! Using this approach, the same {\tt ESMF\_DynamicMask} object can be set by
+! making the following call:
+!EOE
+
+!BOC
+  call ESMF_DynamicMaskSetPredefR4R8R4(dynamicMask, &
+    dynamicSrcMaskValue=srcMaskValueR4, &
+    dynamicDstMaskValue=dstMaskValueR4, &
+    predefFlag=ESMF_DYNAMICMASKPREDEF_VOTE, &
+    rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! Which then is used in the same manner with {\tt ESMF\_FieldRegrid()}:
+!EOE
+
+!BOC
+  call ESMF_FieldRegrid(srcField=srcField, dstField=dstField, &
+    routehandle=routehandle, zeroregion=ESMF_REGION_EMPTY, &
+    dynamicMask=dynamicMask, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+! --- cleanup ---
+
   call ESMF_FieldRegridRelease(routehandle, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -1135,6 +1247,8 @@ program ESMF_RHandleDynamicMaskingEx
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+! ----------------------------------------------------------------------
+
   call ESMF_GridDestroy(srcGrid, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -1146,7 +1260,6 @@ program ESMF_RHandleDynamicMaskingEx
     line=__LINE__, &
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
 
 ! ----------------------------------------------------------------------
 
