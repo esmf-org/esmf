@@ -10,11 +10,11 @@
 !
 !==============================================================================
 !
-      program ESMF_FieldRegridDynMaskTest
+      program ESMF_FieldRegridDynMaskPredefDstUTest
 
 !------------------------------------------------------------------------------
 
-#define FILENAME "ESMF_FieldRegridDynMaskTest.F90"
+#define FILENAME "ESMF_FieldRegridDynMaskPredefDstUTest.F90"
 #define _VERIFY(A) if(A /= ESMF_SUCCESS) then; rc=ESMF_FAILURE; print*,__FILE__,__LINE__;return; endif
 #define _VERIFY_PASS(A) if(ESMF_LogFoundError(A, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rctoReturn=rc)) return
 
@@ -29,7 +29,7 @@
 
 !==============================================================================
 !BOPI
-! !PROGRAM: ESMF_FieldRegridDynMaskTest - Unit tests for Field Regrid methods
+! !PROGRAM: ESMF_FieldRegridDynMaskPredefDstUTest - Unit tests for Field Regrid methods
 !
 ! !DESCRIPTION:
 !
@@ -889,4 +889,4 @@ contains
 
     end function create_grid
 
-end program ESMF_FieldRegridDynMaskTest
+end program ESMF_FieldRegridDynMaskPredefDstUTest

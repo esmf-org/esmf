@@ -29,7 +29,7 @@
 
 !==============================================================================
 !BOPI
-! !PROGRAM: ESMF_FieldRegridDynMaskTest - Unit tests for Field Regrid methods
+! !PROGRAM: ESMF_FieldRegridDynMaskPredefSrcUTest - Unit tests for Field Regrid methods
 !
 ! !DESCRIPTION:
 !
