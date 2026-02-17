@@ -20,8 +20,6 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
-#define masking
-
 //==============================================================================
 //BOP
 // !PROGRAM: ESMC_FieldGridGridRegridUTest - Check ESMC_FieldRegrid functionality
