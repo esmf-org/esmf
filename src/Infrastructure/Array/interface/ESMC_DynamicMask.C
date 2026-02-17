@@ -39,7 +39,9 @@ static const char *const version =
 
 extern "C" {
 
-int ESMC_DynamicMaskPredefinedSetR8R8R8(ESMC_DynamicMask *DynamicMask,
+//-----------------------------------------------------------------------------
+
+int ESMC_DynamicMaskPredefinedSetR8R8R8(ESMC_DynamicMask *dynamicMask,
   ESMC_DynamicMaskPredef_Flag predefFlag, int *handleAllElements,
   ESMC_R8 *dynamicSrcMaskValue, ESMC_R8 *dynamicDstMaskValue) {
 #undef  ESMC_METHOD
@@ -50,7 +52,7 @@ int ESMC_DynamicMaskPredefinedSetR8R8R8(ESMC_DynamicMask *DynamicMask,
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // call into ESMCI interface
-  localrc = ((ESMCI::DynamicMask *)DynamicMask)->setR8R8R8(predefFlag,
+  localrc = ((ESMCI::DynamicMask *)dynamicMask)->setR8R8R8(predefFlag,
     handleAllElements, dynamicSrcMaskValue, dynamicDstMaskValue);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
@@ -60,7 +62,9 @@ int ESMC_DynamicMaskPredefinedSetR8R8R8(ESMC_DynamicMask *DynamicMask,
   return rc;
 }
 
-int ESMC_DynamicMaskPredefinedSetR8R8R8V(ESMC_DynamicMask *DynamicMask,
+//-----------------------------------------------------------------------------
+
+int ESMC_DynamicMaskPredefinedSetR8R8R8V(ESMC_DynamicMask *dynamicMask,
   ESMC_DynamicMaskPredef_Flag predefFlag, int *handleAllElements,
   ESMC_R8 *dynamicSrcMaskValue, ESMC_R8 *dynamicDstMaskValue) {
 #undef  ESMC_METHOD
@@ -71,7 +75,7 @@ int ESMC_DynamicMaskPredefinedSetR8R8R8V(ESMC_DynamicMask *DynamicMask,
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // call into ESMCI interface
-  localrc = ((ESMCI::DynamicMask *)DynamicMask)->setR8R8R8V(predefFlag,
+  localrc = ((ESMCI::DynamicMask *)dynamicMask)->setR8R8R8V(predefFlag,
     handleAllElements, dynamicSrcMaskValue, dynamicDstMaskValue);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
@@ -81,7 +85,9 @@ int ESMC_DynamicMaskPredefinedSetR8R8R8V(ESMC_DynamicMask *DynamicMask,
   return rc;
 }
 
-int ESMC_DynamicMaskPredefinedSetR4R8R4(ESMC_DynamicMask *DynamicMask,
+//-----------------------------------------------------------------------------
+
+int ESMC_DynamicMaskPredefinedSetR4R8R4(ESMC_DynamicMask *dynamicMask,
   ESMC_DynamicMaskPredef_Flag predefFlag, int *handleAllElements,
   ESMC_R4 *dynamicSrcMaskValue, ESMC_R4 *dynamicDstMaskValue) {
 #undef  ESMC_METHOD
@@ -92,7 +98,7 @@ int ESMC_DynamicMaskPredefinedSetR4R8R4(ESMC_DynamicMask *DynamicMask,
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // call into ESMCI interface
-  localrc = ((ESMCI::DynamicMask *)DynamicMask)->setR4R8R4(predefFlag,
+  localrc = ((ESMCI::DynamicMask *)dynamicMask)->setR4R8R4(predefFlag,
     handleAllElements, dynamicSrcMaskValue, dynamicDstMaskValue);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
@@ -102,7 +108,9 @@ int ESMC_DynamicMaskPredefinedSetR4R8R4(ESMC_DynamicMask *DynamicMask,
   return rc;
 }
 
-int ESMC_DynamicMaskPredefinedSetR4R8R4V(ESMC_DynamicMask *DynamicMask,
+//-----------------------------------------------------------------------------
+
+int ESMC_DynamicMaskPredefinedSetR4R8R4V(ESMC_DynamicMask *dynamicMask,
   ESMC_DynamicMaskPredef_Flag predefFlag, int *handleAllElements,
   ESMC_R4 *dynamicSrcMaskValue, ESMC_R4 *dynamicDstMaskValue) {
 #undef  ESMC_METHOD
@@ -113,7 +121,7 @@ int ESMC_DynamicMaskPredefinedSetR4R8R4V(ESMC_DynamicMask *DynamicMask,
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // call into ESMCI interface
-  localrc = ((ESMCI::DynamicMask *)DynamicMask)->setR4R8R4V(predefFlag,
+  localrc = ((ESMCI::DynamicMask *)dynamicMask)->setR4R8R4V(predefFlag,
     handleAllElements, dynamicSrcMaskValue, dynamicDstMaskValue);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
@@ -122,5 +130,7 @@ int ESMC_DynamicMaskPredefinedSetR4R8R4V(ESMC_DynamicMask *DynamicMask,
   rc = ESMF_SUCCESS;
   return rc;
 }
+
+//-----------------------------------------------------------------------------
 
 } //extern "C"

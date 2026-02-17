@@ -52,11 +52,11 @@ typedef struct{
 //
 // !INTERFACE:
 int ESMC_DynamicMaskPredefinedSetR8R8R8(
-  ESMC_DynamicMask *DynamicMask,         // inout
-  enum  ESMC_DynamicMaskPredef_Flag predefFlag,  // in
-  int *handleAllElements,
-  ESMC_R8 *dynamicSrcMaskValue,
-  ESMC_R8 *dynamicDstMaskValue
+  ESMC_DynamicMask *dynamicMask,                // inout
+  enum  ESMC_DynamicMaskPredef_Flag predefFlag, // in
+  int *handleAllElements,                       // in
+  ESMC_R8 *dynamicSrcMaskValue,                 // in
+  ESMC_R8 *dynamicDstMaskValue                  // in
 );
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -67,7 +67,7 @@ int ESMC_DynamicMaskPredefinedSetR8R8R8(
 //
 //  The arguments are:
 //  \begin{description}
-//  \item[DynamicMask]
+//  \item[dynamicMask]
 //    The {\tt ESMC\_DynamicMask} to set.
 //  \item[predefFlag]
 //    Predefined dynamic mask routine.
@@ -88,11 +88,11 @@ int ESMC_DynamicMaskPredefinedSetR8R8R8(
 //
 // !INTERFACE:
 int ESMC_DynamicMaskPredefinedSetR8R8R8V(
-  ESMC_DynamicMask *DynamicMask,         // inout
-  enum  ESMC_DynamicMaskPredef_Flag predefFlag,  // in
-  int *handleAllElements,
-  ESMC_R8 *dynamicSrcMaskValue,
-  ESMC_R8 *dynamicDstMaskValue
+  ESMC_DynamicMask *dynamicMask,                // inout
+  enum  ESMC_DynamicMaskPredef_Flag predefFlag, // in
+  int *handleAllElements,                       // in
+  ESMC_R8 *dynamicSrcMaskValue,                 // in
+  ESMC_R8 *dynamicDstMaskValue                  // in
 );
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -103,7 +103,7 @@ int ESMC_DynamicMaskPredefinedSetR8R8R8V(
 //
 //  The arguments are:
 //  \begin{description}
-//  \item[DynamicMask]
+//  \item[dynamicMask]
 //    The {\tt ESMC\_DynamicMask} to set.
 //  \item[predefFlag]
 //    Predefined dynamic mask routine.
@@ -124,11 +124,11 @@ int ESMC_DynamicMaskPredefinedSetR8R8R8V(
 //
 // !INTERFACE:
 int ESMC_DynamicMaskPredefinedSetR4R8R4(
-  ESMC_DynamicMask *DynamicMask,         // inout
-  enum  ESMC_DynamicMaskPredef_Flag predefFlag,  // in
-  int *handleAllElements,
-  ESMC_R4 *dynamicSrcMaskValue,
-  ESMC_R4 *dynamicDstMaskValue
+  ESMC_DynamicMask *dynamicMask,                // inout
+  enum  ESMC_DynamicMaskPredef_Flag predefFlag, // in
+  int *handleAllElements,                       // in
+  ESMC_R4 *dynamicSrcMaskValue,                 // in
+  ESMC_R4 *dynamicDstMaskValue                  // in
 );
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -139,7 +139,7 @@ int ESMC_DynamicMaskPredefinedSetR4R8R4(
 //
 //  The arguments are:
 //  \begin{description}
-//  \item[DynamicMask]
+//  \item[dynamicMask]
 //    The {\tt ESMC\_DynamicMask} to set.
 //  \item[predefFlag]
 //    Predefined dynamic mask routine.
@@ -160,11 +160,11 @@ int ESMC_DynamicMaskPredefinedSetR4R8R4(
 //
 // !INTERFACE:
 int ESMC_DynamicMaskPredefinedSetR4R8R4V(
-  ESMC_DynamicMask *DynamicMask,         // inout
-  enum  ESMC_DynamicMaskPredef_Flag predefFlag,  // in
-  int *handleAllElements,
-  ESMC_R4 *dynamicSrcMaskValue,
-  ESMC_R4 *dynamicDstMaskValue
+  ESMC_DynamicMask *dynamicMask,                // inout
+  enum  ESMC_DynamicMaskPredef_Flag predefFlag, // in
+  int *handleAllElements,                       // in
+  ESMC_R4 *dynamicSrcMaskValue,                 // in
+  ESMC_R4 *dynamicDstMaskValue                  // in
 );
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -175,7 +175,7 @@ int ESMC_DynamicMaskPredefinedSetR4R8R4V(
 //
 //  The arguments are:
 //  \begin{description}
-//  \item[DynamicMask]
+//  \item[dynamicMask]
 //    The {\tt ESMC\_DynamicMask} to set.
 //  \item[predefFlag]
 //    Predefined dynamic mask routine.

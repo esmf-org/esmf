@@ -42,11 +42,11 @@
 !EOP
 !------------------------------------------------------------------------------
 
-  subroutine f_esmf_dynamicmaskpredefinedsetr8r8r8(dynamicmask, predefFlag, &
-      handleAllElements, haePresent, dynamicSrcMaskValue, dsmPresent, &
-      dynamicDstMaskValue, ddmPresent, rc)
+  subroutine f_esmf_dynamicmasksetprer8r8r8(dynamicmask, predefFlag, &
+    handleAllElements, haePresent, dynamicSrcMaskValue, dsmPresent, &
+    dynamicDstMaskValue, ddmPresent, rc)
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_dynamicmaskpredefinedsetr8r8r8()"
+#define ESMF_METHOD "f_esmf_dynamicmasksetprer8r8r8()"
     use ESMF_DynamicMaskMod
     use ESMF_UtilTypesMod
     use ESMF_LogErrMod
@@ -72,20 +72,21 @@
     rc = ESMF_RC_NOT_IMPL
 
     if (haePresent==1) then
-        if (handleAllElements==0) then
-           allocate(handleAllElements_,source=.false.)
-        else if (handleAllElements==1) then
-           allocate(handleAllElements_,source=.true.)
-        end if
+      if (handleAllElements==0) then
+        allocate(handleAllElements_,source=.false.)
+      else if (handleAllElements==1) then
+        allocate(handleAllElements_,source=.true.)
+      end if
     end if
     if (dsmPresent==1) then
-       allocate(dynamicSrcMaskValue_,source= dynamicSrcMaskValue)
+      allocate(dynamicSrcMaskValue_,source= dynamicSrcMaskValue)
     end if
     if (ddmPresent==1) allocate(dynamicDstMaskValue_,source= dynamicdstMaskValue)
 
-     call ESMF_DynamicMaskSetPredefR8R8R8(dynamicmask=dynamicmask, predefFlag=predefFlag, &
-       handleAllElements=handleAllElements_, dynamicSrcMaskValue=dynamicSrcMaskValue_, &
-       dynamicDstMaskValue=dynamicDstMaskValue_, rc=localrc)
+    call ESMF_DynamicMaskSetPredefR8R8R8(dynamicmask=dynamicmask, &
+      predefFlag=predefFlag, handleAllElements=handleAllElements_, &
+      dynamicSrcMaskValue=dynamicSrcMaskValue_, &
+      dynamicDstMaskValue=dynamicDstMaskValue_, rc=localrc)
 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
@@ -94,169 +95,177 @@
     ! return successfully
     rc = ESMF_SUCCESS
 
-  end subroutine f_esmf_dynamicmaskpredefinedsetr8r8r8
-
-  subroutine f_esmf_dynamicmaskpredefinedsetr8r8r8v(dynamicmask, predefFlag, &
-      handleAllElements, haePresent, dynamicSrcMaskValue, dsmPresent, &
-      dynamicDstMaskValue, ddmPresent, rc)
-#undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_dynamicmaskpredefinedsetr8r8r8v()"
-    use ESMF_DynamicMaskMod
-    use ESMF_UtilTypesMod
-    use ESMF_LogErrMod
-
-    implicit none
-
-    type(ESMF_DynamicMask) :: dynamicmask
-    type(ESMF_DynamicMaskPredef_Flag) :: predefFlag
-    integer  :: handleAllElements
-    integer  :: haePresent
-    real(ESMF_KIND_R8) :: dynamicSrcMaskValue
-    integer  :: dsmPresent
-    real(ESMF_KIND_R8) :: dynamicDstMaskValue
-    integer  :: ddmPresent
-    integer :: rc
-
-    integer                 :: localrc      ! local return code
-    real(ESMF_KIND_R8), allocatable :: dynamicSrcMaskValue_, dynamicDstMaskValue_
-    logical, allocatable :: handleAllElements_
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    rc = ESMF_RC_NOT_IMPL
-
-    if (haePresent==1) then
-        if (handleAllElements==0) then
-           allocate(handleAllElements_,source=.false.)
-        else if (handleAllElements==1) then
-           allocate(handleAllElements_,source=.true.)
-        end if
-    end if
-    if (dsmPresent==1) then
-       allocate(dynamicSrcMaskValue_,source= dynamicSrcMaskValue)
-    end if
-    if (ddmPresent==1) allocate(dynamicDstMaskValue_,source= dynamicdstMaskValue)
-
-     call ESMF_DynamicMaskSetPredefR8R8R8V(dynamicmask=dynamicmask, predefFlag=predefFlag, &
-       handleAllElements=handleAllElements_, dynamicSrcMaskValue=dynamicSrcMaskValue_, &
-       dynamicDstMaskValue=dynamicDstMaskValue_, rc=localrc)
-
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, &
-      rcToReturn=rc)) return
-
-    ! return successfully
-    rc = ESMF_SUCCESS
-
-  end subroutine f_esmf_dynamicmaskpredefinedsetr8r8r8v
-
-  subroutine f_esmf_dynamicmaskpredefinedsetr4r8r4(dynamicmask, predefFlag, &
-      handleAllElements, haePresent, dynamicSrcMaskValue, dsmPresent, &
-      dynamicDstMaskValue, ddmPresent, rc)
-#undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_dynamicmaskpredefinedsetr4r8r4()"
-    use ESMF_DynamicMaskMod
-    use ESMF_UtilTypesMod
-    use ESMF_LogErrMod
-
-    implicit none
-
-    type(ESMF_DynamicMask) :: dynamicmask
-    type(ESMF_DynamicMaskPredef_Flag) :: predefFlag
-    integer  :: handleAllElements
-    integer  :: haePresent
-    real(ESMF_KIND_R4) :: dynamicSrcMaskValue
-    integer  :: dsmPresent
-    real(ESMF_KIND_R4) :: dynamicDstMaskValue
-    integer  :: ddmPresent
-    integer :: rc
-
-    integer                 :: localrc      ! local return code
-    real(ESMF_KIND_R4), allocatable :: dynamicSrcMaskValue_, dynamicDstMaskValue_
-    logical, allocatable :: handleAllElements_
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    rc = ESMF_RC_NOT_IMPL
-
-    if (haePresent==1) then
-        if (handleAllElements==0) then
-           allocate(handleAllElements_,source=.false.)
-        else if (handleAllElements==1) then
-           allocate(handleAllElements_,source=.true.)
-        end if
-    end if
-    if (dsmPresent==1) then
-       allocate(dynamicSrcMaskValue_,source= dynamicSrcMaskValue)
-    end if
-    if (ddmPresent==1) allocate(dynamicDstMaskValue_,source= dynamicdstMaskValue)
-
-     call ESMF_DynamicMaskSetPredefR4R8R4(dynamicmask=dynamicmask, predefFlag=predefFlag, &
-       handleAllElements=handleAllElements_, dynamicSrcMaskValue=dynamicSrcMaskValue_, &
-       dynamicDstMaskValue=dynamicDstMaskValue_, rc=localrc)
-
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, &
-      rcToReturn=rc)) return
-
-    ! return successfully
-    rc = ESMF_SUCCESS
-
-  end subroutine f_esmf_dynamicmaskpredefinedsetr4r8r4
-
-  subroutine f_esmf_dynamicmaskpredefinedsetr4r8r4v(dynamicmask, predefFlag, &
-      handleAllElements, haePresent, dynamicSrcMaskValue, dsmPresent, &
-      dynamicDstMaskValue, ddmPresent, rc)
-#undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_dynamicmaskpredefinedsetr4r8r4v()"
-    use ESMF_DynamicMaskMod
-    use ESMF_UtilTypesMod
-    use ESMF_LogErrMod
-
-    implicit none
-
-    type(ESMF_DynamicMask) :: dynamicmask
-    type(ESMF_DynamicMaskPredef_Flag) :: predefFlag
-    integer  :: handleAllElements
-    integer  :: haePresent
-    real(ESMF_KIND_R4) :: dynamicSrcMaskValue
-    integer  :: dsmPresent
-    real(ESMF_KIND_R4) :: dynamicDstMaskValue
-    integer  :: ddmPresent
-    integer :: rc
-
-    integer                 :: localrc      ! local return code
-    real(ESMF_KIND_R4), allocatable :: dynamicSrcMaskValue_, dynamicDstMaskValue_
-    logical, allocatable :: handleAllElements_
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    rc = ESMF_RC_NOT_IMPL
-
-    if (haePresent==1) then
-        if (handleAllElements==0) then
-           allocate(handleAllElements_,source=.false.)
-        else if (handleAllElements==1) then
-           allocate(handleAllElements_,source=.true.)
-        end if
-    end if
-    if (dsmPresent==1) then
-       allocate(dynamicSrcMaskValue_,source= dynamicSrcMaskValue)
-    end if
-    if (ddmPresent==1) allocate(dynamicDstMaskValue_,source= dynamicdstMaskValue)
-
-     call ESMF_DynamicMaskSetPredefR4R8R4V(dynamicmask=dynamicmask, predefFlag=predefFlag, &
-       handleAllElements=handleAllElements_, dynamicSrcMaskValue=dynamicSrcMaskValue_, &
-       dynamicDstMaskValue=dynamicDstMaskValue_, rc=localrc)
-
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, &
-      rcToReturn=rc)) return
-
-    ! return successfully
-    rc = ESMF_SUCCESS
-
-  end subroutine f_esmf_dynamicmaskpredefinedsetr4r8r4v
+  end subroutine f_esmf_dynamicmasksetprer8r8r8
 
 !---------------------------------------------------------------
 
+  subroutine f_esmf_dynamicmasksetprer8r8r8v(dynamicmask, predefFlag, &
+    handleAllElements, haePresent, dynamicSrcMaskValue, dsmPresent, &
+    dynamicDstMaskValue, ddmPresent, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_dynamicmasksetprer8r8r8v()"
+    use ESMF_DynamicMaskMod
+    use ESMF_UtilTypesMod
+    use ESMF_LogErrMod
+
+    implicit none
+
+    type(ESMF_DynamicMask) :: dynamicmask
+    type(ESMF_DynamicMaskPredef_Flag) :: predefFlag
+    integer  :: handleAllElements
+    integer  :: haePresent
+    real(ESMF_KIND_R8) :: dynamicSrcMaskValue
+    integer  :: dsmPresent
+    real(ESMF_KIND_R8) :: dynamicDstMaskValue
+    integer  :: ddmPresent
+    integer :: rc
+
+    integer                 :: localrc      ! local return code
+    real(ESMF_KIND_R8), allocatable :: dynamicSrcMaskValue_, dynamicDstMaskValue_
+    logical, allocatable :: handleAllElements_
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    rc = ESMF_RC_NOT_IMPL
+
+    if (haePresent==1) then
+      if (handleAllElements==0) then
+        allocate(handleAllElements_,source=.false.)
+      else if (handleAllElements==1) then
+        allocate(handleAllElements_,source=.true.)
+      end if
+    end if
+    if (dsmPresent==1) then
+      allocate(dynamicSrcMaskValue_,source= dynamicSrcMaskValue)
+    end if
+    if (ddmPresent==1) allocate(dynamicDstMaskValue_,source= dynamicdstMaskValue)
+
+    call ESMF_DynamicMaskSetPredefR8R8R8V(dynamicmask=dynamicmask, &
+      predefFlag=predefFlag, handleAllElements=handleAllElements_, &
+      dynamicSrcMaskValue=dynamicSrcMaskValue_, &
+      dynamicDstMaskValue=dynamicDstMaskValue_, rc=localrc)
+
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, &
+      rcToReturn=rc)) return
+
+    ! return successfully
+    rc = ESMF_SUCCESS
+
+  end subroutine f_esmf_dynamicmasksetprer8r8r8v
+
+!---------------------------------------------------------------
+
+  subroutine f_esmf_dynamicmasksetprer4r8r4(dynamicmask, predefFlag, &
+    handleAllElements, haePresent, dynamicSrcMaskValue, dsmPresent, &
+    dynamicDstMaskValue, ddmPresent, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_dynamicmasksetprer4r8r4()"
+    use ESMF_DynamicMaskMod
+    use ESMF_UtilTypesMod
+    use ESMF_LogErrMod
+
+    implicit none
+
+    type(ESMF_DynamicMask) :: dynamicmask
+    type(ESMF_DynamicMaskPredef_Flag) :: predefFlag
+    integer  :: handleAllElements
+    integer  :: haePresent
+    real(ESMF_KIND_R4) :: dynamicSrcMaskValue
+    integer  :: dsmPresent
+    real(ESMF_KIND_R4) :: dynamicDstMaskValue
+    integer  :: ddmPresent
+    integer :: rc
+
+    integer                 :: localrc      ! local return code
+    real(ESMF_KIND_R4), allocatable :: dynamicSrcMaskValue_, dynamicDstMaskValue_
+    logical, allocatable :: handleAllElements_
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    rc = ESMF_RC_NOT_IMPL
+
+    if (haePresent==1) then
+      if (handleAllElements==0) then
+        allocate(handleAllElements_,source=.false.)
+      else if (handleAllElements==1) then
+        allocate(handleAllElements_,source=.true.)
+      end if
+    end if
+    if (dsmPresent==1) then
+      allocate(dynamicSrcMaskValue_,source= dynamicSrcMaskValue)
+    end if
+    if (ddmPresent==1) allocate(dynamicDstMaskValue_,source= dynamicdstMaskValue)
+
+    call ESMF_DynamicMaskSetPredefR4R8R4(dynamicmask=dynamicmask, &
+      predefFlag=predefFlag, handleAllElements=handleAllElements_, &
+      dynamicSrcMaskValue=dynamicSrcMaskValue_, &
+      dynamicDstMaskValue=dynamicDstMaskValue_, rc=localrc)
+
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, &
+      rcToReturn=rc)) return
+
+    ! return successfully
+    rc = ESMF_SUCCESS
+
+  end subroutine f_esmf_dynamicmasksetprer4r8r4
+
+!---------------------------------------------------------------
+
+  subroutine f_esmf_dynamicmasksetprer4r8r4v(dynamicmask, predefFlag, &
+    handleAllElements, haePresent, dynamicSrcMaskValue, dsmPresent, &
+    dynamicDstMaskValue, ddmPresent, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_dynamicmasksetprer4r8r4v()"
+    use ESMF_DynamicMaskMod
+    use ESMF_UtilTypesMod
+    use ESMF_LogErrMod
+
+    implicit none
+
+    type(ESMF_DynamicMask) :: dynamicmask
+    type(ESMF_DynamicMaskPredef_Flag) :: predefFlag
+    integer  :: handleAllElements
+    integer  :: haePresent
+    real(ESMF_KIND_R4) :: dynamicSrcMaskValue
+    integer  :: dsmPresent
+    real(ESMF_KIND_R4) :: dynamicDstMaskValue
+    integer  :: ddmPresent
+    integer :: rc
+
+    integer                 :: localrc      ! local return code
+    real(ESMF_KIND_R4), allocatable :: dynamicSrcMaskValue_, dynamicDstMaskValue_
+    logical, allocatable :: handleAllElements_
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    rc = ESMF_RC_NOT_IMPL
+
+    if (haePresent==1) then
+      if (handleAllElements==0) then
+        allocate(handleAllElements_,source=.false.)
+      else if (handleAllElements==1) then
+        allocate(handleAllElements_,source=.true.)
+      end if
+    end if
+    if (dsmPresent==1) then
+      allocate(dynamicSrcMaskValue_,source= dynamicSrcMaskValue)
+    end if
+    if (ddmPresent==1) allocate(dynamicDstMaskValue_,source= dynamicdstMaskValue)
+
+    call ESMF_DynamicMaskSetPredefR4R8R4V(dynamicmask=dynamicmask, &
+      predefFlag=predefFlag, handleAllElements=handleAllElements_, &
+      dynamicSrcMaskValue=dynamicSrcMaskValue_, &
+      dynamicDstMaskValue=dynamicDstMaskValue_, rc=localrc)
+
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, &
+      rcToReturn=rc)) return
+
+    ! return successfully
+    rc = ESMF_SUCCESS
+
+  end subroutine f_esmf_dynamicmasksetprer4r8r4v
+
+!---------------------------------------------------------------
