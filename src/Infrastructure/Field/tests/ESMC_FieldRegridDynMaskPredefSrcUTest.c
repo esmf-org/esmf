@@ -76,8 +76,11 @@ int main() {
 
   ESMC_TestStart(__FILE__, __LINE__, 0);
   vm = ESMC_VMGetGlobal(&rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
   rc = ESMC_VMGet(vm, &localPet, &petCount, NULL, NULL, NULL, NULL);
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
   maxIndex_src = (int *)malloc(dimcount*sizeof(int));
   maxIndex_dst = (int *)malloc(dimcount*sizeof(int));
@@ -86,11 +89,23 @@ int main() {
   maxIndex_dst[0] = dst_nx;
   maxIndex_dst[1] = dst_ny;
   rc = ESMC_InterArrayIntSet(&i_maxIndex_src, maxIndex_src, dimcount);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
   rc = ESMC_InterArrayIntSet(&i_maxIndex_dst, maxIndex_dst, dimcount);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
   grid_src = ESMC_GridCreate1PeriDim(&i_maxIndex_src, NULL, &perdim, &poledim, &coordsys, &typekind, NULL, &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
   grid_dst = ESMC_GridCreate1PeriDim(&i_maxIndex_dst, NULL, &perdim, &poledim, &coordsys, &typekind, NULL, &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
   rc = ESMC_GridAddCoord(grid_src, ESMC_STAGGERLOC_CENTER);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
   rc = ESMC_GridAddCoord(grid_dst, ESMC_STAGGERLOC_CENTER);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
   int *exLBound_src = (int *)malloc(dimcount*sizeof(int));
   int *exUBound_src = (int *)malloc(dimcount*sizeof(int));
@@ -98,11 +113,13 @@ int main() {
   int *exUBound_dst = (int *)malloc(dimcount*sizeof(int));
 
   double *gridXCoord_src = (double *)ESMC_GridGetCoord(grid_src, 1,
-                                                   ESMC_STAGGERLOC_CENTER, NULL,
-                                                   exLBound_src, exUBound_src, &rc);
+    ESMC_STAGGERLOC_CENTER, NULL, exLBound_src, exUBound_src, &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
   double *gridYCoord_src = (double *)ESMC_GridGetCoord(grid_src, 2,
-                                                   ESMC_STAGGERLOC_CENTER, NULL,
-                                                   NULL, NULL, &rc);
+    ESMC_STAGGERLOC_CENTER, NULL, NULL, NULL, &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
   xmin=-180.0;
   xmax=180.0-dx_src;
@@ -117,7 +134,6 @@ int main() {
          gridXCoord_src[p] = xmin;
       }
       else if (exUBound_src[1] == i0) {
-      
          gridXCoord_src[p] = xmax;
       }
       else {
@@ -138,11 +154,13 @@ int main() {
   }
 
   double *gridXCoord_dst = (double *)ESMC_GridGetCoord(grid_dst, 1,
-                                                   ESMC_STAGGERLOC_CENTER, NULL,
-                                                   exLBound_dst, exUBound_dst, &rc);
+    ESMC_STAGGERLOC_CENTER, NULL, exLBound_dst, exUBound_dst, &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
   double *gridYCoord_dst = (double *)ESMC_GridGetCoord(grid_dst, 2,
-                                                   ESMC_STAGGERLOC_CENTER, NULL,
-                                                   NULL, NULL, &rc);
+    ESMC_STAGGERLOC_CENTER, NULL, NULL, NULL, &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
   xmin=-180.0;
   xmax=180.0-dx_dst;
@@ -178,13 +196,25 @@ int main() {
   }
 
   field_src = ESMC_FieldCreateGridTypeKind(grid_src, ESMC_TYPEKIND_R8,
-    ESMC_STAGGERLOC_CENTER, NULL, NULL, NULL, "dstfield", &rc);
-  field_dst = ESMC_FieldCreateGridTypeKind(grid_dst, ESMC_TYPEKIND_R8,
     ESMC_STAGGERLOC_CENTER, NULL, NULL, NULL, "srcfield", &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
+  field_dst = ESMC_FieldCreateGridTypeKind(grid_dst, ESMC_TYPEKIND_R8,
+    ESMC_STAGGERLOC_CENTER, NULL, NULL, NULL, "dstfield", &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
+  //----------------------------------------------------------------------------
+  // NEX_UTest
+  strcpy(name, "Test R8R8R8 dynamic mask");
+  strcpy(failMsg, "R8R8R8 dynamic masking was not correctly applied");
 
   double * srcfieldptr_r8 = (double *)ESMC_FieldGetPtr(field_src, 0, &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
   double * dstfieldptr_r8 = (double *)ESMC_FieldGetPtr(field_dst, 0, &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
   p = 0;
   for (int i1=exLBound_src[1]; i1<=exUBound_src[1]; ++i1) {
@@ -206,20 +236,26 @@ int main() {
 
   int handleAllElem = 1;
   rc = ESMC_DynamicMaskPredefinedSetR8R8R8(&dynamicMask, predefFlag, &handleAllElem, &srcMaskValue_r8, NULL);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
-  int srcTermProcessing = 0;
   enum ESMC_RegridMethod_Flag regridmethod = ESMC_REGRIDMETHOD_BILINEAR;
-  enum ESMC_PoleMethod_Flag polemethod = ESMC_POLEMETHOD_NONE;
+  enum ESMC_PoleMethod_Flag polemethod = ESMC_POLEMETHOD_ALLAVG;
   enum ESMC_LineType_Flag linetype = ESMC_LINETYPE_GREAT_CIRCLE;
   enum ESMC_UnmappedAction_Flag unmappedaction = ESMC_UNMAPPEDACTION_ERROR;
+
+  int srcTermProcessing = 0;
   rc = ESMC_FieldRegridStore(field_src, field_dst, NULL, NULL, &routehandle,
                              &regridmethod, &polemethod, NULL, NULL, NULL,
                              NULL, NULL, NULL, NULL, NULL,
                              NULL, NULL, &srcTermProcessing, NULL, NULL,
                              NULL, NULL, NULL);
-  int srctermprocessing = 0;
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
   srcfieldptr_r8 = (double *)ESMC_FieldGetPtr(field_src, 0, &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
   p = 0;
   for (int i1=exLBound_src[1]; i1<=exUBound_src[1]; ++i1) {
@@ -232,13 +268,19 @@ int main() {
     }
   }
   rc = ESMC_FieldRegrid(field_src,field_dst,routehandle,NULL,&dynamicMask);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
   dstfieldptr_r8 = (double *)ESMC_FieldGetPtr(field_dst, 0, &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
   int count_def = 0;
   int count_undef = 0;
   double delta = 0.00001;
   dstfieldptr_r8 = (double *)ESMC_FieldGetPtr(field_dst, 0, &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
   p = 0;
   for (int i1=exLBound_dst[1]; i1<=exUBound_dst[1]; ++i1) {
 	  for (int i0=exLBound_dst[0]; i0<=exUBound_dst[0]; ++i0) {
@@ -247,12 +289,17 @@ int main() {
 		  ++p;
 	  }
   }
-  // EX_UTest
-  strcpy(name, "Test R8R8R8 dynamic mask");
-  strcpy(failMsg, "R8R8R8 src dynamic masking was not correctly applied");
   ESMC_Test((count_def+count_undef == dst_nx*dst_ny), name, failMsg, &result, __FILE__, __LINE__, 0);
-       
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  // NEX_UTest
+  strcpy(name, "Test R8R8R8V dynamic mask");
+  strcpy(failMsg, "R8R8R8V dynamic masking was not correctly applied");
+
   srcfieldptr_r8 = (double *)ESMC_FieldGetPtr(field_src, 0, &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
   p = 0;
   for (int i1=exLBound_src[1]; i1<=exUBound_src[1]; ++i1) {
@@ -265,13 +312,21 @@ int main() {
     }
   }
   rc = ESMC_DynamicMaskPredefinedSetR8R8R8V(&dynamicMask, predefFlag, &handleAllElem, &srcMaskValue_r8, NULL);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
   rc = ESMC_FieldRegrid(field_src,field_dst,routehandle,NULL,&dynamicMask);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
   dstfieldptr_r8 = (double *)ESMC_FieldGetPtr(field_dst, 0, &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
   count_def = 0;
   count_undef = 0;
   dstfieldptr_r8 = (double *)ESMC_FieldGetPtr(field_dst, 0, &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
   p = 0;
   for (int i1=exLBound_dst[1]; i1<=exUBound_dst[1]; ++i1) {
 	  for (int i0=exLBound_dst[0]; i0<=exUBound_dst[0]; ++i0) {
@@ -280,22 +335,40 @@ int main() {
 		  ++p;
 	  }
   }
-  // EX_UTest
-  strcpy(name, "Test R8R8R8V dynamic mask");
-  strcpy(failMsg, "R8R8R8V src dynamic masking was not correctly applied");
   ESMC_Test((count_def+count_undef == dst_nx*dst_ny), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
 
   // Now test R4
   rc =ESMC_FieldRegridRelease(&routehandle);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
   rc = ESMC_FieldDestroy(&field_src);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
   rc = ESMC_FieldDestroy(&field_dst);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
+
   field_src = ESMC_FieldCreateGridTypeKind(grid_src, ESMC_TYPEKIND_R4,
-    ESMC_STAGGERLOC_CENTER, NULL, NULL, NULL, "dstfield", &rc);
-  field_dst = ESMC_FieldCreateGridTypeKind(grid_dst, ESMC_TYPEKIND_R4,
     ESMC_STAGGERLOC_CENTER, NULL, NULL, NULL, "srcfield", &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
+  field_dst = ESMC_FieldCreateGridTypeKind(grid_dst, ESMC_TYPEKIND_R4,
+    ESMC_STAGGERLOC_CENTER, NULL, NULL, NULL, "dstfield", &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
+
+  //----------------------------------------------------------------------------
+  // NEX_UTest
+  strcpy(name, "Test R4R8R4 dynamic mask");
+  strcpy(failMsg, "R4R8R4 dynamic masking was not correctly applied");
 
   float * srcfieldptr_r4 = (float*)ESMC_FieldGetPtr(field_src, 0, &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
   float * dstfieldptr_r4 = (float*)ESMC_FieldGetPtr(field_dst, 0, &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
   p = 0;
   for (int i1=exLBound_src[1]; i1<=exUBound_src[1]; ++i1) {
@@ -314,16 +387,23 @@ int main() {
       ++p;
     }
   }
-  
-  rc = ESMC_DynamicMaskPredefinedSetR4R8R4(&dynamicMask, predefFlag, &handleAllElem, &srcMaskValue_r4, NULL);
 
+  rc = ESMC_DynamicMaskPredefinedSetR4R8R4(&dynamicMask, predefFlag, &handleAllElem, &srcMaskValue_r4, NULL);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
+
+  srcTermProcessing = 0;
   rc = ESMC_FieldRegridStore(field_src, field_dst, NULL, NULL, &routehandle,
                              &regridmethod, &polemethod, NULL, NULL, NULL,
                              NULL, NULL, NULL, NULL, NULL,
                              NULL, NULL, &srcTermProcessing, NULL, NULL,
                              NULL, NULL, NULL);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
   srcfieldptr_r4 = (float *)ESMC_FieldGetPtr(field_src, 0, &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
   p = 0;
   for (int i1=exLBound_src[1]; i1<=exUBound_src[1]; ++i1) {
@@ -336,12 +416,18 @@ int main() {
     }
   }
   rc = ESMC_FieldRegrid(field_src,field_dst,routehandle,NULL,&dynamicMask);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
   dstfieldptr_r4 = (float *)ESMC_FieldGetPtr(field_dst, 0, &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
   count_def = 0;
   count_undef = 0;
   delta = 0.0001;
   dstfieldptr_r4= (float *)ESMC_FieldGetPtr(field_dst, 0, &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
   p = 0;
   for (int i1=exLBound_dst[1]; i1<=exUBound_dst[1]; ++i1) {
 	  for (int i0=exLBound_dst[0]; i0<=exUBound_dst[0]; ++i0) {
@@ -350,12 +436,17 @@ int main() {
 		  ++p;
 	  }
   }
-  // EX_UTest
-  strcpy(name, "Test R4R8R4 dynamic mask");
-  strcpy(failMsg, "R4R8R4 src dynamic masking was not correctly applied");
   ESMC_Test((count_def+count_undef == dst_nx*dst_ny), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  // NEX_UTest
+  strcpy(name, "Test R4R8R4V dynamic mask");
+  strcpy(failMsg, "R4R8R4V dynamic masking was not correctly applied");
 
   rc = ESMC_DynamicMaskPredefinedSetR4R8R4V(&dynamicMask, predefFlag, &handleAllElem, &srcMaskValue_r4, NULL);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
   p = 0;
   for (int i1=exLBound_src[1]; i1<=exUBound_src[1]; ++i1) {
     for (int i0=exLBound_src[0]; i0<=exUBound_src[0]; ++i0) {
@@ -367,12 +458,18 @@ int main() {
     }
   }
   rc = ESMC_FieldRegrid(field_src,field_dst,routehandle,NULL,&dynamicMask);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
   dstfieldptr_r4 = (float *)ESMC_FieldGetPtr(field_dst, 0, &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
   count_def = 0;
   count_undef = 0;
   delta = 0.0001;
   dstfieldptr_r4= (float *)ESMC_FieldGetPtr(field_dst, 0, &rc);
+  if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
+    ESMC_FinalizeWithFlag(ESMC_END_ABORT);
   p = 0;
   for (int i1=exLBound_dst[1]; i1<=exUBound_dst[1]; ++i1) {
 	  for (int i0=exLBound_dst[0]; i0<=exUBound_dst[0]; ++i0) {
@@ -381,10 +478,8 @@ int main() {
 		  ++p;
 	  }
   }
-  // EX_UTest
-  strcpy(name, "Test R4R8R4V dynamic mask");
-  strcpy(failMsg, "R4R8R4V src dynamic masking was not correctly applied");
   ESMC_Test((count_def+count_undef == dst_nx*dst_ny), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
 
   ESMC_TestEnd(__FILE__, __LINE__, 0);
   return 0;
