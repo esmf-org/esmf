@@ -207,13 +207,13 @@ RUN_ESMC_FieldGridRegridParUTest:
 RUN_ESMC_FieldRegridDynMaskPredefSrcUTest:
 	$(MAKE) TNAME=FieldRegridDynMaskPredefSrc NP=4 ctest
 
-RUN_ESMC_FieldRegridDynMaskPredefSrcUTestUni:
+RUN_ESMC_FieldRegridDynMaskPredefSrcUTestUNI:
 	$(MAKE) TNAME=FieldRegridDynMaskPredefSrc NP=1 ctest
 
 RUN_ESMC_FieldRegridDynMaskPredefVoteUTest:
 	$(MAKE) TNAME=FieldRegridDynMaskPredefVote NP=4 ctest
 
-RUN_ESMC_FieldRegridDynMaskPredefVoteUTestUni:
+RUN_ESMC_FieldRegridDynMaskPredefVoteUTestUNI:
 	$(MAKE) TNAME=FieldRegridDynMaskPredefVote NP=1 ctest
 
 RUN_ESMF_FieldCreateGetUTest:
