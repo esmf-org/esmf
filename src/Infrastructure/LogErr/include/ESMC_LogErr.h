@@ -51,26 +51,39 @@ void *ptr;
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_LogWrite - Write an entry into the Log file
+// !IROUTINE: ESMC_LogMsgFoundError - Test for error and write message
 //
 // !INTERFACE:
-int ESMC_LogWrite(
-  const char msg[], // in
-  int msgtype       // in
+int ESMC_LogMsgFoundError(
+  int rcToCheck,        // in
+  const char msg[],     // in
+  int LINE,             // in
+  const char FILE[],    // in
+  const char method[],  // in
+  int *rcToReturn       // out
 );
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //
 // !DESCRIPTION:
 //
-//  Write an entry into the Log file.
+//  Test for rcToCheck != ESMF_SUCCESS. Return 1 if error found, 0 otherwise.
+//  Write message to log in case of error.
 //
 //  The arguments are:
 //  \begin{description}
 //  \item[msg]
-//    The message to be written.
-//  \item[msgtype]
-//    The message type.  This flag is documented in section \ref{const:clogmsgflag}
+//    The return code to check.
+//  \item[msg]
+//    The message to be written in case of error.
+//  \item[LINE]
+//    The source line.
+//  \item[FILE]
+//    The source file.
+//  \item[method]
+//    The source method.
+//  \item[rcToReturn]
+//    Propagated return code.
 //  \end{description}
 //
 //EOP
@@ -96,6 +109,33 @@ int ESMC_LogSet(
 //  \item[flush]
 //    If set to ESMF\_TRUE, flush log messages immediately, rather than buffering 
 //    them. Default is to flush after 10 messages.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_LogWrite - Write an entry into the Log file
+//
+// !INTERFACE:
+int ESMC_LogWrite(
+  const char msg[], // in
+  int msgtype       // in
+);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Write an entry into the Log file.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[msg]
+//    The message to be written.
+//  \item[msgtype]
+//    The message type.  This flag is documented in section \ref{const:clogmsgflag}
 //  \end{description}
 //
 //EOP
