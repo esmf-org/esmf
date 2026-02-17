@@ -924,7 +924,7 @@ int ESMC_FieldRegridStoreFile(
     enum ESMC_Logical *ignoreDegenerate,           // in
     int *srcTermProcessing,                        // in
     enum ESMC_Logical *create_rh,                  // in
-    enum ESMC_FileMode_Flag *filemode,                  // in
+    enum ESMC_FileMode_Flag *filemode,             // in
     const char *srcFile,                           // in
     const char *dstFile,                           // in
     enum ESMC_FileFormat_Flag *srcFileType,        // in
@@ -1041,12 +1041,12 @@ int ESMC_FieldRegridStoreFile(
 // !IROUTINE: ESMC_FieldRegrid - Compute a regridding operation
 //
 // !INTERFACE:
-  int ESMC_FieldRegrid( 
+  int ESMC_FieldRegrid(
     ESMC_Field srcField,                  // in
     ESMC_Field dstField,                  // inout
     ESMC_RouteHandle routehandle,         // in
     enum ESMC_Region_Flag *zeroregion,    // in
-    ESMC_DynamicMask *dynamicmask);        // in
+    ESMC_DynamicMask *dynamicMask);       // in
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -1079,6 +1079,8 @@ int ESMC_FieldRegridStoreFile(
 //    destination Array that will be updated by the sparse matrix
 //    multiplication.
 //    \end{sloppypar}
+//  \item [{[dynamicMask]}]
+//    Dynamic mask object.
 //  \end{description}
 //
 //EOP

@@ -189,7 +189,7 @@ void FTN_X(f_esmf_regridstorefile)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldp
 
 void FTN_X(f_esmf_regrid)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   ESMCI::RouteHandle **routehandlep, ESMC_Region_Flag *zeroregion, int *zr_present,
-  ESMC_DynamicMask *dynamicmask, int *dynmask_present, int *rc);
+  ESMCI::DynamicMask *dynamicMask, int *dynmask_present, int *rc);
 
 void FTN_X(f_esmf_regridrelease)(ESMCI::RouteHandle **routehandlep, int *rc);
 
@@ -1637,11 +1637,11 @@ namespace ESMCI {
 //    int error return code
 //
 // !ARGUMENTS:
-    Field *fieldpsrc, 
-    Field *fieldpdst, 
+    Field *fieldpsrc,
+    Field *fieldpdst,
     RouteHandle *routehandlep,
     ESMC_Region_Flag *zeroRegion,
-    ESMC_DynamicMask *dynamicmask) {
+    DynamicMask *dynamicMask) {
 //
 // !DESCRIPTION:
 //
@@ -1656,12 +1656,12 @@ namespace ESMCI {
     if (zeroRegion != NULL)
       zr_present = 1;
     dynmask_present = 0;
-    if (dynamicmask != NULL)
+    if (dynamicMask != NULL)
       dynmask_present = 1; 
 
     // TODO: why are fields.ptr and routehandle by reference??  from create.. 
     FTN_X(f_esmf_regrid)(fieldpsrc, fieldpdst, &routehandlep, 
-                         zeroRegion, &zr_present, dynamicmask, &dynmask_present, &localrc);
+                         zeroRegion, &zr_present, dynamicMask, &dynmask_present, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
 

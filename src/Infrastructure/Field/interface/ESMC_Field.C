@@ -29,6 +29,7 @@
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_Grid.h"
+#include "ESMCI_DynamicMask.h"
 
 #include <string>
 #include <iostream>
@@ -566,10 +567,10 @@ int ESMC_FieldGetLocalDECount(ESMC_Field field, int *localDECount){
 //--------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_FieldRegrid()"
-  int ESMC_FieldRegrid(ESMC_Field srcField, ESMC_Field dstField, 
-                            ESMC_RouteHandle routehandle, 
+  int ESMC_FieldRegrid(ESMC_Field srcField, ESMC_Field dstField,
+                            ESMC_RouteHandle routehandle,
                             enum ESMC_Region_Flag *zeroregion,
-                            ESMC_DynamicMask *dynamicmask){
+                            ESMC_DynamicMask *dynamicMask){
 
     // Initialize return code. Assume routine not implemented
     int rc = ESMF_RC_NOT_IMPL;
@@ -582,8 +583,8 @@ int ESMC_FieldGetLocalDECount(ESMC_Field field, int *localDECount){
       reinterpret_cast<ESMCI::RouteHandle *>(routehandle.ptr);
 
     // Invoke the C++ interface
-    localrc = ESMCI::Field::regrid(fieldpsrc, fieldpdst, routehandlep, 
-                                   zeroregion, dynamicmask);
+    localrc = ESMCI::Field::regrid(fieldpsrc, fieldpdst, routehandlep, zeroregion,
+      (ESMCI::DynamicMask *)dynamicMask);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;  // bail out
 

@@ -876,7 +876,8 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_regrid"
-  subroutine f_esmf_regrid(srcField, dstField, routehandle, zeroregion, zrpresent, dynamicMask, dmpresent, rc)
+  subroutine f_esmf_regrid(srcField, dstField, routehandle, zeroregion, zrpresent, &
+    dynamicMask, dmpresent, rc)
 
     use ESMF_UtilTypesMod
     use ESMF_BaseMod
@@ -917,10 +918,10 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if (zrpresent==1) allocate(zeroregion_, source=zeroregion) 
-    if (dmpresent==1) allocate(dynamicMask_, source=DynamicMask)
+    if (zrpresent==1) allocate(zeroregion_, source=zeroregion)
+    if (dmpresent==1) allocate(dynamicMask_, source=dynamicMask)
     call ESMF_FieldRegrid(srcField, dstField, routehandle=l_routehandle, &
-      zeroregion=zeroregion, DynamicMask=dynamicMask, rc=localrc)
+      zeroregion=zeroregion_, dynamicMask=dynamicMask_, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
   
