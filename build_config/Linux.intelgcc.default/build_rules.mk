@@ -130,6 +130,13 @@ ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} --version
 ESMF_F90MAJORVERSION        = $(shell $(ESMF_DIR)/scripts/version.intel 1 ${ESMF_F90COMPILER} -V)
 
 ############################################################
+# Special optimization flags
+#
+# Prevent speculative execution of floating-point operations
+# that could trigger a hardware exception (safe for -fpe0)
+ESMF_F90OPTFLAG_O       += -fp-speculation=safe
+
+############################################################
 # Special debug flags
 #
 ESMF_F90OPTFLAG_G       += -traceback -check bounds
