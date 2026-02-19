@@ -2291,4 +2291,50 @@ void Mesh::get_node_info_sorted_by_id(int &nodeCount, std::vector<double> &nodeO
 
 }
 
+void Mesh::get_elems_sorted_by_id(std::vector<const MeshObj *> &elems) const {
+  Trace __trace("Mesh::get_elems_sorted_by_id()");
+
+  // Get the elem map
+ const MeshObjIDMap &emap = get_map(MeshObj::ELEMENT);
+
+  // Clear the vector
+  elems.clear();
+
+  // Reserve space
+  elems.reserve(emap.size()); 
+
+  // Loop through the map and count local and fill vector
+  for (MeshObjIDMap::const_iterator ei = emap.begin(); ei != emap.end(); ++ei) {
+     const MeshObj &elem =*ei;
+
+     // Get just local elems
+    if (!GetAttr(elem).is_locally_owned()) continue;
+
+    // Add elem to list
+    elems.push_back(&elem);
+  }
+
+}
+
+// Takes a vector of elements and makes a corresponding vector of node counts
+void Mesh::get_elem_node_counts(std::vector<const MeshObj *> &elems, std::vector<int> &elem_node_counts) const {
+  Trace __trace("Mesh::get_elem_node_counts()");
+
+  // Clear the vector
+  elem_node_counts.clear();
+
+  // Reserve space
+  elem_node_counts.reserve(elems.size()); 
+
+  // Loop through the vector and set sizes
+  for (const MeshObj *elem: elems) {
+
+    // Get topology of elem                                                               
+   const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
+
+   // Set size based on topo
+   elem_node_counts.push_back(topo->num_nodes);
+  }
+
+}
 } // namespace

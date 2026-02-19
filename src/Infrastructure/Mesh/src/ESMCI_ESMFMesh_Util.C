@@ -126,6 +126,23 @@ void get_elementCount_from_ESMFMesh_file(int pioFileDesc, char *filename, PIO_Of
   
 }
 
+void add_elementCount_to_ESMFMesh_file(int pioFileDesc, char *filename, PIO_Offset elementCount, int &elementCountId) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "add_elementCount_to_ESMFMesh_file()"
+
+  // Declare some useful vars
+  int dimid;
+  int localrc;
+  int piorc;
+
+  // Define coordDim
+  piorc = PIOc_def_dim(pioFileDesc, "elementCount", elementCount, &elementCountId);
+  if (!CHECKPIOERROR(piorc, std::string("Unable to add elementCount to file: ") + filename,
+                     ESMF_RC_FILE_WRITE, localrc)) throw localrc;
+}
+
+
+
 void get_nodeCount_from_ESMFMesh_file(int pioFileDesc, char *filename, PIO_Offset &nodeCount) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "get_nodeCount_from_ESMFMesh_file()"
@@ -327,6 +344,72 @@ void get_numElementConn_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, c
                                       ESMC_CONTEXT, &localrc)) throw localrc;
   }
 
+}
+
+// Add numElementConn to ESMFMesh format file
+void add_numElementConn_to_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char *filename, 
+                                     int elementCountId, int &numElementConnId) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "add_numElementConn_to_ESMFMesh_file()"
+
+  // Declare some useful vars
+  int dimid[1];
+  int localrc;
+  int piorc;
+
+  // Set dimensions
+  dimid[0]=elementCountId;
+  
+  // Define variable
+  piorc=PIOc_def_var(pioFileDesc, "numElementConn", PIO_INT, 1, dimid, &numElementConnId);
+  if (!CHECKPIOERROR(piorc, std::string("Unable to add nodeCoords to file: ") + filename,
+                     ESMF_RC_FILE_WRITE, localrc)) throw localrc;  
+    
+}
+
+// Add nodeCoords to ESMFMesh format file
+void write_numElementConn_to_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char *filename, 
+                                           int numElementConnId, PIO_Offset elementCount, int *numElementConn) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "write_nodeCoords_to_ESMFMesh_file()"
+
+  // Declare some useful vars
+  int localrc;
+  int piorc;
+  int rearr = PIO_REARR_SUBSET;
+
+  // Define offsets for nodeCoord decomp (right now they are just all in order on PET 1)
+  PIO_Offset *element_offsets= new PIO_Offset[elementCount];
+  for (int i=0; i<elementCount; i++) {
+      element_offsets[i] = (PIO_Offset) (i+1);
+  }
+
+ // Init Decomp
+  int element_decomp;
+  int element_gdimlen1D[1]={(int)elementCount};
+  piorc = PIOc_InitDecomp(pioSystemDesc, PIO_INT, 1, element_gdimlen1D, elementCount,
+                          element_offsets, &element_decomp, 
+                          &rearr, NULL, NULL);
+
+  // Get rid of node offsets
+  delete [] element_offsets;
+
+  // Write variable
+  piorc=PIOc_write_darray(pioFileDesc, numElementConnId, element_decomp, elementCount, numElementConn, NULL);
+  if (!CHECKPIOERROR(piorc, std::string("Unable to write to numElementConn to file: ") + filename,
+                     ESMF_RC_FILE_WRITE, localrc)) throw localrc;  
+
+  // Sync??
+  piorc=PIOc_sync(pioFileDesc);
+  if (!CHECKPIOERROR(piorc, std::string("Unable to write to numElementConn to file: ") + filename,
+                     ESMF_RC_FILE_WRITE, localrc)) throw localrc;  
+  
+
+  // Get rid of nodeCoords decomp
+  piorc = PIOc_freedecomp(pioSystemDesc, element_decomp);
+  if (!CHECKPIOERROR(piorc, std::string("Error freeing element decomp "),
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+  
 }
 
 // Get elementConn info out of a 1D variable in an ESMFMesh file. 

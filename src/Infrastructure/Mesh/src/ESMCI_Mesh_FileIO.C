@@ -272,7 +272,27 @@ void ESMCI_mesh_write_to_ESMFMesh_file(int pioSystemDesc,
     add_nodeCoords_to_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, 
                                     nodeCountId, coordDimId, nodeCoordsId);
 
+
+    // Get elems sorted by id
+    std::vector<const MeshObj *> elems;
+    mesh->get_elems_sorted_by_id(elems);                                    
+
+    // Get elementCount
+    int elementCountId;
+    int elementCount=elems.size();
+    int elementCountPIO=(PIO_Offset)elementCount;
+    add_elementCount_to_ESMFMesh_file(pioFileDesc, filename, elementCountPIO, elementCountId);
+
+
+    // Get elem sizes
+    std::vector<int> elem_node_counts;
+    mesh->get_elem_node_counts(elems, elem_node_counts);
     
+    // Add numElementConn to file
+    int numElementConnId;
+    add_numElementConn_to_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, 
+                                    elementCountId, numElementConnId);
+
     // End defintions 
     piorc = PIOc_enddef(pioFileDesc);
     if (!CHECKPIOERROR(piorc, std::string("Unable to open existing file: ") + filename,
@@ -284,7 +304,9 @@ void ESMCI_mesh_write_to_ESMFMesh_file(int pioSystemDesc,
     write_nodeCoords_to_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, 
                                       nodeCoordsId, nodeCountPIO, coordDim, nodeOrigCoords.data());
     
-
+    // Write numElementConn to file
+    write_numElementConn_to_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, 
+                                      numElementConnId, elementCountPIO, elem_node_counts.data());
 
     //// Close file using PIO
     piorc = PIOc_closefile(pioFileDesc);
