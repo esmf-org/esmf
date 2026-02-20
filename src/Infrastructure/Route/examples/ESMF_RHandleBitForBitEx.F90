@@ -118,20 +118,20 @@ program ESMF_RHandleBitForBitEx
 !EOE
 
 !BOC
-  sumA = (0.5 + 0.1) + 0.1        ! results in 0.700000048
-  sumB = 0.5 + (0.1 + 0.1)        ! results in 0.699999988
-  
-  sumC = 0.5 +  0.2 + 0.1  + 0.1  ! results in 0.900000036
-  sumD = 0.5 + (0.2 + 0.1) + 0.1  ! results in 0.900000036
-  sumE = 0.5 + (0.2 + 0.1 + 0.1)  ! results in 0.899999976
+  sumA = (0.5 + 0.1) + 0.1        ! results in 0.700000048  (0x3F333334)
+  sumB = 0.5 + (0.1 + 0.1)        ! results in 0.699999988  (0x3F333333)
+
+  sumC = 0.5 +  0.2 + 0.1  + 0.1  ! results in 0.900000036  (0x3F666667)
+  sumD = 0.5 + (0.2 + 0.1) + 0.1  ! results in 0.900000036  (0x3F666667)
+  sumE = 0.5 + (0.2 + 0.1 + 0.1)  ! results in 0.899999976  (0x3F666666)
 !EOC
 
   if (localPet == 0) then
-    print *, "sumA = ", sumA
-    print *, "sumB = ", sumB
-    print *, "sumC = ", sumC
-    print *, "sumD = ", sumD
-    print *, "sumE = ", sumE
+    print '(A, E16.9, "   0x", Z8)', "sumA = ", sumA, sumA
+    print '(A, E16.9, "   0x", Z8)', "sumB = ", sumB, sumB
+    print '(A, E16.9, "   0x", Z8)', "sumC = ", sumC, sumC
+    print '(A, E16.9, "   0x", Z8)', "sumD = ", sumD, sumD
+    print '(A, E16.9, "   0x", Z8)', "sumE = ", sumE, sumE
   endif
 
 !BOE
@@ -451,16 +451,21 @@ program ESMF_RHandleBitForBitEx
 !BOC
   call ESMF_ArraySMM(srcArray, dstArray, routehandle=rh, &
     termorderflag=ESMF_TERMORDER_SRCSEQ, rc=rc)
-!EOC    
+!EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   if (localPet == 0) then
-    print *, "result SRCSEQ#1 = ", farrayPtr(1), " expect: ", sumA
-    if (farrayPtr(1) /= sumA) &
+    print '(A, E16.9, "   0x", Z8)', &
+      "result SRCSEQ#1 = ", farrayPtr(1), farrayPtr(1)
+    print '(A, E16.9, "   0x", Z8)', &
+      "expected result = ", sumA, sumA
+    if (farrayPtr(1) /= sumA) then
+      print *, "result SRCSEQ#1 mismatch"
       finalrc = ESMF_FAILURE
+    endif
   endif
 !EOC
 
@@ -547,9 +552,14 @@ program ESMF_RHandleBitForBitEx
 !EOE
 !BOC
   if (localPet == 0) then
-    print *, "result SRCSEQ#2 = ", farrayPtr(1), " expect: ", sumA
-    if (farrayPtr(1) /= sumA) &
+    print '(A, E16.9, "   0x", Z8)', &
+      "result SRCSEQ#2 = ", farrayPtr(1), farrayPtr(1)
+    print '(A, E16.9, "   0x", Z8)', &
+      "expected result = ", sumA, sumA
+    if (farrayPtr(1) /= sumA) then
+      print *, "result SRCSEQ#2 mismatch"
       finalrc = ESMF_FAILURE
+    endif
   endif
 !EOC
   call ESMF_ArraySMMRelease(rh, rc=rc)
@@ -643,9 +653,14 @@ program ESMF_RHandleBitForBitEx
 
 !BOC
   if (localPet == 0) then
-    print *, "result SRCPET#1 = ", farrayPtr(1), " expect: ", sumA
-    if (farrayPtr(1) /= sumA) &
+    print '(A, E16.9, "   0x", Z8)', &
+      "result SRCPET#1 = ", farrayPtr(1), farrayPtr(1)
+    print '(A, E16.9, "   0x", Z8)', &
+      "expected result = ", sumA, sumA
+    if (farrayPtr(1) /= sumA) then
+      print *, "result SRCPET#1 mismatch"
       finalrc = ESMF_FAILURE
+    endif
   endif
 !EOC
 
@@ -737,9 +752,14 @@ program ESMF_RHandleBitForBitEx
   
 !BOC
   if (localPet == 0) then
-    print *, "result SRCPET#2 = ", farrayPtr(1), " expect: ", sumB
-    if (farrayPtr(1) /= sumB) &
+    print '(A, E16.9, "   0x", Z8)', &
+      "result SRCPET#2 = ", farrayPtr(1), farrayPtr(1)
+    print '(A, E16.9, "   0x", Z8)', &
+      "expected result = ", sumB, sumB
+    if (farrayPtr(1) /= sumB) then
+      print *, "result SRCPET#2 mismatch"
       finalrc = ESMF_FAILURE
+    endif
   endif
 !EOC
 
@@ -830,9 +850,14 @@ program ESMF_RHandleBitForBitEx
   
 !BOC
   if (localPet == 0) then
-    print *, "result SRCPET#3 = ", farrayPtr(1), " expect: ", sumA
-    if (farrayPtr(1) /= sumA) &
+    print '(A, E16.9, "   0x", Z8)', &
+      "result SRCPET#3 = ", farrayPtr(1), farrayPtr(1)
+    print '(A, E16.9, "   0x", Z8)', &
+      "expected result = ", sumA, sumA
+    if (farrayPtr(1) /= sumA) then
+      print *, "result SRCPET#3 mismatch"
       finalrc = ESMF_FAILURE
+    endif
   endif
 !EOC
   
@@ -920,9 +945,14 @@ program ESMF_RHandleBitForBitEx
   
 !BOC
   if (localPet == 0) then
-    print *, "result SRCPET#4 = ", farrayPtr(1), " expect: ", sumB
-    if (farrayPtr(1) /= sumB) &
+    print '(A, E16.9, "   0x", Z8)', &
+      "result SRCPET#4 = ", farrayPtr(1), farrayPtr(1)
+    print '(A, E16.9, "   0x", Z8)', &
+      "expected result = ", sumB, sumB
+    if (farrayPtr(1) /= sumB) then
+      print *, "result SRCPET#4 mismatch"
       finalrc = ESMF_FAILURE
+    endif
   endif
 !EOC
 
@@ -1010,9 +1040,14 @@ program ESMF_RHandleBitForBitEx
   
 !BOC
   if (localPet == 0) then
-    print *, "result SRCPET#5 = ", farrayPtr(1), " expect: ", sumA
-    if (farrayPtr(1) /= sumA) &
+    print '(A, E16.9, "   0x", Z8)', &
+      "result SRCPET#5 = ", farrayPtr(1), farrayPtr(1)
+    print '(A, E16.9, "   0x", Z8)', &
+      "expected result = ", sumA, sumA
+    if (farrayPtr(1) /= sumA) then
+      print *, "result SRCPET#5 mismatch"
       finalrc = ESMF_FAILURE
+    endif
   endif
 !EOC
   
@@ -1057,9 +1092,14 @@ program ESMF_RHandleBitForBitEx
   
 !BOC
   if (localPet == 0) then
-    print *, "result SRCPET#6 = ", farrayPtr(1), " expect: ", sumA
-    if (farrayPtr(1) /= sumA) &
+    print '(A, E16.9, "   0x", Z8)', &
+      "result SRCPET#6 = ", farrayPtr(1), farrayPtr(1)
+    print '(A, E16.9, "   0x", Z8)', &
+      "expected result = ", sumA, sumA
+    if (farrayPtr(1) /= sumA) then
+      print *, "result SRCPET#6 mismatch"
       finalrc = ESMF_FAILURE
+    endif
   endif
 !EOC
 
@@ -1107,9 +1147,14 @@ program ESMF_RHandleBitForBitEx
   
 !BOC
   if (localPet == 0) then
-    print *, "result SRCPET#7 = ", farrayPtr(1), " expect: ", sumB
-    if (farrayPtr(1) /= sumB) &
+    print '(A, E16.9, "   0x", Z8)', &
+      "result SRCPET#7 = ", farrayPtr(1), farrayPtr(1)
+    print '(A, E16.9, "   0x", Z8)', &
+      "expected result = ", sumB, sumB
+    if (farrayPtr(1) /= sumB) then
+      print *, "result SRCPET#7 mismatch"
       finalrc = ESMF_FAILURE
+    endif
   endif
 !EOC
   
@@ -1203,9 +1248,14 @@ program ESMF_RHandleBitForBitEx
   
 !BOC
   if (localPet == 0) then
-    print *, "result SRCPET#8 = ", farrayPtr(1), " expect: ", sumC
-    if (farrayPtr(1) /= sumC) &
+    print '(A, E16.9, "   0x", Z8)', &
+      "result SRCPET#8 = ", farrayPtr(1), farrayPtr(1)
+    print '(A, E16.9, "   0x", Z8)', &
+      "expected result = ", sumC, sumC
+    if (farrayPtr(1) /= sumC) then
+      print *, "result SRCPET#8 mismatch"
       finalrc = ESMF_FAILURE
+    endif
   endif
 !EOC
   
@@ -1273,9 +1323,14 @@ program ESMF_RHandleBitForBitEx
   
 !BOC
   if (localPet == 0) then
-    print *, "result SRCPET#9 = ", farrayPtr(1), " expect: ", sumD
-    if (farrayPtr(1) /= sumD) &
+    print '(A, E16.9, "   0x", Z8)', &
+      "result SRCPET#9 = ", farrayPtr(1), farrayPtr(1)
+    print '(A, E16.9, "   0x", Z8)', &
+      "expected result = ", sumD, sumD
+    if (farrayPtr(1) /= sumD) then
+      print *, "result SRCPET#9 mismatch"
       finalrc = ESMF_FAILURE
+    endif
   endif
 !EOC
   
@@ -1339,9 +1394,14 @@ program ESMF_RHandleBitForBitEx
   
 !BOC
   if (localPet == 0) then
-    print *, "result SRCPET#10 = ", farrayPtr(1), " expect: ", sumE
-    if (farrayPtr(1) /= sumE) &
+    print '(A, E16.9, "   0x", Z8)', &
+      "result SRCPET#10 = ", farrayPtr(1), farrayPtr(1)
+    print '(A, E16.9, "   0x", Z8)', &
+      "expected result = ", sumE, sumE
+    if (farrayPtr(1) /= sumE) then
+      print *, "result SRCPET#10 mismatch"
       finalrc = ESMF_FAILURE
+    endif
   endif
 !EOC
   
@@ -1479,8 +1539,12 @@ do i=1,5
       print *, "result SRCPET#11 = ", farrayPtr(1)
     else
       ! do bfb comparison of the result against reference
-      print *, "result SRCPET#11 = ", farrayPtr(1), " expect: ", sumCompare
+      print '(A, E16.9, "   0x", Z8)', &
+        "result SRCPET#11 = ", farrayPtr(1), farrayPtr(1)
+      print '(A, E16.9, "   0x", Z8)', &
+        "expected result = ", sumCompare, sumCompare
       if (farrayPtr(1) /= sumCompare) then
+        print *, "result SRCPET#11 mismatch"
         finalrc = ESMF_FAILURE
         write (msg, *) "Numerical difference detected: ", &
           farrayPtr(1)-sumCompare
@@ -1535,9 +1599,14 @@ enddo
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
   if (localPet == 0) then
-    print *, "result SRCSEQ#3 = ", farrayPtr(1), " expect: ", sumC
-    if (farrayPtr(1) /= sumC) &
+    print '(A, E16.9, "   0x", Z8)', &
+      "result SRCSEQ#3 = ", farrayPtr(1), farrayPtr(1)
+    print '(A, E16.9, "   0x", Z8)', &
+      "expected result = ", sumC, sumC
+    if (farrayPtr(1) /= sumC) then
+      print *, "result SRCSEQ#3 mismatch"
       finalrc = ESMF_FAILURE
+    endif
   endif
 
   call ESMF_ArraySMMRelease(rh, rc=rc)
