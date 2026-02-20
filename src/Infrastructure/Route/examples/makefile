@@ -31,7 +31,7 @@ include $(ESMF_DIR)/makefile
 # Need to use -fp-model=precise for Intel Fortran compiler to ensure bit-for-bit
 ifeq ($(ESMF_COMPILER),intel)
 ESMF_F90COMPILEOPTS += -fp-model=precise
-else ifeq ($(ESMF_COMPILER),intelgcc
+else ifeq ($(ESMF_COMPILER),intelgcc)
 ESMF_F90COMPILEOPTS += -fp-model=precise
 endif
 
