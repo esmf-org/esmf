@@ -291,7 +291,20 @@ int main() {
 	  }
   }
 
-  ESMC_Test((count_def+count_undef == dst_nx*dst_ny), name, failMsg, &result, __FILE__, __LINE__, 0);
+  // Compute global sum of def and undef
+  int local_tot_def=count_def+count_undef;
+  int global_tot_def=0;
+  enum ESMC_TypeKind_Flag reduce_typekind=ESMC_TYPEKIND_I4;
+  enum ESMC_Reduce_Flag reduce_flag=ESMC_REDUCE_SUM;
+  rc=ESMC_VMReduce(vm, &local_tot_def, &global_tot_def, 1, &reduce_typekind, &reduce_flag, 0);
+
+  // Since we don't have reduce all, just check on root (PET 0)
+  int test_correct=1; // test auto correct everywhere, but 0
+  if (localPet == 0) {
+    test_correct=(global_tot_def == dst_nx*dst_ny)?1:0;
+  }
+  
+  ESMC_Test(test_correct, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -337,7 +350,19 @@ int main() {
 		  ++p;
 	  }
   }
-  ESMC_Test((count_def+count_undef == dst_nx*dst_ny), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // Compute global sum of def and undef
+  local_tot_def=count_def+count_undef;
+  global_tot_def=0;
+  rc=ESMC_VMReduce(vm, &local_tot_def, &global_tot_def, 1, &reduce_typekind, &reduce_flag, 0);
+
+  // Since we don't have reduce all, just check on root (PET 0)
+  test_correct=1; // test auto correct everywhere, but 0
+  if (localPet == 0) {
+    test_correct=(global_tot_def == dst_nx*dst_ny)?1:0; // test only correct if sums are the same
+  }
+  
+  ESMC_Test(test_correct, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   // Now test R4
@@ -438,7 +463,19 @@ int main() {
 		  ++p;
 	  }
   }
-  ESMC_Test((count_def+count_undef == dst_nx*dst_ny), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // Compute global sum of def and undef
+  local_tot_def=count_def+count_undef;
+  global_tot_def=0;
+  rc=ESMC_VMReduce(vm, &local_tot_def, &global_tot_def, 1, &reduce_typekind, &reduce_flag, 0);
+
+  // Since we don't have reduce all, just check on root (PET 0)
+  test_correct=1; // test auto correct everywhere, but 0
+  if (localPet == 0) {
+    test_correct=(global_tot_def == dst_nx*dst_ny)?1:0; // test only correct if sums are the same
+  }
+  
+  ESMC_Test(test_correct, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -480,7 +517,19 @@ int main() {
 		  ++p;
 	  }
   }
-  ESMC_Test((count_def+count_undef == dst_nx*dst_ny), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // Compute global sum of def and undef
+  local_tot_def=count_def+count_undef;
+  global_tot_def=0;
+  rc=ESMC_VMReduce(vm, &local_tot_def, &global_tot_def, 1, &reduce_typekind, &reduce_flag, 0);
+
+  // Since we don't have reduce all, just check on root (PET 0)
+  test_correct=1; // test auto correct everywhere, but 0
+  if (localPet == 0) {
+    test_correct=(global_tot_def == dst_nx*dst_ny)?1:0; // test only correct if sums are the same
+  }
+  
+  ESMC_Test(test_correct, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   ESMC_TestEnd(__FILE__, __LINE__, 0);
