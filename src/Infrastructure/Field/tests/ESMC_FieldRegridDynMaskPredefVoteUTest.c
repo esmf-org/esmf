@@ -48,6 +48,7 @@ int main() {
   int dimcount = 2;
   enum ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_SPH_DEG;
   enum ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
+  enum ESMC_IndexFlag indexflag = ESMC_INDEX_GLOBAL;
   int perdim = 1;
   int poledim = 2;
   double srcMaskValue_r8 = 2000.0;
@@ -96,10 +97,11 @@ int main() {
   rc = ESMC_InterArrayIntSet(&i_maxIndex_dst, maxIndex_dst, dimcount);
   if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
     ESMC_FinalizeWithFlag(ESMC_END_ABORT);
-  grid_src = ESMC_GridCreate1PeriDim(&i_maxIndex_src, NULL, &perdim, &poledim, &coordsys, &typekind, NULL, &rc);
+  
+  grid_src = ESMC_GridCreate1PeriDim(&i_maxIndex_src, NULL, &perdim, &poledim, &coordsys, &typekind, &indexflag, &rc);
   if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
     ESMC_FinalizeWithFlag(ESMC_END_ABORT);
-  grid_dst = ESMC_GridCreate1PeriDim(&i_maxIndex_dst, NULL, &perdim, &poledim, &coordsys, &typekind, NULL, &rc);
+  grid_dst = ESMC_GridCreate1PeriDim(&i_maxIndex_dst, NULL, &perdim, &poledim, &coordsys, &typekind, &indexflag, &rc);
   if (ESMC_LogMsgFoundError(rc, "Checking rc", __LINE__, __FILE__, "main()", NULL))
     ESMC_FinalizeWithFlag(ESMC_END_ABORT);
   rc = ESMC_GridAddCoord(grid_src, ESMC_STAGGERLOC_CORNER);
@@ -257,7 +259,20 @@ int main() {
 		  ++p;
 	  }
   }
-  ESMC_Test((count_def == dst_nx*dst_ny), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // Compute global sum of count_def
+  int global_count_def=0;
+  enum ESMC_TypeKind_Flag reduce_typekind=ESMC_TYPEKIND_I4;
+  enum ESMC_Reduce_Flag reduce_flag=ESMC_REDUCE_SUM;
+  rc=ESMC_VMReduce(vm, &count_def, &global_count_def, 1, &reduce_typekind, &reduce_flag, 0);
+
+  // Since we don't have reduce all, just check on root (PET 0)
+  int test_correct=1; // test auto correct everywhere, but 0
+  if (localPet == 0) {
+    test_correct=(global_count_def == dst_nx*dst_ny)?1:0;
+  }
+  
+  ESMC_Test(test_correct, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -301,7 +316,18 @@ int main() {
 		  ++p;
 	  }
   }
-  ESMC_Test((count_def == dst_nx*dst_ny), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // Compute global sum of count_def
+  global_count_def=0;
+  rc=ESMC_VMReduce(vm, &count_def, &global_count_def, 1, &reduce_typekind, &reduce_flag, 0);
+
+  // Since we don't have reduce all, just check on root (PET 0)
+  test_correct=1; // test auto correct everywhere, but 0
+  if (localPet == 0) {
+    test_correct=(global_count_def == dst_nx*dst_ny)?1:0;
+  }
+  
+  ESMC_Test(test_correct, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   // Now test R4
@@ -399,7 +425,18 @@ int main() {
 		  ++p;
 	  }
   }
-  ESMC_Test((count_def == dst_nx*dst_ny), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // Compute global sum of count_def
+  global_count_def=0;
+  rc=ESMC_VMReduce(vm, &count_def, &global_count_def, 1, &reduce_typekind, &reduce_flag, 0);
+
+  // Since we don't have reduce all, just check on root (PET 0)
+  test_correct=1; // test auto correct everywhere, but 0
+  if (localPet == 0) {
+    test_correct=(global_count_def == dst_nx*dst_ny)?1:0;
+  }
+  
+  ESMC_Test(test_correct, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -438,7 +475,18 @@ int main() {
 		  ++p;
 	  }
   }
-  ESMC_Test((count_def == dst_nx*dst_ny), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // Compute global sum of count_def
+  global_count_def=0;
+  rc=ESMC_VMReduce(vm, &count_def, &global_count_def, 1, &reduce_typekind, &reduce_flag, 0);
+
+  // Since we don't have reduce all, just check on root (PET 0)
+  test_correct=1; // test auto correct everywhere, but 0
+  if (localPet == 0) {
+    test_correct=(global_count_def == dst_nx*dst_ny)?1:0;
+  }
+  
+  ESMC_Test(test_correct, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   ESMC_TestEnd(__FILE__, __LINE__, 0);
