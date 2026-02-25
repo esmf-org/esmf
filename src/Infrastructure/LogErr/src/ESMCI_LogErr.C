@@ -342,12 +342,14 @@ int LogErr::Write(
 //EOP
 {
     int rc;
+    const char *msg_c = msg.c_str();
+    int msg_len = msg.length();
 
     // Initialize return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
 
     if (ESMC_LogDefault.logtype == ESMC_LOGKIND_NONE) return ESMF_SUCCESS;
-    FTN_X(f_esmf_logwrite0)(msg.c_str(), &msgtype, &rc, msg.size());
+    FTN_X(f_esmf_logwrite0)(msg_c, &msgtype, &rc, msg_len);
 
     return rc;
 }
@@ -379,13 +381,19 @@ int LogErr::Write(
 //EOP
 {
     int rc;
+    const char *msg_c = msg.c_str();
+    const char *file_c = FILE.c_str();
+    const char *method_c = method.c_str();
+    int msg_len = msg.length();
+    int file_len = FILE.length();
+    int method_len = method.length();
 
     // Initialize return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
 
     if (ESMC_LogDefault.logtype == ESMC_LOGKIND_NONE) return ESMF_SUCCESS;
-    FTN_X(f_esmf_logwrite1)(msg.c_str(), &msgtype, &LINE, FILE.c_str(), method.c_str(), &rc,
-                          msg.length(), FILE.length(), method.length());
+    FTN_X(f_esmf_logwrite1)(msg_c, &msgtype, &LINE, file_c, method_c, &rc,
+      msg_len, file_len, method_len);
 
     return rc;
 }

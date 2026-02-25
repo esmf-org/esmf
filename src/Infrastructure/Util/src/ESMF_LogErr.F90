@@ -2738,7 +2738,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         alog%LOG_ENTRY(index)%lineflag = .FALSE.
         alog%LOG_ENTRY(index)%fileflag = .FALSE.
         if (present(method)) then
-            tmethod=adjustl(method)
+            tmethod=adjustl(trim(method))
             alog%LOG_ENTRY(index)%methodflag=.TRUE.
             alog%LOG_ENTRY(index)%method = tmethod
         endif
@@ -2748,7 +2748,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             alog%LOG_ENTRY(index)%line = tline
         endif
         if (present(file)) then
-            tfile=adjustl(file)
+            tfile=adjustl(trim(file))
             alog%LOG_ENTRY(index)%fileflag = .TRUE.
             alog%LOG_ENTRY(index)%file = tfile
         endif
