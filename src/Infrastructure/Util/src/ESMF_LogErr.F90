@@ -2764,7 +2764,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         alog%LOG_ENTRY(alog%fIndex)%s  = timevals(7)
         alog%LOG_ENTRY(alog%fIndex)%ms = timevals(8)
         indentCount = alog%LOG_ENTRY(index)%indentCount
-        lenTotal = len_trim(msg) + indentCount
+        lenTotal = len(trim(msg)) + indentCount
         allocate (alog%LOG_ENTRY(alog%fIndex)%msg(lenTotal), stat=memstat)
         if (indentCount > 0) then
           ! insert leading white spaces
