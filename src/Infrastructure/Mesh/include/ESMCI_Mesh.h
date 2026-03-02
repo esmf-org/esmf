@@ -103,6 +103,7 @@ void get_elems_sorted_by_id(std::vector<const MeshObj *> &elems) const;
 
 void get_elem_node_counts(std::vector<const MeshObj *> &elems, std::vector<int> &elem_node_counts) const;
 
+void get_elem_nodes(std::vector<const MeshObj *> &elems, std::vector<MeshObj *> &elem_nodes) const;
 
 const CommRel &GetSymNodeRel() const;
 

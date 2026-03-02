@@ -2337,4 +2337,48 @@ void Mesh::get_elem_node_counts(std::vector<const MeshObj *> &elems, std::vector
   }
 
 }
+
+// Takes a vector of elements and makes a corresponding vector of nodes
+// The nodes will be in the order they are in the individual elements
+// (TODO: Think about making another method that returns a vector of vectors of nodes)
+void Mesh::get_elem_nodes(std::vector<const MeshObj *> &elems, std::vector<MeshObj *> &elem_nodes) const {
+  Trace __trace("Mesh::get_elem_node_counts()");
+
+  // Clear the vector
+  elem_nodes.clear();
+
+  // Sum sizes
+  int tot_num_nodes=0;
+  for (const MeshObj *elem: elems) {
+
+    // Get topology of elem                                                               
+   const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
+
+   // Sum size from topo
+   tot_num_nodes += topo->num_nodes;
+  }
+
+  // Reserve space
+  elem_nodes.reserve(tot_num_nodes); 
+
+  // Loop through the vector and add nodes
+  for (const MeshObj *elem: elems) {
+
+    // Get topology of elem                                                               
+   const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
+
+   // Loop through nodes adding to vector
+   for (int n = 0; n<topo->num_nodes; ++n){
+
+    // Get node
+    MeshObj *node = elem->Relations[n].obj;
+
+    // Add node 
+    elem_nodes.push_back(node);
+   }
+  }
+
+}
+
+
 } // namespace

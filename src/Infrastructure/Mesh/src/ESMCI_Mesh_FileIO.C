@@ -231,9 +231,6 @@ void ESMCI_mesh_write_to_ESMFMesh_file(int pioSystemDesc,
     // For now, only support 1 PET
     if (pet_count > 1) Throw() << "Writing to Mesh currently only supported on 1 PET.";
     
-
-    printf("pio_type=%d NETCDF=%d\n",pio_type,PIO_IOTYPE_NETCDF);
-
     
     /// Create new file via PIO
     int pioFileDesc;
@@ -272,17 +269,21 @@ void ESMCI_mesh_write_to_ESMFMesh_file(int pioSystemDesc,
     add_nodeCoords_to_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, 
                                     nodeCountId, coordDimId, nodeCoordsId);
 
+    // Add units to nodeCoords
+    add_var_coord_units_to_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, 
+                                         nodeCoordsId, mesh->coordSys);
 
     // Get elems sorted by id
     std::vector<const MeshObj *> elems;
     mesh->get_elems_sorted_by_id(elems);                                    
 
     // Get elementCount
-    int elementCountId;
     int elementCount=elems.size();
+
+    // Add elementCount to file
+    int elementCountId;
     int elementCountPIO=(PIO_Offset)elementCount;
     add_elementCount_to_ESMFMesh_file(pioFileDesc, filename, elementCountPIO, elementCountId);
-
 
     // Get elem sizes
     std::vector<int> elem_node_counts;
@@ -292,6 +293,23 @@ void ESMCI_mesh_write_to_ESMFMesh_file(int pioSystemDesc,
     int numElementConnId;
     add_numElementConn_to_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, 
                                     elementCountId, numElementConnId);
+
+    // Get element nodes
+    std::vector<MeshObj *> elem_nodes;
+    mesh->get_elem_nodes(elems, elem_nodes);
+
+    // Get total connection count
+    int connectionCount=elem_nodes.size();
+
+    // Add connectionCount to file
+    int connectionCountId;
+    int connectionCountPIO=(PIO_Offset)connectionCount;
+    add_connectionCount_to_ESMFMesh_file(pioFileDesc, filename, connectionCountPIO, connectionCountId);
+
+    // Add elementConn to file
+    int elementConnId;
+    add_elementConn_to_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, connectionCountId, elementConnId);
+
 
     // End defintions 
     piorc = PIOc_enddef(pioFileDesc);
@@ -307,6 +325,19 @@ void ESMCI_mesh_write_to_ESMFMesh_file(int pioSystemDesc,
     // Write numElementConn to file
     write_numElementConn_to_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, 
                                       numElementConnId, elementCountPIO, elem_node_counts.data());
+
+
+   // Figure out elemConn array
+   std::vector<int> elemConn;
+   elemConn.reserve(elem_nodes.size());
+   for (MeshObj *node: elem_nodes) {
+    elemConn.push_back(node->get_id()); // This only works if there aren't gaps in the node ids
+   } 
+
+    // Write elemConn to file
+    write_elementConn_to_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, 
+                                      elementConnId, connectionCountPIO, elemConn.data());
+
 
     //// Close file using PIO
     piorc = PIOc_closefile(pioFileDesc);
@@ -885,8 +916,6 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
     delete [] node_ids;
     delete [] nodeCoords;
     if (nodeMask != NULL) delete [] nodeMask;
-
-
 
     //// Add elements to Mesh and finish it up
 

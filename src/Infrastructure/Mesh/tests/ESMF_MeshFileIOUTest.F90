@@ -8160,6 +8160,17 @@ subroutine  write_sph_3x3_mesh_to_EM_file(correct, rc)
         rc=rc)
    if (rc /= ESMF_SUCCESS) return
    
+
+   ! Read mesh from file that's the same as the one described by info set up above
+   mesh2=ESMF_MeshCreate("test_esmf.nc", &
+        fileformat=ESMF_FILEFORMAT_ESMFMESH, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   
+   !!!! DEBUG
+   call ESMF_MeshWrite(mesh2, "test_esmf2", rc=rc)   
+   if (rc /= ESMF_SUCCESS) return
    
    ! Activate this part once the above is working
    ! NOTE: I wasn't able to test the below, so

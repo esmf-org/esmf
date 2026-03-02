@@ -58,6 +58,8 @@ void get_elementCount_from_ESMFMesh_file(int pioFileDesc, char *filename, PIO_Of
 
 void add_elementCount_to_ESMFMesh_file(int pioFileDesc, char *filename, PIO_Offset elementCount, int &elementCountId);
 
+void add_connectionCount_to_ESMFMesh_file(int pioFileDesc, char *filename, PIO_Offset connectionCount, int &connectionCountId);
+
 void get_nodeCount_from_ESMFMesh_file(int pioFileDesc, char *filename, PIO_Offset &nodeCount);
 
 void add_nodeCount_to_ESMFMesh_file(int pioFileDesc, char *filename, PIO_Offset nodeCount, int &nodeCountId);
@@ -72,6 +74,12 @@ void write_numElementConn_to_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, c
 
 void get_elemConn_info_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char *filename, PIO_Offset elementCount, int num_elem, int *elem_ids, 
                                           int &totNumElementConn, int *&numElementConn, int *&elementConn);
+
+void add_elementConn_to_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char *filename, 
+                                     int connectionCountId, int &elementConnId);                                          
+
+void write_elementConn_to_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char *filename, 
+                                           int elementConnId, PIO_Offset connectionCount, int *elementConn);                                     
 
 void get_nodeCoords_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char *filename, 
                                        PIO_Offset nodeCount, PIO_Offset coordDim, 
