@@ -270,8 +270,8 @@ void ESMCI_mesh_write_to_ESMFMesh_file(int pioSystemDesc,
                                     nodeCountId, coordDimId, nodeCoordsId);
 
     // Add units to nodeCoords
-    add_var_coord_units_to_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, 
-                                         nodeCoordsId, mesh->coordSys);
+    add_coord_var_units_to_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, 
+                                         nodeCoordsId, mesh->coordsys);
 
     // Get elems sorted by id
     std::vector<const MeshObj *> elems;

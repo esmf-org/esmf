@@ -66,6 +66,9 @@ void add_nodeCount_to_ESMFMesh_file(int pioFileDesc, char *filename, PIO_Offset 
 
 void get_coordsys_from_ESMFMesh_file(int pioFileDesc, char *filename, ESMC_CoordSys_Flag &coord_sys);
 
+void add_coord_var_units_to_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char *filename, 
+                                          int coordsVarId, ESMC_CoordSys_Flag coord_sys);
+
 void add_numElementConn_to_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char *filename, 
                                      int elementCountId, int &numElementConnId);
 

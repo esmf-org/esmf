@@ -1067,9 +1067,9 @@ void write_nodeCoords_to_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char 
   
 }
 
-// Add nodeCoords to ESMFMesh format file
-void add_var_coord_units_to_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char *filename, 
-                                          int nodeCoordsId, ESMC_CoordSys_Flag coord_sys) {
+// Add coord units to ESMFMesh format file
+void add_coord_var_units_to_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char *filename, 
+                                          int coordsVarId, ESMC_CoordSys_Flag coord_sys) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "add_var_coord_units_to_ESMFMesh_file()"
 
@@ -1077,14 +1077,25 @@ void add_var_coord_units_to_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, ch
   int localrc;
   int piorc;
 
-/// STOPPED HERE
 
-  /// NEED TO SET THE NAME OF THE UNITS BASED ON THE coord_sys
-
-
+  // Set the units based on the coord_sys
+  const int max_unit_str_len=10;
+  char units_str[max_unit_str_len];
+  if (coord_sys == ESMC_COORDSYS_SPH_DEG) {
+    snprintf(units_str,max_unit_str_len,"degrees");
+  } else if (coord_sys == ESMC_COORDSYS_SPH_RAD) {
+    snprintf(units_str,max_unit_str_len,"radians");
+  } else if (coord_sys == ESMC_COORDSYS_CART) {
+    snprintf(units_str,max_unit_str_len,"km"); // We need a way to remember distance units in the Mesh, but
+                                               // for now just use km."
+  } else {
+    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_UNEXPECTED,
+                                  " unsupported coordinate system for ESMF Mesh output.",
+                                      ESMC_CONTEXT, &localrc)) throw localrc;
+  }
+      
   // Add attribute
-  // THIS MAY BE WRONG, I WAS JUST STARTING TO FILL IT IN WheN diNNER WAS ANNOUNCED...
-//  piorc=PIOc_put_att_text(pioFileDesc, nodeCoordsId, "units", len("degrees"), "degrees");
+  piorc=PIOc_put_att_text(pioFileDesc, coordsVarId, "units", strlen(units_str), units_str);
   if (!CHECKPIOERROR(piorc, std::string("Unable to add nodeCoords to file: ") + filename,
                      ESMF_RC_FILE_WRITE, localrc)) throw localrc;  
     
