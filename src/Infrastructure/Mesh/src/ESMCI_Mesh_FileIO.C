@@ -310,7 +310,9 @@ void ESMCI_mesh_write_to_ESMFMesh_file(int pioSystemDesc,
     int elementConnId;
     add_elementConn_to_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, connectionCountId, elementConnId);
 
-
+    // Add a set of global attributes to file giving version information, etc
+    add_std_global_attr_to_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename);
+    
     // End defintions 
     piorc = PIOc_enddef(pioFileDesc);
     if (!CHECKPIOERROR(piorc, std::string("Unable to open existing file: ") + filename,

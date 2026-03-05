@@ -1096,10 +1096,44 @@ void add_coord_var_units_to_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, ch
       
   // Add attribute
   piorc=PIOc_put_att_text(pioFileDesc, coordsVarId, "units", strlen(units_str), units_str);
-  if (!CHECKPIOERROR(piorc, std::string("Unable to add nodeCoords to file: ") + filename,
+  if (!CHECKPIOERROR(piorc, std::string("Unable to add units attribute to file: ") + filename,
                      ESMF_RC_FILE_WRITE, localrc)) throw localrc;  
     
 }
+
+
+// Add coord units to ESMFMesh format file
+void add_std_global_attr_to_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char *filename) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "add_std_global_attr_to_ESMFMesh_file()"
+
+  // Declare some useful vars
+  int localrc;
+  int piorc;
+
+  // Set version information
+  const int max_attr_str_len=256;
+  char attr_str[max_attr_str_len];
+
+#ifdef ESMF_VERSION_STRING_GIT
+  snprintf(attr_str,max_attr_str_len,"%s",ESMF_VERSION_STRING_GIT);
+#else
+  snprintf(attr_str,max_attr_str_len,"%s","(No version information available.)");
+#endif
+
+  // Output version info
+  piorc=PIOc_put_att_text(pioFileDesc, NC_GLOBAL, "ESMF_VERSION", strlen(attr_str), attr_str);
+  if (!CHECKPIOERROR(piorc, std::string("Unable to global attributes to file: ") + filename,
+                     ESMF_RC_FILE_WRITE, localrc)) throw localrc;
+
+  // Output creation information
+  snprintf(attr_str,max_attr_str_len,"Created by ESMF_MeshWriteToFile()");
+  piorc=PIOc_put_att_text(pioFileDesc, NC_GLOBAL, "Creation_Method", strlen(attr_str), attr_str);
+  if (!CHECKPIOERROR(piorc, std::string("Unable to global attributes to file: ") + filename,
+                     ESMF_RC_FILE_WRITE, localrc)) throw localrc;  
+    
+}
+
 
 
 
