@@ -258,7 +258,8 @@ int main(void){
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, NULL, &rh, 
                              NULL, NULL, NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL, NULL, &unmappedaction,
-                             NULL, NULL, NULL, NULL, NULL, NULL);
+                             NULL, NULL, NULL, NULL, NULL, NULL, 
+                             NULL);
   if (rc != ESMF_SUCCESS) return ESMF_FAILURE;
 
   //----------------------------------------------------------------------------
@@ -277,7 +278,7 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-  rc = ESMC_FieldRegrid(srcfield, dstfield, rh, NULL);
+  rc = ESMC_FieldRegrid(srcfield, dstfield, rh, NULL, NULL);
   if (rc != ESMF_SUCCESS) return ESMF_FAILURE;
   
   //----------------------------------------------------------------------------
@@ -299,7 +300,7 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-  rc = ESMC_FieldRegrid(srcfield, dstfield, rh2, NULL);
+  rc = ESMC_FieldRegrid(srcfield, dstfield, rh2, NULL, NULL);
   if (rc != ESMF_SUCCESS) return ESMF_FAILURE;
   
   //----------------------------------------------------------------------------

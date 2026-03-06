@@ -608,3 +608,14 @@ class UnmappedAction(IntEnum):
     """
     Unmapped points are ignored.
     """
+# PredefinedDynamicMask
+class PredefinedDynamicMask(IntEnum):
+    MASKSRC = 0
+    MASKDEST = 1
+    MASKSRCDEST = 2
+    MASKVOTE = 3
+
+# DynamicMask
+class DynamicMaskPrecision(IntEnum):
+    R4R8R4 = 0
+    R8R8R8 = 1
