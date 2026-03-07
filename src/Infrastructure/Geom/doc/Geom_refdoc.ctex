@@ -64,7 +64,7 @@
 #ifdef STANDALONE
 \input{Geom_options}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Grid/doc/Geom_options}
+\input{../Infrastructure/Geom/doc/Geom_options}
 #endif
 
 %%%  Take this out for now, but if we end up having time then add an example
