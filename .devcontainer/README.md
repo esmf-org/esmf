@@ -49,6 +49,33 @@ docker run -it --rm \
   ghcr.io/esmf-org/esmfdev_ubuntu-25.10_gcc-15_mpich:latest
 ```
 
+## Dev Container Deployment
+
+Use the GitHub Actions workflow
+[`deploy-devcontainers.yml`](../.github/workflows/deploy-devcontainers.yml)
+to build and publish all deployable dev container variants.
+
+### Prerequisites
+
+1. Ensure each variant that should be published has `"deploy": true` in
+  [`variants.json`](variants.json).
+2. For Docker Hub publishing, configure repository settings:
+  - Secret: `DOCKERHUB_TOKEN`
+  - Optional Variables: `DOCKERHUB_ORG`, `DOCKERHUB_USER`
+3. GHCR publishing uses the built-in `GITHUB_TOKEN` and requires package write
+  permission (already configured in the workflow).
+
+### Run the Workflow
+
+1. Open your repository on GitHub.
+2. Navigate to **Actions** → **Deploy Development Containers**.
+3. Click **Run workflow**.
+4. Set inputs:
+  - `latest_tag`: `true` to also publish `:latest`.
+  - `image_tag`: optional custom tag. Leave blank to auto-generate a tag as
+    `<YYYYMMDD>-<short-sha>`.
+5. Start the run.
+
 ## Notes
 
 For background on Docker itself, see the [Docker documentation](https://docs.docker.com/).

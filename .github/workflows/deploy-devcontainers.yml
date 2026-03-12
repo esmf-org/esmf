@@ -1,0 +1,202 @@
+name: Deploy Development Containers
+
+on:
+  workflow_dispatch:
+    inputs:
+      latest_tag:
+        description: latest tag
+        required: true
+        type: boolean
+        default: true
+      image_tag:
+        description: custom tag
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  DEFAULT_ORG: ${{ github.repository_owner }}
+  DEFAULT_USER: ${{ github.repository_owner }}
+  GITHUB_ORG: ${{ github.repository_owner }}
+  GITHUB_USER: ${{ github.repository_owner }}
+  DOCKERHUB_ORG: ${{ vars.DOCKERHUB_ORG || github.repository_owner }}
+  DOCKERHUB_USER: ${{ vars.DOCKERHUB_USER || github.repository_owner }}
+
+jobs:
+  variants-matrix:
+    name: Discover Variants
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      count: ${{ steps.set-matrix.outputs.count }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Discover devcontainers and set matrix
+        id: set-matrix
+        shell: bash
+        env:
+          IMAGE_TAG: ${{ inputs.image_tag }}
+          IMAGE_LATEST: ${{ inputs.latest_tag }}
+          SOURCE_ROOT: ${{ github.server_url }}/${{ github.repository }}/tree/${{ github.sha }}
+          GHCR_ROOT: ${{ github.server_url }}/${{ github.repository }}/pkgs/container
+          DHCR_ROOT: "https://hub.docker.com/u/${{ env.DOCKERHUB_ORG }}"
+        run: |
+          if [[ "${IMAGE_TAG}" == "" ]]; then
+            IMAGE_TAG="$(date +%Y%m%d)-$(git rev-parse --short HEAD)"
+          fi
+          tags_json="$(jq -nc \
+            --arg tag "$IMAGE_TAG" \
+            --argjson latest "${IMAGE_LATEST}" \
+            '[ $tag ] + (if $latest then ["latest"] end)')"
+          matrix_json="$(jq -c \
+            --arg source "${SOURCE_ROOT}" \
+            --arg dfltorg "${DEFAULT_ORG}" \
+            --arg ghorg "${GITHUB_ORG}" \
+            --arg dhorg "${DOCKERHUB_ORG}" \
+            --arg ghcr "${GHCR_ROOT}" \
+            --arg dhcr "${DHCR_ROOT}" \
+            --arg created "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+            --arg revision "$(git rev-parse HEAD)" \
+            --argjson tags "${tags_json}" \
+            '[.variants[] as $v | select(($v.deploy // false) == true) | $v
+                + {tags:
+                    [ $v.registries[] as $r | $tags[] as $t |
+                      ( $r + "/"
+                        + ( if $r == "docker.io" then $dhorg
+                            elif $r == "ghcr.io" then $ghorg
+                            else $dfltorg end )
+                        + "/" + $v.title + ":" + $t
+                      )
+                    ]
+                  }
+                + {source: "\($source)/\($v.context)"}
+                + {url:
+                    ( ( if ($v.registries | index("ghcr.io")) then $ghcr
+                        elif ($v.registries | index("docker.io")) then $dhcr
+                        else "__UNKNOWN_REGISTRY_URL__" end )
+                      + "/" + $v.title
+                    )
+                  }
+                + {created: "\($created)"}
+                + {revision: "\($revision)"}
+            ]' \
+            .devcontainer/variants.json)"
+          count="$(echo $matrix_json | jq 'length')"
+          if [[ "$count" -lt "1" ]]; then
+            echo "No variants found for deployment" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Discovered ${count} variant(s) for deployment" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "Deployment matrix:"
+          echo "$matrix_json" | jq .
+          echo "matrix=${matrix_json}" >> "$GITHUB_OUTPUT"
+          echo "count=${count}" >> "$GITHUB_OUTPUT"
+
+  build-and-deploy:
+    if: ${{ needs.variants-matrix.outputs.count > '0' }}
+    name: Deploy ${{ matrix.variant.title }}
+    runs-on: ubuntu-latest
+    needs: variants-matrix
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: ${{ fromJson(needs.variants-matrix.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Check Registries
+        env:
+          VARIANT_REGISTRIES: ${{ toJson(matrix.variant.registries) }}
+          KNOWN_REGISTRIES: '["ghcr.io","docker.io"]'
+        run: |
+          unknown=$(jq -cn \
+            --argjson known "${KNOWN_REGISTRIES}" \
+            --argjson variant "${VARIANT_REGISTRIES}" \
+            '($variant - $known)')
+          if [[ "$unknown" != "[]" ]]; then
+            echo "::error::Unknown registry listed - ${unknown}" \
+              "Known registries are: ${KNOWN_REGISTRIES}"
+            exit 1
+          fi
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        if: ${{ contains(matrix.variant.registries, 'ghcr.io') }}
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        if: ${{ contains(matrix.variant.registries, 'docker.io') }}
+        with:
+          registry: docker.io
+          username: ${{ env.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          scope: "${{ env.DOCKERHUB_ORG }}/${{ matrix.variant.title }}@push"
+
+      - name: Summarize Image Metadata
+        id: image-meta
+        shell: bash
+        env:
+          TITLE: ${{ matrix.variant.title }}
+          DESC: ${{ matrix.variant.description }}
+          CONTEXT: ${{ matrix.variant.context }}
+          FILE: ${{ matrix.variant.file }}
+          TAGS: ${{ join(matrix.variant.tags, '<br>') }}
+          PLATFORMS: ${{ join(matrix.variant.platforms, '<br>') }}
+          SOURCE: ${{ matrix.variant.source }}
+          URL: ${{ matrix.variant.url }}
+          CREATED: ${{ matrix.variant.created }}
+          REVISION: ${{ matrix.variant.revision }}
+        run: |
+          echo "## Image Build Spec" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Field | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Title | ${TITLE} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Desc | ${DESC} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Context | ${CONTEXT} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| File | ${FILE} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Tags | ${TAGS} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Platforms | ${PLATFORMS} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Source | ${SOURCE} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| URL | ${URL} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Created | ${CREATED} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Revision | ${REVISION} |" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Build and Deploy devcontainer
+        uses: docker/build-push-action@v7
+        env:
+          BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+        with:
+          context: ${{ matrix.variant.context }}
+          file: ${{ matrix.variant.context }}/${{ matrix.variant.file }}
+          platforms: ${{ join(matrix.variant.platforms, ',') }}
+          tags: ${{ join(matrix.variant.tags, ',') }}
+          annotations: |
+            index:org.opencontainers.image.version=${{ matrix.variant.version }}
+            index:org.opencontainers.image.vendor=${{ matrix.variant.vendor }}
+            index:org.opencontainers.image.title=${{ matrix.variant.title }}
+            index:org.opencontainers.image.description=${{ matrix.variant.description }}
+            index:org.opencontainers.image.authors=${{ matrix.variant.authors }}
+          build-args: |
+            VERSION=${{ matrix.variant.version }}
+            VENDOR=${{ matrix.variant.vendor }}
+            TITLE=${{ matrix.variant.title }}
+            DESCRIPTION=${{ matrix.variant.description }}
+            AUTHORS=${{ matrix.variant.authors }}
+          push: true
