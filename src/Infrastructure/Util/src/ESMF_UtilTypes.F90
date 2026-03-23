@@ -751,7 +751,8 @@
            ESMF_REGRIDMETHOD_CONSERVE    = ESMF_RegridMethod_Flag(2), &
            ESMF_REGRIDMETHOD_NEAREST_STOD  = ESMF_RegridMethod_Flag(3), &
            ESMF_REGRIDMETHOD_NEAREST_DTOS  = ESMF_RegridMethod_Flag(4), &
-           ESMF_REGRIDMETHOD_CONSERVE_2ND  = ESMF_RegridMethod_Flag(5)
+           ESMF_REGRIDMETHOD_CONSERVE_2ND  = ESMF_RegridMethod_Flag(5), &
+           ESMF_REGRIDMETHOD_BINNING     = ESMF_RegridMethod_Flag(6)
 
 
 !------------------------------------------------------------------------------
@@ -1151,7 +1152,8 @@
              ESMF_REGRIDMETHOD_CONSERVE, &
              ESMF_REGRIDMETHOD_NEAREST_STOD, &
              ESMF_REGRIDMETHOD_NEAREST_DTOS, &
-             ESMF_REGRIDMETHOD_CONSERVE_2ND
+             ESMF_REGRIDMETHOD_CONSERVE_2ND, &
+             ESMF_REGRIDMETHOD_BINNING
 
       public ESMF_ExtrapMethod_Flag, &
              ESMF_EXTRAPMETHOD_NONE, & 
