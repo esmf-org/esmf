@@ -1240,6 +1240,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
+        else if (lregridmethod .eq. ESMF_REGRIDMETHOD_BINNING) then
+
+           ! Get src PointList with points on Field location
+           call getPointListOnFieldLoc(srcField, srcMaskValues, addOrigCoordsToPointList, &
+                srcCreatedTmpPointList, srcPointlist, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
+           ! Record that we are using a pointlist
+           srcUsingPointList=.true.
+           
+           ! Get dst Mesh with corners around Field on centers
+           call getMeshOnCornersWFieldOnCenter(dstField, dstMaskValues, &
+                dstCreatedTmpMesh, dstMesh, dstTurnedOnMeshElemMask, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
+           !!!!! STOPPED HERE !!!
+           
         else
            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                 msg=" Unrecognized regridmethod.", & 
