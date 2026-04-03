@@ -2898,6 +2898,8 @@ static void _check_mesh(Mesh &mesh, const char *name) {
 
 }
 
+
+// Create Rendezvous geometries and do search
 Interp::Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *dstplist, Mesh *midmesh,
                bool freeze_src_, int imethod,
                bool set_dst_status, WMat &dst_status,

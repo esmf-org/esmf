@@ -185,6 +185,15 @@ void ESMCI_regrid_create(
       }
     }
 
+    // extrapolation not supported with binning regridding
+    if (*extrapMethod != ESMC_EXTRAPMETHOD_NONE) {
+      if ((*regridMethod==ESMC_REGRID_METHOD_BINNING)) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                         "Extrapolation is not currently supported with binning regridding.",
+             ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+    }
+    
 
     // Conservative not supported on 3D spherical meshes
     if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
@@ -263,7 +272,7 @@ void ESMCI_regrid_create(
           (*regridMethod==ESMC_REGRID_METHOD_PATCH)) {
         degenerate=any_cells_in_mesh_degenerate(srcmesh);
       }
-
+      
       // Degenerate
       if (degenerate) {
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -274,7 +283,8 @@ void ESMCI_regrid_create(
       // Only check dst mesh elements for conservative because for others just nodes are used and it doesn't
       // matter what the cell looks like
       if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
-          (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
+          (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND) ||
+          (*regridMethod==ESMC_REGRID_METHOD_BINNING)) {
         // Check mesh elements
         degenerate=any_cells_in_mesh_degenerate(dstmesh);
 
@@ -332,7 +342,7 @@ void ESMCI_regrid_create(
     VM::logMemInfo(std::string("RegridCreate2.0"));
 #endif
 
-    // Compute Weights matrix
+    // Compute Weight matrix
     IWeights *wts = new IWeights;
 
     // Turn off unmapped action checking in regrid because it's local to a proc, and can therefore
@@ -346,6 +356,11 @@ void ESMCI_regrid_create(
     }
     WMat dst_status;
 
+    // Debug output
+    if (*regridMethod == ESMC_REGRID_METHOD_BINNING) {
+      printf("In regridcreate for Binning regridding\n");
+    }
+    
     ESMCI_REGRID_TRACE_ENTER("NativeMesh Weight Generation");
 
     // to do NEARESTDTOS just do NEARESTSTOD and invert results

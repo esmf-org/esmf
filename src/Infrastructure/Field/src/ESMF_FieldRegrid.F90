@@ -1017,6 +1017,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            endif
         endif
 
+        ! Can't use extrapolation with binning right now
+        if (lregridmethod .eq. ESMF_REGRIDMETHOD_BINNING) then 
+           if (localExtrapMethod .ne. ESMF_EXTRAPMETHOD_NONE) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                   msg=" extrapolation is currently not supported with the binning regrid method.", &
+                   ESMF_CONTEXT, rcToReturn=rc) 
+              return
+           endif
+        endif
+
+        
         ! Error check regridPoleNPnts        
         if (localpolemethod .eq. ESMF_POLEMETHOD_NPNTAVG) then
            if (.not. present(regridPoleNPnts)) then
@@ -1242,6 +1253,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         else if (lregridmethod .eq. ESMF_REGRIDMETHOD_BINNING) then
 
+           write(*,*) "In FRS() for BINNING"
+
+           
            ! Get src PointList with points on Field location
            call getPointListOnFieldLoc(srcField, srcMaskValues, addOrigCoordsToPointList, &
                 srcCreatedTmpPointList, srcPointlist, rc=localrc)

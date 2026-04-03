@@ -114,15 +114,13 @@ contains
   integer :: lDE, srclocalDECount, dstlocalDECount
   real(ESMF_KIND_R8) :: coord(2),x,y,z
   character(len=ESMF_MAXSTR) :: string
-  integer src_tile_size, dst_nx, dst_ny
+  integer src_nx, src_ny, dst_nx, dst_ny
   real(ESMF_KIND_R8) :: lon, lat, theta, phi, relErr
   real(ESMF_KIND_R8) :: coords(2), maxRelErr
+  real(ESMF_KIND_R8),parameter :: DEG2RAD = 3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8
   integer :: localPet, petCount
-  real(ESMF_KIND_R8), parameter ::  DEG2RAD = &
-                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8
-  integer :: decomptile(2,6)
-  integer :: countsPerDEDim1(3,6), countsPerDEDim2(2,6)
   integer :: i
+
 
   ! init success flag
   correct=.true.
@@ -135,37 +133,20 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-  ! Establish the resolution of the grids
-  src_tile_size=20
-
-  dst_nx = 47
-  dst_ny = 47
-
-  
-    ! Set up decomposition for src Grid
-    decomptile(:,1)=(/2,2/)
-    decomptile(:,2)=(/2,2/)
-    decomptile(:,3)=(/2,2/)
-    decomptile(:,4)=(/2,2/)
-    decomptile(:,5)=(/2,2/)
-    decomptile(:,6)=(/2,2/)
-
-    ! Create Src Grid
-    srcGrid=ESMF_GridCreateCubedSphere(tileSize=src_tile_size, &
-       regDecompPTile=decomptile, &
-       staggerLocList = (/ESMF_STAGGERLOC_CORNER, ESMF_STAGGERLOC_CENTER/), &
-       indexflag = ESMF_INDEX_GLOBAL, &
-       rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
+  if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
+  
+  ! Establish the resolution of the grids
+  src_nx=180
+  src_ny=90
 
-  ! Create Dst Grid
-  dstGrid=ESMF_GridCreate1PeriDimUfrm(maxIndex=(/dst_nx,dst_ny/), &
+  dst_nx=src_nx
+  dst_ny=src_ny
+       
+
+  ! Create source Grid
+  srcGrid=ESMF_GridCreate1PeriDimUfrm(maxIndex=(/src_nx,src_ny/), &
        minCornerCoord=(/0.0_ESMF_KIND_R8,-90.0_ESMF_KIND_R8/), &
        maxCornerCoord=(/360.0_ESMF_KIND_R8,90.0_ESMF_KIND_R8/), &
        staggerLocList=(/ESMF_STAGGERLOC_CENTER/), &
@@ -174,8 +155,7 @@ contains
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
-
-  ! Create source/destination fields
+  ! Create source field
    srcField = ESMF_FieldCreate(srcGrid, typekind=ESMF_TYPEKIND_R8, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
    if (ESMF_LogFoundError(localrc, &
@@ -183,24 +163,37 @@ contains
         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
+  
+  ! Create Dst Grid
+  dstGrid=ESMF_GridCreate1PeriDimUfrm(maxIndex=(/dst_nx,dst_ny/), &
+       minCornerCoord=(/0.0_ESMF_KIND_R8,-90.0_ESMF_KIND_R8/), &
+       maxCornerCoord=(/360.0_ESMF_KIND_R8,90.0_ESMF_KIND_R8/), &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER,ESMF_STAGGERLOC_CORNER/), &
+       rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  
+  ! Create destination fields
    dstField = ESMF_FieldCreate(dstGrid, typekind=ESMF_TYPEKIND_R8, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-  xdstField = ESMF_FieldCreate(dstGrid, typekind=ESMF_TYPEKIND_R8, &
-                         staggerloc=ESMF_STAGGERLOC_CENTER, name="xdest", rc=localrc)
+   xdstField = ESMF_FieldCreate(dstGrid, typekind=ESMF_TYPEKIND_R8, &
+        staggerloc=ESMF_STAGGERLOC_CENTER, name="xdest", rc=localrc)
+   if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+   
+   errField = ESMF_FieldCreate(dstGrid, typekind=ESMF_TYPEKIND_R8, &
+        staggerloc=ESMF_STAGGERLOC_CENTER, name="xdest", rc=localrc)
    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-
-  errField = ESMF_FieldCreate(dstGrid, typekind=ESMF_TYPEKIND_R8, &
-                         staggerloc=ESMF_STAGGERLOC_CENTER, name="xdest", rc=localrc)
-   if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Get arrays
   ! dstArray
@@ -236,8 +229,7 @@ contains
         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-  ! Construct Src Grid
-  ! (Get memory and set coords for src)
+  ! Construct Src Field
   do lDE=0,srclocalDECount-1
 
      ! get src pointer
@@ -354,7 +346,7 @@ contains
           dstField=dstField, &
           routeHandle=routeHandle, &
           unmappedAction=ESMF_UNMAPPEDACTION_ERROR, &
-          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
+          regridmethod=ESMF_REGRIDMETHOD_BINNING, &
           rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
