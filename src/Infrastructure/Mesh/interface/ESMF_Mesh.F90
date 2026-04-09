@@ -131,10 +131,10 @@ module ESMF_MeshMod
   end type
 
   type(ESMF_MeshLoc), parameter :: &
-        ESMF_MESHLOC_NODE = ESMF_MeshLoc(0), &
-        ESMF_MESHLOC_ELEMENT = ESMF_MeshLoc(1), &
-        ESMF_MESHLOC_NONE = ESMF_MeshLoc(2)
-
+       ESMF_MESHLOC_NONE = ESMF_MeshLoc(0), &
+       ESMF_MESHLOC_NODE = ESMF_MeshLoc(1), &
+       ESMF_MESHLOC_EDGE = ESMF_MeshLoc(2), &
+       ESMF_MESHLOC_ELEMENT = ESMF_MeshLoc(3)
 
 
 !------------------------------------------------------------------------------
@@ -148,7 +148,7 @@ module ESMF_MeshMod
   public ESMF_MESHELEMTYPE_QUAD, ESMF_MESHELEMTYPE_TRI, &
           ESMF_MESHELEMTYPE_HEX, ESMF_MESHELEMTYPE_TETRA
   public ESMF_MeshLoc
-  public ESMF_MESHLOC_NODE, ESMF_MESHLOC_ELEMENT
+  public ESMF_MESHLOC_NODE, ESMF_MESHLOC_EDGE, ESMF_MESHLOC_ELEMENT
   public ESMF_MeshStatus_Flag
   public ESMF_MESHSTATUS_UNINIT, &
        ESMF_MESHSTATUS_STRUCTCREATED, &
