@@ -96,78 +96,34 @@ RUN <<SPACK_PKG_CONFIG
     SPACK_PKGS="$(
       spack find --show-configured-externals --format '{name}@{version}'
     )"
-    # Extract versions for apt packages
-    gcc_version="$(gcc -dumpfullversion -dumpversion)"
-    cmake_version="$(cmake --version | head -n1 | awk '{ print $3 }')"
-    mpich_version="$(
-      mpichversion | awk -F': *' \
-        '/^[[:space:]]*MPICH Version:/ { print $2; exit }'
-    )"
-    hdf5_version="$(
-      h5cc -showconfig | awk -F': *' \
-        '/^[[:space:]]*HDF5 Version:/ { print $2; exit }'
-    )"
-    netcdf_c_version="$(nc-config --version | awk '{ print $2 }')"
-    netcdf_fortran_version="$(nf-config --version | awk '{ print $2 }')"
-    python_version="$(python3 --version | awk '{ print $2 }')"
-    pip_version="$(pip3 --version | awk '{ print $2 }')"
-    pyyaml_version="$(python3 -c 'import yaml; print(yaml.__version__)')"
     # Add apt package configuration to spack if missing
-    check_package() {
-      local pkg_ver="$1" # package@version
+    add_ext_package() {
+      apt="$1" # apt package name
+      spk="$2" # spack package name
+      pfx="$3" # install prefix
+      ver=$(dpkg-query -W -f='${Version}' "${apt}") || return 1
+      if printf '%s\n' "$ver" | grep -q 'really'; then
+        ver=$(printf '%s\n' "$ver" | sed -E 's/.*really([^+-]+).*/\1/')
+      else
+        ver=$(printf '%s\n' "$ver" | sed -E 's/^[0-9]*://; s/[+-].*//')
+      fi
+      spec="${spk}@${ver}"
       if ! printf '%s\n' "$SPACK_PKGS" | \
-          grep -Fqx "${pkg_ver}"; then
-        return 1
+          grep -Fqx "${spec}"; then
+        spack config add \
+          "packages:${spk}:externals:[{'spec': '${spec}', 'prefix': '${pfx}'}]"
       fi
       return 0
     }
-    add_ext_package() {
-      local pkg="$1" # package
-      local spc="$2" # spec
-      local pfx="$3" # prefix
-      spack config add \
-        "packages:${pkg}:externals:[{'spec': '${spc}', 'prefix': '${pfx}'}]"
-    }
-    if ! check_package "cmake@${cmake_version}"; then
-      add_ext_package cmake \
-        "cmake@${cmake_version}%gcc@${gcc_version}" \
-        "/usr"
-    fi
-    if ! check_package "mpich@${mpich_version}"; then
-      add_ext_package mpich \
-        "mpich@${mpich_version}%gcc@${gcc_version}" \
-        "/usr"
-    fi
-    if ! check_package "hdf5@${hdf5_version}"; then
-      add_ext_package hdf5 \
-        "hdf5@${hdf5_version}%gcc@${gcc_version}" \
-        "/usr"
-    fi
-    if ! check_package "netcdf-c@${netcdf_c_version}"; then
-      add_ext_package netcdf-c \
-        "netcdf-c@${netcdf_c_version}%gcc@${gcc_version}" \
-        "/usr"
-    fi
-    if ! check_package "netcdf-fortran@${netcdf_fortran_version}"; then
-      add_ext_package netcdf-fortran \
-        "netcdf-fortran@${netcdf_fortran_version}%gcc@${gcc_version}" \
-        "/usr"
-    fi
-    if ! check_package "python@${python_version}"; then
-      add_ext_package python \
-        "python@${python_version}" \
-        "/usr"
-    fi
-    if ! check_package "py-pip@${pip_version}"; then
-      add_ext_package py-pip \
-        "py-pip@${pip_version} ^python@${python_version}" \
-        "/usr"
-    fi
-    if ! check_package "py-pyyaml@${pyyaml_version}"; then
-      add_ext_package py-pyyaml \
-        "py-pyyaml@${pyyaml_version}+libyaml ^python@${python_version}" \
-        "/usr"
-    fi
+    add_ext_package "gcc-15" "gcc" "/usr" || exit 1
+    add_ext_package "cmake" "cmake" "/usr" || exit 1
+    add_ext_package "libmpich-dev" "mpich" "/usr" || exit 1
+    add_ext_package "libhdf5-dev" "hdf5" "/usr" || exit 1
+    add_ext_package "libnetcdf-dev" "netcdf-c" "/usr" || exit 1
+    add_ext_package "libnetcdff-dev" "netcdf-fortran" "/usr" || exit 1
+    add_ext_package "python3" "python" "/usr" || exit 1
+    add_ext_package "python3-pip" "py-pip" "/usr" || exit 1
+    add_ext_package "python3-yaml" "py-pyyaml" "/usr" || exit 1
     spack clean --all
 SPACK_PKG_CONFIG
 
