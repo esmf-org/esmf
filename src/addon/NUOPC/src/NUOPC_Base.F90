@@ -843,7 +843,8 @@ module NUOPC_Base
     ! local variables
     type(ESMF_Time)           :: checkCurrTime, setCurrTime, actCurrTime
     type(ESMF_Time)           :: stopTime, startTime
-    type(ESMF_TimeInterval)   :: timeStepCheck, timeStep, runDuration
+    type(ESMF_TimeInterval)   :: timeStepCheck, timeStep
+    type(ESMF_TimeInterval)   :: runDuration, zeroDuration
     integer                   :: aSec, bSec
     type(ESMF_Direction_Flag) :: direction
     character(len=160)        :: msgString
@@ -873,8 +874,16 @@ module NUOPC_Base
       endif
     endif
 
-    call ESMF_ClockGet(setClock, currTime=setCurrTime, timeStep=timeStep, &
-      runDuration=runDuration, rc=localrc)
+    call ESMF_ClockGet(setClock, currTime=setCurrTime, stopTime=stopTime, &
+      timeStep=timeStep, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+
+    ! Need zeroDuration for comparison
+    call ESMF_TimeIntervalSet(zeroDuration, s=0, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
@@ -882,7 +891,11 @@ module NUOPC_Base
       return  ! bail out
 
     ! Make sure to use the correct runDuration
-    if (runDuration > timeStepCheck) runDuration = timeStepCheck
+    runDuration = stopTime - setCurrTime  ! duration to reach setClock stopTime
+    if (runDuration == zeroDuration .or. runDuration > timeStepCheck) then
+      ! use one timeStep on the checkClock to step forward
+      runDuration = timeStepCheck
+    endif
 
     ! deal with optional arguments
     if (present(currTime)) checkCurrTime = currTime
