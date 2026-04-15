@@ -146,14 +146,12 @@ def grid_create_uneven_from_bounds_periodic(nlon, nlat, corners=False, domask=Fa
     """
     [lon, lat] = [0, 1]
 
-    print("bmaaaaaaaaaaaaaaa")
     # Create arrays of center and corner values to emulate what would be read from a standard CF-like file
     # +1 because corners have one more than center
     lons = np.linspace(-180, 180, nlon + 1)
     loncorner = np.array([lons[0:-1], lons[1::]]).T
     dx4 = (loncorner[0,1] - loncorner[0,0])/4.0
     for i in range(len(loncorner)):
-        print(loncorner[i,0],loncorner[i,1])
         if i%2 == 0:
            loncorner[i,1] = loncorner[i,1]-dx4 
         elif i%2 == 1:
