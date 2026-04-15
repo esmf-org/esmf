@@ -610,8 +610,8 @@ class UnmappedAction(IntEnum):
     """
 # PredefinedDynamicMask
 class PredefinedDynamicMask(IntEnum):
-    MASKSRC = 0
-    MASKDEST = 1
+    MASKDEST = 0
+    MASKSRC = 1
     MASKSRCDEST = 2
     MASKVOTE = 3
 
