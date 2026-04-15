@@ -12,7 +12,7 @@ Dev containers provide a reproducible environment with the compilers, MPI librar
 
 ## Available Dev Containers
 
-Container directories are named as `<os>_<compiler>_<mpi>` so additional variants can be added without changing the layout of this directory. Configuration information for each variant (title, description, registries, platforms, etc.) is stored in [`variants.json`](variants.json).
+Configuration information for each variant (title, description, registries, platforms, etc.) is stored in [`variants.json`](variants.json).
 
 | Variant | Summary |
 |---------|---------|
@@ -44,8 +44,8 @@ To work on local source code inside the container, mount your checkout:
 
 ```bash
 docker run -it --rm \
-  -v "$(pwd)":/home/esmf-dev/esmf \
-  -w /home/esmf-dev/esmf \
+  -v "$(pwd)":/home/esmfdev/esmf \
+  -w /home/esmfdev/esmf \
   ghcr.io/esmf-org/esmfdev_ubuntu-25.10_gcc-15_mpich:latest
 ```
 
@@ -71,9 +71,13 @@ to build and publish all deployable dev container variants.
 2. Navigate to **Actions** → **Deploy Development Containers**.
 3. Click **Run workflow**.
 4. Set inputs:
-  - `latest_tag`: `true` to also publish `:latest`.
+  - `filter`: optional regex to match variant titles from `variants.json`. Leave
+    blank to include all deployable variants.
   - `image_tag`: optional custom tag. Leave blank to auto-generate a tag as
     `<YYYYMMDD>-<short-sha>`.
+  - `latest_tag`: `true` to also publish `:latest`.
+  - `test`: `true` (recommended) to run container build tests before deploy.
+  - `deploy`: `true` to publish images. Set to `false` for test-only runs.
 5. Start the run.
 
 ## Notes
