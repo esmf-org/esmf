@@ -48,6 +48,13 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V
 ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -V
 
 ############################################################
+# Special optimization flags
+#
+# Prevent speculative execution of floating-point operations
+# that could trigger a hardware exception (safe for -fpe0)
+ESMF_OPTFLAG_O          += -fp-speculation=safe
+
+############################################################
 # Special debug flags
 #
 ESMF_F90OPTFLAG_G       += -traceback -check arg_temp_created,bounds,format,output_conversion,stack

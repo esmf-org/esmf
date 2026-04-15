@@ -93,6 +93,13 @@ ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -V -v -c
 ESMF_CXXMAJORVERSION        = $(shell $(ESMF_DIR)/scripts/version.intel 1 ${ESMF_CXXCOMPILER} -V)
 
 ############################################################
+# Special optimization flags
+#
+# Prevent speculative execution of floating-point operations
+# that could trigger a hardware exception (safe for -fpe0)
+ESMF_CXXOPTFLAG_O       += -fp-speculation=safe
+
+############################################################
 # Special debug flags
 #
 ESMF_CXXOPTFLAG_G       += -traceback
