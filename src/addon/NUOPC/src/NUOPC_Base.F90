@@ -892,7 +892,7 @@ module NUOPC_Base
 
     ! Make sure to use the correct runDuration
     runDuration = stopTime - setCurrTime  ! duration to reach setClock stopTime
-    if (runDuration == zeroDuration .or. runDuration > timeStepCheck) then
+    if (runDuration <= zeroDuration .or. runDuration > timeStepCheck) then
       ! use one timeStep on the checkClock to step forward
       runDuration = timeStepCheck
     endif
