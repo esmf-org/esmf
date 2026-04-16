@@ -1,0 +1,342 @@
+name: Deploy Development Containers
+
+on:
+  workflow_dispatch:
+    inputs:
+      filter:
+        description: variant filter
+        required: false
+        type: string
+        default: ""
+      image_tag:
+        description: custom tag
+        required: false
+        type: string
+        default: ""
+      latest_tag:
+        description: latest tag
+        required: true
+        type: boolean
+        default: true
+      test:
+        description: run tests
+        required: true
+        type: boolean
+        default: true
+      deploy:
+        description: deploy images
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  DEFAULT_ORG: ${{ github.repository_owner }}
+  DEFAULT_USER: ${{ github.repository_owner }}
+  GITHUB_ORG: ${{ github.repository_owner }}
+  GITHUB_USER: ${{ github.repository_owner }}
+  DOCKERHUB_ORG: ${{ vars.DOCKERHUB_ORG || github.repository_owner }}
+  DOCKERHUB_USER: ${{ vars.DOCKERHUB_USER || github.repository_owner }}
+
+jobs:
+  variants-matrix:
+    name: Discover Variants
+    runs-on: ubuntu-latest
+    outputs:
+      build_matrix: ${{ steps.set-matrix.outputs.build_matrix }}
+      deploy_matrix: ${{ steps.set-matrix.outputs.deploy_matrix }}
+      count: ${{ steps.set-matrix.outputs.count }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Discover devcontainers and set matrix
+        id: set-matrix
+        shell: bash
+        env:
+          IMAGE_TAG: ${{ inputs.image_tag }}
+          IMAGE_LATEST: ${{ inputs.latest_tag }}
+          VARIANT_FILTER: ${{ inputs.filter }}
+          SOURCE_ROOT: ${{ github.server_url }}/${{ github.repository }}/tree/${{ github.sha }}
+          GHCR_ROOT: ${{ github.server_url }}/${{ github.repository }}/pkgs/container
+          DHCR_ROOT: "https://hub.docker.com/u/${{ env.DOCKERHUB_ORG }}"
+        run: |
+          if [[ "${IMAGE_TAG}" == "" ]]; then
+            IMAGE_TAG="$(date +%Y%m%d)-$(git rev-parse --short HEAD)"
+          fi
+          tags_json="$(jq -nc \
+            --arg tag "$IMAGE_TAG" \
+            --argjson latest "${IMAGE_LATEST}" \
+            '[ $tag ] + (if $latest then ["latest"] end)')"
+          deploy_matrix_json="$(jq -c \
+            --arg filter "${VARIANT_FILTER}" \
+            --arg source "${SOURCE_ROOT}" \
+            --arg dfltorg "${DEFAULT_ORG}" \
+            --arg ghorg "${GITHUB_ORG}" \
+            --arg dhorg "${DOCKERHUB_ORG}" \
+            --arg ghcr "${GHCR_ROOT}" \
+            --arg dhcr "${DHCR_ROOT}" \
+            --arg created "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+            --arg revision "$(git rev-parse HEAD)" \
+            --argjson tags "${tags_json}" \
+            '[.variants[] as $v | select(($v.deploy // false) == true)
+              | select($filter == "" or ($v.title | test($filter))) | $v
+                + {tags:
+                    [ $v.registries[] as $r | $tags[] as $t |
+                      ( $r + "/"
+                        + ( if $r == "docker.io" then $dhorg
+                            elif $r == "ghcr.io" then $ghorg
+                            else $dfltorg end )
+                        + "/" + $v.title + ":" + $t
+                      )
+                    ]
+                  }
+                + {source: "\($source)/\($v.context)"}
+                + {url:
+                    ( ( if ($v.registries | index("ghcr.io")) then $ghcr
+                        elif ($v.registries | index("docker.io")) then $dhcr
+                        else "__UNKNOWN_REGISTRY_URL__" end )
+                      + "/" + $v.title
+                    )
+                  }
+                + {created: "\($created)"}
+                + {revision: "\($revision)"}
+                + {build_args: [
+                      "VERSION=\($v.version)",
+                      "VENDOR=\($v.vendor)",
+                      "TITLE=\($v.title)",
+                      "DESCRIPTION=\($v.description)",
+                      "AUTHORS=\($v.authors)"
+                    ]
+                  }
+                + {annotations:
+                    ( ( if ($v.platforms | length > 1) then "index"
+                        else "manifest" end ) as $pfx
+                    | [
+                        "\($pfx):org.opencontainers.image.version=\($v.version)",
+                        "\($pfx):org.opencontainers.image.vendor=\($v.vendor)",
+                        "\($pfx):org.opencontainers.image.title=\($v.title)",
+                        "\($pfx):org.opencontainers.image.description=\($v.description)",
+                        "\($pfx):org.opencontainers.image.authors=\($v.authors)"
+                      ]
+                    )
+                  }
+            ]' \
+            .devcontainer/variants.json)"
+          echo "::warning::Only amd64 platforms are tested. Non-amd64" \
+            "platforms (including arm64) are built using QEMU emulation and" \
+            "are not tested. If support for Docker on macos runners becomes" \
+            "available then testing can be added for arm64 variants."
+          build_matrix_json="$(echo "$deploy_matrix_json" | jq -c '
+            [ .[] | . as $v | $v.platforms[] as $p | $v
+              + {platform: $p}
+              + {cacheid: ($p | gsub("/"; "-"))}
+              + {runner: (if ($p | test("amd64")) then "ubuntu-latest"
+                          elif ($p | test("arm64")) then "ubuntu-latest"
+                          else "ubuntu-latest" end)}
+              + {test: (if ($p | test("amd64")) then true
+                        elif ($p | test("arm64")) then false
+                        else false end)}
+            ]')"
+          count="$(echo $deploy_matrix_json | jq 'length')"
+          if [[ "$count" -lt "1" ]]; then
+            echo "No variants found" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Discovered ${count} variant(s)" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "## Build matrix"
+          echo "$build_matrix_json" | jq .
+          echo "## Deployment matrix"
+          echo "$deploy_matrix_json" | jq .
+          echo "build_matrix=${build_matrix_json}" >> "$GITHUB_OUTPUT"
+          echo "deploy_matrix=${deploy_matrix_json}" >> "$GITHUB_OUTPUT"
+          echo "count=${count}" >> "$GITHUB_OUTPUT"
+
+  build-and-test:
+    if: needs['variants-matrix'].outputs.count > '0'
+    name: Build+Test ${{ matrix.variant.title }} (${{ matrix.variant.platform }})
+    runs-on: ${{ matrix.variant.runner }}
+    needs: variants-matrix
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: ${{ fromJson(needs['variants-matrix'].outputs.build_matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build Container and Store Build Cache
+        uses: docker/build-push-action@v7
+        with:
+          context: ${{ matrix.variant.context }}
+          file: ${{ matrix.variant.context }}/${{ matrix.variant.file }}
+          platforms: ${{ matrix.variant.platform }}
+          tags: ${{ matrix.variant.title }}:build-and-test
+          build-args: |-
+            ${{ join(matrix.variant.build_args, '
+            ') }}
+          load: ${{ matrix.variant.test }}
+          cache-to: type=local,dest=/tmp/buildx-cache,mode=max
+
+      - name: Test Container
+        timeout-minutes: 90
+        if: matrix.variant.test && inputs.test == true
+        run: |
+          docker run --rm \
+            --shm-size=2g \
+            -v "${{ github.workspace }}:/home/esmfdev/esmf" \
+            -w /home/esmfdev/esmf \
+            -e ESMF_DIR=/home/esmfdev/esmf \
+            "${{ matrix.variant.title }}:build-and-test" \
+            bash -lc 'make -j$(nproc) && make all_tests' \
+            | tee all_tests.log
+          { grep "SYSTEM TESTS SUMMARY" -A1 all_tests.log > summary.log || true; }
+          { grep "EXAMPLES SUMMARY" -A1 all_tests.log >> summary.log || true; }
+          { grep "UNIT TESTS SUMMARY" -A1 all_tests.log >> summary.log || true; }
+          echo "## Test Summary" >> $GITHUB_STEP_SUMMARY
+          cat summary.log >> $GITHUB_STEP_SUMMARY
+          { grep "FAIL:\|CRASHED:" all_tests.log > failures.log || true; }
+          if [ -f failures.log ]; then
+            error=$(wc -l < failures.log)
+          else
+            error=0
+          fi
+          if [ ${error} -gt 0 ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "## Test Failures:" >> $GITHUB_STEP_SUMMARY
+            cat failures.log >> $GITHUB_STEP_SUMMARY
+            echo "::error::ESMF tests failed for ${{ matrix.variant.title }}" \
+              "on ${{ matrix.variant.platform }}. See summary above for details."
+            exit 1
+          fi
+
+      - name: Upload Build Cache
+        uses: actions/upload-artifact@v4
+        with:
+          name: buildx-cache-${{ matrix.variant.title }}-${{ matrix.variant.cacheid }}
+          path: /tmp/buildx-cache
+          retention-days: 1
+
+  deploy:
+    if: needs['variants-matrix'].outputs.count > '0' && inputs.deploy == true
+    name: Deploy ${{ matrix.variant.title }}
+    runs-on: ubuntu-latest
+    needs: [variants-matrix, build-and-test]
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: ${{ fromJson(needs['variants-matrix'].outputs.deploy_matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Check Registries
+        env:
+          VARIANT_REGISTRIES: ${{ toJson(matrix.variant.registries) }}
+          KNOWN_REGISTRIES: '["ghcr.io","docker.io"]'
+        run: |
+          unknown=$(jq -cn \
+            --argjson known "${KNOWN_REGISTRIES}" \
+            --argjson variant "${VARIANT_REGISTRIES}" \
+            '($variant - $known)')
+          if [[ "$unknown" != "[]" ]]; then
+            echo "::error::Unknown registry listed - ${unknown}" \
+              "Known registries are: ${KNOWN_REGISTRIES}"
+            exit 1
+          fi
+
+      - name: Download Build Caches
+        uses: actions/download-artifact@v4
+        with:
+          pattern: buildx-cache-${{ matrix.variant.title }}-*
+          path: /tmp/buildx-cache
+
+      - name: Prepare cache-from
+        id: cache
+        run: |
+          {
+            echo "cache_from<<EOF"
+            for dir in /tmp/buildx-cache/buildx-cache-*/; do
+              [[ -d "$dir" ]] && echo "type=local,src=${dir}"
+            done
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        if: contains(matrix.variant.registries, 'ghcr.io')
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        if: contains(matrix.variant.registries, 'docker.io')
+        with:
+          registry: docker.io
+          username: ${{ env.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          scope: "${{ env.DOCKERHUB_ORG }}/${{ matrix.variant.title }}@push"
+
+      - name: Summarize Image Metadata
+        id: image-meta
+        shell: bash
+        env:
+          TITLE: ${{ matrix.variant.title }}
+          DESC: ${{ matrix.variant.description }}
+          CONTEXT: ${{ matrix.variant.context }}
+          FILE: ${{ matrix.variant.file }}
+          TAGS: ${{ join(matrix.variant.tags, '<br>') }}
+          PLATFORMS: ${{ join(matrix.variant.platforms, '<br>') }}
+          SOURCE: ${{ matrix.variant.source }}
+          URL: ${{ matrix.variant.url }}
+          CREATED: ${{ matrix.variant.created }}
+          REVISION: ${{ matrix.variant.revision }}
+        run: |
+          echo "## Image Build Spec" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Field | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Title | ${TITLE} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Desc | ${DESC} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Context | ${CONTEXT} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| File | ${FILE} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Tags | ${TAGS} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Platforms | ${PLATFORMS} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Source | ${SOURCE} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| URL | ${URL} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Created | ${CREATED} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Revision | ${REVISION} |" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Build (Cached) and Deploy Container
+        uses: docker/build-push-action@v7
+        env:
+          BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+        with:
+          context: ${{ matrix.variant.context }}
+          file: ${{ matrix.variant.context }}/${{ matrix.variant.file }}
+          platforms: ${{ join(matrix.variant.platforms, ',') }}
+          tags: ${{ join(matrix.variant.tags, ',') }}
+          annotations: |-
+            ${{ join(matrix.variant.annotations, '
+            ') }}
+          build-args: |-
+            ${{ join(matrix.variant.build_args, '
+            ') }}
+          cache-from: ${{ steps.cache.outputs.cache_from }}
+          push: true
