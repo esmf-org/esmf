@@ -134,7 +134,13 @@ namespace ESMCI {
                       double *nodeCoord,  InterArray<int> *nodeOwnerII, InterArray<int> *nodeMaskII,
                       ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                       int *rc);
-
+    
+     void meshaddedges(int *_num_edges, int *edgeId,
+                           InterArray<int> *edgeOwners,
+                           InterArray<ESMC_R8> *edgeCoordss,
+                           int *_edgeConn_size, int *edgeConn, 
+                           int *rc);
+    
     void meshaddelements(int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                          int *_areaPresent, double *elemArea,
                          int *_coordsPresent, double *elemCoords,

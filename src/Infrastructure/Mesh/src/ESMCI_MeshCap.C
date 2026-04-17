@@ -558,6 +558,42 @@ void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
    }
 }
 
+
+void MeshCap::meshaddedges(int *num_edges, int *edgeId,
+                           InterArray<int> *edgeOwners,
+                           InterArray<ESMC_R8> *edgeCoords,
+                           int *_edgeConn_size, int *edgeConn, 
+                           int *rc)
+{
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::meshaddedges()"
+
+  int localrc;
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_MESHCREATE_TRACE_ENTER("NativeMesh addedges");
+
+    // STOPPED HERE
+    ESMCI_meshaddedges(&mesh,
+                       num_edges, edgeId,
+                       edgeOwners,
+                       edgeCoords,
+                       _edgeConn_size, edgeConn, 
+                       &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,ESMC_CONTEXT, rc);
+    ESMCI_MESHCREATE_TRACE_EXIT("NativeMesh addedges");
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+       " this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+  }
+  
+  // Set member variables
+  this->finalize_counts(&localrc);
+
+}
+
+
 void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                               int *_areaPresent, double *elemArea,
                               int *_coordsPresent, double *elemCoords,

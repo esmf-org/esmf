@@ -442,6 +442,19 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(MeshCap **meshpp,
                          _coordSys, _orig_sdim,
                          rc);
 }
+/* XMRKX */
+extern "C" void FTN_X(c_esmc_meshaddedges)(MeshCap **meshpp,
+                                           int *_num_edges, int *edgeId,                                                                                ESMCI::InterArray<int> *edgeOwners,
+                                           ESMCI::InterArray<ESMC_R8> *edgeCoords,
+                                           int *_num_edgeConn, int *edgeConn, 
+                                           int *rc)
+{
+  // Call into implementation
+  (*meshpp)->meshaddedges(_num_edges, edgeId, edgeOwners, edgeCoords,
+                         _num_edgeConn, edgeConn, rc);
+}
+
+
 
 
 /**

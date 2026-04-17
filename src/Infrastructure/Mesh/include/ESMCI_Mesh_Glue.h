@@ -73,6 +73,13 @@ void ESMCI_meshwritewarrays(Mesh **meshpp, char *fname, ESMCI_FortranStrLenArg n
                             int num_elemArrays, ESMCI::Array **elemArrays, 
                             int *rc);
 
+void ESMCI_meshaddedges(Mesh **meshpp,
+                         int *_num_edges, int *edgeId,
+                         InterArray<int> *_edgeOwners,
+                         InterArray<ESMC_R8> *_edgeCoords,
+                         int *_edgeConn_size, int *edgeConn, 
+                         int *rc);
+
 void ESMCI_meshaddelements(Mesh **meshpp,
                            int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                            int *_areaPresent, double *elemArea,

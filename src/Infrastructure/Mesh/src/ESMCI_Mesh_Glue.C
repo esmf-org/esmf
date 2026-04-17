@@ -1703,6 +1703,67 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 }
 
 
+void ESMCI_meshaddedges(Mesh **meshpp,
+                         int *_num_edges, int *edgeId,
+                         InterArray<int> *_edgeOwners,
+                         InterArray<ESMC_R8> *_edgeCoords,
+                         int *_edgeConn_size, int *edgeConn, 
+                         int *rc)
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshaddedges()"
+
+{
+   try {
+
+  // Initialize the parallel environment for mesh (if not already done)
+    {
+ int localrc;
+ int rc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+   throw localrc;  // bail out with exception
+    }
+
+    // local rc code
+    int localrc;
+
+    // Set some useful variables
+    Mesh *meshp = *meshpp;
+    ThrowRequire(meshp);    
+    Mesh &mesh = *meshp;
+
+
+    printf("In ESMCI_meshaddedges()!!!\n");
+
+    
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // Set return code
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
+
+
+
 /**
  * Routines for reading in a test VTK mesh to fortran arrays (for testing the array interface)
  */
