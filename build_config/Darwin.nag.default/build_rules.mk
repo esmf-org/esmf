@@ -105,6 +105,9 @@ ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -v --version
 # See if g++ is really clang
 #
 ESMF_CLANGSTR := $(findstring clang, $(shell $(ESMF_CXXCOMPILER) --version))
+ifeq ($(ESMF_CLANGSTR), clang)
+$(error "The detected C++ compiler is actually clang. Set ESMF_COMPILER=nagclang.")
+endif
 
 ############################################################
 # Set NAG unix modules when certain non-Standard system calls
@@ -137,7 +140,11 @@ ESMF_F90COMPILEOPTS += -dusty
 
 ifeq ($(ESMF_PTHREADS),ON)
 ESMF_F90COMPILEOPTS += -thread_safe
+ESMF_CXXCOMPILEOPTS += -pthread
+ESMF_CCOMPILEOPTS   += -pthread
 ESMF_F90LINKOPTS    += -thread_safe
+ESMF_CXXLINKOPTS    += -pthread
+ESMF_CLINKOPTS      += -pthread
 endif
 
 ############################################################
@@ -159,9 +166,6 @@ ESMF_CLINKRPATHS        =
 # Link against libesmf.a using the F90 linker front-end
 #
 ESMF_F90LINKLIBS += -lstdc++
-ifeq ($(ESMF_CLANGSTR), clang)
-ESMF_F90LINKLIBS += -lc++
-endif
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
