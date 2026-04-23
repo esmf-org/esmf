@@ -11,6 +11,7 @@ ESMF_F90LINKERDEFAULT   = $(ESMF_CXXLINKER)
 ESMF_CXXDEFAULT         = clang++
 ESMF_CDEFAULT           = clang
 ESMF_CLINKERDEFAULT     = clang++
+ESMF_CLINKLIBS          = $(ESMF_CXXLINKLIBS)
 ESMF_CPPDEFAULT         = clang -E -P -x c
 
 ESMF_CXXCOMPILEOPTS    += -x c++ -mmacosx-version-min=10.7 -stdlib=libc++
@@ -186,11 +187,10 @@ ESMF_F90LINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.nag $(ESMF_F90COMPILER))
 #
 ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.nag $(ESMF_F90COMPILER))
 
-
 ############################################################
 # Shared library options
 ESMF_SL_LIBOPTS  += -dynamiclib
-ESMF_SL_LIBLIBS  += $(ESMF_F90LINKPATHS) $(ESMF_F90LINKLIBS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)
+ESMF_SL_LIBLIBS  += $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)
 
 ############################################################
 # Static builds on Darwin do not support trace lib due to missing linker option
