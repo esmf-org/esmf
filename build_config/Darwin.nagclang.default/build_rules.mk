@@ -8,8 +8,12 @@
 #
 ESMF_F90DEFAULT         = nagfor
 ESMF_F90LINKERDEFAULT   = $(ESMF_CXXLINKER)
-ESMF_CXXDEFAULT         = g++
-ESMF_CDEFAULT           = gcc
+ESMF_CXXDEFAULT         = clang++
+ESMF_CDEFAULT           = clang
+ESMF_CLINKERDEFAULT     = clang++
+ESMF_CPPDEFAULT         = clang -E -P -x c
+
+ESMF_CXXCOMPILEOPTS    += -x c++ -mmacosx-version-min=10.7 -stdlib=libc++
 
 ############################################################
 # Default MPI setting.
