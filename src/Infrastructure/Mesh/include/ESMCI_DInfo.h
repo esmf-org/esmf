@@ -151,19 +151,19 @@ public:
 
 // Set of templated calls to support different id types in allreduce
 template<class IDTYPE>
-void DINFO_get_global_minmax(IDTYPE lmin, IDTYPE lmax, IDTYPE &t_gmin, IDTYPE &t_gmax) {
+inline void DINFO_get_global_minmax(IDTYPE lmin, IDTYPE lmax, IDTYPE &t_gmin, IDTYPE &t_gmax) {
   Throw() << "Unsupported id type.";
 }
 
 template<>
-void DINFO_get_global_minmax(int lmin, int lmax, int &t_gmin, int &t_gmax) {
+inline void DINFO_get_global_minmax(int lmin, int lmax, int &t_gmin, int &t_gmax) {
   MPI_Allreduce(&lmin, &t_gmin, 1, MPI_INT, MPI_MIN, Par::Comm());
   MPI_Allreduce(&lmax, &t_gmax, 1, MPI_INT, MPI_MAX, Par::Comm());
 }
 
 // Set of templated call to calculate proc from id and global info
 template<class IDTYPE>
-UInt DINFO_calc_proc_from_id(IDTYPE id, UInt petCount, IDTYPE gmin, IDTYPE gmax) {
+inline UInt DINFO_calc_proc_from_id(IDTYPE id, UInt petCount, IDTYPE gmin, IDTYPE gmax) {
   //std::cout << "id ="<<id<<" petCount="<<petCount<<" gmin="<<gmin<<" gmax="<<gmax<<std::endl;
 
   UInt num_per_proc = ((gmax-gmin+1) + petCount -1) / petCount;
@@ -175,7 +175,7 @@ UInt DINFO_calc_proc_from_id(IDTYPE id, UInt petCount, IDTYPE gmin, IDTYPE gmax)
 
 // Set up DInfo clas to be searched
 template<class IDTYPE, class INFOTYPE>
-void DInfo<IDTYPE, INFOTYPE> :: commit() {
+inline void DInfo<IDTYPE, INFOTYPE> :: commit() {
 
   // if already committed, then leave
   if (is_committed) return;

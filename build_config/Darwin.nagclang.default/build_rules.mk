@@ -7,8 +7,14 @@
 # Default compiler setting.
 #
 ESMF_F90DEFAULT         = nagfor
-ESMF_CXXDEFAULT         = g++
-ESMF_CDEFAULT           = gcc
+ESMF_F90LINKERDEFAULT   = $(ESMF_CXXLINKER)
+ESMF_CXXDEFAULT         = clang++
+ESMF_CDEFAULT           = clang
+ESMF_CLINKERDEFAULT     = clang++
+ESMF_CLINKLIBS          = $(ESMF_CXXLINKLIBS)
+ESMF_CPPDEFAULT         = clang -E -P -x c
+
+ESMF_CXXCOMPILEOPTS    += -x c++ -mmacosx-version-min=10.7 -stdlib=libc++
 
 ############################################################
 # Default MPI setting.
@@ -32,6 +38,7 @@ ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPICH1
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpiCC
 ESMF_CDEFAULT           = mpicc
+ESMF_CLINKERDEFAULT     = mpiCC
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),mpich2)
@@ -39,6 +46,7 @@ ifeq ($(ESMF_COMM),mpich2)
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
+ESMF_CLINKERDEFAULT     = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
@@ -47,7 +55,9 @@ ifeq ($(ESMF_COMM),mpich)
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
+ESMF_CLINKERDEFAULT     = mpicxx
 ESMF_CXXLINKLIBS       += $(shell $(ESMF_DIR)/scripts/libs.mpich3f90)
+ESMF_F90LINKLIBS       += $(shell $(ESMF_DIR)/scripts/libs.mpich3f90)
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
@@ -56,6 +66,7 @@ ifeq ($(ESMF_COMM),mvapich)
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
+ESMF_CLINKERDEFAULT     = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
@@ -65,6 +76,7 @@ ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif77
 ESMF_CXXDEFAULT         = mpic++
 ESMF_CDEFAULT           = mpicc
+ESMF_CLINKERDEFAULT     = mpic++
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
@@ -76,8 +88,10 @@ else
 ESMF_F90DEFAULT         = mpif90
 endif
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
+ESMF_F90LINKLIBS       += $(shell $(ESMF_DIR)/scripts/libs.openmpif90_forcxx $(ESMF_F90DEFAULT))
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
+ESMF_CLINKERDEFAULT     = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
@@ -105,8 +119,8 @@ ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -v --version
 # See if g++ is really clang
 #
 ESMF_CLANGSTR := $(findstring clang, $(shell $(ESMF_CXXCOMPILER) --version))
-ifeq ($(ESMF_CLANGSTR), clang)
-$(error "The detected C++ compiler is actually clang. Set ESMF_COMPILER=nagclang.")
+ifneq ($(ESMF_CLANGSTR), clang)
+$(error "The detected C++ compiler is actually not clang. Set ESMF_COMPILER=nag.")
 endif
 
 ############################################################
@@ -142,7 +156,7 @@ ifeq ($(ESMF_PTHREADS),ON)
 ESMF_F90COMPILEOPTS += -thread_safe
 ESMF_CXXCOMPILEOPTS += -pthread
 ESMF_CCOMPILEOPTS   += -pthread
-ESMF_F90LINKOPTS    += -thread_safe
+ESMF_F90LINKOPTS    += -pthread
 ESMF_CXXLINKOPTS    += -pthread
 ESMF_CLINKOPTS      += -pthread
 endif
@@ -158,14 +172,15 @@ ESMF_F90COMPILEFIXNOCPP  = -fixed
 ############################################################
 # Blank out variables to prevent rpath encoding
 #
-ESMF_F90LINKRPATHS      =
-ESMF_CXXLINKRPATHS      =
-ESMF_CLINKRPATHS        =
+ESMF_F90RPATHPREFIX         = -Wl,-rpath,
+ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
+ESMF_CRPATHPREFIX           = -Wl,-rpath,
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
 ESMF_F90LINKLIBS += -lstdc++
+ESMF_F90LINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.nag $(ESMF_F90COMPILER))
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
@@ -175,7 +190,7 @@ ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.nag $(ESMF_F90COMPILER))
 ############################################################
 # Shared library options
 ESMF_SL_LIBOPTS  += -dynamiclib
-ESMF_SL_LIBLIBS  += $(ESMF_F90LINKPATHS) $(ESMF_F90LINKLIBS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)
+ESMF_SL_LIBLIBS  += $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)
 
 ############################################################
 # Static builds on Darwin do not support trace lib due to missing linker option
