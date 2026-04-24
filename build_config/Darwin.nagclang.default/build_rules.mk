@@ -206,7 +206,7 @@ ESMF_TRACE_PRELOAD_LINKED=ON
 ############################################################
 # Shared object options
 #
-ESMF_SO_F90COMPILEOPTS  = -fPIC
+ESMF_SO_F90COMPILEOPTS  = -PIC
 ESMF_SO_F90LINKOPTS     = -shared
 ESMF_SO_CXXCOMPILEOPTS  = -fPIC
 ESMF_SO_CXXLINKOPTS     = -shared
