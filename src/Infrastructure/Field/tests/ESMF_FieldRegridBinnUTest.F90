@@ -94,8 +94,8 @@ contains
   integer :: localrc
   type(ESMF_Grid) :: srcGrid
   type(ESMF_Grid) :: dstGrid
-  type(ESMF_Field) :: srcField
-  type(ESMF_Field) :: dstField
+  type(ESMF_Field) :: srcFieldLon,srcFieldLat
+  type(ESMF_Field) :: dstFieldLon,dstFieldLat
   type(ESMF_Field) :: xdstField
   type(ESMF_Field) :: errField
   type(ESMF_Array) :: dstArray
@@ -106,6 +106,7 @@ contains
   real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:)
   real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:)
   real(ESMF_KIND_R8), pointer :: farrayPtr(:,:), farrayPtr2(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrLon(:,:), farrayPtrLat(:,:)
   real(ESMF_KIND_R8), pointer :: xfarrayPtr(:,:)
   real(ESMF_KIND_R8), pointer :: errfarrayPtr(:,:)
   integer :: clbnd(2),cubnd(2)
@@ -155,15 +156,67 @@ contains
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
-  ! Create source field
-   srcField = ESMF_FieldCreate(srcGrid, typekind=ESMF_TYPEKIND_R8, &
+  ! Create source fields
+   srcFieldLon = ESMF_FieldCreate(srcGrid, typekind=ESMF_TYPEKIND_R8, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+   srcFieldLat = ESMF_FieldCreate(srcGrid, typekind=ESMF_TYPEKIND_R8, &
+        staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
+   if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
-  
+
+  ! Get number of local DEs
+  call ESMF_GridGet(srcGrid, localDECount=srclocalDECount, rc=localrc)
+   if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+  ! Construct Src Field
+  do lDE=0,srclocalDECount-1
+
+     ! get src pointer
+     call ESMF_FieldGet(srcFieldLon, lDE, farrayPtrLon, &
+          computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
+     if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+     ! get src pointer
+     call ESMF_FieldGet(srcFieldLat, lDE, farrayPtrLat, rc=localrc)
+     if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+     
+     !! set coords, interpolated function
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+
+        ! Get coords
+        call ESMF_GridGetCoord(srcGrid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+             localDE=lDE, index=(/i1,i2/), coord=coords, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+        
+        ! Init data
+        farrayPtrLon(i1,i2) = coords(1)
+        farrayPtrLat(i1,i2) = coords(2)
+
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+    
   ! Create Dst Grid
   dstGrid=ESMF_GridCreate1PeriDimUfrm(maxIndex=(/dst_nx,dst_ny/), &
        minCornerCoord=(/0.0_ESMF_KIND_R8,-90.0_ESMF_KIND_R8/), &
@@ -176,51 +229,17 @@ contains
 
   
   ! Create destination fields
-   dstField = ESMF_FieldCreate(dstGrid, typekind=ESMF_TYPEKIND_R8, &
+   dstFieldLon = ESMF_FieldCreate(dstGrid, typekind=ESMF_TYPEKIND_R8, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-   xdstField = ESMF_FieldCreate(dstGrid, typekind=ESMF_TYPEKIND_R8, &
-        staggerloc=ESMF_STAGGERLOC_CENTER, name="xdest", rc=localrc)
+   dstFieldLat = ESMF_FieldCreate(dstGrid, typekind=ESMF_TYPEKIND_R8, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-   
-   errField = ESMF_FieldCreate(dstGrid, typekind=ESMF_TYPEKIND_R8, &
-        staggerloc=ESMF_STAGGERLOC_CENTER, name="xdest", rc=localrc)
-   if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-  ! Get arrays
-  ! dstArray
-  call ESMF_FieldGet(dstField, array=dstArray, rc=localrc)
-   if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-  call ESMF_FieldGet(errField, array=errArray, rc=localrc)
-   if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-  ! srcArray
-  call ESMF_FieldGet(srcField, array=srcArray, rc=localrc)
-   if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-  ! Get number of local DEs
-  call ESMF_GridGet(srcGrid, localDECount=srclocalDECount, rc=localrc)
-   if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
 
   ! Get number of local DEs
   call ESMF_GridGet(dstGrid, localDECount=dstlocalDECount, rc=localrc)
@@ -228,109 +247,49 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-
-  ! Construct Src Field
-  do lDE=0,srclocalDECount-1
-
-     ! get src pointer
-     call ESMF_FieldGet(srcField, lDE, farrayPtr, &
-          computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
-     if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-     !! set coords, interpolated function
-     do i1=clbnd(1),cubnd(1)
-     do i2=clbnd(2),cubnd(2)
-
-        ! Get coords
-        call ESMF_GridGetCoord(srcGrid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-             localDE=lDE, index=(/i1,i2/), coord=coords, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-             ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return
-
-        ! init exact answer
-        lon = coords(1)
-        lat = coords(2)
-
-       ! Set the source to be a function of the x,y,z coordinate
-        theta = DEG2RAD*(lon)
-        phi = DEG2RAD*(90.-lat)
-
-        x = cos(theta)*sin(phi)
-        y = sin(theta)*sin(phi)
-        z = cos(phi)
-
-        ! set src data
-        farrayPtr(i1,i2) = x+y+z+15.0
-
-        ! This one seems to do a weird thing around the pole with a cubed sphere
-        ! farrayPtr(i1,i2) = 2. + cos(theta)**2.*cos(2.*phi)
-     enddo
-     enddo
-
-  enddo    ! lDE
-
-
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  ! Destination grid
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  ! Get memory and set coords for dst
+   
+  ! Init destination to 0.0
   do lDE=0,dstlocalDECount-1
 
-     ! get dst pointer
-     call ESMF_FieldGet(dstField, lDE, farrayPtr, &
+     ! Get lon dst pointer
+     call ESMF_FieldGet(dstFieldLon, lDE, farrayPtrLon, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
      if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-     ! Get exact dst pointer
-     call ESMF_FieldGet(xdstField, lDE, xfarrayPtr,  rc=localrc)
+     
+     ! Get lat dst pointer
+     call ESMF_FieldGet(dstFieldLat, lDE, farrayPtrLat, &
+          computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
      if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-     !! dst data
-     do i1=clbnd(1),cubnd(1)
-     do i2=clbnd(2),cubnd(2)
-
-        ! Get coords
-        call ESMF_GridGetCoord(dstGrid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-             localDE=lDE, index=(/i1,i2/), coord=coords, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-             ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return
-
-        ! init exact answer
-        lon = coords(1)
-        lat = coords(2)
-
-       ! Set the source to be a function of the x,y,z coordinate
-        theta = DEG2RAD*(lon)
-        phi = DEG2RAD*(90.-lat)
-        x = cos(theta)*sin(phi)
-        y = sin(theta)*sin(phi)
-        z = cos(phi)
-
-        ! farrayPtr(i1,i2) = 2. + cos(theta)**2.*cos(2.*phi)
-        ! set exact dst data
-        xfarrayPtr(i1,i2) = x+y+z+15.0
-
-        ! This one seems to do a weird thing around the pole with a cubed sphere
-        !xfarrayPtr(i1,i2) = 2. + cos(theta)**2.*cos(2.*phi)
-
-        ! initialize destination field
-        farrayPtr(i1,i2)=0.0
-     enddo
-     enddo
-
+     ! Init to 0.0
+     farrayPtrLon=0.0
+     farrayPtrLat=0.0
+     
   enddo    ! lDE
 
+
 #if 0
+  ! DEBUG OUTPUT
+  
+  ! Get arrays
+  ! dstArray
+  call ESMF_FieldGet(dstFieldLon, array=dstArray, rc=localrc)
+   if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+  ! srcArray
+  call ESMF_FieldGet(srcFieldLon, array=srcArray, rc=localrc)
+   if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+  
   call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
        filename="srcGrid", rc=localrc)
   if (ESMF_LogFoundError(localrc, &
@@ -339,11 +298,10 @@ contains
 
 #endif
 
-  !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore( &
-          srcField, &
-          dstField=dstField, &
+          srcFieldLon, &
+          dstField=dstFieldLon, &
           routeHandle=routeHandle, &
           unmappedAction=ESMF_UNMAPPEDACTION_ERROR, &
           regridmethod=ESMF_REGRIDMETHOD_BINNING, &
@@ -354,61 +312,64 @@ contains
 
 
   ! Do regrid
-  call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
+  call ESMF_FieldRegrid(srcFieldLon, dstFieldLon, routeHandle, rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
+  call ESMF_FieldRegrid(srcFieldLat, dstFieldLat, routeHandle, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+  ! Free routeHandle
   call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
+  
   ! Check results
-  maxRelErr=0.0
+  correct=.true.
   do lDE=0,dstlocalDECount-1
 
-     call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=clbnd, &
+     call ESMF_FieldGet(dstFieldLon, lDE, farrayPtrLon, computationalLBound=clbnd, &
           computationalUBound=cubnd,  rc=localrc)
      if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-     call ESMF_FieldGet(xdstField, lDE, xfarrayPtr,  rc=localrc)
+     call ESMF_FieldGet(dstFieldLat, lDE, farrayPtrLat, rc=localrc) 
      if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-     call ESMF_FieldGet(errField, lDE, errfarrayPtr,  rc=localrc)
-     if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
 
-     !! make sure we're not using any bad points
+     !! Make sure that all the points are being mapped within the correct cell
+     !! by checking that they are very close to the center point 
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
 
-        ! Compute relative error
-        if (xfarrayPtr(i1,i2) .ne. 0.0) then
-           relErr=abs((farrayPtr(i1,i2)-xfarrayPtr(i1,i2))/xfarrayPtr(i1,i2))
-        else
-           relErr=abs(farrayPtr(i1,i2)-xfarrayPtr(i1,i2))
+        ! Get coords
+        call ESMF_GridGetCoord(dstGrid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+             localDE=lDE, index=(/i1,i2/), coord=coords, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
+        lon=coords(1)
+        lat=coords(2)
+
+        ! Since it's a 2deg grid, if points are within 0.25 of the center, they are definitely
+        ! within the cell
+        if (abs(farrayPtrLon(i1,i2)-lon) > 0.25) then
+           correct=.false.
         endif
 
-        ! if working everything should be close to exact answer
-        if (relErr .gt. 0.001) then
-            correct=.false.
-!            write(*,*) "relErr=",relErr,farrayPtr(i1,i2),xfarrayPtr(i1,i2)
-        endif
-
-        ! Calc max
-        if (relErr > maxRelErr) then
-           maxRelErr=relErr
-        endif
-
-        ! put in error field
-        errfarrayPtr(i1,i2)=relErr
-
+        if (abs(farrayPtrLat(i1,i2)-lat) > 0.25) then
+           correct=.false.
+        endif        
      enddo
      enddo
   enddo    ! lDE
@@ -435,22 +396,22 @@ contains
 
 
   ! Destroy the Fields
-   call ESMF_FieldDestroy(srcField, rc=localrc)
+   call ESMF_FieldDestroy(srcFieldLon, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-   call ESMF_FieldDestroy(dstField, rc=localrc)
+   call ESMF_FieldDestroy(srcFieldLat, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-   call ESMF_FieldDestroy(xdstField, rc=localrc)
+   call ESMF_FieldDestroy(dstFieldLon, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-   call ESMF_FieldDestroy(errField, rc=localrc)
+   call ESMF_FieldDestroy(dstFieldLat, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return

@@ -1252,9 +1252,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
         else if (lregridmethod .eq. ESMF_REGRIDMETHOD_BINNING) then
-
-           write(*,*) "In FRS() for BINNING"
-
            
            ! Get src PointList with points on Field location
            call getPointListOnFieldLoc(srcField, srcMaskValues, addOrigCoordsToPointList, &

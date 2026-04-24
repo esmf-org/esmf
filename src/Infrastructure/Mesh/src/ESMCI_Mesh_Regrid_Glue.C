@@ -356,10 +356,6 @@ void ESMCI_regrid_create(
     }
     WMat dst_status;
 
-    // Debug output
-    if (*regridMethod == ESMC_REGRID_METHOD_BINNING) {
-      printf("In regridcreate for Binning regridding\n");
-    }
     
     ESMCI_REGRID_TRACE_ENTER("NativeMesh Weight Generation");
 
@@ -451,7 +447,9 @@ void ESMCI_regrid_create(
           if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg,
              ESMC_CONTEXT, &localrc)) throw localrc;
         }
-      } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) {
+      } else if ((*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) || 
+                 (*regridMethod == ESMC_REGRID_METHOD_BINNING))
+        {
         // CURRENTLY DOESN'T WORK!!!
 #if 0
         if (!all_mesh_node_ids_in_wmat(srcmesh, *wts)) {
