@@ -172,9 +172,9 @@ ESMF_F90COMPILEFIXNOCPP  = -fixed
 ############################################################
 # Blank out variables to prevent rpath encoding
 #
-ESMF_F90LINKRPATHS      =
-ESMF_CXXLINKRPATHS      =
-ESMF_CLINKRPATHS        =
+ESMF_F90RPATHPREFIX         = -Wl,-rpath,
+ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
+ESMF_CRPATHPREFIX           = -Wl,-rpath,
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
