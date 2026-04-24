@@ -172,7 +172,6 @@ ESMF_F90LINKLIBS += -lstdc++
 #
 ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.nag $(ESMF_F90COMPILER))
 
-
 ############################################################
 # Shared library options
 ESMF_SL_LIBOPTS  += -dynamiclib
@@ -183,3 +182,16 @@ ESMF_SL_LIBLIBS  += $(ESMF_F90LINKPATHS) $(ESMF_F90LINKLIBS) $(ESMF_CXXLINKPATHS
 ifeq ($(ESMF_SHARED_LIB_BUILD),OFF)
 ESMF_TRACE_LIB_BUILD = OFF
 endif
+
+############################################################
+# Preloading the dynamic trace library is generally not supported on Darwin
+# when System Integrity Protection (SIP) is enabled. Link directly instead.
+ESMF_TRACE_PRELOAD_LINKED=ON
+
+############################################################
+# Shared object options
+#
+ESMF_SO_F90COMPILEOPTS  = -PIC
+ESMF_SO_F90LINKOPTS     = -shared
+ESMF_SO_CXXCOMPILEOPTS  = -fPIC
+ESMF_SO_CXXLINKOPTS     = -shared
