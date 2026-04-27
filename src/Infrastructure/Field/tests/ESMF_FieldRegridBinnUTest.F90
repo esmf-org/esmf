@@ -361,6 +361,9 @@ contains
         lon=coords(1)
         lat=coords(2)
 
+        ! DEBUG
+        !write(*,*) localPEt,"# orig=(",lon,lat,") map=(",farrayPtrLon(i1,i2),farrayPtrLat(i1,i2),")"
+
         ! Since it's a 2deg grid, if points are within 0.25 of the center, they are definitely
         ! within the cell
         if (abs(farrayPtrLon(i1,i2)-lon) > 0.25) then

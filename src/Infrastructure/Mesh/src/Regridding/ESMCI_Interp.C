@@ -3476,34 +3476,29 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
   }
 #endif
 
-  // Migrate weights back to row decomposition
-  // (use node or elem migration depending on interpolation)
-  if (!has_cnsrv) {
-    if (is_parallel) {
+  // If parallel, migrate info back to destination decomposition
+  if (is_parallel) {
 
-      if (dstpointlist == NULL )
-        iw.Migrate(*dstmesh);
-      else
-        iw.Migrate(*dstpointlist);
-
-    }
-  } else {
-    if (is_parallel) {
-      iw.MigrateToElem(*dstmesh);
-      dst_frac.MigrateToElem(*dstmesh);
+    // Migrate information to node or elem depending on method
+    if (has_cnsrv) { // If conservative, migrate info to elements
+      iw.MigrateToElem(*dstmesh); 
+      dst_frac.MigrateToElem(*dstmesh); 
+      src_frac.MigrateToElem(*srcmesh);
       if (set_dst_status) {
         dst_status.MigrateToElem(*dstmesh);
+      }
+    } else if (has_binning) { // If binning migrate weights to elements
+      iw.MigrateToElem(*dstmesh); 
+    } else { // Other methods, migrate to nodes
+      if (dstpointlist == NULL ) {
+        iw.Migrate(*dstmesh);
+      } else {
+        iw.Migrate(*dstpointlist);
       }
     }
   }
 
-  // Migrate src_frac to source mesh decomp
-  if (has_cnsrv) {
-    if (is_parallel) {
-      src_frac.MigrateToElem(*srcmesh);
-    }
-  }
-
+ 
   //  printf("%d# M1\n",Par::Rank());
 
   // Set destination fractions
@@ -3678,6 +3673,7 @@ void Interp::mat_transfer_serial(int fpair_num, IWeights &iw, IWeights &src_frac
   else if (interp_method == INTERP_NEAREST_DST_TO_SRC) calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
   else if (interp_method == INTERP_CONSERVE_2ND) calc_2nd_order_conserve_mat_serial(*srcmesh, *dstmesh, midmesh, sres, iw, src_frac, dst_frac, zz, set_dst_status, dst_status);
   else if (interp_method == INTERP_BINNING) calc_binning_mat_serial(sres, iw);
+  else Throw() <<"Unrecognized interpolation method.";
 }
 
 void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw, IWeights &src_frac, IWeights &dst_frac,
@@ -3698,6 +3694,8 @@ void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw, IWeights &src_fr
     calc_nearest_npnts_mat_serial(&(grend.GetSrcPlistRend()), &(grend.GetDstPlistRend()), dist_exponent, sres, iw);
   } else if (interp_method == INTERP_NEAREST_DST_TO_SRC) {
     calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
+  }  else if (interp_method == INTERP_BINNING) {
+    calc_binning_mat_serial(sres, iw);
   } else {
     // Send source data to rendezvous decomp
     const std::vector<MEField<> *> &src_rend_Fields = grend.GetSrcRendFields();
