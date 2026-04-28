@@ -224,7 +224,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleDestroy(rh, noGarbage=.true., rc=localrc)
+       call ESMF_RouteHandleRelease(rh, rc=localrc)
        _VERIFY(localrc)
     
        correct = (dst_ny*dst_nx) == (def_count+undef_count)
@@ -314,7 +314,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleDestroy(rh, noGarbage=.true., rc=localrc)
+       call ESMF_RouteHandleRelease(rh, rc=localrc)
        _VERIFY(localrc)
 
        correct = (dst_ny*dst_nx) == (def_count+undef_count)
@@ -404,7 +404,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleDestroy(rh, noGarbage=.true., rc=localrc)
+       call ESMF_RouteHandleRelease(rh, rc=localrc)
        _VERIFY(localrc)
 
        correct = (dst_ny*dst_nx) == (def_count+undef_count)
@@ -494,7 +494,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleDestroy(rh, noGarbage=.true., rc=localrc)
+       call ESMF_RouteHandleRelease(rh, rc=localrc)
        _VERIFY(localrc)
 
        correct = (dst_ny*dst_nx) == (def_count+undef_count)
@@ -586,7 +586,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleDestroy(rh, noGarbage=.true., rc=localrc)
+       call ESMF_RouteHandleRelease(rh, rc=localrc)
        _VERIFY(localrc)
 
        correct = (dst_ny*dst_nx*lm) == (def_count+undef_count)
@@ -678,7 +678,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleDestroy(rh, noGarbage=.true., rc=localrc)
+       call ESMF_RouteHandleRelease(rh, rc=localrc)
        _VERIFY(localrc)
 
        correct = (dst_ny*dst_nx*lm) == (def_count+undef_count)

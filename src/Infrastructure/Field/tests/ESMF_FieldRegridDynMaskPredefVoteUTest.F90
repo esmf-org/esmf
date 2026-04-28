@@ -223,8 +223,6 @@ contains
         call ESMF_FieldRegrid(srcField, dstField, routeHandle=rh, dynamicMask=dyn_mask, rc=localrc)
        _VERIFY(localrc) 
 
-       call ESMF_GridGet(dstGrid, localDECount=localDECount, rc=localrc)
-       _VERIFY(localrc)
        def_count = count_value_in_field_r8_2d(dstField, def_value2, 0.001d0, rc=localrc)
        _VERIFY(localrc)
 
@@ -237,7 +235,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleDestroy(rh, noGarbage=.true., rc=localrc)
+       call ESMF_RouteHandleRelease(rh, rc=localrc)
        _VERIFY(localrc)
 
        correct = (dst_ny*dst_nx) == def_count
@@ -326,7 +324,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleDestroy(rh, noGarbage=.true., rc=localrc)
+       call ESMF_RouteHandleRelease(rh, rc=localrc)
        _VERIFY(localrc)
 
        correct = (dst_ny*dst_nx) == def_count
@@ -415,7 +413,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleDestroy(rh, noGarbage=.true., rc=localrc)
+       call ESMF_RouteHandleRelease(rh, rc=localrc)
        _VERIFY(localrc)
 
        correct = (dst_ny*dst_nx) == def_count
@@ -507,7 +505,7 @@ contains
        _VERIFY_PASS(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY_PASS(localrc)
-       call ESMF_RouteHandleDestroy(rh, noGarbage=.true., rc=localrc)
+       call ESMF_RouteHandleRelease(rh, rc=localrc)
        _VERIFY_PASS(localrc)
 
        correct = (dst_ny*dst_nx) == def_count
@@ -599,7 +597,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleDestroy(rh, noGarbage=.true., rc=localrc)
+       call ESMF_RouteHandleRelease(rh, rc=localrc)
        _VERIFY(localrc)
 
        correct = (dst_ny*dst_nx*lm) == def_count
@@ -691,7 +689,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleDestroy(rh, noGarbage=.true., rc=localrc)
+       call ESMF_RouteHandleRelease(rh, rc=localrc)
        _VERIFY(localrc)
 
        correct = (dst_ny*dst_nx*lm) == def_count
@@ -783,7 +781,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleDestroy(rh, noGarbage=.true., rc=localrc)
+       call ESMF_RouteHandleRelease(rh, rc=localrc)
        _VERIFY(localrc)
 
        correct = (dst_ny*dst_nx*lm) == def_count

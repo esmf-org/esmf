@@ -23,6 +23,9 @@ class DynamicMask(object):
                           srcMaskValue=src_mask_value,
                           dstMaskValue=dst_mask_value)
 
+        else:
+           raise DynamicMaskPrecisionNotSupported
+
         import atexit; atexit.register(self.__del__)
         self._finalized = False
 
