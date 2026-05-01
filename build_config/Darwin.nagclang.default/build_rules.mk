@@ -160,7 +160,7 @@ ESMF_F90COMPILEFIXCPP    = -fixed -fpp
 ESMF_F90COMPILEFIXNOCPP  = -fixed
 
 ############################################################
-# Blank out variables to prevent rpath encoding
+# Set rpath syntax
 #
 ESMF_F90RPATHPREFIX         = -Wl,-rpath,
 ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
