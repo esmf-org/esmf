@@ -643,7 +643,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
 !           can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
-!           list of valid options. If not specified, {\tt unmappedaction} defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
+!           list of valid options. If not specified, {\tt unmappedaction} defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}.
 !     \item [{[ignoreDegenerate]}]
 !           Ignore degenerate cells when checking for errors. If this is set to true, then the 
 !           regridding proceeds, but degenerate cells will be skipped. If set to false, a degenerate cell produces an error. 
@@ -1027,6 +1027,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            endif
         endif
 
+        ! Can't use DstStatusField with binning right now
+        if (lregridmethod .eq. ESMF_REGRIDMETHOD_BINNING) then 
+           if (present(dstStatusField)) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                   msg="the dstStatusField is currently not supported with the binning regrid method.", &
+                   ESMF_CONTEXT, rcToReturn=rc) 
+              return
+           endif
+        endif
+
+        ! Can't use DstStatusField with binning right now
+        if (lregridmethod .eq. ESMF_REGRIDMETHOD_BINNING) then 
+           if (present(unmappedDstList)) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                   msg="the unmappedDstList is currently not supported with the binning regrid method.", &
+                   ESMF_CONTEXT, rcToReturn=rc) 
+              return
+           endif
+        endif
+        
         
         ! Error check regridPoleNPnts        
         if (localpolemethod .eq. ESMF_POLEMETHOD_NPNTAVG) then
