@@ -204,7 +204,7 @@ RUN_ESMF_FieldRegridUTestUNI:
 RUN_ESMF_FieldRegridBinnUTest:
 	$(MAKE) TNAME=FieldRegridBinn NP=4 ftest
 
-RUN_ESMF_FieldRegridUBinnTestUNI:
+RUN_ESMF_FieldRegridBinnUTestUNI:
 	$(MAKE) TNAME=FieldRegridBinn NP=1 ftest
 
 
