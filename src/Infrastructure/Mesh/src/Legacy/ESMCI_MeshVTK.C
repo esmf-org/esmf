@@ -129,10 +129,13 @@ void get_elem_to_array_index_map(const Mesh &mesh, std::map<MeshObj::id_type, in
 
   Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
   for (; ei != ee; ++ei) {
-
     const MeshObj &elem = *ei;
 
+    // Only do local elems
     if (!GetAttr(elem).is_locally_owned()) continue;
+
+    // Don't do split elements
+    if (mesh.is_split && elem.get_id() > mesh.max_non_split_id) continue;
 
     int idx = elem.get_data_index();
 
@@ -140,11 +143,47 @@ void get_elem_to_array_index_map(const Mesh &mesh, std::map<MeshObj::id_type, in
 
   }
 
+  // Sort so ids in order of data index
   std::sort(gids.begin(), gids.end());
 
+  // Construct map from gids to array index
   gid_to_index.clear();
   for (UInt i = 0; i < gids.size(); ++i) {
     gid_to_index[gids[i].second]=i;
+  }
+
+  // If split, also add map for split elems
+  if (mesh.is_split) {
+    // Loop back through elems
+    for (ei = mesh.elem_begin(); ei != ee; ++ei) {      
+      const MeshObj &elem = *ei;
+      
+      // Only do local elems
+      if (!GetAttr(elem).is_locally_owned()) continue;
+     
+      // Only do split elems
+      if (mesh.is_split && elem.get_id() <= mesh.max_non_split_id) continue;
+
+      // get elem id
+      UInt split_elem_id=elem.get_id();
+      
+      // Find orig id
+      std::map<UInt,UInt>::const_iterator soi =  mesh.split_to_orig_id.find(split_elem_id);
+      if (soi == mesh.split_to_orig_id.end()) {
+        Throw() << "split element id not found in split to orig id map.";
+      } 
+      UInt orig_id=soi->second;
+      
+      // Get index for orig id
+      std::map<MeshObj::id_type,int>::iterator mi = gid_to_index.find(orig_id);
+      if (mi == gid_to_index.end()) {
+        Throw() << "object id not found.";
+      }
+      int index=mi->second; 
+      
+      // Add a new entry to map for split gid to original index
+      gid_to_index[split_elem_id]=index;      
+    }        
   }
 }
 

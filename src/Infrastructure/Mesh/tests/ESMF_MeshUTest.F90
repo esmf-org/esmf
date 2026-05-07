@@ -10703,18 +10703,22 @@ subroutine test_meshwritevtkgt4(correct, rc)
       farrayPtr1D(i)=REAL(elemIds(i), ESMF_KIND_R8)
    enddo
 
-   write(*,*) "elemIds=",elemIds
-   write(*,*) "farrayPtr=",farrayPtr1D
+  ! DEBUG OUTPUT
+  !  write(*,*) "elemIds=",elemIds
+  !  write(*,*) "farrayPtr=",farrayPtr1D
 
    ! Get Field array
    call ESMF_FieldGet(elemIdsField, array=elemIdsArray, rc=rc)
    if (rc /= ESMF_SUCCESS) return
-   
-  call ESMF_MeshWriteVTK(mesh, "elemidsgt4tst", &
-         elemArray1=elemIdsArray, &
-         rc=rc)
+
+   ! Write out Mesh and Array to test
+   call ESMF_MeshWriteVTK(mesh, "elemidsgt4tst", &
+        elemArray1=elemIdsArray, &
+        rc=rc)
    if (rc /= ESMF_SUCCESS) return
-       
+   
+   ! TODO: When we have a way to read it back in, add that, but for now just look at file
+
    ! Get rid of Field
    call ESMF_FieldDestroy(elemIdsField, rc=rc)
    if (rc /= ESMF_SUCCESS) return
@@ -10722,7 +10726,7 @@ subroutine test_meshwritevtkgt4(correct, rc)
    ! Get rid of Mesh
    call ESMF_MeshDestroy(mesh, rc=rc)
    if (rc /= ESMF_SUCCESS) return   
-
+   
    ! Return success
    rc=ESMF_SUCCESS
    
