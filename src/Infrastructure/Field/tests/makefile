@@ -38,6 +38,7 @@ TESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMF_FieldRedistArbUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldMeshSMMUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldHaloUTest \
+		$(ESMF_TESTDIR)/ESMF_FieldRegridBinnUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldSMMFromFileUTest
 
 # TESTS_BUILD   = \
@@ -73,6 +74,7 @@ TESTS_RUN     = \
 		RUN_ESMF_FieldRedistArbUTest \
 		RUN_ESMF_FieldMeshSMMUTest \
 		RUN_ESMF_FieldHaloUTest \
+		RUN_ESMF_FieldRegridBinnUTest \
 		RUN_ESMF_FieldSMMFromFileUTest
 
 #		RUN_ESMC_FieldGridRegridParUTest \
@@ -96,6 +98,7 @@ TESTS_RUN_UNI = \
 		RUN_ESMF_FieldRedistArbUTestUNI \
 		RUN_ESMF_FieldRegridCsrvUTestUNI \
 		RUN_ESMF_FieldRegridCsrv2ndUTestUNI \
+		RUN_ESMF_FieldRegridBinnUTestUNI \
 		RUN_ESMF_FieldSMMFromFileUTestUNI
 
 
@@ -197,6 +200,13 @@ RUN_ESMF_FieldRegridUTest:
 
 RUN_ESMF_FieldRegridUTestUNI:
 	$(MAKE) TNAME=FieldRegrid NP=1 ftest
+
+RUN_ESMF_FieldRegridBinnUTest:
+	$(MAKE) TNAME=FieldRegridBinn NP=4 ftest
+
+RUN_ESMF_FieldRegridBinnUTestUNI:
+	$(MAKE) TNAME=FieldRegridBinn NP=1 ftest
+
 
 RUN_ESMF_FieldRegridCSUTest:
 	cp -r data $(ESMF_TESTDIR)
