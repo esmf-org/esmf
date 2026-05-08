@@ -2022,7 +2022,7 @@ module ESMX_Data
 
   subroutine DataAdvance(importState, exportItems, rc)
     type(ESMF_State)              :: importState
-    type(ExportItem)              :: exportItems(:)
+    type(ExportItem), allocatable :: exportItems(:)
     integer, intent(out)          :: rc
 
     type(ESMF_Field)              :: importField
@@ -2039,6 +2039,9 @@ module ESMX_Data
     real(ESMF_KIND_R8), allocatable :: stack(:,:)
 
     rc = ESMF_SUCCESS
+
+    ! Early return if there is nothing to be done
+    if (.not.allocated(exportItems)) return
 
     do i=1, size(exportItems)
       if (exportItems(i)%dataAdvance == "") cycle  ! NOOP
