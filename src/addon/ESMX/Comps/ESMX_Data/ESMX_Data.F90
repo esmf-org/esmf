@@ -38,6 +38,7 @@ module ESMX_Data
     type(GeomItem),        allocatable :: geomItems(:)
     type(ImportItem),      allocatable :: importItems(:)
     type(ExportItem),      allocatable :: exportItems(:)
+    integer                            :: stepCounter
   end type
 
   type InternalState
@@ -84,6 +85,9 @@ module ESMX_Data
     call ESMF_InternalStateAdd(xdata, internalState=is, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+
+    ! initialize the stepCounter inside the internal state
+    is%wrap%stepCounter = 0
 
     ! specialize model
     call NUOPC_CompSpecialize(xdata, specLabel=label_Advertise, &
@@ -1407,7 +1411,6 @@ module ESMX_Data
     character(len=160)         :: clockString
     integer                    :: i, localPet
     type(ESMF_FileStatus_Flag) :: filestatus
-    integer, save              :: step=1
     type(InternalState)        :: is
     integer                    :: statsCount, warnCount, errCount
     real(ESMF_KIND_R8)         :: statsMean, statsMin, statsMax
@@ -1430,6 +1433,9 @@ module ESMX_Data
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
 
+    associate(stepCounter => is%wrap%stepCounter)
+    stepCounter=stepCounter+1
+
     ! query component for import and export states
     call NUOPC_ModelBaseGet(xdata, clock=clock, &
       importState=importState, exportState=exportState, rc=rc)
@@ -1443,10 +1449,10 @@ module ESMX_Data
     if (btest(diagnostic,17)) then
       ! write fields of the importState
       filestatus=ESMF_FILESTATUS_OLD
-      if (step==1) filestatus=ESMF_FILESTATUS_REPLACE
+      if (stepCounter==1) filestatus=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, &
         fileNamePrefix="field_"//trim(name)//"_import_advance_", &
-        timeslice=step, status=filestatus, relaxedFlag=.true., rc=rc)
+        timeslice=stepCounter, status=filestatus, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
     endif
@@ -1544,10 +1550,10 @@ module ESMX_Data
     if (btest(diagnostic,17)) then
       ! write fields of the exportState
       filestatus=ESMF_FILESTATUS_OLD
-      if (step==1) filestatus=ESMF_FILESTATUS_REPLACE
+      if (stepCounter==1) filestatus=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, &
         fileNamePrefix="field_"//trim(name)//"_export_advance_", &
-        timeslice=step, status=filestatus, relaxedFlag=.true., rc=rc)
+        timeslice=stepCounter, status=filestatus, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
     endif
@@ -1569,8 +1575,7 @@ module ESMX_Data
       return  ! bail out
     endif
 
-    ! increment step counter
-    step=step+1
+    end associate
 
   end subroutine Advance
 
