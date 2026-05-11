@@ -26,12 +26,14 @@ module ESMX_Data
     type(ESMF_Field)              :: field
     logical                       :: dataDiagnose
     character(len=:), allocatable :: dataValidate
+    character(len=:), allocatable :: dataInit
   end type
 
   type ExportItem
     type(ESMF_Field)              :: field
     logical                       :: dataDiagnose
     character(len=:), allocatable :: dataValidate
+    character(len=:), allocatable :: dataInit
     character(len=:), allocatable :: dataAdvance
   end type
 
@@ -292,7 +294,8 @@ module ESMX_Data
 
           imports(item)%field = FieldCreateFromHConfig(hconfigIt, geoms=geoms, &
             dataDiagnose=imports(item)%dataDiagnose, &
-            dataValidate=imports(item)%dataValidate, rc=rc)
+            dataValidate=imports(item)%dataValidate, &
+            dataInit=imports(item)%dataInit, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, &
             msg="Problem creating import field.", &
             line=__LINE__, file=__FILE__)) return  ! bail out
@@ -348,6 +351,7 @@ module ESMX_Data
           exports(item)%field = FieldCreateFromHConfig(hconfigIt, geoms=geoms, &
             dataDiagnose=exports(item)%dataDiagnose, &
             dataValidate=exports(item)%dataValidate, &
+            dataInit=exports(item)%dataInit, &
             dataAdvance=exports(item)%dataAdvance, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, &
             msg="Problem creating export field.", &
@@ -371,12 +375,13 @@ module ESMX_Data
   !-----------------------------------------------------------------------------
 
   function FieldCreateFromHConfig(hconfig, geoms, dataDiagnose, dataValidate, &
-    dataAdvance, rc)
+    dataInit, dataAdvance, rc)
     type(ESMF_Field)                           :: FieldCreateFromHConfig
     type(ESMF_HConfigIter),        intent(in)  :: hconfig
     type(GeomItem),                intent(in)  :: geoms(:)
     logical,                       intent(out) :: dataDiagnose
     character(len=:), allocatable, intent(out) :: dataValidate
+    character(len=:), allocatable, intent(out), optional :: dataInit
     character(len=:), allocatable, intent(out), optional :: dataAdvance
     integer,                       intent(out) :: rc
 
@@ -571,44 +576,6 @@ module ESMX_Data
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
 
-      ! handle dataInit (optional)
-      isFlag = ESMF_HConfigIsDefined(hconfigMap, keyString="dataInit", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
-      if (isFlag) then
-        ! ingest key and set as field info metadata
-        call InfoIngestFromHConfig(info, hconfigMap, key="dataInit", &
-          typekind=typekind, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=__FILE__)) return  ! bail out
-        ! for now call FieldFill() right here... this may move into realize
-        ! always use valueR8, because that is what FieldFill() takes for const
-        if (typekind == ESMF_TYPEKIND_I4) then
-          call ESMF_InfoGet(info, key="dataInit", value=valueI4, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          valueR8 = real(valueI4,ESMF_KIND_R8)
-        else if (typekind == ESMF_TYPEKIND_I8) then
-          call ESMF_InfoGet(info, key="dataInit", value=valueI8, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          valueR8 = real(valueI8,ESMF_KIND_R8)
-        else if (typekind == ESMF_TYPEKIND_R4) then
-          call ESMF_InfoGet(info, key="dataInit", value=valueR4, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          valueR8 = real(valueR4,ESMF_KIND_R8)
-        else if (typekind == ESMF_TYPEKIND_R8) then
-          call ESMF_InfoGet(info, key="dataInit", value=valueR8, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-        endif
-        call ESMF_FieldFill(FieldCreateFromHConfig, dataFillScheme="const", &
-          const1=valueR8, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=__FILE__)) return  ! bail out
-      endif
-
       ! handle dataMask (optional)
       isFlag = ESMF_HConfigIsDefined(hconfigMap, keyString="dataMask", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -678,6 +645,24 @@ module ESMX_Data
       else
         ! dataValidate key not provided, default
         dataValidate = "NO"
+      endif
+
+      ! handle dataInit (optional)
+      if (present(dataInit)) then
+        isFlag = ESMF_HConfigIsDefined(hconfigMap, keyString="dataInit", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+        if (isFlag) then
+          ! dataInit key provided -> read value string
+          dataInit = ESMF_HConfigAsString(hconfigMap, &
+            keyString="dataInit", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+        else
+          ! dataInit key not provided, default
+          dataInit = ""  ! NOOP
+        endif
       endif
 
       ! handle dataAdvance (optional)
@@ -1376,8 +1361,9 @@ module ESMX_Data
       enddo
     endif
 
-    ! Advance the data in export fields
-    call DataAdvance(importState, is%wrap%exportItems, rc=rc)
+    ! Initialize the data in export fields
+    call DataHandling(importState, is%wrap%exportItems, is%wrap%stepCounter, &
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
 
@@ -1507,7 +1493,8 @@ module ESMX_Data
     endif
 
     ! Advance the data in export fields
-    call DataAdvance(importState, is%wrap%exportItems, rc=rc)
+    call DataHandling(importState, is%wrap%exportItems, is%wrap%stepCounter, &
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
 
@@ -2027,12 +2014,14 @@ module ESMX_Data
 
   !-----------------------------------------------------------------------------
 
-  subroutine DataAdvance(importState, exportItems, rc)
+  subroutine DataHandling(importState, exportItems, step, rc)
     type(ESMF_State)              :: importState
     type(ExportItem), allocatable :: exportItems(:)
-    integer, intent(out)          :: rc
+    integer,          intent(in)  :: step
+    integer,          intent(out) :: rc
 
     integer                       :: i
+    character(len=:), allocatable :: expression
 
     rc = ESMF_SUCCESS
 
@@ -2040,10 +2029,16 @@ module ESMX_Data
     if (.not.allocated(exportItems)) return
 
     do i=1, size(exportItems)
-      if (exportItems(i)%dataAdvance == "") cycle  ! NOOP
 
-      call process(exportItems(i)%field, exportItems(i)%dataAdvance, &
-        importState, rc=rc)
+      if (step==0) then
+        expression = exportItems(i)%dataInit
+      else
+        expression = exportItems(i)%dataAdvance
+      endif
+
+      if (expression == "") cycle  ! NOOP
+
+      call process(importState, expression, exportItems(i)%field, step, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
 
@@ -2154,6 +2149,7 @@ module ESMX_Data
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
         deallocate(is%wrap%importItems(i)%dataValidate)
+        deallocate(is%wrap%importItems(i)%dataInit)
       enddo
       deallocate(is%wrap%importItems)
     endif
@@ -2166,6 +2162,7 @@ module ESMX_Data
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
         deallocate(is%wrap%exportItems(i)%dataValidate)
+        deallocate(is%wrap%exportItems(i)%dataInit)
         deallocate(is%wrap%exportItems(i)%dataAdvance)
       enddo
       deallocate(is%wrap%exportItems)

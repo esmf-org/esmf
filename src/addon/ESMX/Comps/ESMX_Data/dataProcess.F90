@@ -18,11 +18,13 @@ module dataProcess
 
   !-----------------------------------------------------------------------------
 
-  subroutine process(exportField, dataAdvance, importState, rc)
+  subroutine process(importState, expression, exportField, step, rc)
+    ! Process according to the expression infix string and store in exportField
 
-    type(ESMF_Field), intent(inout) :: exportField
-    character(len=*), intent(in)    :: dataAdvance
     type(ESMF_State), intent(in)    :: importState
+    character(len=*), intent(in)    :: expression
+    type(ESMF_Field), intent(inout) :: exportField
+    integer,          intent(in)    :: step
     integer,          intent(out)   :: rc
 
     type(ESMF_Field)                :: importField
@@ -35,7 +37,8 @@ module dataProcess
     real(ESMF_KIND_R8), pointer, contiguous    :: fPtrImportR8(:)
     real(ESMF_KIND_R8), pointer, contiguous    :: fPtrExportR8(:)
     real(ESMF_KIND_R8)            :: value
-    character(len=:), allocatable :: infix_expression, rpn_expression, token
+    character(len=:), allocatable :: infix_expression, rpn_expression
+    character(len=:), allocatable :: token, tempString
     integer                       :: count, cur, top, depth
     type(ESMF_TYPEKIND_Flag)      :: tkImport, tkExport
     real(ESMF_KIND_R8), allocatable :: stack(:,:)
@@ -43,7 +46,7 @@ module dataProcess
     rc = ESMF_SUCCESS
 
     ! Normalize the incoming infix string with single white space deliminators
-    call normalize_infix(dataAdvance, infix_expression)
+    call normalize_infix(expression, infix_expression)
 
     ! Convert standard infix notation to reverse polish notation
     call infix_to_rpn(infix_expression, rpn_expression)
@@ -77,7 +80,7 @@ module dataProcess
       count = size(fPtrExportR8)
     else
       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
-        msg="DataAdvance() only supports I4, I8, R4, and R8.", &
+        msg="process() only supports I4, I8, R4, and R8.", &
         line=__LINE__, file=__FILE__, rcToReturn=rc)
       return  ! bail out
     end if
@@ -110,8 +113,27 @@ module dataProcess
         if (try_parse(token, value)) then
           ! Numerical value
           stack(:,top) = value
+        else if (token(1:1) == "_") then
+          ! Special variable
+          tempString = ESMF_UtilStringUpperCase(token, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+          if (tempString == "_STEP") then
+            ! Step
+            stack(:,top) = real(step, ESMF_KIND_R8)
+          else if (tempString(1:6) == "_COORD") then
+            ! Coordinate
+            call push_coord(exportField, token, stack(:,top), rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=__FILE__)) return
+          else
+            call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+              msg="Unknown special variable: "//token, &
+              line=__LINE__, file=__FILE__, rcToReturn=rc)
+            return
+          end if
         else
-          ! Variable Name: Pull from importState
+          ! Field in importState
           call ESMF_StateGet(importState, itemName=token, field=importField, &
             rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -141,7 +163,7 @@ module dataProcess
             stack(:,top) = fPtrImportR8
           else
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
-              msg="DataAdvance() only supports I4, I8, R4, and R8.", &
+              msg="process() only supports I4, I8, R4, and R8.", &
               line=__LINE__, file=__FILE__, rcToReturn=rc)
             return  ! bail out
           end if
@@ -162,6 +184,151 @@ module dataProcess
 
     ! clean-up workspace stack
     deallocate(stack)
+
+  end subroutine
+
+  !-----------------------------------------------------------------------------
+
+  subroutine push_coord(field, token, stackColumn, rc)
+    type(ESMF_Field),   intent(in)  :: field
+    character(len=*),   intent(in)  :: token
+    real(ESMF_KIND_R8), intent(out) :: stackColumn(:)
+    integer,            intent(out) :: rc
+
+    integer                         :: coordDim
+    type(ESMF_Grid)                 :: grid
+    type(ESMF_Mesh)                 :: mesh
+    type(ESMF_GeomType_Flag)        :: geomtype
+    type(ESMF_StaggerLoc)           :: staggerloc
+    type(ESMF_MeshLoc)              :: meshloc
+    integer                         :: dimCount, m, i, j, k, idx
+    integer                         :: inner_repeat, outer_replicate
+    integer, allocatable            :: coordDimCount(:), exclusiveCount(:)
+    integer                         :: numOwnedPoints
+    real(ESMF_KIND_R8), pointer, contiguous :: fPtr(:)
+    real(ESMF_KIND_R8), pointer, contiguous :: fPtr1D(:)
+    real(ESMF_KIND_R8), pointer, contiguous :: fPtr2D(:,:)
+    real(ESMF_KIND_R8), pointer, contiguous :: fPtr3D(:,:,:)
+
+    rc = ESMF_SUCCESS
+
+    ! Extract digit from "_coordX"
+    read(token(7:), *, iostat=rc) coordDim
+
+    call ESMF_FieldGet(field, geomtype=geomtype, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return  ! bail out
+
+    if (geomtype==ESMF_GEOMTYPE_GRID) then
+      call ESMF_FieldGet(field, grid=grid, staggerloc=staggerloc, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return  ! bail out
+      call ESMF_GridGet(grid, dimCount=dimCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return  ! bail out
+      allocate(coordDimCount(dimCount))
+      call ESMF_GridGet(grid, coordDimCount=coordDimCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return  ! bail out
+      if (coordDimCount(coordDim)==1) then
+        allocate(exclusiveCount(dimCount))
+        call ESMF_GridGet(grid, staggerloc=staggerloc, localDE=0, &
+          exclusiveCount=exclusiveCount, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+        call ESMF_GridGetCoord(grid, coordDim=coordDim, staggerloc=staggerloc, &
+          farrayPtr=fPtr1D, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+        m = size(fPtr1D)
+        inner_repeat = product(exclusiveCount(1:coordDim-1))
+        outer_replicate = product(exclusiveCount(coordDim+1:dimCount))
+        ! Populate stackColumn with replicated fPtr1D data
+        idx = 1
+        do k = 1, outer_replicate
+          do j = 1, m
+            do i = 1, inner_repeat
+              stackColumn(idx) = fPtr1D(lbound(fPtr1D,1)-1+j)
+              idx = idx + 1
+            end do
+          end do
+        end do
+      else if (coordDimCount(coordDim)==2) then
+        call ESMF_GridGetCoord(grid, coordDim=coordDim, staggerloc=staggerloc, &
+          farrayPtr=fPtr2D, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+        ! Reinterpret
+        fPtr(1:size(fPtr2D)) => fPtr2D(:, :)
+        ! Copy into stackColumn
+        stackColumn(:) = fPtr
+      else if (coordDimCount(coordDim)==3) then
+        call ESMF_GridGetCoord(grid, coordDim=coordDim, staggerloc=staggerloc, &
+          farrayPtr=fPtr3D, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+        ! Reinterpret
+        fPtr(1:size(fPtr3D)) => fPtr3D(:, :, :)
+        ! Copy into stackColumn
+        stackColumn(:) = fPtr
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Unsupported coordDimCount detected.", &
+          line=__LINE__, file=__FILE__, rcToReturn=rc)
+        return ! bail out
+      endif
+    elseif (geomtype==ESMF_GEOMTYPE_MESH) then
+      call ESMF_FieldGet(field, mesh=mesh, meshloc=meshloc, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return  ! bail out
+      if (meshloc==ESMF_MESHLOC_ELEMENT) then
+        call ESMF_MeshGet(mesh, spatialDim=dimCount, &
+          numOwnedElements=numOwnedPoints, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+      elseif (meshloc==ESMF_MESHLOC_NODE) then
+        call ESMF_MeshGet(mesh, spatialDim=dimCount, &
+          numOwnedNodes=numOwnedPoints, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Unsupported MESHLOC detected.", &
+          line=__LINE__, file=__FILE__, rcToReturn=rc)
+        return ! bail out
+      endif
+      if (dimCount==1) then
+        ! Directly fill stackColumn
+        if (meshloc==ESMF_MESHLOC_ELEMENT) then
+          call ESMF_MeshGet(mesh, ownedElemCoords=stackColumn, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+        else
+          call ESMF_MeshGet(mesh, ownedNodeCoords=stackColumn, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+        endif
+      else
+        ! Require temporary fPtr1D
+        allocate(fPtr1D(dimCount*numOwnedPoints))
+        if (meshloc==ESMF_MESHLOC_ELEMENT) then
+          call ESMF_MeshGet(mesh, ownedElemCoords=fPtr1D, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+        else
+          call ESMF_MeshGet(mesh, ownedNodeCoords=fPtr1D, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+        endif
+        stackColumn = fPtr1D(coordDim::dimCount)  ! copy the coorDim entries
+        deallocate(fPtr1D)
+      endif
+    else
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Unsupported geomtype detected.", &
+        line=__LINE__, file=__FILE__, rcToReturn=rc)
+      return ! bail out
+    endif
 
   end subroutine
 
