@@ -22,17 +22,22 @@ module ESMX_Data
     type(ESMF_Geom)               :: geom
   end type
 
+  type Validate
+    real(ESMF_KIND_R8)            :: min, max, mask
+    logical                       :: minGuard, maxGuard, maskGuard
+    logical                       :: diagnose
+    character(len=:), allocatable :: action
+  end type
+
   type ImportItem
     type(ESMF_Field)              :: field
-    logical                       :: dataDiagnose
-    character(len=:), allocatable :: dataValidate
+    type(Validate)                :: dataValidate
     character(len=:), allocatable :: dataInit
   end type
 
   type ExportItem
     type(ESMF_Field)              :: field
-    logical                       :: dataDiagnose
-    character(len=:), allocatable :: dataValidate
+    type(Validate)                :: dataValidate
     character(len=:), allocatable :: dataInit
     character(len=:), allocatable :: dataAdvance
   end type
@@ -293,7 +298,6 @@ module ESMX_Data
           item = item+1
 
           imports(item)%field = FieldCreateFromHConfig(hconfigIt, geoms=geoms, &
-            dataDiagnose=imports(item)%dataDiagnose, &
             dataValidate=imports(item)%dataValidate, &
             dataInit=imports(item)%dataInit, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, &
@@ -349,7 +353,6 @@ module ESMX_Data
           item = item+1
 
           exports(item)%field = FieldCreateFromHConfig(hconfigIt, geoms=geoms, &
-            dataDiagnose=exports(item)%dataDiagnose, &
             dataValidate=exports(item)%dataValidate, &
             dataInit=exports(item)%dataInit, &
             dataAdvance=exports(item)%dataAdvance, rc=rc)
@@ -374,20 +377,19 @@ module ESMX_Data
 
   !-----------------------------------------------------------------------------
 
-  function FieldCreateFromHConfig(hconfig, geoms, dataDiagnose, dataValidate, &
+  function FieldCreateFromHConfig(hconfig, geoms, dataValidate, &
     dataInit, dataAdvance, rc)
     type(ESMF_Field)                           :: FieldCreateFromHConfig
     type(ESMF_HConfigIter),        intent(in)  :: hconfig
     type(GeomItem),                intent(in)  :: geoms(:)
-    logical,                       intent(out) :: dataDiagnose
-    character(len=:), allocatable, intent(out) :: dataValidate
+    type(Validate),                intent(out) :: dataValidate
     character(len=:), allocatable, intent(out), optional :: dataInit
     character(len=:), allocatable, intent(out), optional :: dataAdvance
     integer,                       intent(out) :: rc
 
     ! local variables
     logical                       :: isFlag
-    type(ESMF_HConfig)            :: hconfigMap
+    type(ESMF_HConfig)            :: hconfigMap, hconfigMap2
     character(:),    allocatable  :: geometry, name, badkey, string
     type(ESMF_Grid)               :: grid
     integer                       :: item
@@ -395,7 +397,6 @@ module ESMX_Data
     integer,         allocatable  :: gridToFieldMap(:)
     integer,         allocatable  :: ungriddedLBound(:)
     integer,         allocatable  :: ungriddedUBound(:)
-    type(ESMF_Info)               :: info
     integer(ESMF_KIND_I4)         :: valueI4
     integer(ESMF_KIND_I8)         :: valueI8
     real(ESMF_KIND_R4)            :: valueR4
@@ -424,31 +425,24 @@ module ESMX_Data
                     "gridToFieldMap ", &
                     "ungriddedLBound", &
                     "ungriddedUBound", &
-                    "dataInit       ", &
-                    "dataMask       ", &
-                    "dataMin        ", &
-                    "dataMax        ", &
                     "typekind       ", &
-                    "dataDiagnose   ", &
                     "dataValidate   ", &
+                    "dataInit       ", &
                     "dataAdvance    "  ]
       else
         vocabulary=["geometry       ", &
                     "gridToFieldMap ", &
                     "ungriddedLBound", &
                     "ungriddedUBound", &
-                    "dataInit       ", &
-                    "dataMask       ", &
-                    "dataMin        ", &
-                    "dataMax        ", &
                     "typekind       ", &
-                    "dataDiagnose   ", &
-                    "dataValidate   "  ]
+                    "dataValidate   ", &
+                    "dataInit       "  ]
       end if
       isFlag = ESMF_HConfigValidateMapKeys(hconfigMap, vocabulary=vocabulary, &
         badKey=badKey, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
+      deallocate(vocabulary)
       if (.not.isFlag) then
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
           msg="An invalid key was found for field '"//trim(name)//"' "// &
@@ -571,81 +565,141 @@ module ESMX_Data
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
 
-      ! access the info object
-      call ESMF_InfoGetFromHost(FieldCreateFromHConfig, info=info, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
-
-      ! handle dataMask (optional)
-      isFlag = ESMF_HConfigIsDefined(hconfigMap, keyString="dataMask", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
-      if (isFlag) then
-        ! ingest key and set as field info metadata
-        call InfoIngestFromHConfig(info, hconfigMap, key="dataMask", &
-          typekind=typekind, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=__FILE__)) return  ! bail out
-      endif
-
-      ! handle dataMin (optional)
-      isFlag = ESMF_HConfigIsDefined(hconfigMap, keyString="dataMin", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
-      if (isFlag) then
-        ! ingest key and set as field info metadata
-        call InfoIngestFromHConfig(info, hconfigMap, key="dataMin", &
-          typekind=typekind, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=__FILE__)) return  ! bail out
-      endif
-
-      ! handle dataMax (optional)
-      isFlag = ESMF_HConfigIsDefined(hconfigMap, keyString="dataMax", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
-      if (isFlag) then
-        ! ingest key and set as field info metadata
-        call InfoIngestFromHConfig(info, hconfigMap, key="dataMax", &
-          typekind=typekind, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=__FILE__)) return  ! bail out
-      endif
-
-      ! handle dataDiagnose (optional)
-      isFlag = ESMF_HConfigIsDefined(hconfigMap, keyString="dataDiagnose", &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
-      if (isFlag) then
-        ! dataDiagnose key provided -> read value
-        dataDiagnose = ESMF_HConfigAsLogical(hconfigMap, &
-          keyString="dataDiagnose", rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=__FILE__)) return  ! bail out
-      else
-        ! dataDiagnose key not provided, default
-        dataDiagnose = .false.
-      endif
-
       ! handle dataValidate (optional)
       isFlag = ESMF_HConfigIsDefined(hconfigMap, keyString="dataValidate", &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
       if (isFlag) then
-        ! dataValidate key provided -> read value string
-        dataValidate = ESMF_HConfigAsString(hconfigMap, &
+        ! assert this to be a map element
+        hconfigMap2 = ESMF_HConfigCreateAt(hconfigMap, &
           keyString="dataValidate", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return  ! bail out
-        dataValidate = ESMF_UtilStringUpperCase(dataValidate, rc=rc)
+
+        isFlag = ESMF_HConfigIsMap(hconfigMap2, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return  ! bail out
+
+        if (isFlag) then
+          ! dataValidate key provided -> ingest
+          vocabulary=["min      ", &
+                      "max      ", &
+                      "mask     ", &
+                      "diagnose ", &
+                      "action   "  ]
+          isFlag = ESMF_HConfigValidateMapKeys(hconfigMap2, &
+            vocabulary=vocabulary, badKey=badKey, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+          deallocate(vocabulary)
+          if (.not.isFlag) then
+            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+              msg="An invalid key was found in 'dataValidate' for field "// &
+                "'"//trim(name)//"' "// "(maybe a typo?): "//badKey, &
+              line=__LINE__, file=__FILE__, rcToReturn=rc)
+            return  ! bail out
+          endif
+        else
+          ! not a map -> error condition
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+            msg="The value associated with key 'dataValidate' for field "// &
+            "'"//trim(name)//"' must be a map!", &
+            line=__LINE__, file=__FILE__, rcToReturn=rc)
+          return  ! bail out
+        endif
+
+        ! handle min (optional)
+        isFlag = ESMF_HConfigIsDefined(hconfigMap2, keyString="min", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+        if (isFlag) then
+          ! ingest and set guard variable
+          dataValidate%min = ESMF_HConfigAsR8(hconfigMap2, &
+            keyString="min", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+          dataValidate%minGuard = .true.
+        else
+          ! default
+          dataValidate%minGuard = .false.
+        endif
+
+        ! handle max (optional)
+        isFlag = ESMF_HConfigIsDefined(hconfigMap2, keyString="max", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+        if (isFlag) then
+          ! ingest and set guard variable
+          dataValidate%max = ESMF_HConfigAsR8(hconfigMap2, &
+            keyString="max", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+          dataValidate%maxGuard = .true.
+        else
+          ! default
+          dataValidate%maxGuard = .false.
+        endif
+
+        ! handle mask (optional)
+        isFlag = ESMF_HConfigIsDefined(hconfigMap2, keyString="mask", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+        if (isFlag) then
+          ! ingest and set guard variable
+          dataValidate%mask = ESMF_HConfigAsR8(hconfigMap2, &
+            keyString="mask", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+          dataValidate%maskGuard = .true.
+        else
+          ! default
+          dataValidate%maskGuard = .false.
+        endif
+
+        ! handle diagnose (optional)
+        isFlag = ESMF_HConfigIsDefined(hconfigMap2, keyString="diagnose", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+        if (isFlag) then
+          ! ingest and set guard variable
+          dataValidate%diagnose = ESMF_HConfigAsLogical(hconfigMap2, &
+            keyString="diagnose", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+        else
+          ! default
+          dataValidate%diagnose = .false.
+        endif
+
+        ! handle action (optional)
+        isFlag = ESMF_HConfigIsDefined(hconfigMap2, keyString="action", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+        if (isFlag) then
+          ! ingest and set guard variable
+          dataValidate%action = ESMF_HConfigAsString(hconfigMap2, &
+            keyString="action", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+        else
+          ! default
+          dataValidate%action = "none"
+        endif
+
       else
-        ! dataValidate key not provided, default
-        dataValidate = "NO"
+        ! dataValidate key not provided, default all members
+        dataValidate%minGuard   = .false.
+        dataValidate%maxGuard   = .false.
+        dataValidate%maskGuard  = .false.
+        dataValidate%diagnose   = .false.
+        dataValidate%action     = "none"
       endif
+
+      ! upper case to be case insensitive
+      dataValidate%action = ESMF_UtilStringUpperCase(dataValidate%action, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return  ! bail out
 
       ! handle dataInit (optional)
       if (present(dataInit)) then
@@ -687,7 +741,7 @@ module ESMX_Data
       ! not a map -> error condition
       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
         msg="The value associated with key '"//trim(name)//"' "// &
-        "under 'geometries' must be a map!", &
+        "under 'importFields' or 'exportFields' must be a map!", &
         line=__LINE__, file=__FILE__, rcToReturn=rc)
       return  ! bail out
     endif
@@ -697,60 +751,6 @@ module ESMX_Data
       line=__LINE__, file=__FILE__)) return  ! bail out
 
   end function
-
-  !-----------------------------------------------------------------------------
-
-  subroutine InfoIngestFromHConfig(info, hconfig, key, typekind, rc)
-    type(ESMF_Info),          intent(inout) :: info
-    type(ESMF_HConfig),       intent(in)    :: hconfig
-    character(*),             intent(in)    :: key
-    type(ESMF_TypeKind_Flag), intent(in)    :: typekind
-    integer,                  intent(out)   :: rc
-
-    ! local variables
-    integer(ESMF_KIND_I4)         :: valueI4
-    integer(ESMF_KIND_I8)         :: valueI8
-    real(ESMF_KIND_R4)            :: valueR4
-    real(ESMF_KIND_R8)            :: valueR8
-
-    rc=ESMF_SUCCESS
-
-    if (typekind == ESMF_TYPEKIND_I4) then
-      valueI4 = ESMF_HConfigAsI4(hconfig, keyString=key, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
-      call ESMF_InfoSet(info, key=key, value=valueI4, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
-    else if (typekind == ESMF_TYPEKIND_I8) then
-      valueI8 = ESMF_HConfigAsI8(hconfig, keyString=key, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
-      call ESMF_InfoSet(info, key=key, value=valueI8, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
-    else if (typekind == ESMF_TYPEKIND_R4) then
-      valueR4 = ESMF_HConfigAsR4(hconfig, keyString=key, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
-      call ESMF_InfoSet(info, key=key, value=valueR4, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
-    else if (typekind == ESMF_TYPEKIND_R8) then
-      valueR8 = ESMF_HConfigAsR8(hconfig, keyString=key, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
-      call ESMF_InfoSet(info, key=key, value=valueR8, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
-    else
-      call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-        msg="Unsupported typekind setting!", &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)
-      return  ! bail out
-    endif
-
-  end subroutine
 
   !-----------------------------------------------------------------------------
 
@@ -1449,15 +1449,16 @@ module ESMX_Data
     if (allocated(is%wrap%importItems)) then
       headerPrinted = .false.
       do i=1, size(is%wrap%importItems)
-        if (.not.is%wrap%importItems(i)%dataDiagnose .and. &
-          is%wrap%importItems(i)%dataValidate /= "WARN" .and. &
-          is%wrap%importItems(i)%dataValidate /= "ERR") cycle
-        call FieldStats(is%wrap%importItems(i)%field, statsCount=statsCount, &
-          statsMean=statsMean, statsMin=statsMin, statsMax=statsMax, &
-          statsOkay=statsOkay, rc=rc)
+        associate(dataValidate => is%wrap%importItems(i)%dataValidate)
+        if (.not.dataValidate%diagnose .and. &
+          dataValidate%action /= "WARNING" .and. &
+          dataValidate%action /= "ERROR") cycle
+        call FieldStats(is%wrap%importItems(i)%field, dataValidate, &
+          statsCount=statsCount, statsMean=statsMean, statsMin=statsMin, &
+          statsMax=statsMax, statsOkay=statsOkay, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-        if (is%wrap%importItems(i)%dataDiagnose .or. .not.statsOkay) then
+        if (dataValidate%diagnose .or. .not.statsOkay) then
           if (localPet == 0) then
             if (.not.headerPrinted) then
               headerPrinted = .true.
@@ -1481,11 +1482,10 @@ module ESMX_Data
           endif
         endif
         if (.not.statsOkay) then
-          if (is%wrap%importItems(i)%dataValidate == "WARN") &
-            warnCount = warnCount + 1
-          if (is%wrap%importItems(i)%dataValidate == "ERR") &
-            errCount = errCount + 1
+          if (dataValidate%action == "WARNING") warnCount = warnCount + 1
+          if (dataValidate%action == "ERROR") errCount = errCount + 1
         endif
+        end associate
       enddo
     endif
 
@@ -1499,15 +1499,16 @@ module ESMX_Data
     if (allocated(is%wrap%exportItems)) then
       headerPrinted = .false.
       do i=1, size(is%wrap%exportItems)
-        if (.not.is%wrap%exportItems(i)%dataDiagnose .and. &
-          is%wrap%exportItems(i)%dataValidate /= "WARN" .and. &
-          is%wrap%exportItems(i)%dataValidate /= "ERR") cycle
-        call FieldStats(is%wrap%exportItems(i)%field, statsCount=statsCount, &
-          statsMean=statsMean, statsMin=statsMin, statsMax=statsMax, &
-          statsOkay=statsOkay, rc=rc)
+        associate(dataValidate => is%wrap%exportItems(i)%dataValidate)
+        if (.not.dataValidate%diagnose .and. &
+          dataValidate%action /= "WARNING" .and. &
+          dataValidate%action /= "ERROR") cycle
+        call FieldStats(is%wrap%exportItems(i)%field, dataValidate, &
+          statsCount=statsCount, statsMean=statsMean, statsMin=statsMin, &
+          statsMax=statsMax, statsOkay=statsOkay, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-        if (is%wrap%exportItems(i)%dataDiagnose .or. .not.statsOkay) then
+        if (dataValidate%diagnose .or. .not.statsOkay) then
           if (localPet == 0) then
             if (.not.headerPrinted) then
               headerPrinted = .true.
@@ -1531,11 +1532,10 @@ module ESMX_Data
           endif
         endif
         if (.not.statsOkay) then
-          if (is%wrap%exportItems(i)%dataValidate == "WARN") &
-            warnCount = warnCount + 1
-          if (is%wrap%exportItems(i)%dataValidate == "ERR") &
-            errCount = errCount + 1
+          if (dataValidate%action == "WARNING") warnCount = warnCount + 1
+          if (dataValidate%action == "ERROR") errCount = errCount + 1
         endif
+        end associate
       enddo
     endif
 
@@ -1573,16 +1573,16 @@ module ESMX_Data
 
   !-----------------------------------------------------------------------------
 
-  subroutine FieldStats(field, statsCount, statsMean, statsMin, statsMax, &
-    statsOkay, rc)
+  subroutine FieldStats(field, dataValidate, statsCount, statsMean, statsMin, &
+    statsMax, statsOkay, rc)
     ! arguments
     type(ESMF_Field)                :: field
+    type(Validate)                  :: dataValidate
     integer,            intent(out) :: statsCount
     real(ESMF_KIND_R8), intent(out) :: statsMean, statsMin, statsMax
     logical,            intent(out) :: statsOkay
     integer,            intent(out) :: rc
     ! local variables
-    logical                         :: isFlag
     type(ESMF_VM)                   :: vm
     type(ESMF_TypeKind_Flag)        :: typekind
     integer                         :: rank
@@ -1590,8 +1590,6 @@ module ESMX_Data
     real(ESMF_KIND_R8)              :: lsum(1), lmin(1), lmax(1)
     real(ESMF_KIND_R8)              :: gsum(1), gmin(1), gmax(1)
     real(ESMF_KIND_R8)              :: dataMin, dataMax
-    logical                         :: dataMinSet, dataMaxSet
-    type(ESMF_Info)                 :: info
 
     rc = ESMF_SUCCESS
 
@@ -1603,25 +1601,16 @@ module ESMX_Data
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return  ! bail out
 
-    call ESMF_InfoGetFromHost(field, info=info, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return  ! bail out
-
     if (rank == 2) then
       if (typekind == ESMF_TYPEKIND_I4) then
         block
           integer(ESMF_KIND_I4), pointer  :: fptr(:,:)
-          integer(ESMF_KIND_I4)           :: dataMask, value
+          integer(ESMF_KIND_I4)           :: dataMask
           call ESMF_FieldGet(field, farrayPtr=fptr, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
-          isFlag = ESMF_InfoIsPresent(info, key="dataMask", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (isFlag) then
-            call ESMF_InfoGet(info, key="dataMask", value=dataMask, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
+          if (dataValidate%maskGuard) then
+            dataMask = dataValidate%mask
             lcount(1) = count(fptr/=dataMask)
             lsum(1)   = sum(fptr, fptr/=dataMask)
             lmin(1)   = minval(fptr, fptr/=dataMask)
@@ -1631,40 +1620,17 @@ module ESMX_Data
             lsum(1)   = sum(fptr)
             lmin(1)   = minval(fptr)
             lmax(1)   = maxval(fptr)
-          endif
-          dataMinSet = ESMF_InfoIsPresent(info, key="dataMin", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataMinSet) then
-            call ESMF_InfoGet(info, key="dataMin", value=value, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
-            dataMin = real(value, ESMF_KIND_R8)
-          endif
-          dataMaxSet = ESMF_InfoIsPresent(info, key="dataMax", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataMaxSet) then
-            call ESMF_InfoGet(info, key="dataMax", value=value, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
-            dataMax = real(value, ESMF_KIND_R8)
           endif
         end block
       else if (typekind == ESMF_TYPEKIND_I8) then
         block
           integer(ESMF_KIND_I8), pointer  :: fptr(:,:)
-          integer(ESMF_KIND_I8)           :: dataMask, value
+          integer(ESMF_KIND_I8)           :: dataMask
           call ESMF_FieldGet(field, farrayPtr=fptr, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
-          isFlag = ESMF_InfoIsPresent(info, key="dataMask", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (isFlag) then
-            call ESMF_InfoGet(info, key="dataMask", value=dataMask, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
+          if (dataValidate%maskGuard) then
+            dataMask = dataValidate%mask
             lcount(1) = count(fptr/=dataMask)
             lsum(1)   = sum(fptr, fptr/=dataMask)
             lmin(1)   = minval(fptr, fptr/=dataMask)
@@ -1674,40 +1640,17 @@ module ESMX_Data
             lsum(1)   = sum(fptr)
             lmin(1)   = minval(fptr)
             lmax(1)   = maxval(fptr)
-          endif
-          dataMinSet = ESMF_InfoIsPresent(info, key="dataMin", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataMinSet) then
-            call ESMF_InfoGet(info, key="dataMin", value=value, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
-            dataMin = real(value, ESMF_KIND_R8)
-          endif
-          dataMaxSet = ESMF_InfoIsPresent(info, key="dataMax", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataMaxSet) then
-            call ESMF_InfoGet(info, key="dataMax", value=value, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
-            dataMax = real(value, ESMF_KIND_R8)
           endif
         end block
       else if (typekind == ESMF_TYPEKIND_R4) then
         block
           real(ESMF_KIND_R4), pointer  :: fptr(:,:)
-          real(ESMF_KIND_R4)           :: dataMask, value
+          real(ESMF_KIND_R4)           :: dataMask
           call ESMF_FieldGet(field, farrayPtr=fptr, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
-          isFlag = ESMF_InfoIsPresent(info, key="dataMask", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (isFlag) then
-            call ESMF_InfoGet(info, key="dataMask", value=dataMask, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
+          if (dataValidate%maskGuard) then
+            dataMask = dataValidate%mask
             lcount(1) = count(fptr/=dataMask)
             lsum(1)   = sum(fptr, fptr/=dataMask)
             lmin(1)   = minval(fptr, fptr/=dataMask)
@@ -1717,40 +1660,17 @@ module ESMX_Data
             lsum(1)   = sum(fptr)
             lmin(1)   = minval(fptr)
             lmax(1)   = maxval(fptr)
-          endif
-          dataMinSet = ESMF_InfoIsPresent(info, key="dataMin", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataMinSet) then
-            call ESMF_InfoGet(info, key="dataMin", value=value, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
-            dataMin = real(value, ESMF_KIND_R8)
-          endif
-          dataMaxSet = ESMF_InfoIsPresent(info, key="dataMax", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataMaxSet) then
-            call ESMF_InfoGet(info, key="dataMax", value=value, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
-            dataMax = real(value, ESMF_KIND_R8)
           endif
         end block
       else if (typekind == ESMF_TYPEKIND_R8) then
         block
           real(ESMF_KIND_R8), pointer  :: fptr(:,:)
-          real(ESMF_KIND_R8)           :: dataMask, value
+          real(ESMF_KIND_R8)           :: dataMask
           call ESMF_FieldGet(field, farrayPtr=fptr, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
-          isFlag = ESMF_InfoIsPresent(info, key="dataMask", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (isFlag) then
-            call ESMF_InfoGet(info, key="dataMask", value=dataMask, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
+          if (dataValidate%maskGuard) then
+            dataMask = dataValidate%mask
             lcount(1) = count(fptr/=dataMask)
             lsum(1)   = sum(fptr, fptr/=dataMask)
             lmin(1)   = minval(fptr, fptr/=dataMask)
@@ -1760,24 +1680,6 @@ module ESMX_Data
             lsum(1)   = sum(fptr)
             lmin(1)   = minval(fptr)
             lmax(1)   = maxval(fptr)
-          endif
-          dataMinSet = ESMF_InfoIsPresent(info, key="dataMin", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataMinSet) then
-            call ESMF_InfoGet(info, key="dataMin", value=value, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
-            dataMin = real(value, ESMF_KIND_R8)
-          endif
-          dataMaxSet = ESMF_InfoIsPresent(info, key="dataMax", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataMaxSet) then
-            call ESMF_InfoGet(info, key="dataMax", value=value, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
-            dataMax = real(value, ESMF_KIND_R8)
           endif
         end block
       else
@@ -1791,17 +1693,12 @@ module ESMX_Data
       if (typekind == ESMF_TYPEKIND_I4) then
         block
           integer(ESMF_KIND_I4), pointer  :: fptr(:,:,:)
-          integer(ESMF_KIND_I4)           :: dataMask, value
+          integer(ESMF_KIND_I4)           :: dataMask
           call ESMF_FieldGet(field, farrayPtr=fptr, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
-          isFlag = ESMF_InfoIsPresent(info, key="dataMask", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (isFlag) then
-            call ESMF_InfoGet(info, key="dataMask", value=dataMask, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
+          if (dataValidate%maskGuard) then
+            dataMask = dataValidate%mask
             lcount(1) = count(fptr/=dataMask)
             lsum(1)   = sum(fptr, fptr/=dataMask)
             lmin(1)   = minval(fptr, fptr/=dataMask)
@@ -1811,40 +1708,17 @@ module ESMX_Data
             lsum(1)   = sum(fptr)
             lmin(1)   = minval(fptr)
             lmax(1)   = maxval(fptr)
-          endif
-          dataMinSet = ESMF_InfoIsPresent(info, key="dataMin", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataMinSet) then
-            call ESMF_InfoGet(info, key="dataMin", value=value, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
-            dataMin = real(value, ESMF_KIND_R8)
-          endif
-          dataMaxSet = ESMF_InfoIsPresent(info, key="dataMax", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataMaxSet) then
-            call ESMF_InfoGet(info, key="dataMax", value=value, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
-            dataMax = real(value, ESMF_KIND_R8)
           endif
         end block
       else if (typekind == ESMF_TYPEKIND_I8) then
         block
           integer(ESMF_KIND_I8), pointer  :: fptr(:,:,:)
-          integer(ESMF_KIND_I8)           :: dataMask, value
+          integer(ESMF_KIND_I8)           :: dataMask
           call ESMF_FieldGet(field, farrayPtr=fptr, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
-          isFlag = ESMF_InfoIsPresent(info, key="dataMask", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (isFlag) then
-            call ESMF_InfoGet(info, key="dataMask", value=dataMask, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
+          if (dataValidate%maskGuard) then
+            dataMask = dataValidate%mask
             lcount(1) = count(fptr/=dataMask)
             lsum(1)   = sum(fptr, fptr/=dataMask)
             lmin(1)   = minval(fptr, fptr/=dataMask)
@@ -1854,40 +1728,17 @@ module ESMX_Data
             lsum(1)   = sum(fptr)
             lmin(1)   = minval(fptr)
             lmax(1)   = maxval(fptr)
-          endif
-          dataMinSet = ESMF_InfoIsPresent(info, key="dataMin", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataMinSet) then
-            call ESMF_InfoGet(info, key="dataMin", value=value, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
-            dataMin = real(value, ESMF_KIND_R8)
-          endif
-          dataMaxSet = ESMF_InfoIsPresent(info, key="dataMax", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataMaxSet) then
-            call ESMF_InfoGet(info, key="dataMax", value=value, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
-            dataMax = real(value, ESMF_KIND_R8)
           endif
         end block
       else if (typekind == ESMF_TYPEKIND_R4) then
         block
           real(ESMF_KIND_R4), pointer  :: fptr(:,:,:)
-          real(ESMF_KIND_R4)           :: dataMask, value
+          real(ESMF_KIND_R4)           :: dataMask
           call ESMF_FieldGet(field, farrayPtr=fptr, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
-          isFlag = ESMF_InfoIsPresent(info, key="dataMask", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (isFlag) then
-            call ESMF_InfoGet(info, key="dataMask", value=dataMask, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
+          if (dataValidate%maskGuard) then
+            dataMask = dataValidate%mask
             lcount(1) = count(fptr/=dataMask)
             lsum(1)   = sum(fptr, fptr/=dataMask)
             lmin(1)   = minval(fptr, fptr/=dataMask)
@@ -1897,40 +1748,17 @@ module ESMX_Data
             lsum(1)   = sum(fptr)
             lmin(1)   = minval(fptr)
             lmax(1)   = maxval(fptr)
-          endif
-          dataMinSet = ESMF_InfoIsPresent(info, key="dataMin", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataMinSet) then
-            call ESMF_InfoGet(info, key="dataMin", value=value, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
-            dataMin = real(value, ESMF_KIND_R8)
-          endif
-          dataMaxSet = ESMF_InfoIsPresent(info, key="dataMax", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataMaxSet) then
-            call ESMF_InfoGet(info, key="dataMax", value=value, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
-            dataMax = real(value, ESMF_KIND_R8)
           endif
         end block
       else if (typekind == ESMF_TYPEKIND_R8) then
         block
           real(ESMF_KIND_R8), pointer  :: fptr(:,:,:)
-          real(ESMF_KIND_R8)           :: dataMask, value
+          real(ESMF_KIND_R8)           :: dataMask
           call ESMF_FieldGet(field, farrayPtr=fptr, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
-          isFlag = ESMF_InfoIsPresent(info, key="dataMask", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (isFlag) then
-            call ESMF_InfoGet(info, key="dataMask", value=dataMask, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
+          if (dataValidate%maskGuard) then
+            dataMask = dataValidate%mask
             lcount(1) = count(fptr/=dataMask)
             lsum(1)   = sum(fptr, fptr/=dataMask)
             lmin(1)   = minval(fptr, fptr/=dataMask)
@@ -1940,24 +1768,6 @@ module ESMX_Data
             lsum(1)   = sum(fptr)
             lmin(1)   = minval(fptr)
             lmax(1)   = maxval(fptr)
-          endif
-          dataMinSet = ESMF_InfoIsPresent(info, key="dataMin", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataMinSet) then
-            call ESMF_InfoGet(info, key="dataMin", value=value, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
-            dataMin = real(value, ESMF_KIND_R8)
-          endif
-          dataMaxSet = ESMF_InfoIsPresent(info, key="dataMax", rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataMaxSet) then
-            call ESMF_InfoGet(info, key="dataMax", value=value, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
-            dataMax = real(value, ESMF_KIND_R8)
           endif
         end block
       else
@@ -2005,12 +1815,12 @@ module ESMX_Data
 
     statsOkay = .true. ! initialize to .true. then see if not so
 
-    if (dataMinSet) then
-      if (statsMin < dataMin) statsOkay = .false.  ! found values below min
+    if (dataValidate%minGuard) then
+      if (statsMin < dataValidate%min) statsOkay = .false.  ! values below min
     endif
 
-    if (dataMaxSet) then
-      if (statsMax > dataMax) statsOkay = .false.  ! found values above max
+    if (dataValidate%maxGuard) then
+      if (statsMax > dataValidate%max) statsOkay = .false.  ! values above max
     endif
 
   end subroutine
@@ -2151,7 +1961,6 @@ module ESMX_Data
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-        deallocate(is%wrap%importItems(i)%dataValidate)
         deallocate(is%wrap%importItems(i)%dataInit)
       enddo
       deallocate(is%wrap%importItems)
@@ -2164,7 +1973,6 @@ module ESMX_Data
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-        deallocate(is%wrap%exportItems(i)%dataValidate)
         deallocate(is%wrap%exportItems(i)%dataInit)
         deallocate(is%wrap%exportItems(i)%dataAdvance)
       enddo
