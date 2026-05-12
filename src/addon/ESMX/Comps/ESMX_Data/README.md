@@ -79,31 +79,25 @@ The `importFields` key must be associated with a map of key/value pairs. Each ke
 | `ungriddedLBound`| The lower bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
 | `ungriddedUBound`| The upper bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
 | `dataInit`       | [Dynamic arithmetic expression](#dynamic-arithmetic-expressions) used to initialze field data during DataInitialize. | *none* |
-| `dataMask`       | The numerical value ignored during field statistics and validation check.            | *none* |
-| `dataMin`        | The minimum numerical value allowed in the field data to pass validation check.      | *none* |
-| `dataMax`        | The maximum numerical value allowed in the field data to pass validation check.      | *none* |
-| `dataDiagnose`   | Enable/disable output of field data diagnostics: `yes` or `no`.                      | `no` |
-| `dataValidate`   | The level of field data validation against the provided `dataMin` and `dataMax`: `no` - no validation, `warn` - issue warning if data found outside value range, `err` - return with error if data found outside value range.      | `no` |
+| `dataValidate`   | [Data validation](#data-validation) applied to the field.                                                            | *none* |
 
 For an example, see the following configuration snippet for `ESMX_Data` instance named `DAT`.
 
 ```
 DAT:
   importFields:
-    sea_surface_temperature:  {geometry: global, typekind: r8, dataDiagnose: yes}
+    sea_surface_temperature:  {geometry: global, typekind: r8, dataValidate: {diagnose: yes} }
     density:
       geometry:         global
       typekind:         r4
       ungriddedLBound:  [1]
       ungriddedUBound:  [104]
-      dataMin:          1e-05
-      dataDiagnose:     yes
-      dataValidate:     err
+      dataValidate:     {min: 1e-05, diagnose: yes, action: error}
 ```
 
-This configuration defines two fields within the `DAT` import state. The first, standard-named `sea_surface_temperature`, is defined on the `global` geometry using double-precision (`r8`) data. As there are no ungridded dimensions, `sea_surface_temperature` functions as a 2D surface field. Because no `*Value` keys are specified, the field is neither locally initialized nor restricted by global min/max data bounds. While `dataDiagnose: yes` enables global diagnostic output to `stdout`, data validation remains inactive.
+This configuration defines two fields within the `DAT` import state. The first, standard-named `sea_surface_temperature`, is defined on the `global` geometry using double-precision (`r8`) data. As there are no ungridded dimensions, `sea_surface_temperature` functions as a 2D surface field. The field is neither locally initialized nor restricted by global min/max data bounds. However `dataValidate: {diagnose: yes}` enables global diagnostic output to `stdout`.
 
-The second field, standard-named `density`, is defined on the `global` geometry using single-precision (`r4`) data. It features a single ungridded dimension spanning indices `1` to `104`, representing 104 levels. A `dataMin` of `1e-05` is established to monitor the field during each Advance step. With data diagnostics enabled, the system will output field status to `stdout`; furthermore, the `dataValidate: err` setting ensures an error is triggered if any `density` value falls below the defined minimum.
+The second field, standard-named `density`, is defined on the `global` geometry using single-precision (`r4`) data. It features a single ungridded dimension spanning indices `1` to `104`, representing 104 levels. Data validation is established with `min` of `1e-05` to monitor the field during each Advance step. Diagnostic output to `stdout` is enabled; furthermore, the `action: error` setting ensures an error is triggered if any `density` value falls below the specified minimum.
 
 ### `exportFields`
 
@@ -117,12 +111,8 @@ The `exportFields` key must be associated with a map of key/value pairs. Each ke
 | `ungriddedLBound`| The lower bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
 | `ungriddedUBound`| The upper bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
 | `dataInit`       | [Dynamic arithmetic expression](#dynamic-arithmetic-expressions) used to initialze field data during DataInitialize. | *none* |
-| `dataMask`       | The numerical value ignored during field statistics and validation check.            | *none* |
-| `dataMin`        | The minimum numerical value allowed in the field data to pass validation check.      | *none* |
-| `dataMax`        | The maximum numerical value allowed in the field data to pass validation check.      | *none* |
-| `dataDiagnose`   | Enable/disable output of field data diagnostics: `yes` or `no`.                      | `no` |
-| `dataValidate`   | The level of field data validation against the provided `dataMin` and `dataMax`: `no` - no validation, `warn` - issue warning if data found outside value range, `err` - return with error if data found outside value range.      | `no` |
-| `dataAdvance`    | [Dynamic arithmetic expression](#dynamic-arithmetic-expressions) used to update field data during Advance.  | *none* |
+| `dataAdvance`    | [Dynamic arithmetic expression](#dynamic-arithmetic-expressions) used to update field data during Advance.           | *none* |
+| `dataValidate`   | [Data validation](#data-validation) applied to the field.                                                            | *none* |
 
 For an example, see the following configuration snippet for `ESMX_Data` instance named `DAT`.
 
@@ -132,14 +122,27 @@ DAT:
     sea_surface_temperature:
       geometry:     global
       typekind:     r8
+      dataInit:     sea_surface_temperature
       dataAdvance:  1.1 * sea_surface_temperature
 ```
 
-This configuration defines a single field, `sea_surface_temperature`, in the `DAT` export state. It is defined on the `global` geometry using double-precision (`r8`) values. With no ungridded dimensions, the field is treated as a 2D surface. The omission of `*Value` keys indicates that the field is not locally initialized and incoming values are not validated against global extrema. During each `Advance` step, the `dataAdvance` expression exports the field at 110% of its current imported value; if `sea_surface_temperature` is missing from the `importState`, an error is triggered.
+This configuration defines a single field, `sea_surface_temperature`, in the `DAT` export state. It is defined on the `global` geometry using double-precision (`r8`) values. With no ungridded dimensions, the field is treated as a 2D surface. The field data is initialized via `dataInit` to match that of the imported `sea_surface_temperature` field. During each `Advance` step, the `dataAdvance` expression exports the field at 110% of its current imported value; if `sea_surface_temperature` is missing from the `importState`, an error is triggered.
+
+### Data validation
+
+The `dataValidate` option, if specified, must be associated with a map of key/value pairs. All pairs are optional with default values as per the following table.
+
+| Option key       | Description / Value options                                                          | Default           |
+| ---------------- | ------------------------------------------------------------------------------------ | ----------------- |
+| `min`            | The minimum numerical value allowed in the field data to pass validation.            | *no minimum*  |
+| `max`            | The maximum numerical value allowed in the field data to pass validation.            | *no maximum*  |
+| `mask`           | The numerical value ignored during field diagnostic and validation.                  | *no mask*     |
+| `diagnose`       | Enable/disable field data diagnostic output to stdout: `yes` or `no`.                | `no`          |
+| `action`         | Action to be taken when field data validation fails: `none`, `warning`, `error`      | `none`        |
 
 ### Dynamic arithmetic expressions
 
-Support for dynamic arithmetic expressions allows users to define mathematical transformations for field data using standard **infix notation**. These expressions are evaluated element-wise across the entire spatial domain of the involved fields.
+The `dataInit` and `dataAdvance` options support dynamic arithmetic expressions that allow users to define mathematical transformations for field data using standard **infix notation**. These expressions are evaluated element-wise across the entire spatial domain of the involved fields.
 
 #### 1. Supported Operators
 Expressions support standard arithmetic operators following traditional mathematical precedence.
