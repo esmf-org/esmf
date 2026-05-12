@@ -42,6 +42,7 @@ module dataProcess
     integer                       :: count, cur, top, depth
     type(ESMF_TYPEKIND_Flag)      :: tkImport, tkExport
     real(ESMF_KIND_R8), allocatable :: stack(:,:)
+    real(ESMF_KIND_R8), parameter :: pi = acos(-1.0_ESMF_KIND_R8)
 
     rc = ESMF_SUCCESS
 
@@ -96,17 +97,73 @@ module dataProcess
       if (token == "") exit
 
       select case (token)
-      case ("+")
-        stack(:,top-1) = stack(:,top-1) + stack(:,top)
-        top = top - 1
-      case ("-")
-        stack(:,top-1) = stack(:,top-1) - stack(:,top)
-        top = top - 1
+      case ("ABS")
+        stack(:,top) = abs(stack(:,top))
+      case ("AINT")
+        stack(:,top) = aint(stack(:,top))
+      case ("ANINT")
+        stack(:,top) = anint(stack(:,top))
+      case ("CEILING")
+        stack(:,top) = ceiling(stack(:,top))
+      case ("FLOOR")
+        stack(:,top) = floor(stack(:,top))
+      case ("DEG2RAD")
+        stack(:,top) = (stack(:,top))/180.0*PI
+      case ("RAD2DEG")
+        stack(:,top) = (stack(:,top))/PI*180.0
+      case ("ACOS")
+        stack(:,top) = acos(stack(:,top))
+      case ("ACOSH")
+        stack(:,top) = acosh(stack(:,top))
+      case ("ASIN")
+        stack(:,top) = asin(stack(:,top))
+      case ("ASINH")
+        stack(:,top) = asinh(stack(:,top))
+      case ("ATAN")
+        stack(:,top) = atan(stack(:,top))
+      case ("ATANH")
+        stack(:,top) = atanh(stack(:,top))
+      case ("COS")
+        stack(:,top) = cos(stack(:,top))
+      case ("COSH")
+        stack(:,top) = cosh(stack(:,top))
+      case ("ERF")
+        stack(:,top) = erf(stack(:,top))
+      case ("ERFC")
+        stack(:,top) = erfc(stack(:,top))
+      case ("ERFC_SCALED")
+        stack(:,top) = erfc_scaled(stack(:,top))
+      case ("EXP")
+        stack(:,top) = exp(stack(:,top))
+      case ("GAMMA")
+        stack(:,top) = gamma(stack(:,top))
+      case ("LOG")
+        stack(:,top) = log(stack(:,top))
+      case ("LOG_GAMMA")
+        stack(:,top) = log_gamma(stack(:,top))
+      case ("LOG10")
+        stack(:,top) = log10(stack(:,top))
+      case ("SIN")
+        stack(:,top) = sin(stack(:,top))
+      case ("SINH")
+        stack(:,top) = sinh(stack(:,top))
+      case ("SQRT")
+        stack(:,top) = sqrt(stack(:,top))
+      case ("TAN")
+        stack(:,top) = tan(stack(:,top))
+      case ("TANH")
+        stack(:,top) = tanh(stack(:,top))
       case ("*")
         stack(:,top-1) = stack(:,top-1) * stack(:,top)
         top = top - 1
       case ("/")
         stack(:,top-1) = stack(:,top-1) / stack(:,top)
+        top = top - 1
+      case ("+")
+        stack(:,top-1) = stack(:,top-1) + stack(:,top)
+        top = top - 1
+      case ("-")
+        stack(:,top-1) = stack(:,top-1) - stack(:,top)
         top = top - 1
       case default
         top = top + 1
@@ -118,7 +175,10 @@ module dataProcess
           tempString = ESMF_UtilStringUpperCase(token, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
-          if (tempString == "_STEP") then
+          if (tempString == "_PI") then
+            ! PI
+            stack(:,top) = PI
+          else if (tempString == "_STEP") then
             ! Step
             stack(:,top) = real(step, ESMF_KIND_R8)
           else if (tempString(1:6) == "_COORD") then
@@ -201,7 +261,7 @@ module dataProcess
     type(ESMF_GeomType_Flag)        :: geomtype
     type(ESMF_StaggerLoc)           :: staggerloc
     type(ESMF_MeshLoc)              :: meshloc
-    integer                         :: dimCount, m, i, j, k, idx
+    integer                         :: dimCount, m, i, j, k, idx, off
     integer                         :: inner_repeat, outer_replicate
     integer, allocatable            :: coordDimCount(:), exclusiveCount(:)
     integer                         :: numOwnedPoints
@@ -243,12 +303,14 @@ module dataProcess
         m = size(fPtr1D)
         inner_repeat = product(exclusiveCount(1:coordDim-1))
         outer_replicate = product(exclusiveCount(coordDim+1:dimCount))
+        deallocate(exclusiveCount)
         ! Populate stackColumn with replicated fPtr1D data
+        off = lbound(fPtr1D,1)-1
         idx = 1
         do k = 1, outer_replicate
           do j = 1, m
             do i = 1, inner_repeat
-              stackColumn(idx) = fPtr1D(lbound(fPtr1D,1)-1+j)
+              stackColumn(idx) = fPtr1D(off+j)
               idx = idx + 1
             end do
           end do
@@ -277,6 +339,7 @@ module dataProcess
           line=__LINE__, file=__FILE__, rcToReturn=rc)
         return ! bail out
       endif
+      deallocate(coordDimCount)
     elseif (geomtype==ESMF_GEOMTYPE_MESH) then
       call ESMF_FieldGet(field, mesh=mesh, meshloc=meshloc, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -405,10 +468,14 @@ module dataProcess
     ! Convert standard infix notation to reverse polish notation
     character(len=*), intent(in)               :: infix
     character(len=:), allocatable, intent(out) :: rpn
-    character(len=128):: op_stack(20) ! Stack for operators
-    integer           :: stack_ptr
-    character(len=:), allocatable :: token
-    integer           :: cur, i
+
+    character(len=128), allocatable :: op_stack(:)
+    integer                         :: stack_ptr
+    character(len=:),   allocatable :: token
+    integer                         :: cur, i
+
+    ! Allocate the stack based on the length of the input string
+    allocate(op_stack(len(infix)))
 
     rpn = ""
     stack_ptr = 0
@@ -421,14 +488,13 @@ module dataProcess
 
       if (is_operator(token)) then
         ! Handle Operators
-        do while (stack_ptr > 0)
-          if (op_stack(stack_ptr) /= "(" .and. &
-              precedence(op_stack(stack_ptr)) >= precedence(token)) then
-            rpn = rpn // trim(op_stack(stack_ptr)) // " "
-            stack_ptr = stack_ptr - 1
-          else
-            exit
-          end if
+        do
+          if (stack_ptr <= 0) exit
+          if (op_stack(stack_ptr) == "(") exit
+          if (precedence(op_stack(stack_ptr)) < precedence(token)) exit
+
+          rpn = rpn // trim(op_stack(stack_ptr)) // " "
+          stack_ptr = stack_ptr - 1
         end do
         stack_ptr = stack_ptr + 1
         op_stack(stack_ptr) = token
@@ -440,11 +506,24 @@ module dataProcess
 
       else if (token == ")") then
         ! Handle Right Parenthesis
-        do while (stack_ptr > 0 .and. op_stack(stack_ptr) /= "(")
+        do
+          if (stack_ptr <= 0) exit
+          if (op_stack(stack_ptr) == "(") exit
           rpn = rpn // trim(op_stack(stack_ptr)) // " "
           stack_ptr = stack_ptr - 1
         end do
-        if (stack_ptr > 0) stack_ptr = stack_ptr - 1 ! Pop the "("
+
+        if (stack_ptr > 0) then
+          stack_ptr = stack_ptr - 1 ! Pop the "("
+
+          ! Check if a function was associated with this parenthesis pair
+          if (stack_ptr > 0) then
+            if (is_function(op_stack(stack_ptr))) then
+              rpn = rpn // trim(op_stack(stack_ptr)) // " "
+              stack_ptr = stack_ptr - 1
+            end if
+          end if
+        end if
 
       else
         ! Number or field name - send straight to output
@@ -454,8 +533,13 @@ module dataProcess
 
     ! Pop remaining operators from stack
     do i = stack_ptr, 1, -1
-      rpn = rpn // trim(op_stack(i)) // " "
+      if (op_stack(i) /= "(") then
+        rpn = rpn // trim(op_stack(i)) // " "
+      end if
     end do
+
+    ! Deallocate the stack
+    deallocate(op_stack)
 
     ! Remove trailing space
     rpn = trim(rpn)
@@ -479,7 +563,10 @@ module dataProcess
       call get_next_token(rpn, cur, token)
       if (token == "") exit
 
-      if (is_operator(token)) then
+      if (is_function(token)) then
+        ! Unary functions (sin, cos, ...) pop one and push one: net change 0
+        current_depth = current_depth
+      else if (is_operator(token)) then
         ! Binary operators (+, -, *, /) pop two operands and push one result.
         ! This results in a net change of -1 to the stack height.
         current_depth = current_depth - 1
@@ -521,6 +608,11 @@ module dataProcess
       cur = cur + next_s
     end if
 
+    if (is_function(token)) then
+      ! For functions return token as upper case
+      token = ESMF_UtilStringUpperCase(token)
+    endif
+
   end subroutine
 
   !-----------------------------------------------------------------------------
@@ -542,11 +634,15 @@ module dataProcess
   integer function precedence(op)
     ! Operator precendece
     character(len=*), intent(in) :: op
-    select case (trim(op))
-      case ("+", "-") ; precedence = 2
-      case ("*", "/") ; precedence = 3
-      case default    ; precedence = 0
-    end select
+    if (is_function(op)) then
+      precedence = 4
+    else
+      select case (trim(op))
+        case ("*", "/") ; precedence = 3
+        case ("+", "-") ; precedence = 2
+        case default    ; precedence = 0
+      end select
+    end if
   end function
 
   !-----------------------------------------------------------------------------
@@ -554,9 +650,25 @@ module dataProcess
   logical function is_operator(token)
     ! Identify token as operator
     character(len=*), intent(in) :: token
-    select case (trim(token))
+    select case (token)
       case ("+", "-", "*", "/") ; is_operator = .true.
-      case default              ; is_operator = .false.
+      case default              ; is_operator = is_function(token)
+    end select
+  end function
+
+  !-----------------------------------------------------------------------------
+
+  logical function is_function(token)
+    ! Identify token as unary function
+    character(len=*), intent(in) :: token
+    select case (ESMF_UtilStringUpperCase(token))
+      case ("ABS", "AINT", "ANINT", "CEILING", "FLOOR", "DEG2RAD", "RAD2DEG", &
+        "ACOS", "ACOSH", "ASIN", "ASINH", "ATAN", "ATANH", "COS", "COSH", &
+        "ERF", "ERFC", "ERFC_SCALED", "EXP", "GAMMA", "LOG", "LOG_GAMMA", &
+        "LOG10", "SIN", "SINH", "SQRT", "TAN", "TANH")
+        is_function = .true.
+      case default
+        is_function = .false.
     end select
   end function
 
