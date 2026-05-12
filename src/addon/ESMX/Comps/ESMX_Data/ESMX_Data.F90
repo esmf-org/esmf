@@ -1429,10 +1429,6 @@ module ESMX_Data
       importState=importState, exportState=exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-    call ESMF_ClockPrint(clock, options="currTime", &
-      unit=clockString, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
 
     if (btest(diagnostic,17)) then
       ! write fields of the importState
@@ -1443,11 +1439,6 @@ module ESMX_Data
         timeslice=stepCounter, status=filestatus, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-    endif
-
-    ! write to standard out
-    if (localPet == 0) then
-      write(*,'(A,1X,A)') trim(name)//": Model Advance at: ",trim(clockString)
     endif
 
     ! reset counters
@@ -1470,6 +1461,12 @@ module ESMX_Data
           if (localPet == 0) then
             if (.not.headerPrinted) then
               headerPrinted = .true.
+              call ESMF_ClockPrint(clock, options="currTime", &
+                unit=clockString, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail
+              write(*,'(A,1X,A)') trim(name)//": Model Advance at: ", &
+                trim(clockString)
               write(*,'(A)') trim(name)//": Import Fields"
               write(*,'(A,1X,A25,1X,A9,3(1X,A9),1X,A4)') &
                 trim(name)//":", "FIELD", "COUNT", "MEAN", "MIN", "MAX", "OKAY"
@@ -1510,10 +1507,16 @@ module ESMX_Data
           statsOkay=statsOkay, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-        if (is%wrap%importItems(i)%dataDiagnose .or. .not.statsOkay) then
+        if (is%wrap%exportItems(i)%dataDiagnose .or. .not.statsOkay) then
           if (localPet == 0) then
             if (.not.headerPrinted) then
               headerPrinted = .true.
+              call ESMF_ClockPrint(clock, options="currTime", &
+                unit=clockString, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail
+              write(*,'(A,1X,A)') trim(name)//": Model Advance at: ", &
+                trim(clockString)
               write(*,'(A)') trim(name)//": Export Fields"
               write(*,'(A,1X,A25,1X,A9,3(1X,A9),1X,A4)') &
                 trim(name)//":", "FIELD", "COUNT", "MEAN", "MIN", "MAX", "OKAY"
