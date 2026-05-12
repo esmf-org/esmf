@@ -201,9 +201,15 @@ Standard numerical values (e.g., `2.5`, `100`, `1.0E-4`) are interpreted as doub
 
 #### 4. Usage Examples
 
-* **Unit Conversion (Celsius to Kelvin)**:
-    `temperature_c + 273.15`
-* **Applying a Spatial Mask**:
-    `field_a * SIN(_COORD1 * DEG2RAD)`
-* **Complex Scaling**:
-    `ABS(primary_field - secondary_field) / SQRT(_STEP * 1.0)`
+* **Synthetic data generation (Temperature field with 10 Kelvin variablity around 270 Kelvin mean)**:<br>
+    `10 * (sin(_coord1) * cos(_coord2)) + 270`
+
+* **Data feedback (Return a temperature field that is 10% hotter than the incoming field)**:<br>
+    `1.1 * temperature`
+
+* **Unit Conversion (Kelvin to Celsius)**:<br>
+    `temperature - 273.15`
+
+* **Applying a spatial mask**:<br>
+    `field_a * sin(_coord1)`
+
