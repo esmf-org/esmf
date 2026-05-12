@@ -1,10 +1,14 @@
 # ESMX Data Component
 
-ESMX Data is a lightweight data component designed for use in basic technical testing. Each instance of ESMX Data is run-time configured with a custom list of import and export fields. Each field references a specific geometry, typekind, and optionally init, min, and max values. Multiple geometries can be defined per `ESMX_Data` instance.
+`ESMX_Data` is a lightweight data component designed for basic technical testing of NUOPC compliant components and applications. Each instance of ESMX Data is run-time configured with a custom list of import and export fields. Each field references a specific geometry, typekind, and implements optional data validation. Multiple geometries can be defined per ESMX Data instance.
+
+The component functions as a programmable transformation layer that can be used as a "synthetic data generator", "data feedback component", and/or "diagnostic processor". During the execution phase, it ingests fields from its import state and applies user-defined mathematical expressions element-wise across the spatial grid. This allows for the dynamic derivation of new data or the modification of existing fields. To provide physical context, the system can inject simulation metadata into these calculations, such as spatial coordinates, the current time step index, or physical constants like Pi. Standard mathematical functions, such as sin(), cos(), etc., are supported.
+
+Once the transformation is complete, the data undergoes an optional validation stage where it is checked against user-defined guards to ensure numerical stability and prevent the propagation of invalid values. The final processed fields are then timestamped according to the component's time keeping configuration and made available to connected components through its export state.
 
 ## ESMX Data Build Configuration
 
-The ESMX Data component is built into ESMX applications by default, unless it is explicitly disabled in the ESMX_BUILD_FILE via the `disable_comps` option.
+The ESMX Data component is built into ESMX applications by default. It can be disabled by explicitly setting the `disable_comps` option in the ESMX_BUILD_FILE.
 
 ```
 application:
@@ -12,7 +16,7 @@ application:
   disable_comps: ESMX_Data
 ```
 
-The default ESMX Data implementation that comes with ESMF can be overridden with a custom version under the `components` section of the ESMX_BUILD_FILE. For example, for a custom version that is located under the `MyCustomDataComponent` source directory:
+Furthermore, the default ESMX Data implementation that comes with ESMF can be overridden with a custom version under the `components` section of the ESMX_BUILD_FILE. For example, the following uses a custom ESMX Data version that is located under the `MyCustomDataComponent` source directory:
 ```
 components:
 
@@ -22,7 +26,7 @@ components:
 
 ## ESMX Data Run Configuration
 
-Each ESMX Data instance is configured under its component label section in `esmxRun.yaml` using [YAML](https://yaml.org/) format. The available configuration keys are listed below.
+Each ESMX Data instance is configured under its component label section in `esmxRun.yaml`. The available configuration keys are documented below.
 
 
 ### `timeKeeping`
@@ -69,7 +73,7 @@ This defines a geometry called `global`, which is instantiated as 2D `ESMF_Grid`
 
 ### `importFields`
 
-The `importFields` key must be associated with a map of key/value pairs. Each key specifies the standard name of a field in the import state of the ESMX Data instance. The value once again is a map with key/values as per the following table.
+The `importFields` key must be associated with a map of key/value pairs. Each key specifies the standard name of a field in the import state of the ESMX Data instance. The value once again is a map with key/value pairs as per the following table.
 
 | Option key       | Description / Value options                                                          | Default           |
 | ---------------- | ------------------------------------------------------------------------------------ | ----------------- |
@@ -78,8 +82,9 @@ The `importFields` key must be associated with a map of key/value pairs. Each ke
 | `gridToFieldMap` | The mapping of grid to field dimension. For details see ESMF documentation.          | `[1,2]` or `[1,2,3]` depending on rank |
 | `ungriddedLBound`| The lower bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
 | `ungriddedUBound`| The upper bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
-| `dataInit`       | [Dynamic arithmetic expression](#dynamic-arithmetic-expressions) used to initialze field data during DataInitialize. | *none* |
-| `dataValidate`   | [Data validation](#data-validation) applied to the field.                                                            | *none* |
+| `dataValidate`   | [Data validation](#data-validation) applied to the import fields *before* the Advance step.                          | *none* |
+
+ESMF_Data uses the standard NUOPC data-dependencies during initialize approach to initialize the data in all of the import fields.
 
 For an example, see the following configuration snippet for `ESMX_Data` instance named `DAT`.
 
@@ -112,7 +117,7 @@ The `exportFields` key must be associated with a map of key/value pairs. Each ke
 | `ungriddedUBound`| The upper bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
 | `dataInit`       | [Dynamic arithmetic expression](#dynamic-arithmetic-expressions) used to initialze field data during DataInitialize. | *none* |
 | `dataAdvance`    | [Dynamic arithmetic expression](#dynamic-arithmetic-expressions) used to update field data during Advance.           | *none* |
-| `dataValidate`   | [Data validation](#data-validation) applied to the field.                                                            | *none* |
+| `dataValidate`   | [Data validation](#data-validation) applied to the export fields *after* the Advance step.                           | *none* |
 
 For an example, see the following configuration snippet for `ESMX_Data` instance named `DAT`.
 
@@ -127,6 +132,8 @@ DAT:
 ```
 
 This configuration defines a single field, `sea_surface_temperature`, in the `DAT` export state. It is defined on the `global` geometry using double-precision (`r8`) values. With no ungridded dimensions, the field is treated as a 2D surface. The field data is initialized via `dataInit` to match that of the imported `sea_surface_temperature` field. During each `Advance` step, the `dataAdvance` expression exports the field at 110% of its current imported value; if `sea_surface_temperature` is missing from the `importState`, an error is triggered.
+
+---
 
 ### Data validation
 
