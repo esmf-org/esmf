@@ -32,7 +32,6 @@ module ESMX_Data
   type ImportItem
     type(ESMF_Field)              :: field
     type(Validate)                :: dataValidate
-    character(len=:), allocatable :: dataInit
   end type
 
   type ExportItem
@@ -298,8 +297,7 @@ module ESMX_Data
           item = item+1
 
           imports(item)%field = FieldCreateFromHConfig(hconfigIt, geoms=geoms, &
-            dataValidate=imports(item)%dataValidate, &
-            dataInit=imports(item)%dataInit, rc=rc)
+            dataValidate=imports(item)%dataValidate, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, &
             msg="Problem creating import field.", &
             line=__LINE__, file=__FILE__)) return  ! bail out
@@ -1961,7 +1959,6 @@ module ESMX_Data
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-        deallocate(is%wrap%importItems(i)%dataInit)
       enddo
       deallocate(is%wrap%importItems)
     endif
