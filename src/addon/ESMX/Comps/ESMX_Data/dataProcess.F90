@@ -104,9 +104,9 @@ module dataProcess
       case ("ANINT")
         stack(:,top) = anint(stack(:,top))
       case ("CEILING")
-        stack(:,top) = ceiling(stack(:,top))
+        stack(:,top) = real(ceiling(stack(:,top)),ESMF_KIND_R8)
       case ("FLOOR")
-        stack(:,top) = floor(stack(:,top))
+        stack(:,top) = real(floor(stack(:,top)),ESMF_KIND_R8)
       case ("DEG2RAD")
         stack(:,top) = (stack(:,top))/180.0*PI
       case ("RAD2DEG")
