@@ -78,7 +78,7 @@ The `importFields` key must be associated with a map of key/value pairs. Each ke
 | `gridToFieldMap` | The mapping of grid to field dimension. For details see ESMF documentation.          | `[1,2]` or `[1,2,3]` depending on rank |
 | `ungriddedLBound`| The lower bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
 | `ungriddedUBound`| The upper bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
-| `dataInit`       | The numerical value used to fill field data during initialization.                   | *none* |
+| `dataInit`       | [Dynamic arithmetic expression](#dynamic-arithmetic-expressions) used to initialze field data during DataInitialize. | *none* |
 | `dataMask`       | The numerical value ignored during field statistics and validation check.            | *none* |
 | `dataMin`        | The minimum numerical value allowed in the field data to pass validation check.      | *none* |
 | `dataMax`        | The maximum numerical value allowed in the field data to pass validation check.      | *none* |
@@ -116,13 +116,13 @@ The `exportFields` key must be associated with a map of key/value pairs. Each ke
 | `gridToFieldMap` | The mapping of grid to field dimension. For details see ESMF documentation.          | `[1,2]` or `[1,2,3]` depending on rank |
 | `ungriddedLBound`| The lower bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
 | `ungriddedUBound`| The upper bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
-| `dataInit`       | The numerical value used to fill field data during initialization.                   | *none* |
+| `dataInit`       | [Dynamic arithmetic expression](#dynamic-arithmetic-expressions) used to initialze field data during DataInitialize. | *none* |
 | `dataMask`       | The numerical value ignored during field statistics and validation check.            | *none* |
 | `dataMin`        | The minimum numerical value allowed in the field data to pass validation check.      | *none* |
 | `dataMax`        | The maximum numerical value allowed in the field data to pass validation check.      | *none* |
 | `dataDiagnose`   | Enable/disable output of field data diagnostics: `yes` or `no`.                      | `no` |
 | `dataValidate`   | The level of field data validation against the provided `dataMin` and `dataMax`: `no` - no validation, `warn` - issue warning if data found outside value range, `err` - return with error if data found outside value range.      | `no` |
-| `dataAdvance`    | Simple arithmetic expression that supports numbers and standard names of import fields as operands, and +, -, *, / as operators. Parentheses are supported. The expression is used to update the data of export fields during the Advance step.  | *none* |
+| `dataAdvance`    | [Dynamic arithmetic expression](#dynamic-arithmetic-expressions) used to update field data during Advance.  | *none* |
 
 For an example, see the following configuration snippet for `ESMX_Data` instance named `DAT`.
 
@@ -136,3 +136,64 @@ DAT:
 ```
 
 This configuration defines a single field, `sea_surface_temperature`, in the `DAT` export state. It is defined on the `global` geometry using double-precision (`r8`) values. With no ungridded dimensions, the field is treated as a 2D surface. The omission of `*Value` keys indicates that the field is not locally initialized and incoming values are not validated against global extrema. During each `Advance` step, the `dataAdvance` expression exports the field at 110% of its current imported value; if `sea_surface_temperature` is missing from the `importState`, an error is triggered.
+
+### Dynamic arithmetic expressions
+
+Support for dynamic arithmetic expressions allows users to define mathematical transformations for field data using standard **infix notation**. These expressions are evaluated element-wise across the entire spatial domain of the involved fields.
+
+#### 1. Supported Operators
+Expressions support standard arithmetic operators following traditional mathematical precedence.
+
+| Operator | Description | Precedence | Example |
+| :--- | :--- | :--- | :--- |
+| `*` | Multiplication | high | `field_a * 10.0` |
+| `/` | Division | high | `field_b / 2.0` |
+| `+` | Addition (including Unary Plus) | low | `field_a + field_b` |
+| `-` | Subtraction (including Unary Minus) | low | `-field_c + 5.0` |
+
+> **Note**: Parentheses `()` can be used to override default precedence and group operations.
+
+---
+
+#### 2. Mathematical Functions
+Functions are case-insensitive and apply a transformation to each point in the data field. Most of these functions are implemented directly using their standard Fortran intrinsic equivalents.
+
+##### Trigonometric & Hyperbolic
+* **Trigonometry**: `SIN`, `COS`, `TAN`, `ASIN`, `ACOS`, `ATAN`
+* **Hyperbolic**: `SINH`, `COSH`, `TANH`, `ASINH`, `ACOSH`, `ATANH`
+* **Angular Conversion**: `DEG2RAD` (Degrees to Radians), `RAD2DEG` (Radians to Degrees)
+
+##### Basic & Advanced Math
+* **Logarithmic/Power**: `EXP`, `LOG` (Natural), `LOG10`, `SQRT`
+* **Rounding/Truncation**: `ABS`, `AINT`, `ANINT`, `CEILING`, `FLOOR`
+* **Special Functions**: `ERF`, `ERFC`, `ERFC_SCALED`, `GAMMA`, `LOG_GAMMA`
+
+---
+
+#### 3. Operands and Variables
+The system recognizes three types of values within an expression:
+
+##### Input Fields
+Any alphanumeric name (e.g., `sea_surface_temperature`) is treated as a field name. The system will attempt to retrieve this field from the model's **Import State**. Supported data types include:
+* 4-byte and 8-byte Integers (`I4`, `I8`)
+* 4-byte and 8-byte Real numbers (`R4`, `R8`)
+
+##### Special Context Variables
+Variables prefixed with an underscore provide metadata about the current simulation state:
+* `_PI`: The mathematical constant PI.
+* `_STEP`: The current model time step index.
+* `_COORDx`: The spatial coordinate for dimension `x` (e.g., `_COORD1` typically represents Longitude/X).
+
+##### Numeric Constants
+Standard numerical values (e.g., `2.5`, `100`, `1.0E-4`) are interpreted as double-precision floating-point numbers.
+
+---
+
+#### 4. Usage Examples
+
+* **Unit Conversion (Celsius to Kelvin)**:
+    `temperature_c + 273.15`
+* **Applying a Spatial Mask**:
+    `field_a * SIN(_COORD1 * DEG2RAD)`
+* **Complex Scaling**:
+    `ABS(primary_field - secondary_field) / SQRT(_STEP * 1.0)`
