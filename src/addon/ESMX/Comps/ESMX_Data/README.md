@@ -84,7 +84,7 @@ The `importFields` key must be associated with a map of key/value pairs. Each ke
 | `ungriddedUBound`| The upper bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
 | `dataValidate`   | [Data validation](#data-validation) applied to the import fields *before* the Advance step.                          | *none* |
 
-ESMF_Data uses the standard NUOPC data-dependencies during initialize approach to initialize the data in all of the import fields.
+ESMF_Data uses the standard NUOPC data-dependencies during initialize protocol to initialize the data in all of the import fields. As per standard NUOPC rules, any import fields that are not connected will trigger an error, causing the application to abort.
 
 For an example, see the following configuration snippet for `ESMX_Data` instance named `DAT`.
 
@@ -100,7 +100,7 @@ DAT:
       dataValidate:     {min: 1e-05, diagnose: yes, action: error}
 ```
 
-This configuration defines two fields within the `DAT` import state. The first, standard-named `sea_surface_temperature`, is defined on the `global` geometry using double-precision (`r8`) data. As there are no ungridded dimensions, `sea_surface_temperature` functions as a 2D surface field. The field is neither locally initialized nor restricted by global min/max data bounds. However `dataValidate: {diagnose: yes}` enables global diagnostic output to `stdout`.
+This configuration defines two fields within the `DAT` import state. The first, standard-named `sea_surface_temperature`, is defined on the `global` geometry using double-precision (`r8`) data. As there are no ungridded dimensions, `sea_surface_temperature` functions as a 2D surface field. The field is not restricted by global min/max data bounds. However `dataValidate: {diagnose: yes}` enables global diagnostic output to `stdout`.
 
 The second field, standard-named `density`, is defined on the `global` geometry using single-precision (`r4`) data. It features a single ungridded dimension spanning indices `1` to `104`, representing 104 levels. Data validation is established with `min` of `1e-05` to monitor the field during each Advance step. Diagnostic output to `stdout` is enabled; furthermore, the `action: error` setting ensures an error is triggered if any `density` value falls below the specified minimum.
 
