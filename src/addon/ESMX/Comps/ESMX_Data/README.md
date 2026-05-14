@@ -26,7 +26,27 @@ components:
 
 ## ESMX Data Run Configuration
 
-Each ESMX Data instance is configured under its component label section in `esmxRun.yaml`. The available configuration keys are documented below.
+Each ESMX Data instance is configured under its component label section in `esmxRun.yaml`. It supports the standard NUOPC Model/Mediator attributes
+
+- Verbosity
+- Profiling
+- Diagnostic
+
+with the lower 16 bits of each variable reserved for standard [NUOPC Metadata](https://earthsystemmodeling.org/docs/nightly/develop/NUOPC_refdoc/node3.html#SECTION00033000000000000000) compliance.
+
+Bit 17 of the `Diagnostic` attribute controls custom output to NetCDF. When set, data of the import fields are written to file at the beginning and data of export fields are written to file at the end of each Advance step.
+
+The following shows an `ESMX_Data` instance named `DAT`, with `Verbosity` and `Dignostic` attributes set.
+
+```
+DAT:
+  model:        ESMX_Data
+  attributes:
+    Verbosity:  high
+    Diagnostic: 131072  # bit-17 (writes netcdf field output)
+```
+
+In addition to the standard NUOPC component attributes listed above, `ESMX_Data` implements the following custom configuration keys.
 
 
 ### `timeKeeping`
@@ -35,10 +55,11 @@ The `timeKeeping` key is ***required***. It must either be set to `Model` or `Me
 - Use the `Model` setting to timestamp the export fields according to the time at the *end* of the Advance step of the `ESMX_Data` component instance.
 - Use the `Mediator` setting to timestamp the export fields according to the time at the *beginning* of the Advance step of the `ESMX_Data` component instance.
 
-For an example, see the following configuration snippet for `ESMX_Data` instance named `DAT`.
+The following example sets `Mediator` style time keeping in the `DAT` instance:
 
 ```
 DAT:
+  ...
   timeKeeping:        Mediator
 ```
 
@@ -60,6 +81,7 @@ For an example, see the following configuration snippet for `ESMX_Data` instance
 
 ```
 DAT:
+  ...
   geometries:
     global:
       geom:           grid1PeriDim
@@ -90,6 +112,7 @@ For an example, see the following configuration snippet for `ESMX_Data` instance
 
 ```
 DAT:
+  ...
   importFields:
     sea_surface_temperature:  {geometry: global, typekind: r8, dataValidate: {diagnose: yes} }
     density:
@@ -123,6 +146,7 @@ For an example, see the following configuration snippet for `ESMX_Data` instance
 
 ```
 DAT:
+  ...
   exportFields:
     sea_surface_temperature:
       geometry:     global
@@ -202,14 +226,14 @@ Standard numerical values (e.g., `2.5`, `100`, `1.0E-4`) are interpreted as doub
 #### 4. Usage Examples
 
 * **Synthetic data generation (Temperature field with 10 Kelvin variablity around 270 Kelvin mean)**:<br>
-    `10 * (sin(_coord1) * cos(_coord2)) + 270`
+    `dataAdvance: 10 * (sin(_coord1) * cos(_coord2)) + 270`
 
 * **Data feedback (Return a temperature field that is 10% hotter than the incoming field)**:<br>
-    `1.1 * temperature`
+    `dataAdvance: 1.1 * temperature`
 
 * **Unit Conversion (Kelvin to Celsius)**:<br>
-    `temperature - 273.15`
+    `dataAdvance: temperature - 273.15`
 
 * **Applying a spatial mask**:<br>
-    `field_a * sin(_coord1)`
+    `dataAdvance: field_a * sin(_coord1)`
 
