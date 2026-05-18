@@ -228,7 +228,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleRelease(rh, rc=localrc)
+       call ESMF_FieldRegridRelease(rh, rc=localrc)
        _VERIFY(localrc)
     
        correct = (global_count(1) == undef_count_after)
@@ -321,7 +321,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleRelease(rh, rc=localrc)
+       call ESMF_FieldRegridRelease(rh, rc=localrc)
        _VERIFY(localrc)
     
        correct = (global_count(1) == undef_count_after)
@@ -414,7 +414,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleRelease(rh, rc=localrc)
+       call ESMF_FieldRegridRelease(rh, rc=localrc)
        _VERIFY(localrc)
     
        correct = (global_count(1) == undef_count_after)
@@ -510,7 +510,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleRelease(rh, rc=localrc)
+       call ESMF_FieldRegridRelease(rh, rc=localrc)
        _VERIFY(localrc)
     
        correct = (global_count(1) == undef_count_after)
@@ -603,7 +603,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleRelease(rh, rc=localrc)
+       call ESMF_FieldRegridRelease(rh, rc=localrc)
        _VERIFY(localrc)
     
        correct = (global_count(1) == undef_count_after)
@@ -696,7 +696,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleRelease(rh, rc=localrc)
+       call ESMF_FieldRegridRelease(rh, rc=localrc)
        _VERIFY(localrc)
     
        correct = (global_count(1) == undef_count_after)

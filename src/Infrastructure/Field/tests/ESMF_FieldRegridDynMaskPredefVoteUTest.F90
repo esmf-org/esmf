@@ -235,7 +235,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleRelease(rh, rc=localrc)
+       call ESMF_FieldRegridRelease(rh, rc=localrc)
        _VERIFY(localrc)
 
        correct = (dst_ny*dst_nx) == def_count
@@ -324,7 +324,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleRelease(rh, rc=localrc)
+       call ESMF_FieldRegridRelease(rh, rc=localrc)
        _VERIFY(localrc)
 
        correct = (dst_ny*dst_nx) == def_count
@@ -413,7 +413,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleRelease(rh, rc=localrc)
+       call ESMF_FieldRegridRelease(rh, rc=localrc)
        _VERIFY(localrc)
 
        correct = (dst_ny*dst_nx) == def_count
@@ -505,7 +505,7 @@ contains
        _VERIFY_PASS(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY_PASS(localrc)
-       call ESMF_RouteHandleRelease(rh, rc=localrc)
+       call ESMF_FieldRegridRelease(rh, rc=localrc)
        _VERIFY_PASS(localrc)
 
        correct = (dst_ny*dst_nx) == def_count
@@ -597,7 +597,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleRelease(rh, rc=localrc)
+       call ESMF_FieldRegridRelease(rh, rc=localrc)
        _VERIFY(localrc)
 
        correct = (dst_ny*dst_nx*lm) == def_count
@@ -689,7 +689,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleRelease(rh, rc=localrc)
+       call ESMF_FieldRegridRelease(rh, rc=localrc)
        _VERIFY(localrc)
 
        correct = (dst_ny*dst_nx*lm) == def_count
@@ -781,7 +781,7 @@ contains
        _VERIFY(localrc)
        call ESMF_GridDestroy(dstGrid, noGarbage=.true., rc=localrc)
        _VERIFY(localrc)
-       call ESMF_RouteHandleRelease(rh, rc=localrc)
+       call ESMF_FieldRegridRelease(rh, rc=localrc)
        _VERIFY(localrc)
 
        correct = (dst_ny*dst_nx*lm) == def_count
