@@ -43,7 +43,7 @@ TESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMF_FieldSMMFromFileUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridDynMaskPredefDstUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridDynMaskPredefSrcUTest \
-		$(ESMF_TESTDIR)/ESMF_FieldRegridDynMaskPredefVoteUTest
+		$(ESMF_TESTDIR)/ESMF_FieldRegridDynMaskPredefVoteUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridBinnUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldSMMFromFileUTest
 
@@ -85,7 +85,7 @@ TESTS_RUN     = \
 		RUN_ESMF_FieldSMMFromFileUTest \
 		RUN_ESMF_FieldRegridDynMaskPredefDstUTest \
 		RUN_ESMF_FieldRegridDynMaskPredefSrcUTest \
-		RUN_ESMF_FieldRegridDynMaskPredefVoteUTest
+		RUN_ESMF_FieldRegridDynMaskPredefVoteUTest \
 		RUN_ESMF_FieldRegridBinnUTest \
 		RUN_ESMF_FieldSMMFromFileUTest
 
@@ -115,7 +115,7 @@ TESTS_RUN_UNI = \
 		RUN_ESMF_FieldSMMFromFileUTestUNI \
 		RUN_ESMF_FieldRegridDynMaskPredefDstUTestUNI \
 		RUN_ESMF_FieldRegridDynMaskPredefSrcUTestUNI \
-		RUN_ESMF_FieldRegridDynMaskPredefVoteUTestUNI
+		RUN_ESMF_FieldRegridDynMaskPredefVoteUTestUNI \
 		RUN_ESMF_FieldRegridBinnUTestUNI \
 		RUN_ESMF_FieldSMMFromFileUTestUNI
 
