@@ -67,7 +67,7 @@ int ESMC_LogMsgFoundError(
 //
 // !DESCRIPTION:
 //
-//  Test for rcToCheck != ESMF_SUCCESS. Return 1 if error found, 0 otherwise.
+//  Test for rcToCheck != ESMF\_SUCCESS. Return 1 if error found, 0 otherwise.
 //  Write message to log in case of error.
 //
 //  The arguments are:
