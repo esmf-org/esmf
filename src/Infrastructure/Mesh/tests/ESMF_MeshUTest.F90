@@ -3009,6 +3009,22 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test ESMF_MeshWriteVTK() on Mesh with >4 elements."
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  call test_meshwritevtkgt4(correct, rc)
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  
   !------------------------------------------------------------------------
   ! TODO: "Activate once the mesh is fully created. ESMF_MeshWrite is not meant
   !  to be called until then".
@@ -10616,5 +10632,104 @@ subroutine MeshGetElemInfoWGT4SidesTest(correct, rc)
    rc=ESMF_SUCCESS
    
 end subroutine MeshGetElemInfoWGT4SidesTest
+
+subroutine test_meshwritevtkgt4(correct, rc)
+  logical :: correct
+  integer :: rc
+  
+  type(ESMF_Mesh):: mesh, dualMesh
+  integer, pointer :: nodeIds(:),nodeOwners(:),nodeMask(:),nodeIdsTst(:)
+  real(ESMF_KIND_R8), pointer :: nodeCoords(:), nodeCoordsTst(:)
+  real(ESMF_KIND_R8), pointer :: ownedNodeCoords(:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr1D(:)
+  integer :: numNodes, numOwnedNodes, numOwnedNodesTst
+  integer :: numElems,numOwnedElemsTst
+  integer :: numElemConns, numTriElems, numQuadElems
+  real(ESMF_KIND_R8), pointer :: elemCoords(:), elemCoordsTst(:)
+  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:),elemMask(:), elemIdsTst(:)
+  integer :: petCount, localPet
+  type(ESMF_VM) :: vm
+  integer :: numOwnedElems
+  type(ESMF_Field):: elemIdsField
+  type(ESMF_Array):: elemIdsArray
+  
+  
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! return with an error if not 1 or 4 PETs
+  if ((petCount /= 1) .and. (petCount /=4)) then
+     rc=ESMF_FAILURE
+     return
+  endif
+
+  ! Create Mesh with >sided elements
+  call createTestMeshPH(mesh, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  
+   ! Init correct
+   correct=.true.
+   
+   ! Get count info
+   call ESMF_MeshGet(mesh, &
+        elementCount=numElems, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Allocate space
+   allocate(elemIds(numElems))
+
+   ! Get conn info
+   call ESMF_MeshGet(mesh, &
+        elementIds=elemIds, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Create Field
+   elemIdsField=ESMF_FieldCreate(mesh, typekind=ESMF_TYPEKIND_R8, meshLoc=ESMF_MESHLOC_ELEMENT, &
+        rc=rc) 
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Get Field data
+   call ESMF_FieldGet(elemIdsField, farrayPtr=farrayPtr1D, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Fill field with id values
+   do i=1,numElems
+      farrayPtr1D(i)=REAL(elemIds(i), ESMF_KIND_R8)
+   enddo
+
+  ! DEBUG OUTPUT
+  !  write(*,*) "elemIds=",elemIds
+  !  write(*,*) "farrayPtr=",farrayPtr1D
+
+   ! Get Field array
+   call ESMF_FieldGet(elemIdsField, array=elemIdsArray, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Write out Mesh and Array to test
+   call ESMF_MeshWriteVTK(mesh, "elemidsgt4tst", &
+        elemArray1=elemIdsArray, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+   
+   ! TODO: When we have a way to read it back in, add that, but for now just look at file
+
+   ! Get rid of Field
+   call ESMF_FieldDestroy(elemIdsField, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+   
+   ! Get rid of Mesh
+   call ESMF_MeshDestroy(mesh, rc=rc)
+   if (rc /= ESMF_SUCCESS) return   
+   
+   ! Return success
+   rc=ESMF_SUCCESS
+   
+end subroutine test_meshwritevtkgt4
 
 end program ESMF_MeshUTest

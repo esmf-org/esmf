@@ -1,0 +1,24 @@
+{
+    "name": "esmfdev_ubuntu-25.10_gcc-15_mpich",
+    "image": "ghcr.io/esmf-org/esmfdev_ubuntu-25.10_gcc-15_mpich:latest",
+    // "build": { "dockerfile": "Dockerfile" },
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash",
+                "terminal.integrated.profiles.linux": {
+                    "bash": {
+                        "path": "bash",
+                        "args": ["-l"]
+                    }
+                }
+            }
+        }
+    },
+	"workspaceMount": "source=${localWorkspaceFolder},target=/home/esmfdev/esmf,type=bind,consistency=cached",
+	"workspaceFolder": "/home/esmfdev/esmf",
+    "containerEnv": {
+        "ESMF_DIR": "/home/esmfdev/esmf"
+    },
+	"runArgs": ["--shm-size=2g"]
+}

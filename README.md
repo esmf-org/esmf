@@ -60,6 +60,11 @@ Several add-on packages are included with ESMF under [`./src/addon`](https://git
 
 See each addon package for a specific README file.
 
+## ESMF Development
+
+ESMF configures [Dev Containers](https://containers.dev/), which provide a portable, reproducible development environment for building and testing ESMF.
+See [`.devcontainer/README.md`](.devcontainer/README.md) for instructions on using Dev Containers in VS Code, GitHub Codespaces, and locally with Docker.
+
 ## More Help
 
 Information about the ESMF project can be found at the ESMF web site:

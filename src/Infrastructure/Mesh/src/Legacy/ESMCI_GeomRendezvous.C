@@ -177,8 +177,27 @@ static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
 /*-----------------------------------------------------------------------------------*/
 // GeomRend functions
 /*-----------------------------------------------------------------------------------*/
+  
+GeomRend::GeomRend() :
+                     srcmesh(NULL),
+                     srcplist(NULL),
+                     dstmesh(NULL),
+                     dstplist(NULL),
+                     //                     dcfg(cfg),                     
+                     srcComm(),
+                     srcNbrComm(),                     
+                     dstComm(),
+                     built(false),
+                     sdim(0),
+                     iter_is_obj(false),
+                     freeze_src(false),
+                     srcplist_rend(NULL),
+                     dstplist_rend(NULL),
+                     on_sph(false),
+                     status(GEOMREND_STATUS_UNINIT)
+{}
 
-
+  
   GeomRend::GeomRend(Mesh *_srcmesh, PointList *_srcplist,
                      Mesh *_dstmesh, PointList *_dstplist,
                      const DstConfig &cfg, bool freeze_src_, bool _on_sph) :
@@ -222,6 +241,54 @@ static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
   // For now only allow the 'conservative case for elements (since sides have no relations otherwise)
   ThrowRequire(!iter_is_obj || dcfg.obj_type == MeshObj::ELEMENT);
 }
+
+// This allows the user to setup the GeomRend object if it was originally created using the default constructor
+// TODO: add a flag to ensure that it was originally default constructed, also call one method from this and GeomRend(...)
+void GeomRend::DelayedSetup(Mesh *_srcmesh, PointList *_srcplist,
+                  Mesh *_dstmesh, PointList *_dstplist,
+                  const DstConfig &cfg, bool freeze_src_, bool _on_sph) {
+
+
+  // Make sure that we haven't been init yet
+  ThrowRequire(status == GEOMREND_STATUS_UNINIT);
+  
+  // Assign members
+  srcmesh=_srcmesh;
+  srcplist=_srcplist;
+  dstmesh=_dstmesh;
+  dstplist=_dstplist;
+  dcfg=cfg;
+  iter_is_obj=(cfg.iter_obj_type == cfg.obj_type);
+  freeze_src=freeze_src_;
+  on_sph=_on_sph;
+
+  
+  // Get srcDim
+  if (_srcplist != NULL) {
+    sdim = _srcplist->get_coord_dim();
+  } else {
+    sdim = _srcmesh->spatial_dim();
+  }
+
+  // Get dstDim
+  int dst_dim;
+  if (_dstplist != NULL) {
+    dst_dim = _dstplist->get_coord_dim();
+  } else {
+    dst_dim = _dstmesh->spatial_dim();
+  }
+
+  // Error checking
+  ThrowRequire(sdim == dst_dim);
+  ThrowRequire(dcfg.iter_obj_type == MeshObj::ELEMENT ||
+               dcfg.iter_obj_type == MeshObj::NODE);
+
+
+  // For now only allow the 'conservative case for elements (since sides have no relations otherwise)
+  ThrowRequire(!iter_is_obj || dcfg.obj_type == MeshObj::ELEMENT);
+}
+
+
 
 GeomRend::~GeomRend() {
   if (srcplist_rend != NULL)

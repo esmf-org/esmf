@@ -98,9 +98,18 @@ option (WITH_PNETCDF         "Require the use of PnetCDF"                   ON)
 option (BUILD_SHARED_LIBS    "Build shared libraries"                       OFF)
 
 if(APPLE)
-  # The linker on macOS does not include `common symbols` by default
-  # Passing the -c flag includes them and fixes an error with undefined symbols (err_buffer, resultlen)
-  set(CMAKE_C_ARCHIVE_FINISH "<CMAKE_RANLIB> -c <TARGET>")
+  # Get the version/help output to see if "LLVM" is in the name
+  execute_process(COMMAND ${CMAKE_RANLIB} --version 
+                  OUTPUT_VARIABLE RANLIB_VERSION_OUTPUT
+                  ERROR_QUIET)
+
+  if(NOT RANLIB_VERSION_OUTPUT MATCHES "LLVM")
+    # Only use -c if we aren't using LLVM's version
+    set(CMAKE_C_ARCHIVE_FINISH "<CMAKE_RANLIB> -c <TARGET>")
+  else()
+    # For LLVM, use the standard command without -c
+    set(CMAKE_C_ARCHIVE_FINISH "<CMAKE_RANLIB> <TARGET>")
+  endif()
 endif()
 
 # Set a variable that appears in the config.h.in file.

@@ -37,6 +37,9 @@ public:
   struct DstConfig {
   DstConfig(UInt _iter_otype, UInt _otype, const Context &_ctxt, bool _neighbors = false, bool _all_overlap_dst=false,  double _gtol = 1e-6) :
     iter_obj_type(_iter_otype), obj_type(_otype), ctxt(_ctxt), neighbors(_neighbors), all_overlap_dst(_all_overlap_dst), geom_tol(_gtol) {}
+
+    DstConfig() :  DstConfig(MeshObj::NODE, MeshObj::NODE, Context().flip()) {}
+
     UInt iter_obj_type; // Object to iterate when building intersection
     UInt obj_type; // One of node, node + interp, interp
     Context ctxt; // Context to match when iterating
@@ -45,11 +48,16 @@ public:
     double geom_tol;
   };
 
+  GeomRend();
   GeomRend(Mesh *srcmesh, PointList *_srcplist,
            Mesh *dstmesh, PointList *_dstplist,
            const DstConfig &config, bool freeze_src_=false, bool on_sph=false);
   ~GeomRend();
 
+  void DelayedSetup(Mesh *srcmesh, PointList *_srcplist,
+                    Mesh *dstmesh, PointList *_dstplist,
+                    const DstConfig &config, bool freeze_src_=false, bool on_sph=false);
+  
   /*
    * Build the geometric Rendezvous.
    * We must send the fields to be registered on both the source and
