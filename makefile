@@ -850,6 +850,7 @@ endif
 	fi; \
 	fi
 	$(MAKE) install_info_mk
+	$(ESMF_DIR)/cmake/generate_config.py --esmfmkfile=$(ESMF_INSTALL_LIBDIR_ABSPATH)/esmf.mk --template=$(ESMF_DIR)/cmake/ESMFConfig.cmake.in --output=$(ESMF_INSTALL_LIBDIR_ABSPATH)/cmake/ESMF/ESMFConfig.cmake
 	-@echo " "
 	-@echo "ESMF installation complete."
 	-@echo " "
