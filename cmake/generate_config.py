@@ -28,6 +28,7 @@ def main():
         print(f"Error: Specified esmf.mk file does not exist at: {args.esmfmkfile}", file=sys.stderr)
         sys.exit(1)
 
+    # Read the esmf.mk file content
     esmf_vars = {}
     with open(args.esmfmkfile, "r") as f:
         for line in f:
@@ -47,8 +48,8 @@ def main():
     is_beta = "TRUE" if esmf_vars.get("ESMF_VERSION_BETASNAPSHOT", "").strip("'\"") == "T" else "FALSE"
 
     # Include compilation paths parsing
-    esmf_inc = [x.replace("-I", "") for x in esmf_vars.get("ESMF_F90COMPILEPATHS", "").split()]
-    esmc_inc = [x.replace("-I", "") for x in esmf_vars.get("ESMF_CCOMPILEPATHS", "").split()]
+    esmf_inc = [x[2:] for x in esmf_vars.get("ESMF_F90COMPILEPATHS", "").split() if x.startswith("-I")]
+    esmc_inc = [x[2:] for x in esmf_vars.get("ESMF_CCOMPILEPATHS", "").split() if x.startswith("-I")]
 
     # Determine if this build is MPI-dependent or an mpiuni stub layout
     cpp_flags = esmf_vars.get("ESMF_F90COMPILECPPFLAGS", "")
