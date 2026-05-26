@@ -2,6 +2,8 @@
 @PACKAGE_INIT@
 
 set(ESMF_VERSION "@ESMF_VERSION@")
+set(ESMF_VERSION_STRING_GIT "@ESMF_VERSION_GIT@")
+set(ESMF_BETA_RELEASE @ESMF_BETA_RELEASE@)
 set(ESMF_HAS_MPI @ESMF_HAS_MPI@)
 
 # Conditionally load MPI dependency track ONLY if enabled in esmf.mk
@@ -14,7 +16,7 @@ endif()
 set(ESMF_INCLUDE_DIRECTORIES "@ESMF_INCLUDE_DIRECTORIES@")
 set(ESMC_INCLUDE_DIRECTORIES "@ESMC_INCLUDE_DIRECTORIES@")
 
-# Recreate targets
+# Create Fortran Targets
 if(NOT TARGET ESMF::ESMF)
     add_library(ESMF::ESMF UNKNOWN IMPORTED GLOBAL)
 
@@ -34,6 +36,7 @@ if(NOT TARGET ESMF::ESMF)
     )
 endif()
 
+# Create C/C++ Targets
 if(NOT TARGET ESMF::ESMC)
     add_library(ESMF::ESMC UNKNOWN IMPORTED GLOBAL)
 
