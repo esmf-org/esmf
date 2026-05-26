@@ -16,9 +16,9 @@ import re
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Generate ESMFConfig.cmake and ESMFConfigVersion.cmake from an explicit esmf.mk.")
-    parser.add_argument("--esmfmkfile", required=True, help="Exact absolute path to the esmf.mk file.")
-    parser.add_argument("--template", required=True, help="Path to ESMFConfig.cmake.in input template.")
-    parser.add_argument("--output", required=True, help="Full destination path for ESMFConfig.cmake.")
+    parser.add_argument("--esmfmkfile", required=True, help="The esmf.mk file with full path.")
+    parser.add_argument("--template", required=True, help="The ESMFConfig.cmake.in template with full path.")
+    parser.add_argument("--outputdir", required=True, help="Destination directory for the generated CMake config files.")
     return parser.parse_args()
 
 def main():
@@ -91,15 +91,20 @@ def main():
     for token, value in replacements.items():
         content = content.replace(token, value)
 
-    os.makedirs(os.path.dirname(os.path.abspath(args.output)), exist_ok=True)
-    with open(args.output, "w") as f:
+    # Outputdir
+    out_dir = os.path.abspath(args.outputdir)
+    os.makedirs(out_dir, exist_ok=True)
+
+    # Write the main config file
+    config_output = os.path.join(out_dir, "ESMFConfig.cmake")
+    with open(config_output, "w") as f:
         f.write(content)
-    print(f"Successfully generated config: {args.output} (MPI: {is_mpi_build}, Shared Target: {os.path.basename(lib_loc)})")
+    print(f"Successfully generated config: {config_output} (MPI: {is_mpi_build}, Shared Target: {os.path.basename(lib_loc)})")
 
     # --------------------------------------------------------------------------
     # Generate the companion ESMFConfigVersion.cmake file inline
     # --------------------------------------------------------------------------
-    version_output = args.output.replace("ESMFConfig.cmake", "ESMFConfigVersion.cmake")
+    version_output = os.path.join(out_dir, "ESMFConfigVersion.cmake")
 
     # Extract clean major.minor.patch version string (e.g., "9.0.0") from the full beta snapshot string
     numeric_match = re.search(r"([0-9]+\.[0-9]+\.[0-9]+)", version)
