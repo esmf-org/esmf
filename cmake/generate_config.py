@@ -39,6 +39,9 @@ def main():
     # Extract values
     version = esmf_vars.get("ESMF_VERSION_STRING", "0.0.0").strip("'\"")
     git_str = esmf_vars.get("ESMF_VERSION_STRING_GIT", "unknown").strip("'\"")
+    apps_dir = esmf_vars.get("ESMF_APPSDIR", "unknown").strip("'\"")
+    libs_dir = esmf_vars.get("ESMF_LIBSDIR", "unknown").strip("'\"")
+    esmx_dir = esmf_vars.get("ESMF_ESMXDIR", "unknown").strip("'\"")
 
     # Mirror legacy FindESMF.cmake tracking for downstream compatibility variables
     is_beta = "TRUE" if esmf_vars.get("ESMF_VERSION_BETASNAPSHOT", "").strip("'\"") == "T" else "FALSE"
@@ -73,9 +76,12 @@ def main():
     replacements = {
         "@PACKAGE_INIT@": "",
         "@ESMF_VERSION@": version,
-        "@ESMF_VERSION_GIT@": git_str,
+        "@ESMF_VERSION_STRING_GIT@": git_str,
         "@ESMF_BETA_RELEASE@": is_beta,
         "@ESMF_HAS_MPI@": is_mpi_build,
+        "@ESMF_APPSDIR@": apps_dir,
+        "@ESMF_LIBSDIR@": libs_dir,
+        "@ESMF_ESMXDIR@": esmx_dir,
         "@ESMF_INCLUDE_DIRECTORIES@": ";".join(esmf_inc),
         "@ESMC_INCLUDE_DIRECTORIES@": ";".join(esmc_inc),
         "@ESMF_INTERFACE_LINK_LIBRARIES@": esmf_libs,
