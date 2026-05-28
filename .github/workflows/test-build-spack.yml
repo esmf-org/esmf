@@ -74,7 +74,7 @@ jobs:
     steps:
     # check out base repo
     - name: Checkout Base Repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     # prepare core environment
     - name: Install Core Development Tools
@@ -121,7 +121,7 @@ jobs:
 
     # checkout NUOPC app prototypes
     - name: Checkout NUOPC App Prototypes
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         repository: esmf-org/nuopc-app-prototypes
         path: ${{ github.workspace }}/nuopc-app-prototypes
@@ -144,7 +144,7 @@ jobs:
 
    # push test results to artifacts
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: Artifacts for ${{ matrix.compiler }} ${{ matrix.esmf }}
         path: ${{ github.workspace }}/nuopc-app-prototypes/Artifacts
