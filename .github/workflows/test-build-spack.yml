@@ -14,12 +14,12 @@ on:
         type: string
         default: 'gcc@latest'
       esmf_version: 
-        description: 'ESMF version or tag like esmf@develop or esmf@=8.5.0b23'
+        description: 'ESMF version known to Spack like esmf@X.Y.Z (special case esmf@develop); or Git object like esmf@git.<hash|tag|branch>=X.Y.Z with X.Y.Z as pseudo-version for Spack rules'
         required: false
         type: string
         default: 'esmf@develop'
       nuopc_app_version:
-        description: 'NUOPC Application Prototypes version or tag like develop or v8.5.0b23'
+        description: 'NUOPC Application Prototypes version as Git hash, tag, or branch'
         required: false
         type: string
         default: 'develop'
