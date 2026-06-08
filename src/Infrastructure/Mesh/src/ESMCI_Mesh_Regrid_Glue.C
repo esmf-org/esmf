@@ -656,8 +656,6 @@ void ESMCI_regrid_create(
         if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
       }
 
-printf("HERE\n");
-
       
       // Output Warning if src Array contains a NaN
       if (_Array_contains_NaN(*arraysrcpp)) {
@@ -954,8 +952,6 @@ bool _Array_contains_NaN(ESMCI::Array *array) {
     // Get typekind of Array
     ESMC_TypeKind_Flag typekind=array->getTypekind();
 
-    printf("HERE2 r8=%d tk=%d\n",ESMC_TYPEKIND_R8,typekind);
-
     
     // Check depending on type
     if (typekind == ESMC_TYPEKIND_R8) {
@@ -972,8 +968,6 @@ bool _Array_contains_NaN(ESMCI::Array *array) {
             
           // Get linear index of this element
           long unsigned int linearIndex = arrayElement.getLinearIndex();
-          
-          printf("value=%f\n",lDEBaseAddr[linearIndex]);
           
           // Check for NaN
           if (std::isnan(lDEBaseAddr[linearIndex])) return true;
