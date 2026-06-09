@@ -7,13 +7,45 @@ modes employed by `find_package(ESMF)` are supported: "config mode"
 ## CMake Config Mode
 
 In "config mode", CMake tries to locate the `ESMFConfig.cmake` file in standard
-locations. During this search, CMake automatically respects paths provided
+locations. During this search, CMake respects paths provided
 by the `CMAKE_PREFIX_PATH` variable in the user's environment. Spack-loaded
 installations of ESMF automatically set `CMAKE_PREFIX_PATH`, making this the
 most convenient method of building CMake-based applications against ESMF.
 For ESMF installations not managed by Spack, explicitly add the ESMF
 installation root directory to the `CMAKE_PREFIX_PATH` environment variable
 for seamless integration with CMake.
+
+The configuration file provides exported imported targets that transitively
+bundle include directories, linked libraries, and compiler definitions (such
+as OpenMP or MPI requirements). To consume ESMF targets, utilize the
+`find_package()` command in your project's `CMakeLists.txt` file:
+
+```
+cmake_minimum_required(VERSION 3.22)
+project(MyESMFApplication LANGUAGES Fortran C)
+
+# 1. Locate the ESMF Package
+# Specify a minimum version or version constraints if desired
+# Explicitly request config mode
+find_package(ESMF 9.0.0 REQUIRED CONFIG)
+
+# 2. Define your application target
+add_executable(my_model main.F90 physics_mod.F90)
+
+# 3. Link against ESMF Imported Targets
+# This automatically manages include paths, RPATHs, and downstream dependencies
+target_link_libraries(my_model PUBLIC ESMF::ESMF)
+```
+
+Depending on whether the use application code is written in Fortran or C/C++,
+the ESMF package defines separate targets to avoid linking mismatch issues.
+Target aliases are provided for compatibility.
+
+
+| Target | Alias | Language Focus | Description |
+|----|----|----|----|
+| ESMF::ESMF | ESMF::ESMF_Fortran | Fortran | Configured for Fortran libraries and compiler variables, OpenMP flags, and tracking for MPI::MPI_Fortran dependencies. |
+| ESMF::ESMC | ESMF::ESMF_C       | C/C++   | Configured with native C/C++ compiler variables, OpenMP flags, and tracking for MPI::MPI_C dependencies. |
 
 ## CMake Module Mode
 
