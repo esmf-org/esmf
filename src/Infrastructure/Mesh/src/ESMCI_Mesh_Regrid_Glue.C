@@ -657,7 +657,7 @@ void ESMCI_regrid_create(
       }
 
       
-      // Output Warning if src Array contains a NaN
+      // Output Error if src Array contains a NaN
       if (_Array_contains_NaN(*arraysrcpp)) {
         //  ESMC_LogDefault.Write("The source Field passed to regrid weight generation (e.g. ESMF_FieldRegridStore()) contains a NaN. This may result in a floating point exception with some compiler options.",
         //                    ESMC_LOGMSG_WARN);
@@ -668,11 +668,11 @@ void ESMCI_regrid_create(
 
       // Output Warning if dst Array contains a NaN
       if (_Array_contains_NaN(*arraydstpp)) {
-        // ESMC_LogDefault.Write("The destination Field passed to regrid weight generation (e.g. ESMF_FieldRegridStore()) contains a NaN. This may result in a floating point exception with compiler options.",
-        //                    ESMC_LOGMSG_WARN);
-        if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                                         "The destination Field passed to regrid weight generation (e.g. ESMF_FieldRegridStore()) contains a NaN.",
-                                         ESMC_CONTEXT, &localrc)) throw localrc;                
+        ESMC_LogDefault.Write("The destination Field passed to regrid weight generation (e.g. ESMF_FieldRegridStore()) contains a NaN. This may result in a floating point exception with compiler options.",
+                              ESMC_LOGMSG_WARN);
+        //if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        //                                 "The destination Field passed to regrid weight generation (e.g. ESMF_FieldRegridStore()) contains a NaN.",
+        //                                  ESMC_CONTEXT, &localrc)) throw localrc;                
       }
       
 
