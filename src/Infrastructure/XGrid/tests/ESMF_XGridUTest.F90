@@ -6794,6 +6794,10 @@ end subroutine test_CSGridToGrid_2nd
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_FieldFill(srcField(i), dataFillScheme="const", const1=0.0_ESMF_KIND_R8,  rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
       srcFrac(i) = ESMF_FieldCreate(srcGrid(i), typekind=ESMF_TYPEKIND_R8, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -6814,6 +6818,10 @@ end subroutine test_CSGridToGrid_2nd
 
     do i = 1, ndst
       dstField(i) = ESMF_FieldCreate(dstGrid(i), typekind=ESMF_TYPEKIND_R8, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_FieldFill(dstField(i), dataFillScheme="const", const1=0.0_ESMF_KIND_R8,  rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7164,6 +7172,10 @@ end subroutine test_CSGridToGrid_2nd
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_FieldFill(srcField(i), dataFillScheme="const", const1=0.0_ESMF_KIND_R8,  rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
       srcFrac(i) = ESMF_FieldCreate(srcGrid(i), meshloc=ESMF_MESHLOC_ELEMENT, &
         typekind=ESMF_TYPEKIND_R8, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
@@ -7188,6 +7200,10 @@ end subroutine test_CSGridToGrid_2nd
     do i = 1, ndst
       dstField(i) = ESMF_FieldCreate(dstGrid(i), meshloc=ESMF_MESHLOC_ELEMENT, &
         typekind=ESMF_TYPEKIND_R8, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_FieldFill(dstField(i), dataFillScheme="const", const1=0.0_ESMF_KIND_R8,  rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
