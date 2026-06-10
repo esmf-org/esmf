@@ -71,6 +71,7 @@ int Clock::count=0;
       int          *runTimeStepCount, // in
       Time         *refTime,          // in
       TimeInterval *repeatDuration,   // in
+      int          *repeatCountStart, // in
       int          *rc) {             // out - return code
 
 // !DESCRIPTION:
@@ -159,6 +160,13 @@ int Clock::count=0;
     clock->repeat=false;
     clock->repeatDuration=(TimeInterval)0;
     clock->repeatCount=0;
+
+    // If present, then start repeatCount at another value
+    if (repeatCountStart != ESMC_NULL_POINTER) {
+      clock->repeatCount=*repeatCountStart;
+    }
+
+    // Turn on repeating if duration is present and non-zero
     if ((repeatDuration != ESMC_NULL_POINTER) &&
         (*repeatDuration !=0 )){ // Gives a way to not have repeat, but still have arg. (useful for C->F)
       clock->repeat=true;
