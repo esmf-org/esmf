@@ -26,8 +26,14 @@ if(NOT TARGET ESMF::ESMF)
     set(ESMF_LINK_LIBS_LIST "@ESMF_INTERFACE_LINK_LIBRARIES@")
     separate_arguments(ESMF_LINK_LIBS_LIST NATIVE_COMMAND "${ESMF_LINK_LIBS_LIST}")
 
-    # Append MPI targets to the list only if required
-    set(ESMF_TARGET_LINKS "${ESMF_LINK_LIBS_LIST}")
+    # Filter any raw object files ESMF might use for cross-language linking but will confuse CMake
+    set(ESMF_TARGET_LINKS "")
+    foreach(item IN LISTS ESMF_LINK_LIBS_LIST)
+        if(NOT item MATCHES "\\.o$")
+            list(APPEND ESMF_TARGET_LINKS "${item}")
+        endif()
+    endforeach()
+
     if(ESMF_HAS_MPI)
         list(APPEND ESMF_TARGET_LINKS "MPI::MPI_Fortran")
     endif()
@@ -45,9 +51,15 @@ if(NOT TARGET ESMF::ESMC)
 
     set(ESMC_LINK_LIBS_LIST "@ESMC_INTERFACE_LINK_LIBRARIES@")
     separate_arguments(ESMC_LINK_LIBS_LIST NATIVE_COMMAND "${ESMC_LINK_LIBS_LIST}")
-    list(REMOVE_DUPLICATES ESMC_LINK_LIBS_LIST)
 
-    set(ESMC_TARGET_LINKS "${ESMC_LINK_LIBS_LIST}")
+    # Filter any raw object files ESMF might use for cross-language linking but will confuse CMake
+    set(ESMC_TARGET_LINKS "")
+    foreach(item IN LISTS ESMC_LINK_LIBS_LIST)
+        if(NOT item MATCHES "\\.o$")
+            list(APPEND ESMC_TARGET_LINKS "${item}")
+        endif()
+    endforeach()
+
     if(ESMF_HAS_MPI)
         list(APPEND ESMC_TARGET_LINKS "MPI::MPI_C")
     endif()
