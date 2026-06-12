@@ -29,7 +29,7 @@ if(NOT TARGET ESMF::ESMF)
     # Append MPI targets to the list only if required
     set(ESMF_TARGET_LINKS "${ESMF_LINK_LIBS_LIST}")
     if(ESMF_HAS_MPI)
-        list(APPEND ESMF_TARGET_LINKS "MPI::MPI_Fortran")
+        list(APPEND ESMF_TARGET_LINKS "MPI::MPI_Fortran" "MPI::MPI_C")
     endif()
 
     set_target_properties(ESMF::ESMF PROPERTIES
@@ -45,7 +45,6 @@ if(NOT TARGET ESMF::ESMC)
 
     set(ESMC_LINK_LIBS_LIST "@ESMC_INTERFACE_LINK_LIBRARIES@")
     separate_arguments(ESMC_LINK_LIBS_LIST NATIVE_COMMAND "${ESMC_LINK_LIBS_LIST}")
-    list(REMOVE_DUPLICATES ESMC_LINK_LIBS_LIST)
 
     set(ESMC_TARGET_LINKS "${ESMC_LINK_LIBS_LIST}")
     if(ESMF_HAS_MPI)
