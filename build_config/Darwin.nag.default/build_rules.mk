@@ -156,16 +156,25 @@ ESMF_F90COMPILEFIXCPP    = -fixed -fpp
 ESMF_F90COMPILEFIXNOCPP  = -fixed
 
 ############################################################
-# Blank out variables to prevent rpath encoding
+# Set rpath syntax
 #
-ESMF_F90LINKRPATHS      =
-ESMF_CXXLINKRPATHS      =
-ESMF_CLINKRPATHS        =
+ESMF_F90RPATHPREFIX         = -Wl,-rpath,
+ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
+ESMF_CRPATHPREFIX           = -Wl,-rpath,
 
 ############################################################
-# Link against libesmf.a using the F90 linker front-end
+# Determine where gcc's libraries are located
+# Use when linking against libesmf with F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lstdc++
+# Note that the result of -print-file-name will be the full path to the file if it is found
+# within the compiler installation, and simply the file name verbatim if it is NOT found.
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS) -print-file-name=libstdc++.dylib)
+ifeq ($(ESMF_LIBSTDCXX),libstdc++.dylib)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS) -print-file-name=libstdc++.a)
+endif
+ESMF_F90LINKLIBS += $(ESMF_LIBSTDCXX)
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
+ESMF_F90LINKRPATHS += $(ESMF_F90RPATHPREFIX)$(dir $(ESMF_LIBSTDCXX))
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
