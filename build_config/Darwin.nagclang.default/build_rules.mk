@@ -1,6 +1,6 @@
 # $Id$
 #
-# Darwin.nag.default
+# Darwin.nagclang.default
 #
 
 ############################################################

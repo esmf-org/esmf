@@ -1,4 +1,4 @@
-## Darwin, using the NAG Fortran compiler with Apple Clang C/C++ compiler
+## Darwin, using the NAG Fortran compiler and Apple Clang C/C++ compiler
 
 Activated by setting: `ESMF_COMPILER=nagclang`
 
