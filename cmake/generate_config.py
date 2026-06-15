@@ -13,6 +13,7 @@ import os
 import sys
 import argparse
 import re
+import platform
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Generate ESMFConfig.cmake and ESMFConfigVersion.cmake from an explicit esmf.mk.")
@@ -62,9 +63,12 @@ def main():
     esmf_libs = " ".join([esmf_vars.get(k, "") for k in ["ESMF_F90LINKRPATHS", "ESMF_F90ESMFLINKRPATHS", "ESMF_F90ESMFLINKPATHS", "ESMF_F90LINKPATHS", "ESMF_F90LINKLIBS", "ESMF_F90LINKOPTS"]]).strip()
     esmc_libs = " ".join([esmf_vars.get(k, "") for k in ["ESMF_CLINKRPATHS", "ESMF_CESMFLINKRPATHS", "ESMF_CESMFLINKPATHS", "ESMF_CLINKPATHS", "ESMF_CLINKLIBS", "ESMF_CLINKOPTS"]]).strip()
 
-    # Prioritize shared library (.so) over static archive (.a)
+    # Prioritize shared library (.dylib or .so), with static archive (.a) fallback
     libs_dir = esmf_vars.get("ESMF_LIBSDIR", os.path.dirname(args.esmfmkfile))
-    lib_loc = os.path.join(libs_dir, "libesmf.so")
+    if platform.system() == "Darwin":
+        lib_loc = os.path.join(libs_dir, "libesmf.dylib")
+    else:
+        lib_loc = os.path.join(libs_dir, "libesmf.so")
     if not os.path.exists(lib_loc):
         lib_loc = os.path.join(libs_dir, "libesmf.a")
 
@@ -100,7 +104,7 @@ def main():
     config_output = os.path.join(out_dir, "ESMFConfig.cmake")
     with open(config_output, "w") as f:
         f.write(content)
-    print(f"Successfully generated config: {config_output} (MPI: {is_mpi_build}, Shared Target: {os.path.basename(lib_loc)})")
+    print(f"Successfully generated config: {config_output} (MPI: {is_mpi_build}, Imported Target: {os.path.basename(lib_loc)})")
 
     # --------------------------------------------------------------------------
     # Generate the companion ESMFConfigVersion.cmake file inline
