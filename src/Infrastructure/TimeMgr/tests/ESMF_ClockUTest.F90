@@ -2734,6 +2734,78 @@ call ESMF_LogSet (flush=.true.)
       
       ! ----------------------------------------------------------------------------
 
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(name, *) "repeatCountStart test"
+
+      ! Simple test of repeating within one hour
+      
+      ! Set start time 
+      call ESMF_TimeSet(startTime, yy=2024, mm=3, dd=14, h=5, m=0, s=0, &
+                                calendar=gregorianCalendar, rc=rc)
+
+      ! Set timeStep to one minute
+      call ESMF_TimeIntervalSet(timeStep, m=1, rc=rc)
+      
+      ! Set repeat duration to one hour
+      call ESMF_TimeIntervalSet(repeatDuration, h=1, rc=rc)
+      
+      ! Create Clock
+      repeatClock = ESMF_ClockCreate(timeStep, startTime, &
+           repeatDuration=repeatDuration, repeatCountStart=12, rc=rc)
+
+      ! Iterate for 120 minutes
+      do i=1,120
+        call ESMF_ClockAdvance(repeatClock, rc=rc)
+      end do
+        
+      ! Get counts
+      call ESMF_ClockGet(repeatClock, &
+           advanceCount=advanceCounts, &
+           repeatCount=repeatCounts, &
+           currTime=currentTime, &
+           rc=rc)
+
+      ! DEBUG OUTPUT
+      ! write(*,*) "advanceCounts=",advanceCounts
+      ! write(*,*) "repeatCounts=",repeatCounts
+
+       ! Get time
+       call ESMF_TimeGet(currentTime, &
+        yy=YY, mm=MM, dd=dd, h=H, m=M, &
+        rc=rc)
+
+      ! DEBUG OUTPUT
+      ! write(*,*) "YY=",YY
+      ! write(*,*) "MM=",MM
+      ! write(*,*) "dd=",dd
+      ! write(*,*) "H=",H
+      ! write(*,*) "M=",M
+
+      
+      ! Check info
+      correct=.true.
+      if (advanceCounts .ne. 120) correct=.false.
+      if (repeatCounts .ne. 14) correct=.false.
+      if (YY .ne. 2024) correct=.false.
+      if (MM .ne. 3) correct=.false.
+      if (dd .ne. 14) correct=.false.
+      if (H .ne. 5) correct=.false.
+      if (M .ne. 0) correct=.false.
+
+      ! Free Clock
+      call ESMF_ClockDestroy(repeatClock, rc=rc)
+      
+      call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      
+      ! ----------------------------------------------------------------------------
+
+      
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
@@ -2778,11 +2850,9 @@ call ESMF_LogSet (flush=.true.)
       ! write(*,*) "H=",H
       ! write(*,*) "M=",M
 
-      
+       
       ! Check info
       correct=.true.
-      if (advanceCounts .ne. 120) correct=.false.
-      if (repeatCounts .ne. 2) correct=.false.
       if (YY .ne. 2024) correct=.false.
       if (MM .ne. 3) correct=.false.
       if (dd .ne. 14) correct=.false.
@@ -2798,11 +2868,7 @@ call ESMF_LogSet (flush=.true.)
       
       ! ----------------------------------------------------------------------------
 
-      
-      
-
-
-      
+            
 #endif
       ! destroy calendars
       call ESMF_CalendarDestroy(gregorianCalendar, rc=rc)

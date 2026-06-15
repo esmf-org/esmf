@@ -624,7 +624,7 @@ An optional specialization method for custom finalization code and deallocations
   \item Use the {\tt CplList} attribute to construct {\tt srcFields} and {\tt dstFields} FieldBundles in the internal state that hold matched Field pairs.
   \item Set the {\tt Connected} attribute to {\tt true} in the Field metadata for each Field that is added to the {\tt srcFields} and {\tt dstFields} FieldBundles.
   \item {\it Optional specialization} to precompute a Connector operation: {\tt label\_ComputeRouteHandle}. Simple custom implementations store the precomputed communication RouteHandle in the {\tt rh} member of the internal state. More complex implementations use the {\tt state} member in the internal state to store auxiliary Fields, FieldBundles, and RouteHandles.
-  \item By default (if {\tt label\_ComputeRouteHandle} was {\em not} provided) precompute the Connector RouteHandle as a bilinear Regrid operation between {\tt srcFields} and {\tt dstFields}, with {\tt unmappedaction} set to {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. The resulting RouteHandle is stored in the {\tt rh} member of the internal state.
+  \item By default (if {\tt label\_ComputeRouteHandle} was {\em not} provided) precompute the Connector RouteHandle as a bilinear Regrid operation between {\tt srcFields} and {\tt dstFields}, with {\tt unmappedaction} set to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. The resulting RouteHandle is stored in the {\tt rh} member of the internal state.
   \end{itemize}  
 \end{itemize}
 

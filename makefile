@@ -816,7 +816,7 @@ install: envdump
 	cp -f $(ESMF_DIR)/build_config/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_SITE)/ESMC_Conf.h $(ESMF_INSTALL_HEADERDIR_ABSPATH)
 	cp -fr $(ESMF_ESMXDIR) $(ESMF_INSTALL_HEADERDIR_ABSPATH)
 	mkdir -p $(ESMF_INSTALL_CMAKEDIR_ABSPATH)
-	cp -f $(ESMF_CMAKEDIR)/*.cmake $(ESMF_INSTALL_CMAKEDIR_ABSPATH)
+	cp -f $(ESMF_CMAKEDIR)/FindESMF.cmake $(ESMF_INSTALL_CMAKEDIR_ABSPATH)
 	mkdir -p $(ESMF_INSTALL_MODDIR_ABSPATH)
 	cp -f $(ESMF_MODDIR)/*.mod $(ESMF_INSTALL_MODDIR_ABSPATH)
 	mkdir -p $(ESMF_INSTALL_LIBDIR_ABSPATH)
@@ -850,6 +850,7 @@ endif
 	fi; \
 	fi
 	$(MAKE) install_info_mk
+	$(ESMF_DIR)/cmake/generate_config.py --esmfmkfile=$(ESMF_INSTALL_LIBDIR_ABSPATH)/esmf.mk --template=$(ESMF_DIR)/cmake/ESMFConfig.cmake.in --outputdir=$(ESMF_INSTALL_LIBDIR_ABSPATH)/cmake/ESMF
 	-@echo " "
 	-@echo "ESMF installation complete."
 	-@echo " "

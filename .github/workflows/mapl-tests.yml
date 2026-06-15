@@ -80,7 +80,7 @@ jobs:
         pip install mepo
     - name: Cache Libraries
       id: cache-libraries
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ${{env.STACK_ROOT}}
         key: ${{matrix.config.desc}}
@@ -222,7 +222,7 @@ jobs:
           make all install
         fi
     - name: Checkout ESMF
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         path: ${{env.esmf-sdir}}
     - name: ESMF Install
@@ -243,7 +243,7 @@ jobs:
         echo "ESMF_ROOT=${ESMF_INSTALL_PREFIX}" >> $GITHUB_ENV
         echo "ESMFMKFILE=${ESMF_INSTALL_PREFIX}/lib/esmf.mk" >> $GITHUB_ENV
     - name: Checkout MAPL
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         repository: ${{env.mapl-repo}}
         ref: ${{env.mapl-vers}}
@@ -273,7 +273,7 @@ jobs:
           > ${ARTIFACTS}/mapl-tests-essential.log 2>&1
     - name: Archive Results
       if: ${{failure() || env.enbl-artf == 'true'}}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: logs-${{matrix.config.desc}}
         path: ${{env.ARTIFACTS}}

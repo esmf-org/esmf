@@ -49,6 +49,7 @@ extern "C" {
                                        int *runTimeStepCount,
                                        Time *refTime,
                                        TimeInterval *repeatDuration,
+                                       int *repeatCountStart,
                                        int *status,
                                        ESMCI_FortranStrLenArg name_l) {
           *ptr = ESMCI_ClockCreate(
@@ -62,6 +63,7 @@ extern "C" {
                     ESMC_NOT_PRESENT_FILTER(runTimeStepCount),
                     ESMC_NOT_PRESENT_FILTER(refTime),
                     ESMC_NOT_PRESENT_FILTER(repeatDuration),
+                    ESMC_NOT_PRESENT_FILTER(repeatCountStart),                                           
                     ESMC_NOT_PRESENT_FILTER(status) );
        }
 
