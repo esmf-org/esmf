@@ -213,8 +213,12 @@ endif
 # OpenMP compiler and linker flags
 #
 ifeq ($(ESMF_CLANGSTR),Apple clang)
-# Apple Clang does not support OpenMP
+# Apple Clang does not support OpenMP natively.
+# It requires explicit installation of libomp and manually pointing to the
+# associated include and lib directories.
 ESMF_OPENMPDEFAULT = OFF
+ESMF_OPENMP_CXXCOMPILEOPTS += -Xpreprocessor -fopenmp
+ESMF_OPENMP_CXXLINKOPTS    += -Xpreprocessor -fopenmp
 else
 # LLVM Clang supports OpenMP version 4
 ESMF_OPENMPDEFAULT = OMP4
