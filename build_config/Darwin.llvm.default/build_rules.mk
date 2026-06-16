@@ -256,15 +256,24 @@ ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
 ESMF_CRPATHPREFIX           = -Wl,-rpath,
 
 ############################################################
-# Determine where LLVM libraries are located for Fortran
+# Determine where clang's libraries are located
+# Use when linking against libesmf with F90 linker front-end
 #
+# Note that the result of -print-file-name will be the full path to the file if it is found
+# within the compiler installation, and simply the file name verbatim if it is NOT found.
+ifneq ($(ESMF_CLANGSTR),Apple clang)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXLINKER) $(ESMF_CXXLINKOPTS) -print-file-name=libc++.dylib)
+ifeq ($(ESMF_LIBSTDCXX),libc++.dylib)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXLINKER) $(ESMF_CXXLINKOPTS) -print-file-name=libc++.a)
+endif
+ESMF_F90LINKLIBS += $(ESMF_LIBSTDCXX)
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
+ESMF_F90LINKRPATHS += $(ESMF_F90RPATHPREFIX)$(dir $(ESMF_LIBSTDCXX))
+else
 ESMF_F90LINKPATHS += $(shell $(ESMF_DIR)/scripts/libpath.flang $(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS))
 ESMF_F90LINKRPATHS += $(patsubst -L%,$(ESMF_F90RPATHPREFIX)%,$(ESMF_F90LINKPATHS))
-
-############################################################
-# Link against libesmf.a using the F90 linker front-end
-#
 ESMF_F90LINKLIBS += -lc++
+endif
 
 ############################################################
 # Determine where LLVM libraries are located for C++
