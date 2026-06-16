@@ -51,6 +51,8 @@ from esmpy.util.mesh_utilities import mesh_create_50_parallel
 from esmpy.util.mesh_utilities import mesh_create_50_ngons
 from esmpy.util.mesh_utilities import mesh_create_50_ngons_parallel
 from numpy.testing import assert_array_almost_equal
+import esmpy.util.helpers as helpers
+import esmpy.api.constants as constants
 
 
 NON_CONSERVATIVE_METHODS = (
@@ -1718,7 +1720,12 @@ class TestRegrid(TestBase):
                 if (def_value-delta < dstfield.data[i,j]) & (dstfield.data[i,j] < def_value+delta):
                    count_def = count_def + 1
         
-        self.assertEqual(total_points, count_undef+count_def)
+        global_count_def = 0 
+        global_count_def = helpers.reduce_val(count_def, op=constants.Reduce.SUM) 
+        global_count_undef = 0 
+        global_count_undef = helpers.reduce_val(count_undef, op=constants.Reduce.SUM) 
+        if local_pet() == 0:
+           self.assertEqual(total_points, global_count_undef+global_count_def)
 
     def test_field_regrid_srcmask_R4R8R4(self):
         # create a grid
@@ -1761,9 +1768,14 @@ class TestRegrid(TestBase):
                    count_undef = count_undef + 1
                 if (def_value-delta < dstfield.data[i,j]) & (dstfield.data[i,j] < def_value+delta):
                    count_def = count_def + 1
-        
-        self.assertEqual(total_points, count_undef+count_def)
-#
+       
+        global_count_def = 0 
+        global_count_def = helpers.reduce_val(count_def, op=constants.Reduce.SUM) 
+        global_count_undef = 0 
+        global_count_undef = helpers.reduce_val(count_undef, op=constants.Reduce.SUM) 
+        if local_pet() == 0:
+           self.assertEqual(total_points, global_count_undef+global_count_def)
+
     def test_field_regrid_votemask_R8R8R8(self):
         # create a grid
         srcgrid = grid_create_uneven_from_bounds_periodic(20, 20, corners=True, domask=False)
@@ -1792,7 +1804,7 @@ class TestRegrid(TestBase):
                                     regrid_method=esmpy.RegridMethod.BILINEAR,
                                     unmapped_action=esmpy.UnmappedAction.ERROR,
                                     src_term_processing=0)
- 
+
         handle_all = np.int32(1)
         dyn_mask = esmpy.DynamicMask(DynamicMaskPrecision.R8R8R8, PredefinedDynamicMask.MASKVOTE,handle_all_elements=handle_all,src_mask_value=undef)
         dstfield = regridSrc2Dst(srcfield, dstfield, dynamic_mask=dyn_mask)
@@ -1803,9 +1815,12 @@ class TestRegrid(TestBase):
             for j in range(fbounds[1]):
                 if (v2-delta < dstfield.data[i,j]) & (dstfield.data[i,j] < v2+delta):
                    count_def = count_def + 1
-        
-        self.assertEqual(total_points, count_def)
-#
+      
+        global_count_def = 0 
+        global_count_def = helpers.reduce_val(count_def, op=constants.Reduce.SUM) 
+        if local_pet() == 0:
+           self.assertEqual(total_points, global_count_def)
+
 
     def test_field_regrid_votemask_R4R8R4(self):
         # create a grid
@@ -1847,5 +1862,8 @@ class TestRegrid(TestBase):
                 if (v2-delta < dstfield.data[i,j]) & (dstfield.data[i,j] < v2+delta):
                    count_def = count_def + 1
         
-        self.assertEqual(total_points, count_def)
+        global_count_def = 0 
+        global_count_def = helpers.reduce_val(count_def, op=constants.Reduce.SUM) 
+        if local_pet() == 0:
+           self.assertEqual(total_points, global_count_def)
 #
