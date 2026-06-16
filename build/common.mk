@@ -1699,16 +1699,22 @@ endif
 #-------------------------------------------------------------------------------
 # yaml-cpp C++ YAML API
 #-------------------------------------------------------------------------------
-ifeq ($(ESMF_YAMLCPP),internal)
+ESMF_YAMLCPP_LC := $(shell echo "$(ESMF_YAMLCPP)" | tr '[:upper:]' '[:lower:]')
+
+ifeq ($(ESMF_YAMLCPP_LC),off)
+$(error ESMF_YAMLCPP=OFF is not longer supported. See ESMF User's Guide for valid options.)
+endif
+
 ESMF_YAMLCPP_PRESENT = TRUE
+
+ifeq ($(ESMF_YAMLCPP_LC),internal)
 ESMF_CXXCOMPILEPATHS += -I$(ESMF_DIR)/src/prologue/yaml-cpp/include
 ESMF_YAMLCPP_INCLUDE =
 ESMF_YAMLCPP_LIBPATH =
 ESMF_YAMLCPP_LIBS =
 endif
 
-ifeq ($(ESMF_YAMLCPP),standard)
-ESMF_YAMLCPP_PRESENT = TRUE
+ifeq ($(ESMF_YAMLCPP_LC),standard)
 ifneq ($(origin ESMF_YAMLCPP_LIBS), environment)
 ESMF_YAMLCPP_LIBS = -lyaml-cpp
 endif
