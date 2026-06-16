@@ -1288,8 +1288,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
-           !!!!! STOPPED HERE !!!
-           
         else
            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                 msg=" Unrecognized regridmethod.", & 
