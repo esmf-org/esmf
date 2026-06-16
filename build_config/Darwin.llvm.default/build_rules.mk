@@ -113,6 +113,16 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -v --version
 
 ############################################################
+# See if this is LLVM Clang or Apple Clang
+#
+ESMF_CLANGSTR := $(findstring Apple clang, $(shell $(ESMF_CXXCOMPILER) --version))
+ifeq ($(ESMF_CLANGSTR),Apple clang)
+$(info "The detected C++ compiler is Apple Clang.")
+else
+$(info "The detected C++ compiler is LLVM Clang.")
+endif
+
+############################################################
 # Special debug flags
 #
 ESMF_F90OPTFLAG_G       +=
@@ -202,20 +212,31 @@ endif
 ############################################################
 # OpenMP compiler and linker flags
 #
+ifeq ($(ESMF_CLANGSTR),Apple clang)
+# Apple Clang does not support OpenMP
+ESMF_OPENMPDEFAULT = OFF
+else
+# LLVM Clang supports OpenMP version 4
 ESMF_OPENMPDEFAULT = OMP4
-ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
 ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
-ESMF_OPENMP_F90LINKOPTS    += -fopenmp
 ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
+endif
+ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
+ESMF_OPENMP_F90LINKOPTS    += -fopenmp
 
 ############################################################
 # OpenACC compiler and linker flags
 #
+ifeq ($(ESMF_CLANGSTR),Apple clang)
+# Apple Clang does not support OpenACC
 ESMF_OPENACCDEFAULT = OFF
-ESMF_OPENACC_F90COMPILEOPTS += -fopenacc
+else
+# LLVM Clang supports OpenACC, use ESMF default
 ESMF_OPENACC_CXXCOMPILEOPTS += -fopenacc
-ESMF_OPENACC_F90LINKOPTS    += -fopenacc
 ESMF_OPENACC_CXXLINKOPTS    += -fopenacc
+endif
+ESMF_OPENACC_F90COMPILEOPTS += -fopenacc
+ESMF_OPENACC_F90LINKOPTS    += -fopenacc
 
 ############################################################
 # Explicit flags for handling specific format and cpp combos
