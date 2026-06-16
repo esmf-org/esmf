@@ -2382,6 +2382,7 @@ lib: info
 	@$(MAKE) build_libs
 	@$(MAKE) build_tracelibs
 	@$(MAKE) info_mk ESMF_CCOMPILEPATHS="$(ESMF_CCOMPILEPATHS) -I$(ESMF_CONFDIR)"
+	$(ESMF_DIR)/cmake/generate_config.py --esmfmkfile=$(ESMF_LIBDIR)/esmf.mk --template=$(ESMF_DIR)/cmake/ESMFConfig.cmake.in --outputdir=$(ESMF_LIBDIR)/cmake/ESMF
 	@echo "ESMF library built successfully on "`date`
 	@echo "To verify, build and run the unit and system tests with: $(MAKE) check"
 	@echo " or the more extensive: $(MAKE) all_tests"
