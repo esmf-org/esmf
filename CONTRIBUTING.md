@@ -16,6 +16,10 @@ following guidelines for contributing to the Earth System Modeling Framework.
 * ESMPy Documentation - [html](https://earthsystemmodeling.org/esmpy_doc/nightly/develop/html), [pdf](https://earthsystemmodeling.org/esmpy_doc/nightly/develop/ESMPy.pdf)
 * Developer’s Guide - [html](https://earthsystemmodeling.org/docs/nightly/develop/dev_guide) (Outdated! Use with caution. Ask if unsure.)
 
+## Development Platform
+
+ESMF development can be performed using [Dev Containers](https://containers.dev/), which provide a consistent development environment across different machines. To use ESMF Dev Containers, see the documentation in [.devcontainer/README.md](.devcontainer/README.md) for setup and usage instructions.
+
 ## Submitting a pull request
 
 1. [Fork][fork] and clone the repository
