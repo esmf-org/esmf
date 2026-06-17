@@ -1,5 +1,47 @@
 #!/bin/sh
 # this script expects the LLVM flang command (or a wrapper, e.g. mpif90)
 # and returns the LLVM flang runtime libraries that need to be linked explicitly when using clang as linker
-$* -v $ESMF_DIR/scripts/hello.f90 2>&1 | grep "\-L" | awk 'BEGIN { RS=" "}; /^-l/  || /\.dylib/' | xargs
+
+# Capture the raw compiler verbose output
+raw_tokens=$($* -v $ESMF_DIR/scripts/hello.f90 2>&1 | grep "\-L")
+
+filtered_libs=""
+skip_next=0
+
+# Parse tokens, validating explicit file paths
+for token in $raw_tokens; do
+    if [ $skip_next -eq 1 ]; then
+        skip_next=0
+        continue
+    fi
+
+    case "$token" in
+        # LTO library switch will be followed by file with path, might not exist
+        -lto_library)
+            # Next token is file with path
+            next_token=$(echo "$raw_tokens" | awk -v skip=$(($(echo "$filtered_libs" | wc -w) + 1)) '{print $(skip+1)}')
+            if [ -n "$next_token" ] && [ -f "$next_token" ]; then
+                filtered_libs="$filtered_libs $token"
+            else
+                # Phantom path, e.g. Homebrew Flang. Skip this flag and its preceeding argument
+                skip_next=1
+            fi
+            ;;
+        # Standard library flags pass through cleanly
+        -l*)
+            filtered_libs="$filtered_libs $token"
+            ;;
+        # Explicit shared objects (.dylib or .so) must exist on disk
+        *.dylib|*.so)
+            if [ -f "$token" ]; then
+                filtered_libs="$filtered_libs $token"
+            fi
+            ;;
+    esac
+done
+
+# Output on single line
+echo $filtered_libs | xargs
+
+# Clean-up
 rm -rf hello.o a.out*
