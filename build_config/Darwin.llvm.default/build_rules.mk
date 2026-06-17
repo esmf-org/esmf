@@ -116,11 +116,11 @@ ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -v --version
 # See if this is LLVM Clang or Apple Clang
 #
 ESMF_CLANGSTR := $(findstring Apple clang, $(shell $(ESMF_CXXCOMPILER) --version))
-ifeq ($(ESMF_CLANGSTR),Apple clang)
-$(info "The detected C++ compiler is Apple Clang.")
-else
-$(info "The detected C++ compiler is LLVM Clang.")
-endif
+#ifeq ($(ESMF_CLANGSTR),Apple clang)
+#$(info "The detected C++ compiler is Apple Clang.")
+#else
+#$(info "The detected C++ compiler is LLVM Clang.")
+#endif
 
 ############################################################
 # Special debug flags
