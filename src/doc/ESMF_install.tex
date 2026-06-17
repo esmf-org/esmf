@@ -498,7 +498,7 @@ typical case where {\tt ESMF\_XERCES} is set to {\tt "standard"},
 
 \subsubsection{yaml-cpp}
 \label{sec:yaml-cpp}
-Support for I/O in YAML Ain't Markup Language
+Support for YAML Ain't Markup Language
 (\htmladdnormallink{YAML\texttrademark}{http://yaml.org})
 may be added to ESMF through the open-source
 \htmladdnormallink{yaml-cpp}{https://github.com/jbeder/yaml-cpp} library,
@@ -512,17 +512,15 @@ with yaml-cpp:
 
 \begin{description}
 
-\item[ESMF\_YAMLCPP] Possible values: {\it "internal"} (default), {\tt "OFF"},
+\item[ESMF\_YAMLCPP] Possible values: {\tt "internal"} (default),
 {\tt "standard"}, {\it <userstring>}.
 
 \begin{description}
-\item[{\it "internal"} (default)] The YAML-dependent code inside of ESMF will
+\item[{\tt "internal"} (default)] The YAML-dependent code inside of ESMF will
 be enabled.
 The yaml-cpp sources included with ESMF will be used to provide YAML support.
 The {\tt ESMF\_YAMLCPP\_INCLUDE}, {\tt ESMF\_YAMLCPP\_LIBPATH}, and
 {\tt ESMF\_YAMLCPP\_LIBS} environment variables will be ignored.
-
-\item[{\tt "OFF"}] Disables YAML-dependent code.
 
 \item[{\tt "standard"}] The YAML-dependent code inside of ESMF will
 be enabled.
