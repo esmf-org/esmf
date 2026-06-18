@@ -1787,15 +1787,15 @@ class TestRegrid(TestBase):
         dstfield = esmpy.Field(dstgrid, name='dstfield', typekind=TypeKind.R8)
 
         # initialize the Fields
-        v1=np.float64(170.0)
-        v2=np.float64(2000.0)
+        def1=np.float64(17.0)
+        def2=np.float64(47.0)
         undef=np.float64(20000.0)
         fbounds = srcfield.data.shape
         for i in range(fbounds[0]):
             for j in range(fbounds[1]):
-                srcfield.data[i,j] = v1 
+                srcfield.data[i,j] = def1
                 if i%2 == 1:
-                   srcfield.data[i,j] = v2 
+                   srcfield.data[i,j] = def2
           
 
         # run the ESMF regridding
@@ -1810,16 +1810,23 @@ class TestRegrid(TestBase):
         dstfield = regridSrc2Dst(srcfield, dstfield, dynamic_mask=dyn_mask)
         fbounds = dstfield.data.shape
         delta = 0.001
-        count_def = 0
+        count_def1 = 0
         for i in range(fbounds[0]):
             for j in range(fbounds[1]):
-                if (v2-delta < dstfield.data[i,j]) & (dstfield.data[i,j] < v2+delta):
-                   count_def = count_def + 1
-      
-        global_count_def = 0 
-        global_count_def = helpers.reduce_val(count_def, op=constants.Reduce.SUM) 
+                if (def1-delta < dstfield.data[i,j]) & (dstfield.data[i,j] < def1+delta):
+                   count_def1 = count_def1 + 1
+        count_def2 = 0
+        for i in range(fbounds[0]):
+            for j in range(fbounds[1]):
+                if (def2-delta < dstfield.data[i,j]) & (dstfield.data[i,j] < def2+delta):
+                   count_def2 = count_def2 + 1
+     
+        global_count_def1 = 0 
+        global_count_def1 = helpers.reduce_val(count_def1, op=constants.Reduce.SUM) 
+        global_count_def2 = 0 
+        global_count_def2 = helpers.reduce_val(count_def2, op=constants.Reduce.SUM) 
         if local_pet() == 0:
-           self.assertEqual(total_points, global_count_def)
+           self.assertEqual(total_points, global_count_def2)
 
 
     def test_field_regrid_votemask_R4R8R4(self):
@@ -1833,15 +1840,15 @@ class TestRegrid(TestBase):
         dstfield = esmpy.Field(dstgrid, name='dstfield', typekind=TypeKind.R4)
 
         # initialize the Fields
-        v1=np.float32(170.0)
-        v2=np.float32(2000.0)
+        def1=np.float32(17.0)
+        def2=np.float32(47.0)
         undef=np.float32(20000.0)
         fbounds = srcfield.data.shape
         for i in range(fbounds[0]):
             for j in range(fbounds[1]):
-                srcfield.data[i,j] = v1 
+                srcfield.data[i,j] = def1
                 if i%2 == 1:
-                   srcfield.data[i,j] = v2 
+                   srcfield.data[i,j] = def2
           
 
         # run the ESMF regridding
@@ -1856,14 +1863,20 @@ class TestRegrid(TestBase):
         dstfield = regridSrc2Dst(srcfield, dstfield, dynamic_mask=dyn_mask)
         fbounds = dstfield.data.shape
         delta = 0.001
-        count_def = 0
+        count_def1 = 0
         for i in range(fbounds[0]):
             for j in range(fbounds[1]):
-                if (v2-delta < dstfield.data[i,j]) & (dstfield.data[i,j] < v2+delta):
-                   count_def = count_def + 1
-        
-        global_count_def = 0 
-        global_count_def = helpers.reduce_val(count_def, op=constants.Reduce.SUM) 
+                if (def1-delta < dstfield.data[i,j]) & (dstfield.data[i,j] < def1+delta):
+                   count_def1 = count_def1 + 1
+        count_def2 = 0
+        for i in range(fbounds[0]):
+            for j in range(fbounds[1]):
+                if (def2-delta < dstfield.data[i,j]) & (dstfield.data[i,j] < def2+delta):
+                   count_def2 = count_def2 + 1
+     
+        global_count_def1 = 0 
+        global_count_def1 = helpers.reduce_val(count_def1, op=constants.Reduce.SUM) 
+        global_count_def2 = 0 
+        global_count_def2 = helpers.reduce_val(count_def2, op=constants.Reduce.SUM) 
         if local_pet() == 0:
-           self.assertEqual(total_points, global_count_def)
-#
+           self.assertEqual(total_points, global_count_def2)
