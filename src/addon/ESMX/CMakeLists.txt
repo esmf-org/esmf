@@ -1,26 +1,13 @@
 cmake_minimum_required(VERSION 3.22)
 
-# Where to look for the local Find<Package>.cmake files
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
-
-# Find ESMF
-find_package(ESMF 8.9.0 MODULE REQUIRED)
-
-if(NOT DEFINED CMAKE_Fortran_COMPILER)
-  set(CMAKE_Fortran_COMPILER        "${ESMF_F90COMPILER}")
-endif()
-if(NOT DEFINED CMAKE_CXX_COMPILER)
-  set(CMAKE_CXX_COMPILER            "${ESMF_CXXCOMPILER}")
-endif()
-if(NOT DEFINED CMAKE_C_COMPILER)
-  set(CMAKE_C_COMPILER              "${ESMF_CCOMPILER}")
-endif()
-
 # Project
 project(ESMX
-        VERSION 8.9.0
+        VERSION 9.0.0
         LANGUAGES Fortran CXX C
         )
+
+# Find ESMF
+find_package(ESMF 9.0.0 REQUIRED)
 
 # Define standard installation directories
 include(GNUInstallDirs)

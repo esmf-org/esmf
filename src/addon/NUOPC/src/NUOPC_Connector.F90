@@ -7750,7 +7750,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       enddo
 
       ! determine "unmappedaction"
-      unmappedaction = ESMF_UNMAPPEDACTION_IGNORE ! default
+      unmappedaction = ESMF_UNMAPPEDACTION_ERROR ! default
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"unmappedaction=")==1) then
           call NUOPC_ChopString(chopStringList(j), chopChar="=", &

@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Dockerfiles
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
           repository: esmf-org/esmf-containers
           path: esmf-containers
@@ -63,13 +63,13 @@ jobs:
         docker stop ${CID}
         docker rm ${CID}
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: esmf-docs
         path: ${{ github.workspace }}/artifacts
     - name: Checkout esmf-org.github.io
       if: ${{github.repository_owner == 'esmf-org' && (github.event_name == 'push' || inputs.publish)}}
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
           repository: esmf-org/esmf-org.github.io
           path: ${{github.workspace}}/esmf-org.github.io
@@ -105,7 +105,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Dockerfiles
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
           repository: esmf-org/esmf-containers
           path: esmf-containers
@@ -134,13 +134,13 @@ jobs:
         docker stop ${CID}
         docker rm ${CID}
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: esmpy-docs
         path: ${{ github.workspace }}/artifacts
     - name: Checkout esmpy_doc
       if: ${{github.repository_owner == 'esmf-org' && (github.event_name == 'push' || inputs.publish)}}
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
           repository: esmf-org/esmpy_doc
           path: ${{github.workspace}}/esmpy_doc
