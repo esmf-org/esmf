@@ -69,7 +69,7 @@ The `geometries` key must be associated with a map of key/value pairs. Each key 
 
 | Option key      | Description / Value options                                      | Default           |
 | --------------- | ---------------------------------------------------------------- | ----------------- |
-| `geom`          | ESMF geometry shorthand: `grid1PeriDim`, `gridNoPeriDim`.        | ***required***    |
+| `geom`          | ESMF geometry shorthand: `grid1PeriDimUfrm`, `gridNoPeriDimUfrm`.        | ***required***    |
 | `minIndex`      | The lower corner of the global index space.                      | [1,1] or [1,1,1] depending on rank |
 | `maxIndex`      | The upper corner of the global index space.                      | ***required***    |
 | `minCornerCoord`| The coordinate of the lower corner.                              | ***required***    |
@@ -84,7 +84,7 @@ DAT:
   ...
   geometries:
     global:
-      geom:           grid1PeriDim
+      geom:           grid1PeriDimUfrm
       minCornerCoord: [-180, -89]
       maxCornerCoord: [+180, +89]
       maxIndex:       [ 200, 100]
