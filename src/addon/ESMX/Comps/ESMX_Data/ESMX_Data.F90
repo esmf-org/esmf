@@ -787,8 +787,8 @@ module ESMX_Data
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
 
-      if (geom == "grid1PeriDim") then
-        grid = Grid1PeriDimFromHConfig(hconfigMap, name=name, &
+      if (geom == "grid1PeriDimUfrm") then
+        grid = Grid1PeriDimUfrmFromHConfig(hconfigMap, name=name, &
           staggerLoc=staggerLoc, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return  ! bail out
@@ -796,8 +796,8 @@ module ESMX_Data
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return  ! bail out
-      else if (geom == "gridNoPeriDim") then
-        grid = GridNoPeriDimFromHConfig(hconfigMap, name=name, &
+      else if (geom == "gridNoPeriDimUfrm") then
+        grid = GridNoPeriDimUfrmFromHConfig(hconfigMap, name=name, &
           staggerLoc=staggerLoc, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return  ! bail out
@@ -831,8 +831,8 @@ module ESMX_Data
 
   !-----------------------------------------------------------------------------
 
-  function Grid1PeriDimFromHConfig(hconfig, name, staggerLoc, rc)
-    type(ESMF_Grid)                     :: Grid1PeriDimFromHConfig
+  function Grid1PeriDimUfrmFromHConfig(hconfig, name, staggerLoc, rc)
+    type(ESMF_Grid)                     :: Grid1PeriDimUfrmFromHConfig
     type(ESMF_HConfig),     intent(in)  :: hconfig
     character(*),           intent(in)  :: name
     type(ESMF_StaggerLoc),  intent(out) :: staggerLoc
@@ -1008,7 +1008,7 @@ module ESMX_Data
     endif
 
     ! create the grid
-    Grid1PeriDimFromHConfig = ESMF_GridCreate1PeriDimUfrm(name=name, &
+    Grid1PeriDimUfrmFromHConfig = ESMF_GridCreate1PeriDimUfrm(name=name, &
       minIndex=minIndex, maxIndex=maxIndex, &
       minCornerCoord=minCornerCoord, maxCornerCoord=maxCornerCoord, &
       coordSys=coordSys, staggerLocList=[staggerLoc], &
@@ -1020,8 +1020,8 @@ module ESMX_Data
 
   !-----------------------------------------------------------------------------
 
-  function GridNoPeriDimFromHConfig(hconfig, name, staggerLoc, rc)
-    type(ESMF_Grid)                     :: GridNoPeriDimFromHConfig
+  function GridNoPeriDimUfrmFromHConfig(hconfig, name, staggerLoc, rc)
+    type(ESMF_Grid)                     :: GridNoPeriDimUfrmFromHConfig
     type(ESMF_HConfig),     intent(in)  :: hconfig
     character(*),           intent(in)  :: name
     type(ESMF_StaggerLoc),  intent(out) :: staggerLoc
@@ -1181,7 +1181,7 @@ module ESMX_Data
     endif
 
     ! create the grid
-    GridNoPeriDimFromHConfig = ESMF_GridCreateNoPeriDimUfrm(name=name, &
+    GridNoPeriDimUfrmFromHConfig = ESMF_GridCreateNoPeriDimUfrm(name=name, &
       minIndex=minIndex, maxIndex=maxIndex, &
       minCornerCoord=minCornerCoord, maxCornerCoord=maxCornerCoord, &
       coordSys=coordSys, staggerLocList=[staggerLoc], rc=rc)
