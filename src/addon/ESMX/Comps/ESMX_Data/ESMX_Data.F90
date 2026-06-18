@@ -379,7 +379,7 @@ module ESMX_Data
     dataInit, dataAdvance, rc)
     type(ESMF_Field)                           :: FieldCreateFromHConfig
     type(ESMF_HConfigIter),        intent(in)  :: hconfig
-    type(GeomItem),                intent(in)  :: geoms(:)
+    type(GeomItem), allocatable,   intent(in)  :: geoms(:)
     type(Validate),                intent(out) :: dataValidate
     character(len=:), allocatable, intent(out), optional :: dataInit
     character(len=:), allocatable, intent(out), optional :: dataAdvance
@@ -400,6 +400,7 @@ module ESMX_Data
     real(ESMF_KIND_R4)            :: valueR4
     real(ESMF_KIND_R8)            :: valueR8
     character(len=20), allocatable:: vocabulary(:)
+    logical                       :: geomFound
 
     rc=ESMF_SUCCESS
 
@@ -467,12 +468,19 @@ module ESMX_Data
         return  ! bail out
       endif
 
-      ! search for match in geoms list
-      do item=1, size(geoms)
-        if (geoms(item)%name == geometry) exit
-      enddo
+      ! search for geometry match
+      geomFound = .false.
+      if (allocated(geoms)) then
+        do item=1, size(geoms)
+          if (geoms(item)%name == geometry) then
+            geomFound = .true.
+            exit
+          endif
+        enddo
+      endif
 
-      if (item == size(geoms)+1) then
+      if (.not.geomFound) then
+        !TODO: trigger geom transfer for this field, but for now:
         ! error condition
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
           msg="Unknown geometry for field '"//trim(name)//"': "//geometry, &
