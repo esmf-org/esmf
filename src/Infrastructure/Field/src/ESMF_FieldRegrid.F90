@@ -565,7 +565,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item [srcField]
-!           Source Field. This Field is used internally, so not initializing it or filling it with non-valid data (e.g. NaNs) may result in floating point exceptions. 
+!           Source Field. The data in this Field is used during the process of generating a routeHandle, so not initializing it or filling it with non-valid data (e.g. NaNs) may result in floating point exceptions. 
 !     \item [dstField]
 !           Destination Field. The data in this Field may be overwritten by this call. 
 !     \item [{[srcMaskValues]}]
