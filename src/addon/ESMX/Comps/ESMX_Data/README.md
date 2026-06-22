@@ -69,13 +69,15 @@ The `geometries` key must be associated with a map of key/value pairs. Each key 
 
 | Option key      | Description / Value options                                      | Default           |
 | --------------- | ---------------------------------------------------------------- | ----------------- |
-| `geom`          | ESMF geometry shorthand: `grid1PeriDimUfrm`, `gridNoPeriDimUfrm`.        | ***required***    |
+| `geom`          | ESMF geometry shorthand: `grid1PeriDimUfrm`, `gridNoPeriDimUfrm`.| ***required***    |
 | `minIndex`      | The lower corner of the global index space.                      | [1,1] or [1,1,1] depending on rank |
 | `maxIndex`      | The upper corner of the global index space.                      | ***required***    |
 | `minCornerCoord`| The coordinate of the lower corner.                              | ***required***    |
 | `maxCornerCoord`| The coordinate of the upper corner.                              | ***required***    |
 | `coordSys`      | ESMF coordSys shorthand: `CART`, `SPH_DEG`, `SPH_RAD`.           | `SPH_DEG`         |
-| `staggerLoc`    | ESMF staggerLoc shorthand: `CENTER`, `CORNER`, `EDGE1`, `EDGE2`. | `CENTER`          |
+| `staggerLocList`| List of stagger locations provided by this geom object. ESMF staggerLoc shorthand options:<br> 2D: `CENTER`, `CORNER`, `EDGE1`, `EDGE2`.<br> 3D: `CENTER_VCENTER`, `CORNER_VCENTER`, `EDGE1_VCENTER`, `EDGE2_VCENTER`, `CORNER_VFACE`, `EDGE1_VFACE`, `EDGE2_VFACE`, `CENTER_VFACE`.| `CENTER` or `CENTER_VCENTER` depending on rank |
+
+The geometric rank is uniquely determined by the size of `minIndex` (if present), `maxIndex`, `minCornerCoord`, and `maxCornerCoord`. The sizes of these arrays must be identical; a mismatch in their lengths will result in a configuration validation error.
 
 For an example, see the following configuration snippet for `ESMX_Data` instance named `DAT`.
 
@@ -88,7 +90,7 @@ DAT:
       minCornerCoord: [-180, -89]
       maxCornerCoord: [+180, +89]
       maxIndex:       [ 200, 100]
-      staggerLoc:     center
+      staggerLocList: center
 ```
 
 This defines a geometry called `global`, which is instantiated as 2D `ESMF_Grid` object where the first dimension is periodic. There are 200 elements along the first dimension, and 100 elements along the second dimension. Default spherical degrees are used for the coordinates. The longitudes (first dimension) run from `-180` to `+180` degrees. The latitudes (second dimension) run from `-89` to `+89` degrees. The values of any field defined on `global` are located on the `center` stagger location.
@@ -99,7 +101,7 @@ The `importFields` key must be associated with a map of key/value pairs. Each ke
 
 | Option key       | Description / Value options                                                          | Default           |
 | ---------------- | ------------------------------------------------------------------------------------ | ----------------- |
-| `geometry`       | The name of a geometry defined under `geometries`.                                   | ***required***    |
+| `geometry`       | The name of a geometry defined under `geometries`. Optionally followed by `@staggerLoc`, where `staggerLoc` is any valid staggerLoc option used under `geometries`.      | ***required***    |
 | `typekind`       | One of the valid type kinds: `i4`, `i8`, `r4`, `r8`.                                 | ***required***    |
 | `gridToFieldMap` | The mapping of grid to field dimension. For details see ESMF documentation.          | `[1,2]` or `[1,2,3]` depending on rank |
 | `ungriddedLBound`| The lower bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
@@ -133,7 +135,7 @@ The `exportFields` key must be associated with a map of key/value pairs. Each ke
 
 | Option key       | Description / Value options                                                          | Default           |
 | ---------------- | ------------------------------------------------------------------------------------ | ----------------- |
-| `geometry`       | The name of a geometry defined under `geometries`.                                   | ***required***    |
+| `geometry`       | The name of a geometry defined under `geometries`. Optionally followed by `@staggerLoc`, where `staggerLoc` is any valid staggerLoc option used under `geometries`.      | ***required***    |
 | `typekind`       | One of the valid type kinds: `i4`, `i8`, `r4`, `r8`.                                 | ***required***    |
 | `gridToFieldMap` | The mapping of grid to field dimension. For details see ESMF documentation.          | `[1,2]` or `[1,2,3]` depending on rank |
 | `ungriddedLBound`| The lower bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |

@@ -388,9 +388,8 @@ module ESMX_Data
     ! local variables
     logical                       :: isFlag
     type(ESMF_HConfig)            :: hconfigMap, hconfigMap2
-    character(:),    allocatable  :: geometry, name, badkey, string
-    type(ESMF_Grid)               :: grid
-    integer                       :: item
+    character(:),    allocatable  :: geometry, name, badkey, string, stagger
+    integer                       :: item, dimCount, staggerCount, i, atPos
     type(ESMF_TypeKind_Flag)      :: typekind
     integer,         allocatable  :: gridToFieldMap(:)
     integer,         allocatable  :: ungriddedLBound(:)
@@ -400,7 +399,10 @@ module ESMX_Data
     real(ESMF_KIND_R4)            :: valueR4
     real(ESMF_KIND_R8)            :: valueR8
     character(len=20), allocatable:: vocabulary(:)
-    logical                       :: geomFound
+    type(ESMF_GeomType_Flag)      :: geomtype
+    type(ESMF_Grid)               :: grid
+    type(ESMF_StaggerLoc), allocatable  :: staggerLoc, staggerLocDefault
+    type(ESMF_StaggerLoc), allocatable  :: staggerLocList(:)
 
     rc=ESMF_SUCCESS
 
@@ -459,6 +461,55 @@ module ESMX_Data
         geometry = ESMF_HConfigAsString(hconfigMap, keyString="geometry", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return  ! bail out
+        ! inspect the geometry string for staggerLoc specification via "@"
+        atPos = index(geometry, '@')
+        if (atPos > 0) then
+          if (atPos > 1) then
+            stagger = trim(adjustl(geometry(atPos+1:len(geometry))))
+            string = geometry(1:atPos-1)  ! temp array, safe for older compilers
+            geometry = trim(adjustl(string))
+            ! set staggerLoc
+            string = ESMF_UtilStringUpperCase(stagger, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=__FILE__)) return  ! bail out
+            select case (string)
+              case ("CENTER")
+                staggerLoc = ESMF_STAGGERLOC_CENTER
+              case ("CORNER")
+                staggerLoc = ESMF_STAGGERLOC_CORNER
+              case ("EDGE1")
+                staggerLoc = ESMF_STAGGERLOC_EDGE1
+              case ("EDGE2")
+                staggerLoc = ESMF_STAGGERLOC_EDGE2
+              case ("CENTER_VCENTER")
+                staggerLoc = ESMF_STAGGERLOC_CENTER_VCENTER
+              case ("CORNER_VCENTER")
+                staggerLoc = ESMF_STAGGERLOC_CORNER_VCENTER
+              case ("EDGE1_VCENTER")
+                staggerLoc = ESMF_STAGGERLOC_EDGE1_VCENTER
+              case ("EDGE2_VCENTER")
+                staggerLoc = ESMF_STAGGERLOC_EDGE2_VCENTER
+              case ("CORNER_VFACE")
+                staggerLoc = ESMF_STAGGERLOC_CORNER_VFACE
+              case ("EDGE1_VFACE")
+                staggerLoc = ESMF_STAGGERLOC_EDGE1_VFACE
+              case ("EDGE2_VFACE")
+                staggerLoc = ESMF_STAGGERLOC_EDGE2_VFACE
+              case ("CENTER_VFACE")
+                staggerLoc = ESMF_STAGGERLOC_CENTER_VFACE
+              case default
+                call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+                  msg="Invalid value in staggerLocList for field: "//name//&
+                  ": "//string, line=__LINE__, file=__FILE__, rcToReturn=rc)
+                return  ! bail out
+            end select
+          else
+            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+              msg="The 'geometry' must not start with '@': "//geometry, &
+              line=__LINE__, file=__FILE__, rcToReturn=rc)
+            return  ! bail out
+          end if
+        end if
       else
         ! error
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
@@ -469,17 +520,20 @@ module ESMX_Data
       endif
 
       ! search for geometry match
-      geomFound = .false.
+      isFlag = .false.
       if (allocated(geoms)) then
         do item=1, size(geoms)
           if (geoms(item)%name == geometry) then
-            geomFound = .true.
+            isFlag = .true.
+            call ESMF_GeomGet(geoms(item)%geom, geomtype=geomtype, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=__FILE__)) return  ! bail out
             exit
           endif
         enddo
       endif
 
-      if (.not.geomFound) then
+      if (.not.isFlag) then
         !TODO: trigger geom transfer for this field, but for now:
         ! error condition
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
@@ -563,13 +617,67 @@ module ESMX_Data
           line=__LINE__, file=__FILE__)) return  ! bail out
       endif
 
-      ! create the field
-      FieldCreateFromHConfig = ESMF_FieldCreate(geoms(item)%geom, &
-        typekind=typekind, gridToFieldMap=gridToFieldMap, &
-        ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-        name=name, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+      ! handle geomtype
+      if (geomtype==ESMF_GEOMTYPE_GRID) then
+        call ESMF_GeomGet(geoms(item)%geom, grid=grid, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+        ! handle staggerloc
+        call ESMF_GridGet(grid, dimCount=dimCount, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+        if (dimCount==2) then
+          staggerLocList = [ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER, &
+            ESMF_STAGGERLOC_EDGE1, ESMF_STAGGERLOC_EDGE2]
+        else if (dimCount==3) then
+          staggerLocList = [ESMF_STAGGERLOC_CENTER_VCENTER, &
+            ESMF_STAGGERLOC_CORNER_VCENTER, ESMF_STAGGERLOC_EDGE1_VCENTER, &
+            ESMF_STAGGERLOC_EDGE2_VCENTER, ESMF_STAGGERLOC_CORNER_VFACE, &
+            ESMF_STAGGERLOC_EDGE1_VFACE, ESMF_STAGGERLOC_EDGE2_VFACE, &
+            ESMF_STAGGERLOC_CENTER_VFACE]
+        endif
+        if (allocated(staggerLocList)) then
+          staggerCount = 0
+          do i=1, size(staggerLocList)
+            call ESMF_GridGetCoord(grid, staggerLoc=staggerLocList(i), &
+              isPresent=isFlag, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=__FILE__)) return  ! bail out
+            if (isFlag) then
+              staggerCount = staggerCount + 1
+              staggerLocDefault = staggerLocList(i)
+            endif
+          enddo
+          if (staggerCount == 0) then
+            call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+              msg="Geom must provide at least one staggerLoc: "//geometry, &
+              line=__LINE__, file=__FILE__, rcToReturn=rc)
+            return  ! bail out
+          else if (staggerCount == 1) then
+            if (.not.allocated(staggerLoc)) staggerLoc = staggerLocDefault
+          else
+            ! field must specify the staggerLoc explicitly
+            if (.not.allocated(staggerLoc)) then
+              call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+                msg="Field must specify staggerLoc for grid via '@' syntax: " &
+                //name, line=__LINE__, file=__FILE__, rcToReturn=rc)
+              return  ! bail out
+            endif
+          endif
+        endif
+        ! create the field
+        FieldCreateFromHConfig = ESMF_FieldCreate(grid, staggerLoc=staggerLoc, &
+          typekind=typekind, gridToFieldMap=gridToFieldMap, &
+          ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
+          name=name, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+          msg="Currently only ESMF_GEOMTYPE_GRID supported.", &
+          line=__LINE__, file=__FILE__, rcToReturn=rc)
+        return  ! bail out
+      endif
 
       ! handle dataValidate (optional)
       isFlag = ESMF_HConfigIsDefined(hconfigMap, keyString="dataValidate", &
@@ -693,6 +801,10 @@ module ESMX_Data
           dataValidate%action = "none"
         endif
 
+        call ESMF_HConfigDestroy(hconfigMap2, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+
       else
         ! dataValidate key not provided, default all members
         dataValidate%minGuard   = .false.
@@ -771,7 +883,6 @@ module ESMX_Data
     type(ESMF_HConfig)            :: hconfigMap
     character(:),    allocatable  :: geom
     type(ESMF_Grid)               :: grid
-    type(ESMF_StaggerLoc)         :: staggerLoc
 
     rc=ESMF_SUCCESS
 
@@ -796,21 +907,17 @@ module ESMX_Data
         line=__LINE__, file=__FILE__)) return  ! bail out
 
       if (geom == "grid1PeriDimUfrm") then
-        grid = Grid1PeriDimUfrmFromHConfig(hconfigMap, name=name, &
-          staggerLoc=staggerLoc, rc=rc)
+        grid = Grid1PeriDimUfrmFromHConfig(hconfigMap, name=name, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return  ! bail out
-        GeomCreateFromHConfig = ESMF_GeomCreate(grid, staggerLoc=staggerLoc, &
-          rc=rc)
+        GeomCreateFromHConfig = ESMF_GeomCreate(grid, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return  ! bail out
       else if (geom == "gridNoPeriDimUfrm") then
-        grid = GridNoPeriDimUfrmFromHConfig(hconfigMap, name=name, &
-          staggerLoc=staggerLoc, rc=rc)
+        grid = GridNoPeriDimUfrmFromHConfig(hconfigMap, name=name, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return  ! bail out
-        GeomCreateFromHConfig = ESMF_GeomCreate(grid, staggerLoc=staggerLoc, &
-          rc=rc)
+        GeomCreateFromHConfig = ESMF_GeomCreate(grid, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return  ! bail out
 !      else if (geom == "mesh") then
@@ -839,21 +946,21 @@ module ESMX_Data
 
   !-----------------------------------------------------------------------------
 
-  function Grid1PeriDimUfrmFromHConfig(hconfig, name, staggerLoc, rc)
+  function Grid1PeriDimUfrmFromHConfig(hconfig, name, rc)
     type(ESMF_Grid)                     :: Grid1PeriDimUfrmFromHConfig
     type(ESMF_HConfig),     intent(in)  :: hconfig
     character(*),           intent(in)  :: name
-    type(ESMF_StaggerLoc),  intent(out) :: staggerLoc
     integer,                intent(out) :: rc
 
     ! local variables
     logical                         :: isFlag
-    character(:),       allocatable :: badKey, string
+    character(:),       allocatable :: badKey, string, stringList(:)
     integer,            allocatable :: minIndex(:), maxIndex(:)
     real(ESMF_KIND_R8), allocatable :: minCornerCoord(:), maxCornerCoord(:)
-    integer                         :: rank
+    integer                         :: rank, i
     type(ESMF_CoordSys_Flag), allocatable :: coordSys
-    logical,            allocatable :: ignoreNonPeriCoord
+    logical,                  allocatable :: ignoreNonPeriCoord
+    type(ESMF_StaggerLoc),    allocatable :: staggerLocList(:)
 
     ! validate keys in map
     isFlag = ESMF_HConfigValidateMapKeys(hconfig, &
@@ -863,7 +970,7 @@ module ESMX_Data
                   "minCornerCoord     ", &
                   "maxCornerCoord     ", &
                   "coordSys           ", &
-                  "staggerLoc         ", &
+                  "staggerLocList     ", &
                   "ignoreNonPeriCoord "  &
                  ], badKey=badKey, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -969,36 +1076,70 @@ module ESMX_Data
       end select
     endif
 
-    ! handle staggerLoc (optional)
-    isFlag = ESMF_HConfigIsDefined(hconfig, keyString="staggerLoc", rc=rc)
+    ! handle staggerLocList (optional)
+    isFlag = ESMF_HConfigIsDefined(hconfig, keyString="staggerLocList", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return  ! bail out
     if (isFlag) then
       ! ingest
-      string = ESMF_HConfigAsString(hconfig, keyString="staggerLoc", rc=rc)
+      stringList = ESMF_HConfigAsStringSeq(hconfig, stringLen=20, &
+        keyString="staggerLocList", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      string = ESMF_UtilStringUpperCase(string, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
-      select case (string)
-        case ("CENTER")
-          staggerLoc = ESMF_STAGGERLOC_CENTER
-        case ("CORNER")
-          staggerLoc = ESMF_STAGGERLOC_CORNER
-        case ("EDGE1")
-          staggerLoc = ESMF_STAGGERLOC_EDGE1
-        case ("EDGE2")
-          staggerLoc = ESMF_STAGGERLOC_EDGE2
-        case default
-          call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-            msg="Invalid value for staggerLoc: "//string, &
-            line=__LINE__, file=__FILE__, rcToReturn=rc)
-          return  ! bail out
-      end select
+      allocate(staggerLocList(size(stringList)))
+      do i=1, size(stringList)
+        string = ESMF_UtilStringUpperCase(stringList(i), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+        if (size(minCornerCoord)==2) then
+          select case (string)
+            case ("CENTER")
+              staggerLocList(i) = ESMF_STAGGERLOC_CENTER
+            case ("CORNER")
+              staggerLocList(i) = ESMF_STAGGERLOC_CORNER
+            case ("EDGE1")
+              staggerLocList(i) = ESMF_STAGGERLOC_EDGE1
+            case ("EDGE2")
+              staggerLocList(i) = ESMF_STAGGERLOC_EDGE2
+            case default
+              call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+                msg="Invalid value in staggerLocList: "//string, &
+                line=__LINE__, file=__FILE__, rcToReturn=rc)
+              return  ! bail out
+          end select
+        else if (size(minCornerCoord)==3) then
+          select case (string)
+            case ("CENTER_VCENTER")
+              staggerLocList(i) = ESMF_STAGGERLOC_CENTER_VCENTER
+            case ("CORNER_VCENTER")
+              staggerLocList(i) = ESMF_STAGGERLOC_CORNER_VCENTER
+            case ("EDGE1_VCENTER")
+              staggerLocList(i) = ESMF_STAGGERLOC_EDGE1_VCENTER
+            case ("EDGE2_VCENTER")
+              staggerLocList(i) = ESMF_STAGGERLOC_EDGE2_VCENTER
+            case ("CORNER_VFACE")
+              staggerLocList(i) = ESMF_STAGGERLOC_CORNER_VFACE
+            case ("EDGE1_VFACE")
+              staggerLocList(i) = ESMF_STAGGERLOC_EDGE1_VFACE
+            case ("EDGE2_VFACE")
+              staggerLocList(i) = ESMF_STAGGERLOC_EDGE2_VFACE
+            case ("CENTER_VFACE")
+              staggerLocList(i) = ESMF_STAGGERLOC_CENTER_VFACE
+            case default
+              call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+                msg="Invalid value in staggerLocList: "//string, &
+                line=__LINE__, file=__FILE__, rcToReturn=rc)
+              return  ! bail out
+          end select
+        endif
+      enddo
     else
       ! default
-      staggerLoc = ESMF_STAGGERLOC_CENTER
+      if (size(minCornerCoord)==2) then
+        staggerLocList = [ESMF_STAGGERLOC_CENTER]
+      else if (size(minCornerCoord)==3) then
+        staggerLocList = [ESMF_STAGGERLOC_CENTER_VCENTER]
+      endif
     endif
 
     ! handle ignoreNonPeriCoord (optional)
@@ -1019,7 +1160,7 @@ module ESMX_Data
     Grid1PeriDimUfrmFromHConfig = ESMF_GridCreate1PeriDimUfrm(name=name, &
       minIndex=minIndex, maxIndex=maxIndex, &
       minCornerCoord=minCornerCoord, maxCornerCoord=maxCornerCoord, &
-      coordSys=coordSys, staggerLocList=[staggerLoc], &
+      coordSys=coordSys, staggerLocList=staggerLocList, &
       ignoreNonPeriCoord=ignoreNonPeriCoord, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return  ! bail out
@@ -1028,20 +1169,20 @@ module ESMX_Data
 
   !-----------------------------------------------------------------------------
 
-  function GridNoPeriDimUfrmFromHConfig(hconfig, name, staggerLoc, rc)
+  function GridNoPeriDimUfrmFromHConfig(hconfig, name, rc)
     type(ESMF_Grid)                     :: GridNoPeriDimUfrmFromHConfig
     type(ESMF_HConfig),     intent(in)  :: hconfig
     character(*),           intent(in)  :: name
-    type(ESMF_StaggerLoc),  intent(out) :: staggerLoc
     integer,                intent(out) :: rc
 
     ! local variables
     logical                         :: isFlag
-    character(:),       allocatable :: badKey, string
+    character(:),       allocatable :: badKey, string, stringList(:)
     integer,            allocatable :: minIndex(:), maxIndex(:)
     real(ESMF_KIND_R8), allocatable :: minCornerCoord(:), maxCornerCoord(:)
-    integer                         :: rank
+    integer                         :: rank, i
     type(ESMF_CoordSys_Flag), allocatable :: coordSys
+    type(ESMF_StaggerLoc),    allocatable :: staggerLocList(:)
 
     ! validate keys in map
     isFlag = ESMF_HConfigValidateMapKeys(hconfig, &
@@ -1051,7 +1192,7 @@ module ESMX_Data
                   "minCornerCoord     ", &
                   "maxCornerCoord     ", &
                   "coordSys           ", &
-                  "staggerLoc         "  &
+                  "staggerLocList     "  &
                  ], badKey=badKey, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return  ! bail out
@@ -1156,43 +1297,77 @@ module ESMX_Data
       end select
     endif
 
-    ! handle staggerLoc (optional)
-    isFlag = ESMF_HConfigIsDefined(hconfig, keyString="staggerLoc", rc=rc)
+    ! handle staggerLocList (optional)
+    isFlag = ESMF_HConfigIsDefined(hconfig, keyString="staggerLocList", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return  ! bail out
     if (isFlag) then
       ! ingest
-      string = ESMF_HConfigAsString(hconfig, keyString="staggerLoc", rc=rc)
+      stringList = ESMF_HConfigAsStringSeq(hconfig, stringLen=20, &
+        keyString="staggerLocList", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      string = ESMF_UtilStringUpperCase(string, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
-      select case (string)
-        case ("CENTER")
-          staggerLoc = ESMF_STAGGERLOC_CENTER
-        case ("CORNER")
-          staggerLoc = ESMF_STAGGERLOC_CORNER
-        case ("EDGE1")
-          staggerLoc = ESMF_STAGGERLOC_EDGE1
-        case ("EDGE2")
-          staggerLoc = ESMF_STAGGERLOC_EDGE2
-        case default
-          call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-            msg="Invalid value for staggerLoc: "//string, &
-            line=__LINE__, file=__FILE__, rcToReturn=rc)
-          return  ! bail out
-      end select
+      allocate(staggerLocList(size(stringList)))
+      do i=1, size(stringList)
+        string = ESMF_UtilStringUpperCase(stringList(i), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+        if (size(minCornerCoord)==2) then
+          select case (string)
+            case ("CENTER")
+              staggerLocList(i) = ESMF_STAGGERLOC_CENTER
+            case ("CORNER")
+              staggerLocList(i) = ESMF_STAGGERLOC_CORNER
+            case ("EDGE1")
+              staggerLocList(i) = ESMF_STAGGERLOC_EDGE1
+            case ("EDGE2")
+              staggerLocList(i) = ESMF_STAGGERLOC_EDGE2
+            case default
+              call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+                msg="Invalid value in staggerLocList: "//string, &
+                line=__LINE__, file=__FILE__, rcToReturn=rc)
+              return  ! bail out
+          end select
+        else if (size(minCornerCoord)==3) then
+          select case (string)
+            case ("CENTER_VCENTER")
+              staggerLocList(i) = ESMF_STAGGERLOC_CENTER_VCENTER
+            case ("CORNER_VCENTER")
+              staggerLocList(i) = ESMF_STAGGERLOC_CORNER_VCENTER
+            case ("EDGE1_VCENTER")
+              staggerLocList(i) = ESMF_STAGGERLOC_EDGE1_VCENTER
+            case ("EDGE2_VCENTER")
+              staggerLocList(i) = ESMF_STAGGERLOC_EDGE2_VCENTER
+            case ("CORNER_VFACE")
+              staggerLocList(i) = ESMF_STAGGERLOC_CORNER_VFACE
+            case ("EDGE1_VFACE")
+              staggerLocList(i) = ESMF_STAGGERLOC_EDGE1_VFACE
+            case ("EDGE2_VFACE")
+              staggerLocList(i) = ESMF_STAGGERLOC_EDGE2_VFACE
+            case ("CENTER_VFACE")
+              staggerLocList(i) = ESMF_STAGGERLOC_CENTER_VFACE
+            case default
+              call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+                msg="Invalid value in staggerLocList: "//string, &
+                line=__LINE__, file=__FILE__, rcToReturn=rc)
+              return  ! bail out
+          end select
+        endif
+      enddo
     else
       ! default
-      staggerLoc = ESMF_STAGGERLOC_CENTER
+      if (size(minCornerCoord)==2) then
+        staggerLocList = [ESMF_STAGGERLOC_CENTER]
+      else if (size(minCornerCoord)==3) then
+        staggerLocList = [ESMF_STAGGERLOC_CENTER_VCENTER]
+      endif
     endif
 
     ! create the grid
     GridNoPeriDimUfrmFromHConfig = ESMF_GridCreateNoPeriDimUfrm(name=name, &
       minIndex=minIndex, maxIndex=maxIndex, &
       minCornerCoord=minCornerCoord, maxCornerCoord=maxCornerCoord, &
-      coordSys=coordSys, staggerLocList=[staggerLoc], rc=rc)
+      coordSys=coordSys, staggerLocList=staggerLocList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return  ! bail out
 
