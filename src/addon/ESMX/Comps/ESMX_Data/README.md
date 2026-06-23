@@ -106,17 +106,17 @@ For an example, see the following configuration snippet for `ESMX_Data` instance
 DAT:
   ...
   importFields:
-    sea_surface_temperature:  {geometry: global, typekind: r8, dataValidate: {diagnose: yes} }
+    sea_surface_temperature:  {geometry: global, typekind: r8, dataValidate: {print: yes} }
     density:
       geometry:         global
       typekind:         r4
       ungriddedLBound:  [1]
       ungriddedUBound:  [104]
-      dataValidate:     {min: 1e-05, diagnose: yes, action: error}
+      dataValidate:     {min: 1e-05, print: yes, action: error}
       outputList:       [import]
 ```
 
-This configuration defines two fields within the `DAT` import state. The first, standard-named `sea_surface_temperature`, is defined on the `global` geometry using double-precision (`r8`) data. As there are no ungridded dimensions, `sea_surface_temperature` functions as a 2D surface field. The field is not restricted by global min/max data bounds. However `dataValidate: {diagnose: yes}` enables global diagnostic output to `stdout`.
+This configuration defines two fields within the `DAT` import state. The first, standard-named `sea_surface_temperature`, is defined on the `global` geometry using double-precision (`r8`) data. As there are no ungridded dimensions, `sea_surface_temperature` functions as a 2D surface field. The field is not restricted by global min/max data bounds. However `dataValidate: {print: yes}` enables global diagnostic output to `stdout`.
 
 The second field, standard-named `density`, is defined on the `global` geometry using single-precision (`r4`) data. It features a single ungridded dimension spanning indices `1` to `104`, representing 104 levels. Data validation is established with `min` of `1e-05` to monitor the field during each Advance step. Diagnostic output to `stdout` is enabled; furthermore, the `action: error` setting ensures an error is triggered if any `density` value falls below the specified minimum. The field is added to the `import` output.
 
@@ -196,9 +196,9 @@ The `dataValidate` option, if specified, must be associated with a map of key/va
 | ---------------- | ------------------------------------------------------------------------------------ | ----------------- |
 | `min`            | The minimum numerical value allowed in the field data to pass validation.            | *no minimum*  |
 | `max`            | The maximum numerical value allowed in the field data to pass validation.            | *no maximum*  |
-| `mask`           | The numerical value ignored during field diagnostic and validation.                  | *no mask*     |
-| `diagnose`       | Enable/disable field data diagnostic output to stdout: `yes` or `no`.                | `no`          |
-| `action`         | Action to be taken when field data validation fails: `none`, `warning`, `error`      | `none`        |
+| `mask`           | The numerical value ignored during field validation.                                 | *no mask*     |
+| `print`          | Logical to enable/disable field data diagnostic output to stdout.                    | `false`       |
+| `action`         | Action to be taken when field data validation fails: `ignore`, `warning`, `error`    | `error`       |
 
 ### Dynamic arithmetic expressions
 

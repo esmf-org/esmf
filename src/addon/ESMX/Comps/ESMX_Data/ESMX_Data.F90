@@ -25,7 +25,7 @@ module ESMX_Data
   type Validate
     real(ESMF_KIND_R8)            :: min, max, mask
     logical                       :: minGuard, maxGuard, maskGuard
-    logical                       :: diagnose
+    logical                       :: print
     character(len=:), allocatable :: action
   end type
 
@@ -878,7 +878,7 @@ module ESMX_Data
           vocabulary=["min      ", &
                       "max      ", &
                       "mask     ", &
-                      "diagnose ", &
+                      "print    ", &
                       "action   "  ]
           isFlag = ESMF_HConfigValidateMapKeys(hconfigMap2, &
             vocabulary=vocabulary, badKey=badKey, rc=rc)
@@ -949,19 +949,19 @@ module ESMX_Data
           dataValidate%maskGuard = .false.
         endif
 
-        ! handle diagnose (optional)
-        isFlag = ESMF_HConfigIsDefined(hconfigMap2, keyString="diagnose", rc=rc)
+        ! handle print (optional)
+        isFlag = ESMF_HConfigIsDefined(hconfigMap2, keyString="print", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return  ! bail out
         if (isFlag) then
           ! ingest and set guard variable
-          dataValidate%diagnose = ESMF_HConfigAsLogical(hconfigMap2, &
-            keyString="diagnose", rc=rc)
+          dataValidate%print = ESMF_HConfigAsLogical(hconfigMap2, &
+            keyString="print", rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
         else
           ! default
-          dataValidate%diagnose = .false.
+          dataValidate%print = .false.
         endif
 
         ! handle action (optional)
@@ -976,7 +976,7 @@ module ESMX_Data
             line=__LINE__, file=__FILE__)) return  ! bail out
         else
           ! default
-          dataValidate%action = "none"
+          dataValidate%action = "error"
         endif
 
         call ESMF_HConfigDestroy(hconfigMap2, rc=rc)
@@ -988,14 +988,23 @@ module ESMX_Data
         dataValidate%minGuard   = .false.
         dataValidate%maxGuard   = .false.
         dataValidate%maskGuard  = .false.
-        dataValidate%diagnose   = .false.
-        dataValidate%action     = "none"
+        dataValidate%print      = .false.
+        dataValidate%action     = "error"
       endif
 
-      ! upper case to be case insensitive
+      ! upper case to be case insensitive and check if valid option
       dataValidate%action = ESMF_UtilStringUpperCase(dataValidate%action, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
+      if (dataValidate%action/="IGNORE" &
+        .and.dataValidate%action/="WARNING" &
+        .and.dataValidate%action/="ERROR") then
+        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+          msg="Valid 'dataValidate: action' options are 'IGNORE', "// &
+          "'WARNING', and 'ERROR'. Maybe typo?: "//dataValidate%action, &
+          line=__LINE__, file=__FILE__, rcToReturn=rc)
+        return  ! bail out
+      endif
 
       ! handle dataInit (optional)
       if (present(dataInit)) then
@@ -1865,12 +1874,12 @@ module ESMX_Data
     warnCount = 0
     errCount = 0
 
-    ! diagnose and check import fields
+    ! check import fields
     if (allocated(is%wrap%importItems)) then
       headerPrinted = .false.
       do i=1, size(is%wrap%importItems)
         associate(dataValidate => is%wrap%importItems(i)%dataValidate)
-        if (.not.dataValidate%diagnose .and. &
+        if (.not.dataValidate%print .and. &
           dataValidate%action /= "WARNING" .and. &
           dataValidate%action /= "ERROR") cycle
         call FieldStats(is%wrap%importItems(i)%field, dataValidate, &
@@ -1878,7 +1887,7 @@ module ESMX_Data
           statsMax=statsMax, statsOkay=statsOkay, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-        if (dataValidate%diagnose .or. .not.statsOkay) then
+        if (dataValidate%print .or. .not.statsOkay) then
           if (localPet == 0) then
             if (.not.headerPrinted) then
               headerPrinted = .true.
@@ -1915,12 +1924,12 @@ module ESMX_Data
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
 
-    ! diagnose and check export fields
+    ! check export fields
     if (allocated(is%wrap%exportItems)) then
       headerPrinted = .false.
       do i=1, size(is%wrap%exportItems)
         associate(dataValidate => is%wrap%exportItems(i)%dataValidate)
-        if (.not.dataValidate%diagnose .and. &
+        if (.not.dataValidate%print .and. &
           dataValidate%action /= "WARNING" .and. &
           dataValidate%action /= "ERROR") cycle
         call FieldStats(is%wrap%exportItems(i)%field, dataValidate, &
@@ -1928,7 +1937,7 @@ module ESMX_Data
           statsMax=statsMax, statsOkay=statsOkay, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-        if (dataValidate%diagnose .or. .not.statsOkay) then
+        if (dataValidate%print .or. .not.statsOkay) then
           if (localPet == 0) then
             if (.not.headerPrinted) then
               headerPrinted = .true.
@@ -2006,8 +2015,8 @@ module ESMX_Data
     ! handle warnCount
     if (warnCount > 0) then
       call ESMF_LogWrite( &
-        msg="Found fields with value outside valid [min,max] range!", &
-        logmsgFlag=ESMF_LOGMSG_WARNING, rc=rc)
+        msg="Found fields with value outside valid [min,max] range! "//&
+        "See stdout for details.", logmsgFlag=ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
     endif
@@ -2015,7 +2024,8 @@ module ESMX_Data
     ! handle errCount
     if (errCount > 0) then
       call ESMF_LogSetError(ESMF_RC_VAL_WRONG, &
-        msg="Found fields with value outside valid [min,max] range!", &
+        msg="Found fields with value outside valid [min,max] range! "//&
+        "See stdout for details.", &
         line=__LINE__, file=__FILE__, rcToReturn=rc)
       return  ! bail out
     endif
