@@ -382,7 +382,7 @@ module NUOPC_Auxiliary
 !   \item[{[separateFieldFiles]}]
 !     If {\tt .true.}, each field is written to its own separate file.
 !     Otherwise all fields are written to the same file.
-!     Default is {\tt .false.}.
+!     Default is {\tt .true.}.
 !   \item[{[relaxedflag]}]
 !     If {\tt .true.}, then no error is returned even if the call cannot write
 !     the file due to library limitations. Default is {\tt .false.}.
@@ -447,7 +447,7 @@ module NUOPC_Auxiliary
       endif
     enddo
 
-    separateFieldFiles_loc = .false.  ! default
+    separateFieldFiles_loc = .true.  ! default
     if (present(separateFieldFiles)) separateFieldFiles_loc = separateFieldFiles
 
     status_loc = ESMF_FILESTATUS_UNKNOWN  ! default
@@ -606,7 +606,7 @@ module NUOPC_Auxiliary
 !   \item[{[separateFieldFiles]}]
 !     If {\tt .true.}, each field is written to its own separate file.
 !     Otherwise all fields are written to the same file.
-!     Default is {\tt .false.}.
+!     Default is {\tt .true.}.
 !   \item[{[relaxedflag]}]
 !     If {\tt .true.}, then no error is returned even if the call cannot write
 !     the file due to library limitations. Default is {\tt .false.}.
@@ -649,7 +649,7 @@ module NUOPC_Auxiliary
         return  ! bail out
     endif
 
-    separateFieldFiles_loc = .false.  ! default
+    separateFieldFiles_loc = .true.  ! default
     if (present(separateFieldFiles)) separateFieldFiles_loc = separateFieldFiles
 
     status_loc = ESMF_FILESTATUS_UNKNOWN  ! default
