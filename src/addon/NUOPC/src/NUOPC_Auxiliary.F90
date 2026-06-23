@@ -1,10 +1,10 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright (c) 2002-2026, University Corporation for Atmospheric Research, 
-! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-! Laboratory, University of Michigan, National Centers for Environmental 
-! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !
@@ -19,13 +19,13 @@ module NUOPC_Auxiliary
                       !!!! TODO: Replace this once public Write() available.
 
   implicit none
-  
+
   private
-  
+
   public NUOPC_Write                      ! method
-  
+
 !==============================================================================
-! 
+!
 ! INTERFACE BLOCKS
 !
 !==============================================================================
@@ -37,13 +37,13 @@ module NUOPC_Auxiliary
     module procedure NUOPC_StateWrite
     module procedure NUOPC_FieldBundleWrite
   end interface
-  
+
   !-----------------------------------------------------------------------------
-  
+
   !-----------------------------------------------------------------------------
   contains
   !-----------------------------------------------------------------------------
-  
+
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_Write - Write a distributed interpolation matrix to file in SCRIP format
@@ -53,15 +53,15 @@ module NUOPC_Auxiliary
     relaxedflag, rc)
 ! !ARGUMENTS:
     real(ESMF_KIND_R8), intent(in), target    :: factorList(:)
-    integer,            intent(in), target    :: factorIndexList(:,:) 
+    integer,            intent(in), target    :: factorIndexList(:,:)
     character(*),       intent(in)            :: fileName
     logical,            intent(in),  optional :: relaxedflag
     integer,            intent(out), optional :: rc
 ! !DESCRIPTION:
 !   \label{api_NUOPC_SCRIPWrite}
-!   Write the destributed interpolaton matrix provided by {\tt factorList} 
+!   Write the destributed interpolaton matrix provided by {\tt factorList}
 !   and {\tt factorIndexList} to a SCRIP formatted NetCDF file. Each PET calls
-!   with its local list of factors and indices. The call then writes the 
+!   with its local list of factors and indices. The call then writes the
 !   distributed factors into a single file. If the file already exists, the
 !   contents is replaced by this call.
 !
@@ -88,21 +88,21 @@ module NUOPC_Auxiliary
     integer                 :: localrc
 
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
     ioCapable = ESMF_IO_NETCDF_PRESENT
-    
+
     doItFlag = .true. ! default
     if (present(relaxedFlag)) then
       doItFlag = .not.relaxedflag .or. (relaxedflag.and.ioCapable)
     endif
-    
+
     if (doItFlag) then
       call ESMF_OutputSimpleWeightFile(fileName, factorList, &
         factorIndexList, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     endif
-    
+
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -120,11 +120,11 @@ module NUOPC_Auxiliary
 ! !DESCRIPTION:
 !
 !   THIS METHOD IS DEPRECATED. Use \ref{api_NUOPC_SCRIPWrite} instead.
-! 
-!   Write the destributed {\tt factorList} to file. Each PET calls with its 
+!
+!   Write the destributed {\tt factorList} to file. Each PET calls with its
 !   local list of factors. The call then writes the distributed factors into
-!   a single file. The order of the factors in the file is first by PET, and 
-!   within each PET the PET-local order is preserved. Changing the number of 
+!   a single file. The order of the factors in the file is first by PET, and
+!   within each PET the PET-local order is preserved. Changing the number of
 !   PETs for the same regrid operation will likely change the order of factors
 !   across PETs, and therefore files written will differ.
 !
@@ -148,9 +148,9 @@ module NUOPC_Auxiliary
     integer                         :: localrc
     integer                         :: localPet, petCount
     integer                         :: j
-    
+
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
     call ESMF_VMGetCurrent(vm, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
@@ -191,7 +191,7 @@ module NUOPC_Auxiliary
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     deallocate(weightsPerPet, deBlockList)
-    
+
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -212,7 +212,7 @@ module NUOPC_Auxiliary
     logical,                    intent(in),  optional :: relaxedflag
     integer,                    intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Write the data in {\tt field} to {\tt file} under the field's "StandardName" 
+!   Write the data in {\tt field} to {\tt file} under the field's "StandardName"
 !   attribute if supported by the {\tt iofmt}.
 !
 !   The arguments are:
@@ -230,7 +230,7 @@ module NUOPC_Auxiliary
 !      Note that it is always an error to attempt to overwrite a NetCDF
 !      variable with data which has a different shape.
 !   \item[{[status]}]
-!      The file status. Valid options are {\tt ESMF\_FILESTATUS\_NEW}, 
+!      The file status. Valid options are {\tt ESMF\_FILESTATUS\_NEW},
 !      {\tt ESMF\_FILESTATUS\_OLD}, {\tt ESMF\_FILESTATUS\_REPLACE}, and
 !      {\tt ESMF\_FILESTATUS\_UNKNOWN} (default).
 !   \item[{[timeslice]}]
@@ -251,7 +251,7 @@ module NUOPC_Auxiliary
 !     present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 !   \item[{[relaxedflag]}]
 !     If {\tt .true.}, then no error is returned even if the call cannot write
-!     the file due to library limitations, or because {\tt field} does not 
+!     the file due to library limitations, or because {\tt field} does not
 !     contain any data. Default is {\tt .false.}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -268,25 +268,25 @@ module NUOPC_Auxiliary
     type(ESMF_Info)             :: info
 
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
     ioCapable = (ESMF_IO_PIO_PRESENT .and. &
       (ESMF_IO_NETCDF_PRESENT .or. ESMF_IO_PNETCDF_PRESENT))
-      
+
     call ESMF_FieldGet(field, status=fieldStatus, name=fieldName, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
-    
+
     doItFlag = .true. ! default
     if (present(relaxedFlag)) then
       doItFlag = .not.relaxedflag .or. (relaxedflag.and.ioCapable.and. &
         (fieldStatus==ESMF_FIELDSTATUS_COMPLETE))
     endif
-    
+
     if (doItFlag) then
-      
+
       call ESMF_InfoGetFromHost(field, info=info, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
@@ -301,7 +301,7 @@ module NUOPC_Auxiliary
         file=FILENAME, &
         rcToReturn=rc)) &
         return  ! bail out
-    
+
       call ESMF_FieldWrite(field, fileName=fileName, &
         variableName=standardName, overwrite=overwrite, status=status, &
         timeslice=timeslice, iofmt=iofmt, rc=localrc)
@@ -310,7 +310,7 @@ module NUOPC_Auxiliary
         file=FILENAME, &
         rcToReturn=rc)) &
         return  ! bail out
-      
+
     endif
 
   end subroutine
@@ -318,11 +318,11 @@ module NUOPC_Auxiliary
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_Write - Write the Fields within a State to NetCDF files
+! !IROUTINE: NUOPC_Write - Write the Fields within a State to NetCDF file(s)
 ! !INTERFACE:
   ! Private name; call using NUOPC_Write()
   subroutine NUOPC_StateWrite(state, fieldNameList, fileNamePrefix, overwrite, &
-    status, timeslice, iofmt, relaxedflag, rc)
+    status, timeslice, iofmt, separateFieldFiles, relaxedflag, rc)
 ! !ARGUMENTS:
     type(ESMF_State),           intent(in)            :: state
     character(len=*),           intent(in),  optional :: fieldNameList(:)
@@ -331,12 +331,13 @@ module NUOPC_Auxiliary
     type(ESMF_FileStatus_Flag), intent(in),  optional :: status
     integer,                    intent(in),  optional :: timeslice
     type(ESMF_IOFmt_Flag),      intent(in),  optional :: iofmt
+    logical,                    intent(in),  optional :: separateFieldFiles
     logical,                    intent(in),  optional :: relaxedflag
     integer,                    intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Write the data of the fields contained in {\tt state} to NetCDF files.
-!   Each field is written to an individual file using its "StandardName"
-!   attribute as its NetCDF attribute.
+!   Write the data of the fields contained in {\tt state} to NetCDF file(s).
+!   Each field is written using its "StandardName" attribute for its NetCDF
+!   attribute.
 !   FieldBundle objects that are encountered within {\tt state} are traversed,
 !   and the contained fields are handled in the same manner as fields directly
 !   held by the {\tt state} object.
@@ -378,6 +379,10 @@ module NUOPC_Auxiliary
 !     The I/O format.  Supported options are {\tt ESMF\_IOFMT\_NETCDF},
 !     {\tt ESMF\_IOFMT\_NETCDF4P}, and {\tt ESMF\_IOFMT\_NETCDF4C}. If not
 !     present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
+!   \item[{[separateFieldFiles]}]
+!     If {\tt .true.}, each field is written to its own separate file.
+!     Otherwise all fields are written to the same file.
+!     Default is {\tt .false.}.
 !   \item[{[relaxedflag]}]
 !     If {\tt .true.}, then no error is returned even if the call cannot write
 !     the file due to library limitations. Default is {\tt .false.}.
@@ -399,6 +404,8 @@ module NUOPC_Auxiliary
     character(len=160),        allocatable  :: fieldBundleNameList_loc(:)
     character(len=160),        allocatable  :: itemNameList(:)
     type(ESMF_StateItem_Flag), allocatable  :: itemTypeList(:)
+    logical                         :: separateFieldFiles_loc
+    type(ESMF_FileStatus_Flag)      :: status_loc
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -440,13 +447,11 @@ module NUOPC_Auxiliary
       endif
     enddo
 
-    if (present(fieldNameList)) then
-      deallocate(fieldNameList_loc)
-      allocate(fieldNameList_loc(size(fieldNameList)))
-      do i=1, size(fieldNameList)
-        fieldNameList_loc(i) = trim(fieldNameList(i))
-      enddo
-    endif
+    separateFieldFiles_loc = .false.  ! default
+    if (present(separateFieldFiles)) separateFieldFiles_loc = separateFieldFiles
+
+    status_loc = ESMF_FILESTATUS_UNKNOWN  ! default
+    if (present(status)) status_loc = status
 
     do i=1, size(fieldNameList_loc)
       call ESMF_StateGet(state, itemName=fieldNameList_loc(i), &
@@ -465,14 +470,31 @@ module NUOPC_Auxiliary
           file=FILENAME, &
           rcToReturn=rc)) &
           return  ! bail out
-        ! -> output to file
-        if (present(fileNamePrefix)) then
-          write (fileName,"(A)") fileNamePrefix//trim(fieldNameList_loc(i))//".nc"
+        ! -> construct filename and handle status
+        if (separateFieldFiles_loc) then
+          if (present(fileNamePrefix)) then
+            write (fileName,"(A)") fileNamePrefix// &
+              trim(fieldNameList_loc(i))//".nc"
+          else
+            write (fileName,"(A)") trim(fieldNameList_loc(i))//".nc"
+          endif
         else
-          write (fileName,"(A)") trim(fieldNameList_loc(i))//".nc"
+          if (present(fileNamePrefix)) then
+            write (fileName,"(A)") fileNamePrefix//".nc"
+          else
+            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+              msg="The 'fileNamePrefix' argument must be present for "// &
+              "'separateFieldFiles=.false.'.", &
+              line=__LINE__, file=__FILE__, rcToReturn=rc)
+            return  ! bail out
+          endif
+          if (status_loc==ESMF_FILESTATUS_REPLACE.and.i>1) then
+            status_loc = ESMF_FILESTATUS_OLD
+          endif
         endif
+        ! -> output to file
         call NUOPC_FieldWrite(field, fileName=trim(fileName), &
-          overwrite=overwrite, status=status, timeslice=timeslice, &
+          overwrite=overwrite, status=status_loc, timeslice=timeslice, &
           iofmt=iofmt, relaxedflag=relaxedflag, rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg="Failed writing file: "// &
           trim(fileName), &
@@ -503,7 +525,9 @@ module NUOPC_Auxiliary
         ! -> output to file
         call NUOPC_FieldBundleWrite(fieldbundle, fieldNameList=fieldNameList, &
           fileNamePrefix=fileNamePrefix, overwrite=overwrite, status=status, &
-          timeslice=timeslice, iofmt=iofmt, relaxedflag=relaxedflag, rc=localrc)
+          timeslice=timeslice, iofmt=iofmt, &
+          separateFieldFiles=separateFieldFiles, relaxedflag=relaxedflag, &
+          rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg="Failed writing file: "// &
           trim(fileName), &
           line=__LINE__, &
@@ -521,11 +545,11 @@ module NUOPC_Auxiliary
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_Write - Write the Fields within a FieldBundle to NetCDF files
+! !IROUTINE: NUOPC_Write - Write the Fields within a FieldBundle to NetCDF file(s)
 ! !INTERFACE:
   ! Private name; call using NUOPC_Write()
   subroutine NUOPC_FieldBundleWrite(fieldbundle, fieldNameList, fileNamePrefix, overwrite, &
-    status, timeslice, iofmt, relaxedflag, rc)
+    status, timeslice, iofmt, separateFieldFiles, relaxedflag, rc)
 ! !ARGUMENTS:
     type(ESMF_FieldBundle),     intent(in)            :: fieldbundle
     character(len=*),           intent(in),  optional :: fieldNameList(:)
@@ -534,12 +558,13 @@ module NUOPC_Auxiliary
     type(ESMF_FileStatus_Flag), intent(in),  optional :: status
     integer,                    intent(in),  optional :: timeslice
     type(ESMF_IOFmt_Flag),      intent(in),  optional :: iofmt
+    logical,                    intent(in),  optional :: separateFieldFiles
     logical,                    intent(in),  optional :: relaxedflag
     integer,                    intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Write the data of the fields contained in {\tt fieldbundle} to NetCDF files.
-!   Each field is written to an individual file using its "StandardName"
-!   attribute as its NetCDF attribute.
+!   Write the data of the fields contained in {\tt fieldbundle} to NetCDF file(s).
+!   Each field is written using its "StandardName" attribute for its NetCDF
+!   attribute.
 !
 !   The arguments are:
 !   \begin{description}
@@ -578,6 +603,10 @@ module NUOPC_Auxiliary
 !     The I/O format.  Supported options are {\tt ESMF\_IOFMT\_NETCDF},
 !     {\tt ESMF\_IOFMT\_NETCDF4P}, and {\tt ESMF\_IOFMT\_NETCDF4C}. If not
 !     present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
+!   \item[{[separateFieldFiles]}]
+!     If {\tt .true.}, each field is written to its own separate file.
+!     Otherwise all fields are written to the same file.
+!     Default is {\tt .false.}.
 !   \item[{[relaxedflag]}]
 !     If {\tt .true.}, then no error is returned even if the call cannot write
 !     the file due to library limitations. Default is {\tt .false.}.
@@ -593,6 +622,8 @@ module NUOPC_Auxiliary
     type(ESMF_Field)                :: field
     character(len=160)              :: fileName
     character(len=160), allocatable :: fieldNameList_loc(:)
+    logical                         :: separateFieldFiles_loc
+    type(ESMF_FileStatus_Flag)      :: status_loc
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -618,6 +649,12 @@ module NUOPC_Auxiliary
         return  ! bail out
     endif
 
+    separateFieldFiles_loc = .false.  ! default
+    if (present(separateFieldFiles)) separateFieldFiles_loc = separateFieldFiles
+
+    status_loc = ESMF_FILESTATUS_UNKNOWN  ! default
+    if (present(status)) status_loc = status
+
     do i=1, size(fieldNameList_loc)
       call ESMF_FieldBundleGet(fieldbundle, fieldName=fieldNameList_loc(i), &
         field=field, rc=localrc)
@@ -626,14 +663,31 @@ module NUOPC_Auxiliary
         file=FILENAME, &
         rcToReturn=rc)) &
         return  ! bail out
-      ! -> output to file
-      if (present(fileNamePrefix)) then
-        write (fileName,"(A)") fileNamePrefix//trim(fieldNameList_loc(i))//".nc"
+      ! -> construct filename and handle status
+      if (separateFieldFiles_loc) then
+        if (present(fileNamePrefix)) then
+          write (fileName,"(A)") fileNamePrefix// &
+            trim(fieldNameList_loc(i))//".nc"
+        else
+          write (fileName,"(A)") trim(fieldNameList_loc(i))//".nc"
+        endif
       else
-        write (fileName,"(A)") trim(fieldNameList_loc(i))//".nc"
+        if (present(fileNamePrefix)) then
+          write (fileName,"(A)") fileNamePrefix//".nc"
+        else
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+            msg="The 'fileNamePrefix' argument must be present for "// &
+            "'separateFieldFiles=.false.'.", &
+            line=__LINE__, file=__FILE__, rcToReturn=rc)
+          return  ! bail out
+        endif
+        if (status_loc==ESMF_FILESTATUS_REPLACE.and.i>1) then
+          status_loc = ESMF_FILESTATUS_OLD
+        endif
       endif
+      ! -> output to file
       call NUOPC_FieldWrite(field, fileName=trim(fileName), &
-        overwrite=overwrite, status=status, timeslice=timeslice, &
+        overwrite=overwrite, status=status_loc, timeslice=timeslice, &
         iofmt=iofmt, relaxedflag=relaxedflag, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg="Failed writing file: "// &
         trim(fileName), &
