@@ -41,11 +41,20 @@ module ESMX_Data
     character(len=:), allocatable :: dataAdvance
   end type
 
+  type OutputItem
+    character(len=:), allocatable :: name
+    logical                       :: onDataInit
+    logical                       :: onImport
+    logical                       :: onExport
+    type(ESMF_State)              :: state
+  end type
+
   type InternalStateStruct
     character(len=:),      allocatable :: timeKeeping    ! "Model" or "Mediator"
     type(GeomItem),        allocatable :: geomItems(:)
     type(ImportItem),      allocatable :: importItems(:)
     type(ExportItem),      allocatable :: exportItems(:)
+    type(OutputItem),      allocatable :: outputItems(:)
     integer                            :: stepCounter
   end type
 
@@ -148,6 +157,7 @@ module ESMX_Data
                     "attributes   ", &  ! ESMX_Driver handled option
                     "timeKeeping  ", &  ! ESMX_Data handled option
                     "geometries   ", &  ! ESMX_Data handled option
+                    "outputs      ", &  ! ESMX_Data handled option
                     "importFields ", &  ! ESMX_Data handled option
                     "exportFields "  &  ! ESMX_Data handled option
                    ], badKey=badKey, rc=rc)
@@ -163,7 +173,8 @@ module ESMX_Data
 
       ! ingest hconfig
       call IngestFromHConfig(hconfigNode, is%wrap%timeKeeping, &
-        is%wrap%geomItems, is%wrap%importItems, is%wrap%exportItems, rc=rc)
+        is%wrap%geomItems, is%wrap%importItems, is%wrap%exportItems, &
+        is%wrap%outputItems, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg="Problem ingesting hconfig.", &
         line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
 
@@ -174,12 +185,13 @@ module ESMX_Data
   !-----------------------------------------------------------------------------
 
   subroutine IngestFromHConfig(hconfig, timeKeeping, geoms, imports, exports, &
-    rc)
+    outputs, rc)
     type(ESMF_HConfig),                 intent(in)  :: hconfig
     character(len=:),      allocatable, intent(out) :: timeKeeping
     type(GeomItem),        allocatable, intent(out) :: geoms(:)
     type(ImportItem),      allocatable, intent(out) :: imports(:)
     type(ExportItem),      allocatable, intent(out) :: exports(:)
+    type(OutputItem),      allocatable, intent(out) :: outputs(:)
     integer,                            intent(out) :: rc
 
     ! local variables
@@ -188,6 +200,9 @@ module ESMX_Data
     type(ESMF_HConfig)            :: hconfigNode
     type(ESMF_HConfigIter)        :: hconfigIt, hconfigItBegin, hconfigItEnd
     integer                       :: itemCount, item
+    type(ESMF_HConfig)            :: hconfigMap
+    character(len=20), allocatable:: vocabulary(:)
+    character(:), allocatable     :: badKey
 
     rc=ESMF_SUCCESS
 
@@ -206,6 +221,119 @@ module ESMX_Data
           "(maybe a typo?): "//tempString, &
         line=__LINE__, file=__FILE__, rcToReturn=rc)
       return  ! bail out
+    endif
+
+    ! handle outputs
+    isFlag = ESMF_HConfigIsDefined(hconfig, keyString="outputs", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return  ! bail out
+
+    if (isFlag) then
+      ! ingest geometries
+      hconfigNode = ESMF_HConfigCreateAt(hconfig, keyString="outputs", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return  ! bail out
+      itemCount = ESMF_HConfigGetSize(hconfigNode, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return  ! bail out
+
+      if (itemCount>0) then
+        allocate(outputs(itemCount))
+
+        hconfigItBegin = ESMF_HConfigIterBegin(hconfigNode, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+
+        hconfigItEnd = ESMF_HConfigIterEnd(hconfigNode, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+
+        item = 0
+        hconfigIt = hconfigItBegin
+        do while (ESMF_HConfigIterLoop(hconfigIt, hconfigItBegin, &
+          hconfigItEnd, rc=rc))
+          ! error check ESMF_HConfigIterLoop()
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+          item = item+1
+
+          outputs(item)%name = ESMF_HConfigAsStringMapKey(hconfigIt, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+
+          outputs(item)%state = ESMF_StateCreate(name=outputs(item)%name, &
+            stateIntent=ESMF_STATEINTENT_INTERNAL, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+
+          hconfigMap = ESMF_HConfigCreateAtMapVal(hconfigIt, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+
+          isFlag = ESMF_HConfigIsMap(hconfigMap, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+
+          if (isFlag) then
+            ! validate keys in map
+            vocabulary=["onDataInit ", &
+                        "onImport   ", &
+                        "onExport   "  ]
+            isFlag = ESMF_HConfigValidateMapKeys(hconfigMap, &
+              vocabulary=vocabulary, badKey=badKey, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=__FILE__)) return  ! bail out
+            deallocate(vocabulary)
+            if (.not.isFlag) then
+              call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+                msg="An invalid key was found for output '"// &
+                  outputs(item)%name//"' "// "(maybe a typo?): "//badKey, &
+                line=__LINE__, file=__FILE__, rcToReturn=rc)
+              return  ! bail out
+            endif
+            ! ingest onDataInit
+            outputs(item)%onDataInit = ESMF_HConfigAsLogical(hconfigMap, &
+               keyString="onDataInit", asOkay=isFlag, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=__FILE__)) return  ! bail out
+            if (.not.isFlag) outputs(item)%onDataInit = .false. ! default
+            ! ingest onImport
+            outputs(item)%onImport = ESMF_HConfigAsLogical(hconfigMap, &
+               keyString="onImport", asOkay=isFlag, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=__FILE__)) return  ! bail out
+            if (.not.isFlag) outputs(item)%onImport = .false. ! default
+            ! ingest onExport
+            outputs(item)%onExport = ESMF_HConfigAsLogical(hconfigMap, &
+               keyString="onExport", asOkay=isFlag, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=__FILE__)) return  ! bail out
+            if (.not.isFlag) outputs(item)%onExport = .false. ! default
+          else
+            ! not a map -> error condition
+            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+              msg="The value associated with key '"//outputs(item)%name// &
+              "' "//"must be a map!", &
+              line=__LINE__, file=__FILE__, rcToReturn=rc)
+            return  ! bail out
+          endif
+
+          call ESMF_HConfigDestroy(hconfigMap, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+
+        enddo
+        ! error check ESMF_HConfigIterLoop()
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+
+      endif
+
+      call ESMF_HConfigDestroy(hconfigNode, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return  ! bail out
+
     endif
 
     ! handle geometries
@@ -297,7 +425,7 @@ module ESMX_Data
           item = item+1
 
           imports(item)%field = FieldCreateFromHConfig(hconfigIt, geoms=geoms, &
-            dataValidate=imports(item)%dataValidate, rc=rc)
+            outputs=outputs, dataValidate=imports(item)%dataValidate, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, &
             msg="Problem creating import field.", &
             line=__LINE__, file=__FILE__)) return  ! bail out
@@ -351,7 +479,7 @@ module ESMX_Data
           item = item+1
 
           exports(item)%field = FieldCreateFromHConfig(hconfigIt, geoms=geoms, &
-            dataValidate=exports(item)%dataValidate, &
+            outputs=outputs, dataValidate=exports(item)%dataValidate, &
             dataInit=exports(item)%dataInit, &
             dataAdvance=exports(item)%dataAdvance, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, &
@@ -375,11 +503,12 @@ module ESMX_Data
 
   !-----------------------------------------------------------------------------
 
-  function FieldCreateFromHConfig(hconfig, geoms, dataValidate, &
+  function FieldCreateFromHConfig(hconfig, geoms, outputs, dataValidate, &
     dataInit, dataAdvance, rc)
     type(ESMF_Field)                           :: FieldCreateFromHConfig
     type(ESMF_HConfigIter),        intent(in)  :: hconfig
     type(GeomItem), allocatable,   intent(in)  :: geoms(:)
+    type(OutputItem), allocatable, intent(inout):: outputs(:)
     type(Validate),                intent(out) :: dataValidate
     character(len=:), allocatable, intent(out), optional :: dataInit
     character(len=:), allocatable, intent(out), optional :: dataAdvance
@@ -389,7 +518,8 @@ module ESMX_Data
     logical                       :: isFlag
     type(ESMF_HConfig)            :: hconfigMap, hconfigMap2
     character(:),    allocatable  :: geometry, name, badkey, string, stagger
-    integer                       :: item, dimCount, staggerCount, i, atPos
+    character(:),    allocatable  :: stringList(:)
+    integer                       :: item, dimCount, staggerCount, i, j, atPos
     type(ESMF_TypeKind_Flag)      :: typekind
     integer,         allocatable  :: gridToFieldMap(:)
     integer,         allocatable  :: ungriddedLBound(:)
@@ -427,6 +557,7 @@ module ESMX_Data
                     "ungriddedLBound", &
                     "ungriddedUBound", &
                     "typekind       ", &
+                    "outputList     ", &
                     "dataValidate   ", &
                     "dataInit       ", &
                     "dataAdvance    "  ]
@@ -436,6 +567,7 @@ module ESMX_Data
                     "ungriddedLBound", &
                     "ungriddedUBound", &
                     "typekind       ", &
+                    "outputList     ", &
                     "dataValidate   ", &
                     "dataInit       "  ]
       end if
@@ -677,6 +809,36 @@ module ESMX_Data
           msg="Currently only ESMF_GEOMTYPE_GRID supported.", &
           line=__LINE__, file=__FILE__, rcToReturn=rc)
         return  ! bail out
+      endif
+
+      ! handle outputList (optional)
+      isFlag = ESMF_HConfigIsDefined(hconfigMap, keyString="outputList", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return  ! bail out
+      if (isFlag) then
+        ! ingest
+        stringList = ESMF_HConfigAsStringSeq(hconfigMap, stringLen=80, &
+          keyString="outputList", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+        ! add the created field to all of the listed output states
+        do i=1, size(stringList)
+          do j=1, size(outputs)
+            if (trim(stringList(i))==outputs(j)%name) then
+              call ESMF_StateAdd(outputs(j)%state, [FieldCreateFromHConfig], &
+                rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=__FILE__)) return  ! bail out
+              exit
+            endif
+          enddo
+          if (j == size(outputs) + 1) then
+            call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+              msg="Output named '"//trim(stringList(i))//"' not found for "// &
+              "field: "//name, line=__LINE__, file=__FILE__, rcToReturn=rc)
+            return  ! bail out
+          endif
+        enddo
       endif
 
       ! handle dataValidate (optional)
@@ -1489,7 +1651,6 @@ module ESMX_Data
     integer, intent(out) :: rc
     ! local variables
     character(ESMF_MAXSTR)     :: name
-    integer                    :: diagnostic
     integer                    :: stat, i
     type(ESMF_Time)            :: time
     type(ESMF_Clock)           :: clock
@@ -1501,7 +1662,7 @@ module ESMX_Data
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(xdata, name=name, diagnostic=diagnostic, rc=rc)
+    call NUOPC_CompGet(xdata, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
 
@@ -1548,19 +1709,29 @@ module ESMX_Data
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
 
-    if (btest(diagnostic,17)) then
-      ! write fields of the importState
-      call NUOPC_Write(importState, &
-        fileNamePrefix="field_"//trim(name)//"_import_data_initialize_", &
-        status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-      ! write fields of the exportState
-      call NUOPC_Write(exportState, &
-        fileNamePrefix="field_"//trim(name)//"_export_data_initialize_", &
-        status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+    ! Loop through outputItems, trigger for onDataInit
+    if (allocated(is%wrap%outputItems)) then
+      do i=1, size(is%wrap%outputItems)
+        if (is%wrap%outputItems(i)%onDataInit) then
+          if (is%wrap%outputItems(i)%onImport &
+            .or.is%wrap%outputItems(i)%onExport) then
+            call NUOPC_Write(is%wrap%outputItems(i)%state, &
+              fileNamePrefix="field_"//trim(name)//"_"//&
+              is%wrap%outputItems(i)%name//"_", &
+              timeslice=1, &  ! first timeslice, with more coming in advance
+              status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+          else
+            call NUOPC_Write(is%wrap%outputItems(i)%state, &
+              fileNamePrefix="field_"//trim(name)//"_"//&
+              is%wrap%outputItems(i)%name//"_", &
+              status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+          endif
+        endif
+      enddo
     endif
 
   end subroutine DataInitialize
@@ -1573,12 +1744,11 @@ module ESMX_Data
     integer, intent(out) :: rc
     ! local variables
     character(ESMF_MAXSTR)     :: name, fieldName
-    integer                    :: diagnostic
     type(ESMF_Clock)           :: clock
     type(ESMF_State)           :: importState
     type(ESMF_State)           :: exportState
     character(len=160)         :: clockString
-    integer                    :: i, localPet
+    integer                    :: i, localPet, step
     type(ESMF_FileStatus_Flag) :: filestatus
     type(InternalState)        :: is
     integer                    :: statsCount, warnCount, errCount
@@ -1588,7 +1758,7 @@ module ESMX_Data
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(xdata, name=name, diagnostic=diagnostic, rc=rc)
+    call NUOPC_CompGet(xdata, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
 
@@ -1611,15 +1781,25 @@ module ESMX_Data
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
 
-    if (btest(diagnostic,17)) then
-      ! write fields of the importState
-      filestatus=ESMF_FILESTATUS_OLD
-      if (stepCounter==1) filestatus=ESMF_FILESTATUS_REPLACE
-      call NUOPC_Write(importState, &
-        fileNamePrefix="field_"//trim(name)//"_import_advance_", &
-        timeslice=stepCounter, status=filestatus, relaxedFlag=.true., rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+    ! Loop through outputItems, trigger for onImport
+    if (allocated(is%wrap%outputItems)) then
+      do i=1, size(is%wrap%outputItems)
+        if (is%wrap%outputItems(i)%onImport) then
+          filestatus=ESMF_FILESTATUS_OLD
+          if (is%wrap%outputItems(i)%onDataInit) then
+            step = stepCounter+1
+          else
+            step = stepCounter
+            if (stepCounter==1) filestatus=ESMF_FILESTATUS_REPLACE
+          endif
+          call NUOPC_Write(is%wrap%outputItems(i)%state, &
+            fileNamePrefix="field_"//trim(name)//"_"//&
+            is%wrap%outputItems(i)%name//"_", &
+            timeslice=step, status=filestatus, relaxedFlag=.true., rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+        endif
+      enddo
     endif
 
     ! reset counters
@@ -1720,15 +1900,25 @@ module ESMX_Data
       enddo
     endif
 
-    if (btest(diagnostic,17)) then
-      ! write fields of the exportState
-      filestatus=ESMF_FILESTATUS_OLD
-      if (stepCounter==1) filestatus=ESMF_FILESTATUS_REPLACE
-      call NUOPC_Write(exportState, &
-        fileNamePrefix="field_"//trim(name)//"_export_advance_", &
-        timeslice=stepCounter, status=filestatus, relaxedFlag=.true., rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+    ! Loop through outputItems, trigger for onExport
+    if (allocated(is%wrap%outputItems)) then
+      do i=1, size(is%wrap%outputItems)
+        if (is%wrap%outputItems(i)%onExport) then
+          filestatus=ESMF_FILESTATUS_OLD
+          if (is%wrap%outputItems(i)%onDataInit) then
+            step = stepCounter+1
+          else
+            step = stepCounter
+            if (stepCounter==1) filestatus=ESMF_FILESTATUS_REPLACE
+          endif
+          call NUOPC_Write(is%wrap%outputItems(i)%state, &
+            fileNamePrefix="field_"//trim(name)//"_"//&
+            is%wrap%outputItems(i)%name//"_", &
+            timeslice=step, status=filestatus, relaxedFlag=.true., rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+        endif
+      enddo
     endif
 
     ! handle warnCount
@@ -2134,6 +2324,16 @@ module ESMX_Data
     call ESMF_InternalStateGet(xdata, internalState=is, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+
+    ! destroy outputItems
+    if (allocated(is%wrap%outputItems)) then
+      do i=1, size(is%wrap%outputItems)
+        call ESMF_StateDestroy(is%wrap%outputItems(i)%state, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+      enddo
+      deallocate(is%wrap%outputItems)
+    endif
 
     ! destroy importItems
     if (allocated(is%wrap%importItems)) then

@@ -26,27 +26,16 @@ components:
 
 ## ESMX Data Run Configuration
 
-Each ESMX Data instance is configured under its component label section in `esmxRun.yaml`. It supports the standard NUOPC Model/Mediator attributes
-
-- Verbosity
-- Profiling
-- Diagnostic
-
-with the lower 16 bits of each variable reserved for standard [NUOPC Metadata](https://earthsystemmodeling.org/docs/nightly/develop/NUOPC_refdoc/node3.html#SECTION00033000000000000000) compliance.
-
-Bit 17 of the `Diagnostic` attribute controls custom output to NetCDF. When set, data of the import fields are written to file at the beginning and data of export fields are written to file at the end of each Advance step.
-
-The following shows an `ESMX_Data` instance named `DAT`, with `Verbosity` and `Dignostic` attributes set.
+Each ESMX Data instance is configured under its component label section in `esmxRun.yaml`. All the standard [ESMX Component Label Options](../../README.md#component-label-options) are supported, with `model` set to `ESMX_Data`. The following example defines an `ESMX_Data` component called `DAT`, where the `Verbosity` attribute is set to `high` for increased level of NUOPC level information written to the ESMF Log file during execution.
 
 ```
 DAT:
   model:        ESMX_Data
   attributes:
     Verbosity:  high
-    Diagnostic: 131072  # bit-17 (writes netcdf field output)
 ```
 
-In addition to the standard NUOPC component attributes listed above, `ESMX_Data` implements the following custom configuration keys.
+In addition, `ESMX_Data` implements the following custom configuration keys.
 
 
 ### `timeKeeping`
@@ -107,6 +96,7 @@ The `importFields` key must be associated with a map of key/value pairs. Each ke
 | `ungriddedLBound`| The lower bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
 | `ungriddedUBound`| The upper bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
 | `dataValidate`   | [Data validation](#data-validation) applied to the import fields *before* the Advance step.                          | *none* |
+| `outputList`     | List of output names defined under the `outputs` key.                                | *none* |
 
 ESMF_Data uses the standard NUOPC data-dependencies during initialize protocol to initialize the data in all of the import fields. As per standard NUOPC rules, any import fields that are not connected will trigger an error, causing the application to abort.
 
@@ -123,11 +113,12 @@ DAT:
       ungriddedLBound:  [1]
       ungriddedUBound:  [104]
       dataValidate:     {min: 1e-05, diagnose: yes, action: error}
+      outputList:       [import]
 ```
 
 This configuration defines two fields within the `DAT` import state. The first, standard-named `sea_surface_temperature`, is defined on the `global` geometry using double-precision (`r8`) data. As there are no ungridded dimensions, `sea_surface_temperature` functions as a 2D surface field. The field is not restricted by global min/max data bounds. However `dataValidate: {diagnose: yes}` enables global diagnostic output to `stdout`.
 
-The second field, standard-named `density`, is defined on the `global` geometry using single-precision (`r4`) data. It features a single ungridded dimension spanning indices `1` to `104`, representing 104 levels. Data validation is established with `min` of `1e-05` to monitor the field during each Advance step. Diagnostic output to `stdout` is enabled; furthermore, the `action: error` setting ensures an error is triggered if any `density` value falls below the specified minimum.
+The second field, standard-named `density`, is defined on the `global` geometry using single-precision (`r4`) data. It features a single ungridded dimension spanning indices `1` to `104`, representing 104 levels. Data validation is established with `min` of `1e-05` to monitor the field during each Advance step. Diagnostic output to `stdout` is enabled; furthermore, the `action: error` setting ensures an error is triggered if any `density` value falls below the specified minimum. The field is added to the `import` output.
 
 ### `exportFields`
 
@@ -143,6 +134,7 @@ The `exportFields` key must be associated with a map of key/value pairs. Each ke
 | `dataInit`       | [Dynamic arithmetic expression](#dynamic-arithmetic-expressions) used to initialze field data during DataInitialize. | *none* |
 | `dataAdvance`    | [Dynamic arithmetic expression](#dynamic-arithmetic-expressions) used to update field data during Advance.           | *none* |
 | `dataValidate`   | [Data validation](#data-validation) applied to the export fields *after* the Advance step.                           | *none* |
+| `outputList`     | List of output names defined under the `outputs` key.                                | *none* |
 
 For an example, see the following configuration snippet for `ESMX_Data` instance named `DAT`.
 
@@ -155,9 +147,42 @@ DAT:
       typekind:     r8
       dataInit:     sea_surface_temperature
       dataAdvance:  1.1 * sea_surface_temperature
+      outputList:   [export]
+
 ```
 
-This configuration defines a single field, `sea_surface_temperature`, in the `DAT` export state. It is defined on the `global` geometry using double-precision (`r8`) values. With no ungridded dimensions, the field is treated as a 2D surface. The field data is initialized via `dataInit` to match that of the imported `sea_surface_temperature` field. During each `Advance` step, the `dataAdvance` expression exports the field at 110% of its current imported value; if `sea_surface_temperature` is missing from the `importState`, an error is triggered.
+This configuration defines a single field, `sea_surface_temperature`, in the `DAT` export state. It is defined on the `global` geometry using double-precision (`r8`) values. With no ungridded dimensions, the field is treated as a 2D surface. The field data is initialized via `dataInit` to match that of the imported `sea_surface_temperature` field. During each `Advance` step, the `dataAdvance` expression exports the field at 110% of its current imported value; if `sea_surface_temperature` is missing from the `importState`, an error is triggered. The field is added to the `export` output.
+
+### `outputs`
+
+The `outputs` key must be associated with a map of key/value pairs. Each key specifies the name by which the output can be referenced from a field in `importFields` or `exportFields`. The value once again is a map with key/values as per the following table.
+
+| Option key      | Description / Value options                                      | Default           |
+| --------------- | ---------------------------------------------------------------- | ----------------- |
+| `onDataInit`    | Logical to enable/disable data output at the end of the DataInitialize phase. | `false` |
+| `onImport`      | Logical to enable/disable data output at the beginning of the Advance phase.  | `false` |
+| `onExport`      | Logical to enable/disable data output at the end of the Advance phase.        | `false` |
+
+Each field that is associated with a particular output will be written to file when the output triggers. The format of these data files is NetCDF. The naming pattern of the generated files is:
+
+```
+field_<component-name>_<output-name>_<standard-name>.nc
+```
+
+For an example, see the following configuration snippet for `ESMX_Data` instance named `DAT`.
+
+```
+DAT:
+  ...
+  outputs:
+    import:
+      onImport:   true
+    export:
+      onDataInit: true
+      onExport:   true
+```
+
+This configuration defines two outputs. The output called `import` triggers at the beginning of the Advance phase, while output called `export` triggers at the end of the DataInitialize _and_ Advance phases.
 
 ---
 
