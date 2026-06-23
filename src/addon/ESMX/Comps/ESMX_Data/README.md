@@ -162,11 +162,13 @@ The `outputs` key must be associated with a map of key/value pairs. Each key spe
 | `onDataInit`    | Logical to enable/disable data output at the end of the DataInitialize phase. | `false` |
 | `onImport`      | Logical to enable/disable data output at the beginning of the Advance phase.  | `false` |
 | `onExport`      | Logical to enable/disable data output at the end of the Advance phase.        | `false` |
+| `separateFieldFiles` | Logical to control whether fields are written to individual files (`true`), or bundled together into a single file (`false`).              | `false` |
+| `separateTimeFiles`  | Logical to control whether each time step is written to a separate file (`true`), or appended as timeslices within the same file (`false`).| `false` |
 
 Each field that is associated with a particular output will be written to file when the output triggers. The format of these data files is NetCDF. The naming pattern of the generated files is:
 
 ```
-field_<component-name>_<output-name>_<standard-name>.nc
+data_<component-name>_<output-name>[_<time-slice>][_<standard-name>].nc
 ```
 
 For an example, see the following configuration snippet for `ESMX_Data` instance named `DAT`.

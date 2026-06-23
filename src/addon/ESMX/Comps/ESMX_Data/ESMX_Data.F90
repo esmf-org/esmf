@@ -46,6 +46,8 @@ module ESMX_Data
     logical                       :: onDataInit
     logical                       :: onImport
     logical                       :: onExport
+    logical                       :: separateFieldFiles
+    logical                       :: separateTimeFiles
     type(ESMF_State)              :: state
   end type
 
@@ -277,9 +279,11 @@ module ESMX_Data
 
           if (isFlag) then
             ! validate keys in map
-            vocabulary=["onDataInit ", &
-                        "onImport   ", &
-                        "onExport   "  ]
+            vocabulary=["onDataInit         ", &
+                        "onImport           ", &
+                        "onExport           ", &
+                        "separateFieldFiles ", &
+                        "separateTimeFiles  "  ]
             isFlag = ESMF_HConfigValidateMapKeys(hconfigMap, &
               vocabulary=vocabulary, badKey=badKey, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -310,6 +314,18 @@ module ESMX_Data
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=__FILE__)) return  ! bail out
             if (.not.isFlag) outputs(item)%onExport = .false. ! default
+            ! ingest separateFieldFiles
+            outputs(item)%separateFieldFiles = ESMF_HConfigAsLogical(hconfigMap, &
+               keyString="separateFieldFiles", asOkay=isFlag, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=__FILE__)) return  ! bail out
+            if (.not.isFlag) outputs(item)%separateFieldFiles = .false. ! default
+            ! ingest separateTimeFiles
+            outputs(item)%separateTimeFiles = ESMF_HConfigAsLogical(hconfigMap, &
+               keyString="separateTimeFiles", asOkay=isFlag, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=__FILE__)) return  ! bail out
+            if (.not.isFlag) outputs(item)%separateTimeFiles = .false. ! default
           else
             ! not a map -> error condition
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
@@ -1657,7 +1673,9 @@ module ESMX_Data
     type(ESMF_State)           :: importState
     type(ESMF_State)           :: exportState
     type(InternalState)        :: is
-    logical                    :: neededCurrent
+    logical                    :: neededCurrent, withTimeslice
+    character(:), allocatable  :: fileNamePrefix
+    character(len=4)           :: stepString
 
     rc = ESMF_SUCCESS
 
@@ -1712,25 +1730,41 @@ module ESMX_Data
     ! Loop through outputItems, trigger for onDataInit
     if (allocated(is%wrap%outputItems)) then
       do i=1, size(is%wrap%outputItems)
-        if (is%wrap%outputItems(i)%onDataInit) then
-          if (is%wrap%outputItems(i)%onImport &
-            .or.is%wrap%outputItems(i)%onExport) then
-            call NUOPC_Write(is%wrap%outputItems(i)%state, &
-              fileNamePrefix="field_"//trim(name)//"_"//&
-              is%wrap%outputItems(i)%name//"_", &
-              timeslice=1, &  ! first timeslice, with more coming in advance
-              status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-          else
-            call NUOPC_Write(is%wrap%outputItems(i)%state, &
-              fileNamePrefix="field_"//trim(name)//"_"//&
-              is%wrap%outputItems(i)%name//"_", &
-              status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+        associate(output=>is%wrap%outputItems(i))
+          if (output%onDataInit) then
+            ! trigger output
+            fileNamePrefix="data_"//trim(name)//"_"//output%name
+            withTimeslice = output%onImport.or.output%onExport
+            if (output%separateTimeFiles) then
+              if (withTimeslice) then
+                write(stepString, "(I4.4)") 0
+                fileNamePrefix=fileNamePrefix//"_"//stepString
+              endif
+              withTimeslice = .false.
+            endif
+            if (output%separateFieldFiles) then
+              fileNamePrefix=fileNamePrefix//"_"
+            endif
+            if (withTimeslice) then
+              call NUOPC_Write(output%state, &
+                fileNamePrefix=fileNamePrefix, overwrite=.true., &
+                timeslice=1, &  ! first timeslice, with more coming in advance
+                status=ESMF_FILESTATUS_REPLACE, &
+                separateFieldFiles=output%separateFieldFiles, &
+                relaxedFlag=.true., rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+            else
+              call NUOPC_Write(output%state, &
+                fileNamePrefix=fileNamePrefix, overwrite=.true., &
+                status=ESMF_FILESTATUS_REPLACE, &
+                separateFieldFiles=output%separateFieldFiles, &
+                relaxedFlag=.true., rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+            endif
           endif
-        endif
+        end associate
       enddo
     endif
 
@@ -1754,6 +1788,8 @@ module ESMX_Data
     integer                    :: statsCount, warnCount, errCount
     real(ESMF_KIND_R8)         :: statsMean, statsMin, statsMax
     logical                    :: statsOkay, headerPrinted
+    character(:), allocatable  :: fileNamePrefix
+    character(len=4)           :: stepString
 
     rc = ESMF_SUCCESS
 
@@ -1784,21 +1820,44 @@ module ESMX_Data
     ! Loop through outputItems, trigger for onImport
     if (allocated(is%wrap%outputItems)) then
       do i=1, size(is%wrap%outputItems)
-        if (is%wrap%outputItems(i)%onImport) then
-          filestatus=ESMF_FILESTATUS_OLD
-          if (is%wrap%outputItems(i)%onDataInit) then
-            step = stepCounter+1
-          else
-            step = stepCounter
-            if (stepCounter==1) filestatus=ESMF_FILESTATUS_REPLACE
+        associate(output=>is%wrap%outputItems(i))
+          if (output%onImport) then
+            ! trigger output
+            filestatus=ESMF_FILESTATUS_OLD
+            if (output%onDataInit) then
+              step = stepCounter+1
+            else
+              step = stepCounter
+              if (stepCounter==1) filestatus=ESMF_FILESTATUS_REPLACE
+            endif
+            fileNamePrefix="data_"//trim(name)//"_"//output%name
+            if (output%separateTimeFiles) then
+              write(stepString, "(I4.4)") stepCounter
+              fileNamePrefix=fileNamePrefix//"_"//stepString
+              filestatus=ESMF_FILESTATUS_REPLACE
+            endif
+            if (output%separateFieldFiles) then
+              fileNamePrefix=fileNamePrefix//"_"
+            endif
+            if (output%separateTimeFiles) then
+              call NUOPC_Write(output%state, &
+                fileNamePrefix=fileNamePrefix, overwrite=.true., &
+                status=filestatus, &
+                separateFieldFiles=output%separateFieldFiles, &
+                relaxedFlag=.true., rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+            else
+              call NUOPC_Write(output%state, &
+                fileNamePrefix=fileNamePrefix, overwrite=.true., &
+                timeslice=step, status=filestatus, &
+                separateFieldFiles=output%separateFieldFiles, &
+                relaxedFlag=.true., rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+            endif
           endif
-          call NUOPC_Write(is%wrap%outputItems(i)%state, &
-            fileNamePrefix="field_"//trim(name)//"_"//&
-            is%wrap%outputItems(i)%name//"_", &
-            timeslice=step, status=filestatus, relaxedFlag=.true., rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-        endif
+        end associate
       enddo
     endif
 
@@ -1903,21 +1962,44 @@ module ESMX_Data
     ! Loop through outputItems, trigger for onExport
     if (allocated(is%wrap%outputItems)) then
       do i=1, size(is%wrap%outputItems)
-        if (is%wrap%outputItems(i)%onExport) then
-          filestatus=ESMF_FILESTATUS_OLD
-          if (is%wrap%outputItems(i)%onDataInit) then
-            step = stepCounter+1
-          else
-            step = stepCounter
-            if (stepCounter==1) filestatus=ESMF_FILESTATUS_REPLACE
+        associate(output=>is%wrap%outputItems(i))
+          if (output%onExport) then
+            ! trigger output
+            filestatus=ESMF_FILESTATUS_OLD
+            if (output%onDataInit) then
+              step = stepCounter+1
+            else
+              step = stepCounter
+              if (stepCounter==1) filestatus=ESMF_FILESTATUS_REPLACE
+            endif
+            fileNamePrefix="data_"//trim(name)//"_"//output%name
+            if (output%separateTimeFiles) then
+              write(stepString, "(I4.4)") stepCounter
+              fileNamePrefix=fileNamePrefix//"_"//stepString
+              filestatus=ESMF_FILESTATUS_REPLACE
+            endif
+            if (output%separateFieldFiles) then
+              fileNamePrefix=fileNamePrefix//"_"
+            endif
+            if (output%separateTimeFiles) then
+              call NUOPC_Write(output%state, &
+                fileNamePrefix=fileNamePrefix, overwrite=.true., &
+                status=filestatus, &
+                separateFieldFiles=output%separateFieldFiles, &
+                relaxedFlag=.true., rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+            else
+              call NUOPC_Write(output%state, &
+                fileNamePrefix=fileNamePrefix, overwrite=.true., &
+                timeslice=step, status=filestatus, &
+                separateFieldFiles=output%separateFieldFiles, &
+                relaxedFlag=.true., rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+            endif
           endif
-          call NUOPC_Write(is%wrap%outputItems(i)%state, &
-            fileNamePrefix="field_"//trim(name)//"_"//&
-            is%wrap%outputItems(i)%name//"_", &
-            timeslice=step, status=filestatus, relaxedFlag=.true., rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-        endif
+        end associate
       enddo
     endif
 
