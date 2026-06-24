@@ -1710,6 +1710,9 @@ module ESMX_Data
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
 
+    ! start assuming all needed fields are current
+    neededCurrent = .true.
+
     ! initialize fields in the importState and Timestamp accordingly
     if (allocated(is%wrap%importItems)) then
       do i=1, size(is%wrap%importItems)
@@ -1719,8 +1722,10 @@ module ESMX_Data
             okayTime=time, importsOkay=isFlag, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
+          ! update collective result
           neededCurrent = neededCurrent .and. isFlag
           if (isFlag) then
+            ! explicitly timestamp this import field if successfully initialized
             call NUOPC_SetTimestamp(item%field, time=time, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
@@ -1735,7 +1740,7 @@ module ESMX_Data
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
 
-    ! initialize fields in the exportState and set as Updated
+    ! initialize fields in the exportState and set Updated accordingly
     if (allocated(is%wrap%exportItems)) then
       do i=1, size(is%wrap%exportItems)
         associate(item=>is%wrap%exportItems(i))
@@ -1744,8 +1749,10 @@ module ESMX_Data
             okayTime=time, importsOkay=isFlag, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
+          ! update collective result
           neededCurrent = neededCurrent .and. isFlag
           if (isflag) then
+            ! set Updated attribute if successfully initialized
             call NUOPC_SetAttribute(item%field, name="Updated", value="true", &
               rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1756,7 +1763,7 @@ module ESMX_Data
     endif
 
     if (neededCurrent) then
-      ! indicate that data initialization is complete (breaking out of init-loop)
+      ! indicate data initialization is complete (breaking out of init-loop)
       call NUOPC_CompAttributeSet(xdata, &
         name="InitializeDataComplete", value="true", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
