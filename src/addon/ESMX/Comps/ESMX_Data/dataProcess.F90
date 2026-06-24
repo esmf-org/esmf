@@ -5,6 +5,7 @@ module dataProcess
   !-----------------------------------------------------------------------------
 
   use ESMF
+  use NUOPC
 
   implicit none
 
@@ -18,13 +19,16 @@ module dataProcess
 
   !-----------------------------------------------------------------------------
 
-  subroutine process(importState, expression, exportField, step, rc)
+  subroutine process(importState, expression, exportField, step, okayTime, &
+    importsOkay, rc)
     ! Process according to the expression infix string and store in exportField
 
     type(ESMF_State), intent(in)    :: importState
     character(len=*), intent(in)    :: expression
     type(ESMF_Field), intent(inout) :: exportField
     integer,          intent(in)    :: step
+    type(ESMF_Time),  intent(in),  optional :: okayTime
+    logical,          intent(out), optional :: importsOkay
     integer,          intent(out)   :: rc
 
     type(ESMF_Field)                :: importField
@@ -45,6 +49,17 @@ module dataProcess
     real(ESMF_KIND_R8), parameter :: pi = acos(-1.0_ESMF_KIND_R8)
 
     rc = ESMF_SUCCESS
+
+    ! assume all needed imports at okayTime
+    if (present(importsOkay)) then
+      if (.not.present(okayTime)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+          msg="'okayTime' argument must be provided with 'importsOkay'.", &
+          line=__LINE__, file=__FILE__, rcToReturn=rc)
+        return  ! bail out
+      endif
+      importsOkay = .true.
+    endif
 
     ! Normalize the incoming infix string with single white space deliminators
     call normalize_infix(expression, infix_expression)
@@ -198,6 +213,16 @@ module dataProcess
             rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
+          if (present(importsOkay)) then
+            importsOkay = NUOPC_IsAtTime(importField, okayTime, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=__FILE__)) return  ! bail out
+            if (.not.importsOkay) then
+              ! early return if needed importField not at okayTime
+              deallocate(stack)
+              return
+            endif
+          endif
           call ESMF_FieldGet(importField, typekind=tkImport, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out

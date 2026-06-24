@@ -32,6 +32,7 @@ module ESMX_Data
   type ImportItem
     type(ESMF_Field)              :: field
     type(Validate)                :: dataValidate
+    character(len=:), allocatable :: dataInit
   end type
 
   type ExportItem
@@ -441,7 +442,8 @@ module ESMX_Data
           item = item+1
 
           imports(item)%field = FieldCreateFromHConfig(hconfigIt, geoms=geoms, &
-            outputs=outputs, dataValidate=imports(item)%dataValidate, rc=rc)
+            outputs=outputs, dataValidate=imports(item)%dataValidate, &
+            dataInit=imports(item)%dataInit, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, &
             msg="Problem creating import field.", &
             line=__LINE__, file=__FILE__)) return  ! bail out
@@ -1682,7 +1684,7 @@ module ESMX_Data
     type(ESMF_State)           :: importState
     type(ESMF_State)           :: exportState
     type(InternalState)        :: is
-    logical                    :: neededCurrent, withTimeslice
+    logical                    :: neededCurrent, withTimeslice, isFlag
     character(:), allocatable  :: fileNamePrefix
     character(len=4)           :: stepString
 
@@ -1704,14 +1706,55 @@ module ESMX_Data
       importState=importState, exportState=exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-
-    ! see if all the fields in the importState are at current time
     call ESMF_ClockGet(clock, currTime=time, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-    neededCurrent = NUOPC_IsAtTime(importState, time=time, rc=rc)
+
+    ! initialize fields in the importState and Timestamp accordingly
+    if (allocated(is%wrap%importItems)) then
+      do i=1, size(is%wrap%importItems)
+        associate(item=>is%wrap%importItems(i))
+          if (item%dataInit == "") cycle  ! NOOP
+          call process(importState, item%dataInit, item%field, 0, &
+            okayTime=time, importsOkay=isFlag, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+          neededCurrent = neededCurrent .and. isFlag
+          if (isFlag) then
+            call NUOPC_SetTimestamp(item%field, time=time, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+          endif
+        end associate
+      enddo
+    endif
+
+    ! see if all the fields in the importState are at current time
+    neededCurrent = neededCurrent.and. &
+      NUOPC_IsAtTime(importState, time=time, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+
+    ! initialize fields in the exportState and set as Updated
+    if (allocated(is%wrap%exportItems)) then
+      do i=1, size(is%wrap%exportItems)
+        associate(item=>is%wrap%exportItems(i))
+          if (item%dataInit == "") cycle  ! NOOP
+          call process(importState, item%dataInit, item%field, 0, &
+            okayTime=time, importsOkay=isFlag, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+          neededCurrent = neededCurrent .and. isFlag
+          if (isflag) then
+            call NUOPC_SetAttribute(item%field, name="Updated", value="true", &
+              rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
+          endif
+        end associate
+      enddo
+    endif
+
     if (neededCurrent) then
       ! indicate that data initialization is complete (breaking out of init-loop)
       call NUOPC_CompAttributeSet(xdata, &
@@ -1719,22 +1762,6 @@ module ESMX_Data
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
     endif
-
-    ! set all of the fields in the exportState as Updated
-    if (allocated(is%wrap%exportItems)) then
-      do i=1, size(is%wrap%exportItems)
-        call NUOPC_SetAttribute(is%wrap%exportItems(i)%field, &
-          name="Updated", value="true", rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-      enddo
-    endif
-
-    ! Initialize the data in export fields
-    call DataHandling(importState, is%wrap%exportItems, is%wrap%stepCounter, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
 
     ! Loop through outputItems, trigger for onDataInit
     if (allocated(is%wrap%outputItems)) then
