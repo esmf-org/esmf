@@ -138,7 +138,6 @@ class TimeInterval : public BaseTime {
                              Time *startTimeIn=0, Time *endTimeIn=0,
                              Calendar **calendarIn=0,
                              ESMC_CalKind_Flag *calkindflagIn=0,
-                             ESMC_Logical *isAbsolute=(ESMC_Logical *)NULL,
                              int timeStringLen=0, int *tempTimeStringLen=0,
                              char *tempTimeString=0,
                              int timeStringLenISOFrac=0,

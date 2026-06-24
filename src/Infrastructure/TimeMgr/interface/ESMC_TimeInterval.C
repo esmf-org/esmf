@@ -132,7 +132,6 @@ int ESMC_TimeIntervalGet(ESMC_TimeInterval timeInterval,
                              (ESMCI::Time *)NULL, (ESMCI::Time *)NULL,
                              (ESMCI::Calendar **)NULL,
                              (ESMC_CalKind_Flag *)NULL,
-                             (ESMC_Logical *)NULL,
                              (int)0, (int *)NULL, (char *)NULL,
                              (int)0, (int *)NULL, (char *)NULL);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,

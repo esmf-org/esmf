@@ -289,7 +289,6 @@ namespace ESMCI{
                                   //       unit conversions
       ESMC_CalKind_Flag *calkindflagIn,  // in  - calendar kind for calendar
                                          //       interval unit conversions
-      ESMC_Logical *isAbsolute,  // out - is an absolute interval
       int   timeStringLen,             // in  - F90 time string size
       int  *tempTimeStringLen,         // out - temp F90 time string size
       char *tempTimeString,            // out - hybrid format
@@ -840,21 +839,6 @@ namespace ESMCI{
       // see also method TimeInterval::print()
     }
 
-    // See if this is an absolute interval
-    if (isAbsolute != ESMC_NULL_POINTER) {
-
-      // Make an unset time
-      Time unsetTime;
-      unsetTime.set((ESMC_I8)0);
-
-      // Determine if absolute by whether startTime has been set
-      *isAbsolute = ESMF_TRUE;
-      if (this->startTime == unsetTime) {
-        *isAbsolute = ESMF_FALSE;
-      }
-      
-    }
-    
     return(ESMF_SUCCESS);
 
  }  // end TimeInterval::get
