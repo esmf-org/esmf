@@ -4113,14 +4113,16 @@
       correct=.true.
 
       ! Check non-absolute interval
-      call ESMF_TimeIntervalSet(timeStep, yy=1, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, calkindflag=ESMF_CALKIND_GREGORIAN, &
+           yy=1, rc=rc)
 
       call ESMF_TimeIntervalGet(timeStep, isAbsolute=isAbsolute, rc=rc)
 
       if (isAbsolute) correct=.false.
 
       ! Check non-absolute interval
-      call ESMF_TimeSet(startTime, yy=2004, mm=3, dd=20, h=12, m=17, s=58, rc=rc)
+      call ESMF_TimeSet(startTime, calkindflag=ESMF_CALKIND_GREGORIAN, &
+           yy=2004, mm=3, dd=20, h=12, m=17, s=58, rc=rc)
 
       call ESMF_TimeIntervalSet(timeStep, startTime=startTime, yy=1, rc=rc)
 
