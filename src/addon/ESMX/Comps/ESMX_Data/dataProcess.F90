@@ -112,61 +112,61 @@ module dataProcess
       if (token == "") exit
 
       select case (token)
-      case ("ABS")
+      case ("@ABS")
         stack(:,top) = abs(stack(:,top))
-      case ("AINT")
+      case ("@AINT")
         stack(:,top) = aint(stack(:,top))
-      case ("ANINT")
+      case ("@ANINT")
         stack(:,top) = anint(stack(:,top))
-      case ("CEILING")
+      case ("@CEILING")
         stack(:,top) = real(ceiling(stack(:,top)),ESMF_KIND_R8)
-      case ("FLOOR")
+      case ("@FLOOR")
         stack(:,top) = real(floor(stack(:,top)),ESMF_KIND_R8)
-      case ("DEG2RAD")
+      case ("@DEG2RAD")
         stack(:,top) = (stack(:,top))/180.0*PI
-      case ("RAD2DEG")
+      case ("@RAD2DEG")
         stack(:,top) = (stack(:,top))/PI*180.0
-      case ("ACOS")
+      case ("@ACOS")
         stack(:,top) = acos(stack(:,top))
-      case ("ACOSH")
+      case ("@ACOSH")
         stack(:,top) = acosh(stack(:,top))
-      case ("ASIN")
+      case ("@ASIN")
         stack(:,top) = asin(stack(:,top))
-      case ("ASINH")
+      case ("@ASINH")
         stack(:,top) = asinh(stack(:,top))
-      case ("ATAN")
+      case ("@ATAN")
         stack(:,top) = atan(stack(:,top))
-      case ("ATANH")
+      case ("@ATANH")
         stack(:,top) = atanh(stack(:,top))
-      case ("COS")
+      case ("@COS")
         stack(:,top) = cos(stack(:,top))
-      case ("COSH")
+      case ("@COSH")
         stack(:,top) = cosh(stack(:,top))
-      case ("ERF")
+      case ("@ERF")
         stack(:,top) = erf(stack(:,top))
-      case ("ERFC")
+      case ("@ERFC")
         stack(:,top) = erfc(stack(:,top))
-      case ("ERFC_SCALED")
+      case ("@ERFC_SCALED")
         stack(:,top) = erfc_scaled(stack(:,top))
-      case ("EXP")
+      case ("@EXP")
         stack(:,top) = exp(stack(:,top))
-      case ("GAMMA")
+      case ("@GAMMA")
         stack(:,top) = gamma(stack(:,top))
-      case ("LOG")
+      case ("@LOG")
         stack(:,top) = log(stack(:,top))
-      case ("LOG_GAMMA")
+      case ("@LOG_GAMMA")
         stack(:,top) = log_gamma(stack(:,top))
-      case ("LOG10")
+      case ("@LOG10")
         stack(:,top) = log10(stack(:,top))
-      case ("SIN")
+      case ("@SIN")
         stack(:,top) = sin(stack(:,top))
-      case ("SINH")
+      case ("@SINH")
         stack(:,top) = sinh(stack(:,top))
-      case ("SQRT")
+      case ("@SQRT")
         stack(:,top) = sqrt(stack(:,top))
-      case ("TAN")
+      case ("@TAN")
         stack(:,top) = tan(stack(:,top))
-      case ("TANH")
+      case ("@TANH")
         stack(:,top) = tanh(stack(:,top))
       case ("*")
         stack(:,top-1) = stack(:,top-1) * stack(:,top)
@@ -618,6 +618,8 @@ module dataProcess
     character(len=:), allocatable, intent(out) :: token
 
     integer :: next_s
+    integer :: peek_cur, peek_s
+    character(len=:), allocatable :: peek_token
 
     if (cur > len(str)) then
       token = ""; return
@@ -633,10 +635,23 @@ module dataProcess
       cur = cur + next_s
     end if
 
-    if (is_function(token)) then
-      ! For functions return token as upper case
-      token = ESMF_UtilStringUpperCase(token)
-    endif
+    ! Lookahead check: Is this a function name followed by an opening parenthesis?
+    if (is_valid_function_name(token)) then
+      if (cur <= len_trim(str)) then
+        peek_cur = cur
+        peek_s = index(str(peek_cur:), " ")
+        if (peek_s == 0) then
+          peek_token = str(peek_cur:)
+        else
+          peek_token = str(peek_cur : peek_cur + peek_s - 2)
+        end if
+
+        if (peek_token == "(") then
+          ! Confirmed mathematical function call: apply internal prefix mangling
+          token = "@" // ESMF_UtilStringUpperCase(token)
+        end if
+      end if
+    end if
 
   end subroutine
 
@@ -683,18 +698,28 @@ module dataProcess
 
   !-----------------------------------------------------------------------------
 
-  logical function is_function(token)
-    ! Identify token as unary function
+  logical function is_valid_function_name(token)
+    ! Identify token as valid name of unary function, regardless of case
     character(len=*), intent(in) :: token
     select case (ESMF_UtilStringUpperCase(token))
       case ("ABS", "AINT", "ANINT", "CEILING", "FLOOR", "DEG2RAD", "RAD2DEG", &
         "ACOS", "ACOSH", "ASIN", "ASINH", "ATAN", "ATANH", "COS", "COSH", &
         "ERF", "ERFC", "ERFC_SCALED", "EXP", "GAMMA", "LOG", "LOG_GAMMA", &
         "LOG10", "SIN", "SINH", "SQRT", "TAN", "TANH")
-        is_function = .true.
+        is_valid_function_name = .true.
       case default
-        is_function = .false.
+        is_valid_function_name = .false.
     end select
+  end function
+
+  logical function is_function(token)
+    ! Identify token as an internal unary function (must have the '@' prefix)
+    character(len=*), intent(in) :: token
+    if (len(token) < 2 .or. token(1:1) /= "@") then
+      is_function = .false.
+      return
+    end if
+    is_function = is_valid_function_name(token(2:))
   end function
 
   !-----------------------------------------------------------------------------
