@@ -26,7 +26,7 @@ components:
 
 ## ESMX Data Run Configuration
 
-Each ESMX Data instance is configured under its component label section in `esmxRun.yaml`. All the standard [ESMX Component Label Options](../../README.md#component-label-options) are supported, with `model` set to `ESMX_Data`. The following example defines an `ESMX_Data` component called `DAT`, where the `Verbosity` attribute is set to `high` for increased level of NUOPC level information written to the ESMF Log file during execution.
+Each ESMX Data instance is configured under its component label section in `esmxRun.yaml`. All standard [ESMX Component Label Options](../../README.md#component-label-options) are supported, in particular `model: ESMX_Data`. The following example defines an `ESMX_Data` component called `DAT`, where the `Verbosity` attribute is set to `high` to write detailed NUOPC information to the ESMF Log file during execution.
 
 ```
 DAT:
@@ -95,6 +95,7 @@ The `importFields` key must be associated with a map of key/value pairs. Each ke
 | `gridToFieldMap` | The mapping of grid to field dimension. For details see ESMF documentation.          | `[1,2]` or `[1,2,3]` depending on rank |
 | `ungriddedLBound`| The lower bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
 | `ungriddedUBound`| The upper bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
+| `dataInit`       | [Dynamic arithmetic expression](#dynamic-arithmetic-expressions) used to initialze field data during DataInitialize. Import fields with `dataInit` provide their own data initialization, while import fields without `dataInit` rely on the NUOPC data-dependency resolution protocol for initialization.   | *none* |
 | `dataValidate`   | [Data validation](#data-validation) applied to the import fields *before* the Advance step.                          | *none* |
 | `outputList`     | List of output names defined under the `outputs` key.                                | *none* |
 
@@ -131,7 +132,7 @@ The `exportFields` key must be associated with a map of key/value pairs. Each ke
 | `gridToFieldMap` | The mapping of grid to field dimension. For details see ESMF documentation.          | `[1,2]` or `[1,2,3]` depending on rank |
 | `ungriddedLBound`| The lower bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
 | `ungriddedUBound`| The upper bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
-| `dataInit`       | [Dynamic arithmetic expression](#dynamic-arithmetic-expressions) used to initialze field data during DataInitialize. | *none* |
+| `dataInit`       | [Dynamic arithmetic expression](#dynamic-arithmetic-expressions) used to initialze field data during DataInitialize. Only export fields that set `dataInit` provide valid data and participate in the NUOPC data-dependency resolution protocol during initialization.   | *none* |
 | `dataAdvance`    | [Dynamic arithmetic expression](#dynamic-arithmetic-expressions) used to update field data during Advance.           | *none* |
 | `dataValidate`   | [Data validation](#data-validation) applied to the export fields *after* the Advance step.                           | *none* |
 | `outputList`     | List of output names defined under the `outputs` key.                                | *none* |
