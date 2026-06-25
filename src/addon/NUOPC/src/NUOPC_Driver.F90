@@ -34,9 +34,7 @@ module NUOPC_Driver
   public &
     SetVM, &
     SetServices, &
-    routine_Run, &
-    SetServicesInterfaceGridComp, SetVMInterfaceGridComp, &
-    SetServicesInterfaceCplComp, SetVMInterfaceCplComp
+    routine_Run
 
   public &
     label_PreChildrenAdvertise, &
@@ -81,33 +79,6 @@ module NUOPC_Driver
     label_Finalize = "Driver_Finalize"
   character(*), parameter :: &
     label_SetRunClock = "Driver_SetRunClock"
-
-  abstract interface
-    recursive subroutine SetServicesInterfaceGridComp(gridcomp, rc)
-      use ESMF
-      implicit none
-      type(ESMF_GridComp)        :: gridcomp ! must not be optional
-      integer, intent(out)       :: rc       ! must not be optional
-    end subroutine
-    recursive subroutine SetVMInterfaceGridComp(gridcomp, rc)
-      use ESMF
-      implicit none
-      type(ESMF_GridComp)        :: gridcomp ! must not be optional
-      integer, intent(out)       :: rc       ! must not be optional
-    end subroutine
-    recursive subroutine SetServicesInterfaceCplComp(cplcomp, rc)
-      use ESMF
-      implicit none
-      type(ESMF_CplComp)         :: cplcomp  ! must not be optional
-      integer, intent(out)       :: rc       ! must not be optional
-    end subroutine
-    recursive subroutine SetVMInterfaceCplComp(cplcomp, rc)
-      use ESMF
-      implicit none
-      type(ESMF_CplComp)         :: cplcomp  ! must not be optional
-      integer, intent(out)       :: rc       ! must not be optional
-    end subroutine
-  end interface
 
   type type_InternalStateStruct
     integer                           :: modelCount
@@ -4634,8 +4605,8 @@ module NUOPC_Driver
 ! !ARGUMENTS:
     type(ESMF_GridComp)                               :: driver
     character(len=*),    intent(in)                   :: compLabel
-    procedure(SetServicesInterfaceGridComp)           :: compSetServicesRoutine
-    procedure(SetVMInterfaceGridComp),       optional :: compSetVMRoutine
+    procedure(ESMF_I_GridCompServices)                :: compSetServicesRoutine
+    procedure(ESMF_I_GridCompVM),            optional :: compSetVMRoutine
     integer,             intent(in),         optional :: petList(:)
     integer,             intent(in),         optional :: devList(:)
     type(ESMF_Info),     intent(in),         optional :: info
@@ -5003,8 +4974,8 @@ module NUOPC_Driver
     type(ESMF_GridComp)                               :: driver
     character(len=*),    intent(in)                   :: srcCompLabel
     character(len=*),    intent(in)                   :: dstCompLabel
-    procedure(SetServicesInterfaceCplComp)            :: compSetServicesRoutine
-    procedure(SetVMInterfaceCplComp),        optional :: compSetVMRoutine
+    procedure(ESMF_I_CplCompServices)                 :: compSetServicesRoutine
+    procedure(ESMF_I_CplCompVM),             optional :: compSetVMRoutine
     integer, target,     intent(in),         optional :: petList(:)
     integer, target,     intent(in),         optional :: devList(:)
     type(ESMF_Info),     intent(in),         optional :: info
