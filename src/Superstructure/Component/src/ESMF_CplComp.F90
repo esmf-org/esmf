@@ -127,7 +127,7 @@ module ESMF_CplCompMod
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_I_CplCompEntryPoint - Abstract interface for CplCompEntryPoint callback routine
+! !IINTERFACE: ESMF_I_CplCompEntryPoint - Abstract interface for CplCompEntryPoint callback routine
 !
 ! !INTERFACE:
   abstract interface
@@ -172,7 +172,7 @@ module ESMF_CplCompMod
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_I_CplCompServices - Abstract interface for CplCompServices callback routine
+! !IINTERFACE: ESMF_I_CplCompServices - Abstract interface for CplCompServices callback routine
 !
 ! !INTERFACE:
   abstract interface
@@ -205,7 +205,7 @@ module ESMF_CplCompMod
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_I_CplCompVM - Abstract interface for CplCompVM callback routine
+! !IINTERFACE: ESMF_I_CplCompVM - Abstract interface for CplCompVM callback routine
 !
 ! !INTERFACE:
   abstract interface

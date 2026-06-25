@@ -131,7 +131,7 @@ module ESMF_GridCompMod
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_I_GridCompEntryPoint - Abstract interface for GridCompEntryPoint callback routine
+! !IINTERFACE: ESMF_I_GridCompEntryPoint - Abstract interface for GridCompEntryPoint callback routine
 !
 ! !INTERFACE:
   abstract interface
@@ -176,7 +176,7 @@ module ESMF_GridCompMod
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_I_GridCompServices - Abstract interface for GridCompServices callback routine
+! !IINTERFACE: ESMF_I_GridCompServices - Abstract interface for GridCompServices callback routine
 !
 ! !INTERFACE:
   abstract interface
@@ -209,7 +209,7 @@ module ESMF_GridCompMod
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_I_GridCompVM - Abstract interface for GridCompVM callback routine
+! !IINTERFACE: ESMF_I_GridCompVM - Abstract interface for GridCompVM callback routine
 !
 ! !INTERFACE:
   abstract interface
