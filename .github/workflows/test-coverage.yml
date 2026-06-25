@@ -25,13 +25,13 @@ jobs:
 
     - name: Copy and extract artifacts
       run: |
-        mkdir -p ${{ github.workspace }}/artifacts
+        mkdir -p ${{ github.workspace }}/artifacts/ESMF-TEST-COVERAGE
         CID=$(docker run -dit --name runner esmf/test-coverage)
         docker cp ${CID}:/artifacts/test_coverage-artifacts.zip ${{ github.workspace }}/artifacts
         docker stop ${CID}
         docker rm ${CID}
         # Extract the contents and delete the original zip file
-        unzip ${{ github.workspace }}/artifacts/test_coverage-artifacts.zip -d ${{ github.workspace }}/artifacts
+        unzip ${{ github.workspace }}/artifacts/test_coverage-artifacts.zip -d ${{ github.workspace }}/artifacts/ESMF-TEST-COVERAGE
         rm ${{ github.workspace }}/artifacts/test_coverage-artifacts.zip
 
     - name: Upload artifacts
