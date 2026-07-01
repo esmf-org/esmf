@@ -20,8 +20,8 @@ module ESMX_Driver
   public SetServices, SetVM, HConfigCreateFoundNode
 
   type type_CompDef
-    procedure(SetServicesInterfaceGridComp), pointer, nopass :: ssPtr => null()
-    procedure(SetVMInterfaceGridComp),       pointer, nopass :: svPtr => null()
+    procedure(ESMF_I_GridCompServices), pointer, nopass :: ssPtr => null()
+    procedure(ESMF_I_GridCompVM),       pointer, nopass :: svPtr => null()
     character(ESMF_MAXSTR)                  :: name = "__uninitialized__"
   end type
 

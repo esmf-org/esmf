@@ -23,16 +23,20 @@ jobs:
         cd ${{ github.workspace }}/esmf-containers/test-coverage
         docker build . --tag esmf/test-coverage --build-arg ESMF_BRANCH=$GITHUB_REF_NAME
 
-    - name: Copy artifacts
+    - name: Copy and extract artifacts
       run: |
         mkdir -p ${{ github.workspace }}/artifacts
         CID=$(docker run -dit --name runner esmf/test-coverage)
         docker cp ${CID}:/artifacts/test_coverage-artifacts.zip ${{ github.workspace }}/artifacts
         docker stop ${CID}
         docker rm ${CID}
+        # Extract the contents and delete the original zip file
+        unzip ${{ github.workspace }}/artifacts/test_coverage-artifacts.zip -d ${{ github.workspace }}/artifacts
+        mv ${{ github.workspace }}/artifacts/artifacts ${{ github.workspace }}/artifacts/ESMF-TEST-COVERAGE
+        rm ${{ github.workspace }}/artifacts/test_coverage-artifacts.zip
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v6
       with:
-        name: test-coverage
+        name: Artifacts-ESMF-TEST-COVERAGE
         path: ${{ github.workspace }}/artifacts
