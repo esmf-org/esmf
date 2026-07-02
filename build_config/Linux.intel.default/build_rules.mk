@@ -153,6 +153,22 @@ ESMF_F90OPTFLAG_G       += -traceback -check arg_temp_created,bounds,format,outp
 ESMF_CXXOPTFLAG_G       += -traceback -Wcheck
 
 ############################################################
+# Special sanitizer flags
+#
+# Activate to turn on UBSan:
+#ESMF_OPTFLAG_G          += -fsanitize=undefined
+#ESMF_LINKOPTFLAG_G      += -fsanitize=undefined
+# Also set environment variable UBSAN_OPTIONS="help=1" to see available
+# run-time options.
+#
+# Activate to turn on ASan:
+#ESMF_OPTFLAG_G          += -fsanitize=address
+#ESMF_LINKOPTFLAG_G      += -fsanitize=address
+# Also set environment variable ASAN_OPTIONS="help=1" to see available
+# run-time options.
+#
+
+############################################################
 # Enable TR15581/F2003 Allocatable array resizing
 #
 ESMF_F90COMPILEOPTS += -assume realloc_lhs
