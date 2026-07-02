@@ -1,10 +1,10 @@
-## Linux, using the commercial Intel compiler suite, including oneAPI
+## Linux, using the commercial Intel compiler suite branded as oneAPI
 
 Activated by setting: `ESMF_COMPILER=intel`
 
 Defaults to `ESMF_COMM=mpiuni`. This can be overridden by explicitly setting the
 `ESMF_COMM` environment variable.
-The common setting are:
+The common settings are:
 - mpiuni
 - intelmpi
 - mpich
@@ -12,22 +12,21 @@ The common setting are:
 - mpt
 
 ### With `ESMF_COMM=mpiuni`
-The **classic** Intel compiler front-ends are chosen by default:
-- `ESMF_F90=ifort`
-- `ESMF_CXX=icpc`
-- `ESMF_C=icc`
+The LLVM-based Intel compiler front-ends are chosen by default:
+- `ESMF_F90=ifx`
+- `ESMF_CXX=icpx`
+- `ESMF_C=icx`
 
 These defaults can be overridden by explicitly setting the appropriate
 environment variable.
 
-To choose a *combination* of **classic** Fortran and **oneAPI** C/C++ set:
-- `ESMF_CXX=icpx`
-- `ESMF_C=icx`
+To choose a *combination* of **classic** Fortran and **LLVM-based** C/C++ set:
+- `ESMF_F90=ifort`
 
-To choose **oneAPI** Fortran and C/C++ front-ends set:
-- `ESMF_F90=ifx`
-- `ESMF_CXX=icpx`
-- `ESMF_C=icx``
+To choose **classic** Fortran *and* C/C++ front-ends set:
+- `ESMF_F90=ifort`
+- `ESMF_CXX=icpc`
+- `ESMF_C=icc`
 
 ### With `ESMF_COMM=intelmpi`
 The IntelMPI compiler front-ends are chosen by default:
@@ -39,7 +38,7 @@ These defaults can be overridden by explicitly setting the appropriate
 environment variable.
 
 Notice that it depends on the specific IntelMPI installation which actual
-compilers, classic vs. oneAPI, are chosen by default under each MPI wrapper.
+compilers, classic vs. LLVM-based, are chosen by default under each MPI wrapper.
 The IntelMPI defaults can be overridden using the `I_MPI_F90`, `I_MPI_CXX`,
 and `I_MPI_CC` environment variables.
 
@@ -48,7 +47,7 @@ To choose **classic** Fortran and C/C++ set:
 - `I_MPI_CXX=<path>/icpc`
 - `I_MPI_CC=<path>/icc`
 
-To choose **oneAPI** Fortran and C/C++ set:
+To choose **LLVM-based** Fortran and C/C++ set:
 - `I_MPI_F90=<path>/ifx`
 - `I_MPI_CXX=<path>/icpx`
 - `I_MPI_CC=<path>/icx`

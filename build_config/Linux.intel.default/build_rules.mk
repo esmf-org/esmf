@@ -6,9 +6,9 @@
 ############################################################
 # Default compiler setting.
 #
-ESMF_F90DEFAULT         = ifort
-ESMF_CXXDEFAULT         = icpc
-ESMF_CDEFAULT           = icc
+ESMF_F90DEFAULT         = ifx
+ESMF_CXXDEFAULT         = icpx
+ESMF_CDEFAULT           = icx
 
 ############################################################
 # Default MPI setting.
