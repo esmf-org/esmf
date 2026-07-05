@@ -1791,17 +1791,18 @@ class TestRegrid(TestBase):
         def2=np.float64(47.0)
         undef=np.float64(20000.0)
         fbounds = srcfield.data.shape
+        srclbounds=srcfield.lower_bounds
         for i in range(fbounds[0]):
             for j in range(fbounds[1]):
                 srcfield.data[i,j] = def1
-                if i%2 == 1:
+                if (srclbounds[0]+i)%2 == 1:
                    srcfield.data[i,j] = def2
           
 
         # run the ESMF regridding
         regridSrc2Dst = esmpy.Regrid(srcfield, dstfield,
                                     src_mask_values=np.atleast_1d(np.array([0])),
-                                    regrid_method=esmpy.RegridMethod.BILINEAR,
+                                    regrid_method=esmpy.RegridMethod.CONSERVE,
                                     unmapped_action=esmpy.UnmappedAction.ERROR,
                                     src_term_processing=0)
 
@@ -1844,17 +1845,18 @@ class TestRegrid(TestBase):
         def2=np.float32(47.0)
         undef=np.float32(20000.0)
         fbounds = srcfield.data.shape
+        srclbounds=srcfield.lower_bounds
         for i in range(fbounds[0]):
             for j in range(fbounds[1]):
                 srcfield.data[i,j] = def1
-                if i%2 == 1:
+                if (srclbounds[0]+i)%2 == 1:
                    srcfield.data[i,j] = def2
           
 
         # run the ESMF regridding
         regridSrc2Dst = esmpy.Regrid(srcfield, dstfield,
                                     src_mask_values=np.atleast_1d(np.array([0])),
-                                    regrid_method=esmpy.RegridMethod.BILINEAR,
+                                    regrid_method=esmpy.RegridMethod.CONSERVE,
                                     unmapped_action=esmpy.UnmappedAction.ERROR,
                                     src_term_processing=0)
  
