@@ -59,36 +59,19 @@ Once downloaded, development snapshots are built in the same way as releases.
 \label{sec:systemreq}
 \input{ESMF_systemreq}
 
-\subsubsection{Intel Compiler (Classic and oneAPI)}
+\subsubsection{Intel Compiler (Classic and LLVM-based)}
 
-ESMF supports the Intel compiler suite via {\tt ESMF\_COMPILER=intel}. Starting in 2020, Intel began promoting their
-new LLVM-based C/C++ and Fortran compiler line under the oneAPI brand. As of 2023, the older compilers are still
-part of the Intel compiler suite and referred to as Intel Compiler Classic. ESMF supports both the classic and oneAPI
-compiler lines. The following paragraphs provide important details that allow users to fine-tune the interaction
-with the Intel compilers.
+ESMF supports the Intel compiler suite via {\tt ESMF\_COMPILER=intel}. Starting in 2020, Intel began promoting their new LLVM-based C/C++ and Fortran compiler line as part of the oneAPI brand. During a multi-year transition period, the oneAPI product shipped with both classic ({\tt icc}, {\tt icpc}, {\tt ifort}) {\em and} LLVM-based ({\tt icx}, {\tt icpx}, {\tt ifx}) compilers. As of version 2024.0 of oneAPI, only the LLVM-based compilers are provided by Intel. ESMF supports both Intel compiler lines. The following paragraphs provide important details that allow users to fine-tune the interaction with the Intel compiler suite.
 
-Under {\tt ESMF\_OS=Linux}, with {\tt ESMF\_COMPILER=intel} and {\tt ESMF\_COMM=mpiuni} set, the C, C++, and
-Fortran compiler front-ends default to the classic options {\tt icc}, {\tt icpc}, and {\tt ifort}, respectively. Any
-of these defaults can be overridden by explicitly setting the {\tt ESMF\_C}, {\tt ESMF\_CXX}, or {\tt ESMF\_F90}
-environment variables to the oneAPI options {\tt icx}, {\tt icpx}, and {\tt ifx}, respectively.
+Under {\tt ESMF\_OS=Linux}, with {\tt ESMF\_COMPILER=intel} and {\tt ESMF\_COMM=mpiuni} set, the C, C++, and Fortran compiler front-ends default to the LLVM-based option {\tt icx}, {\tt icpx}, and {\tt ifx}, respectively. Any of these defaults can be overridden by explicitly setting the {\tt ESMF\_C}, {\tt ESMF\_CXX}, or {\tt ESMF\_F90} environment variables, e.g. to the classic compiler options {\tt icc}, {\tt icpc}, and {\tt ifort}, respectively.
 
-Under {\tt ESMF\_OS=Linux}, with {\tt ESMF\_COMPILER=intel} and {\tt ESMF\_COMM=intelmpi} set, the C, C++, and
-Fortran compiler front-ends default to the MPI compiler wrappers {\tt mpiicc}, {\tt mpicpc}, and {\tt mpiifort},
-respectively. It depends on the IntelMPI installation details whether classic, oneAPI, or a mixture of compilers
-are used underneath the MPI wrappers. The IntelMPI defaults can be overridden by explicitly setting the
-{\tt I\_MPI\_CC}, {\tt I\_MPI\_CXX}, or {\tt I\_MPI\_F90} environment variables. This is an IntelMPI feature.
+Under {\tt ESMF\_OS=Linux}, with {\tt ESMF\_COMPILER=intel} and {\tt ESMF\_COMM=intelmpi} set, the C, C++, and Fortran compiler front-ends default to the MPI compiler wrappers {\tt mpiicc}, {\tt mpicpc}, and {\tt mpiifort}, respectively. It depends on the IntelMPI installation details whether classic, LLVM-based, or a mixture of compilers are used underneath the MPI wrappers. The IntelMPI defaults can be overridden by explicitly setting the IntelMPI-specific environment variables {\tt I\_MPI\_CC}, {\tt I\_MPI\_CXX}, or {\tt I\_MPI\_F90}. This is an IntelMPI feature.
 
-The recommendation for Cray systems that use the Cray compiler wrappers {\tt cc}, {\tt CC}, and {\tt ftn},
-respectively, is to use {\tt ESMF\_OS=Unicos}. In most cases this setting is detected automatically by the ESMF
-build system, and should {\em not} be overridden.
+The recommendation for Cray systems that utilize the Cray Programming Environment (CPE) is to use {\tt ESMF\_OS=Unicos}. In most cases this setting is detected automatically by the ESMF build system, and should {\em not} be overridden.
 
-Under {\tt ESMF\_OS=Unicos}, with {\tt ESMF\_COMPILER=intel}, the C, C++, and Fortran compiler front-ends default to
-{\tt cc}, {\tt CC}, and {\tt ftn}, respectively, regardless of the  {\tt ESMF\_COMM} setting. The appropriate
-classic, oneAPI, or mixed compiler combination is typically determined by the Intel environment module loaded.
-Common module names on Cray systems are {\tt intel-classic}, {\tt intel-oneAPI}, and {\tt intel}, respectively.
+Under {\tt ESMF\_OS=Unicos}, with {\tt ESMF\_COMPILER=intel}, the C, C++, and Fortran compiler front-ends default to {\tt cc}, {\tt CC}, and {\tt ftn}, respectively, regardless of the  {\tt ESMF\_COMM} setting. The appropriate classic, oneAPI, or mixed compiler combination is typically determined by the Intel environment module loaded. Common module names on Cray systems are {\tt intel-classic}, {\tt intel-oneAPI}, and {\tt intel}, respectively.
 
-{\bf Tip: } Use the ESMF "{\tt make info}" target to query compiler version information. This can be used to determine the
-appropriate settings, and to diagnose issues before kicking off the complete ESMF build procedure.
+{\bf Tip: } Use the ESMF "{\tt make info}" target to query detailed compiler version information. This can be used to determine the appropriate settings, and to diagnose issues before kicking off the complete ESMF build procedure.
 
 \subsubsection{MacOS Darwin}
 
@@ -498,7 +481,7 @@ typical case where {\tt ESMF\_XERCES} is set to {\tt "standard"},
 
 \subsubsection{yaml-cpp}
 \label{sec:yaml-cpp}
-Support for I/O in YAML Ain't Markup Language
+Support for YAML Ain't Markup Language
 (\htmladdnormallink{YAML\texttrademark}{http://yaml.org})
 may be added to ESMF through the open-source
 \htmladdnormallink{yaml-cpp}{https://github.com/jbeder/yaml-cpp} library,
@@ -512,17 +495,15 @@ with yaml-cpp:
 
 \begin{description}
 
-\item[ESMF\_YAMLCPP] Possible values: {\it "internal"} (default), {\tt "OFF"},
+\item[ESMF\_YAMLCPP] Possible values: {\tt "internal"} (default),
 {\tt "standard"}, {\it <userstring>}.
 
 \begin{description}
-\item[{\it "internal"} (default)] The YAML-dependent code inside of ESMF will
+\item[{\tt "internal"} (default)] The YAML-dependent code inside of ESMF will
 be enabled.
 The yaml-cpp sources included with ESMF will be used to provide YAML support.
 The {\tt ESMF\_YAMLCPP\_INCLUDE}, {\tt ESMF\_YAMLCPP\_LIBPATH}, and
 {\tt ESMF\_YAMLCPP\_LIBS} environment variables will be ignored.
-
-\item[{\tt "OFF"}] Disables YAML-dependent code.
 
 \item[{\tt "standard"}] The YAML-dependent code inside of ESMF will
 be enabled.

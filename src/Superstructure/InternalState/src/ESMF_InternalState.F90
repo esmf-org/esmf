@@ -174,8 +174,8 @@ module ESMF_InternalStateMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InternalStateAdd()
-  subroutine ESMF_InternalStateCplCompAdd(cplcomp, keywordEnforcer, &
-    internalState, label, rc)
+  subroutine ESMF_InternalStateCplCompAdd(cplcomp, internalState, keywordEnforcer, &
+    label, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(in)            :: cplcomp
@@ -236,8 +236,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InternalStateAdd()
-  subroutine ESMF_InternalStateGridCompAdd(gcomp, keywordEnforcer, &
-    internalState, label, rc)
+  subroutine ESMF_InternalStateGridCompAdd(gcomp, internalState, keywordEnforcer, &
+    label, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(in)            :: gcomp
@@ -298,8 +298,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InternalStateGet()
-  subroutine ESMF_InternalStateCplCompGet(cplcomp, keywordEnforcer, &
-    internalState, label, rc)
+  subroutine ESMF_InternalStateCplCompGet(cplcomp, internalState, keywordEnforcer, &
+    label, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(in)            :: cplcomp
@@ -358,11 +358,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InternalStateGet()
-  subroutine ESMF_InternalStateCplCompGetL(cplcomp, labelList, rc)
+  subroutine ESMF_InternalStateCplCompGetL(cplcomp, labelList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),            intent(in)            :: cplcomp
     character(len=:), allocatable, intent(out)           :: labelList(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -420,8 +421,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InternalStateGet()
-  subroutine ESMF_InternalStateGridCompGet(gcomp, keywordEnforcer, &
-    internalState, label, rc)
+  subroutine ESMF_InternalStateGridCompGet(gcomp, internalState, keywordEnforcer, &
+    label, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(in)            :: gcomp
@@ -480,11 +481,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_InternalStateGet()
-  subroutine ESMF_InternalStateGridCompGetL(gcomp, labelList, rc)
+  subroutine ESMF_InternalStateGridCompGetL(gcomp, labelList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),           intent(in)            :: gcomp
     character(len=:), allocatable, intent(out)           :: labelList(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(out), optional :: rc
 !
 ! !DESCRIPTION:
