@@ -1778,9 +1778,9 @@ class TestRegrid(TestBase):
 
     def test_field_regrid_votemask_R8R8R8(self):
         # create a grid
-        srcgrid = grid_create_uneven_from_bounds_periodic(20, 20, corners=True, domask=False)
-        dstgrid = grid_create_from_bounds_periodic(10, 10, corners=True)
-        total_points = 10*10
+        srcgrid = grid_create_uneven_from_bounds_periodic(40, 40, corners=True, domask=False)
+        dstgrid = grid_create_from_bounds_periodic(20, 20, corners=True)
+        total_points = 20*20
 
         # create the Fields
         srcfield = esmpy.Field(srcgrid, name='srcfield', typekind=TypeKind.R8)
@@ -1832,9 +1832,9 @@ class TestRegrid(TestBase):
 
     def test_field_regrid_votemask_R4R8R4(self):
         # create a grid
-        srcgrid = grid_create_uneven_from_bounds_periodic(20, 20, corners=True, domask=False)
-        dstgrid = grid_create_from_bounds_periodic(10, 10, corners=True)
-        total_points = 10*10
+        srcgrid = grid_create_uneven_from_bounds_periodic(40, 40, corners=True, domask=False)
+        dstgrid = grid_create_from_bounds_periodic(20, 20, corners=True)
+        total_points = 20*20
 
         # create the Fields
         srcfield = esmpy.Field(srcgrid, name='srcfield', typekind=TypeKind.R4)
