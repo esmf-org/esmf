@@ -15,8 +15,7 @@ program ESMX_App
   use NUOPC
   use ESMX_Driver, only: &
     driverSV => SetVM, &
-    driverSS => SetServices, &
-    HConfigCreateFoundNode
+    driverSS => SetServices
 
   implicit none
 
@@ -43,7 +42,7 @@ program ESMX_App
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! Find hconfigNode that holds app level settings according to configKey
-  hconfigNode = HConfigCreateFoundNode(hconfig, configKey=configKey, &
+  hconfigNode = ESMF_HConfigCreateAt(hconfig, keyStringList=configKey, &
     foundFlag=isFlag, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &
@@ -178,7 +177,7 @@ program ESMX_App
 
   ! set up petList
   configKey = ["ESMX   ", "Driver ", "petList"]
-  hconfigNode = HConfigCreateFoundNode(hconfig, configKey=configKey, &
+  hconfigNode = ESMF_HConfigCreateAt(hconfig, keyStringList=configKey, &
     foundFlag=isFlag, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &
@@ -198,7 +197,7 @@ program ESMX_App
 
   ! set up devList
   configKey = ["ESMX   ", "Driver ", "devList"]
-  hconfigNode = HConfigCreateFoundNode(hconfig, configKey=configKey, &
+  hconfigNode = ESMF_HConfigCreateAt(hconfig, keyStringList=configKey, &
     foundFlag=isFlag, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &
@@ -231,7 +230,7 @@ program ESMX_App
 
   ! Set OpenMP hints on info
   configKey = ["ESMX         ", "Driver       ", "ompNumThreads"]
-  hconfigNode = HConfigCreateFoundNode(hconfig, configKey=configKey, &
+  hconfigNode = ESMF_HConfigCreateAt(hconfig, keyStringList=configKey, &
     foundFlag=isFlag, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &
@@ -254,7 +253,7 @@ program ESMX_App
 
   ! Set stdout redirect hints on info
   configKey = ["ESMX  ", "Driver", "stdout"]
-  hconfigNode = HConfigCreateFoundNode(hconfig, configKey=configKey, &
+  hconfigNode = ESMF_HConfigCreateAt(hconfig, keyStringList=configKey, &
     foundFlag=isFlag, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &
@@ -284,7 +283,7 @@ program ESMX_App
 
   ! Set stderr redirect hints in info
   configKey = ["ESMX  ", "Driver", "stderr"]
-  hconfigNode = HConfigCreateFoundNode(hconfig, configKey=configKey, &
+  hconfigNode = ESMF_HConfigCreateAt(hconfig, keyStringList=configKey, &
     foundFlag=isFlag, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &
@@ -332,7 +331,7 @@ program ESMX_App
 
   ! Find hconfigNode that holds driver level attributes, conditionally ingest
   configKey = ["ESMX      ", "Driver    ", "attributes"]
-  hconfigNode = HConfigCreateFoundNode(hconfig, configKey=configKey, &
+  hconfigNode = ESMF_HConfigCreateAt(hconfig, keyStringList=configKey, &
     foundFlag=isFlag, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME)) &

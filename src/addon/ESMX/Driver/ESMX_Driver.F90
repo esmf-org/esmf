@@ -17,7 +17,7 @@ module ESMX_Driver
 
   private
 
-  public SetServices, SetVM, HConfigCreateFoundNode
+  public SetServices, SetVM
 
   type type_CompDef
     procedure(ESMF_I_GridCompServices), pointer, nopass :: ssPtr => null()
@@ -99,7 +99,7 @@ module ESMX_Driver
         line=__LINE__, file=FILENAME)) return  ! bail out
       ! Find hconfig node that holds driver level attributes, conditionally ingest
       configKey = ["ESMX      ", "Driver    ", "attributes"]
-      hconfigNode2 = HConfigCreateFoundNode(hconfig, configKey=configKey, &
+      hconfigNode2 = ESMF_HConfigCreateAt(hconfig, keyStringList=configKey, &
         foundFlag=isFlag, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
@@ -115,7 +115,7 @@ module ESMX_Driver
 
     ! Find hconfigNode that holds driver level settings according to configKey
     configKey = ["ESMX  ", "Driver"]
-    hconfigNode = HConfigCreateFoundNode(hconfig, configKey=configKey, &
+    hconfigNode = ESMF_HConfigCreateAt(hconfig, keyStringList=configKey, &
       foundFlag=isFlag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -194,9 +194,10 @@ module ESMX_Driver
     do i=1, componentCount
       ! compLabel
       compLabel=trim(componentList(i))
+      configKey = [ character(len=32) :: "ESMX", "Components", compLabel]
 
       ! Find hconfigNode that holds component level settings
-      hconfigNode = HConfigCreateFoundNode(hconfig, configKey=[compLabel], &
+      hconfigNode = ESMF_HConfigCreateAt(hconfig, keyStringList=configKey, &
         foundFlag=isFlag, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
@@ -451,7 +452,7 @@ module ESMX_Driver
 
     ! Find hconfigNode that holds driver level settings according to configKey
     configKey = ["ESMX  ", "Driver"]
-    hconfigNode = HConfigCreateFoundNode(hconfig, configKey=configKey, &
+    hconfigNode = ESMF_HConfigCreateAt(hconfig, keyStringList=configKey, &
       foundFlag=isFlag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -481,55 +482,6 @@ module ESMX_Driver
     endif
 
   end subroutine SetRunSequence
-
-  !-----------------------------------------------------------------------------
-
-  function HConfigCreateFoundNode(hconfig, configKey, foundFlag, rc)
-    type(ESMF_HConfig)    :: HConfigCreateFoundNode
-    type(ESMF_HConfig)    :: hconfig
-    character(*)          :: configKey(:)
-    logical, intent(out)  :: foundFlag
-    integer, intent(out)  :: rc
-
-    ! local variables
-    type(ESMF_HConfig)    :: hconfigNodePrev
-    integer               :: i
-    logical               :: isFlag
-
-    rc = ESMF_SUCCESS
-
-    HConfigCreateFoundNode = ESMF_HConfigCreate(hconfig, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    foundFlag = .true.
-    do i=1, size(configKey)
-      isFlag = ESMF_HConfigIsDefined(HConfigCreateFoundNode, &
-        keyString=configKey(i), rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
-      if (i<size(configKey)) then
-        ! must be map again if not the last iteration yet
-        isFlag = ESMF_HConfigIsMap(HConfigCreateFoundNode, &
-          keyString=configKey(i), rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=FILENAME)) return  ! bail out
-      endif
-      if (.not.isFlag) then
-        ! unsuccessful search 
-        foundFlag = .false.
-        exit  ! break out of loop
-      endif
-      hconfigNodePrev = HConfigCreateFoundNode
-      HConfigCreateFoundNode = ESMF_HConfigCreateAt(hconfigNodePrev, &
-        keyString=configKey(i),rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
-      call ESMF_HConfigDestroy(hconfigNodePrev, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
-    enddo
-
-  end function
 
   !-----------------------------------------------------------------------------
 
