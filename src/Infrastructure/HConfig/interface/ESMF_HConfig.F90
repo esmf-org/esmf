@@ -8135,7 +8135,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer               :: localrc                ! local return code
     integer               :: presentCount, i
     type(ESMF_HConfig)    :: hKey, hconfigNodePrev
-    logical               :: isFlag
+    logical               :: isFlag, goDeep
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -8157,74 +8157,81 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     endif
 
+    goDeep = .true.
+
     ! initialize foundFlag
     if (present(foundFlag)) then
       foundFlag = ESMF_HConfigIsDefined(hconfig, &
         index=index, keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+      goDeep = foundFlag
     endif
 
-    ! handle different cases
-    if (present(key) .or. present(keyString)) then
-      if (present(keyString)) then
-        hkey = ESMF_HConfigCreate(content=keyString, rc=localrc)
+    if (goDeep) then
+
+      ! handle different cases
+      if (present(key) .or. present(keyString)) then
+        if (present(keyString)) then
+          hkey = ESMF_HConfigCreate(content=keyString, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else
+          ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, key, rc)
+          hkey = key
+        endif
+        ! Call into the C++ interface, which will sort out optional arguments.
+        call c_ESMC_HConfigCreateAtKey(hconfig, hconfigReturn, &
+          hkey, doc, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      else
-        ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, key, rc)
-        hkey = key
-      endif
-      ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigCreateAtKey(hconfig, hconfigReturn, &
-        hkey, doc, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if (present(keyString)) then
-        call ESMF_HConfigDestroy(hkey, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
-    else if (present(keyStringList)) then
-      ! Step through the nested keyStringList
-      hconfigReturn = ESMF_HConfigCreate(hconfig, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      do i=1, size(keyStringList)
-        isFlag = ESMF_HConfigIsDefined(hconfigReturn, &
-          keyString=keyStringList(i), rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        if (i<size(keyStringList)) then
-          ! must be map again if not the last iteration yet
-          isFlag = ESMF_HConfigIsMap(hconfigReturn, &
-            keyString=keyStringList(i), rc=localrc)
+        if (present(keyString)) then
+          call ESMF_HConfigDestroy(hkey, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        if (present(foundFlag)) then
-          foundFlag = isFlag
-          if (.not.foundFlag) exit  ! break out of loop
-        endif
-        hconfigNodePrev = hconfigReturn
-        hconfigReturn = ESMF_HConfigCreateAt(hconfigNodePrev, &
-          keyString=keyStringList(i),rc=localrc)
+      else if (present(keyStringList)) then
+        ! Step through the nested keyStringList
+        hconfigReturn = ESMF_HConfigCreate(hconfig, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_HConfigDestroy(hconfigNodePrev, rc=localrc)
+        do i=1, size(keyStringList)
+          isFlag = ESMF_HConfigIsDefined(hconfigReturn, &
+            keyString=keyStringList(i), rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (i<size(keyStringList)) then
+            ! must be map again if not the last iteration yet
+            isFlag = ESMF_HConfigIsMap(hconfigReturn, &
+              keyString=keyStringList(i), rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+          if (present(foundFlag)) then
+            foundFlag = isFlag
+            if (.not.foundFlag) exit  ! break out of loop
+          endif
+          hconfigNodePrev = hconfigReturn
+          hconfigReturn = ESMF_HConfigCreateAt(hconfigNodePrev, &
+            keyString=keyStringList(i),rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          call ESMF_HConfigDestroy(hconfigNodePrev, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        enddo
+      else
+        ! Call into the C++ interface, which will sort out optional arguments.
+        call c_ESMC_HConfigCreateAt(hconfig, hconfigReturn, &
+          index, doc, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      enddo
-    else
-      ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigCreateAt(hconfig, hconfigReturn, &
-        index, doc, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
+      endif
 
-    ! Set init code
-    ESMF_INIT_SET_CREATED(hconfigReturn)
+      ! Set init code
+      ESMF_INIT_SET_CREATED(hconfigReturn)
+
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
