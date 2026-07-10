@@ -41,6 +41,41 @@ program ESMX_App
     line=__LINE__, file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+# if 0
+!TODO: Keeping disabled for now to simplify work that extends ESMX options.
+
+  ! Validate hconfig against ESMX controlled key vocabulary
+  hconfigNode = ESMF_HConfigCreateAt(hconfig, keyString="ESMX", &
+    foundFlag=isFlag, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  if (.not.isFlag) then
+    call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+      msg="Must provide settings for: "//configKey(1)//":"//configKey(2), &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  endif
+  isFlag = ESMF_HConfigValidateMapKeys(hconfigNode, &
+    vocabulary=["App        ", & ! ESMX
+                "Driver     ", & ! ESMX
+                "Components "  & ! ESMX
+                ], badKey=valueString, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  if (.not.isFlag) then
+    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+      msg="An invalid key was found in config under ESMX (maybe a typo?): "//valueString, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  endif
+  call ESMF_HConfigDestroy(hconfigNode, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+#endif
+
   ! Find hconfigNode that holds app level settings according to configKey
   hconfigNode = ESMF_HConfigCreateAt(hconfig, keyStringList=configKey, &
     foundFlag=isFlag, rc=rc)
