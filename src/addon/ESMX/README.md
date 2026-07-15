@@ -162,7 +162,7 @@ This script installs `ESMX_EXE_NAME` into INSTALL_PREFIX/bin.
 
 Regardless which one of the three build options is chosen, the ESMX build system depends on a build file defined by the ESMX_BUILD_FILE variable. When unspecified the ESMX_BUILD_FILE defaults `esmxBuild.yaml`. This is a [YAML](https://yaml.org/) file with a very simple format. An example is given here:
 
-```
+```yaml
 application:
 
   disable_comps: ESMX_Data
@@ -285,7 +285,7 @@ At startup, the `ESMX_EXE_NAME` executable checks the first command line argumen
 An example *ESMX Run Configuration* file is given here:
 
 
-```
+```yaml
 ESMX:
 
   App:
@@ -412,25 +412,17 @@ A good starting point to explore this feature is the [ESMX_ExternalDriverAPIProt
 
 The typical situation where `ESMX_Driver` comes into play is where a user application needs to access a NUOPC based system that uses the unified ESMX driver. Assuming the user application uses CMake, integration of ESMX is straight forward. The critical piece required is to add `add_subdirectory()` in the application's `CMakeLists.txt` file to bring in the `${ESMF_ESMXDIR}/Driver` directory, and make the application dependent on target `esmx_driver`. An example for a very simple application is shown:
 
-```
+```cmake
 cmake_minimum_required(VERSION 3.22)
-
-# Where to look for the local Find<Package>.cmake files
-list(APPEND CMAKE_MODULE_PATH "${ESMF_ESMXDIR}/Driver/cmake")
-
-# Find ESMF
-find_package(ESMF 8.5.0 MODULE REQUIRED)
-
-# Set compilers consistent with ESMF
-set(CMAKE_Fortran_COMPILER        "${ESMF_F90COMPILER}")
-set(CMAKE_CXX_COMPILER            "${ESMF_CXXCOMPILER}")
-set(CMAKE_C_COMPILER              "${ESMF_CCOMPILER}")
 
 # Project
 project(ExternalDriverAPIProto
         VERSION 1.0.0
         LANGUAGES Fortran CXX C
         )
+
+# Find ESMF
+find_package(ESMF 9.0.0 REQUIRED)
 
 # Add ESMX driver
 add_subdirectory(${ESMF_ESMXDIR}/Driver ./ESMX_Driver)
@@ -439,6 +431,7 @@ add_subdirectory(${ESMF_ESMXDIR}/Driver ./ESMX_Driver)
 add_executable(externalApp externalApp.F90)
 target_include_directories(externalApp PUBLIC ${PROJECT_BINARY_DIR})
 target_link_libraries(externalApp PUBLIC esmx_driver)
+set_target_properties(externalApp PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # Install executable
 install(
@@ -479,7 +472,29 @@ The ESMX layer includes a test system based on CTest. This system is still in be
 
 ## ESMX Components
 
-ESMX includes a data component, which can be used for testing NUOPC caps. This component is known as [`ESMX_Data`](Comps/ESMX_Data).
+ESMX works with standard NUOPC components. Currently, the ESMX layer itself provides a data component that can be used for diagnostics and testing of user-provided NUOPC components. This data component is known as [`ESMX_Data`](Comps/ESMX_Data).
+
+Generally, a NUOPC component executing under ESMX has access to the current *ESMX Run Configuration* via the `hconfig` object carried by the component instance.
+
+```fortran
+type(ESMF_GridComp)                 :: myComponent
+type(ESMF_HConfig)                  :: hconfig
+...
+call ESMF_GridCompGet(myComponent, hconfig=hconfig, rc=rc)
+```
+
+To access the instance-specific YAML block of the *ESMX Run Configuration*, first query the instance name, then use it to construct the nested `configKey` for lookup inside `hconfig`.
+
+```fortran
+character(ESMF_MAXSTR)              :: compLabel
+character(:),           allocatable :: configKey(:)
+type(ESMF_HConfig)                  :: hconfigNode
+...
+call ESMF_GridCompGet(model, name=compLabel, rc=rc)
+configKey = [ character(len=ESMF_MAXSTR) :: "ESMX", "Components", compLabel ]
+hconfigNode = ESMF_HConfigCreateAt(hconfig, keyStringList=configKey, rc=rc)
+
+```
 
 ## ESMX Software Dependencies
 
