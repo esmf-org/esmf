@@ -172,8 +172,8 @@ module ESMX_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
       if (isFlag) then
-        componentList = ESMF_HConfigAsStringSeq(hconfigNode, stringLen=32, &
-          keyString="componentList", rc=rc)
+        componentList = ESMF_HConfigAsStringSeq(hconfigNode, &
+          stringLen=ESMF_MAXSTR, keyString="componentList", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME)) return  ! bail out
       endif
@@ -194,7 +194,8 @@ module ESMX_Driver
     do i=1, componentCount
       ! compLabel
       compLabel=trim(componentList(i))
-      configKey = [ character(len=32) :: "ESMX", "Components", compLabel]
+      configKey = [ character(len=ESMF_MAXSTR) :: "ESMX", "Components", &
+        compLabel]
 
       ! Find hconfigNode that holds component level settings
       hconfigNode = ESMF_HConfigCreateAt(hconfig, keyStringList=configKey, &
