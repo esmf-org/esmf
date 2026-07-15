@@ -183,7 +183,7 @@ tests:
     dir: path/to/test/data
 ```
 
-In this example two components are built into `ESMX_EXE_NAME` explicitly. (Read about [dynamically loading of components from shared objects at run-time](#dynamically-loading-components-from-shared-objects-at-run-time) later.) Each component is given a name, here `TaWaS` and `Lumo`, respectively. Components will be referenced by this *component-name* in the run-time configuration (`esmxRun.yaml`) discussed below.
+In this example two components are built into `ESMX_EXE_NAME` explicitly. (Read about [dynamically loading of components from shared objects at run-time](#dynamically-loading-components-from-shared-objects-at-run-time) later.) Each component is given a name, here `TaWaS` and `Lumo`, respectively. Components will be referenced by this *component-name* in the *ESMX Run Configuration* (`esmxRun.yaml`) discussed below.
 
 **CAUTION:** Component names are case-sensitive when used e.g. by default to construct library names, etc. However, they are treated case-insensitive when referenced from within the `esmxRun.yaml` file due to the case-insensitive nature of Fortran when referencing modules via the USE statement.
 
@@ -280,9 +280,9 @@ This section contains a key for for each *test-name*, specifying test specific o
 
 ### ESMX Run Configuration
 
-At startup, the `ESMX_EXE_NAME` executable checks the first command line argument for a filename. If no argument is provided then the filename defaults to `esmxRun.yaml`. This is the ESMX run-time configuration file in [YAML](https://yaml.org/) format, providing settings such as the list of components active at run-time, component attributes, the run sequence, as well as application level options.
+At startup, the `ESMX_EXE_NAME` executable checks the first command line argument for a filename. If no argument is provided then the filename defaults to `esmxRun.yaml`. This is the *ESMX Run Configuration* file in [YAML](https://yaml.org/) format, providing settings such as the list of components active at run-time, component attributes, the run sequence, as well as application level options.
 
-An example `ESMX Run Configuration` file is given here:
+An example *ESMX Run Configuration* file is given here:
 
 
 ```
@@ -309,27 +309,29 @@ ESMX:
         OCN
       @
 
-ATM:
-  model:            Tawas     # model value is case insensitive to match Fortran
-  ompNumThreads:    4
-  attributes:
-    Verbosity:      low
-  petList:          [3, [2-0]]  # petList is list of scalars and lists.
-                                # each list again can be of scalars and lists
-                                # recursively.
-  stdout:
-    filename:       atm.out
+  Components:
 
-OCN:
-  model:            lumo
-  petList:          [0-1, 3]
-  attributes:
-    Verbosity:      low
-  stdout:           {filename: lumo.out}
-  stderr:           {filename: lumo.err}
+    ATM:
+      model:            Tawas     # model value is case insensitive to match Fortran
+      ompNumThreads:    4
+      attributes:
+        Verbosity:      low
+      petList:          [3, [2-0]]  # petList is list of scalars and lists.
+                                    # each list again can be of scalars and lists
+                                    # recursively.
+      stdout:
+        filename:       atm.out
+
+    OCN:
+      model:            lumo
+      petList:          [0-1, 3]
+      attributes:
+        Verbosity:      low
+      stdout:           {filename: lumo.out}
+      stderr:           {filename: lumo.err}
 ```
 
-On the highest level, `ESMX Run Configuration` is expected to define the `ESMX` key, as well as a key for every component that is listed in the `componentList` found under the `Driver` level. The `ESMX` key is associated with a map containing the `App` and `Driver` keys. The `App` key must be present if `ESMX Run Configuration` is read by the `ESMX_EXE_NAME` executable, but is optional (and will be ignored) in case `esmfRun.yaml` is read by the `esmx_driver`.
+On the highest level, *ESMX Run Configuration* is expected to define the `ESMX` key. The `ESMX` key is associated with a map containing the `App`, `Driver`, and `Components` keys. The `App` key must be present if *ESMX Run Configuration* is read by the `ESMX_EXE_NAME` executable, but is optional (and will be ignored) in case `esmfRun.yaml` is read by the `esmx_driver`.
 
 #### ESMX/App Options
 
@@ -369,7 +371,7 @@ This section affects the driver level.
 
 | Option key            | Description / Value options                                                         | Default         |
 | --------------------- | ----------------------------------------------------------------------------------- | --------------- |
-| `componentList`       | list of component labels, each matching a top level key in this file                | *Empty*         |
+| `componentList`       | list of component labels, each matching a key under the ESMX/Components block                | *Empty*         |
 | `runSequence`         | block literal string defining the run sequence                                      | *NUOPC default* |
 | `logSystem`           | system information logging in SetModelServices(): `true` or `false`                 | `false`         |
 | `petList`             | list of PETs on which the driver executes                                           | *None*          |
@@ -379,7 +381,7 @@ This section affects the driver level.
 | `stderr`              | stderr redirection into `filename` provided as subkey                               | *None*          |
 | `attributes`          | map of key value pairs, each defining a driver attribute                            | *None*          |
 
-#### Component Label Options
+#### ESMX/Components Label Options
 
 This section affects the specific component instance.
 
@@ -396,7 +398,7 @@ This section affects the specific component instance.
 
 ### Dynamically loading components from shared objects at run-time
 
-There are two options recognized when specifying the value of the `model` field for a component in the `esmxRun.yaml` file:
+There are two options recognized when specifying the value of the `model` field for a component in the *ESMX Run Configuration* file:
 
 - First, if the value specified is recognized as a *component-name* provided by any of the components built into the `esmx_app` during build-time, as specified by `esmxBuild.yaml`, the respective component is accessed via its Fortran module.
 - Second, if the value does *not* match a build-time dependency, it is assumed to correspond to a shared object file instead. In that case the attempt is made to load the specified shared object file at run-time, and, if successful, is associated with the generic component label. The search order details of the OS dependent dynamic linker apply when looking for the specified shared object file on the system. A convenient way to target a shared object file at a specific location is to use absolute or relative paths, i.e. the value specified in the `model` field contains at least one slash ("/") character. The asterisk character ("*") is supported as a wildcard for the file name suffix of the specified shared object. This allows portability across systems that differ in shared object suffix. The implemented search order is "so", followed by "dylib", and finally "dll", where the first successfully loaded shared object file is used.
@@ -463,7 +465,7 @@ build/externalApp: externalApp.F90 esmxBuild.yaml
 
 The `esmx_driver` target defined by the `add_subdirectory(${ESMF_ESMXDIR}/Driver ./ESMX_Driver)` has a build-time dependency on the ESMX_BUILD_FILE already discussed under the [ESMX Build Configuration section](#esmx-build-configuration). The identical file can be used when working on the `ESMX_Driver` level.
 
-The run-time configuration needed by `ESMX_Driver` can either be supplied by the user application, or alternatively default to `esmxRun.yaml`. The following rules apply:
+The *ESMX Run Configuration* needed by `ESMX_Driver` can either be supplied by the user application, or alternatively default to `esmxRun.yaml`. The following rules apply:
 - `ESMX_Driver`, at the beginning of its `SetModelServices()` method checks whether the parent level has provided an `ESMF_Config` object by setting the `config` member on the `ESMX_Driver` component. If so, the provided `config` object is used. Otherwise `ESMX_Driver` itself creates `config` from file `esmxRun.yaml`.
 - For the case where the `config` object was provided by the parent layer, `ESMX_Driver` does not ingest attributes from `config`. Instead the assumption is made that the parent layer sets the desired attributes on `ESMX_Driver`.
 - For the case where the `config` object was loaded from `esmxRun.yaml` by `ESMX_Driver`, the driver ingests attributes from `config`, potentially overriding parent level settings.
