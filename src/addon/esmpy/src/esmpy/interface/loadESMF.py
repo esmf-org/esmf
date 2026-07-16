@@ -6,7 +6,8 @@ import os
 import sys
 import traceback
 
-from esmpy.interface.loadESMF_helpers import _check_version
+from esmpy.interface.loadESMF_helpers import (_check_version, _find_esmf_mk,
+                                              _esmf_mk_is_bundled)
 import esmpy.api.constants as constants
 
 try:
@@ -20,21 +21,11 @@ try:
 except:
     raise ImportError('The CTypes library cannot be found.')
 
-esmfmk = None
-try:
-    esmfmk = os.environ["ESMFMKFILE"]
-except KeyError:
-    # Try to guess with very common paths in normal installs (especially conda)
-    guesses = [
-        os.path.join(sys.prefix, 'lib', 'esmf.mk'),  # conda build of esmf
-        os.path.join(sys.prefix, 'Library', 'lib', 'esmf.mk')
-    ]
-    for path in guesses:
-        if os.path.isfile(path):
-            esmfmk = path
-            break
-    else:
-        raise ImportError('The esmf.mk file cannot be found. Pass its path in the ESMFMKFILE environment variable.')
+# The esmpy package directory (two levels up from this file: esmpy/interface/).
+# Used both to find an esmf.mk bundled inside a pip wheel and to detect that case.
+_PACKAGE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+esmfmk = _find_esmf_mk(os.environ, sys.prefix, _PACKAGE_DIR)
 
 #### INVESTIGATE esmf.mk ######################################################
 
@@ -92,6 +83,13 @@ if not esmfabi:
 libsdir = libsdir.rstrip()
 esmfos = esmfos.rstrip()
 
+# For a pip wheel that bundles the ESMF library, the absolute ESMF_LIBSDIR baked
+# into esmf.mk at build time is invalid once the package is relocated into
+# site-packages. The bundled library sits next to esmf.mk, so resolve the library
+# directory relative to it. This is a no-op for conda/source/HPC installs.
+if _esmf_mk_is_bundled(esmfmk, _PACKAGE_DIR):
+    libsdir = os.path.dirname(os.path.abspath(esmfmk))
+
 # set _ESMF_OS
 if "Darwin" in esmfos:
     constants._ESMF_OS = constants._ESMF_OS_DARWIN
@@ -99,6 +97,10 @@ elif "Linux" in esmfos:
     constants._ESMF_OS = constants._ESMF_OS_LINUX
 elif "Unicos" in esmfos:
     constants._ESMF_OS = constants._ESMF_OS_UNICOS
+elif os.name == "nt":
+    # Windows (e.g. a MinGW build); the esmf.mk ESMF_OS string varies, so key off
+    # the running interpreter, which for a wheel always matches the target OS.
+    constants._ESMF_OS = constants._ESMF_OS_WINDOWS
 else:
     raise ValueError("Unrecognized ESMF_OS setting!")
 
@@ -134,6 +136,12 @@ constants._ESMF_USE_INMEM_FACTORS = use_inmem_factors
 try:
     if constants._ESMF_OS == constants._ESMF_OS_DARWIN:
         _ESMF = np.ctypeslib.load_library('libesmf_fullylinked',libsdir)
+    elif constants._ESMF_OS == constants._ESMF_OS_WINDOWS:
+        # Ensure the bundled dependency DLLs (also in libsdir) are on the search path.
+        if hasattr(os, "add_dll_directory"):
+            os.add_dll_directory(libsdir)
+        _ESMF = ct.CDLL(os.path.join(libsdir,'libesmf_fullylinked.dll'),
+                        mode=ct.RTLD_GLOBAL)
     else:
         _ESMF = ct.CDLL(os.path.join(libsdir,'libesmf_fullylinked.so'),
                         mode=ct.RTLD_GLOBAL)
