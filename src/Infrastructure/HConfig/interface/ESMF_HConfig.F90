@@ -8055,7 +8055,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
 !  function ESMF_HConfigCreateAt(hconfig, keywordEnforcer, index, key, &
-!    keyString, doc, rc)
+!    keyString, keyStringList, doc, foundFlag, rc
 !
 ! !RETURN VALUE:
 !    type(ESMF_HConfig) :: ESMF_HConfigCreateAt
@@ -8066,12 +8066,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,            intent(in),  optional :: index
 !    type(ESMF_HConfig), intent(in),  optional :: key
 !    character(*),       intent(in),  optional :: keyString
+!    character(*),       intent(in),  optional :: keyStringList(:)
 !    integer,            intent(in),  optional :: doc
+!    logical,            intent(out), optional :: foundFlag
 !    integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Create a new HConfig object at the current iteration, or
-!   as specified by {\tt index}, {\tt key} or {\tt keyString}.
+!   as specified by {\tt index}, {\tt key}, {\tt keyString},
+!   or {\tt keyStringList}.
 !   The {\tt hconfig} must {\em not} be a map iterator.
 !
 !   The arguments are:
@@ -8081,14 +8084,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[index]}]
 !     Attempt to access by index if specified.
 !     Requires {\tt hconfig} of NodeType Sequence.
-!     Muturally exclusive with {\tt key} and {\tt keyString}.
+!     Muturally exclusive with {\tt key}, {\tt keyString},
+!     and {\tt keyStringList}.
 !   \item[{[key]}]
-!     Attempt to access by key if specified. Muturally exclusive with
-!     {\tt index} and {\tt keyString},
+!     Attempt to access by key if specified.
+!     Muturally exclusive with {\tt index}, {\tt keyString},
+!     and {\tt keyStringList}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified.
 !     Requires {\tt hconfig} of NodeType Map.
-!     Muturally exclusive with {\tt index} and {\tt key}.
+!     Muturally exclusive with {\tt index}, {\tt key},
+!     and {\tt keyStringList}.
+!   \item[{[keyStringList]}]
+!     Attempt to access by nested key strings if specified.
+!     Requires {\tt hconfig} of NodeType Map.
+!     Muturally exclusive with {\tt index}, {\tt key},
+!     and {\tt keyString}.
+!   \item[{[foundFlag]}]
+!     Only valid for {\tt rc==ESMF\_SUCCESS}. A value of {\tt .true.} indicates
+!     that the requested item was found. Returns {\tt .false.} otherwise.
 !   \item[{[doc]}]
 !     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
@@ -8104,69 +8118,120 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_HConfigCreateAt()"
 
   function ESMF_HConfigCreateAt(hconfig, keywordEnforcer, index, key, &
-    keyString, doc, rc)
+    keyString, keyStringList, doc, foundFlag, rc) result (hconfigReturn)
 
-    type(ESMF_HConfig) :: ESMF_HConfigCreateAt
+    type(ESMF_HConfig) :: hconfigReturn
 
     type(ESMF_HConfig), intent(in)            :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     type(ESMF_HConfig), intent(in),  optional :: key
     character(*),       intent(in),  optional :: keyString
+    character(*),       intent(in),  optional :: keyStringList(:)
     integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: foundFlag
     integer,            intent(out), optional :: rc
 
     integer               :: localrc                ! local return code
-    type(ESMF_HConfig)    :: hKey
+    integer               :: presentCount, i
+    type(ESMF_HConfig)    :: hKey, hconfigNodePrev
+    logical               :: isFlag, goDeep
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! invalidate return value
-    ESMF_HConfigCreateAt%shallowMemory = 0
+    hconfigReturn%shallowMemory = 0
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
     ! Check mutual exclusions
-    if ((present(index) .and. (present(key) .or. present(keyString))) &
-      .or. (present(key) .and. present(keyString))) then
+    presentCount = count([present(index), present(key), present(keyString), &
+      present(keyStringList)])
+    if (presentCount > 1) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-        msg="The 'index', 'key', and 'keyString' arguments are mutual exclusive", &
-        ESMF_CONTEXT, rcToReturn=rc)
+        msg="The 'index', 'key', 'keyString', and 'keyStringList' arguments" //&
+        " are mutual exclusive", ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
-    if (present(key) .or. present(keyString)) then
-      if (present(keyString)) then
-        hkey = ESMF_HConfigCreate(content=keyString, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      else
-        ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, key, rc)
-        hkey = key
-      endif
-      ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigCreateAtKey(hconfig, ESMF_HConfigCreateAt, &
-        hkey, doc, localrc)
+    goDeep = .true.
+
+    ! initialize foundFlag
+    if (present(foundFlag)) then
+      foundFlag = ESMF_HConfigIsDefined(hconfig, &
+        index=index, keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-      if (present(keyString)) then
-        call ESMF_HConfigDestroy(hkey, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
-    else
-      ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigCreateAt(hconfig, ESMF_HConfigCreateAt, &
-        index, doc, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      goDeep = foundFlag
     endif
 
-    ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_HConfigCreateAt)
+    if (goDeep) then
+
+      ! handle different cases
+      if (present(key) .or. present(keyString)) then
+        if (present(keyString)) then
+          hkey = ESMF_HConfigCreate(content=keyString, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else
+          ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, key, rc)
+          hkey = key
+        endif
+        ! Call into the C++ interface, which will sort out optional arguments.
+        call c_ESMC_HConfigCreateAtKey(hconfig, hconfigReturn, &
+          hkey, doc, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        if (present(keyString)) then
+          call ESMF_HConfigDestroy(hkey, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+      else if (present(keyStringList)) then
+        ! Step through the nested keyStringList
+        hconfigReturn = ESMF_HConfigCreate(hconfig, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        do i=1, size(keyStringList)
+          isFlag = ESMF_HConfigIsDefined(hconfigReturn, &
+            keyString=keyStringList(i), rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (i<size(keyStringList)) then
+            ! must be map again if not the last iteration yet
+            isFlag = ESMF_HConfigIsMap(hconfigReturn, &
+              keyString=keyStringList(i), rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+          if (present(foundFlag)) then
+            foundFlag = isFlag
+            if (.not.foundFlag) exit  ! break out of loop
+          endif
+          hconfigNodePrev = hconfigReturn
+          hconfigReturn = ESMF_HConfigCreateAt(hconfigNodePrev, &
+            keyString=keyStringList(i),rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          call ESMF_HConfigDestroy(hconfigNodePrev, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        enddo
+      else
+        ! Call into the C++ interface, which will sort out optional arguments.
+        call c_ESMC_HConfigCreateAt(hconfig, hconfigReturn, &
+          index, doc, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+
+      ! Set init code
+      ESMF_INIT_SET_CREATED(hconfigReturn)
+
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -8180,7 +8245,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_HConfigIterCreateAt()"
 
   function ESMF_HConfigIterCreateAt(hconfig, keywordEnforcer, index, key, &
-    keyString, doc, rc)
+    keyString, keyStringList, doc, foundFlag, rc)
 
     type(ESMF_HConfig) :: ESMF_HConfigIterCreateAt
 
@@ -8189,7 +8254,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     type(ESMF_HConfig), intent(in),  optional :: key
     character(*),       intent(in),  optional :: keyString
+    character(*),       intent(in),  optional :: keyStringList(:)
     integer,            intent(in),  optional :: doc
+    logical,            intent(out), optional :: foundFlag
     integer,            intent(out), optional :: rc
 
     integer               :: localrc                ! local return code
@@ -8204,7 +8271,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_HConfigIterCreateAt = ESMF_HConfigCreateAt(hconfigTemp, &
-      index=index, key=key, keyString=keyString, doc=doc, rc=localrc)
+      index=index, key=key, keyString=keyString, keyStringList=keyStringList, &
+      doc=doc, foundFlag=foundFlag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
