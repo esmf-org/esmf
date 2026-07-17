@@ -11,6 +11,20 @@ ESMF_CXXDEFAULT         = g++
 ESMF_CDEFAULT           = gcc
 
 ############################################################
+# Use the GNU dialect (gnu++/gnu) instead of strict ISO (c++/c). On MinGW the
+# strict -std=c++NN / -std=cNN flags define __STRICT_ANSI__, which makes the CRT
+# headers (<io.h>, <unistd.h>) hide their POSIX-named entry points (dup, dup2,
+# close, open, read, write, ...). ESMF's VM code uses those names, so the strict
+# dialect breaks the build. The GNU dialect keeps them visible.
+#
+ifneq ($(ESMF_CXXSTD),sysdefault)
+ESMF_CXXSTDFLAG         = -std=gnu++$(ESMF_CXXSTD)
+endif
+ifneq ($(ESMF_CSTD),sysdefault)
+ESMF_CSTDFLAG           = -std=gnu$(ESMF_CSTD)
+endif
+
+############################################################
 # Default MPI setting.
 #
 ifeq ($(ESMF_COMM),default)
