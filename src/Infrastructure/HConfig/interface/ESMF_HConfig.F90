@@ -8117,7 +8117,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigCreateAt()"
 
-  function ESMF_HConfigCreateAt(hconfig, keywordEnforcer, index, key, &
+  recursive function ESMF_HConfigCreateAt(hconfig, keywordEnforcer, index, key, &
     keyString, keyStringList, doc, foundFlag, rc) result (hconfigReturn)
 
     type(ESMF_HConfig) :: hconfigReturn
