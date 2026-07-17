@@ -1015,7 +1015,7 @@ VMK::Redirects VMK::setRedirects(void *ssarg){
   Redirects reds;
   // stdout and stderr redirect
   if (sarg->stdoutName.length()){
-    reds.oldStdout = fcntl(STDOUT_FILENO, F_DUPFD, 0);  // keep access to stdout
+    reds.oldStdout = dup(STDOUT_FILENO);  // keep access to stdout (== fcntl F_DUPFD,0)
     if (reds.oldStdout == -1){
       int localrc;
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -1036,7 +1036,7 @@ VMK::Redirects VMK::setRedirects(void *ssarg){
     reds.oldStdout = -1;  // indicate no redirect
   }
   if (sarg->stderrName.length()){
-    reds.oldStderr = fcntl(STDERR_FILENO, F_DUPFD, 0);  // keep access to stderr
+    reds.oldStderr = dup(STDERR_FILENO);  // keep access to stderr (== fcntl F_DUPFD,0)
     if (reds.oldStderr == -1){
       int localrc;
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
