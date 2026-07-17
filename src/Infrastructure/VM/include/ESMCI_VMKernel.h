@@ -40,6 +40,10 @@
 #include <sys/time.h>
 #else
 #include <windows.h>
+// <windows.h> (via the COM headers) defines `interface` as a macro (== struct),
+// which collides with identifiers named `interface` in headers included later --
+// notably MOAB's moab/Interface.hpp. ESMF/MOAB do not use COM, so drop it.
+#undef interface
 #include <io.h>       // Windows CRT: dup, dup2, close, open (used by Redirects)
 // Windows has no unistd.h STD*_FILENO constants; define the POSIX values.
 #ifndef STDIN_FILENO
