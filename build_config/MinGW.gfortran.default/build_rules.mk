@@ -96,7 +96,20 @@ endif
 ifeq ($(ESMF_ABI),64)
 ESMF_ABISTRING := x86_64_small
 endif
-else
+endif
+# 64-bit MSYS2/MinGW reports `uname -m` as x86_64; accept it alongside the legacy
+# i686 label (mirrors the Linux.gfortran ABISTRING handling). ESMF_ABI still selects
+# the 32- vs 64-bit memory model.
+ifeq ($(ESMF_MACHINE),x86_64)
+ESMF_ABISTRING := x86_64_small
+ifeq ($(ESMF_ABI),32)
+ESMF_ABISTRING := x86_64_32
+endif
+ifeq ($(ESMF_ABI),64)
+ESMF_ABISTRING := x86_64_small
+endif
+endif
+ifeq ($(ESMF_ABISTRING),)
 $(error "ESMF_MACHINE = $(ESMF_MACHINE)" not recognized)
 endif
 
