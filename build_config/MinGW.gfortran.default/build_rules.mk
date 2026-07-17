@@ -176,8 +176,10 @@ ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SYSTEMCALL
 
 ############################################################
 # Windows does not have support for the times system call
+# (also define it for C: vendored Zoltan timer.c is C and includes sys/times.h)
 #
 ESMF_CXXCOMPILECPPFLAGS += -DNO_TIMES
+ESMF_CCOMPILECPPFLAGS   += -DNO_TIMES
 
 ############################################################
 # Windows does not have support for Pthreads
