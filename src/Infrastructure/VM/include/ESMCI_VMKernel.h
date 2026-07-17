@@ -40,6 +40,17 @@
 #include <sys/time.h>
 #else
 #include <windows.h>
+#include <io.h>       // Windows CRT: dup, dup2, close, open (used by Redirects)
+// Windows has no unistd.h STD*_FILENO constants; define the POSIX values.
+#ifndef STDIN_FILENO
+#define STDIN_FILENO  0
+#endif
+#ifndef STDOUT_FILENO
+#define STDOUT_FILENO 1
+#endif
+#ifndef STDERR_FILENO
+#define STDERR_FILENO 2
+#endif
 #endif
 
 #ifndef ESMF_NO_OPENMP
