@@ -130,6 +130,32 @@ if "mpiuni" in esmfcomm:
 # point.
 constants._ESMF_USE_INMEM_FACTORS = use_inmem_factors
 
+#### MPI RUNTIME (real-MPI builds) ############################################
+
+# A real-MPI build (ESMF_COMM != mpiuni) links libesmf_fullylinked against the C
+# MPI runtime (libmpi). For a pip wheel we do NOT vendor libmpi: it is supplied by a
+# separate runtime wheel (e.g. `mpich`, an install-requires of the esmpy-mpich
+# distribution), which installs libmpi into <prefix>/lib via the wheel "data"
+# scheme -- a directory not on the default dynamic-loader search path. Preload it
+# here with RTLD_GLOBAL, before libesmf is dlopened, so libesmf's MPI symbols bind
+# to it. Best-effort: if it is not there (a conda/HPC/system MPI already on the
+# loader path, or a serial build), skip and let the normal loader search apply.
+if esmfcomm is not None and "mpiuni" not in esmfcomm:
+    import sysconfig
+    _mpi_libdir = os.path.join(sysconfig.get_paths()["data"], "lib")
+    if constants._ESMF_OS == constants._ESMF_OS_DARWIN:
+        _mpi_names = ("libmpi.12.dylib", "libmpi.dylib")
+    else:
+        _mpi_names = ("libmpi.so.12", "libmpi.so")
+    for _mpi_name in _mpi_names:
+        _mpi_path = os.path.join(_mpi_libdir, _mpi_name)
+        if os.path.exists(_mpi_path):
+            try:
+                ct.CDLL(_mpi_path, mode=ct.RTLD_GLOBAL)
+            except OSError:
+                pass
+            break
+
 #### SHARED LIBRARY ###########################################################
 
 # load the shared library for esmf
