@@ -241,7 +241,14 @@ ESMF_CXXLINKLIBS += -lgfortran -lWs2_32
 ############################################################
 # Shared library options
 #
-ESMF_SL_LIBOPTS  += -shared
+# --export-all-symbols is required: parts of the tree (yaml-cpp, MOAB/mesquite,
+# MOAB Factory.cpp, verdict, ESMCI_Trace, nlohmann/json) decorate symbols with
+# __declspec(dllexport). As soon as ANY symbol is explicitly exported, MinGW ld
+# stops auto-exporting the rest, so the undecorated extern "C" ESMC_* / ESMF C API
+# (e.g. ESMC_Initialize) is absent from the DLL export table and ctypes can't find
+# it. Forcing all globals to be exported restores the Unix-.so-like behavior ESMPy
+# expects.
+ESMF_SL_LIBOPTS  += -shared -Wl,--export-all-symbols
 ESMF_SL_LIBLIBS       += $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS) -lgfortran
 
 ############################################################
