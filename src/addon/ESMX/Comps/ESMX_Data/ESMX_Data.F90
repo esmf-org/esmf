@@ -89,6 +89,7 @@ module esmx_data
     character(80)              :: compLabel
     character(:), allocatable  :: badKey
     logical                    :: isFlag
+    character(:), allocatable  :: configKey(:)
 
     rc = ESMF_SUCCESS
 
@@ -162,9 +163,17 @@ module esmx_data
       call ESMF_GridCompGet(xdata, hconfig=hconfig, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__,    file=__FILE__)) return  ! bail out
-      hconfigNode = ESMF_HConfigCreateAt(hconfig, keyString=compLabel, rc=rc)
+      configKey = [ character(len=32) :: "ESMX", "Components", compLabel]
+      hconfigNode = ESMF_HConfigCreateAt(hconfig, keyStringList=configKey, &
+        foundFlag=isFlag, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
+      if (.not.isFlag) then
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+          msg="Must provide settings for component: "//compLabel, &
+          line=__LINE__, file=__FILE__, rcToReturn=rc)
+        return  ! bail out
+      endif
       ! component responsibility to validate ESMX handled options here, and
       ! potentially locally handled options
       isFlag = ESMF_HConfigValidateMapKeys(hconfigNode, &
@@ -743,6 +752,7 @@ module esmx_data
     logical            :: check
     type(ESMF_HConfig) :: hconfig
     type(ESMF_HConfig) :: xdatacfg
+    character(:), allocatable :: configKey(:)
 
     rc = ESMF_SUCCESS
 
@@ -761,14 +771,13 @@ module esmx_data
       call ESMF_GridCompGet(xdata, hconfig=hconfig, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
-      isPresent = ESMF_HConfigIsDefined(hconfig, &
-        keyString=xstate%cname, rc=rc)
+      configKey = [ character(len=32) :: "ESMX", "Components", xstate%cname]
+      xdatacfg = ESMF_HConfigCreateAt(hconfig, keyStringList=configKey, &
+        foundFlag=isPresent, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
       if (isPresent) then
-        ! access xdatacfg
-        xdatacfg = ESMF_HConfigCreateAt(hconfig, &
-          keyString=xstate%cname, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=__FILE__)) return
+        ! ingest xdatacfg
         call x_comp_read_output(xdatacfg, xstate, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return
@@ -1635,6 +1644,5 @@ module esmx_data
   endfunction x_comp_hconfig_logical
 
   !-----------------------------------------------------------------------------
-
 
 endmodule esmx_data

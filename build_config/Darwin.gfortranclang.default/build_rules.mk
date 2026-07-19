@@ -198,15 +198,14 @@ endif
 ############################################################
 # OpenMP compiler and linker flags
 #
-ESMF_OPENMPDEFAULT=OFF
-ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
-# As of 2022-12-05, Apple's clang doesn't support -fopenmp directly; instead, it requires
-# -Xpreprocessor -fopenmp. In addition, you will need to install libomp and explicitly add
-# the appropriate include and link directories and libraries to pull it in (this is not
-# done here yet).
+# Apple Clang does not support OpenMP natively.
+# It requires explicit installation of libomp and manually pointing to the
+# associated include and lib directories.
+ESMF_OPENMPDEFAULT = OFF
 ESMF_OPENMP_CXXCOMPILEOPTS += -Xpreprocessor -fopenmp
-ESMF_OPENMP_F90LINKOPTS    += -fopenmp
 ESMF_OPENMP_CXXLINKOPTS    += -Xpreprocessor -fopenmp
+ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
+ESMF_OPENMP_F90LINKOPTS    += -fopenmp
 
 ############################################################
 # Explicit flags for handling specific format and cpp combos

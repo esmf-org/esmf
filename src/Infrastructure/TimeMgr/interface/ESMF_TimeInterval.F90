@@ -1029,7 +1029,7 @@
         d_r8, h_r8, m_r8, s_r8, &
         ms_r8, us_r8, ns_r8, &
         sN, sN_i8, sD, sD_i8, &
-        startTime, calendar, calkindflag, &
+        startTime, calendar, calkindflag, isAbsolute,  &
         timeString, timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
@@ -1062,6 +1062,7 @@
       type(ESMF_Time),         intent(out), optional :: startTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
       type(ESMF_CalKind_Flag), intent(out), optional :: calkindflag
+      logical,                 intent(out), optional :: isAbsolute
       character (len=*),       intent(out), optional :: timeString
       character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: rc
@@ -1070,6 +1071,11 @@
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[9.0.0] Added argument {\tt isAbsolute} to allow the user to determine if
+!              the time interval refers to a specific period of time.
+! \end{description}      
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1160,6 +1166,12 @@
 !          Associated {\tt Calendar}, if any.
 !     \item[{[calkindflag]}]
 !          Associated {\tt CalKind\_Flag}, if any.
+!     \item[{[isAbsolute]}]
+!          Returns true if the time interval is an absolute interval. That is
+!          if the time interval refers to a specific period of time with a
+!          specific start time (e.g. March 1, 2014 to March 1, 2015).
+!          If false, the time interval is a duration that doesn't refer to a
+!          specific period of time (e.g. 1 year).
 !     \item[{[timeString]}]
 !          \begin{sloppypar}
 !          Convert time interval value to format string PyYmMdDThHmMs[:n/d]S,
@@ -1187,6 +1199,7 @@
       integer :: timeStringLen, timeStringLenISOFrac
       integer :: tempTimeStringLen, tempTimeStringLenISOFrac
       integer :: localrc                        ! local return code
+      type(ESMF_Logical) :: isAbsInt
 
       ! Assume failure until success
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1218,10 +1231,11 @@
                                      tempTimeString, &
                                      timeStringLenISOFrac, &
                                      tempTimeStringLenISOFrac, &
-                                     tempTimeStringISOFrac, localrc)
+                                     tempTimeStringISOFrac, isAbsInt, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+      
       ! copy temp time string back to given time string to restore
       !   native Fortran storage style
       if (present(timeString)) then
@@ -1230,7 +1244,13 @@
       if (present(timeStringISOFrac)) then
         timeStringISOFrac = tempTimeStringISOFrac(1:tempTimeStringLenISOFrac)
       endif
-    
+
+      ! Copy from ESMF logical to fortran
+      if (present(isAbsolute)) then
+         isAbsolute = .false.       
+         if (isAbsInt == ESMF_TRUE) isAbsolute = .true.
+      endif
+         
       ! mark outputs as successfully initialized
       call ESMF_TimeInit(startTime)
       call ESMF_CalendarSetInitCreated(calendar)

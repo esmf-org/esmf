@@ -66,6 +66,10 @@ module ESMF_GridCompMod
   public operator(==)
   public operator(/=)
 
+  public ESMF_I_GridCompEntryPoint
+  public ESMF_I_GridCompServices
+  public ESMF_I_GridCompVM
+
   public ESMF_GridCompCreate
   public ESMF_GridCompDestroy
   public ESMF_GridCompFinalize
@@ -123,6 +127,117 @@ module ESMF_GridCompMod
     module procedure ESMF_GridCompSetVM
     module procedure ESMF_GridCompSetVMShObj
   end interface
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IINTERFACE: ESMF_I_GridCompEntryPoint - Abstract interface for GridCompEntryPoint callback routine
+!
+! !INTERFACE:
+  abstract interface
+    subroutine ESMF_I_GridCompEntryPoint(gridcomp, importState, exportState, clock, rc)
+      use ESMF_CompMod
+      use ESMF_StateMod
+      use ESMF_ClockMod
+      implicit none
+! !ARGUMENTS:
+      type(ESMF_GridComp)         :: gridcomp     ! must not be optional
+      type(ESMF_State)            :: importState  ! must not be optional
+      type(ESMF_State)            :: exportState  ! must not be optional
+      type(ESMF_Clock)            :: clock        ! must not be optional
+      integer, intent(out)        :: rc           ! must not be optional
+    end subroutine
+  end interface
+!
+! !DESCRIPTION:
+!   \label{api_ESMF_I_GridCompEntryPoint}
+!   An abstract interface defining the mandatory calling profile for any
+!   user-supplied callback routine registered via
+!   {\tt ESMF\_GridCompSetEntryPoint}. Such routine must conform to this exact
+!   argument order, type validation, and cannot contain {\tt optional}
+!   attributes.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[gridcomp]
+!     The component object that makes the callback.
+!   \item[importState]
+!     The import state associated with {\tt gridcomp} at the time of callback.
+!   \item[exportState]
+!     The export state associated with {\tt gridcomp} at the time of callback.
+!   \item[clock]
+!     The clock object associated with {\tt gridcomp} at the time of callback.
+!   \item[rc]
+!     The return code. Return {\tt ESMF\_SUCCESS} for success, any of the
+!     standard ESMF return codes otherwise.
+!   \end{description}
+!EOP
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IINTERFACE: ESMF_I_GridCompServices - Abstract interface for GridCompServices callback routine
+!
+! !INTERFACE:
+  abstract interface
+    subroutine ESMF_I_GridCompServices(gridcomp, rc)
+      use ESMF_CompMod
+      implicit none
+! !ARGUMENTS:
+      type(ESMF_GridComp)        :: gridcomp ! must not be optional
+      integer, intent(out)       :: rc       ! must not be optional
+    end subroutine
+  end interface
+!
+! !DESCRIPTION:
+!   \label{api_ESMF_I_GridCompServices}
+!   An abstract interface defining the mandatory calling profile for any
+!   user-supplied routine called by {\tt ESMF\_GridCompSetServices}.
+!   Such routine must conform to this exact argument order, type validation,
+!   and cannot contain {\tt optional} attributes.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[gridcomp]
+!     The component object that makes the callback.
+!   \item[rc]
+!     The return code. Return {\tt ESMF\_SUCCESS} for success, any of the
+!     standard ESMF return codes otherwise.
+!   \end{description}
+!EOP
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IINTERFACE: ESMF_I_GridCompVM - Abstract interface for GridCompVM callback routine
+!
+! !INTERFACE:
+  abstract interface
+    subroutine ESMF_I_GridCompVM(gridcomp, rc)
+      use ESMF_CompMod
+      implicit none
+! !ARGUMENTS:
+      type(ESMF_GridComp)        :: gridcomp ! must not be optional
+      integer, intent(out)       :: rc       ! must not be optional
+    end subroutine
+  end interface
+!
+! !DESCRIPTION:
+!   \label{api_ESMF_I_GridCompVM}
+!   An abstract interface defining the mandatory calling profile for any
+!   user-supplied routine called by {\tt ESMF\_GridCompSetVM}.
+!   Such routine must conform to this exact argument order, type validation,
+!   and cannot contain {\tt optional} attributes.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[gridcomp]
+!     The component object that makes the callback.
+!   \item[rc]
+!     The return code. Return {\tt ESMF\_SUCCESS} for success, any of the
+!     standard ESMF return codes otherwise.
+!   \end{description}
+!EOP
 !------------------------------------------------------------------------------
 
 !===============================================================================
@@ -2348,19 +2463,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_GridComp),    intent(inout)         :: gridcomp
     type(ESMF_Method_Flag), intent(in)            :: methodflag
-    interface
-      subroutine userRoutine(gridcomp, importState, exportState, clock, rc)
-        use ESMF_CompMod
-        use ESMF_StateMod
-        use ESMF_ClockMod
-        implicit none
-        type(ESMF_GridComp)         :: gridcomp     ! must not be optional
-        type(ESMF_State)            :: importState  ! must not be optional
-        type(ESMF_State)            :: exportState  ! must not be optional
-        type(ESMF_Clock)            :: clock        ! must not be optional
-        integer, intent(out)        :: rc           ! must not be optional
-      end subroutine
-    end interface
+    procedure(ESMF_I_GridCompEntryPoint)          :: userRoutine
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: phase
     integer,                intent(out), optional :: rc
@@ -2387,15 +2490,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   for a complete list of valid method options.
 !   \end{sloppypar}
 ! \item[userRoutine]
-!   The user-supplied subroutine to be associated for this Component
-!   {\tt method}.  Argument types, intent and order must match
-!   the interface signature, and must not have the {\tt optional} attribute.
-!   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
-!   or an external procedure that has a matching interface block specified for it.
-!   An internal procedure which is contained within another procedure must not be used.
-!   From Fortran-2008 onwards, an internal procedure contained within either a main program
-!   or a module procedure may be used.  If the internal procedure is contained within a
-!   module procedure, it is subject to initialization requirements.  See: \ref{sec:AppDriverIntProc}
+!   \begin{sloppypar}
+!   The user-supplied subroutine to be associated for this Component under the
+!   method indicated by {\tt methodflag}. Must precisely match the
+!   {\tt ESMF\_I\_GridCompEntryPoint} abstract interface documented at
+!   \ref{api_ESMF_I_GridCompEntryPoint}.
+!
+!   Prior to Fortran-2008, the subroutine must be either a module scope
+!   procedure, or an external procedure that has a matching interface block
+!   specified for it. An internal procedure which is contained within another
+!   procedure must not be used. From Fortran-2008 onwards, an internal
+!   procedure contained within either a main program or a module procedure
+!   may be used.  If the internal procedure is contained within a module
+!   procedure, it is subject to initialization requirements.
+!   See: \ref{sec:AppDriverIntProc}
+!   \end{sloppypar}
 ! \item[{[phase]}]
 !   The {\tt phase} number for multi-phase methods. For single phase
 !   methods the {\tt phase} argument can be omitted. The default setting
@@ -2501,14 +2610,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
-    interface
-      subroutine userRoutine(gridcomp, rc)
-        use ESMF_CompMod
-        implicit none
-        type(ESMF_GridComp)        :: gridcomp ! must not be optional
-        integer, intent(out)       :: rc       ! must not be optional
-      end subroutine
-    end interface
+    procedure(ESMF_I_GridCompServices)         :: userRoutine
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: userRc
     integer,             intent(out), optional :: rc
@@ -2528,20 +2630,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[gridcomp]
 !   Gridded Component.
 ! \item[userRoutine]
-!   The Component writer must supply a subroutine with the exact interface
-!   shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
-!   must not be declared as optional, and the types, intent and order must match.
-!   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
-!   or an external procedure that has a matching interface block specified for it.
-!   An internal procedure which is contained within another procedure must not be used.
-!   From Fortran-2008 onwards, an internal procedure contained within either a main program
-!   or a module procedure may be used.  If the internal procedure is contained within a
-!   module procedure, it is subject to initialization requirements.  See: \ref{sec:AppDriverIntProc}
-!
 !   \begin{sloppypar}
-!   The {\tt userRoutine}, when called by the framework, must make successive calls
-!   to {\tt ESMF\_GridCompSetEntryPoint()} to preset callback routines for
-!   standard Component Initialize(), Run(), and Finalize() methods.
+!   The user-supplied subroutine that sets the component services by making
+!   successive calls to {\tt ESMF\_GridCompSetEntryPoint()} to preset callback
+!   routines for standard component Initialize(), Run(), and Finalize() methods.
+!
+!   Must precisely match the {\tt ESMF\_I\_GridCompServices} abstract interface
+!   documented at \ref{api_ESMF_I_GridCompServices}.
+!
+!   Prior to Fortran-2008, the subroutine must be either a module scope
+!   procedure, or an external procedure that has a matching interface block
+!   specified for it. An internal procedure which is contained within another
+!   procedure must not be used. From Fortran-2008 onwards, an internal
+!   procedure contained within either a main program or a module procedure
+!   may be used.  If the internal procedure is contained within a module
+!   procedure, it is subject to initialization requirements.
+!   See: \ref{sec:AppDriverIntProc}
 !   \end{sloppypar}
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
@@ -2622,30 +2726,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[gridcomp]
 !   Gridded Component.
 ! \item[userRoutine]
-!   Name of routine to be called, specified as a character string.
-!   The Component writer must supply a subroutine with the exact interface
-!   shown for {\tt userRoutine} below. Arguments must not be declared
-!   as optional, and the types, intent and order must match.
-!   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
-!   or an external procedure that has a matching interface block specified for it.
-!   An internal procedure which is contained within another procedure must not be used.
-!   From Fortran-2008 onwards, an internal procedure contained within either a main program
-!   or a module procedure may be used.  If the internal procedure is contained within a
-!   module procedure, it is subject to initialization requirements.  See: \ref{sec:AppDriverIntProc}
-!
-!   !INTERFACE:
-!     interface
-!       subroutine userRoutine(gridcomp, rc)
-!         type(ESMF_GridComp)  :: gridcomp   ! must not be optional
-!         integer, intent(out) :: rc         ! must not be optional
-!       end subroutine
-!     end interface
-!
-!   !DESCRIPTION:
 !   \begin{sloppypar}
-!   The {\tt userRoutine}, when called by the framework, must make successive calls
-!   to {\tt ESMF\_GridCompSetEntryPoint()} to preset callback routines for
-!   standard Component Initialize(), Run(), and Finalize() methods.
+!   Name of the user-supplied routine that sets the component services by making
+!   successive calls to {\tt ESMF\_GridCompSetEntryPoint()} to preset callback
+!   routines for standard component Initialize(), Run(), and Finalize() methods.
+!
+!   Must precisely match the {\tt ESMF\_I\_GridCompServices} abstract interface
+!   documented at \ref{api_ESMF_I_GridCompServices}.
+!
+!   Prior to Fortran-2008, the subroutine must be either a module scope
+!   procedure, or an external procedure that has a matching interface block
+!   specified for it. An internal procedure which is contained within another
+!   procedure must not be used. From Fortran-2008 onwards, an internal
+!   procedure contained within either a main program or a module procedure
+!   may be used.  If the internal procedure is contained within a module
+!   procedure, it is subject to initialization requirements.
+!   See: \ref{sec:AppDriverIntProc}
 !   \end{sloppypar}
 ! \item[{[sharedObj]}]
 !   Name of shared object that contains {\tt userRoutine}. The asterisk
@@ -2896,14 +2992,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     userRc, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
-    interface
-      subroutine userRoutine(gridcomp, rc)
-        use ESMF_CompMod
-        implicit none
-        type(ESMF_GridComp)        :: gridcomp ! must not be optional
-        integer, intent(out)       :: rc       ! must not be optional
-      end subroutine
-    end interface
+    procedure(ESMF_I_GridCompVM)               :: userRoutine
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: userRc
     integer,             intent(out), optional :: rc
@@ -2922,19 +3011,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[gridcomp]
 !   Gridded Component.
 ! \item[userRoutine]
-!   The Component writer must supply a subroutine with the exact interface
-!   shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
-!   must not be declared as optional, and the types, intent and order must match.
-!   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
-!   or an external procedure that has a matching interface block specified for it.
-!   An internal procedure which is contained within another procedure must not be used.
-!   From Fortran-2008 onwards, an internal procedure contained within either a main program
-!   or a module procedure may be used.  If the internal procedure is contained within a
-!   module procedure, it is subject to initialization requirements.  See: \ref{sec:AppDriverIntProc}
+!   \begin{sloppypar}
+!   The user-supplied subroutine that sets the component VM properties by
+!   utilizing the {\tt ESMF\_GridCompSetVMxxx()} methods.
 !
-!   The subroutine, when called by the framework, is expected to use any of the
-!   {\tt ESMF\_GridCompSetVMxxx()} methods to set the properties of the VM
-!   associated with the Gridded Component.
+!   Must precisely match the {\tt ESMF\_I\_GridCompVM} abstract interface
+!   documented at \ref{api_ESMF_I_GridCompVM}.
+!
+!   Prior to Fortran-2008, the subroutine must be either a module scope
+!   procedure, or an external procedure that has a matching interface block
+!   specified for it. An internal procedure which is contained within another
+!   procedure must not be used. From Fortran-2008 onwards, an internal
+!   procedure contained within either a main program or a module procedure
+!   may be used.  If the internal procedure is contained within a module
+!   procedure, it is subject to initialization requirements.
+!   See: \ref{sec:AppDriverIntProc}
+!   \end{sloppypar}
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -3009,29 +3101,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[gridcomp]
 !   Gridded Component.
 ! \item[userRoutine]
-!   Routine to be called, specified as a character string.
-!   The Component writer must supply a subroutine with the exact interface
-!   shown for {\tt userRoutine} below. Arguments must not be declared
-!   as optional, and the types, intent and order must match.
-!   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
-!   or an external procedure that has a matching interface block specified for it.
-!   An internal procedure which is contained within another procedure must not be used.
-!   From Fortran-2008 onwards, an internal procedure contained within either a main program
-!   or a module procedure may be used.  If the internal procedure is contained within a
-!   module procedure, it is subject to initialization requirements.  See: \ref{sec:AppDriverIntProc}
+!   \begin{sloppypar}
+!   Name of the user-supplied routine that sets the component VM properties by
+!   utilizing the {\tt ESMF\_GridCompSetVMxxx()} methods.
 !
-!   !INTERFACE:
-!     interface
-!       subroutine userRoutine(gridcomp, rc)
-!         type(ESMF_GridComp)  :: gridcomp    ! must not be optional
-!         integer, intent(out) :: rc          ! must not be optional
-!       end subroutine
-!     end interface
+!   Must precisely match the {\tt ESMF\_I\_GridCompVM} abstract interface
+!   documented at \ref{api_ESMF_I_GridCompVM}.
 !
-!   !DESCRIPTION:
-!   The subroutine, when called by the framework, is expected to use any of the
-!   {\tt ESMF\_GridCompSetVMxxx()} methods to set the properties of the VM
-!   associated with the Gridded Component.
+!   Prior to Fortran-2008, the subroutine must be either a module scope
+!   procedure, or an external procedure that has a matching interface block
+!   specified for it. An internal procedure which is contained within another
+!   procedure must not be used. From Fortran-2008 onwards, an internal
+!   procedure contained within either a main program or a module procedure
+!   may be used.  If the internal procedure is contained within a module
+!   procedure, it is subject to initialization requirements.
+!   See: \ref{sec:AppDriverIntProc}
+!   \end{sloppypar}
 ! \item[{[sharedObj]}]
 !   Name of shared object that contains {\tt userRoutine}. The asterisk
 !   character {\tt (*)} is supported as a wildcard for the file name suffix.
@@ -3156,7 +3241,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   For cases where OpenMP threads
 !   are used by the user code, each thread allocates its own private stack. For
-!   all threads {\em other} than the master, the stack size is set via the 
+!   all threads {\em other} than the master, the stack size is set via the
 !   typical {\tt OMP\_STACKSIZE} environment variable mechanism. The PET itself,
 !   however, becomes the {\em master} of the OpenMP thread team, and is not
 !   affected by {\tt OMP\_STACKSIZE}. It is the master's stack that can be
@@ -3172,7 +3257,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Depending on how much private data is used by the user code under
 !   the master thread, the default might be too small, and
 !   {\tt pthreadMinStackSize} must be used to allocate sufficient stack space.
-! \item[{[openMpHandling]}] 
+! \item[{[openMpHandling]}]
 !   Handling of OpenMP threads. Supported options are:
 !   \begin{itemize}
 !   \item "{\tt none}" - OpenMP handling is completely left to the user.
@@ -3184,11 +3269,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !                        triggers the instantiation of the team, and pins each
 !                        OpenMP thread to the corresponding PE.
 !   \end{itemize}
-! \item[{[openMpNumThreads]}] 
+! \item[{[openMpNumThreads]}]
 !   Number of OpenMP threads in each OpenMP thread team. This can be any
 !   positive number. By default, or if {\tt openMpNumThreads} is negative, each
 !   PET sets the number of OpenMP threads to its local peCount.
-! \item[{[forceChildPthreads]}] 
+! \item[{[forceChildPthreads]}]
 !   For {\tt .true.}, force each child PET to execute in its own Pthread.
 !   By default, {\tt .false.}, single PETs spawned from a parent PET
 !   execute in the same thread (or MPI process) as the parent PET. Multiple
@@ -3286,7 +3371,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   For cases where OpenMP threads
 !   are used by the user code, each thread allocates its own private stack. For
-!   all threads {\em other} than the master, the stack size is set via the 
+!   all threads {\em other} than the master, the stack size is set via the
 !   typical {\tt OMP\_STACKSIZE} environment variable mechanism. The PET itself,
 !   however, becomes the {\em master} of the OpenMP thread team, and is not
 !   affected by {\tt OMP\_STACKSIZE}. It is the master's stack that can be
@@ -3302,7 +3387,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Depending on how much private data is used by the user code under
 !   the master thread, the default might be too small, and
 !   {\tt pthreadMinStackSize} must be used to allocate sufficient stack space.
-! \item[{[forceChildPthreads]}] 
+! \item[{[forceChildPthreads]}]
 !   For {\tt .true.}, force each child PET to execute in its own Pthread.
 !   By default, {\tt .false.}, single PETs spawned from a parent PET
 !   execute in the same thread (or MPI process) as the parent PET. Multiple
@@ -3397,7 +3482,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   For cases where OpenMP threads
 !   are used by the user code, each thread allocates its own private stack. For
-!   all threads {\em other} than the master, the stack size is set via the 
+!   all threads {\em other} than the master, the stack size is set via the
 !   typical {\tt OMP\_STACKSIZE} environment variable mechanism. The PET itself,
 !   however, becomes the {\em master} of the OpenMP thread team, and is not
 !   affected by {\tt OMP\_STACKSIZE}. It is the master's stack that can be
@@ -3413,7 +3498,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Depending on how much private data is used by the user code under
 !   the master thread, the default might be too small, and
 !   {\tt pthreadMinStackSize} must be used to allocate sufficient stack space.
-! \item[{[forceChildPthreads]}] 
+! \item[{[forceChildPthreads]}]
 !   For {\tt .true.}, force each child PET to execute in its own Pthread.
 !   By default, {\tt .false.}, single PETs spawned from a parent PET
 !   execute in the same thread (or MPI process) as the parent PET. Multiple

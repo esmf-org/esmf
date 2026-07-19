@@ -90,7 +90,7 @@
                                  timeInterval4, timeInterval5, timeInterval6
       type(ESMF_TimeInterval) :: diffTime, absoluteTime
       type(ESMF_CalKind_Flag) :: calkindflag
-      logical :: correct
+      logical :: correct,isAbsolute
 
 #endif
 
@@ -4102,11 +4102,42 @@
       call ESMF_Test((rc .eq. ESMF_SUCCESS) .and. correct, &
                       name, failMsg, result, ESMF_SRCLINE)
 
+! ----------------------------------------------------------------------------
       
+      !EX_UTest
+      ! Testing isAbsolute flag to see if startTime is set
+      write(name, *) "Test isAbsolute argument"
+      write(failMsg, *) "isAbsolute argument has wrong value."
+
+      ! Init correct
+      correct=.true.
+
+      ! Check non-absolute interval
+      call ESMF_TimeIntervalSet(timeStep, calkindflag=ESMF_CALKIND_GREGORIAN, &
+           yy=1, rc=rc)
+
+      call ESMF_TimeIntervalGet(timeStep, isAbsolute=isAbsolute, rc=rc)
+
+      if (isAbsolute) correct=.false.
+
+      ! Check non-absolute interval
+      call ESMF_TimeSet(startTime, calkindflag=ESMF_CALKIND_GREGORIAN, &
+           yy=2004, mm=3, dd=20, h=12, m=17, s=58, rc=rc)
+
+      call ESMF_TimeIntervalSet(timeStep, startTime=startTime, yy=1, rc=rc)
+
+      call ESMF_TimeIntervalGet(timeStep, isAbsolute=isAbsolute, rc=rc)
+
+      if (.not. isAbsolute) correct=.false.
+
+      
+      call ESMF_Test((rc .eq. ESMF_SUCCESS) .and. correct, &
+                      name, failMsg, result, ESMF_SRCLINE)
+            
       ! ----------------------------------------------------------------------------
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
-  
+      
 #endif
       ! finalize ESMF framework
       call ESMF_TestEnd(ESMF_SRCLINE)
