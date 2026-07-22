@@ -113,9 +113,35 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -v --version
 
 ############################################################
+# See if this is LLVM Clang or Apple Clang
+#
+ESMF_CLANGSTR := $(findstring Apple clang, $(shell $(ESMF_CXXCOMPILER) --version))
+#ifeq ($(ESMF_CLANGSTR),Apple clang)
+#$(info "The detected C++ compiler is Apple Clang.")
+#else
+#$(info "The detected C++ compiler is LLVM Clang.")
+#endif
+
+############################################################
 # Special debug flags
 #
 ESMF_F90OPTFLAG_G       +=
+
+############################################################
+# Special sanitizer flags
+#
+# Activate to turn on UBSan:
+#ESMF_OPTFLAG_G          += -fsanitize=undefined
+#ESMF_LINKOPTFLAG_G      += -fsanitize=undefined
+# Also set environment variable UBSAN_OPTIONS="help=1" to see available
+# run-time options.
+#
+# Activate to turn on ASan:
+#ESMF_OPTFLAG_G          += -fsanitize=address
+#ESMF_LINKOPTFLAG_G      += -fsanitize=address
+# Also set environment variable ASAN_OPTIONS="help=1" to see available
+# run-time options.
+#
 
 ############################################################
 # Fortran symbol convention
@@ -202,20 +228,35 @@ endif
 ############################################################
 # OpenMP compiler and linker flags
 #
+ifeq ($(ESMF_CLANGSTR),Apple clang)
+# Apple Clang does not support OpenMP natively.
+# It requires explicit installation of libomp and manually pointing to the
+# associated include and lib directories.
+ESMF_OPENMPDEFAULT = OFF
+ESMF_OPENMP_CXXCOMPILEOPTS += -Xpreprocessor -fopenmp
+ESMF_OPENMP_CXXLINKOPTS    += -Xpreprocessor -fopenmp
+else
+# LLVM Clang supports OpenMP version 4
 ESMF_OPENMPDEFAULT = OMP4
-ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
 ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
-ESMF_OPENMP_F90LINKOPTS    += -fopenmp
 ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
+endif
+ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
+ESMF_OPENMP_F90LINKOPTS    += -fopenmp
 
 ############################################################
 # OpenACC compiler and linker flags
 #
+ifeq ($(ESMF_CLANGSTR),Apple clang)
+# Apple Clang does not support OpenACC
 ESMF_OPENACCDEFAULT = OFF
-ESMF_OPENACC_F90COMPILEOPTS += -fopenacc
+else
+# LLVM Clang supports OpenACC, use ESMF default
 ESMF_OPENACC_CXXCOMPILEOPTS += -fopenacc
-ESMF_OPENACC_F90LINKOPTS    += -fopenacc
 ESMF_OPENACC_CXXLINKOPTS    += -fopenacc
+endif
+ESMF_OPENACC_F90COMPILEOPTS += -fopenacc
+ESMF_OPENACC_F90LINKOPTS    += -fopenacc
 
 ############################################################
 # Explicit flags for handling specific format and cpp combos
@@ -231,15 +272,24 @@ ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
 ESMF_CRPATHPREFIX           = -Wl,-rpath,
 
 ############################################################
-# Determine where LLVM libraries are located for Fortran
+# Determine where clang's libraries are located
+# Use when linking against libesmf with F90 linker front-end
 #
+# Note that the result of -print-file-name will be the full path to the file if it is found
+# within the compiler installation, and simply the file name verbatim if it is NOT found.
+ifneq ($(ESMF_CLANGSTR),Apple clang)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXLINKER) $(ESMF_CXXLINKOPTS) -print-file-name=libc++.dylib)
+ifeq ($(ESMF_LIBSTDCXX),libc++.dylib)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXLINKER) $(ESMF_CXXLINKOPTS) -print-file-name=libc++.a)
+endif
+ESMF_F90LINKLIBS += $(ESMF_LIBSTDCXX)
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
+ESMF_F90LINKRPATHS += $(ESMF_F90RPATHPREFIX)$(dir $(ESMF_LIBSTDCXX))
+else
 ESMF_F90LINKPATHS += $(shell $(ESMF_DIR)/scripts/libpath.flang $(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS))
 ESMF_F90LINKRPATHS += $(patsubst -L%,$(ESMF_F90RPATHPREFIX)%,$(ESMF_F90LINKPATHS))
-
-############################################################
-# Link against libesmf.a using the F90 linker front-end
-#
 ESMF_F90LINKLIBS += -lc++
+endif
 
 ############################################################
 # Determine where LLVM libraries are located for C++

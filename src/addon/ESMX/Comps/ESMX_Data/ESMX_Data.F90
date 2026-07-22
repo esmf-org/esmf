@@ -83,6 +83,7 @@ module ESMX_Data
     type(ESMF_HConfig)         :: hconfig, hconfigNode
     character(:), allocatable  :: badKey
     logical                    :: isFlag
+    character(:), allocatable  :: configKey(:)
 
     rc = ESMF_SUCCESS
 
@@ -144,10 +145,17 @@ module ESMX_Data
       call ESMF_GridCompGet(xdata, hconfig=hconfig, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-      hconfigNode = ESMF_HConfigCreateAt(hconfig, keyString=trim(name), rc=rc)
+      configKey = [ character(len=ESMF_MAXSTR) :: "ESMX", "Components", name ]
+      hconfigNode = ESMF_HConfigCreateAt(hconfig, keyStringList=configKey, &
+        foundFlag=isFlag, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-
+        line=__LINE__, file=__FILE__)) return  ! bail out
+      if (.not.isFlag) then
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+          msg="Must provide settings for component: "//trim(name), &
+          line=__LINE__, file=__FILE__, rcToReturn=rc)
+        return  ! bail out
+      endif
       ! component responsibility to validate ESMX handled options here,
       ! and potentially locally handled options
       isFlag = ESMF_HConfigValidateMapKeys(hconfigNode, &

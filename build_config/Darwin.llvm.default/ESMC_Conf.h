@@ -30,12 +30,8 @@ Licensed under the University of Illinois-NCSA License.
 #if defined (__cplusplus)
 // Typedef to match the data type of the 'hidden' string length
 // argument that Fortran uses when passing CHARACTER strings.
-#if (__GNUC__ > 7)
 #include <cstddef>
 typedef size_t ESMCI_FortranStrLenArg;
-#else
-typedef int ESMCI_FortranStrLenArg;
-#endif
 #endif
 
 #define ESMC_PRESENT(arg) ( (arg) != 0 )
