@@ -1702,12 +1702,13 @@ endif
 ESMF_YAMLCPP_LC := $(shell echo "$(ESMF_YAMLCPP)" | tr '[:upper:]' '[:lower:]')
 
 ifeq ($(ESMF_YAMLCPP_LC),off)
-$(error ESMF_YAMLCPP=OFF is not longer supported. See ESMF User's Guide for valid options.)
+$(error ESMF_YAMLCPP=OFF is no longer supported. See ESMF User's Guide for valid options.)
 endif
 
 ESMF_YAMLCPP_PRESENT = TRUE
 
 ifeq ($(ESMF_YAMLCPP_LC),internal)
+ESMF_CPPFLAGS        += -DYAML=ESMF_YAML
 ESMF_CXXCOMPILEPATHS += -I$(ESMF_DIR)/src/prologue/yaml-cpp/include
 ESMF_YAMLCPP_INCLUDE =
 ESMF_YAMLCPP_LIBPATH =
@@ -1721,7 +1722,7 @@ endif
 endif
 
 ifeq ($(ESMF_YAMLCPP_PRESENT),TRUE)
-ESMF_CPPFLAGS                += -DESMF_YAMLCPP=1 -DESMF_YAML=1
+ESMF_CPPFLAGS                += -DESMF_YAMLCPP=1
 ifdef ESMF_YAMLCPP_INCLUDE
 ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_YAMLCPP_INCLUDE)
 ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_YAMLCPP_INCLUDE)
