@@ -1522,7 +1522,7 @@ recursive subroutine f_esmf_dynmaskcallbackr8r8r8(routehandle, count, &
     ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! look at typeKey to see what needs to be done
-  if (dynamicMaskState%wrap%typeKey == "R8R8R8") then
+  if (dynamicMaskState%wrap%typeKey == "R8R8R8 ") then
     ! non-vector version
     ! prepare the dynamicMaskList
     if (vectorL==1) then
@@ -1704,7 +1704,7 @@ recursive subroutine f_esmf_dynmaskcallbackr4r8r4(routehandle, count, &
     ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! look at typeKey to see what needs to be done
-  if (dynamicMaskState%wrap%typeKey == "R4R8R4") then
+  if (dynamicMaskState%wrap%typeKey == "R4R8R4 ") then
     ! non-vector version
     ! prepare the dynamicMaskList
     if (vectorL==1) then
@@ -1883,7 +1883,7 @@ recursive subroutine f_esmf_dynmaskcallbackr4r4r4(routehandle, count, &
     ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! look at typeKey to see what needs to be done
-  if (dynamicMaskState%wrap%typeKey == "R4R4R4") then
+  if (dynamicMaskState%wrap%typeKey == "R4R4R4 ") then
     ! non-vector version
     ! prepare the dynamicMaskList
     if (vectorL==1) then
