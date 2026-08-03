@@ -61,9 +61,9 @@ TESTS_RUN     = \
 		RUN_ESMC_FieldGridRegridParUTest \
 		RUN_ESMC_FieldGridGridRegridUTest \
 		RUN_ESMC_FieldGridGridRegridCsrvUTest \
-		RUN_ESMC_FieldSMMFromFileUTest \
 		RUN_ESMC_FieldRegridDynMaskPredefSrcUTest \
 		RUN_ESMC_FieldRegridDynMaskPredefVoteUTest \
+		RUN_ESMC_FieldSMMFromFileUTest \
 		RUN_ESMF_FieldUTest \
 		RUN_ESMF_FieldCreateGetUTest \
 		RUN_ESMF_FieldRegridUTest \
@@ -82,7 +82,6 @@ TESTS_RUN     = \
 		RUN_ESMF_FieldRedistArbUTest \
 		RUN_ESMF_FieldMeshSMMUTest \
 		RUN_ESMF_FieldHaloUTest \
-		RUN_ESMF_FieldSMMFromFileUTest \
 		RUN_ESMF_FieldRegridDynMaskPredefDstUTest \
 		RUN_ESMF_FieldRegridDynMaskPredefSrcUTest \
 		RUN_ESMF_FieldRegridDynMaskPredefVoteUTest \
@@ -100,10 +99,10 @@ TESTS_RUN_UNI = \
 		RUN_ESMC_FieldGridRegridCsrvUTestUNI \
 		RUN_ESMC_FieldGridRegridCsrv2UTestUNI \
 		RUN_ESMC_FieldGridGridRegridUTestUNI \
-		RUN_ESMC_FieldSMMFromFileUTestUNI \
 		RUN_ESMC_FieldGridGridRegridCsrvUTestUNI \
 		RUN_ESMC_FieldRegridDynMaskPredefSrcUTestUNI \
 		RUN_ESMC_FieldRegridDynMaskPredefVoteUTestUNI \
+		RUN_ESMC_FieldSMMFromFileUTestUNI \
 		RUN_ESMF_FieldStressUTestUNI \
 		RUN_ESMF_FieldRegridUTestUNI \
 		RUN_ESMF_FieldRegridCSUTestUNI \
@@ -112,7 +111,6 @@ TESTS_RUN_UNI = \
 		RUN_ESMF_FieldRedistArbUTestUNI \
 		RUN_ESMF_FieldRegridCsrvUTestUNI \
 		RUN_ESMF_FieldRegridCsrv2ndUTestUNI \
-		RUN_ESMF_FieldSMMFromFileUTestUNI \
 		RUN_ESMF_FieldRegridDynMaskPredefDstUTestUNI \
 		RUN_ESMF_FieldRegridDynMaskPredefSrcUTestUNI \
 		RUN_ESMF_FieldRegridDynMaskPredefVoteUTestUNI \
