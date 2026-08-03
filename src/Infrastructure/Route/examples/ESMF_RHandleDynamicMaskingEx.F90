@@ -359,7 +359,7 @@ program ESMF_RHandleDynamicMaskingEx
 
 !BOE
 ! Now that {\tt routehandle} is available, it can be used to execute the
-! regrid operation over and over during the course of the simualtion run, by
+! regrid operation over and over during the course of the simulation run, by
 ! calling the {\tt ESMF\_FieldRegrid()} method.
 !EOE
 
