@@ -185,8 +185,8 @@ tests:
 
 In this example two components are built into `ESMX_EXE_NAME` explicitly. (Read about [dynamically loading of components from shared objects at run-time](#dynamically-loading-components-from-shared-objects-at-run-time) later.) Each component is given a name, here `TaWaS` and `Lumo`, respectively. Components will be referenced by this *component-name* in the *ESMX Run Configuration* (`esmxRun.yaml`) discussed below.
 
-[!CAUTION]
-Component names are case-sensitive when used as default for directory or library names. However, they are treated case-insensitive from within the `esmxRun.yaml` file due to the case-insensitive nature of Fortran when referencing modules via the USE statement.
+> [!CAUTION]
+> Component names are case-sensitive when used as default for directory or library names. However, they are treated case-insensitive from within the `esmxRun.yaml` file due to the case-insensitive nature of Fortran when referencing modules via the USE statement.
 
 ESMX comes with a default data component called `ESMX_Data`. It is built into `ESMX_EXE_NAME` by default. This example disables this behavior by setting `disable_comps: ESMX_Data`.
 
@@ -338,8 +338,8 @@ On the highest level, *ESMX Run Configuration* is expected to define the `ESMX` 
 
 This section affects the application level.
 
-[!IMPORTANT]
-Specifying any of the  `ESMF_RUNTIME_*` keys overrides the corresponding environment variables set in the user's environment.
+> [!IMPORTANT]
+> Specifying any of the  `ESMF_RUNTIME_*` keys overrides the corresponding environment variables set in the user's environment.
 
 | Option key                | Description / Value options                               | Default         |
 | ------------------------- | --------------------------------------------------------- | --------------- |
