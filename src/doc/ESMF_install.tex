@@ -483,15 +483,20 @@ typical case where {\tt ESMF\_XERCES} is set to {\tt "standard"},
 \label{sec:yaml-cpp}
 Support for YAML Ain't Markup Language
 (\htmladdnormallink{YAML\texttrademark}{http://yaml.org})
-may be added to ESMF through the open-source
+in ESMF is provided through the open-source
 \htmladdnormallink{yaml-cpp}{https://github.com/jbeder/yaml-cpp} library,
-a YAML parser and emitter written in C++ that implements
-\htmladdnormallink{YAML Version 1.2 specifications}{http://yaml.org/spec/1.2/spec.html}.
+a YAML parser and emitter written in C++ that implements the
+\htmladdnormallink{YAML Version 1.2 specification}{http://yaml.org/spec/1.2/spec.html}.
 
-ESMF includes the option to build the yaml-cpp from sources kept inside the
-ESMF source tree, or to link against an external build of the yaml-cpp library.
-The following environment variables control the details of how ESMF interacts
-with yaml-cpp:
+ESMF provides the option to build yaml-cpp from sources included within the
+ESMF source tree or to link against an external installation of the library.
+Note that the internally bundled sources are based on yaml-cpp v0.7.0 and
+include a patch that adds support for the YAML merge key ("<<") syntax. This
+extension may not be present when using an externally provided installation of
+yaml-cpp.
+
+The following environment variables control how ESMF accesses the yaml-cpp
+library:
 
 \begin{description}
 

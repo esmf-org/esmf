@@ -790,7 +790,7 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   // Creating large contiguous MPI data types in support of large MPI messages
   // within the 32-bit count limit of MPI version < 4.
   int byteCount=1;
-  for (auto i=0; i<(signed)customType.size(); i++){
+  for (size_t i=0; i<customType.size(); i++){
     byteCount *= 2;
     MPI_Type_contiguous(byteCount, MPI_BYTE, &(customType[i]));
     MPI_Type_commit(&(customType[i]));
@@ -857,10 +857,18 @@ void VMK::finalize(int finalizeMpi){
   int finalized;
   MPI_Finalized(&finalized);
   if (!finalized){
+    // Free MPI objects
+    for (size_t i=0; i<customType.size(); i++){
+      if (customType[i] != MPI_DATATYPE_NULL){
+        // MPI_Type_free frees the datatype and sets to MPI_DATATYPE_NULL
+        MPI_Type_free(&customType[i]);
+      }
+    }
     MPI_Comm_free(&mpi_c);
 #if (MPI_VERSION >= 3)
     MPI_Comm_free(&mpi_c_ssi);
 #endif
+    // Finalize MPI
     if (finalizeMpi)
       MPI_Finalize();
   }

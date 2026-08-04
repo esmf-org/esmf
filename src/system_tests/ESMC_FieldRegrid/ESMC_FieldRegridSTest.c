@@ -170,12 +170,12 @@ int main(void) {
   ESMC_RouteHandle routehandle;
   localrc = ESMC_FieldRegridStore(srcField, dstField, NULL, NULL, &routehandle, 
                                   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                                  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                                  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
   if (localrc != ESMF_SUCCESS) ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
   
   // Apply routehandle
-  localrc = ESMC_FieldRegrid(srcField, dstField, routehandle, NULL);
+  localrc = ESMC_FieldRegrid(srcField, dstField, routehandle, NULL, NULL);
   if (localrc != ESMF_SUCCESS) ESMC_FinalizeWithFlag(ESMC_END_ABORT);
 
   
