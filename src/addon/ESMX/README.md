@@ -185,7 +185,8 @@ tests:
 
 In this example two components are built into `ESMX_EXE_NAME` explicitly. (Read about [dynamically loading of components from shared objects at run-time](#dynamically-loading-components-from-shared-objects-at-run-time) later.) Each component is given a name, here `TaWaS` and `Lumo`, respectively. Components will be referenced by this *component-name* in the *ESMX Run Configuration* (`esmxRun.yaml`) discussed below.
 
-**CAUTION:** Component names are case-sensitive when used e.g. by default to construct library names, etc. However, they are treated case-insensitive when referenced from within the `esmxRun.yaml` file due to the case-insensitive nature of Fortran when referencing modules via the USE statement.
+[!CAUTION]
+Component names are case-sensitive when used as default for directory or library names. However, they are treated case-insensitive from within the `esmxRun.yaml` file due to the case-insensitive nature of Fortran when referencing modules via the USE statement.
 
 ESMX comes with a default data component called `ESMX_Data`. It is built into `ESMX_EXE_NAME` by default. This example disables this behavior by setting `disable_comps: ESMX_Data`.
 
@@ -331,13 +332,14 @@ ESMX:
       stderr:           {filename: lumo.err}
 ```
 
-On the highest level, *ESMX Run Configuration* is expected to define the `ESMX` key. The `ESMX` key is associated with a map containing the `App`, `Driver`, and `Components` keys. The `App` key must be present if *ESMX Run Configuration* is read by the `ESMX_EXE_NAME` executable, but is optional (and will be ignored) in case `esmfRun.yaml` is read by the `esmx_driver`.
+On the highest level, *ESMX Run Configuration* is expected to define the `ESMX` key. The `ESMX` key is associated with a map containing the `App`, `Driver`, and `Components` keys. The `App` key must be present if *ESMX Run Configuration* is read by the `ESMX_EXE_NAME` executable, but is optional (and will be ignored) in case `esmxRun.yaml` is read by the `esmx_driver`.
 
 #### ESMX/App Options
 
 This section affects the application level.
 
-**CAUTION:** Specifying any of the  `ESMF_RUNTIME_*` keys overrides the corresponding environment variables set in the user's environment.
+[!IMPORTANT]
+Specifying any of the  `ESMF_RUNTIME_*` keys overrides the corresponding environment variables set in the user's environment.
 
 | Option key                | Description / Value options                               | Default         |
 | ------------------------- | --------------------------------------------------------- | --------------- |
