@@ -240,15 +240,17 @@ Functions are case-insensitive and apply a transformation to each point in the d
 The system recognizes three types of values within an expression:
 
 ##### Input Fields
-Any alphanumeric name (e.g., `sea_surface_temperature`) is treated as a field name. The system will attempt to retrieve this field from the model's **Import State**. Supported data types include:
+Any alphanumeric operand (e.g., `sea_surface_temperature`) is treated as a field name. Field names are case-sensitive. The system will attempt to retrieve this field from the model's **Import State**. Any operand that cannot be matched to a field will trigger an error, causing the application to abort.
+
+The currently supported field data types are:
 * 4-byte and 8-byte Integers (`I4`, `I8`)
 * 4-byte and 8-byte Real numbers (`R4`, `R8`)
 
 ##### Special Context Variables
-Variables prefixed with an underscore provide metadata about the current simulation state:
+Variables prefixed with an underscore provide metadata about the current simulation state. These variable are case-insensitive. The currently available context variables are:
 * `_PI`: The mathematical constant PI.
 * `_STEP`: The current model time step index.
-* `_COORDx`: The spatial coordinate for dimension `x` (e.g., `_COORD1` typically represents Longitude/X).
+* `_COORDx`: The spatial coordinate for dimension `x` (e.g., `_COORD1` typically represents Longitude or X).
 
 ##### Numeric Constants
 Standard numerical values (e.g., `2.5`, `100`, `1.0E-4`) are interpreted as double-precision floating-point numbers.
