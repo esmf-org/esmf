@@ -26,7 +26,9 @@ components:
 
 ## ESMX Data Run Configuration
 
-Each ESMX Data instance is configured under its component label section in `esmxRun.yaml`. All standard [ESMX Component Label Options](../../README.md#component-label-options) are supported, in particular `model: ESMX_Data`. The following example defines an `ESMX_Data` component called `DAT`, where the `Verbosity` attribute is set to `high` to write detailed NUOPC information to the ESMF Log file during execution.
+Each ESMX Data instance is configured under its component label section in `esmxRun.yaml`. All standard [ESMX Component Label Options](../../README.md#component-label-options) are supported. Use `model: ESMX_Data` to implement an ESMX Data component instance.
+
+The following example defines an `ESMX_Data` component called `DAT`, where the `Verbosity` attribute is set to `high` to write detailed NUOPC information to the ESMF Log file during execution.
 
 ```
 DAT:
@@ -35,7 +37,7 @@ DAT:
     Verbosity:  high
 ```
 
-In addition, `ESMX_Data` implements the following custom configuration keys.
+In addition to the standard component options, `ESMX_Data` implements the following custom configuration keys that can be used to customize an `ESMX_Data` instance.
 
 
 ### `timeKeeping`
