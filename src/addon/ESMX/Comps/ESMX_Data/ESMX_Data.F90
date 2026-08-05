@@ -23,10 +23,11 @@ module ESMX_Data
   end type
 
   type Validate
-    real(ESMF_KIND_R8)            :: min, max, mask
-    logical                       :: minGuard, maxGuard, maskGuard
-    logical                       :: print
-    character(len=:), allocatable :: action
+    real(ESMF_KIND_R8)              :: min, max
+    real(ESMF_KIND_R8), allocatable :: skip(:)
+    logical                         :: minGuard, maxGuard, skipGuard
+    logical                         :: print
+    character(len=:), allocatable   :: action
   end type
 
   type ImportItem
@@ -887,7 +888,7 @@ module ESMX_Data
           ! dataValidate key provided -> ingest
           vocabulary=["min      ", &
                       "max      ", &
-                      "mask     ", &
+                      "skip     ", &
                       "print    ", &
                       "action   "  ]
           isFlag = ESMF_HConfigValidateMapKeys(hconfigMap2, &
@@ -943,20 +944,20 @@ module ESMX_Data
           dataValidate%maxGuard = .false.
         endif
 
-        ! handle mask (optional)
-        isFlag = ESMF_HConfigIsDefined(hconfigMap2, keyString="mask", rc=rc)
+        ! handle skip (optional)
+        isFlag = ESMF_HConfigIsDefined(hconfigMap2, keyString="skip", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return  ! bail out
         if (isFlag) then
           ! ingest and set guard variable
-          dataValidate%mask = ESMF_HConfigAsR8(hconfigMap2, &
-            keyString="mask", rc=rc)
+          dataValidate%skip = ESMF_HConfigAsR8Seq(hconfigMap2, &
+            keyString="skip", rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
-          dataValidate%maskGuard = .true.
+          dataValidate%skipGuard = .true.
         else
           ! default
-          dataValidate%maskGuard = .false.
+          dataValidate%skipGuard = .false.
         endif
 
         ! handle print (optional)
@@ -997,7 +998,7 @@ module ESMX_Data
         ! dataValidate key not provided, default all members
         dataValidate%minGuard   = .false.
         dataValidate%maxGuard   = .false.
-        dataValidate%maskGuard  = .false.
+        dataValidate%skipGuard  = .false.
         dataValidate%print      = .false.
         dataValidate%action     = "error"
       endif
@@ -1940,14 +1941,14 @@ module ESMX_Data
               write(*,'(A,1X,A)') trim(name)//": Model Advance at: ", &
                 trim(clockString)
               write(*,'(A)') trim(name)//": Import Fields"
-              write(*,'(A,1X,A25,1X,A9,3(1X,A9),1X,A4)') &
+              write(*,'(A,1X,A40,1X,A9,3(1X,A9),1X,A4)') &
                 trim(name)//":", "FIELD", "COUNT", "MEAN", "MIN", "MAX", "OKAY"
             endif
             call ESMF_FieldGet(is%wrap%importItems(i)%field, name=fieldName, &
               rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-            write(*,'(A,1X,A25,1X,I9,3(1X,E9.2),1X,L4)') &
+            write(*,'(A,1X,A40,1X,I9,3(1X,E9.2),1X,L4)') &
               trim(name)//":", trim(fieldName), &
               statsCount, statsMean, statsMin, statsMax, statsOkay
           endif
@@ -1990,14 +1991,14 @@ module ESMX_Data
               write(*,'(A,1X,A)') trim(name)//": Model Advance at: ", &
                 trim(clockString)
               write(*,'(A)') trim(name)//": Export Fields"
-              write(*,'(A,1X,A25,1X,A9,3(1X,A9),1X,A4)') &
+              write(*,'(A,1X,A40,1X,A9,3(1X,A9),1X,A4)') &
                 trim(name)//":", "FIELD", "COUNT", "MEAN", "MIN", "MAX", "OKAY"
             endif
             call ESMF_FieldGet(is%wrap%exportItems(i)%field, name=fieldName, &
               rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
-            write(*,'(A,1X,A25,1X,I9,3(1X,E9.2),1X,L4)') &
+            write(*,'(A,1X,A40,1X,I9,3(1X,E9.2),1X,L4)') &
               trim(name)//":", trim(fieldName), &
               statsCount, statsMean, statsMin, statsMax, statsOkay
           endif
@@ -2090,7 +2091,7 @@ module ESMX_Data
     ! local variables
     type(ESMF_VM)                   :: vm
     type(ESMF_TypeKind_Flag)        :: typekind
-    integer                         :: rank
+    integer                         :: rank, i
     integer                         :: lcount(1), gcount(1)
     real(ESMF_KIND_R8)              :: lsum(1), lmin(1), lmax(1)
     real(ESMF_KIND_R8)              :: gsum(1), gmin(1), gmax(1)
@@ -2106,186 +2107,170 @@ module ESMX_Data
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return  ! bail out
 
-    if (rank == 2) then
-      if (typekind == ESMF_TYPEKIND_I4) then
-        block
-          integer(ESMF_KIND_I4), pointer  :: fptr(:,:)
-          integer(ESMF_KIND_I4)           :: dataMask
+    if (typekind == ESMF_TYPEKIND_I4) then
+      block
+        integer(ESMF_KIND_I4), pointer, contiguous  :: fptr(:)
+        integer(ESMF_KIND_I4), pointer, contiguous  :: fptr2D(:,:)
+        integer(ESMF_KIND_I4), pointer, contiguous  :: fptr3D(:,:,:)
+        integer(ESMF_KIND_I4), allocatable          :: dataSkip(:)
+        if (rank == 1) then
           call ESMF_FieldGet(field, farrayPtr=fptr, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataValidate%maskGuard) then
-            dataMask = dataValidate%mask
-            lcount(1) = count(fptr/=dataMask)
-            lsum(1)   = sum(fptr, fptr/=dataMask)
-            lmin(1)   = minval(fptr, fptr/=dataMask)
-            lmax(1)   = maxval(fptr, fptr/=dataMask)
-          else
-            lcount(1) = size(fptr)
-            lsum(1)   = sum(fptr)
-            lmin(1)   = minval(fptr)
-            lmax(1)   = maxval(fptr)
-          endif
-        end block
-      else if (typekind == ESMF_TYPEKIND_I8) then
-        block
-          integer(ESMF_KIND_I8), pointer  :: fptr(:,:)
-          integer(ESMF_KIND_I8)           :: dataMask
+        else if (rank == 2) then
+          call ESMF_FieldGet(field, farrayPtr=fptr2D, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+          fptr(1:size(fptr2D)) => fptr2D
+        else if (rank == 3) then
+          call ESMF_FieldGet(field, farrayPtr=fptr3D, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+          fptr(1:size(fptr3D)) => fptr3D
+        else
+          call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+            msg="Currently FieldStats() limited to rank <= 3.", &
+            line=__LINE__, file=__FILE__, rcToReturn=rc)
+          return  ! bail out
+        endif
+        if (dataValidate%skipGuard) then
+          allocate(dataSkip(size(dataValidate%skip)))
+          dataSkip(:) = dataValidate%skip(:)
+          lcount(1) = count([(all(fptr(i) /= dataSkip), i = 1, size(fptr))])
+          lsum(1)   = sum(fptr, [(all(fptr(i) /= dataSkip), i = 1, size(fptr))])
+          lmin(1)   = minval(fptr, [(all(fptr(i) /= dataSkip), i = 1, size(fptr))])
+          lmax(1)   = maxval(fptr, [(all(fptr(i) /= dataSkip), i = 1, size(fptr))])
+        else
+          lcount(1) = size(fptr)
+          lsum(1)   = sum(fptr)
+          lmin(1)   = minval(fptr)
+          lmax(1)   = maxval(fptr)
+        endif
+      end block
+    else if (typekind == ESMF_TYPEKIND_I8) then
+      block
+        integer(ESMF_KIND_I8), pointer, contiguous  :: fptr(:)
+        integer(ESMF_KIND_I8), pointer, contiguous  :: fptr2D(:,:)
+        integer(ESMF_KIND_I8), pointer, contiguous  :: fptr3D(:,:,:)
+        integer(ESMF_KIND_I8), allocatable          :: dataSkip(:)
+        if (rank == 1) then
           call ESMF_FieldGet(field, farrayPtr=fptr, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataValidate%maskGuard) then
-            dataMask = dataValidate%mask
-            lcount(1) = count(fptr/=dataMask)
-            lsum(1)   = sum(fptr, fptr/=dataMask)
-            lmin(1)   = minval(fptr, fptr/=dataMask)
-            lmax(1)   = maxval(fptr, fptr/=dataMask)
-          else
-            lcount(1) = size(fptr)
-            lsum(1)   = sum(fptr)
-            lmin(1)   = minval(fptr)
-            lmax(1)   = maxval(fptr)
-          endif
-        end block
-      else if (typekind == ESMF_TYPEKIND_R4) then
-        block
-          real(ESMF_KIND_R4), pointer  :: fptr(:,:)
-          real(ESMF_KIND_R4)           :: dataMask
+        else if (rank == 2) then
+          call ESMF_FieldGet(field, farrayPtr=fptr2D, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+          fptr(1:size(fptr2D)) => fptr2D
+        else if (rank == 3) then
+          call ESMF_FieldGet(field, farrayPtr=fptr3D, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+          fptr(1:size(fptr3D)) => fptr3D
+        else
+          call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+            msg="Currently FieldStats() limited to rank <= 3.", &
+            line=__LINE__, file=__FILE__, rcToReturn=rc)
+          return  ! bail out
+        endif
+        if (dataValidate%skipGuard) then
+          allocate(dataSkip(size(dataValidate%skip)))
+          dataSkip(:) = dataValidate%skip(:)
+          lcount(1) = count([(all(fptr(i) /= dataSkip), i = 1, size(fptr))])
+          lsum(1)   = sum(fptr, [(all(fptr(i) /= dataSkip), i = 1, size(fptr))])
+          lmin(1)   = minval(fptr, [(all(fptr(i) /= dataSkip), i = 1, size(fptr))])
+          lmax(1)   = maxval(fptr, [(all(fptr(i) /= dataSkip), i = 1, size(fptr))])
+        else
+          lcount(1) = size(fptr)
+          lsum(1)   = sum(fptr)
+          lmin(1)   = minval(fptr)
+          lmax(1)   = maxval(fptr)
+        endif
+      end block
+    else if (typekind == ESMF_TYPEKIND_R4) then
+      block
+        real(ESMF_KIND_R4), pointer, contiguous  :: fptr(:)
+        real(ESMF_KIND_R4), pointer, contiguous  :: fptr2D(:,:)
+        real(ESMF_KIND_R4), pointer, contiguous  :: fptr3D(:,:,:)
+        real(ESMF_KIND_R4), allocatable          :: dataSkip(:)
+        if (rank == 1) then
           call ESMF_FieldGet(field, farrayPtr=fptr, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataValidate%maskGuard) then
-            dataMask = dataValidate%mask
-            lcount(1) = count(fptr/=dataMask)
-            lsum(1)   = sum(fptr, fptr/=dataMask)
-            lmin(1)   = minval(fptr, fptr/=dataMask)
-            lmax(1)   = maxval(fptr, fptr/=dataMask)
-          else
-            lcount(1) = size(fptr)
-            lsum(1)   = sum(fptr)
-            lmin(1)   = minval(fptr)
-            lmax(1)   = maxval(fptr)
-          endif
-        end block
-      else if (typekind == ESMF_TYPEKIND_R8) then
-        block
-          real(ESMF_KIND_R8), pointer  :: fptr(:,:)
-          real(ESMF_KIND_R8)           :: dataMask
+        else if (rank == 2) then
+          call ESMF_FieldGet(field, farrayPtr=fptr2D, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+          fptr(1:size(fptr2D)) => fptr2D
+        else if (rank == 3) then
+          call ESMF_FieldGet(field, farrayPtr=fptr3D, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return  ! bail out
+          fptr(1:size(fptr3D)) => fptr3D
+        else
+          call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+            msg="Currently FieldStats() limited to rank <= 3.", &
+            line=__LINE__, file=__FILE__, rcToReturn=rc)
+          return  ! bail out
+        endif
+        if (dataValidate%skipGuard) then
+          allocate(dataSkip(size(dataValidate%skip)))
+          dataSkip(:) = dataValidate%skip(:)
+          lcount(1) = count([(all(fptr(i) /= dataSkip), i = 1, size(fptr))])
+          lsum(1)   = sum(fptr, [(all(fptr(i) /= dataSkip), i = 1, size(fptr))])
+          lmin(1)   = minval(fptr, [(all(fptr(i) /= dataSkip), i = 1, size(fptr))])
+          lmax(1)   = maxval(fptr, [(all(fptr(i) /= dataSkip), i = 1, size(fptr))])
+        else
+          lcount(1) = size(fptr)
+          lsum(1)   = sum(fptr)
+          lmin(1)   = minval(fptr)
+          lmax(1)   = maxval(fptr)
+        endif
+      end block
+    else if (typekind == ESMF_TYPEKIND_R8) then
+      block
+        real(ESMF_KIND_R8), pointer, contiguous  :: fptr(:)
+        real(ESMF_KIND_R8), pointer, contiguous  :: fptr2D(:,:)
+        real(ESMF_KIND_R8), pointer, contiguous  :: fptr3D(:,:,:)
+        real(ESMF_KIND_R8), allocatable          :: dataSkip(:)
+        if (rank == 1) then
           call ESMF_FieldGet(field, farrayPtr=fptr, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataValidate%maskGuard) then
-            dataMask = dataValidate%mask
-            lcount(1) = count(fptr/=dataMask)
-            lsum(1)   = sum(fptr, fptr/=dataMask)
-            lmin(1)   = minval(fptr, fptr/=dataMask)
-            lmax(1)   = maxval(fptr, fptr/=dataMask)
-          else
-            lcount(1) = size(fptr)
-            lsum(1)   = sum(fptr)
-            lmin(1)   = minval(fptr)
-            lmax(1)   = maxval(fptr)
-          endif
-        end block
-      else
-        ! error condition: unsupported typekind
-        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="Unsupported typekind!", &
-          line=__LINE__, file=__FILE__, rcToReturn=rc)
-        return  ! bail out
-      endif
-    else if (rank == 3) then
-      if (typekind == ESMF_TYPEKIND_I4) then
-        block
-          integer(ESMF_KIND_I4), pointer  :: fptr(:,:,:)
-          integer(ESMF_KIND_I4)           :: dataMask
-          call ESMF_FieldGet(field, farrayPtr=fptr, rc=rc)
+        else if (rank == 2) then
+          call ESMF_FieldGet(field, farrayPtr=fptr2D, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataValidate%maskGuard) then
-            dataMask = dataValidate%mask
-            lcount(1) = count(fptr/=dataMask)
-            lsum(1)   = sum(fptr, fptr/=dataMask)
-            lmin(1)   = minval(fptr, fptr/=dataMask)
-            lmax(1)   = maxval(fptr, fptr/=dataMask)
-          else
-            lcount(1) = size(fptr)
-            lsum(1)   = sum(fptr)
-            lmin(1)   = minval(fptr)
-            lmax(1)   = maxval(fptr)
-          endif
-        end block
-      else if (typekind == ESMF_TYPEKIND_I8) then
-        block
-          integer(ESMF_KIND_I8), pointer  :: fptr(:,:,:)
-          integer(ESMF_KIND_I8)           :: dataMask
-          call ESMF_FieldGet(field, farrayPtr=fptr, rc=rc)
+          fptr(1:size(fptr2D)) => fptr2D
+        else if (rank == 3) then
+          call ESMF_FieldGet(field, farrayPtr=fptr3D, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataValidate%maskGuard) then
-            dataMask = dataValidate%mask
-            lcount(1) = count(fptr/=dataMask)
-            lsum(1)   = sum(fptr, fptr/=dataMask)
-            lmin(1)   = minval(fptr, fptr/=dataMask)
-            lmax(1)   = maxval(fptr, fptr/=dataMask)
-          else
-            lcount(1) = size(fptr)
-            lsum(1)   = sum(fptr)
-            lmin(1)   = minval(fptr)
-            lmax(1)   = maxval(fptr)
-          endif
-        end block
-      else if (typekind == ESMF_TYPEKIND_R4) then
-        block
-          real(ESMF_KIND_R4), pointer  :: fptr(:,:,:)
-          real(ESMF_KIND_R4)           :: dataMask
-          call ESMF_FieldGet(field, farrayPtr=fptr, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataValidate%maskGuard) then
-            dataMask = dataValidate%mask
-            lcount(1) = count(fptr/=dataMask)
-            lsum(1)   = sum(fptr, fptr/=dataMask)
-            lmin(1)   = minval(fptr, fptr/=dataMask)
-            lmax(1)   = maxval(fptr, fptr/=dataMask)
-          else
-            lcount(1) = size(fptr)
-            lsum(1)   = sum(fptr)
-            lmin(1)   = minval(fptr)
-            lmax(1)   = maxval(fptr)
-          endif
-        end block
-      else if (typekind == ESMF_TYPEKIND_R8) then
-        block
-          real(ESMF_KIND_R8), pointer  :: fptr(:,:,:)
-          real(ESMF_KIND_R8)           :: dataMask
-          call ESMF_FieldGet(field, farrayPtr=fptr, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (dataValidate%maskGuard) then
-            dataMask = dataValidate%mask
-            lcount(1) = count(fptr/=dataMask)
-            lsum(1)   = sum(fptr, fptr/=dataMask)
-            lmin(1)   = minval(fptr, fptr/=dataMask)
-            lmax(1)   = maxval(fptr, fptr/=dataMask)
-          else
-            lcount(1) = size(fptr)
-            lsum(1)   = sum(fptr)
-            lmin(1)   = minval(fptr)
-            lmax(1)   = maxval(fptr)
-          endif
-        end block
-      else
-        ! error condition: unsupported typekind
-        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          msg="Unsupported typekind!", &
-          line=__LINE__, file=__FILE__, rcToReturn=rc)
-        return  ! bail out
-      endif
+          fptr(1:size(fptr3D)) => fptr3D
+        else
+          call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+            msg="Currently FieldStats() limited to rank <= 3.", &
+            line=__LINE__, file=__FILE__, rcToReturn=rc)
+          return  ! bail out
+        endif
+        if (dataValidate%skipGuard) then
+          allocate(dataSkip(size(dataValidate%skip)))
+          dataSkip(:) = dataValidate%skip(:)
+          lcount(1) = count([(all(fptr(i) /= dataSkip), i = 1, size(fptr))])
+          lsum(1)   = sum(fptr, [(all(fptr(i) /= dataSkip), i = 1, size(fptr))])
+          lmin(1)   = minval(fptr, [(all(fptr(i) /= dataSkip), i = 1, size(fptr))])
+          lmax(1)   = maxval(fptr, [(all(fptr(i) /= dataSkip), i = 1, size(fptr))])
+        else
+          lcount(1) = size(fptr)
+          lsum(1)   = sum(fptr)
+          lmin(1)   = minval(fptr)
+          lmax(1)   = maxval(fptr)
+        endif
+      end block
     else
-      ! error condition: unsupported rank
+      ! error condition: unsupported typekind
       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-        msg="Unsupported rank!", &
+        msg="Unsupported typekind!", &
         line=__LINE__, file=__FILE__, rcToReturn=rc)
       return  ! bail out
     endif
