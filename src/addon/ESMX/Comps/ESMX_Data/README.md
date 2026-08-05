@@ -197,11 +197,11 @@ The `dataValidate` option, if specified, must be associated with a map of key/va
 
 | Option key       | Description / Value options                                                          | Default           |
 | ---------------- | ------------------------------------------------------------------------------------ | ----------------- |
-| `min`            | The minimum numerical value allowed in the field data to pass validation.            | *no minimum*  |
-| `max`            | The maximum numerical value allowed in the field data to pass validation.            | *no maximum*  |
-| `mask`           | The numerical value ignored during field validation.                                 | *no mask*     |
-| `print`          | Logical to enable/disable field data diagnostic output to stdout.                    | `false`       |
-| `action`         | Action to be taken when field data validation fails: `ignore`, `warning`, `error`    | `error`       |
+| `min`            | The minimum numerical value allowed in the field data to pass validation.            | *no minimum*      |
+| `max`            | The maximum numerical value allowed in the field data to pass validation.            | *no maximum*      |
+| `skip`           | The numerical value (or list of values) ignored during field validation.             | *no skip values*  |
+| `print`          | Logical to enable/disable field data diagnostic output to stdout.                    | `false`           |
+| `action`         | Action to be taken when field data validation fails: `ignore`, `warning`, `error`    | `error`           |
 
 ### Dynamic arithmetic expressions
 
@@ -257,7 +257,7 @@ Standard numerical values (e.g., `2.5`, `100`, `1.0E-4`) are interpreted as doub
 
 #### 4. Usage Examples
 
-* **Synthetic data generation (Temperature field with 10 Kelvin variablity around 270 Kelvin mean)**:<br>
+* **Synthetic data generation (Temperature field with 10 Kelvin variability around 270 Kelvin mean)**:<br>
     `dataAdvance: 10 * (sin(_coord1) * cos(_coord2)) + 270`
 
 * **Data feedback (Return a temperature field that is 10% hotter than the incoming field)**:<br>
@@ -266,6 +266,6 @@ Standard numerical values (e.g., `2.5`, `100`, `1.0E-4`) are interpreted as doub
 * **Unit Conversion (Kelvin to Celsius)**:<br>
     `dataAdvance: temperature - 273.15`
 
-* **Applying a spatial mask**:<br>
+* **Spatially varying scaling (Scale `field_a` based on location)**:<br>
     `dataAdvance: field_a * sin(_coord1)`
 
