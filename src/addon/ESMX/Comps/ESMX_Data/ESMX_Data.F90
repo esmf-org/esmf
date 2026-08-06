@@ -150,11 +150,11 @@ module ESMX_Data
       hconfigNode = ESMF_HConfigCreateAt(hconfig, keyStringList=configKey, &
         foundFlag=isFlag, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
       if (.not.isFlag) then
         call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
           msg="Must provide settings for component: "//trim(name), &
-          line=__LINE__, file=__FILE__, rcToReturn=rc)
+          line=__LINE__, file=trim(name)//":"//__FILE__, rcToReturn=rc)
         return  ! bail out
       endif
       ! component responsibility to validate ESMX handled options here,
@@ -1730,7 +1730,7 @@ module ESMX_Data
           call process(importState, item%dataInit, item%field, 0, &
             okayTime=time, importsOkay=isFlag, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
+            line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
           ! update collective result
           neededCurrent = neededCurrent .and. isFlag
           if (isFlag) then
@@ -1757,7 +1757,7 @@ module ESMX_Data
           call process(importState, item%dataInit, item%field, 0, &
             okayTime=time, importsOkay=isFlag, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
+            line=__LINE__, file=trim(name)//":"//__FILE__)) return  ! bail out
           ! update collective result
           neededCurrent = neededCurrent .and. isFlag
           if (isflag) then
@@ -2069,7 +2069,7 @@ module ESMX_Data
       call ESMF_LogSetError(ESMF_RC_VAL_WRONG, &
         msg="Found fields with value outside valid [min,max] range! "//&
         "See stdout for details.", &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)
+        line=__LINE__, file=trim(name)//":"//__FILE__, rcToReturn=rc)
       return  ! bail out
     endif
 
