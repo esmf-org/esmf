@@ -346,7 +346,7 @@ module dataProcess
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return  ! bail out
         ! Reinterpret
-        fPtr(1:size(fPtr2D)) => fPtr2D(:, :)
+        fPtr(1:size(fPtr2D)) => fPtr2D(:,:)
         ! Copy into stackColumn
         stackColumn(:) = fPtr
       else if (coordDimCount(coordDim)==3) then
@@ -355,7 +355,7 @@ module dataProcess
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return  ! bail out
         ! Reinterpret
-        fPtr(1:size(fPtr3D)) => fPtr3D(:, :, :)
+        fPtr(1:size(fPtr3D)) => fPtr3D(:,:,:)
         ! Copy into stackColumn
         stackColumn(:) = fPtr
       else
@@ -750,32 +750,32 @@ module dataProcess
       call ESMF_FieldGet(field, farrayPtr=fPtr2D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr2D)) => fPtr2D(:, :)
+      fPtr(1:size(fPtr2D)) => fPtr2D(:,:)
     else if (rank == 3) then
       call ESMF_FieldGet(field, farrayPtr=fPtr3D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr3D)) => fPtr3D(:, :,:)
+      fPtr(1:size(fPtr3D)) => fPtr3D(:,:,:)
     else if (rank == 4) then
       call ESMF_FieldGet(field, farrayPtr=fPtr4D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr4D)) => fPtr4D(:, :,:,:)
+      fPtr(1:size(fPtr4D)) => fPtr4D(:,:,:,:)
     else if (rank == 5) then
       call ESMF_FieldGet(field, farrayPtr=fPtr5D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr5D)) => fPtr5D(:, :,:,:,:)
+      fPtr(1:size(fPtr5D)) => fPtr5D(:,:,:,:,:)
     else if (rank == 6) then
       call ESMF_FieldGet(field, farrayPtr=fPtr6D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr6D)) => fPtr6D(:, :,:,:,:,:)
+      fPtr(1:size(fPtr6D)) => fPtr6D(:,:,:,:,:,:)
     else if (rank == 7) then
       call ESMF_FieldGet(field, farrayPtr=fPtr7D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr7D)) => fPtr7D(:, :,:,:,:,:,:)
+      fPtr(1:size(fPtr7D)) => fPtr7D(:,:,:,:,:,:,:)
     end if
   end subroutine
 
@@ -805,32 +805,32 @@ module dataProcess
       call ESMF_FieldGet(field, farrayPtr=fPtr2D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr2D)) => fPtr2D(:, :)
+      fPtr(1:size(fPtr2D)) => fPtr2D(:,:)
     else if (rank == 3) then
       call ESMF_FieldGet(field, farrayPtr=fPtr3D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr3D)) => fPtr3D(:, :,:)
+      fPtr(1:size(fPtr3D)) => fPtr3D(:,:,:)
     else if (rank == 4) then
       call ESMF_FieldGet(field, farrayPtr=fPtr4D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr4D)) => fPtr4D(:, :,:,:)
+      fPtr(1:size(fPtr4D)) => fPtr4D(:,:,:,:)
     else if (rank == 5) then
       call ESMF_FieldGet(field, farrayPtr=fPtr5D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr5D)) => fPtr5D(:, :,:,:,:)
+      fPtr(1:size(fPtr5D)) => fPtr5D(:,:,:,:,:)
     else if (rank == 6) then
       call ESMF_FieldGet(field, farrayPtr=fPtr6D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr6D)) => fPtr6D(:, :,:,:,:,:)
+      fPtr(1:size(fPtr6D)) => fPtr6D(:,:,:,:,:,:)
     else if (rank == 7) then
       call ESMF_FieldGet(field, farrayPtr=fPtr7D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr7D)) => fPtr7D(:, :,:,:,:,:,:)
+      fPtr(1:size(fPtr7D)) => fPtr7D(:,:,:,:,:,:,:)
     end if
   end subroutine
 
@@ -860,32 +860,32 @@ module dataProcess
       call ESMF_FieldGet(field, farrayPtr=fPtr2D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr2D)) => fPtr2D(:, :)
+      fPtr(1:size(fPtr2D)) => fPtr2D(:,:)
     else if (rank == 3) then
       call ESMF_FieldGet(field, farrayPtr=fPtr3D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr3D)) => fPtr3D(:, :,:)
+      fPtr(1:size(fPtr3D)) => fPtr3D(:,:,:)
     else if (rank == 4) then
       call ESMF_FieldGet(field, farrayPtr=fPtr4D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr4D)) => fPtr4D(:, :,:,:)
+      fPtr(1:size(fPtr4D)) => fPtr4D(:,:,:,:)
     else if (rank == 5) then
       call ESMF_FieldGet(field, farrayPtr=fPtr5D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr5D)) => fPtr5D(:, :,:,:,:)
+      fPtr(1:size(fPtr5D)) => fPtr5D(:,:,:,:,:)
     else if (rank == 6) then
       call ESMF_FieldGet(field, farrayPtr=fPtr6D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr6D)) => fPtr6D(:, :,:,:,:,:)
+      fPtr(1:size(fPtr6D)) => fPtr6D(:,:,:,:,:,:)
     else if (rank == 7) then
       call ESMF_FieldGet(field, farrayPtr=fPtr7D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr7D)) => fPtr7D(:, :,:,:,:,:,:)
+      fPtr(1:size(fPtr7D)) => fPtr7D(:,:,:,:,:,:,:)
     end if
   end subroutine
 
@@ -915,32 +915,32 @@ module dataProcess
       call ESMF_FieldGet(field, farrayPtr=fPtr2D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr2D)) => fPtr2D(:, :)
+      fPtr(1:size(fPtr2D)) => fPtr2D(:,:)
     else if (rank == 3) then
       call ESMF_FieldGet(field, farrayPtr=fPtr3D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr3D)) => fPtr3D(:, :,:)
+      fPtr(1:size(fPtr3D)) => fPtr3D(:,:,:)
     else if (rank == 4) then
       call ESMF_FieldGet(field, farrayPtr=fPtr4D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr4D)) => fPtr4D(:, :,:,:)
+      fPtr(1:size(fPtr4D)) => fPtr4D(:,:,:,:)
     else if (rank == 5) then
       call ESMF_FieldGet(field, farrayPtr=fPtr5D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr5D)) => fPtr5D(:, :,:,:,:)
+      fPtr(1:size(fPtr5D)) => fPtr5D(:,:,:,:,:)
     else if (rank == 6) then
       call ESMF_FieldGet(field, farrayPtr=fPtr6D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr6D)) => fPtr6D(:, :,:,:,:,:)
+      fPtr(1:size(fPtr6D)) => fPtr6D(:,:,:,:,:,:)
     else if (rank == 7) then
       call ESMF_FieldGet(field, farrayPtr=fPtr7D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return  ! bail out
-      fPtr(1:size(fPtr7D)) => fPtr7D(:, :,:,:,:,:,:)
+      fPtr(1:size(fPtr7D)) => fPtr7D(:,:,:,:,:,:,:)
     end if
   end subroutine
 
