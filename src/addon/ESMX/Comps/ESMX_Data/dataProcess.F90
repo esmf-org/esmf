@@ -230,21 +230,49 @@ module dataProcess
             call access_data_i4(importField, fPtrImportI4, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=__FILE__)) return  ! bail out
+            if (size(fPtrImportI4) /= count) then
+              call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+                msg="Import fields in arithmetic expression '"// &
+                  expression//"' must match size of targeted export field!", &
+                line=__LINE__, file=__FILE__, rcToReturn=rc)
+              return  ! bail out
+            endif
             stack(:,top) = fPtrImportI4
           else if (tkImport == ESMF_TYPEKIND_I8) then
             call access_data_i8(importField, fPtrImportI8, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=__FILE__)) return  ! bail out
+            if (size(fPtrImportI8) /= count) then
+              call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+                msg="Import fields in arithmetic expression '"// &
+                  expression//"' must match size of targeted export field!", &
+                line=__LINE__, file=__FILE__, rcToReturn=rc)
+              return  ! bail out
+            endif
             stack(:,top) = fPtrImportI8
           else if (tkImport == ESMF_TYPEKIND_R4) then
             call access_data_r4(importField, fPtrImportR4, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=__FILE__)) return  ! bail out
+            if (size(fPtrImportR4) /= count) then
+              call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+                msg="Import fields in arithmetic expression '"// &
+                  expression//"' must match size of targeted export field!", &
+                line=__LINE__, file=__FILE__, rcToReturn=rc)
+              return  ! bail out
+            endif
             stack(:,top) = fPtrImportR4
           else if (tkImport == ESMF_TYPEKIND_R8) then
             call access_data_r8(importField, fPtrImportR8, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=__FILE__)) return  ! bail out
+            if (size(fPtrImportR8) /= count) then
+              call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+                msg="Import fields in arithmetic expression '"// &
+                  expression//"' must match size of targeted export field!", &
+                line=__LINE__, file=__FILE__, rcToReturn=rc)
+              return  ! bail out
+            endif
             stack(:,top) = fPtrImportR8
           else
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
