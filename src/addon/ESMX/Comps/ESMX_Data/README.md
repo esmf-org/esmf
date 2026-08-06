@@ -217,7 +217,8 @@ Expressions support standard arithmetic operators following traditional mathemat
 | `+` | Addition (including Unary Plus) | low | `field_a + field_b` |
 | `-` | Subtraction (including Unary Minus) | low | `-field_c + 5.0` |
 
-> **Note**: Parentheses `()` can be used to override default precedence and group operations.
+> [!NOTE]
+> Parentheses `()` can be used to override default precedence and group operations.
 
 ---
 
@@ -246,14 +247,17 @@ The currently supported field data types are:
 * 4-byte and 8-byte Integers (`I4`, `I8`)
 * 4-byte and 8-byte Real numbers (`R4`, `R8`)
 
+> [!IMPORTANT]
+> Input field names starting with an underscore `_` are supported, however they must not be identical to any of the special context variables discussed below when used in arithmetic expressions.
+
 ##### Special Context Variables
-Variables prefixed with an underscore provide metadata about the current simulation state. These variable are case-insensitive. The currently available context variables are:
-* `_PI`: The mathematical constant PI.
+Named numeric constants or variables providing context-specific information about the current simulation state are prefixed with an underscore `_`. These variables are case-insensitive. The currently available context variables are:
+* `_PI`: The mathematical constant $\pi$.
 * `_STEP`: The current model time step index.
 * `_COORDx`: The spatial coordinate for dimension `x` (e.g., `_COORD1` typically represents Longitude or X).
 
-##### Numeric Constants
-Standard numerical values (e.g., `2.5`, `100`, `1.0E-4`) are interpreted as double-precision floating-point numbers.
+##### Literal Numeric Constants
+Literal numeric values (e.g., `2.5`, `100`, `1.0E-4`) are interpreted as double-precision floating-point numbers.
 
 ---
 

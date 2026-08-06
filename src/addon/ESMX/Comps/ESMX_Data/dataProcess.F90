@@ -47,6 +47,7 @@ module dataProcess
     type(ESMF_TYPEKIND_Flag)      :: tkImport, tkExport
     real(ESMF_KIND_R8), allocatable :: stack(:,:)
     real(ESMF_KIND_R8), parameter :: pi = acos(-1.0_ESMF_KIND_R8)
+    type(ESMF_StateItem_Flag)     :: itemType
 
     rc = ESMF_SUCCESS
 
@@ -182,31 +183,48 @@ module dataProcess
         top = top - 1
       case default
         top = top + 1
+        call ESMF_StateGet(importState, itemName=token, itemType=itemType, &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
+        tempString = ESMF_UtilStringUpperCase(token, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return  ! bail out
         if (try_parse(token, value)) then
           ! Numerical value
           stack(:,top) = value
-        else if (token(1:1) == "_") then
-          ! Special variable
-          tempString = ESMF_UtilStringUpperCase(token, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
-          if (tempString == "_PI") then
-            ! PI
-            stack(:,top) = PI
-          else if (tempString == "_STEP") then
-            ! Step
-            stack(:,top) = real(step, ESMF_KIND_R8)
-          else if (tempString(1:6) == "_COORD") then
-            ! Coordinate
-            call push_coord(exportField, token, stack(:,top), rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return
-          else
-            call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-              msg="Unknown special variable: "//token, &
+        else if (tempString == "_PI") then
+          ! Special variable: _PI
+          if (itemType == ESMF_STATEITEM_FIELD) then
+            call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+              msg="Import field with same name as special variable '"// &
+                token//"' not allowed in the same context!", &
               line=__LINE__, file=__FILE__, rcToReturn=rc)
-            return
-          end if
+            return  ! bail out
+          endif
+          stack(:,top) = PI
+        else if (tempString == "_STEP") then
+          ! Special variable: _STEP
+          if (itemType == ESMF_STATEITEM_FIELD) then
+            call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+              msg="Import field with same name as special variable '"// &
+                token//"' not allowed in the same context!", &
+              line=__LINE__, file=__FILE__, rcToReturn=rc)
+            return  ! bail out
+          endif
+          stack(:,top) = real(step, ESMF_KIND_R8)
+        else if (tempString(1:6) == "_COORD") then
+          ! Special variable: _COORDx
+          if (itemType == ESMF_STATEITEM_FIELD) then
+            call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+              msg="Import field with same name as special variable '"// &
+                token//"' not allowed in the same context!", &
+              line=__LINE__, file=__FILE__, rcToReturn=rc)
+            return  ! bail out
+          endif
+          call push_coord(exportField, token, stack(:,top), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=__FILE__)) return
         else
           ! Field in importState
           call ESMF_StateGet(importState, itemName=token, field=importField, &
@@ -663,7 +681,7 @@ module dataProcess
       cur = cur + next_s
     end if
 
-    ! Lookahead check: Is this a function name followed by an opening parenthesis?
+    ! Lookahead check: a function name followed by an opening parenthesis?
     if (is_valid_function_name(token)) then
       if (cur <= len_trim(str)) then
         peek_cur = cur
