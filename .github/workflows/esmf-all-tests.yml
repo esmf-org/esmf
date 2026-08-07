@@ -22,6 +22,19 @@ jobs:
       matrix:
         config:
         - {
+            desc: ubuntu@22.04-gfortran@11-mpiuni-netcdf-O,
+            osys: ubuntu-22.04,
+            cors: 4,
+            ropt: '',
+            exhs: ON,
+            cmpr: gfortran,
+            cvrs: 11,
+            bopt: 'O',
+            comm: mpiuni,
+            tlib: ON,
+            ncdf: nc-config
+          }
+        - {
             desc: ubuntu@22.04-gfortran@12-mpich-netcdf-O,
             osys: ubuntu-22.04,
             cors: 4,
@@ -31,6 +44,32 @@ jobs:
             cvrs: 12,
             bopt: 'O',
             comm: mpich,
+            tlib: ON,
+            ncdf: nc-config
+          }
+        - {
+            desc: macos@14-gfortran@13-mpiuni-netcdf-O,
+            osys: macos-14,
+            cors: 3,
+            ropt: '',
+            exhs: OFF,
+            cmpr: gfortran,
+            cvrs: 13,
+            bopt: 'O',
+            comm: mpiuni,
+            tlib: OFF,
+            ncdf: nc-config
+          }
+        - {
+            desc: macos@14-clang-gfortran@14-openmpi-netcdf-g,
+            osys: macos-14,
+            cors: 3,
+            ropt: '--oversubscribe',
+            exhs: ON,
+            cmpr: gfortranclang,
+            cvrs: 14,
+            bopt: 'g',
+            comm: openmpi,
             tlib: ON,
             ncdf: nc-config
           }
@@ -181,13 +220,8 @@ jobs:
     - name: ESMF Build
       run: |
         make -j ${{matrix.config.cors}} > ${ARTIFACTS}/build.log 2>&1
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-      if: always() # Or conditionally trigger on failure
-      with:
-        detached: true # Keeps the job running while opening the SSH session
     - name: ESMF All Tests
-      timeout-minutes: 30
+      timeout-minutes: 60
       run: |
         make all_tests > ${ARTIFACTS}/all_tests.log 2>&1
         { grep "SYSTEM TESTS SUMMARY" -A1 ${ARTIFACTS}/all_tests.log > ${ARTIFACTS}/summary.log || true; }
@@ -220,7 +254,7 @@ jobs:
           exit 1
         fi
     - name: Archive Results
-      if: always()
+      if: ${{ failure() }}
       uses: actions/upload-artifact@v6
       with:
         name: logs-${{matrix.config.desc}}
