@@ -687,7 +687,7 @@ program ESMF_RouteHandleAdvancedUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Apply the Routehandle with dynamic masking - srcTermProcessing=1"
   write(failMsg, *) "ESMF_FieldRegrid unexpected success"
-  call ESMF_FieldRegrid(srcField=fieldA, dstField=fieldB2, &
+  call ESMF_FieldRegrid(srcField=fieldA, dstField=fieldB1, &
     routehandle=rh1, dynamicMask=dynamicMask, rc=rc)
   call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
@@ -714,7 +714,7 @@ program ESMF_RouteHandleAdvancedUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Apply the Routehandle with dynamic masking - srcTermProcessing=0"
   write(failMsg, *) "ESMF_FieldRegrid failed"
-  call ESMF_FieldRegrid(srcField=fieldA, dstField=fieldB2, &
+  call ESMF_FieldRegrid(srcField=fieldA, dstField=fieldB1, &
     routehandle=rh1, dynamicMask=dynamicMask, rc=rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
@@ -723,7 +723,7 @@ program ESMF_RouteHandleAdvancedUTest
   !NEX_disabled_UTest_Multi_Proc_Only
   write(name, *) "Apply the Routehandle with dynamic masking - ESMF_TERMORDER_FREE"
   write(failMsg, *) "ESMF_FieldRegrid unexpected success"
-  call ESMF_FieldRegrid(srcField=fieldA, dstField=fieldB2, &
+  call ESMF_FieldRegrid(srcField=fieldA, dstField=fieldB1, &
     routehandle=rh1, termorderflag=ESMF_TERMORDER_FREE, &
     dynamicMask=dynamicMask, rc=rc)
   call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
