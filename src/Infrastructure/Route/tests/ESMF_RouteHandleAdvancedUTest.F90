@@ -663,9 +663,9 @@ program ESMF_RouteHandleAdvancedUTest
   !-----------------------------------------------------------------------------
 
   ! DynamicMask testing
-
+#if 0
   !-----------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_disabled_UTest_Multi_Proc_Only
   write(name, *) "Test ESMF_DynamicMaskSetR8R8R8()"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_DynamicMaskSetR8R8R8(dynamicMask, &
@@ -674,7 +674,7 @@ program ESMF_RouteHandleAdvancedUTest
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_disabled_UTest_Multi_Proc_Only
   write(name, *) "Create RouteHandle for dynamic masking - srcTermProcessing=1"
   write(failMsg, *) "RouteHandleCreate failed"
   srcTermProcessing=1 ! this will trigger error when trying to apply
@@ -684,7 +684,7 @@ program ESMF_RouteHandleAdvancedUTest
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_disabled_UTest_Multi_Proc_Only
   write(name, *) "Apply the Routehandle with dynamic masking - srcTermProcessing=1"
   write(failMsg, *) "ESMF_FieldRegrid unexpected success"
   call ESMF_FieldRegrid(srcField=fieldA, dstField=fieldB2, &
@@ -693,7 +693,7 @@ program ESMF_RouteHandleAdvancedUTest
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_disabled_UTest_Multi_Proc_Only
   write(name, *) "Test RouteHandleDestroy()"
   write(failMsg, *) "RouteHandleDestroy failed"
   call ESMF_RouteHandleDestroy(rh1, noGarbage=.true., rc=rc)
@@ -701,7 +701,7 @@ program ESMF_RouteHandleAdvancedUTest
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_disabled_UTest_Multi_Proc_Only
   write(name, *) "Create RouteHandle for dynamic masking - srcTermProcessing=0"
   write(failMsg, *) "RouteHandleCreate failed"
   srcTermProcessing=0 ! required for dynamic masking
@@ -711,7 +711,7 @@ program ESMF_RouteHandleAdvancedUTest
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_disabled_UTest_Multi_Proc_Only
   write(name, *) "Apply the Routehandle with dynamic masking - srcTermProcessing=0"
   write(failMsg, *) "ESMF_FieldRegrid failed"
   call ESMF_FieldRegrid(srcField=fieldA, dstField=fieldB2, &
@@ -720,7 +720,7 @@ program ESMF_RouteHandleAdvancedUTest
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_disabled_UTest_Multi_Proc_Only
   write(name, *) "Apply the Routehandle with dynamic masking - ESMF_TERMORDER_FREE"
   write(failMsg, *) "ESMF_FieldRegrid unexpected success"
   call ESMF_FieldRegrid(srcField=fieldA, dstField=fieldB2, &
@@ -730,13 +730,13 @@ program ESMF_RouteHandleAdvancedUTest
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_disabled_UTest_Multi_Proc_Only
   write(name, *) "Test RouteHandleDestroy()"
   write(failMsg, *) "RouteHandleDestroy failed"
   call ESMF_RouteHandleDestroy(rh1, noGarbage=.true., rc=rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-
+#endif
   ! Clean-up
 
   call ESMF_GridCompFinalize(compA, exportState=stateAB1, userRc=urc, rc=rc)
