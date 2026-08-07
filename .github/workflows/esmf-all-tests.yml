@@ -22,7 +22,7 @@ jobs:
       matrix:
         config:
         - {
-            desc: ubuntu@22.04-gfortran@12-mpich-netcdf,
+            desc: ubuntu@22.04-gfortran@12-mpich-netcdf-O,
             osys: ubuntu-22.04,
             cors: 4,
             ropt: '',
@@ -35,7 +35,7 @@ jobs:
             ncdf: nc-config
           }
         - {
-            desc: ubuntu@22.04-gfortran@12-mpich-netcdf,
+            desc: ubuntu@22.04-gfortran@12-mpich-netcdf-g,
             osys: ubuntu-22.04,
             cors: 4,
             ropt: '',
