@@ -181,6 +181,11 @@ jobs:
     - name: ESMF Build
       run: |
         make -j ${{matrix.config.cors}} > ${ARTIFACTS}/build.log 2>&1
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      if: always() # Or conditionally trigger on failure
+      with:
+        detached: true # Keeps the job running while opening the SSH session
     - name: ESMF All Tests
       timeout-minutes: 30
       run: |
