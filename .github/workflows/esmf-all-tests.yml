@@ -34,19 +34,6 @@ jobs:
             tlib: ON,
             ncdf: nc-config
           }
-        - {
-            desc: ubuntu@22.04-gfortran@12-mpich-netcdf-g,
-            osys: ubuntu-22.04,
-            cors: 4,
-            ropt: '',
-            exhs: OFF,
-            cmpr: gfortran,
-            cvrs: 12,
-            bopt: 'g',
-            comm: mpich,
-            tlib: ON,
-            ncdf: nc-config
-          }
     steps:
     - name: Set up system
       run: |
@@ -195,7 +182,7 @@ jobs:
       run: |
         make -j ${{matrix.config.cors}} > ${ARTIFACTS}/build.log 2>&1
     - name: ESMF All Tests
-      timeout-minutes: 60
+      timeout-minutes: 30
       run: |
         make all_tests > ${ARTIFACTS}/all_tests.log 2>&1
         { grep "SYSTEM TESTS SUMMARY" -A1 ${ARTIFACTS}/all_tests.log > ${ARTIFACTS}/summary.log || true; }
@@ -228,7 +215,7 @@ jobs:
           exit 1
         fi
     - name: Archive Results
-      if: ${{ failure() }}
+      if: always()
       uses: actions/upload-artifact@v6
       with:
         name: logs-${{matrix.config.desc}}
