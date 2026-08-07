@@ -682,16 +682,16 @@ program ESMF_RouteHandleAdvancedUTest
     srcTermProcessing=srcTermProcessing, routehandle=rh1, rc=rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-#if 0
+
   !-----------------------------------------------------------------------------
-  !NEX_disabled_UTest_Multi_Proc_Only
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Apply the Routehandle with dynamic masking - srcTermProcessing=1"
   write(failMsg, *) "ESMF_FieldRegrid unexpected success"
   call ESMF_FieldRegrid(srcField=fieldA, dstField=fieldB2, &
     routehandle=rh1, dynamicMask=dynamicMask, rc=rc)
   call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-
+#if 0
   !-----------------------------------------------------------------------------
   !NEX_disabled_UTest_Multi_Proc_Only
   write(name, *) "Test RouteHandleDestroy()"
