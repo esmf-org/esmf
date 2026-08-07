@@ -22,19 +22,6 @@ jobs:
       matrix:
         config:
         - {
-            desc: ubuntu@22.04-gfortran@11-mpiuni-netcdf,
-            osys: ubuntu-22.04,
-            cors: 4,
-            ropt: '',
-            exhs: ON,
-            cmpr: gfortran,
-            cvrs: 11,
-            bopt: 'O',
-            comm: mpiuni,
-            tlib: ON,
-            ncdf: nc-config
-          }
-        - {
             desc: ubuntu@22.04-gfortran@12-mpich-netcdf,
             osys: ubuntu-22.04,
             cors: 4,
@@ -48,28 +35,15 @@ jobs:
             ncdf: nc-config
           }
         - {
-            desc: macos@14-gfortran@13-mpiuni-netcdf,
-            osys: macos-14,
-            cors: 3,
+            desc: ubuntu@22.04-gfortran@12-mpich-netcdf,
+            osys: ubuntu-22.04,
+            cors: 4,
             ropt: '',
             exhs: OFF,
             cmpr: gfortran,
-            cvrs: 13,
-            bopt: 'O',
-            comm: mpiuni,
-            tlib: OFF,
-            ncdf: nc-config
-          }
-        - {
-            desc: macos@14-clang-gfortran@14-openmpi-netcdf,
-            osys: macos-14,
-            cors: 3,
-            ropt: '--oversubscribe',
-            exhs: ON,
-            cmpr: gfortranclang,
-            cvrs: 14,
+            cvrs: 12,
             bopt: 'g',
-            comm: openmpi,
+            comm: mpich,
             tlib: ON,
             ncdf: nc-config
           }
