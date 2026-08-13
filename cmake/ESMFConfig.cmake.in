@@ -24,9 +24,9 @@ if(NOT TARGET ESMF::ESMF)
     add_library(ESMF::ESMF UNKNOWN IMPORTED GLOBAL)
 
     set(ESMF_LINK_LIBS_LIST "@ESMF_INTERFACE_LINK_LIBRARIES@")
-    separate_arguments(ESMF_TARGET_LINKS NATIVE_COMMAND "${ESMF_LINK_LIBS_LIST}")
+    separate_arguments(ESMF_TARGET_LINKS UNIX_COMMAND "${ESMF_LINK_LIBS_LIST}")
     set(ESMF_LINK_OPTIONS "@ESMF_INTERFACE_LINK_OPTIONS@")
-    separate_arguments(ESMF_LINK_OPTIONS NATIVE_COMMAND "${ESMF_LINK_OPTIONS}")
+    separate_arguments(ESMF_LINK_OPTIONS UNIX_COMMAND "${ESMF_LINK_OPTIONS}")
 
     # Filter any raw object files ESMF might use for cross-language linking but will confuse CMake
     list(FILTER ESMF_TARGET_LINKS EXCLUDE REGEX "\\.o$")
@@ -52,9 +52,9 @@ if(NOT TARGET ESMF::ESMC)
     add_library(ESMF::ESMC UNKNOWN IMPORTED GLOBAL)
 
     set(ESMC_LINK_LIBS_LIST "@ESMC_INTERFACE_LINK_LIBRARIES@")
-    separate_arguments(ESMC_TARGET_LINKS NATIVE_COMMAND "${ESMC_LINK_LIBS_LIST}")
+    separate_arguments(ESMC_TARGET_LINKS UNIX_COMMAND "${ESMC_LINK_LIBS_LIST}")
     set(ESMC_LINK_OPTIONS "@ESMC_INTERFACE_LINK_OPTIONS@")
-    separate_arguments(ESMC_LINK_OPTIONS NATIVE_COMMAND "${ESMC_LINK_OPTIONS}")
+    separate_arguments(ESMC_LINK_OPTIONS UNIX_COMMAND "${ESMC_LINK_OPTIONS}")
 
     # Filter any raw object files ESMF might use for cross-language linking but will confuse CMake
     list(FILTER ESMC_TARGET_LINKS EXCLUDE REGEX "\\.o$")
