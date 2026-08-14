@@ -241,7 +241,7 @@ module ESMX_Data
       line=__LINE__, file=__FILE__)) return  ! bail out
 
     if (isFlag) then
-      ! ingest geometries
+      ! ingest
       hconfigNode = ESMF_HConfigCreateAt(hconfig, keyString="outputs", &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

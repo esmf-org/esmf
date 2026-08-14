@@ -62,7 +62,7 @@ module dataProcess
       importsOkay = .true.
     endif
 
-    ! Normalize the incoming infix string with single white space deliminators
+    ! Normalize the incoming infix string with single white space delimiters
     call normalize_infix(expression, infix_expression, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return  ! bail out
@@ -200,7 +200,7 @@ module dataProcess
           tempString = ESMF_UtilStringUpperCase(token, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
-          ! Handle destinct cases, special variables first, then fields in state
+          ! Handle distinct cases, special variables first, then fields in state
           if (tempString == "_PI") then
             ! Special variable: _PI
             if (itemType == ESMF_STATEITEM_FIELD) then
@@ -311,7 +311,7 @@ module dataProcess
       end select
     end do
 
-    ! Stored final result in the export field
+    ! Store final result in the export field
     if (tkExport == ESMF_TYPEKIND_I4) then
       fPtrExportI4 = stack(:,1)
     else if (tkExport == ESMF_TYPEKIND_I8) then
@@ -322,7 +322,7 @@ module dataProcess
       fPtrExportR8 = stack(:,1)
     end if
 
-    ! clean-up workspace stack
+    ! clean up workspace stack
     deallocate(stack)
 
   end subroutine
@@ -463,7 +463,7 @@ module dataProcess
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
         endif
-        stackColumn = fPtr1D(coordDim::dimCount)  ! copy the coorDim entries
+        stackColumn = fPtr1D(coordDim::dimCount)  ! copy the coordDim entries
         deallocate(fPtr1D)
       endif
     else
@@ -478,7 +478,7 @@ module dataProcess
   !-----------------------------------------------------------------------------
 
   subroutine normalize_infix(input, output, rc)
-    ! Normalize the incoming infix string with single white space deliminators
+    ! Normalize the incoming infix string with single white space delimiters
     ! Reject adjacent operators as invalid
     character(len=*),               intent(in)  :: input
     character(len=:), allocatable,  intent(out) :: output
@@ -776,7 +776,7 @@ module dataProcess
   !-----------------------------------------------------------------------------
 
   integer function precedence(op)
-    ! Operator precendece
+    ! Operator precedence
     character(len=*), intent(in) :: op
     if (is_function(op)) then
       precedence = 5
@@ -830,7 +830,7 @@ module dataProcess
   !-----------------------------------------------------------------------------
 
   subroutine access_data_i4(field, fPtr, rc)
-    ! Access field data as 1D contigous data array
+    ! Access field data as 1D contiguous data array
     type(ESMF_Field),                           intent(in)   :: field
     integer(ESMF_KIND_I4), pointer, contiguous, intent(out)  :: fPtr(:)
     integer,                                    intent(out)  :: rc
@@ -885,7 +885,7 @@ module dataProcess
   end subroutine
 
   subroutine access_data_i8(field, fPtr, rc)
-    ! Access field data as 1D contigous data array
+    ! Access field data as 1D contiguous data array
     type(ESMF_Field),                           intent(in)   :: field
     integer(ESMF_KIND_I8), pointer, contiguous, intent(out)  :: fPtr(:)
     integer,                                    intent(out)  :: rc
@@ -940,7 +940,7 @@ module dataProcess
   end subroutine
 
   subroutine access_data_r4(field, fPtr, rc)
-    ! Access field data as 1D contigous data array
+    ! Access field data as 1D contiguous data array
     type(ESMF_Field),                        intent(in)   :: field
     real(ESMF_KIND_R4), pointer, contiguous, intent(out)  :: fPtr(:)
     integer,                                 intent(out)  :: rc
@@ -995,7 +995,7 @@ module dataProcess
   end subroutine
 
   subroutine access_data_r8(field, fPtr, rc)
-    ! Access field data as 1D contigous data array
+    ! Access field data as 1D contiguous data array
     type(ESMF_Field),                        intent(in)   :: field
     real(ESMF_KIND_R8), pointer, contiguous, intent(out)  :: fPtr(:)
     integer,                                 intent(out)  :: rc
