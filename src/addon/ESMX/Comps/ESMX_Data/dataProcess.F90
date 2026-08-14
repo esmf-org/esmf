@@ -218,7 +218,7 @@ module dataProcess
               return  ! bail out
             endif
             stack(:,top) = real(step, ESMF_KIND_R8)
-          else if (tempString(1:6) == "_COORD") then
+          else if (index(tempString, "_COORD") == 1) then
             ! Special variable: _COORDx
             if (itemType == ESMF_STATEITEM_FIELD) then
               call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
