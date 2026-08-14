@@ -532,14 +532,6 @@ module dataProcess
           in_operand = .false.
         end if
         if ((c == "-" .or. c == "+")) then
-          ! Reject adjacent binary operators
-          if (prev_was_bin_op) then
-            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
-              msg="Adjacent operators detected: '"//input// &
-              "' Must use parentheses!", &
-              line=__LINE__, file=__FILE__, rcToReturn=rc)
-            return ! bail out
-          end if
           ! Handle unary sign after '(' or at start of string
           if (needs_leading_zero) then
             output = output // "0 "
@@ -551,8 +543,7 @@ module dataProcess
         else if (c == "*" .or. c == "/" .or. c == "^") then
           if (prev_was_bin_op) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
-              msg="Adjacent operators detected: '"//input// &
-              "' Must use parentheses!", &
+              msg="Invalid adjacent operators detected: '"//input//"'", &
               line=__LINE__, file=__FILE__, rcToReturn=rc)
             return ! bail out
           else if (needs_leading_zero) then
@@ -622,6 +613,7 @@ module dataProcess
     integer                         :: stack_ptr
     character(len=:),   allocatable :: token
     integer                         :: cur, i
+    logical                         :: expect_operand
 
     ! Allocate the stack based on the length of the input string
     allocate(op_stack(len(infix)))
@@ -629,6 +621,7 @@ module dataProcess
     rpn = ""
     stack_ptr = 0
     cur = 1
+    expect_operand = .true.
 
     do while (cur <= len_trim(infix))
       ! Extract next space-separated token
@@ -636,29 +629,40 @@ module dataProcess
       if (len(token) == 0) exit
 
       if (is_operator(token)) then
-        ! Handle Operators
-        do
-          if (stack_ptr <= 0) exit
-          if (op_stack(stack_ptr) == "(") exit
+        ! Check if operator is unary ('+' or '-' when an operand is expected)
+        if (expect_operand .and. (token == "+" .or. token == "-")) then
+          ! This is unary '+' or '-'. Emit '0' immediately as an operand into
+          ! the RPN stream.
+          rpn = rpn // "0 "
+        else
+          ! Standard binary operator handling: pop higher/equal precedence operators
+          do
+            if (stack_ptr <= 0) exit
+            if (op_stack(stack_ptr) == "(") exit
 
-          if (token == "^") then
-            ! Default right-associative exponentiation
-            if (precedence(op_stack(stack_ptr)) <= precedence(token)) exit
-          else
-            ! Default left-associative all other operations
-            if (precedence(op_stack(stack_ptr)) < precedence(token)) exit
-          end if
+            if (token == "^") then
+              ! Right-associative exponentiation
+              if (precedence(op_stack(stack_ptr)) <= precedence(token)) exit
+            else
+              ! Left-associative operations
+              if (precedence(op_stack(stack_ptr)) < precedence(token)) exit
+            end if
 
-          rpn = rpn // trim(op_stack(stack_ptr)) // " "
-          stack_ptr = stack_ptr - 1
-        end do
+            rpn = rpn // trim(op_stack(stack_ptr)) // " "
+            stack_ptr = stack_ptr - 1
+          end do
+        end if
+
+        ! Push the operator onto the stack
         stack_ptr = stack_ptr + 1
         op_stack(stack_ptr) = token
+        expect_operand = .true.
 
       else if (token == "(") then
         ! Handle Left Parenthesis
         stack_ptr = stack_ptr + 1
         op_stack(stack_ptr) = "("
+        expect_operand = .true.
 
       else if (token == ")") then
         ! Handle Right Parenthesis
@@ -681,9 +685,12 @@ module dataProcess
           end if
         end if
 
+        expect_operand = .false.
+
       else
         ! Number or field name - send straight to output
         rpn = rpn // token // " "
+        expect_operand = .false.
       end if
     end do
 
@@ -694,7 +701,7 @@ module dataProcess
       end if
     end do
 
-    ! Deallocate the stack
+    ! Deallocate stack
     deallocate(op_stack)
 
     ! Remove trailing space
