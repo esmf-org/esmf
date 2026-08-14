@@ -63,7 +63,9 @@ module dataProcess
     endif
 
     ! Normalize the incoming infix string with single white space deliminators
-    call normalize_infix(expression, infix_expression)
+    call normalize_infix(expression, infix_expression, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return  ! bail out
 
     ! Convert standard infix notation to reverse polish notation
     call infix_to_rpn(infix_expression, rpn_expression)
@@ -472,17 +474,24 @@ module dataProcess
 
   !-----------------------------------------------------------------------------
 
-  subroutine normalize_infix(input, output)
+  subroutine normalize_infix(input, output, rc)
     ! Normalize the incoming infix string with single white space deliminators
+    ! Reject adjacent operators as invalid
     character(len=*),               intent(in)  :: input
     character(len=:), allocatable,  intent(out) :: output
+    integer,                        intent(out) :: rc
+
     character                       :: c
     integer                         :: i
     logical                         :: needs_leading_zero, in_operand
+    logical                         :: prev_was_bin_op
 
     output = ""
     needs_leading_zero = .true.
     in_operand = .false.
+    prev_was_bin_op = .false.
+
+    rc = ESMF_SUCCESS
 
     do i = 1, len_trim(input)
       c = input(i:i)  ! current character
@@ -502,20 +511,55 @@ module dataProcess
           output = output // " "
           in_operand = .false.
         end if
-        ! Handle Unary Plus and Minus
-        if ((c == "-" .or. c == "+") .and. needs_leading_zero) then
-          ! insert the leading zero with space
-          output = output // "0 "
+        if ((c == "-" .or. c == "+")) then
+          ! Reject adjacent binary operators
+          if (prev_was_bin_op) then
+            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+              msg="Adjacent operators detected: '"//input// &
+              "' Must use parentheses!", &
+              line=__LINE__, file=__FILE__, rcToReturn=rc)
+            return ! bail out
+          end if
+          ! Handle unary sign after '(' or at start of string
+          if (needs_leading_zero) then
+            output = output // "0 "
+          end if
+          ! Add operator and trailing space, set flags
+          output = output // c // " "
+          needs_leading_zero = .false.
+          prev_was_bin_op = .true.
+        else if (c == "*" .or. c == "/") then
+          if (prev_was_bin_op) then
+            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+              msg="Adjacent operators detected: '"//input// &
+              "' Must use parentheses!", &
+              line=__LINE__, file=__FILE__, rcToReturn=rc)
+            return ! bail out
+          else if (needs_leading_zero) then
+            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+              msg="Invalid unary operator detected: '"//input//"'", &
+              line=__LINE__, file=__FILE__, rcToReturn=rc)
+            return ! bail out
+          end if
+          ! Add operator and trailing space, set flags
+          output = output // c // " "
+          needs_leading_zero = .false.
+          prev_was_bin_op = .true.
+        else if (c == "(") then
+          output = output // "( "
+          needs_leading_zero = .true.
+          prev_was_bin_op = .false.
+        else if (c == ")") then
+          output = output // ") "
+          needs_leading_zero = .false.
+          prev_was_bin_op = .false.
         end if
-        ! Add operator and trailing space
-        output = output // c // " "
-        ! Update the flag for next iteration according to operator
-        needs_leading_zero = (c /= ")")
       else
         ! Inside operand
-        in_operand = .true.
         output = output // c
+        in_operand = .true.
         needs_leading_zero = .false.
+        prev_was_bin_op = .false.
       end if
     end do
 
