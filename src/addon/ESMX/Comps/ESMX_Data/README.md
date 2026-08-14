@@ -212,8 +212,9 @@ Expressions support standard arithmetic operators following traditional mathemat
 
 | Operator | Description | Precedence | Example |
 | :--- | :--- | :--- | :--- |
-| `*` | Multiplication | high | `field_a * 10.0` |
-| `/` | Division | high | `field_b / 2.0` |
+| `^` | Power | high | `field_a ^ 2` |
+| `*` | Multiplication | medium | `field_a * 10.0` |
+| `/` | Division | medium | `field_b / 2.0` |
 | `+` | Addition (including Unary Plus) | low | `field_a + field_b` |
 | `-` | Subtraction (including Unary Minus) | low | `-field_c + 5.0` |
 
