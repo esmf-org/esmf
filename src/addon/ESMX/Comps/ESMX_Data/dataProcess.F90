@@ -171,6 +171,9 @@ module dataProcess
         stack(:,top) = tan(stack(:,top))
       case ("@TANH")
         stack(:,top) = tanh(stack(:,top))
+      case ("^")
+        stack(:,top-1) = stack(:,top-1) ** stack(:,top)
+        top = top - 1
       case ("*")
         stack(:,top-1) = stack(:,top-1) * stack(:,top)
         top = top - 1
@@ -528,7 +531,7 @@ module dataProcess
           output = output // c // " "
           needs_leading_zero = .false.
           prev_was_bin_op = .true.
-        else if (c == "*" .or. c == "/") then
+        else if (c == "*" .or. c == "/" .or. c == "^") then
           if (prev_was_bin_op) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
               msg="Adjacent operators detected: '"//input// &
@@ -574,7 +577,7 @@ module dataProcess
     ! Look for boundary character
     character, intent(in) :: ch
     select case (ch)
-      case ("+", "-", "*", "/", "(", ")")
+      case ("+", "-", "*", "/", "^", "(", ")")
         is_boundary = .true.
       case default
         is_boundary = .false.
@@ -610,7 +613,14 @@ module dataProcess
         do
           if (stack_ptr <= 0) exit
           if (op_stack(stack_ptr) == "(") exit
-          if (precedence(op_stack(stack_ptr)) < precedence(token)) exit
+
+          if (token == "^") then
+            ! Default right-associative exponentiation
+            if (precedence(op_stack(stack_ptr)) <= precedence(token)) exit
+          else
+            ! Default left-associative all other operations
+            if (precedence(op_stack(stack_ptr)) < precedence(token)) exit
+          end if
 
           rpn = rpn // trim(op_stack(stack_ptr)) // " "
           stack_ptr = stack_ptr - 1
@@ -769,9 +779,10 @@ module dataProcess
     ! Operator precendece
     character(len=*), intent(in) :: op
     if (is_function(op)) then
-      precedence = 4
+      precedence = 5
     else
       select case (trim(op))
+        case ("^")      ; precedence = 4
         case ("*", "/") ; precedence = 3
         case ("+", "-") ; precedence = 2
         case default    ; precedence = 0
@@ -785,8 +796,8 @@ module dataProcess
     ! Identify token as operator
     character(len=*), intent(in) :: token
     select case (token)
-      case ("+", "-", "*", "/") ; is_operator = .true.
-      case default              ; is_operator = is_function(token)
+      case ("+", "-", "*", "/", "^") ; is_operator = .true.
+      case default                   ; is_operator = is_function(token)
     end select
   end function
 
