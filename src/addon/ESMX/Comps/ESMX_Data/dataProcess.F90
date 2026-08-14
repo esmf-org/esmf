@@ -696,7 +696,7 @@ module dataProcess
         ! Unary functions (sin, cos, ...) pop one and push one: net change 0
         current_depth = current_depth
       else if (is_operator(token)) then
-        ! Binary operators (+, -, *, /) pop two operands and push one result.
+        ! Binary operators (+, -, *, /, ^) pop two operands and push one result.
         ! This results in a net change of -1 to the stack height.
         current_depth = current_depth - 1
       else
