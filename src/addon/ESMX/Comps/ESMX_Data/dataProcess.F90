@@ -183,120 +183,124 @@ module dataProcess
         top = top - 1
       case default
         top = top + 1
-        call ESMF_StateGet(importState, itemName=token, itemType=itemType, &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=__FILE__)) return  ! bail out
-        tempString = ESMF_UtilStringUpperCase(token, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=__FILE__)) return  ! bail out
         if (try_parse(token, value)) then
           ! Numerical value
           stack(:,top) = value
-        else if (tempString == "_PI") then
-          ! Special variable: _PI
-          if (itemType == ESMF_STATEITEM_FIELD) then
-            call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-              msg="Import field with same name as special variable '"// &
-                token//"' not allowed in the same context!", &
-              line=__LINE__, file=__FILE__, rcToReturn=rc)
-            return  ! bail out
-          endif
-          stack(:,top) = PI
-        else if (tempString == "_STEP") then
-          ! Special variable: _STEP
-          if (itemType == ESMF_STATEITEM_FIELD) then
-            call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-              msg="Import field with same name as special variable '"// &
-                token//"' not allowed in the same context!", &
-              line=__LINE__, file=__FILE__, rcToReturn=rc)
-            return  ! bail out
-          endif
-          stack(:,top) = real(step, ESMF_KIND_R8)
-        else if (tempString(1:6) == "_COORD") then
-          ! Special variable: _COORDx
-          if (itemType == ESMF_STATEITEM_FIELD) then
-            call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-              msg="Import field with same name as special variable '"// &
-                token//"' not allowed in the same context!", &
-              line=__LINE__, file=__FILE__, rcToReturn=rc)
-            return  ! bail out
-          endif
-          call push_coord(exportField, token, stack(:,top), rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return
         else
-          ! Field in importState
-          call ESMF_StateGet(importState, itemName=token, field=importField, &
+          ! Special variable or field in importState
+          call ESMF_StateGet(importState, itemName=token, itemType=itemType, &
             rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
-          if (present(importsOkay)) then
-            importsOkay = NUOPC_IsAtTime(importField, okayTime, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
-            if (.not.importsOkay) then
-              ! early return if needed importField not at okayTime
-              deallocate(stack)
-              return
-            endif
-          endif
-          call ESMF_FieldGet(importField, typekind=tkImport, rc=rc)
+          tempString = ESMF_UtilStringUpperCase(token, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=__FILE__)) return  ! bail out
-          if (tkImport == ESMF_TYPEKIND_I4) then
-            call access_data_i4(importField, fPtrImportI4, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
-            if (size(fPtrImportI4) /= count) then
+          ! Handle destinct cases, special variables first, then fields in state
+          if (tempString == "_PI") then
+            ! Special variable: _PI
+            if (itemType == ESMF_STATEITEM_FIELD) then
               call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-                msg="Import fields in arithmetic expression '"// &
-                  expression//"' must match size of targeted export field!", &
+                msg="Import field with same name as special variable '"// &
+                  token//"' not allowed in the same context!", &
                 line=__LINE__, file=__FILE__, rcToReturn=rc)
               return  ! bail out
             endif
-            stack(:,top) = fPtrImportI4
-          else if (tkImport == ESMF_TYPEKIND_I8) then
-            call access_data_i8(importField, fPtrImportI8, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
-            if (size(fPtrImportI8) /= count) then
+            stack(:,top) = PI
+          else if (tempString == "_STEP") then
+            ! Special variable: _STEP
+            if (itemType == ESMF_STATEITEM_FIELD) then
               call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-                msg="Import fields in arithmetic expression '"// &
-                  expression//"' must match size of targeted export field!", &
+                msg="Import field with same name as special variable '"// &
+                  token//"' not allowed in the same context!", &
                 line=__LINE__, file=__FILE__, rcToReturn=rc)
               return  ! bail out
             endif
-            stack(:,top) = fPtrImportI8
-          else if (tkImport == ESMF_TYPEKIND_R4) then
-            call access_data_r4(importField, fPtrImportR4, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
-            if (size(fPtrImportR4) /= count) then
+            stack(:,top) = real(step, ESMF_KIND_R8)
+          else if (tempString(1:6) == "_COORD") then
+            ! Special variable: _COORDx
+            if (itemType == ESMF_STATEITEM_FIELD) then
               call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-                msg="Import fields in arithmetic expression '"// &
-                  expression//"' must match size of targeted export field!", &
+                msg="Import field with same name as special variable '"// &
+                  token//"' not allowed in the same context!", &
                 line=__LINE__, file=__FILE__, rcToReturn=rc)
               return  ! bail out
             endif
-            stack(:,top) = fPtrImportR4
-          else if (tkImport == ESMF_TYPEKIND_R8) then
-            call access_data_r8(importField, fPtrImportR8, rc=rc)
+            call push_coord(exportField, token, stack(:,top), rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
-            if (size(fPtrImportR8) /= count) then
-              call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-                msg="Import fields in arithmetic expression '"// &
-                  expression//"' must match size of targeted export field!", &
-                line=__LINE__, file=__FILE__, rcToReturn=rc)
-              return  ! bail out
-            endif
-            stack(:,top) = fPtrImportR8
+              line=__LINE__, file=__FILE__)) return
           else
-            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
-              msg="process() only supports I4, I8, R4, and R8.", &
-              line=__LINE__, file=__FILE__, rcToReturn=rc)
-            return  ! bail out
+            ! Field in importState
+            call ESMF_StateGet(importState, itemName=token, field=importField, &
+              rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=__FILE__)) return  ! bail out
+            if (present(importsOkay)) then
+              importsOkay = NUOPC_IsAtTime(importField, okayTime, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=__FILE__)) return  ! bail out
+              if (.not.importsOkay) then
+                ! Early successful return with importsOkay==.false.
+                deallocate(stack)
+                return
+              endif
+            endif
+            call ESMF_FieldGet(importField, typekind=tkImport, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=__FILE__)) return  ! bail out
+            if (tkImport == ESMF_TYPEKIND_I4) then
+              call access_data_i4(importField, fPtrImportI4, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=__FILE__)) return  ! bail out
+              if (size(fPtrImportI4) /= count) then
+                call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+                  msg="Import fields in arithmetic expression '"// &
+                    expression//"' must match size of targeted export field!", &
+                  line=__LINE__, file=__FILE__, rcToReturn=rc)
+                return  ! bail out
+              endif
+              stack(:,top) = fPtrImportI4
+            else if (tkImport == ESMF_TYPEKIND_I8) then
+              call access_data_i8(importField, fPtrImportI8, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=__FILE__)) return  ! bail out
+              if (size(fPtrImportI8) /= count) then
+                call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+                  msg="Import fields in arithmetic expression '"// &
+                    expression//"' must match size of targeted export field!", &
+                  line=__LINE__, file=__FILE__, rcToReturn=rc)
+                return  ! bail out
+              endif
+              stack(:,top) = fPtrImportI8
+            else if (tkImport == ESMF_TYPEKIND_R4) then
+              call access_data_r4(importField, fPtrImportR4, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=__FILE__)) return  ! bail out
+              if (size(fPtrImportR4) /= count) then
+                call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+                  msg="Import fields in arithmetic expression '"// &
+                    expression//"' must match size of targeted export field!", &
+                  line=__LINE__, file=__FILE__, rcToReturn=rc)
+                return  ! bail out
+              endif
+              stack(:,top) = fPtrImportR4
+            else if (tkImport == ESMF_TYPEKIND_R8) then
+              call access_data_r8(importField, fPtrImportR8, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=__FILE__)) return  ! bail out
+              if (size(fPtrImportR8) /= count) then
+                call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+                  msg="Import fields in arithmetic expression '"// &
+                    expression//"' must match size of targeted export field!", &
+                  line=__LINE__, file=__FILE__, rcToReturn=rc)
+                return  ! bail out
+              endif
+              stack(:,top) = fPtrImportR8
+            else
+              call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+                msg="process() only supports I4, I8, R4, and R8.", &
+                line=__LINE__, file=__FILE__, rcToReturn=rc)
+              return  ! bail out
+            end if
           end if
         end if
       end select
