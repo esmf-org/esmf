@@ -486,10 +486,12 @@ module dataProcess
 
     character                       :: c, prev_c
     integer                         :: i, len_out
+    integer                         :: paren_depth
     logical                         :: needs_leading_zero, in_operand
     logical                         :: prev_was_bin_op, is_exponent_sign
 
     output = ""
+    paren_depth = 0
     needs_leading_zero = .true.
     in_operand = .false.
     prev_was_bin_op = .false.
@@ -564,10 +566,12 @@ module dataProcess
           needs_leading_zero = .false.
           prev_was_bin_op = .true.
         else if (c == "(") then
+          paren_depth = paren_depth + 1
           output = output // "( "
           needs_leading_zero = .true.
           prev_was_bin_op = .false.
         else if (c == ")") then
+          paren_depth = paren_depth - 1
           output = output // ") "
           needs_leading_zero = .false.
           prev_was_bin_op = .false.
@@ -580,6 +584,14 @@ module dataProcess
         prev_was_bin_op = .false.
       end if
     end do
+
+    ! Ensure parentheses are balanced
+    if (paren_depth /= 0) then
+      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+        msg="Unbalanced parentheses in expression: '"//input//"'", &
+        line=__LINE__, file=__FILE__, rcToReturn=rc)
+      return ! bail out
+    end if
 
     ! Remove trailing space
     output = trim(output)
