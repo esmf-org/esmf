@@ -487,12 +487,12 @@ module dataProcess
     character                       :: c, prev_c
     integer                         :: i, len_out
     integer                         :: paren_depth
-    logical                         :: needs_leading_zero, in_operand
+    logical                         :: unary_guard, in_operand
     logical                         :: prev_was_bin_op, is_exponent_sign
 
     output = ""
     paren_depth = 0
-    needs_leading_zero = .true.
+    unary_guard = .true.
     in_operand = .false.
     prev_was_bin_op = .false.
 
@@ -532,13 +532,9 @@ module dataProcess
           in_operand = .false.
         end if
         if ((c == "-" .or. c == "+")) then
-          ! Handle unary sign after '(' or at start of string
-          if (needs_leading_zero) then
-            output = output // "0 "
-          end if
           ! Add operator and trailing space, set flags
           output = output // c // " "
-          needs_leading_zero = .false.
+          unary_guard = .false.
           prev_was_bin_op = .true.
         else if (c == "*" .or. c == "/" .or. c == "^") then
           if (prev_was_bin_op) then
@@ -546,7 +542,7 @@ module dataProcess
               msg="Invalid adjacent operators detected: '"//input//"'", &
               line=__LINE__, file=__FILE__, rcToReturn=rc)
             return ! bail out
-          else if (needs_leading_zero) then
+          else if (unary_guard) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
               msg="Invalid unary operator detected: '"//input//"'", &
               line=__LINE__, file=__FILE__, rcToReturn=rc)
@@ -554,24 +550,24 @@ module dataProcess
           end if
           ! Add operator and trailing space, set flags
           output = output // c // " "
-          needs_leading_zero = .false.
+          unary_guard = .false.
           prev_was_bin_op = .true.
         else if (c == "(") then
           paren_depth = paren_depth + 1
           output = output // "( "
-          needs_leading_zero = .true.
+          unary_guard = .true.
           prev_was_bin_op = .false.
         else if (c == ")") then
           paren_depth = paren_depth - 1
           output = output // ") "
-          needs_leading_zero = .false.
+          unary_guard = .false.
           prev_was_bin_op = .false.
         end if
       else
         ! Inside operand
         output = output // c
         in_operand = .true.
-        needs_leading_zero = .false.
+        unary_guard = .false.
         prev_was_bin_op = .false.
       end if
     end do
@@ -635,7 +631,7 @@ module dataProcess
           ! the RPN stream.
           rpn = rpn // "0 "
         else
-          ! Standard binary operator handling: pop higher/equal precedence operators
+          ! Standard binary operator handling: pop higher/equal precedence ops
           do
             if (stack_ptr <= 0) exit
             if (op_stack(stack_ptr) == "(") exit
