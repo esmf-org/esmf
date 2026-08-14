@@ -484,10 +484,10 @@ module dataProcess
     character(len=:), allocatable,  intent(out) :: output
     integer,                        intent(out) :: rc
 
-    character                       :: c
-    integer                         :: i
+    character                       :: c, prev_c
+    integer                         :: i, len_out
     logical                         :: needs_leading_zero, in_operand
-    logical                         :: prev_was_bin_op
+    logical                         :: prev_was_bin_op, is_exponent_sign
 
     output = ""
     needs_leading_zero = .true.
@@ -508,7 +508,22 @@ module dataProcess
         cycle
       end if
 
-      if (is_boundary(c)) then
+      ! See if '+' or '-' is part of scientific notation (e.g. 1e+10 or 1.0E-5)
+      is_exponent_sign = .false.
+      if (in_operand .and. (c == "+" .or. c == "-")) then
+        len_out = len(output)
+        if (len_out >= 1) then
+          prev_c = output(len_out:len_out)
+          if (prev_c == "e" .or. prev_c == "E") then
+            is_exponent_sign = .true.
+          end if
+        end if
+      end if
+
+      if (is_exponent_sign) then
+        ! Keep exponent sign attached directly to the operand string
+        output = output // c
+      else if (is_boundary(c)) then
         if (in_operand) then
           ! finish operand by adding trailing space
           output = output // " "
