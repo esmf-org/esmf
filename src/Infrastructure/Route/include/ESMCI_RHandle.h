@@ -76,6 +76,7 @@ namespace ESMCI {
     void *srcMaskValue;
     void *dstMaskValue;
     bool handleAllElements;
+    int srcTermProcessing;
    public:
     RouteHandle():ESMC_Base(-1){    // use Base constructor w/o BaseID increment
       // initialize the name for this RouteHandle object in the Base class
@@ -83,6 +84,7 @@ namespace ESMCI {
       srcMaskValue=NULL;
       dstMaskValue=NULL;
       handleAllElements=false;
+      srcTermProcessing=0;
     }
     ~RouteHandle(){destruct();}
     static RouteHandle *create(int *rc);
@@ -143,6 +145,10 @@ namespace ESMCI {
       handleAllElements = handleAllElements_;
       return ESMF_SUCCESS;
     }
+    int setSrcTermProcessing(int srcTermProcessing_){
+      srcTermProcessing = srcTermProcessing_;
+      return ESMF_SUCCESS;
+    }
     template<typename T> bool getSrcMaskValue(T* &value){
       value=(T*)srcMaskValue;
       return (srcMaskValue != NULL);
@@ -154,7 +160,10 @@ namespace ESMCI {
     bool getHandleAllElements(){
       return handleAllElements;
     }
-        
+    int getSrcTermProcessing(){
+      return srcTermProcessing;
+    }
+
     // fingerprinting of src/dst Arrays
     int fingerprint(Array *srcArrayArg, Array *dstArrayArg){
       srcArray = srcArrayArg;
