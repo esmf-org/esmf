@@ -60,8 +60,10 @@ def main():
         is_mpi_build = "TRUE"
 
     # Consolidated linking strings
-    esmf_libs = " ".join([esmf_vars.get(k, "") for k in ["ESMF_F90LINKRPATHS", "ESMF_F90ESMFLINKRPATHS", "ESMF_F90ESMFLINKPATHS", "ESMF_F90LINKPATHS", "ESMF_F90LINKLIBS", "ESMF_F90LINKOPTS"]]).strip()
-    esmc_libs = " ".join([esmf_vars.get(k, "") for k in ["ESMF_CLINKRPATHS", "ESMF_CESMFLINKRPATHS", "ESMF_CESMFLINKPATHS", "ESMF_CLINKPATHS", "ESMF_CLINKLIBS", "ESMF_CLINKOPTS"]]).strip()
+    esmf_libs = " ".join([esmf_vars.get(k, "") for k in ["ESMF_F90LINKRPATHS", "ESMF_F90ESMFLINKRPATHS", "ESMF_F90ESMFLINKPATHS", "ESMF_F90LINKPATHS", "ESMF_F90LINKLIBS"]]).strip()
+    esmf_link_options = esmf_vars.get("ESMF_F90LINKOPTS", "").strip()
+    esmc_libs = " ".join([esmf_vars.get(k, "") for k in ["ESMF_CLINKRPATHS", "ESMF_CESMFLINKRPATHS", "ESMF_CESMFLINKPATHS", "ESMF_CLINKPATHS", "ESMF_CLINKLIBS"]]).strip()
+    esmc_link_options = esmf_vars.get("ESMF_CLINKOPTS", "").strip()
 
     # Prioritize shared library (.dylib or .so), with static archive (.a) fallback
     libs_dir = esmf_vars.get("ESMF_LIBSDIR", os.path.dirname(args.esmfmkfile))
@@ -90,7 +92,9 @@ def main():
         "@ESMF_INCLUDE_DIRECTORIES@": ";".join(esmf_inc),
         "@ESMC_INCLUDE_DIRECTORIES@": ";".join(esmc_inc),
         "@ESMF_INTERFACE_LINK_LIBRARIES@": esmf_libs,
+        "@ESMF_INTERFACE_LINK_OPTIONS@": esmf_link_options,
         "@ESMC_INTERFACE_LINK_LIBRARIES@": esmc_libs,
+        "@ESMC_INTERFACE_LINK_OPTIONS@": esmc_link_options,
         "@ESMF_LIBRARY_LOCATION@": lib_loc
     }
     for token, value in replacements.items():
