@@ -233,18 +233,31 @@ end module compBmod
 
 !-------------------------------------------------------------------------------
 
-#ifndef ESMF_NO_DYNMASKOVERLOAD
-
 module dynMaskmod
   use ESMF
   implicit none
   private
+  public dynMaskR8R8R8
+#ifndef ESMF_NO_DYNMASKOVERLOAD
   public dynMaskR4R4R4
   public dynMaskR4R4R4V
   public dynMaskR4R8R4V
-  
+#endif
+
  contains
- 
+
+  subroutine dynMaskR8R8R8(dynamicMaskList, dynamicSrcMaskValue, &
+    dynamicDstMaskValue, rc)
+    type(ESMF_DynamicMaskElementR8R8R8), pointer        :: dynamicMaskList(:)
+    real(ESMF_KIND_R8),            intent(in), optional :: dynamicSrcMaskValue
+    real(ESMF_KIND_R8),            intent(in), optional :: dynamicDstMaskValue
+    integer,                       intent(out)          :: rc
+    ! dummy routine for unit test that does nothing
+    ! return successfully
+    rc = ESMF_SUCCESS
+  end subroutine
+
+#ifndef ESMF_NO_DYNMASKOVERLOAD
   subroutine dynMaskR4R4R4(dynamicMaskList, dynamicSrcMaskValue, &
     dynamicDstMaskValue, rc)
     type(ESMF_DynamicMaskElementR4R4R4), pointer        :: dynamicMaskList(:)
@@ -266,7 +279,7 @@ module dynMaskmod
     ! return successfully
     rc = ESMF_SUCCESS
   end subroutine
- 
+
   subroutine dynMaskR4R8R4V(dynamicMaskList, dynamicSrcMaskValue, &
     dynamicDstMaskValue, rc)
     type(ESMF_DynamicMaskElementR4R8R4V), pointer       :: dynamicMaskList(:)
@@ -277,10 +290,9 @@ module dynMaskmod
     ! return successfully
     rc = ESMF_SUCCESS
   end subroutine
- 
-end module dynMaskmod
-
 #endif
+
+end module dynMaskmod
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -310,9 +322,7 @@ program ESMF_RouteHandleAdvancedUTest
 
   use compAmod, only: ssA => SetServices
   use compBmod, only: ssB => SetServices
-#ifndef ESMF_NO_DYNMASKOVERLOAD  
   use dynMaskmod
-#endif
 
   implicit none
 
@@ -338,6 +348,7 @@ program ESMF_RouteHandleAdvancedUTest
   type(ESMF_RouteHandle)  :: rh1, rh2
   logical                 :: isCreated
   type(ESMF_DynamicMask)  :: dynamicMask
+  integer                 :: srcTermProcessing
 
   ! individual test failure message
   character(ESMF_MAXSTR) :: failMsg
@@ -651,6 +662,83 @@ program ESMF_RouteHandleAdvancedUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  ! DynamicMask testing
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test ESMF_DynamicMaskSetR8R8R8()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DynamicMaskSetR8R8R8(dynamicMask, &
+    dynamicMaskRoutine=dynMaskR8R8R8, handleAllElements=.true., rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create RouteHandle for dynamic masking - srcTermProcessing=1"
+  write(failMsg, *) "RouteHandleCreate failed"
+  srcTermProcessing=1 ! this will trigger error when trying to apply
+  call ESMF_FieldRegridStore(srcField=fieldA, dstField=fieldB1, &
+    srcTermProcessing=srcTermProcessing, routehandle=rh1, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Apply the Routehandle with dynamic masking - srcTermProcessing=1"
+  write(failMsg, *) "ESMF_FieldRegrid unexpected success"
+  call ESMF_FieldRegrid(srcField=fieldA, dstField=fieldB1, &
+    routehandle=rh1, dynamicMask=dynamicMask, rc=rc)
+  call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test RouteHandleDestroy()"
+  write(failMsg, *) "RouteHandleDestroy failed"
+  call ESMF_RouteHandleDestroy(rh1, noGarbage=.true., rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create RouteHandle for dynamic masking - srcTermProcessing=0"
+  write(failMsg, *) "RouteHandleCreate failed"
+  srcTermProcessing=0 ! required for dynamic masking
+  call ESMF_FieldRegridStore(srcField=fieldA, dstField=fieldB1, &
+    srcTermProcessing=srcTermProcessing, routehandle=rh1, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Apply the Routehandle with dynamic masking - srcTermProcessing=0"
+  write(failMsg, *) "ESMF_FieldRegrid failed"
+  call ESMF_FieldRegrid(srcField=fieldA, dstField=fieldB1, &
+    routehandle=rh1, dynamicMask=dynamicMask, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Apply the Routehandle with dynamic masking - ESMF_TERMORDER_FREE"
+  write(failMsg, *) "ESMF_FieldRegrid unexpected success"
+  call ESMF_FieldRegrid(srcField=fieldA, dstField=fieldB1, &
+    routehandle=rh1, termorderflag=ESMF_TERMORDER_FREE, &
+    dynamicMask=dynamicMask, rc=rc)
+  call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test RouteHandleDestroy()"
+  write(failMsg, *) "RouteHandleDestroy failed"
+  call ESMF_RouteHandleDestroy(rh1, noGarbage=.true., rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  ! Clean-up
+
   call ESMF_GridCompFinalize(compA, exportState=stateAB1, userRc=urc, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -707,7 +795,7 @@ program ESMF_RouteHandleAdvancedUTest
 
 #ifndef ESMF_NO_DYNMASKOVERLOAD
 
- !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Test ESMF_DynamicMaskSetR4R4R4()"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -716,7 +804,7 @@ program ESMF_RouteHandleAdvancedUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
- !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Test ESMF_DynamicMaskSetR4R4R4V()"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -725,7 +813,7 @@ program ESMF_RouteHandleAdvancedUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
- !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Test ESMF_DynamicMaskSetR4R8R4V()"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -733,7 +821,7 @@ program ESMF_RouteHandleAdvancedUTest
     dynamicMaskRoutine=dynMaskR4R8R4V, rc=rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-  
+
 #else
 
   write(name, *) "Dummy test to satisfy scripts for ESMF_NO_DYNMASKOVERLOAD"

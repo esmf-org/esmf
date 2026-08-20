@@ -3769,6 +3769,14 @@ int XXE::exec(
   VM::logMemInfo(std::string("XXE::exec():1.0"));
 #endif
 
+  // check for dynamicMask compatibility
+  if (rh && rh->validAsPtr() && rh->getSrcTermProcessing()!=0){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "Dynamic Masking requires RouteHandle with srcTermProcessing=0",
+      ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
   // set index range
   int indexRangeStart = 0;        // default
   if (indexStart > 0) indexRangeStart = indexStart;
