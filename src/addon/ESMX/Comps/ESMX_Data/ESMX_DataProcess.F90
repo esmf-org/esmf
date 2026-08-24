@@ -66,7 +66,7 @@ module ESMX_DataProcess
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
           msg="'okayTime' argument must be provided with 'importsOkay'.", &
           line=__LINE__, file=__FILE__, rcToReturn=rc)
-        return  ! bail out
+        return
       endif
       importsOkay = .true.
     endif
@@ -74,7 +74,7 @@ module ESMX_DataProcess
     ! Normalize the incoming infix string with single white space delimiters
     call normalize_infix(expression, infix_expression, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return  ! bail out
+      line=__LINE__, file=__FILE__)) return
 
     ! Convert standard infix notation to reverse polish notation
     call infix_to_rpn(infix_expression, rpn_expression)
@@ -85,32 +85,32 @@ module ESMX_DataProcess
     ! Setup export pointer
     call ESMF_FieldGet(exportField, typekind=tkExport, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return  ! bail out
+      line=__LINE__, file=__FILE__)) return
     if (tkExport == ESMF_TYPEKIND_I4) then
       call access_data_i4(exportField, fPtrExportI4, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       count = size(fPtrExportI4)
     else if (tkExport == ESMF_TYPEKIND_I8) then
       call access_data_i8(exportField, fPtrExportI8, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       count = size(fPtrExportI8)
     else if (tkExport == ESMF_TYPEKIND_R4) then
       call access_data_r4(exportField, fPtrExportR4, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       count = size(fPtrExportR4)
     else if (tkExport == ESMF_TYPEKIND_R8) then
       call access_data_r8(exportField, fPtrExportR8, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       count = size(fPtrExportR8)
     else
       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
         msg="process() only supports I4, I8, R4, and R8.", &
         line=__LINE__, file=__FILE__, rcToReturn=rc)
-      return  ! bail out
+      return
     end if
 
     ! Setup workspace stack
@@ -205,10 +205,10 @@ module ESMX_DataProcess
           call ESMF_StateGet(importState, itemName=token, itemType=itemType, &
             rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
+            line=__LINE__, file=__FILE__)) return
           tempString = ESMF_UtilStringUpperCase(token, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
+            line=__LINE__, file=__FILE__)) return
           ! Handle distinct cases, special variables first, then fields in state
           if (tempString == "_PI") then
             ! Special variable: _PI
@@ -217,7 +217,7 @@ module ESMX_DataProcess
                 msg="Import field with same name as special variable '"// &
                   token//"' not allowed in the same context!", &
                 line=__LINE__, file=__FILE__, rcToReturn=rc)
-              return  ! bail out
+              return
             endif
             stack(:,top) = PI
           else if (tempString == "_STEP") then
@@ -227,7 +227,7 @@ module ESMX_DataProcess
                 msg="Import field with same name as special variable '"// &
                   token//"' not allowed in the same context!", &
                 line=__LINE__, file=__FILE__, rcToReturn=rc)
-              return  ! bail out
+              return
             endif
             stack(:,top) = real(step, ESMF_KIND_R8)
           else if (index(tempString, "_COORD") == 1) then
@@ -237,7 +237,7 @@ module ESMX_DataProcess
                 msg="Import field with same name as special variable '"// &
                   token//"' not allowed in the same context!", &
                 line=__LINE__, file=__FILE__, rcToReturn=rc)
-              return  ! bail out
+              return
             endif
             call push_coord(exportField, token, stack(:,top), rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -247,11 +247,11 @@ module ESMX_DataProcess
             call ESMF_StateGet(importState, itemName=token, field=importField, &
               rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
+              line=__LINE__, file=__FILE__)) return
             if (present(importsOkay)) then
               importsOkay = NUOPC_IsAtTime(importField, okayTime, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=__FILE__)) return  ! bail out
+                line=__LINE__, file=__FILE__)) return
               if (.not.importsOkay) then
                 ! Early successful return with importsOkay==.false.
                 deallocate(stack)
@@ -260,60 +260,60 @@ module ESMX_DataProcess
             endif
             call ESMF_FieldGet(importField, typekind=tkImport, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=__FILE__)) return  ! bail out
+              line=__LINE__, file=__FILE__)) return
             if (tkImport == ESMF_TYPEKIND_I4) then
               call access_data_i4(importField, fPtrImportI4, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=__FILE__)) return  ! bail out
+                line=__LINE__, file=__FILE__)) return
               if (size(fPtrImportI4) /= count) then
                 call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
                   msg="Import fields in arithmetic expression '"// &
                     expression//"' must match size of targeted export field!", &
                   line=__LINE__, file=__FILE__, rcToReturn=rc)
-                return  ! bail out
+                return
               endif
               stack(:,top) = fPtrImportI4
             else if (tkImport == ESMF_TYPEKIND_I8) then
               call access_data_i8(importField, fPtrImportI8, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=__FILE__)) return  ! bail out
+                line=__LINE__, file=__FILE__)) return
               if (size(fPtrImportI8) /= count) then
                 call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
                   msg="Import fields in arithmetic expression '"// &
                     expression//"' must match size of targeted export field!", &
                   line=__LINE__, file=__FILE__, rcToReturn=rc)
-                return  ! bail out
+                return
               endif
               stack(:,top) = fPtrImportI8
             else if (tkImport == ESMF_TYPEKIND_R4) then
               call access_data_r4(importField, fPtrImportR4, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=__FILE__)) return  ! bail out
+                line=__LINE__, file=__FILE__)) return
               if (size(fPtrImportR4) /= count) then
                 call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
                   msg="Import fields in arithmetic expression '"// &
                     expression//"' must match size of targeted export field!", &
                   line=__LINE__, file=__FILE__, rcToReturn=rc)
-                return  ! bail out
+                return
               endif
               stack(:,top) = fPtrImportR4
             else if (tkImport == ESMF_TYPEKIND_R8) then
               call access_data_r8(importField, fPtrImportR8, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=__FILE__)) return  ! bail out
+                line=__LINE__, file=__FILE__)) return
               if (size(fPtrImportR8) /= count) then
                 call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
                   msg="Import fields in arithmetic expression '"// &
                     expression//"' must match size of targeted export field!", &
                   line=__LINE__, file=__FILE__, rcToReturn=rc)
-                return  ! bail out
+                return
               endif
               stack(:,top) = fPtrImportR8
             else
               call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
                 msg="process() only supports I4, I8, R4, and R8.", &
                 line=__LINE__, file=__FILE__, rcToReturn=rc)
-              return  ! bail out
+              return
             end if
           end if
         end if
@@ -366,29 +366,29 @@ module ESMX_DataProcess
 
     call ESMF_FieldGet(field, geomtype=geomtype, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return  ! bail out
+      line=__LINE__, file=__FILE__)) return
 
     if (geomtype==ESMF_GEOMTYPE_GRID) then
       call ESMF_FieldGet(field, grid=grid, staggerloc=staggerloc, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       call ESMF_GridGet(grid, dimCount=dimCount, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       allocate(coordDimCount(dimCount))
       call ESMF_GridGet(grid, coordDimCount=coordDimCount, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       if (coordDimCount(coordDim)==1) then
         allocate(exclusiveCount(dimCount))
         call ESMF_GridGet(grid, staggerloc=staggerloc, localDE=0, &
           exclusiveCount=exclusiveCount, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=__FILE__)) return  ! bail out
+          line=__LINE__, file=__FILE__)) return
         call ESMF_GridGetCoord(grid, coordDim=coordDim, staggerloc=staggerloc, &
           farrayPtr=fPtr1D, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=__FILE__)) return  ! bail out
+          line=__LINE__, file=__FILE__)) return
         m = size(fPtr1D)
         inner_repeat = product(exclusiveCount(1:coordDim-1))
         outer_replicate = product(exclusiveCount(coordDim+1:dimCount))
@@ -408,7 +408,7 @@ module ESMX_DataProcess
         call ESMF_GridGetCoord(grid, coordDim=coordDim, staggerloc=staggerloc, &
           farrayPtr=fPtr2D, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=__FILE__)) return  ! bail out
+          line=__LINE__, file=__FILE__)) return
         ! Reinterpret
         fPtr(1:size(fPtr2D)) => fPtr2D(:,:)
         ! Copy into stackColumn
@@ -417,7 +417,7 @@ module ESMX_DataProcess
         call ESMF_GridGetCoord(grid, coordDim=coordDim, staggerloc=staggerloc, &
           farrayPtr=fPtr3D, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=__FILE__)) return  ! bail out
+          line=__LINE__, file=__FILE__)) return
         ! Reinterpret
         fPtr(1:size(fPtr3D)) => fPtr3D(:,:,:)
         ! Copy into stackColumn
@@ -426,39 +426,39 @@ module ESMX_DataProcess
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="Unsupported coordDimCount detected.", &
           line=__LINE__, file=__FILE__, rcToReturn=rc)
-        return ! bail out
+        return
       endif
       deallocate(coordDimCount)
     elseif (geomtype==ESMF_GEOMTYPE_MESH) then
       call ESMF_FieldGet(field, mesh=mesh, meshloc=meshloc, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       if (meshloc==ESMF_MESHLOC_ELEMENT) then
         call ESMF_MeshGet(mesh, spatialDim=dimCount, &
           numOwnedElements=numOwnedPoints, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=__FILE__)) return  ! bail out
+          line=__LINE__, file=__FILE__)) return
       elseif (meshloc==ESMF_MESHLOC_NODE) then
         call ESMF_MeshGet(mesh, spatialDim=dimCount, &
           numOwnedNodes=numOwnedPoints, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=__FILE__)) return  ! bail out
+          line=__LINE__, file=__FILE__)) return
       else
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="Unsupported MESHLOC detected.", &
           line=__LINE__, file=__FILE__, rcToReturn=rc)
-        return ! bail out
+        return
       endif
       if (dimCount==1) then
         ! Directly fill stackColumn
         if (meshloc==ESMF_MESHLOC_ELEMENT) then
           call ESMF_MeshGet(mesh, ownedElemCoords=stackColumn, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
+            line=__LINE__, file=__FILE__)) return
         else
           call ESMF_MeshGet(mesh, ownedNodeCoords=stackColumn, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
+            line=__LINE__, file=__FILE__)) return
         endif
       else
         ! Require temporary fPtr1D
@@ -466,11 +466,11 @@ module ESMX_DataProcess
         if (meshloc==ESMF_MESHLOC_ELEMENT) then
           call ESMF_MeshGet(mesh, ownedElemCoords=fPtr1D, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
+            line=__LINE__, file=__FILE__)) return
         else
           call ESMF_MeshGet(mesh, ownedNodeCoords=fPtr1D, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=__FILE__)) return  ! bail out
+            line=__LINE__, file=__FILE__)) return
         endif
         stackColumn = fPtr1D(coordDim::dimCount)  ! copy the coordDim entries
         deallocate(fPtr1D)
@@ -479,7 +479,7 @@ module ESMX_DataProcess
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="Unsupported geomtype detected.", &
         line=__LINE__, file=__FILE__, rcToReturn=rc)
-      return ! bail out
+      return
     endif
 
   end subroutine
@@ -550,12 +550,12 @@ module ESMX_DataProcess
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
               msg="Invalid adjacent operators detected: '"//input//"'", &
               line=__LINE__, file=__FILE__, rcToReturn=rc)
-            return ! bail out
+            return
           else if (unary_guard) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
               msg="Invalid unary operator detected: '"//input//"'", &
               line=__LINE__, file=__FILE__, rcToReturn=rc)
-            return ! bail out
+            return
           end if
           ! Add operator and trailing space, set flags
           output = output // c // " "
@@ -586,7 +586,7 @@ module ESMX_DataProcess
       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
         msg="Unbalanced parentheses in expression: '"//input//"'", &
         line=__LINE__, file=__FILE__, rcToReturn=rc)
-      return ! bail out
+      return
     end if
 
     ! Remove trailing space
@@ -884,41 +884,41 @@ module ESMX_DataProcess
 
     call ESMF_FieldGet(field, rank=rank, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return  ! bail out
+      line=__LINE__, file=__FILE__)) return
 
     if (rank == 1) then
       call ESMF_FieldGet(field, farrayPtr=fPtr, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
     else if (rank == 2) then
       call ESMF_FieldGet(field, farrayPtr=fPtr2D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr2D)) => fPtr2D(:,:)
     else if (rank == 3) then
       call ESMF_FieldGet(field, farrayPtr=fPtr3D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr3D)) => fPtr3D(:,:,:)
     else if (rank == 4) then
       call ESMF_FieldGet(field, farrayPtr=fPtr4D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr4D)) => fPtr4D(:,:,:,:)
     else if (rank == 5) then
       call ESMF_FieldGet(field, farrayPtr=fPtr5D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr5D)) => fPtr5D(:,:,:,:,:)
     else if (rank == 6) then
       call ESMF_FieldGet(field, farrayPtr=fPtr6D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr6D)) => fPtr6D(:,:,:,:,:,:)
     else if (rank == 7) then
       call ESMF_FieldGet(field, farrayPtr=fPtr7D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr7D)) => fPtr7D(:,:,:,:,:,:,:)
     end if
   end subroutine
@@ -939,41 +939,41 @@ module ESMX_DataProcess
 
     call ESMF_FieldGet(field, rank=rank, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return  ! bail out
+      line=__LINE__, file=__FILE__)) return
 
     if (rank == 1) then
       call ESMF_FieldGet(field, farrayPtr=fPtr, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
     else if (rank == 2) then
       call ESMF_FieldGet(field, farrayPtr=fPtr2D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr2D)) => fPtr2D(:,:)
     else if (rank == 3) then
       call ESMF_FieldGet(field, farrayPtr=fPtr3D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr3D)) => fPtr3D(:,:,:)
     else if (rank == 4) then
       call ESMF_FieldGet(field, farrayPtr=fPtr4D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr4D)) => fPtr4D(:,:,:,:)
     else if (rank == 5) then
       call ESMF_FieldGet(field, farrayPtr=fPtr5D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr5D)) => fPtr5D(:,:,:,:,:)
     else if (rank == 6) then
       call ESMF_FieldGet(field, farrayPtr=fPtr6D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr6D)) => fPtr6D(:,:,:,:,:,:)
     else if (rank == 7) then
       call ESMF_FieldGet(field, farrayPtr=fPtr7D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr7D)) => fPtr7D(:,:,:,:,:,:,:)
     end if
   end subroutine
@@ -994,41 +994,41 @@ module ESMX_DataProcess
 
     call ESMF_FieldGet(field, rank=rank, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return  ! bail out
+      line=__LINE__, file=__FILE__)) return
 
     if (rank == 1) then
       call ESMF_FieldGet(field, farrayPtr=fPtr, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
     else if (rank == 2) then
       call ESMF_FieldGet(field, farrayPtr=fPtr2D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr2D)) => fPtr2D(:,:)
     else if (rank == 3) then
       call ESMF_FieldGet(field, farrayPtr=fPtr3D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr3D)) => fPtr3D(:,:,:)
     else if (rank == 4) then
       call ESMF_FieldGet(field, farrayPtr=fPtr4D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr4D)) => fPtr4D(:,:,:,:)
     else if (rank == 5) then
       call ESMF_FieldGet(field, farrayPtr=fPtr5D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr5D)) => fPtr5D(:,:,:,:,:)
     else if (rank == 6) then
       call ESMF_FieldGet(field, farrayPtr=fPtr6D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr6D)) => fPtr6D(:,:,:,:,:,:)
     else if (rank == 7) then
       call ESMF_FieldGet(field, farrayPtr=fPtr7D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr7D)) => fPtr7D(:,:,:,:,:,:,:)
     end if
   end subroutine
@@ -1049,41 +1049,41 @@ module ESMX_DataProcess
 
     call ESMF_FieldGet(field, rank=rank, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return  ! bail out
+      line=__LINE__, file=__FILE__)) return
 
     if (rank == 1) then
       call ESMF_FieldGet(field, farrayPtr=fPtr, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
     else if (rank == 2) then
       call ESMF_FieldGet(field, farrayPtr=fPtr2D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr2D)) => fPtr2D(:,:)
     else if (rank == 3) then
       call ESMF_FieldGet(field, farrayPtr=fPtr3D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr3D)) => fPtr3D(:,:,:)
     else if (rank == 4) then
       call ESMF_FieldGet(field, farrayPtr=fPtr4D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr4D)) => fPtr4D(:,:,:,:)
     else if (rank == 5) then
       call ESMF_FieldGet(field, farrayPtr=fPtr5D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr5D)) => fPtr5D(:,:,:,:,:)
     else if (rank == 6) then
       call ESMF_FieldGet(field, farrayPtr=fPtr6D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr6D)) => fPtr6D(:,:,:,:,:,:)
     else if (rank == 7) then
       call ESMF_FieldGet(field, farrayPtr=fPtr7D, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=__FILE__)) return  ! bail out
+        line=__LINE__, file=__FILE__)) return
       fPtr(1:size(fPtr7D)) => fPtr7D(:,:,:,:,:,:,:)
     end if
   end subroutine
