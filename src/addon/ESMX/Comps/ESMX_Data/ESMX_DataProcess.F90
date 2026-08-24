@@ -21,7 +21,16 @@ module ESMX_DataProcess
 
   subroutine process(importState, expression, exportField, step, okayTime, &
     importsOkay, rc)
-    ! Process according to the expression infix string and store in exportField
+    ! Process according to the infix expression string and store in exportField.
+    ! ARGUMENTS:
+    !    importState - ESMF_State holding fields that can be accessed for input.
+    !    expression  - String that holds the infix expression to be processed.
+    !    exportField - ESMF_Field to store processed output data.
+    !    step        - Integer advance step counter. Accessible via _STEP.
+    !    okayTime    - ESMF_Time of the current advance step.
+    !    importsOkay - Logical indicating whether all accessed fields in
+    !                  the importState are at okayTime. Only used if
+    !                  both arguments okayTime and importsOkay are present.
 
     type(ESMF_State), intent(in)    :: importState
     character(len=*), intent(in)    :: expression
