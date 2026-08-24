@@ -1119,6 +1119,7 @@ module ESMX_Data
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return  ! bail out
 !      else if (geom == "mesh") then
+!TODO: Implement Mesh specific options in the future.
       else
         ! error condition
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
