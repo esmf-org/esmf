@@ -36,7 +36,7 @@ elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "NVHPC")
   set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0")
 endif()
 
-add_library(ESMX_Data ESMX_Data.F90)
+add_library(ESMX_Data ESMX_Data.F90 ESMX_DataProcess.F90)
 target_include_directories(ESMX_Data
   INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
