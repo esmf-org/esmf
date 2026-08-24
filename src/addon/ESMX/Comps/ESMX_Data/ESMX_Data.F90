@@ -1791,7 +1791,7 @@ module ESMX_Data
             if (output%separateTimeFiles) then
               if (withTimeslice) then
                 write(stepString, "(I4.4)") 0
-                fileNamePrefix=fileNamePrefix//"_"//stepString
+                fileNamePrefix=fileNamePrefix//"_"//trim(stepString)
               endif
               withTimeslice = .false.
             endif
@@ -1842,7 +1842,10 @@ module ESMX_Data
     real(ESMF_KIND_R8)         :: statsMean, statsMin, statsMax
     logical                    :: statsOkay, headerPrinted
     character(:), allocatable  :: fileNamePrefix
-    character(len=4)           :: stepString
+    integer, parameter         :: formatDigitsMax = 32
+    integer                    :: formatDigits    =  4  ! default
+    character(len=32)          :: formatString
+    character(len=formatDigitsMax) :: stepString
 
     rc = ESMF_SUCCESS
 
@@ -1870,6 +1873,12 @@ module ESMX_Data
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return
 
+    ! construct formatString that might be needed twice below
+    if (stepCounter > 0) then
+      formatDigits = max(floor(log10(real(stepCounter))) + 1, formatDigits)
+    endif
+    write(formatString, "('(I', I0, '.', I0, ')')") formatDigits, formatDigits
+
     ! Loop through outputItems, trigger for onImport
     if (allocated(is%wrap%outputItems)) then
       do i=1, size(is%wrap%outputItems)
@@ -1885,8 +1894,14 @@ module ESMX_Data
             endif
             fileNamePrefix="data_"//trim(name)//"_"//output%name
             if (output%separateTimeFiles) then
-              write(stepString, "(I4.4)") stepCounter
-              fileNamePrefix=fileNamePrefix//"_"//stepString
+              if (formatDigits > formatDigitsMax) then
+                call ESMF_LogSetError(ESMF_RC_VAL_WRONG, &
+                  msg="Overflow in fileNamePrefix: "//fileNamePrefix, &
+                  line=__LINE__, file=trim(name)//":"//__FILE__, rcToReturn=rc)
+                return
+              endif
+              write(stepString, formatString) stepCounter
+              fileNamePrefix=fileNamePrefix//"_"//trim(stepString)
               filestatus=ESMF_FILESTATUS_REPLACE
             endif
             if (output%separateFieldFiles) then
@@ -2027,8 +2042,14 @@ module ESMX_Data
             endif
             fileNamePrefix="data_"//trim(name)//"_"//output%name
             if (output%separateTimeFiles) then
-              write(stepString, "(I4.4)") stepCounter
-              fileNamePrefix=fileNamePrefix//"_"//stepString
+              if (formatDigits > formatDigitsMax) then
+                call ESMF_LogSetError(ESMF_RC_VAL_WRONG, &
+                  msg="Overflow in fileNamePrefix: "//fileNamePrefix, &
+                  line=__LINE__, file=trim(name)//":"//__FILE__, rcToReturn=rc)
+                return
+              endif
+              write(stepString, formatString) stepCounter
+              fileNamePrefix=fileNamePrefix//"_"//trim(stepString)
               filestatus=ESMF_FILESTATUS_REPLACE
             endif
             if (output%separateFieldFiles) then
