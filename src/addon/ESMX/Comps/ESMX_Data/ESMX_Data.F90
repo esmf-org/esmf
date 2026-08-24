@@ -9,7 +9,7 @@ module ESMX_Data
   use NUOPC_ModelBase, &
     modelBaseSS    => SetServices
 
-  use dataProcess
+  use ESMX_DataProcess
 
   implicit none
 

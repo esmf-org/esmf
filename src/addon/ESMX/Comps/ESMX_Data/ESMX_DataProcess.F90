@@ -1,4 +1,4 @@
-module dataProcess
+module ESMX_DataProcess
 
   !-----------------------------------------------------------------------------
   ! Data Processing
@@ -1081,4 +1081,4 @@ module dataProcess
 
   !-----------------------------------------------------------------------------
 
-end module dataProcess
+end module ESMX_DataProcess
