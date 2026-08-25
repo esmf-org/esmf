@@ -22,7 +22,7 @@ on:
 env:
   esmf-sdir: 'esmf-sdir'
   mapl-repo: 'GEOS-ESM/MAPL'
-  mapl-vers: 'develop'
+  mapl-vers: 'release/v2' # Test with MAPL2 by default until NASA has us switch back to develop (MAPL3)
   mapl-sdir: 'mapl-sdir'
   mapl-bdir: 'build'
   mapl-btyp: 'DEBUG'
