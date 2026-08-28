@@ -13,6 +13,7 @@ SOURCEC	  = \
             ESMCI_FileIO_Util.C \
             ESMCI_ESMFMesh_Util.C \
             ESMCI_UGRID_Util.C \
+            ESMCI_GDAL_Util.C \
             ESMCI_Mesh_FileIO.C \
             ESMCI_GToM_Util.C \
             ESMCI_Mesh_GToM_Glue.C \
@@ -57,7 +58,7 @@ endif
 SOURCEH	  = ESMCI_MeshCXX.h
 
 # List all .h files which should be copied to common include dir
-STOREH	  = ESMCI_MeshCXX.h
+STOREH	  = ESMCI_MeshCXX.h ESMCI_GDAL_Util.h ESMCI_FileIO_Util.h
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))

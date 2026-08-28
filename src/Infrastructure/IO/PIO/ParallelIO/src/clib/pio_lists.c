@@ -29,6 +29,8 @@ pio_add_to_file_list(file_desc_t *file)
     /* Keep a global pointer to the current file. */
     current_file = file;
 
+    PLOG((2, "pio_add_to_file_list"));
+
     /* Add file to list. */
     HASH_ADD_INT(pio_file_list, pio_ncid, file);
 }
