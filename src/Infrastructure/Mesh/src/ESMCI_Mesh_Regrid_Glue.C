@@ -650,33 +650,24 @@ void ESMCI_regrid_create(
     // Build the RouteHandle using ArraySMMStore() 
     if (*has_rh) {
 
+      // Output Error if src Array contains a NaN
+      // TODO: eventually only check non-masked values and then put under checkFlag
+#ifdef ESMF_CHECK_FOR_RHSTORE_SRC_NAN      
+      if (_Array_contains_NaN(*arraysrcpp)) {
+        if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                         "The source Field passed to regrid weight generation (e.g. ESMF_FieldRegridStore()) contains a NaN.",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;        
+      }
+#endif
+
+      
       // Enter profile around routehandle creation
       if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 1) {
         ESMCI::TraceEventRegionEnter("RouteHandle creation", &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
       }
 
-      
-      // Output Error if src Array contains a NaN
-      if (_Array_contains_NaN(*arraysrcpp)) {
-        //  ESMC_LogDefault.Write("The source Field passed to regrid weight generation (e.g. ESMF_FieldRegridStore()) contains a NaN. This may result in a floating point exception with some compiler options.",
-        //                    ESMC_LOGMSG_WARN);
-
-        if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                                         "The source Field passed to regrid weight generation (e.g. ESMF_FieldRegridStore()) contains a NaN.",
-                                         ESMC_CONTEXT, &localrc)) throw localrc;        
-      }
-
-      // Output Warning if dst Array contains a NaN
-      if (_Array_contains_NaN(*arraydstpp)) {
-        ESMC_LogDefault.Write("The destination Field passed to regrid weight generation (e.g. ESMF_FieldRegridStore()) contains a NaN. This may result in a floating point exception with compiler options.",
-                              ESMC_LOGMSG_WARN);
-        //if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        //                                 "The destination Field passed to regrid weight generation (e.g. ESMF_FieldRegridStore()) contains a NaN.",
-        //                                  ESMC_CONTEXT, &localrc)) throw localrc;                
-      }
-      
-
+     
       // Set some flags
       enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
       ESMC_Logical ignoreUnmatched = ESMF_FALSE;
