@@ -31,15 +31,20 @@
 
 using namespace std;
 
-enum Operation : int8_t { EQUAL=0, INSERT=1, DELETE=2 };
+// Enumerators are prefixed with OP_ to avoid collisions with preprocessor
+// macros from system headers -- notably <windows.h>, which #defines DELETE
+// (a Win32 access-right constant) on MinGW/Windows. A plain `DELETE` here would
+// be macro-expanded before compilation, so the prefix is required for the
+// MinGW build; renaming all three keeps the set consistent.
+enum Operation : int8_t { OP_EQUAL=0, OP_INSERT=1, OP_DELETE=2 };
 
 inline char op2chr(Operation op) {
     switch (op) {
-        case DELETE:
+        case OP_DELETE:
             return '-';
-        case INSERT:
+        case OP_INSERT:
             return '+';
-        case EQUAL:
+        case OP_EQUAL:
             return '=';
         default:
             return '?';
@@ -187,7 +192,7 @@ class MyersDiff {
         Diffs diffs{};
         if (text1 == text2) {
             if (text1.size() != 0) {
-                diffs.push_back(Diff(EQUAL, text1));
+                diffs.push_back(Diff(OP_EQUAL, text1));
             }
             return diffs;
         }
@@ -209,10 +214,10 @@ class MyersDiff {
 
         // Restore the prefix and suffix.
         if (commonprefix.size() != 0) {
-            diffs.insert(diffs.begin(), Diff(EQUAL, commonprefix));
+            diffs.insert(diffs.begin(), Diff(OP_EQUAL, commonprefix));
         }
         if (commonsuffix.size() != 0) {
-            diffs.push_back(Diff(EQUAL, commonsuffix));
+            diffs.push_back(Diff(OP_EQUAL, commonsuffix));
         }
 
         // TODO diff_cleanupMerge(diffs);
@@ -235,13 +240,13 @@ class MyersDiff {
 
         if (text1.size() == 0) {
             // Just add some text (speedup).
-            diffs.push_back(Diff(INSERT, text2));
+            diffs.push_back(Diff(OP_INSERT, text2));
             return diffs;
         }
 
         if (text2.size() == 0) {
             // Just delete some text (speedup).
-            diffs.push_back(Diff(DELETE, text1));
+            diffs.push_back(Diff(OP_DELETE, text1));
             return diffs;
         }
 
@@ -250,9 +255,9 @@ class MyersDiff {
         int i = longtext.find(shorttext);
         if (i != -1) {
             // Shorter text is inside the longer text (speedup).
-            Operation op = (text1.size() > text2.size()) ? DELETE : INSERT;
+            Operation op = (text1.size() > text2.size()) ? OP_DELETE : OP_INSERT;
             diffs.push_back(Diff(op, longtext.substr(0, i)));
-            diffs.push_back(Diff(EQUAL, shorttext));
+            diffs.push_back(Diff(OP_EQUAL, shorttext));
             diffs.push_back(Diff(op, longtext.substr(i + shorttext.size())));
             return diffs;
         }
@@ -260,8 +265,8 @@ class MyersDiff {
         if (shorttext.size() == 1) {
             // Single character string.
             // After the previous speedup, the character can't be an equality.
-            diffs.push_back(Diff(DELETE, text1));
-            diffs.push_back(Diff(INSERT, text2));
+            diffs.push_back(Diff(OP_DELETE, text1));
+            diffs.push_back(Diff(OP_INSERT, text2));
             return diffs;
         }
 
@@ -281,7 +286,7 @@ class MyersDiff {
                                                checklines, deadline);
           // Merge the results.
           diffs = diffs_a;
-          diffs.push_back(Diff(EQUAL, mid_common));
+          diffs.push_back(Diff(OP_EQUAL, mid_common));
           diffs.addAll(diffs_b);
           return diffs;
         }
@@ -417,8 +422,8 @@ class MyersDiff {
         // Diff took too long and hit the deadline or
         // number of diffs equals number of characters, no commonality at all.
         Diffs diffs{};
-        diffs.push_back(Diff{DELETE, text1});
-        diffs.push_back(Diff{INSERT, text2});
+        diffs.push_back(Diff{OP_DELETE, text1});
+        diffs.push_back(Diff{OP_INSERT, text2});
         return diffs;
     }
 
@@ -642,7 +647,7 @@ class MyersDiff {
       int length_deletions2 = 0;
       Diff thisDiff = pointer.next();
       while (thisDiff != null) {
-        if (thisDiff.operation == EQUAL) {
+        if (thisDiff.operation == OP_EQUAL) {
           // Equality found.
           equalities.push(thisDiff);
           length_insertions1 = length_insertions2;
@@ -652,7 +657,7 @@ class MyersDiff {
           lastEquality = thisDiff.text;
         } else {
           // An insertion or deletion.
-          if (thisDiff.operation == INSERT) {
+          if (thisDiff.operation == OP_INSERT) {
             length_insertions2 += thisDiff.text.size();
           } else {
             length_deletions2 += thisDiff.text.size();
@@ -671,9 +676,9 @@ class MyersDiff {
             pointer.next();
 
             // Replace equality with a delete.
-            pointer.set(Diff(DELETE, lastEquality));
+            pointer.set(Diff(OP_DELETE, lastEquality));
             // Insert a corresponding an insert.
-            pointer.push_back(Diff(INSERT, lastEquality));
+            pointer.push_back(Diff(OP_INSERT, lastEquality));
 
             equalities.pop();  // Throw away the equality we just deleted.
             if (!equalities.isEmpty()) {
@@ -726,8 +731,8 @@ class MyersDiff {
         }
       }
       while (thisDiff != null) {
-        if (prevDiff.operation == DELETE &&
-            thisDiff.operation == INSERT) {
+        if (prevDiff.operation == OP_DELETE &&
+            thisDiff.operation == OP_INSERT) {
           String deletion = prevDiff.text;
           String insertion = thisDiff.text;
           int overlap_length1 = diff_commonOverlap(deletion, insertion);
@@ -736,7 +741,7 @@ class MyersDiff {
             if (overlap_length1 >= deletion.size() / 2.0 ||
                 overlap_length1 >= insertion.size() / 2.0) {
               // Overlap found. Insert an equality and trim the surrounding
-    edits. pointer.previous(); pointer.push_back(Diff(EQUAL,
+    edits. pointer.previous(); pointer.push_back(Diff(OP_EQUAL,
                                    insertion.substring(0, overlap_length1)));
               prevDiff.text =
                   deletion.substring(0, deletion.size() - overlap_length1);
@@ -750,12 +755,12 @@ class MyersDiff {
               // Reverse overlap found.
               // Insert an equality and swap and trim the surrounding edits.
               pointer.previous();
-              pointer.push_back(Diff(EQUAL,
+              pointer.push_back(Diff(OP_EQUAL,
                                    deletion.substring(0, overlap_length2)));
-              prevDiff.operation = INSERT;
+              prevDiff.operation = OP_INSERT;
               prevDiff.text =
                 insertion.substring(0, insertion.size() - overlap_length2);
-              thisDiff.operation = DELETE;
+              thisDiff.operation = OP_DELETE;
               thisDiff.text = deletion.substring(overlap_length2);
               // pointer.add inserts the element before the cursor, so there is
               // no need to step past the new element.
@@ -788,8 +793,8 @@ class MyersDiff {
       Diff nextDiff = pointer.hasNext() ? pointer.next() : null;
       // Intentionally ignore the first and last element (don't need checking).
       while (nextDiff != null) {
-        if (prevDiff.operation == EQUAL &&
-            nextDiff.operation == EQUAL) {
+        if (prevDiff.operation == OP_EQUAL &&
+            nextDiff.operation == OP_EQUAL) {
           // This is a single edit surrounded by equalities.
           equality1 = prevDiff.text;
           edit = thisDiff.text;
@@ -933,7 +938,7 @@ class MyersDiff {
       bool post_del = false;
       Diff thisDiff = pointer.next();
       Diff safeDiff = thisDiff;  // The last Diff that is known to be
-    unsplittable. while (thisDiff != null) { if (thisDiff.operation == EQUAL) {
+    unsplittable. while (thisDiff != null) { if (thisDiff.operation == OP_EQUAL) {
           // Equality found.
           if (thisDiff.text.size() < Diff_EditCost && (post_ins || post_del))
     {
@@ -951,7 +956,7 @@ class MyersDiff {
           post_ins = post_del = false;
         } else {
           // An insertion or deletion.
-          if (thisDiff.operation == DELETE) {
+          if (thisDiff.operation == OP_DELETE) {
             post_del = true;
           } else {
             post_ins = true;
@@ -977,9 +982,9 @@ class MyersDiff {
             pointer.next();
 
             // Replace equality with a delete.
-            pointer.set(Diff(DELETE, lastEquality));
+            pointer.set(Diff(OP_DELETE, lastEquality));
             // Insert a corresponding an insert.
-            pointer.push_back(thisDiff = Diff(INSERT, lastEquality));
+            pointer.push_back(thisDiff = Diff(OP_INSERT, lastEquality));
 
             equalities.pop();  // Throw away the equality we just deleted.
             lastEquality = null;
@@ -1025,7 +1030,7 @@ class MyersDiff {
      * @param diffs std::vector of Diff objects.
      *
     void diff_cleanupMerge(Diffs diffs) {
-      diffs.push_back(Diff(EQUAL, ""));  // Add a dummy entry at the end.
+      diffs.push_back(Diff(OP_EQUAL, ""));  // Add a dummy entry at the end.
       std::vectorIterator<Diff> pointer = diffs.listIterator();
       int count_delete = 0;
       int count_insert = 0;
@@ -1036,17 +1041,17 @@ class MyersDiff {
       int commonlength;
       while (thisDiff != null) {
         switch (thisDiff.operation) {
-        case INSERT:
+        case OP_INSERT:
           count_insert++;
           text_insert += thisDiff.text;
           prevEqual = null;
           break;
-        case DELETE:
+        case OP_DELETE:
           count_delete++;
           text_delete += thisDiff.text;
           prevEqual = null;
           break;
-        case EQUAL:
+        case OP_EQUAL:
           if (count_delete + count_insert > 1) {
             bool both_types = count_delete != 0 && count_insert != 0;
             // Delete the offending records.
@@ -1065,12 +1070,12 @@ class MyersDiff {
               if (commonlength != 0) {
                 if (pointer.hasPrevious()) {
                   thisDiff = pointer.previous();
-                  assert thisDiff.operation == EQUAL
+                  assert thisDiff.operation == OP_EQUAL
                          : "Previous diff should have been an equality.";
                   thisDiff.text += text_insert.substring(0, commonlength);
                   pointer.next();
                 } else {
-                  pointer.push_back(Diff(EQUAL,
+                  pointer.push_back(Diff(OP_EQUAL,
                       text_insert.substring(0, commonlength)));
                 }
                 text_insert = text_insert.substring(commonlength);
@@ -1091,10 +1096,10 @@ class MyersDiff {
             }
             // Insert the merged records.
             if (text_delete.size() != 0) {
-              pointer.push_back(Diff(DELETE, text_delete));
+              pointer.push_back(Diff(OP_DELETE, text_delete));
             }
             if (text_insert.size() != 0) {
-              pointer.push_back(Diff(INSERT, text_insert));
+              pointer.push_back(Diff(OP_INSERT, text_insert));
             }
             // Step forward to the equality.
             thisDiff = pointer.hasNext() ? pointer.next() : null;
@@ -1133,8 +1138,8 @@ class MyersDiff {
       Diff nextDiff = pointer.hasNext() ? pointer.next() : null;
       // Intentionally ignore the first and last element (don't need checking).
       while (nextDiff != null) {
-        if (prevDiff.operation == EQUAL &&
-            nextDiff.operation == EQUAL) {
+        if (prevDiff.operation == OP_EQUAL &&
+            nextDiff.operation == OP_EQUAL) {
           // This is a single edit surrounded by equalities.
           if (thisDiff.text.endsWith(prevDiff.text)) {
             // Shift the edit over the previous equality.
@@ -1179,7 +1184,7 @@ class MyersDiff {
     String diff_text1(Diffs diffs) {
         Range text{};
         for (Diff aDiff : diffs) {
-            if (aDiff.operation != INSERT) {
+            if (aDiff.operation != OP_INSERT) {
                 text.append(aDiff.text);
             }
         }
@@ -1194,7 +1199,7 @@ class MyersDiff {
     String diff_text2(Diffs diffs) {
         Range text{};
         for (Diff aDiff : diffs) {
-            if (aDiff.operation != DELETE) {
+            if (aDiff.operation != OP_DELETE) {
                 text.append(aDiff.text);
             }
         }
@@ -1210,9 +1215,9 @@ class MyersDiff {
         Stats ret;
         for (const auto &i : result) {
             switch (i.operation) {
-                case EQUAL:  ret.equal += i.text.size(); break;
-                case INSERT: ret.inserted += i.text.size(); break;
-                case DELETE: ret.deleted += i.text.size(); break;
+                case OP_EQUAL:  ret.equal += i.text.size(); break;
+                case OP_INSERT: ret.inserted += i.text.size(); break;
+                case OP_DELETE: ret.deleted += i.text.size(); break;
             }
         }
         return ret;

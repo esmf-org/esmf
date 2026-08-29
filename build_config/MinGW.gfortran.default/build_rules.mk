@@ -11,6 +11,20 @@ ESMF_CXXDEFAULT         = g++
 ESMF_CDEFAULT           = gcc
 
 ############################################################
+# Use the GNU dialect (gnu++/gnu) instead of strict ISO (c++/c). On MinGW the
+# strict -std=c++NN / -std=cNN flags define __STRICT_ANSI__, which makes the CRT
+# headers (<io.h>, <unistd.h>) hide their POSIX-named entry points (dup, dup2,
+# close, open, read, write, ...). ESMF's VM code uses those names, so the strict
+# dialect breaks the build. The GNU dialect keeps them visible.
+#
+ifneq ($(ESMF_CXXSTD),sysdefault)
+ESMF_CXXSTDFLAG         = -std=gnu++$(ESMF_CXXSTD)
+endif
+ifneq ($(ESMF_CSTD),sysdefault)
+ESMF_CSTDFLAG           = -std=gnu$(ESMF_CSTD)
+endif
+
+############################################################
 # Default MPI setting.
 #
 ifeq ($(ESMF_COMM),default)
@@ -96,7 +110,20 @@ endif
 ifeq ($(ESMF_ABI),64)
 ESMF_ABISTRING := x86_64_small
 endif
-else
+endif
+# 64-bit MSYS2/MinGW reports `uname -m` as x86_64; accept it alongside the legacy
+# i686 label (mirrors the Linux.gfortran ABISTRING handling). ESMF_ABI still selects
+# the 32- vs 64-bit memory model.
+ifeq ($(ESMF_MACHINE),x86_64)
+ESMF_ABISTRING := x86_64_small
+ifeq ($(ESMF_ABI),32)
+ESMF_ABISTRING := x86_64_32
+endif
+ifeq ($(ESMF_ABI),64)
+ESMF_ABISTRING := x86_64_small
+endif
+endif
+ifeq ($(ESMF_ABISTRING),)
 $(error "ESMF_MACHINE = $(ESMF_MACHINE)" not recognized)
 endif
 
@@ -149,8 +176,10 @@ ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SYSTEMCALL
 
 ############################################################
 # Windows does not have support for the times system call
+# (also define it for C: vendored Zoltan timer.c is C and includes sys/times.h)
 #
 ESMF_CXXCOMPILECPPFLAGS += -DNO_TIMES
+ESMF_CCOMPILECPPFLAGS   += -DNO_TIMES
 
 ############################################################
 # Windows does not have support for Pthreads
@@ -212,7 +241,14 @@ ESMF_CXXLINKLIBS += -lgfortran -lWs2_32
 ############################################################
 # Shared library options
 #
-ESMF_SL_LIBOPTS  += -shared
+# --export-all-symbols is required: parts of the tree (yaml-cpp, MOAB/mesquite,
+# MOAB Factory.cpp, verdict, ESMCI_Trace, nlohmann/json) decorate symbols with
+# __declspec(dllexport). As soon as ANY symbol is explicitly exported, MinGW ld
+# stops auto-exporting the rest, so the undecorated extern "C" ESMC_* / ESMF C API
+# (e.g. ESMC_Initialize) is absent from the DLL export table and ctypes can't find
+# it. Forcing all globals to be exported restores the Unix-.so-like behavior ESMPy
+# expects.
+ESMF_SL_LIBOPTS  += -shared -Wl,--export-all-symbols
 ESMF_SL_LIBLIBS       += $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS) -lgfortran
 
 ############################################################
