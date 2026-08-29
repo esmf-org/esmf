@@ -564,12 +564,11 @@ void get_elemConn_info_2Dvar_from_ESMFMesh_file(int pioSystemDesc, int pioFileDe
   // Get rid of offsets
   delete [] nec_offsets;
   
-  // Get total number of connections on this PET
+  // Get total number of valid connections on this PET
   totNumElementConn=0;
   for (int i=0; i<num_elems; i++) {
     totNumElementConn += numElementConn[i];
   }
-
 
   // Get maxNodePElement
   piorc = PIOc_inq_dimid(pioFileDesc, "maxNodePElement", &dimid);
@@ -582,6 +581,74 @@ void get_elemConn_info_2Dvar_from_ESMFMesh_file(int pioSystemDesc, int pioFileDe
                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;
   
 
+  // Read connection information
+#ifndef JUST_READ_VALID_CONN_06192026
+  // PIO has problems if the read is broken up into too many pieces per PET.
+  // The issue is because of the VLAs used inside PIO, so one solution is to
+  // set the stack size to ULIMITED. However, to prevent the issue from happening in
+  // the first place here we read even the invalid connection entries to prevent gaps.
+  // After reading we then compress down to just the valid parts.
+
+  // Calculate the total number of entries to read (including invalid)
+  int readTotNumElementConn=num_elems*maxNodePElement;
+
+  // Define offsets for elementConn decomp
+  PIO_Offset *ec_offsets=new PIO_Offset[readTotNumElementConn];
+  for (int i=0,pos=0; i<num_elems; i++) {
+    int elem_start_ind=(elem_ids[i]-1)*maxNodePElement+1; // +1 to make base-1
+    for (int j=0; j<maxNodePElement; j++) {
+      ec_offsets[pos] = (PIO_Offset) (elem_start_ind+j);
+      pos++;
+    }
+  }
+  
+  // Init elementConn decomp
+  int ec_iodesc;
+  int gdimlen2D[2]={(int)elementCount,(int)maxNodePElement};
+  piorc = PIOc_InitDecomp_ReadOnly(pioSystemDesc, PIO_INT, 2, gdimlen2D, readTotNumElementConn,
+                                   ec_offsets, &ec_iodesc, &rearr, NULL, NULL);
+  if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for file ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+  
+  // Get rid of offsets
+  delete [] ec_offsets;
+
+  // Get id for elementConn variable
+  piorc = PIOc_inq_varid(pioFileDesc, "elementConn", &varid);
+  if (!CHECKPIOERROR(piorc, std::string("Error elementConn variable not in file ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
+  piorc = PIOc_setframe(pioFileDesc, varid, -1);
+  if (!CHECKPIOERROR(piorc, std::string("Error setting frame for variable elementConn ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+  // Read elementConn including invalid entries into readElementConn array
+  int *readElementConn= new int[readTotNumElementConn];
+  piorc = PIOc_read_darray(pioFileDesc, varid, ec_iodesc, readTotNumElementConn, readElementConn);
+  if (!CHECKPIOERROR(piorc, std::string("Error reading variable elementConn from file ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+  // Get rid of elementConn decomp
+  piorc = PIOc_freedecomp(pioSystemDesc, ec_iodesc);
+  if (!CHECKPIOERROR(piorc, std::string("Error freeing elementConn decomp "),
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+    
+  // Copy to compressed version with just valid entries
+  elementConn= new int[totNumElementConn];
+  for (int i=0,pos=0; i<num_elems; i++) {
+    int elem_start_ind=i*maxNodePElement;
+    for (int j=0; j<numElementConn[i]; j++) {
+      elementConn[pos] = readElementConn[elem_start_ind+j];      
+      pos++;
+    }
+  }
+
+  // Get rid of readElementConn
+  delete [] readElementConn;
+  
+#else
+  
   // Define offsets for elementConn decomp
   // (Only define offsets for valid elementConn entries)
   PIO_Offset *ec_offsets=new PIO_Offset[totNumElementConn];
@@ -593,7 +660,6 @@ void get_elemConn_info_2Dvar_from_ESMFMesh_file(int pioSystemDesc, int pioFileDe
     }
   }
   
-
   // Init elementConn decomp
   int ec_iodesc;
   int gdimlen2D[2]={(int)elementCount,(int)maxNodePElement};
@@ -619,11 +685,13 @@ void get_elemConn_info_2Dvar_from_ESMFMesh_file(int pioSystemDesc, int pioFileDe
   piorc = PIOc_read_darray(pioFileDesc, varid, ec_iodesc, totNumElementConn, elementConn);
   if (!CHECKPIOERROR(piorc, std::string("Error reading variable elementConn from file ") + filename,
                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;
-  
+
   // Get rid of elementConn decomp
   piorc = PIOc_freedecomp(pioSystemDesc, ec_iodesc);
   if (!CHECKPIOERROR(piorc, std::string("Error freeing elementConn decomp "),
-                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+  
+#endif
   
 }
 

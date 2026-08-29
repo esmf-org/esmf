@@ -1699,23 +1699,30 @@ endif
 #-------------------------------------------------------------------------------
 # yaml-cpp C++ YAML API
 #-------------------------------------------------------------------------------
-ifeq ($(ESMF_YAMLCPP),internal)
+ESMF_YAMLCPP_LC := $(shell echo "$(ESMF_YAMLCPP)" | tr '[:upper:]' '[:lower:]')
+
+ifeq ($(ESMF_YAMLCPP_LC),off)
+$(error ESMF_YAMLCPP=OFF is no longer supported. See ESMF User's Guide for valid options.)
+endif
+
 ESMF_YAMLCPP_PRESENT = TRUE
+
+ifeq ($(ESMF_YAMLCPP_LC),internal)
+ESMF_CPPFLAGS        += -DYAML=ESMF_YAML
 ESMF_CXXCOMPILEPATHS += -I$(ESMF_DIR)/src/prologue/yaml-cpp/include
 ESMF_YAMLCPP_INCLUDE =
 ESMF_YAMLCPP_LIBPATH =
 ESMF_YAMLCPP_LIBS =
 endif
 
-ifeq ($(ESMF_YAMLCPP),standard)
-ESMF_YAMLCPP_PRESENT = TRUE
+ifeq ($(ESMF_YAMLCPP_LC),standard)
 ifneq ($(origin ESMF_YAMLCPP_LIBS), environment)
 ESMF_YAMLCPP_LIBS = -lyaml-cpp
 endif
 endif
 
 ifeq ($(ESMF_YAMLCPP_PRESENT),TRUE)
-ESMF_CPPFLAGS                += -DESMF_YAMLCPP=1 -DESMF_YAML=1
+ESMF_CPPFLAGS                += -DESMF_YAMLCPP=1
 ifdef ESMF_YAMLCPP_INCLUDE
 ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_YAMLCPP_INCLUDE)
 ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_YAMLCPP_INCLUDE)
@@ -2382,6 +2389,7 @@ lib: info
 	@$(MAKE) build_libs
 	@$(MAKE) build_tracelibs
 	@$(MAKE) info_mk ESMF_CCOMPILEPATHS="$(ESMF_CCOMPILEPATHS) -I$(ESMF_CONFDIR)"
+	$(ESMF_DIR)/cmake/generate_config.py --esmfmkfile=$(ESMF_LIBDIR)/esmf.mk --template=$(ESMF_DIR)/cmake/ESMFConfig.cmake.in --outputdir=$(ESMF_LIBDIR)/cmake/ESMF
 	@echo "ESMF library built successfully on "`date`
 	@echo "To verify, build and run the unit and system tests with: $(MAKE) check"
 	@echo " or the more extensive: $(MAKE) all_tests"

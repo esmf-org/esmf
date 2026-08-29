@@ -1,0 +1,98 @@
+# ESMFConfig.cmake.in
+@PACKAGE_INIT@
+
+set(ESMF_VERSION "@ESMF_VERSION@")
+set(ESMF_VERSION_STRING_GIT "@ESMF_VERSION_STRING_GIT@")
+set(ESMF_BETA_RELEASE @ESMF_BETA_RELEASE@)
+set(ESMF_HAS_MPI @ESMF_HAS_MPI@)
+set(ESMF_APPSDIR @ESMF_APPSDIR@)
+set(ESMF_LIBSDIR @ESMF_LIBSDIR@)
+set(ESMF_ESMXDIR @ESMF_ESMXDIR@)
+
+# Conditionally load MPI dependency track ONLY if enabled in esmf.mk
+if(ESMF_HAS_MPI)
+    include(CMakeFindDependencyMacro)
+    find_dependency(MPI COMPONENTS Fortran C)
+endif()
+
+# Include and link tracking arrays
+set(ESMF_INCLUDE_DIRECTORIES "@ESMF_INCLUDE_DIRECTORIES@")
+set(ESMC_INCLUDE_DIRECTORIES "@ESMC_INCLUDE_DIRECTORIES@")
+
+# Create Fortran Targets
+if(NOT TARGET ESMF::ESMF)
+    add_library(ESMF::ESMF UNKNOWN IMPORTED GLOBAL)
+
+    set(ESMF_LINK_LIBS_LIST "@ESMF_INTERFACE_LINK_LIBRARIES@")
+    separate_arguments(ESMF_TARGET_LINKS UNIX_COMMAND "${ESMF_LINK_LIBS_LIST}")
+    set(ESMF_LINK_OPTIONS "@ESMF_INTERFACE_LINK_OPTIONS@")
+    separate_arguments(ESMF_LINK_OPTIONS UNIX_COMMAND "${ESMF_LINK_OPTIONS}")
+
+    # Filter any raw object files ESMF might use for cross-language linking but will confuse CMake
+    list(FILTER ESMF_TARGET_LINKS EXCLUDE REGEX "\\.o$")
+
+    # Filter items starting with -lmpi, since MPI handled via CMake target
+    list(FILTER ESMF_TARGET_LINKS EXCLUDE REGEX "^-lmpi")
+
+    # Append the proper CMake MPI target if needed
+    if(ESMF_HAS_MPI)
+        list(APPEND ESMF_TARGET_LINKS "MPI::MPI_Fortran")
+    endif()
+
+    set_target_properties(ESMF::ESMF PROPERTIES
+        IMPORTED_LOCATION "@ESMF_LIBRARY_LOCATION@"
+        INTERFACE_INCLUDE_DIRECTORIES "${ESMF_INCLUDE_DIRECTORIES}"
+        INTERFACE_LINK_LIBRARIES "${ESMF_TARGET_LINKS}"
+        INTERFACE_LINK_OPTIONS "${ESMF_LINK_OPTIONS}"
+    )
+endif()
+
+# Create C/C++ Targets
+if(NOT TARGET ESMF::ESMC)
+    add_library(ESMF::ESMC UNKNOWN IMPORTED GLOBAL)
+
+    set(ESMC_LINK_LIBS_LIST "@ESMC_INTERFACE_LINK_LIBRARIES@")
+    separate_arguments(ESMC_TARGET_LINKS UNIX_COMMAND "${ESMC_LINK_LIBS_LIST}")
+    set(ESMC_LINK_OPTIONS "@ESMC_INTERFACE_LINK_OPTIONS@")
+    separate_arguments(ESMC_LINK_OPTIONS UNIX_COMMAND "${ESMC_LINK_OPTIONS}")
+
+    # Filter any raw object files ESMF might use for cross-language linking but will confuse CMake
+    list(FILTER ESMC_TARGET_LINKS EXCLUDE REGEX "\\.o$")
+
+    # Filter items starting with -lmpi, since MPI handled via CMake target
+    list(FILTER ESMC_TARGET_LINKS EXCLUDE REGEX "^-lmpi")
+
+    # Append the proper CMake MPI target if needed
+    if(ESMF_HAS_MPI)
+        list(APPEND ESMC_TARGET_LINKS "MPI::MPI_C")
+    endif()
+
+    set_target_properties(ESMF::ESMC PROPERTIES
+        IMPORTED_LOCATION "@ESMF_LIBRARY_LOCATION@"
+        INTERFACE_INCLUDE_DIRECTORIES "${ESMC_INCLUDE_DIRECTORIES}"
+        INTERFACE_LINK_LIBRARIES "${ESMC_TARGET_LINKS}"
+        INTERFACE_LINK_OPTIONS "${ESMC_LINK_OPTIONS}"
+    )
+endif()
+
+# Compatibility Aliases
+if(NOT TARGET ESMF::ESMF_Fortran)
+    add_library(ESMF::ESMF_Fortran ALIAS ESMF::ESMF)
+endif()
+if(NOT TARGET ESMF)
+    add_library(ESMF ALIAS ESMF::ESMF)
+endif()
+if(NOT TARGET ESMF::ESMF_C)
+    add_library(ESMF::ESMF_C ALIAS ESMF::ESMC)
+endif()
+
+# Standardize discovery reporting
+set(ESMF_LIBRARY_LOCATION "@ESMF_LIBRARY_LOCATION@")
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(ESMF
+    REQUIRED_VARS ESMF_LIBRARY_LOCATION
+    VERSION_VAR ESMF_VERSION
+)
+
+# Indicate Success
+set(ESMF_FOUND TRUE)

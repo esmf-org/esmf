@@ -111,5 +111,6 @@ from esmpy.api.mesh import *
 from esmpy.api.locstream import *
 from esmpy.api.field import *
 from esmpy.api.regrid import *
+from esmpy.api.dynamicmask import *
 from esmpy.api.constants import *
 from esmpy.util.helpers import *

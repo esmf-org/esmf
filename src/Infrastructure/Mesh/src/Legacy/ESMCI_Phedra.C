@@ -427,7 +427,7 @@ void make_polygon_3Dcart(int num_pnts, double *pnts, double *normal, PntAndAngle
   // Loop through to find a point which is not zero distance to center
   int first=-1;
   for (int i=0; i<num_pnts; i++) {
-    if (!(CLOSE((pnts+3*first),center))) {
+    if (!(CLOSE((pnts+3*i),center))) {
       first=i;
       break;
     }
