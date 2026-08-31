@@ -1161,7 +1161,7 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_FieldFill(f_ocn, dataFillScheme="const", const1=0.0_ESMF_KIND_R8, rc=localrc) 
+    call ESMF_FieldFill(f_atm, dataFillScheme="const", const1=0.0_ESMF_KIND_R8, rc=localrc) 
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
