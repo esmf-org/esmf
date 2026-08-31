@@ -104,9 +104,18 @@ module ESMX_Data
       msg="Allocation of the internal state memory failed.", &
       line=__LINE__, file=trim(name)//":"//__FILE__, &
       rcToReturn=rc)) return
+#if 0
+!TODO: Switch to the ESMF_InternalState API once all supported compilers
+!TODO: support the Fortran 2018 assumed-type dummy argument feature.
     call ESMF_InternalStateAdd(xdata, internalState=is, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return
+#else
+!TODO: For now rely on older ESMF API to handle internal state
+    call ESMF_GridCompSetInternalState(xdata, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//__FILE__)) return
+#endif
 
     ! initialize the stepCounter inside the internal state
     is%wrap%stepCounter = 0
@@ -1593,9 +1602,18 @@ module ESMX_Data
 
     ! query component for internal state
     nullify(is%wrap)
+#if 0
+!TODO: Switch to the ESMF_InternalState API once all supported compilers
+!TODO: support the Fortran 2018 assumed-type dummy argument feature.
     call ESMF_InternalStateGet(xdata, internalState=is, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return
+#else
+!TODO: For now rely on older ESMF API to handle internal state
+    call ESMF_GridCompGetInternalState(xdata, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//__FILE__)) return
+#endif
 
     ! query for importState and exportState
     call NUOPC_ModelBaseGet(xdata, importState=importState, &
@@ -1650,9 +1668,18 @@ module ESMX_Data
 
     ! query component for internal state
     nullify(is%wrap)
+#if 0
+!TODO: Switch to the ESMF_InternalState API once all supported compilers
+!TODO: support the Fortran 2018 assumed-type dummy argument feature.
     call ESMF_InternalStateGet(xdata, internalState=is, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return
+#else
+!TODO: For now rely on older ESMF API to handle internal state
+    call ESMF_GridCompGetInternalState(xdata, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//__FILE__)) return
+#endif
 
     ! query for importState and exportState
     call NUOPC_ModelBaseGet(xdata, importState=importState, &
@@ -1707,9 +1734,18 @@ module ESMX_Data
 
     ! query component for internal state
     nullify(is%wrap)
+#if 0
+!TODO: Switch to the ESMF_InternalState API once all supported compilers
+!TODO: support the Fortran 2018 assumed-type dummy argument feature.
     call ESMF_InternalStateGet(xdata, internalState=is, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return
+#else
+!TODO: For now rely on older ESMF API to handle internal state
+    call ESMF_GridCompGetInternalState(xdata, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//__FILE__)) return
+#endif
 
     ! query component for clock, import, and export states
     call NUOPC_ModelBaseGet(xdata, clock=clock, &
@@ -1860,9 +1896,18 @@ module ESMX_Data
 
     ! query component for internal state
     nullify(is%wrap)
+#if 0
+!TODO: Switch to the ESMF_InternalState API once all supported compilers
+!TODO: support the Fortran 2018 assumed-type dummy argument feature.
     call ESMF_InternalStateGet(xdata, internalState=is, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return
+#else
+!TODO: For now rely on older ESMF API to handle internal state
+    call ESMF_GridCompGetInternalState(xdata, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//__FILE__)) return
+#endif
 
     associate(stepCounter => is%wrap%stepCounter)
     stepCounter=stepCounter+1
@@ -2406,9 +2451,18 @@ module ESMX_Data
 
     ! query component for internal state
     nullify(is%wrap)
+#if 0
+!TODO: Switch to the ESMF_InternalState API once all supported compilers
+!TODO: support the Fortran 2018 assumed-type dummy argument feature.
     call ESMF_InternalStateGet(xdata, internalState=is, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return
+#else
+!TODO: For now rely on older ESMF API to handle internal state
+    call ESMF_GridCompGetInternalState(xdata, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//__FILE__)) return
+#endif
 
     ! use correct timeKeeping
     if (is%wrap%timeKeeping == "MODEL") then
@@ -2462,9 +2516,18 @@ module ESMX_Data
 
     ! query component for internal state
     nullify(is%wrap)
+#if 0
+!TODO: Switch to the ESMF_InternalState API once all supported compilers
+!TODO: support the Fortran 2018 assumed-type dummy argument feature.
     call ESMF_InternalStateGet(xdata, internalState=is, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return
+#else
+!TODO: For now rely on older ESMF API to handle internal state
+    call ESMF_GridCompGetInternalState(xdata, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//__FILE__)) return
+#endif
 
     ! destroy outputItems
     if (allocated(is%wrap%outputItems)) then
