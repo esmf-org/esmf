@@ -2437,14 +2437,17 @@ module ESMX_Data
 
     ! query component for modelBase internal state
     nullify(modelBaseIs%wrap)
-#ifdef ESMF_NO_F2018ASSUMEDTYPE
-    call ESMF_UserCompGetInternalState(xdata, label_InternalState, &
-      modelBaseIs, rc)
+#if 0
+!TODO: Switch to the ESMF_InternalState API once all supported compilers
+!TODO: support the Fortran 2018 assumed-type dummy argument feature.
+    call ESMF_InternalStateGet(xdata, internalState=modelBaseIs, &
+      label=label_InternalState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return
 #else
+!TODO: For now rely on older ESMF API to handle internal state
     call ESMF_UserCompGetInternalState(xdata, label_InternalState, &
-      modelBaseIs, rc=rc)
+      modelBaseIs, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return
 #endif
