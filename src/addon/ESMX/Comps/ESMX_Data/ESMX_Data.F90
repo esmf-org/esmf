@@ -232,6 +232,7 @@ module ESMX_Data
     if (ESMF_LogFoundError(rcToCheck=rc, msg="Must specify 'timeKeeping'!", &
       line=__LINE__, file=__FILE__)) return
 
+    allocate(character(len=len(tempString)) :: timeKeeping) ! help nvfortran
     timeKeeping = ESMF_UtilStringUpperCase(tempString, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg="Must specify 'timeKeeping'!", &
       line=__LINE__, file=__FILE__)) return
@@ -637,6 +638,8 @@ module ESMX_Data
             string = geometry(1:atPos-1)  ! temp array, safe for older compilers
             geometry = trim(adjustl(string))
             ! set staggerLoc
+            if (allocated(string)) deallocate(string)       ! help nvfortran
+            allocate(character(len=len(stagger)) :: string) ! help nvfortran
             string = ESMF_UtilStringUpperCase(stagger, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=__FILE__)) return
@@ -1296,6 +1299,8 @@ module ESMX_Data
         line=__LINE__, file=__FILE__)) return
       allocate(staggerLocList(size(stringList)))
       do i=1, size(stringList)
+        if (allocated(string)) deallocate(string)             ! help nvfortran
+        allocate(character(len=len(stringList(i))) :: string) ! help nvfortran
         string = ESMF_UtilStringUpperCase(stringList(i), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return
@@ -1517,6 +1522,8 @@ module ESMX_Data
         line=__LINE__, file=__FILE__)) return
       allocate(staggerLocList(size(stringList)))
       do i=1, size(stringList)
+        if (allocated(string)) deallocate(string)             ! help nvfortran
+        allocate(character(len=len(stringList(i))) :: string) ! help nvfortran
         string = ESMF_UtilStringUpperCase(stringList(i), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return
@@ -2437,14 +2444,17 @@ module ESMX_Data
 
     ! query component for modelBase internal state
     nullify(modelBaseIs%wrap)
-#ifdef ESMF_NO_F2018ASSUMEDTYPE
-    call ESMF_UserCompGetInternalState(xdata, label_InternalState, &
-      modelBaseIs, rc)
+#if 0
+!TODO: Switch to the ESMF_InternalState API once all supported compilers
+!TODO: support the Fortran 2018 assumed-type dummy argument feature.
+    call ESMF_InternalStateGet(xdata, internalState=modelBaseIs, &
+      label=label_InternalState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return
 #else
+!TODO: For now rely on older ESMF API to handle internal state
     call ESMF_UserCompGetInternalState(xdata, label_InternalState, &
-      modelBaseIs, rc=rc)
+      modelBaseIs, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return
 #endif
