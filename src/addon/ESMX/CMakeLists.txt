@@ -6,9 +6,50 @@ project(ESMX
         LANGUAGES Fortran CXX C
         )
 
-if(NOT TARGET ESMF AND NOT ESMF_FOUND)
+if(PROJECT_IS_TOP_LEVEL)
   # Find ESMF
   find_package(ESMF 9.0.0 REQUIRED)
+
+  # Set global defaults
+  if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -fbacktrace -O2" CACHE STRING "" FORCE)
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g -fbacktrace -O0 -fcheck=all -ffpe-trap=invalid,zero,overflow,underflow" CACHE STRING "" FORCE)
+
+  elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Cray")
+    set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -O2" CACHE STRING "" FORCE)
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g" CACHE STRING "" FORCE)
+
+  elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Flang")
+    set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -O2" CACHE STRING "" FORCE)
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g" CACHE STRING "" FORCE)
+
+  elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "LLVMFlang")
+    set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -O2" CACHE STRING "" FORCE)
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g" CACHE STRING "" FORCE)
+
+  elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
+    set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -traceback -O2" CACHE STRING "" FORCE)
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0 -check all -fpe0 -ftrapuv -init=snan,arrays" CACHE STRING "" FORCE)
+
+  elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "IntelLLVM")
+    set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -traceback -O2" CACHE STRING "" FORCE)
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0 -check all -fpe0 -ftrapuv -init=snan,arrays" CACHE STRING "" FORCE)
+    # Fix for ifx 2023.x: Pass -check all to the linker in Debug mode to pull in MSan runtime symbols
+    add_link_options($<$<AND:$<CONFIG:Debug>,$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,Fortran>>:-check all>)
+
+  elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "NAG")
+    set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -gline" CACHE STRING "" FORCE)
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g -gline -C=all" CACHE STRING "" FORCE)
+    # Ensure NAG runtime check and line-tracing libraries link properly across targets
+    add_link_options(
+      $<$<AND:$<CONFIG:RelWithDebInfo>,$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,Fortran>>:-gline>
+      $<$<AND:$<CONFIG:Debug>,$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,Fortran>>:-gline;-C=all>
+    )
+
+  elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "NVHPC")
+    set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -traceback -O2 -fast" CACHE STRING "" FORCE)
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0" CACHE STRING "" FORCE)
+  endif()
 endif()
 
 # Define standard installation directories
