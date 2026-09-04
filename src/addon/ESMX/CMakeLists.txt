@@ -33,18 +33,11 @@ if(PROJECT_IS_TOP_LEVEL)
 
   elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "IntelLLVM")
     set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -traceback -O2" CACHE STRING "" FORCE)
-    set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0 -check all -fpe0 -ftrapuv -init=snan,arrays" CACHE STRING "" FORCE)
-    # Fix for ifx 2023.x: Pass -check all to the linker in Debug mode to pull in MSan runtime symbols
-    add_link_options($<$<AND:$<CONFIG:Debug>,$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,Fortran>>:-check all>)
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0 -check bounds,pointers,stack -fpe0 -ftrapuv -init=snan,arrays" CACHE STRING "" FORCE)
 
   elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "NAG")
     set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -gline" CACHE STRING "" FORCE)
-    set(CMAKE_Fortran_FLAGS_DEBUG "-g -gline -C=all" CACHE STRING "" FORCE)
-    # Ensure NAG runtime check and line-tracing libraries link properly across targets
-    add_link_options(
-      $<$<AND:$<CONFIG:RelWithDebInfo>,$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,Fortran>>:-gline>
-      $<$<AND:$<CONFIG:Debug>,$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,Fortran>>:-gline;-C=all>
-    )
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g -gline -C=array -C=bits -C=dangling -C=pointer -C=recursion" CACHE STRING "" FORCE)
 
   elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "NVHPC")
     set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -traceback -O2 -fast" CACHE STRING "" FORCE)
