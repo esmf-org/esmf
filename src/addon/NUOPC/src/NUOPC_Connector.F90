@@ -5145,7 +5145,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     integer                         :: count
     integer                         :: sIndex
     character(ESMF_MAXSTR)          :: iShareStatus, eShareStatus
-    logical                         :: sharedFlag
+    logical                         :: sharedFlag, isAtCurrentTime
     character(ESMF_MAXSTR)          :: valueString
     integer                   :: verbosity, diagnostic, profiling
     type(ESMF_Time)           :: currTime
@@ -5158,7 +5158,13 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
       diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+
+    ! access clock for current time
+    call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
     ! handle profiling
     if (btest(profiling,9)) then
       call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
@@ -5188,10 +5194,6 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
 
     ! handle diagnostic
     if (diagnostic>0) then
-      call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-        return  ! bail out
       call ESMF_TimePrint(currTime, unit=currTimeString, options="underscore", &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -5476,8 +5478,19 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           cplSetListTemp(sIndex)%cplList(cplSetListTemp(sIndex)%j)=cplList(i)
           cplSetListTemp(sIndex)%j=cplSetListTemp(sIndex)%j+1
+          ! guard Regrid/RedistStore() from data that is outside valid range
+          isAtCurrentTime = NUOPC_IsAtTime(iField, currTime, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (.not.isAtCurrentTime) then
+            ! not at current time
+            ! -> NUOPC convention: fill with random data of valid range
+            call ESMF_FieldFill(iField, dataFillScheme="random", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
         endif
-          
+
         ! set the connected Attribute on import Field
         call NUOPC_SetAttribute(iField, name="Connected", value="true", &
           rc=rc)
