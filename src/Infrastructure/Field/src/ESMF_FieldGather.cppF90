@@ -168,6 +168,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                         :: rank, dimCount, ldeCount, lde
     integer, allocatable            :: coordDimCount(:)
     real(ESMF_KIND_R8)              :: l_const1
+    real(ESMF_KIND_R8),    pointer, contiguous  :: contigDataPtrR8(:)
+    real(ESMF_KIND_R4),    pointer, contiguous  :: contigDataPtrR4(:)
+    integer(ESMF_KIND_I8), pointer, contiguous  :: contigDataPtrI8(:)
+    integer(ESMF_KIND_I4), pointer, contiguous  :: contigDataPtrI4(:)
     real(ESMF_KIND_R8), pointer     :: dataPtrR8D1(:)
     real(ESMF_KIND_R8), pointer     :: dataPtrR8D2(:,:)
     real(ESMF_KIND_R8), pointer     :: dataPtrR8D3(:,:,:)
@@ -195,7 +199,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
     
     call ESMF_FieldGet(field, typekind=typekind, rank=rank, &
-      geomtype=geomtype, rc=rc)
+      geomtype=geomtype, localDeCount=ldeCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT)) &
       return  ! bail out
@@ -214,68 +218,67 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if(present(param3I4)) l_member = param3I4
     l_dataFillScheme = "sincos" ! default
     if(present(dataFillScheme)) l_dataFillScheme = dataFillScheme
-      
-    allocate(coordDimCount(rank))
 
-    if (geomtype==ESMF_GEOMTYPE_GRID) then
-      call ESMF_FieldGet(field, grid=grid, localDeCount=ldeCount, &
-        staggerloc=staggerloc, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT)) &
-        return  ! bail out
-      call ESMF_GridGet(grid, dimCount=dimCount, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT)) &
-        return  ! bail out
-    elseif (geomtype==ESMF_GEOMTYPE_MESH) then
-      call ESMF_FieldGet(field, mesh=mesh, localDeCount=ldeCount, &
-        meshloc=meshloc, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT)) &
-        return  ! bail out
-      if (meshloc==ESMF_MESHLOC_ELEMENT) then
+    !--------------------------------------------------------------------------
+    if (trim(l_dataFillScheme)=="sincos") then
+
+      allocate(coordDimCount(rank))
+
+      if (geomtype==ESMF_GEOMTYPE_GRID) then
+        call ESMF_FieldGet(field, grid=grid, staggerloc=staggerloc, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT)) &
+          return  ! bail out
+        call ESMF_GridGet(grid, dimCount=dimCount, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT)) &
+          return  ! bail out
+      elseif (geomtype==ESMF_GEOMTYPE_MESH) then
+        call ESMF_FieldGet(field, mesh=mesh, meshloc=meshloc, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT)) &
+          return  ! bail out
+        if (meshloc==ESMF_MESHLOC_ELEMENT) then
+          call ESMF_MeshGet(mesh, spatialDim=dimCount, &
+            numOwnedElements=numOwnedPoints, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return  ! bail out
+        elseif (meshloc==ESMF_MESHLOC_NODE) then
+          call ESMF_MeshGet(mesh, spatialDim=dimCount, &
+            numOwnedNodes=numOwnedPoints, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return  ! bail out
+        else
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="Unsupported MESHLOC detected.", &
+            ESMF_CONTEXT, &
+            rcToReturn=rc)
+          return ! bail out
+        endif
+      elseif (geomtype==ESMF_GEOMTYPE_XGRID) then
+        call ESMF_FieldGet(field, xgrid=xgrid, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT)) &
+          return ! bail out
+        call ESMF_XGridGet(xgrid, mesh=mesh, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT)) &
+          return ! bail out
         call ESMF_MeshGet(mesh, spatialDim=dimCount, &
           numOwnedElements=numOwnedPoints, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT)) &
-          return  ! bail out
-      elseif (meshloc==ESMF_MESHLOC_NODE) then
-        call ESMF_MeshGet(mesh, spatialDim=dimCount, &
-          numOwnedNodes=numOwnedPoints, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT)) &
-          return  ! bail out
+          return ! bail out
       else
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="Unsupported MESHLOC detected.", &
+          msg="Unsupported geomtype detected.", &
           ESMF_CONTEXT, &
           rcToReturn=rc)
         return ! bail out
       endif
-    elseif (geomtype==ESMF_GEOMTYPE_XGRID) then
-      call ESMF_FieldGet(field, xgrid=xgrid, localDeCount=ldeCount, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT)) &
-        return ! bail out
-      call ESMF_XGridGet(xgrid, mesh=mesh, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT)) &
-        return ! bail out
-      call ESMF_MeshGet(mesh, spatialDim=dimCount, &
-        numOwnedElements=numOwnedPoints, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT)) &
-        return ! bail out
-    else
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="Unsupported geomtype detected.", &
-        ESMF_CONTEXT, &
-        rcToReturn=rc)
-      return ! bail out
-    endif
 
-    if (trim(l_dataFillScheme)=="sincos") then
       if (typekind==ESMF_TYPEKIND_R8 .and. rank==1) then
         if (dimCount==1) then
           ! 1D sin pattern
@@ -915,58 +918,40 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           rcToReturn=rc)
         return ! bail out
       endif
+
+      deallocate(coordDimCount)
+
+    !--------------------------------------------------------------------------
     else if (trim(l_dataFillScheme)=="one") then
       do lde=0, ldeCount-1
-        if (typekind==ESMF_TYPEKIND_R8 .and. rank==1) then
-          ! 1D all 1.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D1, rc=rc)
+        if (typekind==ESMF_TYPEKIND_R8) then
+          call access_data_r8(field, contigDataPtrR8, localDe=lde, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT)) &
             return  ! bail out
-          ! initialize the entire array
-          dataPtrR8D1 = 1._ESMF_KIND_R8
-        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==1) then
-          ! 1D all 1.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D1, rc=rc)
+          contigDataPtrR8 = 1._ESMF_KIND_R8
+        else if (typekind==ESMF_TYPEKIND_R4) then
+          call access_data_r4(field, contigDataPtrR4, localDe=lde, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT)) &
             return  ! bail out
-          ! initialize the entire array
-          dataPtrR4D1 = 1._ESMF_KIND_R4
-        elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==2) then
-          ! 2D all 1.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D2, rc=rc)
+          contigDataPtrR4 = 1._ESMF_KIND_R4
+        else if (typekind==ESMF_TYPEKIND_I8) then
+          call access_data_i8(field, contigDataPtrI8, localDe=lde, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT)) &
             return  ! bail out
-          ! initialize the entire array
-          dataPtrR8D2 = 1._ESMF_KIND_R8
-        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==2) then
-          ! 2D all 1.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D2, rc=rc)
+          contigDataPtrI8 = 1_ESMF_KIND_I8
+        else if (typekind==ESMF_TYPEKIND_I4) then
+          call access_data_i4(field, contigDataPtrI4, localDe=lde, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT)) &
             return  ! bail out
-          ! initialize the entire array
-          dataPtrR4D2 = 1._ESMF_KIND_R4
-        elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==3) then
-          ! 3D all 1.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D3, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT)) &
-            return  ! bail out
-          ! initialize the entire array
-          dataPtrR8D3 = 1._ESMF_KIND_R8
-        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==3) then
-          ! 3D all 1.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D3, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT)) &
-            return  ! bail out
-          ! initialize the entire array
-          dataPtrR4D3 = 1._ESMF_KIND_R4
+          contigDataPtrI4 = 1_ESMF_KIND_I4
         endif
       enddo
+
+    !--------------------------------------------------------------------------
     else if (trim(l_dataFillScheme)=="nan") then
       if (typekind==ESMF_TYPEKIND_R8 .and. ieee_support_nan(nanR8)) then
         nanR8 = ieee_value(nanR8, ieee_quiet_nan)
@@ -980,56 +965,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return ! bail out
       endif
       do lde=0, ldeCount-1
-        if (typekind==ESMF_TYPEKIND_R8 .and. rank==1) then
-          ! 1D all qnan.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D1, rc=rc)
+        if (typekind==ESMF_TYPEKIND_R8) then
+          call access_data_r8(field, contigDataPtrR8, localDe=lde, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT)) &
-            return ! bail out
-          ! initialize the entire array
-          dataPtrR8D1 = nanR8
-        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==1) then
-          ! 1D all qnan.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D1, rc=rc)
+            return  ! bail out
+          contigDataPtrR8 = nanR8
+        else if (typekind==ESMF_TYPEKIND_R4) then
+          call access_data_r4(field, contigDataPtrR4, localDe=lde, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT)) &
-            return ! bail out
-          ! initialize the entire array
-          dataPtrR4D1 = nanR4
-        elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==2) then
-          ! 2D all qnan.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D2, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT)) &
-            return ! bail out
-          ! initialize the entire array
-          dataPtrR8D2 = nanR8
-        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==2) then
-          ! 2D all qnan.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D2, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT)) &
-            return ! bail out
-          ! initialize the entire array
-          dataPtrR4D2 = nanR4
-        elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==3) then
-          ! 3D all qnan.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D3, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT)) &
-            return ! bail out
-          ! initialize the entire array
-          dataPtrR8D3 = nanR8
-        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==3) then
-          ! 3D all qnan.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D3, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT)) &
-            return ! bail out
-          ! initialize the entire array
-          dataPtrR4D3 = nanR4
+            return  ! bail out
+          contigDataPtrR4 = nanR4
         endif
       enddo
+
+    !--------------------------------------------------------------------------
     else if (trim(l_dataFillScheme)=="snan") then
       if (typekind==ESMF_TYPEKIND_R8 .and. ieee_support_nan(nanR8)) then
         nanR8 = ieee_value(nanR8, ieee_signaling_nan)
@@ -1043,160 +994,86 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return ! bail out
       endif
       do lde=0, ldeCount-1
-        if (typekind==ESMF_TYPEKIND_R8 .and. rank==1) then
-          ! 1D all snan.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D1, rc=rc)
+        if (typekind==ESMF_TYPEKIND_R8) then
+          call access_data_r8(field, contigDataPtrR8, localDe=lde, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT)) &
-            return ! bail out
-          ! initialize the entire array
-          dataPtrR8D1 = nanR8
-        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==1) then
-          ! 1D all snan.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D1, rc=rc)
+            return  ! bail out
+          contigDataPtrR8 = nanR8
+        else if (typekind==ESMF_TYPEKIND_R4) then
+          call access_data_r4(field, contigDataPtrR4, localDe=lde, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT)) &
-            return ! bail out
-          ! initialize the entire array
-          dataPtrR4D1 = nanR4
-        elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==2) then
-          ! 2D all snan.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D2, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT)) &
-            return ! bail out
-          ! initialize the entire array
-          dataPtrR8D2 = nanR8
-        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==2) then
-          ! 2D all snan.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D2, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT)) &
-            return ! bail out
-          ! initialize the entire array
-          dataPtrR4D2 = nanR4
-        elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==3) then
-          ! 3D all snan.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D3, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT)) &
-            return ! bail out
-          ! initialize the entire array
-          dataPtrR8D3 = nanR8
-        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==3) then
-          ! 3D all snan.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D3, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT)) &
-            return ! bail out
-          ! initialize the entire array
-          dataPtrR4D3 = nanR4
+            return  ! bail out
+          contigDataPtrR4 = nanR4
         endif
       enddo
+
+    !--------------------------------------------------------------------------
     else if (trim(l_dataFillScheme)=="const") then
       do lde=0, ldeCount-1
-        if (typekind==ESMF_TYPEKIND_R8 .and. rank==1) then
-          ! 1D all 1.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D1, rc=rc)
+        if (typekind==ESMF_TYPEKIND_R8) then
+          call access_data_r8(field, contigDataPtrR8, localDe=lde, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT)) &
             return  ! bail out
-          ! initialize the entire array
-          dataPtrR8D1 = real(l_const1,ESMF_KIND_R8);
-        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==1) then
-          ! 1D all 1.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D1, rc=rc)
+          contigDataPtrR8 = real(l_const1,ESMF_KIND_R8)
+        else if (typekind==ESMF_TYPEKIND_R4) then
+          call access_data_r4(field, contigDataPtrR4, localDe=lde, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT)) &
             return  ! bail out
-          ! initialize the entire array
-          dataPtrR4D1 = real(l_const1,ESMF_KIND_R4);
-        elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==2) then
-          ! 2D all 1.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D2, rc=rc)
+          contigDataPtrR4 = real(l_const1,ESMF_KIND_R4)
+        else if (typekind==ESMF_TYPEKIND_I8) then
+          call access_data_i8(field, contigDataPtrI8, localDe=lde, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT)) &
             return  ! bail out
-          ! initialize the entire array
-          dataPtrR8D2 = real(l_const1,ESMF_KIND_R8);
-        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==2) then
-          ! 2D all 1.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D2, rc=rc)
+          contigDataPtrI8 = int(l_const1,ESMF_KIND_I8)
+        else if (typekind==ESMF_TYPEKIND_I4) then
+          call access_data_i4(field, contigDataPtrI4, localDe=lde, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT)) &
             return  ! bail out
-          ! initialize the entire array
-          dataPtrR4D2 = real(l_const1,ESMF_KIND_R4);
-        elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==3) then
-          ! 3D all 1.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D3, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT)) &
-            return  ! bail out
-          ! initialize the entire array
-          dataPtrR8D3 = real(l_const1,ESMF_KIND_R8);
-        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==3) then
-          ! 3D all 1.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D3, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT)) &
-            return  ! bail out
-          ! initialize the entire array
-          dataPtrR4D3 = real(l_const1,ESMF_KIND_R4);
+          contigDataPtrI4 = int(l_const1,ESMF_KIND_I4)
         endif
       enddo
+
+    !--------------------------------------------------------------------------
     else if (trim(l_dataFillScheme)=="random") then
       do lde=0, ldeCount-1
-        if (typekind==ESMF_TYPEKIND_R8 .and. rank==1) then
-          ! 1D all 1.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D1, rc=rc)
+        if (typekind==ESMF_TYPEKIND_R8) then
+          call access_data_r8(field, contigDataPtrR8, localDe=lde, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT)) &
             return  ! bail out
-          ! initialize the entire array
-          call random_number(dataPtrR8D1)
-        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==1) then
-          ! 1D all 1.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D1, rc=rc)
+          call random_number(contigDataPtrR8)
+        else if (typekind==ESMF_TYPEKIND_R4) then
+          call access_data_r4(field, contigDataPtrR4, localDe=lde, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT)) &
             return  ! bail out
-          ! initialize the entire array
-          call random_number(dataPtrR4D1)
-        elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==2) then
-          ! 2D all 1.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D2, rc=rc)
+          call random_number(contigDataPtrR4)
+        else if (typekind==ESMF_TYPEKIND_I8) then
+          call access_data_i8(field, contigDataPtrI8, localDe=lde, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT)) &
             return  ! bail out
-          ! initialize the entire array
-          call random_number(dataPtrR8D2)
-        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==2) then
-          ! 2D all 1.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D2, rc=rc)
+          allocate(contigDataPtrR8(size(contigDataPtrI8))) ! temporary float
+          call random_number(contigDataPtrR8)
+          contigDataPtrI8 = transfer(contigDataPtrR8, contigDataPtrI8)
+        else if (typekind==ESMF_TYPEKIND_I4) then
+          call access_data_i4(field, contigDataPtrI4, localDe=lde, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT)) &
             return  ! bail out
-          ! initialize the entire array
-          call random_number(dataPtrR4D2)
-        elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==3) then
-          ! 3D all 1.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D3, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT)) &
-            return  ! bail out
-          ! initialize the entire array
-          call random_number(dataPtrR8D3)
-        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==3) then
-          ! 3D all 1.
-          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D3, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT)) &
-            return  ! bail out
-          ! initialize the entire array
-          call random_number(dataPtrR4D3)
+          allocate(contigDataPtrR4(size(contigDataPtrI4))) ! temporary float
+          call random_number(contigDataPtrR4)
+          contigDataPtrI4 = transfer(contigDataPtrR4, contigDataPtrI4)
         endif
       enddo
+
+    !--------------------------------------------------------------------------
     else
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="Unknown dataFillScheme requested.", &
@@ -1204,8 +1081,264 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         rcToReturn=rc)
       return ! bail out
     endif
-    
-    deallocate(coordDimCount)
+
+  contains
+
+  subroutine access_data_i4(field, fPtr, localDe, rc)
+    ! Access field data as 1D contiguous data array
+    type(ESMF_Field),                           intent(in)   :: field
+    integer(ESMF_KIND_I4), pointer, contiguous, intent(out)  :: fPtr(:)
+    integer,                          optional, intent(in)   :: localDe
+    integer,                                    intent(out)  :: rc
+
+    integer                                    :: rank
+    integer(ESMF_KIND_I4), pointer, contiguous :: fPtr2D(:,:)
+    integer(ESMF_KIND_I4), pointer, contiguous :: fPtr3D(:,:,:)
+    integer(ESMF_KIND_I4), pointer, contiguous :: fPtr4D(:,:,:,:)
+    integer(ESMF_KIND_I4), pointer, contiguous :: fPtr5D(:,:,:,:,:)
+    integer(ESMF_KIND_I4), pointer, contiguous :: fPtr6D(:,:,:,:,:,:)
+    integer(ESMF_KIND_I4), pointer, contiguous :: fPtr7D(:,:,:,:,:,:,:)
+
+    call ESMF_FieldGet(field, rank=rank, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT)) &
+      return  ! bail out
+
+    if (rank == 1) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+    else if (rank == 2) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr2D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr2D)) => fPtr2D(:,:)
+    else if (rank == 3) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr3D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr3D)) => fPtr3D(:,:,:)
+    else if (rank == 4) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr4D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr4D)) => fPtr4D(:,:,:,:)
+    else if (rank == 5) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr5D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr5D)) => fPtr5D(:,:,:,:,:)
+    else if (rank == 6) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr6D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr6D)) => fPtr6D(:,:,:,:,:,:)
+    else if (rank == 7) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr7D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr7D)) => fPtr7D(:,:,:,:,:,:,:)
+    end if
+  end subroutine
+
+  subroutine access_data_i8(field, fPtr, localDe, rc)
+    ! Access field data as 1D contiguous data array
+    type(ESMF_Field),                           intent(in)   :: field
+    integer(ESMF_KIND_I8), pointer, contiguous, intent(out)  :: fPtr(:)
+    integer,                          optional, intent(in)   :: localDe
+    integer,                                    intent(out)  :: rc
+
+    integer                                    :: rank
+    integer(ESMF_KIND_I8), pointer, contiguous :: fPtr2D(:,:)
+    integer(ESMF_KIND_I8), pointer, contiguous :: fPtr3D(:,:,:)
+    integer(ESMF_KIND_I8), pointer, contiguous :: fPtr4D(:,:,:,:)
+    integer(ESMF_KIND_I8), pointer, contiguous :: fPtr5D(:,:,:,:,:)
+    integer(ESMF_KIND_I8), pointer, contiguous :: fPtr6D(:,:,:,:,:,:)
+    integer(ESMF_KIND_I8), pointer, contiguous :: fPtr7D(:,:,:,:,:,:,:)
+
+    call ESMF_FieldGet(field, rank=rank, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT)) &
+      return  ! bail out
+
+    if (rank == 1) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+    else if (rank == 2) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr2D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr2D)) => fPtr2D(:,:)
+    else if (rank == 3) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr3D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr3D)) => fPtr3D(:,:,:)
+    else if (rank == 4) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr4D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr4D)) => fPtr4D(:,:,:,:)
+    else if (rank == 5) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr5D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr5D)) => fPtr5D(:,:,:,:,:)
+    else if (rank == 6) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr6D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr6D)) => fPtr6D(:,:,:,:,:,:)
+    else if (rank == 7) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr7D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr7D)) => fPtr7D(:,:,:,:,:,:,:)
+    end if
+  end subroutine
+
+  subroutine access_data_r4(field, fPtr, localDe, rc)
+    ! Access field data as 1D contiguous data array
+    type(ESMF_Field),                        intent(in)   :: field
+    real(ESMF_KIND_R4), pointer, contiguous, intent(out)  :: fPtr(:)
+    integer,                       optional, intent(in)   :: localDe
+    integer,                                 intent(out)  :: rc
+
+    integer                                 :: rank
+    real(ESMF_KIND_R4), pointer, contiguous :: fPtr2D(:,:)
+    real(ESMF_KIND_R4), pointer, contiguous :: fPtr3D(:,:,:)
+    real(ESMF_KIND_R4), pointer, contiguous :: fPtr4D(:,:,:,:)
+    real(ESMF_KIND_R4), pointer, contiguous :: fPtr5D(:,:,:,:,:)
+    real(ESMF_KIND_R4), pointer, contiguous :: fPtr6D(:,:,:,:,:,:)
+    real(ESMF_KIND_R4), pointer, contiguous :: fPtr7D(:,:,:,:,:,:,:)
+
+    call ESMF_FieldGet(field, rank=rank, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT)) &
+      return  ! bail out
+
+    if (rank == 1) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+    else if (rank == 2) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr2D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr2D)) => fPtr2D(:,:)
+    else if (rank == 3) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr3D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr3D)) => fPtr3D(:,:,:)
+    else if (rank == 4) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr4D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr4D)) => fPtr4D(:,:,:,:)
+    else if (rank == 5) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr5D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr5D)) => fPtr5D(:,:,:,:,:)
+    else if (rank == 6) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr6D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr6D)) => fPtr6D(:,:,:,:,:,:)
+    else if (rank == 7) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr7D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr7D)) => fPtr7D(:,:,:,:,:,:,:)
+    end if
+  end subroutine
+
+  subroutine access_data_r8(field, fPtr, localDe, rc)
+    ! Access field data as 1D contiguous data array
+    type(ESMF_Field),                        intent(in)   :: field
+    real(ESMF_KIND_R8), pointer, contiguous, intent(out)  :: fPtr(:)
+    integer,                       optional, intent(in)   :: localDe
+    integer,                                 intent(out)  :: rc
+
+    integer                                 :: rank
+    real(ESMF_KIND_R8), pointer, contiguous :: fPtr2D(:,:)
+    real(ESMF_KIND_R8), pointer, contiguous :: fPtr3D(:,:,:)
+    real(ESMF_KIND_R8), pointer, contiguous :: fPtr4D(:,:,:,:)
+    real(ESMF_KIND_R8), pointer, contiguous :: fPtr5D(:,:,:,:,:)
+    real(ESMF_KIND_R8), pointer, contiguous :: fPtr6D(:,:,:,:,:,:)
+    real(ESMF_KIND_R8), pointer, contiguous :: fPtr7D(:,:,:,:,:,:,:)
+
+    call ESMF_FieldGet(field, rank=rank, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT)) &
+      return  ! bail out
+
+    if (rank == 1) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+    else if (rank == 2) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr2D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr2D)) => fPtr2D(:,:)
+    else if (rank == 3) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr3D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr3D)) => fPtr3D(:,:,:)
+    else if (rank == 4) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr4D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr4D)) => fPtr4D(:,:,:,:)
+    else if (rank == 5) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr5D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr5D)) => fPtr5D(:,:,:,:,:)
+    else if (rank == 6) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr6D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr6D)) => fPtr6D(:,:,:,:,:,:)
+    else if (rank == 7) then
+      call ESMF_FieldGet(field, farrayPtr=fPtr7D, localDe=localDe, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      fPtr(1:size(fPtr7D)) => fPtr7D(:,:,:,:,:,:,:)
+    end if
+  end subroutine
 
   end subroutine
 ^undef ESMF_FILE
