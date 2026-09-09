@@ -172,7 +172,14 @@
 \input{../addon/NUOPC/doc/NUOPC_ConnectionOptions}
 #endif
 
-\subsubsection{Data-Dependencies during Initialize}
+\subsubsection{Data Considerations during Initialize}
+#ifdef STANDALONE
+\input{NUOPC_DataConsiderInit}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_DataConsiderInit}
+#endif
+
+\subsubsection{Data Dependencies during Initialize}
 #ifdef STANDALONE
 \input{NUOPC_DataDepInit}
 #elif defined(CONSTITUENT)
