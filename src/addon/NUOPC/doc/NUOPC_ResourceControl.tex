@@ -17,6 +17,8 @@ The NUOPC {\em unaware} hybrid MPI+OpenMP approach provides a quick way to run h
 
 Under the NUOPC {\em aware} resource control, some components might be purely MPI based, while others use the hybrid approach. Different hybrid components can be configured to run with different threading levels. This is possible independent on whether the components use the same or exclusive sets of resources.
 
+\subsubsection{Configuring Threaded Child Components}
+
 Besides the already discussed {\tt petList} argument, there are two additional optional arguments to {\tt NUOPC\_DriverAddComp()}. It is through those arguments that the advanced resource control features under NUOPC are implemented. One of these arguments is {\tt compSetVMRoutine}. This argument allows the user to point to a specific public method of the child component. The signature of this method is the same as for the {\tt compSetServicesRoutine} argument. If {\tt compSetVMRoutine} is provided, it will be called {\em before} {\tt compSetServicesRoutine}. The purpose of {\tt compSetVMRoutine} is to allow the child component to set specific aspects of its own ESMF virtual machine (VM) before instantiating it. The ESMF reference manual discusses the details of this procedure under the "User-code SetVM method" section. Based on the information provided there, a user could implement a custom {\tt compSetVMRoutine} method for a component. However, for convenience, NUOPC provides a generic implementation that can be passed into {\tt compSetVMRoutine}. For most common situation, the generic implementation provided by NUOPC is sufficient, and there is no need for the user to provide a custom implementation of {\tt compSetVMRoutine}.
 
 Utilizing the generic {\tt SetVM} method provided by NUOPC involves a few steps. First, the component implementation must make the generic {\tt SetVM} {\em public} inside its own {\em cap} module:
@@ -165,4 +167,39 @@ If the default settings for some of the keys are not appropriate, they can be se
 
 In this example, all three child components "MODEL1", "MODEL2", and "MODEL3" use the exact same parent resources. Due to this fact all three components can only execute sequentially. However, each child component manages the resources provided by the parent differently, and independently. Through this tailored approach, NUOPC allows optimal use of the available resources by each component. {\tt NUOPC\_Connector} components defined between components work as usual, taking care of all the required data movements automatically and completely transparent to the user.
 
-In order to obtain best performance when using NUOPC {\em aware} resource control for hybrid parallelism, it is {\em strongly recommended} to set {\tt OMP\_WAIT\_POLICY=PASSIVE} in the environment. This is one of the standard OpenMP environment variables. The {\tt PASSIVE} setting ensures that OpenMP threads relinquish the hardware threads (i.e. cores) as soon as they have completed their work. Without that setting ESMF resource control threads can be delayed, and context switching between components becomes more expensive.
+\subsubsection{Driver Queries on Threaded Child Components}
+
+There are cases where the driver component needs to know whether a child component is actively using a specific PET given to it, or whether that PET is paused during child execution --- contributing its PEs to support child-level multithreading instead. To access this information, the driver must first query the child component for its VM:
+
+\begin{verbatim}
+type(ESMF_GridComp)     :: child
+type(ESMF_VM)           :: vm
+...
+call NUOPC_DriverGetComp(driver, compLabel="MODEL1", comp=child, rc=rc)
+! check rc
+call ESMF_GridCompGet(child, vm=vm, rc=rc)
+! check rc
+\end{verbatim}
+
+With the child VM retrieved, the driver can query it for the {\tt localPet} information:
+
+\begin{verbatim}
+integer                 :: localPet
+...
+call ESMF_VMGet(vm, localPet=localPet, rc=rc)
+! check rc
+\end{verbatim}
+
+Because this information is queried directly from the child VM, the returned {\tt localPet} reflects the child component's perspective:
+
+\begin{itemize}
+\item Active PET: {\tt localPet >= 0}, representing the PET's local index within the child VM.
+
+\item Inactive/Paused PET: {\tt localPet == -1}, indicating that the PET is not active under the child VM.
+\end{itemize}
+
+N.B. The MPI communicator queried form the child VM returns {\tt MPI\_COMM\_NULL} on PETs that are inactive under the child component.
+
+\subsubsection{Performance}
+
+For best performance when using NUOPC {\em aware} resource control for hybrid parallelism, it is {\em strongly recommended} to set {\tt OMP\_WAIT\_POLICY=PASSIVE} in the environment. This is one of the standard OpenMP environment variables. The {\tt PASSIVE} setting ensures that OpenMP threads relinquish the hardware threads (i.e. cores) as soon as they have completed their work. Without that setting, ESMF resource control threads can be delayed and context switching between components potentially becomes more expensive.
