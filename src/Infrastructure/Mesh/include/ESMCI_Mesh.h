@@ -186,6 +186,17 @@ ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<i
   // TODO: wrap these with a version that takes an elem id
   double getOrigElemArea(MeshObj *elem);
 
+  // Turn on edges
+  void setHasEdges() {hasEdges=true;}
+
+  // Set number of Edges (needs to be done before anything is
+  // added, so it can be used for error checking. 
+  void setEdgeCount(int _edgeCount) {edgeCount=_edgeCount;}
+  
+  // Set edge info
+  void setEdgeIds(int numEdges, int *edgeIds);
+
+  void setEdgeOwners(int numEdges, int *edgeOwners);
   
   private:
 
@@ -199,6 +210,16 @@ ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<i
   bool has_orig_elem_area;
   std::map<UInt,double> orig_id_to_area;
 
+  // Information about edges
+  int edgeCount;
+  bool hasEdges; // Does the mesh have edges? 
+
+  // Ordered by original order that they were input
+  std::vector<UInt> edgeIds;
+  std::vector<int> edgeOwners;
+
+  // Could add other information, but probably don't need it until you have ability to retrieve it...
+  /// STOPPED HERE ///
   
 
 void assign_new_ids();

@@ -65,8 +65,9 @@ Mesh::Mesh() : MeshDB(), FieldReg(), CommReg(),
                has_orig_elem_nodes(false),
                has_orig_elem_area(false),
                origElemConnCount(-1),
-	       ind(-1), side(-1),
+	       ind(-1), side(-1), hasEdges(false), 
                orig_comm(MPI_COMM_NULL)
+
 {
 
    GetCommRel(MeshObj::NODE).Init("node_sym", *this, *this, true);
@@ -2464,7 +2465,38 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
    
  }
 
- 
+ void Mesh::setEdgeIds(int numEdges, int *_edgeIds) {
+
+   // Error check
+   if (!hasEdges) Throw() << "Edge ids can not be added to a Mesh without edges.";
+   if (numEdges != edgeCount) Throw() << "Number of edge ids being set ("<<numEdges<<") must match internal edge number ("<<edgeCount<<")";
+   
+    // Reserve space
+    edgeIds.reserve(numEdges);
+
+    // Add edges
+    for (int i=0; i<numEdges; i++) {
+      edgeIds.push_back(((UInt)_edgeIds[i]));
+    }
+  }
+
+ void Mesh::setEdgeOwners(int numEdges, int *_edgeOwners) {
+
+   // Error check
+   if (!hasEdges) Throw() << "Edge owners can not be added to a Mesh without edges.";
+   if (numEdges != edgeCount) Throw() << "Number of edge owners being set ("<<numEdges<<") must match internal edge number ("<<edgeCount<<")";
+   
+    // Reserve space
+    edgeOwners.reserve(numEdges);
+
+    // Add edges
+    for (int i=0; i<numEdges; i++) {
+      edgeOwners.push_back(_edgeOwners[i]);
+    }
+  }
+
+
+
  
  
 

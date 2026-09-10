@@ -194,7 +194,7 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *_num_nodes, int *nodeId,
                                           " node ids must be >= 1 ", ESMC_CONTEXT,&localrc)) throw localrc;
        }
      }
-     
+
      // Get nodeOwner
      int *nodeOwner=NULL;
      bool nodeOwner_allocated=false;
@@ -1704,7 +1704,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
 
 void ESMCI_meshaddedges(Mesh **meshpp,
-                         int *_num_edges, int *edgeId,
+                         int *_num_edges, int *edgeIds,
                          InterArray<int> *_edgeOwners,
                          InterArray<ESMC_R8> *_edgeCoords,
                          int *_edgeConn_size, int *edgeConn, 
@@ -1715,15 +1715,20 @@ void ESMCI_meshaddedges(Mesh **meshpp,
 {
    try {
 
-  // Initialize the parallel environment for mesh (if not already done)
+     // Initialize the parallel environment for mesh (if not already done)
     {
- int localrc;
- int rc;
-  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-   throw localrc;  // bail out with exception
+      int localrc;
+      int rc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+        throw localrc;  // bail out with exception
     }
 
+    
+    // Debug output    
+    printf("In ESMCI_meshaddedges()!!!\n");
+
+    
     // local rc code
     int localrc;
 
@@ -1731,11 +1736,65 @@ void ESMCI_meshaddedges(Mesh **meshpp,
     Mesh *meshp = *meshpp;
     ThrowRequire(meshp);    
     Mesh &mesh = *meshp;
+    
+    ThrowRequire(_num_edges);    
+    int num_edges=*_num_edges;
 
+    // Mark that edges are present
+    mesh.setHasEdges();
 
-    printf("In ESMCI_meshaddedges()!!!\n");
+    // Set edge count
+    mesh.setEdgeCount(num_edges);
+
+    // Error check ids
+    for (int e = 0; e < num_edges; e++) {
+      if (edgeIds[e] < 1) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                         " edge ids must be >= 1 ", ESMC_CONTEXT,&localrc)) throw localrc;
+      }
+    }
+
+    // Add edge ids to mesh
+    mesh.setEdgeIds(num_edges, edgeIds);
+    
+     
+
+#if 0     
+     // Get nodeOwner
+     int *nodeOwner=NULL;
+     bool nodeOwner_allocated=false;
+     if (present(nodeOwnerII)) { // if node owners exist
+       // Error checking
+       if (nodeOwnerII->dimCount !=1) {
+         int localrc;
+         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+                                          " nodeOwner array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+       }
+       
+       if (nodeOwnerII->extent[0] != num_nodes) {
+         int localrc;
+         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+                                          " nodeOwner array must be the same size as the nodeIds array ", ESMC_CONTEXT, &localrc)) throw localrc;
+       }
+       
+       // Get array
+       nodeOwner=nodeOwnerII->array;
+
+     } else { // automatically figure out node owners
+
+       // Create local version of owners array
+       nodeOwner=new int[num_nodes];
+       nodeOwner_allocated=true;
+       
+       // Autofill
+       set_node_owners_wo_list(num_nodes, nodeId, nodeOwner);        
+     }
+#endif
 
     
+    
+    
+      
   } catch(std::exception &x) {
     // catch Mesh exception return code
     if (x.what()) {
