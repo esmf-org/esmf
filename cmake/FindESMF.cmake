@@ -165,6 +165,36 @@ if(EXISTS ${ESMFMKFILE})
   separate_arguments(ESMC_INTERFACE_LINK_LIBRARIES UNIX_COMMAND "${RAW_ESMC_INTERFACE_LINK_LIBRARIES}")
   separate_arguments(ESMC_INTERFACE_LINK_OPTIONS UNIX_COMMAND "${ESMF_CLINKOPTS}")
 
+  # Preserve Apple framework flag/name pairs when publishing the target
+  # interface.  CMake treats a bare framework name in LINK_LIBRARIES as a
+  # regular library and rewrites it as -l<name>.
+  function(_esmf_extract_frameworks link_libraries link_options)
+    set(_esmf_libraries)
+    list(LENGTH ${link_libraries} _esmf_library_count)
+    set(_esmf_library_index 0)
+    while(_esmf_library_index LESS _esmf_library_count)
+      list(GET ${link_libraries} ${_esmf_library_index} _esmf_library)
+      if(_esmf_library STREQUAL "-framework")
+        math(EXPR _esmf_framework_index "${_esmf_library_index} + 1")
+        if(_esmf_framework_index LESS _esmf_library_count)
+          list(GET ${link_libraries} ${_esmf_framework_index} _esmf_framework)
+          list(APPEND ${link_options} "SHELL:-framework ${_esmf_framework}")
+          math(EXPR _esmf_library_index "${_esmf_library_index} + 1")
+        else()
+          list(APPEND _esmf_libraries "${_esmf_library}")
+        endif()
+      else()
+        list(APPEND _esmf_libraries "${_esmf_library}")
+      endif()
+      math(EXPR _esmf_library_index "${_esmf_library_index} + 1")
+    endwhile()
+    set(${link_libraries} "${_esmf_libraries}" PARENT_SCOPE)
+    set(${link_options} "${${link_options}}" PARENT_SCOPE)
+  endfunction()
+
+  _esmf_extract_frameworks(ESMF_INTERFACE_LINK_LIBRARIES ESMF_INTERFACE_LINK_OPTIONS)
+  _esmf_extract_frameworks(ESMC_INTERFACE_LINK_LIBRARIES ESMC_INTERFACE_LINK_OPTIONS)
+
   # Finalize find_package
   include(FindPackageHandleStandardArgs)
 
