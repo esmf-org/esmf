@@ -45,8 +45,6 @@ usage () {
   printf "      load modulefile before building\n"
   printf "  --load-bashenv=BASHENV\n"
   printf "      load bash environment file before building\n"
-  printf "  --test[=TEST_ARGS], -t[=TEST_ARGS]\n"
-  printf "      (beta) enable testing, add TEST_ARGS as needed.\n"
   printf "  --verbose, -v\n"
   printf "      build with verbose output\n"
   printf "\n"
@@ -80,8 +78,6 @@ settings () {
   printf "  BUILD_JOBS=${BUILD_JOBS}\n"
   printf "  MODULEFILE=${MODULEFILE}\n"
   printf "  BASHENV=${BASHENV}\n"
-  printf "  TEST=${TEST}\n"
-  printf "  TEST_ARGS=${TEST_ARGS}\n"
   printf "  VERBOSE=${VERBOSE}\n"
   printf "\n"
 }
@@ -100,8 +96,6 @@ BUILD_DIR="${CWD}/build"
 INSTALL_PREFIX="${CWD}/install"
 MODULEFILE=""
 BASHENV=""
-TEST=false
-TEST_ARGS=""
 VERBOSE=false
 
 # required arguments
@@ -153,9 +147,6 @@ while [[ $# -gt 0 ]]; do
     --load-bashenv=?*) BASHENV=${1#*=} ;;
     --load-bashenv)  usage_error "$1" "requires an argument" ;;
     --load-bashenv=) usage_error "$1" "requires an argument" ;;
-    --test|-t) TEST=true ;;
-    --test=?*|-t=?*) TEST=true; TEST_ARGS=${1#*=} ;;
-    --test=)   usage_error "$1" "argument ignored" ;;
     --verbose|-v) VERBOSE=true ;;
     --verbose=?*) usage_error "$1" "argument ignored" ;;
     --verbose=)   usage_error "$1" "argument ignored" ;;
@@ -237,9 +228,6 @@ fi
 if [ ! -z "${DISABLE_COMPS}" ]; then
   CMAKE_SETTINGS+=("-DESMX_DISABLE_COMPS=${DISABLE_COMPS}")
 fi
-if [ "${TEST}" = true ]; then
-  CMAKE_SETTINGS+=("-DESMX_TEST=ON")
-fi
 if [ "${VERBOSE}" = true ]; then
   CMAKE_SETTINGS+=("-DESMX_BUILD_VERBOSE=ON")
 fi
@@ -262,12 +250,6 @@ if [ "${VERBOSE}" = true ]; then
 fi
 if [ ! -z "${BUILD_JOBS}" ]; then
   BUILD_SETTINGS+=("-j ${BUILD_JOBS}")
-fi
-
-# test settings
-TEST_SETTINGS=("")
-if [ ! -z "${TEST_ARGS}" ]; then
-  TEST_SETTINGS+=("${TEST_ARGS}")
 fi
 
 # install settings
@@ -309,17 +291,4 @@ RC=$?
 if [ $RC -ne 0 ]; then
   echo "ESMX_Builder Failed: 'cmake --install ${BUILD_DIR} ${INSTALL_SETTINGS[@]}'"
   exit -3
-fi
-echo
-if [ "${TEST}" = true ]; then
-  (cd ${BUILD_DIR}/Driver; ctest ${TEST_SETTINGS[@]})
-  if [ "$?" !=  "0" ]; then
-    echo "ESMX_Builder Failed: (ctest)"
-    LASTTEST="${BUILD_DIR}/Driver/Testing/Temporary/LastTest.log"
-    if [ -f "${LASTTEST}" ]; then
-      exit $(grep -c '^Test Failed\.$' ${LASTTEST})
-    else
-      exit -4
-    fi
-  fi
 fi
