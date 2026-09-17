@@ -115,7 +115,6 @@ options:
   [--build-jobs=JOBS]
   [--load-modulefile=MODULEFILE]
   [--load-bashenv=BASHENV]
-  [--test[=TEST_ARGS]] or [-t[=TEST_ARGS]]
   [--verbose] or [-v]
 
 where:
@@ -150,9 +149,6 @@ where:
 
   --load-bashenv=BASHENV   load bash environment file before building
 
-  --test[=TEST_ARGS] or    (beta) run ctest suite for ESMX Driver, pass TEST_ARGS to ctest
-  -t[=TEST_ARGS]
-
   --verbose or -v          build with verbose output
 ```
 
@@ -177,10 +173,6 @@ components:
   Lumo:
     cmake_config: Lumo/lumo.cmake
 
-tests:
-
-  TestTawasLumo:
-    dir: path/to/test/data
 ```
 
 In this example two components are built into `ESMX_EXE_NAME` explicitly. (Read about [dynamically loading of components from shared objects at run-time](#dynamically-loading-components-from-shared-objects-at-run-time) later.) Each component is given a name, here `TaWaS` and `Lumo`, respectively. Components will be referenced by this *component-name* in the *ESMX Run Configuration* (`esmxRun.yaml`) discussed below.
@@ -190,7 +182,7 @@ In this example two components are built into `ESMX_EXE_NAME` explicitly. (Read 
 
 ESMX comes with a default data component called `ESMX_Data`. It is built into `ESMX_EXE_NAME` by default. This example disables this behavior by setting `disable_comps: ESMX_Data`.
 
-There are *three* top level sections recognized in the ESMX build file. Each is introduced by a specific key using the [YAML](https://yaml.org/) map syntax: `application:`, `components:`, and `tests:`. The value associated with each key is a map of key/value pairs. The available option keys under each top level section are discussed below.
+There are *two* top level sections recognized in the ESMX build file. Each is introduced by a specific key using the [YAML](https://yaml.org/) map syntax: `application:` and `components:`. The value associated with each key is a map of key/value pairs. The available option keys under each top level section are discussed below.
 
 #### Application Options (`application` key)
 
@@ -214,10 +206,6 @@ These options affect the ESMX application layer. If no key/value pair is provide
 | `make_build_args`     | scalar or list of argumens passed to all make builds                 | *None*                 |
 | `make_build_jobs`     | job number used for all make builds                                  | *None*                 |
 | `script_build_args`   | scalar or list of argumens passed to all script builds               | *None*                 |
-| `test`                | (beta) add test cases: `on` or `off`                                 | `off`                  |
-| `test_exe`            | (beta) executable used to launch test cases                          | ESMF_INTERNAL_MPIRUN   |
-| `test_dir`            | (beta) output directory for test cases                               | CMAKE_BINARY_DIR-tests |
-| `test_tasks`          | (beta) number of tasks used to run test cases                        | `4`                    |
 
 #### Component Options (`components` key)
 
@@ -243,9 +231,6 @@ This section contains a key for for each *component-name*, specifying component 
 | `git_repository` | URL for downloading git repository            | *None*                 |
 | `git_tag`        | tag for downloading git repository            | *None*                 |
 | `git_dir`        | download directory for git repository         | *None*                 |
-| `test_dir`       | (beta) directory used for test case data      | *None*                 |
-| `test_exe`       | (beta) executable used to run test case       | ESMX_TEST_EXE          |
-| `test_tasks`     | (beta) number of tasks used to run test case  | ESMX_TEST_TASKS        |
 
 
 ##### Build Types:
@@ -268,16 +253,6 @@ The ESMX build system uses `build_script` in the component's `source_dir` to bui
 **`none`** -
 The ESMX build system will not build the component. The ESMX build system searches for the CMake configuration file, Fortran module, and libraries in the `install_prefix` directory.
 
-
-#### Test Options (`tests` key)
-
-This section contains a key for for each *test-name*, specifying test specific options.
-
-| Option key       | Description / Value options                   | Default         |
-| ---------------- | --------------------------------------------- | --------------- |
-| `dir`            | (beta) directory used for test case data      | *None*          |
-| `exe`            | (beta) executable used to run test case       | ESMX_TEST_EXE   |
-| `tasks`          | (beta) number of tasks used to run test case  | ESMX_TEST_TASKS |
 
 ### ESMX Run Configuration
 
@@ -467,10 +442,6 @@ The *ESMX Run Configuration* needed by `ESMX_Driver` can either be supplied by t
 - The `ESMX_component_list`, child component, and run sequence information is ingested from `config` as described under the [ESMX Run Configuration section](#esmx-run-configuration).
 - If the parent level passes an `ESMF_Clock` object to `ESMX_Driver` during initialize, the driver uses it instead of looking for `startTime` and `stopTime` in `config`.
 - For the case where a clock is provided by the parent layer, its `timeStep` is used as the *default* time step of the outer run sequence loop when using the `@*` syntax. If a specific time step is set in the run sequence with `@DT`, then `DT` must be a divisor of the `timeStep` provided by the parent clock.
-
-## ESMX Test System (beta)
-
-The ESMX layer includes a test system based on CTest. This system is still in beta and as it evolves features may be added or removed. When enabled the test system adds a suite of component and system level tests. All tests in the test suite can be executed via `ESMX_Builder -t`. If the `ESMX_Builder` is not used then tests can be added by setting `test: on` under `Application Options`. Tests can be manually executed from each directory in `test_dir` or through executing `ctest` in the `<CMAKE_BINARY_DIR>/Driver` directory.
 
 ## ESMX Components
 
