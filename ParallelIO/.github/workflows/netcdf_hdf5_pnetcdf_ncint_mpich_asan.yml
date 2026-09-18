@@ -1,0 +1,162 @@
+name: netcdf_hdf5_pnetcdf_ncint_mpich_asan
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    env:
+      CPPFLAGS: "-I/home/runner/mpich/include -I/home/runner/hdf5/include -I/home/runner/netcdf-c/include -I/home/runner/netcdf-fortran/include -I/home/runner/pnetcdf/include"
+      LDFLAGS: "-L/home/runner/mpich/lib -L/home/runner/hdf5/lib -L/home/runner/netcdf-c/lib -L/home/runner/netcdf-fortran/lib -L/home/runner/pnetcdf/lib"
+      # Note issue https://github.com/NCAR/ParallelIO/issues/1889 netcdf integration only currently works with netcdf-c 4.7.4
+      NETCDF_C_VERSION: 4.7.4
+      NETCDF_F_VERSION: 4.5.4
+      PNETCDF_VERSION: 1.12.3
+      MPICH_VERSION: 4.0.3
+      HDF5_VERSION_MAJOR: 1.12
+      HDF5_VERSION_PATCH: 2
+      FCFLAGS: "-fallow-argument-mismatch"
+      FFLAGS: "-fallow-argument-mismatch"
+    steps:
+    - uses: actions/checkout@v3
+    - name: Installs
+      run: |
+        sudo apt-get install doxygen graphviz wget gfortran libjpeg-dev libz-dev
+    - name: cache-mpich
+      id: cache-mpich
+      uses: actions/cache@v3
+      with:
+        path: ~/mpich
+        key: mpich-${{ runner.os }}-${{ env.MPICH_VERSION }}
+
+    - name: build-mpich
+      if: steps.cache-mpich.outputs.cache-hit != 'true'
+      run: |
+        wget http://www.mpich.org/static/downloads/${{ env.MPICH_VERSION }}/mpich-${{ env.MPICH_VERSION }}.tar.gz &> /dev/null
+        tar -xzf mpich-${{ env.MPICH_VERSION }}.tar.gz
+        pushd mpich-${{ env.MPICH_VERSION }}
+        ./configure --prefix=/home/runner/mpich
+        make
+        sudo make install
+        popd
+    - name: cache-hdf5
+      id: cache-hdf5
+      uses: actions/cache@v3
+      with:
+        path: ~/hdf5
+        key: hdf5-${{ runner.os }}-${{ env.HDF5_VERSION_MAJOR }}.${{ env.HDF5_VERSION_PATCH }}-mpich-${{ env.MPICH_VERSION }}
+
+    - name: build-hdf5
+      if: steps.cache-hdf5.outputs.cache-hit != 'true'
+      run: |
+        set -x
+        export PATH="/home/runner/mpich/bin:$PATH"
+        export CC=/home/runner/mpich/bin/mpicc
+        wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${{ env.HDF5_VERSION_MAJOR }}/hdf5-${{ env.HDF5_VERSION_MAJOR }}.${{ env.HDF5_VERSION_PATCH }}/src/hdf5-${{ env.HDF5_VERSION_MAJOR }}.${{ env.HDF5_VERSION_PATCH }}.tar.gz &> /dev/null
+        tar -xzf hdf5-${{ env.HDF5_VERSION_MAJOR }}.${{ env.HDF5_VERSION_PATCH }}.tar.gz
+        pushd hdf5-${{ env.HDF5_VERSION_MAJOR }}.${{ env.HDF5_VERSION_PATCH }}
+        ./configure --prefix=/home/runner/hdf5 --enable-parallel --disable-tools --disable-fortran --disable-cxx --enable-parallel-tests
+        make
+        sudo make install
+        popd
+    - name: cache-netcdf-c
+      id: cache-netcdf-c
+      uses: actions/cache@v3
+      with:
+        path: ~/netcdf-c
+        key: netcdf-c-${{ runner.os }}-${{ env.NETCDF_C_VERSION }}-mpich-${{ env.MPICH_VERSION }}-hdf5-${{ env.HDF5_VERSION_MAJOR }}.${{ env.HDF5_VERSION_PATCH }}
+
+    - name: build-netcdf-c
+      if: steps.cache-netcdf-c.outputs.cache-hit != 'true'
+      run: |
+        set -x
+        export PATH="/home/runner/mpich/bin:$PATH"
+        export CC=/home/runner/mpich/bin/mpicc
+        wget https://github.com/Unidata/netcdf-c/archive/refs/tags/v${{ env.NETCDF_C_VERSION }}.tar.gz
+        tar -xzf v${{ env.NETCDF_C_VERSION }}.tar.gz
+        pushd netcdf-c-${{ env.NETCDF_C_VERSION }}
+        ./configure --prefix=/home/runner/netcdf-c --disable-dap --disable-utilities
+        make -j
+        sudo make install
+        popd
+    - name: cache-netcdf-fortran
+      id: cache-netcdf-fortran
+      uses: actions/cache@v3
+      with:
+        path: ~/netcdf-fortran
+        key: netcdf-fortran-${{ runner.os }}-${{ env.NETCDF_F_VERSION }}-mpich-${{ env.MPICH_VERSION }}-hdf5-${{ env.HDF5_VERSION_MAJOR }}.${{ env.HDF5_VERSION_PATCH }}
+
+    - name: build-netcdf-fortran
+      if: steps.cache-netcdf-fortran.outputs.cache-hit != 'true'
+      run: |
+        set -x
+        export PATH="/home/runner/mpich/bin:$PATH"
+        export CC=/home/runner/mpich/bin/mpicc
+        wget https://github.com/Unidata/netcdf-fortran/archive/refs/tags/v${{ env.NETCDF_F_VERSION }}.tar.gz
+        tar -xzf v${{ env.NETCDF_F_VERSION }}.tar.gz
+        pushd netcdf-fortran-${{ env.NETCDF_F_VERSION }}
+        ./configure --prefix=/home/runner/netcdf-fortran
+        make -j
+        sudo make install
+        popd
+    - name: cache-pnetcdf
+      id: cache-pnetcdf
+      uses: actions/cache@v3
+      with:
+        path: ~/pnetcdf
+        key: pnetcdf-${{ runner.os }}-${{ env.PNETCDF_VERSION }}-mpich-${{ env.MPICH_VERSION }}
+
+    - name: build-pnetcdf
+      if: steps.cache-pnetcdf.outputs.cache-hit != 'true'
+      run: |
+        set -x
+        export PATH="/home/runner/mpich/bin:$PATH"
+        export CC=/home/runner/mpich/bin/mpicc
+        wget https://parallel-netcdf.github.io/Release/pnetcdf-${{ env.PNETCDF_VERSION }}.tar.gz  &> /dev/null
+        tar -xzf pnetcdf-${{ env.PNETCDF_VERSION }}.tar.gz
+        pushd pnetcdf-${{ env.PNETCDF_VERSION }}
+        ./configure --prefix=/home/runner/pnetcdf --enable-shared --disable-cxx
+        make
+        sudo make install
+        popd
+    - name: cmake build
+      run: |
+        set -x
+        gcc --version
+        echo 'export PATH=/home/runner/mpich/bin:$PATH' > .bashrc
+        source .bashrc
+        export CC=/home/runner/mpich/bin/mpicc
+        export FC=/home/runner/mpich/bin/mpifort
+        export CFLAGS="-g -O0 -fsanitize=address -fno-omit-frame-pointer -static-libasan"
+        export FCFLAGS="$FCFLAGS -g -O0 -fsanitize=address -fno-omit-frame-pointer -static-libasan"
+        export LDFLAGS="$LDFLAGS -static-libasan"
+        export LD_LIBRARY_PATH="/home/runner/netcdf-c/lib:/home/runner/mpich/lib:/home/runner/hdf5/lib:/home/runner/netcdf-fortran/lib:/home/runner/pnetcdf/lib:$LD_LIBRARY_PATH"
+        export ASAN_OPTIONS="detect_odr_violation=0"
+        mkdir build
+        cd build
+        cmake -Wno-dev -DNetCDF_C_LIBRARY=/home/runner/netcdf-c/lib/libnetcdf.so -DNetCDF_C_INCLUDE_DIR=/home/runner/netcdf-c/include -DPnetCDF_PATH='/home/runner/pnetcdf' -DPIO_ENABLE_FORTRAN=Off -DPIO_ENABLE_LOGGING=On -DPIO_ENABLE_TIMING=Off .. || (cat CMakeFiles/CMakeOutput.log && cat CMakeFiles/CMakeError.log)
+        make VERBOSE=1
+        make tests VERBOSE=1
+#        ctest -VV
+    - name: autotools build
+      run: |
+        set -x
+        gcc --version
+        echo 'export PATH=/home/runner/mpich/bin:$PATH' > .bashrc
+        source .bashrc
+        export CC=/home/runner/mpich/bin/mpicc
+        export FC=/home/runner/mpich/bin/mpifort
+        export CFLAGS="-g -O0 -fsanitize=address -fno-omit-frame-pointer -static-libasan"
+        export FCFLAGS="$FCFLAGS -g -O0 -fsanitize=address -fno-omit-frame-pointer -static-libasan"
+        export LDFLAGS="$LDFLAGS -static-libasan"
+        export ASAN_OPTIONS="detect_odr_violation=0"
+        autoreconf -i
+        ./configure --enable-fortran --enable-netcdf-integration
+        make -j check
+        
+        
