@@ -3,7 +3,7 @@ interface
   function c_info_base_get(base_address) bind(C, name="ESMC_BaseGetInfo")
     use iso_c_binding
     implicit none
-    integer(C_LONG), intent(in) :: base_address
+    integer(C_LONG_LONG), intent(in) :: base_address
     type(C_PTR) :: c_info_base_get
   end function c_info_base_get
 
@@ -66,8 +66,8 @@ interface
   subroutine c_info_copyforattribute_reference(src_base_address, dst_base_address, rc) bind(C, name="ESMC_InfoCopyForAttributeReference")
     use iso_c_binding
     implicit none
-    integer(C_LONG) :: src_base_address
-    integer(C_LONG) :: dst_base_address
+    integer(C_LONG_LONG) :: src_base_address
+    integer(C_LONG_LONG) :: dst_base_address
     integer(C_INT), intent(out) :: rc
   end subroutine
   
@@ -205,7 +205,7 @@ interface
     implicit none
     type(C_PTR), value :: inqstate
     integer(C_INT), intent(in) :: rootPet
-    integer(C_LONG), intent(in) :: vmAddress
+    integer(C_LONG_LONG), intent(in) :: vmAddress
     integer(C_INT), intent(in) :: markClean
     integer(C_INT), intent(out) :: rc
   end subroutine
