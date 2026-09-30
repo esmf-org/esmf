@@ -5423,6 +5423,10 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
         is%wrap%cplSet(sIndex)%count=count
         is%wrap%cplSet(sIndex)%srcFieldList(count) = iField
         is%wrap%cplSet(sIndex)%dstFieldList(count) = eField
+        ! check if iField is at current time
+        isAtCurrentTime = NUOPC_IsAtTime(iField, currTime, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         ! check if the field pair is doing reference sharing
         call NUOPC_GetAttribute(iField, name="ShareStatusField", &
           value=iShareStatus, rc=rc)
@@ -5444,6 +5448,31 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
+          endif
+          ! propagate knowledge about valid data through the shared connection
+          if (isAtCurrentTime) then
+            ! at current time -> assume valid data
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- at current time: propagate this through sharing."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
+            call NUOPC_SetTimestamp(eField, currTime, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else
+            ! not at current time -> cannot assume valid data
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- not at current time: leave shared export side unchanged."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           endif
         else
           ! not sharing -> add the import and export Fields to FieldBundles
@@ -5479,10 +5508,8 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
           cplSetListTemp(sIndex)%cplList(cplSetListTemp(sIndex)%j)=cplList(i)
           cplSetListTemp(sIndex)%j=cplSetListTemp(sIndex)%j+1
           ! guard Regrid/RedistStore() from data that is outside valid range
-          isAtCurrentTime = NUOPC_IsAtTime(iField, currTime, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (isAtCurrentTime) then
+            ! at current time -> assume valid data
             if (btest(verbosity,12)) then
               write (msgString, '(A)') trim(name)//": "//&
                 "- at current time: assume valid data."
@@ -5492,7 +5519,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
                 return  ! bail out
             endif
           else
-            ! not at current time
+            ! not at current time -> cannot assume valid data
             ! -> NUOPC convention: fill with random data of valid range
             call ESMF_FieldFill(iField, dataFillScheme="random", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
