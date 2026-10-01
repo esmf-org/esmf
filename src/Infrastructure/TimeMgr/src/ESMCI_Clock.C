@@ -1813,30 +1813,30 @@ int Clock::count=0;
         if (currTime < startTime || currTime > stopTime) {
           ESMC_LogDefault.Write("currTime out-of-range (startTime to "
                                         "stopTime).", ESMC_LOGMSG_WARN,ESMC_CONTEXT);
-//          return(ESMC_RC_VAL_OUTOFRANGE);
+          return(ESMC_RC_VAL_OUTOFRANGE);
         }
         if (currTime == startTime && timeStep < zeroTimeStep) {
           ESMC_LogDefault.Write("timeStep negative for positive "
                                         "startTime to stopTime range).",
                                         ESMC_LOGMSG_WARN,ESMC_CONTEXT);
-//          return(ESMC_RC_VAL_OUTOFRANGE);
+          return(ESMC_RC_VAL_OUTOFRANGE);
         }
       } else if (stopTime < startTime) {
         if (currTime > startTime || currTime < stopTime) {
           ESMC_LogDefault.Write("currTime out-of-range (startTime to "
                                         "stopTime).", ESMC_LOGMSG_WARN,ESMC_CONTEXT);
-//          return(ESMC_RC_VAL_OUTOFRANGE);
+          return(ESMC_RC_VAL_OUTOFRANGE);
         }
         if (currTime == startTime && timeStep > zeroTimeStep) {
           ESMC_LogDefault.Write("timeStep positive for negative "
                                         "startTime to stopTime range).",
                                         ESMC_LOGMSG_WARN,ESMC_CONTEXT);
-//          return(ESMC_RC_VAL_OUTOFRANGE);
+          return(ESMC_RC_VAL_OUTOFRANGE);
         }
       } else { // stopTime == startTime
         ESMC_LogDefault.Write("stopTime equals startTime.",
                                       ESMC_LOGMSG_WARN,ESMC_CONTEXT);
-//        return(ESMC_RC_VAL_WRONG);
+        return(ESMC_RC_VAL_WRONG);
       }
 
       // check for zero time step
