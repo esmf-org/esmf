@@ -133,6 +133,10 @@ module ESMX_Data
       specRoutine=DataInitialize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return
+    call NUOPC_CompSpecialize(xdata, specLabel=label_SetRunClock, &
+      specRoutine=SetRunClock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//__FILE__)) return
     call NUOPC_CompSpecialize(xdata, specLabel=label_Advance, &
       specRoutine=Advance, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1865,6 +1869,60 @@ module ESMX_Data
     endif
 
   end subroutine DataInitialize
+
+  !-----------------------------------------------------------------------------
+
+  subroutine SetRunClock(xdata, rc)
+    ! arguments
+    type(ESMF_GridComp)  :: xdata
+    integer, intent(out) :: rc
+    ! local variables
+    character(ESMF_MAXSTR)     :: name
+    type(ESMF_Clock)           :: driverClock, clock
+    type(ESMF_Time)            :: driverCurrTime, currTime, driverNextTime
+    type(ESMF_TimeInterval)    :: driverTimeStep, timeStep
+
+    rc = ESMF_SUCCESS
+
+    ! query the component for info
+    call NUOPC_CompGet(xdata, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//__FILE__)) return
+
+    ! access clocks
+    call NUOPC_ModelBaseGet(xdata, driverClock=driverClock, clock=clock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//__FILE__)) return
+
+    ! query driverClock -> driverCurrTime and driverTimeStep
+    call ESMF_ClockGet(driverClock, currTime=driverCurrTime, &
+      timeStep=driverTimeStep, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//__FILE__)) return
+
+    ! query clock -> currTime
+    call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//__FILE__)) return
+
+    ! determine time that driver steps in one step from now
+    driverNextTime = driverCurrTime + driverTimeStep
+
+    if (currTime < driverCurrTime .or. currTime > driverNextTime) then
+      ! Violation of NUOPC timekeeping rules
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="Violation of NUOPC timekeeping rules detected!", &
+        line=__LINE__, file=trim(name)//":"//__FILE__, rcToReturn=rc)
+        return
+    end if
+
+    ! set stopTime and timeStep
+    timeStep = driverNextTime-currTime
+    call ESMF_ClockSet(clock, stopTime=driverNextTime, timeStep=timeStep, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//__FILE__)) return
+
+  end subroutine SetRunClock
 
   !-----------------------------------------------------------------------------
 
