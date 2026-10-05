@@ -599,6 +599,7 @@ end subroutine
 !
 !   This call is {\em collective} across the current VM.
 !
+!   The arguments are:
 !   \begin{description}
 !   \item [elementIds]
 !          An array containing the global ids of the elements to be created on this PET.
@@ -841,6 +842,7 @@ end subroutine
 !   in {\tt nodeCoords} consists of spatial dimension coordinates, so the coordinates
 !   for node $n$ in the {\tt nodeIds} array will start at $(n-1)*spatialDim+1$.
 !
+!   The arguments are:
 !   \begin{description}
 !   \item [nodeIds]
 !         An array containing the global ids of the nodes to be created on this PET.
@@ -994,6 +996,7 @@ end subroutine
 !
 !   This call is {\em collective} across the current VM.
 !
+!   The arguments are:
 !   \begin{description}
 !   \item [parametricDim]
 !         Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would
@@ -1120,6 +1123,7 @@ end subroutine
 !
 !   This call is {\em collective} across the current VM.
 !
+!   The arguments are:
 !   \begin{description}
 !   \item [parametricDim]
 !         Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would
@@ -1461,6 +1465,7 @@ num_elems, &
 !   Create a Mesh from an elemental distgrid. Such a mesh will have no coordinate or
 !   connectivity information stored.
 !
+!   The arguments are:
 !   \begin{description}
 !   \item [distgrid]
 !         The elemental distgrid.
@@ -1563,6 +1568,7 @@ end function ESMF_MeshCreateFromDG
 !   This method currently only works for 2D Grids. In addition, this method requires
 !   the input Grid to have coordinates in the corner stagger location.
 !
+!   The arguments are:
 !   \begin{description}
 !   \item [grid]
 !         The ESMF Grid from which to create the Mesh.
@@ -1872,6 +1878,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   This call is {\em collective} across the current VM.
 !
+!   The arguments are:
 !   \begin{description}
 !   \item [filename]
 !         The name of the grid file
@@ -3327,6 +3334,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! ({\tt ESMF\_FieldRedistStore()}, etc.). The equivalent methods
 ! can also be used for data in FieldBundles.
 !
+! The arguments are:
 ! \begin{description}
 !  \item [mesh]
 !         The source Mesh to be redistributed.
@@ -3781,6 +3789,7 @@ end function ESMF_MeshCreateDual
 !
 !   This call is {\em collective} across the current VM.
 !
+!   The arguments are:
 !   \begin{description}
 !   \item [parametricDim]
 !         Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would
@@ -3926,6 +3935,7 @@ end function ESMF_MeshCreateDual
 !
 !   This call is {\em collective} across the current VM.
 !
+!   The arguments are:
 !   \begin{description}
 !   \item [parametricDim]
 !         Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would
@@ -4544,8 +4554,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !  This call removes internal memory associated with {\tt mesh}.
 !  After this call {\tt mesh} will no longer be usable.
- !
- ! The arguments are:
+!
+! The arguments are:
 ! \begin{description}
 ! \item [mesh]
 ! Mesh object to be destroyed.
@@ -4642,6 +4652,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Aside from holding distgrids the Mesh created by this call can't be used in other
 !   ESMF functionality (e.g. it can't be used to create a Field or in regridding).
 !
+!   The arguments are:
 !   \begin{description}
 !   \item [{[nodalDistgrid]}]
 !         The nodal distgrid.
@@ -5501,6 +5512,7 @@ end function ESMF_MeshEmptyCreate
 !   meshes of the same type (e.g. you can regrid between two MOAB meshes, but not between a MOAB and
 !   a native mesh).
 !
+!   The arguments are:
 !   \begin{description}
 !   \item [moabOn]
 !         Output variable which indicates current state of MOAB.
@@ -5553,7 +5565,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
 !   returned, the return value of the function will also be {\tt .false.}.
 !
-! The arguments are:
+!   The arguments are:
 !   \begin{description}
 !   \item[mesh]
 !     {\tt ESMF\_Mesh} queried.
@@ -6131,6 +6143,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   meshes of the same type (e.g. you can regrid between two MOAB meshes, but not between a MOAB and
 !   a native mesh).
 !
+!   The arguments are:
 !   \begin{description}
 !   \item [moabOn]
 !         Variable used to turn MOAB on or off
