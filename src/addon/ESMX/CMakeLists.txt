@@ -62,14 +62,14 @@ if(USE_SANITIZERS)
     set(USE_SANITIZERS "" CACHE STRING "List of sanitizers" FORCE)
 
   else()
-    # 3. Normalize options to uppercase
+    # Normalize options to uppercase
     set(SANITIZERS_UPPER "")
     foreach(ITEM IN LISTS USE_SANITIZERS)
       string(TOUPPER "${ITEM}" ITEM_UPPER)
       list(APPEND SANITIZERS_UPPER "${ITEM_UPPER}")
     endforeach()
 
-    # 4. Enforce mutual exclusion rules
+    # Enforce mutual exclusion rules
     if("THREAD" IN_LIST SANITIZERS_UPPER)
       if("ADDRESS" IN_LIST SANITIZERS_UPPER OR "LEAK" IN_LIST SANITIZERS_UPPER OR "MEMORY" IN_LIST SANITIZERS_UPPER)
         message(FATAL_ERROR "ThreadSanitizer (TSan) cannot be combined with Address, Leak, or Memory sanitizers in Fortran.")
@@ -82,7 +82,7 @@ if(USE_SANITIZERS)
       endif()
     endif()
 
-    # 5. Assemble flags based on validated selections
+    # Assemble flags based on validated selections
     set(SANITIZER_FLAGS "")
 
     foreach(SANITIZER IN LISTS SANITIZERS_UPPER)
@@ -106,7 +106,7 @@ if(USE_SANITIZERS)
       endif()
     endforeach()
 
-    # 6. Apply flags strictly to Fortran targets and linker
+    # Apply flags strictly to Fortran targets and linker
     if(SANITIZER_FLAGS)
       list(JOIN SANITIZER_FLAGS "," SANITIZER_ARG)
 
