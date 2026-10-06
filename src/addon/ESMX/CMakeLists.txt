@@ -47,78 +47,11 @@ endif()
 
 # Sanitizer options
 
-include(CheckFortranCompilerFlag)
-
 set(USE_SANITIZERS "" CACHE STRING "List of sanitizers for Fortran: Address, Leak, Undefined, Thread, Memory")
 
 if(USE_SANITIZERS)
-  # End-to-end compile AND link check for general sanitizer support
-  set(CMAKE_REQUIRED_LINK_OPTIONS "-fsanitize=address")
-  check_fortran_compiler_flag("-fsanitize=address" Fortran_SUPPORTS_SANITIZERS)
-  unset(CMAKE_REQUIRED_LINK_OPTIONS)
-
-  if(NOT Fortran_SUPPORTS_SANITIZERS)
-    message(WARNING "Sanitizers requested (-DUSE_SANITIZERS='${USE_SANITIZERS}'), but Fortran compiler '${CMAKE_Fortran_COMPILER_ID}' failed sanitizer link checks. Sanitizers will be ignored.")
-    set(USE_SANITIZERS "" CACHE STRING "List of sanitizers" FORCE)
-
-  else()
-    # Normalize options to uppercase
-    set(SANITIZERS_UPPER "")
-    foreach(ITEM IN LISTS USE_SANITIZERS)
-      string(TOUPPER "${ITEM}" ITEM_UPPER)
-      list(APPEND SANITIZERS_UPPER "${ITEM_UPPER}")
-    endforeach()
-
-    # Enforce mutual exclusion rules
-    if("THREAD" IN_LIST SANITIZERS_UPPER)
-      if("ADDRESS" IN_LIST SANITIZERS_UPPER OR "LEAK" IN_LIST SANITIZERS_UPPER OR "MEMORY" IN_LIST SANITIZERS_UPPER)
-        message(FATAL_ERROR "ThreadSanitizer (TSan) cannot be combined with Address, Leak, or Memory sanitizers in Fortran.")
-      endif()
-    endif()
-
-    if("MEMORY" IN_LIST SANITIZERS_UPPER)
-      if("ADDRESS" IN_LIST SANITIZERS_UPPER OR "LEAK" IN_LIST SANITIZERS_UPPER)
-        message(FATAL_ERROR "MemorySanitizer (MSan) cannot be combined with Address or Leak sanitizers in Fortran.")
-      endif()
-    endif()
-
-    # Assemble flags based on validated selections
-    set(SANITIZER_FLAGS "")
-
-    foreach(SANITIZER IN LISTS SANITIZERS_UPPER)
-      if(SANITIZER STREQUAL "ADDRESS")
-        list(APPEND SANITIZER_FLAGS "address")
-      elseif(SANITIZER STREQUAL "LEAK")
-        list(APPEND SANITIZER_FLAGS "leak")
-      elseif(SANITIZER STREQUAL "UNDEFINED")
-        list(APPEND SANITIZER_FLAGS "undefined")
-      elseif(SANITIZER STREQUAL "THREAD")
-        list(APPEND SANITIZER_FLAGS "thread")
-      elseif(SANITIZER STREQUAL "MEMORY")
-        if(CMAKE_Fortran_COMPILER_ID MATCHES "LLVMFlang|Flang|Clang")
-          list(APPEND SANITIZER_FLAGS "memory")
-          add_compile_options($<$<COMPILE_LANGUAGE:Fortran>:-fsanitize-memory-track-origins>)
-        else()
-          message(FATAL_ERROR "MemorySanitizer (MSan) for Fortran requires LLVM Flang.")
-        endif()
-      else()
-        message(FATAL_ERROR "Unknown Fortran sanitizer option: '${SANITIZER}'")
-      endif()
-    endforeach()
-
-    # Apply flags strictly to Fortran targets and linker
-    if(SANITIZER_FLAGS)
-      list(JOIN SANITIZER_FLAGS "," SANITIZER_ARG)
-
-      add_compile_options(
-        $<$<COMPILE_LANGUAGE:Fortran>:-fsanitize=${SANITIZER_ARG}>
-        $<$<COMPILE_LANGUAGE:Fortran>:-fno-omit-frame-pointer>
-      )
-
-      add_link_options(-fsanitize=${SANITIZER_ARG})
-    endif()
-
-  endif()
+  include("${CMAKE_CURRENT_LIST_DIR}/cmake/helpers.cmake")
+  configure_sanitizers("${USE_SANITIZERS}")
 endif()
 
 # Define standard installation directories
