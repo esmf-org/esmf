@@ -45,6 +45,15 @@ if(PROJECT_IS_TOP_LEVEL)
   endif()
 endif()
 
+# Sanitizer options
+
+set(USE_SANITIZERS "" CACHE STRING "List of sanitizers for Fortran: Address, Leak, Undefined, Thread, Memory")
+
+if(USE_SANITIZERS)
+  include("${CMAKE_CURRENT_LIST_DIR}/cmake/helpers.cmake")
+  configure_sanitizers("${USE_SANITIZERS}")
+endif()
+
 # Define standard installation directories
 include(GNUInstallDirs)
 
