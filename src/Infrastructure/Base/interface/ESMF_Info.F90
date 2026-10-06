@@ -893,7 +893,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc
 
   integer :: localrc
-  integer(C_LONG), target :: local_default
+  integer(ESMF_KIND_I8), target :: local_default
   integer(C_INT), target :: local_idx
   type(C_PTR) :: local_default_ptr, local_idx_ptr
   integer(C_INT) :: recursive, strlen_only
