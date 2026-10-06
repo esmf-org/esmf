@@ -126,19 +126,15 @@ jobs:
                   }
             ]' \
             .devcontainer/variants.json)"
-          echo "::warning::Only amd64 platforms are tested. Non-amd64" \
-            "platforms (including arm64) are built using QEMU emulation and" \
-            "are not tested. If support for Docker on macos runners becomes" \
-            "available then testing can be added for arm64 variants."
           build_matrix_json="$(echo "$deploy_matrix_json" | jq -c '
             [ .[] | . as $v | $v.platforms[] as $p | $v
               + {platform: $p}
               + {cacheid: ($p | gsub("/"; "-"))}
-              + {runner: (if ($p | test("amd64")) then "ubuntu-latest"
-                          elif ($p | test("arm64")) then "ubuntu-latest"
+              + {runner: (if ($p | test("amd64")) then "ubuntu-24.04"
+                          elif ($p | test("arm64")) then "ubuntu-24.04-arm"
                           else "ubuntu-latest" end)}
               + {test: (if ($p | test("amd64")) then true
-                        elif ($p | test("arm64")) then false
+                        elif ($p | test("arm64")) then true
                         else false end)}
             ]')"
           count="$(echo $deploy_matrix_json | jq 'length')"
