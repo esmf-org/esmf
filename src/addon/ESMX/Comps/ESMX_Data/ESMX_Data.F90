@@ -1882,6 +1882,10 @@ module ESMX_Data
     type(ESMF_Time)            :: driverCurrTime, currTime, driverNextTime
     type(ESMF_TimeInterval)    :: driverTimeStep, timeStep
 
+    ! Set time step and stop time for xdata's clock to match the step taken by
+    ! the driver. Important for situations where the same xdata instance is used
+    ! on multiple run sequence cycles.
+
     rc = ESMF_SUCCESS
 
     ! query the component for info
