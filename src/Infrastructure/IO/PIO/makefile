@@ -29,8 +29,11 @@ ifdef ESMF_NETCDF_INCLUDE
   ifneq ("$(wildcard $(ESMF_NETCDF_LIBPATH)/libnetcdf.a)","")
     PIO_CMAKE_OPTS += -DNetCDF_C_INCLUDE_DIR=$(ESMF_NETCDF_INCLUDE) -DNetCDF_C_LIBRARY=$(ESMF_NETCDF_LIBPATH)/libnetcdf.a
   else
-    PIO_CMAKE_OPTS += -DNetCDF_C_INCLUDE_DIR=$(ESMF_NETCDF_INCLUDE) -DNetCDF_C_LIBRARY=$(ESMF_NETCDF_LIBPATH)/libnetcdf.so
+    PIO_CMAKE_OPTS += -DNetCDF_C_INCLUDE_DIR=$(ESMF_NETCDF_INCLUDE) -DNetCDF_C_LIBRARY=$(ESMF_NETCDF_LIBPATH)/libnetcdf.so 
   endif
+  # Add these for non-standard CURL and HDF5 locations
+  PIO_CMAKE_OPTS += -DHDF5_C_PATH=$(ESMF_INSTALL_PREFIX)
+  PIO_CMAKE_OPTS += -DCURL_C_PATH=$(ESMF_INSTALL_PREFIX)
 else
   $(error PIO requires NetCDF!!!)
 endif
@@ -42,6 +45,10 @@ else
   PIO_CONF_OPTS += --disable-pnetcdf
 endif
 
+ifdef ESMF_GDAL_LIBPATH
+  GDAL_Found=true
+  PIO_CMAKE_OPTS += -DGDAL_INCLUDE_DIR=$(ESMF_GDAL_INCLUDE) -DGDAL_LIBRARY=$(ESMF_GDAL_LIBPATH)/libgdal.so
+endif
 
 ifndef PIO_AUTOTOOLS_BUILD
 # Use the PIO native cmake build system to build and install

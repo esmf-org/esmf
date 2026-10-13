@@ -118,6 +118,8 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+  PIOc_set_log_level(4);
+
   //------------------------------------------------------------------------
   // Test NETCDF
   //------------------------------------------------------------------------
@@ -413,13 +415,15 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
   rc = ESMF_SUCCESS;
-  for (int i=0; i<DIM_X; i++)
+  for (int i=0; i<DIM_X; i++) {
+    printf("Test: %f %f\n",test_data[i],read_data[i]);
     if (test_data[i] != read_data[i]) {
       rc = ESMF_FAILURE;
       cout << "Comparison failed at element " << i
 	  << test_data[i] << " != " << read_data[i] << endl;
       break;
-    };
+    }
+  };
 #else
   strcpy(disname, "DISABLED: ");
   strcat(disname, name);

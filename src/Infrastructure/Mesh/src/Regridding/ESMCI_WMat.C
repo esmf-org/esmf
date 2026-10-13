@@ -284,11 +284,12 @@ void WMat::InsertRowMerge(const Entry &row, const std::vector<Entry> &cols) {
         // NOTE: equality for entries considers more than just the .id, but doesn't
         //       consider .value
         if ((tmp_cols[i]       == old_cols[j]) &&
-            (std::abs(tmp_cols[i].value-old_cols[j].value) > 1e-5))
-          //          printf("ERROR dst_id=%d tmp_cols: id=%d idx=%d src_id=%d value=%f old_cols: id=%d idx=%d src_id=%d value=%f \n", row.id,
-          //                 tmp_cols[i].id,tmp_cols[i].idx,tmp_cols[i].src_id,tmp_cols[i].value,old_cols[j].id,old_cols[j].idx,old_cols[j].src_id,old_cols[j].value);
+            (std::abs(tmp_cols[i].value-old_cols[j].value) > 1e-5)) {
+                    printf("ERROR dst_id=%d tmp_cols: id=%d idx=%d src_id=%d value=%f old_cols: id=%d idx=%d src_id=%d value=%f \n", row.id,
+                           tmp_cols[i].id,tmp_cols[i].idx,tmp_cols[i].src_id,tmp_cols[i].value,old_cols[j].id,old_cols[j].idx,old_cols[j].src_id,old_cols[j].value);
 
             Throw() << "Shouldn't have the same matrix entries with different values.";
+	}
       }
     }
 
