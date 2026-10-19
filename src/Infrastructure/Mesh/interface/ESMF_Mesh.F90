@@ -4941,12 +4941,18 @@ end function ESMF_MeshEmptyCreate
       subroutine ESMF_MeshGet(mesh, parametricDim, spatialDim, &
                    nodeCount, nodeIds, nodeCoords, nodeOwners, &
                    nodeMaskIsPresent, nodeMask,&
+
+                   edgeIsPresent, edgeCount, edgeIds, &
+                   edgeOwners, edgeConnCount, edgeConn, &
+                   edgeCoordsIsPresent, edgeCoords, &
+
                    elementCount, elementIds, elementTypes, &
                    elementConnCount, elementConn, &
                    elementMaskIsPresent,elementMask, &
                    elementAreaIsPresent, elementArea, &
                    elementCoordsIsPresent, elementCoords, &
                    nodalDistgridIsPresent, nodalDistgrid, &
+                   edgeDistgridIsPresent, edgeDistgrid, &
                    elementDistgridIsPresent, elementDistgrid, &
                    numOwnedNodes, ownedNodeCoords, &
                    numOwnedElements, ownedElemCoords, &
@@ -4965,6 +4971,16 @@ end function ESMF_MeshEmptyCreate
     integer,                  intent(out), optional :: nodeOwners(:)
     logical,                  intent(out), optional :: nodeMaskIsPresent
     integer,                  intent(out), optional :: nodeMask(:)
+
+    logical,                  intent(out), optional :: edgeIsPresent
+    integer,                  intent(out), optional :: edgeCount
+    integer,                  intent(out), optional :: edgeIds(:)
+    integer,                  intent(out), optional :: edgeOwners(:)
+    integer,                  intent(out), optional :: edgeConnCount
+    integer,                  intent(out), optional :: edgeConn(:)
+    logical,                  intent(out), optional :: edgeCoordsIsPresent
+    real(ESMF_KIND_R8),       intent(out), optional :: edgeCoords(:)
+
     integer,                  intent(out), optional :: elementCount
     integer,                  intent(out), optional :: elementIds(:)
     integer,                  intent(out), optional :: elementTypes(:)
@@ -4978,6 +4994,8 @@ end function ESMF_MeshEmptyCreate
     real(ESMF_KIND_R8),       intent(out), optional :: elementCoords(:)
     logical,                  intent(out), optional :: nodalDistgridIsPresent
     type(ESMF_DistGrid),      intent(out), optional :: nodalDistgrid
+    logical,                  intent(out), optional :: edgeDistgridIsPresent
+    type(ESMF_DistGrid),      intent(out), optional :: edgeDistgrid
     logical,                  intent(out), optional :: elementDistgridIsPresent
     type(ESMF_DistGrid),      intent(out), optional :: elementDistgrid
     integer,                  intent(out), optional :: numOwnedNodes
@@ -5017,8 +5035,31 @@ end function ESMF_MeshEmptyCreate
 ! An array of the PET numbers that own each local node in the mesh. The nodeOwners array should be of size nodeCount.
 ! \item [{[nodeMaskIsPresent]}]
 ! .true. if node masking was set in mesh, .false. otherwise.
-! \item [{[nodeMask]}]
+! \item [{[nodeMask]}]    
 ! An array of mask values for each local node in the mesh. The nodeOwners array should be of size nodeCount.
+! \item [{[edgeCount]}]
+! The number of local edges in the mesh (both owned and shared with another PET).
+! \item [{[edgeIds]}]
+! An array of ids for each local edge in the mesh. The edgeIds array should be of size edgeCount.
+! \item [{[edgeOwners]}]
+! An array of the PET numbers that own each local edge in the mesh. The edgeOwners array should be of size edgeCount.
+! \item[edgeConn]
+!         An array containing the indexes of the sets of nodes to be connected together to form the
+!         edges to be created on this PET. The entries in this list are NOT node global ids,
+!         but rather each entry is a local index (1 based) into the list of nodes to be
+!         created on this PET by this call.
+!         In other words, an entry of 1 indicates that this edge contains the node
+!         described by {\tt nodeIds(1)}, {\tt nodeCoords(1)}, etc. on this PET. 
+!         This input consists of a 1D array with
+!         a total size equal to 2*{\tt edgeCount}.  The number of nodes contained in each edge on
+!         this PET is also provided by {\tt edgeConnCount}.  The nodes for each edge
+!         are in sequence in this array (e.g. the nodes for edge 1 are edgeConn(1),
+!         edgeConn(2), etc.).
+! \item [{[edgeCoordsIsPresent]}]
+! .true. if edge coordinates were set in mesh, .false. otherwise.
+! \item [{[edgeCoords]}]
+    ! An array of coordinate values for each local edge in the mesh. The edgeCoord array should be of size (spatialDim*edgeCount).
+    
 ! \item [{[elementCount]}]
 ! The number of local elements in the mesh (both owned and shared with another PET).
 ! \item [{[elementIds]}]
@@ -5126,6 +5167,12 @@ end function ESMF_MeshEmptyCreate
     type(ESMF_InterArray) :: elementMaskIA
     type(ESMF_InterArray) :: elementAreaIA
     type(ESMF_InterArray) :: elementCoordsIA
+
+    type(ESMF_InterArray) :: edgeIdsIA
+    type(ESMF_InterArray) :: edgeOwnersIA
+    type(ESMF_InterArray) :: edgeConnIA
+    type(ESMF_InterArray) :: edgeCoordsIA
+
     type(ESMF_InterArray) :: nodeIdsIA
     type(ESMF_InterArray) :: nodeCoordsIA
     type(ESMF_InterArray) :: nodeOwnersIA
@@ -5134,7 +5181,9 @@ end function ESMF_MeshEmptyCreate
     integer :: elemMaskIsPresentI
     integer :: elemAreaIsPresentI
     integer :: elemCoordsIsPresentI
-    type(ESMF_DistGrid) :: nodeDistGrid, elemDistGrid, elemDistGrid2
+    integer :: edgeCoordsIsPresentI
+    integer :: edgeIsPresentI    
+    type(ESMF_DistGrid) :: nodeDistGrid, elemDistGrid, elemDistGrid2, edgeDistGridTmp
 
     ! Init local rc
     localrc = ESMF_SUCCESS
@@ -5182,6 +5231,21 @@ end function ESMF_MeshEmptyCreate
 
 
        ! Check another set, just so the length of the if isn't so big
+       if ( present(edgeCoordsIsPresent) .or. &
+            present(edgeCount) .or. &
+            present(edgeIds) .or. &
+            present(edgeConnCount) .or. &
+            present(edgeConn) .or. &
+            present(edgeCoordsIsPresent) .or. &
+            present(edgeCoords)) then
+
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+               msg="- the mesh has not been fully created", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
+
+       ! Check another set, just so the length of the if isn't so big
        if (present(elementCount) .or. &
             present(elementIds) .or. &
             present(elementTypes) .or. &
@@ -5199,6 +5263,8 @@ end function ESMF_MeshEmptyCreate
                ESMF_CONTEXT, rcToReturn=rc)
           return
        endif
+
+
     endif
 
     ! XMRKX !
@@ -5312,7 +5378,104 @@ end function ESMF_MeshEmptyCreate
     endif
 
 
+    !!!!!!!! Get Edge info from Mesh !!!!!!!!
 
+    ! Get Element Count
+    if (present(edgeCount)) then
+       ! Make call to get info
+       call C_ESMC_MeshGetEdgeCount(mesh, edgeCount, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Get Element Connection Count
+    if (present(edgeConnCount)) then
+       ! Make call to get info
+       call C_ESMC_MeshGetEdgeConnCount(mesh, edgeConnCount, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+
+    ! Get information about whether various elem information is present
+    if (present(edgeIsPresent) .or. &
+        present(edgeCoordsIsPresent)) then
+
+       ! Init integer variables for getting logical info from C
+       edgeIsPresentI=0
+       edgeCoordsIsPresentI=0
+
+       ! Call into C
+       call C_ESMC_MeshGetEdgeInfoPresence(mesh, &
+            edgeIsPresentI, &
+            edgeCoordsIsPresentI, &
+            localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Set variables from C info
+       if (present(edgeIsPresent)) then
+          edgeIsPresent=.false.
+          if (edgeIsPresentI .ne. 0) edgeIsPresent=.true.
+       endif
+
+       if (present(edgeCoordsIsPresent)) then
+          edgeCoordsIsPresent=.false.
+          if (edgeCoordsIsPresentI .ne. 0) edgeCoordsIsPresent=.true.
+       endif
+    endif
+
+   ! Get elem creation info
+    if (present(edgeIds) .or. &
+        present(edgeOwners) .or. &
+        present(edgeConn) .or. &         
+        present(edgeCoords)) then
+
+       ! Create interface arrays
+        edgeIdsIA = ESMF_InterArrayCreate(edgeIds, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+        edgeOwnersIA = ESMF_InterArrayCreate(edgeOwners, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+        edgeConnIA = ESMF_InterArrayCreate(edgeConn, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+        edgeCoordsIA = ESMF_InterArrayCreate(farray1DR8=edgeCoords, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return       
+
+
+       ! Call into C
+       call C_ESMC_MeshGetEdgeCreateInfo(mesh, &
+            edgeIdsIA, edgeOwnersIA, &
+            edgeConnIA, edgeCoordsIA, &
+            localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Destroy interface arrays
+       call ESMF_InterArrayDestroy(edgeIdsIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InterArrayDestroy(edgeOwnersIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InterArrayDestroy(edgeConnIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InterArrayDestroy(edgeCoordsIA, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    
     !!!!!!!! Get Elem info from Mesh !!!!!!!!
 
     ! Get Element Count
@@ -5526,6 +5689,49 @@ end function ESMF_MeshEmptyCreate
         endif
     endif
 
+    isPresent = .false.
+    ! Get edge Distgrid presence
+    if (present(edgeDistgridIsPresent)) then
+
+        call c_ESMC_MeshGetEdgeDistGridPresent(mesh, isPresentAux, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! Output state
+        edgeDistgridIsPresent=isPresentAux
+    endif
+
+    isPresent = .false.
+    ! Get edge Distgrid
+    if (present(edgeDistgrid)) then
+
+        call c_ESMC_MeshGetEdgeDistGridPresent(mesh, isPresentAux, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if (isPresentAux==ESMF_TRUE) then
+
+            call c_ESMC_MeshGetEdgeDistGrid(mesh, edgeDistGridTmp, localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
+            ! Set init code for deep C++ DistGrid object
+            call ESMF_DistGridSetInitCreated(edgeDistGridTmp, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
+            ! Output distgrid
+            edgeDistgrid = edgeDistGridTmp
+        else
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_NOT_CREATED, &
+                          msg="- this mesh doesn't contain an edge distgrid", &
+                          ESMF_CONTEXT, rcToReturn=rc)
+            return
+        endif
+    endif
+
+    
+    
     isPresent = .false.
     ! Get element Distgrid presence
     if (present(elementDistgridIsPresent)) then

@@ -189,14 +189,29 @@ ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<i
   // Turn on edges
   void setHasEdges() {hasEdges=true;}
 
+  // Check for edges
+  bool getHasEdges() {return hasEdges;}
+
+  // Check for edges
+  bool getHasEdgeCoords() {return hasEdgeCoords;}
+  
   // Set number of Edges (needs to be done before anything is
   // added, so it can be used for error checking. 
   void setEdgeCount(int _edgeCount) {edgeCount=_edgeCount;}
+  int getEdgeCount() {return edgeCount;}
   
   // Set edge info
-  void setEdgeIds(int numEdges, int *edgeIds);
-
-  void setEdgeOwners(int numEdges, int *edgeOwners);
+  void setEdgeIds(int *edgeIds);
+  void getEdgeIds(int *_edgeIds);
+  
+  void setEdgeOwners(int *edgeOwners);
+  void getEdgeOwners(int *_edgeOwners);
+  
+  void setEdgeOrigCoords(ESMC_R8 *_edgeOrigCoords);
+  void getEdgeOrigCoords(ESMC_R8 *_edgeOrigCoords);
+  
+  void setEdgeConn(int *_edgeConn);
+  void getEdgeConn(int *_edgeConn);
   
   private:
 
@@ -213,14 +228,14 @@ ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<i
   // Information about edges
   int edgeCount;
   bool hasEdges; // Does the mesh have edges? 
-
+  bool hasEdgeCoords; // Does the mesh have edge coords?
+  
   // Ordered by original order that they were input
   std::vector<UInt> edgeIds;
   std::vector<int> edgeOwners;
+  std::vector<int> edgeConn; // Size of numEdges*2
+  std::vector<ESMC_R8> edgeOrigCoords; // Size of numEdges*orig_spatial_dim
 
-  // Could add other information, but probably don't need it until you have ability to retrieve it...
-  /// STOPPED HERE ///
-  
 
 void assign_new_ids();
 CommReg *sghost;

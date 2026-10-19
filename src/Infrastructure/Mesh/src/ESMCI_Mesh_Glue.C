@@ -152,7 +152,7 @@ void ESMCI_meshcreate(Mesh **meshpp,
 } // meshcreate
 
 
-void set_node_owners_wo_list(int num_nodes, int *node_ids, int *node_owners);
+void get_owners_wo_list(int num_nodes, int *node_ids, int *node_owners);
 
 
 void ESMCI_meshaddnodes(Mesh **meshpp, int *_num_nodes, int *nodeId,
@@ -222,7 +222,7 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *_num_nodes, int *nodeId,
        nodeOwner_allocated=true;
        
        // Autofill
-       set_node_owners_wo_list(num_nodes, nodeId, nodeOwner);        
+       get_owners_wo_list(num_nodes, nodeId, nodeOwner);        
      }
 
 
@@ -1705,8 +1705,8 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
 void ESMCI_meshaddedges(Mesh **meshpp,
                          int *_num_edges, int *edgeIds,
-                         InterArray<int> *_edgeOwners,
-                         InterArray<ESMC_R8> *_edgeCoords,
+                         InterArray<int> *edgeOwnerII,
+                         InterArray<ESMC_R8> *edgeCoordsII,
                          int *_edgeConn_size, int *edgeConn, 
                          int *rc)
 #undef  ESMC_METHOD
@@ -1755,46 +1755,84 @@ void ESMCI_meshaddedges(Mesh **meshpp,
     }
 
     // Add edge ids to mesh
-    mesh.setEdgeIds(num_edges, edgeIds);
+    mesh.setEdgeIds(edgeIds);
     
-     
-
-#if 0     
-     // Get nodeOwner
-     int *nodeOwner=NULL;
-     bool nodeOwner_allocated=false;
-     if (present(nodeOwnerII)) { // if node owners exist
-       // Error checking
-       if (nodeOwnerII->dimCount !=1) {
-         int localrc;
-         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-                                          " nodeOwner array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
-       }
-       
-       if (nodeOwnerII->extent[0] != num_nodes) {
-         int localrc;
-         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-                                          " nodeOwner array must be the same size as the nodeIds array ", ESMC_CONTEXT, &localrc)) throw localrc;
-       }
-       
-       // Get array
-       nodeOwner=nodeOwnerII->array;
-
-     } else { // automatically figure out node owners
-
-       // Create local version of owners array
-       nodeOwner=new int[num_nodes];
-       nodeOwner_allocated=true;
-       
-       // Autofill
-       set_node_owners_wo_list(num_nodes, nodeId, nodeOwner);        
-     }
-#endif
-
-    
-    
-    
+    // Get edgeOwner
+    int *edgeOwner=NULL;
+    bool edgeOwner_allocated=false;
+    if (present(edgeOwnerII)) { // if edge owners exist
+      // Error checking
+      if (edgeOwnerII->dimCount !=1) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+                                         " edgeOwner array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
       
+      if (edgeOwnerII->extent[0] != num_edges) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+                                         " edgeOwner array must be the same size as the edgeIds array ", ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+      
+      // Get array
+      edgeOwner=edgeOwnerII->array;
+      
+    } else { // automatically figure out edge owners
+      
+      // Create local version of owners array
+      edgeOwner=new int[num_edges];
+      edgeOwner_allocated=true;
+      
+      // Autofill
+      get_owners_wo_list(num_edges, edgeIds, edgeOwner);        
+    }
+
+    // Set edge owners in Mesh
+    mesh.setEdgeOwners(edgeOwner);   
+    
+    // If locally allocated, get rid of edgeOwner
+    if (edgeOwner_allocated) {
+      delete [] edgeOwner;
+      edgeOwner=NULL;
+    }
+
+
+    // Set edgeCoords
+    if (present(edgeCoordsII)) { // if edge owners exist
+      // Error checking
+      if (edgeCoordsII->dimCount !=1) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+                                         " edgeCoords array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+      
+      if (edgeCoordsII->extent[0] != num_edges*mesh.orig_spatial_dim) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+                                         " edgeCoords array must be the same size as the edgeIds array ", ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+      
+      // Get array
+      ESMC_R8 *edgeCoords=edgeCoordsII->array;
+      
+
+      // Set edge owners in Mesh
+      mesh.setEdgeOrigCoords(edgeCoords);   
+    }
+
+    // Error check edge connections information
+    ThrowRequire(edgeConn);
+    if (*_edgeConn_size != 2*num_edges) {
+      int localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+                                       " edgeConn array must be 2x the size of the edgeIds array.", ESMC_CONTEXT,  &localrc)) throw localrc;
+    }
+    
+    // Set edge connections
+    mesh.setEdgeConn(edgeConn);
+
+     
+    
   } catch(std::exception &x) {
     // catch Mesh exception return code
     if (x.what()) {
@@ -2157,6 +2195,200 @@ void ESMCI_MeshGetNodeCount(Mesh *mesh, int *nodeCount, int *rc){
 
     if(rc != NULL) *rc = ESMF_SUCCESS;
 }
+
+void ESMCI_MeshGetEdgeCount(Mesh *mesh, int *edgeCount, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_MeshGetEdgeCount()"
+
+  // Get edge count if edges are present
+  if (mesh->getHasEdges()) {    
+    *edgeCount = mesh->getEdgeCount();
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Attempting to get edgeCount from a Mesh with no edges.", ESMC_CONTEXT, rc);
+    return;    
+  }
+
+  // Return success
+  if(rc != NULL) *rc = ESMF_SUCCESS;
+}
+
+
+void ESMCI_MeshGetEdgeConnCount(Mesh *mesh, int *edgeConnCount, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_MeshGetEdgeConnCount()"
+
+  // Get edge count if edges are present
+  if (mesh->getHasEdges()) {    
+    *edgeConnCount = 2*mesh->getEdgeCount(); // 2 nodes per edge
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Attempting to get edgeCount from a Mesh with no edges.", ESMC_CONTEXT, rc);
+    return;    
+  }
+
+  // Return success
+  if(rc != NULL) *rc = ESMF_SUCCESS;
+}
+
+void ESMCI_MeshGetEdgeInfoPresence(Mesh *mesh, 
+                                   int *edgeIsPresent,
+                                   int *edgeCoordsIsPresent,
+                                   int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_MeshGetEdgeInfoPresence()"
+
+  // Check if element mask is present
+  if (edgeIsPresent) {
+    *edgeIsPresent=0;
+    if (mesh->getHasEdges()) *edgeIsPresent=1;
+  }
+
+  // Check if element coords are present
+  if (edgeCoordsIsPresent) {
+    *edgeCoordsIsPresent=0;
+    if (mesh->getHasEdgeCoords()) *edgeCoordsIsPresent=1;
+  }
+
+  // return success
+  if (rc != NULL) *rc = ESMF_SUCCESS;
+}
+
+
+void ESMCI_MeshGetEdgeCreateInfo(Mesh *mesh,
+                                 ESMCI::InterArray<int> *edgeIds,
+                                 ESMCI::InterArray<int> *edgeOwners,
+                                 ESMCI::InterArray<int> *edgeConn,
+                                 ESMCI::InterArray<ESMC_R8> *edgeCoords, int *rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI_MeshGetEdgeCreateInfo()"
+
+  // Try-catch block around main part of method
+  try {
+     
+
+    ////// Get some handy information //////
+    int orig_sdim=mesh->orig_spatial_dim;
+
+
+    // If requested, get edge ids
+    if (present(edgeIds)) {
+      // Error checking
+      if (edgeIds->dimCount !=1) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          " edgeentIds array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+
+      if (edgeIds->extent[0] != mesh->getEdgeCount()) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+        " edgeIds array must be of size edgeCount", ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+
+      // Get ids
+      mesh->getEdgeIds(edgeIds->array);
+    }
+
+    // If requested, get edge owners
+    if (present(edgeOwners)) {
+            
+      // Error checking
+      if (edgeOwners->dimCount !=1) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          " edgeOwners array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+
+      if (edgeOwners->extent[0] != mesh->getEdgeCount()) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+        " edgeOwners array must be of size edgeCount", ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+
+      // Get owners
+      mesh->getEdgeOwners(edgeOwners->array);      
+    }
+
+
+    // If requested, get edge connections
+    if (present(edgeConn)) {
+      
+      // Error checking
+      if (edgeConn->dimCount !=1) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          " edgeConn array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+
+      
+      // Make sure input array is the correct size
+      if (edgeConn->extent[0] != 2*(mesh->getEdgeCount())) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+        " edgeConn array must be of size edgeConnCount", ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+
+      // Get edgeConn
+      mesh->getEdgeConn(edgeConn->array);            
+    }
+
+    
+    // If requested, get edge coordinates
+    if (present(edgeCoords)) {
+
+      // Mask sure edge coords area present
+      if (!mesh->getHasEdgeCoords()) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          " edgeCoords being requested, but edge coords have not been set in mesh", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+
+      // Error checking
+      if (edgeCoords->dimCount !=1) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          " edgeCoords array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+
+      if (edgeCoords->extent[0] != orig_sdim*(mesh->getEdgeCount())) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+        " edgeCoords array must be of size spatialDim*edgeCount", ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+
+      // Get edge coordinates
+      mesh->getEdgeOrigCoords(edgeCoords->array);                  
+    }
+
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  } catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+  
+  // We've gotten to bottom successfully, so return success
+  if (rc != NULL) *rc = ESMF_SUCCESS;
+}
+
+
+
 
 
 void ESMCI_MeshGetElemCount(Mesh *mesh, int *elemCount, int *rc){
@@ -6703,21 +6935,21 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
 } // meshcreate_easy_elems
 
 
-  // Fill nodeOwners list from nodeIds list using a DDir
-// node_ids and node_owners should both be allocated to the size of num_nodes
-void set_node_owners_wo_list(int num_nodes, int *node_ids, int *node_owners) {
+  // Fill objOwners list from objIds list using a DDir
+// obj_ids and obj_owners should both be allocated to the size of num_objs
+void get_owners_wo_list(int num_objs, int *obj_ids, int *obj_owners) {
   
   // Allocate structuress for DDir
   // TODO: we have to create seperate lists because of UInt, template DDir to get
   //       rid of this issue
   std::vector<UInt> gids;
-  gids.resize(num_nodes,0);
+  gids.resize(num_objs,0);
   std::vector<UInt> lids; 
-  lids.resize(num_nodes,0);
+  lids.resize(num_objs,0);
 
   // Fill gid list from input
-  for (int i=0; i<num_nodes; i++) {
-    gids[i]=(UInt)node_ids[i];
+  for (int i=0; i<num_objs; i++) {
+    gids[i]=(UInt)obj_ids[i];
   }
 
 
@@ -6775,8 +7007,8 @@ void set_node_owners_wo_list(int num_nodes, int *node_ids, int *node_owners) {
          }
        } else {
          // Set owner of gid before moving on
-         ThrowRequire(curr_pos < num_nodes);
-         node_owners[curr_pos]=curr_proc_best;
+         ThrowRequire(curr_pos < num_objs);
+         obj_owners[curr_pos]=curr_proc_best;
          
          // Move to next gid
          curr_pos++;
@@ -6795,9 +7027,9 @@ void set_node_owners_wo_list(int num_nodes, int *node_ids, int *node_owners) {
 
      // Set owner of last gid before moving on
      // (but first make sure list isn't empty) 
-     if (num_nodes > 0) {
-       ThrowRequire(curr_pos < num_nodes);
-       node_owners[curr_pos]=curr_proc_best;
+     if (num_objs > 0) {
+       ThrowRequire(curr_pos < num_objs);
+       obj_owners[curr_pos]=curr_proc_best;
      }
 
      // printf("Last curr_pos=%d gids.size()=%d\n",curr_pos,gids.size());

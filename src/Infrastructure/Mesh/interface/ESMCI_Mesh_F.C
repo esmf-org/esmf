@@ -116,6 +116,21 @@ extern "C" void FTN_X(c_esmc_meshgetnodedistgridpresent)(MeshCap **meshpp,
     if (rc!=NULL) *rc = ESMF_SUCCESS; 
 }
 
+
+// Accessors to MeshCap member variables
+extern "C" void FTN_X(c_esmc_meshgetedgedistgridpresent)(MeshCap **meshpp, 
+  ESMC_Logical *ispresent, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshgetedgedistgridpresent()"
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    *ispresent = ((*meshpp)->edge_distgrid_set) ? ESMF_TRUE : ESMF_FALSE;
+
+    if (rc!=NULL) *rc = ESMF_SUCCESS; 
+}
+
+
 // Accessors to MeshCap member variables
 extern "C" void FTN_X(c_esmc_meshgetelemdistgridpresent)(MeshCap **meshpp, 
   ESMC_Logical *ispresent, int *rc) {
@@ -128,6 +143,7 @@ extern "C" void FTN_X(c_esmc_meshgetelemdistgridpresent)(MeshCap **meshpp,
 
     if (rc!=NULL) *rc = ESMF_SUCCESS; 
 }
+
 
 // Accessors to MeshCap member variables
 extern "C" void FTN_X(c_esmc_meshgetnodedistgrid)(MeshCap **meshpp, DistGrid **dg, int *rc) {
@@ -148,6 +164,27 @@ extern "C" void FTN_X(c_esmc_meshgetnodedistgrid)(MeshCap **meshpp, DistGrid **d
   
     if (rc!=NULL) *rc = ESMF_SUCCESS; 
 }
+
+extern "C" void FTN_X(c_esmc_meshgetedgedistgrid)(MeshCap **meshpp, DistGrid **dg, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshgetedgedistgrid()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    
+    // ensure 'meshpp' argument is valid to be dereferenced
+    if (ESMC_NOT_PRESENT_FILTER(meshpp) == ESMC_NULL_POINTER){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "The 'meshpp' argument must not be a NULL pointer",
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+      return; // bail out
+    }
+    
+    *dg = (*meshpp)->meshgetedgedistgrid();
+
+    if (rc!=NULL) *rc = ESMF_SUCCESS; 
+}
+
 
 extern "C" void FTN_X(c_esmc_meshgetelemdistgrid)(MeshCap **meshpp, DistGrid **dg, int *rc) {
 #undef  ESMC_METHOD
@@ -515,6 +552,17 @@ extern "C" void FTN_X(c_esmc_meshgetelemconncount)(MeshCap **meshpp, int *elemCo
   (*meshpp)->getElemConnCount(elemConnCount, rc);
 }
 
+extern "C" void FTN_X(c_esmc_meshgetedgecount)(MeshCap **meshpp, int *edgeCount, int *rc){
+
+  (*meshpp)->getEdgeCount(edgeCount, rc);
+}
+
+extern "C" void FTN_X(c_esmc_meshgetedgeconncount)(MeshCap **meshpp, int *edgeConnCount, int *rc){
+
+  (*meshpp)->getEdgeConnCount(edgeConnCount, rc);
+}
+
+
 extern "C" void FTN_X(c_esmc_meshgetownednodecount)(MeshCap **meshpp, int *nodeCount, int *rc){
 
   (*meshpp)->getOwnedNodeCount(nodeCount, rc);
@@ -525,6 +573,29 @@ extern "C" void FTN_X(c_esmc_meshgetownedelemcount)(MeshCap **meshpp, int *elemC
 
   (*meshpp)->getOwnedElemCount(elemCount, rc);
 }
+
+
+
+
+extern "C" void FTN_X(c_esmc_meshgetedgeinfopresence)(MeshCap **meshpp, 
+                                                      int *edgeIsPresent,
+                                                      int *edgeCoordsIsPresent,
+                                                      int *rc){
+
+  (*meshpp)->getEdgeInfoPresence(edgeIsPresent, edgeCoordsIsPresent, rc);
+}
+
+extern "C" void FTN_X(c_esmc_meshgetedgecreateinfo)(MeshCap **meshpp, 
+                                                    ESMCI::InterArray<int> *edgeIds,
+                                                    ESMCI::InterArray<int> *edgeOwners,
+                                                    ESMCI::InterArray<int> *edgeConn,
+                                                    ESMCI::InterArray<ESMC_R8> *edgeCoords,
+                                                    int *rc){
+
+  (*meshpp)->getEdgeCreateInfo(edgeIds, edgeOwners, edgeConn, edgeCoords, rc);
+}
+
+
 
 extern "C" void FTN_X(c_esmc_meshgeteleminfopresence)(MeshCap **meshpp, 
                                                       int *elemMaskIsPresent,

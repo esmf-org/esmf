@@ -106,6 +106,19 @@ void ESMCI_meshfreememory(Mesh **meshpp, int *rc);
 void ESMCI_meshget(Mesh **meshpp, int *num_nodes, int *num_elements, int *rc);
 
 void ESMCI_MeshGetNodeCount(Mesh *meshpp, int *nodeCount, int *rc);
+
+void ESMCI_MeshGetEdgeCount(Mesh *meshpp, int *edgeCount, int *rc);
+void ESMCI_MeshGetEdgeConnCount(Mesh *mesh, int *edgeConnCount, int *rc);
+void ESMCI_MeshGetEdgeInfoPresence(Mesh *mesh, 
+                                   int *edgeIsPresent,
+                                   int *elemCoordsIsPresent,
+                                   int *rc);
+void ESMCI_MeshGetEdgeCreateInfo(Mesh *mesh,
+                                 ESMCI::InterArray<int> *edgeIds,
+                                 ESMCI::InterArray<int> *edgeOwners,
+                                 ESMCI::InterArray<int> *edgeConn,
+                                 ESMCI::InterArray<ESMC_R8> *edgeCoords, int *rc);
+
 void ESMCI_MeshGetElemCount(Mesh *meshpp, int *elemCount, int *rc);
 void ESMCI_MeshGetElemConnCount(Mesh *meshpp, int *elemConnCount, int *rc);
 void ESMCI_MeshGetOwnedNodeCount(Mesh *meshpp, int *nodeCount, int *rc);
