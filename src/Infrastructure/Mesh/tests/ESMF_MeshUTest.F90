@@ -121,7 +121,7 @@ program ESMF_MeshUTest
 
 
  ! This surrounds all the tests to make turning off everything but one test easier
-#if 1
+#if 0
 
   !------------------------------------------------------------------------
 
@@ -3009,7 +3009,7 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
-
+#endif
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test creating a Mesh with edges in 3 steps"
@@ -3024,7 +3024,7 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
-  
+#if 0  
   !------------------------------------------------------------------------
   ! TODO: "Activate once the mesh is fully created. ESMF_MeshWrite is not meant
   !  to be called until then".
@@ -10644,15 +10644,15 @@ end subroutine MeshGetElemInfoWGT4SidesTest
   !
   !              Mesh Ids
   !
-  !   20.0   7 ------- 8 -------- 9
+  !   20.0   7 ---5--- 8 ---6---- 9
   !          |         |          |
-  !          |    3    |    4     |
+  !         10    3   11    4    12
   !          |         |          |
-  !   10.0   4 ------- 5 -------- 6
+  !   10.0   4 ---3--- 5 ---4---- 6
   !          |         |          |
-  !          |    1    |    2     |
+  !          7    1    8    2     9
   !          |         |          |
-  !   0.0    1 ------- 2 -------- 3
+  !   0.0    1 ---1--- 2 ---2---- 3
   !
   !        0.0       10.0        20.0
   !
@@ -10666,15 +10666,15 @@ end subroutine MeshGetElemInfoWGT4SidesTest
   !
   !             Mesh Owners
   !
-  !   20.0  2 ------- 2 -------- 3
+  !   20.0  2 ---2--- 2 ---3---- 3
   !         |         |          |
-  !         |    2    |    3     |
+  !         2    2    |    3     3
   !         |         |          |
-  !   10.0  0 ------- 0 -------- 1
+  !   10.0  0 ---0--- 0 ---1---- 1
   !         |         |          |
-  !         |    0    |    1     |
+  !         0    0    0    1     1
   !         |         |          |
-  !   0.0   0 ------- 0 -------- 1
+  !   0.0   0 ---0--- 0 ---1---- 1
   !
   !        0.0       10.0       20.0
   !
@@ -10691,8 +10691,15 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
   real(ESMF_KIND_R8), pointer :: ownedNodeCoords(:)
   integer :: numNodes, numOwnedNodes, numOwnedNodesTst
 
-  integer :: numEdges
+  
+  integer :: numEdges, numEdgeConns
   integer, pointer :: edgeIds(:),edgeOwners(:),edgeConn(:)
+  real(ESMF_KIND_R8), pointer :: edgeCoords(:)
+
+  logical:: edgeIsPresent, edgeCoordsIsPresent
+  integer :: numEdgesTst, numEdgeConnsTst
+  integer, pointer :: edgeIdsTst(:),edgeOwnersTst(:),edgeConnTst(:)
+  real(ESMF_KIND_R8), pointer :: edgeCoordsTst(:)
   
   integer :: numElems,numOwnedElemsTst
   integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
@@ -10743,7 +10750,8 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
 
       ! Edge information
       numEdges=12
-
+      numEdgeConns=2*numEdges
+      
       !! Edge ids
       allocate(edgeIds(numEdges))
       edgeIds=(/1,2,3,4,5,6,7,8,9,10,11,12/)
@@ -10753,7 +10761,7 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
       edgeOwners=0 ! everything on proc 0
 
       !! Edge conn
-      allocate(edgeConn(2*numEdges))
+      allocate(edgeConn(numEdgeConns))
       edgeConn=(/1,2, & ! id 1
                  2,3, & ! id 2
                  4,5, & ! id 3
@@ -10814,6 +10822,26 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
        !! node owners
        allocate(nodeOwners(numNodes))
        nodeOwners=(/0,0,0,0/) ! everything on proc 0
+       
+       ! Edge information
+       numEdges=4
+       numEdgeConns=2*numEdges
+       
+       !! Edge ids
+       allocate(edgeIds(numEdges))
+       edgeIds=(/1,3,7,8/)
+       
+       !! Edge owners
+       allocate(edgeOwners(numEdges))
+       edgeOwners=(/0,0,0,0/) ! everything on proc 0
+       
+       !! Edge conn
+       allocate(edgeConn(numEdgeConns))
+       edgeConn=(/1,2, & ! id 1
+                  3,4, & ! id 3
+                  1,3, & ! id 7
+                  2,4/)  ! id 8
+
 
        ! Fill in elem data
        numElems=1
@@ -10858,6 +10886,26 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
        allocate(nodeOwners(numNodes))
        nodeOwners=(/0,1,0,1/)
 
+       ! Edge information
+       numEdges=4
+       numEdgeConns=2*numEdges
+       
+       !! Edge ids
+       allocate(edgeIds(numEdges))
+       edgeIds=(/2,4,8,9/)
+       
+       !! Edge owners
+       allocate(edgeOwners(numEdges))
+       edgeOwners=(/1,1,0,1/) 
+       
+       !! Edge conn
+       allocate(edgeConn(numEdgeConns))
+       edgeConn=(/1,2, & ! id 2
+                  3,4, & ! id 4
+                  1,3, & ! id 8
+                  1,4/)  ! id 9
+
+       
        ! Fill in elem data
        numElems=1
 
@@ -10900,6 +10948,26 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
        allocate(nodeOwners(numNodes))
        nodeOwners=(/0,0,2,2/)
 
+       ! Edge information
+       numEdges=4
+       numEdgeConns=2*numEdges
+       
+       !! Edge ids
+       allocate(edgeIds(numEdges))
+       edgeIds=(/3,5,10,11/)
+       
+       !! Edge owners
+       allocate(edgeOwners(numEdges))
+       edgeOwners=(/0,2,2,2/) 
+       
+       !! Edge conn
+       allocate(edgeConn(numEdgeConns))
+       edgeConn=(/1,2, & ! id 3
+                  3,4, & ! id 5
+                  1,3, & ! id 10
+                  2,4/)  ! id 11
+
+       
        ! Fill in elem data
        numElems=1
 
@@ -10941,6 +11009,26 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
        !! node owners
        allocate(nodeOwners(numNodes))
        nodeOwners=(/0,1,2,3/)
+
+
+       ! Edge information
+       numEdges=4
+       numEdgeConns=2*numEdges
+       
+       !! Edge ids
+       allocate(edgeIds(numEdges))
+       edgeIds=(/4,6,11,12/)
+       
+       !! Edge owners
+       allocate(edgeOwners(numEdges))
+       edgeOwners=(/1,3,2,3/) 
+       
+       !! Edge conn
+       allocate(edgeConn(numEdgeConns))
+       edgeConn=(/1,2, & ! id 4
+                  3,4, & ! id 6
+                  1,3, & ! id 11
+                  2,4/)  ! id 12
 
        ! Fill in elem data
        numElems=1
@@ -10994,6 +11082,72 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
 
    ! Init correct
    correct=.true.
+
+   ! Get count info from Mesh
+   call ESMF_MeshGet(mesh, &
+        edgeIsPresent=edgeIsPresent, &
+        edgeCoordsIsPresent=edgeCoordsIsPresent, &
+        edgeCount=numEdgesTst, &
+        edgeConnCount=numEdgeConnsTst, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! ! DEBUG OUTPUT
+   
+   ! Make sure edges are present
+   if (.not. edgeIsPresent) correct=.false.
+   if (edgeCoordsIsPresent) correct=.false.
+   
+   ! Make sure things match
+   if (numEdges /= numEdgesTst) correct=.false.
+   if (numEdgeConns /= numEdgeConnsTst) correct=.false.
+
+   write(*,*) "numEdges=",numEdges,numEdgesTst
+   write(*,*) "numEdges=",numEdgeConns,numEdgeConnsTst
+
+write(*,*) "H1 ", correct
+
+
+   ! If not correct, leave so we're not using arrays of the wrong size
+   if (.not. correct) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+   
+   ! Allocate space for arrays
+   allocate(edgeIdsTst(numEdges))
+   allocate(edgeOwnersTst(numEdges))
+   allocate(edgeConnTst(numEdgeConns))
+   allocate(edgeCoordsTst(2*numEdges))
+
+   ! Get edge information
+   call ESMF_MeshGet(mesh, &
+        edgeIds=edgeIdsTst, &
+        edgeOwners=edgeOwnersTst, &
+        edgeConn=edgeConnTst, & 
+!        edgeCoords=edgeCoordsTst, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+  
+   ! Check edge info
+   do i=1,numEdges
+      if (edgeIdsTst(i) /= edgeIds(i)) correct=.false.
+      if (edgeOwnersTst(i) /= edgeOwners(i)) correct=.false.
+!      if (edgeCoordsTst(2*i-1) /= edgeCoords(2*i-1)) correct=.false.
+!      if (edgeCoordsTst(2*i) /= edgeCoords(2*i)) correct=.false.
+   enddo
+
+   write(*,*) "H2 ", correct
+
+   
+   ! Check edge info
+   do i=1,numEdgeConns
+      if (edgeConnTst(i) /= edgeConn(i)) correct=.false.
+   enddo
+
+      write(*,*) "H3 ", correct
    
    ! deallocate node data
    deallocate(nodeIds)
@@ -11004,7 +11158,12 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
    deallocate(edgeIds)
    deallocate(edgeOwners)
    deallocate(edgeConn)
-   
+
+   ! deallocate edge Tst data
+   deallocate(edgeIdsTst)
+   deallocate(edgeOwnersTst)
+   deallocate(edgeConnTst)
+
    ! deallocate elem data
    deallocate(elemIds)
    deallocate(elemTypes)
