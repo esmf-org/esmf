@@ -1723,11 +1723,6 @@ void ESMCI_meshaddedges(Mesh **meshpp,
       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
         throw localrc;  // bail out with exception
     }
-
-    
-    // Debug output    
-    printf("In ESMCI_meshaddedges()!!!\n");
-
     
     // local rc code
     int localrc;

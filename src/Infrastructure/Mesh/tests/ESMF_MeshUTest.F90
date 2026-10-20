@@ -10760,6 +10760,21 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
       allocate(edgeOwners(numEdges))
       edgeOwners=0 ! everything on proc 0
 
+      !! Edge Coords
+      allocate(edgeCoords(2*numEdges))
+      edgeCoords=(/ 5.0,  0.0, & ! id 1
+                   15.0,  0.0, & ! id 2
+                    5.0, 10.0, & ! id 3
+                   15.0, 10.0, & ! id 4
+                    5.0, 20.0, & ! id 5
+                   15.0, 30.0, & ! id 6
+                    0.0,  5.0, & ! id 7
+                   10.0,  5.0, & ! id 8
+                   20.0,  5.0, & ! id 9
+                    0.0, 15.0, & ! id 10
+                   10.0, 15.0, & ! id 11
+                   20.0, 15.0/)  ! id 12
+      
       !! Edge conn
       allocate(edgeConn(numEdgeConns))
       edgeConn=(/1,2, & ! id 1
@@ -10834,6 +10849,12 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
        !! Edge owners
        allocate(edgeOwners(numEdges))
        edgeOwners=(/0,0,0,0/) ! everything on proc 0
+
+      allocate(edgeCoords(2*numEdges))
+      edgeCoords=(/ 5.0,  0.0, & ! id 1
+                    5.0, 10.0, & ! id 3
+                    0.0,  5.0, & ! id 7
+                   10.0,  5.0/) ! id 8
        
        !! Edge conn
        allocate(edgeConn(numEdgeConns))
@@ -10898,6 +10919,12 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
        allocate(edgeOwners(numEdges))
        edgeOwners=(/1,1,0,1/) 
        
+      allocate(edgeCoords(2*numEdges))
+      edgeCoords=(/15.0,  0.0, & ! id 2
+                   15.0, 10.0, & ! id 4
+                   10.0,  5.0, & ! id 8
+                   20.0,  5.0/) ! id 9
+
        !! Edge conn
        allocate(edgeConn(numEdgeConns))
        edgeConn=(/1,2, & ! id 2
@@ -10960,6 +10987,13 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
        allocate(edgeOwners(numEdges))
        edgeOwners=(/0,2,2,2/) 
        
+      !! Edge Coords
+      allocate(edgeCoords(2*numEdges))
+      edgeCoords=(/5.0, 10.0, & ! id 3
+                   5.0, 20.0, & ! id 5
+                   0.0, 15.0, & ! id 10
+                   10.0, 15.0/) ! id 11
+
        !! Edge conn
        allocate(edgeConn(numEdgeConns))
        edgeConn=(/1,2, & ! id 3
@@ -11022,6 +11056,14 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
        !! Edge owners
        allocate(edgeOwners(numEdges))
        edgeOwners=(/1,3,2,3/) 
+
+      !! Edge Coords
+      allocate(edgeCoords(2*numEdges))
+      edgeCoords=(/15.0, 10.0, & ! id 4
+                   15.0, 30.0, & ! id 6
+                   10.0, 15.0, & ! id 11
+                   20.0, 15.0/)  ! id 12
+
        
        !! Edge conn
        allocate(edgeConn(numEdgeConns))
@@ -11068,7 +11110,7 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
 
    ! Add edges
    call ESMF_MeshAddEdges(mesh, edgeIds=edgeIds, edgeOwners=edgeOwners, &
-        edgeConn=edgeConn, rc=rc)
+        edgeConn=edgeConn, edgeCoords=edgeCoords, rc=rc)
    if (rc /= ESMF_SUCCESS) return
 
 
@@ -11096,16 +11138,13 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
    
    ! Make sure edges are present
    if (.not. edgeIsPresent) correct=.false.
-   if (edgeCoordsIsPresent) correct=.false.
+   if (.not. edgeCoordsIsPresent) correct=.false.
    
    ! Make sure things match
    if (numEdges /= numEdgesTst) correct=.false.
    if (numEdgeConns /= numEdgeConnsTst) correct=.false.
 
-   write(*,*) "numEdges=",numEdges,numEdgesTst
-   write(*,*) "numEdges=",numEdgeConns,numEdgeConnsTst
-
-write(*,*) "H1 ", correct
+!write(*,*) "H1 ", correct
 
 
    ! If not correct, leave so we're not using arrays of the wrong size
@@ -11126,20 +11165,23 @@ write(*,*) "H1 ", correct
         edgeIds=edgeIdsTst, &
         edgeOwners=edgeOwnersTst, &
         edgeConn=edgeConnTst, & 
-!        edgeCoords=edgeCoordsTst, &
+        edgeCoords=edgeCoordsTst, &
         rc=rc)
    if (rc /= ESMF_SUCCESS) return
 
-  
+!   write(*,*) "edgeCoords   =",edgeCoords
+!   write(*,*) "edgeCoordsTst=",edgeCoordsTst
+
+   
    ! Check edge info
    do i=1,numEdges
       if (edgeIdsTst(i) /= edgeIds(i)) correct=.false.
       if (edgeOwnersTst(i) /= edgeOwners(i)) correct=.false.
-!      if (edgeCoordsTst(2*i-1) /= edgeCoords(2*i-1)) correct=.false.
-!      if (edgeCoordsTst(2*i) /= edgeCoords(2*i)) correct=.false.
+      if (edgeCoordsTst(2*i-1) /= edgeCoords(2*i-1)) correct=.false.
+      if (edgeCoordsTst(2*i) /= edgeCoords(2*i)) correct=.false.
    enddo
 
-   write(*,*) "H2 ", correct
+!   write(*,*) "H2 ", correct
 
    
    ! Check edge info
@@ -11147,7 +11189,7 @@ write(*,*) "H1 ", correct
       if (edgeConnTst(i) /= edgeConn(i)) correct=.false.
    enddo
 
-      write(*,*) "H3 ", correct
+!      write(*,*) "H3 ", correct
    
    ! deallocate node data
    deallocate(nodeIds)
@@ -11158,11 +11200,13 @@ write(*,*) "H1 ", correct
    deallocate(edgeIds)
    deallocate(edgeOwners)
    deallocate(edgeConn)
+   deallocate(edgeCoords)
 
    ! deallocate edge Tst data
    deallocate(edgeIdsTst)
    deallocate(edgeOwnersTst)
    deallocate(edgeConnTst)
+   deallocate(edgeCoordsTst)
 
    ! deallocate elem data
    deallocate(elemIds)

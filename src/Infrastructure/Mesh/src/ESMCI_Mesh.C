@@ -2534,7 +2534,7 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
    ThrowRequire(_edgeOrigCoords);
    
    // Copy out
-   std::memcpy(_edgeOrigCoords, edgeOrigCoords.data(), edgeOrigCoords.size() * sizeof(int));   
+   std::memcpy(_edgeOrigCoords, edgeOrigCoords.data(), edgeOrigCoords.size() * sizeof(ESMC_R8));   
  }
 
  // Set Edge Connections in the mesh.
