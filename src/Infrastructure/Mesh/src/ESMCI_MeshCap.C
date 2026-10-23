@@ -1906,6 +1906,41 @@ void MeshCap::meshcreatenodedistgrid(int *rc) {
   if (rc != NULL) *rc=ESMF_SUCCESS;
 }
 
+void MeshCap::meshcreateedgedistgrid(int *rc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::meshcreateedgedistgrid()"
+
+  int localrc;
+  DistGrid *dg;
+
+  // this is necessary because the fortran interface creates  
+  // the distgrid at multiple points
+  if (edge_distgrid_set == false) {
+  // Call into func. depending on mesh type
+    if (is_esmf_mesh) {
+      ESMCI_meshcreateedgedistgrid(&mesh, &dg, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                        ESMC_CONTEXT, rc)) return;
+  
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+                                    "- this functionality is not currently supported using MOAB",
+                                    ESMC_CONTEXT, rc);
+      return;
+    }
+
+    // Set member variables
+    this->edge_distgrid = dg;
+    this->edge_distgrid_set = true;
+
+  } else {
+    ESMC_LogDefault.Write("Edge DistGrid has already been set", ESMC_LOGMSG_WARN);
+  }
+
+  // Set to success
+  if (rc != NULL) *rc=ESMF_SUCCESS;
+}
+
 
 void MeshCap::meshcreateelemdistgrid(int *rc) {
 #undef ESMC_METHOD

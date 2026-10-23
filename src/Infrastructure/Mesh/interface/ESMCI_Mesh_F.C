@@ -235,6 +235,37 @@ extern "C" void FTN_X(c_esmc_meshsetnodedistgrid)(MeshCap **meshpp, DistGrid **d
     if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 
+extern "C" void FTN_X(c_esmc_meshsetedgedistgrid)(MeshCap **meshpp, DistGrid **dg, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshsetedgedistgrid()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    
+    // ensure 'meshpp' argument is valid to be dereferenced
+    if (ESMC_NOT_PRESENT_FILTER(meshpp) == ESMC_NULL_POINTER){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "The 'meshpp' argument must not be a NULL pointer",
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+      return; // bail out
+    }
+    // ensure 'dg' argument is valid to be dereferenced
+    if (ESMC_NOT_PRESENT_FILTER(dg) == ESMC_NULL_POINTER){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "The 'dg' argument must not be a NULL pointer",
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+      return; // bail out
+    }
+    
+    ESMCI_NULL_CHECK_PRC(dg, rc)
+    (*meshpp)->meshsetedgedistgrid(*dg);
+
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
+
+
+
 extern "C" void FTN_X(c_esmc_meshsetelemdistgrid)(MeshCap **meshpp, DistGrid **dg, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshsetelemdistgrid()"
@@ -282,6 +313,31 @@ extern "C" void FTN_X(c_esmc_meshcreatenodedistgrid)(MeshCap **meshpp, int *rc) 
     }
     
     (*meshpp)->meshcreatenodedistgrid(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,
+        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc)))
+      return;
+
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
+
+
+extern "C" void FTN_X(c_esmc_meshcreateedgedistgrid)(MeshCap **meshpp, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshcreateedgedistgrid()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    
+    // ensure 'meshpp' argument is valid to be dereferenced
+    if (ESMC_NOT_PRESENT_FILTER(meshpp) == ESMC_NULL_POINTER){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "The 'dg' argument must not be a NULL pointer",
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+      return; // bail out
+    }
+    
+    (*meshpp)->meshcreateedgedistgrid(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc)))
       return;

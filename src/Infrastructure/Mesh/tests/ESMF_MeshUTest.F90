@@ -10696,7 +10696,7 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
   integer, pointer :: edgeIds(:),edgeOwners(:),edgeConn(:)
   real(ESMF_KIND_R8), pointer :: edgeCoords(:)
 
-  logical:: edgeIsPresent, edgeCoordsIsPresent
+  logical:: edgeIsPresent, edgeCoordsIsPresent, edgeDistGridIsPresent
   integer :: numEdgesTst, numEdgeConnsTst
   integer, pointer :: edgeIdsTst(:),edgeOwnersTst(:),edgeConnTst(:)
   real(ESMF_KIND_R8), pointer :: edgeCoordsTst(:)
@@ -10707,7 +10707,9 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
   real(ESMF_KIND_R8), pointer :: elemArea(:)
   integer :: petCount, localPet
   type(ESMF_VM) :: vm
-
+  type(ESMF_DistGrid) :: edgeDistgrid
+  integer :: elementCount
+  
 
   ! get global VM
   call ESMF_VMGetGlobal(vm, rc=rc)
@@ -11130,6 +11132,7 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
         edgeIsPresent=edgeIsPresent, &
         edgeCoordsIsPresent=edgeCoordsIsPresent, &
         edgeCount=numEdgesTst, &
+        edgeDistGridIsPresent=edgeDistGridIsPresent, &
         edgeConnCount=numEdgeConnsTst, &
         rc=rc)
    if (rc /= ESMF_SUCCESS) return
@@ -11139,6 +11142,7 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
    ! Make sure edges are present
    if (.not. edgeIsPresent) correct=.false.
    if (.not. edgeCoordsIsPresent) correct=.false.
+   if (.not. edgeDistGridIsPresent) correct=.false.
    
    ! Make sure things match
    if (numEdges /= numEdgesTst) correct=.false.
@@ -11166,12 +11170,12 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
         edgeOwners=edgeOwnersTst, &
         edgeConn=edgeConnTst, & 
         edgeCoords=edgeCoordsTst, &
+        edgeDistGrid=edgeDistGrid, &
         rc=rc)
    if (rc /= ESMF_SUCCESS) return
 
 !   write(*,*) "edgeCoords   =",edgeCoords
 !   write(*,*) "edgeCoordsTst=",edgeCoordsTst
-
    
    ! Check edge info
    do i=1,numEdges
@@ -11182,7 +11186,6 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
    enddo
 
 !   write(*,*) "H2 ", correct
-
    
    ! Check edge info
    do i=1,numEdgeConns
@@ -11190,6 +11193,11 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
    enddo
 
 !      write(*,*) "H3 ", correct
+
+   ! Check DistGrid
+   call ESMF_DistGridValidate(edgeDistgrid, rc=localrc)
+   if (rc .ne. ESMF_SUCCESS) correct=.false.
+
    
    ! deallocate node data
    deallocate(nodeIds)

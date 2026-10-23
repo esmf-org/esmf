@@ -158,6 +158,7 @@ namespace ESMCI {
 
     void meshcreatenodedistgrid(int *rc);
     void meshcreateelemdistgrid(int *rc);
+    void meshcreateedgedistgrid(int *rc);
     
     DistGrid *meshgetnodedistgrid();
     DistGrid *meshgetedgedistgrid();

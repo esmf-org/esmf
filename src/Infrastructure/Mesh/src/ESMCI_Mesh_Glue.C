@@ -3444,6 +3444,76 @@ void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid **node_distgrid, int *
 }
 
 
+void ESMCI_meshcreateedgedistgrid(Mesh **meshpp, DistGrid **edge_distgrid, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshcreateedgedistgrid()"
+
+ int localrc;
+  
+  try {
+
+  // Initialize the parallel environment for mesh (if not already done)
+    {
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+        throw localrc;  // bail out with exception
+    }
+
+    Mesh *meshp = *meshpp;
+
+    // Get info from mesh
+    const std::vector<int>& edgeIds = meshp->getEdgeIds();
+    const std::vector<int>& edgeOwners = meshp->getEdgeOwners();
+
+    // Vector to hold owned ids
+    std::vector<int> ownedIds;
+    ownedIds.reserve(edgeIds.size());
+    
+    // Loop getting just owned ids
+    for (auto i=0; i<edgeOwners.size(); i++) {
+      if (edgeOwners[i] == Par::Rank()) {
+        ownedIds.push_back(edgeIds[i]);
+      }
+    }
+
+    // Get vector info
+    int ownedIdsSize = ownedIds.size();
+    int *ownedIdsData = (ownedIdsSize==0)?NULL:ownedIds.data();
+
+    // Call Distgrid creation
+    FTN_X(f_esmf_getmeshdistgrid)(edge_distgrid, &ownedIdsSize, ownedIdsData, &localrc);
+    if(ESMC_LogDefault.MsgFoundError(localrc,
+                                     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, NULL)) throw localrc;
+
+    
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  } catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+   } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+
+  // Set return code
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
+
+
 void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, DistGrid **elem_distgrid, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshcreateelemdistgrid()"

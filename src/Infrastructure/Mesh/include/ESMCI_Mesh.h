@@ -203,9 +203,11 @@ ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<i
   // Set edge info
   void setEdgeIds(int *edgeIds);
   void getEdgeIds(int *_edgeIds);
+  const std::vector<int>& getEdgeIds() {return edgeIds;}
   
   void setEdgeOwners(int *edgeOwners);
   void getEdgeOwners(int *_edgeOwners);
+  const std::vector<int>& getEdgeOwners() {return edgeOwners;}
   
   void setEdgeOrigCoords(ESMC_R8 *_edgeOrigCoords);
   void getEdgeOrigCoords(ESMC_R8 *_edgeOrigCoords);
@@ -231,7 +233,7 @@ ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<i
   bool hasEdgeCoords; // Does the mesh have edge coords?
   
   // Ordered by original order that they were input
-  std::vector<UInt> edgeIds;
+  std::vector<int> edgeIds;
   std::vector<int> edgeOwners;
   std::vector<int> edgeConn; // Size of numEdges*2
   std::vector<ESMC_R8> edgeOrigCoords; // Size of numEdges*orig_spatial_dim

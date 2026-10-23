@@ -705,7 +705,7 @@ end subroutine
                localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
-#if 0
+
     ! Set edge Distgrid
     if (.not. present(edgeDistgrid)) then
        call C_ESMC_MeshCreateEdgeDistGrid(mesh, localrc)
@@ -716,7 +716,7 @@ end subroutine
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-#endif
+
     ! Get rid of interface Array wrappers
     call ESMF_InterArrayDestroy(edgeOwnersIA, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4847,7 +4847,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! This is only a vehical for carrying distgrids, so it's not fully
     ! created yet. It should error out of most calls, except a specific set
     ! of MeshGet() queries.
-    call C_ESMC_MeshSetStatus(ESMF_MeshEmptyCreate, ESMF_MESHSTATUS_EMPTY)
+    call C_ESMC_MeshSetStatus( ESMF_MeshEmptyCreate, ESMF_MESHSTATUS_EMPTY)
 
     if (present(nodalDistgrid)) then
       call C_ESMC_MeshSetNodeDistGrid(ESMF_MeshEmptyCreate, nodalDistgrid, localrc)

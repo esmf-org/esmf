@@ -156,7 +156,11 @@ void ESMCI_MeshGetNodeCreateInfo(Mesh *mesh,
 
 void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid **dg, int *rc);
 
+void ESMCI_meshcreateedgedistgrid(Mesh **meshpp, DistGrid **edge_distgrid, int *rc);
+
 void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, DistGrid **dg, int *rc);
+
+
 
 void ESMCI_meshserialize(Mesh **meshpp,
                          char *buffer, int *length, int *offset,
