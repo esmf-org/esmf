@@ -10710,7 +10710,9 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
   type(ESMF_VM) :: vm
   type(ESMF_DistGrid) :: edgeDistgrid
   integer :: elementCount
-  
+  type(ESMF_Field) :: edgeField
+  real(ESMF_KIND_R8), pointer :: edgeDataPtr(:)
+  integer :: edgeCC(1),edgeCL(1), edgeCU(1)
 
   ! get global VM
   call ESMF_VMGetGlobal(vm, rc=rc)
@@ -11209,7 +11211,39 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
    if (rc /= ESMF_SUCCESS) return
 
    if (elementCount /= numOwnedEdges) correct=.false.
+
+   ! Test creating a Field
+   edgeField = ESMF_FieldCreate(mesh, typekind=ESMF_TYPEKIND_R8, meshloc=ESMF_MESHLOC_EDGE, rc=rc)   
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Validate Field
+   call ESMF_FieldValidate(edgeField, rc=rc)
+   if (rc .ne. ESMF_SUCCESS) correct=.false.
+
+   ! Get memory fron Field
+   call ESMF_FieldGet(edgeField, farrayPtr=edgeDataPtr, &
+        computationalLBound=edgeCL, computationalUBound=edgeCU, computationalCount=edgeCC, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Make sure sizes and bounds are correct
+   if (edgeCL(1) /= 1) correct=.false.
+   if (edgeCU(1) /= numOwnedEdges) correct=.false.
+   if (edgeCC(1) /= numOwnedEdges) correct=.false.
+   if (size(edgeDataPtr) /= numOwnedEdges) correct=.false. 
    
+   ! Access data just to test
+   if (edgeCU(1) > 1) then
+      edgeDataPtr(1)=14.0
+   endif
+   
+   ! Get rid of Mesh
+   call ESMF_MeshDestroy(mesh, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Get rid of Field
+   call ESMF_FieldDestroy(edgeField, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
    
    ! deallocate node data
    deallocate(nodeIds)
@@ -11234,6 +11268,8 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
    deallocate(elemMask)
    deallocate(elemConn)
 
+   
+   
 end subroutine testCreatingMeshWithEdges3Steps
 
 end program ESMF_MeshUTest

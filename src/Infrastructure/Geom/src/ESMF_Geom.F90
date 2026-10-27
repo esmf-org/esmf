@@ -599,6 +599,13 @@ end interface
                if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
+            else if (gbcp%meshloc == ESMF_MESHLOC_EDGE) then
+               call ESMF_MeshGet(mesh=gbcp%mesh, &
+                                 edgeDistgrid=distgrid, &
+                                  rc=localrc)
+               if (ESMF_LogFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
             else if (gbcp%meshloc == ESMF_MESHLOC_ELEMENT) then
                call ESMF_MeshGet(mesh=gbcp%mesh, &
                                  elementDistgrid=distgrid, &
@@ -1241,6 +1248,13 @@ end interface
                if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc)) return
+            else if (gbcp%meshloc == ESMF_MESHLOC_EDGE) then
+               call ESMF_MeshGet(mesh=gbcp%mesh, &
+                    edgeDistgrid=localDistgrid, &
+                    rc=localrc)
+               if (ESMF_LogFoundError(localrc, &
+                    ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
             else if (gbcp%meshloc == ESMF_MESHLOC_ELEMENT) then
                call ESMF_MeshGet(mesh=gbcp%mesh, &
                     elementDistgrid=localDistgrid, &
@@ -1296,6 +1310,13 @@ end interface
                if (gbcp%meshloc == ESMF_MESHLOC_NODE) then
                   call ESMF_MeshGet(mesh=gbcp%mesh, &
                        nodalDistgrid=distgrid, &
+                       rc=localrc)
+                  if (ESMF_LogFoundError(localrc, &
+                       ESMF_ERR_PASSTHRU, &
+                       ESMF_CONTEXT, rcToReturn=rc)) return
+               else if (gbcp%meshloc == ESMF_MESHLOC_EDGE) then
+                  call ESMF_MeshGet(mesh=gbcp%mesh, &
+                       edgeDistgrid=distgrid, &
                        rc=localrc)
                   if (ESMF_LogFoundError(localrc, &
                        ESMF_ERR_PASSTHRU, &
@@ -1479,13 +1500,20 @@ end subroutine ESMF_GeomGet
                   if (ESMF_LogFoundError(localrc, &
                                    ESMF_ERR_PASSTHRU, &
                                    ESMF_CONTEXT, rcToReturn=rc)) return
+               else if (gbcp%meshloc == ESMF_MESHLOC_EDGE) then
+                  call ESMF_MeshGet(mesh=gbcp%mesh, &
+                                    numOwnedEdges=exclusiveUBound(1), &
+                                    rc=localrc)
+                  if (ESMF_LogFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
                else if (gbcp%meshloc == ESMF_MESHLOC_ELEMENT) then
                   call ESMF_MeshGet(mesh=gbcp%mesh, &
                                     numOwnedElements=exclusiveUBound(1), &
                                     rc=localrc)
                   if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return                  
                else
                   if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
                                msg=" Bad Mesh Location value", &
@@ -1500,13 +1528,20 @@ end subroutine ESMF_GeomGet
                   if (ESMF_LogFoundError(localrc, &
                                    ESMF_ERR_PASSTHRU, &
                                    ESMF_CONTEXT, rcToReturn=rc)) return
+               else if (gbcp%meshloc == ESMF_MESHLOC_EDGE) then
+                  call ESMF_MeshGet(mesh=gbcp%mesh, &
+                                    numOwnedEdges=exclusiveCount(1), &
+                                    rc=localrc)
+                  if (ESMF_LogFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
                else if (gbcp%meshloc == ESMF_MESHLOC_ELEMENT) then
                   call ESMF_MeshGet(mesh=gbcp%mesh, &
                                     numOwnedElements=exclusiveCount(1), &
                                     rc=localrc)
                   if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return                  
                else
                   if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
                                msg=" Bad Mesh Location value", &
