@@ -625,6 +625,11 @@ extern "C" void FTN_X(c_esmc_meshgetownednodecount)(MeshCap **meshpp, int *nodeC
 }
 
 
+extern "C" void FTN_X(c_esmc_meshgetownededgecount)(MeshCap **meshpp, int *edgeCount, int *rc){
+
+  (*meshpp)->getOwnedEdgeCount(edgeCount, rc);
+}
+
 extern "C" void FTN_X(c_esmc_meshgetownedelemcount)(MeshCap **meshpp, int *elemCount, int *rc){
 
   (*meshpp)->getOwnedElemCount(elemCount, rc);

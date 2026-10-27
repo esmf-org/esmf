@@ -65,7 +65,7 @@ Mesh::Mesh() : MeshDB(), FieldReg(), CommReg(),
                has_orig_elem_nodes(false),
                has_orig_elem_area(false),
                origElemConnCount(-1),
-	       ind(-1), side(-1), hasEdges(false), hasEdgeCoords(false), 
+	       ind(-1), side(-1), hasEdges(false), hasEdgeCoords(false), edgeCount(0), edgeOwnedCount(0),
                orig_comm(MPI_COMM_NULL)
 
 {
@@ -2488,7 +2488,7 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
    std::memcpy(_edgeIds, edgeIds.data(), edgeIds.size() * sizeof(int));   
  }
 
- // Set Edge Owners in the mesh.
+ // Set Edge Owners and edgeOwnedCount in Mesh.
  // _edgeOwners needs to be of size edgeCount
  void Mesh::setEdgeOwners(int *_edgeOwners) {
 
@@ -2498,7 +2498,14 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
    
    // Add owners
    edgeOwners.assign(_edgeOwners, _edgeOwners+edgeCount);
- }
+
+   // Loop counting owned edges (i.e. edges on this pet) to set edgeOwnedCount
+   edgeOwnedCount=0;
+   for (auto owner: edgeOwners) {
+     if (owner == Par::Rank()) edgeOwnedCount++;
+   } 
+
+}
 
 
  void Mesh::getEdgeOwners(int *_edgeOwners) {

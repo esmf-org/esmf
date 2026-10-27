@@ -124,9 +124,11 @@ void MeshCap::finalize_counts(int *rc){
 
   int localrc;
 
-  int non, noe;
+  int non, noe, noedge;
   if (is_esmf_mesh) {
     ESMCI_MeshGetOwnedNodeCount(mesh, &non, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,ESMC_CONTEXT, rc);
+    ESMCI_MeshGetOwnedEdgeCount(mesh, &noedge, &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,ESMC_CONTEXT, rc);
     ESMCI_MeshGetOwnedElemCount(mesh, &noe, &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,ESMC_CONTEXT, rc);
@@ -142,6 +144,7 @@ void MeshCap::finalize_counts(int *rc){
   }
   
   this->num_owned_node_mc = non;
+  this->num_owned_edge_mc = noedge;
   this->num_owned_elem_mc = noe;
 }
 
@@ -880,6 +883,14 @@ void MeshCap::getOwnedNodeCount(int *nodeCount, int *rc){
   *rc = ESMF_SUCCESS;
 }
 
+void MeshCap::getOwnedEdgeCount(int *edgeCount, int *rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::getOwnedEdgeCount()"
+
+  *edgeCount = this->num_owned_edge_mc;
+  *rc = ESMF_SUCCESS;
+
+}
 
 void MeshCap::getOwnedElemCount(int *elemCount, int *rc){
 #undef ESMC_METHOD

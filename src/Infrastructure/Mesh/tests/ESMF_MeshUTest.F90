@@ -10700,6 +10700,7 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
   integer :: numEdgesTst, numEdgeConnsTst
   integer, pointer :: edgeIdsTst(:),edgeOwnersTst(:),edgeConnTst(:)
   real(ESMF_KIND_R8), pointer :: edgeCoordsTst(:)
+  integer :: numOwnedEdges, numOwnedEdgesTst
   
   integer :: numElems,numOwnedElemsTst
   integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
@@ -10753,6 +10754,7 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
       ! Edge information
       numEdges=12
       numEdgeConns=2*numEdges
+      numOwnedEdges=12
       
       !! Edge ids
       allocate(edgeIds(numEdges))
@@ -10843,6 +10845,7 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
        ! Edge information
        numEdges=4
        numEdgeConns=2*numEdges
+       numOwnedEdges=4
        
        !! Edge ids
        allocate(edgeIds(numEdges))
@@ -10912,6 +10915,7 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
        ! Edge information
        numEdges=4
        numEdgeConns=2*numEdges
+       numOwnedEdges=3
        
        !! Edge ids
        allocate(edgeIds(numEdges))
@@ -10980,6 +10984,7 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
        ! Edge information
        numEdges=4
        numEdgeConns=2*numEdges
+       numOwnedEdges=3
        
        !! Edge ids
        allocate(edgeIds(numEdges))
@@ -11050,6 +11055,7 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
        ! Edge information
        numEdges=4
        numEdgeConns=2*numEdges
+       numOwnedEdges=2
        
        !! Edge ids
        allocate(edgeIds(numEdges))
@@ -11134,6 +11140,7 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
         edgeCount=numEdgesTst, &
         edgeDistGridIsPresent=edgeDistGridIsPresent, &
         edgeConnCount=numEdgeConnsTst, &
+        numOwnedEdges=numOwnedEdgesTst, &
         rc=rc)
    if (rc /= ESMF_SUCCESS) return
 
@@ -11147,16 +11154,15 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
    ! Make sure things match
    if (numEdges /= numEdgesTst) correct=.false.
    if (numEdgeConns /= numEdgeConnsTst) correct=.false.
+   if (numOwnedEdges /= numOwnedEdgesTst) correct=.false.
 
-!write(*,*) "H1 ", correct
-
+   !write(*,*) "H1 ", correct
 
    ! If not correct, leave so we're not using arrays of the wrong size
    if (.not. correct) then
       rc=ESMF_FAILURE
       return
    endif
-
    
    ! Allocate space for arrays
    allocate(edgeIdsTst(numEdges))
@@ -11195,9 +11201,15 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
 !      write(*,*) "H3 ", correct
 
    ! Check DistGrid
-   call ESMF_DistGridValidate(edgeDistgrid, rc=localrc)
+   call ESMF_DistGridValidate(edgeDistgrid, rc=rc)
    if (rc .ne. ESMF_SUCCESS) correct=.false.
 
+   ! Check size of DistGrid
+   call ESMF_DistGridGet(edgeDistgrid, localDE=0, elementCount=elementcount, rc=rc) 
+   if (rc /= ESMF_SUCCESS) return
+
+   if (elementCount /= numOwnedEdges) correct=.false.
+   
    
    ! deallocate node data
    deallocate(nodeIds)

@@ -2476,6 +2476,19 @@ void ESMCI_MeshGetOwnedNodeCount(Mesh *mesh, int *nodeCount, int *rc){
 }
 
 
+
+void ESMCI_MeshGetOwnedEdgeCount(Mesh *mesh, int *edgeCount, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_MeshGetOwnedEdgeCount()"
+
+  // Just get out of struct
+  *edgeCount=mesh->getEdgeOwnedCount();
+  
+  // Return success
+  if(rc != NULL) *rc = ESMF_SUCCESS;
+}
+
+
 void ESMCI_MeshGetOwnedElemCount(Mesh *mesh, int *elemCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_MeshGetOwnedElemCount()"
@@ -2497,6 +2510,9 @@ void ESMCI_MeshGetOwnedElemCount(Mesh *mesh, int *elemCount, int *rc){
   
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
+
+
+
 
 
 // Convert the parametric dim and the number of nodes to a element type

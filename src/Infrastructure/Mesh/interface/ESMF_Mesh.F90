@@ -4941,11 +4941,9 @@ end function ESMF_MeshEmptyCreate
       subroutine ESMF_MeshGet(mesh, parametricDim, spatialDim, &
                    nodeCount, nodeIds, nodeCoords, nodeOwners, &
                    nodeMaskIsPresent, nodeMask,&
-
                    edgeIsPresent, edgeCount, edgeIds, &
                    edgeOwners, edgeConnCount, edgeConn, &
                    edgeCoordsIsPresent, edgeCoords, &
-
                    elementCount, elementIds, elementTypes, &
                    elementConnCount, elementConn, &
                    elementMaskIsPresent,elementMask, &
@@ -4955,6 +4953,7 @@ end function ESMF_MeshEmptyCreate
                    edgeDistgridIsPresent, edgeDistgrid, &
                    elementDistgridIsPresent, elementDistgrid, &
                    numOwnedNodes, ownedNodeCoords, &
+                   numOwnedEdges, &
                    numOwnedElements, ownedElemCoords, &
                    elemMaskArray, elemAreaArray, &
                    isMemFreed, coordSys, status, name, rc)
@@ -4999,6 +4998,7 @@ end function ESMF_MeshEmptyCreate
     logical,                  intent(out), optional :: elementDistgridIsPresent
     type(ESMF_DistGrid),      intent(out), optional :: elementDistgrid
     integer,                  intent(out), optional :: numOwnedNodes
+    integer,                  intent(out), optional :: numOwnedEdges
     real(ESMF_KIND_R8),       intent(out), optional :: ownedNodeCoords(:)
     integer,                  intent(out), optional :: numOwnedElements
     real(ESMF_KIND_R8),       intent(out), optional :: ownedElemCoords(:)
@@ -5117,6 +5117,9 @@ end function ESMF_MeshEmptyCreate
 ! with the nodes in the {\tt nodalDistgrid} returned by this call, and hence with a Field built on
 ! {\tt mesh}. The size of the input array should be the spatial dim of {\tt mesh} times
 ! {\tt numOwnedNodes}.
+! \item [{[numOwnedEdges]}]
+! The number of local edges which are owned by this PET. This is the number of PET local entries in
+! the edgeDistgrid.
 ! \item [{[numOwnedElements]}]
 ! The number of local elements which are owned by this PET. Note that every element is owned by
 ! the PET it resides on, so unlike for nodes, {\tt numOwnedElements} is identical to the number of elements on
@@ -5237,6 +5240,7 @@ end function ESMF_MeshEmptyCreate
             present(edgeConnCount) .or. &
             present(edgeConn) .or. &
             present(edgeCoordsIsPresent) .or. &
+            present(numOwnedEdges) .or. &
             present(edgeCoords)) then
 
           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
@@ -5298,6 +5302,16 @@ end function ESMF_MeshEmptyCreate
     ! Get number owned elements
     if (present(numOwnedElements)) numOwnedElements = numElem
 
+    ! Get number owned edges
+    if (present(numOwnedEdges)) then
+       call C_ESMC_MeshGetOwnedEdgeCount(mesh, numOwnedEdges, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return       
+    endif
+
+
+
+    
     ! Get Node Count
     if (present(nodeCount)) then
        ! Make call to get info

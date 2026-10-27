@@ -47,6 +47,7 @@ namespace ESMCI {
     int sdim_mc;
     int pdim_mc;
     int num_owned_node_mc;
+    int num_owned_edge_mc;
     int num_owned_elem_mc;
     
     bool node_distgrid_set;
@@ -189,6 +190,7 @@ namespace ESMCI {
     void getElemConnCount(int *elemConnCount, int *rc);
 
     void getOwnedNodeCount(int *nodeCount, int *rc);
+    void getOwnedEdgeCount(int *edgeCount, int *rc);
     void getOwnedElemCount(int *elemCount, int *rc);
 
 

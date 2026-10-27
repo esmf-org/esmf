@@ -199,6 +199,7 @@ ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<i
   // added, so it can be used for error checking. 
   void setEdgeCount(int _edgeCount) {edgeCount=_edgeCount;}
   int getEdgeCount() {return edgeCount;}
+  int getEdgeOwnedCount() {return edgeOwnedCount;}
   
   // Set edge info
   void setEdgeIds(int *edgeIds);
@@ -229,6 +230,7 @@ ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<i
 
   // Information about edges
   int edgeCount;
+  int edgeOwnedCount;  // Set when owners are set 
   bool hasEdges; // Does the mesh have edges? 
   bool hasEdgeCoords; // Does the mesh have edge coords?
   

@@ -122,6 +122,7 @@ void ESMCI_MeshGetEdgeCreateInfo(Mesh *mesh,
 void ESMCI_MeshGetElemCount(Mesh *meshpp, int *elemCount, int *rc);
 void ESMCI_MeshGetElemConnCount(Mesh *meshpp, int *elemConnCount, int *rc);
 void ESMCI_MeshGetOwnedNodeCount(Mesh *meshpp, int *nodeCount, int *rc);
+void ESMCI_MeshGetOwnedEdgeCount(Mesh *mesh, int *edgeCount, int *rc);
 void ESMCI_MeshGetOwnedElemCount(Mesh *meshpp, int *elemCount, int *rc);
 
 void ESMCI_MeshGetElemInfoPresence(Mesh *mesh, 
