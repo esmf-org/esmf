@@ -1,4 +1,4 @@
-! $Id$
+! $Id$ 
 !
 ! Earth System Modeling Framework
 ! Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
@@ -95,6 +95,7 @@ program ESMF_MeshUTest
   integer, pointer :: elemIdsTst(:),elemMaskTst(:)
   real(ESMF_KIND_R8), pointer :: elemCoordsTst(:)
   integer :: elementCount
+  logical :: edgeIsPresent, edgeCoordsIsPresent
   
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -121,7 +122,7 @@ program ESMF_MeshUTest
 
 
  ! This surrounds all the tests to make turning off everything but one test easier
-#if 0
+#if 1
 
   !------------------------------------------------------------------------
 
@@ -904,7 +905,6 @@ program ESMF_MeshUTest
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
-
   !-----------------------------------------------------------------------------
   ! NOTE THAT SERIALIZE/DESERIALIZE IS AN INTERNAL INTERFACE AND NOT INTENDED FOR PUBLIC USE
   !NEX_UTest
@@ -953,7 +953,8 @@ program ESMF_MeshUTest
   call ESMF_MeshGet(mesh2, nodalDistgrid=nodeDistgrid, elementDistgrid=elemDistgrid, &
                    numOwnedNodes=numOwnedNodesTst, numOwnedElements=numOwnedElemsTst, &
                    spatialDim=spatialDim, parametricDim=parametricDim, &
-                   isMemFreed=isMemFreed,  coordSys=coordSys, rc=localrc)
+                   isMemFreed=isMemFreed,  coordSys=coordSys, &
+                   edgeIsPresent=edgeIsPresent, edgeCoordsIsPresent=edgeCoordsIsPresent, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! removed this check because no longer correct after counts migrated to C
@@ -971,7 +972,9 @@ program ESMF_MeshUTest
   if (parametricDim .ne. 2) correct=.false.
   if (isMemFreed) correct=.false.
   if (coordSys .ne. ESMF_COORDSYS_CART) correct=.false.
-
+  if (edgeIsPresent) correct=.false. ! There are no edges in the Mesh
+  if (edgeCoordsIsPresent) correct=.false. ! There are no edges in the Mesh
+  
   ! Make sure node distgrid is ok
   call ESMF_DistGridValidate(nodeDistgrid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) correct=.false.
@@ -3009,7 +3012,6 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
-#endif
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test creating a Mesh with edges in 3 steps"
@@ -3023,16 +3025,6 @@ endif
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-
-#if 0  
-  !------------------------------------------------------------------------
-  ! TODO: "Activate once the mesh is fully created. ESMF_MeshWrite is not meant
-  !  to be called until then".
-  !NEX_deactivate_UTest
-  !write(name, *) "MeshWrite Test"
-  !write(failMsg, *) "Did not return ESMF_SUCCESS"
-  !  call ESMF_MeshWrite(meshSrc, filename="mesh_out", rc=rc)
-  !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
 
@@ -10685,7 +10677,7 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
   logical :: correct
   integer :: rc
 
-  type(ESMF_Mesh) :: mesh
+  type(ESMF_Mesh) :: mesh, mesh2
   integer, pointer :: nodeIds(:),nodeOwners(:)
   real(ESMF_KIND_R8), pointer :: nodeCoords(:)
   real(ESMF_KIND_R8), pointer :: ownedNodeCoords(:)
@@ -10713,6 +10705,8 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
   type(ESMF_Field) :: edgeField
   real(ESMF_KIND_R8), pointer :: edgeDataPtr(:)
   integer :: edgeCC(1),edgeCL(1), edgeCU(1)
+  integer :: bufCount, offset
+  character, pointer :: buf(:)
 
   ! get global VM
   call ESMF_VMGetGlobal(vm, rc=rc)
@@ -10725,6 +10719,7 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
      rc=ESMF_FAILURE
      return
   endif
+
 
   ! Setup mesh info depending on the
   ! number of PETs
@@ -11107,7 +11102,7 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
      endif
    endif
 
-
+   
    ! Create Mesh structure
    mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
         coordSys=ESMF_COORDSYS_SPH_DEG, rc=rc)
@@ -11118,6 +11113,7 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
         nodeOwners=nodeOwners, rc=rc)
    if (rc /= ESMF_SUCCESS) return
 
+   
    ! Add edges
    call ESMF_MeshAddEdges(mesh, edgeIds=edgeIds, edgeOwners=edgeOwners, &
         edgeConn=edgeConn, edgeCoords=edgeCoords, rc=rc)
@@ -11146,6 +11142,7 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
         rc=rc)
    if (rc /= ESMF_SUCCESS) return
 
+   
    ! ! DEBUG OUTPUT
    
    ! Make sure edges are present
@@ -11158,7 +11155,6 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
    if (numEdgeConns /= numEdgeConnsTst) correct=.false.
    if (numOwnedEdges /= numOwnedEdgesTst) correct=.false.
 
-   !write(*,*) "H1 ", correct
 
    ! If not correct, leave so we're not using arrays of the wrong size
    if (.not. correct) then
@@ -11193,14 +11189,12 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
       if (edgeCoordsTst(2*i) /= edgeCoords(2*i)) correct=.false.
    enddo
 
-!   write(*,*) "H2 ", correct
    
    ! Check edge info
    do i=1,numEdgeConns
       if (edgeConnTst(i) /= edgeConn(i)) correct=.false.
    enddo
 
-!      write(*,*) "H3 ", correct
 
    ! Check DistGrid
    call ESMF_DistGridValidate(edgeDistgrid, rc=rc)
@@ -11235,13 +11229,56 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
    if (edgeCU(1) > 1) then
       edgeDataPtr(1)=14.0
    endif
+
+   ! Get rid of Field
+   call ESMF_FieldDestroy(edgeField, rc=rc)
+
+
+   !!!! Test Serialize/Deserialize of edge info !!!!
+   
+   ! Create a buffer to put the Mesh in
+   offset=0
+   allocate (buf(1))
+   call ESMF_MeshSerialize(mesh, buf, bufCount, offset,  &
+        inquireflag=ESMF_INQUIREONLY, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   deallocate(buf)
+   bufCount=2*offset ! a little more room
+   allocate(buf(bufCount))
+   
+   ! Serialize
+   offset=0
+   call ESMF_MeshSerialize(mesh, buf, bufCount, offset, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Deserialize
+   offset=0
+   mesh2=ESMF_MeshDeserialize(buf, offset, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Get rid of buffer
+   deallocate(buf)
+
+   
+   ! Make sure info is correct in deserialized mesh
+   call ESMF_MeshGet(mesh2, &
+        edgeIsPresent=edgeIsPresent, &
+        edgeCoordsIsPresent=edgeCoordsIsPresent, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+   
+   ! Make sure edges are present
+   if (.not. edgeIsPresent) correct=.false.
+   if (.not. edgeCoordsIsPresent) correct=.false.   
+
    
    ! Get rid of Mesh
    call ESMF_MeshDestroy(mesh, rc=rc)
    if (rc /= ESMF_SUCCESS) return
 
-   ! Get rid of Field
-   call ESMF_FieldDestroy(edgeField, rc=rc)
+   ! Get rid of Mesh
+   call ESMF_MeshDestroy(mesh2, rc=rc)
    if (rc /= ESMF_SUCCESS) return
 
    
@@ -11271,5 +11308,9 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
    
    
 end subroutine testCreatingMeshWithEdges3Steps
+
+
+
+
 
 end program ESMF_MeshUTest

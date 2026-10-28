@@ -192,6 +192,10 @@ ESMCI::PointList *MeshToPointList(ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<i
   // Check for edges
   bool getHasEdges() {return hasEdges;}
 
+  // Turn on edgeCoords
+  // THIS SHOULD ONLY BE USED BY DESERIALIZE AS IT'S SET AUTOMATICALLY WHEN COORDS ARE ADDED
+  void setHasEdgeCoords() {hasEdgeCoords=true;}
+  
   // Check for edges
   bool getHasEdgeCoords() {return hasEdgeCoords;}
   

@@ -567,7 +567,7 @@ end subroutine
 !
 ! !INTERFACE:
     subroutine ESMF_MeshAddEdges(mesh, edgeIds, &
-         edgeConn, edgeCoords, edgeOwners, edgeDistgrid, rc)
+          edgeConn, edgeOwners, edgeCoords,  edgeDistgrid, rc)
       !
 ! !ARGUMENTS:
     type(ESMF_Mesh),    intent(inout)         :: mesh
@@ -585,8 +585,8 @@ end subroutine
 !   and after the nodes are added with {\tt ESMF\_MeshAddNodes()} (\ref{sec:mesh:api:meshaddnodes}).
 !   This call adds edges to the mesh.
 !
-!   The parameters to this call {\tt edgeIds}, {\tt edgeTypes}, and
-!   {\tt edgeConn} describe the edges to be created. The description
+!   The parameters to this call {\tt edgeIds}, {\tt edgeOwners},
+!   {\tt edgeConn}, and {\tt edgeCoords} describe the edges to be created. The description
 !   for a particular element lies at the same index location in {\tt edgeIds}. Each entry in {\tt edgeConn} consists of the list of
 !   pairs of nodes used to create that edge, so the connections for edge $e$ in the
 !   {\tt edgesIds} array will start at $2*(e-1)+1$ {\tt edgeConn}.
@@ -609,7 +609,14 @@ end subroutine
 !         created on this PET by the previous {\tt ESMF\_MeshAddNodes()} call.
 !         In other words, an entry of 1 indicates that this edge contains the node
 !         described by {\tt nodeIds(1)}, {\tt nodeCoords(1)}, etc. passed into the
-!         {\tt ESMF\_MeshAddNodes()} call on this PET. 
+!         {\tt ESMF\_MeshAddNodes()} call on this PET.
+!   \item[{[edgeOwners]}]
+!         An array containing the PETs that own the edges to be created on this PET.
+!         If the edge is shared with another PET, the value
+!         may be a PET other than the current one. Only edges owned by this PET
+!         will have PET local entries in a Field created on the Mesh. This input consists of
+!         a 1D array the size of the number of edges on this PET. If not provided by the user, 
+!         then ESMF will calculate edge ownership.     
 !   \item[{[edgeCoords]}]
 !          An array containing the physical coordinates of the edges to be created on this
 !          PET. This input consists of a 1D array the size of the number of edges on this PET times the Mesh's
@@ -4970,7 +4977,6 @@ end function ESMF_MeshEmptyCreate
     integer,                  intent(out), optional :: nodeOwners(:)
     logical,                  intent(out), optional :: nodeMaskIsPresent
     integer,                  intent(out), optional :: nodeMask(:)
-
     logical,                  intent(out), optional :: edgeIsPresent
     integer,                  intent(out), optional :: edgeCount
     integer,                  intent(out), optional :: edgeIds(:)
@@ -4979,7 +4985,6 @@ end function ESMF_MeshEmptyCreate
     integer,                  intent(out), optional :: edgeConn(:)
     logical,                  intent(out), optional :: edgeCoordsIsPresent
     real(ESMF_KIND_R8),       intent(out), optional :: edgeCoords(:)
-
     integer,                  intent(out), optional :: elementCount
     integer,                  intent(out), optional :: elementIds(:)
     integer,                  intent(out), optional :: elementTypes(:)
@@ -5043,6 +5048,8 @@ end function ESMF_MeshEmptyCreate
 ! An array of ids for each local edge in the mesh. The edgeIds array should be of size edgeCount.
 ! \item [{[edgeOwners]}]
 ! An array of the PET numbers that own each local edge in the mesh. The edgeOwners array should be of size edgeCount.
+! \item [{[edgeConnCount]}]
+! The number of entries edgeConn array. Provided as a convenience.
 ! \item[edgeConn]
 !         An array containing the indexes of the sets of nodes to be connected together to form the
 !         edges to be created on this PET. The entries in this list are NOT node global ids,
@@ -5058,8 +5065,7 @@ end function ESMF_MeshEmptyCreate
 ! \item [{[edgeCoordsIsPresent]}]
 ! .true. if edge coordinates were set in mesh, .false. otherwise.
 ! \item [{[edgeCoords]}]
-    ! An array of coordinate values for each local edge in the mesh. The edgeCoord array should be of size (spatialDim*edgeCount).
-    
+! An array of coordinate values for each local edge in the mesh. The edgeCoord array should be of size (spatialDim*edgeCount).    
 ! \item [{[elementCount]}]
 ! The number of local elements in the mesh (both owned and shared with another PET).
 ! \item [{[elementIds]}]
@@ -5103,7 +5109,12 @@ end function ESMF_MeshEmptyCreate
 ! A Distgrid describing the distribution of the nodes across the PETs. Note that
 ! on each PET the distgrid will only contain entries for nodes owned by that PET.
 ! This is the DistGrid that would be used to construct the Array in a Field that is constructed
-! on {\tt mesh}.
+    ! on {\tt mesh}.
+! \item [{[edgeDistgridIsPresent]}]
+! .true. if edgeDistgrid was set in Mesh object, .false. otherwise.
+! \item [{[edgeDistgrid]}]
+! A Distgrid describing the distribution of edges across the PETs. Note that
+! on each PET the distgrid will only contain entries for the edges owned by that PET.
 ! \item [{[elementDistgridIsPresent]}]
 ! .true. if elementDistgrid was set in Mesh object, .false. otherwise.
 ! \item [{[elementDistgrid]}]

@@ -3663,7 +3663,7 @@ void ESMCI_meshserialize(Mesh **meshpp,
 
 
     // Calc Size
-    int size = 7*sizeof(int)+
+    int size = 9*sizeof(int)+
                ESMF_RECONCILE_MESH_NUM_FIELDS*sizeof(int)+
                2*numSets*sizeof(UInt);
 
@@ -3703,6 +3703,12 @@ void ESMCI_meshserialize(Mesh **meshpp,
       if (mesh.is_split) *ip++ = 1;
       else *ip++ = 0;
       *ip++ = mesh.max_non_split_id;
+
+      if (mesh.getHasEdges()) *ip++ = 1;
+      else *ip++ = 0;
+
+      if (mesh.getHasEdgeCoords()) *ip++ = 1;
+      else *ip++ = 0;
     }
 
 
@@ -3830,6 +3836,9 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
     int is_split=*ip++;
     int max_non_split_id=*ip++;
 
+    // Edge stuff
+    int hasEdgesInt=*ip++;
+    int hasEdgeCoordsInt=*ip++;
 
     // convert pointer
     uip=(UInt *)ip;
@@ -3873,7 +3882,7 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
       }
 
     // Adjust offset
-      *offset += 7*sizeof(int)+ESMF_RECONCILE_MESH_NUM_FIELDS*sizeof(int)+
+      *offset += 9*sizeof(int)+ESMF_RECONCILE_MESH_NUM_FIELDS*sizeof(int)+
       nvalSetSizes.size()*sizeof(UInt)+nvalSetVals.size()*sizeof(UInt)+
       nvalSetObjSizes.size()*sizeof(UInt)+nvalSetObjVals.size()*sizeof(UInt);
 
@@ -3893,6 +3902,10 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
 
     meshp->max_non_split_id=max_non_split_id;
 
+    // Edge info
+    if (hasEdgesInt == 1) meshp->setHasEdges();
+    if (hasEdgeCoordsInt == 1) meshp->setHasEdgeCoords();
+    
     //  printf(" is_split=%d mnsi=%d\n",meshp->is_split,meshp->max_non_split_id);
 
 
