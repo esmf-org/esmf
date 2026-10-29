@@ -201,6 +201,7 @@ ESMF\_RegridWeightGen & Command Line Tool & Grid files & yes  & no & Sec.~\ref{s
 \end{table}
 
 
+
 \subsubsection{Interpolation methods: bilinear}\label{sec:interpolation:bilinear}
  Bilinear interpolation calculates the value for the 
  destination point as a combination of multiple linear interpolations, one for each dimension of the Grid. Note that for ease of 
@@ -237,9 +238,10 @@ ESMF\_RegridWeightGen & Command Line Tool & Grid files & yes  & no & Sec.~\ref{s
  \end{itemize}
 
  To use the bilinear method the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
- any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) for a Mesh. For either a Grid or a Mesh, the location upon which the Field is built 
+ any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) except {\tt ESMF\_MESHLOC\_EDGE} for a Mesh. For either a Grid or a Mesh, the location upon which the Field is built 
  must contain coordinates. This method will also work with a destination Field built on a LocStream that contains coordinates, 
  or with a source or destination Field built on an XGrid.
+
 
 \subsubsection{Interpolation methods: higher-order patch}\label{sec:interpolation:patch}
 
@@ -289,7 +291,7 @@ ESMF\_RegridWeightGen & Command Line Tool & Grid files & yes  & no & Sec.~\ref{s
  \end{itemize}
 
  To use the patch method the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
- any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) for a Mesh. For either a Grid or a Mesh, the location upon which the Field is built 
+ any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) except {\tt ESMF\_MESHLOC\_EDGE} for a Mesh. For either a Grid or a Mesh, the location upon which the Field is built 
  must contain coordinates. This method will also work with a destination Field built on a LocStream that contains coordinates, 
  or with a source or destination Field built on an XGrid.
 
@@ -323,7 +325,7 @@ In nearest source to destination interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
 \smallskip
 
  To use the nearest source to destination method the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
- any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) for a Mesh. For either a Grid or a Mesh, the location upon which the Field is built 
+ any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) except {\tt ESMF\_MESHLOC\_EDGE} for a Mesh. For either a Grid or a Mesh, the location upon which the Field is built 
  must contain coordinates. This method will also work with a source or destination Field built on a LocStream that contains coordinates, or when the source 
 or destination Field is built on an XGrid.
 
@@ -360,9 +362,48 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
 \smallskip
 
  To use the nearest destination to source method the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
- any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) for a Mesh. For either a Grid or a Mesh, the location upon which the Field is built 
+ any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) except {\tt ESMF\_MESHLOC\_EDGE} for a Mesh. For either a Grid or a Mesh, the location upon which the Field is built 
  must contain coordinates. This method will also work with a source or destination Field built on a LocStream that contains coordinates, or when the source 
 or destination Field is built on an XGrid.
+
+\subsubsection{Interpolation methods: binning}\label{sec:interpolation:binning}
+ Binning interpolation calculates the value for the destination cell as the sum of all the values of the source points which are located in the cell.  A given destination cell may receive input from multiple source points, but no source point will go to more than one destination cell.
+
+\smallskip
+
+ In 2D, ESMF supports binning regridding between any combination of the following:
+ \begin{itemize}
+ \item Structured grids ({\tt ESMF\_Grid}) composed of any number of logically rectangular tiles
+ \item Unstructured meshes ({\tt ESMF\_Mesh}) composed of polygons with any number of sides
+ \item A set of disconnected points ({\tt ESMF\_LocStream}) may be the source of the regridding
+ \item An exchange grid ({\tt ESMF\_XGrid})
+ \end{itemize}
+
+\smallskip
+
+ In 3D, ESMF supports binning regridding between any combination of the following:
+ \begin{itemize}
+ \item Structured grids ({\tt ESMF\_Grid}) composed of a single logically rectangular tile
+ \item Unstructured meshes ({\tt ESMF\_Mesh}) composed of hexahedrons 
+ \item A set of disconnected points ({\tt ESMF\_LocStream}) may be the source of the regridding
+ \end{itemize}
+
+\smallskip
+
+{\bf Restrictions:}
+\begin{itemize}
+ \item The unmapped destination point detection doesn't currently work for this method. Even if there are unmapped points, no error will be returned. 
+ \item Cells which contain enough identical corners to collapse to a line or point are currently ignored
+ \item Self-intersecting cells (e.g. a cell twisted into a bow tie) are not supported 
+ \item On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported 
+ \item Source Fields built on a Grid which contains a DE of width less than 2 elements are not supported
+ \end{itemize}
+
+ To use the binning method the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
+ any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) except {\tt ESMF\_MESHLOC\_EDGE} for a Mesh. For either a Grid or a Mesh, the location upon which the
+ Field is built must contain coordinates. This method will also work with a source Field built on a LocStream that contains coordinates, 
+ or with a source or destination Field built on an XGrid.
+
 
 \subsubsection{Interpolation methods: first-order conservative}\label{sec:interpolation:conserve}
  The goal of this method is to preserve the integral of the field across the interpolation from source to destination.  
