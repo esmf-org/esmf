@@ -5049,23 +5049,21 @@ end function ESMF_MeshEmptyCreate
 ! \item [{[edgeOwners]}]
 ! An array of the PET numbers that own each local edge in the mesh. The edgeOwners array should be of size edgeCount.
 ! \item [{[edgeConnCount]}]
-! The number of entries edgeConn array. Provided as a convenience.
-! \item[edgeConn]
+! The number of entries in the edgeConn array. Provided as a convenience.
+! \item [{[edgeConn]}]
 !         An array containing the indexes of the sets of nodes to be connected together to form the
 !         edges to be created on this PET. The entries in this list are NOT node global ids,
 !         but rather each entry is a local index (1 based) into the list of nodes to be
 !         created on this PET by this call.
 !         In other words, an entry of 1 indicates that this edge contains the node
-!         described by {\tt nodeIds(1)}, {\tt nodeCoords(1)}, etc. on this PET. 
+!         described by {\tt nodeIds(1)}, {\tt nodeCoords(1)}, etc. on this PET.
 !         This input consists of a 1D array with
-!         a total size equal to 2*{\tt edgeCount}.  The number of nodes contained in each edge on
-!         this PET is also provided by {\tt edgeConnCount}.  The nodes for each edge
-!         are in sequence in this array (e.g. the nodes for edge 1 are edgeConn(1),
-!         edgeConn(2), etc.).
+!         a total size equal to 2*{\tt edgeCount} (also provided by edgeConnCount). The nodes for each edge
+!         are in sequence in this array (e.g. the nodes for edge 1 are edgeConn(1), edgeConn(2), etc.).
 ! \item [{[edgeCoordsIsPresent]}]
 ! .true. if edge coordinates were set in mesh, .false. otherwise.
 ! \item [{[edgeCoords]}]
-! An array of coordinate values for each local edge in the mesh. The edgeCoord array should be of size (spatialDim*edgeCount).    
+! An array of coordinate values for each local edge in the mesh. The edgeCoord array should be of size spatialDim*edgeCount.    
 ! \item [{[elementCount]}]
 ! The number of local elements in the mesh (both owned and shared with another PET).
 ! \item [{[elementIds]}]
@@ -5074,8 +5072,8 @@ end function ESMF_MeshEmptyCreate
 ! An array of types for each local element in the mesh. Please see
 ! section~\ref{const:meshelemtype} for the list of options. The elementTypes array should be of size elementCount.
 ! \item [{[elementConnCount]}]
-! The number of entries elementConn array. Provided as a convenience.
-! \item[elementConn]
+! The number of entries in the elementConn array. Provided as a convenience.
+! \item [{[elementConn]}]
 !         An array containing the indexes of the sets of nodes to be connected together to form the
 !         elements to be created on this PET. The entries in this list are NOT node global ids,
 !         but rather each entry is a local index (1 based) into the list of nodes to be
@@ -5102,7 +5100,7 @@ end function ESMF_MeshEmptyCreate
 ! \item [{[elementCoordsIsPresent]}]
 ! .true. if element coordinates were set in mesh, .false. otherwise.
 ! \item [{[elementCoords]}]
-! An array of coordinate values for each local element in the mesh. The elementCoord array should be of size (spatialDim*elementCount).
+! An array of coordinate values for each local element in the mesh. The elementCoord array should be of size spatialDim*elementCount.
 ! \item [{[nodalDistgridIsPresent]}]
 ! .true. if nodalDistgrid was set in Mesh object, .false. otherwise.
 ! \item [{[nodalDistgrid]}]
