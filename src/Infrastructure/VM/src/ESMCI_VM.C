@@ -142,6 +142,7 @@ static bool garbageLog = false;
 #define ESMC_METHOD "ESMCI::VMKeyCompare()"
 static bool VMKeyCompare(unsigned char *vmKey1, unsigned char *vmKey2,
   bool super=false){
+  if (!vmKey1 || !vmKey2) return false; // quick return for NULL pointers
   if (vmKey1==vmKey2) return true;  // quick return for identical pointers
   if (super){
     // ensure each bit that is set in vmKey2 is also set in vmKey1,
