@@ -1206,7 +1206,7 @@ void VM::shutdown(
               // Removing remnant from garbage collection might be unsafe
               if (garbageLog){
                 char msg[800];
-                sprintf(msg, "VM::finalize(): fortran obj: "
+                sprintf(msg, "VM::shutdown(): fortran obj: "
                   "%15s - REMOVE REMNANT",
                   ESMC_ObjectID_Name(matchTable_FObjects[i][k].objectID));
                 ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
@@ -1225,11 +1225,19 @@ void VM::shutdown(
             }
             if (garbageLog){
               std::stringstream msg;
-              msg << "VM::finalize(): matchTable_FObjects[i] -   RELEASE";
+              msg << "VM::shutdown(): matchTable_FObjects[i] -   RELEASE";
               ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
             }
             // swap() trick with a temporary to free vector's memory
             std::vector<FortranObject>().swap(matchTable_FObjects[i]);
+          }else{
+            // In safe-mode just clear the matchTable_FObjects[i] vector
+            if (garbageLog){
+              std::stringstream msg;
+              msg << "VM::shutdown(): matchTable_FObjects[i] -   CLEAR";
+              ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+            }
+            matchTable_FObjects[i].clear();
           }
           // The following loop deletes deep C++ ESMF objects derived from
           // Base class. For deep Fortran classes it deletes the Base member.
@@ -1245,7 +1253,7 @@ void VM::shutdown(
               const char *action;
               action="KEEP";
               if (mustDelete) action="DELETE";
-              sprintf(msg, "VM::finalize(): c++base obj: "
+              sprintf(msg, "VM::shutdown(): c++base obj: "
                 "%15s %p - %6s - %7s - %7s : %04d : VM=%p : %30s - %8s",
                 matchTable_Objects[i][k]->ESMC_BaseGetClassName(),
                 matchTable_Objects[i][k], proxyString,
@@ -1273,11 +1281,19 @@ void VM::shutdown(
             }
             if (garbageLog){
               std::stringstream msg;
-              msg << "VM::finalize(): matchTable_Objects[i] -   RELEASE";
+              msg << "VM::shutdown(): matchTable_Objects[i] -   RELEASE";
               ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
             }
             // swap() trick with a temporary to free vector's memory
             std::vector<ESMC_Base *>().swap(matchTable_Objects[i]);
+          }else{
+            // In safe-mode just clear the matchTable_Objects[i] vector
+            if (garbageLog){
+              std::stringstream msg;
+              msg << "VM::shutdown(): matchTable_Objects[i] -   CLEAR";
+              ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+            }
+            matchTable_Objects[i].clear();
           }
           // mark match table context as garbage collected, also VM will be gone
           matchTable_vm[i] = NULL;  
@@ -3853,7 +3869,15 @@ void VM::finalize(
       }
       // swap() trick with a temporary to free vector's memory
       std::vector<FortranObject>().swap(matchTable_FObjects[0]);
-    }
+   }else{
+     // In safe-mode just clear the matchTable_FObjects[0] vector
+     if (garbageLog){
+       std::stringstream msg;
+       msg << "VM::finalize(): matchTable_FObjects[0] -   CLEAR";
+       ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+     }
+     matchTable_FObjects[0].clear();
+   }
     // The following loop deletes deep C++ ESMF objects derived from
     // Base class. For deep Fortran classes it deletes the Base member.
     for (int k=matchTable_Objects[0].size()-1; k>=0; k--){
@@ -3902,6 +3926,14 @@ void VM::finalize(
       }
       // swap() trick with a temporary to free vector's memory
       std::vector<ESMC_Base *>().swap(matchTable_Objects[0]);
+    }else{
+      // In safe-mode just clear the matchTable_Objects[0] vector
+      if (garbageLog){
+        std::stringstream msg;
+        msg << "VM::finalize(): matchTable_Objects[0] -   CLEAR";
+        ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+      }
+      matchTable_Objects[0].clear();
     }
     // destroy VMId object
     VMIdDestroy(&(matchTable_vmID[0]), &localrc);
