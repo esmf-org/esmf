@@ -2370,7 +2370,7 @@ VM *VM::getCurrent(
   if (matchTable_tid[i] != mytid){
     // simple linear search for maching thread id
     for (i=0; i<matchTableBound; i++)
-      if (matchTable_tid[i] == mytid) break;
+      if (matchTable_vm[i] && matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
         "- Could not determine current VM", ESMC_CONTEXT, rc);
@@ -2421,7 +2421,7 @@ bool VM::isThreadKnown(
   if (matchTable_tid[i] != mytid){
     // simple linear search for maching thread id
     for (i=0; i<matchTableBound; i++)
-      if (matchTable_tid[i] == mytid) break;
+      if (matchTable_vm[i] && matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
       // executing thread is NOT known as PET by any VM under this VAS.
       found = false;
@@ -2469,7 +2469,7 @@ VMId *VM::getCurrentID(
   int i = matchTableIndex;
   if (matchTable_tid[i] != mytid){
     for (i=0; i<matchTableBound; i++)
-      if (matchTable_tid[i] == mytid) break;
+      if (matchTable_vm[i] && matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
         "- Could not determine current VM", ESMC_CONTEXT, rc);
@@ -2516,7 +2516,7 @@ void VM::getCurrentGarbageInfo(
   int i = matchTableIndex;
   if (matchTable_tid[i] != mytid){
     for (i=0; i<matchTableBound; i++)
-      if (matchTable_tid[i] == mytid) break;
+      if (matchTable_vm[i] && matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
         "- Could not determine current VM", ESMC_CONTEXT, &rc);
@@ -2567,7 +2567,7 @@ void VM::logGarbageInfo(
   if (matchTable_tid[i] != mytid){
     // dealing with VM that uses its own Pthreads for PETs -> search for match
     for (i=0; i<matchTableBound; i++)
-      if (matchTable_tid[i] == mytid) break;
+      if (matchTable_vm[i] && matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
         "- Could not determine current VM", ESMC_CONTEXT, &rc);
@@ -3096,7 +3096,7 @@ void VM::rmObject(
   int i = matchTableIndex;  // correct index if non-threaded VM
   if (matchTable_tid[i] != mytid){
     for (i=0; i<matchTableBound; i++)
-      if (matchTable_tid[i] == mytid) break;
+      if (matchTable_vm[i] && matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
         "- Could not determine current VM", ESMC_CONTEXT, &rc);
@@ -3244,7 +3244,7 @@ void VM::rmFObject(
   int i = matchTableIndex;  // correct index if non-threaded VM
   if (matchTable_tid[i] != mytid){
     for (i=0; i<matchTableBound; i++)
-      if (matchTable_tid[i] == mytid) break;
+      if (matchTable_vm[i] && matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
         "- Could not determine current VM", ESMC_CONTEXT, &rc);
