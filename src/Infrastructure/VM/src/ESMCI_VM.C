@@ -1202,27 +1202,9 @@ void VM::shutdown(
                 ESMC_CONTEXT, rc))
                 return;
             }
-            if (garbageMode == garbageFull){
-              // Removing remnant from garbage collection might be unsafe
-              if (garbageLog){
-                char msg[800];
-                sprintf(msg, "VM::shutdown(): fortran obj: "
-                  "%15s - REMOVE REMNANT",
-                  ESMC_ObjectID_Name(matchTable_FObjects[i][k].objectID));
-                ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
-              }
-              matchTable_FObjects[i].pop_back();
-            }
           }
           if (garbageMode == garbageFull){
             // Taking down garbage collection table might be unsafe
-            if (matchTable_FObjects[i].size() > 0){
-              std::stringstream msg;
-              msg << "found corrupt garbage collection table";
-              ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg,
-                ESMC_CONTEXT, rc);
-              return;
-            }
             if (garbageLog){
               std::stringstream msg;
               msg << "VM::shutdown(): matchTable_FObjects[i] -   RELEASE";
@@ -1238,6 +1220,14 @@ void VM::shutdown(
               ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
             }
             matchTable_FObjects[i].clear();
+          }
+          // health check
+          if (matchTable_FObjects[i].size() > 0){
+            std::stringstream msg;
+            msg << "Corrupt garbage collection table: matchTable_FObjects[i]";
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg,
+              ESMC_CONTEXT, rc);
+            return;
           }
           // The following loop deletes deep C++ ESMF objects derived from
           // Base class. For deep Fortran classes it deletes the Base member.
@@ -1267,18 +1257,11 @@ void VM::shutdown(
             }
             if (mustDelete){
               // Removing remnant from garbage collection might be unsafe
-              matchTable_Objects[i].pop_back();
+              delete matchTable_Objects[i][k];// delete ESMF object, incl. Base
             }
           }
           if (garbageMode == garbageFull){
             // Taking down garbage collection table might be unsafe
-            if (matchTable_Objects[i].size() > 0){
-              std::stringstream msg;
-              msg << "found corrupt garbage collection table";
-              ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg,
-                ESMC_CONTEXT, rc);
-              return;
-            }
             if (garbageLog){
               std::stringstream msg;
               msg << "VM::shutdown(): matchTable_Objects[i] -   RELEASE";
@@ -1294,6 +1277,14 @@ void VM::shutdown(
               ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
             }
             matchTable_Objects[i].clear();
+          }
+          // health check
+          if (matchTable_Objects[i].size() > 0){
+            std::stringstream msg;
+            msg << "Corrupt garbage collection table: matchTable_Objects[i]";
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg,
+              ESMC_CONTEXT, rc);
+            return;
           }
           // mark match table context as garbage collected, also VM will be gone
           matchTable_vm[i] = NULL;
@@ -3841,27 +3832,9 @@ void VM::finalize(
           ESMC_CONTEXT, rc))
           return;
       }
-      if (GlobalVM->garbageMode == garbageFull){
-        // Removing remnant from garbage collection might be unsafe
-        if (garbageLog){
-          char msg[800];
-          sprintf(msg, "VM::finalize(): fortran obj: "
-            "%15s - REMOVE REMNANT",
-            ESMC_ObjectID_Name(matchTable_FObjects[0][k].objectID));
-          ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
-        }
-        matchTable_FObjects[0].pop_back();
-      }
     }
     if (GlobalVM->garbageMode == garbageFull){
       // Taking down garbage collection table might be unsafe
-      if (matchTable_FObjects[0].size() > 0){
-        std::stringstream msg;
-        msg << "found corrupt garbage collection table";
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg, ESMC_CONTEXT,
-          rc);
-        return;
-      }
       if (garbageLog){
         std::stringstream msg;
         msg << "VM::finalize(): matchTable_FObjects[0] -   RELEASE";
@@ -3869,15 +3842,23 @@ void VM::finalize(
       }
       // swap() trick with a temporary to free vector's memory
       std::vector<FortranObject>().swap(matchTable_FObjects[0]);
-   }else{
-     // In safe-mode just clear the matchTable_FObjects[0] vector
-     if (garbageLog){
-       std::stringstream msg;
-       msg << "VM::finalize(): matchTable_FObjects[0] -   CLEAR";
-       ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
-     }
-     matchTable_FObjects[0].clear();
-   }
+    }else{
+      // In safe-mode just clear the matchTable_FObjects[0] vector
+      if (garbageLog){
+        std::stringstream msg;
+        msg << "VM::finalize(): matchTable_FObjects[0] -   CLEAR";
+        ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+      }
+      matchTable_FObjects[0].clear();
+    }
+    // health check
+    if (matchTable_FObjects[0].size() > 0){
+      std::stringstream msg;
+      msg << "Corrupt garbage collection table: matchTable_FObjects[0]";
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg,
+        ESMC_CONTEXT, rc);
+      return;
+    }
     // The following loop deletes deep C++ ESMF objects derived from
     // Base class. For deep Fortran classes it deletes the Base member.
     for (int k=matchTable_Objects[0].size()-1; k>=0; k--){
@@ -3907,18 +3888,10 @@ void VM::finalize(
       if (mustDelete){
         // Removing remnant from garbage collection might be unsafe
         delete matchTable_Objects[0][k];  // delete ESMF object, incl. Base
-        matchTable_Objects[0].pop_back();
       }
     }
     if (GlobalVM->garbageMode == garbageFull){
       // Taking down garbage collection table might be unsafe
-      if (matchTable_Objects[0].size() > 0){
-        std::stringstream msg;
-        msg << "found corrupt garbage collection table";
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg, ESMC_CONTEXT,
-          rc);
-        return;
-      }
       if (garbageLog){
         std::stringstream msg;
         msg << "VM::finalize(): matchTable_Objects[0] -   RELEASE";
@@ -3934,6 +3907,13 @@ void VM::finalize(
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
       }
       matchTable_Objects[0].clear();
+    }
+    // health check
+    if (matchTable_Objects[0].size() > 0){
+      std::stringstream msg;
+      msg << "Corrupt garbage collection table: matchTable_Objects[0]";
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg, ESMC_CONTEXT, rc);
+      return;
     }
     // destroy VMId object
     VMIdDestroy(&(matchTable_vmID[0]), &localrc);
