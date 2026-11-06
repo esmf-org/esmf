@@ -33,12 +33,14 @@ module ESMX_Data
   type ImportItem
     type(ESMF_Field)              :: field
     type(Validate)                :: dataValidate
+    character(len=:), allocatable :: timeStamp
     character(len=:), allocatable :: dataInit
   end type
 
   type ExportItem
     type(ESMF_Field)              :: field
     type(Validate)                :: dataValidate
+    character(len=:), allocatable :: timeStamp
     character(len=:), allocatable :: dataInit
     character(len=:), allocatable :: dataAdvance
   end type
@@ -54,7 +56,6 @@ module ESMX_Data
   end type
 
   type InternalStateStruct
-    character(len=:),      allocatable :: timeKeeping    ! "Model" or "Mediator"
     type(GeomItem),        allocatable :: geomItems(:)
     type(ImportItem),      allocatable :: importItems(:)
     type(ExportItem),      allocatable :: exportItems(:)
@@ -139,6 +140,10 @@ module ESMX_Data
       line=__LINE__, file=trim(name)//":"//__FILE__)) return
     call NUOPC_CompSpecialize(xdata, specLabel=label_Advance, &
       specRoutine=Advance, rc=rc)
+    call NUOPC_CompSpecialize(xdata, specLabel=label_CheckImport, &
+      specRoutine=CheckImport, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//__FILE__)) return
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//__FILE__)) return
     call NUOPC_CompSpecialize(xdata, specLabel=label_TimestampExport, &
@@ -180,7 +185,6 @@ module ESMX_Data
                     "stdout       ", &  ! ESMX_Driver handled option
                     "stderr       ", &  ! ESMX_Driver handled option
                     "attributes   ", &  ! ESMX_Driver handled option
-                    "timeKeeping  ", &  ! ESMX_Data handled option
                     "geometries   ", &  ! ESMX_Data handled option
                     "outputs      ", &  ! ESMX_Data handled option
                     "importFields ", &  ! ESMX_Data handled option
@@ -197,9 +201,8 @@ module ESMX_Data
       endif
 
       ! ingest hconfig
-      call IngestFromHConfig(hconfigNode, is%wrap%timeKeeping, &
-        is%wrap%geomItems, is%wrap%importItems, is%wrap%exportItems, &
-        is%wrap%outputItems, rc=rc)
+      call IngestFromHConfig(hconfigNode, is%wrap%geomItems, &
+        is%wrap%importItems, is%wrap%exportItems, is%wrap%outputItems, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg="Problem ingesting hconfig.", &
         line=__LINE__, file=trim(name)//":"//__FILE__)) return
 
@@ -209,10 +212,9 @@ module ESMX_Data
 
   !-----------------------------------------------------------------------------
 
-  subroutine IngestFromHConfig(hconfig, timeKeeping, geoms, imports, exports, &
+  subroutine IngestFromHConfig(hconfig, geoms, imports, exports, &
     outputs, rc)
     type(ESMF_HConfig),                 intent(in)  :: hconfig
-    character(len=:),      allocatable, intent(out) :: timeKeeping
     type(GeomItem),        allocatable, intent(out) :: geoms(:)
     type(ImportItem),      allocatable, intent(out) :: imports(:)
     type(ExportItem),      allocatable, intent(out) :: exports(:)
@@ -230,24 +232,6 @@ module ESMX_Data
     character(:), allocatable     :: badKey
 
     rc=ESMF_SUCCESS
-
-    ! handle timeKeeping
-    tempString = ESMF_HConfigAsString(hconfig, keyString="timeKeeping", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg="Must specify 'timeKeeping'!", &
-      line=__LINE__, file=__FILE__)) return
-
-    allocate(character(len=len(tempString)) :: timeKeeping) ! help nvfortran
-    timeKeeping = ESMF_UtilStringUpperCase(tempString, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg="Must specify 'timeKeeping'!", &
-      line=__LINE__, file=__FILE__)) return
-
-    if (timeKeeping /= "MODEL" .and. timeKeeping /= "MEDIATOR") then
-      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
-        msg="An invalid setting was found for 'timeKeeping' "// &
-          "(maybe a typo?): "//tempString, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)
-      return
-    endif
 
     ! handle outputs
     isFlag = ESMF_HConfigIsDefined(hconfig, keyString="outputs", rc=rc)
@@ -466,6 +450,7 @@ module ESMX_Data
 
           imports(item)%field = FieldCreateFromHConfig(hconfigIt, geoms=geoms, &
             outputs=outputs, dataValidate=imports(item)%dataValidate, &
+            timeStamp=imports(item)%timeStamp, &
             dataInit=imports(item)%dataInit, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, &
             msg="Problem creating import field.", &
@@ -521,6 +506,7 @@ module ESMX_Data
 
           exports(item)%field = FieldCreateFromHConfig(hconfigIt, geoms=geoms, &
             outputs=outputs, dataValidate=exports(item)%dataValidate, &
+            timeStamp=exports(item)%timeStamp, &
             dataInit=exports(item)%dataInit, &
             dataAdvance=exports(item)%dataAdvance, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, &
@@ -545,12 +531,13 @@ module ESMX_Data
   !-----------------------------------------------------------------------------
 
   function FieldCreateFromHConfig(hconfig, geoms, outputs, dataValidate, &
-    dataInit, dataAdvance, rc)
+    timeStamp, dataInit, dataAdvance, rc)
     type(ESMF_Field)                           :: FieldCreateFromHConfig
     type(ESMF_HConfigIter),        intent(in)  :: hconfig
     type(GeomItem), allocatable,   intent(in)  :: geoms(:)
     type(OutputItem), allocatable, intent(inout):: outputs(:)
     type(Validate),                intent(out) :: dataValidate
+    character(len=:), allocatable, intent(out) :: timeStamp
     character(len=:), allocatable, intent(out), optional :: dataInit
     character(len=:), allocatable, intent(out), optional :: dataAdvance
     integer,                       intent(out) :: rc
@@ -600,6 +587,7 @@ module ESMX_Data
                     "typekind       ", &
                     "outputList     ", &
                     "dataValidate   ", &
+                    "timeStamp      ", &
                     "dataInit       ", &
                     "dataAdvance    "  ]
       else
@@ -610,6 +598,7 @@ module ESMX_Data
                     "typekind       ", &
                     "outputList     ", &
                     "dataValidate   ", &
+                    "timeStamp      ", &
                     "dataInit       "  ]
       end if
       isFlag = ESMF_HConfigValidateMapKeys(hconfigMap, vocabulary=vocabulary, &
@@ -1019,7 +1008,7 @@ module ESMX_Data
         dataValidate%action     = "error"
       endif
 
-      ! upper case to be case insensitive and check if valid option
+      ! upper case action for case-insensitivity and check if valid option
       dataValidate%action = ESMF_UtilStringUpperCase(dataValidate%action, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
@@ -1029,6 +1018,38 @@ module ESMX_Data
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
           msg="Valid 'dataValidate: action' options are 'IGNORE', "// &
           "'WARNING', and 'ERROR'. Maybe typo?: "//dataValidate%action, &
+          line=__LINE__, file=__FILE__, rcToReturn=rc)
+        return
+      endif
+
+      ! handle timeStamp (optional)
+      isFlag = ESMF_HConfigIsDefined(hconfigMap, keyString="timeStamp", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      if (isFlag) then
+        ! timeStamp key provided -> read value string
+        timeStamp = ESMF_HConfigAsString(hconfigMap, &
+          keyString="timeStamp", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+      else
+        ! timeStamp key not provided, default
+        timeStamp = "default"
+      endif
+
+      ! upper case timeStamp for case-insensitivity and check if valid option
+      timeStamp = ESMF_UtilStringUpperCase(timeStamp, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      if (timeStamp/="DEFAULT" &
+        .and.timeStamp/="PREADVANCE" &
+        .and.timeStamp/="POSTADVANCE" &
+        .and.timeStamp/="IGNORE") then
+        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+          msg="Valid 'timeStamp' options are 'DEFAULT', "// &
+          "'PREADVANCE', 'POSTADVANCE', and 'IGNORE'. "// &
+          "Maybe typo?: "//timeStamp, &
           line=__LINE__, file=__FILE__, rcToReturn=rc)
         return
       endif
@@ -1782,7 +1803,7 @@ module ESMX_Data
           ! update collective result
           neededCurrent = neededCurrent .and. isFlag
           if (isFlag) then
-            ! explicitly timestamp this import field if successfully initialized
+            ! explicitly timeStamp this import field if successfully initialized
             call NUOPC_SetTimestamp(item%field, time=time, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//__FILE__)) return
@@ -2487,15 +2508,19 @@ module ESMX_Data
 
   !-----------------------------------------------------------------------------
 
-  subroutine TimestampExport(xdata, rc)
+  subroutine CheckImport(xdata, rc)
     ! arguments
     type(ESMF_GridComp)  :: xdata
     integer, intent(out) :: rc
     ! local variables
-    character(ESMF_MAXSTR)     :: name
+    character(ESMF_MAXSTR)     :: name, fieldName
     type(ESMF_Clock)           :: clock
+    type(ESMF_Time)            :: time
+    type(ESMF_TimeInterval)    :: timeStep
     type(type_InternalState)   :: modelBaseIs
     type(InternalState)        :: is
+    integer                    :: i
+    logical                    :: passCheck
 
     rc = ESMF_SUCCESS
 
@@ -2536,34 +2561,152 @@ module ESMX_Data
       line=__LINE__, file=trim(name)//":"//__FILE__)) return
 #endif
 
-    ! use correct timeKeeping
-    if (is%wrap%timeKeeping == "MODEL") then
-      ! Model style timeKeeping -> timestamp exports with post-Advance time
+    ! Loop through import items and check timeStamp as per-field specification
+    if (allocated(is%wrap%importItems)) then
+      do i = 1, size(is%wrap%importItems)
+        associate(item => is%wrap%importItems(i))
+          call ESMF_FieldGet(item%field, name=fieldName, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//__FILE__)) return
+          select case (item%timeStamp)
+            case ("PREADVANCE", "DEFAULT")
+              ! check against current time on component clock
+              call NUOPC_ModelBaseGet(xdata, clock=clock, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//__FILE__)) return
+              call ESMF_ClockGet(clock, currTime=time, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//__FILE__)) return
+              passCheck = NUOPC_IsAtTime(item%field, time, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//__FILE__)) return
+            case ("POSTADVANCE")
+              ! check against current time on driver clock + timeStep
+              call NUOPC_ModelBaseGet(xdata, driverClock=clock, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//__FILE__)) return
+              call ESMF_ClockGet(clock, currTime=time, timeStep=timestep, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//__FILE__)) return
+              time = time + timeStep
+              passCheck = NUOPC_IsAtTime(item%field, time, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//__FILE__)) return
+            case ("IGNORE")
+              ! ignore timeStamp and pass blindly
+              passCheck = .true.
+            case default
+              ! unknown timeStamp option
+              call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                msg="Timestamp option for Import Field '"// &
+                trim(fieldName)//"' not supported!", &
+                line=__LINE__, file=trim(name)//":"//__FILE__, &
+                rcToReturn=rc)
+              return
+          end select
+          if (.not.passCheck) then
+            call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+              msg="NUOPC INCOMPATIBILITY DETECTED: Import Field '"// &
+              trim(fieldName)//"' not at expected time!", &
+              line=__LINE__, file=trim(name)//":"//__FILE__, &
+              rcToReturn=rc)
+            return
+          endif
+        end associate
+      end do
+    endif
 
-      ! query component for clock
-      call NUOPC_ModelBaseGet(xdata, clock=clock, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//__FILE__)) return
+  end subroutine
 
-      ! update timestamp on export Fields
-      if (associated(modelBaseIs%wrap%cachedExportFieldList)) then
-        call NUOPC_SetTimestamp(modelBaseIs%wrap%cachedExportFieldList, &
-          clock, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//__FILE__)) return
-      endif
+  !-----------------------------------------------------------------------------
 
-    else
-      ! Mediator style timeKeeping -> timestamp exports with pre-Advance time
+  subroutine TimestampExport(xdata, rc)
+    ! arguments
+    type(ESMF_GridComp)  :: xdata
+    integer, intent(out) :: rc
+    ! local variables
+    character(ESMF_MAXSTR)     :: name, fieldName
+    type(ESMF_Clock)           :: clock
+    type(ESMF_Time)            :: time
+    type(type_InternalState)   :: modelBaseIs
+    type(InternalState)        :: is
+    integer                    :: i
 
-      ! update timestamp on export Fields
-      if (associated(modelBaseIs%wrap%cachedExportFieldList)) then
-        call NUOPC_SetTimestamp(modelBaseIs%wrap%cachedExportFieldList, &
-          modelBaseIs%wrap%preAdvanceCurrTime, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//__FILE__)) return
-      endif
+    rc = ESMF_SUCCESS
 
+    ! query the component for info
+    call NUOPC_CompGet(xdata, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//__FILE__)) return
+
+    ! query component for modelBase internal state
+    nullify(modelBaseIs%wrap)
+#if 0
+!TODO: Switch to the ESMF_InternalState API once all supported compilers
+!TODO: support the Fortran 2018 assumed-type dummy argument feature.
+    call ESMF_InternalStateGet(xdata, internalState=modelBaseIs, &
+      label=label_InternalState, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//__FILE__)) return
+#else
+!TODO: For now rely on older ESMF API to handle internal state
+    call ESMF_UserCompGetInternalState(xdata, label_InternalState, &
+      modelBaseIs, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//__FILE__)) return
+#endif
+
+    ! query component for internal state
+    nullify(is%wrap)
+#if 0
+!TODO: Switch to the ESMF_InternalState API once all supported compilers
+!TODO: support the Fortran 2018 assumed-type dummy argument feature.
+    call ESMF_InternalStateGet(xdata, internalState=is, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//__FILE__)) return
+#else
+!TODO: For now rely on older ESMF API to handle internal state
+    call ESMF_GridCompGetInternalState(xdata, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//__FILE__)) return
+#endif
+
+    ! Loop through export items and timeStamp individually as per-field rule
+    if (allocated(is%wrap%exportItems)) then
+      do i = 1, size(is%wrap%exportItems)
+        associate(item => is%wrap%exportItems(i))
+          call ESMF_FieldGet(item%field, name=fieldName, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//__FILE__)) return
+          select case (item%timeStamp)
+            case ("PREADVANCE")
+              ! timeStamp according to stored preAdvance current time
+              call NUOPC_SetTimestamp(item%field, &
+                modelBaseIs%wrap%preAdvanceCurrTime, rc=rc)
+            case ("POSTADVANCE", "DEFAULT")
+              ! timeStamp according to current time on component clock
+              call NUOPC_ModelBaseGet(xdata, clock=clock, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//__FILE__)) return
+              call ESMF_ClockGet(clock, currTime=time, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//__FILE__)) return
+              call NUOPC_SetTimestamp(item%field, time, rc=rc)
+            case ("IGNORE")
+              ! ignore timeStamp, nothing to do
+            case default
+              ! unknown timeStamp option
+              call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                msg="Timestamp option for Export Field '"// &
+                trim(fieldName)//"' not supported!", &
+                line=__LINE__, file=trim(name)//":"//__FILE__, &
+                rcToReturn=rc)
+              return
+          end select
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//__FILE__)) return
+        end associate
+      end do
     endif
 
   end subroutine
@@ -2618,6 +2761,8 @@ module ESMX_Data
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//__FILE__)) return
+        deallocate(is%wrap%importItems(i)%timeStamp)
+        deallocate(is%wrap%importItems(i)%dataInit)
       enddo
       deallocate(is%wrap%importItems)
     endif
@@ -2629,6 +2774,7 @@ module ESMX_Data
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//__FILE__)) return
+        deallocate(is%wrap%exportItems(i)%timeStamp)
         deallocate(is%wrap%exportItems(i)%dataInit)
         deallocate(is%wrap%exportItems(i)%dataAdvance)
       enddo
