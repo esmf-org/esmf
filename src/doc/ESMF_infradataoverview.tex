@@ -237,7 +237,7 @@ ESMF\_RegridWeightGen & Command Line Tool & Grid files & yes  & no & Sec.~\ref{s
  \item Source Fields built on a Grid which contains a DE of width less than 2 elements are not supported
  \end{itemize}
 
- To use the bilinear method the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
+ To use the bilinear method, the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
  any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) except {\tt ESMF\_MESHLOC\_EDGE} for a Mesh. For either a Grid or a Mesh, the location upon which the Field is built 
  must contain coordinates. This method will also work with a destination Field built on a LocStream that contains coordinates, 
  or with a source or destination Field built on an XGrid.
@@ -290,7 +290,7 @@ ESMF\_RegridWeightGen & Command Line Tool & Grid files & yes  & no & Sec.~\ref{s
  \item Source Fields built on a Grid which contains a DE of width less than 2 elements are not supported
  \end{itemize}
 
- To use the patch method the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
+ To use the patch method, the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
  any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) except {\tt ESMF\_MESHLOC\_EDGE} for a Mesh. For either a Grid or a Mesh, the location upon which the Field is built 
  must contain coordinates. This method will also work with a destination Field built on a LocStream that contains coordinates, 
  or with a source or destination Field built on an XGrid.
@@ -324,7 +324,7 @@ In nearest source to destination interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
 
 \smallskip
 
- To use the nearest source to destination method the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
+ To use the nearest source to destination method, the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
  any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) except {\tt ESMF\_MESHLOC\_EDGE} for a Mesh. For either a Grid or a Mesh, the location upon which the Field is built 
  must contain coordinates. This method will also work with a source or destination Field built on a LocStream that contains coordinates, or when the source 
 or destination Field is built on an XGrid.
@@ -361,7 +361,7 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
 
 \smallskip
 
- To use the nearest destination to source method the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
+ To use the nearest destination to source method, the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
  any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) except {\tt ESMF\_MESHLOC\_EDGE} for a Mesh. For either a Grid or a Mesh, the location upon which the Field is built 
  must contain coordinates. This method will also work with a source or destination Field built on a LocStream that contains coordinates, or when the source 
 or destination Field is built on an XGrid.
@@ -399,11 +399,12 @@ or destination Field is built on an XGrid.
  \item Source Fields built on a Grid which contains a DE of width less than 2 elements are not supported
  \end{itemize}
 
- To use the binning method the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
+ To use the binning method, the user may create the source Field on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
  any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) except {\tt ESMF\_MESHLOC\_EDGE} for a Mesh. For either a Grid or a Mesh, the location upon which the
  Field is built must contain coordinates. This method will also work with a source Field built on a LocStream that contains coordinates, 
- or with a source or destination Field built on an XGrid.
+ or with a source Field built on an XGrid.
 
+ The destination Field for binning regridding should be created on the center stagger location ({\tt ESMF\_STAGGERLOC\_CENTER} in 2D or {\tt ESMF\_STAGGERLOC\_CENTER\_VCENTER} in 3D) for Grids, or the element location ({\tt ESMF\_MESHLOC\_ELEMENT}) for Meshes. For Grids, the corner stagger location ({\tt ESMF\_STAGGERLOC\_CORNER} in 2D or {\tt ESMF\_STAGGERLOC\_CORNER\_VFACE} in 3D) must contain coordinates describing the outer perimeter of the Grid cells. 
 
 \subsubsection{Interpolation methods: first-order conservative}\label{sec:interpolation:conserve}
  The goal of this method is to preserve the integral of the field across the interpolation from source to destination.  
@@ -446,7 +447,7 @@ or destination Field is built on an XGrid.
 
 \smallskip
 
- To use the conservative method the user should create their Fields on the center 
+ To use the conservative method, the user should create their Fields on the center 
  stagger location ({\tt ESMF\_STAGGERLOC\_CENTER} in 2D or {\tt ESMF\_STAGGERLOC\_CENTER\_VCENTER} in 3D) for Grids  or the element location ({\tt ESMF\_MESHLOC\_ELEMENT}) for Meshes.
  For Grids, the corner stagger location ({\tt ESMF\_STAGGERLOC\_CORNER} in 2D or {\tt ESMF\_STAGGERLOC\_CORNER\_VFACE} in 3D) must contain coordinates describing the outer perimeter of the Grid cells. This method will also work when the source or destination Field is built on an XGrid.
 
@@ -514,7 +515,7 @@ Where:
  
 \smallskip
 
- To use the second-order conservative method the user should create their Fields on the center 
+ To use the second-order conservative method, the user should create their Fields on the center 
  stagger location ({\tt ESMF\_STAGGERLOC\_CENTER} for Grids  or the element location ({\tt ESMF\_MESHLOC\_ELEMENT}) for Meshes.
  For Grids, the corner stagger location ({\tt ESMF\_STAGGERLOC\_CORNER} in 2D must contain coordinates describing the outer perimeter of the Grid cells. 
  This method will also work when the source or destination Field is built on an XGrid.
