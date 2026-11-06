@@ -142,6 +142,7 @@ static bool garbageLog = false;
 #define ESMC_METHOD "ESMCI::VMKeyCompare()"
 static bool VMKeyCompare(unsigned char *vmKey1, unsigned char *vmKey2,
   bool super=false){
+  if (!vmKey1 || !vmKey2) return false; // quick return for NULL pointers
   if (vmKey1==vmKey2) return true;  // quick return for identical pointers
   if (super){
     // ensure each bit that is set in vmKey2 is also set in vmKey1,
@@ -159,7 +160,7 @@ static bool VMKeyCompare(unsigned char *vmKey1, unsigned char *vmKey2,
 #define ESMC_METHOD "ESMCI::VMKeyLessThan()"
 static bool VMKeyLessThan(unsigned char *vmKey1, unsigned char *vmKey2){
   // notice that left most VAS bits set leads to less than condition
-  // this is so that where this is used in a sort, the desired order is 
+  // this is so that where this is used in a sort, the desired order is
   // achieved
   int i;
   for (i=0; i<vmKeyWidth; i++)
@@ -212,7 +213,7 @@ static void VMKeyVasList(unsigned char *vmKey, vector<unsigned> &vasList){
     <<" testByte="<<(int)testByte<<" (vmKey[i] & testByte)="<< (vmKey[i] & testByte);
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 }
-#endif    
+#endif
         if (vmKey[i] & testByte){
           // index byte is set
           vasList.push_back(i*8+index);
@@ -438,17 +439,16 @@ int VMId::getLeftmostOnBit(
 
   // Get leftmost
   unsigned unsigned_leftmost=VMKeyFirstBitFromLeft(this->vmKey);
-    
+
   // a value returned of vmKeyWidth * 8 indicates that no bit was set
   if (unsigned_leftmost == (unsigned)vmKeyWidth*8) *leftmostOnBit=-1;
   else *leftmostOnBit=(signed int)unsigned_leftmost;
- 
+
   localrc = ESMF_SUCCESS;
   return localrc;
 }
 //-----------------------------------------------------------------------------
 
-  
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -645,13 +645,13 @@ int VMId::serialize(
       return localrc;
     }
   }
-  
+
   ip = (int *)(buffer + *offset);
   if (inquireflag != ESMF_INQUIREONLY)
     *ip++ = localID;
   else
     ip += 1;
-  
+
   cp = (char *) ip;
   if (inquireflag != ESMF_INQUIREONLY){
     if (vmKey == NULL) {
@@ -1202,34 +1202,32 @@ void VM::shutdown(
                 ESMC_CONTEXT, rc))
                 return;
             }
-            if (garbageMode == garbageFull){
-              // Removing remnant from garbage collection might be unsafe
-              if (garbageLog){
-                char msg[800];
-                sprintf(msg, "VM::finalize(): fortran obj: "
-                  "%15s - REMOVE REMNANT",
-                  ESMC_ObjectID_Name(matchTable_FObjects[i][k].objectID));
-                ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
-              }
-              matchTable_FObjects[i].pop_back();
-            }
           }
           if (garbageMode == garbageFull){
             // Taking down garbage collection table might be unsafe
-            if (matchTable_FObjects[i].size() > 0){
-              std::stringstream msg;
-              msg << "found corrupt garbage collection table";
-              ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg,
-                ESMC_CONTEXT, rc);
-              return;
-            }
             if (garbageLog){
               std::stringstream msg;
-              msg << "VM::finalize(): matchTable_FObjects[i] -   RELEASE";
+              msg << "VM::shutdown(): matchTable_FObjects[i] -   RELEASE";
               ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
             }
             // swap() trick with a temporary to free vector's memory
             std::vector<FortranObject>().swap(matchTable_FObjects[i]);
+          }else{
+            // In safe-mode just clear the matchTable_FObjects[i] vector
+            if (garbageLog){
+              std::stringstream msg;
+              msg << "VM::shutdown(): matchTable_FObjects[i] -   CLEAR";
+              ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+            }
+            matchTable_FObjects[i].clear();
+          }
+          // health check
+          if (matchTable_FObjects[i].size() > 0){
+            std::stringstream msg;
+            msg << "Corrupt garbage collection table: matchTable_FObjects[i]";
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg,
+              ESMC_CONTEXT, rc);
+            return;
           }
           // The following loop deletes deep C++ ESMF objects derived from
           // Base class. For deep Fortran classes it deletes the Base member.
@@ -1245,7 +1243,7 @@ void VM::shutdown(
               const char *action;
               action="KEEP";
               if (mustDelete) action="DELETE";
-              sprintf(msg, "VM::finalize(): c++base obj: "
+              sprintf(msg, "VM::shutdown(): c++base obj: "
                 "%15s %p - %6s - %7s - %7s : %04d : VM=%p : %30s - %8s",
                 matchTable_Objects[i][k]->ESMC_BaseGetClassName(),
                 matchTable_Objects[i][k], proxyString,
@@ -1259,28 +1257,37 @@ void VM::shutdown(
             }
             if (mustDelete){
               // Removing remnant from garbage collection might be unsafe
-              matchTable_Objects[i].pop_back();
+              delete matchTable_Objects[i][k];// delete ESMF object, incl. Base
             }
           }
           if (garbageMode == garbageFull){
             // Taking down garbage collection table might be unsafe
-            if (matchTable_Objects[i].size() > 0){
-              std::stringstream msg;
-              msg << "found corrupt garbage collection table";
-              ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg,
-                ESMC_CONTEXT, rc);
-              return;
-            }
             if (garbageLog){
               std::stringstream msg;
-              msg << "VM::finalize(): matchTable_Objects[i] -   RELEASE";
+              msg << "VM::shutdown(): matchTable_Objects[i] -   RELEASE";
               ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
             }
             // swap() trick with a temporary to free vector's memory
             std::vector<ESMC_Base *>().swap(matchTable_Objects[i]);
+          }else{
+            // In safe-mode just clear the matchTable_Objects[i] vector
+            if (garbageLog){
+              std::stringstream msg;
+              msg << "VM::shutdown(): matchTable_Objects[i] -   CLEAR";
+              ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+            }
+            matchTable_Objects[i].clear();
+          }
+          // health check
+          if (matchTable_Objects[i].size() > 0){
+            std::stringstream msg;
+            msg << "Corrupt garbage collection table: matchTable_Objects[i]";
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg,
+              ESMC_CONTEXT, rc);
+            return;
           }
           // mark match table context as garbage collected, also VM will be gone
-          matchTable_vm[i] = NULL;  
+          matchTable_vm[i] = NULL;
           // destroy VMId object
           VMIdDestroy(&(matchTable_vmID[i]), &localrc);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -1843,14 +1850,14 @@ int VM::translateVMId(
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   if (ids->dimCount != 1){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
       "ids must enter with one dimension",
       ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   int elementCount = ids->extent[0];
   int *idsArray = ids->array;
   int petCount = getPetCount();
@@ -1858,7 +1865,7 @@ int VM::translateVMId(
   MPI_Comm mpiComm = getMpi_c();
   MPI_Group mpiGroup;
   MPI_Comm_group(mpiComm, &mpiGroup);
-  
+
   *rootVmIdCount = 0; // initialize
   int *rootVmIdsArray = rootVmIds->array;
 
@@ -1882,7 +1889,7 @@ int VM::translateVMId(
         VMKeyVasList(vmID->vmKey, vasList);
       }
     };
-    
+
     // set up helper1 vector and sort
     vector<Helper1> helper1(elementCount);
     for (int i=0; i<elementCount; i++){
@@ -1907,7 +1914,7 @@ int VM::translateVMId(
       if (!(helper1[i] == helper1[i-1])) ++ii;
       idsArray[helper1[i].index] = ii;
     }
-    
+
     // cut out duplicate elements from sorted helper1 vector
     helper1.erase(unique(helper1.begin(),helper1.end()),helper1.end());
 
@@ -1934,7 +1941,7 @@ int VM::translateVMId(
         subRootPet = -1;
       }
     };
-    
+
     // setup helper2 to only reference elements in helper1 with unique vmKey
     vector<Helper2> helper2;
     helper2.reserve(helper1.size());  // maximum possible size
@@ -2058,7 +2065,7 @@ int VM::translateVMId(
     for (unsigned i=0; i<helper2.size(); i++){
       std::stringstream msg;
       msg << "helper2[" << i << "] - indexH1=" << helper2[i].indexH1
-        << " - count=" << helper2[i].count 
+        << " - count=" << helper2[i].count
         << " - rootPet=" << helper2[i].rootPet;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -2354,7 +2361,7 @@ VM *VM::getCurrent(
   if (matchTable_tid[i] != mytid){
     // simple linear search for maching thread id
     for (i=0; i<matchTableBound; i++)
-      if (matchTable_tid[i] == mytid) break;
+      if (matchTable_vm[i] && matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
         "- Could not determine current VM", ESMC_CONTEXT, rc);
@@ -2405,7 +2412,7 @@ bool VM::isThreadKnown(
   if (matchTable_tid[i] != mytid){
     // simple linear search for maching thread id
     for (i=0; i<matchTableBound; i++)
-      if (matchTable_tid[i] == mytid) break;
+      if (matchTable_vm[i] && matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
       // executing thread is NOT known as PET by any VM under this VAS.
       found = false;
@@ -2453,7 +2460,7 @@ VMId *VM::getCurrentID(
   int i = matchTableIndex;
   if (matchTable_tid[i] != mytid){
     for (i=0; i<matchTableBound; i++)
-      if (matchTable_tid[i] == mytid) break;
+      if (matchTable_vm[i] && matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
         "- Could not determine current VM", ESMC_CONTEXT, rc);
@@ -2500,7 +2507,7 @@ void VM::getCurrentGarbageInfo(
   int i = matchTableIndex;
   if (matchTable_tid[i] != mytid){
     for (i=0; i<matchTableBound; i++)
-      if (matchTable_tid[i] == mytid) break;
+      if (matchTable_vm[i] && matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
         "- Could not determine current VM", ESMC_CONTEXT, &rc);
@@ -2551,7 +2558,7 @@ void VM::logGarbageInfo(
   if (matchTable_tid[i] != mytid){
     // dealing with VM that uses its own Pthreads for PETs -> search for match
     for (i=0; i<matchTableBound; i++)
-      if (matchTable_tid[i] == mytid) break;
+      if (matchTable_vm[i] && matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
         "- Could not determine current VM", ESMC_CONTEXT, &rc);
@@ -3080,7 +3087,7 @@ void VM::rmObject(
   int i = matchTableIndex;  // correct index if non-threaded VM
   if (matchTable_tid[i] != mytid){
     for (i=0; i<matchTableBound; i++)
-      if (matchTable_tid[i] == mytid) break;
+      if (matchTable_vm[i] && matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
         "- Could not determine current VM", ESMC_CONTEXT, &rc);
@@ -3228,7 +3235,7 @@ void VM::rmFObject(
   int i = matchTableIndex;  // correct index if non-threaded VM
   if (matchTable_tid[i] != mytid){
     for (i=0; i<matchTableBound; i++)
-      if (matchTable_tid[i] == mytid) break;
+      if (matchTable_vm[i] && matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
         "- Could not determine current VM", ESMC_CONTEXT, &rc);
@@ -3825,27 +3832,9 @@ void VM::finalize(
           ESMC_CONTEXT, rc))
           return;
       }
-      if (GlobalVM->garbageMode == garbageFull){
-        // Removing remnant from garbage collection might be unsafe
-        if (garbageLog){
-          char msg[800];
-          sprintf(msg, "VM::finalize(): fortran obj: "
-            "%15s - REMOVE REMNANT",
-            ESMC_ObjectID_Name(matchTable_FObjects[0][k].objectID));
-          ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
-        }
-        matchTable_FObjects[0].pop_back();
-      }
     }
     if (GlobalVM->garbageMode == garbageFull){
       // Taking down garbage collection table might be unsafe
-      if (matchTable_FObjects[0].size() > 0){
-        std::stringstream msg;
-        msg << "found corrupt garbage collection table";
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg, ESMC_CONTEXT,
-          rc);
-        return;
-      }      
       if (garbageLog){
         std::stringstream msg;
         msg << "VM::finalize(): matchTable_FObjects[0] -   RELEASE";
@@ -3853,6 +3842,22 @@ void VM::finalize(
       }
       // swap() trick with a temporary to free vector's memory
       std::vector<FortranObject>().swap(matchTable_FObjects[0]);
+    }else{
+      // In safe-mode just clear the matchTable_FObjects[0] vector
+      if (garbageLog){
+        std::stringstream msg;
+        msg << "VM::finalize(): matchTable_FObjects[0] -   CLEAR";
+        ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+      }
+      matchTable_FObjects[0].clear();
+    }
+    // health check
+    if (matchTable_FObjects[0].size() > 0){
+      std::stringstream msg;
+      msg << "Corrupt garbage collection table: matchTable_FObjects[0]";
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg,
+        ESMC_CONTEXT, rc);
+      return;
     }
     // The following loop deletes deep C++ ESMF objects derived from
     // Base class. For deep Fortran classes it deletes the Base member.
@@ -3883,18 +3888,10 @@ void VM::finalize(
       if (mustDelete){
         // Removing remnant from garbage collection might be unsafe
         delete matchTable_Objects[0][k];  // delete ESMF object, incl. Base
-        matchTable_Objects[0].pop_back();
       }
     }
     if (GlobalVM->garbageMode == garbageFull){
       // Taking down garbage collection table might be unsafe
-      if (matchTable_Objects[0].size() > 0){
-        std::stringstream msg;
-        msg << "found corrupt garbage collection table";
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg, ESMC_CONTEXT,
-          rc);
-        return;
-      }
       if (garbageLog){
         std::stringstream msg;
         msg << "VM::finalize(): matchTable_Objects[0] -   RELEASE";
@@ -3902,6 +3899,21 @@ void VM::finalize(
       }
       // swap() trick with a temporary to free vector's memory
       std::vector<ESMC_Base *>().swap(matchTable_Objects[0]);
+    }else{
+      // In safe-mode just clear the matchTable_Objects[0] vector
+      if (garbageLog){
+        std::stringstream msg;
+        msg << "VM::finalize(): matchTable_Objects[0] -   CLEAR";
+        ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+      }
+      matchTable_Objects[0].clear();
+    }
+    // health check
+    if (matchTable_Objects[0].size() > 0){
+      std::stringstream msg;
+      msg << "Corrupt garbage collection table: matchTable_Objects[0]";
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg, ESMC_CONTEXT, rc);
+      return;
     }
     // destroy VMId object
     VMIdDestroy(&(matchTable_vmID[0]), &localrc);
@@ -4086,7 +4098,7 @@ bool VM::MPIError(
 // !ARGUMENTS:
 //
   int mpiErrorToCheck,
-  int LINE, 
+  int LINE,
   const std::string &FILE,
   const std::string &method,
   int *rcToReturn){
