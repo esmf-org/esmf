@@ -572,6 +572,14 @@ void ESMCI_regrid_create(
     }
 
 
+    ///// If binning, translate split destination element weights to non-split //////
+    if (*regridMethod == ESMC_REGRID_METHOD_BINNING) {
+      ThrowRequire(dstmesh);
+      if (dstmesh->is_split) translate_split_dst_elems_in_wts_just_ids(dstmesh, num_entries, iientries);
+    }
+
+    
+
     ///// If requested, then change weights to be vector weights
     if (vectorRegrid) {
 
