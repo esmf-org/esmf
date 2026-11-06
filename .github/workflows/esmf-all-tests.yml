@@ -83,7 +83,7 @@ jobs:
           sudo systemsetup -setusingnetworktime off
           sudo rm -rf /etc/ntp.conf
           brew install autoconf automake libtool
-          brew unlink libevent || true
+          brew list libevent &>/dev/null && brew unlink libevent || true
         fi
         export STACK_ROOT=${HOME}/stack
         mkdir -p ${STACK_ROOT}/{include,lib,lib64,bin}
