@@ -1113,6 +1113,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod) then
               map_method = "Bilinear remapping"
               esmf_regrid_method = "Nearest destination to source"
+           elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_BINNING%regridmethod) then
+              map_method = "Bilinear remapping"
+              esmf_regrid_method = "Binning"
            else
               !report error
               call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
@@ -1282,7 +1285,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
               (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod .or. &
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod .or. &
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod .or. &
-              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod)) then
+              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod .or. &
+              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BINNING%regridmethod)) then
             call ESMF_EsmfInq(srcFile, nodeCount=srcDim,  &
                 coordDim = srcCoordDim, elementCount=srcNodeDim, rc=status)
                 src_grid_corner =3
@@ -1302,7 +1306,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
               (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod .or. &
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod .or. &
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod .or. &
-              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod)) then
+              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod .or. &
+              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BINNING%regridmethod)) then
             call ESMF_UGridInq(srcFile, srcmeshname, nodeCount=srcDim,  &
                 nodeCoordDim=dim, units=srcunits, rc=status)
             ! If it is 1D network topology, there is no corner coordinates
@@ -2202,7 +2207,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            if (useSrcCornerlocal .and. (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod &
                 .or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod &
                 .or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod &
-                .or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod)) then
+                .or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod &
+                .or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BINNING%regridmethod)) then
              ! check if centerCoords exit
              ncStatus=nf90_inq_varid(ncid1,"nodeCoords",VarId)
              varStr = "nodeCoords"
@@ -3652,6 +3658,9 @@ subroutine ESMF_OutputSimpleWeightFile (wgtFile, factorList, factorIndexList, &
            elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod) then
               map_method = "Bilinear remapping"
               esmf_regrid_method = "Nearest destination to source"
+           elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_BINNING%regridmethod) then
+              map_method = "Bilinear remapping"
+              esmf_regrid_method = "Binning"
            else
               !report error
               call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
