@@ -1279,6 +1279,7 @@ int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind) {
       // TODO: should we also do max rights, to handle polygons in the other direction? 
       if (cross > 0.0) {
 
+#if 0        
         // Get other points for detecting flat places
         int prev_ind=(i+num_t-1)%num_t;
         double *pnt_prev=GEOM::getPntAt(td,prev_ind);
@@ -1321,7 +1322,7 @@ int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind) {
             continue;
           }
         }          
-        
+#endif        
         // Update to the best tri to clip so far
         double dot;
         dot=GEOM::dot(v12,v10);
