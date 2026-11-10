@@ -41,21 +41,6 @@ DAT:
 
 In addition to the standard component options, `ESMX_Data` implements the following custom configuration keys that can be used to customize an `ESMX_Data` instance.
 
-
-### `timeKeeping`
-
-The `timeKeeping` key is ***required***. It must either be set to `Model` or `Mediator`:
-- Use the `Model` setting to timestamp the export fields according to the time at the *end* of the Advance step of the `ESMX_Data` component instance.
-- Use the `Mediator` setting to timestamp the export fields according to the time at the *beginning* of the Advance step of the `ESMX_Data` component instance.
-
-The following example sets `Mediator` style time keeping in the `DAT` instance:
-
-```
-DAT:
-  ...
-  timeKeeping:        Mediator
-```
-
 ### `geometries`
 
 The `geometries` key must be associated with a map of key/value pairs. Each key specifies the name by which the geometry can be referenced from a field in `importFields` or `exportFields` (defined further down). The value once again is a map with key/values as per the following table.
@@ -99,6 +84,7 @@ The `importFields` key must be associated with a map of key/value pairs. Each ke
 | `gridToFieldMap` | The mapping of grid to field dimension. For details see ESMF documentation.          | `[1,2]` or `[1,2,3]` depending on rank |
 | `ungriddedLBound`| The lower bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
 | `ungriddedUBound`| The upper bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
+| `timeStamp`      | One of the valid timestamp modes: `PreAdvance` (default), `PostAdvance`, `Ignore`. The timestamp of the field will be checked on import against the component clock accordingly.  | `default` |
 | `dataInit`       | [Dynamic arithmetic expression](#dynamic-arithmetic-expressions) used to initialze field data during DataInitialize. Import fields with `dataInit` provide their own data initialization, while import fields without `dataInit` rely on the NUOPC data-dependency resolution protocol for initialization.   | *none* |
 | `dataValidate`   | [Data validation](#data-validation) applied to the import fields *before* the Advance step.                          | *none* |
 | `outputList`     | List of output names defined under the `outputs` key.                                | *none* |
@@ -136,6 +122,7 @@ The `exportFields` key must be associated with a map of key/value pairs. Each ke
 | `gridToFieldMap` | The mapping of grid to field dimension. For details see ESMF documentation.          | `[1,2]` or `[1,2,3]` depending on rank |
 | `ungriddedLBound`| The lower bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
 | `ungriddedUBound`| The upper bound of the ungridded dimension(s). For details see ESMF documentation.   | *none* |
+| `timeStamp`      | One of the valid timestamp modes: `PreAdvance`, `PostAdvance` (default), `Ignore`. The field will be timestamped on export accordingly.  | `default` |
 | `dataInit`       | [Dynamic arithmetic expression](#dynamic-arithmetic-expressions) used to initialze field data during DataInitialize. Only export fields that set `dataInit` provide valid data and participate in the NUOPC data-dependency resolution protocol during initialization.   | *none* |
 | `dataAdvance`    | [Dynamic arithmetic expression](#dynamic-arithmetic-expressions) used to update field data during Advance.           | *none* |
 | `dataValidate`   | [Data validation](#data-validation) applied to the export fields *after* the Advance step.                           | *none* |
