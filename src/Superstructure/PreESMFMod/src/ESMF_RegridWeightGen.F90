@@ -357,7 +357,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical            :: isConserve, srcIsSphere, dstIsSphere
     logical            :: addCorners
     logical            :: convertSrcToDual,convertDstToDual
-    type(ESMF_MeshLoc) :: meshloc
+    type(ESMF_MeshLoc) :: meshloc, srcMaskMeshLoc, dstMaskMeshLoc
     logical            :: srcIsReg, dstIsReg
     logical            :: srcIsMosaic, dstIsMosaic
     logical            :: srcIsRegional, dstIsRegional, typeSetFlag
@@ -1100,14 +1100,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       isConserve=.true.
       addCorners=.true.
       meshloc=ESMF_MESHLOC_ELEMENT
+      srcMaskMeshLoc=ESMF_MESHLOC_ELEMENT
+      dstMaskMeshLoc=ESMF_MESHLOC_ELEMENT
     else
       isConserve=.false.
       addCorners=.false.
+      srcMaskMeshLoc=ESMF_MESHLOC_NODE
+      dstMaskMeshLoc=ESMF_MESHLOC_NODE      
       if (.not. useSrcCorner) then
          convertSrcToDual=.true.
+         srcMaskMeshLoc=ESMF_MESHLOC_ELEMENT
       endif
       if (.not. useDstCorner) then
          convertDstToDual=.true.
+         dstMaskMeshLoc=ESMF_MESHLOC_ELEMENT
       endif
       meshloc=ESMF_MESHLOC_NODE
     endif
@@ -1263,7 +1269,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! if srcfile is not SCRIP, it is always unstructured
         if (srcMissingValue) then
            srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, &
-               maskFlag =meshloc, &
+               maskFlag =srcMaskMeshloc, &
                addUserArea=localUserAreaFlag, &
                convertToDual=convertSrcToDual, &
                varname=trim(srcMissingvalueVar), rc=localrc)
@@ -1415,7 +1421,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! if dstfile is not SCRIP, it is always unstructured
         if (dstMissingValue) then
            dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, &
-                      maskFlag=meshloc, &
+                      maskFlag=dstMaskMeshLoc, &
                       addUserArea=localUserAreaFlag, &
                       convertToDual=convertDstToDual, &
                       varname=trim(dstMissingvalueVar), rc=localrc)
