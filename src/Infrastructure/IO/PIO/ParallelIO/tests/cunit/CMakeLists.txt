@@ -120,6 +120,8 @@ if (NOT PIO_USE_MPISERIAL)
     target_link_libraries (test_simple pioc)
     add_executable (test_async_perf EXCLUDE_FROM_ALL test_async_perf.c test_common.c)
     target_link_libraries(test_async_perf pioc)
+    add_executable (test_gdal EXCLUDE_FROM_ALL test_gdal.c test_common.c)
+    target_link_libraries (test_gdal pioc)
 endif ()
 add_executable (test_spmd EXCLUDE_FROM_ALL test_spmd.c test_common.c)
 target_link_libraries (test_spmd pioc)
@@ -154,6 +156,7 @@ add_dependencies (tests test_async_manyproc)
 add_dependencies (tests test_async_1d)
 add_dependencies (tests test_simple)
 add_dependencies (tests test_async_perf)
+add_dependencies (tests test_gdal)
 
 # Test Timeout in seconds.
 if (PIO_VALGRIND_CHECK)
@@ -341,5 +344,9 @@ else ()
   #   EXECUTABLE ${CMAKE_CURRENT_BINARY_DIR}/test_async_perf
   #   NUMPROCS ${EXACTLY_FOUR_TASKS}
   #   TIMEOUT ${DEFAULT_TEST_TIMEOUT})
+  add_mpi_test(test_gdal
+    EXECUTABLE ${CMAKE_CURRENT_BINARY_DIR}/test_gdal
+    NUMPROCS ${EXACTLY_FOUR_TASKS}
+    TIMEOUT ${DEFAULT_TEST_TIMEOUT})
 endif ()
 MESSAGE("CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS}")

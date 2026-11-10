@@ -163,7 +163,7 @@ void get_mesh_topo_id_from_UGRID_file(int pioFileDesc, char *filename, int &mesh
 void get_dim_from_UGRID_file(int pioFileDesc, char *filename, int mesh_topo_id, 
                               int &dim) {
 #undef ESMC_METHOD
-#define ESMC_METHOD "get_dim _from_UGRID_file()"
+#define ESMC_METHOD "get_dim_from_UGRID_file()"
 
   // Declare some useful vars
   int dimid;

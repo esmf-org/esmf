@@ -1,0 +1,156 @@
+name: netcdf_pnetcdf_openmpi
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    env:
+      CPPFLAGS: "-I/home/runner/openmpi/include -I/home/runner/hdf5/include -I/home/runner/netcdf-c/include -I/home/runner/netcdf-fortran/include -I/home/runner/pnetcdf/include"
+      LDFLAGS: "-L/home/runner/openmpi/lib -L/home/runner/hdf5/lib -L/home/runner/netcdf-c/lib -L/home/runner/netcdf-fortran/lib -L/home/runner/pnetcdf/lib"
+      NETCDF_C_VERSION: 4.9.0
+      NETCDF_F_VERSION: 4.6.0
+      OPENMPI_VERSION_MAJOR: 4.1
+      OPENMPI_VERSION_PATCH: 4
+      PNETCDF_VERSION: 1.12.3
+      HDF5_VERSION_PATCH: 2
+      HDF5_VERSION_MAJOR: 1.12
+      FCFLAGS: "-fallow-argument-mismatch"
+      FFLAGS: "-fallow-argument-mismatch"
+    steps:
+    - uses: actions/checkout@v3
+    - name: Installs
+      run: |
+        sudo apt-get install doxygen graphviz wget gfortran libjpeg-dev libz-dev
+    - name: cache-openmpi
+      id: cache-openmpi
+      uses: actions/cache@v3
+      with:
+        path: ~/openmpi
+        key: openmpi-${{ runner.os }}-${{ env.OPENMPI_VERSION }}
+
+    - name: build-openmpi
+      if: steps.cache-openmpi.outputs.cache-hit != 'true'
+      run: |
+        wget https://download.open-mpi.org/release/open-mpi/v${{ env.OPENMPI_VERSION_MAJOR }}/openmpi-${{ env.OPENMPI_VERSION_MAJOR }}.${{ env.OPENMPI_VERSION_PATCH}}.tar.gz &> /dev/null
+        tar -xzf openmpi-${{ env.OPENMPI_VERSION_MAJOR }}.${{ env.OPENMPI_VERSION_PATCH }}.tar.gz
+        pushd openmpi-${{ env.OPENMPI_VERSION_MAJOR }}.${{ env.OPENMPI_VERSION_PATCH }}
+        ./configure --prefix=/home/runner/openmpi
+        make
+        sudo make install
+        popd
+    - name: cache-hdf5
+      id: cache-hdf5
+      uses: actions/cache@v3
+      with:
+        path: ~/hdf5
+        key: hdf5-${{ runner.os }}-${{ env.HDF5_VERSION_MAJOR }}.${{ env.HDF5_VERSION_PATCH }}-openmpi-${{ env.OPENMPI_VERSION_MAJOR }}.${{ env.OPENMPI_VERSION_PATCH }}
+
+    - name: build-hdf5
+      if: steps.cache-hdf5.outputs.cache-hit != 'true'
+      run: |
+        set -x
+        export PATH="/home/runner/openmpi/bin:$PATH"
+        export CC=/home/runner/openmpi/bin/mpicc
+        wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${{ env.HDF5_VERSION_MAJOR }}/hdf5-${{ env.HDF5_VERSION_MAJOR }}.${{ env.HDF5_VERSION_PATCH }}/src/hdf5-${{ env.HDF5_VERSION_MAJOR }}.${{ env.HDF5_VERSION_PATCH }}.tar.gz &> /dev/null
+        tar -xzf hdf5-${{ env.HDF5_VERSION_MAJOR }}.${{ env.HDF5_VERSION_PATCH }}.tar.gz
+        pushd hdf5-${{ env.HDF5_VERSION_MAJOR }}.${{ env.HDF5_VERSION_PATCH }}
+        ./configure --prefix=/home/runner/hdf5 --enable-parallel --disable-tools --disable-fortran --disable-cxx --enable-parallel-tests
+        make
+        sudo make install
+        popd
+    - name: cache-netcdf-c
+      id: cache-netcdf-c
+      uses: actions/cache@v3
+      with:
+        path: ~/netcdf-c
+        key: netcdf-c-${{ runner.os }}-${{ env.NETCDF_C_VERSION }}-openmpi-${{ env.OPENMPI_VERSION_MAJOR }}.${{ env.OPENMPI_VERSION_PATCH }}-hdf5-${{ env.HDF5_VERSION_MAJOR }}.${{ env.HDF5_VERSION_PATCH }}
+
+    - name: build-netcdf-c
+      if: steps.cache-netcdf-c.outputs.cache-hit != 'true'
+      run: |
+        set -x
+        export PATH="/home/runner/openmpi/bin:$PATH"
+        export CC=/home/runner/openmpi/bin/mpicc
+        wget https://github.com/Unidata/netcdf-c/archive/refs/tags/v${{ env.NETCDF_C_VERSION }}.tar.gz
+        tar -xzf v${{ env.NETCDF_C_VERSION }}.tar.gz &> /dev/null
+        pushd netcdf-c-${{ env.NETCDF_C_VERSION }}
+        ./configure --prefix=/home/runner/netcdf-c --disable-dap --disable-utilities
+        make -j
+        sudo make install
+        popd
+    - name: cache-netcdf-fortran
+      id: cache-netcdf-fortran
+      uses: actions/cache@v3
+      with:
+        path: ~/netcdf-fortran
+        key: netcdf-fortran-${{ runner.os }}-${{ env.NETCDF_F_VERSION }}-openmpi-${{ env.OPENMPI_VERSION_MAJOR }}.${{ env.OPENMPI_VERSION_PATCH }}-hdf5-${{ env.HDF5_VERSION_MAJOR }}.${{ env.HDF5_VERSION_PATCH }}
+
+    - name: build-netcdf-fortran
+      if: steps.cache-netcdf-fortran.outputs.cache-hit != 'true'
+      run: |
+        set -x
+        export PATH="/home/runner/openmpi/bin:$PATH"
+        export CC=/home/runner/openmpi/bin/mpicc
+        wget https://github.com/Unidata/netcdf-fortran/archive/refs/tags/v${{ env.NETCDF_F_VERSION }}.tar.gz
+        tar -zxf v${{ env.NETCDF_F_VERSION }}.tar.gz &> /dev/null
+        pushd netcdf-fortran-${{ env.NETCDF_F_VERSION }}
+        ./configure --prefix=/home/runner/netcdf-fortran
+        make -j
+        sudo make install
+        popd
+    - name: cache-pnetcdf
+      id: cache-pnetcdf
+      uses: actions/cache@v3
+      with:
+        path: ~/pnetcdf
+        key: pnetcdf-${{ runner.os }}-${{ env.PNETCDF_VERSION }}-openmpi-${{ env.OPENMPI_VERSION_MAJOR }}.${{ env.OPENMPI_VERSION_PATCH }}
+
+    - name: build-pnetcdf
+      if: steps.cache-pnetcdf.outputs.cache-hit != 'true'
+      run: |
+        set -x
+        export PATH="/home/runner/openmpi/bin:$PATH"
+        export CC=/home/runner/openmpi/bin/mpicc
+        wget https://parallel-netcdf.github.io/Release/pnetcdf-${{ env.PNETCDF_VERSION }}.tar.gz  &> /dev/null
+        tar -xzf pnetcdf-${{ env.PNETCDF_VERSION }}.tar.gz
+        pushd pnetcdf-${{ env.PNETCDF_VERSION }}
+        ./configure --prefix=/home/runner/pnetcdf --enable-shared --disable-cxx
+        make
+        sudo make install
+        popd
+    - name: autotools build
+      run: |
+        set -x
+        echo 'export PATH=/home/runner/openmpi/bin:$PATH' > .bashrc
+        source .bashrc
+        export PATH="/home/runner/openmpi/bin:$PATH"
+        export CC=/home/runner/openmpi/bin/mpicc
+        autoreconf -i
+        ./configure --with-mpiexec='mpiexec --oversubscribe'
+        cat config.h
+        make check
+    - name: cmake build
+      run: |
+        set -x
+        echo 'export PATH=/home/runner/openmpi/bin:$PATH' > .bashrc
+        source .bashrc
+        export CC=mpicc
+        mkdir build
+        cd build
+        export LD_LIBRARY_PATH="/home/runner/netcdf-c/lib:/home/runner/pnetcdf/lib:/home/runner/hdf5/lib:/home/runner/openmpi/lib:$LD_LIBRARY_PATH"
+        cmake -Wno-dev -DWITH_MPIEXEC='/home/runner/openmpi/bin/mpiexec;--oversubscribe' \
+        -DNetCDF_C_LIBRARY=/home/runner/netcdf-c/lib/libnetcdf.so \
+        -DNetCDF_C_INCLUDE_DIR=/home/runner/netcdf-c/include -DPnetCDF_PATH='/home/runner/pnetcdf' \
+        -DPIO_ENABLE_FORTRAN=Off -DPIO_HDF5_LOGGING=On -DPIO_USE_MALLOC=On -DPIO_ENABLE_LOGGING=On \
+        -DPIO_ENABLE_TIMING=Off .. || (cat CMakeFiles/CMakeOutput.log && cat CMakeFiles/CMakeError.log)
+        cat config.h
+        make VERBOSE=1
+        make tests VERBOSE=1
+        ctest -VV

@@ -35,6 +35,9 @@
 #ifdef ESMF_PIO
 #include "ESMCI_PIO_Handler.h"
 #endif
+#ifdef ESMF_GDAL
+#include "ESMCI_GDAL_Handler.h"
+#endif
 
 #define ROOT_PET (0)
 
@@ -149,6 +152,14 @@ IO_Handler *IO_Handler::create (
       errmsg = "PIO & (P)NetCDF libraries required for I/O operation";
       localrc = ESMF_RC_LIB_NOT_PRESENT;
 #endif // defined(ESMF_PIO) && (defined(ESMF_NETCDF) || defined(ESMF_PNETCDF))
+      break;
+    case ESMF_IOFMT_SHP:
+#if  defined(ESMF_PIO) && defined(ESMF_GDAL)
+      iohandler = new GDAL_Handler(iofmt, ntiles, &localrc);
+#else // defined(ESMF_PIO) && (defined(ESMF_NETCDF) || defined(ESMF_PNETCDF))
+      errmsg = "PIO & GDAL libraries required for GIS I/O operation";
+      localrc = ESMF_RC_LIB_NOT_PRESENT;
+#endif // defined(ESMF_PIO) && defined(ESMF_GDAL)
       break;
     default:
       localrc = ESMF_RC_ARG_BAD;

@@ -1,0 +1,188 @@
+#+TODO: TODO IN-PROGRESS ISSUES BETA WAITING DONE
+
+* From Bob - 3/15/23
+** Basics
+I’ve added a new unit test in the file: 
+   <ESMF_DIR>/src/Infrastructure/Mesh/tests/ESMF_MeshFileIOUTest.F90  
+This test is called test_create_mesh_from_SH_file() and all it does is call mesh create from file 
+with the new flag ESMF_FILEFORMAT_SHAPEFILE this calls down through the layers to the new 
+subroutine ESMCI_mesh_create_from_SHAPEFILE_file() in the file 
+   <ESMF_DIR>/src/Infrastructure/Mesh/src/ESMCI_Mesh_FileIO.C 
+this is a good place to add the high level implementation of the mesh create code. You can see 
+analogous code in 
+   ESMCI_mesh_create_from_ESMFMesh_file() 
+in the same file. I also added a place to put the shapefile specific calls in the file 
+   ESMCI_SHAPEFILE_Util.C 
+in the same directory. I added an example subroutine: 
+   get_example_from_SHAPEFILE_file() 
+in there, just to make sure that all the compiling works. Feel free to get rid of that. 
+
+** Enviroment 
+  In order for ESMF to be built with the shapefile library I also added the environment variables 
+to the ESMF build: 
+   ESMF_SHAPEFILE
+   ESMF_SHAPEFILE_INCLUDE
+   ESMF_SHAPEFILE_LIBPATH
+   ESMF_SHAPEFILE_LIBS
+
+I didn’t know anything about the library for the shapefile stuff so you will need to fill them in:
+   - ESMF_SHAPEFILE just needs to be defined to something (e.g. ON)
+   - ESMF_SHAPEFILE_LIBS is the name of the library e.g. -lshapelib ???
+   - ESMF_SHAPEFILE_INCLUDE is the path to the shapefile include file
+   - ESMF_SHAPEFILE_LIBPATH is the path to the shapfile library 
+
+** shplib
+I didn’t have the shapefile library built, so this might take a bit of experimenting, but it should 
+be approximately correct. Making sure it works is probably a good place to start. 
+   Along these lines I didn’t know the name of the include file, so that’ll have to be changed 
+around line 52 of ESMCI_SHAPEFILE_Util.C and line 40 of 
+   <ESMF_DIR>/src/Infrastructure/Mesh/include/ESMCI_SHAPEFILE_Util.h 
+(in the place where it says #include<pio.h> replace pio.h with the shapefile one)
+
+** Where to add new code/modules
+If you have more code that you want to add (or that you’ve added already) that you don’t think will 
+fit in ESMCI_SHAPEFILE_Util.C, then we can add a new directory in 
+   <ESMF_DIR>/src/Infrastructure/IO 
+(e.g. <ESMF_DIR>/src/Infrastructure/IO/SHAPEFILE )
+
+** Unit test
+The new unit test I added for this references the file data/test_shape.shp, this file doesn’t exist. 
+You can change that name and add a new small test file into 
+   <ESMF_DIR>/src/Infrastructure/Mesh/tests/data . 
+If in the test directory (<ESMF_DIR>/src/Infrastructure/Mesh/tests) you do: 
+   $ make RUN_ESMF_MeshFileIOUTestUNI 
+it will copy the data and run all the tests in the file ESMF_MeshFileIOUTest.F90  The test will be 
+run and the results will appear in the directory: 
+   <ESMF_DIR>/test/*/*  
+Once you’ve done it once via the makefile you can then run the tests in that directory just by 
+doing mpirun -np 1 ./ESMF_MeshFileIOUTest
+
+** Fin
+I know that’s a lot of information, so feel free to ask lots of questions. I think once we get things 
+moving it shouldn’t be hard to bring this capability in, but there might be some back and forth at 
+the beginning just to get both of us on the same page. 
+
+* Parallelization
+** Notes:
+features and elements need to be defined separately, since a feature may be decomposed into several elements.
+** Issues/Questions
+*** geographic location of features not ordered.
+*** Do we want to sync with a regular lat/lon grid so data are more likely to be on the PET where they're needed?
+** get_DS_params <global>
+** divvy up feature/element IDs to PETS
+** get features for ID bounds
+* Field Read
+ESMF_FieldRead() <ESMF_FieldPr.F90>
+-- ESMF_IORead() <ESMF_IO.F90>
+-- -- c_ESMC_IORead() <ESMCI_IO_F.C>
+-- -- -- (*ptr)->read() <ESMCI_IO.C>
+-- -- -- -- IO::read() <ESMCI_IO.C>
+-- -- -- -- -- IO_Handler::arrayRead() <ESMCI_IO_Handler.C>
+-- -- -- -- -- -- PIO_Handler::arrayReadOneTileFile() <ESMCI_PIO_Handler.C>
+-- -- -- -- -- -- -- PIOc_Read_Array() <pio_darray.c>
+* BETA Field Write
+** ESMF_FieldWrite()
+-- ESMF_IOWrite() <ESMF_IO.F90>
+-- -- c_ESMC_IOWrite() <ESMCI_IO_F.C>
+-- -- -- (*ptr)->write() <ESMCI_IO.C>
+-- -- -- -- IO::write() <ESMCI_IO.C>
+-- -- -- -- -- IO_Handler::arrayWrite() <ESMCI_IO_Handler.C>
+-- -- -- -- -- -- PIO_Handler::arrayWriteOneTileFile() <ESMCI_PIO_Handler.C>
+-- -- -- -- -- -- -- PIOc_write_darray() <pio_darray.c>
+-- -- -- -- -- -- -- -- flush_buffer() <pio_darray_int.c>
+-- -- -- -- -- -- -- -- -- PIOc_write_darray_multi() <pio_darray.c>
+-- -- -- -- -- -- -- -- -- -- write_darray_multi_serial() <pio_darray_int.c>
+-- -- -- -- -- -- -- -- -- -- -- recv_and_write_data() <pio_darray_int.c>
+
+Will write a field to an existing shapefile as a 'double'
+Lots to do!
+
+* Questions:
+** What about CRS and projection to/from GEOS? 
+Will area (spatial extent) be conserved? e.g. if the GIS CRS is curvilinear, is the mapping in ESMF able to handle that?
+i.e. is ESMF mapping only planar?
+*** Solution: add a transformation routine from->to. e.g. from ESMF planar to GIS curvilear, or vice versa
+** How to deal with time slices? Can we use '%' tags like in ExtData?
+** Sept 19, 2024: How to make the decomposition geographically coincident with the cube? Is that useful/more efficient?
+* Sept 21, 2023
+** MeshCreate:
+*** Need to create an index that identifies which multipolygon feature ID
+    is associated with a given subdivided polygon. The point is to allow 
+    for a data read/write to know what data to use when reading a field.
+    e.g. if a multipolyon with index 20 has a field value of 10, an the
+    multipolygon is broken into several polygons, each sub-polygon would
+    have a reference index to multipolygon 20 so it could be given a field
+    value of 10 (or otherwise scaled proportionally).
+
+    - the index needs to be a handle of type OGRFeatureH <- NOPE. Get Feature Index of type GBigInt
+    - It needs to happen in the meshgrid processing step
+
+* Oct 16, 2023 - file write
+1) Create a new file (if needed)
+2) add variable
+3) add data
+
+Right now, we have to assume:
+- CRS
+- Layer name
+
+Proposed workflow: 
+- Call PIO all the way down to PIOc_write_darray_multi
+- Use file->iodesc & file->hDS to determine if its GDAL
+- If GDAL, call GDAL specific write routine (in pioc_gdal.c)
+
+* Oct 26, 2023 - file write, cont'd
+1) Determine file type
+2) Get driver
+3) Define spatial reference w/ CRS
+
+* Nov 16, 2023 - WriteMesh
+Legacy/ESMCI_MeshRead.C -> call to WriteVTKMesh() in ESMCI_VTKMesh.C
+
+* Apr 3, 2024 - ISSUE: regridstore() garbles the SHP mesh
+It may be that the global element connectivity vectors are actually local.
+How to do this in distributed envirnonment?
+* Jun 5, 2024: ArraySMM -- regridding not working?
+* Aug 14, 2024: Update
+** Unit test data file updates.
+added some new files for testing, into the Mesh/tests/data/ folder
+- esmf_3x3_mesh.shp and associated files: This is the 3x3 mesh described in the 
+  ref doc, and in test_sph_3x3_esmf.nc
+
+- test_sph_3x3_fromshp.nc is the 3x3 mesh but the nodes are sequential, 
+  i.e. there are no shared edges. This is how the ESMF/GDAL interface reads
+  the shapefile-equivalent from esmf_3x3_mesh.shp
+
+- esmf_3x3_multimesh.shp and associated files: the same as esmf_3x3_mesh.shp but the two
+  triangular elements are incorporated into one multipolygon element so that GDAL/ESMF
+  has to parse an multipolygon
+
+** Unit test updates:
+Several version of the ESMF_IO_GDALUTest.F90, each labeled 
+   ESMF_IO_GDALUTest.v_.F90, versions 1-5
+the most recent version, v5, is linked to the file ESMF_IO_GDALUTest.F90
+as a symlink.
+
+v4: runs a test of the shapefile and NetCDF mesh generation and regrid routines using
+    the same mesh. The shapefile is either esmf_3x3_mesh.shp or esmf_3x3_multimesh.shp
+    The NetCDF file is test_sph_3x3_fromshp.nc.
+
+v5: runs only a test of the shapefile mesh generation and regridding onto a cube grid.
+    user can select the desired test shapefile by commenting/uncommenting the file.
+* Oct 16, 2024: Status
+** Shapefile read & regrid is working. Issues...
+Holes: How to deal with holes? According to Oehmke, this is an ESMF issue. ESMF wants the 
+same winding for all polygons. Shapefiles control whether hole or doughnut based on winding.
+** Time to read points into LocStream
+Start with manufacturing locations.
+* LocStream
+* NEED!
+** Mesh write
+maybe just write to existing shapefile
+** LocStream bkg, unmappedaction_ignore
+
+* GDAL Implementation issues
+** SHAPEFILE READS are inefficient
+The whole file has to be queried TWICE on each PET. This is because nodes need distributed IDs and they can't repeat, or regridding 
+is messed up. And you can't query a polygon's nodes and know to give them ID X on Pet Y in a way that doesn't give X to a node on 
+Pet Z without knowing in advance something about all the nodes in the shapfile.
