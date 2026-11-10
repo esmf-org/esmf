@@ -89,8 +89,30 @@ if (sys.version_info <= (3,8)):
 elif (sys.version_info >= (3,8)):
     # this requires Python 3.8 or higher
     import importlib.metadata as ilm
-    
-    msg = ilm.metadata("esmpy")
+
+    try:
+        msg = ilm.metadata("esmpy")
+    except ilm.PackageNotFoundError:
+        # ESMPy may be installed under a variant distribution name that ships the
+        # same `esmpy` import package -- e.g. `esmpy-mpich` (an MPI-enabled build
+        # whose wheel depends on the `mpich` runtime). The distribution name is
+        # not the import name, so resolve whichever distribution provides this
+        # package rather than assuming "esmpy".
+        _dist_name = None
+        _pkg_to_dists = getattr(ilm, "packages_distributions", lambda: {})()
+        _dists = _pkg_to_dists.get("esmpy")
+        if _dists:
+            _dist_name = _dists[0]
+        else:
+            # Fallback (Python 3.8/3.9 lack packages_distributions): scan installed
+            # distributions for the one shipping the top-level `esmpy` package.
+            for _d in ilm.distributions():
+                if "esmpy" in (_d.read_text("top_level.txt") or "").split():
+                    _dist_name = _d.metadata["Name"]
+                    break
+        if _dist_name is None:
+            raise
+        msg = ilm.metadata(_dist_name)
 
 # set the private metadata
 __name__ = msg["Name"]

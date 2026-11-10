@@ -3,7 +3,13 @@
 # leave alone.
 ALL: build_here 
 
-ESMF_CXXCOMPILECPPFLAGS += -DIS_BUILDING_MB -DHAVE_VSNPRINTF -DLINUX -DUSE_MPI
+ESMF_CXXCOMPILECPPFLAGS += -DIS_BUILDING_MB -DHAVE_VSNPRINTF -DUSE_MPI
+# -DLINUX selects MOAB's Unix code paths (dlfcn.h, dirent.h in Core.cpp).
+# Those headers do not exist on MinGW; leave LINUX undefined there so MOAB
+# uses its POSIX/Windows-safe fallbacks. Kept for Linux and Darwin.
+ifneq ($(ESMF_OS),MinGW)
+ESMF_CXXCOMPILECPPFLAGS += -DLINUX
+endif
 
 SOURCEC = \
   AdaptiveKDTree.cpp AEntityFactory.cpp AffineXform.cpp AxisBox.cpp \

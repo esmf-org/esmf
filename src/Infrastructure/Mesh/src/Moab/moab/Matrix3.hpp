@@ -71,7 +71,18 @@
 
 // We will rely on LAPACK directly
 
-#ifdef WIN32
+// RLO: Only use ESMF-internal LAPACK subroutines with ESMF internal LAPACK.
+//      It seems like only dgeev and dsyevd are currently in use with MOAB.
+//      ESMF-internal LAPACK does not currently support dsyevr, dgetrf, dgetri.
+//      NOTE: this must be checked before the WIN32 case below. MinGW predefines
+//      WIN32, but the ESMF-internal LAPACK still exposes only the esmf_-prefixed
+//      names, so they must be used on Windows too -- otherwise the link fails
+//      with undefined references to dgeev_/dsyevd_.
+#if defined ESMF_LAPACK_INTERNAL
+#define MOAB_dgeev  MOAB_FC_WRAPPER(esmf_dgeev, ESMF_DGEEV)
+#define MOAB_dsyevd MOAB_FC_WRAPPER(esmf_dsyevd, ESMF_DSYEVD)
+
+#elif defined( WIN32 )
 
 // Should use second form below for windows but
 // needed to do this to make it work.
@@ -82,29 +93,9 @@
 #define MOAB_dgetrf MOAB_FC_FUNC( dgetrf, DGETRF )
 #define MOAB_dgetri MOAB_FC_FUNC( dgetri, DGETRI )
 
-#else
-
-// RLO: Only use ESMF-internal LAPACK subroutines with ESMF internal LAPACK.
-//      It seems like only dgeev and dsyevd are currently in use with MOAB.
-//      ESMF-internal LAPACK does not currently support dsyevr, dgetrf, dgetri.
-#if defined ESMF_LAPACK_INTERNAL
-#define MOAB_dgeev  MOAB_FC_WRAPPER(esmf_dgeev, ESMF_DGEEV)
-#define MOAB_dsyevd MOAB_FC_WRAPPER(esmf_dsyevd, ESMF_DSYEVD)
 #elif defined ESMF_LAPACK
 #define MOAB_dgeev  MOAB_FC_WRAPPER(dgeev, DGEEV)
 #define MOAB_dsyevd MOAB_FC_WRAPPER(dsyevd, DSYEVD)
-#endif
-
-// #define MOAB_dsyevr MOAB_FC_FUNC(dsyevr, DSYEVR)
-// #define MOAB_dgetrf MOAB_FC_FUNC(dgetrf, DGETRF)
-// #define MOAB_dgetri MOAB_FC_FUNC(dgetri, DGETRI)
-
-// #define MOAB_dsyevd MOAB_FC_WRAPPER( dsyevd, DSYEVD )
-// #define MOAB_dsyevr MOAB_FC_WRAPPER( dsyevr, DSYEVR )
-// #define MOAB_dgeev  MOAB_FC_WRAPPER( dgeev, DGEEV )
-// #define MOAB_dgetrf MOAB_FC_WRAPPER( dgetrf, DGETRF )
-// #define MOAB_dgetri MOAB_FC_WRAPPER( dgetri, DGETRI )
-
 #endif
 
 extern "C" {
