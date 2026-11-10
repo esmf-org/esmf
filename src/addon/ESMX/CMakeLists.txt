@@ -13,7 +13,9 @@ if(PROJECT_IS_TOP_LEVEL)
   # Set global defaults
   if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -fbacktrace -O2" CACHE STRING "" FORCE)
-    set(CMAKE_Fortran_FLAGS_DEBUG "-g -fbacktrace -O0 -fcheck=all -ffpe-trap=invalid,zero,overflow,underflow" CACHE STRING "" FORCE)
+    #TODO: Re-enable trapping on "underflow" when NUOPC random-data-init feature becomes active in ESMF 10.0.0 release!
+    #set(CMAKE_Fortran_FLAGS_DEBUG "-g -fbacktrace -O0 -fcheck=all -ffpe-trap=invalid,zero,overflow,underflow" CACHE STRING "" FORCE)
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g -fbacktrace -O0 -fcheck=all -ffpe-trap=invalid,zero,overflow" CACHE STRING "" FORCE)
 
   elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Cray")
     set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -O2" CACHE STRING "" FORCE)

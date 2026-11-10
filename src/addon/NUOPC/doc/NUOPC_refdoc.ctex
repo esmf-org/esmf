@@ -172,18 +172,11 @@
 \input{../addon/NUOPC/doc/NUOPC_ConnectionOptions}
 #endif
 
-\subsubsection{Data Considerations during Initialize}
+\subsubsection{Data Initialization}
 #ifdef STANDALONE
-\input{NUOPC_DataConsiderInit}
+\input{NUOPC_DataInit}
 #elif defined(CONSTITUENT)
-\input{../addon/NUOPC/doc/NUOPC_DataConsiderInit}
-#endif
-
-\subsubsection{Data Dependencies during Initialize}
-#ifdef STANDALONE
-\input{NUOPC_DataDepInit}
-#elif defined(CONSTITUENT)
-\input{../addon/NUOPC/doc/NUOPC_DataDepInit}
+\input{../addon/NUOPC/doc/NUOPC_DataInit}
 #endif
 
 \subsubsection{Transfer of Grid/Mesh/LocStream Objects between Components}
