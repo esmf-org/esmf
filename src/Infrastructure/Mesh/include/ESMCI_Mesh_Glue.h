@@ -119,6 +119,15 @@ void ESMCI_MeshGetEdgeCreateInfo(Mesh *mesh,
                                  ESMCI::InterArray<int> *edgeConn,
                                  ESMCI::InterArray<ESMC_R8> *edgeCoords, int *rc);
 
+// The edges of the supported 3D element types in terms of (0-based) positions
+// in the element's node connection list
+extern const int ESMCI_MESH_TET_EDGES[6][2];
+extern const int ESMCI_MESH_HEX_EDGES[12][2];
+
+void ESMCI_MeshGetElemEdgeConnCount(Mesh *mesh, int *elemEdgeConnCount, int *rc);
+void ESMCI_MeshGetElemEdgeConn(Mesh *mesh,
+                               ESMCI::InterArray<int> *elemEdgeConn, int *rc);
+
 void ESMCI_MeshGetElemCount(Mesh *meshpp, int *elemCount, int *rc);
 void ESMCI_MeshGetElemConnCount(Mesh *meshpp, int *elemConnCount, int *rc);
 void ESMCI_MeshGetOwnedNodeCount(Mesh *meshpp, int *nodeCount, int *rc);

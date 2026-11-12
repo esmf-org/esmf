@@ -704,16 +704,6 @@ static void get_local_edges_from_UGRID_file(int pioFileDesc, char *filename, int
 #undef ESMC_METHOD
 #define ESMC_METHOD "get_local_edges_from_UGRID_file()"
 
-  // The edges of the supported 3D element types in terms of (0-based) positions
-  // in the element's connection list. These follow the ESMF node ordering in
-  // which the first 4 nodes of a hexahedron go around one face and the last 4
-  // go around the opposite face, with node 5 across from node 1, etc.
-  static const int hex_edges[12][2]={{0,1},{1,2},{2,3},{3,0},
-                                     {4,5},{5,6},{6,7},{7,4},
-                                     {0,4},{1,5},{2,6},{3,7}};
-  static const int tet_edges[6][2]={{0,1},{1,2},{2,0},
-                                    {0,3},{1,3},{2,3}};
-
   // Init output
   edge_ids.clear();
   edge_node_ids.clear();
@@ -758,10 +748,10 @@ static void get_local_edges_from_UGRID_file(int pioFileDesc, char *filename, int
       const int (*elem_edges)[2]=NULL;
       if (num_conn == 8) {
         num_elem_edges=12;
-        elem_edges=hex_edges;
+        elem_edges=ESMCI_MESH_HEX_EDGES;
       } else if (num_conn == 4) {
         num_elem_edges=6;
-        elem_edges=tet_edges;
+        elem_edges=ESMCI_MESH_TET_EDGES;
       } else {
         Throw() << "Unrecognized 3D element type with "<<num_conn<<" nodes.";
       }

@@ -3026,6 +3026,20 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test getting element to edge connections from a Mesh"
+  write(failMsg, *) "Did not return ESMF_SUCCESS or connections incorrect"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  call testElementEdgeConn(correct, rc)
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
 #endif
 
   !------------------------------------------------------------------------
@@ -11308,6 +11322,135 @@ subroutine testCreatingMeshWithEdges3Steps(correct, rc)
    
    
 end subroutine testCreatingMeshWithEdges3Steps
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !
+  ! Tests getting the element to edge connections from a Mesh, including
+  ! the case where an element has a side without an edge, and the
+  ! case where the Mesh doesn't have edges.
+  !
+  ! To be able to run on any number of PETs, each PET creates one
+  ! quadrilateral which isn't connected to the ones on the other PETs:
+  !
+  !   1.0   4 ------- 3
+  !         |         |
+  !         3    1    2
+  !         |         |
+  !   0.0   1 ---1--- 2
+  !
+  !        0.0       1.0
+  !
+  !    Local node indices at corners
+  !    Local edge indices on sides
+  !
+  ! There isn't an edge on the top side, and edges 2 (3->2) and 3 (1->4)
+  ! go in the opposite direction to the element's sides.
+  !
+  !!!!!
+subroutine testElementEdgeConn(correct, rc)
+  logical :: correct
+  integer :: rc
+  type(ESMF_Mesh) :: mesh
+  type(ESMF_VM) :: vm
+  integer :: petCount, localPet
+  integer :: nodeIds(4), nodeOwners(4)
+  real(ESMF_KIND_R8) :: nodeCoords(8)
+  integer :: edgeIds(3), edgeOwners(3), edgeConn(6)
+  integer :: elemIds(1), elemTypes(1), elemConn(4)
+  integer :: numElemEdgeConns
+  integer :: elemEdgeConn(4)
+  integer :: localrc
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! Set up nodes
+  nodeIds=(/1,2,3,4/)+4*localPet
+  nodeOwners=localPet
+  nodeCoords=(/0.0,0.0, &
+               1.0,0.0, &
+               1.0,1.0, &
+               0.0,1.0/)
+  nodeCoords(1:7:2)=nodeCoords(1:7:2)+2.0*localPet
+
+  ! Set up edges
+  edgeIds=(/1,2,3/)+3*localPet
+  edgeOwners=localPet
+  edgeConn=(/1,2, &
+             3,2, &
+             1,4/)
+
+  ! Set up element
+  elemIds=(/1/)+localPet
+  elemTypes=(/ESMF_MESHELEMTYPE_QUAD/)
+  elemConn=(/1,2,3,4/)
+
+
+  !!!!! Mesh with edges !!!!!
+  mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+       coordSys=ESMF_COORDSYS_CART, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  call ESMF_MeshAddNodes(mesh, nodeIds=nodeIds, nodeCoords=nodeCoords, &
+       nodeOwners=nodeOwners, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  call ESMF_MeshAddEdges(mesh, edgeIds=edgeIds, edgeOwners=edgeOwners, &
+       edgeConn=edgeConn, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  call ESMF_MeshAddElements(mesh, elementIds=elemIds,&
+       elementTypes=elemTypes, elementConn=elemConn, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! Get element to edge connections
+  call ESMF_MeshGet(mesh, elementEdgeConnCount=numElemEdgeConns, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  if (numElemEdgeConns .ne. 4) correct=.false.
+
+  call ESMF_MeshGet(mesh, elementEdgeConn=elemEdgeConn, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! The 3rd side (the top) doesn't have an edge, so it should be 0
+  if (any(elemEdgeConn .ne. (/1,2,0,3/))) correct=.false.
+
+  call ESMF_MeshDestroy(mesh, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+
+  !!!!! Mesh without edges !!!!!
+  mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+       coordSys=ESMF_COORDSYS_CART, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  call ESMF_MeshAddNodes(mesh, nodeIds=nodeIds, nodeCoords=nodeCoords, &
+       nodeOwners=nodeOwners, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  call ESMF_MeshAddElements(mesh, elementIds=elemIds,&
+       elementTypes=elemTypes, elementConn=elemConn, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! Getting element to edge connections should return an error
+  call ESMF_MeshGet(mesh, elementEdgeConnCount=numElemEdgeConns, rc=localrc)
+  if (localrc .eq. ESMF_SUCCESS) correct=.false.
+
+  call ESMF_MeshGet(mesh, elementEdgeConn=elemEdgeConn, rc=localrc)
+  if (localrc .eq. ESMF_SUCCESS) correct=.false.
+
+  call ESMF_MeshDestroy(mesh, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! Return success
+  rc=ESMF_SUCCESS
+
+end subroutine testElementEdgeConn
+
 
 
 

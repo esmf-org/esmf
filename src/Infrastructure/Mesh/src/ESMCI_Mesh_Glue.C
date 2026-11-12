@@ -2456,6 +2456,319 @@ void ESMCI_MeshGetElemConnCount(Mesh *mesh, int *_elemConnCount, int *rc){
   
 }
 
+// The edges of the supported 3D element types in terms of (0-based) positions
+// in the element's node connection list. The order of the edges in these tables is the
+// order in which the edges of an element are given by ESMCI_MeshGetElemEdgeConn().
+// Each edge is listed in the direction of increasing parametric coordinate for a
+// hexahedron, and from its lower to its higher local node for a tetrahedron.
+const int ESMCI_MESH_TET_EDGES[6][2]={{0,1},{1,2},{0,2},
+                                      {0,3},{1,3},{2,3}};
+const int ESMCI_MESH_HEX_EDGES[12][2]={{0,1},{1,2},{3,2},{0,3},
+                                       {4,5},{5,6},{7,6},{4,7},
+                                       {0,4},{1,5},{2,6},{3,7}};
+
+// Get the number of nodes of a 3D element type
+static int _elem_type_3D_to_num_nodes(int elem_type) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "_elem_type_3D_to_num_nodes()"
+  if (elem_type == 10) return 4;
+  else if (elem_type == 12) return 8;
+  Throw() << "Unrecognized 3D element type "<<elem_type<<".";
+}
+
+// Get the number of edges of a 3D element type
+static int _elem_type_3D_to_num_edges(int elem_type) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "_elem_type_3D_to_num_edges()"
+  if (elem_type == 10) return 6;
+  else if (elem_type == 12) return 12;
+  Throw() << "Unrecognized 3D element type "<<elem_type<<".";
+}
+
+// Get the types and (optionally) node connections of the elements in the mesh
+// in the same order and form as given by ESMCI_MeshGetElemCreateInfo()
+static void _get_elem_types_and_conn(Mesh *mesh, std::vector<int> &elem_types,
+                                     std::vector<int> *elem_conn) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "_get_elem_types_and_conn()"
+  int localrc;
+
+  // Init output
+  elem_types.clear();
+  if (elem_conn) elem_conn->clear();
+
+  // Get number of elems
+  int num_elems=0;
+  ESMCI_MeshGetElemCount(mesh, &num_elems, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                    &localrc)) throw localrc;
+
+  // If there aren't any, then leave
+  if (num_elems < 1) return;
+
+  // Set up types
+  elem_types.resize(num_elems);
+  InterArray<int> elemTypesIA(&elem_types[0], num_elems);
+
+  // Set up connections, if requested
+  int num_elem_conn=0;
+  int *elem_conn_ptr=NULL; // NULL means not present
+  if (elem_conn) {
+    num_elem_conn=mesh->getOrigElemConnCount();
+    if (num_elem_conn > 0) {
+      elem_conn->resize(num_elem_conn);
+      elem_conn_ptr=&((*elem_conn)[0]);
+    }
+  }
+  InterArray<int> elemConnIA(elem_conn_ptr, num_elem_conn);
+
+  // Get info
+  ESMCI_MeshGetElemCreateInfo(mesh, NULL, &elemTypesIA, &elemConnIA,
+                              NULL, NULL, NULL, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                    &localrc)) throw localrc;
+}
+
+
+// Get the size of the array filled by ESMCI_MeshGetElemEdgeConn()
+void ESMCI_MeshGetElemEdgeConnCount(Mesh *mesh, int *_elemEdgeConnCount, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_MeshGetElemEdgeConnCount()"
+
+  // Init output
+  *_elemEdgeConnCount = 0;
+
+  try {
+    int localrc;
+
+    // Make sure that the mesh has edges
+    if (!mesh->getHasEdges()) {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
+          "Attempting to get element to edge connection information from a Mesh with no edges.",
+          ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+
+    // Get count depending on dimension
+    int pdim=mesh->parametric_dim();
+    if (pdim == 2) {
+      // In 2D an element has the same number of edges as nodes
+      *_elemEdgeConnCount = mesh->getOrigElemConnCount();
+
+    } else if (pdim == 3) {
+      // In 3D the number of edges depends on the type
+      std::vector<int> elem_types;
+      _get_elem_types_and_conn(mesh, elem_types, NULL);
+
+      int count=0;
+      for (int i=0; i<elem_types.size(); i++) {
+        count += _elem_type_3D_to_num_edges(elem_types[i]);
+      }
+      *_elemEdgeConnCount = count;
+
+    } else {
+      Throw() << "Element to edge connections are only available for meshes with parametric dimension 2 or 3.";
+    }
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // Set return code
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
+
+
+// Get the edges of each element in the mesh.
+//
+// This is derived from the node connections of the elements and of the edges, by matching
+// each side of an element to the edge that connects the same two nodes (in either
+// direction). It only uses information local to this PET, so the edges of an element
+// need to be present on the same PET as the element.
+//
+// elemEdgeConn - must be of the size given by ESMCI_MeshGetElemEdgeConnCount(). The
+//                elements are in the same order as from ESMCI_MeshGetElemCreateInfo(), and
+//                the entries for an element are in sequence. Each entry is the 1-based
+//                position of an edge in the list of edges on this PET (i.e. the order
+//                given by ESMCI_MeshGetEdgeCreateInfo()), or 0 if there is no edge on
+//                this PET that connects the two nodes.
+//
+//                In 2D, an element has one entry for each entry in its node connections.
+//                Entry j is the edge that connects node j of the element to the next node
+//                around the element (the last node connects back to the first). The
+//                entry that corresponds to a polygon break is 0.
+//
+//                In 3D, a tetrahedron has 6 entries and a hexahedron has 12. They are in
+//                the order given by ESMCI_MESH_TET_EDGES and ESMCI_MESH_HEX_EDGES.
+void ESMCI_MeshGetElemEdgeConn(Mesh *mesh,
+                               ESMCI::InterArray<int> *elemEdgeConn, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_MeshGetElemEdgeConn()"
+
+  try {
+    int localrc;
+
+    // Make sure that the mesh has edges
+    if (!mesh->getHasEdges()) {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
+          "Attempting to get element to edge connection information from a Mesh with no edges.",
+          ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+
+    // Get the size that the output should be
+    int elemEdgeConnCount=0;
+    ESMCI_MeshGetElemEdgeConnCount(mesh, &elemEdgeConnCount, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &localrc)) throw localrc;
+
+    // Error check output array
+    ThrowRequire(elemEdgeConn);
+    if (elemEdgeConn->dimCount !=1) {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          " elementEdgeConn array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+    }
+
+    if (elemEdgeConn->extent[0] != elemEdgeConnCount) {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          " elementEdgeConn array must be of size elementEdgeConnCount", ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+
+    // If there's nothing to do, then leave
+    if (elemEdgeConnCount > 0) {
+
+      // Array into which to put the edges
+      int *elemEdgeConn_array=elemEdgeConn->array;
+
+      // Get element types and node connections
+      // (The node connections are 1-based positions in the list of nodes on this PET.)
+      std::vector<int> elem_types;
+      std::vector<int> elem_conn;
+      _get_elem_types_and_conn(mesh, elem_types, &elem_conn);
+
+      // Get edge node connections
+      // (These are also 1-based positions in the list of nodes on this PET.)
+      int num_edges=mesh->getEdgeCount();
+      std::vector<int> edge_conn(2*num_edges+1); // +1 so never 0 sized
+      if (num_edges > 0) mesh->getEdgeConn(&edge_conn[0]);
+
+      // Construct a map from the pair of nodes of an edge (smaller first, so that
+      // the direction of the edge doesn't matter) to the position of the edge
+      std::map<std::pair<int,int>,int> nodes_to_edge;
+      for (int e=0; e<num_edges; e++) {
+        int n1=edge_conn[2*e];
+        int n2=edge_conn[2*e+1];
+        std::pair<int,int> nodes = (n1 < n2) ? std::make_pair(n1,n2) : std::make_pair(n2,n1);
+
+        // If the same pair of nodes is there more than once, this keeps the first
+        nodes_to_edge.insert(std::make_pair(nodes,e+1)); // +1 to make 1-based
+      }
+
+      // Loop through elements finding their edges
+      int pdim=mesh->parametric_dim();
+      int conn_pos=0; // position in elem_conn
+      int out_pos=0;  // position in elemEdgeConn_array
+      for (int i=0; i<elem_types.size(); i++) {
+
+        // Get the number of nodes and the edges of this element in terms of
+        // positions in its list of nodes
+        int num_elem_nodes;
+        int num_elem_edges;
+        const int (*elem_edges)[2]=NULL; // NULL means next node around the element
+        if (pdim == 2) {
+          num_elem_nodes=elem_types[i];
+          num_elem_edges=num_elem_nodes;
+        } else {
+          num_elem_nodes=_elem_type_3D_to_num_nodes(elem_types[i]);
+          num_elem_edges=_elem_type_3D_to_num_edges(elem_types[i]);
+          if (num_elem_nodes == 4) elem_edges=ESMCI_MESH_TET_EDGES;
+          else elem_edges=ESMCI_MESH_HEX_EDGES;
+        }
+
+        // Loop through the edges of the element
+        for (int k=0; k<num_elem_edges; k++) {
+
+          // Get the nodes at either end
+          int n1,n2;
+          if (elem_edges == NULL) {
+            n1=elem_conn[conn_pos+k];
+
+            // A polygon break isn't a node, so it doesn't have an edge
+            if (n1 == MESH_POLYBREAK_IND) {
+              elemEdgeConn_array[out_pos]=0;
+              out_pos++;
+              continue;
+            }
+
+            // The next node around the element. If this is the last node of the
+            // element (or of one of the polygons of an element which contains polygon
+            // breaks), then that's the first node of the element (or of that polygon).
+            int next=k+1;
+            if ((next == num_elem_nodes) ||
+                (elem_conn[conn_pos+next] == MESH_POLYBREAK_IND)) {
+              next=k;
+              while ((next > 0) && (elem_conn[conn_pos+next-1] != MESH_POLYBREAK_IND)) next--;
+            }
+            n2=elem_conn[conn_pos+next];
+          } else {
+            n1=elem_conn[conn_pos+elem_edges[k][0]];
+            n2=elem_conn[conn_pos+elem_edges[k][1]];
+          }
+          std::pair<int,int> nodes = (n1 < n2) ? std::make_pair(n1,n2) : std::make_pair(n2,n1);
+
+          // Look up edge, using 0 if there isn't one
+          std::map<std::pair<int,int>,int>::iterator ni=nodes_to_edge.find(nodes);
+          if (ni != nodes_to_edge.end()) elemEdgeConn_array[out_pos]=ni->second;
+          else elemEdgeConn_array[out_pos]=0;
+          out_pos++;
+        }
+
+        // Advance to next element
+        conn_pos += num_elem_nodes;
+      }
+    }
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // Set return code
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
+
+
 void ESMCI_MeshGetOwnedNodeCount(Mesh *mesh, int *nodeCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_MeshGetOwnedNodeCount()"

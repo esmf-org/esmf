@@ -829,6 +829,42 @@ void MeshCap::getEdgeConnCount(int *edgeConnCount, int *rc){
   }
 }
 
+void MeshCap::getElemEdgeConnCount(int *elemEdgeConnCount, int *rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::getElemEdgeConnCount()"
+
+  int localrc;
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_MeshGetElemEdgeConnCount(mesh, elemEdgeConnCount, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+       "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+}
+
+void MeshCap::getElemEdgeConn(ESMCI::InterArray<int> *elemEdgeConn, int *rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::getElemEdgeConn()"
+
+  int localrc;
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_MeshGetElemEdgeConn(mesh, elemEdgeConn, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+       "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+}
+
 void MeshCap::getElemCount(int *elemCount, int *rc){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::getElemCount()"

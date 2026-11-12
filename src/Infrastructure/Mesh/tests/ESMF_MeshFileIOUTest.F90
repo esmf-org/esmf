@@ -7844,6 +7844,8 @@ subroutine  check_mesh_edges_from_sph_3x3_UG_file(correct, rc)
   integer, allocatable :: nodeIds(:)
   integer, allocatable :: elemTypes(:), elemConn(:)
   integer, allocatable :: edgeIds(:), edgeOwners(:), edgeConn(:)
+  integer :: numElemEdgeConns
+  integer, allocatable :: elemEdgeConn(:)
   real(ESMF_KIND_R8), allocatable :: edgeCoords(:)
   logical :: edgeIsPresent, edgeCoordsIsPresent, edgeDistgridIsPresent
   type(ESMF_DistGrid) :: edgeDistgrid
@@ -8055,6 +8057,44 @@ subroutine  check_mesh_edges_from_sph_3x3_UG_file(correct, rc)
   ! write(*,*) localPet," edgeConn  =",edgeConn
 
 
+  !! Check the element to edge connections
+  call ESMF_MeshGet(mesh, elementEdgeConnCount=numElemEdgeConns, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! In 2D an element has the same number of edges as nodes
+  if (numElemEdgeConns .ne. numElemConns) correct=.false.
+
+  allocate(elemEdgeConn(numElemEdgeConns))
+  call ESMF_MeshGet(mesh, elementEdgeConn=elemEdgeConn, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  pos=0
+  do i=1,numElems
+     do j=1,elemTypes(i)
+
+        ! Local indices of the nodes at each end of this side of the element
+        n1=elemConn(pos+j)
+        n2=elemConn(pos+mod(j,elemTypes(i))+1)
+
+        ! Every side of every element is an edge in this file, so there should be one
+        k=elemEdgeConn(pos+j)
+        if ((k .lt. 1) .or. (k .gt. numEdges)) then
+           correct=.false.
+           cycle
+        endif
+
+        ! Check that the edge connects the same two nodes as the side (in either direction)
+        f1=edgeConn(2*k-1)
+        f2=edgeConn(2*k)
+        if (.not. (((n1 .eq. f1) .and. (n2 .eq. f2)) .or. &
+                   ((n1 .eq. f2) .and. (n2 .eq. f1)))) correct=.false.
+     enddo
+     pos=pos+elemTypes(i)
+  enddo
+
+  deallocate(elemEdgeConn)
+
+
   !! Check that across all PETs each edge in the file is owned exactly once.
   !! (Every edge in this file is a side of an element, so it has to be on at
   !!  least one PET, and the owner of an edge is the same on every PET it's on.)
@@ -8170,6 +8210,8 @@ subroutine  check_mesh_edges_from_sph_3D_UG_file(correct, rc)
   real(ESMF_KIND_R8), allocatable :: nodeCoords(:)
   integer, allocatable :: elemTypes(:), elemConn(:)
   integer, allocatable :: edgeIds(:), edgeOwners(:), edgeConn(:)
+  integer :: numElemEdgeConns
+  integer, allocatable :: elemEdgeConn(:)
   real(ESMF_KIND_R8), allocatable :: edgeCoords(:)
   logical :: edgeIsPresent, edgeCoordsIsPresent, edgeDistgridIsPresent
   type(ESMF_DistGrid) :: edgeDistgrid
@@ -8178,7 +8220,7 @@ subroutine  check_mesh_edges_from_sph_3D_UG_file(correct, rc)
 
   integer :: petCount, localPet
   type(ESMF_VM) :: vm
-  integer :: i, j, k, d, e, pos
+  integer :: i, j, k, d, e, pos, epos
   integer :: n1, n2, f1, f2
   integer :: numLocalExpected, numOwnedCheck, dgElemCount
   integer :: sendBuf(1), recvBuf(1)
@@ -8201,12 +8243,14 @@ subroutine  check_mesh_edges_from_sph_3D_UG_file(correct, rc)
                  19,20, 20,21, 21,19, 22,19, 20,22, 21,22/)  ! 34-39
 
   ! Edges of a hexahedron
-  hexEdges=reshape((/1,2, 2,3, 3,4, 4,1, &
-                     5,6, 6,7, 7,8, 8,5, &
+  ! (in the order documented for elementEdgeConn in ESMF_MeshGet())
+  hexEdges=reshape((/1,2, 2,3, 4,3, 1,4, &
+                     5,6, 6,7, 8,7, 5,8, &
                      1,5, 2,6, 3,7, 4,8/),(/2,12/))
 
   ! Edges of a tetrahedron
-  tetEdges=reshape((/1,2, 2,3, 3,1, &
+  ! (in the order documented for elementEdgeConn in ESMF_MeshGet())
+  tetEdges=reshape((/1,2, 2,3, 1,3, &
                      1,4, 2,4, 3,4/),(/2,6/))
 
 
@@ -8371,6 +8415,67 @@ subroutine  check_mesh_edges_from_sph_3D_UG_file(correct, rc)
   ! write(*,*) localPet," edgeIds   =",edgeIds
   ! write(*,*) localPet," edgeOwners=",edgeOwners
   ! write(*,*) localPet," edgeConn  =",edgeConn
+
+
+  !! Check the element to edge connections
+  call ESMF_MeshGet(mesh, elementEdgeConnCount=numElemEdgeConns, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! A hexahedron has 12 edges and a tetrahedron has 6
+  k=0
+  do i=1,numElems
+     if (elemTypes(i) .eq. ESMF_MESHELEMTYPE_HEX) k=k+12
+     if (elemTypes(i) .eq. ESMF_MESHELEMTYPE_TETRA) k=k+6
+  enddo
+  if (numElemEdgeConns .ne. k) correct=.false.
+
+  allocate(elemEdgeConn(numElemEdgeConns))
+  call ESMF_MeshGet(mesh, elementEdgeConn=elemEdgeConn, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  pos=0   ! position in elemConn
+  epos=0  ! position in elemEdgeConn
+  do i=1,numElems
+
+     ! Get edges based on type of element
+     ! (These are in the order documented for elementEdgeConn in ESMF_MeshGet())
+     if (elemTypes(i) .eq. ESMF_MESHELEMTYPE_HEX) then
+        numElemNodes=8
+        numElemEdges=12
+        elemEdges(:,1:12)=hexEdges(:,1:12)
+     else if (elemTypes(i) .eq. ESMF_MESHELEMTYPE_TETRA) then
+        numElemNodes=4
+        numElemEdges=6
+        elemEdges(:,1:6)=tetEdges(:,1:6)
+     else
+        correct=.false.
+        exit
+     endif
+
+     do j=1,numElemEdges
+
+        ! Local indices of the nodes at each end of this edge of the element
+        n1=elemConn(pos+elemEdges(1,j))
+        n2=elemConn(pos+elemEdges(2,j))
+
+        ! Every edge of every element is an edge in this file, so there should be one
+        k=elemEdgeConn(epos+j)
+        if ((k .lt. 1) .or. (k .gt. numEdges)) then
+           correct=.false.
+           cycle
+        endif
+
+        ! Check that the edge connects the same two nodes (in either direction)
+        f1=edgeConn(2*k-1)
+        f2=edgeConn(2*k)
+        if (.not. (((n1 .eq. f1) .and. (n2 .eq. f2)) .or. &
+                   ((n1 .eq. f2) .and. (n2 .eq. f1)))) correct=.false.
+     enddo
+     pos=pos+numElemNodes
+     epos=epos+numElemEdges
+  enddo
+
+  deallocate(elemEdgeConn)
 
 
   !! Check that across all PETs each edge in the file is owned exactly once.

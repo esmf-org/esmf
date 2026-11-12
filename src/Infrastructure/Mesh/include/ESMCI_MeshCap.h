@@ -186,6 +186,8 @@ namespace ESMCI {
     void getNodeCount(int *nodeCount, int *rc);
     void getEdgeCount(int *edgeCount, int *rc);
     void getEdgeConnCount(int *edgeConnCount, int *rc);
+    void getElemEdgeConnCount(int *elemEdgeConnCount, int *rc);
+    void getElemEdgeConn(ESMCI::InterArray<int> *elemEdgeConn, int *rc);
     void getElemCount(int *elemCount, int *rc);
     void getElemConnCount(int *elemConnCount, int *rc);
 

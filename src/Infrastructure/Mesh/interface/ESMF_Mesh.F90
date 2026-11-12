@@ -4979,6 +4979,7 @@ end function ESMF_MeshEmptyCreate
                    edgeCoordsIsPresent, edgeCoords, &
                    elementCount, elementIds, elementTypes, &
                    elementConnCount, elementConn, &
+                   elementEdgeConnCount, elementEdgeConn, &
                    elementMaskIsPresent,elementMask, &
                    elementAreaIsPresent, elementArea, &
                    elementCoordsIsPresent, elementCoords, &
@@ -5016,6 +5017,8 @@ end function ESMF_MeshEmptyCreate
     integer,                  intent(out), optional :: elementTypes(:)
     integer,                  intent(out), optional :: elementConnCount
     integer,                  intent(out), optional :: elementConn(:)
+    integer,                  intent(out), optional :: elementEdgeConnCount
+    integer,                  intent(out), optional :: elementEdgeConn(:)
     logical,                  intent(out), optional :: elementMaskIsPresent
     integer,                  intent(out), optional :: elementMask(:)
     logical,                  intent(out), optional :: elementAreaIsPresent
@@ -5115,6 +5118,29 @@ end function ESMF_MeshEmptyCreate
 !         {\tt elementTypes}. The nodes for each element
 !         are in sequence in this array (e.g. the nodes for element 1 are elementConn(1),
 !         elementConn(2), etc.).
+! \item [{[elementEdgeConnCount]}]
+!         The number of entries in the elementEdgeConn array. Only available if the Mesh contains edges.
+! \item [{[elementEdgeConn]}]
+!         An array containing the edges of each element on this PET. Only available if the
+!         Mesh contains edges. Each entry is a local index (1 based) into the list of edges on this
+!         PET. In other words, an entry of 1 indicates the edge described by {\tt edgeIds(1)},
+!         the first two entries in {\tt edgeConn}, etc. on this PET. An entry is 0 if there
+!         is no edge on this PET which connects the corresponding pair of nodes of the element.
+!         This information is derived by matching the pairs of nodes in {\tt elementConn}
+!         with those in {\tt edgeConn}, and doesn't depend on the direction of the edge. To find
+!         the direction of an edge relative to an element compare the order of its nodes in
+!         {\tt edgeConn} with the order of the nodes of the element given below.
+!         This array is of size elementEdgeConnCount and the edges for each element
+!         are in sequence in it. For a Mesh with parametric dimension 2, an element has the same
+!         number of edges as nodes (so elementEdgeConnCount is the same as elementConnCount) and
+!         edge $j$ of an element connects node $j$ of the element to the next node around the
+!         element, with the last node connecting back to the first. For a Mesh with parametric
+!         dimension 3, a tetrahedron has 6 edges which connect the following pairs of its nodes in
+!         this order: (1,2), (2,3), (1,3), (1,4), (2,4), (3,4). A hexahedron has 12 edges which
+!         connect the following pairs of its nodes in this order: (1,2), (2,3), (4,3), (1,4),
+!         (5,6), (6,7), (8,7), (5,8), (1,5), (2,6), (3,7), (4,8). Here the node numbers are
+!         positions in the list of nodes of the element in {\tt elementConn}
+!         (see Section~\ref{const:meshelemtype}).
 ! \item [{[elementMaskIsPresent]}]
 ! .true. if element masking was set in mesh, .false. otherwise.
 ! \item [{[elementMask]}]
@@ -5206,6 +5232,7 @@ end function ESMF_MeshEmptyCreate
     type(ESMF_InterArray) :: elementAreaIA
     type(ESMF_InterArray) :: elementCoordsIA
 
+    type(ESMF_InterArray) :: elementEdgeConnIA
     type(ESMF_InterArray) :: edgeIdsIA
     type(ESMF_InterArray) :: edgeOwnersIA
     type(ESMF_InterArray) :: edgeConnIA
@@ -5290,6 +5317,8 @@ end function ESMF_MeshEmptyCreate
             present(elementTypes) .or. &
             present(elementConnCount) .or. &
             present(elementConn) .or. &
+            present(elementEdgeConnCount) .or. &
+            present(elementEdgeConn) .or. &
             present(elementMaskIsPresent) .or. &
             present(elementMask) .or. &
             present(elementAreaIsPresent) .or. &
@@ -5539,6 +5568,33 @@ end function ESMF_MeshEmptyCreate
     if (present(elementConnCount)) then
        ! Make call to get info
        call C_ESMC_MeshGetElemConnCount(mesh, elementConnCount, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Get Element to Edge Connection Count
+    if (present(elementEdgeConnCount)) then
+       ! Make call to get info
+       call C_ESMC_MeshGetElemEdgeConnCount(mesh, elementEdgeConnCount, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Get Element to Edge Connections
+    if (present(elementEdgeConn)) then
+
+       ! Create interface array
+       elementEdgeConnIA = ESMF_InterArrayCreate(elementEdgeConn, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Make call to get info
+       call C_ESMC_MeshGetElemEdgeConn(mesh, elementEdgeConnIA, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Get rid of interface array
+       call ESMF_InterArrayDestroy(elementEdgeConnIA, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
