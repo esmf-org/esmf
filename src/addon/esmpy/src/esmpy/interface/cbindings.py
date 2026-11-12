@@ -1252,9 +1252,13 @@ def ESMP_MeshCreateFromFile(filename, fileTypeFlag,
         string (optional)  :: varname\n
         """
     lrc = ct.c_int(0)
+
+    # MeshLoc values aren't the same as those of the corresponding C enum
+    maskFlag_c = constants._meshloc_to_esmc(maskFlag)
+
     mesh = _ESMF.ESMC_MeshCreateFromFile(filename, fileTypeFlag,
                                          convertToDual, addUserArea,
-                                         meshname, maskFlag, varname,
+                                         meshname, maskFlag_c, varname,
                                          ct.byref(lrc))
     rc = lrc.value
     if rc != constants._ESMP_SUCCESS:
@@ -1852,9 +1856,12 @@ def ESMP_FieldCreateMesh(mesh, name=None,
             raise TypeError('ungriddedUBound must have dtype=int32')
         ungriddedUBound_i = ESMP_InterfaceInt(ungriddedUBound)
 
+    # MeshLoc values aren't the same as those of the corresponding C enum
+    meshloc_c = constants._meshloc_to_esmc(meshloc)
+
     # call into the FieldCreate C interface
     field = _ESMF.ESMC_FieldCreateMeshTypeKind(mesh.struct.ptr, typekind,
-                                               meshloc,
+                                               meshloc_c,
                                                gridToFieldMap_i,
                                                ungriddedLBound_i,
                                                ungriddedUBound_i, name,

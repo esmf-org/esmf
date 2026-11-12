@@ -320,6 +320,29 @@ class MeshLoc(IntEnum):
     The elements of the :class:`~esmpy.api.mesh.Mesh`.
     """
 
+# The values of the ESMC_MeshLoc_Flag enumeration in the ESMF C interface that
+# correspond to each MeshLoc. These are not the same as the MeshLoc values,
+# because the MeshLoc values are also used on the Python side as indices
+# (e.g. into the coordinates of a Mesh), and so need to stay 0-based and
+# contiguous. Use _meshloc_to_esmc() to convert before passing into ESMF.
+_ESMC_MESHLOC_NODE = 1
+_ESMC_MESHLOC_ELEMENT = 3
+_MeshLocToESMC = {int(MeshLoc.NODE): _ESMC_MESHLOC_NODE,
+                  int(MeshLoc.ELEMENT): _ESMC_MESHLOC_ELEMENT}
+
+def _meshloc_to_esmc(meshloc):
+    """
+    Convert a :class:`MeshLoc` (or the equivalent integer) into the value of the
+    corresponding ESMC_MeshLoc_Flag in the ESMF C interface. ``None`` is passed
+    through, so that this can be used with optional arguments.
+    """
+    if meshloc is None:
+        return None
+    try:
+        return _MeshLocToESMC[int(meshloc)]
+    except (KeyError, TypeError, ValueError):
+        raise ValueError('Unrecognized MeshLoc: ' + str(meshloc))
+
 # NormType
 class NormType(IntEnum):
     """
