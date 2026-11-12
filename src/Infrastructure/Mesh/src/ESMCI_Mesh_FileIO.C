@@ -19,6 +19,8 @@
 //------------------------------------------------------------------------------
 
 #include <string>
+#include <vector>
+#include <utility>
 #include <ostream>
 #include <iterator>
 #include <algorithm>
@@ -671,6 +673,119 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
 }
 
 //
+// Get from a UGRID file the edges which are a side of at least one of the elements
+// local to this PET. (This means that, like nodes, an edge on the boundary between
+// PETs will end up on each of the PETs that have an element which contains it.)
+//
+// INPUTS:
+//  edgeConn_id    - the id of the edge connection variable in the file
+//  num_elems      - the number of elements on this PET
+//  numElementConn - the number of connections for each element on this PET
+//  elementConn    - the element connections in terms of global node ids (may
+//                   contain MESH_POLYBREAK_IND)
+//
+// OUTPUTS:
+//  edge_ids       - the global ids (1-based position in the file) of the edges
+//                   on this PET, in ascending order
+//  edge_node_ids  - the global ids of the 2 nodes of each of the edges in
+//                   edge_ids, in the order in which they appear in the file
+//                   (i.e. the orientation of the edge in the file is preserved)
+//
+static void get_local_edges_from_UGRID_file(int pioFileDesc, char *filename, int edgeConn_id,
+                                            int num_elems, int *numElementConn, int *elementConn,
+                                            std::vector<int> &edge_ids,
+                                            std::vector<int> &edge_node_ids) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "get_local_edges_from_UGRID_file()"
+
+  // Init output
+  edge_ids.clear();
+  edge_node_ids.clear();
+
+  //// Construct a sorted list of the sides of the elements on this PET
+  //// (Each side is stored with the smaller node id first, so that it can be
+  ////  matched with an edge irrespective of the edge's orientation.)
+  std::vector<std::pair<int,int> > sides;
+  for (int e=0, pos=0; e<num_elems; e++) {
+
+    // Number of connections in this elem
+    int num_conn=numElementConn[e];
+
+    // Loop through the polygons that make up this elem
+    // (There is usually just 1, but there can be more if there are polygon breaks)
+    int poly_beg=0;
+    for (int j=0; j<=num_conn; j++) {
+
+      // If not at the end of a polygon, then keep going
+      if ((j < num_conn) && (elementConn[pos+j] != MESH_POLYBREAK_IND)) continue;
+
+      // Add the sides of the polygon that just ended
+      int num_poly_nodes=j-poly_beg;
+      for (int k=0; k<num_poly_nodes; k++) {
+        int n1=elementConn[pos+poly_beg+k];
+        int n2=elementConn[pos+poly_beg+(k+1)%num_poly_nodes];
+        if (n1 == n2) continue; // skip degenerate sides
+        if (n1 < n2) sides.push_back(std::make_pair(n1,n2));
+        else sides.push_back(std::make_pair(n2,n1));
+      }
+
+      // Next polygon starts after break
+      poly_beg=j+1;
+    }
+
+    // Advance to next elem
+    pos += num_conn;
+  }
+
+  // Sort and get rid of repeats (interior sides will be there twice)
+  std::sort(sides.begin(), sides.end());
+  sides.erase(std::unique(sides.begin(), sides.end()), sides.end());
+
+
+  //// Loop through the edges in the file in blocks keeping the ones that match a side
+  //// Note that this has to be done even if there are no sides on this PET,
+  //// because the reads are collective.
+
+  // Get global edgeCount
+  PIO_Offset edgeCount;
+  get_edgeCount_from_UGRID_file(pioFileDesc, filename, edgeConn_id, edgeCount);
+
+  // Max number of edges to read at one time
+  const PIO_Offset max_block_size=1048576;
+
+  // Allocate buffer to hold a block
+  PIO_Offset buff_size=(edgeCount < max_block_size) ? edgeCount : max_block_size;
+  std::vector<int> block_edgeConn(2*buff_size+1); // +1 so never 0 sized
+
+  // Loop through blocks
+  for (PIO_Offset block_beg=0; block_beg<edgeCount; block_beg += max_block_size) {
+
+    // Size of this block
+    PIO_Offset block_size=edgeCount-block_beg;
+    if (block_size > max_block_size) block_size=max_block_size;
+
+    // Read block
+    get_edgeConn_block_from_UGRID_file(pioFileDesc, filename, edgeConn_id,
+                                       block_beg, block_size, &block_edgeConn[0]);
+
+    // Keep the edges that are a side of a local elem
+    for (PIO_Offset i=0; i<block_size; i++) {
+      int n1=block_edgeConn[2*i];
+      int n2=block_edgeConn[2*i+1];
+
+      std::pair<int,int> side = (n1 < n2) ? std::make_pair(n1,n2) : std::make_pair(n2,n1);
+
+      if (std::binary_search(sides.begin(), sides.end(), side)) {
+        edge_ids.push_back((int)(block_beg+i+1)); // +1 to make 1-based
+        edge_node_ids.push_back(n1);
+        edge_node_ids.push_back(n2);
+      }
+    }
+  }
+}
+
+
+//
 // Create a Mesh from a UGRID format file
 //
 // INPUTS: 
@@ -843,6 +958,23 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
     int *elementType=NULL;
     convert_numElementConn_to_elementType(pdim, num_elems, numElementConn, elementType);
 
+    // Get the edges on this PET, if edges are present in the file
+    // (This needs to be done while we still have the global element connection info.)
+    // Edges are only read for 2D meshes, because in 3D the edges of an element
+    // can't be worked out from just the order of its nodes. 
+    int edgesPresent=0;
+    int edgeConn_id;
+    std::vector<int> edge_ids_vec;
+    std::vector<int> edge_node_ids_vec;
+    if (pdim == 2) {
+      get_edgeConn_id_from_UGRID_file(pioFileDesc, filename, mesh_topo_id, edgeConn_id, edgesPresent);
+      if (edgesPresent) {
+        get_local_edges_from_UGRID_file(pioFileDesc, filename, edgeConn_id,
+                                        num_elems, numElementConn, elementConn,
+                                        edge_ids_vec, edge_node_ids_vec);
+      }
+    }
+
     // Free element connection info, because we don't need it any more
     delete [] numElementConn;
     delete [] elementConn;
@@ -890,6 +1022,86 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
                        &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                       &localrc)) throw localrc;
+
+    //// Add edges to Mesh (if present in file)
+    if (edgesPresent) {
+
+      // Number of edges on this PET
+      int num_edges=edge_ids_vec.size();
+
+      // Use dummy variables when there aren't any edges on this PET, so that
+      // there are still valid pointers to pass into the calls below
+      int dummy_int=0;
+      double dummy_double=0.0;
+      int *edge_ids=&dummy_int;
+      if (num_edges > 0) edge_ids=&edge_ids_vec[0];
+
+      // Convert the global node ids of the edge connections into 1-based indices into
+      // the list of nodes added above (which is what's expected by the mesh).
+      // node_ids is sorted, so this can be done using a binary search. 
+      int edgeConn_size=2*num_edges;
+      int *edgeConn=&dummy_int;
+      if (num_edges > 0) edgeConn=&edge_node_ids_vec[0];
+      for (int i=0; i<edgeConn_size; i++) {
+        int *pos=std::lower_bound(node_ids, node_ids+num_nodes, edgeConn[i]);
+        if ((pos == node_ids+num_nodes) || (*pos != edgeConn[i])) {
+          Throw() << "Node id "<<edgeConn[i]<<" in edge connection not found in list of nodes on this PET.";
+        }
+        edgeConn[i]=(int)(pos-node_ids)+1; // +1 to make 1-based
+      }
+
+      // Get edgeCoords, if present in file
+      double *edgeCoords=NULL;
+      int edgeCoord_ids[ESMF_MAXDIM];
+      int edgeCoordsPresent=0;
+      get_edgeCoord_ids_from_UGRID_file(pioFileDesc, filename, mesh_topo_id,
+                                        dim, edgeCoord_ids, edgeCoordsPresent);
+      if (edgeCoordsPresent) {
+
+        // Get global edgeCount
+        PIO_Offset edgeCount;
+        get_edgeCount_from_UGRID_file(pioFileDesc, filename, edgeConn_id, edgeCount);
+
+        // Get edgeCoords at positions indicated by edge_ids
+        get_coords_from_UGRID_file(pioSystemDesc, pioFileDesc, filename,
+                                   coord_sys_file, dim, edgeCoord_ids,
+                                   edgeCount,
+                                   num_edges, edge_ids,
+                                   edgeCoords);
+
+        // If edge coords exist and
+        // file in different coordinate system than mesh, convert
+        if ((edgeCoords != NULL) && (coord_sys_file != coord_sys_mesh)) {
+          convert_coords_between_coord_sys(coord_sys_file, coord_sys_mesh,
+                                           dim, num_edges, edgeCoords);
+        }
+      }
+
+      // Set up InterArray variables for optional edge info
+      // Note that present() for InterArray checks if the array is NULL
+      // Owners aren't in the file, so pass NULL to have them calculated.
+      InterArray<int> edgeOwnersIA((int *)NULL, 0);
+
+      // If the file has edge coords pass a non-NULL pointer even if there aren't any edges
+      // on this PET, so that the presence of edge coords is the same across PETs.
+      double *edgeCoordsArg=edgeCoords;
+      if (edgeCoordsPresent && (edgeCoordsArg == NULL)) edgeCoordsArg=&dummy_double;
+      int edgeCoords_size=0;
+      if (edgeCoordsPresent) edgeCoords_size=num_edges*orig_sdim;
+      InterArray<ESMC_R8> edgeCoordsIA(edgeCoordsArg, edgeCoords_size);
+
+      // Add edges
+      ESMCI_meshaddedges(out_mesh, &num_edges, edge_ids,
+                         &edgeOwnersIA, &edgeCoordsIA,
+                         &edgeConn_size, edgeConn,
+                         &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                        &localrc)) throw localrc;
+
+      // Get rid of things used for adding edges
+      if (edgeCoords != NULL) delete [] edgeCoords;
+    }
+
 
     // Get rid of things used for adding nodes
     delete [] node_ids;

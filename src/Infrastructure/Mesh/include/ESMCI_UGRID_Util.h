@@ -89,6 +89,19 @@ void get_mask_from_UGRID_file(int pioSystemDesc, int pioFileDesc, char *filename
                               int num_ids, int *ids, 
                               int *&mask);
 
+void get_edgeConn_id_from_UGRID_file(int pioFileDesc, char *filename, int mesh_topo_id,
+                                     int &edgeConn_id, int &edgeConnPresent);
+
+void get_edgeCount_from_UGRID_file(int pioFileDesc, char *filename, int edgeConn_id,
+                                   PIO_Offset &edgeCount);
+
+void get_edgeConn_block_from_UGRID_file(int pioFileDesc, char *filename, int edgeConn_id,
+                                        PIO_Offset start_edge, PIO_Offset num_edges,
+                                        int *edgeConn);
+
+void get_edgeCoord_ids_from_UGRID_file(int pioFileDesc, char *filename, int mesh_topo_id, int dim,
+                                       int *edgeCoord_ids, int &edgeCoordsPresent);
+
 #endif // ifdef ESMF_PIO
 
 #endif // ESMCI_UGRID_UTIL_H

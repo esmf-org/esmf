@@ -2054,6 +2054,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Create a Mesh from a file. Provides options to convert to 3D and in the case of SCRIP
 !   format files, allows the dual of the mesh to be created.
 !
+!   If a 2D UGRID format file contains edge information (i.e. the mesh topology variable has an
+!   {\tt edge\_node\_connectivity} attribute), then the edges are read from the file and added
+!   to the Mesh in the same way as if {\tt ESMF\_MeshAddEdges()} (\ref{sec:mesh:api:meshaddedges})
+!   had been called. The id of an edge is its position (starting at 1) in the file, and the order
+!   of the two nodes of an edge is the same as in the file. A PET gets the edges that are a side of
+!   at least one of its elements. If the mesh topology variable also has an {\tt edge\_coordinates}
+!   attribute, then the edge coordinates are read as well. Edges are currently not read from 3D UGRID
+!   files, and are not present in the resulting Mesh when {\tt convertToDual} is {\tt .true.} or
+!   when {\tt nodalDistgrid} is specified.
+!
 !   This call is {\em collective} across the current VM.
 !
 !   \begin{description}
@@ -2114,6 +2124,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Logical) :: localConvertToDual
     type(ESMF_CoordSys_Flag) :: localCoordSys
     type(ESMF_MeshLoc) :: localMaskFlag
+    integer :: edgeIsPresentI, edgeCoordsIsPresentI
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistgridGetInit, nodalDistgrid, rc)
@@ -2172,6 +2183,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
     else
       call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateFromFile, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! If the Mesh ended up with edges (e.g. they were read from a UGRID file),
+    ! then set edgeDistgrid in Mesh
+    edgeIsPresentI=0
+    edgeCoordsIsPresentI=0
+    call C_ESMC_MeshGetEdgeInfoPresence(ESMF_MeshCreateFromFile, &
+         edgeIsPresentI, edgeCoordsIsPresentI, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (edgeIsPresentI .ne. 0) then
+      call C_ESMC_MeshCreateEdgeDistGrid(ESMF_MeshCreateFromFile, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     endif

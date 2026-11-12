@@ -19,6 +19,7 @@
 //------------------------------------------------------------------------------
 
 #include <string>
+#include <vector>
 #include <ostream>
 #include <iterator>
 #include <algorithm>
@@ -1125,5 +1126,218 @@ void get_mask_from_UGRID_file(int pioSystemDesc, int pioFileDesc, char *filename
   delete [] mask_vals;
 }
 
-#endif // ifdef ESMF_PIO
 
+// Get the id of the edge connection variable (i.e. the variable named by the optional
+// edge_node_connectivity attribute of the mesh topology variable).
+// edgeConnPresent - set to 1 if the file contains edge connection info, 0 otherwise.
+//                   If 0, then edgeConn_id is not set.
+void get_edgeConn_id_from_UGRID_file(int pioFileDesc, char *filename, int mesh_topo_id,
+                                     int &edgeConn_id, int &edgeConnPresent) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "get_edgeConn_id_from_UGRID_file()"
+
+  // Declare some useful vars
+  int localrc;
+  int piorc;
+  nc_type type;
+
+  // Init edgeConnPresent to 0 (for the case it isn't present)
+  edgeConnPresent=0;
+
+  // Get attribute len
+  PIO_Offset len_edgeConn_name;
+  piorc = PIOc_inq_att(pioFileDesc, mesh_topo_id, "edge_node_connectivity", &type, &len_edgeConn_name);
+
+  // Edges are optional in UGRID, so if the attribute isn't present, then leave
+  if (piorc != PIO_NOERR) return;
+
+  // Allocate space
+  char *edgeConn_name=new char[len_edgeConn_name+1]; // +1 for null terminator
+
+  // Get attribute value
+  piorc = PIOc_get_att_text(pioFileDesc, mesh_topo_id, "edge_node_connectivity", edgeConn_name);
+  if (!CHECKPIOERROR(piorc, std::string("Error reading edge_node_connectivity attribute on mesh topology var in file ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+  // Add null terminator
+  edgeConn_name[len_edgeConn_name]='\0';
+
+  // Now that we have the name get id of edgeConn var
+  piorc = PIOc_inq_varid(pioFileDesc, edgeConn_name, &edgeConn_id);
+  if (!CHECKPIOERROR(piorc, std::string("Error finding edge connection variable in file ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+  // Free name memory
+  delete [] edgeConn_name;
+
+  // Mark as present
+  edgeConnPresent=1;
+}
+
+
+// Get the global number of edges from the edge connection variable
+// (This also checks that the variable has the expected (edgeCount,2) shape.)
+void get_edgeCount_from_UGRID_file(int pioFileDesc, char *filename, int edgeConn_id,
+                                   PIO_Offset &edgeCount) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "get_edgeCount_from_UGRID_file()"
+
+  // Declare some useful vars
+  int localrc;
+  int piorc;
+
+  // Get number of dims of edge connectivity
+  int num_dims;
+  piorc = PIOc_inq_varndims(pioFileDesc, edgeConn_id, &num_dims);
+  if (!CHECKPIOERROR(piorc, std::string("Error finding number of dims of edge connection variable in file ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+  // Error if number of dims isn't 2
+  if (num_dims != 2) {
+    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_UNEXPECTED,
+                                      " edge connection variable should have two dimensions.",
+                                      ESMC_CONTEXT, &localrc)) throw localrc;
+  }
+
+  // Get dim ids
+  int dim_ids[2];
+  piorc = PIOc_inq_vardimid(pioFileDesc, edgeConn_id, dim_ids);
+  if (!CHECKPIOERROR(piorc, std::string("Error finding the dim ids of edge connection variable in file ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+  // Get edgeCount from 1st dim_id
+  piorc = PIOc_inq_dimlen(pioFileDesc, dim_ids[0], &edgeCount);
+  if (!CHECKPIOERROR(piorc, std::string("Error reading number of edges from file ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+  // Make sure that the 2nd dim is of size 2 (an edge always has 2 nodes)
+  PIO_Offset num_nodes_per_edge;
+  piorc = PIOc_inq_dimlen(pioFileDesc, dim_ids[1], &num_nodes_per_edge);
+  if (!CHECKPIOERROR(piorc, std::string("Error reading number of nodes per edge from file ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+  if (num_nodes_per_edge != 2) {
+    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_UNEXPECTED,
+                                      " the second dimension of the edge connection variable should be of size 2.",
+                                      ESMC_CONTEXT, &localrc)) throw localrc;
+  }
+}
+
+
+// Get a contiguous block of edge connection info out from a UGRID file.
+// Unlike the element connections this isn't read using a decomposition, because
+// without also having face to edge connectivity a PET has no way of knowing ahead of
+// time which edges it needs. Instead, the caller is expected to loop reading blocks
+// (the same blocks on every PET, since this is a collective call) and to keep just
+// the edges it wants from each block. This keeps the memory used bounded.
+//
+// start_edge - the 0-based position of the first edge to read
+// num_edges  - the number of edges to read
+// edgeConn   - must be allocated to at least size 2*num_edges. On output contains
+//              the global ids (1-based) of the 2 nodes of each edge in the block,
+//              in the order in which they appear in the file.
+void get_edgeConn_block_from_UGRID_file(int pioFileDesc, char *filename, int edgeConn_id,
+                                        PIO_Offset start_edge, PIO_Offset num_edges,
+                                        int *edgeConn) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "get_edgeConn_block_from_UGRID_file()"
+
+  // Declare some useful vars
+  int localrc;
+  int piorc;
+
+  // If nothing to do, then leave
+  if (num_edges < 1) return;
+
+  // Read block
+  PIO_Offset starts[2]={start_edge,0};
+  PIO_Offset counts[2]={num_edges,2};
+  piorc = PIOc_get_vara_int(pioFileDesc, edgeConn_id, starts, counts, edgeConn);
+  if (!CHECKPIOERROR(piorc, std::string("Error reading edge connection variable from file ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+  // Get start_index attribute, otherwise default to 0.
+  int start_index=0; // Set to default
+  int att_start_index=0;
+  piorc = PIOc_get_att_int(pioFileDesc, edgeConn_id, "start_index", &att_start_index);
+  if (piorc == PIO_NOERR) {
+    start_index=att_start_index;
+  }
+
+  // Given start_index switch base of connections to be 1-based (i.e. to be global node ids)
+  for (PIO_Offset i=0; i<2*num_edges; i++) {
+    edgeConn[i] = edgeConn[i]-start_index+1;
+  }
+}
+
+
+// Get the ids of the edge coordinate variables (i.e. the variables named by the optional
+// edge_coordinates attribute of the mesh topology variable).
+// edgeCoord_ids - must at least be of size dim
+// edgeCoordsPresent - set to 1 if the file contains edge coordinates, 0 otherwise.
+void get_edgeCoord_ids_from_UGRID_file(int pioFileDesc, char *filename, int mesh_topo_id, int dim,
+                                       int *edgeCoord_ids, int &edgeCoordsPresent) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "get_edgeCoord_ids_from_UGRID_file()"
+
+  // Declare some useful vars
+  int localrc;
+  int piorc;
+  nc_type type;
+
+  // Init edgeCoordsPresent to 0 (for the case it isn't present)
+  edgeCoordsPresent=0;
+
+  // Get attribute len
+  PIO_Offset len_edge_coord_attr;
+  piorc = PIOc_inq_att(pioFileDesc, mesh_topo_id, "edge_coordinates", &type, &len_edge_coord_attr);
+
+  // If they aren't present, then leave (init. as not present above)
+  if (piorc != PIO_NOERR) return;
+
+  // Allocate space
+  char *edge_coord_attr=new char[len_edge_coord_attr+1]; // +1 for null terminator
+
+  // Get attribute value
+  piorc = PIOc_get_att_text(pioFileDesc, mesh_topo_id, "edge_coordinates", edge_coord_attr);
+  if (!CHECKPIOERROR(piorc, std::string("Error reading edge_coordinates attribute on mesh topology var in file ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+  // Add null terminator to end of whole attribute
+  edge_coord_attr[len_edge_coord_attr]='\0';
+
+  // Break attribute into the space separated names that it contains
+  std::vector<std::string> edge_coord_names;
+  std::string curr_name;
+  for (PIO_Offset i=0; i<=len_edge_coord_attr; i++) {
+    char c=edge_coord_attr[i];
+    if ((c == ' ') || (c == '\0')) {
+      if (!curr_name.empty()) edge_coord_names.push_back(curr_name);
+      curr_name.clear();
+    } else {
+      curr_name.push_back(c);
+    }
+  }
+
+  // Free attribute memory
+  delete [] edge_coord_attr;
+
+  // Make sure the number of names matches the dim of the mesh
+  if (edge_coord_names.size() != dim) {
+    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_UNEXPECTED,
+                                      "The number of names in the edge_coordinates attribute doesn't match the dimension of the mesh.",
+                                      ESMC_CONTEXT, &localrc)) throw localrc;
+  }
+
+  // Loop getting edge coordinate ids from names
+  for (int n=0; n<dim; n++) {
+    piorc = PIOc_inq_varid(pioFileDesc, edge_coord_names[n].c_str(), edgeCoord_ids+n);
+    if (!CHECKPIOERROR(piorc, std::string("Error finding edge coordinate variable in file ") + filename,
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+  }
+
+  // Mark as present
+  edgeCoordsPresent=1;
+}
+
+#endif // ifdef ESMF_PIO
