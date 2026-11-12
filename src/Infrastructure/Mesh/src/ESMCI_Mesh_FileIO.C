@@ -677,8 +677,13 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
 // local to this PET. (This means that, like nodes, an edge on the boundary between
 // PETs will end up on each of the PETs that have an element which contains it.)
 //
+// In 2D the sides of an element are given by consecutive nodes in its connection
+// list. In 3D the edges of an element depend on its type, so tables giving the
+// edges of the supported types (hexahedrons and tetrahedrons) are used.
+//
 // INPUTS:
 //  edgeConn_id    - the id of the edge connection variable in the file
+//  pdim           - the parametric dimension of the mesh (2 or 3)
 //  num_elems      - the number of elements on this PET
 //  numElementConn - the number of connections for each element on this PET
 //  elementConn    - the element connections in terms of global node ids (may
@@ -692,17 +697,28 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
 //                   (i.e. the orientation of the edge in the file is preserved)
 //
 static void get_local_edges_from_UGRID_file(int pioFileDesc, char *filename, int edgeConn_id,
+                                            int pdim,
                                             int num_elems, int *numElementConn, int *elementConn,
                                             std::vector<int> &edge_ids,
                                             std::vector<int> &edge_node_ids) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "get_local_edges_from_UGRID_file()"
 
+  // The edges of the supported 3D element types in terms of (0-based) positions
+  // in the element's connection list. These follow the ESMF node ordering in
+  // which the first 4 nodes of a hexahedron go around one face and the last 4
+  // go around the opposite face, with node 5 across from node 1, etc.
+  static const int hex_edges[12][2]={{0,1},{1,2},{2,3},{3,0},
+                                     {4,5},{5,6},{6,7},{7,4},
+                                     {0,4},{1,5},{2,6},{3,7}};
+  static const int tet_edges[6][2]={{0,1},{1,2},{2,0},
+                                    {0,3},{1,3},{2,3}};
+
   // Init output
   edge_ids.clear();
   edge_node_ids.clear();
 
-  //// Construct a sorted list of the sides of the elements on this PET
+  //// Construct a sorted list of the sides (edges in 3D) of the elements on this PET
   //// (Each side is stored with the smaller node id first, so that it can be
   ////  matched with an edge irrespective of the edge's orientation.)
   std::vector<std::pair<int,int> > sides;
@@ -711,26 +727,56 @@ static void get_local_edges_from_UGRID_file(int pioFileDesc, char *filename, int
     // Number of connections in this elem
     int num_conn=numElementConn[e];
 
-    // Loop through the polygons that make up this elem
-    // (There is usually just 1, but there can be more if there are polygon breaks)
-    int poly_beg=0;
-    for (int j=0; j<=num_conn; j++) {
+    if (pdim == 2) {
 
-      // If not at the end of a polygon, then keep going
-      if ((j < num_conn) && (elementConn[pos+j] != MESH_POLYBREAK_IND)) continue;
+      // Loop through the polygons that make up this elem
+      // (There is usually just 1, but there can be more if there are polygon breaks)
+      int poly_beg=0;
+      for (int j=0; j<=num_conn; j++) {
 
-      // Add the sides of the polygon that just ended
-      int num_poly_nodes=j-poly_beg;
-      for (int k=0; k<num_poly_nodes; k++) {
-        int n1=elementConn[pos+poly_beg+k];
-        int n2=elementConn[pos+poly_beg+(k+1)%num_poly_nodes];
-        if (n1 == n2) continue; // skip degenerate sides
+        // If not at the end of a polygon, then keep going
+        if ((j < num_conn) && (elementConn[pos+j] != MESH_POLYBREAK_IND)) continue;
+
+        // Add the sides of the polygon that just ended
+        int num_poly_nodes=j-poly_beg;
+        for (int k=0; k<num_poly_nodes; k++) {
+          int n1=elementConn[pos+poly_beg+k];
+          int n2=elementConn[pos+poly_beg+(k+1)%num_poly_nodes];
+          if (n1 == n2) continue; // skip degenerate sides
+          if (n1 < n2) sides.push_back(std::make_pair(n1,n2));
+          else sides.push_back(std::make_pair(n2,n1));
+        }
+
+        // Next polygon starts after break
+        poly_beg=j+1;
+      }
+
+    } else if (pdim == 3) {
+
+      // Get the table of edges for this type of elem
+      int num_elem_edges=0;
+      const int (*elem_edges)[2]=NULL;
+      if (num_conn == 8) {
+        num_elem_edges=12;
+        elem_edges=hex_edges;
+      } else if (num_conn == 4) {
+        num_elem_edges=6;
+        elem_edges=tet_edges;
+      } else {
+        Throw() << "Unrecognized 3D element type with "<<num_conn<<" nodes.";
+      }
+
+      // Add the edges of the elem
+      for (int k=0; k<num_elem_edges; k++) {
+        int n1=elementConn[pos+elem_edges[k][0]];
+        int n2=elementConn[pos+elem_edges[k][1]];
+        if (n1 == n2) continue; // skip degenerate edges
         if (n1 < n2) sides.push_back(std::make_pair(n1,n2));
         else sides.push_back(std::make_pair(n2,n1));
       }
 
-      // Next polygon starts after break
-      poly_beg=j+1;
+    } else {
+      Throw() << "Meshes can only be created with dim=2 or 3.";
     }
 
     // Advance to next elem
@@ -960,19 +1006,16 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
 
     // Get the edges on this PET, if edges are present in the file
     // (This needs to be done while we still have the global element connection info.)
-    // Edges are only read for 2D meshes, because in 3D the edges of an element
-    // can't be worked out from just the order of its nodes. 
     int edgesPresent=0;
     int edgeConn_id;
     std::vector<int> edge_ids_vec;
     std::vector<int> edge_node_ids_vec;
-    if (pdim == 2) {
-      get_edgeConn_id_from_UGRID_file(pioFileDesc, filename, mesh_topo_id, edgeConn_id, edgesPresent);
-      if (edgesPresent) {
-        get_local_edges_from_UGRID_file(pioFileDesc, filename, edgeConn_id,
-                                        num_elems, numElementConn, elementConn,
-                                        edge_ids_vec, edge_node_ids_vec);
-      }
+    get_edgeConn_id_from_UGRID_file(pioFileDesc, filename, mesh_topo_id, edgeConn_id, edgesPresent);
+    if (edgesPresent) {
+      get_local_edges_from_UGRID_file(pioFileDesc, filename, edgeConn_id,
+                                      pdim,
+                                      num_elems, numElementConn, elementConn,
+                                      edge_ids_vec, edge_node_ids_vec);
     }
 
     // Free element connection info, because we don't need it any more

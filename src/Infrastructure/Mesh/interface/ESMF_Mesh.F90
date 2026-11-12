@@ -2054,15 +2054,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Create a Mesh from a file. Provides options to convert to 3D and in the case of SCRIP
 !   format files, allows the dual of the mesh to be created.
 !
-!   If a 2D UGRID format file contains edge information (i.e. the mesh topology variable has an
+!   If a UGRID format file contains edge information (i.e. the mesh topology variable has an
 !   {\tt edge\_node\_connectivity} attribute), then the edges are read from the file and added
 !   to the Mesh in the same way as if {\tt ESMF\_MeshAddEdges()} (\ref{sec:mesh:api:meshaddedges})
 !   had been called. The id of an edge is its position (starting at 1) in the file, and the order
-!   of the two nodes of an edge is the same as in the file. A PET gets the edges that are a side of
-!   at least one of its elements. If the mesh topology variable also has an {\tt edge\_coordinates}
-!   attribute, then the edge coordinates are read as well. Edges are currently not read from 3D UGRID
-!   files, and are not present in the resulting Mesh when {\tt convertToDual} is {\tt .true.} or
-!   when {\tt nodalDistgrid} is specified.
+!   of the two nodes of an edge is the same as in the file. A PET gets the edges that are a side
+!   (an edge in 3D) of at least one of its elements. If the mesh topology variable also has an {\tt edge\_coordinates}
+!   attribute, then the edge coordinates are read as well. This is supported for both 2D and 3D
+!   (hexahedron and tetrahedron) meshes. Edges are currently not present in the resulting Mesh
+!   when {\tt convertToDual} is {\tt .true.} or when {\tt nodalDistgrid} is specified.
 !
 !   This call is {\em collective} across the current VM.
 !

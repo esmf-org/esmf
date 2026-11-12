@@ -406,6 +406,25 @@ program ESMF_MeshFileIOUTest
 #endif
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test create Mesh with edges from spherical 3D UGrid file."
+  write(failMsg, *) "Did not return ESMF_SUCCESS or edge info incorrect"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  call check_mesh_edges_from_sph_3D_UG_file(correct, rc)
+
+#ifdef ESMF_PIO
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMC_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMC_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+#endif
+  !-----------------------------------------------------------------------------
+
 #endif
 
   !------------------------------------------------------------------------
@@ -8088,6 +8107,325 @@ subroutine  check_mesh_edges_from_sph_3x3_UG_file(correct, rc)
   rc=ESMF_SUCCESS
 
 end subroutine check_mesh_edges_from_sph_3x3_UG_file
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !
+  ! Reads a 3D mesh, including its edges, from a UGRID file.
+  ! This can be run on any number of PETs.
+  !
+  ! The mesh consists of the 2x2x1 set of hexahedrons used in the other
+  ! 3D tests (nodes 1-9 in the bottom layer and 10-18 in the top layer,
+  ! with node n+9 above node n) plus a separate tetrahedron (nodes 19-22)
+  ! so that both of the supported 3D element types are checked.
+  !
+  !          Bottom layer                 Top layer
+  !
+  !   2.0   7 ------- 8 ------- 9      16 ------ 17 ------ 18
+  !         |         |         |      |         |         |
+  !         |    3    |    4    |      |    3    |    4    |
+  !         |         |         |      |         |         |
+  !   1.0   4 ------- 5 ------- 6      13 ------ 14 ------ 15
+  !         |         |         |      |         |         |
+  !         |    1    |    2    |      |    1    |    2    |
+  !         |         |         |      |         |         |
+  !   0.0   1 ------- 2 ------- 3      10 ------ 11 ------ 12
+  !
+  !        0.0       1.0       2.0    0.0       1.0       2.0
+  !
+  !               Node Ids at corners
+  !              Element Ids in centers
+  !
+  ! The file contains 39 edges: 12 in each layer, the 9 vertical ones
+  ! between the layers, and the 6 edges of the tetrahedron. In the file each
+  ! edge goes from its lower node id to its higher node id, except for edges
+  ! 3 (5->4), 18 (18->17), 29 (14->5) and 37 (22->19) which are reversed to
+  ! check that the orientation of the edges in the file is preserved.
+  !
+  !!!!!
+
+  ! Reads in a spherical 3D UGRID mesh file which contains edge information
+  ! (edge_node_connectivity and edge_coordinates) and verifies that the edges
+  ! in the resulting Mesh are correct.
+subroutine  check_mesh_edges_from_sph_3D_UG_file(correct, rc)
+  type(ESMF_Mesh) :: mesh
+  logical :: correct
+  integer :: rc
+
+  ! Edge info expected from file
+  integer, parameter :: numEdgesFile=39
+  integer :: edgeConnFile(2*numEdgesFile)
+  logical :: edgeIsLocal(numEdgesFile)
+
+  ! The edges of a hexahedron and a tetrahedron in terms of
+  ! positions in the element's connection list
+  integer :: hexEdges(2,12), tetEdges(2,6)
+  integer :: numElemNodes, numElemEdges
+  integer :: elemEdges(2,12)
+
+  ! Info from mesh
+  integer :: numNodes, numElems, numElemConns
+  integer :: numEdges, numEdgeConns, numOwnedEdges
+  integer, allocatable :: nodeIds(:)
+  real(ESMF_KIND_R8), allocatable :: nodeCoords(:)
+  integer, allocatable :: elemTypes(:), elemConn(:)
+  integer, allocatable :: edgeIds(:), edgeOwners(:), edgeConn(:)
+  real(ESMF_KIND_R8), allocatable :: edgeCoords(:)
+  logical :: edgeIsPresent, edgeCoordsIsPresent, edgeDistgridIsPresent
+  type(ESMF_DistGrid) :: edgeDistgrid
+  type(ESMF_Field) :: edgeField
+  real(ESMF_KIND_R8), pointer :: edgeFieldPtr(:)
+
+  integer :: petCount, localPet
+  type(ESMF_VM) :: vm
+  integer :: i, j, k, d, e, pos
+  integer :: n1, n2, f1, f2
+  integer :: numLocalExpected, numOwnedCheck, dgElemCount
+  integer :: sendBuf(1), recvBuf(1)
+  real(ESMF_KIND_R8) :: midCoord
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! The global node ids of the 2 nodes of each edge in the file
+  ! (in the order in which they are in the file)
+  edgeConnFile=(/1,2,   2,3,   5,4,   5,6,   7,8,   8,9,   & ! 1-6
+                 1,4,   2,5,   3,6,   4,7,   5,8,   6,9,   & ! 7-12
+                 10,11, 11,12, 13,14, 14,15, 16,17, 18,17, & ! 13-18
+                 10,13, 11,14, 12,15, 13,16, 14,17, 15,18, & ! 19-24
+                 1,10,  2,11,  3,12,  4,13,  14,5,  6,15,  & ! 25-30
+                 7,16,  8,17,  9,18,                       & ! 31-33
+                 19,20, 20,21, 21,19, 22,19, 20,22, 21,22/)  ! 34-39
+
+  ! Edges of a hexahedron
+  hexEdges=reshape((/1,2, 2,3, 3,4, 4,1, &
+                     5,6, 6,7, 7,8, 8,5, &
+                     1,5, 2,6, 3,7, 4,8/),(/2,12/))
+
+  ! Edges of a tetrahedron
+  tetEdges=reshape((/1,2, 2,3, 3,1, &
+                     1,4, 2,4, 3,4/),(/2,6/))
+
+
+  ! Read mesh from a file that contains edges
+  mesh=ESMF_MeshCreate("data/test_sph_2x2x1_edges_ugrid.nc", &
+       fileformat=ESMF_FILEFORMAT_UGRID, &
+       rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! Check that edge information is present
+  call ESMF_MeshGet(mesh, &
+       edgeIsPresent=edgeIsPresent, &
+       edgeCoordsIsPresent=edgeCoordsIsPresent, &
+       edgeDistgridIsPresent=edgeDistgridIsPresent, &
+       rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  if (.not. edgeIsPresent) correct=.false.
+  if (.not. edgeCoordsIsPresent) correct=.false.
+  if (.not. edgeDistgridIsPresent) correct=.false.
+
+  ! If there aren't edges, then the gets below will fail, so
+  ! leave here reporting that things aren't correct
+  if (.not. correct) then
+     call ESMF_MeshDestroy(mesh, rc=rc)
+     return
+  endif
+
+  ! Get counts
+  call ESMF_MeshGet(mesh, &
+       nodeCount=numNodes, &
+       elementCount=numElems, &
+       elementConnCount=numElemConns, &
+       edgeCount=numEdges, &
+       edgeConnCount=numEdgeConns, &
+       numOwnedEdges=numOwnedEdges, &
+       rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! Check counts
+  if (numEdgeConns .ne. 2*numEdges) correct=.false.
+  if ((petCount .eq. 1) .and. (numEdges .ne. numEdgesFile)) correct=.false.
+
+  ! Allocate space for mesh info
+  allocate(nodeIds(numNodes))
+  allocate(nodeCoords(3*numNodes))
+  allocate(elemTypes(numElems))
+  allocate(elemConn(numElemConns))
+  allocate(edgeIds(numEdges))
+  allocate(edgeOwners(numEdges))
+  allocate(edgeConn(numEdgeConns))
+  allocate(edgeCoords(3*numEdges))
+
+  ! Get mesh info
+  call ESMF_MeshGet(mesh, &
+       nodeIds=nodeIds, &
+       nodeCoords=nodeCoords, &
+       elementTypes=elemTypes, &
+       elementConn=elemConn, &
+       edgeIds=edgeIds, &
+       edgeOwners=edgeOwners, &
+       edgeConn=edgeConn, &
+       edgeCoords=edgeCoords, &
+       rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+
+  !! Use the elements on this PET to work out which of the edges
+  !! in the file should be on this PET (i.e. those which are an
+  !! edge of a local element)
+  edgeIsLocal(:)=.false.
+  pos=0
+  do i=1,numElems
+
+     ! Get edges based on type of element
+     if (elemTypes(i) .eq. ESMF_MESHELEMTYPE_HEX) then
+        numElemNodes=8
+        numElemEdges=12
+        elemEdges(:,1:12)=hexEdges(:,1:12)
+     else if (elemTypes(i) .eq. ESMF_MESHELEMTYPE_TETRA) then
+        numElemNodes=4
+        numElemEdges=6
+        elemEdges(:,1:6)=tetEdges(:,1:6)
+     else
+        correct=.false.
+        exit
+     endif
+
+     do j=1,numElemEdges
+
+        ! Global ids of the nodes at each end of this edge
+        n1=nodeIds(elemConn(pos+elemEdges(1,j)))
+        n2=nodeIds(elemConn(pos+elemEdges(2,j)))
+
+        ! Find the matching edge in the file
+        do e=1,numEdgesFile
+           f1=edgeConnFile(2*e-1)
+           f2=edgeConnFile(2*e)
+           if (((n1 .eq. f1) .and. (n2 .eq. f2)) .or. &
+               ((n1 .eq. f2) .and. (n2 .eq. f1))) then
+              edgeIsLocal(e)=.true.
+           endif
+        enddo
+     enddo
+     pos=pos+numElemNodes
+  enddo
+  numLocalExpected=count(edgeIsLocal)
+
+  ! Check that the number of edges matches the expected number
+  if (numEdges .ne. numLocalExpected) correct=.false.
+
+
+  !! Check each edge
+  numOwnedCheck=0
+  do k=1,numEdges
+     e=edgeIds(k)
+
+     ! Check that the id is in range
+     if ((e .lt. 1) .or. (e .gt. numEdgesFile)) then
+        correct=.false.
+        cycle
+     endif
+
+     ! Check that the edge should be on this PET
+     if (.not. edgeIsLocal(e)) correct=.false.
+
+     ! Check that the ids are in ascending order (so there are no repeats)
+     if (k .gt. 1) then
+        if (edgeIds(k) .le. edgeIds(k-1)) correct=.false.
+     endif
+
+     ! Check that the connection indices are in range
+     if ((edgeConn(2*k-1) .lt. 1) .or. (edgeConn(2*k-1) .gt. numNodes) .or. &
+         (edgeConn(2*k)   .lt. 1) .or. (edgeConn(2*k)   .gt. numNodes)) then
+        correct=.false.
+        cycle
+     endif
+
+     ! Check that the nodes of the edge are the same as in the file
+     ! (and in the same order)
+     if (nodeIds(edgeConn(2*k-1)) .ne. edgeConnFile(2*e-1)) correct=.false.
+     if (nodeIds(edgeConn(2*k))   .ne. edgeConnFile(2*e))   correct=.false.
+
+     ! Check edge coords. In the file these are the mid-points of the edges, and
+     ! the changes made to coordinates when they are read in (e.g. the scaling of the
+     ! height) keep that true, so compare with the mid-point of the node coords. 
+     do d=1,3
+        midCoord=0.5_ESMF_KIND_R8*(nodeCoords(3*(edgeConn(2*k-1)-1)+d)+ &
+                                   nodeCoords(3*(edgeConn(2*k)-1)+d))
+        if (abs(edgeCoords(3*(k-1)+d)-midCoord) .gt. 1.0E-12_ESMF_KIND_R8) correct=.false.
+     enddo
+
+     ! Check owner
+     if ((edgeOwners(k) .lt. 0) .or. (edgeOwners(k) .ge. petCount)) correct=.false.
+     if (edgeOwners(k) .eq. localPet) numOwnedCheck=numOwnedCheck+1
+  enddo
+
+  ! Check the number of owned edges
+  if (numOwnedEdges .ne. numOwnedCheck) correct=.false.
+
+  ! Debug output
+  ! write(*,*) localPet," edgeIds   =",edgeIds
+  ! write(*,*) localPet," edgeOwners=",edgeOwners
+  ! write(*,*) localPet," edgeConn  =",edgeConn
+
+
+  !! Check that across all PETs each edge in the file is owned exactly once.
+  !! (Every edge in this file is an edge of an element, so it has to be on at
+  !!  least one PET, and the owner of an edge is the same on every PET it's on.)
+  sendBuf(1)=numOwnedEdges
+  call ESMF_VMAllFullReduce(vm, sendData=sendBuf, recvData=recvBuf(1), &
+       count=1, reduceflag=ESMF_REDUCE_SUM, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  if (recvBuf(1) .ne. numEdgesFile) correct=.false.
+
+
+  !! Check the edge Distgrid
+  call ESMF_MeshGet(mesh, edgeDistgrid=edgeDistgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  call ESMF_DistGridGet(edgeDistgrid, localDE=0, elementCount=dgElemCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  if (dgElemCount .ne. numOwnedEdges) correct=.false.
+
+
+  !! Check that a Field can be created on the edges
+  edgeField = ESMF_FieldCreate(mesh, typekind=ESMF_TYPEKIND_R8, &
+       meshloc=ESMF_MESHLOC_EDGE, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  call ESMF_FieldGet(edgeField, localDE=0, farrayPtr=edgeFieldPtr, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  if (size(edgeFieldPtr) .ne. numOwnedEdges) correct=.false.
+
+  call ESMF_FieldDestroy(edgeField, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+
+  ! Deallocate mesh info
+  deallocate(nodeIds)
+  deallocate(nodeCoords)
+  deallocate(elemTypes)
+  deallocate(elemConn)
+  deallocate(edgeIds)
+  deallocate(edgeOwners)
+  deallocate(edgeConn)
+  deallocate(edgeCoords)
+
+  ! Get rid of Mesh
+  call ESMF_MeshDestroy(mesh, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! Return success
+  rc=ESMF_SUCCESS
+
+end subroutine check_mesh_edges_from_sph_3D_UG_file
 
 
 end program ESMF_MeshFileIOUTest
