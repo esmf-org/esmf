@@ -829,6 +829,25 @@ void MeshCap::getEdgeConnCount(int *edgeConnCount, int *rc){
   }
 }
 
+void MeshCap::getEdgeSeqPos(int *num_seq, int *seq_list,
+                            ESMCI::InterArray<int> *edgeSeqPos, int *rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::getEdgeSeqPos()"
+
+  int localrc;
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_MeshGetEdgeSeqPos(mesh, num_seq, seq_list, edgeSeqPos, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+       "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+}
+
 void MeshCap::getElemEdgeConnCount(int *elemEdgeConnCount, int *rc){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::getElemEdgeConnCount()"

@@ -2769,6 +2769,87 @@ void ESMCI_MeshGetElemEdgeConn(Mesh *mesh,
 }
 
 
+// For each edge on this PET, get the position of its id in a list of sequence indices.
+//
+// This is used to work out where the data for each edge is in a Field built on the edges
+// of a Mesh: seq_list is the list of sequence indices of the edge DistGrid on this PET,
+// which is the order of the data in the Field.
+//
+// num_seq    - the size of seq_list
+// seq_list   - the list of sequence indices
+// edgeSeqPos - must be of size edgeCount. On output, entry i is the 1-based position in
+//              seq_list of the id of edge i (in the order given by
+//              ESMCI_MeshGetEdgeCreateInfo()), or 0 if the id isn't in seq_list.
+void ESMCI_MeshGetEdgeSeqPos(Mesh *mesh, int *num_seq, int *seq_list,
+                             ESMCI::InterArray<int> *edgeSeqPos, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_MeshGetEdgeSeqPos()"
+
+  try {
+    int localrc;
+
+    // Make sure that the mesh has edges
+    if (!mesh->getHasEdges()) {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
+          "Attempting to get edge information from a Mesh with no edges.",
+          ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+
+    // Error check output array
+    ThrowRequire(edgeSeqPos);
+    if (edgeSeqPos->dimCount !=1) {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          " edgeFieldIndex array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+    }
+
+    if (edgeSeqPos->extent[0] != mesh->getEdgeCount()) {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          " edgeFieldIndex array must be of size edgeCount", ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+
+    // Construct a map from sequence index to its position in the list
+    ThrowRequire(num_seq);
+    std::map<int,int> seq_to_pos;
+    for (int i=0; i<*num_seq; i++) {
+      // If the same index is there more than once, this keeps the first
+      seq_to_pos.insert(std::make_pair(seq_list[i],i+1)); // +1 to make 1-based
+    }
+
+    // Look up each edge id, using 0 if it isn't there
+    const std::vector<int>& edgeIds = mesh->getEdgeIds();
+    int *edgeSeqPos_array=edgeSeqPos->array;
+    for (int i=0; i<edgeIds.size(); i++) {
+      std::map<int,int>::iterator si=seq_to_pos.find(edgeIds[i]);
+      if (si != seq_to_pos.end()) edgeSeqPos_array[i]=si->second;
+      else edgeSeqPos_array[i]=0;
+    }
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // Set return code
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
+
+
 void ESMCI_MeshGetOwnedNodeCount(Mesh *mesh, int *nodeCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_MeshGetOwnedNodeCount()"

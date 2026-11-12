@@ -124,6 +124,9 @@ void ESMCI_MeshGetEdgeCreateInfo(Mesh *mesh,
 extern const int ESMCI_MESH_TET_EDGES[6][2];
 extern const int ESMCI_MESH_HEX_EDGES[12][2];
 
+void ESMCI_MeshGetEdgeSeqPos(Mesh *mesh, int *num_seq, int *seq_list,
+                             ESMCI::InterArray<int> *edgeSeqPos, int *rc);
+
 void ESMCI_MeshGetElemEdgeConnCount(Mesh *mesh, int *elemEdgeConnCount, int *rc);
 void ESMCI_MeshGetElemEdgeConn(Mesh *mesh,
                                ESMCI::InterArray<int> *elemEdgeConn, int *rc);

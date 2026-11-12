@@ -3040,6 +3040,20 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test getting the location of edge data in a Field from a Mesh"
+  write(failMsg, *) "Did not return ESMF_SUCCESS or locations incorrect"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  call testEdgeFieldIndex(correct, rc)
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
 #endif
 
   !------------------------------------------------------------------------
@@ -11450,6 +11464,170 @@ subroutine testElementEdgeConn(correct, rc)
   rc=ESMF_SUCCESS
 
 end subroutine testElementEdgeConn
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !
+  ! Tests getting the location of the data for each edge in a Field built
+  ! on the edges of a Mesh (edgeFieldIndex), both when the edge Distgrid is
+  ! created by the Mesh and when the user provides one in which the edges
+  ! are in a different order than in the Mesh.
+  !
+  ! To be able to run on any number of PETs, each PET creates one
+  ! quadrilateral which isn't connected to the ones on the other PETs:
+  !
+  !   1.0   4 ---3--- 3
+  !         |         |
+  !         4    1    2
+  !         |         |
+  !   0.0   1 ---1--- 2
+  !
+  !        0.0       1.0
+  !
+  !    Local node indices at corners
+  !    Local edge indices on sides
+  !
+  !!!!!
+subroutine testEdgeFieldIndex(correct, rc)
+  logical :: correct
+  integer :: rc
+  type(ESMF_Mesh) :: mesh
+  type(ESMF_VM) :: vm
+  type(ESMF_DistGrid) :: edgeDistgrid
+  type(ESMF_Field) :: edgeField
+  real(ESMF_KIND_R8), pointer :: edgeFieldPtr(:)
+  integer :: petCount, localPet
+  integer :: nodeIds(4), nodeOwners(4)
+  real(ESMF_KIND_R8) :: nodeCoords(8)
+  integer :: edgeIds(4), edgeOwners(4), edgeConn(8)
+  integer :: elemIds(1), elemTypes(1), elemConn(4)
+  integer :: edgeFieldIndex(4), seqIndexList(4)
+  integer :: i, k, lb, iter
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! Set up nodes
+  nodeIds=(/1,2,3,4/)+4*localPet
+  nodeOwners=localPet
+  nodeCoords=(/0.0,0.0, &
+               1.0,0.0, &
+               1.0,1.0, &
+               0.0,1.0/)
+  nodeCoords(1:7:2)=nodeCoords(1:7:2)+2.0*localPet
+
+  ! Set up edges
+  edgeIds=(/1,2,3,4/)+4*localPet
+  edgeOwners=localPet
+  edgeConn=(/1,2, &
+             2,3, &
+             3,4, &
+             4,1/)
+
+  ! Set up element
+  elemIds=(/1/)+localPet
+  elemTypes=(/ESMF_MESHELEMTYPE_QUAD/)
+  elemConn=(/1,2,3,4/)
+
+  ! Do this twice. The first time let the Mesh create the edge Distgrid,
+  ! and the second time provide one. 
+  do iter=1,2
+
+     mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+          coordSys=ESMF_COORDSYS_CART, rc=rc)
+     if (rc /= ESMF_SUCCESS) return
+
+     call ESMF_MeshAddNodes(mesh, nodeIds=nodeIds, nodeCoords=nodeCoords, &
+          nodeOwners=nodeOwners, rc=rc)
+     if (rc /= ESMF_SUCCESS) return
+
+     if (iter .eq. 1) then
+        call ESMF_MeshAddEdges(mesh, edgeIds=edgeIds, edgeOwners=edgeOwners, &
+             edgeConn=edgeConn, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+     else
+        ! Provide a Distgrid with the edges in a different order than in the Mesh
+        edgeDistgrid=ESMF_DistGridCreate(arbSeqIndexList= &
+             (/edgeIds(3),edgeIds(1),edgeIds(4),edgeIds(2)/), rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+
+        call ESMF_MeshAddEdges(mesh, edgeIds=edgeIds, edgeOwners=edgeOwners, &
+             edgeConn=edgeConn, edgeDistgrid=edgeDistgrid, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+     endif
+
+     call ESMF_MeshAddElements(mesh, elementIds=elemIds,&
+          elementTypes=elemTypes, elementConn=elemConn, rc=rc)
+     if (rc /= ESMF_SUCCESS) return
+
+     ! Get the location of each edge's data
+     call ESMF_MeshGet(mesh, edgeFieldIndex=edgeFieldIndex, rc=rc)
+     if (rc /= ESMF_SUCCESS) return
+
+     ! Check against the expected locations
+     if (iter .eq. 1) then
+        if (any(edgeFieldIndex .ne. (/1,2,3,4/))) correct=.false.
+     else
+        if (any(edgeFieldIndex .ne. (/2,4,1,3/))) correct=.false.
+     endif
+
+     ! Create a Field on the edges and use the locations to set
+     ! the data for each edge to its id
+     edgeField = ESMF_FieldCreate(mesh, typekind=ESMF_TYPEKIND_R8, &
+          meshloc=ESMF_MESHLOC_EDGE, rc=rc)
+     if (rc /= ESMF_SUCCESS) return
+
+     call ESMF_FieldGet(edgeField, localDE=0, farrayPtr=edgeFieldPtr, rc=rc)
+     if (rc /= ESMF_SUCCESS) return
+
+     if (size(edgeFieldPtr) .ne. 4) then
+        correct=.false.
+     else
+        lb=lbound(edgeFieldPtr,1)
+        do i=1,4
+           k=edgeFieldIndex(i)
+           if ((k .lt. 1) .or. (k .gt. 4)) then
+              correct=.false.
+              cycle
+           endif
+           edgeFieldPtr(lb+k-1)=real(edgeIds(i),ESMF_KIND_R8)
+        enddo
+
+        ! The data in a Field is in the order of the sequence indices of its Distgrid,
+        ! and those are the edge ids, so the Field should now contain them
+        if (iter .eq. 1) then
+           call ESMF_MeshGet(mesh, edgeDistgrid=edgeDistgrid, rc=rc)
+           if (rc /= ESMF_SUCCESS) return
+        endif
+
+        call ESMF_DistGridGet(edgeDistgrid, localDE=0, seqIndexList=seqIndexList, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+
+        do k=1,4
+           if (nint(edgeFieldPtr(lb+k-1)) .ne. seqIndexList(k)) correct=.false.
+        enddo
+     endif
+
+     call ESMF_FieldDestroy(edgeField, rc=rc)
+     if (rc /= ESMF_SUCCESS) return
+
+     call ESMF_MeshDestroy(mesh, rc=rc)
+     if (rc /= ESMF_SUCCESS) return
+
+     if (iter .eq. 2) then
+        call ESMF_DistGridDestroy(edgeDistgrid, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+     endif
+  enddo
+
+  ! Return success
+  rc=ESMF_SUCCESS
+
+end subroutine testEdgeFieldIndex
+
 
 
 

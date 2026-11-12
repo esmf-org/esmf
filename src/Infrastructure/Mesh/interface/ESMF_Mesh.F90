@@ -4977,6 +4977,7 @@ end function ESMF_MeshEmptyCreate
                    edgeIsPresent, edgeCount, edgeIds, &
                    edgeOwners, edgeConnCount, edgeConn, &
                    edgeCoordsIsPresent, edgeCoords, &
+                   edgeFieldIndex, &
                    elementCount, elementIds, elementTypes, &
                    elementConnCount, elementConn, &
                    elementEdgeConnCount, elementEdgeConn, &
@@ -5012,6 +5013,7 @@ end function ESMF_MeshEmptyCreate
     integer,                  intent(out), optional :: edgeConn(:)
     logical,                  intent(out), optional :: edgeCoordsIsPresent
     real(ESMF_KIND_R8),       intent(out), optional :: edgeCoords(:)
+    integer,                  intent(out), optional :: edgeFieldIndex(:)
     integer,                  intent(out), optional :: elementCount
     integer,                  intent(out), optional :: elementIds(:)
     integer,                  intent(out), optional :: elementTypes(:)
@@ -5093,6 +5095,19 @@ end function ESMF_MeshEmptyCreate
 ! .true. if edge coordinates were set in mesh, .false. otherwise.
 ! \item [{[edgeCoords]}]
 ! An array of coordinate values for each local edge in the mesh. The edgeCoord array should be of size spatialDim*edgeCount.    
+! \item [{[edgeFieldIndex]}]
+!         An array which gives the location of the data for each edge on this PET in a Field
+!         created on the edges of this Mesh (i.e. with {\tt meshloc=ESMF\_MESHLOC\_EDGE}).
+!         Only available if the Mesh contains edges. The array should be of size edgeCount.
+!         Entry $i$ is the index, starting from the lower bound, into the first (gridded) dimension
+!         of the Field's data on this PET of the edge described by {\tt edgeIds(i)}, etc. In other
+!         words, if {\tt farrayPtr} is the pointer returned by {\tt ESMF\_FieldGet()} for such a
+!         Field and {\tt k=edgeFieldIndex(i)}, then the data for that edge is in
+!         {\tt farrayPtr(lbound(farrayPtr,1)+k-1)}. The entry is 0 for an edge which isn't owned by
+!         this PET, because a Field only contains data for the edges that a PET owns. This
+!         information comes from the edge Distgrid of the Mesh, so it takes into account a
+!         user specified {\tt edgeDistgrid}. It's currently an error to request it when there
+!         is more than one DE on this PET.
 ! \item [{[elementCount]}]
 ! The number of local elements in the mesh (both owned and shared with another PET).
 ! \item [{[elementIds]}]
@@ -5233,6 +5248,10 @@ end function ESMF_MeshEmptyCreate
     type(ESMF_InterArray) :: elementCoordsIA
 
     type(ESMF_InterArray) :: elementEdgeConnIA
+    type(ESMF_InterArray) :: edgeFieldIndexIA
+    type(ESMF_DELayout) :: edgeDELayout
+    integer :: edgeLocalDeCount, edgeSeqCount
+    integer, allocatable :: edgeSeqList(:)
     type(ESMF_InterArray) :: edgeIdsIA
     type(ESMF_InterArray) :: edgeOwnersIA
     type(ESMF_InterArray) :: edgeConnIA
@@ -5303,6 +5322,7 @@ end function ESMF_MeshEmptyCreate
             present(edgeConn) .or. &
             present(edgeCoordsIsPresent) .or. &
             present(numOwnedEdges) .or. &
+            present(edgeFieldIndex) .or. &
             present(edgeCoords)) then
 
           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
@@ -5837,6 +5857,83 @@ end function ESMF_MeshEmptyCreate
 
     
     
+    ! Get the location of the data for each edge in a Field built on the edges
+    if (present(edgeFieldIndex)) then
+
+        ! The order of the data in a Field is given by the edge Distgrid
+        call c_ESMC_MeshGetEdgeDistGridPresent(mesh, isPresentAux, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if (isPresentAux .ne. ESMF_TRUE) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_NOT_CREATED, &
+                          msg="- this mesh doesn't contain an edge distgrid", &
+                          ESMF_CONTEXT, rcToReturn=rc)
+            return
+        endif
+
+        call c_ESMC_MeshGetEdgeDistGrid(mesh, edgeDistGridTmp, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! Set init code for deep C++ DistGrid object
+        call ESMF_DistGridSetInitCreated(edgeDistGridTmp, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! Get the number of DEs on this PET
+        call ESMF_DistGridGet(edgeDistGridTmp, delayout=edgeDELayout, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_DELayoutGet(edgeDELayout, localDeCount=edgeLocalDeCount, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! A single index per edge isn't enough to describe more than one DE
+        if (edgeLocalDeCount .gt. 1) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_IMPL, &
+                 msg="- edgeFieldIndex isn't currently supported when there is "// &
+                     "more than one DE on a PET", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+            return
+        endif
+
+        ! Get the sequence indices on this PET
+        ! (If there aren't any DEs on this PET, then there aren't any)
+        edgeSeqCount=0
+        if (edgeLocalDeCount .eq. 1) then
+            call ESMF_DistGridGet(edgeDistGridTmp, localDe=0, &
+                 elementCount=edgeSeqCount, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
+        allocate(edgeSeqList(edgeSeqCount))
+        if (edgeSeqCount .gt. 0) then
+            call ESMF_DistGridGet(edgeDistGridTmp, localDe=0, &
+                 seqIndexList=edgeSeqList, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
+        ! Find the position of each edge in the sequence indices
+        edgeFieldIndexIA = ESMF_InterArrayCreate(edgeFieldIndex, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call C_ESMC_MeshGetEdgeSeqPos(mesh, edgeSeqCount, edgeSeqList, &
+             edgeFieldIndexIA, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_InterArrayDestroy(edgeFieldIndexIA, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        deallocate(edgeSeqList)
+    endif
+
     isPresent = .false.
     ! Get element Distgrid presence
     if (present(elementDistgridIsPresent)) then

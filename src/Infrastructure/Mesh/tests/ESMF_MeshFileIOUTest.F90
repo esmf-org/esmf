@@ -425,6 +425,25 @@ program ESMF_MeshFileIOUTest
 #endif
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test setting and getting data in a Field on the edges of a Mesh from a UGrid file."
+  write(failMsg, *) "Did not return ESMF_SUCCESS or edge Field data incorrect"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  call check_edge_field_from_sph_3x3_UG_file(correct, rc)
+
+#ifdef ESMF_PIO
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMC_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMC_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+#endif
+  !-----------------------------------------------------------------------------
+
 #endif
 
   !------------------------------------------------------------------------
@@ -8531,6 +8550,145 @@ subroutine  check_mesh_edges_from_sph_3D_UG_file(correct, rc)
   rc=ESMF_SUCCESS
 
 end subroutine check_mesh_edges_from_sph_3D_UG_file
+
+
+  ! Reads in the spherical 3x3 UGRID mesh file which contains edges (see
+  ! check_mesh_edges_from_sph_3x3_UG_file() for a diagram), creates a Field on the
+  ! edges, and checks that data can be put into the Field and retrieved from it
+  ! using the edgeFieldIndex information from the Mesh.
+  ! This can be run on any number of PETs.
+subroutine  check_edge_field_from_sph_3x3_UG_file(correct, rc)
+  type(ESMF_Mesh) :: mesh
+  logical :: correct
+  integer :: rc
+
+  integer, parameter :: numEdgesFile=25
+
+  integer :: numEdges, numOwnedEdges
+  integer, allocatable :: edgeIds(:), edgeOwners(:), edgeFieldIndex(:)
+  integer, allocatable :: seqIndexList(:)
+  logical, allocatable :: isSet(:)
+  type(ESMF_DistGrid) :: edgeDistgrid
+  type(ESMF_Field) :: edgeField
+  real(ESMF_KIND_R8), pointer :: edgeFieldPtr(:)
+
+  integer :: petCount, localPet
+  type(ESMF_VM) :: vm
+  integer :: i, k, lb, numField
+  real(ESMF_KIND_R8) :: sendBuf(1), recvBuf(1)
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! Read mesh from a file that contains edges
+  mesh=ESMF_MeshCreate("data/test_sph_3x3_edges_ugrid.nc", &
+       fileformat=ESMF_FILEFORMAT_UGRID, &
+       rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! Get edge info
+  call ESMF_MeshGet(mesh, edgeCount=numEdges, numOwnedEdges=numOwnedEdges, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  allocate(edgeIds(numEdges))
+  allocate(edgeOwners(numEdges))
+  allocate(edgeFieldIndex(numEdges))
+  call ESMF_MeshGet(mesh, edgeIds=edgeIds, edgeOwners=edgeOwners, &
+       edgeFieldIndex=edgeFieldIndex, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! Create a Field on the edges
+  edgeField = ESMF_FieldCreate(mesh, typekind=ESMF_TYPEKIND_R8, &
+       meshloc=ESMF_MESHLOC_EDGE, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  call ESMF_FieldGet(edgeField, localDE=0, farrayPtr=edgeFieldPtr, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  lb=lbound(edgeFieldPtr,1)
+  numField=size(edgeFieldPtr)
+
+  ! A Field only has data for the edges that are owned by this PET
+  if (numField .ne. numOwnedEdges) correct=.false.
+
+  ! Set the data for each owned edge to its id, checking that every entry
+  ! in the Field corresponds to exactly one owned edge
+  allocate(isSet(numField))
+  isSet(:)=.false.
+  edgeFieldPtr(:)=-1.0_ESMF_KIND_R8
+  do i=1,numEdges
+     k=edgeFieldIndex(i)
+
+     if (edgeOwners(i) .eq. localPet) then
+        ! Owned edges should have a valid index that hasn't been used before
+        if ((k .lt. 1) .or. (k .gt. numField)) then
+           correct=.false.
+           cycle
+        endif
+        if (isSet(k)) correct=.false.
+        isSet(k)=.true.
+
+        edgeFieldPtr(lb+k-1)=real(edgeIds(i),ESMF_KIND_R8)
+     else
+        ! Edges that aren't owned shouldn't have an index
+        if (k .ne. 0) correct=.false.
+     endif
+  enddo
+  if (.not. all(isSet)) correct=.false.
+
+  ! Independently of edgeFieldIndex, the data in a Field is in the order of the
+  ! sequence indices of the Distgrid it's built on, and for the edge Distgrid those
+  ! are the edge ids. So the Field should now contain the sequence indices.
+  call ESMF_MeshGet(mesh, edgeDistgrid=edgeDistgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  allocate(seqIndexList(numField))
+  if (numField .gt. 0) then
+     call ESMF_DistGridGet(edgeDistgrid, localDE=0, seqIndexList=seqIndexList, rc=rc)
+     if (rc /= ESMF_SUCCESS) return
+  endif
+
+  do k=1,numField
+     if (nint(edgeFieldPtr(lb+k-1)) .ne. seqIndexList(k)) correct=.false.
+  enddo
+
+  ! Get the data back out using edgeFieldIndex
+  do i=1,numEdges
+     k=edgeFieldIndex(i)
+     if (k .lt. 1) cycle
+     if (k .gt. numField) cycle
+     if (nint(edgeFieldPtr(lb+k-1)) .ne. edgeIds(i)) correct=.false.
+  enddo
+
+  ! Each edge is owned by exactly one PET, so the sum of the Field over all
+  ! PETs should be the sum of all of the edge ids in the file
+  sendBuf(1)=sum(edgeFieldPtr)
+  call ESMF_VMAllFullReduce(vm, sendData=sendBuf, recvData=recvBuf(1), &
+       count=1, reduceflag=ESMF_REDUCE_SUM, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  if (nint(recvBuf(1)) .ne. (numEdgesFile*(numEdgesFile+1))/2) correct=.false.
+
+  ! Clean up
+  deallocate(edgeIds)
+  deallocate(edgeOwners)
+  deallocate(edgeFieldIndex)
+  deallocate(seqIndexList)
+  deallocate(isSet)
+
+  call ESMF_FieldDestroy(edgeField, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  call ESMF_MeshDestroy(mesh, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! Return success
+  rc=ESMF_SUCCESS
+
+end subroutine check_edge_field_from_sph_3x3_UG_file
 
 
 end program ESMF_MeshFileIOUTest
