@@ -311,11 +311,11 @@ class MeshLoc(IntEnum):
     """
     The :class:`~esmpy.api.mesh.Mesh` location used to hold :class:`~esmpy.api.field.Field` data.
     """
-    NODE = 0
+    NODE = 1
     """
     The nodes of the :class:`~esmpy.api.mesh.Mesh`.
     """
-    ELEMENT = 1
+    ELEMENT = 3
     """
     The elements of the :class:`~esmpy.api.mesh.Mesh`.
     """

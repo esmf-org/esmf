@@ -65,8 +65,9 @@ Mesh::Mesh() : MeshDB(), FieldReg(), CommReg(),
                has_orig_elem_nodes(false),
                has_orig_elem_area(false),
                origElemConnCount(-1),
-	       ind(-1), side(-1),
+	       ind(-1), side(-1), hasEdges(false), hasEdgeCoords(false), edgeCount(0), edgeOwnedCount(0),
                orig_comm(MPI_COMM_NULL)
+
 {
 
    GetCommRel(MeshObj::NODE).Init("node_sym", *this, *this, true);
@@ -2464,7 +2465,108 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
    
  }
 
- 
+ // Set Edge Ids in the mesh.
+ // _edgeIds needs to be of size edgeCount
+ void Mesh::setEdgeIds(int *_edgeIds) {
+
+   // Error check
+   if (!hasEdges) Throw() << "Edge ids can not be added to a Mesh without edges.";
+   ThrowRequire(_edgeIds);
+   
+   // Add owners
+   edgeIds.assign(_edgeIds, _edgeIds+edgeCount);
+   
+  }
+
+ void Mesh::getEdgeIds(int *_edgeIds) {
+
+   // Error checking
+   if (!hasEdges) Throw() << "Edge ids can not be gotten from a Mesh without edges.";
+   ThrowRequire(_edgeIds);
+   
+   // Copy out
+   std::memcpy(_edgeIds, edgeIds.data(), edgeIds.size() * sizeof(int));   
+ }
+
+ // Set Edge Owners and edgeOwnedCount in Mesh.
+ // _edgeOwners needs to be of size edgeCount
+ void Mesh::setEdgeOwners(int *_edgeOwners) {
+
+   // Error check
+   if (!hasEdges) Throw() << "Edge owners can not be added to a Mesh without edges.";
+   ThrowRequire(_edgeOwners);
+   
+   // Add owners
+   edgeOwners.assign(_edgeOwners, _edgeOwners+edgeCount);
+
+   // Loop counting owned edges (i.e. edges on this pet) to set edgeOwnedCount
+   edgeOwnedCount=0;
+   for (auto owner: edgeOwners) {
+     if (owner == Par::Rank()) edgeOwnedCount++;
+   } 
+
+}
+
+
+ void Mesh::getEdgeOwners(int *_edgeOwners) {
+
+   // Error checking
+   if (!hasEdges) Throw() << "Edge Owners can not be gotten from a Mesh without edges.";
+   ThrowRequire(_edgeOwners);
+   
+   // Copy out
+   std::memcpy(_edgeOwners, edgeOwners.data(), edgeOwners.size() * sizeof(int));   
+ }
+
+  // Set Edge Coordinates in the mesh.
+ // _edgeOrigCoords needs to be of size orig_spatial_dim*edgeCount
+  void Mesh::setEdgeOrigCoords(ESMC_R8 *_edgeOrigCoords) {
+
+   // Error check
+   if (!hasEdges) Throw() << "Edge coords can not be added to a Mesh without edges.";
+   ThrowRequire(_edgeOrigCoords);
+   
+   // Remember that we have these
+   hasEdgeCoords=true;
+
+   // Add coords to vector
+   edgeOrigCoords.assign(_edgeOrigCoords, _edgeOrigCoords+edgeCount*orig_spatial_dim);   
+  }
+
+ void Mesh::getEdgeOrigCoords(ESMC_R8 *_edgeOrigCoords) {
+
+   // Error checking
+   if (!hasEdges) Throw() << "Edge Coords can not be gotten from a Mesh without edges.";
+   if (!hasEdgeCoords) Throw() << "Edge Coords can not be gotten from a Mesh without edge coordinates set.";
+   ThrowRequire(_edgeOrigCoords);
+   
+   // Copy out
+   std::memcpy(_edgeOrigCoords, edgeOrigCoords.data(), edgeOrigCoords.size() * sizeof(ESMC_R8));   
+ }
+
+ // Set Edge Connections in the mesh.
+ // _edgeConn needs to be of size 2*edgeCount
+  void Mesh::setEdgeConn(int *_edgeConn) {
+
+   // Error check
+   if (!hasEdges) Throw() << "Edge connections can not be added to a Mesh without edges.";
+   ThrowRequire(_edgeConn);
+   
+   // Add coords to vector
+   edgeConn.assign(_edgeConn, _edgeConn+2*edgeCount);   
+  }
+
+
+ void Mesh::getEdgeConn(int *_edgeConn) {
+
+   // Error checking
+   if (!hasEdges) Throw() << "Edge connenctions can not be gotten from a Mesh without edges.";
+   ThrowRequire(_edgeConn);
+   
+   // Copy out
+   std::memcpy(_edgeConn, edgeConn.data(), edgeConn.size() * sizeof(int));   
+ }
+
  
  
 

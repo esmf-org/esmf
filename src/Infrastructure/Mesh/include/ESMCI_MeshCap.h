@@ -47,11 +47,14 @@ namespace ESMCI {
     int sdim_mc;
     int pdim_mc;
     int num_owned_node_mc;
+    int num_owned_edge_mc;
     int num_owned_elem_mc;
     
     bool node_distgrid_set;
+    bool edge_distgrid_set;
     bool elem_distgrid_set;
     DistGrid *node_distgrid;
+    DistGrid *edge_distgrid;
     DistGrid *elem_distgrid;
 
     static void meshGetMOAB(int *_moabOn, int *rc);
@@ -134,7 +137,13 @@ namespace ESMCI {
                       double *nodeCoord,  InterArray<int> *nodeOwnerII, InterArray<int> *nodeMaskII,
                       ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                       int *rc);
-
+    
+     void meshaddedges(int *_num_edges, int *edgeId,
+                           InterArray<int> *edgeOwners,
+                           InterArray<ESMC_R8> *edgeCoordss,
+                           int *_edgeConn_size, int *edgeConn, 
+                           int *rc);
+    
     void meshaddelements(int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                          int *_areaPresent, double *elemArea,
                          int *_coordsPresent, double *elemCoords,
@@ -150,11 +159,14 @@ namespace ESMCI {
 
     void meshcreatenodedistgrid(int *rc);
     void meshcreateelemdistgrid(int *rc);
+    void meshcreateedgedistgrid(int *rc);
     
     DistGrid *meshgetnodedistgrid();
+    DistGrid *meshgetedgedistgrid();
     DistGrid *meshgetelemdistgrid();
 
     void meshsetnodedistgrid(DistGrid *dg);
+    void meshsetedgedistgrid(DistGrid *dg);
     void meshsetelemdistgrid(DistGrid *dg);
 
     void meshserialize(char *buffer, int *length, int *offset,
@@ -172,10 +184,13 @@ namespace ESMCI {
                      double *pnts, int *pets, int *rc);
 
     void getNodeCount(int *nodeCount, int *rc);
+    void getEdgeCount(int *edgeCount, int *rc);
+    void getEdgeConnCount(int *edgeConnCount, int *rc);
     void getElemCount(int *elemCount, int *rc);
     void getElemConnCount(int *elemConnCount, int *rc);
 
     void getOwnedNodeCount(int *nodeCount, int *rc);
+    void getOwnedEdgeCount(int *edgeCount, int *rc);
     void getOwnedElemCount(int *elemCount, int *rc);
 
 
@@ -204,6 +219,15 @@ namespace ESMCI {
     static void triangulate(int *pdim, int *sdim, int *numPnts,
                      double *pnts, double *td, int *ti, int *triInd, int *rc);
 
+    void getEdgeInfoPresence(int *edgeIsPresent,
+                             int *edgeCoordsIsPresent,
+                             int *rc);
+
+    void getEdgeCreateInfo(ESMCI::InterArray<int> *edgeIds,
+                                ESMCI::InterArray<int> *edgeOwners,
+                                ESMCI::InterArray<int> *edgeConn,
+                                ESMCI::InterArray<ESMC_R8> *edgeCoords, int *rc);
+    
     void getElemInfoPresence(int *elemMaskIsPresent,
                               int *elemAreaIsPresent,
                               int *elemCoordsIsPresent,
