@@ -238,7 +238,7 @@ namespace ESMCI{
     // friend function to allocate and initialize clock from heap
     friend Clock *ESMCI_ClockCreate(int, const char*, TimeInterval*,
                                  Time*, Time*, TimeInterval*,
-                                 int*, Time*, TimeInterval*, int*);
+                                    int*, Time*, TimeInterval*, int*, int*);
 // TODO: add overload for ESMC_R8  *runTimeStepCount
 
     // friend function to copy a clock
@@ -294,6 +294,7 @@ namespace ESMCI{
 // TODO: add overload for ESMC_R8             *runTimeStepCount=0,
                                  Time*         refTime=0,
                                  TimeInterval *repeatDuration=0,
+                                 int        *repeatCountStart=0,
                                  int*               rc=0);
 
     // friend function to copy a clock

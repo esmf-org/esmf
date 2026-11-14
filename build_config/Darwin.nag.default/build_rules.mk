@@ -105,6 +105,9 @@ ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -v --version
 # See if g++ is really clang
 #
 ESMF_CLANGSTR := $(findstring clang, $(shell $(ESMF_CXXCOMPILER) --version))
+ifeq ($(ESMF_CLANGSTR), clang)
+$(error "The detected C++ compiler is actually clang. Set ESMF_COMPILER=nagclang.")
+endif
 
 ############################################################
 # Set NAG unix modules when certain non-Standard system calls
@@ -137,7 +140,11 @@ ESMF_F90COMPILEOPTS += -dusty
 
 ifeq ($(ESMF_PTHREADS),ON)
 ESMF_F90COMPILEOPTS += -thread_safe
+ESMF_CXXCOMPILEOPTS += -pthread
+ESMF_CCOMPILEOPTS   += -pthread
 ESMF_F90LINKOPTS    += -thread_safe
+ESMF_CXXLINKOPTS    += -pthread
+ESMF_CLINKOPTS      += -pthread
 endif
 
 ############################################################
@@ -149,25 +156,30 @@ ESMF_F90COMPILEFIXCPP    = -fixed -fpp
 ESMF_F90COMPILEFIXNOCPP  = -fixed
 
 ############################################################
-# Blank out variables to prevent rpath encoding
+# Set rpath syntax
 #
-ESMF_F90LINKRPATHS      =
-ESMF_CXXLINKRPATHS      =
-ESMF_CLINKRPATHS        =
+ESMF_F90RPATHPREFIX         = -Wl,-rpath,
+ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
+ESMF_CRPATHPREFIX           = -Wl,-rpath,
 
 ############################################################
-# Link against libesmf.a using the F90 linker front-end
+# Determine where gcc's libraries are located
+# Use when linking against libesmf with F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lstdc++
-ifeq ($(ESMF_CLANGSTR), clang)
-ESMF_F90LINKLIBS += -lc++
+# Note that the result of -print-file-name will be the full path to the file if it is found
+# within the compiler installation, and simply the file name verbatim if it is NOT found.
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS) -print-file-name=libstdc++.dylib)
+ifeq ($(ESMF_LIBSTDCXX),libstdc++.dylib)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS) -print-file-name=libstdc++.a)
 endif
+ESMF_F90LINKLIBS += $(ESMF_LIBSTDCXX)
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
+ESMF_F90LINKRPATHS += $(ESMF_F90RPATHPREFIX)$(dir $(ESMF_LIBSTDCXX))
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
 ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.nag $(ESMF_F90COMPILER))
-
 
 ############################################################
 # Shared library options
@@ -179,3 +191,16 @@ ESMF_SL_LIBLIBS  += $(ESMF_F90LINKPATHS) $(ESMF_F90LINKLIBS) $(ESMF_CXXLINKPATHS
 ifeq ($(ESMF_SHARED_LIB_BUILD),OFF)
 ESMF_TRACE_LIB_BUILD = OFF
 endif
+
+############################################################
+# Preloading the dynamic trace library is generally not supported on Darwin
+# when System Integrity Protection (SIP) is enabled. Link directly instead.
+ESMF_TRACE_PRELOAD_LINKED=ON
+
+############################################################
+# Shared object options
+#
+ESMF_SO_F90COMPILEOPTS  = -PIC
+ESMF_SO_F90LINKOPTS     = -shared
+ESMF_SO_CXXCOMPILEOPTS  = -fPIC
+ESMF_SO_CXXLINKOPTS     = -shared

@@ -134,7 +134,7 @@ class Interp {
 public:
 
   enum {INTERP_STD = 0, INTERP_PATCH, INTERP_CONSERVE, INTERP_NEAREST_SRC_TO_DST, INTERP_NEAREST_DST_TO_SRC, INTERP_CONSERVE_2ND, 
-        INTERP_NEAREST_IDAVG};
+        INTERP_BINNING, INTERP_NEAREST_IDAVG};
   
   struct FieldPair {
   FieldPair(MEField<> *_sF, MEField<> *_dF, UChar _idata=INTERP_STD, UChar _patch_order=2) :
@@ -201,6 +201,7 @@ public:
   bool has_nearest_src_to_dst; // true if a nearest interp exists
   bool has_nearest_dst_to_src; // true if a nearest interp exists
   bool has_nearest_idavg; // true if a nearest idavg interp exists
+  bool has_binning; // true if binning interp exists
   int num_src_pnts;
   ESMC_R8 dist_exponent;
   Mesh *srcmesh;

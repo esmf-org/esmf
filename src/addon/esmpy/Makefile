@@ -18,10 +18,12 @@ clean:
 		find . -name "*__pycache__" -exec rm -rf {} \; || :
 		find . -name "*ESMF_LogFile*" -exec rm -f {} \; || :
 		find . -name "*.report.json" -exec rm -rf {} \; || :
+		find . -name "*-summary.json" -exec rm -rf {} \; || :
 		find . -name "*.test" -exec rm -rf {} \; || :
 dust:
 		find . -name "*ESMF_LogFile*" -exec rm -f {} \; || :
 		find . -name "*.report.json" -exec rm -rf {} \; || :
+		find . -name "*-summary.json" -exec rm -rf {} \; || :
 		find . -name "*.test" -exec rm -rf {} \; || :
 
 install:

@@ -751,7 +751,8 @@
            ESMF_REGRIDMETHOD_CONSERVE    = ESMF_RegridMethod_Flag(2), &
            ESMF_REGRIDMETHOD_NEAREST_STOD  = ESMF_RegridMethod_Flag(3), &
            ESMF_REGRIDMETHOD_NEAREST_DTOS  = ESMF_RegridMethod_Flag(4), &
-           ESMF_REGRIDMETHOD_CONSERVE_2ND  = ESMF_RegridMethod_Flag(5)
+           ESMF_REGRIDMETHOD_CONSERVE_2ND  = ESMF_RegridMethod_Flag(5), &
+           ESMF_REGRIDMETHOD_BINNING     = ESMF_RegridMethod_Flag(6)
 
 
 !------------------------------------------------------------------------------
@@ -771,7 +772,6 @@
            ESMF_EXTRAPMETHOD_NEAREST_D = ESMF_ExtrapMethod_Flag(3), &
            ESMF_EXTRAPMETHOD_CREEP = ESMF_ExtrapMethod_Flag(4), &
            ESMF_EXTRAPMETHOD_CREEP_NRST_D = ESMF_ExtrapMethod_Flag(5)
-
 
 !------------------------------------------------------------------------------
       type ESMF_CubedSphereCalc_Flag
@@ -853,6 +853,25 @@
 
 
 !------------------------------------------------------------------------------
+      type ESMF_DynamicMaskPredef_Flag
+#ifndef ESMF_NO_SEQUENCE
+      sequence
+#endif
+!  private
+         integer :: predefFlag
+      end type
+
+
+      type(ESMF_DynamicMaskPredef_Flag), parameter :: &
+           ESMF_DYNAMICMASKPREDEF_DST     =  ESMF_DynamicMaskPredef_Flag(0), &
+           ESMF_DYNAMICMASKPREDEF_SRC     =  ESMF_DynamicMaskPredef_Flag(1), &
+           ESMF_DYNAMICMASKPREDEF_SRCDST  =  ESMF_DynamicMaskPredef_Flag(2), &
+           ESMF_DYNAMICMASKPREDEF_VOTE    =  ESMF_DynamicMaskPredef_Flag(3)
+
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
 !
 !
       integer, parameter :: ESMF_REGRID_SCHEME_FULL3D = 0, &
@@ -862,7 +881,6 @@
                             ESMF_REGRID_SCHEME_REGTOFULL3D=4, &
                             ESMF_REGRID_SCHEME_DCON3D=5, &
                             ESMF_REGRID_SCHEME_DCON3DWPOLE=6
-
 
 
 !------------------------------------------------------------------------------
@@ -1151,7 +1169,8 @@
              ESMF_REGRIDMETHOD_CONSERVE, &
              ESMF_REGRIDMETHOD_NEAREST_STOD, &
              ESMF_REGRIDMETHOD_NEAREST_DTOS, &
-             ESMF_REGRIDMETHOD_CONSERVE_2ND
+             ESMF_REGRIDMETHOD_CONSERVE_2ND, &
+             ESMF_REGRIDMETHOD_BINNING
 
       public ESMF_ExtrapMethod_Flag, &
              ESMF_EXTRAPMETHOD_NONE, & 
@@ -1164,7 +1183,6 @@
       public ESMF_CubedSphereCalc_Flag, &
              ESMF_CUBEDSPHERECALC_1TILE, &
              ESMF_CUBEDSPHERECALC_LOCAL 
-      
       
       public ESMF_LineType_Flag, &
              ESMF_LINETYPE_CART, &
@@ -1269,11 +1287,17 @@
       public ESMF_NormType_Flag
       public ESMF_NORMTYPE_DSTAREA, ESMF_NORMTYPE_FRACAREA
 
+      public ESMF_DynamicMaskPredef_Flag,   &
+             ESMF_DYNAMICMASKPREDEF_DST,    &
+             ESMF_DYNAMICMASKPREDEF_SRC,    &
+             ESMF_DYNAMICMASKPREDEF_SRCDST, &
+             ESMF_DYNAMICMASKPREDEF_VOTE
+
       public ESMF_MESH_POLYBREAK
 
       public ESMF_RWGCheckMethod_Flag
       public ESMF_RWGCHECKMETHOD_ARRAY, ESMF_RWGCHECKMETHOD_FIELD
-      
+
 !  Overloaded = operator functions
       public operator(==), operator(/=), assignment(=)
 !
@@ -1312,6 +1336,7 @@ interface operator (==)
   module procedure ESMF_NormTypeEqual
   module procedure ESMF_RWGCheckMethodEqual
   module procedure ESMF_TermOrderEq
+  module procedure ESMF_DynamicMaskPredef_FlagEq
 end interface
 
 interface operator (/=)
@@ -2287,7 +2312,6 @@ end function
 
       end function ESMF_LineTypeNotEqual
 
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RWGCheckMethodEqual"
@@ -2322,6 +2346,7 @@ end function
                                   CheckMethod2%flag)
 
       end function ESMF_RWGCheckMethodEqual
+
 !-------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RWGCheckMethodNotEqual"
@@ -2356,7 +2381,6 @@ end function
                                      CheckMethod2%flag)
 
       end function ESMF_RWGCheckMethodNotEqual
-!-------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2392,9 +2416,41 @@ end function
 
       end function ESMF_TermOrderEq
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DynamicMaskPredef_FlagEq"
+!BOPI
+! !IROUTINE: ESMF_DynamicMaskPredef_FlagEq - Equality of Predef_Flag
+!
+! !INTERFACE:
+      impure elemental function ESMF_DynamicMaskPredef_FlagEq(flag1, flag2)
 
+! !RETURN VALUE:
+      logical :: ESMF_DynamicMaskPredef_FlagEq
 
-!------------------------------------------------------------------------- 
+! !ARGUMENTS:
+
+      type (ESMF_DynamicMaskPredef_Flag), intent(in) :: &
+         flag1,      &
+         flag2 
+
+! !DESCRIPTION:
+!     This routine compares two ESMF DynamicMaskPredef flags to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[flag1, flag2]
+!          DynamicMaskPredef flags
+!     \end{description}
+!
+!EOPI
+
+      ESMF_DynamicMaskPredef_FlagEq = (flag1%predefFlag == flag2%predefFlag)
+
+      end function ESMF_DynamicMaskPredef_FlagEq
+
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_UtilVersionPrint"
 !BOPI

@@ -29,6 +29,7 @@
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_Grid.h"
+#include "ESMCI_DynamicMask.h"
 
 #include <string>
 #include <iostream>
@@ -414,6 +415,7 @@ int ESMC_FieldGetLocalDECount(ESMC_Field field, int *localDECount){
                             int *extrapNumLevels,
                             enum ESMC_UnmappedAction_Flag *unmappedaction,
                             ESMC_Logical *ignoreDegenerate,
+                            int *srcTermProcessing,
                             double **factorList,
                             int **factorIndexList,
                             int *numFactors,
@@ -465,6 +467,7 @@ int ESMC_FieldGetLocalDECount(ESMC_Field field, int *localDECount){
                                         extrapNumLevels,
                                         unmappedaction,
                                         ignoreDegenerate,
+                                        srcTermProcessing,
                                         factorList,
                                         factorIndexList,
                                         &local_numFactors,
@@ -508,6 +511,7 @@ int ESMC_FieldGetLocalDECount(ESMC_Field field, int *localDECount){
                             enum ESMC_Logical *vectorRegrid,
                             enum ESMC_UnmappedAction_Flag *unmappedaction,
                             enum ESMC_Logical *ignoreDegenerate,
+                            int *srcTermProcessing,
                             enum ESMC_Logical *create_rh,
                             enum ESMC_FileMode_Flag *filemode,
                             const char *srcFile,
@@ -537,8 +541,8 @@ int ESMC_FieldGetLocalDECount(ESMC_Field field, int *localDECount){
     // Invoke the C++ interface
     localrc = ESMCI::Field::regridstorefile(fieldpsrc, fieldpdst, filename,
       srcMaskValues, dstMaskValues, &rhPtr, regridmethod,
-      polemethod, regridPoleNPnts, lineType, normType, vectorRegrid, unmappedaction,
-      ignoreDegenerate, create_rh, filemode, srcFile, dstFile, 
+      polemethod, regridPoleNPnts, lineType, normType, vectorRegrid, unmappedaction, 
+      ignoreDegenerate, srcTermProcessing, create_rh, filemode, srcFile, dstFile, 
       srcFileType, dstFileType, largeFileFlag, srcfracp, dstfracp);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;  // bail out
@@ -563,9 +567,10 @@ int ESMC_FieldGetLocalDECount(ESMC_Field field, int *localDECount){
 //--------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_FieldRegrid()"
-  int ESMC_FieldRegrid(ESMC_Field srcField, ESMC_Field dstField, 
-                            ESMC_RouteHandle routehandle, 
-                            enum ESMC_Region_Flag *zeroregion){
+  int ESMC_FieldRegrid(ESMC_Field srcField, ESMC_Field dstField,
+                            ESMC_RouteHandle routehandle,
+                            enum ESMC_Region_Flag *zeroregion,
+                            ESMC_DynamicMask *dynamicMask){
 
     // Initialize return code. Assume routine not implemented
     int rc = ESMF_RC_NOT_IMPL;
@@ -578,8 +583,8 @@ int ESMC_FieldGetLocalDECount(ESMC_Field field, int *localDECount){
       reinterpret_cast<ESMCI::RouteHandle *>(routehandle.ptr);
 
     // Invoke the C++ interface
-    localrc = ESMCI::Field::regrid(fieldpsrc, fieldpdst, routehandlep, 
-                                   zeroregion);
+    localrc = ESMCI::Field::regrid(fieldpsrc, fieldpdst, routehandlep, zeroregion,
+      (ESMCI::DynamicMask *)dynamicMask);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;  // bail out
 

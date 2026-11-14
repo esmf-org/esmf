@@ -573,6 +573,22 @@ LINE:
 }#         end if
 }#      end if
 
+#       A new INTERNAL Interface
+#       ----------------------------------
+        if ($Fld[1] eq '!IINTERFACE:') {            # Internal interface
+           if ($prologue) {
+              shift @Fld;
+              shift @Fld;
+              $_ = join(' ', @Fld);
+              $name_is = $_;
+              s/_/\\_/g;                        # Replace "_" with "\_"
+	      @words = split " ", $_;
+              printf "\\subsubsection [$words[0]] {$_}\n\n";
+              $have_name = 1;
+              next LINE;
+}#         end if
+}#      end if
+
 #       A new CLASS
 #       ------------
         if ($Fld[1] eq '!CLASS:' ) { 

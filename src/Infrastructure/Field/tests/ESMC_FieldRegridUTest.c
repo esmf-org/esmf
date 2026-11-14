@@ -352,7 +352,7 @@ int main(void){
                              NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL, NULL,
-                             NULL, NULL, NULL,NULL, NULL);
+                             NULL, NULL, NULL,NULL, NULL, NULL);
 #else
   rc = ESMC_FieldRegridStore(srcfield, dstfield,
                              NULL, NULL,
@@ -360,7 +360,7 @@ int main(void){
                              NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL, NULL,
-                             NULL, NULL, NULL, NULL, NULL);
+                             NULL, NULL, NULL, NULL, NULL, NULL);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //--------------------------------------------------------------------------- -
@@ -369,7 +369,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Execute ESMC_FieldRegrid()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, NULL);
+  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, NULL, NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -570,7 +570,7 @@ int main(void){
                              NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL, NULL,
-                             NULL, NULL, NULL, NULL, NULL);
+                             NULL, NULL, NULL, NULL, NULL, NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -579,7 +579,7 @@ int main(void){
   strcpy(name, "Execute ESMC_FieldRegrid()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   enum ESMC_Region_Flag zeroregion = ESMC_REGION_SELECT;
-  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, &zeroregion);
+  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, &zeroregion, NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

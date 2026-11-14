@@ -734,12 +734,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
 
-    ! Use LocStream if the source file format is SCRIP and the regridmethod is nearest-neighbor
+    ! Use LocStream if the source file format is SCRIP and the regridmethod is nearest-neighbor or binning
     if ((localSrcFileType /= ESMF_FILEFORMAT_GRIDSPEC .and. &
          localSrcFileType /= ESMF_FILEFORMAT_TILE .and. &
          localSrcFileType /= ESMF_FILEFORMAT_MOSAIC ) .and. &
-        (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD .or. &
-        localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS)) then
+         (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD .or. &
+         localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS .or. &
+         localRegridMethod == ESMF_REGRIDMETHOD_BINNING)) then
         srcUseLocStream = .TRUE.
     endif
 
@@ -751,13 +752,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (extrapMethod == ESMF_EXTRAPMETHOD_CREEP_NRST_D) usingCreepExtrap=.true.
     endif
 
-    ! Use LocStream if the dest file format is SCRIP and the regridmethod is non-conservative
+    ! Use LocStream if the dest file format is SCRIP and the regridmethod is non-conservative and non-binning
     ! and we aren't using creep fill extrapolation
     if ((localDstFileType /= ESMF_FILEFORMAT_GRIDSPEC .and. &
          localDstFileType /= ESMF_FILEFORMAT_TILE .and. &
          localDstFileType /= ESMF_FILEFORMAT_MOSAIC) .and. &
         (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) .and. &
         (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE_2ND) .and. &
+        (localRegridMethod /= ESMF_REGRIDMETHOD_BINNING) .and. &
         .not. usingCreepExtrap) then
         dstUseLocStream = .TRUE.
     endif
@@ -1000,7 +1002,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       elseif (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD) then
         print *, "  Regrid Method: nearest source to destination"
       elseif (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS) then
-        print *, "  Regrid Method: nearest destination to source"
+         print *, "  Regrid Method: nearest destination to source"
+      elseif (localRegridMethod == ESMF_REGRIDMETHOD_BINNING) then
+        print *,  "  Regrid Method: binning"         
       endif
       if (localPoleMethod .eq. ESMF_POLEMETHOD_NONE) then
          print *, "  Pole option: NONE"
@@ -1096,11 +1100,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     convertSrcToDual=.false.
     convertDstToDual=.false.
     if ((localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) .or. &
-        (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
+         (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
       isConserve=.true.
       addCorners=.true.
       meshloc=ESMF_MESHLOC_ELEMENT
-    else
+   else if (localRegridMethod == ESMF_REGRIDMETHOD_BINNING) then
+      isConserve=.false.
+      addCorners=.true.
+      meshloc=ESMF_MESHLOC_ELEMENT      
+   else       
       isConserve=.false.
       addCorners=.false.
       if (.not. useSrcCorner) then
@@ -1484,17 +1492,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else if (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD) then
       methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Nearest neighbor
     else if (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS) then
-      methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Nearest neighbor
+       methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Nearest neighbor
+    else if (localRegridMethod == ESMF_REGRIDMETHOD_BINNING) then
+      methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Binning
     else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
       methodStr = "Conservative remapping"
     else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE_2ND) then
-      methodStr = "Conservative remapping" ! SCRIP doesn't recognize second-order conservative
+       methodStr = "Conservative remapping" ! SCRIP doesn't recognize second-order conservative
     else ! nothing recognizable so report error
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
         msg="unrecognized RegridMethod", &
         ESMF_CONTEXT, rcToReturn=rc)
     endif
-
+!!!!!! STOPPED HERE !!!!
+    
     if (present (rhFile)) then
       if (useSrcMask .and. useDstMask) then
         call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
@@ -2413,7 +2424,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       elseif (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD) then
         print *, "  Regrid Method: nearest source to destination"
       elseif (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS) then
-        print *, "  Regrid Method: nearest destination to source"
+         print *, "  Regrid Method: nearest destination to source"
+      elseif (localRegridMethod == ESMF_REGRIDMETHOD_BINNING) then
+        print *, "  Regrid Method: binning"
             endif
       if (localUnmappedaction .eq. ESMF_UNMAPPEDACTION_IGNORE) then
               print *, "  Ignore unmapped destination points"
@@ -2596,7 +2609,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else if (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD) then
       methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Nearest neighbor
     else if (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS) then
-      methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Nearest neighbor
+       methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Nearest neighbor
+    else if (localRegridMethod == ESMF_REGRIDMETHOD_BINNING) then
+      methodStr = "Bilinear remapping" ! SCRIP doesn't recognize binning
     else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
       methodStr = "Conservative remapping"
     else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE_2ND) then

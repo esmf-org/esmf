@@ -62,6 +62,10 @@ module ESMF_CplCompMod
   public operator(==)
   public operator(/=)
 
+  public ESMF_I_CplCompEntryPoint
+  public ESMF_I_CplCompServices
+  public ESMF_I_CplCompVM
+
   public ESMF_CplCompCreate
   public ESMF_CplCompDestroy
   public ESMF_CplCompFinalize
@@ -119,6 +123,117 @@ module ESMF_CplCompMod
     module procedure ESMF_CplCompSetVM
     module procedure ESMF_CplCompSetVMShObj
   end interface
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IINTERFACE: ESMF_I_CplCompEntryPoint - Abstract interface for CplCompEntryPoint callback routine
+!
+! !INTERFACE:
+  abstract interface
+    subroutine ESMF_I_CplCompEntryPoint(cplcomp, importState, exportState, clock, rc)
+      use ESMF_CompMod
+      use ESMF_StateMod
+      use ESMF_ClockMod
+      implicit none
+! !ARGUMENTS:
+      type(ESMF_CplComp)          :: cplcomp      ! must not be optional
+      type(ESMF_State)            :: importState  ! must not be optional
+      type(ESMF_State)            :: exportState  ! must not be optional
+      type(ESMF_Clock)            :: clock        ! must not be optional
+      integer, intent(out)        :: rc           ! must not be optional
+    end subroutine
+  end interface
+!
+! !DESCRIPTION:
+!   \label{api_ESMF_I_CplCompEntryPoint}
+!   An abstract interface defining the mandatory calling profile for any
+!   user-supplied callback routine registered via
+!   {\tt ESMF\_CplCompSetEntryPoint}. Such routine must conform to this exact
+!   argument order, type validation, and cannot contain {\tt optional}
+!   attributes.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[cplcomp]
+!     The component object that makes the callback.
+!   \item[importState]
+!     The import state associated with {\tt cplcomp} at the time of callback.
+!   \item[exportState]
+!     The export state associated with {\tt cplcomp} at the time of callback.
+!   \item[clock]
+!     The clock object associated with {\tt cplcomp} at the time of callback.
+!   \item[rc]
+!     The return code. Return {\tt ESMF\_SUCCESS} for success, any of the
+!     standard ESMF return codes otherwise.
+!   \end{description}
+!EOP
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IINTERFACE: ESMF_I_CplCompServices - Abstract interface for CplCompServices callback routine
+!
+! !INTERFACE:
+  abstract interface
+    subroutine ESMF_I_CplCompServices(cplcomp, rc)
+      use ESMF_CompMod
+      implicit none
+! !ARGUMENTS:
+      type(ESMF_CplComp)         :: cplcomp  ! must not be optional
+      integer, intent(out)       :: rc       ! must not be optional
+    end subroutine
+  end interface
+!
+! !DESCRIPTION:
+!   \label{api_ESMF_I_CplCompServices}
+!   An abstract interface defining the mandatory calling profile for any
+!   user-supplied routine called by {\tt ESMF\_CplCompSetServices}.
+!   Such routine must conform to this exact argument order, type validation,
+!   and cannot contain {\tt optional} attributes.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[cplcomp]
+!     The component object that makes the callback.
+!   \item[rc]
+!     The return code. Return {\tt ESMF\_SUCCESS} for success, any of the
+!     standard ESMF return codes otherwise.
+!   \end{description}
+!EOP
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IINTERFACE: ESMF_I_CplCompVM - Abstract interface for CplCompVM callback routine
+!
+! !INTERFACE:
+  abstract interface
+    subroutine ESMF_I_CplCompVM(cplcomp, rc)
+      use ESMF_CompMod
+      implicit none
+! !ARGUMENTS:
+      type(ESMF_CplComp)         :: cplcomp  ! must not be optional
+      integer, intent(out)       :: rc       ! must not be optional
+    end subroutine
+  end interface
+!
+! !DESCRIPTION:
+!   \label{api_ESMF_I_CplCompVM}
+!   An abstract interface defining the mandatory calling profile for any
+!   user-supplied routine called by {\tt ESMF\_CplCompSetVM}.
+!   Such routine must conform to this exact argument order, type validation,
+!   and cannot contain {\tt optional} attributes.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[cplcomp]
+!     The component object that makes the callback.
+!   \item[rc]
+!     The return code. Return {\tt ESMF\_SUCCESS} for success, any of the
+!     standard ESMF return codes otherwise.
+!   \end{description}
+!EOP
 !------------------------------------------------------------------------------
 
 !===============================================================================
@@ -1998,19 +2113,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_CplComp),     intent(inout)         :: cplcomp
     type(ESMF_Method_Flag), intent(in)            :: methodflag
-    interface
-      subroutine userRoutine(cplcomp, importState, exportState, clock, rc)
-        use ESMF_CompMod
-        use ESMF_StateMod
-        use ESMF_ClockMod
-        implicit none
-        type(ESMF_CplComp)          :: cplcomp      ! must not be optional
-        type(ESMF_State)            :: importState  ! must not be optional
-        type(ESMF_State)            :: exportState  ! must not be optional
-        type(ESMF_Clock)            :: clock        ! must not be optional
-        integer, intent(out)        :: rc           ! must not be optional
-      end subroutine
-    end interface
+    procedure(ESMF_I_CplCompEntryPoint)           :: userRoutine
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: phase
     integer,                intent(out), optional :: rc
@@ -2037,16 +2140,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   for a complete list of valid method options.
 !   \end{sloppypar}
 ! \item[userRoutine]
-!   The user-supplied subroutine to be associated for this {\tt methodflag}.
-!   The Component writer must supply a subroutine with the exact interface
-!   shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
-!   must not be declared as optional, and the types, intent and order must match.
-!   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
-!   or an external procedure that has a matching interface block specified for it.
-!   An internal procedure which is contained within another procedure must not be used.
-!   From Fortran-2008 onwards, an internal procedure contained within either a main program
-!   or a module procedure may be used.  If the internal procedure is contained within a
-!   module procedure, it is subject to initialization requirements.  See: \ref{sec:AppDriverIntProc}
+!   \begin{sloppypar}
+!   The user-supplied subroutine to be associated for this Component under the
+!   method indicated by {\tt methodflag}. Must precisely match the
+!   {\tt ESMF\_I\_CplCompEntryPoint} abstract interface documented at
+!   \ref{api_ESMF_I_CplCompEntryPoint}.
+!
+!   Prior to Fortran-2008, the subroutine must be either a module scope
+!   procedure, or an external procedure that has a matching interface block
+!   specified for it. An internal procedure which is contained within another
+!   procedure must not be used. From Fortran-2008 onwards, an internal
+!   procedure contained within either a main program or a module procedure
+!   may be used.  If the internal procedure is contained within a module
+!   procedure, it is subject to initialization requirements.
+!   See: \ref{sec:AppDriverIntProc}
+!   \end{sloppypar}
 ! \item[{[phase]}]
 !   The {\tt phase} number for multi-phase methods. For single phase
 !   methods the {\tt phase} argument can be omitted. The default setting
@@ -2152,14 +2260,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp), intent(inout)         :: cplcomp
-    interface
-      subroutine userRoutine(cplcomp, rc)
-        use ESMF_CompMod
-        implicit none
-        type(ESMF_CplComp)         :: cplcomp  ! must not be optional
-        integer, intent(out)       :: rc       ! must not be optional
-      end subroutine
-    end interface
+    procedure(ESMF_I_CplCompServices)         :: userRoutine
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: userRc
     integer,            intent(out), optional :: rc
@@ -2179,21 +2280,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[cplcomp]
 !   Coupler Component.
 ! \item[userRoutine]
-!  The Component writer must supply a subroutine with the exact interface
-!  shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
-!  must not be declared as optional, and the types, intent and order must match.
-!   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
-!   or an external procedure that has a matching interface block specified for it.
-!   An internal procedure which is contained within another procedure must not be used.
-!   From Fortran-2008 onwards, an internal procedure contained within either a main program
-!   or a module procedure may be used.  If the internal procedure is contained within a
-!   module procedure, it is subject to initialization requirements.  See: \ref{sec:AppDriverIntProc}
+!   \begin{sloppypar}
+!   The user-supplied subroutine that sets the component services by making
+!   successive calls to {\tt ESMF\_CplCompSetEntryPoint()} to preset callback
+!   routines for standard component Initialize(), Run(), and Finalize() methods.
 !
-!  \begin{sloppypar}
-!  The {\tt userRoutine}, when called by the framework, must make successive calls to
-!  {\tt ESMF\_CplCompSetEntryPoint()} to preset callback routines for standard
-!  Component Initialize(), Run(), and Finalize() methods.
-!  \end{sloppypar}
+!   Must precisely match the {\tt ESMF\_I\_CplCompServices} abstract interface
+!   documented at \ref{api_ESMF_I_CplCompServices}.
+!
+!   Prior to Fortran-2008, the subroutine must be either a module scope
+!   procedure, or an external procedure that has a matching interface block
+!   specified for it. An internal procedure which is contained within another
+!   procedure must not be used. From Fortran-2008 onwards, an internal
+!   procedure contained within either a main program or a module procedure
+!   may be used.  If the internal procedure is contained within a module
+!   procedure, it is subject to initialization requirements.
+!   See: \ref{sec:AppDriverIntProc}
+!   \end{sloppypar}
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -2272,30 +2375,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[cplcomp]
 !   Coupler Component.
 ! \item[userRoutine]
-!   Name of routine to be called, specified as a character string.
-!   The Component writer must supply a subroutine with the exact interface
-!   shown for {\tt userRoutine} below. Arguments must not be declared
-!   as optional, and the types, intent and order must match.
-!   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
-!   or an external procedure that has a matching interface block specified for it.
-!   An internal procedure which is contained within another procedure must not be used.
-!   From Fortran-2008 onwards, an internal procedure contained within either a main program
-!   or a module procedure may be used.  If the internal procedure is contained within a
-!   module procedure, it is subject to initialization requirements.  See: \ref{sec:AppDriverIntProc}
-!
-!   !INTERFACE:
-!     interface
-!       subroutine userRoutine(cplcomp, rc)
-!         type(ESMF_CplComp)   :: cplcomp    ! must not be optional
-!         integer, intent(out) :: rc         ! must not be optional
-!       end subroutine
-!     end interface
-!
-!   !DESCRIPTION:
 !   \begin{sloppypar}
-!   The {\tt userRoutine}, when called by the framework, must make successive
-!   calls to {\tt ESMF\_CplCompSetEntryPoint()} to preset callback routines for
-!   standard Component Initialize(), Run(), and Finalize() methods.
+!   Name of the user-supplied routine that sets the component services by making
+!   successive calls to {\tt ESMF\_CplCompSetEntryPoint()} to preset callback
+!   routines for standard component Initialize(), Run(), and Finalize() methods.
+!
+!   Must precisely match the {\tt ESMF\_I\_CplCompServices} abstract interface
+!   documented at \ref{api_ESMF_I_CplCompServices}.
+!
+!   Prior to Fortran-2008, the subroutine must be either a module scope
+!   procedure, or an external procedure that has a matching interface block
+!   specified for it. An internal procedure which is contained within another
+!   procedure must not be used. From Fortran-2008 onwards, an internal
+!   procedure contained within either a main program or a module procedure
+!   may be used.  If the internal procedure is contained within a module
+!   procedure, it is subject to initialization requirements.
+!   See: \ref{sec:AppDriverIntProc}
 !   \end{sloppypar}
 ! \item[{[sharedObj]}]
 !   Name of shared object that contains {\tt userRoutine}. The asterisk
@@ -2546,14 +2641,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     keywordEnforcer, userRc, rc)
 ! !ARGUMENTS:
     type(ESMF_CplComp), intent(inout)         :: cplcomp
-    interface
-      subroutine userRoutine(cplcomp, rc)
-        use ESMF_CompMod
-        implicit none
-        type(ESMF_CplComp)         :: cplcomp  ! must not be optional
-        integer, intent(out)       :: rc       ! must not be optional
-      end subroutine
-    end interface
+    procedure(ESMF_I_CplCompVM)               :: userRoutine
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: userRc
     integer,            intent(out), optional :: rc
@@ -2572,19 +2660,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[cplcomp]
 !   Coupler Component.
 ! \item[userRoutine]
-!   The Component writer must supply a subroutine with the exact interface
-!   shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
-!   must not be declared as optional, and the types, intent and order must match.
-!   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
-!   or an external procedure that has a matching interface block specified for it.
-!   An internal procedure which is contained within another procedure must not be used.
-!   From Fortran-2008 onwards, an internal procedure contained within either a main program
-!   or a module procedure may be used.  If the internal procedure is contained within a
-!   module procedure, it is subject to initialization requirements.  See: \ref{sec:AppDriverIntProc}
+!   \begin{sloppypar}
+!   The user-supplied subroutine that sets the component VM properties by
+!   utilizing the {\tt ESMF\_CplCompSetVMxxx()} methods.
 !
-!   The subroutine, when called by the framework, is expected to use any of the
-!   {\tt ESMF\_CplCompSetVMxxx()} methods to set the properties of the VM
-!   associated with the Coupler Component.
+!   Must precisely match the {\tt ESMF\_I\_CplCompVM} abstract interface
+!   documented at \ref{api_ESMF_I_CplCompVM}.
+!
+!   Prior to Fortran-2008, the subroutine must be either a module scope
+!   procedure, or an external procedure that has a matching interface block
+!   specified for it. An internal procedure which is contained within another
+!   procedure must not be used. From Fortran-2008 onwards, an internal
+!   procedure contained within either a main program or a module procedure
+!   may be used.  If the internal procedure is contained within a module
+!   procedure, it is subject to initialization requirements.
+!   See: \ref{sec:AppDriverIntProc}
+!   \end{sloppypar}
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -2658,29 +2749,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[cplcomp]
 !   Coupler Component.
 ! \item[userRoutine]
-!   Routine to be called, specified as a character string.
-!   The Component writer must supply a subroutine with the exact interface
-!   shown for {\tt userRoutine} below. Arguments must not be declared
-!   as optional, and the types, intent and order must match.
-!   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
-!   or an external procedure that has a matching interface block specified for it.
-!   An internal procedure which is contained within another procedure must not be used.
-!   From Fortran-2008 onwards, an internal procedure contained within either a main program
-!   or a module procedure may be used.  If the internal procedure is contained within a
-!   module procedure, it is subject to initialization requirements.  See: \ref{sec:AppDriverIntProc}
+!   \begin{sloppypar}
+!   Name of the user-supplied routine that sets the component VM properties by
+!   utilizing the {\tt ESMF\_CplCompSetVMxxx()} methods.
 !
-!   !INTERFACE:
-!     interface
-!       subroutine userRoutine(cplcomp, rc)
-!         type(ESMF_CplComp)   :: cplcomp     ! must not be optional
-!         integer, intent(out) :: rc          ! must not be optional
-!       end subroutine
-!     end interface
+!   Must precisely match the {\tt ESMF\_I\_CplCompVM} abstract interface
+!   documented at \ref{api_ESMF_I_CplCompVM}.
 !
-!   !DESCRIPTION:
-!   The subroutine, when called by the framework, is expected to use any of the
-!   {\tt ESMF\_CplCompSetVMxxx()} methods to set the properties of the VM
-!   associated with the Coupler Component.
+!   Prior to Fortran-2008, the subroutine must be either a module scope
+!   procedure, or an external procedure that has a matching interface block
+!   specified for it. An internal procedure which is contained within another
+!   procedure must not be used. From Fortran-2008 onwards, an internal
+!   procedure contained within either a main program or a module procedure
+!   may be used.  If the internal procedure is contained within a module
+!   procedure, it is subject to initialization requirements.
+!   See: \ref{sec:AppDriverIntProc}
+!   \end{sloppypar}
 ! \item[{[sharedObj]}]
 !   Name of shared object that contains {\tt userRoutine}. The asterisk
 !   character {\tt (*)} is supported as a wildcard for the file name suffix.
@@ -2802,7 +2886,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   For cases where OpenMP threads
 !   are used by the user code, each thread allocates its own private stack. For
-!   all threads {\em other} than the master, the stack size is set via the 
+!   all threads {\em other} than the master, the stack size is set via the
 !   typical {\tt OMP\_STACKSIZE} environment variable mechanism. The PET itself,
 !   however, becomes the {\em master} of the OpenMP thread team, and is not
 !   affected by {\tt OMP\_STACKSIZE}. It is the master's stack that can be
@@ -2818,7 +2902,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Depending on how much private data is used by the user code under
 !   the master thread, the default might be too small, and
 !   {\tt pthreadMinStackSize} must be used to allocate sufficient stack space.
-! \item[{[forceChildPthreads]}] 
+! \item[{[forceChildPthreads]}]
 !   For {\tt .true.}, force each child PET to execute in its own Pthread.
 !   By default, {\tt .false.}, single PETs spawned from a parent PET
 !   execute in the same thread (or MPI process) as the parent PET. Multiple
@@ -2916,7 +3000,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   For cases where OpenMP threads
 !   are used by the user code, each thread allocates its own private stack. For
-!   all threads {\em other} than the master, the stack size is set via the 
+!   all threads {\em other} than the master, the stack size is set via the
 !   typical {\tt OMP\_STACKSIZE} environment variable mechanism. The PET itself,
 !   however, becomes the {\em master} of the OpenMP thread team, and is not
 !   affected by {\tt OMP\_STACKSIZE}. It is the master's stack that can be
@@ -2932,7 +3016,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Depending on how much private data is used by the user code under
 !   the master thread, the default might be too small, and
 !   {\tt pthreadMinStackSize} must be used to allocate sufficient stack space.
-! \item[{[forceChildPthreads]}] 
+! \item[{[forceChildPthreads]}]
 !   For {\tt .true.}, force each child PET to execute in its own Pthread.
 !   By default, {\tt .false.}, single PETs spawned from a parent PET
 !   execute in the same thread (or MPI process) as the parent PET. Multiple
@@ -3027,7 +3111,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   For cases where OpenMP threads
 !   are used by the user code, each thread allocates its own private stack. For
-!   all threads {\em other} than the master, the stack size is set via the 
+!   all threads {\em other} than the master, the stack size is set via the
 !   typical {\tt OMP\_STACKSIZE} environment variable mechanism. The PET itself,
 !   however, becomes the {\em master} of the OpenMP thread team, and is not
 !   affected by {\tt OMP\_STACKSIZE}. It is the master's stack that can be
@@ -3043,7 +3127,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Depending on how much private data is used by the user code under
 !   the master thread, the default might be too small, and
 !   {\tt pthreadMinStackSize} must be used to allocate sufficient stack space.
-! \item[{[forceChildPthreads]}] 
+! \item[{[forceChildPthreads]}]
 !   For {\tt .true.}, force each child PET to execute in its own Pthread.
 !   By default, {\tt .false.}, single PETs spawned from a parent PET
 !   execute in the same thread (or MPI process) as the parent PET. Multiple

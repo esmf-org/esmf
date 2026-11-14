@@ -1,21 +1,78 @@
 % $Id$
 
-Building user applications against an ESMF installation requires that the 
-compiler and linker be able to find the appropriate ESMF header, module and 
-library files. If this procedure has been documented by the installer of the 
+Building user applications against an ESMF installation requires that the
+compiler and linker be able to find the appropriate ESMF header, module, and
+library files. If this procedure has been documented by the installer of the
 ESMF library on your system then follow the directions provided.
 
-In the absence of installation specific instructions there are two standard
-methods supported by ESMF to build user code against the installation. The
-first method is based on a GNU makefile fragment that can be included by the
-user code build infrastructure. This method requires that the user application
-also uses the
+In the absence of site-specific instructions, there are standard
+\htmladdnormallink{CMake}{https://cmake.org/} and
 \htmladdnormallink{GNU Make}{http://www.gnu.org/software/make/make.html}
-system. The second method is based on 
-\htmladdnormallink{CMake}{https://cmake.org/}.
+methods that ESMF supports to build user code against an ESMF installation.
+
+\subsection{CMake method using config mode}
+
+Starting with ESMF version 9, a standard {\tt ESMFConfig.cmake} file is generated
+when ESMF built and installed. CMake tries to locate this {\tt ESMFConfig.cmake} file
+in standard locations. During this search, CMake respects
+paths provided by the {\tt CMAKE\_PREFIX\_PATH} variable in the user's environment. Spack-loaded
+installations of ESMF automatically set {\tt CMAKE\_PREFIX\_PATH}, making this the
+most convenient method of building CMake-based applications against ESMF.
+For ESMF installations not managed by Spack, explicitly add the ESMF
+installation root directory to the {\tt CMAKE\_PREFIX\_PATH} environment variable
+for seamless integration with CMake.
+
+The configuration file provides exported imported targets that transitively bundle include directories, linked libraries, and compiler definitions (such as OpenMP or MPI requirements). To consume ESMF targets, utilize the \texttt{find\_package()} command in your project's \texttt{CMakeLists.txt} file:
+
+\begin{verbatim}
+cmake_minimum_required(VERSION 3.22)
+project(MyESMFApplication LANGUAGES Fortran C)
+
+# 1. Locate the ESMF Package
+# Specify a minimum version or version constraints if desired
+# Explicitly request config mode
+find_package(ESMF 9.0.0 REQUIRED CONFIG)
+
+# 2. Define your application target
+add_executable(my_model main.F90 physics_mod.F90)
+
+# 3. Link against ESMF Imported Targets
+# This automatically manages include paths, RPATHs, and downstream dependencies
+target_link_libraries(my_model PUBLIC ESMF::ESMF)
+\end{verbatim}
+
+Depending on whether the use application code is written in Fortran or C/C++, the ESMF package
+defines separate targets to avoid linking mismatch issues. Target aliases are provided for
+compatibility.
+
+\vspace{1.5em}
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Target} & \textbf{Alias} & \textbf{Language Focus} & \textbf{Description} \\ \hline \hline
+\texttt{ESMF::ESMF} & \texttt{ESMF::ESMF\_Fortran} & Fortran & \parbox[t]{6.5cm}{Configured for Fortran libraries and compiler variables, OpenMP flags, and tracking for \texttt{MPI::MPI\_Fortran} dependencies.} \\ \hline
+\texttt{ESMF::ESMC} & \texttt{ESMF::ESMF\_C}       & C/C++   & \parbox[t]{6.5cm}{Configured with native C/C++ compiler variables, OpenMP flags, and tracking for \texttt{MPI::MPI\_C} dependencies.} \\ \hline
+\end{tabular}
+\end{table}
 
 
-\subsection{esmf.mk method}
+\subsection{CMake method using module mode}
+
+An ESMF CMake find file is located at: \textit{<ESMF source or install directory>/cmake/FindESMF.cmake}
+
+The find file will parse the \textit{esmf.mk} file created following a successful
+ESMF build. (See \ref{sec:EsmfMkMethod} for a description of the \textit{esmf.mk} file.)
+The CMake module sets \textit{esmf.mk} variables as global CMake variables. When
+using the find file, {\tt ESMFMKFILE} must be set to the filepath of \textit{esmf.mk}.
+If this is NOT set, then {\tt ESMF\_FOUND} will always be {\tt FALSE}. If {\tt ESMFMKFILE}
+exists, then {\tt ESMF\_FOUND=TRUE} and all ESMF makefile variables will be set
+in the global scope. Optionally, set {\tt ESMF\_MKGLOBALS} to a string list to
+filter makefile variables. For example, to globally scope only {\tt ESMF\_LIBSDIR}
+and {\tt ESMF\_APPSDIR} variables, use this CMake command in \textit{CMakeLists.txt}: \verb|set(ESMF_MKGLOBALS "LIBSDIR" "APPSDIR")|
+
+\subsection{GNU Make method using the esmf.mk file}
 \label{sec:EsmfMkMethod}
 
 Every ESMF installation provides a file named {\tt esmf.mk} that contains the 
@@ -152,18 +209,3 @@ the ESMF library, and do not specify where to find the compiler, MPI, and/or
 the responsibility of the application build system to ensure the required
 libraries can be found by the linker, and are compatible with the ESMF
 installation.
-
-
-\subsection{CMake method}
-
-An ESMF CMake find file is located at: \textit{<ESMF source directory>/cmake/FindESMF.cmake}
-
-The find file will parse the \textit{esmf.mk} file created following a successful
-ESMF build. (See \ref{sec:EsmfMkMethod} for a description of the \textit{esmf.mk} file.)
-The CMake module sets \textit{esmf.mk} variables as global CMake variables. When
-using the find file, {\tt ESMFMKFILE} must be set to the filepath of \textit{esmf.mk}.
-If this is NOT set, then {\tt ESMF\_FOUND} will always be {\tt FALSE}. If {\tt ESMFMKFILE}
-exists, then {\tt ESMF\_FOUND=TRUE} and all ESMF makefile variables will be set
-in the global scope. Optionally, set {\tt ESMF\_MKGLOBALS} to a string list to
-filter makefile variables. For example, to globally scope only {\tt ESMF\_LIBSDIR}
-and {\tt ESMF\_APPSDIR} variables, use this CMake command in \textit{CMakeLists.txt}: \verb|set(ESMF_MKGLOBALS "LIBSDIR" "APPSDIR")|

@@ -510,7 +510,15 @@ class RegridMethod(IntEnum):
     :class:`~esmpy.api.grid.Grid` center stagger or 
     the :class:`~esmpy.api.mesh.Mesh` element location. 
     """
-
+    BINNING = 6
+    """
+    Binning regridding. For this regrid method, values located at each source point are 
+    mapped to the destination cell that contains the point. A given destination cell may 
+    receive input from multiple source points, but no source point will go to 
+    more than one destination cell. The value in a destination cell is the sum of all
+    the source values mapped to it. 
+    """
+    
 # StaggerLoc
 class StaggerLoc(IntEnum):
     """
@@ -608,3 +616,14 @@ class UnmappedAction(IntEnum):
     """
     Unmapped points are ignored.
     """
+# PredefinedDynamicMask
+class PredefinedDynamicMask(IntEnum):
+    MASKDEST = 0
+    MASKSRC = 1
+    MASKSRCDEST = 2
+    MASKVOTE = 3
+
+# DynamicMask
+class DynamicMaskPrecision(IntEnum):
+    R4R8R4 = 0
+    R8R8R8 = 1

@@ -1,26 +1,58 @@
 cmake_minimum_required(VERSION 3.22)
 
-# Where to look for the local Find<Package>.cmake files
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
-
-# Find ESMF
-find_package(ESMF 8.9.0 MODULE REQUIRED)
-
-if(NOT DEFINED CMAKE_Fortran_COMPILER)
-  set(CMAKE_Fortran_COMPILER        "${ESMF_F90COMPILER}")
-endif()
-if(NOT DEFINED CMAKE_CXX_COMPILER)
-  set(CMAKE_CXX_COMPILER            "${ESMF_CXXCOMPILER}")
-endif()
-if(NOT DEFINED CMAKE_C_COMPILER)
-  set(CMAKE_C_COMPILER              "${ESMF_CCOMPILER}")
-endif()
-
 # Project
 project(ESMX
-        VERSION 8.9.0
+        VERSION 9.0.0
         LANGUAGES Fortran CXX C
         )
+
+if(PROJECT_IS_TOP_LEVEL)
+  # Find ESMF
+  find_package(ESMF 9.0.0 REQUIRED)
+
+  # Set global defaults
+  if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -fbacktrace -O2" CACHE STRING "" FORCE)
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g -fbacktrace -O0 -fcheck=all -ffpe-trap=invalid,zero,overflow,underflow" CACHE STRING "" FORCE)
+
+  elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Cray")
+    set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -O2" CACHE STRING "" FORCE)
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g" CACHE STRING "" FORCE)
+
+  elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Flang")
+    set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -O2" CACHE STRING "" FORCE)
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g" CACHE STRING "" FORCE)
+
+  elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "LLVMFlang")
+    set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -O2" CACHE STRING "" FORCE)
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g" CACHE STRING "" FORCE)
+
+  elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
+    set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -traceback -O2" CACHE STRING "" FORCE)
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0 -check all -fpe0 -ftrapuv -init=snan,arrays" CACHE STRING "" FORCE)
+
+  elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "IntelLLVM")
+    set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -traceback -O2" CACHE STRING "" FORCE)
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0 -check bounds,pointers,stack -fpe0 -ftrapuv -init=snan,arrays" CACHE STRING "" FORCE)
+
+  elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "NAG")
+    set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -gline" CACHE STRING "" FORCE)
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g -gline -C=array -C=bits -C=dangling -C=pointer -C=recursion" CACHE STRING "" FORCE)
+
+  elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "NVHPC")
+    set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -traceback -O2 -fast" CACHE STRING "" FORCE)
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0" CACHE STRING "" FORCE)
+  endif()
+endif()
+
+# Sanitizer options
+
+set(USE_SANITIZERS "" CACHE STRING "List of sanitizers for Fortran: Address, Leak, Undefined, Thread, Memory")
+
+if(USE_SANITIZERS)
+  include("${CMAKE_CURRENT_LIST_DIR}/cmake/helpers.cmake")
+  configure_sanitizers("${USE_SANITIZERS}")
+endif()
 
 # Define standard installation directories
 include(GNUInstallDirs)
@@ -28,19 +60,19 @@ include(GNUInstallDirs)
 # Add ESMX driver
 add_subdirectory(Driver)
 
-# define ESMX_EXE_NAME
+# Define ESMX_EXE_NAME defaults if not supplied by parent scope/CLI
 if(NOT DEFINED ESMX_EXE_NAME)
-  set(ESMX_EXE_NAME "esmx_app")
+  set(ESMX_EXE_NAME "esmx_app" CACHE STRING "Name of the ESMX executable")
 endif()
 
 # Create ESMX executable
 add_executable(${ESMX_EXE_NAME} ESMX_App.F90)
-target_include_directories(${ESMX_EXE_NAME} PUBLIC ${PROJECT_BINARY_DIR})
-target_link_libraries(${ESMX_EXE_NAME} PUBLIC esmx_driver)
+target_include_directories(${ESMX_EXE_NAME} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(${ESMX_EXE_NAME} PRIVATE esmx_driver)
 set_target_properties(${ESMX_EXE_NAME} PROPERTIES
   INSTALL_RPATH     "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR};${CMAKE_INSTALL_PREFIX}/lib"
   LINKER_LANGUAGE   Fortran
 )
 
 # Install executable
-install(TARGETS ${ESMX_EXE_NAME})
+install(TARGETS ${ESMX_EXE_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})

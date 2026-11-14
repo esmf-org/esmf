@@ -1,0 +1,10 @@
+% $Id$
+%
+
+\label{DataConsiderInit}
+
+NUOPC does not strictly require components to fill their exported fields with valid data until the registered {\tt label\_DataInitialize} specialization point (discussed in section \ref{DataDepInit}) is called. However, when a Connector computes the RouteHandle between field pairs, the underlying ESMF functionality often accesses the source field data to perform auto-tuning of the generated RouteHandle. This can trigger runtime exceptions for applications built with strict compiler-level runtime checks, where invalid or out-of-range data is accessed during the auto-tuning process.
+
+NUOPC guards against such runtime exceptions by automatically initializing the data in fields accessed by a Connector as source fields for RouteHandle computation. The governing convention is that source fields whose timestamp is not at the current time of the driver clock when the Connector precomputes the RouteHandle are initialized with random, valid-ranged data of the respective {\em typekind}. This ensures that only valid data is accessed during auto-tuning.
+
+This convention also supports situations where a NUOPC component advertises or realizes a field directly using the data allocation of the native model code. In such a case, when the native model code has already initialized the associated field with valid data, it is undesirable to have the Connector re-initialize the same allocation with random data values. By simply timestamping the realized field with the current driver time, any Connector accessing this field for RouteHandle computation is advised not to modify the field, thus preserving the native model data.

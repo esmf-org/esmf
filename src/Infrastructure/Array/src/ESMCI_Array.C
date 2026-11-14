@@ -11313,6 +11313,11 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     }
 #endif
 
+    // store srcTermProcessingOpt setting in routehandle for reference
+    localrc = (*routehandle)->setSrcTermProcessing(srcTermProcessingOpt);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, &rc)) return rc;
+
 #ifdef ASMM_STORE_TIMING_on
   VMK::wtime(t12);   //gjt - profile
 #endif

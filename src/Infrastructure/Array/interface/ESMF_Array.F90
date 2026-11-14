@@ -753,7 +753,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(dynamicMask)) then
       ! check for valid input
       ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_DynamicMaskGetInit, dynamicMask, rc)
-      if (dynamicMask%typeKey=="R8R8R8") then
+      if (dynamicMask%typeKey=="R8R8R8 ") then
         ! insert dynMaskState into RouteHandle for Fortran layer
         dynMaskStateR8R8R8%wrap => dynamicMask%dmsR8R8R8
         call c_ESMC_RouteHandleSetASR8R8R8(routehandle, dynMaskStateR8R8R8, &
@@ -804,7 +804,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           handleAllElements, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      else if (dynamicMask%typeKey=="R4R8R4") then
+      else if (dynamicMask%typeKey=="R4R8R4 ") then
         ! insert dynMaskState into RouteHandle for Fortran layer
         dynMaskStateR4R8R4%wrap => dynamicMask%dmsR4R8R4
         call c_ESMC_RouteHandleSetASR4R8R4(routehandle, dynMaskStateR4R8R4, &
@@ -854,7 +854,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           handleAllElements, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      else if (dynamicMask%typeKey=="R4R4R4") then
+      else if (dynamicMask%typeKey=="R4R4R4 ") then
         ! insert dynMaskState into RouteHandle for Fortran layer
         dynMaskStateR4R4R4%wrap => dynamicMask%dmsR4R4R4
         call c_ESMC_RouteHandleSetASR4R4R4(routehandle, dynMaskStateR4R4R4, &

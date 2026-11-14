@@ -514,25 +514,25 @@ int main(void){
 #ifdef meshmasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, NULL, &routehandle, 
                              &regridmethod, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                             NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+                             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
                              &srcFracField, &dstFracField);
 #endif
 #ifdef gridmasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, &i_maskValues, &routehandle, 
                              &regridmethod, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                             NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+                             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
                              &srcFracField, &dstFracField);
 #endif
 #ifdef bothmasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, &i_maskValues, &routehandle, 
                              &regridmethod, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                             NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+                             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
                              &srcFracField, &dstFracField);
 #endif
 #ifdef nomasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, NULL, &routehandle, 
                              &regridmethod, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                             NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+                             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
                              &srcFracField, &dstFracField);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -542,7 +542,7 @@ int main(void){
   //EX_UTest
   strcpy(name, "Execute ESMC_FieldRegrid()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, NULL);
+  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, NULL, NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

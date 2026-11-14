@@ -555,10 +555,12 @@ module NUOPC_Comp
 !
 !   This call assumes to find a scalar value. An error is returned otherwise.
 !
-!   This call concverts to a string value, regardless of the actual attribute
-!   storage.
+!   This call converts the output to a string value, regardless of the actual
+!   attribute storage. In particular, for {\tt ESMF\_TYPEKIND\_LOGICAL}
+!   attributes, the returned values are (uppercase) {\tt T} and {\tt F} for,
+!   {\tt .true.} and {\tt .false.}, respectively.
 !
-!   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
+!   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if
 !   the attribute is not present or not set, respectively.
 !
 !   The arguments are:
@@ -648,7 +650,7 @@ module NUOPC_Comp
         file=FILENAME, &
         rcToReturn=rc)) &
         return  ! bail out
-      write(value,*) valueL
+      write(value,"(L1)") valueL
     else if (tk==ESMF_TYPEKIND_I4) then
       call ESMF_InfoGet(info, key="/NUOPC/Instance/"//name, value=valueI4, &
         rc=localrc)
@@ -719,10 +721,12 @@ module NUOPC_Comp
 !
 !   This call assumes to find a scalar value. An error is returned otherwise.
 !
-!   This call concverts to a string value, regardless of the actual attribute
-!   storage.
+!   This call converts the output to a string value, regardless of the actual
+!   attribute storage. In particular, for {\tt ESMF\_TYPEKIND\_LOGICAL}
+!   attributes, the returned values are (uppercase) {\tt T} and {\tt F} for,
+!   {\tt .true.} and {\tt .false.}, respectively.
 !
-!   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
+!   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if
 !   the attribute is not present or not set, respectively.
 !
 !   The arguments are:
@@ -812,7 +816,7 @@ module NUOPC_Comp
         file=FILENAME, &
         rcToReturn=rc)) &
         return  ! bail out
-      write(value,*) valueL
+      write(value,"(L1)") valueL
     else if (tk==ESMF_TYPEKIND_I4) then
       call ESMF_InfoGet(info, key="/NUOPC/Instance/"//name, value=valueI4, &
         rc=localrc)

@@ -1,12 +1,11 @@
 cmake_minimum_required(VERSION 3.22)
 
 # load packages and modules
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../cmake)
 set(Python_FIND_UNVERSIONED_NAMES "FIRST")
 set(Python_FIND_FRAMEWORK "LAST")
 set(Python_FIND_REGISTRY  "LAST")
 find_package(Python 3.5 REQUIRED COMPONENTS Interpreter)
-find_package(ESMF 8.9.0 MODULE REQUIRED)
+find_package(ESMF 9.0.0 REQUIRED)
 include(FetchContent)
 
 # esmx functions
@@ -71,25 +70,6 @@ if(NOT DEFINED ESMX_SDIR)
 endif()
 set(ENV{ESMX_SDIR} "${ESMX_SDIR}")
 
-# test options
-if(ESMX_TEST)
-  enable_testing()
-  if(NOT DEFINED ESMX_TEST_DIR)
-    set(ESMX_TEST_DIR "${CMAKE_BINARY_DIR}-tests")
-  endif()
-  file(MAKE_DIRECTORY ${ESMX_TEST_DIR})
-  if(NOT DEFINED ESMX_TEST_EXE)
-    string(REPLACE "\"" "" ESMX_TEST_EXE ${ESMF_INTERNAL_MPIRUN})
-    string(STRIP ${ESMX_TEST_EXE} ESMX_TEST_EXE)
-    string(REGEX REPLACE " .*" "" ESMX_TEST_EXE ${ESMX_TEST_EXE})
-  endif()
-  if(DEFINED ESMX_TEST_TASKS)
-    set(ESMX_TEST_TASKS -np ${ESMX_TEST_TASKS})
-  else()
-    set(ESMX_TEST_TASKS -np 4)
-  endif()
-endif()
-
 # build verbosity
 if(ESMX_CMAKE_BUILD_VERBOSE)
   set(ESMX_CMAKE_BUILD_VERBOSE "-v")
@@ -116,42 +96,10 @@ message("ESMX_EXE_NAME ............... ${ESMX_EXE_NAME}")
 message("ESMX_DISABLE_COMPS .......... ${ESMX_DISABLE_COMPS}")
 #message("ESMX_CMAKE_BUILD_VERBOSE .... ${ESMX_CMAKE_BUILD_VERBOSE}")
 #message("ESMX_CMAKE_BUILD_JOBS ....... ${ESMX_CMAKE_BUILD_JOBS}")
-#message("ESMX_TEST_DIR ............... ${ESMX_TEST_DIR}")
-#message("ESMX_TEST_TASKS ............. ${ESMX_TEST_TASKS}")
 message("")
 
-# compiler options
 if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
-  set(CMAKE_Fortran_FLAGS -ffree-line-length-none)
-  set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
-  set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -fbacktrace -O2")
-  set(CMAKE_Fortran_FLAGS_DEBUG "-g -fbacktrace -O0 -fcheck=all -ffpe-trap=invalid,zero,overflow,underflow")
-elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Cray")
-  set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
-  set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -O2")
-  set(CMAKE_Fortran_FLAGS_DEBUG "-g")
-elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Flang")
-  set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
-  set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -O2")
-  set(CMAKE_Fortran_FLAGS_DEBUG "-g")
-elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
-  set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
-  set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -traceback -O2")
-  set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0 -check all -fpe0 -ftrapuv -init=snan,arrays")
-elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "IntelLLVM")
-  set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
-  set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -traceback -O2")
-  set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0 -check all -fpe0 -ftrapuv -init=snan,arrays")
-elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "NAG")
-  set(CMAKE_Fortran_FLAGS_RELEASE "")
-  set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -gline")
-  set(CMAKE_Fortran_FLAGS_DEBUG "-g -gline -C=all")
-elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "NVHPC")
-  set(CMAKE_Fortran_FLAGS_RELEASE "-O2 -fast")
-  set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -traceback -O2 -fast")
-  set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0")
-else()
-  message(WARNING "${CMAKE_Fortran_COMPILER_ID} Fortran compiler will be used with default options")
+  string(APPEND CMAKE_Fortran_FLAGS " -ffree-line-length-none")
 endif()
 
 # generate component config file(s)
@@ -159,12 +107,6 @@ execute_process(COMMAND ${Python_EXECUTABLE}
   ${CMAKE_CURRENT_LIST_DIR}/esmx_comp_config.py --ifile ${ESMX_BUILD_FILE} --odir ${CMAKE_CURRENT_BINARY_DIR} --sdir ${ESMX_SDIR} ${ESMX_DISABLE_COMPS}
   RESULT_VARIABLE ret)
 esmx_check_ret(${ret} "esmx_comp_config.py failed processing ${ESMX_BUILD_FILE}")
-
-# generate test config file(s)
-execute_process(COMMAND ${Python_EXECUTABLE}
-  ${CMAKE_CURRENT_LIST_DIR}/esmx_test_config.py --ifile ${ESMX_BUILD_FILE} --odir ${CMAKE_CURRENT_BINARY_DIR}
-  RESULT_VARIABLE ret)
-esmx_check_ret(${ret} "esmx_test_config.py failed processing ${ESMX_BUILD_FILE}")
 
 # specify driver dependency
 add_library(esmx_driver ESMX_Driver.F90)
@@ -194,13 +136,15 @@ foreach(ESMX_LINK_LIBRARY IN ITEMS ${ESMX_LINK_LIBRARIES})
   endif()
 endforeach()
 
-# CMake has a bug with NAG and OpenMP:
-#   https://gitlab.kitware.com/cmake/cmake/-/issues/21280
-# so we work around it ... credit to https://github.com/mathomp4
+# CMake has bugs with NAG and OpenMP
 if (OpenMP_Fortran_FOUND AND CMAKE_Fortran_COMPILER_ID STREQUAL "NAG")
-  message(WARNING "NAG Fortran detected, resetting OpenMP flags to avoid CMake bug")
+  message(STATUS "ESMX detected NAG Fortran, resetting OpenMP flags to avoid CMake bug")
+  # https://gitlab.kitware.com/cmake/cmake/-/issues/21280
+  # link flag workaround credit to https://github.com/mathomp4
   set_property(TARGET OpenMP::OpenMP_Fortran PROPERTY INTERFACE_LINK_LIBRARIES "")
   set_property(TARGET OpenMP::OpenMP_Fortran PROPERTY INTERFACE_LINK_OPTIONS "-openmp")
+  # also handle compile flag issue
+  set_property(TARGET OpenMP::OpenMP_Fortran PROPERTY INTERFACE_COMPILE_OPTIONS "-openmp")
 endif()
 
 # link options
@@ -226,10 +170,7 @@ set(CMP_OPTIONS BUILD_TYPE;
                 LINK_PATHS;
                 LINK_INTO_APP;
                 BUILD_ARGS;
-                BUILD_SCRIPT;
-                TEST_DIR;
-                TEST_EXE;
-                TEST_TASKS)
+                BUILD_SCRIPT)
 include(${CMAKE_CURRENT_BINARY_DIR}/compList.txt)
 foreach(CMP IN ITEMS ${COMPS})
 
@@ -612,106 +553,9 @@ foreach(CMP IN ITEMS ${COMPS})
     endforeach()
   endif()
 
-  # add component test
-  if(ESMX_TEST)
-    if(CMP_TEST_DIR STREQUAL "")
-      message(WARNING "No test directory provided for ${CMP}")
-    elseif(NOT EXISTS ${CMP_TEST_DIR})
-      message(FATAL_ERROR "ESMX Error: Cannot find test directory for ${CMP}: ${CMP_TEST_DIR}")
-    else()
-      if(CMP_TEST_EXE STREQUAL "")
-        set(CMP_TEST_EXE ${ESMX_TEST_EXE})
-      endif()
-      if(CMP_TEST_TASKS STREQUAL "")
-        set(CMP_TEST_TASKS ${ESMX_TEST_TASKS})
-      else()
-        set(CMP_TEST_TASKS -np ${CMP_TEST_TASKS})
-      endif()
-
-      # copy test files
-      file(COPY ${CMP_TEST_DIR}/ DESTINATION ${ESMX_TEST_DIR}/cmp/${CMP})
-      file(CREATE_LINK ${CMAKE_BINARY_DIR}/${ESMX_EXE_NAME}
-        ${ESMX_TEST_DIR}/cmp/${CMP}/${ESMX_EXE_NAME}
-        SYMBOLIC
-      )
-
-      # find test application
-      find_program(FND_TEST_EXE
-        NAMES ${CMP_TEST_EXE}
-        NO_CACHE
-      )
-      if(NOT FND_TEST_EXE)
-        message(FATAL_ERROR "ESMX Error: Cannot find test executable for ${CMP}: ${CMP_TEST_EXE}")
-      endif()
-
-      # add test
-      add_test(NAME esmx-cmp-${CMP}
-        COMMAND ${FND_TEST_EXE} ${CMP_TEST_TASKS} ./${ESMX_EXE_NAME}
-        WORKING_DIRECTORY ${ESMX_TEST_DIR}/cmp/${CMP})
-      unset(FND_TEST_EXE)
-    endif()
-  endif()
-
   # unset variables used for component
   foreach(CMPVAR IN LISTS CMP_OPTIONS)
     unset(CMP_${CMPVAR})
   endforeach()
 
 endforeach()
-
-# add system tests
-if(ESMX_TEST)
-  set(TST_OPTIONS  DIR;
-                   EXE;
-                   TASKS)
-  include(${CMAKE_CURRENT_BINARY_DIR}/testList.txt)
-  foreach(TST IN ITEMS ${TESTS})
-
-    # get test options
-    foreach(TSTVAR IN LISTS TST_OPTIONS)
-      set(TST_${TSTVAR} "${${TST}-${TSTVAR}}")
-    endforeach()
-    if(TST_DIR STREQUAL "")
-      message(WARNING "No test directory provided for: ${TST}")
-    elseif(NOT EXISTS ${TST_DIR})
-      message(FATAL_ERROR "ESMX Error: Cannot find test directory: ${TST_DIR}")
-    endif()
-    if(TST_EXE STREQUAL "")
-      set(TST_EXE ${ESMX_TEST_EXE})
-    endif()
-    if(TST_TASKS STREQUAL "")
-      set(TST_TASKS ${ESMX_TEST_TASKS})
-    else()
-      set(TST_TASKS -np ${TST_TASKS})
-    endif()
-
-    # copy test files
-    file(COPY ${TST_DIR}/ DESTINATION ${ESMX_TEST_DIR}/sys/${TST})
-    file(CREATE_LINK ${CMAKE_BINARY_DIR}/${ESMX_EXE_NAME}
-      ${ESMX_TEST_DIR}/sys/${TST}/${ESMX_EXE_NAME}
-      SYMBOLIC
-    )
-
-    # find test application
-    find_program(FND_TST_EXE
-      NAMES ${TST_EXE}
-      NO_CACHE
-    )
-    if(NOT FND_TST_EXE)
-      message(FATAL_ERROR "ESMX Error: Cannot find test executable: ${TST_EXE}")
-    endif()
-
-    # add test
-    add_test(NAME esmx-sys-${TST}
-      COMMAND ${FND_TST_EXE} ${TST_TASKS} ./${ESMX_EXE_NAME}
-      WORKING_DIRECTORY ${ESMX_TEST_DIR}/sys/${TST})
-    unset(FND_TST_EXE)
-
-    # unset variables used for test
-    foreach(TSTVAR IN LISTS TEST_OPTIONS)
-      unset(TST_${TSTVAR})
-    endforeach()
-
-  endforeach()
-endif()
-

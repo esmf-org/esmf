@@ -49,6 +49,7 @@
 #include "ESMC_Field.h"
 #include "ESMC_LocStream.h"
 #include "ESMC_Trace.h"
+#include "ESMC_DynamicMask.h"
 
 // Superstructure headers
 #include "ESMC_State.h"

@@ -47,6 +47,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <cmath>
 
   //------------------------------------------------------------------------------
 //BOP
@@ -82,6 +83,8 @@ static void copy_cnsv_rs_from_WMat_to_Array(WMat *wmat, ESMCI::Array *array);
 void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray);
 void CpMeshElemDataToArray(Grid &grid, int staggerloc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray);
 void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array);
+
+bool _Array_contains_NaN(ESMCI::Array *array);
 
 void ESMCI_regrid_create(
                      Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
@@ -185,6 +188,15 @@ void ESMCI_regrid_create(
       }
     }
 
+    // extrapolation not supported with binning regridding
+    if (*extrapMethod != ESMC_EXTRAPMETHOD_NONE) {
+      if ((*regridMethod==ESMC_REGRID_METHOD_BINNING)) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                         "Extrapolation is not currently supported with binning regridding.",
+             ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+    }
+    
 
     // Conservative not supported on 3D spherical meshes
     if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
@@ -263,7 +275,7 @@ void ESMCI_regrid_create(
           (*regridMethod==ESMC_REGRID_METHOD_PATCH)) {
         degenerate=any_cells_in_mesh_degenerate(srcmesh);
       }
-
+      
       // Degenerate
       if (degenerate) {
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -274,7 +286,8 @@ void ESMCI_regrid_create(
       // Only check dst mesh elements for conservative because for others just nodes are used and it doesn't
       // matter what the cell looks like
       if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
-          (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
+          (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND) ||
+          (*regridMethod==ESMC_REGRID_METHOD_BINNING)) {
         // Check mesh elements
         degenerate=any_cells_in_mesh_degenerate(dstmesh);
 
@@ -332,7 +345,7 @@ void ESMCI_regrid_create(
     VM::logMemInfo(std::string("RegridCreate2.0"));
 #endif
 
-    // Compute Weights matrix
+    // Compute Weight matrix
     IWeights *wts = new IWeights;
 
     // Turn off unmapped action checking in regrid because it's local to a proc, and can therefore
@@ -346,6 +359,7 @@ void ESMCI_regrid_create(
     }
     WMat dst_status;
 
+    
     ESMCI_REGRID_TRACE_ENTER("NativeMesh Weight Generation");
 
     // to do NEARESTDTOS just do NEARESTSTOD and invert results
@@ -436,7 +450,9 @@ void ESMCI_regrid_create(
           if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg,
              ESMC_CONTEXT, &localrc)) throw localrc;
         }
-      } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) {
+      } else if ((*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) || 
+                 (*regridMethod == ESMC_REGRID_METHOD_BINNING))
+        {
         // CURRENTLY DOESN'T WORK!!!
 #if 0
         if (!all_mesh_node_ids_in_wmat(srcmesh, *wts)) {
@@ -556,6 +572,14 @@ void ESMCI_regrid_create(
     }
 
 
+    ///// If binning, translate split destination element weights to non-split //////
+    if (*regridMethod == ESMC_REGRID_METHOD_BINNING) {
+      ThrowRequire(dstmesh);
+      if (dstmesh->is_split) translate_split_dst_elems_in_wts_just_ids(dstmesh, num_entries, iientries);
+    }
+
+    
+
     ///// If requested, then change weights to be vector weights
     if (vectorRegrid) {
 
@@ -634,12 +658,24 @@ void ESMCI_regrid_create(
     // Build the RouteHandle using ArraySMMStore() 
     if (*has_rh) {
 
+      // Output Error if src Array contains a NaN
+      // TODO: eventually only check non-masked values and then put under checkFlag
+#ifdef ESMF_CHECK_FOR_RHSTORE_SRC_NAN      
+      if (_Array_contains_NaN(*arraysrcpp)) {
+        if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                         "The source Field passed to regrid weight generation (e.g. ESMF_FieldRegridStore()) contains a NaN.",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;        
+      }
+#endif
+
+      
       // Enter profile around routehandle creation
       if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 1) {
         ESMCI::TraceEventRegionEnter("RouteHandle creation", &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
       }
 
+     
       // Set some flags
       enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
       ESMC_Logical ignoreUnmatched = ESMF_FALSE;
@@ -902,6 +938,79 @@ void ESMCI_regrid_getiwts(Grid **gridpp,
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
+
+/* XMRKX */
+// Check the local piece of an Array for NaNs
+bool _Array_contains_NaN(ESMCI::Array *array) {
+
+    // Get Distgrid
+    ESMCI::DistGrid *distGrid=array->getDistGrid();
+
+   // Get localDECount
+    int localDECount=distGrid->getDELayout()->getLocalDeCount();
+    
+    // Get typekind of Array
+    ESMC_TypeKind_Flag typekind=array->getTypekind();
+
+    
+    // Check depending on type
+    if (typekind == ESMC_TYPEKIND_R8) {
+      
+      // Loop over DEs
+      for (auto lDE=0; lDE < localDECount; lDE++) {
+        
+        // Get base address for local DE memory
+        ESMC_R8 *lDEBaseAddr = (ESMC_R8 *)(array->getLarrayBaseAddrList())[lDE];
+        
+        // iterator through Array Elements
+        ArrayElement arrayElement(array, lDE, false, false, false);
+        while(arrayElement.isWithin()){
+            
+          // Get linear index of this element
+          long unsigned int linearIndex = arrayElement.getLinearIndex();
+          
+          // Check for NaN
+          if (std::isnan(lDEBaseAddr[linearIndex])) return true;
+          
+          // next element
+          arrayElement.next();  
+        } // multi dim index loop
+        
+      } // Loop over local DEs
+
+    } else if (typekind == ESMC_TYPEKIND_R4) {
+
+      // Loop over DEs
+      for (auto lDE=0; lDE < localDECount; lDE++) {
+        
+        // Get base address for local DE memory
+        ESMC_R4 *lDEBaseAddr = (ESMC_R4 *)(array->getLarrayBaseAddrList())[lDE];
+        
+        // iterator through Array Elements
+        ArrayElement arrayElement(array, lDE, false, false, false);
+        while(arrayElement.isWithin()){
+            
+          // Get linear index of this element
+          long unsigned int linearIndex = arrayElement.getLinearIndex();
+          
+          // Check for NaN
+          if (std::isnan(lDEBaseAddr[linearIndex])) return true;
+          
+          // next element
+          arrayElement.next();  
+        } // multi dim index loop
+        
+      } // Loop over local DEs
+      
+    } else {
+      //  Only floating point can have NaNs, so leave if not
+      return false;
+    }
+      
+    // No NaNs found
+    return false;    
+}
+
 
 void ESMCI_regrid_getarea(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
@@ -2623,5 +2732,8 @@ void copy_cnsv_rs_from_WMat_to_Array(WMat *wmat, ESMCI::Array *array) {
 #undef ZERO_TOL
 #undef cWtoA_MAXDIM
 }
+
+
+
 
 #undef  ESMC_METHOD

@@ -311,7 +311,6 @@ class TestMesh(TestBase):
         assert mesh2.size_owned == [5, None]
 
 
-    @pytest.mark.xfail
     @pytest.mark.skipif(_ESMF_PIO==False, reason="PIO required in ESMF build")
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")

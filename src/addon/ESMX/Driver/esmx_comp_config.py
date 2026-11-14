@@ -28,10 +28,7 @@ def create_compList(cmpCfg: ESMXCmpCfg, odir, sdir):
                 ESMXOpt('link_into_app', 'True', str),
                 ESMXOpt('git_repository', '', str),
                 ESMXOpt('git_tag', '', str),
-                ESMXOpt('git_dir', '', dir),
-                ESMXOpt('test_dir', '', dir),
-                ESMXOpt('test_exe', '', str),
-                ESMXOpt('test_tasks', '', str)]
+                ESMXOpt('git_dir', '', dir)]
             for opt in options:
                 val = cfg.get(opt.option, opt.default)
                 if (val):
@@ -112,8 +109,6 @@ def main(argv):
             {'build_type':'cmake'})
         comps.get('ESMX_Data').update(
             {'source_dir':'${ESMF_ESMXDIR}/Comps/ESMX_Data'})
-        comps.get('ESMX_Data').update(
-            {'test_dir':'${ESMF_ESMXDIR}/Tests/esmx-data'})
 
     # remove disabled components
     for dis in disable_comps:

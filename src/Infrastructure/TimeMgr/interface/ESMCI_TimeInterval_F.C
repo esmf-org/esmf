@@ -252,7 +252,9 @@ extern "C" {
                                  char *tempTimeString,
                                  int *timeStringLenISOFrac,
                                  int *tempTimeStringLenISOFrac,
-                                 char *tempTimeStringISOFrac, int *status,
+                                 char *tempTimeStringISOFrac,
+                                 ESMC_Logical *isAbsolute,              
+                                 int *status,
                                  ESMCI_FortranStrLenArg tempTime_l,
                                  ESMCI_FortranStrLenArg tempTimeISOFrac_l) {
           int rc = (ptr)->TimeInterval::get(
@@ -288,6 +290,7 @@ extern "C" {
                        ESMC_NULL_POINTER,
                        ESMC_NULL_POINTER,
                        ESMC_NULL_POINTER,
+                       ESMC_NOT_PRESENT_FILTER(isAbsolute),
                                           // always present internal arguments
                                               *timeStringLen,
                                                tempTimeStringLen,
@@ -356,6 +359,7 @@ extern "C" {
                        ESMC_NULL_POINTER,
                        ESMC_NULL_POINTER,
                        ESMC_NULL_POINTER,
+                       ESMC_NULL_POINTER, // isAbsolute
                                           // always present internal arguments
                                               *timeStringLen,
                                                tempTimeStringLen,
@@ -424,6 +428,7 @@ extern "C" {
                        ESMC_NULL_POINTER,
                        ESMC_NOT_PRESENT_FILTER(calendarIn),
                        ESMC_NULL_POINTER,
+                       ESMC_NULL_POINTER, // isAbsolute
                                           // always present internal arguments
                                               *timeStringLen,
                                                tempTimeStringLen,
@@ -492,6 +497,7 @@ extern "C" {
                        ESMC_NULL_POINTER,
                        ESMC_NULL_POINTER,
                        ESMC_NOT_PRESENT_FILTER(calkindflagIn),
+                       ESMC_NULL_POINTER, // isAbsolute
                                           // always present internal arguments
                                               *timeStringLen,
                                                tempTimeStringLen,

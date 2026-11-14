@@ -2698,6 +2698,42 @@ void calc_nearest_npnts_mat_serial(PointList *srcpointlist, PointList *dstpointl
 }
 
 
+
+void calc_binning_mat_serial(SearchResult &sres, IWeights &iw) {
+  Trace __trace("calc_binning_mat_serial(PointList *srcpointlist, PointList *dstpointlist, SearchResult &sres, IWeights &iw)");
+
+  // Temporary empty col with negatives so unset values
+  // can be detected if they sneak through
+  IWeights::Entry col_empty(-1, 0, -1.0, 0);
+
+  // Loop through search results
+  SearchResult::iterator sb = sres.begin(), se = sres.end();
+  for (; sb != se; sb++) {
+    Search_result &sr = **sb;
+
+    // Set the destination
+    // (but here we are using the source element, because things are reversed)
+    IWeights::Entry row(sr.elem->get_id(), 0, 0.0, 0);
+
+    // Loop over nodes in search result
+    // TODO: see if you should make one big vector of cols
+    for (auto n=0; n<sr.nodes.size(); n++) {
+
+      // Set the source
+      // but here we are using the destination id, because things are reversed)
+      IWeights::Entry col(sr.nodes[n].dst_gid, 0, 1.0, 0);
+      
+      // Put weights into weight matrix
+      // Need merge version in nearest src to dest case where there may be more than 1 src,dst pair with the same dst.
+      iw.InsertRowMergeSingle(row, col);
+    }
+
+    
+  } // for searchresult
+
+}
+  
+
  void mat_point_serial_transfer(MEField<> &sfield, SearchResult &sres, IWeights &iw, PointList *dstpointlist) {
   Trace __trace("mat_point_serial_transfer(UInt num_fields, MEField<> *const *sfields, int *iflag, SearchResult &sres)");
 
@@ -2898,6 +2934,8 @@ static void _check_mesh(Mesh &mesh, const char *name) {
 
 }
 
+
+// Create Rendezvous geometries and do search
 Interp::Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *dstplist, Mesh *midmesh,
                bool freeze_src_, int imethod,
                bool set_dst_status, WMat &dst_status,
@@ -2907,7 +2945,7 @@ Interp::Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *dstplist, 
 #define ESMC_METHOD "Interp::Interp()"
 
 sres(),
-grend(src, srcplist, dest, dstplist, get_dst_config(imethod), freeze_src_, (mtype==MAP_TYPE_GREAT_CIRCLE)),
+//grend(src, srcplist, dest, dstplist, get_dst_config(imethod), freeze_src_, (mtype==MAP_TYPE_GREAT_CIRCLE)),
 is_parallel(Par::Size() > 1),
 srcF(),
 dstF(),
@@ -2917,6 +2955,7 @@ has_cnsrv(false),
 has_nearest_src_to_dst(false),
 has_nearest_dst_to_src(false),
 has_nearest_idavg(false),
+has_binning(false),
 num_src_pnts(_num_src_pnts),
 dist_exponent(_dist_exponent),
 srcmesh(src),
@@ -2927,9 +2966,22 @@ midmesh(midmesh),
 zz(0),
 interp_method(imethod)
 {
-
+  
   // Declare local return code
   int localrc;
+
+
+  // Setup GeomRendezvous object
+  if (interp_method != Interp::INTERP_BINNING) {
+    grend.DelayedSetup(src, srcplist, dest, dstplist, get_dst_config(imethod), freeze_src_, (mtype==MAP_TYPE_GREAT_CIRCLE));
+  } else {
+    // Reverse source and dest for binning
+    grend.DelayedSetup(dest, dstplist, src, srcplist, get_dst_config(imethod), freeze_src_, (mtype==MAP_TYPE_GREAT_CIRCLE));
+  }
+  
+  // STOPPED HERE
+
+  
   
   // Different paths for parallel/serial
   UInt search_obj_type = grend.GetDstObjType();
@@ -2945,6 +2997,7 @@ interp_method(imethod)
   else if (interp_method == Interp::INTERP_CONSERVE_2ND) has_cnsrv = true;
   else if (interp_method == Interp::INTERP_NEAREST_SRC_TO_DST) has_nearest_src_to_dst = true;
   else if (interp_method == Interp::INTERP_NEAREST_DST_TO_SRC) has_nearest_dst_to_src = true;
+  else if (interp_method == Interp::INTERP_BINNING) has_binning = true;
   else if (interp_method == Interp::INTERP_NEAREST_IDAVG) has_nearest_idavg = true;
 
   if (dstmesh != NULL) {
@@ -2963,9 +3016,15 @@ interp_method(imethod)
     // Form the parallel rendezvous meshes/specs
    //  if (Par::Rank() == 0)
        //std::cout << "Building rendezvous..." << std::endl;
-    grend.Build(srcF.size(), (srcF.size()>0)?(&srcF[0]):NULL, 
-                dstF.size(), (dstF.size()>0)?(&dstF[0]):NULL,
-                &zz, midmesh==0? true:false);
+    if (interp_method != Interp::INTERP_BINNING) {
+      grend.Build(srcF.size(), (srcF.size()>0)?(&srcF[0]):NULL, 
+                  dstF.size(), (dstF.size()>0)?(&dstF[0]):NULL,
+                  &zz, midmesh==0? true:false);
+    } else {
+      grend.Build(dstF.size(), (dstF.size()>0)?(&dstF[0]):NULL,
+                  srcF.size(), (srcF.size()>0)?(&srcF[0]):NULL,                     
+                  &zz, midmesh==0? true:false);
+    }
 
     // Exit profile around geom redist
     if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
@@ -2998,6 +3057,31 @@ interp_method(imethod)
     if (has_nearest_dst_to_src) {
       Throw() << "unable to proceed with interpolation method dst_to_src";
 
+    } else if (has_binning) {
+      // Enter profile around search
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+        ESMCI::TraceEventRegionEnter("Search", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
+      
+      // Search
+      // NOTE: because of the fact that we switched the src and dst above when creating the
+      //       grend, the SrcRend and DstPListRend in the below are actually the reverse
+      OctSearch(grend.GetSrcRend(), grend.GetDstPlistRend(), mtype, search_obj_type,
+                unmappedaction, sres, set_dst_status, dst_status, 1e-8);
+
+      // Exit profile for search
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+        ESMCI::TraceEventRegionExit("Search", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
+
+      // TODO: figure out status
+      // Redistribute regrid status
+      //        if (set_dst_status) {
+      //  dst_status.Migrate(*dstplist);
+      // }      
+      
     } else if (has_nearest_src_to_dst) {
       // Enter profile around search
       if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
@@ -3130,6 +3214,27 @@ interp_method(imethod)
 
     if (has_nearest_dst_to_src) {
       Throw() << "unable to proceed with interpolation method dst_to_src";
+      
+    } else if (has_binning) {
+      // Enter profile around search      
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+        ESMCI::TraceEventRegionEnter("Search", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
+
+
+      // Do search
+      // NOTE: reverse of bilinear
+      OctSearch(*dest, *srcpointlist, mtype, search_obj_type,
+                unmappedaction, sres, set_dst_status, dst_status, 1e-8);
+      
+      // Exit profile for search
+      if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
+        ESMCI::TraceEventRegionExit("Search", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
+      }
+
+      
     } else if (has_nearest_src_to_dst) {
       // Enter profile around search      
       if (TraceGetProfileTypeInfo(ESMC_PROFILETYPE_REGRID) > 2) {
@@ -3371,34 +3476,29 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
   }
 #endif
 
-  // Migrate weights back to row decomposition
-  // (use node or elem migration depending on interpolation)
-  if (!has_cnsrv) {
-    if (is_parallel) {
+  // If parallel, migrate info back to destination decomposition
+  if (is_parallel) {
 
-      if (dstpointlist == NULL )
-        iw.Migrate(*dstmesh);
-      else
-        iw.Migrate(*dstpointlist);
-
-    }
-  } else {
-    if (is_parallel) {
-      iw.MigrateToElem(*dstmesh);
-      dst_frac.MigrateToElem(*dstmesh);
+    // Migrate information to node or elem depending on method
+    if (has_cnsrv) { // If conservative, migrate info to elements
+      iw.MigrateToElem(*dstmesh); 
+      dst_frac.MigrateToElem(*dstmesh); 
+      src_frac.MigrateToElem(*srcmesh);
       if (set_dst_status) {
         dst_status.MigrateToElem(*dstmesh);
+      }
+    } else if (has_binning) { // If binning migrate weights to elements
+      iw.MigrateToElem(*dstmesh); 
+    } else { // Other methods, migrate to nodes
+      if (dstpointlist == NULL ) {
+        iw.Migrate(*dstmesh);
+      } else {
+        iw.Migrate(*dstpointlist);
       }
     }
   }
 
-  // Migrate src_frac to source mesh decomp
-  if (has_cnsrv) {
-    if (is_parallel) {
-      src_frac.MigrateToElem(*srcmesh);
-    }
-  }
-
+ 
   //  printf("%d# M1\n",Par::Rank());
 
   // Set destination fractions
@@ -3572,7 +3672,8 @@ void Interp::mat_transfer_serial(int fpair_num, IWeights &iw, IWeights &src_frac
   else if (interp_method == INTERP_NEAREST_IDAVG) calc_nearest_npnts_mat_serial(srcpointlist, dstpointlist, dist_exponent,  sres, iw);
   else if (interp_method == INTERP_NEAREST_DST_TO_SRC) calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
   else if (interp_method == INTERP_CONSERVE_2ND) calc_2nd_order_conserve_mat_serial(*srcmesh, *dstmesh, midmesh, sres, iw, src_frac, dst_frac, zz, set_dst_status, dst_status);
-
+  else if (interp_method == INTERP_BINNING) calc_binning_mat_serial(sres, iw);
+  else Throw() <<"Unrecognized interpolation method.";
 }
 
 void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw, IWeights &src_frac, IWeights &dst_frac,
@@ -3593,6 +3694,8 @@ void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw, IWeights &src_fr
     calc_nearest_npnts_mat_serial(&(grend.GetSrcPlistRend()), &(grend.GetDstPlistRend()), dist_exponent, sres, iw);
   } else if (interp_method == INTERP_NEAREST_DST_TO_SRC) {
     calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
+  }  else if (interp_method == INTERP_BINNING) {
+    calc_binning_mat_serial(sres, iw);
   } else {
     // Send source data to rendezvous decomp
     const std::vector<MEField<> *> &src_rend_Fields = grend.GetSrcRendFields();

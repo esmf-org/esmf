@@ -394,11 +394,11 @@ int main(void){
                              &routehandle, 
                              NULL, NULL, NULL, NULL, NULL, NULL,
                              &extrapmethod, NULL, NULL, NULL, &unmappedaction,
-                             NULL, NULL, NULL, NULL, NULL, NULL);
+                             NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 #else
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, NULL, &routehandle, 
                              NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -413,9 +413,9 @@ int main(void){
   // SMM operation will need to be initialized to 0 before having the new
   // value added to them.
   enum ESMC_Region_Flag zeroregion = ESMC_REGION_SELECT;
-  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, &zeroregion);
+  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, &zeroregion, NULL);
 #else
-  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, NULL);
+  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, NULL, NULL);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------

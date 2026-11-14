@@ -1,11 +1,12 @@
 [![ESMF CI](https://github.com/esmf-org/esmf/actions/workflows/esmf-all-tests.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/esmf-all-tests.yml)
-[![NUOPC App Prototypes Test](https://github.com/esmf-org/nuopc-app-prototypes/actions/workflows/develop-nightly.yml/badge.svg)](https://github.com/esmf-org/nuopc-app-prototypes/actions/workflows/develop-nightly.yml)
+[![NUOPC App Prototypes Test](https://github.com/esmf-org/nuopc-app-prototypes/actions/workflows/ci.yaml/badge.svg)](https://github.com/esmf-org/nuopc-app-prototypes/actions/workflows/ci.yaml)
 [![ESMF Spack Test](https://github.com/esmf-org/esmf/actions/workflows/test-build-spack.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/test-build-spack.yml)
 [![ESMF Docs](https://github.com/esmf-org/esmf/actions/workflows/build-esmf-docs.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/build-esmf-docs.yml)
 
 # Earth System Modeling Framework (ESMF)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11205526.svg)](https://doi.org/10.5281/zenodo.11205526)
+
 
 >Copyright (c) 2002-2026 University Corporation for Atmospheric Research, Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory, University of Michigan, National Centers for Environmental Prediction, Los Alamos National Laboratory, Argonne National Laboratory, NASA Goddard Space Flight Center. All rights reserved.
 
@@ -59,6 +60,11 @@ Several add-on packages are included with ESMF under [`./src/addon`](https://git
  * [NUOPC](src/addon/NUOPC) - Interoperability layer developed under the National Unified Operational Prediction Capability (NUOPC) program.
 
 See each addon package for a specific README file.
+
+## ESMF Development
+
+ESMF configures [Dev Containers](https://containers.dev/), which provide a portable, reproducible development environment for building and testing ESMF.
+See [`.devcontainer/README.md`](.devcontainer/README.md) for instructions on using Dev Containers in VS Code, GitHub Codespaces, and locally with Docker.
 
 ## More Help
 

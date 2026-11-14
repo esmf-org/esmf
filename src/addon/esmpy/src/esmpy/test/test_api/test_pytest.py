@@ -5,11 +5,11 @@ pytest tests
 import pytest
 
 from esmpy.test.base import TestBase
-from esmpy.api.esmpymanager import pet_count
+from esmpy.api.esmpymanager import pet_count, local_pet
 
 class TestPyTest(TestBase):
 
-    @pytest.mark.xfail
+    @pytest.mark.xfail(local_pet() == 2, reason="expected failure on PET2", raises=ValueError)
     @pytest.mark.skipif(pet_count()<3, reason="test must be run with more than 3 cores")
     def test_pytest_singlecorefailure(self):
 

@@ -37,11 +37,7 @@ def create_appConf(appCfg: ESMXAppCfg, odir):
                ESMXOpt('cmake_build_verbose', None, str),
                ESMXOpt('make_build_args', None, str),
                ESMXOpt('make_build_jobs', None, str),
-               ESMXOpt('script_build_args', None, str),
-               ESMXOpt('test', None, str),
-               ESMXOpt('test_exe', None, str),
-               ESMXOpt('test_dir', None, dir),
-               ESMXOpt('test_tasks', None, str)]
+               ESMXOpt('script_build_args', None, str)]
     # open file
     with open(os.path.join(odir, 'appConf.txt'), 'w') as f:
         for opt in options:

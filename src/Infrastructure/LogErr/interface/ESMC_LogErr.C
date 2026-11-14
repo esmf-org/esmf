@@ -38,6 +38,21 @@ static const char *const version = "$Id$";
 
 extern "C" {
 
+int ESMC_LogMsgFoundError(int rcToCheck, const char msg[],
+  int LINE, const char FILE[], const char method[], int *rcToReturn){
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMC_LogMsgFoundError()"
+
+//TODO: Add context arguments as optional arguments
+
+  // Call into ESMCI method
+  if (ESMC_LogDefault.MsgFoundError(rcToCheck, msg, LINE, FILE,
+    method, rcToReturn)) return 1;
+
+  return 0;
+
+} // ESMC_LogMsgFoundError
+
 int ESMC_LogSet(int flush){
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMC_LogSet()"

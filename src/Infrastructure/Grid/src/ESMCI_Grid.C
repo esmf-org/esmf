@@ -2315,19 +2315,16 @@ int Grid::getDistExclusiveLBound(
   } else {
     // Get some useful information
     const int *localDeToDeMap = distgrid->getDELayout()->getLocalDeToDeMap();
-
+    
     // Get the Global DE from the local DE
     int de = localDeToDeMap[localDEArg];
 
+    // Get the array holding the size of each index list
+    const int *indexCountPDimPDe=distgrid->getIndexCountPDimPDe();
+    
     // Set Bound based on distgrid info
     for (int i=0; i<distDimCount; i++){
-        
-      // obtain indexList for this DE and dim
-      const int *indexList =
-        distgrid->getIndexListPDimPLocalDe(localDEArg, i+1, &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-         &rc)) return rc;
-      
+
       // make sure this dimension is contiguous         
       const int contig=distgrid->getContigFlagPDimPDe(de, i+1, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -2338,8 +2335,19 @@ int Grid::getDistExclusiveLBound(
         return rc;
       }
       
+      // Obtain size of indexList for this DE and dim
+      int indexCount=indexCountPDimPDe[de*distDimCount+i];
+
+      // obtain indexList for this DE and dim
+      const int *indexList =
+        distgrid->getIndexListPDimPLocalDe(localDEArg, i+1, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+         &rc)) return rc;
+      
       // Set lower bounds of exclusive region to match indexList[0]
-      lBndArg[i] = indexList[0];
+      if (indexCount > 0)  lBndArg[i] = indexList[0];
+      else lBndArg[i] = 1; // If indexList doesn't exist, default to 1.
+      
     } // i
   }
   
@@ -2400,35 +2408,41 @@ int Grid::getDistExclusiveUBound(
 
   // Get the Global DE from the local DE
   int de = localDeToDeMap[localDEArg];
-
+  
   // exlc. region for each DE ends at indexCountPDimPDe of the associated
   // DistGrid
-    for (int i=0; i<distDimCount; i++)
-      uBndArg[i]=indexCountPDimPDe[de*distDimCount+i];
+  for (int i=0; i<distDimCount; i++)
+    uBndArg[i]=indexCountPDimPDe[de*distDimCount+i];
 
   // Set upper bound based on indexflag
   if (indexflag==ESMC_INDEX_GLOBAL) {
 
       for (int i=0; i<distDimCount; i++){
 
-        // obtain indexList for this DE and dim
+        // make sure is contiguous         
+        const int contig=distgrid->getContigFlagPDimPDe(de, i+1, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,
+                                          ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
+        if (!contig) {
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+             "- doesn't handle non-contiguous DEs yet ", ESMC_CONTEXT, &rc);
+          return rc;
+        }
+
+        // Obtain size of indexList for this DE and dim
+        int indexCount=indexCountPDimPDe[de*distDimCount+i];
+        
+        // Obtain indexList for this DE and dim
         const int *indexList =
           distgrid->getIndexListPDimPLocalDe(localDEArg, i+1, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &rc)) return rc;
 
-        // make sure is contiguous         
-        const int contig=distgrid->getContigFlagPDimPDe(de, i+1, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc,
-                       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-        if (!contig) {
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-                "- doesn't handle non-contiguous DEs yet ", ESMC_CONTEXT, &rc);
-          return rc;
-        }
 
-        // shift bounds of exclusive region to match indexList[0]
-        uBndArg[i] += indexList[0] - 1;
+        // Shift bounds of exclusive region to match indexList[0]        
+        if (indexCount > 0) uBndArg[i] += indexList[0] - 1;
+        // else uBndArg[i] += 1 - 1; // If indexList doesn't exist, default it to 1.
+        
       } // i
   }
 
@@ -10944,12 +10958,6 @@ int Grid::getDistExclusiveUBound(
 
       for (int i=0; i<distDimCount; i++){
 
-        // obtain indexList for this DE and dim
-        const int *indexList =
-          distgridArg->getIndexListPDimPLocalDe(localDEArg, i+1, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-           &rc)) return rc;
-
         // make sure is contiguous         
         const int contig=distgridArg->getContigFlagPDimPDe(de, i+1, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -10959,9 +10967,20 @@ int Grid::getDistExclusiveUBound(
                      "- doesn't handle non-contiguous DEs yet ", ESMC_CONTEXT, &rc);
           return rc;
         }
+        
+        // Obtain size of indexList for this DE and dim
+        int indexCount=indexCountPDimPDe[de*distDimCount+i];
+        
+        // obtain indexList for this DE and dim
+        const int *indexList =
+          distgridArg->getIndexListPDimPLocalDe(localDEArg, i+1, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+           &rc)) return rc;
 
-        // shift bounds of exclusive region to match indexList[0]
-        uBndArg[i] += indexList[0] - 1;
+        // Shift bounds of exclusive region to match indexList[0]        
+        if (indexCount > 0) uBndArg[i] += indexList[0] - 1;
+        // else uBndArg[i] += 1 - 1; // If indexList doesn't exist, default it to 1.        
+
       } // i
   }
 
@@ -11029,15 +11048,13 @@ int Grid::getDistExclusiveLBound(
     // Get the Global DE from the local DE
     int de = localDeToDeMap[localDEArg];
 
+    // Get the array holding the size of each index list
+    const int *indexCountPDimPDe=distgridArg->getIndexCountPDimPDe();
+
+    
     // Set Bound based on distgridArg info
     for (int i=0; i<distDimCount; i++){
         
-      // obtain indexList for this DE and dim
-      const int *indexList =
-        distgridArg->getIndexListPDimPLocalDe(localDEArg, i+1, &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-        &rc)) return rc;
-      
       // make sure this dimension is contiguous         
        const int contig=distgridArg->getContigFlagPDimPDe(de, i+1, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -11047,9 +11064,20 @@ int Grid::getDistExclusiveLBound(
           "- doesn't handle non-contiguous DEs yet ",ESMC_CONTEXT, &rc);
         return rc;
       }
+
+      // Obtain size of indexList for this DE and dim
+      int indexCount=indexCountPDimPDe[de*distDimCount+i];
+      
+      // obtain indexList for this DE and dim
+      const int *indexList =
+        distgridArg->getIndexListPDimPLocalDe(localDEArg, i+1, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &rc)) return rc;
       
       // Set lower bounds of exclusive region to match indexList[0]
-      lBndArg[i] = indexList[0];
+      if (indexCount > 0)  lBndArg[i] = indexList[0];
+      else lBndArg[i] = 1; // If indexList doesn't exist, default to 1.
+      
     } // i
   }
   

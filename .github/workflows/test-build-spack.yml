@@ -14,12 +14,12 @@ on:
         type: string
         default: 'gcc@latest'
       esmf_version: 
-        description: 'ESMF version or tag like esmf@develop or esmf@=8.5.0b23'
+        description: 'ESMF version known to Spack like esmf@X.Y.Z (special case esmf@develop); or Git object like esmf@git.<hash|tag|branch>=X.Y.Z with X.Y.Z as pseudo-version for Spack rules'
         required: false
         type: string
         default: 'esmf@develop'
       nuopc_app_version:
-        description: 'NUOPC Application Prototypes version or tag like develop or v8.5.0b23'
+        description: 'NUOPC Application Prototypes version as Git hash, tag, or branch'
         required: false
         type: string
         default: 'develop'
@@ -74,7 +74,7 @@ jobs:
     steps:
     # check out base repo
     - name: Checkout Base Repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     # prepare core environment
     - name: Install Core Development Tools
@@ -88,7 +88,7 @@ jobs:
 
     # restore Intel oneAPI compiler installation from cache
     - name: Restore Intel oneAPI Compiler Installation
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       if: ${{ startsWith(matrix.compiler, 'oneapi') }}
       with:
         path: /opt/intel/oneapi
@@ -121,7 +121,7 @@ jobs:
 
     # checkout NUOPC app prototypes
     - name: Checkout NUOPC App Prototypes
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         repository: esmf-org/nuopc-app-prototypes
         path: ${{ github.workspace }}/nuopc-app-prototypes
@@ -144,7 +144,7 @@ jobs:
 
    # push test results to artifacts
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: Artifacts for ${{ matrix.compiler }} ${{ matrix.esmf }}
         path: ${{ github.workspace }}/nuopc-app-prototypes/Artifacts

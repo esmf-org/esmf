@@ -1,0 +1,16 @@
+{
+  "variants": [
+    {
+      "title": "esmfdev_ubuntu-25.10_gcc-15_mpich",
+      "description": "ESMF development container with gcc-15 and mpich",
+      "version": "1.0.0",
+      "vendor": "ESMF Core Team",
+      "authors": "esmf_support@ucar.edu",
+      "context": ".devcontainer/ubuntu-25.10_gcc-15_mpich",
+      "file": "Dockerfile",
+      "deploy": true,
+      "registries": ["ghcr.io"],
+      "platforms": ["linux/amd64","linux/arm64/v8"]
+    }
+  ]
+}

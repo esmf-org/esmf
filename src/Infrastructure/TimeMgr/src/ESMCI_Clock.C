@@ -71,6 +71,7 @@ int Clock::count=0;
       int          *runTimeStepCount, // in
       Time         *refTime,          // in
       TimeInterval *repeatDuration,   // in
+      int          *repeatCountStart, // in
       int          *rc) {             // out - return code
 
 // !DESCRIPTION:
@@ -159,6 +160,13 @@ int Clock::count=0;
     clock->repeat=false;
     clock->repeatDuration=(TimeInterval)0;
     clock->repeatCount=0;
+
+    // If present, then start repeatCount at another value
+    if (repeatCountStart != ESMC_NULL_POINTER) {
+      clock->repeatCount=*repeatCountStart;
+    }
+
+    // Turn on repeating if duration is present and non-zero
     if ((repeatDuration != ESMC_NULL_POINTER) &&
         (*repeatDuration !=0 )){ // Gives a way to not have repeat, but still have arg. (useful for C->F)
       clock->repeat=true;
@@ -1805,36 +1813,35 @@ int Clock::count=0;
         if (currTime < startTime || currTime > stopTime) {
           ESMC_LogDefault.Write("currTime out-of-range (startTime to "
                                         "stopTime).", ESMC_LOGMSG_WARN,ESMC_CONTEXT);
-          return(ESMC_RC_VAL_OUTOFRANGE);
+          return(ESMC_RC_VAL_OUTOFRANGE); // TODO: Returning an error code is inconsistent with the leading comment!
         }
         if (currTime == startTime && timeStep < zeroTimeStep) {
           ESMC_LogDefault.Write("timeStep negative for positive "
                                         "startTime to stopTime range).",
                                         ESMC_LOGMSG_WARN,ESMC_CONTEXT);
-          return(ESMC_RC_VAL_OUTOFRANGE);
+          return(ESMC_RC_VAL_OUTOFRANGE); // TODO: Returning an error code is inconsistent with the leading comment!
         }
       } else if (stopTime < startTime) {
         if (currTime > startTime || currTime < stopTime) {
           ESMC_LogDefault.Write("currTime out-of-range (startTime to "
                                         "stopTime).", ESMC_LOGMSG_WARN,ESMC_CONTEXT);
-          return(ESMC_RC_VAL_OUTOFRANGE);
+          return(ESMC_RC_VAL_OUTOFRANGE); // TODO: Returning an error code is inconsistent with the leading comment!
         }
         if (currTime == startTime && timeStep > zeroTimeStep) {
           ESMC_LogDefault.Write("timeStep positive for negative "
                                         "startTime to stopTime range).",
                                         ESMC_LOGMSG_WARN,ESMC_CONTEXT);
-          return(ESMC_RC_VAL_OUTOFRANGE);
+          return(ESMC_RC_VAL_OUTOFRANGE); // TODO: Returning an error code is inconsistent with the leading comment!
         }
       } else { // stopTime == startTime
         ESMC_LogDefault.Write("stopTime equals startTime.",
                                       ESMC_LOGMSG_WARN,ESMC_CONTEXT);
-        return(ESMC_RC_VAL_WRONG);
+        return(ESMC_RC_VAL_WRONG);  // TODO: Returning an error code is inconsistent with the leading comment!
       }
 
       // check for zero time step
       if(timeStep == zeroTimeStep) {
         ESMC_LogDefault.Write("timeStep equals zero.", ESMC_LOGMSG_WARN,ESMC_CONTEXT);
-        return(ESMC_RC_VAL_WRONG);
       }
 
       // note:  don't check prevTime relative to currTime, as user could
