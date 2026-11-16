@@ -12,7 +12,7 @@ from esmpy.api.locstream import *
 from esmpy.util.esmpyarray import *
 
 #### Field class ##############################################################
-[node, element] = [0, 1]
+[node, element] = [1, 3]
 
 class Field(object):
     """
