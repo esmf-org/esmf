@@ -5519,6 +5519,9 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
                 return  ! bail out
             endif
           else
+#if 0
+!TODO: Re-enable this for ESMF 10.0.0 release!!
+!TODO: Make sure to publicize and get this into an early v10.0.0bXX tag!!
             ! not at current time -> cannot assume valid data
             ! -> NUOPC convention: fill with random data of valid range
             call ESMF_FieldFill(iField, dataFillScheme="random", rc=rc)
@@ -5532,6 +5535,27 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
             endif
+#else
+!TODO: Remove this else-branch when re-enabled code above!!
+            ! not at current time -> warn about upcoming random data fill
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- not at current time: "//&
+                "Uninitialized data might lead to Floating Point Exceptions!"
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+              write (msgString, '(A)') trim(name)//": "//&
+                "- not at current time: "//&
+                "Future versions of ESMF/NUOPC will fill with 'random' data "//&
+                "to prevent FPE problems!"
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_WARNING, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
+#endif
           endif
         endif
 
