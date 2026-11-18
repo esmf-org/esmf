@@ -1110,7 +1110,8 @@ program ESMF_NUOPC_UTest
   write(name, *) "NUOPC_Write() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_Write(stateA, fieldNameList=(/"sea_surface_temperature"/), &
-    status=ESMF_FILESTATUS_REPLACE, relaxedflag=.true., rc=rc)
+    status=ESMF_FILESTATUS_REPLACE, separateFieldFiles=.true., &
+    relaxedflag=.true., rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 

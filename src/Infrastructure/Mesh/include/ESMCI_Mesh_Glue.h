@@ -73,6 +73,13 @@ void ESMCI_meshwritewarrays(Mesh **meshpp, char *fname, ESMCI_FortranStrLenArg n
                             int num_elemArrays, ESMCI::Array **elemArrays, 
                             int *rc);
 
+void ESMCI_meshaddedges(Mesh **meshpp,
+                         int *_num_edges, int *edgeId,
+                         InterArray<int> *_edgeOwners,
+                         InterArray<ESMC_R8> *_edgeCoords,
+                         int *_edgeConn_size, int *edgeConn, 
+                         int *rc);
+
 void ESMCI_meshaddelements(Mesh **meshpp,
                            int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                            int *_areaPresent, double *elemArea,
@@ -99,9 +106,23 @@ void ESMCI_meshfreememory(Mesh **meshpp, int *rc);
 void ESMCI_meshget(Mesh **meshpp, int *num_nodes, int *num_elements, int *rc);
 
 void ESMCI_MeshGetNodeCount(Mesh *meshpp, int *nodeCount, int *rc);
+
+void ESMCI_MeshGetEdgeCount(Mesh *meshpp, int *edgeCount, int *rc);
+void ESMCI_MeshGetEdgeConnCount(Mesh *mesh, int *edgeConnCount, int *rc);
+void ESMCI_MeshGetEdgeInfoPresence(Mesh *mesh, 
+                                   int *edgeIsPresent,
+                                   int *elemCoordsIsPresent,
+                                   int *rc);
+void ESMCI_MeshGetEdgeCreateInfo(Mesh *mesh,
+                                 ESMCI::InterArray<int> *edgeIds,
+                                 ESMCI::InterArray<int> *edgeOwners,
+                                 ESMCI::InterArray<int> *edgeConn,
+                                 ESMCI::InterArray<ESMC_R8> *edgeCoords, int *rc);
+
 void ESMCI_MeshGetElemCount(Mesh *meshpp, int *elemCount, int *rc);
 void ESMCI_MeshGetElemConnCount(Mesh *meshpp, int *elemConnCount, int *rc);
 void ESMCI_MeshGetOwnedNodeCount(Mesh *meshpp, int *nodeCount, int *rc);
+void ESMCI_MeshGetOwnedEdgeCount(Mesh *mesh, int *edgeCount, int *rc);
 void ESMCI_MeshGetOwnedElemCount(Mesh *meshpp, int *elemCount, int *rc);
 
 void ESMCI_MeshGetElemInfoPresence(Mesh *mesh, 
@@ -136,7 +157,11 @@ void ESMCI_MeshGetNodeCreateInfo(Mesh *mesh,
 
 void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid **dg, int *rc);
 
+void ESMCI_meshcreateedgedistgrid(Mesh **meshpp, DistGrid **edge_distgrid, int *rc);
+
 void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, DistGrid **dg, int *rc);
+
+
 
 void ESMCI_meshserialize(Mesh **meshpp,
                          char *buffer, int *length, int *offset,

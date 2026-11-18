@@ -1643,7 +1643,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          {\tt ESMF\_ClockAdvance()} below for specifying variable timesteps
 !          that are NOT saved as the clock's internal time step property.
 !          See "direction" argument below for behavior with
-!          {\\t ESMF\_DIRECTION\_REVERSE} direction.
+!          {\tt ESMF\_DIRECTION\_REVERSE} direction.
 !     \item[{[startTime]}]
 !          The {\tt ESMF\_Clock}'s starting time.  Can be less than or
 !          or greater than stopTime, depending on a positive or negative

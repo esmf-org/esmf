@@ -428,7 +428,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[meshloc]}]
 !       \begin{sloppypar}
 !       Which part of the mesh to build the Field on. Can be set to either
-!       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set,
+!       {\tt ESMF\_MESHLOC\_NODE}, {\tt ESMF\_MESHLOC\_EDGE}, or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set,
 !       defaults to {\tt ESMF\_MESHLOC\_NODE}.
 !       \end{sloppypar}
 ! \item [{[localDe]}]

@@ -228,7 +228,8 @@ program ESMF_RegridWeightGenApp
           if ((trim(method) .ne. 'bilinear') .and. &
           (trim(method) .ne. 'conserve') .and. &
           (trim(method) .ne. 'conserve2nd') .and. &
-              (trim(method) .ne. 'patch')    .and. &
+          (trim(method) .ne. 'patch')    .and. &
+          (trim(method) .ne. 'binning')    .and. &
           (trim(method) .ne. 'nearestdtos')   .and. &
           (trim(method) .ne. 'neareststod')) then
         write(*,*)
@@ -723,7 +724,7 @@ program ESMF_RegridWeightGenApp
       endif
     else  ! the argument does not exist
       if ((dstFileType == ESMF_FILEFORMAT_UGRID .or. dstFileType == ESMF_FILEFORMAT_ESMFMESH) &
-          .and. (method /= 'conserve') .and. (method /= 'conserve2nd')) then
+          .and. (method /= 'conserve') .and. (method /= 'conserve2nd')  .and. (method /= 'binning')) then
           write(*,*)
           print *, 'ERROR: --dst_loc is required for this source file type and regridding'
           print *, '       method.'
@@ -751,6 +752,14 @@ program ESMF_RegridWeightGenApp
           call ESMF_Finalize(endflag=ESMF_END_ABORT)
     endif
 
+    ! does not support dst corner coordinates for binning regridding for any file types
+    if (method == 'binning' .and. useDstCorner) then
+          write(*,*)
+          print *, 'ERROR: using destination corner coordinates for binning regridding is not supported.'
+          call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    endif
+
+    
     ! --tilefile_path to specify alternative tile file path
     call ESMF_UtilGetArgIndex('--tilefile_path', argindex=ind, rc=rc)
     if (ind /= -1) then
@@ -826,6 +835,7 @@ program ESMF_RegridWeightGenApp
       if (method .eq. 'neareststod') commandbuf2(3)=3
       if (method .eq. 'nearestdtos') commandbuf2(3)=4
       if (method .eq. 'conserve2nd') commandbuf2(3)=5
+      if (method .eq. 'binning') commandbuf2(3)=6
       commandbuf2(4)=poleptrs
       if (ignoreUnmapped) commandbuf2(5) = 1
       if (userAreaFlag)   commandbuf2(6) = 1
@@ -908,7 +918,9 @@ program ESMF_RegridWeightGenApp
       method = 'nearestdtos'
     else if (commandbuf2(3)==5) then
       method = 'conserve2nd'
-    else
+    else if (commandbuf2(3)==6) then
+      method = 'binning'
+   else
       method = 'bilinear'
     endif
     poleptrs = commandbuf2(4)
@@ -1078,7 +1090,9 @@ program ESMF_RegridWeightGenApp
   else if (trim(method) .eq. 'neareststod') then
     methodflag = ESMF_REGRIDMETHOD_NEAREST_STOD
   else if (trim(method) .eq. 'nearestdtos') then
-    methodflag = ESMF_REGRIDMETHOD_NEAREST_DTOS
+     methodflag = ESMF_REGRIDMETHOD_NEAREST_DTOS
+  else if (trim(method) .eq. 'binning') then
+    methodflag = ESMF_REGRIDMETHOD_BINNING     
   endif       
 
   if (ignoreunmapped) then
@@ -1349,7 +1363,7 @@ contains
 #if 0
     print *, "                      [--routehandle out_routehandle_file]"
 #endif
-    print *, "                      [--method|-m bilinear|patch|neareststod|nearestdtos|conserve|conserve2nd]"
+    print *, "                      [--method|-m bilinear|patch|neareststod|nearestdtos|conserve|conserve2nd|binning]"
     print *, "                      [--pole|-p all|none|teeth|<N>]"
     print *, "                      [--line_type|-l cartesian|greatcircle]"
     print *, "                      [--norm_type dstarea|fracarea]"

@@ -1813,36 +1813,35 @@ int Clock::count=0;
         if (currTime < startTime || currTime > stopTime) {
           ESMC_LogDefault.Write("currTime out-of-range (startTime to "
                                         "stopTime).", ESMC_LOGMSG_WARN,ESMC_CONTEXT);
-          return(ESMC_RC_VAL_OUTOFRANGE);
+          return(ESMC_RC_VAL_OUTOFRANGE); // TODO: Returning an error code is inconsistent with the leading comment!
         }
         if (currTime == startTime && timeStep < zeroTimeStep) {
           ESMC_LogDefault.Write("timeStep negative for positive "
                                         "startTime to stopTime range).",
                                         ESMC_LOGMSG_WARN,ESMC_CONTEXT);
-          return(ESMC_RC_VAL_OUTOFRANGE);
+          return(ESMC_RC_VAL_OUTOFRANGE); // TODO: Returning an error code is inconsistent with the leading comment!
         }
       } else if (stopTime < startTime) {
         if (currTime > startTime || currTime < stopTime) {
           ESMC_LogDefault.Write("currTime out-of-range (startTime to "
                                         "stopTime).", ESMC_LOGMSG_WARN,ESMC_CONTEXT);
-          return(ESMC_RC_VAL_OUTOFRANGE);
+          return(ESMC_RC_VAL_OUTOFRANGE); // TODO: Returning an error code is inconsistent with the leading comment!
         }
         if (currTime == startTime && timeStep > zeroTimeStep) {
           ESMC_LogDefault.Write("timeStep positive for negative "
                                         "startTime to stopTime range).",
                                         ESMC_LOGMSG_WARN,ESMC_CONTEXT);
-          return(ESMC_RC_VAL_OUTOFRANGE);
+          return(ESMC_RC_VAL_OUTOFRANGE); // TODO: Returning an error code is inconsistent with the leading comment!
         }
       } else { // stopTime == startTime
         ESMC_LogDefault.Write("stopTime equals startTime.",
                                       ESMC_LOGMSG_WARN,ESMC_CONTEXT);
-        return(ESMC_RC_VAL_WRONG);
+        return(ESMC_RC_VAL_WRONG);  // TODO: Returning an error code is inconsistent with the leading comment!
       }
 
       // check for zero time step
       if(timeStep == zeroTimeStep) {
         ESMC_LogDefault.Write("timeStep equals zero.", ESMC_LOGMSG_WARN,ESMC_CONTEXT);
-        return(ESMC_RC_VAL_WRONG);
       }
 
       // note:  don't check prevTime relative to currTime, as user could

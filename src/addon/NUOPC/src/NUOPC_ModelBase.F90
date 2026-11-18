@@ -1884,6 +1884,7 @@ module NUOPC_ModelBase
     integer                   :: localrc
     type(type_InternalState)  :: is
     type(ESMF_Clock)          :: internalClock
+    type(ESMF_TimeInterval)   :: timeStep, zeroTimeStep
     logical                   :: allCurrent
     logical                   :: existflag
     character(ESMF_MAXSTR)    :: msgString, pLabel
@@ -2018,7 +2019,7 @@ module NUOPC_ModelBase
 
     ! store the current time of the internalClock before advancing it
     call ESMF_ClockGet(internalClock, currTime=is%wrap%preAdvanceCurrTime, &
-      rc=rc)
+      timeStep=timeStep, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -2071,16 +2072,18 @@ module NUOPC_ModelBase
       call ESMF_TraceRegionExit("label_CheckImport")
     endif
 
-    ! model time stepping loop
-    do while (.not. ESMF_ClockIsStopTime(internalClock, rc=rc))
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        
+    ! Decide between single call of Advance() vs time stepping loop
+    call ESMF_TimeIntervalSet(zeroTimeStep, s=0, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    if (timeStep == zeroTimeStep) then
+      ! For zero-time-step condition call into Advance() one time
       ! handle verbosity
       if (btest(verbosity,12)) then
         call ESMF_ClockPrint(internalClock, options="currTime", &
-          preString=trim(name)//": time step-loop starting, current time: ", &
-          unit=msgString, rc=rc)
+          preString=trim(name)//": zero-time-step before Advance(), "// &
+          "current time: ", unit=msgString, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -2088,8 +2091,6 @@ module NUOPC_ModelBase
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
       endif
-
-      ! advance the model t->t+dt
       ! SPECIALIZE required: label_Advance
       if (btest(profiling,4)) then
         call ESMF_TraceRegionEnter("label_Advance")
@@ -2119,23 +2120,44 @@ module NUOPC_ModelBase
       if (btest(profiling,4)) then
         call ESMF_TraceRegionExit("label_Advance")
       endif
-
-      if (btest(profiling,4)) then
-        call ESMF_TraceRegionEnter("label_AdvanceClock")
+      ! handle verbosity
+      if (btest(verbosity,12)) then
+        call ESMF_ClockPrint(internalClock, options="currTime", &
+          preString=trim(name)//": zero-time-step after Advance(), "// &
+          "current time: ", unit=msgString, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
       endif
-      ! advance the internalClock to the new current time (optionally specialz)
-      call ESMF_MethodExecute(gcomp, label=label_AdvanceClock, index=phase, &
-        existflag=existflag, userRc=localrc, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) &
-        return  ! bail out
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, &
-        rcToReturn=rc)) &
-        return  ! bail out
-      if (.not.existflag) then
-        ! -> next check for the label without phase index
-        call ESMF_MethodExecute(gcomp, label=label_AdvanceClock, &
+    else
+      ! Else enter model time stepping loop
+      do while (.not. ESMF_ClockIsStopTime(internalClock, rc=rc))
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+        ! handle verbosity
+        if (btest(verbosity,12)) then
+          call ESMF_ClockPrint(internalClock, options="currTime", &
+            preString=trim(name)//": time-stepping-loop before Advance(), "// &
+            "current time: ", unit=msgString, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
+
+        ! advance the model t->t+dt
+        ! SPECIALIZE required: label_Advance
+        if (btest(profiling,4)) then
+          call ESMF_TraceRegionEnter("label_Advance")
+        endif
+        ! -> first check for the label with phase index
+        call ESMF_MethodExecute(gcomp, label=label_Advance, index=phase, &
           existflag=existflag, userRc=localrc, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -2145,34 +2167,75 @@ module NUOPC_ModelBase
           rcToReturn=rc)) &
           return  ! bail out
         if (.not.existflag) then
-          ! at last use the DEFAULT implementation to advance the Clock
-          call ESMF_ClockAdvance(internalClock, rc=rc)
+          ! -> next check for the label without phase index
+          call ESMF_MethodExecute(gcomp, label=label_Advance, userRc=localrc, &
+            rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) &
             return  ! bail out
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
         endif
-      endif
-      if (btest(profiling,4)) then
-        call ESMF_TraceRegionExit("label_AdvanceClock")
-      endif
-    
-      ! handle verbosity
-      if (btest(verbosity,12)) then
-        call ESMF_ClockPrint(internalClock, options="currTime", &
-          preString=trim(name)//": time step-loop ending,   current time: ", &
-          unit=msgString, rc=rc)
+        if (btest(profiling,4)) then
+          call ESMF_TraceRegionExit("label_Advance")
+        endif
+
+        if (btest(profiling,4)) then
+          call ESMF_TraceRegionEnter("label_AdvanceClock")
+        endif
+        ! advance the internalClock to the new current time (optionally specialz)
+        call ESMF_MethodExecute(gcomp, label=label_AdvanceClock, index=phase, &
+          existflag=existflag, userRc=localrc, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) &
           return  ! bail out
-      endif
-        
-    enddo ! end of time stepping loop
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+        if (.not.existflag) then
+          ! -> next check for the label without phase index
+          call ESMF_MethodExecute(gcomp, label=label_AdvanceClock, &
+            existflag=existflag, userRc=localrc, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) &
+            return  ! bail out
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
+          if (.not.existflag) then
+            ! at last use the DEFAULT implementation to advance the Clock
+            call ESMF_ClockAdvance(internalClock, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) &
+              return  ! bail out
+          endif
+        endif
+        if (btest(profiling,4)) then
+          call ESMF_TraceRegionExit("label_AdvanceClock")
+        endif
+
+        ! handle verbosity
+        if (btest(verbosity,12)) then
+          call ESMF_ClockPrint(internalClock, options="currTime", &
+            preString=trim(name)//": time-stepping-loop after Advance(), "// &
+            "current time: ", unit=msgString, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
+
+      enddo ! end of time stepping loop
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+    endif
 
     exportIsCreated = ESMF_StateIsCreated(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

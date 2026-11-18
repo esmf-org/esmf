@@ -91,8 +91,10 @@ MeshCap::MeshCap() {
     num_owned_elem_mc = 0;
     
     node_distgrid_set = false;
+    edge_distgrid_set = false;
     elem_distgrid_set = false;
     node_distgrid = nullptr;
+    edge_distgrid = nullptr;
     elem_distgrid = nullptr;
   }
 
@@ -122,9 +124,11 @@ void MeshCap::finalize_counts(int *rc){
 
   int localrc;
 
-  int non, noe;
+  int non, noe, noedge;
   if (is_esmf_mesh) {
     ESMCI_MeshGetOwnedNodeCount(mesh, &non, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,ESMC_CONTEXT, rc);
+    ESMCI_MeshGetOwnedEdgeCount(mesh, &noedge, &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,ESMC_CONTEXT, rc);
     ESMCI_MeshGetOwnedElemCount(mesh, &noe, &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,ESMC_CONTEXT, rc);
@@ -140,6 +144,7 @@ void MeshCap::finalize_counts(int *rc){
   }
   
   this->num_owned_node_mc = non;
+  this->num_owned_edge_mc = noedge;
   this->num_owned_elem_mc = noe;
 }
 
@@ -558,6 +563,42 @@ void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
    }
 }
 
+
+void MeshCap::meshaddedges(int *num_edges, int *edgeId,
+                           InterArray<int> *edgeOwners,
+                           InterArray<ESMC_R8> *edgeCoords,
+                           int *_edgeConn_size, int *edgeConn, 
+                           int *rc)
+{
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::meshaddedges()"
+
+  int localrc;
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_MESHCREATE_TRACE_ENTER("NativeMesh addedges");
+
+    // STOPPED HERE
+    ESMCI_meshaddedges(&mesh,
+                       num_edges, edgeId,
+                       edgeOwners,
+                       edgeCoords,
+                       _edgeConn_size, edgeConn, 
+                       &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,ESMC_CONTEXT, rc);
+    ESMCI_MESHCREATE_TRACE_EXIT("NativeMesh addedges");
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+       " this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+  }
+  
+  // Set member variables
+  this->finalize_counts(&localrc);
+
+}
+
+
 void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                               int *_areaPresent, double *elemArea,
                               int *_coordsPresent, double *elemCoords,
@@ -751,6 +792,43 @@ void MeshCap::getNodeCount(int *nodeCount, int *rc){
 }
 
 
+void MeshCap::getEdgeCount(int *edgeCount, int *rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::getEdgeCount()"
+
+  int localrc;
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_MeshGetEdgeCount(mesh, edgeCount, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+       "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+}
+
+
+void MeshCap::getEdgeConnCount(int *edgeConnCount, int *rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::getEdgeConnCount()"
+
+  int localrc;
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_MeshGetEdgeConnCount(mesh, edgeConnCount, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+       "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+}
+
 void MeshCap::getElemCount(int *elemCount, int *rc){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::getElemCount()"
@@ -796,6 +874,7 @@ void MeshCap::getElemConnCount(int *elemConnCount, int *rc){
   }
 }
 
+
 void MeshCap::getOwnedNodeCount(int *nodeCount, int *rc){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::getOwnedNodeCount()"
@@ -804,6 +883,14 @@ void MeshCap::getOwnedNodeCount(int *nodeCount, int *rc){
   *rc = ESMF_SUCCESS;
 }
 
+void MeshCap::getOwnedEdgeCount(int *edgeCount, int *rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::getOwnedEdgeCount()"
+
+  *edgeCount = this->num_owned_edge_mc;
+  *rc = ESMF_SUCCESS;
+
+}
 
 void MeshCap::getOwnedElemCount(int *elemCount, int *rc){
 #undef ESMC_METHOD
@@ -814,6 +901,55 @@ void MeshCap::getOwnedElemCount(int *elemCount, int *rc){
 
 }
 
+
+void MeshCap::getEdgeInfoPresence(int *edgeIsPresent,
+                                  int *edgeCoordsIsPresent,
+                                  int *rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::getEdgeInfoPresence()"
+
+  int localrc;
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_MeshGetEdgeInfoPresence(mesh,
+                                  edgeIsPresent, 
+                                  edgeCoordsIsPresent, 
+                                  &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+       "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+}
+
+
+
+void MeshCap::getEdgeCreateInfo(ESMCI::InterArray<int> *edgeIds,
+                                ESMCI::InterArray<int> *edgeOwners,
+                                ESMCI::InterArray<int> *edgeConn,
+                                ESMCI::InterArray<ESMC_R8> *edgeCoords, int *rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::getEdgeCreateInfo()"
+
+  int localrc;
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_MeshGetEdgeCreateInfo(mesh, edgeIds,
+                                edgeOwners, edgeConn,
+                                edgeCoords, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+       "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+}
+  
 
 void MeshCap::getElemInfoPresence(int *elemMaskIsPresent,
                                   int *elemAreaIsPresent,
@@ -1781,6 +1917,41 @@ void MeshCap::meshcreatenodedistgrid(int *rc) {
   if (rc != NULL) *rc=ESMF_SUCCESS;
 }
 
+void MeshCap::meshcreateedgedistgrid(int *rc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::meshcreateedgedistgrid()"
+
+  int localrc;
+  DistGrid *dg;
+
+  // this is necessary because the fortran interface creates  
+  // the distgrid at multiple points
+  if (edge_distgrid_set == false) {
+  // Call into func. depending on mesh type
+    if (is_esmf_mesh) {
+      ESMCI_meshcreateedgedistgrid(&mesh, &dg, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                        ESMC_CONTEXT, rc)) return;
+  
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+                                    "- this functionality is not currently supported using MOAB",
+                                    ESMC_CONTEXT, rc);
+      return;
+    }
+
+    // Set member variables
+    this->edge_distgrid = dg;
+    this->edge_distgrid_set = true;
+
+  } else {
+    ESMC_LogDefault.Write("Edge DistGrid has already been set", ESMC_LOGMSG_WARN);
+  }
+
+  // Set to success
+  if (rc != NULL) *rc=ESMF_SUCCESS;
+}
+
 
 void MeshCap::meshcreateelemdistgrid(int *rc) {
 #undef ESMC_METHOD
@@ -1830,6 +2001,16 @@ DistGrid *MeshCap::meshgetnodedistgrid() {
   else return this->node_distgrid;
 }
 
+
+DistGrid *MeshCap::meshgetedgedistgrid() {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::meshgetedgedistgrid()"
+
+  if (edge_distgrid_set == false) return NULL;
+  else return this->edge_distgrid;
+}
+
+
 DistGrid *MeshCap::meshgetelemdistgrid() {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshgetelemdistgrid()"
@@ -1837,6 +2018,8 @@ DistGrid *MeshCap::meshgetelemdistgrid() {
   if (elem_distgrid_set == false) return NULL;
   else return this->elem_distgrid;
 }
+
+
 
 void MeshCap::meshsetnodedistgrid(DistGrid *dg) {
 #undef ESMC_METHOD
@@ -1848,6 +2031,19 @@ void MeshCap::meshsetnodedistgrid(DistGrid *dg) {
   else {
     node_distgrid = dg; 
     node_distgrid_set = true;
+  }
+}
+
+void MeshCap::meshsetedgedistgrid(DistGrid *dg) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::meshsetedgedistgrid()"
+
+  if (edge_distgrid_set == true) {
+    ESMC_LogDefault.Write("Edge DistGrid has already been set", ESMC_LOGMSG_WARN);
+  }
+  else {
+    edge_distgrid = dg; 
+    edge_distgrid_set = true;
   }
 }
 
@@ -1863,6 +2059,7 @@ void MeshCap::meshsetelemdistgrid(DistGrid *dg) {
     elem_distgrid_set = true;
   }
 }
+
 
 void MeshCap::meshserialize(char *buffer, int *length, int *offset,
                             const ESMC_AttReconcileFlag &attreconflag,

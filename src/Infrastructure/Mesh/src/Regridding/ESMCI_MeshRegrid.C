@@ -353,6 +353,26 @@ namespace ESMCI {
   }
   
 
+  // This should only be used where dstmesh->is_split is true. This function translates
+  // the just the dst indices in iientires to what they should be without splitting
+  void translate_split_dst_elems_in_wts_just_ids(Mesh *dstmesh, int num_entries,
+                                        int *iientries) {
+    
+    // Loop through weights modifying split dst element ids
+    for (int i=0; i<num_entries; i++) {
+      int dst_id=iientries[2*i+1];
+              
+      // See if the id needs to be translated, if so then translate
+      std::map<UInt,UInt>::iterator soi =  dstmesh->split_to_orig_id.find(dst_id);
+      if (soi != dstmesh->split_to_orig_id.end()) {
+        iientries[2*i+1]=soi->second;
+      }
+    }
+    
+  }
+  
+
+  
   // to generate the iwts again, and return to Fortran
   int get_iwts(Mesh &mesh, MEField<> *iwts) {
 

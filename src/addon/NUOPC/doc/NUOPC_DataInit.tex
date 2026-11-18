@@ -1,6 +1,18 @@
 % $Id$
 %
 
+\label{DataInit}
+
+NUOPC does not strictly require components to fill their exported fields with valid data until the {\tt label\_DataInitialize} specialization point. In fact, complex data dependencies discussed further down might make this practically impossible. Hence, the {\tt label\_Realize} specialization, strictly speaking, is only responsible for providing the data {\em allocations} for the previously advertised field. However, when a Connector computes the RouteHandle between field pairs (after {\tt label\_Realize} but before {\tt label\_DataInitialize}), the underlying ESMF functionality typically accesses the source field data to auto-tune the generated RouteHandle. This can trigger floating point exceptions (FPEs) for applications built with compiler flags that enforce strict runtime checks when invalid, out-of-range data is encountered during the auto-tuning process.
+
+To prevent or resolve such FPE issues, it is recommended to either fill all export fields with valid data of the respective {\em typekind} during {\tt label\_Realize}, or to lessen the floating point traps enabled by the application build system. In particular, trapping on {\em underflow} has been identified as problematic in this context, and should be disabled.
+
+{\bf Future versions of ESMF/NUOPC (planned for 10.0.0)} will guard against such runtime floating point exceptions by automatically initializing the data in fields accessed by a Connector as source fields for RouteHandle computation. The convention will be that source fields whose timestamp is not at the current time of the driver clock, when the Connector precomputes the RouteHandle, are automatically filled with random, valid-ranged data of the respective {\em typekind}. This then ensures that only valid data is accessed during auto-tuning.
+
+This convention also supports situations where a NUOPC component advertises or realizes a field directly using the data allocation of the native model code. In such cases, if the native model code has already initialized the associated field with valid data, it is undesirable to have the Connector overwrite the native model allocation with random data values. To guard against this, the field simply needs to be timestamped during {\tt label\_Realize} with the current driver time. Any Connector subsequently accessing this field for RouteHandle computation is thus instructed to not modify its data.
+
+\paragraph{Data Dependencies during Initialize}
+
 \label{DataDepInit}
 
 For multi-model applications it is not uncommon that during start-up one or more components depends on data from one or more other components. These types of data-dependencies during initialize can become very complex very quickly. Finding the "correct" sequence to initialize all components for a complex dependency graph is not trivial. The NUOPC Layer deals with this issue by repeatedly looping over all components that indicate that their initialization has data dependencies on other components. The loop is finally exited when either all components have indicated completion of their initialization, or a dead-lock situation is being detected by the NUOPC Layer.

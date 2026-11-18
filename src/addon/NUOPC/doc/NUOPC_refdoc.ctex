@@ -172,11 +172,11 @@
 \input{../addon/NUOPC/doc/NUOPC_ConnectionOptions}
 #endif
 
-\subsubsection{Data-Dependencies during Initialize}
+\subsubsection{Data Initialization}
 #ifdef STANDALONE
-\input{NUOPC_DataDepInit}
+\input{NUOPC_DataInit}
 #elif defined(CONSTITUENT)
-\input{../addon/NUOPC/doc/NUOPC_DataDepInit}
+\input{../addon/NUOPC/doc/NUOPC_DataInit}
 #endif
 
 \subsubsection{Transfer of Grid/Mesh/LocStream Objects between Components}
@@ -253,8 +253,10 @@
 \label{NUOPC_ModelBase}
 #ifdef STANDALONE
 \input{NUOPC_ModelBase_manual_fapi}
+\input{NUOPC_ModelBase_fapi}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_ModelBase_manual_fapi}
+\input{../addon/NUOPC/doc/NUOPC_ModelBase_fapi}
 #endif
 
 \subsection{Generic Component: NUOPC\_Model}

@@ -1,4 +1,4 @@
-! $Id$
+! $Id$ 
 !
 ! Earth System Modeling Framework
 ! Copyright (c) 2002-2026, University Corporation for Atmospheric Research,
@@ -95,6 +95,7 @@ program ESMF_MeshUTest
   integer, pointer :: elemIdsTst(:),elemMaskTst(:)
   real(ESMF_KIND_R8), pointer :: elemCoordsTst(:)
   integer :: elementCount
+  logical :: edgeIsPresent, edgeCoordsIsPresent
   
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -904,7 +905,6 @@ program ESMF_MeshUTest
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
-
   !-----------------------------------------------------------------------------
   ! NOTE THAT SERIALIZE/DESERIALIZE IS AN INTERNAL INTERFACE AND NOT INTENDED FOR PUBLIC USE
   !NEX_UTest
@@ -953,7 +953,8 @@ program ESMF_MeshUTest
   call ESMF_MeshGet(mesh2, nodalDistgrid=nodeDistgrid, elementDistgrid=elemDistgrid, &
                    numOwnedNodes=numOwnedNodesTst, numOwnedElements=numOwnedElemsTst, &
                    spatialDim=spatialDim, parametricDim=parametricDim, &
-                   isMemFreed=isMemFreed,  coordSys=coordSys, rc=localrc)
+                   isMemFreed=isMemFreed,  coordSys=coordSys, &
+                   edgeIsPresent=edgeIsPresent, edgeCoordsIsPresent=edgeCoordsIsPresent, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! removed this check because no longer correct after counts migrated to C
@@ -971,7 +972,9 @@ program ESMF_MeshUTest
   if (parametricDim .ne. 2) correct=.false.
   if (isMemFreed) correct=.false.
   if (coordSys .ne. ESMF_COORDSYS_CART) correct=.false.
-
+  if (edgeIsPresent) correct=.false. ! There are no edges in the Mesh
+  if (edgeCoordsIsPresent) correct=.false. ! There are no edges in the Mesh
+  
   ! Make sure node distgrid is ok
   call ESMF_DistGridValidate(nodeDistgrid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) correct=.false.
@@ -3020,19 +3023,22 @@ endif
   rc=ESMF_SUCCESS
 
   call test_meshwritevtkgt4(correct, rc)
+  
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
+ !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test creating a Mesh with edges in 3 steps"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  call testCreatingMeshWithEdges3Steps(correct, rc)
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-
-  
-  !------------------------------------------------------------------------
-  ! TODO: "Activate once the mesh is fully created. ESMF_MeshWrite is not meant
-  !  to be called until then".
-  !NEX_deactivate_UTest
-  !write(name, *) "MeshWrite Test"
-  !write(failMsg, *) "Did not return ESMF_SUCCESS"
-  !  call ESMF_MeshWrite(meshSrc, filename="mesh_out", rc=rc)
-  !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
 
@@ -10631,7 +10637,692 @@ subroutine MeshGetElemInfoWGT4SidesTest(correct, rc)
    ! Return success
    rc=ESMF_SUCCESS
    
+
 end subroutine MeshGetElemInfoWGT4SidesTest
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !
+  ! Creates the following mesh on
+  ! 1 or 4 PETs. Returns an error
+  ! if run on other than 1 or 4 PETs
+  !
+  !              Mesh Ids
+  !
+  !   20.0   7 ---5--- 8 ---6---- 9
+  !          |         |          |
+  !         10    3   11    4    12
+  !          |         |          |
+  !   10.0   4 ---3--- 5 ---4---- 6
+  !          |         |          |
+  !          7    1    8    2     9
+  !          |         |          |
+  !   0.0    1 ---1--- 2 ---2---- 3
+  !
+  !        0.0       10.0        20.0
+  !
+  !      Node Ids at corners
+  !      Element Ids in centers
+  !
+  !!!!!
+  !
+  ! The owners for 1 PET are all Pet 0.
+  ! The owners for 4 PETs are as follows:
+  !
+  !             Mesh Owners
+  !
+  !   20.0  2 ---2--- 2 ---3---- 3
+  !         |         |          |
+  !         2    2    |    3     3
+  !         |         |          |
+  !   10.0  0 ---0--- 0 ---1---- 1
+  !         |         |          |
+  !         0    0    0    1     1
+  !         |         |          |
+  !   0.0   0 ---0--- 0 ---1---- 1
+  !
+  !        0.0       10.0       20.0
+  !
+  !      Node Owners at corners
+  !      Element Owners in centers
+  !
+subroutine testCreatingMeshWithEdges3Steps(correct, rc)
+  logical :: correct
+  integer :: rc
+
+  type(ESMF_Mesh) :: mesh, mesh2
+  integer, pointer :: nodeIds(:),nodeOwners(:)
+  real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+  real(ESMF_KIND_R8), pointer :: ownedNodeCoords(:)
+  integer :: numNodes, numOwnedNodes, numOwnedNodesTst
+
+  
+  integer :: numEdges, numEdgeConns
+  integer, pointer :: edgeIds(:),edgeOwners(:),edgeConn(:)
+  real(ESMF_KIND_R8), pointer :: edgeCoords(:)
+
+  logical:: edgeIsPresent, edgeCoordsIsPresent, edgeDistGridIsPresent
+  integer :: numEdgesTst, numEdgeConnsTst
+  integer, pointer :: edgeIdsTst(:),edgeOwnersTst(:),edgeConnTst(:)
+  real(ESMF_KIND_R8), pointer :: edgeCoordsTst(:)
+  integer :: numOwnedEdges, numOwnedEdgesTst
+  
+  integer :: numElems,numOwnedElemsTst
+  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+  integer, pointer :: elemMask(:)
+  real(ESMF_KIND_R8), pointer :: elemArea(:)
+  integer :: petCount, localPet
+  type(ESMF_VM) :: vm
+  type(ESMF_DistGrid) :: edgeDistgrid
+  integer :: elementCount
+  type(ESMF_Field) :: edgeField
+  real(ESMF_KIND_R8), pointer :: edgeDataPtr(:)
+  integer :: edgeCC(1),edgeCL(1), edgeCU(1)
+  integer :: bufCount, offset
+  character, pointer :: buf(:)
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! return with an error if not 1 or 4 PETs
+  if ((petCount /= 1) .and. (petCount /=4)) then
+     rc=ESMF_FAILURE
+     return
+  endif
+
+
+  ! Setup mesh info depending on the
+  ! number of PETs
+  if (petCount .eq. 1) then
+
+     ! Fill in node data
+     numNodes=9
+
+     !! node ids
+     allocate(nodeIds(numNodes))
+     nodeIds=(/1,2,3,4,5,6,7,8,9/)
+
+     !! node Coords
+     allocate(nodeCoords(numNodes*2))
+     nodeCoords=(/0.0,0.0, &
+                 10.0,0.0, &
+                 20.0,0.0, &
+                 0.0,10.0, &
+                 10.0,10.0, &
+                 20.0,10.0, &
+                 0.0,20.0, &
+                 10.0,20.0, &
+                 20.0,20.0 /)
+
+      !! node owners
+      allocate(nodeOwners(numNodes))
+      nodeOwners=0 ! everything on proc 0
+
+      ! Edge information
+      numEdges=12
+      numEdgeConns=2*numEdges
+      numOwnedEdges=12
+      
+      !! Edge ids
+      allocate(edgeIds(numEdges))
+      edgeIds=(/1,2,3,4,5,6,7,8,9,10,11,12/)
+
+      !! Edge owners
+      allocate(edgeOwners(numEdges))
+      edgeOwners=0 ! everything on proc 0
+
+      !! Edge Coords
+      allocate(edgeCoords(2*numEdges))
+      edgeCoords=(/ 5.0,  0.0, & ! id 1
+                   15.0,  0.0, & ! id 2
+                    5.0, 10.0, & ! id 3
+                   15.0, 10.0, & ! id 4
+                    5.0, 20.0, & ! id 5
+                   15.0, 30.0, & ! id 6
+                    0.0,  5.0, & ! id 7
+                   10.0,  5.0, & ! id 8
+                   20.0,  5.0, & ! id 9
+                    0.0, 15.0, & ! id 10
+                   10.0, 15.0, & ! id 11
+                   20.0, 15.0/)  ! id 12
+      
+      !! Edge conn
+      allocate(edgeConn(numEdgeConns))
+      edgeConn=(/1,2, & ! id 1
+                 2,3, & ! id 2
+                 4,5, & ! id 3
+                 5,6, & ! id 4
+                 7,8, & ! id 5
+                 8,9, & ! id 6
+                 1,4, & ! id 7
+                 2,5, & ! id 8
+                 3,6, & ! id 9
+                 4,7, & ! id 10
+                 5,8, & ! id 11
+                 6,9/)  ! id 12
+      
+      ! Fill in elem data
+      numElems=4
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/1,2,3,4/)
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+      !! elem mask
+      allocate(elemMask(numElems))
+      elemMask=(/0,1,1,2/)
+
+      !! elem area
+      allocate(elemArea(numElems))
+      elemArea=(/7.0,8.0,9.0,10.0/)
+
+      !! elem conn
+      allocate(elemConn(numElems*4))
+      elemConn=(/1,2,5,4, &
+                 2,3,6,5, &
+                 4,5,8,7, &
+                 5,6,9,8/)
+
+   else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+     if (localPet .eq. 0) then
+        ! Fill in node data
+        numNodes=4
+        numOwnedNodes=4
+
+       !! node ids
+       allocate(nodeIds(numNodes))
+       nodeIds=(/1,2,4,5/)
+
+       !! node Coords
+       allocate(nodeCoords(numNodes*2))
+       nodeCoords=(/0.0,0.0, &
+                    10.0,0.0, &
+                    0.0,10.0, &
+                    10.0,10.0/)
+
+       !! node owners
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0,0,0,0/) ! everything on proc 0
+       
+       ! Edge information
+       numEdges=4
+       numEdgeConns=2*numEdges
+       numOwnedEdges=4
+       
+       !! Edge ids
+       allocate(edgeIds(numEdges))
+       edgeIds=(/1,3,7,8/)
+       
+       !! Edge owners
+       allocate(edgeOwners(numEdges))
+       edgeOwners=(/0,0,0,0/) ! everything on proc 0
+
+      allocate(edgeCoords(2*numEdges))
+      edgeCoords=(/ 5.0,  0.0, & ! id 1
+                    5.0, 10.0, & ! id 3
+                    0.0,  5.0, & ! id 7
+                   10.0,  5.0/) ! id 8
+       
+       !! Edge conn
+       allocate(edgeConn(numEdgeConns))
+       edgeConn=(/1,2, & ! id 1
+                  3,4, & ! id 3
+                  1,3, & ! id 7
+                  2,4/)  ! id 8
+
+
+       ! Fill in elem data
+       numElems=1
+
+       !! elem ids
+       allocate(elemIds(numElems))
+       elemIds=(/1/)
+
+       !! elem type
+       allocate(elemTypes(numElems))
+       elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+
+      !! elem mask
+      allocate(elemMask(numElems))
+      elemMask=(/0/)
+
+      !! elem area
+      allocate(elemArea(numElems))
+      elemArea=(/7.0/)
+
+       !! elem conn
+       allocate(elemConn(numElems*4))
+       elemConn=(/1,2,4,3/)
+     else if (localPet .eq. 1) then
+        ! Fill in node data
+        numNodes=4
+        numOwnedNodes=2
+
+       !! node ids
+       allocate(nodeIds(numNodes))
+       nodeIds=(/2,3,5,6/)
+
+       !! node Coords
+       allocate(nodeCoords(numNodes*2))
+       nodeCoords=(/10.0,0.0, &
+                    20.0,0.0, &
+                    10.0,10.0, &
+                    20.0,10.0/)
+
+       !! node owners
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0,1,0,1/)
+
+       ! Edge information
+       numEdges=4
+       numEdgeConns=2*numEdges
+       numOwnedEdges=3
+       
+       !! Edge ids
+       allocate(edgeIds(numEdges))
+       edgeIds=(/2,4,8,9/)
+       
+       !! Edge owners
+       allocate(edgeOwners(numEdges))
+       edgeOwners=(/1,1,0,1/) 
+       
+      allocate(edgeCoords(2*numEdges))
+      edgeCoords=(/15.0,  0.0, & ! id 2
+                   15.0, 10.0, & ! id 4
+                   10.0,  5.0, & ! id 8
+                   20.0,  5.0/) ! id 9
+
+       !! Edge conn
+       allocate(edgeConn(numEdgeConns))
+       edgeConn=(/1,2, & ! id 2
+                  3,4, & ! id 4
+                  1,3, & ! id 8
+                  1,4/)  ! id 9
+
+       
+       ! Fill in elem data
+       numElems=1
+
+       !! elem ids
+       allocate(elemIds(numElems))
+       elemIds=(/2/)
+
+       !! elem type
+       allocate(elemTypes(numElems))
+       elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+      !! elem mask
+      allocate(elemMask(numElems))
+      elemMask=(/1/)
+
+      !! elem area
+      allocate(elemArea(numElems))
+      elemArea=(/8.0/)
+
+       !! elem conn
+       allocate(elemConn(numElems*4))
+       elemConn=(/1,2,4,3/)
+     else if (localPet .eq. 2) then
+        ! Fill in node data
+        numNodes=4
+        numOwnedNodes=2
+
+       !! node ids
+       allocate(nodeIds(numNodes))
+       nodeIds=(/4,5,7,8/)
+
+       !! node Coords
+       allocate(nodeCoords(numNodes*2))
+       nodeCoords=(/0.0,10.0, &
+                    10.0,10.0, &
+                    0.0,20.0, &
+                    10.0,20.0/)
+
+       !! node owners
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0,0,2,2/)
+
+       ! Edge information
+       numEdges=4
+       numEdgeConns=2*numEdges
+       numOwnedEdges=3
+       
+       !! Edge ids
+       allocate(edgeIds(numEdges))
+       edgeIds=(/3,5,10,11/)
+       
+       !! Edge owners
+       allocate(edgeOwners(numEdges))
+       edgeOwners=(/0,2,2,2/) 
+       
+      !! Edge Coords
+      allocate(edgeCoords(2*numEdges))
+      edgeCoords=(/5.0, 10.0, & ! id 3
+                   5.0, 20.0, & ! id 5
+                   0.0, 15.0, & ! id 10
+                   10.0, 15.0/) ! id 11
+
+       !! Edge conn
+       allocate(edgeConn(numEdgeConns))
+       edgeConn=(/1,2, & ! id 3
+                  3,4, & ! id 5
+                  1,3, & ! id 10
+                  2,4/)  ! id 11
+
+       
+       ! Fill in elem data
+       numElems=1
+
+       !! elem ids
+       allocate(elemIds(numElems))
+       elemIds=(/3/)
+
+      !! elem mask
+      allocate(elemMask(numElems))
+      elemMask=(/1/)
+
+      !! elem area
+      allocate(elemArea(numElems))
+      elemArea=(/9.0/)
+
+       !! elem type
+       allocate(elemTypes(numElems))
+       elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+       !! elem conn
+       allocate(elemConn(numElems*4))
+       elemConn=(/1,2,4,3/)
+     else
+        ! Fill in node data
+        numNodes=4
+        numOwnedNodes=1
+
+       !! node ids
+       allocate(nodeIds(numNodes))
+       nodeIds=(/5,6,8,9/)
+
+       !! node Coords
+       allocate(nodeCoords(numNodes*2))
+       nodeCoords=(/10.0,10.0, &
+                    20.0,10.0, &
+                    10.0,20.0, &
+                    20.0,20.0/)
+
+       !! node owners
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0,1,2,3/)
+
+
+       ! Edge information
+       numEdges=4
+       numEdgeConns=2*numEdges
+       numOwnedEdges=2
+       
+       !! Edge ids
+       allocate(edgeIds(numEdges))
+       edgeIds=(/4,6,11,12/)
+       
+       !! Edge owners
+       allocate(edgeOwners(numEdges))
+       edgeOwners=(/1,3,2,3/) 
+
+      !! Edge Coords
+      allocate(edgeCoords(2*numEdges))
+      edgeCoords=(/15.0, 10.0, & ! id 4
+                   15.0, 30.0, & ! id 6
+                   10.0, 15.0, & ! id 11
+                   20.0, 15.0/)  ! id 12
+
+       
+       !! Edge conn
+       allocate(edgeConn(numEdgeConns))
+       edgeConn=(/1,2, & ! id 4
+                  3,4, & ! id 6
+                  1,3, & ! id 11
+                  2,4/)  ! id 12
+
+       ! Fill in elem data
+       numElems=1
+
+       !! elem ids
+       allocate(elemIds(numElems))
+       elemIds=(/4/)
+
+       !! elem type
+       allocate(elemTypes(numElems))
+       elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+       !! elem mask
+       allocate(elemMask(numElems))
+       elemMask=(/2/)
+
+      !! elem area
+      allocate(elemArea(numElems))
+      elemArea=(/10.0/)
+
+       !! elem conn
+       allocate(elemConn(numElems*4))
+       elemConn=(/1,2,4,3/)
+     endif
+   endif
+
+   
+   ! Create Mesh structure
+   mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_SPH_DEG, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Add nodes
+   call ESMF_MeshAddNodes(mesh, nodeIds=nodeIds, nodeCoords=nodeCoords, &
+        nodeOwners=nodeOwners, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   
+   ! Add edges
+   call ESMF_MeshAddEdges(mesh, edgeIds=edgeIds, edgeOwners=edgeOwners, &
+        edgeConn=edgeConn, edgeCoords=edgeCoords, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+
+   ! Add elements
+   call ESMF_MeshAddElements(mesh,elementIds=elemIds,&
+        elementTypes=elemTypes, elementConn=elemConn, &
+        elementMask=elemMask, elementArea=elemArea, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+
+   ! Init correct
+   correct=.true.
+
+   ! Get count info from Mesh
+   call ESMF_MeshGet(mesh, &
+        edgeIsPresent=edgeIsPresent, &
+        edgeCoordsIsPresent=edgeCoordsIsPresent, &
+        edgeCount=numEdgesTst, &
+        edgeDistGridIsPresent=edgeDistGridIsPresent, &
+        edgeConnCount=numEdgeConnsTst, &
+        numOwnedEdges=numOwnedEdgesTst, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   
+   ! ! DEBUG OUTPUT
+   
+   ! Make sure edges are present
+   if (.not. edgeIsPresent) correct=.false.
+   if (.not. edgeCoordsIsPresent) correct=.false.
+   if (.not. edgeDistGridIsPresent) correct=.false.
+   
+   ! Make sure things match
+   if (numEdges /= numEdgesTst) correct=.false.
+   if (numEdgeConns /= numEdgeConnsTst) correct=.false.
+   if (numOwnedEdges /= numOwnedEdgesTst) correct=.false.
+
+
+   ! If not correct, leave so we're not using arrays of the wrong size
+   if (.not. correct) then
+      rc=ESMF_FAILURE
+      return
+   endif
+   
+   ! Allocate space for arrays
+   allocate(edgeIdsTst(numEdges))
+   allocate(edgeOwnersTst(numEdges))
+   allocate(edgeConnTst(numEdgeConns))
+   allocate(edgeCoordsTst(2*numEdges))
+
+   ! Get edge information
+   call ESMF_MeshGet(mesh, &
+        edgeIds=edgeIdsTst, &
+        edgeOwners=edgeOwnersTst, &
+        edgeConn=edgeConnTst, & 
+        edgeCoords=edgeCoordsTst, &
+        edgeDistGrid=edgeDistGrid, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+!   write(*,*) "edgeCoords   =",edgeCoords
+!   write(*,*) "edgeCoordsTst=",edgeCoordsTst
+   
+   ! Check edge info
+   do i=1,numEdges
+      if (edgeIdsTst(i) /= edgeIds(i)) correct=.false.
+      if (edgeOwnersTst(i) /= edgeOwners(i)) correct=.false.
+      if (edgeCoordsTst(2*i-1) /= edgeCoords(2*i-1)) correct=.false.
+      if (edgeCoordsTst(2*i) /= edgeCoords(2*i)) correct=.false.
+   enddo
+
+   
+   ! Check edge info
+   do i=1,numEdgeConns
+      if (edgeConnTst(i) /= edgeConn(i)) correct=.false.
+   enddo
+
+
+   ! Check DistGrid
+   call ESMF_DistGridValidate(edgeDistgrid, rc=rc)
+   if (rc .ne. ESMF_SUCCESS) correct=.false.
+
+   ! Check size of DistGrid
+   call ESMF_DistGridGet(edgeDistgrid, localDE=0, elementCount=elementcount, rc=rc) 
+   if (rc /= ESMF_SUCCESS) return
+
+   if (elementCount /= numOwnedEdges) correct=.false.
+
+   ! Test creating a Field
+   edgeField = ESMF_FieldCreate(mesh, typekind=ESMF_TYPEKIND_R8, meshloc=ESMF_MESHLOC_EDGE, rc=rc)   
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Validate Field
+   call ESMF_FieldValidate(edgeField, rc=rc)
+   if (rc .ne. ESMF_SUCCESS) correct=.false.
+
+   ! Get memory fron Field
+   call ESMF_FieldGet(edgeField, farrayPtr=edgeDataPtr, &
+        computationalLBound=edgeCL, computationalUBound=edgeCU, computationalCount=edgeCC, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Make sure sizes and bounds are correct
+   if (edgeCL(1) /= 1) correct=.false.
+   if (edgeCU(1) /= numOwnedEdges) correct=.false.
+   if (edgeCC(1) /= numOwnedEdges) correct=.false.
+   if (size(edgeDataPtr) /= numOwnedEdges) correct=.false. 
+   
+   ! Access data just to test
+   if (edgeCU(1) > 1) then
+      edgeDataPtr(1)=14.0
+   endif
+
+   ! Get rid of Field
+   call ESMF_FieldDestroy(edgeField, rc=rc)
+
+
+   !!!! Test Serialize/Deserialize of edge info !!!!
+   
+   ! Create a buffer to put the Mesh in
+   offset=0
+   allocate (buf(1))
+   call ESMF_MeshSerialize(mesh, buf, bufCount, offset,  &
+        inquireflag=ESMF_INQUIREONLY, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   deallocate(buf)
+   bufCount=2*offset ! a little more room
+   allocate(buf(bufCount))
+   
+   ! Serialize
+   offset=0
+   call ESMF_MeshSerialize(mesh, buf, bufCount, offset, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Deserialize
+   offset=0
+   mesh2=ESMF_MeshDeserialize(buf, offset, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Get rid of buffer
+   deallocate(buf)
+
+   
+   ! Make sure info is correct in deserialized mesh
+   call ESMF_MeshGet(mesh2, &
+        edgeIsPresent=edgeIsPresent, &
+        edgeCoordsIsPresent=edgeCoordsIsPresent, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+   
+   ! Make sure edges are present
+   if (.not. edgeIsPresent) correct=.false.
+   if (.not. edgeCoordsIsPresent) correct=.false.   
+
+   
+   ! Get rid of Mesh
+   call ESMF_MeshDestroy(mesh, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Get rid of Mesh
+   call ESMF_MeshDestroy(mesh2, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   
+   ! deallocate node data
+   deallocate(nodeIds)
+   deallocate(nodeCoords)
+   deallocate(nodeOwners)
+
+   ! deallocate edge data
+   deallocate(edgeIds)
+   deallocate(edgeOwners)
+   deallocate(edgeConn)
+   deallocate(edgeCoords)
+
+   ! deallocate edge Tst data
+   deallocate(edgeIdsTst)
+   deallocate(edgeOwnersTst)
+   deallocate(edgeConnTst)
+   deallocate(edgeCoordsTst)
+
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemMask)
+   deallocate(elemConn)
+   
+   ! Return success
+   rc=ESMF_SUCCESS
+   
+end subroutine testCreatingMeshWithEdges3Steps
+
 
 subroutine test_meshwritevtkgt4(correct, rc)
   logical :: correct
@@ -10652,8 +11343,7 @@ subroutine test_meshwritevtkgt4(correct, rc)
   integer :: numOwnedElems
   type(ESMF_Field):: elemIdsField
   type(ESMF_Array):: elemIdsArray
-  
-  
+
   ! get global VM
   call ESMF_VMGetGlobal(vm, rc=rc)
   if (rc /= ESMF_SUCCESS) return

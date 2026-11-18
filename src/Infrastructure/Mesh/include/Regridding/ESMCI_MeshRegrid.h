@@ -40,13 +40,16 @@ namespace ESMCI {
             int *unmappedaction,
             bool set_dst_status, WMat &dst_status, bool checkFlag);
 
- void translate_split_src_elems_in_wts(Mesh *srcmesh, int num_entries,
-                                      int *iientries);
- void translate_split_dst_elems_in_wts(Mesh *dstmesh, int num_entries,
-                                      int *iientries, double *factors);
+  void translate_split_src_elems_in_wts(Mesh *srcmesh, int num_entries,
+                                        int *iientries);
+  void translate_split_dst_elems_in_wts(Mesh *dstmesh, int num_entries,
+                                        int *iientries, double *factors);
   
- int get_iwts(Mesh &mesh, MEField<> *iwts);
-
+  void translate_split_dst_elems_in_wts_just_ids(Mesh *dstmesh, int num_entries,
+                                                 int *iientries);
+  
+  int get_iwts(Mesh &mesh, MEField<> *iwts);
+  
 } // namespace
 
 #endif /*ESMC_MESHREGRID_H_*/
