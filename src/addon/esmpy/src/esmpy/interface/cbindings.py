@@ -12,6 +12,14 @@ import esmpy.api.constants as constants
 from esmpy.util.decorators import *
 from esmpy.interface.loadESMF import _ESMF
 
+# Convert from the 0,1 meshloc used by ESMPy                                                                                                                                                                                    
+# to the 1,3 one used by the C/Fortran side                                                                                                                                                                                     
+# TODO: make the two sides consistent                                                                                                                                                                                           
+def convert_to_cf_meshloc(meshloc):
+    cf_meshloc=1  # This also handles None case and defaults to NODE
+    if (meshloc == constants.MeshLoc.ELEMENT):
+        cf_meshloc=3
+    return cf_meshloc    
 
 def copy_struct(src):
     dst = type(src)()
@@ -1268,7 +1276,7 @@ def ESMP_MeshCreateFromFile(filename, fileTypeFlag,
     lrc = ct.c_int(0)
     mesh = _ESMF.ESMC_MeshCreateFromFile(filename, fileTypeFlag,
                                          convertToDual, addUserArea,
-                                         meshname, maskFlag, varname,
+                                         meshname, convert_to_cf_meshloc(maskFlag), varname,
                                          ct.byref(lrc))
     rc = lrc.value
     if rc != constants._ESMP_SUCCESS:
@@ -1870,7 +1878,7 @@ def ESMP_FieldCreateMesh(mesh, name=None,
 
     # call into the FieldCreate C interface
     field = _ESMF.ESMC_FieldCreateMeshTypeKind(mesh.struct.ptr, typekind,
-                                               meshloc,
+                                               convert_to_cf_meshloc(meshloc),
                                                gridToFieldMap_i,
                                                ungriddedLBound_i,
                                                ungriddedUBound_i, name,
