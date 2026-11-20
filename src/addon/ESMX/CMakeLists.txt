@@ -31,15 +31,21 @@ if(PROJECT_IS_TOP_LEVEL)
 
   elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
     set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -traceback -O2" CACHE STRING "" FORCE)
-    set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0 -check all -fpe0 -ftrapuv -init=snan,arrays" CACHE STRING "" FORCE)
+    #TODO: Re-enable FPE trapping when NUOPC random-data-init feature becomes active in ESMF 10.0.0 release!
+    #set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0 -check all -fpe0 -ftrapuv -init=snan,arrays" CACHE STRING "" FORCE)
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0 -check all -ftrapuv -init=snan,arrays" CACHE STRING "" FORCE)
 
   elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "IntelLLVM")
     set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -traceback -O2" CACHE STRING "" FORCE)
-    set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0 -check bounds,pointers,stack -fpe0 -ftrapuv -init=snan,arrays" CACHE STRING "" FORCE)
+    #TODO: Re-enable FPE trapping when NUOPC random-data-init feature becomes active in ESMF 10.0.0 release!
+    #set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0 -check bounds,pointers,stack -fpe0 -ftrapuv -init=snan,arrays" CACHE STRING "" FORCE)
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0 -check bounds,pointers,stack -ftrapuv -init=snan,arrays" CACHE STRING "" FORCE)
 
   elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "NAG")
     set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -gline" CACHE STRING "" FORCE)
-    set(CMAKE_Fortran_FLAGS_DEBUG "-g -gline -C=array -C=bits -C=dangling -C=pointer -C=recursion" CACHE STRING "" FORCE)
+    #TODO: Re-enable FPE trapping (-ieee=stop, or just remove -ieee=full) when NUOPC random-data-init feature becomes active in ESMF 10.0.0 release!
+    #set(CMAKE_Fortran_FLAGS_DEBUG "-g -gline -C=array -C=bits -C=dangling -C=pointer -C=recursion" CACHE STRING "" FORCE)
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g -gline -ieee=full -C=array -C=bits -C=dangling -C=pointer -C=recursion" CACHE STRING "" FORCE)
 
   elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "NVHPC")
     set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -traceback -O2 -fast" CACHE STRING "" FORCE)
