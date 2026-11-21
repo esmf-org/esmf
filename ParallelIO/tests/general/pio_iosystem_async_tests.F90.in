@@ -1,0 +1,257 @@
+#include "config.h"
+! Split comm world into three comms two comp_comms and an io_comm
+SUBROUTINE split_world_odd_even_io(world, all_comp_comm, comp_comm, io_comm, ierr)
+  use mpi
+  use pio_tutil
+  implicit none
+  integer, intent(in) :: world
+  integer, intent(out) :: comp_comm(2)
+  integer, intent(out) :: io_comm
+  integer, intent(out) :: all_comp_comm
+  integer, intent(out) :: ierr
+
+  integer :: key
+  integer :: color
+  integer :: new_comm
+  integer :: world_size
+  integer :: world_rank
+
+  comp_comm(:) = MPI_COMM_NULL
+  io_comm = MPI_COMM_NULL
+  new_comm = MPI_COMM_NULL
+  all_comp_comm = MPI_COMM_NULL
+  call MPI_comm_size(world, world_size, ierr)
+  call MPI_Comm_rank(world, world_rank, ierr)
+  if(world_size < 3) then
+     print *,'This test requires 3 or more ranks ',world_size
+     ierr = -1
+     return
+  endif
+
+  if(world_rank == world_size - 1) then
+     key = 0
+     color = 0
+  else
+    color = 1
+    key = world_rank
+  end if
+
+  call MPI_Comm_split(world, color, key, new_comm, ierr)
+
+  if (color > 0) then
+     all_comp_comm = new_comm
+     key = (world_rank/2)
+     if(mod(world_rank,2)==0) then
+        color = 0
+     else
+        color = 1
+     endif
+     call MPI_Comm_split(all_comp_comm, color, key, new_comm, ierr)
+     if(color == 0) then
+        comp_comm(1) = new_comm
+     else
+        comp_comm(2) = new_comm
+     endif
+  else
+     io_comm = new_comm
+  endif
+
+
+
+END SUBROUTINE split_world_odd_even_io
+
+! Create a file with a global attribute (filename)
+SUBROUTINE create_file(comm, iosys, iotype, fname, attname, dimname, ret)
+    use pio_tutil
+    implicit none
+
+    integer, intent(in) :: comm
+    type(iosystem_desc_t), intent(inout) :: iosys
+    integer, intent(in) :: iotype
+    character(len=*), intent(in) :: fname
+    character(len=*), intent(in) :: attname
+    character(len=*), intent(in) :: dimname
+    integer, intent(inout) :: ret
+
+    type(file_desc_t) :: pio_file
+    integer :: pio_dim
+    type(var_desc_t) :: pio_var
+!    ret = PIO_set_log_level(iosys, 3)
+    ret = PIO_createfile(iosys, pio_file, iotype, fname, PIO_CLOBBER)
+    PIO_TF_CHECK_ERR(ret, comm, "Failed to create dummy file :" // trim(fname))
+!    print *,__FILE__,__LINE__,'create file'
+    ret = PIO_def_dim(pio_file, dimname, PIO_TF_MAX_STR_LEN, pio_dim)
+    PIO_TF_CHECK_ERR(ret, comm, "Failed to define dim "// trim(dimname) // "in file :" // trim(fname))
+!    print *,__FILE__,__LINE__,'def_dim'
+    ret = PIO_def_var(pio_file, attname, PIO_char, (/pio_dim/), pio_var)
+    PIO_TF_CHECK_ERR(ret, comm, "Failed to define var " // trim(attname) // " in file :" // trim(fname))
+!    print *,__FILE__,__LINE__,'def_var ',trim(fname)
+    ret = PIO_put_att(pio_file, pio_var, attname, fname)
+    PIO_TF_CHECK_ERR(ret, comm, "Failed to put att " // trim(attname) // " in file :" // trim(fname))
+!    print *,__FILE__,__LINE__,'put_att'
+    ret = PIO_enddef(pio_file)
+    PIO_TF_CHECK_ERR(ret, comm, "Failed in enddef " // trim(attname) // " in file :" // trim(fname))
+
+    call PIO_closefile(pio_file)
+!    print *,__FILE__,__LINE__,'closefile'
+END SUBROUTINE create_file
+
+! Check the contents of file : Check the
+! global attribute 'filename' (should be equal to the
+! name of the file, fname)
+SUBROUTINE check_file(comm, iosys, pio_file, fname, attname, dimname, ret)
+    use pio_tutil
+    implicit none
+
+    integer, intent(in) :: comm
+    type(iosystem_desc_t), intent(in) :: iosys
+    type(file_desc_t), intent(inout) :: pio_file
+    character(len=*), intent(in) :: fname
+    character(len=*), intent(in) :: attname
+    character(len=*), intent(in) :: dimname
+    integer, intent(inout) :: ret
+    integer, parameter :: PIO_ENOTATT=-43
+    integer :: pio_dim, old_eh
+    type(var_desc_t) :: pio_var
+    character(len=PIO_TF_MAX_STR_LEN) :: val, errstr
+    integer :: ival
+
+    ret = PIO_inq_dimid(pio_file, dimname, pio_dim)
+    PIO_TF_CHECK_ERR(ret, comm, "Failed to find dim "// trim(dimname) // "in file :" // trim(fname))
+
+    ret = PIO_inq_varid(pio_file, attname, pio_var)
+    PIO_TF_CHECK_ERR(ret, comm, "Failed to find var " // trim(attname) // " in file :" // trim(fname))
+
+    ret = PIO_get_att(pio_file, pio_var, attname, val)
+    PIO_TF_CHECK_ERR(ret, comm, "Failed to get att " // trim(attname) // " in file :" // trim(fname))
+
+    PRINT *, "val = ", trim(val), ", fname =", trim(fname)
+    PIO_TF_PASSERT(val .eq. fname, comm, "Attribute value is not the expected value")
+
+    call PIO_SetErrorHandling(pio_file, PIO_BCAST_ERROR, old_eh)
+!    ret = pio_set_log_level(iosys, 3)
+    ret = PIO_get_att(pio_file, pio_var, "wrongname", ival)
+    write(errstr, *) "Got wrong error ",ret," on getatt in file:", trim(fname)
+    PIO_TF_PASSERT(ret==PIO_ENOTATT, comm, errstr)
+    call PIO_SetErrorHandling(pio_file, old_eh)
+    ret = PIO_NOERR
+
+END SUBROUTINE check_file
+
+! Open and check the contents of file : open it and check the
+! global attribute 'filename' (should be equal to the
+! name of the file, fname)
+SUBROUTINE open_and_check_file(comm, iosys, iotype, pio_file, fname, &
+                      attname, dimname, disable_fclose, ret)
+    use pio_tutil
+    implicit none
+
+    integer, intent(in) :: comm
+    type(iosystem_desc_t), intent(inout) :: iosys
+    integer, intent(in) :: iotype
+    type(file_desc_t), intent(inout) :: pio_file
+    character(len=*), intent(in) :: fname
+    character(len=*), intent(in) :: attname
+    character(len=*), intent(in) :: dimname
+    logical, intent(in) :: disable_fclose
+    integer, intent(inout) :: ret
+
+    ret = PIO_openfile(iosys, pio_file, iotype, fname, PIO_write)
+    PIO_TF_CHECK_ERR(ret, comm, "Failed to open:" // fname)
+
+    call check_file(comm, iosys, pio_file, fname, attname, dimname, ret)
+    PIO_TF_CHECK_ERR(ret, comm, "Checking contents of file failed:" // fname)
+
+    if(.not. disable_fclose) then
+      call PIO_closefile(pio_file)
+    end if
+END SUBROUTINE open_and_check_file
+
+! Create a file with one iosystem - with all procs, and open/read with
+! another iosystem - subset (odd/even) of procs
+PIO_TF_AUTO_TEST_SUB_BEGIN two_comps_odd_even_async
+  use mpi
+  implicit none
+
+  character(len=PIO_TF_MAX_STR_LEN), target :: fname1 = "pio_iosys_async_test_file1.nc"
+  character(len=PIO_TF_MAX_STR_LEN), target :: fname2 = "pio_iosys_async_test_file2.nc"
+  character(len=PIO_TF_MAX_STR_LEN), parameter :: attname = "filename"
+  character(len=PIO_TF_MAX_STR_LEN), parameter :: dimname = "filename_dim"
+  character(len=PIO_TF_MAX_STR_LEN), pointer :: fname
+  integer, dimension(:), allocatable :: iotypes
+  character(len=PIO_TF_MAX_STR_LEN), dimension(:), allocatable :: iotype_descs
+  integer :: i, num_iotypes = 0
+  type(file_desc_t) :: pio_file
+
+  type(iosystem_desc_t) :: iosys(2)
+
+  logical :: is_even
+  integer :: comp_comm(2), io_comm
+  integer :: all_comp_comm  ! comm common to all components
+  integer :: ret
+
+  ! Split world to odd even and io procs
+  call split_world_odd_even_io(pio_tf_comm_, all_comp_comm, comp_comm, io_comm, ret)
+  call PIO_init(iosys, pio_tf_comm_, comp_comm, io_comm, PIO_REARR_BOX)
+  if(io_comm == MPI_COMM_NULL) then
+     if(comp_comm(1) /= MPI_COMM_NULL) then
+        call PIO_seterrorhandling(iosys(1), PIO_BCAST_ERROR)
+     else
+        call PIO_seterrorhandling(iosys(2), PIO_BCAST_ERROR)
+     endif
+     ! Open two different files and close it with two different iosystems
+     call PIO_TF_Get_nc_iotypes(iotypes, iotype_descs, num_iotypes)
+
+     do i=1,num_iotypes
+        PIO_TF_LOG(0,*) "Testing : ", iotype_descs(i)
+        ! Create two files to be opened later
+        if(comp_comm(1) /= MPI_COMM_NULL) then
+           is_even = .false.
+!           print *,__FILE__,__LINE__,'create_file', is_even
+           call create_file(comp_comm(1), iosys(1), iotypes(i), &
+                fname1, attname, dimname, ret)
+           PIO_TF_CHECK_ERR(ret, comp_comm(1), "Failed to create file :" // fname1)
+        else
+           is_even = .true.
+!           print *,__FILE__,__LINE__,'create_file', is_even
+           call create_file(comp_comm(2), iosys(2), iotypes(i), &
+                fname2, attname, dimname, ret)
+           PIO_TF_CHECK_ERR(ret, comp_comm(2), "Failed to create file :" // fname2)
+        endif
+
+!        print *,__FILE__,__LINE__,'at barrier', is_even
+        call mpi_barrier(all_comp_comm, ret)
+
+        ! Open file1 from odd processes and file2 from even processes
+        if(is_even) then
+           call open_and_check_file(comp_comm(2), iosys(2), iotypes(i), &
+                pio_file, fname1, attname, dimname, .false., ret)
+           PIO_TF_CHECK_ERR(ret, comp_comm(2), "Checking contents of file failed :" // fname1)
+           call pio_deletefile(iosys(2), fname1)
+        else
+           call open_and_check_file(comp_comm(1), iosys(1), iotypes(i), &
+                pio_file, fname2, attname, dimname, .false., ret)
+           PIO_TF_CHECK_ERR(ret, comp_comm(1), "Checking contents of file failed :" // fname2)
+           call pio_deletefile(iosys(1), fname2)
+        end if
+     end do
+     if (is_even) then
+        call PIO_finalize(iosys(2), ret)
+     else
+        call PIO_finalize(iosys(1), ret)
+     endif
+  endif
+  if(comp_comm(1) /= MPI_COMM_NULL) then
+     call MPI_Comm_free(comp_comm(1), ret)
+  endif
+  if(comp_comm(2) /= MPI_COMM_NULL) then
+     call MPI_Comm_free(comp_comm(2), ret)
+  endif
+  if(io_comm /= MPI_COMM_NULL) then
+     call MPI_Comm_free(io_comm, ret)
+  endif
+  if(allocated(iotypes)) then
+    deallocate(iotypes)
+    deallocate(iotype_descs)
+  end if
+PIO_TF_AUTO_TEST_SUB_END two_comps_odd_even_async
