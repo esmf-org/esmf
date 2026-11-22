@@ -139,6 +139,13 @@ ESMF_OPTLEVELDEFAULT  = 0
 ESMF_F90COMPILEOPTS += -dusty
 
 ############################################################
+# Switch to the full IEEE arithmetic model for full compliance
+# NAG default arithmetic model is more strict and can lead to FPE
+# where full IEEE model does not
+#
+ESMF_F90COMPILEOPTS += -ieee=full
+
+############################################################
 # Conditionally add pthread compiler and linker flags
 #
 
