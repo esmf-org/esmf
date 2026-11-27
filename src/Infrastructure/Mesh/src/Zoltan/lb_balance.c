@@ -734,8 +734,20 @@ int *local_parts_params = NULL;
 int i, j, cnt, pcnt;
 int frac = 0, mod = 0;
 MPI_Op op;
+MPI_Datatype partdist_type;
 MPI_User_function Zoltan_PartDist_MPIOp;
 
+  /* The reduction is over one 6-int record whose fields use DIFFERENT
+   * operations (sum, sum, max, sum, sum, sum). MPI never tells a user
+   * reduction function its offset within the buffer, so a position-dependent
+   * op cannot be applied to an arbitrary slice -- yet MPI is free to invoke
+   * it on any sub-range (OpenMPI 5's coll/han does exactly this, calling it
+   * with *len == 3). Reduce ONE element of a 6-int contiguous type so that a
+   * partial record can never be handed to the callback.
+   * NOTE: this pairs with Zoltan_PartDist_MPIOp below, which relies on *len
+   * counting whole records. The two changes must stay together. */
+  MPI_Type_contiguous(6, MPI_INT, &partdist_type);
+  MPI_Type_commit(&partdist_type);
   MPI_Op_create(&Zoltan_PartDist_MPIOp,1,&op);
 
   /* Check whether global parts or local parts parameters were used. */
@@ -747,8 +759,9 @@ MPI_User_function Zoltan_PartDist_MPIOp;
   inflag[4] = (zz->LB.Num_Global_Parts_Param != zz->LB.Prev_Global_Parts_Param);
   inflag[5] = (zz->LB.Num_Local_Parts_Param != zz->LB.Prev_Local_Parts_Param);
 
-  MPI_Allreduce(inflag, outflag, 6, MPI_INT, op, zz->Communicator);
+  MPI_Allreduce(inflag, outflag, 1, partdist_type, op, zz->Communicator);
   MPI_Op_free(&op);
+  MPI_Type_free(&partdist_type);
 
   if (!outflag[4] && !outflag[5]) {
     /* Parameter values have not changed since last invocation of Zoltan. */
@@ -982,13 +995,34 @@ void Zoltan_PartDist_MPIOp(
 {
 int *int_in = (int *) in;
 int *int_inout = (int *) inout;
+int i, tsize = 0;
 
-  int_inout[0] += int_in[0];
-  int_inout[1] += int_in[1];
-  int_inout[2] = ((int_in[2] > int_inout[2]) ? int_in[2] : int_inout[2]);
-  int_inout[3] += int_in[3];
-  int_inout[4] += int_in[4];
-  int_inout[5] += int_in[5];
+  /* *len counts elements of *dptr. This op is registered only for the 6-int
+   * record built in Zoltan_LB_Build_PartDist; refuse anything else rather than
+   * write past the caller's buffer. (A type query is not MPI communication and
+   * is safe to issue from a reduction callback.) */
+  MPI_Type_size(*dptr, &tsize);
+  if (tsize != (int)(6 * sizeof(int))) {
+    static int warned = 0;
+    if (!warned) {
+      warned = 1;
+      fprintf(stderr, "Zoltan_PartDist_MPIOp: refusing datatype of size %d "
+                      "(expected %d) -- reduction skipped\n",
+              tsize, (int)(6 * sizeof(int)));
+    }
+    return;
+  }
+
+  for (i = 0; i < *len; i++) {
+    int *a = int_in    + 6*i;
+    int *b = int_inout + 6*i;
+    b[0] += a[0];
+    b[1] += a[1];
+    b[2] = ((a[2] > b[2]) ? a[2] : b[2]);
+    b[3] += a[3];
+    b[4] += a[4];
+    b[5] += a[5];
+  }
 }
 
 #ifdef __cplusplus
